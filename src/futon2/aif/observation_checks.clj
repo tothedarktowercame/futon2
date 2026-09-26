@@ -19,9 +19,12 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import (java.net URLEncoder)
            (java.security MessageDigest)))
+
+(load-identity/register! *ns* *file*)
 
 (def repo-root "/home/joe/code")
 

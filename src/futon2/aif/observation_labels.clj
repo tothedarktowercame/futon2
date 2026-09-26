@@ -7,11 +7,30 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.walk :as walk]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.observation-admission :as admission]
             [futon2.aif.observation-checks :as checks]))
 
+(load-identity/register! *ns* *file*)
+
+(defn loaded-identities
+  "Read both load registrations once. No disk or HEAD fallback."
+  []
+  (let [entries @load-identity/registry
+        sources [[:mechanism-sha 'futon2.aif.observation-checks]
+                 [:code-sha 'futon2.aif.observation-labels]]]
+    (or (some (fn [[_ n]]
+                (let [entry (get entries n)]
+                  (when-not (and (= :captured (:status entry))
+                                 (string? (:sha256 entry))
+                                 (re-matches #"[0-9a-f]{64}" (:sha256 entry)))
+                    {:status :missing :kind :code-identity-unregistered :namespace n})))
+              sources)
+        (into {} (map (fn [[k n]] [k (str "sha256:" (:sha256 (get entries n)))]) sources)))))
+
 (def ^:dynamic *code-sha*
-  "The commit identifying this namespace, supplied by the caller. write-labels
+  "Code identity: a load-identity source digest sha256:<hex>, or a commit
+   when the caller holds a verified one. write-labels
    binds it from opts :code-sha; direct recomputation callers must bind it too.
    No HEAD lookup: a later unrelated commit must not rename the mechanism."
   nil)
@@ -46,7 +65,7 @@
    Presence means a line's leading tokens equal all of decl's tokens. Tokens
    split on whitespace, colon and opening (, {, [. This is not the check's
    literal anchored regex. An unreadable file yields :insufficient, not absent.
-   Bind *code-sha* to the commit identifying this namespace."
+   Bind *code-sha* to this namespace's source digest or a verified commit."
   [subject]
   (let [view (admission/observer-view subject)
         {:keys [repo resolved-sha path decl]} (first (:evidence-pointers view))
@@ -85,7 +104,7 @@
    requires a listed path field EXACTLY equal to the requested path, never a
    prefix. -z preserves literal path bytes without git's display quoting.
    An empty or nonmatching listing is :absent; git failure is :insufficient.
-   Bind *code-sha* to the commit identifying this namespace."
+   Bind *code-sha* to this namespace's source digest or a verified commit."
   [subject]
   (let [view (admission/observer-view subject)
         {:keys [repo resolved-sha path]} (first (:evidence-pointers view))
@@ -107,8 +126,9 @@
 (defn write-labels
   "CHECK-RESULTS is a sequence of C3/C4 results (optionally carrying :token).
    STORE maps admission/label-key to admission/label-record. OPTS requires
-   :mechanism-sha (the check's code commit) and :code-sha (this namespace's
-   code commit). Repeated keys skip recomputation and add no label. Admission
+   :mechanism-sha (the check's code identity) and :code-sha (this namespace's
+   code identity): load-identity source digests sha256:<hex>, or commits when
+   the caller holds verified ones. Repeated keys skip recomputation and add no label. Admission
    refusals are returned verbatim with :key; upstream check refusals pass
    through without being reinterpreted as observations. No store IO."
   [check-results store {:keys [mechanism-sha code-sha]}]
