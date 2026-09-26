@@ -178,3 +178,116 @@ The pinned tests now run under this fixture; claude-8's bad case is a
 test verbatim (six such rows are excluded, the kind insufficient), and a
 test pins the one-argument all-`:unclassified` behaviour. The three
 section-5 falsifiers are kept.
+
+## Revision 3 (2026-09-26, claude-12): the reference for token labels, and the reader's rules
+
+Appended, not rewritten. Sections 1–5 and Revision 2 stand. This revision governs the
+**token-label** population (`observation-admission` → `observation-rates/sourced-rates`,
+per token class C3..C8). The check-ledger population of sections 1–4 (per check kind,
+classified row by row) is unchanged. Source: A-LABELS-D (futon3c df65eac9), which found
+that the two texts disagreed about what a reference is:
+
+- Revision 2's `truth-kinds` count an `:independent-recomputation` as a reference by
+  itself;
+- `observation-admission/admit` requires every token label to have an observer's
+  adjudication **and** a distinct reviewer's `:concur`;
+- F1b-D reads that review as part of establishing the reference.
+
+**Why the two can agree.** `admit`'s blinded review exists to make the reference
+independent of the check's verdict:
+
+- the observer, author, enactor and reviewer are all distinct;
+- the observer sees only `observer-view`, which excludes the recorded verdict;
+- the reviewer concurs on a view digest it did not produce.
+
+A recomputation by a **different mechanism**, which cannot see the check's verdict and
+works on the same view and cutoff, meets that condition. A recomputation by the **same
+mechanism** does not: it is the self-truthed row section 1 excludes.
+
+For a recomputation, what needs checking per row is therefore not judgement but three
+equalities, and a mechanical reviewer can check them.
+
+**1. A new truth kind: `:independent-recomputation-reviewed`.** A token label's reference
+is admitted under this kind when:
+
+- **(a) Different mechanism.** The adjudication's observer is a **recomputation
+  mechanism id**, and that id differs from the check's mechanism id.
+  - A mechanism id names the code that decides: class, var and code sha. Examples:
+    `C4/decl-present?@<sha>` against `C4/reader-form@<sha>`; `C3/cat-file-e@<sha>`
+    against `C3/ls-tree@<sha>`.
+  - The subject declares its check's mechanism id.
+- **(b) Blinded.** The recomputation reads only `observer-view` (token, application,
+  evidence pointers). The recorded verdict is not in its input.
+- **(c) Same view and cutoff.** The adjudication's view digest equals
+  `view-digest (observer-view subject)`, and its cutoff (`{repo sha}`, the resolved sha
+  from the evidence pointers) equals the check's.
+- **(d) Mechanical review.** The review is by a **mechanical reviewer**: a reviewer id
+  that is neither the observer nor the check's mechanism. Its `:concur` is computed
+  from (a) and (c) and from nothing else.
+  - It does not re-read the evidence and makes no judgement.
+  - When any of the three fails, the verdict is not `:concur`, and the review names
+    which one failed:
+    - **`:self-truthed`:** the recomputation's mechanism id equals the check's. This
+      is section 1's excluded row.
+    - **`:view-mismatch`:** the adjudication's digest is not the subject's observer-view
+      digest.
+    - **`:cutoff-mismatch`:** the adjudication's cutoff is not the check's.
+  - `admit` then refuses `:review-not-concur`, carrying that reason. No label results.
+
+The finding may still be `:insufficient`, `:ambiguous` or `:conflicting` (for example,
+the recomputation could not read the file). That is `admit`'s existing `:no-label`
+refusal, unchanged. `admit`'s other refusals are also unchanged, including
+`:authorship-undeclared`: a tick-time check declares `:author :none :enactor :none`
+explicitly.
+
+A human or agent `:later-review` remains a reference as before. This kind adds a
+reference the machine can produce at tick time without a reviewer seat. It does not
+replace review where the check is a judgement (a `:judgement` class has no
+recomputation mechanism, and so no label under this kind).
+
+**2. The reader's rules** (the function that turns stored labels into `sourced-rates`'
+`{:labels :subjects}`). Section 2 already fixes both a minimum count and an estimator,
+so both apply here, per cell rather than per kind:
+
+- **Minimum count, per cell.** A class enters the rates only when **both** of its cells
+  have a denominator of at least **5**:
+  - admitted-`:present` labels, for false-neg;
+  - admitted-`:absent` labels, for false-pos.
+
+  Section 2's reason applies to each cell separately: below 5, one label moves that
+  cell's rate by 20 points or more. `rates-by-class` itself has no minimum, and makes
+  a rate from any positive denominator (0/1 reads as a measured 0).
+- **Estimator.** The point estimate is section 2's Jeffreys Beta(1/2, 1/2). It is passed
+  to `rates-by-class` as an **authorised prior**, `{:alpha 1/2 :beta 1/2 :authority "A-S
+  §2 (Jeffreys), Revision 3"}`. `check-prior` admits exactly this form.
+  - The posterior mean `(k + 1/2)/(n + 1)` is section 2's `fp-rate`/`fn-rate`.
+  - This is an explicit, authorised prior, as the `:adjudication-rates` registry row
+    requires, not a default.
+- **Both cells, or the class is left out.** `token-likelihood-rates` refuses a class with
+  one cell unobserved (`:unsupported-class`), and the refusal ends the whole call (C2's
+  `kernelSupply`). So the reader passes only classes meeting the minimum on both cells.
+  - Any other class is **left out of `:labels`**, and so reaches the kernel as wholly
+    unobserved. For a checkable class that means the zero kernel, recorded
+    `:measurement :absent`: the unmeasured default, not a measurement.
+  - The reader records each class it left out, typed, beside the labels:
+    `{:class c :excluded :below-minimum|:one-cell-unobserved :counts {…}}`. A class it
+    left out is never silent.
+- **One label per subject and check-code sha.** A subject is the check's evidence
+  pointers `(repo, resolved-sha, path, decl|entry|…)` under its class.
+  - A subject re-checked on a later tick adds no second label while the check's
+    mechanism id is unchanged. Tick run records re-check the same 29 subjects about
+    1,249 times (A-LABELS-D §1).
+  - A changed check mechanism is a new population, and its labels start afresh.
+- **Subjects count.** `:subjects {class n}` is the number of distinct located subjects
+  of the class the store has seen (for coverage), not the number of labels.
+
+**3. Falsifiers.** This revision is wrong if any of the following yields an admitted
+label or a counted rate:
+
+- a recomputation whose mechanism id equals the check's (`:self-truthed`);
+- a review whose digest or cutoff differs (`:view-mismatch`, `:cutoff-mismatch`);
+- an adjudication with no reviewer (`:reviewer-missing`; never stored as a label);
+- a subject with undeclared authorship (`:authorship-undeclared`);
+- the same subject counted twice under one mechanism id;
+- a class with a cell below 5 or unobserved reaching `sourced-rates` as measured, or
+  refusing the whole call instead of being excluded and recorded.
