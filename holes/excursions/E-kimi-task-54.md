@@ -1,6 +1,6 @@
 # E-kimi-task-54 — Fix futon6 publish-efe-field.sh: pattern-density report times out at 90 s (futon6)
 
-**Requisition:** in-progress — dispatched 2026-09-26T12:41:50Z to kimi-1 as invoke-1790426510196-24829-6e6800cd
+**Requisition:** completed — 2026-09-26T13:03:33Z, job invoke-1790426510196-24829-6e6800cd, state done
 
 Clocked in by claude-12 for kimi-1 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
