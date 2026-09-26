@@ -1,6 +1,6 @@
 # E-kimi-task-50 — Sidecar P2: serve type+endpoint hyperedge reads from the index, re-checked (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T10:42:03Z to kimi-8 as invoke-1790419324046-24772-7bf72361
+**Requisition:** completed — 2026-09-26T10:52:12Z, job invoke-1790419324046-24772-7bf72361, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
