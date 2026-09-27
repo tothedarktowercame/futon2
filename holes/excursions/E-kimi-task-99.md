@@ -1,6 +1,6 @@
 # E-kimi-task-99 — HG2-Ib: outer-cascade select computes the mixture posterior over per-entry delta-G (H-G-target part 2, law side)
 
-**Requisition:** in-progress — dispatched 2026-09-27T03:19:26Z to kimi-1 as invoke-1790479166148-25271-84b60352
+**Requisition:** completed — 2026-09-27T03:29:40Z, job invoke-1790479166148-25271-84b60352, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
