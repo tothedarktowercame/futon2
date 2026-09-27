@@ -56,7 +56,10 @@
     (is (= {"M-a" 1/2 "M-b" 1/2} (:posterior s)))
     (is (= 1 (reduce + (vals (:posterior s)))))
     (is (= {:basis :uniform-no-data} (:E s)))
-    (is (= {:absent :no-target-grain-g} (:g s)) "never a number standing in")
+    (is (= :E-only (:law s)) "no entry carries a :delta-g value, so the posterior is E alone")
+    (is (= [] (:g-defined-on s)))
+    (is (= {"M-a" {:absent :no-target-grain-g} "M-b" {:absent :no-target-grain-g}} (:g s))
+        "per-target: no :delta-g key on the entry is the HG2-Ia default, never a number")
     (is (= :seeded-draw-from-E (:rule s)))))
 
 (deftest one-eligible-target-is-chosen-whatever-the-seed
@@ -115,7 +118,7 @@
         inputs (:inputs selection)
         law #(dissoc (:target-selection %) :inputs)]
     (is (= 2 (count (:support selection))))
-    (is (= [:eligible] (:law-uses selection)))
+    (is (= [:eligible :delta-g] (:law-uses selection)))
     (doseq [k [:next-step :pair-overlap]]
       (is (= (into {} (map (juxt :target k) (get-in opts [:field :feasible]))) (get inputs k)))
       (is (every? some? (vals (get inputs k)))))
@@ -145,4 +148,101 @@
         (is (= {:different :value} (get-in changed [:target-selection :inputs k])))
         (is (= (law result) (law changed)))))
     (is (= {:basis :uniform-no-data} (:E selection)))
-    (is (= {:absent :no-target-grain-g} (:g selection)))))
+    (is (= [:eligible :delta-g] (:law-uses selection)))
+    (is (= :E-only (:law selection)))
+    (is (every? #(contains? % :absent) (vals (:g selection)))
+        "every target's :g entry is a typed absence, never a number")))
+
+;;; HG2-Ib: the mixture law over per-target ΔG (H-G-TARGET part 2, law side).
+
+(def field-with-delta-g
+  "Two eligible targets: M-a carries a recorded ΔG value (HG2-Ia shape), M-b a
+  typed absence."
+  (update field :feasible
+          (fn [fs]
+            (mapv #(case (:target %)
+                     "M-a" (assoc % :delta-g {:value 2.0 :universe [:u]
+                                              :receipt-digest "served/abc"
+                                              :baseline-g {:value :universe}
+                                              :g-of-best {:value 4.0 :universe [:u]}})
+                     "M-b" (assoc % :delta-g {:absent :no-constructed-candidate
+                                              :next-step :ready})
+                     %)
+                  fs))))
+
+(deftest a-single-member-d-cannot-move-mass
+  (let [s (:target-selection (oc/select {:field field-with-delta-g :seed 11}))]
+    (is (= :mixed (:law s)))
+    (is (= ["M-a"] (:g-defined-on s)) "the sorted vector of D")
+    (is (= {"M-a" {:delta 2.0 :universe [:u]}
+            "M-b" {:absent :no-constructed-candidate :next-step :ready}}
+           (:g s))
+        "value re-keyed to {:delta :universe}; the absent target's :g entry is its typed absence, never a number")
+    (testing "p(a) = E(D)·E_a·e^(−Δ)/Σ_{s∈D} E_s·e^(−ΔG_s); with D = {a} the softmax factor is 1, so p(a) = E(D) = E_a — a single-member D cannot move mass"
+      (let [p (:posterior s)]
+        (is (= 0.5 (get p "M-a")) "D member recorded as a double")
+        (is (= 1/2 (get p "M-b")) "t ∉ D keeps the exact ratio E_t")
+        (is (= 1.0 (double (reduce + (vals p)))))))))
+
+(def three-target-field
+  {:considered [{:target "t-a"} {:target "t-b"} {:target "t-c"}]
+   :feasible [{:target "t-b" :eligible true
+               :delta-g {:value 2.0 :universe [:u] :receipt-digest "served/b"}}
+              {:target "t-c" :eligible true :delta-g {:absent :no-evaluator-supplied}}
+              {:target "t-a" :eligible true
+               :delta-g {:value 0.0 :universe [:u] :receipt-digest "served/a"}}]
+   :exclusions []})
+
+(deftest the-softmax-moves-mass-between-d-members-only
+  (let [s (:target-selection (oc/select {:field three-target-field :seed 5}))
+        p (:posterior s)
+        wa 1.0 wb (Math/exp -2.0)
+        e-d 2/3]
+    (is (= ["t-a" "t-b"] (:g-defined-on s)))
+    (is (= :mixed (:law s)))
+    (testing "the law's terms, shown: E uniform 1/3, D = {t-a,t-b}, E(D) = 2/3"
+      (is (= (double (* e-d (/ wa (+ wa wb)))) (get p "t-a")))
+      (is (= (double (* e-d (/ wb (+ wa wb)))) (get p "t-b")))
+      (is (= 1/3 (get p "t-c")) "the absent target keeps exactly E_t, an exact ratio"))
+    (testing "mass visibly moved between the D members, and only there"
+      (is (> (get p "t-a") 1/3) "the smaller ΔG draws mass")
+      (is (< (get p "t-b") 1/3))
+      (is (< (Math/abs (- 1.0 (double (reduce + (vals p))))) 1e-12)))))
+
+(deftest the-draw-is-over-the-mixture-posterior-and-replays
+  (let [a (oc/select {:field three-target-field :seed 5})
+        b (oc/select {:field three-target-field :seed 5})
+        s (:target-selection a)]
+    (is (= a b) "same seed and field: identical record")
+    (is (= (oc/draw (:posterior s) 5) (:draw s)) "the seeded draw from that posterior")
+    (is (= (:chosen-target a) (nth (get-in s [:draw :order]) (get-in s [:draw :index]))))
+    (is (= 5 (:draw-seed a)))
+    (is (= {"t-c" {:absent :no-evaluator-supplied}
+            "t-a" {:delta 0.0 :universe [:u]}
+            "t-b" {:delta 2.0 :universe [:u]}}
+           (:g s)))))
+
+(deftest a-malformed-delta-g-is-a-typed-absence-never-a-number
+  (let [f (assoc three-target-field
+                 :feasible [{:target "t-a" :eligible true
+                             :delta-g {:value 1.0}} ; no :universe: forged
+                            {:target "t-b" :eligible true
+                             :delta-g {:value 2.0 :universe [:u] :receipt-digest "served/b"}}
+                            {:target "t-c" :eligible true :delta-g {:absent :no-evaluator-supplied}}])
+        s (:target-selection (oc/select {:field f :seed 5}))]
+    (is (= {:absent :delta-g-malformed} (get (:g s) "t-a"))
+        "a :delta-g value with no :universe is a typed absence")
+    (is (= ["t-b"] (:g-defined-on s)) "the forged entry is not in D")
+    (is (= 1/3 (get (:posterior s) "t-a")) "it keeps exactly E_t — never given a number")
+    (is (every? (fn [[t v]] (if (= t "t-b") (double? v) (ratio? v))) (:posterior s)))
+    (testing "and when nothing well-formed remains, D is empty and the law is E-only"
+      (let [f2 (assoc three-target-field
+                      :feasible [{:target "t-a" :eligible true :delta-g {:value 1.0}}
+                                 {:target "t-b" :eligible true :delta-g {:absent :no-evaluator-supplied}}])
+            s2 (:target-selection (oc/select {:field f2 :seed 5}))]
+        (is (= :E-only (:law s2)))
+        (is (= [] (:g-defined-on s2)))
+        (is (= {"t-a" 1/2 "t-b" 1/2} (:posterior s2)))
+        (is (= {"t-a" {:absent :delta-g-malformed}
+                "t-b" {:absent :no-evaluator-supplied}}
+               (:g s2)))))))

@@ -56,7 +56,7 @@
       (is (= {:target "M-futon-seams" :target-source :chosen :draw-seed 42 :target-selection (:target-selection r)}
              (:placement p)))
       (is (= (:target-selection r) (:target-selection p)) "and the plan carries the selection on every plan")
-      (is (= {:absent :no-target-grain-g} (get-in p [:target-selection :g])))
+      (is (= {"M-futon-seams" {:absent :no-target-grain-g}} (get-in p [:target-selection :g])))
       (is (= {:basis :uniform-no-data} (get-in p [:target-selection :E]))))
     (testing "the chosen entry rides beside it, and the plan is a plan"
       (is (= :ask-interpretation (get-in p [:resolved-steps :field-entry :next-step])))
