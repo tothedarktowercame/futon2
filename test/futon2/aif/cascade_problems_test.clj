@@ -265,3 +265,23 @@
     (is (empty? problems))
     (is (= :no-constructed-candidate (:kind (first refusals))))
     (is (some? (:constructor-refusal (first refusals))))))
+
+(deftest base-problem-extraction-preserves-assembly
+  ;; Captured from the unmodified assembly at 90af94845c, before HG2-Ic.
+  ;; Includes competing missing-candidate / missing-beta refusals.
+  (let [s (locfix/locate-all full-sources)
+        variants [s (dissoc s :universes) (dissoc s :interpretations)
+                  (dissoc s :wants) (dissoc s :candidates)
+                  (dissoc s :beta-by-context) (dissoc s :candidates :beta-by-context)]
+        printed (pr-str (mapv #(cp/assemble {:sources % :targets [target]}) variants))
+        digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                        (.getBytes printed "UTF-8"))]
+    (is (= "38f8b5d4a53e8494a5c29a14df0672b54d4db5ce83d2f6d594f8f2f9f9e1b28c"
+           (apply str (map #(format "%02x" %) digest))))
+    (is (= (dissoc (get-in (cp/assemble {:sources s :targets [target]})
+                           [:problems 0 :cascade-problem]) :precedences)
+           (cp/base-problem s 3 target)))
+    (is (= [:universe-not-admitted :no-admitted-interpretation :want-not-declared
+            :beta-not-declared]
+           (mapv #(:kind (cp/base-problem (dissoc s %) 3 target))
+                 [:universes :interpretations :wants :beta-by-context])))))

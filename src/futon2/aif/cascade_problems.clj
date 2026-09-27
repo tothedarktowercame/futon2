@@ -139,10 +139,9 @@
   [locators tokens]
   (seq (sort-by pr-str (remove #(checkable-classes (:class (get locators %))) tokens))))
 
-(defn- assemble-one
-  "Assemble one target's cascade problem, or its first applicable typed
-  refusal (kind order: universe, interpretation, want, candidate, β).
-  PURE: everything is read from `sources`."
+(defn- base-problem-data
+  "One map builder. assemble-one needs the unvalidated map while constructing,
+   before its candidate-before-beta refusal order has been decided."
   [sources horizon target]
   (let [universe (get-in sources [:universes target])
         interp (get-in sources [:interpretations target])
@@ -153,9 +152,8 @@
         schedule (or (get-in sources [:preference-schedules target])
                      (live-c/preference-schedule {}))
         beta (beta-for sources target)
-        ctx-fn (:context-of sources)
         locators (get-in sources [:locators target])
-        base-problem {:facts universe
+        problem {:facts universe
                       :preference-source-id target
                       :want (vec want)
                       :interpretations patterns
@@ -172,7 +170,48 @@
                       :preference-scales scales
                       :beta beta
                       :locators locators
-                      :token-initialization (get-in sources [:token-initialization target])}
+                      :token-initialization (get-in sources [:token-initialization target])}]
+    problem))
+
+(defn base-problem
+  "Assemble the candidate-independent problem, or its first typed refusal:
+   universe, interpretation, want, locators, beta. Candidate validation remains
+   assemble-one's responsibility; no precedences are invented here."
+  [sources horizon target]
+  (let [problem (base-problem-data sources horizon target)
+        {:keys [facts interpretations want beta locators]} problem
+        unlocated (when (and (map? facts) (map? interpretations))
+                    (unlocated-tokens locators (problem-tokens facts want interpretations)))]
+    (cond
+      (not (and (map? facts) (seq facts)))
+      (refusal target :universe-not-admitted :universes)
+      (not (and (map? interpretations) (seq interpretations)))
+      (refusal target :no-admitted-interpretation :interpretations
+               (when-let [clause (get-in sources [:interpretations target :refused :clause])]
+                 {:clause clause}))
+      (not (and (sequential? (get-in sources [:wants target])) (seq want)))
+      (refusal target :want-not-declared :wants)
+      unlocated
+      (refusal target :universe-not-admitted :locators
+               {:tokens-without-checkable-locator (vec unlocated)})
+      (nil? beta)
+      (refusal target :beta-not-declared :beta-by-context
+               {:context (let [f (:context-of sources)] (when (ifn? f) (f target)))})
+      :else problem)))
+
+(defn- assemble-one
+  "Assemble one target's cascade problem, or its first applicable typed
+  refusal (kind order: universe, interpretation, want, candidate, β).
+  PURE: everything is read from `sources`."
+  [sources horizon target]
+  (let [base (base-problem-data sources horizon target)
+        universe (:facts base)
+        interp (get-in sources [:interpretations target])
+        patterns (:interpretations base)
+        want (get-in sources [:wants target])
+        beta (:beta base)
+        ctx-fn (:context-of sources)
+        locators (:locators base)
         declared (get-in sources [:candidates target])
         ;; A declared candidate that produces no want still open (every token
         ;; it produces is already true) cannot advance the target, so it does
@@ -185,7 +224,7 @@
         built (when (and (empty? advancing)
                          (map? patterns) (seq patterns) (sequential? want) (seq want) (map? universe))
                 (constructed-from-interpretations sources horizon target universe patterns want
-                                                  base-problem))
+                                                  base))
         ;; Once construction ran, its result stands: declared candidates that
         ;; advance nothing are not a fallback for a constructor refusal.
         candidates (if built (or (:candidates built) []) declared)
@@ -242,7 +281,7 @@
       {:target target
        :cascade-problem
        ;; Only constructed nonempty orders enter the executable family.
-       (assoc base-problem :precedences (mapv :precedence constructed))
+       (assoc (base-problem sources horizon target) :precedences (mapv :precedence constructed))
        :constructed-candidates
        (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
        :interpretation-receipts
