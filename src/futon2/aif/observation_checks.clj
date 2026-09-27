@@ -20,7 +20,8 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.registry-port :as registry-port])
   (:import (java.net URLEncoder)
            (java.security MessageDigest)))
 
@@ -242,11 +243,21 @@
                 (nil? (:entry parsed)) :absent
                 :else (:entry parsed))))))
 
+(defn local-registry-entry
+  "Read and chain-verify one record through the supplied local registry port."
+  [_base entry-id]
+  (let [entry (registry-port/call :entry entry-id)]
+    (cond
+      (registry-port/failure? entry)
+      (refuse (:kind entry) (merge {:check :C8 :entry-id entry-id} (:data entry)))
+      (nil? entry) :absent
+      :else entry)))
+
 (def ^:dynamic *registry-entry*
   "The seam C8 reads the registry through: (fn [base entry-id] -> entry |
   :absent | refusal). Bound by tests to a stubbed registry, so C8's own tests
   neither need a live agency nor load anything into the serving JVM."
-  fetch-registry-entry)
+  local-registry-entry)
 
 (defn- fetch-latest-for
   "GET /api/alpha/test-registry/latest?<param>=<value>&limit=100 — the shared
@@ -324,12 +335,27 @@
     (fetch-latest-for-namespace base locator)
     (fetch-latest-for-command base (:command locator))))
 
+(defn local-registry-latest
+  "Resolve the newest run through the supplied local registry port."
+  [_base locator]
+  (let [entry (if (string? locator)
+                (registry-port/call :latest-namespace locator)
+                (registry-port/call :latest-command (vec (:command locator))))]
+    (cond
+      (registry-port/failure? entry)
+      (refuse (:kind entry) (merge {:check :C8} (:data entry)))
+      (nil? entry) :absent
+      :else {:entry-id (:evidence/id entry)
+             :resolved-by (if (string? locator)
+                            :namespace-lookup
+                            :command-lookup)})))
+
 (def ^:dynamic *registry-latest*
   "The seam C8 resolves a locator through: (fn [base locator] -> {:entry-id …}
   | :absent | refusal), where the locator is a namespace string or
   {:command [...]}. Bound by tests, so no test needs the lookup endpoint to
   be live."
-  fetch-latest)
+  local-registry-latest)
 
 (defn- decode-record
   "The record is EDN inside the entry body, named by its own digest. Verify
@@ -473,7 +499,7 @@
             ;; the registry answered and holds no run for this locator
             {:observed false :check :C8
              :evidence (cond-> {:repo repo :root (str repo-root "/" repo)
-                                :resolved-by resolved-by :reason :no-entry}
+                                :resolved-by resolved-by :reason :no-local-record}
                          (and (string? namespace) (not (str/blank? namespace)))
                          (assoc :namespace namespace)
                          by-command? (assoc :command (vec command)))}
@@ -490,7 +516,7 @@
               (cond
                 (:status entry) (assoc entry :evidence evidence)
                 (= :absent entry) {:observed false :check :C8
-                                   :evidence (assoc evidence :reason :no-entry)}
+                                   :evidence (assoc evidence :reason :no-local-record)}
                 :else
                 (let [record (decode-record entry-id entry)]
                   (if (:status record) (assoc record :evidence evidence)

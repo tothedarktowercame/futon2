@@ -12,7 +12,8 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.registry-port :as registry-port])
   (:import [java.net URLEncoder]
            [java.nio.charset StandardCharsets]
            [java.time Instant]))
@@ -104,6 +105,12 @@
       (or (:entries (json/parse-string (:body r) true)) [])
       [])))
 
+(defn warrant-entries-local
+  "Read locally registered runs through the supplied port. Storage failures
+  remain typed failures; only a successful query with no matches is []."
+  [_opts query]
+  (registry-port/call :runs query))
+
 (defn- run-payload
   "The parsed run record of a test-registry evidence entry, or nil when the
   entry is not a completed registry run."
@@ -161,17 +168,19 @@
 
 (defn increment-evidence
   "The :increment evidence map for the build checkpoint judgment, or nil.
-  `opts` carries :warrant-lookup-fn (default: the Agency HTTP port) and the
+  `opts` carries :warrant-lookup-fn (default: the local registry port) and the
   declarations (default: the wm/route-attestation-v1 resource); `context`
   carries {:keys [repo author since]}. Only increment criteria backed by a
   qualifying registered warrant yield evidence; the warrant's own content
   hash (its registry id suffix) is the evidence digest."
   ([context] (increment-evidence {} context))
   ([opts context]
-   (let [lookup (or (:warrant-lookup-fn opts) warrant-entries-http)
+   (let [lookup (or (:warrant-lookup-fn opts) warrant-entries-local)
          decls (or (:route-attestation opts) (declarations))
          entries (lookup opts (select-keys context [:author :since]))]
-     (some (fn [criterion]
+     (if (registry-port/failure? entries)
+       entries
+       (some (fn [criterion]
              (when (and (= :increment (:kind criterion))
                         (= :registered-test-warrant (:evidence-kind criterion)))
                (when-let [warrant (qualifying-warrant criterion entries context)]
@@ -189,4 +198,4 @@
                       :sha256 digest
                       :warrant-id warrant-id
                       :at (:finished-at warrant)})))))
-           (:criteria decls)))))
+             (:criteria decls))))))

@@ -3,7 +3,6 @@
   (:require [babashka.http-client :as http]
             [clojure.data.json :as json]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-checks :as oc]))
@@ -151,7 +150,7 @@
   (let [r (observe-c8 nil)]
     (is (false? (:observed r)))
     (is (nil? (:status r)))
-    (is (= :no-entry (get-in r [:evidence :reason])))))
+    (is (= :no-local-record (get-in r [:evidence :reason])))))
 
 (deftest c8-postcheck-not-matched-is-false
   (let [r (observe-c8 (run-record :postcheck {:record/type :test-registry/refusal
@@ -168,14 +167,13 @@
   (is (= :no-record-id (:kind (oc/check-registered-run
                                {:repo "futon2" :namespace "futon2.x-test"
                                 :config "not-an-entry-id"}))))
-  ;; a registry that cannot be reached refuses; it does not read false. The
-  ;; real reader is exercised here (no stub), against a port nothing serves.
-  (with-redefs [oc/agency-base (constantly "http://127.0.0.1:1")]
-    (let [r (oc/check-registered-run
-             {:repo "futon2" :namespace "futon2.x-test"
-              :config (str "test-registry-" (apply str (repeat 64 "a")))})]
-      (is (= :registry-unreadable (:kind r)))
-      (is (nil? (:observed r)))))
+  ;; Standalone Futon2 has no installed composition root: this is a typed
+  ;; failure, never an HTTP fallback or a false observation.
+  (let [r (oc/check-registered-run
+           {:repo "futon2" :namespace "futon2.x-test"
+            :config (str "test-registry-" (apply str (repeat 64 "a")))})]
+    (is (= :registry-port-unset (:kind r)))
+    (is (nil? (:observed r))))
   ;; a body whose text does not hash to the id it was fetched under is an
   ;; unreadable registry, not an observation about tests
   (binding [oc/*registry-entry*
@@ -239,7 +237,7 @@
     (let [r (oc/check-registered-run {:repo "futon2" :namespace "futon2.aif.nothing-test"})]
       (is (false? (:observed r)))
       (is (nil? (:status r)))
-      (is (= :no-entry (get-in r [:evidence :reason])))
+      (is (= :no-local-record (get-in r [:evidence :reason])))
       (is (= :namespace-lookup (get-in r [:evidence :resolved-by])))))
   ;; the lookup could not be reached: nothing was observed about any registry
   (binding [oc/*registry-latest* (fn [_ _] {:status :missing :kind :registry-unreadable
@@ -327,7 +325,7 @@
     (let [r (oc/check-registered-run {:repo "futon2" :command ["bb" "scripts/gates.clj"]})]
       (is (false? (:observed r)))
       (is (nil? (:status r)))
-      (is (= :no-entry (get-in r [:evidence :reason])))
+      (is (= :no-local-record (get-in r [:evidence :reason])))
       (is (= :command-lookup (get-in r [:evidence :resolved-by]))))))
 
 (deftest c8-command-locator-refusals
@@ -411,27 +409,6 @@
 ;; {:absent :no-command-form-entry} and only the namespace lookup is asserted.
 ;; A command-form entry needs a registered :run whose :command is the exact
 ;; vector ["clojure" "-M:test" "-n" <ns>], which register-warrant.sh writes.
-(def ^:private live-pinned-entry-id
-  "test-registry-204346f534d4686aa9172f223f6d3e897c7b413045f6f50d40147c3b89141605")
-
-(defn- entry-payload
-  "The registry record's payload map, read from the evidence body's EDN."
-  [entry]
-  (some-> entry :evidence/body :payload-edn edn/read-string))
-
-(defn- pinned-entry
-  "The pinned record by id, or a typed failure naming the id."
-  [base entry-id]
-  (let [e (oc/fetch-registry-entry base entry-id)]
-    (cond
-      (= :absent e) {:absent :pinned-entry-not-in-registry :entry-id entry-id}
-      (:status e) {:absent :registry-unreadable :entry-id entry-id :refusal e}
-      :else {:entry e :payload (entry-payload e)})))
-
-(def ^:private pinned-marker-at
-  "The :at of the ledger build marker the C8 live pin was taken against."
-  "2026-09-25T03:23:03.538975798Z")
-
 (defn- complete-marker-failure
   "nil when ENTRIES hold a :namespace-ledger-built marker at AT that is
   :complete? with :scanned = :registry-entries; else a typed reason with the
@@ -454,46 +431,12 @@
            (:failure (complete-marker-failure [(assoc ok :registry-entries 6)] "t"))))
     (is (= :pinned-marker-not-in-ledger (:absent (complete-marker-failure [ok] "u"))))))
 
-(deftest c8-live-command-lookup-observes-the-same-entry-as-the-namespace-lookup
-  (let [base (oc/agency-base)
-        ns-name "futon3c.test-registry-test"
-        cmd ["clojure" "-M:test" "-n" ns-name]
-        pinned (pinned-entry base live-pinned-entry-id)]
-    (is (nil? (:absent pinned))
-        (str "pinned entry " live-pinned-entry-id " did not resolve: " (pr-str pinned)))
-    (when-let [payload (:payload pinned)]
-      (is (= :run (:kind payload)) live-pinned-entry-id)
-      (let [command-form? (= cmd (:command payload))
-            by-namespace (oc/fetch-latest-for-namespace base ns-name)
-            by-command (if command-form?
-                         (oc/fetch-latest-for-command base cmd)
-                         {:absent :no-command-form-entry})]
-        (is (= :namespace-lookup (:resolved-by by-namespace)) (pr-str by-namespace))
-        (if-not command-form?
-          (is (= {:absent :no-command-form-entry} by-command))
-          (let [found (pinned-entry base (:entry-id by-command))]
-            (is (= :command-lookup (:resolved-by by-command)) (pr-str by-command))
-            (is (= (:entry-id by-namespace) (:entry-id by-command))
-                "the two lookups observe the same entry")
-            (is (= cmd (get-in found [:payload :command]))
-                "the entry both lookups return carries the pinned entry's command")
-            (is (not (neg? (compare (get-in found [:payload :ran-at])
-                                    (get-in pinned [:payload :ran-at]))))
-                "a latest lookup never answers a run older than the pinned one"))))))
-  ;; the marker this pin was taken against: a complete command-keyed build.
-  ;; Pinned by identity (LIVE-PIN-I2): a :namespace-ledger-built marker has no
-  ;; id field; its identity is :at, the Instant build-namespace-ledger! stamps
-  ;; it with (futon3c src/futon3c/test_registry.clj L1209-1213). The ledger is
-  ;; append-only (append-ledger-entry!), so a later rebuild adds a marker and
-  ;; this one stays. Its counts are asserted equal to EACH OTHER, not to a
-  ;; number the registry will outgrow.
-  (let [ledger-file (io/file "/home/joe/code/futon3c/data/test-registry/namespace-ledger.edn")
-        entries (with-open [r (java.io.PushbackReader. (io/reader ledger-file))]
-                  (loop [acc []]
-                    (let [form (edn/read {:eof ::eof} r)]
-                      (if (= ::eof form) acc (recur (conj acc form))))))]
-    (is (nil? (complete-marker-failure entries pinned-marker-at))
-        (pr-str (complete-marker-failure entries pinned-marker-at)))))
+(deftest c8-standalone-does-not-fall-back-to-the-former-live-store
+  (let [result (oc/check-registered-run
+                {:repo "futon3c" :namespace "futon3c.test-registry-test"})]
+    (is (= :registry-port-unset (:kind result)))
+    (is (= 'futon3c.test-registry.local-port/install!
+           (get-in result [:data :installer])))))
 
 (deftest c8-reads-a-run-record-s-counts-by-shape
   ;; review bad case (claude-8, 2026-09-25, of b9eae2d6): the first live gate
@@ -540,7 +483,7 @@
         (is (= offending (get-in r [:data :offending])))))
     ;; a well-formed argv still goes through to the registry
     (binding [oc/*registry-latest* (fn [_ _] :absent)]
-      (is (= :no-entry (get-in (oc/check-registered-run {:repo "futon3c" :command ["bb" "g.clj"]})
+      (is (= :no-local-record (get-in (oc/check-registered-run {:repo "futon3c" :command ["bb" "g.clj"]})
                                [:evidence :reason]))))))
 
 ;; locator-refusal: each class's locator rule, held once here and asked by the
