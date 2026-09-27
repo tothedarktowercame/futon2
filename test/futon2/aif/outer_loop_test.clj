@@ -9,6 +9,7 @@
             [futon2.aif.flight-driver :as fd]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.outer-loop :as outer-loop]
+            [futon2.aif.outer-cascade :as cascade]
             [futon2.aif.outer-cascade-test :as oc-test])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -49,6 +50,8 @@
         p (:plan r)]
     (testing "1. only the eligible target is chosen; the ineligible and the excluded are on the record"
       (is (= "M-futon-seams" (:requisition p)))
+      ;; Captured from unchanged HEAD 1114a8bd0c, seed 42, this fixture.
+      (is (= 6 (count (get-in p [:wants :in-view]))))
       (is (= ["M-futon-seams"] (get-in r [:target-selection :support])))
       (is (= ["E-not-a-target" "M-mooted"] (mapv :target (get-in r [:target-selection :excluded]))))
       (is (= [:not-lifecycle-shaped :requisition/mooted] (mapv :reason (get-in r [:target-selection :excluded])))))
@@ -126,3 +129,18 @@
     (is (= (dissoc (:target-selection baseline) :inputs)
            (dissoc (:target-selection result) :inputs)))
     (is (= (get-in baseline [:plan :requisition]) (get-in result [:plan :requisition])))))
+
+(deftest missing-chosen-location-is-data-not-an-empty-mission
+  (doseq [[f missing] [[(assoc field :considered []) [:considered-entry]]
+                       [(assoc-in field [:considered 0 :path] "  ") [:path]]
+                       [(assoc-in field [:considered 0 :repo] "") [:repo]]
+                       [(update-in field [:considered 0] dissoc :repo :path) [:repo :path]]]]
+    (let [called (atom false)
+          expected (cascade/select {:field f :seed 42 :trigger :wallclock-cron})
+          r (with-redefs [fd/plan (fn [_] (reset! called true) :unexpected-plan)]
+              (outer-loop/plan-from-field! (entry-opts (store-dir) {:field f})))]
+      (is (= {:absent :chosen-target-not-in-field
+              :chosen-target "M-futon-seams" :missing missing} (:plan r)))
+      (is (= (:target-selection expected) (:target-selection r)))
+      (is (false? @called))
+      (println :missing-location r))))

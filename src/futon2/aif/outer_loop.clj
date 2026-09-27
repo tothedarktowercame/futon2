@@ -10,7 +10,8 @@
   `plan-from-field!` PLANS. It calls `flight-driver/plan`, which sends nothing
   and writes nothing; running the flight is not here (no flight before the
   spike is belled)."
-  (:require [futon2.aif.flight-driver :as driver]
+  (:require [clojure.string :as str]
+            [futon2.aif.flight-driver :as driver]
             [futon2.aif.outer-cascade :as outer-cascade]
             [futon2.aif.target-field :as target-field]))
 
@@ -24,7 +25,8 @@
   Returns {:target-selection the outer cascade's record, :plan the flight's plan}; when
   no target is eligible, :plan is {:absent :no-eligible-target} and nothing is
   planned. The chosen entry's :repo and :path come from the field's :considered
-  entry for it (the feasible entry does not carry them).
+  entry for it (the feasible entry does not carry them). Missing entries or
+  blank locations produce :chosen-target-not-in-field without calling the planner.
   :enactment-records, :publication-observed and :clock-lineage are forwarded
   to selection for recording only; their producers remain caller-owned."
   [{:keys [trigger seed seat load-field-fn plan-opts]
@@ -36,9 +38,20 @@
                        {:field field :seed seed :trigger trigger}))
         target (:chosen-target chosen)
         entry (first (filter #(= target (:target %)) (:feasible field)))
-        considered (first (filter #(= target (:target %)) (:considered field)))]
-    (if-not target
+        considered (first (filter #(= target (:target %)) (:considered field)))
+        missing (if-not considered
+                  [:considered-entry]
+                  (filterv #(let [v (get considered %)]
+                              (or (not (string? v)) (str/blank? v)))
+                           [:repo :path]))]
+    (cond
+      (not target)
       {:target-selection (:target-selection chosen) :plan {:absent :no-eligible-target}}
+      (seq missing)
+      {:target-selection (:target-selection chosen)
+       :plan {:absent :chosen-target-not-in-field :chosen-target target :missing missing}}
+
+      :else
       {:target-selection (:target-selection chosen)
        :plan (driver/plan
               (merge {:chosen-target target
