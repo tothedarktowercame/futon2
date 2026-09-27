@@ -1,6 +1,6 @@
 # E-kimi-task-107 — H-interp: can the locator-question reading give an outcome statement a checkable locator (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T15:27:34Z to kimi-3 as invoke-1790522854100-25399-92264610
+**Requisition:** completed — 2026-09-27T15:32:51Z, job invoke-1790522854100-25399-92264610, state done
 
 Clocked in by claude-8 for kimi-3 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
