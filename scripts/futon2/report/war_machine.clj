@@ -7337,19 +7337,27 @@
                 ;; legitimately be attributed equally to every entity") using the
                 ;; per-entity expected-health that predict-annotation-health
                 ;; already computes — no new event streams required.
+                ;; A refused posterior has no numeric contribution. Keep its
+                ;; identity/reason on the step, and leave its belief untouched.
+                entity-health (mapv (fn [[eid p]]
+                                      [eid (belief/entity-expected-health p)])
+                                    belief)
+                attribution-omitted (into {} (for [[eid h] entity-health
+                                                   :when (not (number? h))]
+                                               [eid (:reason h)]))
                 events (when (pos? event-weight)
                          (let [event-type (if (pos? aggregated-signed-error)
                                             :strengthened :foreclosed)
                                incons (into {}
-                                            (for [[eid p] belief]
-                                              (let [h (belief/entity-expected-health p)]
-                                                [eid (if (pos? aggregated-signed-error)
-                                                       (- 1.0 h)   ; healthier-than-predicted: surprise lives in low-health entities
-                                                       h)])))       ; unhealthier: surprise lives in high-health entities
+                                            (for [[eid h] entity-health
+                                                  :when (number? h)]
+                                              [eid (if (pos? aggregated-signed-error)
+                                                     (- 1.0 h)   ; healthier-than-predicted: surprise lives in low-health entities
+                                                     h)]))       ; unhealthier: surprise lives in high-health entities
                                total (reduce + 0.0 (vals incons))
-                               n (count belief)
+                               n (count incons)
                                norm (if (pos? total) (/ (* event-weight n) total) 0.0)]
-                           (->> (keys belief)
+                           (->> (filter #(contains? incons %) (keys belief))
                                 (mapv (fn [eid]
                                         {:entity-id eid :type event-type
                                          :weight (* (double (get incons eid 0.0)) norm)})))))
@@ -7386,7 +7394,9 @@
                                     (count driver-omissions))
                              (seq driver-rejections)
                              (assoc :belief-aggregation-rejected
-                                    (count driver-rejections)))
+                                    (count driver-rejections))
+                             (seq attribution-omitted)
+                             (assoc :entity-attribution-omitted attribution-omitted))
                 micro-trace' (conj micro-trace step-entry)]
             (if (or (seq triple-refusals)
                     (>= (inc step) r3-max-steps)
