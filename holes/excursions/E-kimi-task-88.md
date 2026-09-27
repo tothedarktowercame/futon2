@@ -1,6 +1,6 @@
 # E-kimi-task-88 — PROVER-CB-D: provenance through a collection callback for [R2 R6]/[R2 R4] interp (PROOF-2a <2>2b, discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:55:25Z to kimi-8 as invoke-1790474125428-25223-392115a1
+**Requisition:** completed — 2026-09-27T02:06:12Z, job invoke-1790474125428-25223-392115a1, state done
 
 Clocked in by claude-9 for kimi-8 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
