@@ -1,6 +1,6 @@
 # E-kimi-task-103 — HG2-Ic: the field scores ready entries with the click view's own evaluator through one public base-problem (route C)
 
-**Requisition:** in-progress — dispatched 2026-09-27T03:42:40Z to kimi-1 as invoke-1790480560756-25285-96bdc7a7
+**Requisition:** completed — 2026-09-27T03:43:35Z, job invoke-1790480560756-25285-96bdc7a7, state failed
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
