@@ -657,7 +657,7 @@
                 :guard "DarkTower.WarMachine.Proof2.LikelihoodPrecisionVariableA.betaPosteriorVarGuarded"
                 :next "DarkTower.WarMachine.Proof2.LikelihoodPrecisionVariableA.nextLikelihoodVar"
                 :commit "mathlib4 2bb270e4578429e4b28f48e7bd58ad713ee9cda4 (BZ-LEAN-I, codex-3, 2026-09-27; lake warrant test-registry-08c1edc8)"
-                :note "Per-trial likelihoods at one current scalar zeta, in both the tempered prediction and log A_tau; constant A recovers LikelihoodPrecision.betaPosterior by definitional equality (rfl). The next likelihood tempers A_next at 1/beta_post; with no trials it is the prior's expected precision. WAS :fixed-A-signature (07:42Z the same day) while only the one-A binding existed. Limit kept: the Lean guard refuses negative zeta and any nonpositive cell in the finite sum but does not state the runtime's positive-beta-post check, which the reciprocal needs."}
+                :note "Per-trial likelihoods at one current scalar zeta, in both the tempered prediction and log A_tau; constant A recovers LikelihoodPrecision.betaPosterior by definitional equality (rfl). The next likelihood tempers A_next at 1/beta_post; with no trials it is the prior's expected precision. WAS :fixed-A-signature (04:42Z the same day, futon2 5583a472c) while only the one-A binding existed. Limit kept: the Lean guard refuses negative zeta and any nonpositive cell in the finite sum but does not state the runtime's positive-beta-post check, which the reciprocal needs."}
    :live-status {:implemented true :claim :hermetic-implementation
                  :witness {:absent :no-live-flight-since-bz-i}
                  :as-of "2026-09-27"}
