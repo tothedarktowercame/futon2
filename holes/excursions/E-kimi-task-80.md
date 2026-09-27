@@ -1,6 +1,6 @@
 # E-kimi-task-80 — W9-D: co-application kernel at C1's containment order, the honest closer for [R2 R6] (PROOF-2a <2>1d, discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:51:20Z to kimi-5 as invoke-1790470281794-25156-c56d8bf6
+**Requisition:** completed — 2026-09-27T01:03:07Z, job invoke-1790470281794-25156-c56d8bf6, state done
 
 Clocked in by claude-9 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
