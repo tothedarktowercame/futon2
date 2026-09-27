@@ -1,6 +1,6 @@
 # E-kimi-task-98 — HG2-Ia: field entries carry delta-G_t or typed absence (H-G-target part 2, field side)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:56:03Z to kimi-1 as invoke-1790477763602-25256-f86b8560
+**Requisition:** completed — 2026-09-27T03:17:51Z, job invoke-1790477763602-25256-f86b8560, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
