@@ -48,6 +48,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.interpretation-construction :as ic]
+            [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.mission-registry :as mr]
             [futon2.aif.served-by-reading :as served]
@@ -272,42 +273,34 @@
     {:absent :no-constructed-candidate :reason … :next-step :ready}
       construction refused or took no move; support still held, so the
       entry's next step stays :ready.
-    {:absent :no-evaluator-supplied}
-      the sources carry no :construction — see below.
-  The evaluator is never invented in the field: it comes from
-  (:construction SOURCES), the convention cascade-problems.clj documents
-  ({:construct … :budget … :move-cost … :evaluate-g (fn [problem
-  candidate] G)}). The field passes the minimal problem it reads
-  ({:facts observation :want :interpretations}); whether that suffices for
-  a caller's evaluator is the caller's wiring, not this packet. At HEAD the
-  declared sources (cascade-sources/load-declared, flight-driver's
-  :construction-parameters) carry budget and move-cost but no :evaluate-g,
-  so a live :ready entry records :no-evaluator-supplied — a wiring finding
-  for the caller."
-  [input sources]
-  (if-let [evaluate-g (get-in sources [:construction :evaluate-g])]
-    (let [problem {:facts (:observation input)
-                   :want (vec (:want input))
-                   :interpretations (:interpretations input)}
-          result (ic/construct (assoc input :evaluate-g (fn [c] (evaluate-g problem c))))]
-      (if (= :constructed (:status result))
-        (let [receipt (get-in result [:candidates 0 :construction-receipt])
-              cmp (construction/delta-g (:baseline-g result) (:g-of-best receipt))]
-          (if-let [inc (:incommensurable cmp)]
-            {:absent :incommensurable :universes (:universes inc)}
-            {:value (:delta cmp)
-             :universe (:universe cmp)
-             :receipt-digest (served/sha256 (pr-str receipt))
-             :baseline-g (:baseline-g result)
-             :g-of-best (:g-of-best receipt)}))
-        (let [receipt (:construction-receipt result)]
-          (if (= :g-universes-incommensurable (:stop-reason receipt))
-            {:absent :incommensurable
-             :universes (get-in receipt [:coverage :final-evaluation
-                                         :compose-by-need :incommensurable :universes])}
-            {:absent :no-constructed-candidate
-             :reason (:kind result)
-             :next-step :ready}))))
+    {:absent :no-evaluator-supplied} for a view without construction.
+    {:absent :problem-not-assembled :reason kind} for assembly refusal.
+  The real target-view supplies the click's evaluator; base-problem is the
+  same assembly authority selection uses, without candidate precedences."
+  [input view]
+  (if-let [evaluate-g (get-in view [:construction :evaluate-g])]
+    (let [problem (cascade-problems/base-problem view (:horizon input) (:target input))]
+      (if (:kind problem)
+        {:absent :problem-not-assembled :reason (:kind problem)}
+        (let [result (ic/construct (assoc input :evaluate-g (fn [c] (evaluate-g problem c))))]
+          (if (= :constructed (:status result))
+            (let [receipt (get-in result [:candidates 0 :construction-receipt])
+                  cmp (construction/delta-g (:baseline-g result) (:g-of-best receipt))]
+              (if-let [inc (:incommensurable cmp)]
+                {:absent :incommensurable :universes (:universes inc)}
+                {:value (:delta cmp)
+                 :universe (:universe cmp)
+                 :receipt-digest (served/sha256 (pr-str receipt))
+                 :baseline-g (:baseline-g result)
+                 :g-of-best (:g-of-best receipt)}))
+            (let [receipt (:construction-receipt result)]
+              (if (= :g-universes-incommensurable (:stop-reason receipt))
+                {:absent :incommensurable
+                 :universes (get-in receipt [:coverage :final-evaluation
+                                             :compose-by-need :incommensurable :universes])}
+                {:absent :no-constructed-candidate
+                 :reason (:kind result)
+                 :next-step :ready}))))))
     {:absent :no-evaluator-supplied}))
 
 (defn assess
@@ -373,7 +366,7 @@
                           r (ic/support input)]
                       (if (= :supported (:status r))
                         (step t :ready {:support (count (:family r)) :open-wants open
-                                        :delta-g (ready-delta-g input sources)})
+                                        :delta-g (ready-delta-g input view)})
                         (constructor-step t r wants universe (:criteria-by-token src))))))))
             (catch Exception e
               (step t :construct {:finding {:kind :assembly-refused

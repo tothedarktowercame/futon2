@@ -10,7 +10,10 @@
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.mission-registry :as mr]
             [futon2.aif.served-by-reading :as served]
-            [futon2.aif.target-field :as tf])
+            [futon2.aif.target-field :as tf]
+            [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.flight-runner :as fr]
+            [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -393,18 +396,32 @@
 ;; constructor fixtures are interpretation-construction-test's shape (one
 ;; producer pattern over the M-shaped layout's published interpretation).
 
-(defn- delta-g-field [evaluate-g]
-  (let [l (layout)
-        loaded {:missions (:missions (mr/load-missions-from-files (:root l)))
-                :tickets (:tickets (mr/load-tickets (:root l)))
-                :excursions (:excursions (mr/load-excursions (:root l)))}]
-    (tf/target-field {:code-root (:root l) :store (:store l)
-                      :sources (if evaluate-g
-                                 {:construction {:evaluate-g evaluate-g}}
-                                 {})
-                      :read-text (fn [code-root repo path] (let [f (io/file code-root repo path)] (when (.isFile f) (slurp f))))
-                      :observe (fn [l'] (str/includes? (slurp (io/file (:root l) (:repo l') (:path l'))) (str (:decl l'))))}
-                     loaded)))
+(defn- delta-g-field
+  ([evaluate-g] (delta-g-field evaluate-g (atom nil)))
+  ([evaluate-g captured]
+   (let [l (layout)
+         real-view fr/target-view
+         loaded {:missions (:missions (mr/load-missions-from-files (:root l)))
+                 :tickets (:tickets (mr/load-tickets (:root l)))
+                 :excursions (:excursions (mr/load-excursions (:root l)))}]
+     ;; Existing evaluator-branch tests inject at the view boundary. ::real
+     ;; retains target-view's own construction, including its actual scorer.
+     (with-redefs [fr/target-view
+                   (fn [& args]
+                     (let [view (apply real-view args)
+                           view (cond (= ::real evaluate-g) view
+                                      evaluate-g (assoc-in view [:construction :evaluate-g] evaluate-g)
+                                      :else (dissoc view :construction))]
+                       (when (= "M-shaped" (:target (second args))) (reset! captured view))
+                       view))]
+       (tf/target-field {:code-root (:root l) :store (:store l)
+                         :sources {:beta-by-context {:WM {:beta 1}}}
+                         :read-text (fn [code-root repo path]
+                                      (let [f (io/file code-root repo path)]
+                                        (when (.isFile f) (slurp f))))
+                         :observe (fn [l'] (str/includes? (slurp (io/file (:root l) (:repo l') (:path l')))
+                                                          (str (:decl l'))))}
+                        loaded)))))
 
 (defn- by-precedence [baseline-v candidate-v universe-of]
   (fn [_problem candidate]
@@ -447,3 +464,32 @@
         dg (get-in (by-target (:feasible (delta-g-field evaluate-g))) ["M-shaped" :delta-g])]
     (is (= {:absent :incommensurable :universes [[:u-a] [:u-b]]} dg))
     (is (not (contains? dg :value)))))
+
+(deftest d-real-view-scores-the-assembled-problem
+  (let [captured (atom nil)
+        entry (get (by-target (:feasible (delta-g-field ::real captured))) "M-shaped")
+        view @captured
+        horizon (:value (wm/resolve-cascade-horizon view ["M-shaped"]))
+        problem (cp/base-problem view horizon "M-shaped")
+        dg (:delta-g entry)
+        baseline (wm/constructed-candidate-g problem {:precedence []})
+        best (wm/constructed-candidate-g problem {:precedence [:survey/list-callers]})]
+    (is (= :ready (:next-step entry)))
+    (is (identical? wm/constructed-candidate-g (get-in view [:construction :evaluate-g])))
+    (is (= :WM ((:context-of view) "M-shaped")))
+    (is (= 1 (:beta problem)))
+    (is (= (:facts problem) (get-in view [:universes "M-shaped"])))
+    (is (= (:want problem) (get-in view [:wants "M-shaped"])))
+    (is (= (:locators problem) (get-in view [:locators "M-shaped"])))
+    (is (double? (:value dg)))
+    (is (= (vec (sort-by pr-str (cp/problem-tokens (:facts problem) (:want problem)
+                                                 (:interpretations problem))))
+           (:universe dg)))
+    (is (= baseline (:baseline-g dg)))
+    (is (= best (:g-of-best dg)))
+    (is (= (- (:value baseline) (:value best)) (:value dg)))
+    (is (= (pr-str dg)
+           (pr-str (get-in (by-target (:feasible (delta-g-field ::real))) ["M-shaped" :delta-g]))))
+    (is (= {:absent :problem-not-assembled :reason :universe-not-admitted}
+           (#'tf/ready-delta-g {:target "M-shaped" :horizon horizon}
+                              (dissoc view :universes))))))
