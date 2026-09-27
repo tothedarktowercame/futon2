@@ -163,7 +163,9 @@
                  :tokens tokens :established established}))))))))
 
 (defn construct
-  "Return {:status :constructed :candidates [...]} or a typed refusal.
+  "Return {:status :constructed :candidates [...] :baseline-g {:value …
+  :universe …}} or a typed refusal. :baseline-g is the scored G of the empty
+  baseline cascade the comparison ran against (target-grain ΔG's minuend).
 
   Inputs: :target, nonempty :want, :observation {token boolean},
   :interpretations {id {:guard {:needs #{} :forbids #{}} :produces #{}}},
@@ -306,6 +308,14 @@
                     (refuse :construction-not-taken {:construction-receipt receipt :findings findings})
                     :else
                     {:status :constructed :findings findings
+                     ;; The scored baseline G {:value … :universe …} the
+                     ;; taken move was compared against (HG2-Ia): target-grain
+                     ;; ΔG is the difference against the empty baseline
+                     ;; cascade (deltaG_localises), so the field's :delta-g
+                     ;; reads it from here beside the receipt's :g-of-best.
+                     ;; (evaluated baseline) is memoised — the evaluator is
+                     ;; not run again.
+                     :baseline-g (evaluated baseline)
                      ;; Full-want plans first (stable): inside the
                      ;; constructor a partial plan never ranks above a plan
                      ;; that reaches every want. G scoring against the full

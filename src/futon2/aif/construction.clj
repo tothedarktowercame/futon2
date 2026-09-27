@@ -90,6 +90,18 @@
      :universe (:universe a)}
     {:incommensurable {:universes [(:universe a) (:universe b)]}}))
 
+(defn delta-g
+  "The recorded comparison of two scored G values {:value … :universe …}
+  (W6/X6), made public so a caller's ΔG is the SAME comparison the
+  constructor records, never a copy of it: {:delta … :universe …} with
+  delta = a − b (positive means b improved) when both operands carry the
+  same recorded universe, else {:incommensurable {:universes [ua ub]}} —
+  no improvement number exists and none is claimed. The target field's
+  per-entry :delta-g (HG2-Ia) is this function over the construction
+  baseline and the receipt's :g-of-best."
+  [a b]
+  (compare-g a b))
+
 (defn- established-tokens
   "Tokens already established in q0. q0 is accepted as a coll of tokens
   (a tick-like token state). Anything else establishes nothing here."

@@ -19,7 +19,11 @@
                Each feasible entry also carries :requisition (the state read
                from the file, or a typed absence), :eligible, and
                :ineligible-reason when a requisition makes it ineligible.
-               See `requisition`. An
+               See `requisition`. A feasible entry also carries :delta-g
+               (H-G-target part 2, HG2-Ia): a :ready entry's ΔG_t (value +
+               universe, or a typed absence; see `ready-delta-g`), every
+               other entry the typed absence {:absent
+               :no-constructed-candidate :next-step <its next step>}. An
                ineligible entry stays on the record with its :next-step:
                the ruling makes it ineligible, it does not unwrite it.
   :exclusions  non-targets only, with :reason and :what-would-make-feasible:
@@ -40,6 +44,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.cascade-sources :as cs]
+            [futon2.aif.construction :as construction]
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.interpretation-construction :as ic]
@@ -249,6 +254,62 @@
     (cond-> (assoc e :requisition req :eligible (nil? state))
       state (assoc :ineligible-reason (keyword "requisition" (name state))))))
 
+(defn- ready-delta-g
+  "ΔG_t for a :ready target (PROOF-2a H-G-target part 2, field side;
+  HG2-Ia): run interpretation-construction/construct on the SAME input the
+  support step just held, and compare the scored baseline G against the
+  receipt's :g-of-best with construction/delta-g — the same compare-g the
+  constructor records, never a copy. One of:
+    {:value Δ :universe U :receipt-digest … :baseline-g … :g-of-best …}
+      a constructed candidate improved on the empty baseline over one shared
+      recorded universe (Δ = baseline − best, compare-g's sign); :universe
+      is the receipt's own, :receipt-digest the SHA-256 of the construction
+      receipt's printed form, so the record replays against it.
+    {:absent :incommensurable :universes [ua ub]}
+      the comparison has no shared recorded universe — the constructor
+      stopped :g-universes-incommensurable (or, defensively, the final
+      delta-g did); never a number.
+    {:absent :no-constructed-candidate :reason … :next-step :ready}
+      construction refused or took no move; support still held, so the
+      entry's next step stays :ready.
+    {:absent :no-evaluator-supplied}
+      the sources carry no :construction — see below.
+  The evaluator is never invented in the field: it comes from
+  (:construction SOURCES), the convention cascade-problems.clj documents
+  ({:construct … :budget … :move-cost … :evaluate-g (fn [problem
+  candidate] G)}). The field passes the minimal problem it reads
+  ({:facts observation :want :interpretations}); whether that suffices for
+  a caller's evaluator is the caller's wiring, not this packet. At HEAD the
+  declared sources (cascade-sources/load-declared, flight-driver's
+  :construction-parameters) carry budget and move-cost but no :evaluate-g,
+  so a live :ready entry records :no-evaluator-supplied — a wiring finding
+  for the caller."
+  [input sources]
+  (if-let [evaluate-g (get-in sources [:construction :evaluate-g])]
+    (let [problem {:facts (:observation input)
+                   :want (vec (:want input))
+                   :interpretations (:interpretations input)}
+          result (ic/construct (assoc input :evaluate-g (fn [c] (evaluate-g problem c))))]
+      (if (= :constructed (:status result))
+        (let [receipt (get-in result [:candidates 0 :construction-receipt])
+              cmp (construction/delta-g (:baseline-g result) (:g-of-best receipt))]
+          (if-let [inc (:incommensurable cmp)]
+            {:absent :incommensurable :universes (:universes inc)}
+            {:value (:delta cmp)
+             :universe (:universe cmp)
+             :receipt-digest (served/sha256 (pr-str receipt))
+             :baseline-g (:baseline-g result)
+             :g-of-best (:g-of-best receipt)}))
+        (let [receipt (:construction-receipt result)]
+          (if (= :g-universes-incommensurable (:stop-reason receipt))
+            {:absent :incommensurable
+             :universes (get-in receipt [:coverage :final-evaluation
+                                         :compose-by-need :incommensurable :universes])}
+            {:absent :no-constructed-candidate
+             :reason (:kind result)
+             :next-step :ready}))))
+    {:absent :no-evaluator-supplied}))
+
 (defn assess
   "One considered target T: an exclusion when T is not a work target (an M-
   file without the lifecycle form, a file not at HEAD), else a feasible entry
@@ -273,7 +334,8 @@
                      {:shape shape})
 
           :else
-          (try
+          (let [entry
+                (try
             (let [f (flight/start {:target (:target t) :chosen-because {:kind :target-field}}
                                   (cond-> {:kind :a-exits :repo (:repo t) :path (:path t) :store store
                                            :code-root code-root :read-text (fn [& _] text)}
@@ -302,18 +364,28 @@
                                                  :unobserved (unobserved open universe)
                                                  :finding {:kind :no-published-interpretation}})
                     :else
-                    (let [r (ic/support {:target target :want wants :observation universe
-                                         :interpretations patterns
-                                         :interpretation-receipts (get-in view [:interpretations target :receipts])
-                                         :budget (:value (wm/construction-budget sources))
-                                         :horizon (:value (wm/resolve-cascade-horizon view [target]))
-                                         :move-cost (:value wm/construction-move-cost)})]
+                    (let [input {:target target :want wants :observation universe
+                                 :interpretations patterns
+                                 :interpretation-receipts (get-in view [:interpretations target :receipts])
+                                 :budget (:value (wm/construction-budget sources))
+                                 :horizon (:value (wm/resolve-cascade-horizon view [target]))
+                                 :move-cost (:value wm/construction-move-cost)}
+                          r (ic/support input)]
                       (if (= :supported (:status r))
-                        (step t :ready {:support (count (:family r)) :open-wants open})
+                        (step t :ready {:support (count (:family r)) :open-wants open
+                                        :delta-g (ready-delta-g input sources)})
                         (constructor-step t r wants universe (:criteria-by-token src))))))))
             (catch Exception e
               (step t :construct {:finding {:kind :assembly-refused
-                                            :refusal (or (ex-data e) {:message (.getMessage e)})}}))))]
+                                            :refusal (or (ex-data e) {:message (.getMessage e)})}})))]
+            ;; HG2-Ia: ΔG is defined only for :ready targets (the direction's
+            ;; "construct first but not for all 343"); every other feasible
+            ;; entry carries the typed absence with its own next step, never
+            ;; a number standing in.
+            (if (= :ready (:next-step entry))
+              entry
+              (assoc entry :delta-g {:absent :no-constructed-candidate
+                                     :next-step (:next-step entry)}))))]
     (if (:reason entry) entry (with-eligibility entry req (:kind t)))))
 
 (defn with-pair-overlap

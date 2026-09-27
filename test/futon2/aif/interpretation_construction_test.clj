@@ -243,7 +243,9 @@
 
 (deftest nf-4-all-finite-is-byte-identical-to-before
   ;; fixture: pr-str of this call on the unchanged source (futon2 3bbf5059,
-  ;; interpretation_construction.clj sha256 ef18699e...), captured before the change
+  ;; interpretation_construction.clj sha256 ef18699e...), captured before the change;
+  ;; regenerated at HG2-Ia with only the :constructed result's new :baseline-g
+  ;; key inserted (verified: the bytes beyond that key are unchanged)
   (let [r (sut/construct (three-input {:P 3.0 :P2 1.5 :P3 2}))]
     (is (= (slurp "test/fixtures/interpretation-construction/nf4-all-finite@futon2-3bbf5059.edn")
            (pr-str r)))
@@ -307,6 +309,8 @@
     (is (not= (:absent baseline) (:absent all-cand)))))
 
 (deftest nb-4-finite-baseline-is-byte-identical-to-082dfe5e
+  ;; fixture regenerated at HG2-Ia with only the :constructed result's new
+  ;; :baseline-g key inserted (verified: the bytes beyond it are unchanged)
   (let [r (sut/construct (three-input {nil 4 :P 2.5 :P2 0.5 :P3 1}))]
     (is (= (slurp "test/fixtures/interpretation-construction/nb4-finite-baseline@futon2-082dfe5e.edn")
            (pr-str r)))))

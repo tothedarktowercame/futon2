@@ -383,3 +383,67 @@
     (is (= {:malformed "**Requisition:**"}
            (tf/requisition "# E-1\n\n**Requisition:**\n"))
         "the marker with no state word is malformed, not a state")))
+
+;; ---------------------------------------------------------------------------
+;; HG2-Ia (PROOF-2a H-G-target part 2, field side): a :ready entry carries
+;; its ΔG_t (value + universe) or the typed absence; every other feasible
+;; entry carries {:absent :no-constructed-candidate :next-step …}. The
+;; evaluator is supplied under (:construction sources), the convention
+;; cascade-problems.clj documents; the field never invents one. The
+;; constructor fixtures are interpretation-construction-test's shape (one
+;; producer pattern over the M-shaped layout's published interpretation).
+
+(defn- delta-g-field [evaluate-g]
+  (let [l (layout)
+        loaded {:missions (:missions (mr/load-missions-from-files (:root l)))
+                :tickets (:tickets (mr/load-tickets (:root l)))
+                :excursions (:excursions (mr/load-excursions (:root l)))}]
+    (tf/target-field {:code-root (:root l) :store (:store l)
+                      :sources (if evaluate-g
+                                 {:construction {:evaluate-g evaluate-g}}
+                                 {})
+                      :read-text (fn [code-root repo path] (let [f (io/file code-root repo path)] (when (.isFile f) (slurp f))))
+                      :observe (fn [l'] (str/includes? (slurp (io/file (:root l) (:repo l') (:path l'))) (str (:decl l'))))}
+                     loaded)))
+
+(defn- by-precedence [baseline-v candidate-v universe-of]
+  (fn [_problem candidate]
+    {:value (if (empty? (:precedence candidate)) baseline-v candidate-v)
+     :universe (universe-of candidate)}))
+
+(deftest d-ready-entry-carries-a-replayable-delta-g
+  (let [evaluate-g (by-precedence 10.0 1.0 (constantly [:u-delta]))
+        dg (get-in (by-target (:feasible (delta-g-field evaluate-g))) ["M-shaped" :delta-g])]
+    (is (= :ready (get-in (by-target (:feasible (delta-g-field evaluate-g))) ["M-shaped" :next-step])))
+    (is (= 9.0 (:value dg)) "Δ = baseline − best over the shared universe, positive = improved")
+    (is (= [:u-delta] (:universe dg)) "the receipt's own universe, none invented")
+    (is (= {:value 10.0 :universe [:u-delta]} (:baseline-g dg)))
+    (is (= {:value 1.0 :universe [:u-delta]} (:g-of-best dg)))
+    (is (string? (:receipt-digest dg)))
+    (is (not (contains? dg :absent)))
+    (testing "replayable: the same inputs give the identical :delta-g"
+      (is (= dg (get-in (by-target (:feasible (delta-g-field evaluate-g))) ["M-shaped" :delta-g]))))))
+
+(deftest d-no-evaluator-supplied-is-a-typed-absence
+  (let [ok (by-target (:feasible (delta-g-field nil)))]
+    (is (= :ready (get-in ok ["M-shaped" :next-step])))
+    (is (= {:absent :no-evaluator-supplied} (get-in ok ["M-shaped" :delta-g]))
+        "never an evaluator invented in the field")))
+
+(deftest d-non-ready-entries-carry-the-typed-absence-with-their-next-step
+  (let [ok (by-target (:feasible (delta-g-field (by-precedence 10.0 1.0 (constantly [:u-delta])))))]
+    (doseq [[target next-step] {"M-autoclock-in" :read-criteria "T-plain" :read-criteria}]
+      (is (= next-step (get-in ok [target :next-step])))
+      (is (= {:absent :no-constructed-candidate :next-step next-step}
+             (get-in ok [target :delta-g]))))
+    (is (every? #(contains? % :delta-g) (:feasible (delta-g-field nil)))
+        "no feasible entry is silently without a :delta-g record")))
+
+(deftest d-incommensurable-universes-record-no-number
+  ;; The baseline's universe differs from the candidate's — by the fixture's
+  ;; evaluator, compare-g is not stubbed. Construction stops
+  ;; :g-universes-incommensurable and the entry records the absence.
+  (let [evaluate-g (by-precedence 10.0 1.0 #(if (empty? (:precedence %)) [:u-a] [:u-b]))
+        dg (get-in (by-target (:feasible (delta-g-field evaluate-g))) ["M-shaped" :delta-g])]
+    (is (= {:absent :incommensurable :universes [[:u-a] [:u-b]]} dg))
+    (is (not (contains? dg :value)))))

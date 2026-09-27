@@ -34,8 +34,15 @@
 
 (deftest the-fields-other-keys-are-unchanged
   ;; fixture: pr-str of the target-field test layout's field from
-  ;; target_field.clj at futon2 42b5abdc, before row 8
+  ;; target_field.clj at futon2 42b5abdc, before row 8. The field gained two
+  ;; keys since, both recorded changes with their own pins, so they are
+  ;; dissoc'd beside :pair-overlap: :universe-source (the U(t) reading,
+  ;; 7e6ae82de — its absence from the dissoc list was a pre-existing failure
+  ;; of this test, found at HG2-Ia) and :delta-g (HG2-Ia). Compared as data,
+  ;; not bytes: an entry past eight keys prints in hash order, so the byte
+  ;; pin could not survive any recorded key addition (the failure above was
+  ;; exactly that).
   (let [f (#'futon2.aif.target-field-test/field (#'futon2.aif.target-field-test/layout))]
-    (is (= (edn/read-string (slurp "test/fixtures/target-field-overlap/field-before@futon2-42b5abdc.edn"))
-           (pr-str (update f :feasible #(mapv (fn [e] (dissoc e :pair-overlap)) %)))))
+    (is (= (edn/read-string (edn/read-string (slurp "test/fixtures/target-field-overlap/field-before@futon2-42b5abdc.edn")))
+           (edn/read-string (pr-str (update f :feasible #(mapv (fn [e] (dissoc e :pair-overlap :universe-source :delta-g)) %))))))
     (is (every? :pair-overlap (:feasible f)))))
