@@ -255,7 +255,7 @@
         b (judged (assoc (inputs-rational) :tick-id "b"))
         winner (publish a)]
     (is (= :scored (get-in winner [:bmr-receipt :status])))
-    (is (= 0 (:delta-f (first (filter #(= :identity (:id %))
+    (is (zero? (:delta-f (first (filter #(= :identity (:id %))
                                       (get-in winner [:bmr-receipt :proposals]))))))
     (let [saved (publish b)
           receipt (:bmr-receipt saved)

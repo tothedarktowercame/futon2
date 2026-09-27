@@ -118,8 +118,12 @@
         A (concentration-vector :full-posterior full-posterior)
         a' (concentration-vector :reduced-prior reduced-prior)]
     (same-cardinality! a A a')
+    ;; A' = A + (a' - a), the difference formed FIRST: when a' = a the
+    ;; difference is exactly 0 and A' is A bitwise, so an identity
+    ;; proposal cancels exactly instead of leaving a rounding residue
+    ;; from (A + a') - a.
     (let [A' (mapv (fn [posterior reduced prior]
-                     (+ posterior reduced (- prior)))
+                     (+ posterior (- reduced prior)))
                    A a' a)]
       (doseq [[i x] (map-indexed vector A')]
         (when-not (finite-positive? x)
@@ -129,10 +133,14 @@
                            :full-prior (nth a i)
                            :full-posterior (nth A i)
                            :reduced-prior (nth a' i)}))))
-      (let [delta-F (- (+ (log-multivariate-beta A)
-                          (log-multivariate-beta a'))
-                       (log-multivariate-beta a)
-                       (log-multivariate-beta A'))]
+      ;; delta-F = [ln B(A) - ln B(A')] + [ln B(a') - ln B(a)]: like terms
+      ;; paired, so identical inputs cancel exactly (x - x = 0 in IEEE);
+      ;; the unpaired form (lnB(A) + lnB(a')) - lnB(a) - lnB(A') leaves
+      ;; ~1e-14 for an identity proposal. Same value otherwise.
+      (let [delta-F (+ (- (log-multivariate-beta A)
+                          (log-multivariate-beta A'))
+                       (- (log-multivariate-beta a')
+                          (log-multivariate-beta a)))]
         {:reduced-posterior A'
          :delta-F delta-F
          :accept? (<= delta-F acceptance-threshold)}))))

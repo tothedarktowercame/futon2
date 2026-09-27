@@ -88,7 +88,13 @@
       order
       (let [prior (get-in state [:initialization :prior])]
         (if (number? prior)
-          (mapv (fn [_s] (mapv (fn [_c] prior) channels)) statuses)
+          ;; The live config declares the scalar as a double (1.0,
+          ;; machine-accumulation-config.edn); `rationalize` converts it
+          ;; exactly (1.0 -> 1) so the deltas a' - a are rationals and
+          ;; `proposal`'s rationality check admits them. The value is the
+          ;; same number; the state's concentrations are read as stored.
+          (let [p (rationalize prior)]
+            (mapv (fn [_s] (mapv (fn [_c] p) channels)) statuses))
           {:status :refused :kind :no-declared-initialization})))))
 
 (defn- refusal? [x] (and (map? x) (:status x)))
@@ -220,23 +226,23 @@
 
 (defn- score-member
   "One family member scored against the state. The identity control is
-   exact: a' = a gives delta-F 0 by cancellation, emitted as exactly 0.
-   Other members go through the adapter's `proposal` + `score`; a refusal
-   stays attached to THAT proposal — the rest of the family still scores."
-  [state member statuses]
-  (if (= :identity (:id member))
-    {:id :identity :delta-f 0
-     :per-factor (mapv (fn [s] {:status s :delta-f 0}) statuses)}
-    (let [deltas (member-deltas state member)]
-      (if (refusal? deltas)
-        {:id (:id member) :status :refused :reason (:kind deltas) :cause deltas}
-        (let [result (score state deltas)]
-          (if (refusal? result)
-            {:id (:id member) :status :refused :reason (:kind result) :cause result}
-            {:id (:id member)
-             :delta-f (:delta-f result)
-             :per-factor (mapv #(select-keys % [:status :delta-f])
-                               (:per-factor result))}))))))
+   the scorer run with NO deltas (a' = a): its delta-F is 0 by the
+   computation itself (A' = A + a' - a = A, so every log-beta term
+   cancels), never a constant written in its place — a control that is
+   not computed controls nothing. Other members go through
+   `member-deltas` + `proposal` + `score`; a refusal stays attached to
+   THAT proposal — the rest of the family still scores."
+  [state member _statuses]
+  (let [deltas (if (= :identity (:id member)) {} (member-deltas state member))]
+    (if (refusal? deltas)
+      {:id (:id member) :status :refused :reason (:kind deltas) :cause deltas}
+      (let [result (score state deltas)]
+        (if (refusal? result)
+          {:id (:id member) :status :refused :reason (:kind result) :cause result}
+          {:id (:id member)
+           :delta-f (:delta-f result)
+           :per-factor (mapv #(select-keys % [:status :delta-f])
+                             (:per-factor result))})))))
 
 (defn receipt-for-record
   "Score the declared proposal `family` from the PUBLISHED accumulation on

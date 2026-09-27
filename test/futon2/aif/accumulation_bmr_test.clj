@@ -249,9 +249,13 @@
          (is (string? (:origin-digest receipt)))
          (is (string? (:accumulation-digest receipt)))
          (is (string? (:support-order-digest receipt))))
-       (testing "identity is exactly 0"
-         (is (= 0 (:delta-f (proposals :identity))))
-         (is (every? #(= 0 (:delta-f %)) (:per-factor (proposals :identity)))))
+       (testing "identity is exactly 0, by the scorer's own computation (a' = a), not a constant"
+         (is (zero? (:delta-f (proposals :identity))))
+         (is (= 7 (count (:per-factor (proposals :identity)))))
+         (is (every? #(zero? (:delta-f %)) (:per-factor (proposals :identity))))
+         (is (= (:delta-f (proposals :identity))
+                (:delta-f (accum-bmr/score state {})))
+             "the identity member IS the scorer run with no deltas"))
        (testing "profile proposals match the independent computation (tol 1e-9)"
          (is (approx= (expected-family-score state 2)
                       (:delta-f (proposals :common-profile-k2)) 1e-9))
@@ -360,3 +364,34 @@
     (is (= :scored (:status receipt')))
     (is (not= (:support-order-digest receipt) (:support-order-digest receipt')))
     (is (= (vec (rseq channels)) (get-in receipt' [:support-order :observation])))))
+
+
+(deftest production-shaped-double-prior-scores-the-profile-proposals
+  ;; The live config declares the scalar prior as the double 1.0
+  ;; (holes/labs/wm-contract/machine-accumulation-config.edn). Before the
+  ;; adapter rationalized it, the k2/k4 deltas were doubles and were refused
+  ;; per proposal as :non-positive-delta, so only the identity control ever
+  ;; scored in production. Bad case: the same state with prior 1.0 must
+  ;; score k2/k4 and agree with the rational-prior fixture.
+  (with-temp-dir
+   (fn [dir]
+     (let [o (zipmap channels (map #(/ % 14) (range 1 15)))
+           mu (zipmap statuses (map #(/ % 28) (range 1 8)))
+           init (acc/initialize channels statuses 1.0)
+           _ (assert (:ok init))
+           state (acc/step init {:id "item6-fixture-double" :previous-id nil
+                                 :observation o :belief mu})
+           publication (trace/write-trace! (publishable-record state "t-double")
+                                           :dir (str dir) :date-str "2026-09-27"
+                                           :return-record? true)
+           receipt (:bmr-receipt (:record publication))
+           proposals (into {} (map (juxt :id identity)) (:proposals receipt))
+           rational-state (fixture-state)]
+       (is (= :scored (:status receipt)))
+       (is (= 1.0 (get-in state [:initialization :prior])) "the state still records the double it was given")
+       (is (zero? (:delta-f (proposals :identity))))
+       (doseq [k [:common-profile-k2 :common-profile-k4]]
+         (is (not (contains? (proposals k) :status)) (str (name k) " is scored, not refused"))
+         (is (number? (:delta-f (proposals k))) (name k)))
+       (is (approx= (expected-family-score rational-state 2) (:delta-f (proposals :common-profile-k2)) 1e-9))
+       (is (approx= (expected-family-score rational-state 4) (:delta-f (proposals :common-profile-k4)) 1e-9))))))
