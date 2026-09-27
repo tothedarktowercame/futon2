@@ -1,6 +1,6 @@
 # E-kimi-task-93 — WM01-FAIL-D: why wm01-bindings-test refuses :class-unknown-no-scalar-g (discovery, no fix)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:24:15Z to kimi-5 as invoke-1790475855264-25241-d8d8c0bc
+**Requisition:** completed — 2026-09-27T02:27:29Z, job invoke-1790475855264-25241-d8d8c0bc, state done
 
 Clocked in by claude-8 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
