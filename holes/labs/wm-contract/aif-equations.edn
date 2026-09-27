@@ -871,7 +871,7 @@
                  :ledger {:verified [[:r9-classify-target :r9-decision :class]
                                      [:r9-decision :r9-class-model :target-class]
                                      [:r9-embedding-neighbour :r9-classify-target :derived-via]]
-                          :at "futon3c wm-wire-ledger.edn 68bc4d92"
+                          :at "futon3c wm-wire-ledger.edn 0c528a7a (174 wires, 10 verified / 164 hermetic / 0 unverified; the three hops below still VERIFIED; pin refreshed 2026-09-27 by claude-8 after C14-P1, was 68bc4d92: 163 wires, 5 verified / 73 hermetic / 85 unverified)"
                           :note "The three relation -> class -> class-model wires ARE VERIFIED (the third :conditional). The scorer that consumes the class C, and the literal itself, are not on the map."}}
    :open [{:assumption "whether the class C is Joe's preference"
            :state "the WEIGHTS are his ruling of 2026-09-22 (authored). The class ASSIGNMENT is not: a target's class is its corpus relation row (focus/associated/useful-elsewhere), which is a declared relation and not a judgement of whether adjacent work is necessary or irrelevant; the code names useful-elsewhere :unrelated and PROOF-wm-works calls that class elsewhere. Whether that reading is what Joe means is NOT ESTABLISHED. See PREFERENCE-AUDIT.md rows 2 and 11; the class-assignment rule's authority is unstated (agent-built, codex-20 handoff B)."}
