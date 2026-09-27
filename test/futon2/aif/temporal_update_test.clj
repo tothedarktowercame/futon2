@@ -89,7 +89,7 @@
          (let [r (temporal/publish! (io/file root "published" "multiple.edn")
                                     (assoc record-c :attempts (vec (concat (:attempts record-c) (:attempts record-c))))
                                     (temporal/envelope record-c) (str (io/file root "trace")))]
-           (is (= :temporal-step-order-not-declared (get-in r [:receipt :reason])))
+           (is (= :multiple-temporal-steps (get-in r [:receipt :reason])))
            (is (not (contains? (:record r) :temporal-posterior)))))
        (testing "event replay cannot rewrite the file or advance again"
          (let [bytes (slurp (:record-path a))

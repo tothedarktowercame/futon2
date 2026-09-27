@@ -124,7 +124,7 @@
                            (not= (:record previous) (:temporal-posterior latest-record))))
                   (absent :temporal-stale-predecessor {:expected expected :actual actual})
                   (not= 1 (count attempts))
-                  (absent :temporal-step-order-not-declared {:attempts (count attempts)}))
+                  (absent :multiple-temporal-steps {:attempts (count attempts)}))
         input (when-not refusal (temporal/temporal-input previous (first attempts) (:check (first attempts))))
         posterior (when (= :admitted (:status input)) (compute input))
         receipt (or refusal
@@ -160,8 +160,9 @@
   "Validate the predecessor and write the existing enactment record under the
    SAME cross-process trace/index lock, without appending a trace or touching
    its index. Enactment files are the temporal authority, never overwritten.
-   AIF validity: multiple attempts need a declared event order; lock contention
-   in this JVM prevents atomic predecessor validation. Both publish absence,
+   AIF validity: several executed transitions and observations cannot be
+   collapsed into this single-update adapter. Same-JVM lock contention prevents
+   atomic predecessor validation. Both publish absence,
    never a posterior claim or a gate. No previous envelope also writes only
    absence, so it needs no cursor lock. Reusing an initial cursor after an
    advance is stale, never a restart; contradictions remain recorded."
