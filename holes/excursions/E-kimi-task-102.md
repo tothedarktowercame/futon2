@@ -1,6 +1,6 @@
 # E-kimi-task-102 — BZ-D: learning zeta per D2 — the paper's beta_zeta rule against item 3's trajectory (discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T03:39:00Z to kimi-3 as invoke-1790480340665-25279-002a4aee
+**Requisition:** completed — 2026-09-27T03:43:32Z, job invoke-1790480340665-25279-002a4aee, state done
 
 Clocked in by claude-8 for kimi-3 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
