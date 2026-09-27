@@ -1,6 +1,6 @@
 # E-kimi-task-83 — W9-1-LEAN: co-application kernel at C1's containment order (PROOF-2a <2>1d)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:04:01Z to kimi-7 as invoke-1790471042966-25166-e4167552
+**Requisition:** completed — 2026-09-27T01:18:56Z, job invoke-1790471042966-25166-e4167552, state done
 
 Clocked in by claude-9 for kimi-7 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
