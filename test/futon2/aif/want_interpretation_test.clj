@@ -450,3 +450,40 @@
     (testing "an absolute path refuses rather than throwing"
       (is (contains? (reasons (agent-search-runs [{:pattern "x" :source {:path "/etc/passwd"}}]))
                      :appended-candidate-outside-library)))))
+
+(deftest machine-declares-the-admitted-model-and-preserves-seat-claims
+  (let [seat {:model-identity {:A "seat-claim" :B :seat-model} :domain #{:seat-token}}
+        v (validate-hand (merge placenta-unit {:pattern :gauntlet/placenta-transfer} seat))
+        i (get-in v [:interpretation :gauntlet/placenta-transfer])
+        d (futon2.aif.observation-checks/loaded-check :C3)]
+    (is (= :valid (:status v)) (pr-str v))
+    (is (= {:A (str (:mechanism-name d) "@" (:mechanism-sha d))
+            :B {:authority 'futon2.aif.cascade-model-manifest/pattern-kernel
+                :revision :declared-add-only-v1}}
+           (:model-identity i)))
+    (is (= #{["M-hand" :sites-enumerated] ["M-hand" :one-producer]
+             ["M-hand" :caller-converted]} (:domain i)))
+    (is (= seat (:seat-declared i)))))
+
+(deftest missing-checkable-locator-is-a-typed-declaration
+  ;; Existing assembly refuses truly unlocated tokens; this tests the declaration
+  ;; without relaxing that admission rule.
+  (let [s (update-in (hand-sources) [:locators "M-hand"] dissoc :caller-converted)
+        i (wi/declare-model "M-hand" :gauntlet/placenta-transfer placenta-unit s {})]
+    (is (= {:absent :no-checkable-locator :token :caller-converted} (:model-identity i)))
+    (is (set? (:domain i)))
+    (is (not (contains? i :seat-declared)))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"lane refused"
+           (wi/validate-response {:target "M-hand" :want {:token :caller-converted}}
+                     (assoc placenta-unit :pattern :gauntlet/placenta-transfer)
+                     {:sources s :code-root library-root})))))
+
+(deftest domain-includes-all-pattern-tokens-and-mixed-checkers-are-not-guessed
+  (let [s (-> (hand-sources)
+              (assoc-in [:interpretations "M-hand" :patterns :p/other]
+                        {:guard {:needs #{:extra} :forbids #{:blocked}} :produces #{:more}})
+              (assoc-in [:locators "M-hand" :another] {:class :C4}))
+        i (wi/declare-model "M-hand" :p/new
+                            {:guard {:needs #{} :forbids #{}} :produces #{:caller-converted :another}} s {})]
+    (is (every? (:domain i) [["M-hand" :extra] ["M-hand" :blocked] ["M-hand" :more]]))
+    (is (= :multiple-check-mechanisms (get-in i [:model-identity :absent])))))

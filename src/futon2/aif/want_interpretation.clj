@@ -22,6 +22,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-sources :as cs]
+            [futon2.aif.observation-checks :as checks]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as ireq])
   (:import [java.nio.file Files StandardCopyOption]
@@ -213,6 +214,40 @@
                         (not (contains? (set (get-in interp [:guard :needs])) requires)))]
          {:reason :owner-constraint-violated :constraint c})))
 
+(defn declare-model
+  "Machine-owned model reading at admission. Domain authority is problem-tokens,
+   qualified by target exactly as temporal-input qualifies transition tokens.
+   Seat assertions are retained separately and never supply this declaration."
+  [target id interp sources response]
+  (let [patterns (assoc (get-in sources [:interpretations target :patterns]) id interp)
+        domain (into #{} (map #(vector target %))
+                     (cp/problem-tokens (get-in sources [:universes target])
+                                        (get-in sources [:wants target]) patterns))
+        tokens (sort-by pr-str (:produces interp))
+        declarations
+        (mapv (fn [token]
+                (let [locator (get-in sources [:locators target token])]
+                  (if-not (#{:C3 :C4 :C5} (:class locator))
+                    {:absent :no-checkable-locator :token token}
+                    (let [d (checks/loaded-check (:class locator))]
+                      (if (:status d)
+                        {:absent :check-mechanism-unavailable :token token :detail d}
+                        {:A (str (:mechanism-name d) "@" (:mechanism-sha d))})))))
+              tokens)
+        missing (first (filter :absent declarations))
+        identities (set (map :A declarations))
+        model (cond
+                missing missing
+                (empty? tokens) {:absent :no-produced-token}
+                (not= 1 (count identities))
+                {:absent :multiple-check-mechanisms :tokens (vec tokens)}
+                :else {:A (first identities)
+                       :B {:authority 'futon2.aif.cascade-model-manifest/pattern-kernel
+                           :revision :declared-add-only-v1}})
+        seat (select-keys response [:model-identity :domain])]
+    (cond-> (assoc interp :model-identity model :domain domain)
+      (seq seat) (assoc :seat-declared seat))))
+
 (defn validate-response
   "Validate RESPONSE to REQUEST against the target's SOURCES (the tick's
   sources map, with :construction supplied). RESPONSE is
@@ -297,7 +332,7 @@
                :reasons [{:reason :admission-refused :refusal (:refusal admitted)}]}
               :else
               {:status :valid :target target :want want
-               :interpretation {id interp}
+               :interpretation {id (declare-model target id interp sources response)}
                :receipt (:receipt response)
                :candidate (select-keys using [:precedence :construction-receipt])})))))))
 
