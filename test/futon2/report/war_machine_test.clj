@@ -2728,3 +2728,17 @@
     (is (.contains md "Pressure completeness:"))
     (is (.contains md "collection incomplete (2 repo(s) failed)"))
     (is (.contains md "backlog write failed"))))
+
+(deftest empty-hygiene-queues-do-not-hide-unavailable-evidence
+  (doseq [uncertainty [{:status "missing"}
+                       {:status "available" :collection-complete? false
+                        :row-failures 2 :backlog-written? false}]]
+    (let [summary (#'wm/summarize-working-tree-hygiene
+                   {:available? true :per-repo [] :channels []
+                    :uncertainty uncertainty})
+          md (wm/render-war-machine (assoc sample-data :commit-hygiene summary))]
+      (is (empty? (:queues summary)))
+      (if (= "missing" (:status uncertainty))
+        (is (.contains md "Uncertain-ownership feed: missing"))
+        (do (is (.contains md "collection incomplete (2 repo(s) failed)"))
+            (is (.contains md "backlog write failed")))))))

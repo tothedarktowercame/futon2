@@ -4481,6 +4481,29 @@
     ;; --- Commit Hygiene ---
     (when commit-hygiene
       (.append sb "## Commit Hygiene\n\n")
+          (when-let [u (:uncertainty commit-hygiene)]
+            (when (or (not= "available" (:status u)) (:stale? u))
+              (.append sb (str "\nUncertain-ownership feed: "
+                               (name (or (:status u) :unknown))
+                               (cond (:stale? u) " (stale)"
+                                     (= "malformed" (str (:status u)))
+                                     (str " (" (name (or (:reason u) :invalid)) ")")
+                                     :else "")
+                               " — ownership-unknown counts may be absent or outdated.\n"))))
+          ;; Producer completeness is part of the rendered surface: a pass
+          ;; that lost rows or the backlog write says so here, never
+          ;; implying complete coverage.
+          (when-let [u (:uncertainty commit-hygiene)]
+            (let [issues (cond-> []
+                           (false? (:collection-complete? u))
+                           (conj (str "collection incomplete ("
+                                      (or (:row-failures u) "?")
+                                      " repo(s) failed)"))
+                           (false? (:backlog-written? u))
+                           (conj "backlog write failed"))]
+              (when (seq issues)
+                (.append sb (str "\nPressure completeness: "
+                                 (str/join "; " issues) ".\n")))))
       (cond
         (not (:available? commit-hygiene))
         (.append sb "*Commit-hygiene snapshot unavailable.*\n\n")
@@ -4519,29 +4542,6 @@
                              (when-let [d (:drilldown commit-hygiene)]
                                (str " — full detail: " d))
                              "\n")))
-          (when-let [u (:uncertainty commit-hygiene)]
-            (when (or (not= "available" (:status u)) (:stale? u))
-              (.append sb (str "\nUncertain-ownership feed: "
-                               (name (or (:status u) :unknown))
-                               (cond (:stale? u) " (stale)"
-                                     (= "malformed" (str (:status u)))
-                                     (str " (" (name (or (:reason u) :invalid)) ")")
-                                     :else "")
-                               " — ownership-unknown counts may be absent or outdated.\n"))))
-          ;; Producer completeness is part of the rendered surface: a pass
-          ;; that lost rows or the backlog write says so here, never
-          ;; implying complete coverage.
-          (when-let [u (:uncertainty commit-hygiene)]
-            (let [issues (cond-> []
-                           (false? (:collection-complete? u))
-                           (conj (str "collection incomplete ("
-                                      (or (:row-failures u) "?")
-                                      " repo(s) failed)"))
-                           (false? (:backlog-written? u))
-                           (conj "backlog write failed"))]
-              (when (seq issues)
-                (.append sb (str "\nPressure completeness: "
-                                 (str/join "; " issues) ".\n")))))
           ;; Full per-file drilldown inside the rendered surface itself:
           ;; EVERY uncertain repo — including those past the display bound —
           ;; lists ALL of its dirty paths here, so neither the 8-queue
