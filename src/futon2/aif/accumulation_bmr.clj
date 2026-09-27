@@ -21,6 +21,8 @@
 
 (def receipt-schema :wm/accumulation-bmr-score-v1)
 
+(def consumer-receipt-schema :wm/accumulation-bmr-v1)
+
 (def declared-model :channel-given-status)
 
 (def prototype-label "prototyping our way forward, not closure of the proof")
@@ -176,3 +178,124 @@
              :delta-f (reduce + (map :delta-f per-factor))
              :inputs inputs
              :rule {:threshold -3 :applied false}}))))))
+
+;; ---------------------------------------------------------------------
+;; ITEM6-CONSUMER-I: the scoring consumer.
+;;
+;; The declared proposal family (registry :model-reduction row,
+;; :declared-model :proposal-family) is scored against the PUBLISHED
+;; accumulation carried on a finalized trace record. Record-only per Joe's
+;; 2026-09-27 rulings: no :accepted? anywhere, the -3 rule is recorded as
+;; not applied, compared ONCE on the sum, never a per-factor vote. A
+;; missing or unavailable accumulation is a typed absence with its actual
+;; cause, never a gate: the selected action is unchanged.
+
+(defn- member-deltas
+  "a' - a per cell for one declared family member, computed from the
+   ORIGIN a (the state's declared initialization, broadcast by
+   `parent-prior`): a'_s = k * (sum_c a[c,s]) * r with r the uniform
+   channel profile (1/n each, n = channel count). Positive multipliers on
+   a positive origin give positive deltas; if a multiplier ever makes a
+   cell delta <= 0 the adapter's `proposal` refuses it — nothing is
+   adjusted here."
+  [state member]
+  (let [{:keys [channels statuses] :as order} (support-order state)]
+    (if (:status order)
+      order
+      (let [a (parent-prior state)]
+        (if (refusal? a)
+          a
+          (let [k (:concentration-multiplier member)
+                n (count channels)
+                s-index (into {} (map-indexed (fn [i s] [s i]) statuses))
+                c-index (into {} (map-indexed (fn [i c] [c i]) channels))]
+            (into {}
+                  (for [s statuses
+                        c channels
+                        :let [si (s-index s)
+                              kappa (* k (reduce + (nth a si)))
+                              a' (/ kappa n)
+                              delta (- a' (nth (nth a si) (c-index c)))]]
+                    [[c s] delta]))))))))
+
+(defn- score-member
+  "One family member scored against the state. The identity control is
+   exact: a' = a gives delta-F 0 by cancellation, emitted as exactly 0.
+   Other members go through the adapter's `proposal` + `score`; a refusal
+   stays attached to THAT proposal — the rest of the family still scores."
+  [state member statuses]
+  (if (= :identity (:id member))
+    {:id :identity :delta-f 0
+     :per-factor (mapv (fn [s] {:status s :delta-f 0}) statuses)}
+    (let [deltas (member-deltas state member)]
+      (if (refusal? deltas)
+        {:id (:id member) :status :refused :reason (:kind deltas) :cause deltas}
+        (let [result (score state deltas)]
+          (if (refusal? result)
+            {:id (:id member) :status :refused :reason (:kind result) :cause result}
+            {:id (:id member)
+             :delta-f (:delta-f result)
+             :per-factor (mapv #(select-keys % [:status :delta-f])
+                               (:per-factor result))}))))))
+
+(defn receipt-for-record
+  "Score the declared proposal `family` from the PUBLISHED accumulation on
+   a finalized trace record, as one retained receipt. Pure: the caller
+   supplies the family and runs this under the append lock; there is no
+   second scoring on readback and no fallback to an older state.
+
+   - record carries :accumulation-state + :accumulation-initialization
+     (the winning publication) -> {:status :scored ...} with one entry per
+     family member (identity exactly 0; a refused proposal keeps its
+     refusal beside the scored ones).
+   - the record's :accumulation-receipt is an absence (stale predecessor,
+     history unavailable, configuration refusal, observation unavailable)
+     -> {:status :absent :reason <that reason> :cause <that receipt>}.
+   - state present but the adapter refuses at the STATE level (missing
+     cell, unordered supports) -> {:status :absent :reason <adapter kind>}.
+   - any numerical failure -> {:status :absent :reason :bmr-unavailable}."
+  [record family]
+  (let [base {:schema consumer-receipt-schema
+              :label prototype-label
+              :family (:id family)}
+        accumulation-receipt (:accumulation-receipt record)
+        state (:accumulation-state record)]
+    (cond
+      (and (map? accumulation-receipt)
+           (not= :accumulated (:status accumulation-receipt)))
+      (assoc base :status :absent
+                  :reason (:reason accumulation-receipt)
+                  :cause accumulation-receipt)
+
+      (nil? state)
+      (assoc base :status :absent
+                  :reason :accumulation-state-unavailable
+                  :cause accumulation-receipt)
+
+      :else
+      (try
+        (let [{:keys [channels statuses] :as order} (support-order state)]
+          (if (:status order)
+            (assoc base :status :absent :reason (:kind order) :cause order)
+            (let [a (parent-prior state)
+                  big-a (factors state)
+                  state-refusal (first (filter refusal? [big-a a]))]
+              (if state-refusal
+                (assoc base :status :absent
+                            :reason (:kind state-refusal)
+                            :cause state-refusal)
+                (assoc base
+                       :status :scored
+                       :origin-digest (sha256-hex (:accumulation-initialization record))
+                       :accumulation-digest (sha256-hex (state-fingerprint state))
+                       :support-order {:observation channels :state statuses}
+                       :support-order-digest (sha256-hex [channels statuses])
+                       :proposals (mapv #(score-member state % statuses)
+                                        (:proposals family))
+                       :rule {:threshold -3 :applied false
+                              :sum-compared-once true})))))
+        (catch Throwable t
+          (assoc base :status :absent
+                      :reason :bmr-unavailable
+                      :error {:class (.getName (class t))
+                              :message (ex-message t)}))))))

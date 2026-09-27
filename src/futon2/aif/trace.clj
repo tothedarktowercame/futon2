@@ -46,7 +46,8 @@
    stamp (git sha + dirty flag, the resolved mode/flag set, and
    `trace-schema-version`). Present-only; see `wm-version-stamp` /
    `wm-version-of`."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.accumulation-bmr :as accumulation-bmr]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
@@ -650,6 +651,59 @@
 
 (declare read-history-strict)
 
+;; ITEM6-CONSUMER-I: the declared proposal family, read ONCE per process
+;; from its registry authority (the :model-reduction row's :declared-model
+;; :proposal-family, aif-equations.edn). A one-form read, validated to the
+;; declared 13-key shape; any failure yields nil, which the caller turns
+;; into a typed absence — never a throw, never a gate on selection.
+(def ^:private proposal-family-registry-path
+  "holes/labs/wm-contract/aif-equations.edn")
+
+(defn- load-proposal-family []
+  (try
+    (with-open [r (PushbackReader. (io/reader (io/file proposal-family-registry-path)))]
+      (let [registry (edn/read r)
+            row (first (filter #(= :model-reduction (:id %))
+                               (:equations registry)))
+            family (get-in row [:declared-model :proposal-family])]
+        (when (and (map? family)
+                   (= 13 (count family))
+                   (= [:identity :common-profile-k2 :common-profile-k4]
+                      (mapv :id (:proposals family))))
+          family)))
+    (catch Throwable _ nil)))
+
+(def ^:private declared-proposal-family (delay (load-proposal-family)))
+
+(defn- with-bmr-receipt
+  "Compute the BMR score receipt for the declared proposal family from the
+   record's PUBLISHED accumulation and attach it as :bmr-receipt and under
+   [:decision :accumulation-bmr]. Runs under the append lock (inside
+   `finalize-accumulation`), so a losing update of a publication race gets
+   the ABSENCE, never a score over unpublished concentrations. Computed
+   once here; never recomputed on readback; any failure is a typed
+   absence, so no exception can reach selection. Record-only per Joe's
+   2026-09-27 rulings (prototype label, -3 rule recorded as not applied)."
+  [record]
+  (let [family @declared-proposal-family
+        receipt (try
+                  (if family
+                    (accumulation-bmr/receipt-for-record record family)
+                    {:schema accumulation-bmr/consumer-receipt-schema
+                     :label accumulation-bmr/prototype-label
+                     :status :absent
+                     :reason :proposal-family-unavailable})
+                  (catch Throwable t
+                    {:schema accumulation-bmr/consumer-receipt-schema
+                     :label accumulation-bmr/prototype-label
+                     :status :absent
+                     :reason :bmr-unavailable
+                     :error {:class (.getName (class t))
+                             :message (ex-message t)}}))]
+    (-> record
+        (assoc :bmr-receipt receipt)
+        (assoc-in [:decision :accumulation-bmr] receipt))))
+
 (defn reconcile-accumulation
   "Copy the publication's accumulation outcome into its caller's judgement.
    No selection fields are changed. A refused update cannot retain its state."
@@ -659,14 +713,17 @@
     (let [receipt (:accumulation-receipt record)]
       (reduce (fn [out k]
                 (if (contains? record k) (assoc out k (get record k)) (dissoc out k)))
-              (-> judgement
-                  (assoc :accumulation-receipt receipt)
-                  (assoc-in [:decision :accumulation] receipt))
-              [:accumulation-state :accumulation-update-input :accumulation-initialization]))))
+              (cond-> (-> judgement
+                          (assoc :accumulation-receipt receipt)
+                          (assoc-in [:decision :accumulation] receipt))
+                (contains? record :bmr-receipt)
+                (assoc-in [:decision :accumulation-bmr] (:bmr-receipt record)))
+              [:accumulation-state :accumulation-update-input :accumulation-initialization
+               :bmr-receipt]))))
 
 (defn- finalize-accumulation [dir record]
-  (if-not (:accumulation-state record)
-    record
+  (cond
+    (:accumulation-state record)
     (let [history (read-history-strict 1 :dir dir)
           previous (peek (:records history))
           actual (or (:run/id previous) (:timestamp previous))
@@ -679,11 +736,18 @@
                     {:status :absent :reason :accumulation-stale-predecessor
                      :expected expected :actual actual})]
       (if refusal
-        (-> record
-            (dissoc :accumulation-state :accumulation-update-input :accumulation-initialization)
-            (assoc :accumulation-receipt refusal)
-            (assoc-in [:decision :accumulation] refusal))
-        record))))
+        (with-bmr-receipt
+         (-> record
+             (dissoc :accumulation-state :accumulation-update-input :accumulation-initialization)
+             (assoc :accumulation-receipt refusal)
+             (assoc-in [:decision :accumulation] refusal)))
+        (with-bmr-receipt record)))
+    ;; An accumulation ABSENCE (configuration refusal, observation
+    ;; unavailable, not configured) gets the same typed BMR absence,
+    ;; naming that receipt as its cause.
+    (contains? record :accumulation-receipt)
+    (with-bmr-receipt record)
+    :else record))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
