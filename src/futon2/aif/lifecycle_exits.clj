@@ -46,10 +46,55 @@
                                 :phase phase :role :how :supplied-by :lifecycle-definition)))
                      (remove #(present (:phase %)) (definition-exits definition-text))))))))
 
+(defn verdict-decl
+  "The written Met verdict observed by C4; the person supplies the judgment."
+  [phase]
+  (str "**" (name phase) " exit: Met.**"))
+
+(defn verdict-locators
+  "Convention-derived C4 locators for supplied exits only. Criterion provenance
+  is marked by wants when these locators are admitted; locator shape stays C4."
+  [criteria {:keys [repo path sha]}]
+  (into {} (for [{:keys [token phase supplied-by]} criteria
+                 :when (= :lifecycle-definition supplied-by)]
+             [token {:class :C4 :repo repo :sha (or sha "HEAD")
+                     :path path :decl (verdict-decl phase)}])))
+
+(defn section-verdicts
+  "Reporting only: one row per written verdict (duplicates retained), or a
+  {:phase p :verdict nil} row when absent. :in-section? refers to the enclosing
+  level-2 heading; misplaced rows retain its title, nil before any such section.
+  This does not constrain C4's whole-file observation."
+  [mission-text]
+  (let [{:keys [rows]}
+        (reduce
+         (fn [{:keys [heading] :as state} line]
+           (if-let [[_ title] (re-matches #"^##\s+(.*)$" line)]
+             (assoc state :heading title)
+             (if-let [[_ phase verdict]
+                      (re-matches #"^\*\*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT) exit: (Met|Not met|Not started)\.\*\*\s*$" line)]
+               (let [p (keyword phase) own? (= p (phase-name heading))]
+                 (update state :rows conj
+                         (cond-> {:phase p :verdict (get {"Met" :met "Not met" :not-met
+                                                         "Not started" :not-started} verdict)
+                                  :in-section? own?}
+                           (not own?) (assoc :misplaced-under heading))))
+               state)))
+         {:heading nil :rows []} (str/split-lines mission-text))]
+    (vec (mapcat (fn [p] (or (seq (filter #(= p (:phase %)) rows))
+                             [{:phase p :verdict nil}])) phases))))
+
 (defn wants
   "Only checkable published locators admit secondary wants. OBSERVE returns a boolean."
   [criteria published-locators observe]
-  (let [criteria (mapv #(assoc % :role :how) criteria)
+  (let [criteria (mapv (fn [c]
+                              (let [loc (get published-locators (:token c))]
+                                (cond-> (assoc c :role :how)
+                                  (and (= :lifecycle-definition (:supplied-by c))
+                                       (= :C4 (:class loc))
+                                       (= (verdict-decl (:phase c)) (:decl loc)))
+                                  (assoc :located-by :verdict-line-convention))))
+                            criteria)
         located? #(contains? problems/checkable-classes
                              (:class (get published-locators (:token %))))
         admitted (filterv located? criteria)
