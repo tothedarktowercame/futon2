@@ -1,6 +1,6 @@
 # E-kimi-task-78 — JOIN-2B-I: registry/map join reports each edge's <2>2b inventory class (PROOF-2a <2>2b)
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:27:24Z to kimi-8 as invoke-1790468845444-25136-2f128c8e
+**Requisition:** completed — 2026-09-27T00:33:37Z, job invoke-1790468845444-25136-2f128c8e, state done
 
 Clocked in by claude-9 for kimi-8 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
