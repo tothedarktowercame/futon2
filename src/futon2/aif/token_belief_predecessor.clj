@@ -15,8 +15,10 @@
 
 (defn inspect-trace
   "Snapshot exactly the candidate fields inspected in the previous trace.
+   OPTS supplies the flight courier separately from trace candidate fields.
    This is not a search of construction history or evidence of execution."
-  [trace]
+  ([trace] (inspect-trace trace nil))
+  ([trace opts]
   (cond-> {:scope :previous-trace-only
    :identity (select-keys trace [:timestamp :run/id :cohort-attempt])
    :candidates
@@ -27,7 +29,11 @@
          candidate-paths)}
     (:d-task-context trace) (assoc :task-context (:d-task-context trace))
     (:temporal-previous trace) (assoc :temporal-previous (:temporal-previous trace))
-    (:temporal-enactment trace) (assoc :temporal-enactment (:temporal-enactment trace))))
+    (:temporal-enactment trace) (assoc :temporal-enactment (:temporal-enactment trace))
+    (map? (:flight opts)) (-> (dissoc :temporal-previous)
+                              (assoc :temporal-context? true))
+    (contains? (:flight opts) :temporal-previous)
+    (assoc :temporal-previous (get-in opts [:flight :temporal-previous])))))
 
 (defn- reject-candidate [{:keys [path status record] :as candidate}]
   (assoc candidate :admission :refused
@@ -134,15 +140,50 @@
                 :observation-updates (:observation-updates outcome)
                 :continuation-belief (:continuation-belief outcome)))))))
 
+(defn- consume-temporal
+  "AIF validity: a posterior is usable only on the same declared domain/model
+   and after exact replay. All retained pattern declarations must agree on the
+   model; missing or conflicting declarations cannot authorize consumption.
+   Failures retain initialization and a reason, never gate selection. Historical
+   inspections without flight context keep their original initialization policy."
+  [receipt stage inspection]
+  (if-not (:temporal-context? inspection) receipt
+    (let [previous (:temporal-previous inspection)
+          declarations (mapcat #(vals (get-in % [:declaration :interpretations]))
+                               (:domain-inputs stage))
+          identities (map :model-identity declarations)
+          declared? (and (seq identities)
+                         (every? #(and (map? %) (some? (:A %)) (some? (:B %))) identities)
+                         (apply = identities))
+          reason (cond
+                   (nil? previous) :trajectory-start
+                   (= :absent (:status previous))
+                   (if (= :temporal-posterior (:reason previous))
+                     :temporal-previous-absent
+                     (or (:reason previous) :temporal-previous-absent))
+                   (= :declared-initialization (:basis previous)) :trajectory-start
+                   (not= :posterior (:basis previous)) :temporal-previous-absent
+                   (not= (:domain previous) (get-in stage [:prospective-carry :universe])) :domain-changed
+                   (not declared?) :temporal-previous-unverifiable
+                   (not= (:model-identity previous) (first identities)) :model-identity-changed
+                   (nil? (temporal/previous-belief previous)) :temporal-record-mismatch)]
+      (if reason
+        (assoc receipt :basis :declared-initialization :conditioning-status reason
+               :reason reason :temporal-detail
+               (if (= reason :temporal-previous-unverifiable)
+                 {:reason :stage-model-identity-undeclared-or-inconsistent}
+                 (select-keys previous [:reason :detail :publication])))
+        (assoc receipt :basis :posterior :conditioning-status :temporal-posterior
+               :reason :verified-temporal-posterior :temporal-previous previous
+               :continuation-belief (get-in previous [:record :posterior]))))))
+
 (defn input-receipt
-  "Retain the optional temporal join beside v3 initialization, never as q.
-   inspect-trace retains an explicitly supplied :temporal-previous envelope and
-   one :temporal-enactment attempt. No supplied attempt means typed absence.
-   This annotation grants no filtering or execution authority to initialization."
+  "Consume a verified flight posterior, otherwise retain initialization with
+   its reason. The optional enactment annotation remains a separate join."
   [stage inspection & authorities]
   (let [receipt (apply initialization-input-receipt stage inspection authorities)]
     (if (= :wm/token-belief-input-v3 (:schema receipt))
-      (assoc receipt :temporal-input
+      (assoc (consume-temporal receipt stage inspection) :temporal-input
              (if-let [attempt (:temporal-enactment inspection)]
                (temporal/temporal-input (:temporal-previous inspection) attempt (:check attempt))
                (temporal/absent :no-enactment-supplied nil)))
@@ -158,8 +199,8 @@
   "Replay each version under its own policy. V1/V2 preserve fresh initialization;
    V3 replays signed observation updates. External snapshot origin is checked
    by the production reader, not by this retained-receipt replay.
-   :temporal-input is a non-consumed annotation, outside this initialization
-   verdict; historical v3 receipts without it retain the same verdict."
+   Flight receipts also replay domain/model admission and the exact posterior.
+   :temporal-input remains a separate annotation; historical receipts replay unchanged."
   [receipt stage]
   ;; :policy-prefixes (F1b-admit-I) is the per-candidate prefix record the tick
   ;; writes beside the receipt; it is not part of the receipt being replayed
@@ -181,7 +222,12 @@
                 (= receipt (legacy-input-receipt stage inspection (get-in receipt [:carry-admission :authority]))))
            :wm/token-belief-input-v3
            (and (= :wm/token-belief-stage-v2 (:schema stage))
+                (or (not= :temporal-posterior (:conditioning-status receipt))
+                    (and (= :posterior (:basis receipt))
+                         (some? (temporal/previous-belief (:temporal-previous receipt)))))
                 (valid-authority? (get-in receipt [:carry-admission :authority]) inspection)
-                (= receipt (initialization-input-receipt stage inspection (get-in receipt [:carry-admission :authority])
-                                          (:observation-authority receipt))))
+                (= receipt (consume-temporal
+                            (initialization-input-receipt stage inspection
+                              (get-in receipt [:carry-admission :authority]) (:observation-authority receipt))
+                            stage inspection)))
            false))))

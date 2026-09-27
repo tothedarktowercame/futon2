@@ -63,7 +63,10 @@
     (select-keys observed [:class :repo :path :decl :entry :bundle-path])
     (get-in observed [:result :evidence :resolved-sha])]))
 
-(defn- previous-belief [{:keys [basis record stage trajectory-start? initialization-authority
+(defn previous-belief
+  "Replay the declared initialization or exact posterior; nil means unverifiable.
+   The temporal join and next-selection admission share this one verifier."
+  [{:keys [basis record stage trajectory-start? initialization-authority
                                occurrence-id domain model-identity]}]
   (case basis
     :declared-initialization

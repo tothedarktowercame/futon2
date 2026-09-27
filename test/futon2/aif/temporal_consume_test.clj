@@ -1,0 +1,213 @@
+(ns futon2.aif.temporal-consume-test
+  "Real flight loop, isolated git checks, decision/ranker and persisted records.
+   Transport executes declared primitives locally. Three declared artifact
+   wants permit three chronological clicks; no progress still closes."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.cascade-problems :as problems]
+            [futon2.aif.efe :as efe]
+            [futon2.aif.flight :as flight]
+            [futon2.aif.flight-runner :as runner]
+            [futon2.aif.full-loop-runner :as loop-runner]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.observation-checks :as checks]
+            [futon2.aif.temporal-input-test :as fixture]
+            [futon2.aif.temporal-update :as temporal]
+            [futon2.aif.token-belief-predecessor :as predecessor]
+            [futon2.aif.token-initialization-policy :as initialization]
+            [futon2.report.cascade-decision-test :as decision-fixture]
+            [futon2.report.war-machine :as wm])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
+
+(defn- read! [path] (edn/read-string (slurp path)))
+(defn- git! [repo & args]
+  (let [{:keys [exit out err]} (apply sh/sh "git" "-C" (str repo) args)]
+    (when-not (zero? exit) (throw (ex-info "git fixture" {:err err})))
+    (str/trim out)))
+(defn- isolated [f]
+  (let [root (.toFile (Files/createTempDirectory "temporal-consume-" (make-array FileAttribute 0)))]
+    (try (with-redefs [checks/repo-root (str root)] (f root))
+         (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+
+(defn- harness [root {:keys [first-pattern outcome theta stale?]
+                      :or {first-pattern :write-a outcome true theta 1/2}}]
+  (let [{:keys [repo interps check]} (fixture/fixture root)
+        target fixture/target tokens [:a :b :open]
+        domain (set (map #(vector target %) tokens))
+        interps (assoc interps :write-open (assoc (:write-a interps) :produces #{:open}))
+        interps (into {} (map (fn [[k v]] [k (assoc v :domain domain :theta theta
+                                                   :guard {:needs #{} :forbids #{}})])) interps)
+        locators (into {} (for [t tokens] [t {:class :C3 :repo "artifacts" :sha "HEAD" :path (name t)}]))
+        facts #(into {} (map (fn [[t result]] [t (:observed result)]))
+                     (:results (checks/observe locators)))
+        calls (atom []) paths (atom {}) results (atom []) q0s (atom [])
+        real-rank efe/rank-actions
+        source (fn [pattern]
+                 {:universes {target (facts)} :locators {target locators}
+                  :wants {target tokens} :horizon-steps 1
+                  :beta-by-context {:test 1} :context-of (constantly :test)
+                  :token-initialization {target {:policy initialization/disabled}}
+                  :interpretations {target {:patterns interps
+                                            :receipts (zipmap (keys interps) (repeat {:receipt "declared fixture"}))}}
+                  :candidates {target [{:precedence [pattern] :construction-receipt decision-fixture/receipt}]}})
+        click (fn [opts]
+                (let [n (inc (count @calls)) id (str "click-" n)
+                      pattern (if (= n 1) first-pattern (if (= n 2) (if (= first-pattern :write-b) :write-a :write-b) :write-open))
+                      assembled (problems/assemble {:targets [target] :sources (source pattern)})
+                      decision (:decision
+                                (with-redefs [efe/rank-actions
+                                              (fn [belief actions options]
+                                                (when (:prediction-context options)
+                                                  (swap! q0s conj (:cascade-belief belief)))
+                                                (real-rank belief actions options))]
+                                  (wm/cascade-decision assembled
+                                   (merge decision-fixture/live-c-opts opts
+                                          {:focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
+                                                                 conj (assoc (first (get-in decision-fixture/live-c-opts [:focus-inputs :relations]))
+                                                                             :target target))
+                                           :cascade-habit-path (str (io/file root "no-habit"))
+                                           :token-belief-context {:occurrence-id (str "selection-" n)}}))))
+                      saved (#'loop-runner/persist-run-record!
+                             {:run-record-dir (str (io/file root "runs")) :click-id id}
+                             id "2026-09-27T03:00:00Z"
+                             {:outcome :offline-no-selection
+                              :checkpoints {:selection {:judgment {:controller-decision decision}}}})
+                      record (read! (:run-record saved))]
+                  (swap! paths assoc id (:run-record saved))
+                  (swap! calls conj record)
+                  {:click-id id :chosen (get-in record [:decision :chosen])}))
+        fetch #(read! (get @paths (if (= % "racer") "click-2" %)))
+        enact (runner/enact-fn
+               {:interpretations (constantly interps) :check-fn check
+                :trace-dir (str (io/file root "trace")) :record-dir (str (io/file root "enactments"))
+                :fetch-run-record fetch
+                :dispatch-step!
+                (fn [{:keys [interpretation]}]
+                  (let [t (first (:produces interpretation))]
+                    (when (or (> (count @calls) 1) outcome)
+                      (spit (io/file repo (name t)) (str t)))
+                    (git! repo "add" ".") (git! repo "commit" "--allow-empty" "-qm" "execute")
+                    (let [sha (git! repo "rev-parse" "HEAD")]
+                      {:commit sha :produced t :check (assoc (get locators t) :sha sha)})))})
+        run (fn []
+              (flight/run!
+               (flight/start {:target target} {:kind :operator-declared :wants tokens :declared-by :test}
+                             {:id "consume-fixture"})
+               {:max-clicks 3 :click-fn click :sources-fn #(source first-pattern)
+                :observe-fn (fn [_ _] (facts)) :fetch-run-record fetch
+                :enact-fn (fn [f c]
+                           (when (and stale? (= "click-2" (:click-id c)))
+                             (enact f (assoc c :click-id "racer")))
+                           (let [r (enact f c)] (swap! results conj r) r))}))]
+    {:run run :click click :calls calls :results results :q0s q0s :interps interps}))
+
+(defn- receipt [record] (get-in record [:decision :selection-certificate :token-belief-input]))
+(defn- stage [record] (get-in record [:decision :selection-certificate :token-belief-stage]))
+
+(deftest ^:slow three-clicks-consume-the-published-posterior
+  (isolated
+   (fn [root]
+     (let [{:keys [run calls results q0s]} (harness root {})
+           f (run) records @calls enactments (mapv #(read! (:record-path %)) @results)]
+       (is (= 3 (count records)) (pr-str (select-keys f [:status :clicks])))
+       (is (= [:trajectory-start :temporal-posterior :temporal-posterior]
+              (mapv (comp :conditioning-status receipt) records)))
+       (is (= 3 (count @q0s)))
+       (doseq [i [1 2]]
+         (let [r (receipt (nth records i)) prior-record (nth enactments (dec i))
+               posterior (get-in prior-record [:temporal-posterior :posterior])]
+           (is (= (evidence/value-digest posterior)
+                  (evidence/value-digest (:continuation-belief r))
+                  (evidence/value-digest (nth @q0s i))))
+           (is (= (select-keys (:temporal-receipt (nth @results (dec i))) [:record-path :digest])
+                  (get-in r [:temporal-previous :publication])))
+           (is (predecessor/valid-input? r (stage (nth records i))))))
+       (is (predecessor/valid-input? (receipt (first records)) (stage (first records))))
+       (is (= [:write-a :write-b :write-open]
+              (mapv #(get-in % [:attempts 0 :pattern]) enactments)))
+       (is (not= (get-in enactments [0 :temporal-posterior :prior])
+                 (get-in enactments [0 :temporal-posterior :predicted-state])))
+       (testing "replaying the first event cannot publish or change its record"
+         (let [first-result (first @results) r (first enactments)
+               before (slurp (:record-path first-result))
+               replay (temporal/publish! (:record-path first-result) r
+                                         (get-in r [:temporal-input :previous])
+                                         (str (io/file root "trace")))]
+           (is (= :event-already-consumed (get-in replay [:receipt :reason])))
+           (is (= before (slurp (:record-path first-result))))))
+       (testing "forged posterior, citation envelope, or replay status is invalid"
+         (let [r (receipt (second records)) s (stage (second records))]
+           (doseq [bad [(dissoc r :temporal-previous)
+                        (assoc r :continuation-belief {#{} 1})
+                        (assoc-in r [:inspection :temporal-previous :record :posterior] {#{} 1})
+                        (assoc (receipt (first records)) :conditioning-status :temporal-posterior)]]
+             (is (not (predecessor/valid-input? bad s))))))
+       (testing "domain, model, absence, and old declarations retain initialization"
+         (let [r (receipt (second records)) s (stage (second records)) prev (:temporal-previous r)]
+           (doseq [[p expected] [[{:status :absent :reason :temporal-posterior} :temporal-previous-absent]
+                                [(assoc prev :domain #{}) :domain-changed]
+                                [(assoc prev :model-identity {:A "other" :B "other"}) :model-identity-changed]
+                                [(assoc-in prev [:record :posterior] {#{} 1}) :temporal-record-mismatch]
+                                [{:status :absent :reason :temporal-record-unreadable} :temporal-record-unreadable]]]
+             (let [v (predecessor/input-receipt s (predecessor/inspect-trace nil {:flight {:temporal-previous p}})
+                                               fixture/admission nil)]
+               (is (= expected (:conditioning-status v)))
+               (is (= (get-in s [:initialization :value]) (:continuation-belief v)))
+               (is (predecessor/valid-input? v s))))
+           (let [old (update-in s [:domain-inputs 0 :declaration :interpretations]
+                                #(into {} (map (fn [[k v]] [k (dissoc v :model-identity)])) %))
+                 v (predecessor/input-receipt old (:inspection r) fixture/admission nil)]
+             (is (= :temporal-previous-unverifiable (:conditioning-status v))))))
+       (println "CONSUMED-RECEIPT" (pr-str (receipt (second records))))
+       (println "INITIALIZATION-RECEIPT" (pr-str (receipt (first records))))))))
+
+(deftest ^:slow action-and-observation-controls-reach-the-next-ranker
+  (let [next-q (fn [options]
+                 (isolated
+                  (fn [root]
+                    (let [{:keys [run click q0s results]} (harness root options)
+                          f (run)
+                          bytes (slurp (:record-path (first @results)))]
+                      ;; A false observation closes the flight for no progress.
+                      ;; Still exercise its next-input courier/decision directly.
+                      (when (= 1 (count @q0s)) (click (flight/judge-opts f {:wants [:a :b :open]})))
+                      (is (= bytes (slurp (:record-path (first @results))))
+                          "later selection cannot rewrite the published record")
+                      (second @q0s)))))
+        a (next-q {}) b (next-q {:first-pattern :write-b}) no-a (next-q {:outcome false})]
+    (is (= 1 (get a #{[fixture/target :a]})))
+    (is (= 1 (get b #{[fixture/target :b]})))
+    (is (= 1 (get no-a #{})))
+    (is (not= a b no-a))
+    (println "CONSUMED-CONTROLS" (pr-str {:action-a a :action-b b :false-check no-a}))))
+
+(deftest ^:slow stale-and-contradiction-initialize-the-following-selection
+  (doseq [[options expected index] [[{:stale? true} :temporal-stale-predecessor 2]
+                                  [{:theta 0} :temporal-contradiction 1]]]
+    (isolated
+     (fn [root]
+       (let [{:keys [run calls results q0s]} (harness root options)
+             _ (run) r (receipt (nth @calls index)) s (stage (nth @calls index))
+             enacted (read! (:record-path (nth @results (dec index))))]
+         (is (= expected (:conditioning-status r)))
+         (is (= expected (get-in enacted [:temporal-receipt :reason])))
+         (is (= (get-in s [:initialization :value]) (:continuation-belief r) (nth @q0s index)))
+         (is (= :declared-initialization (:basis r)))
+         (is (predecessor/valid-input? r s))
+         (when (:stale? options)
+           (is (= :temporal-posterior (:conditioning-status (receipt (second @calls))))))
+         (when (= 0 (:theta options))
+           (is (= :refused (get-in enacted [:temporal-posterior :status])))))))))
+
+(deftest courier-omits-a-missing-enactment-and-retains-typed-absence
+  (is (not (contains? (predecessor/inspect-trace {:temporal-previous {:basis :posterior}}
+                                                {:flight {}}) :temporal-previous))
+      "a trace annotation cannot replace the flight courier")
+  (is (not (contains? (:flight (flight/judge-opts {:clicks []} {})) :temporal-previous)))
+  (let [absence {:status :absent :reason :temporal-stale-predecessor :detail {:expected :old}}]
+    (is (= absence (get-in (flight/judge-opts {:enactments [{:temporal-receipt absence}]} {})
+                           [:flight :temporal-previous])))))

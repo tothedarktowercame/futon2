@@ -11,7 +11,8 @@
   :no-progress and ends the flight, because clicks carry a heavy overhead and
   a click that moves nothing is a counterexample, not a step.
 
-  Pure except `run!`, which calls the injected click and observe functions."
+  `run!` calls the injected click and observe functions; `judge-opts` reads
+  the last enactment publication through its digest-checked citation."
   (:refer-clojure :exclude [run!])
   (:require [clojure.set :as set]
             [clojure.string :as str]
@@ -21,7 +22,8 @@
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.observation-checks :as checks]
-            [futon2.aif.repair-proposals :as repairs])
+            [futon2.aif.repair-proposals :as repairs]
+            [futon2.aif.temporal-update :as temporal-update])
   (:import [java.util UUID]))
 
 ;; ---------------------------------------------------------------------------
@@ -194,13 +196,16 @@
   "What the flight passes the tick's judge: the fixed target and the wants
   to use for it. The judge considers only this target (flight rule 4)."
   [flight wants]
-  {:flight {:flight/id (:flight/id flight)
+  (cond-> {:flight {:flight/id (:flight/id flight)
             :target (:target flight)
             :wants (:wants wants)
             :locators (:locators wants)
             :universe (:universe wants)
             :want-source (:source wants)
-            :click (inc (count (:clicks flight)))}})
+            :click (inc (count (:clicks flight)))}}
+    (seq (:enactments flight))
+    (assoc-in [:flight :temporal-previous]
+              (temporal-update/read-receipt (:temporal-receipt (peek (:enactments flight)))))))
 
 (defn advanced
   "Wants false or unknown BEFORE and true AFTER."

@@ -6601,7 +6601,7 @@
               token-belief-input (token-predecessor/input-receipt
                                   token-belief-stage
                                   (token-predecessor/inspect-trace
-                                   (:token-belief-predecessor-trace opts)))
+                                   (:token-belief-predecessor-trace opts) opts))
               joint-q0 (:continuation-belief token-belief-input)
               joint-want (reduce (fn [acc p]
                                    (let [t (:target p)]
