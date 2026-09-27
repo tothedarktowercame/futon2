@@ -3897,6 +3897,24 @@
     (:refresh m)
     {:absent :no-refresh-record}))
 
+(defn- publish-selection-trace! [opts judgement]
+  (let [publication (if-let [write (:trace-fn opts)]
+                      (write judgement)
+                      (if-let [dir (:trace-dir opts)]
+                        (trace/write-trace! judgement :dir dir :return-record? true)
+                        (trace/write-trace! judgement :return-record? true)))]
+    ;; Legacy injected test writers return a path; production returns the record.
+    (if (map? publication)
+      (assoc publication :judgement (trace/reconcile-accumulation judgement (:record publication)))
+      {:path publication :judgement judgement})))
+
+(defn- reconcile-selection-publication [cell record]
+  (if-not (contains? record :accumulation-receipt)
+    cell
+    (-> cell
+        (assoc-in [:judgment :controller-decision :accumulation] (:accumulation-receipt record))
+        (assoc-in [:ground :decision :accumulation] (:accumulation-receipt record)))))
+
 (defn- default-selection-judge [opts days]
   (wm/generate-war-machine
    days
@@ -5121,15 +5139,16 @@
           ;; A constructed selection enters the canonical trace as an event.
           ;; Cascade habit reinforcement requires observed token outcomes at close;
           ;; neither selection nor successful construction reinforces it.
-          (let [trace-path (when-not repair-action?
-                             ((or (:trace-fn opts)
-                                  (fn [record] (if-let [dir (:trace-dir opts)]
-                                                 (trace/write-trace! record :dir dir)
-                                                 (trace/write-trace! record))))
-                              (assoc judgement :d-task-context @d-task-context :trace/reason
-                                     {:kind :routing-rule
-                                      :rule :constructed-selection-persisted
-                                      :question "Does the constructed selection require operator review?"})))
+          (let [publication (when-not repair-action?
+                              (publish-selection-trace!
+                               opts (assoc judgement :d-task-context @d-task-context :trace/reason
+                                           {:kind :routing-rule
+                                            :rule :constructed-selection-persisted
+                                            :question "Does the constructed selection require operator review?"})))
+                trace-path (:path publication)
+                _ (when-let [record (:record publication)]
+                    (swap! pending-selection reconcile-selection-publication record)
+                    (swap! checkpoints update :selection reconcile-selection-publication record))
                 construction-cell
                 (term (cond-> {:mission (str target)
                               :cascade (select-keys construction

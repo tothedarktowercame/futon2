@@ -152,14 +152,24 @@
       (is (= :accumulation-lineage-mismatch
              (refusal #(wm/accumulation-step-for-tick (assoc input :previous-record first-record))))))))
 
-(deftest two-publishers-cannot-commit-from-the-same-predecessor
-  ;; Both read the actual same disk state before either publishes. The
-  ;; append-lock validation must reject the second without writing its state.
+(deftest two-publishers-record-the-losing-update-without-stopping
+  ;; Both computations read the same disk predecessor. Both runs can publish,
+  ;; but only the first may claim a new accumulated state.
   (let [a (judged (assoc (inputs) :tick-id "a"))
         b (judged (assoc (inputs) :tick-id "b"))]
     (publish a)
-    (is (= :accumulation-stale-predecessor (refusal #(publish b))))
-    (is (= ["a"] (mapv :run/id (:records (trace/read-history-strict 12 :dir (str *dir*))))))))
+    (let [saved (publish b)
+          receipt (:accumulation-receipt saved)
+          returned (trace/reconcile-accumulation b saved)]
+      (is (= :accumulation-stale-predecessor (:reason receipt)))
+      (is (= nil (:expected receipt)))
+      (is (= "a" (:actual receipt)))
+      (is (= receipt (get-in saved [:decision :accumulation])
+             (:accumulation-receipt returned) (get-in returned [:decision :accumulation])))
+      (doseq [record [saved returned] k [:accumulation-state :accumulation-update-input :accumulation-initialization]]
+        (is (not (contains? record k))))
+      (same-selection b saved)
+      (is (= ["a" "b"] (mapv :run/id (:records (trace/read-history-strict 12 :dir (str *dir*)))))))))
 
 (deftest receipt-only-tail-does-not-reinitialize-or-skip
   (publish (judged (assoc (inputs) :tick-id "a")))
@@ -188,3 +198,43 @@
         (is (= {:receipt refusal}
                (wm/accumulation-outcome-for-tick
                 (assoc (inputs) :configuration-refusal refusal))))))))
+
+(deftest returned-tick-and-flight-receipts-use-the-published-refusal
+  (let [a (judged (assoc (inputs) :tick-id "a"))
+        b (judged (assoc (inputs) :tick-id "b"))]
+    (publish a)
+    (let [publication (#'wm/write-trace-and-clock! b (str *dir*) true)
+          returned (:judgement publication)
+          receipt (get-in publication [:record :accumulation-receipt])
+          once (#'tick/tick-run-record "b" "start" {} {:entries-read 0 :entries-limit 0}
+                returned "offline" true)]
+      (is (= :accumulation-stale-predecessor (:reason receipt)))
+      (is (= receipt (get-in once [:decision :accumulation])))
+      (is (nil? (:trace-write-failed returned)))
+      (same-selection b returned)
+      (let [flight (#'runner/publish-selection-trace! {:trace-dir (str *dir*)}
+                    (assoc b :run/id "flight"))
+            cell (#'runner/reconcile-selection-publication
+                  {:judgment {:controller-decision (:decision b)} :ground {:decision (:decision b)}}
+                  (:record flight))
+            receipt (get-in flight [:record :accumulation-receipt])
+            saved (#'runner/persist-run-record!
+                   {:run-record-dir (str (io/file *dir* "runs"))} "flight" "2026-09-27T00:00:00Z"
+                   {:outcome :offline-no-selection :trace-path (:path flight)
+                    :checkpoints {:selection cell}})
+            disk (edn/read-string (slurp (:run-record saved)))]
+        (is (= :accumulation-stale-predecessor (:reason receipt)))
+        (is (= receipt (get-in flight [:judgement :decision :accumulation])
+               (get-in cell [:judgment :controller-decision :accumulation])
+               (get-in cell [:ground :decision :accumulation])
+               (get-in disk [:decision :accumulation])))
+        (is (not (contains? (:judgement flight) :accumulation-state)))
+        (same-selection b (:judgement flight))))))
+
+(deftest corrupt-corpus-does-not-claim-coherent-publication
+  ;; A stale predecessor is recoverable. A corrupt authoritative corpus still
+  ;; cannot yield the exact futility index; do not hide that independent error.
+  (let [pending (judged (inputs))]
+    (spit (io/file *dir* "wm-trace-2026-09-25.edn") "{:broken")
+    (is (thrown-with-msg? RuntimeException #"EOF" (publish pending)))
+    (is (not (.exists (io/file *dir* "wm-trace-2026-09-26.edn"))))))

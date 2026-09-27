@@ -2220,18 +2220,22 @@
    The clock witness keeps its historical flag guard; that guard is about a
    substrate write, not about the rationale.
 
-   Persisted trace bytes are unchanged: `:return-record? true` only changes
-   what `trace/write-trace!` RETURNS (trace.clj:712-733)."
-  [result trace-dir]
+   The optional third argument requests the published record and reconciled
+   judgement; the two-argument form retains its historical path return."
+  ([result trace-dir] (:path (write-trace-and-clock! result trace-dir true)))
+  ([result trace-dir _return-publication?]
   (let [{:keys [path record]}
         (if trace-dir
           (trace/write-trace! result :dir trace-dir :return-record? true)
           (trace/write-trace! result :return-record? true))]
-    (selection-rationale/emit! record {:dir (rationale-dir trace-dir)
-                                       :trace-path path})
-    (when *clock-selection?*
-      (record-selection-clock! record (:decision result)))
-    path))
+    (try
+      (selection-rationale/emit! record {:dir (rationale-dir trace-dir) :trace-path path})
+      (when *clock-selection?*
+        (record-selection-clock! record (:decision record)))
+      (catch Exception e
+        (throw (ex-info (ex-message e)
+                        (assoc (ex-data e) :published-record record) e))))
+    {:path path :record record :judgement (trace/reconcile-accumulation result record)})))
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
@@ -7783,24 +7787,15 @@
             ;; Folding it into :trace-write-failed would tell a reader (and
             ;; `run-tick-once`, which reads that key) that the trace did not
             ;; land when it did.
-            (if-let [write-failed
-                     (try
-                       (write-trace-and-clock! result trace-dir)
-                       nil
-                       (catch Exception e
-                         (let [rationale? (= :selection-rationale
-                                             (:stage (ex-data e)))
-                               k (if rationale?
-                                   :rationale-write-failed
-                                   :trace-write-failed)]
-                           (binding [*out* *err*]
-                             (println (if rationale?
-                                        "selection-rationale/emit! failed:"
-                                        "trace/write-trace! failed:")
-                                      (ex-message e)))
-                           {k {k (ex-message e)}})))]
-              (conj result write-failed)
-              result))
+            (try
+              (:judgement (write-trace-and-clock! result trace-dir true))
+              (catch Exception e
+                (let [rationale? (= :selection-rationale (:stage (ex-data e)))
+                      k (if rationale? :rationale-write-failed :trace-write-failed)
+                      result (if-let [record (:published-record (ex-data e))]
+                               (trace/reconcile-accumulation result record) result)]
+                  (binding [*out* *err*] (println (str (name k) ":") (ex-message e)))
+                  (assoc result k {k (ex-message e)})))))
           result0)]
     result)))
 

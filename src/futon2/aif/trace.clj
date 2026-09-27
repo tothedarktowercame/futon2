@@ -647,25 +647,49 @@
 
 (declare read-history-strict)
 
-(defn- validate-accumulation-predecessor! [dir record]
-  (when (:accumulation-state record)
+(defn reconcile-accumulation
+  "Copy the publication's accumulation outcome into its caller's judgement.
+   No selection fields are changed. A refused update cannot retain its state."
+  [judgement record]
+  (if-not (contains? record :accumulation-receipt)
+    judgement
+    (let [receipt (:accumulation-receipt record)]
+      (reduce (fn [out k]
+                (if (contains? record k) (assoc out k (get record k)) (dissoc out k)))
+              (-> judgement
+                  (assoc :accumulation-receipt receipt)
+                  (assoc-in [:decision :accumulation] receipt))
+              [:accumulation-state :accumulation-update-input :accumulation-initialization]))))
+
+(defn- finalize-accumulation [dir record]
+  (if-not (:accumulation-state record)
+    record
     (let [history (read-history-strict 1 :dir dir)
           previous (peek (:records history))
           actual (or (:run/id previous) (:timestamp previous))
-          expected (get-in record [:accumulation-update-input :previous-id])]
-      (when-not (= :ok (:status history))
-        (throw (ex-info "Accumulation publication history unavailable" history)))
-      (when-not (= expected actual)
-        (throw (ex-info "Accumulation predecessor changed before publication"
-                        {:refusal :accumulation-stale-predecessor
-                         :expected expected :actual actual}))))))
+          expected (get-in record [:accumulation-update-input :previous-id])
+          refusal (cond
+                    (not= :ok (:status history))
+                    {:status :absent :reason :accumulation-publication-history-unavailable
+                     :cause history}
+                    (not= expected actual)
+                    {:status :absent :reason :accumulation-stale-predecessor
+                     :expected expected :actual actual})]
+      (if refusal
+        (-> record
+            (dissoc :accumulation-state :accumulation-update-input :accumulation-initialization)
+            (assoc :accumulation-receipt refusal)
+            (assoc-in [:decision :accumulation] refusal))
+        record))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
    the daily trace file. Creates the trace directory if absent. Returns
    the path written. With `:return-record? true`, return
    `{:path <path> :record <exact-record-written>}`; the default return value and
-   persisted bytes are unchanged. This lets a post-write witness cite the
+   return option does not affect persisted bytes. Accumulation is finalized
+   under the append lock; a stale update becomes an absence without state.
+   This lets a post-write witness cite the
    record's own timestamp/run id without constructing a second record.
 
    Opts:
@@ -683,13 +707,13 @@
                                  trace-schema-version))
         record (trace-record judge-output)
         path (daily-path dir date-str)
-        written-path (do
+        publication (do
                        (io/make-parents path)
                        (lane-futility/append-indexed-trace!
-                        dir path record #(validate-accumulation-predecessor! dir record)))]
+                        dir path record #(finalize-accumulation dir %)))]
     (if return-record?
-      {:path written-path :record record}
-      written-path)))
+      publication
+      (:path publication))))
 
 (def ^:private default-tag-reader
   "Tolerant default-tag reader: any unknown EDN tag becomes
