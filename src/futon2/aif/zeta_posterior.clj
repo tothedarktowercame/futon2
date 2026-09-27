@@ -4,7 +4,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.likelihood-precision :as precision]))
 
-(def default-prior {:beta-prior 1 :authority :declared-default-pending-joe})
+(def default-prior {:beta-prior 1 :authority :joe-ruling-2026-09-27})
 (defn- absent [reason detail] {:status :absent :reason reason :detail detail})
 (defn- positive? [x] (and (number? x) (Double/isFinite (double x)) (pos? x)))
 (defn- subsets [xs] (reduce (fn [ss x] (into ss (map #(conj % x) ss))) [#{}] xs))
@@ -106,6 +106,15 @@
         (assoc (beta-posterior trials nil (:beta-prior prior) zeta) :prior-declaration prior))))
 
 
+(defn- prior-options
+  "AIF validity: a prior rate must be positive before taking its reciprocal.
+   Preserve its authority; an invalid declaration annotates, never gates."
+  [prior]
+  (if (positive? (:beta-prior prior))
+    {:zeta (/ 1 (:beta-prior prior))
+     :zeta-basis (assoc prior :basis :prior-no-trials)}
+    {:zeta-basis {:absent :nonpositive-beta-prior}}))
+
 (defn lane-options
   "Only the existing temporal admission's verified receipt may supply ζ.
    A rejected envelope's mean is never lifted. A declared trajectory start
@@ -116,12 +125,12 @@
         p (get-in receipt [:temporal-previous :zeta-posterior])]
     (cond
       (= :trajectory-start status)
-      {:zeta-basis (assoc default-prior :basis :prior-no-trials)}
+      (prior-options (if (contains? receipt :zeta-prior) (:zeta-prior receipt) default-prior))
       (not= :temporal-posterior status)
       {:zeta-basis {:absent (or status :no-temporal-envelope)}}
       (and (= :posterior (:basis p)) (positive? (:zeta-mean p)))
       {:zeta (:zeta-mean p)
        :zeta-basis (select-keys p [:basis :trajectory-digest :zeta-mean])}
       (= :prior-no-trials (:basis p))
-      {:zeta-basis (select-keys p [:basis :beta-prior])}
+      (prior-options (select-keys p [:basis :beta-prior :authority]))
       :else {:zeta-basis {:absent (or (:reason p) :zeta-posterior-unavailable)}})))

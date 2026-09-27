@@ -37,3 +37,33 @@
     (is (not= (:beta-post wrong) (:beta-post full)))
     (is (= full (zeta/beta-posterior trials rates 1 current)))
     (is (= 2 (:trials full)))))
+
+(deftest declared-prior-is-shared-by-consumer-and-publisher
+  (doseq [prior [zeta/default-prior {:beta-prior 2 :authority :caller-declared}]]
+    (let [start (cond-> {:conditioning-status :trajectory-start}
+                  (not= prior zeta/default-prior) (assoc :zeta-prior prior))
+          opts (zeta/lane-options start)
+          envelope (zeta/lane-options
+                    {:conditioning-status :temporal-posterior
+                     :temporal-previous {:zeta-posterior (assoc prior :basis :prior-no-trials)}})
+          record {:zeta-prior prior
+                  :zeta-likelihood {:target :target :checked-tokens #{:x} :rates rates}
+                  :temporal-posterior {:model {:click-id "prior-agreement"}
+                                       :observation true :predicted-state {#{} 1}}}
+          published (zeta/trajectory-posterior [record])]
+      (is (= (assoc prior :basis :prior-no-trials) (:zeta-basis opts)))
+      (is (= (/ 1 (:beta-prior prior)) (:zeta opts)))
+      (is (= opts envelope) "The no-trials envelope retains the declaration's authority")
+      (is (= :posterior (:basis published)))
+      (is (= prior (:prior-declaration published)))
+      (is (= (:zeta opts) (:evaluated-at-zeta published)))
+      (println :prior-basis (:zeta-basis opts) :consumer-zeta (:zeta opts)
+               :publisher-zeta (:evaluated-at-zeta published))))
+  (is (= {:beta-prior 1 :authority :joe-ruling-2026-09-27} zeta/default-prior))
+  (doseq [beta [0 -1]]
+    (let [prior {:beta-prior beta :authority :caller-declared}]
+      (doseq [receipt [{:conditioning-status :trajectory-start :zeta-prior prior}
+                       {:conditioning-status :temporal-posterior
+                        :temporal-previous {:zeta-posterior (assoc prior :basis :prior-no-trials)}}]]
+        (is (= {:zeta-basis {:absent :nonpositive-beta-prior}}
+               (zeta/lane-options receipt)))))))

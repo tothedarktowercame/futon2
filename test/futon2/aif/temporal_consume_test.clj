@@ -47,7 +47,7 @@
         locators (into {} (for [t tokens] [t {:class :C3 :repo "artifacts" :sha "HEAD" :path (name t)}]))
         facts #(into {} (map (fn [[t result]] [t (:observed result)]))
                      (:results (checks/observe locators)))
-        calls (atom []) paths (atom {}) results (atom []) q0s (atom []) joint-rankings (atom []) lane-options (atom []) lane-rankings (atom [])
+        calls (atom []) paths (atom {}) results (atom []) q0s (atom []) joint-rankings (atom []) lane-options (atom []) lane-inputs (atom []) lane-rankings (atom [])
         real-rank efe/rank-actions real-lane wm/cascade-lane
         source (fn [pattern]
                  {:universes {target (facts)} :locators {target locators}
@@ -73,6 +73,7 @@
                                               wm/cascade-lane
                                               (fn [problem options]
                                                 (swap! lane-options conj options)
+                                                (swap! lane-inputs conj [problem options])
                                                 (let [lane (real-lane problem options)]
                                                   (swap! lane-rankings conj (:ranked lane)) lane))]
                                   (wm/cascade-decision assembled
@@ -115,7 +116,7 @@
                            (when (and stale? (= "click-2" (:click-id c)))
                              (enact f (assoc c :click-id "racer")))
                            (let [r (enact f c)] (swap! results conj r) r))}))]
-    {:run run :click click :calls calls :results results :q0s q0s :interps interps :lane-options lane-options :joint-rankings joint-rankings :lane-rankings lane-rankings}))
+    {:run run :click click :calls calls :results results :q0s q0s :interps interps :lane-options lane-options :lane-inputs lane-inputs :joint-rankings joint-rankings :lane-rankings lane-rankings}))
 
 (defn- receipt [record] (get-in record [:decision :selection-certificate :token-belief-input]))
 (defn- stage [record] (get-in record [:decision :selection-certificate :token-belief-stage]))
@@ -277,7 +278,7 @@
    (fn [root]
      (binding [population/*dir* root]
        (with-redefs [checks/repo-root "/home/joe/code"] (#'population/fill! 5)))
-     (let [{:keys [run results calls lane-options joint-rankings lane-rankings]}
+     (let [{:keys [run results calls lane-options lane-inputs joint-rankings lane-rankings]}
            (harness root {:theta 1/4 :observation-labels-path (str (io/file root "labels.edn"))})
            finished (run)
            records (mapv #(read! (:record-path %)) @results)
@@ -296,7 +297,16 @@
        (let [refusal {:status :absent :reason :nonpositive-beta-post}]
          (is (= refusal (:zeta-posterior (temporal/envelope (assoc (last records) :zeta-posterior refusal))))))
        (is (not= effective (get-in third-sc [:precision-model :rates])))
-       (is (not (contains? (first @lane-options) :zeta)))
+       (is (= 1 (:zeta (first @lane-options))))
+       (is (= {:basis :prior-no-trials :beta-prior 1 :authority :joe-ruling-2026-09-27}
+              (:zeta-basis (sc (first @calls)))))
+       (let [[problem opts] (first @lane-inputs)
+             omitted (wm/cascade-lane problem (dissoc opts :zeta))
+             old-g (mapv :G-efe (:ranked omitted))
+             new-g (mapv :G-efe (first @lane-rankings))]
+         (is (seq old-g))
+         (is (= old-g new-g))
+         (println :default-prior-G-omitted old-g :explicit new-g))
        (is (= :prior-no-trials (get-in (sc (first @calls)) [:zeta-basis :basis])))
        (is (= 1 (get-in (sc (first @calls)) [:zeta-basis :beta-prior])))
        (is (every? #(not (contains? (:opts %) :zeta)) @joint-rankings))
