@@ -439,6 +439,14 @@
    :lean "Proof2.PrefixFreeEnergyPosterior.machineWeightsAtPrefixF" :lean-status :closed
    :lean-at "mathlib4 b79b4ab666 (Proof2/PrefixFreeEnergyPosterior.lean, W11-2, codex-1; lake warrants 90892653, cafe9cb0). A row of its own because :policy-posterior must keep machinePosteriorE (W10: re-pointing it un-places the posterior module at R6 and regresses [R6 R16] and [R6 R4]); this row places the [R8 R6] composition at R6. The [R8 R6] edge itself is :policy-posterior's :imports F-pi. Text of :formal/:latex from codex-1's trial (W11-2-LEAN return)."
    :note "Added 2026-09-27 by claude-9 (PROOF-2a <2>1d, W11-D 6c52e7247 section 2.4). It restates :policy-posterior at the executed-prefix F that the machine now computes (F1a-F1c); it is not a new theory quantity."}
+  {:id :policy-posterior-at-machine-g
+   :latex "Q(\\pi) = \\sigma\\bigl(\\ln E(\\pi) - G_{\\mathrm{machine}}(\\pi)/\\tau - F_\\pi(\\pi)\\bigr),\\quad G_{\\mathrm{machine}}(\\pi) < \\infty"
+   :defines :machine-G-posterior :node :R6 :class :stack-defined :ref :parr2022
+   :imports []
+   :formal "machinePosteriorE at G(pi) := machineExpectedFreeEnergy(model, reading, belief, Cdist, positivePreference)(pi).value; every typed posterior absence preserved. This G supply is finite, so the infinite-G arm is not exercised by it."
+   :lean "Proof2.ExpectedFreeEnergyPosterior.machinePosteriorAtG" :lean-status :closed
+   :lean-at "mathlib4 b10700369c (Proof2/ExpectedFreeEnergyPosterior.lean, P-inst-G, codex-3; lake warrant 947faa59). Sibling composition at the actual MachineQ source; :policy-posterior keeps machinePosteriorE (as for W11-2's row), this row places the [R5 R6] G composition at R6. Bad case: two G supplies give weights [1/2, 1/2] vs [1/4, 3/4]."
+   :note "Added 2026-09-27 by claude-9 (PROOF-2a <2>1, G1-DEMOTIONS-D a590fe5c0). It restates :policy-posterior at the machine's G; it is not a new theory quantity."}
   {:id :action
    :latex "u_t := \\operatorname*{argmax}_u \\sum_\\pi \\delta(u,\\pi_t)\\,Q(\\pi)"
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :diverges

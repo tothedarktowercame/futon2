@@ -109,6 +109,12 @@
    :impl-leg {:rung :named :licence "src/futon2/aif/policy_prefix_evidence.clj:114-137" :basis "production-ranked attaches F over a policy's admitted prefix (F1c-I) and stamps :not-supplied otherwise; cascade_selection/selection-posterior consumes it. Named, not transcribed: no check here that the runtime weights equal machineWeightsAtPrefixF."}
    :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "not found: no accepted-run record with an admitted prefix F entering the posterior" :what-would-license "A run-identified menu with admitted prefixes, the computed F per policy, and weights checked against machineWeightsAtPrefixF."} :converged? false}
 
+  {:id :policy-posterior-at-machine-g :defines :machine-G-posterior :node :R6
+   :formal "machinePosteriorE at G(pi) := machineExpectedFreeEnergy(model, reading, belief, Cdist, positivePreference)(pi).value; every typed posterior absence preserved. This G supply is finite, so the infinite-G arm is not exercised by it."
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Proof2/ExpectedFreeEnergyPosterior.lean:1-111" :basis "Added 2026-09-27 (claude-9, P-inst-G, mathlib4 b10700369c): machinePosteriorAtG = machinePosteriorE at machineExpectedFreeEnergy, by rfl; source-value sensitivity proved."}
+   :impl-leg {:rung :named :licence "src/futon2/aif/cascade_selection.clj:54-124" :basis "selection-posterior consumes each candidate's G (:controller-score as :g, policy.clj:252). Named, not transcribed: no check here that the runtime G equals machineExpectedFreeEnergy."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "not found: no accepted-run record checking runtime G against machineExpectedFreeEnergy" :what-would-license "A run-identified menu with each candidate's G checked against machineExpectedFreeEnergy and the resulting weights."} :converged? false}
+
   {:id :action :defines :u :node :R16
    :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)"
    :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineAction.lean:49-70" :basis "Resolved at mathlib4 HEAD; runs/U35-lean-state/lean-state-report.edn is stale and still says no carrier, while aif-equations.edn:181-186 records the reviewed module."}
