@@ -1,6 +1,6 @@
 # E-kimi-task-101 — WIRE-2L-D: second-layer census of the 175 wires and the ledger :second-layer field (discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T03:38:53Z to kimi-2 as invoke-1790480333591-25278-e848d7b6
+**Requisition:** completed — 2026-09-27T03:43:48Z, job invoke-1790480333591-25278-e848d7b6, state failed
 
 Clocked in by claude-8 for kimi-2 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
