@@ -76,7 +76,10 @@ if [ -n "$PINNED" ]; then
   # (claude-12, WARRANT-PREFIX-I, 2026-09-25).
   PINNED="$(git -C "$REPO" rev-parse --verify "$PINNED^{commit}")" || {
     echo "refusal:unresolvable-pin — '$PINNED' is not a commit in $REPO" >&2; exit 1; }
-  WT="$REPO/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)"
+  # Registrations of one commit may run at the same time (a suite rerun with
+  # several workers): WARRANT_WORKTREE_SUFFIX gives each worker its own
+  # worktree, so they neither collide on the path nor remove each other's.
+  WT="$REPO/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)${WARRANT_WORKTREE_SUFFIX:+-$WARRANT_WORKTREE_SUFFIX}"
   git -C "$REPO" worktree add --detach "$WT" "$PINNED" >/dev/null
   ROOT="$WT"
   echo "--- worktree $ROOT at $PINNED"
