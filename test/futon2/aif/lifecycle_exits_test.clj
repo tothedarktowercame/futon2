@@ -191,3 +191,75 @@ Some prose **MAP exit: Met.**
     (doseq [[phase expected] {:HEAD true :MAP false :ARGUE false :DERIVE false}]
       (is (= expected (checks/decl-present? text (le/verdict-decl phase))) (name phase)))
     (println :verdict-lines-with-prose (mapv #(select-keys (get by-phase %) [:phase :verdict]) [:HEAD :MAP :ARGUE :DERIVE]))))
+
+(deftest current-phase-is-explicit
+  (is (= {:phase :IDENTIFY}
+         (le/current-phase "**Status:** HEAD complete; IDENTIFY pending")))
+  (is (= {:phase :DERIVE} (le/current-phase "**Status:** DERIVE (2026-09-27)")))
+  (is (= {:absent :status-line-missing} (le/current-phase "## MAP")) )
+  (is (= {:absent :status-phase-unrecognised :line "**Status:** UNKNOWN"}
+         (le/current-phase "**Status:** UNKNOWN
+**Status:** MAP")))
+  (println :composite (le/current-phase "**Status:** HEAD complete; IDENTIFY pending")))
+
+(deftest reached-exits-and-misplaced-verdicts
+  (with-verdict-repo
+    (fn [{:keys [repo root]}]
+      (let [text "**Status:** DERIVE (2026-09-27)
+## MAP
+**MAP exit: Met.** Evidence.
+"
+            bad "**Status:** DERIVE (2026-09-27)
+## ARGUE
+**MAP exit: Met.**
+"
+            git (fn [& args] (let [r (apply shell/sh "git" "-C" (str root) args)]
+                              (when-not (zero? (:exit r)) (throw (ex-info "fixture git" r)))))
+            _ (spit (io/file root "reached.md") text)
+            _ (spit (io/file root "bad.md") bad)
+            _ (git "add" "--" "reached.md" "bad.md")
+            _ (git "commit" "-m" "Phase fixtures")
+            opts {:repo repo :path "reached.md" :observe #(:observed (checks/check-decl-in-file %))}
+            w (le/flight-exits "fixture" text @definition opts)
+            b (le/flight-exits "fixture" bad @definition (assoc opts :path "bad.md"))
+            tokens (into {} (map (juxt :phase :token) (vals (:criteria-by-token w))))
+            unknown (le/flight-exits "fixture" "## MAP
+" @definition
+                                     (assoc opts :observe (fn [_] (throw (Exception. "must not observe")))))
+            sources {:universes {"fixture" (:universe w)} :wants {"fixture" (:wants w)}
+                     :locators {"fixture" (:locators w)}
+                     :interpretations {"fixture" {:patterns {:p {:guard {:needs #{} :forbids #{}}
+                                                                 :produces (set (:wants w))}}}}
+                     :candidates {"fixture" [{:precedence [:p] :construction-receipt {:kind :fixture}}]}
+                     :horizon-steps 1 :context-of (constantly :WM) :beta-by-context {:WM 1}}
+            assembled (cp/assemble {:targets ["fixture"] :sources sources})]
+        (is (= [:HEAD :IDENTIFY :MAP :DERIVE]
+               (mapv #(get-in w [:criteria-by-token % :phase]) (:wants w))))
+        (is (= (zipmap (map tokens [:HEAD :IDENTIFY :MAP :DERIVE]) [false false true false])
+               (:universe w)))
+        (is (= [:ARGUE :VERIFY :INSTANTIATE :DOCUMENT] (mapv :phase (:not-started w))))
+        (is (every? #(= :phase-not-reached (:reason %)) (:not-started w)))
+        (is (not-any? (set (:wants w)) (map :token (:not-started w))))
+        (is (empty? (:to-ask w)))
+        (is (true? (:observed (checks/check-decl-in-file (get-in b [:locators (tokens :MAP)])))))
+        (is (false? (get-in b [:universe (tokens :MAP)])))
+        (is (= {:reason :verdict-line-misplaced :misplaced-under "ARGUE"}
+               (get-in b [:criteria-by-token (tokens :MAP) :not-counted])))
+        (is (empty? (:wants unknown)))
+        (is (= 8 (count (:not-started unknown))))
+        (is (every? #(= :current-phase-unknown (:reason %)) (:not-started unknown)))
+        (is (= {:absent :status-line-missing} (:current-phase unknown)))
+        (is (empty? (:refusals assembled)))
+        (is (= 1 (count (:problems assembled))))
+        (println :reached w :misplaced b :unknown unknown :assembly-count (count (:problems assembled)))))))
+
+(deftest pinned-seams-flight-exits
+  (let [text (mission "M-futon-seams")
+        r (le/flight-exits "M-futon-seams" text @definition
+                           {:repo "futon3c" :path "holes/missions/M-futon-seams.md"
+                            :sha mission-pin :observe (constantly false)})]
+    (is (= :status-phase-unrecognised (get-in r [:current-phase :absent])) "COMPLETE is not a lifecycle phase")
+    (is (empty? (:wants r)))
+    (is (= [:HEAD :IDENTIFY] (mapv :phase (:not-started r))))
+    (println :seams-pin mission-pin :current-phase (:current-phase r)
+             :supplied-wants (:wants r) :not-started (:not-started r))))

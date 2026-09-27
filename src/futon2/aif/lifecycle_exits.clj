@@ -116,3 +116,57 @@
      :unlocated (mapv #(assoc (select-keys % [:token :stated :role :phase])
                               :reason :no-admitted-locator) missing)
      :to-ask missing}))
+
+(defn current-phase
+  "Read the first bold Status line. A plain PHASE (date) names the phase.
+  In semicolon composites, take the latest lifecycle phase explicitly marked
+  complete, current or pending: 'HEAD complete; IDENTIFY pending' means IDENTIFY,
+  whose exit is not yet met. Other status prose (including COMPLETE alone)
+  is not interpreted as a phase. mission-registry's status regex is private."
+  [mission-text]
+  (if-let [line (first (filter #(re-find #"^\s*\*\*Status:\*\*" %)
+                              (str/split-lines mission-text)))]
+    (let [body (str/trim (str/replace-first line #"^\s*\*\*Status:\*\*\s*" ""))
+          parts (str/split body #";")
+          pattern (if (> (count parts) 1)
+                    #"^\s*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT)\s+(?:complete|current|pending)\b"
+                    #"^\s*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT)(?:\s|$)")
+          named (set (keep #(some-> (re-find pattern %) second keyword) parts))]
+      (if-let [phase (last (filter named phases))]
+        {:phase phase}
+        {:absent :status-phase-unrecognised :line line}))
+    {:absent :status-line-missing}))
+
+(defn flight-exits
+  "Pure supplied secondary wants, through the current phase only. Observation
+  and an in-section Met line must both hold. Future/unknown phases are listed,
+  never asked about. Mission-authored exits remain the existing reader's job."
+  [mission-id mission-text definition-text {:keys [observe] :as opts}]
+  (let [current (current-phase mission-text)
+        cs (:criteria (supplied mission-id mission-text definition-text))
+        reached (if (:phase current)
+                  (set (take (inc (.indexOf phases (:phase current))) phases)) #{})
+        active (filterv #(reached (:phase %)) cs)
+        later (remove #(reached (:phase %)) cs)
+        reports (group-by :phase (section-verdicts mission-text))
+        locs (verdict-locators active opts)
+        result (wants active locs observe)]
+    (assoc result
+           :current-phase current
+           :universe (into {} (for [{:keys [phase token]} active]
+                                [token (boolean (and (get-in result [:universe token])
+                                                     (some #(and (= :met (:verdict %)) (:in-section? %))
+                                                           (reports phase))))]))
+           :criteria-by-token
+           (into {} (for [[token c] (:criteria-by-token result)
+                          :let [rows (reports (:phase c))
+                                own? (some #(and (= :met (:verdict %)) (:in-section? %)) rows)
+                                misplaced (first (filter #(and (= :met (:verdict %))
+                                                                (not (:in-section? %))) rows))]]
+                      [token (cond-> c
+                               (and misplaced (not own?))
+                               (assoc :not-counted {:reason :verdict-line-misplaced
+                                                    :misplaced-under (:misplaced-under misplaced)}))]))
+           :not-started (mapv #(assoc (select-keys % [:phase :token])
+                                     :reason (if (:phase current) :phase-not-reached :current-phase-unknown))
+                              later))))
