@@ -825,9 +825,10 @@
   and never the action id standing in for it."
   [{:keys [dispatch-step! check-fn interpretations fetch-run-record
            publication-observation repair-id-fn record-dir repo-root trace-dir]
-    :or {check-fn (fn [check] (if-let [f (get checks/checks (:class check))]
-                                (f check)
-                                {:status :refused :reason :no-mechanical-check}))
+    :or {check-fn (fn [check]
+                     (let [observation (checks/observe {::attempt check})]
+                       (or (get-in observation [:results ::attempt])
+                           (get-in observation [:refused ::attempt]))))
          repo-root "/home/joe/code/futon3c"}}]
   (fn [flight click]
     (let [chosen (:chosen click)

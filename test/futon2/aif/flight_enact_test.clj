@@ -5,6 +5,9 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.flight :as flight]
+            [futon2.aif.observation-checks :as checks]
+            [futon2.aif.temporal-input :as temporal]
+            [futon2.aif.temporal-input-test :as temporal-fixture]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner])
   (:import [java.nio.file Files]
@@ -113,3 +116,26 @@
     (is (= "run-1" (:click-id (first (:enactments f)))))
     (is (string? (:record-path (first (:enactments f)))))
     (is (= [{:enactment {:absent :no-decision} :click-id "run-3"}] (:enactments abst)))))
+
+
+(deftest ^:slow default-checker-stamps-a-real-temporal-attempt
+  (let [root (io/file (temp-dir))
+        make-enact fr/enact-fn]
+    (try
+      (with-redefs [checks/repo-root (str root)]
+        ;; Reuse the exact previous-envelope and real git-dispatch fixture.
+        ;; Remove its injected checker at construction so production's default runs.
+        (let [{:keys [previous execute]}
+              (with-redefs [fr/enact-fn #(make-enact (dissoc % :check-fn))]
+                (temporal-fixture/fixture root))
+              attempt (execute "click-a" :write-a)
+              result (get-in attempt [:check :result])
+              input (temporal/temporal-input previous attempt (:check attempt))
+              unstamped (update-in attempt [:check :result]
+                                  dissoc :check-mechanism :check-mechanism-name)]
+          (is (= (get-in previous [:model-identity :A]) (:check-mechanism result)))
+          (is (= "C3/cat-file-e" (:check-mechanism-name result)))
+          (is (= :admitted (:status input)) (pr-str input))
+          (is (= :observation-not-linked
+                 (:reason (temporal/temporal-input previous unstamped (:check unstamped)))))))
+      (finally (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
