@@ -7,10 +7,18 @@
   repair finding's :failure-data (fixture header: path and sha)."
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runner-test :as fixture]
-            [futon2.aif.hermetic-repair-fixture :as hermetic]))
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.locator-fixtures :as loc]
+            [futon2.aif.trace :as trace]
+            [futon2.report.cascade-decision-test :as cfix]
+            [futon2.report.war-machine :as wm])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
 (use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false] (f))))
@@ -64,6 +72,52 @@
     (is (not= :untyped-failure (get-in result [:data :failure-kind])))
     (is (= :class-unknown-no-scalar-g
            (:kind (:abstention (fr/record-summary "M-autoclock-in" "click-1" record)))))))
+
+(defn- temp-dir [prefix]
+  (.getPath (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0)))))
+
+(defn- run-judge
+  "Like run, but the judge-fn itself is supplied: the decision writer under
+  test is called inside the tick, not replayed from a supplied exception.
+  Self-contained stores and record dirs, so the var may be called directly
+  (futon3c's wire test does, wrapping the writer var)."
+  [judge-fn & [flight]]
+  (let [findings (atom [])]
+    (with-redefs-fn {#'trace/default-trace-dir (temp-dir "wire-judge-trace-")
+                     #'runner/default-run-record-dir (temp-dir "wire-judge-records-")
+                     #'learning-ledger/default-root (temp-dir "wire-judge-learning-")}
+      #(binding [runner/*wm-status-reporting?* false]
+         (let [result (runner/run-opportunity!
+                       (merge (fixture/isolated-runner-opts)
+                              {:judge-fn judge-fn
+                               :repair-system-record-fn (fn [m] (swap! findings conj m)
+                                                          {:repair/id (str "repair-test-" (count @findings))
+                                                           :repair/class (:repair-class m)})
+                               :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}
+                              (when flight {:flight flight})))]
+           {:result result :findings @findings
+            :record (edn/read-string (slurp (:run-record result)))})))))
+
+(deftest the-real-judge-refusal-is-the-ticks-typed-abstention
+  ;; WIRE-23-C2 (PROOF-2a <2>3 lane C2): the judge-fn IS the real writer,
+  ;; war-machine/cascade-decision, refusing: the injected live-C derivation
+  ;; carries a refusal, so the :live-c guard in cascade-decision-admitted
+  ;; (war_machine.clj) throws ex-info "cascade decision refused"
+  ;; {:kind :live-c-refused} before any scoring.
+  (let [assembled (cp/assemble {:targets [cfix/tick-1-target]
+                                :sources (loc/locate-all cfix/tick-1-sources)})
+        {:keys [result record]}
+        (run-judge (fn [_]
+                     (wm/cascade-decision
+                      assembled
+                      (assoc cfix/live-c-opts
+                             :live-c {:derived {:refusals [{:kind :source-not-available}]}})))
+                   {:target "M-autoclock-in"})
+        carrier (get-in record [:decision :abstention])]
+    (is (= :abstained (:status carrier)))
+    (is (= :live-c-refused (get-in carrier [:targets 0 :kind])))
+    (is (= :live-c-refused
+           (get-in result [:checkpoints :selection :sorry :judge-refusal :kind])))))
 
 (deftest an-untyped-judge-failure-stays-untyped
   (let [{:keys [result findings record]} (run (RuntimeException. "boom"))]

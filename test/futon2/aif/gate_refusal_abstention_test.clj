@@ -8,10 +8,18 @@
   :failure-data (fixture header: path and sha)."
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runner-test :as fixture]
-            [futon2.aif.hermetic-repair-fixture :as hermetic]))
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.locator-fixtures :as loc]
+            [futon2.aif.trace :as trace]
+            [futon2.report.cascade-decision-test :as cfix]
+            [futon2.report.war-machine :as wm])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
 (use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false] (f))))
@@ -65,6 +73,52 @@
     (is (= {:absent :reason-names-no-missing-input} (:missing t)))
     (is (= :abstained (get-in result [:data :failure-kind])))
     (is (not= :untyped-failure (get-in result [:data :failure-kind])))))
+
+(defn- temp-dir [prefix]
+  (.getPath (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0)))))
+
+(defn- run-judge
+  "Like run, but the judge-fn itself is supplied: the decision writer under
+  test is called inside the tick, not replayed from a supplied exception.
+  Self-contained stores and record dirs, so the var may be called directly
+  (futon3c's wire test does, wrapping the writer var)."
+  [judge-fn & [flight]]
+  (let [findings (atom [])]
+    (with-redefs-fn {#'trace/default-trace-dir (temp-dir "wire-gate-trace-")
+                     #'runner/default-run-record-dir (temp-dir "wire-gate-records-")
+                     #'learning-ledger/default-root (temp-dir "wire-gate-learning-")}
+      #(binding [runner/*wm-status-reporting?* false]
+         (let [result (runner/run-opportunity!
+                       (merge (fixture/isolated-runner-opts)
+                              {:judge-fn judge-fn
+                               :repair-system-record-fn (fn [m] (swap! findings conj m)
+                                                          {:repair/id (str "repair-test-" (count @findings))
+                                                           :repair/class (:repair-class m)})
+                               :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}
+                              (when flight {:flight flight})))]
+           {:result result :findings @findings
+            :record (edn/read-string (slurp (:run-record result)))})))))
+
+(deftest the-real-gate-refusal-is-the-ticks-typed-abstention
+  ;; WIRE-23-C2 (PROOF-2a <2>3 lane C2): the judge-fn drives the REAL
+  ;; writer, war-machine/cascade-decision, whose decision gate refuses: the
+  ;; fixture family is admitted with one guard token's locator present but
+  ;; invalid for its class (C4 without :decl passes assembly's admission
+  ;; and fails decision-gate/emit!'s guard-locator check), so
+  ;; cascade-decision-admitted throws ex-info "Inadmissible decision"
+  ;; {:error :inadmissible-decision :reason :missing-observation-locators}.
+  (let [sources (assoc-in (loc/locate-all cfix/tick-1-sources)
+                          [:locators cfix/tick-1-target :summary-without-total-repos-throws]
+                          {:class :C4 :repo "futon2" :sha "fixture" :path "fixture/p"})
+        assembled (cp/assemble {:targets [cfix/tick-1-target] :sources sources})
+        {:keys [result record]}
+        (run-judge (fn [_] (wm/cascade-decision assembled cfix/live-c-opts))
+                   {:target "M-autoclock-in"})
+        [t] (get-in record [:decision :abstention :targets])]
+    (is (= :abstained (get-in record [:decision :abstention :status])))
+    (is (= :missing-observation-locators (:kind t)))
+    (is (= :missing-observation-locators
+           (get-in result [:checkpoints :construction :sorry :judge-refusal-kind])))))
 
 (deftest an-unrelated-exception-stays-untyped
   ;; control: no :error, no :outcome, no :failure-kind
