@@ -1106,9 +1106,11 @@
   Pure; the existing single-action channel scoring in `rank-actions` is
   unchanged. A mixed list (cascade candidates and :type actions together)
   is the typed refusal :mixed-candidate-kinds — no combined semantics is
-  invented."
+  invented. Metadata [:cascade-scoring :spec-in] retains the received option
+  verbatim, including on refusals; a missing key records typed absence."
   [state candidate-actions opts]
-  (if (contains? opts :observation-model)
+  (let [result
+        (if (contains? opts :observation-model)
     ((requiring-resolve 'futon2.aif.cascade-observation-scoring/rank-cascade-actions)
      state candidate-actions opts)
     (let [T (:horizon-steps opts)
@@ -1423,7 +1425,9 @@
                              (if fe-refusal?
                                {:status :refused :source f-source :reason fe}
                                {:status :computed :source f-source
-                                :params (:params fe)})}})))))))
+                                :params (:params fe)})}}))))))]
+    (vary-meta result assoc-in [:cascade-scoring :spec-in]
+               (get opts :cascade-spec {:absent :no-cascade-spec}))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score
