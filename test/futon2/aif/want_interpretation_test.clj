@@ -487,3 +487,17 @@
                             {:guard {:needs #{} :forbids #{}} :produces #{:caller-converted :another}} s {})]
     (is (every? (:domain i) [["M-hand" :extra] ["M-hand" :blocked] ["M-hand" :more]]))
     (is (= :multiple-check-mechanisms (get-in i [:model-identity :absent])))))
+
+(deftest admitted-declarations-remain-consumable-by-the-real-constructor
+  ;; Admission constructs before attaching metadata. Replay that exact input
+  ;; with the returned record, as a later consumer of published patterns does.
+  (let [original futon2.aif.interpretation-construction/construct
+        input (atom nil)
+        v (with-redefs [futon2.aif.interpretation-construction/construct
+                        (fn [x] (reset! input x) (original x))]
+            (validate-hand (assoc placenta-unit :pattern :gauntlet/placenta-transfer)))
+        constructed (original (assoc @input :interpretations (:interpretation v)))]
+    (is (= :valid (:status v)))
+    (is (= :constructed (:status constructed)) (pr-str constructed))
+    (is (= [:gauntlet/placenta-transfer]
+           (get-in constructed [:candidates 0 :precedence])))))
