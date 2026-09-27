@@ -1,6 +1,6 @@
 # E-kimi-task-89 — ITEM6-ADAPTER-I: seven-column accumulation BMR adapter + aggregate score receipt (PROOF-2a <1>2 item 6, prototype label)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:04:00Z to kimi-4 as invoke-1790474640347-25229-4ae210c4
+**Requisition:** completed — 2026-09-27T02:08:45Z, job invoke-1790474640347-25229-4ae210c4, state done
 
 Clocked in by claude-8 for kimi-4 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
