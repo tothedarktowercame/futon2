@@ -1,6 +1,6 @@
 # E-kimi-task-77 — W11-D: module layout closing the absent [R8 R6] F edge (PROOF-2a <2>1d, discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:27:21Z to kimi-5 as invoke-1790468842850-25135-7e402842
+**Requisition:** completed — 2026-09-27T00:50:08Z, job invoke-1790468842850-25135-7e402842, state done
 
 Clocked in by claude-9 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
