@@ -4040,14 +4040,20 @@
                             (map (fn [r]
                                    (cond-> {:repo (or (:repo r)
                                                       (repo-label-from-path (:abs-path r)))
-                                            :pressure (or (:P r) 0.0)
-                                            :count (or (:count r) 0)
-                                            :max-age-days (or (:max-age-days r) 0.0)
-                                            :bytes (or (:total-bytes r) 0)
-                                            :tier (:tier r)}
+                                            ;; :pressure may be nil for
+                                            ;; uncertain-only roots: unknown,
+                                            ;; never an invented zero.
+                                            :pressure (:P r)
+                                            :count (:count r)
+                                            :max-age-days (:max-age-days r)
+                                            :bytes (:total-bytes r)
+                                            :tier (:tier r)
+                                            :abs-path (:abs-path r)}
                                      (:uncertain r) (assoc :uncertain (:uncertain r))
+                                     (:uncertain-only r) (assoc :uncertain-only true)
                                      (:uncertain-stale r) (assoc :uncertain-stale true))))
-                            (sort-by :pressure #(compare %2 %1))
+                            (sort-by #(double (or (:pressure %) -1.0))
+                                     #(compare %2 %1))
                             vec)
               sessions (->> (or (:sessions snap) [])
                             (mapv (fn [s]
@@ -4107,50 +4113,69 @@
           ;; A repo is operator-visible when it has pressure OR uncertain
           ;; dirty paths: uncertain ownership never lands on a person (C8),
           ;; so pressure-zero repos with uncertain dirt must still appear.
+          label-counts (frequencies (map :repo repos))
           active (->> repos
                       (filter #(or (pos? (double (or (:pressure %) 0.0)))
                                    (pos? (long (get-in % [:uncertain :dirty-count] 0)))))
                       (mapv (fn [{:keys [repo pressure tier count max-age-days bytes
-                                         uncertain uncertain-stale]}]
-                              (let [ucount (long (or (:dirty-count uncertain) 0))]
+                                         uncertain uncertain-stale uncertain-only
+                                         abs-path]}]
+                              (let [ucount (when uncertain
+                                             (long (or (:dirty-count uncertain) 0)))
+                                    upaths (when uncertain
+                                             (mapv :path (or (:paths uncertain) [])))
+                                    distinct? (or uncertain-only
+                                                  (> (get label-counts repo 0) 1))]
                                 (cond->
                                  {:repo repo
+                                  :abs-path abs-path
+                                  :display-name (if (and distinct? abs-path)
+                                                  (str repo " [" abs-path "]")
+                                                  repo)
                                   :pressure pressure
                                   :tier tier
                                   :count count
                                   :max-age-days max-age-days
                                   :bytes bytes
+                                  ;; nil when the feed has no row for this
+                                  ;; repo: unknown is never a zero.
                                   :uncertain-count ucount
+                                  :uncertain-paths upaths
                                   :needs-fixing
-                                  (if (pos? ucount)
-                                    (format (str "%s has %d dirty paths (%d ownership-unknown%s), "
+                                  (if (and ucount (pos? ucount))
+                                    (format (str "%s has %s dirty paths (%d ownership-unknown%s), "
                                                  "age %.1fd, %.2f pressure")
-                                            repo (or count 0) ucount
+                                            repo (if count (str count) "?") ucount
                                             (if uncertain-stale " [stale feed]" "")
                                             (double (or max-age-days 0.0))
                                             (double (or pressure 0.0)))
-                                    (format "%s has %d dirty paths, age %.1fd, %.2f pressure"
-                                            repo (or count 0) (double (or max-age-days 0.0))
+                                    (format "%s has %s dirty paths, age %.1fd, %.2f pressure"
+                                            repo (if count (str count) "?")
+                                            (double (or max-age-days 0.0))
                                             (double (or pressure 0.0))))
                                   :action
-                                  (if (and (pos? ucount) drilldown)
+                                  (if (and ucount (pos? ucount) drilldown)
                                     (format (str "Review %s for commit/disposition clustering; "
                                                  "%d path(s) ownership-unknown — detail: %s")
                                             repo ucount drilldown)
                                     (format "Review %s for commit/disposition clustering"
                                             repo))}
+                                 uncertain-only (assoc :uncertain-only true)
                                  uncertain-stale (assoc :uncertain-stale true)))))
-                      (sort-by (juxt (comp - tier-rank :tier) (comp - :pressure)))
+                      (sort-by (juxt (comp - tier-rank :tier)
+                                     (comp - #(double (or (:pressure %) 0.0)))))
                       vec)
           channels (or (:channels metabolic-balance) [])
           active-sessions (some #(when (= :active-sessions (:channel %)) %) channels)
           working-tree (some #(when (= :working-tree (:channel %)) %) channels)]
       {:available? true
        :clustering-status :not-yet-grouped
-       ;; Bounded display: at most 8 queues, with the remainder reported
-       ;; explicitly and the drilldown path named, never silently dropped.
+       ;; Bounded display: at most 8 queues; the remainder is reported
+       ;; explicitly WITH its repo names, so no pressure queue is lost
+       ;; behind the bound.
        :queues (vec (take 8 active))
        :queue-remainder (max 0 (- (count active) 8))
+       :remainder-repos (mapv :display-name (drop 8 active))
        :drilldown drilldown
        :uncertainty (:uncertainty metabolic-balance)
        :active-count (count active)
@@ -4462,26 +4487,49 @@
           (.append sb (render-table
                        ["Repo" "Tier" "Pressure" "Dirty" "Max age" "Action"]
                        [:left :left :right :right :right :left]
-                       (mapv (fn [{:keys [repo tier pressure count max-age-days action
-                                          uncertain-count]}]
-                               [repo
-                                (name tier)
+                       (mapv (fn [{:keys [repo display-name tier pressure count
+                                          max-age-days action uncertain-count]}]
+                               [(or display-name repo)
+                                (if tier (name tier) "?")
                                 ;; (or pressure 0), as at :4025, :4460 and
                                 ;; :4483. This site was the one that missed it,
                                 ;; and (double nil) throws.
                                 (format "%.2f" (double (or pressure 0)))
-                                (if (pos? (long (or uncertain-count 0)))
-                                  (str count " (" uncertain-count " ownership-unknown)")
-                                  (str count))
+                                (cond
+                                  (and uncertain-count (pos? uncertain-count))
+                                  (str (or count "?") " (" uncertain-count
+                                       " ownership-unknown)")
+                                  (nil? count) "?"
+                                  :else (str count))
                                 (format "%.1fd" (double (or max-age-days 0.0)))
                                 action])
                              (:queues commit-hygiene))))
           (when (pos? (long (or (:queue-remainder commit-hygiene) 0)))
             (.append sb (str "\n… + " (:queue-remainder commit-hygiene)
-                             " more repo(s) over the reporting floor"
+                             " more repo(s) over the reporting floor: "
+                             (str/join ", " (:remainder-repos commit-hygiene))
                              (when-let [d (:drilldown commit-hygiene)]
                                (str " — full detail: " d))
                              "\n")))
+          (when-let [u (:uncertainty commit-hygiene)]
+            (when (or (not= "available" (:status u)) (:stale? u))
+              (.append sb (str "\nUncertain-ownership feed: "
+                               (name (or (:status u) :unknown))
+                               (cond (:stale? u) " (stale)"
+                                     (= "malformed" (str (:status u)))
+                                     (str " (" (name (or (:reason u) :invalid)) ")")
+                                     :else "")
+                               " — ownership-unknown counts may be absent or outdated.\n"))))
+          ;; Full per-file drilldown inside the rendered surface itself:
+          ;; every uncertain repo lists ALL of its dirty paths here, so the
+          ;; bounded table above never hides a filename.
+          (doseq [{:keys [display-name repo uncertain-paths]} (:queues commit-hygiene)
+                  :when (seq uncertain-paths)]
+            (.append sb (str "\n### Uncertain detail — " (or display-name repo)
+                             " (ownership unknown, " (count uncertain-paths)
+                             " path(s))\n"))
+            (doseq [p uncertain-paths]
+              (.append sb (str "- " p "\n"))))
           (.append sb "\n"))
 
         :else

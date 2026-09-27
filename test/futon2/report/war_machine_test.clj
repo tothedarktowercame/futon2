@@ -2488,7 +2488,10 @@
                   :channels []
                   :per-repo [{:repo "futon3c-d" :pressure 0.0 :count 10
                               :max-age-days 1.2 :bytes 1000 :tier :silent
-                              :uncertain {:dirty-count 10 :untracked 3 :remainder 5}}]})]
+                              :uncertain {:dirty-count 10 :untracked 3 :remainder 5
+                                         :paths (vec (for [i (range 10)]
+                                                       {:path (str "runs/out-" i ".edn")
+                                                        :mtime-ms i}))}}]})]
     (is (:available? summary))
     (is (= 1 (:active-count summary)))
     (is (= ["futon3c-d"] (mapv :repo (:queues summary))))
@@ -2520,8 +2523,8 @@
                               :max-age-days 2.0 :bytes 10 :tier :high}]})]
     (is (= 1 (:active-count summary)))
     (is (= "missing" (get-in summary [:uncertainty :status])))
-    (is (zero? (long (or (:uncertain-count (first (:queues summary))) 0)))
-        "missing feed is not an authoritative zero")))
+    (is (nil? (:uncertain-count (first (:queues summary))))
+        "missing feed is unknown, never an authoritative zero")))
 
 (deftest render-shows-ownership-unknown-and-remainder-drilldown
   (let [md (wm/render-war-machine
@@ -2532,6 +2535,7 @@
                                         :uncertain-count 10
                                         :action "Review — detail: /storage/b.edn"}]
                               :queue-remainder 2
+                              :remainder-repos ["futon8" "futon9"]
                               :drilldown "/storage/operator-backlog.edn"
                               :active-count 3 :high-count 0 :stop-count 0
                               :clustering-status :not-yet-grouped}
@@ -2542,6 +2546,7 @@
              :now "2026-09-27" :days 14})]
     (is (.contains md "10 (10 ownership-unknown)"))
     (is (.contains md "+ 2 more repo(s)"))
+    (is (.contains md "futon8, futon9"))
     (is (.contains md "/storage/operator-backlog.edn"))))
 
 (deftest producer-to-render-integration-via-real-snapshot-file
@@ -2559,7 +2564,10 @@
                  :per-repo [{:repo "futon3c-d" :abs-path "/home/joe/code/futon3c"
                              :P 0.0 :count 10 :max-age-days 0.5 :total-bytes 100
                              :tier "silent"
-                             :uncertain {:dirty-count 10 :untracked 3 :remainder 5}}]
+                             :uncertain {:dirty-count 10 :untracked 3 :remainder 5
+                                         :paths (vec (for [i (range 10)]
+                                                       {:path (str "runs/out-" i ".edn")
+                                                        :mtime-ms i}))}}]
                  :sessions [] :pool {}}]
     (spit snap-path (json/generate-string fixture))
     (with-redefs [wm/mana-snapshot-path snap-path]
@@ -2578,4 +2586,66 @@
         (is (= "available" (get-in scanned [:uncertainty :status])))
         (is (= ["futon3c-d"] (mapv :repo (:queues summary))))
         (is (.contains md "ownership-unknown"))
-        (is (.contains md "/storage/operator-backlog.edn"))))))
+        (is (.contains md "/storage/operator-backlog.edn"))
+        ;; full per-file drilldown is INSIDE the rendered surface
+        (is (.contains md "### Uncertain detail — futon3c-d"))
+        (is (.contains md "- runs/out-0.edn"))
+        (is (.contains md "- runs/out-9.edn"))))))
+
+(deftest uncertain-only-root-displays-with-root-identity
+  ;; A feed-only root (absent from the mana manifest, no pressure
+  ;; measurement) must still surface, distinctly named by its path.
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :silent :max-pressure 0.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available" :drilldown "/storage/b.edn"}
+                  :channels []
+                  :per-repo [{:repo "futon3c" :pressure 0.5 :count 3
+                              :max-age-days 1.0 :bytes 10 :tier :advisory
+                              :abs-path "/home/joe/code/futon3c"}
+                             {:repo "futon3c" :pressure nil :count nil
+                              :max-age-days nil :bytes nil :tier nil
+                              :abs-path "/home/joe/code/worktrees/futon3c-d"
+                              :uncertain-only true
+                              :uncertain {:dirty-count 10 :untracked 0
+                                          :remainder 5
+                                          :paths [{:path "a.clj" :mtime-ms 1}]}}]})]
+    (is (= 2 (:active-count summary)))
+    (is (= ["/home/joe/code/futon3c" "/home/joe/code/worktrees/futon3c-d"]
+           (mapv :abs-path (:queues summary)))
+        "same-label worktrees stay distinct rows")
+    (is (some #(str/includes? (:display-name %) "/home/joe/code/worktrees/futon3c-d")
+              (:queues summary)))
+    (let [md (wm/render-war-machine
+              {:self-watch (:self-watch sample-data)
+               :commit-hygiene summary
+               :loop-health (:loop-health sample-data)
+               :support-attack (:support-attack sample-data)
+               :mission-triage (:mission-triage sample-data)
+               :graph (:graph sample-data)
+               :now "2026-09-27" :days 14})]
+      (is (.contains md "futon3c [/home/joe/code/worktrees/futon3c-d]"))
+      (is (.contains md "### Uncertain detail"))
+      (is (.contains md "- a.clj")))))
+
+(deftest stale-feed-status-is-rendered-on-the-surface
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :silent :max-pressure 0.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available" :stale? true
+                                :drilldown "/storage/b.edn"}
+                  :channels []
+                  :per-repo [{:repo "futon3c-d" :pressure 0.0 :count 10
+                              :max-age-days 1.0 :bytes 10 :tier :silent
+                              :uncertain {:dirty-count 10 :untracked 0 :remainder 5
+                                          :paths []}
+                              :uncertain-stale true}]})
+        md (wm/render-war-machine
+            {:self-watch (:self-watch sample-data)
+             :commit-hygiene summary
+             :loop-health (:loop-health sample-data)
+             :support-attack (:support-attack sample-data)
+             :mission-triage (:mission-triage sample-data)
+             :graph (:graph sample-data)
+             :now "2026-09-27" :days 14})]
+    (is (.contains md "Uncertain-ownership feed: available (stale)"))))
