@@ -30,3 +30,11 @@
     (is (= :invalid-observation-model
            (:reason (b/categorical-filter-step (b/uniform-prior)
                      {:type :spawned} a b/transition-model-v1 {:weight 1}))))))
+
+(deftest explicit-missing-model-does-not-select-the-default
+  (doseq [[key reason] [[:observation-model :invalid-observation-model]
+                        [:transition-model :invalid-transition-model]]]
+    (is (= reason
+           (:reason (b/update-entity-belief (b/uniform-prior)
+                      {:type :spawned :weight 1}
+                      {:likelihood-mode :aif key nil}))))))

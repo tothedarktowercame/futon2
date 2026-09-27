@@ -403,9 +403,8 @@
                          (default `transition-model-v1`).
    The flip to :a-matrix or :aif is the operator's (arena-*-mode idiom)."
   ([posterior event] (update-entity-belief posterior event {}))
-  ([posterior event {:keys [likelihood-mode a-matrix
-                            observation-model transition-model]
-                     :or {likelihood-mode :legacy}}]
+  ([posterior event {:keys [likelihood-mode a-matrix]
+                     :or {likelihood-mode :legacy} :as opts}]
    (let [{:keys [type weight]} event
          w (double (or weight 1.0))]
      (if (belief-refusal? posterior)
@@ -423,8 +422,8 @@
                        [k (* v (double (get L k 1.0)))]))))
          :aif
          (categorical-filter-step posterior event
-                                   (or observation-model observation-model-v1)
-                                   (or transition-model transition-model-v1)
+                                   (get opts :observation-model observation-model-v1)
+                                   (get opts :transition-model transition-model-v1)
                                    {:weight w}))
        posterior)))))
 
