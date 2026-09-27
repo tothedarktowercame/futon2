@@ -6,11 +6,13 @@
   (count + alpha) / multiplicity / sum over the menu, alpha 1.0)."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-habit-store :as habit]
             [futon2.aif.cascade-prior :as prior]
             [futon2.aif.enactment-habit :as eh]
+            [futon2.aif.grain-gate :as gate]
             [futon2.aif.policy :as policy])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -89,3 +91,59 @@
                     :when (str/includes? (slurp f) ":habit-state")]
                 (str f))]
     (is (= ["src/futon2/aif/policy.clj"] (vec files)))))
+
+(def checker-path
+  "../futon3c/holes/labs/M-futon-seams/exemplar/proof2a_check.clj")
+
+(defn checker-verdict
+  "Run the real W_c executable on temporary carriers; missing bb/script fails."
+  [record enactment]
+  (assert (.isFile (io/file checker-path)) (str "Missing checker: " checker-path))
+  (let [dir (.toFile (Files/createTempDirectory "fold-real-checker" (make-array FileAttribute 0)))
+        r (io/file dir "click.edn") e (io/file dir "enactment.edn")]
+    (try
+      (spit r (pr-str record))
+      (spit e (pr-str enactment))
+      (let [{:keys [exit out err]}
+            (try (sh/sh "bb" checker-path (str r) (str e) "--wc" "--edn")
+                 (catch java.io.IOException ex
+                   (throw (ex-info (str "Cannot execute bb " checker-path) {} ex))))]
+        (assert (zero? exit) (str "Checker failed: " checker-path " " err))
+        (edn/read-string out))
+      (finally (doseq [f (reverse (file-seq dir))] (.delete f))))))
+
+(defn- pinned-exemplar [name sha]
+  (let [path (io/file (.getParent (io/file checker-path)) name)
+        bytes (Files/readAllBytes (.toPath path))
+        actual (apply str (map #(format "%02x" (bit-and 0xff %))
+                              (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))]
+    (assert (= sha actual) (str "Exemplar changed: " path))
+    (edn/read-string (String. bytes java.nio.charset.StandardCharsets/UTF_8))))
+
+(deftest real-checker-verdict-into-increment
+  (let [record (pinned-exemplar "click-001.edn" "98aa1cba12cdd1c759474d54447e89de38bcea58aa00fe6cd7cb392776a41409")
+        enactment (pinned-exemplar "click-001-enactment.edn" "e51063896e2a42096718d902e0b4dfe0e4652323de0b42848c2c0cf318bf6c89")
+        cid (:candidate enactment)
+        derivation (get-in record [:decision :selection-certificate :candidate-derivations cid])
+        grain (:grain enactment)
+        gate-result (gate/grain-gate {:grain grain} {:grain grain} "../futon3c")
+        good (update enactment :attempts
+                     (fn [attempts]
+                       (mapv #(if (and (= 3 (:n %))
+                                       (= :cascade-construction/choose-the-grain-where-state-lives (:pattern %)))
+                                (assoc % :check {:kind :grain-gate :repo "futon3c"
+                                                :attempt-grain grain :result gate-result}) %) attempts)))
+        action {:kind :cascade-candidate :id cid :target (:target derivation)
+                :construction-receipt (:construction-receipt derivation)
+                :precedence (mapv #(hash-map :id %) (distinct (map :pattern (:attempts good))))}]
+    (is (= :pass (:status gate-result)))
+    (doseq [[selected delta] [[cid 1] [:cand/b-observe-first 0]]]
+      (let [verdict (checker-verdict (assoc-in record [:decision :selection-law :candidate] selected) good)
+            receipts (vec (enactment-receipts action 1 verdict))
+            folded (eh/fold nil receipts)]
+        (is (vector? verdict))
+        (if (= 1 delta)
+          (is (= [] verdict))
+          (is (some #(str/includes? % "differs from the click's selected candidate") verdict)))
+        (is (= delta (:delta (first receipts))))
+        (is (= delta (count (:enactment-records folded))))))))
