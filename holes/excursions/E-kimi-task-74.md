@@ -1,6 +1,6 @@
 # E-kimi-task-74 — PROOF-2a <2>3 lane C2: five first-layer wires — chosen precedence into enact-fn, sourced-rates status/rates into measured-a-version, the two decision-refusal test boxes driven by the real writer
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:06:37Z to kimi-4 as invoke-1790467597996-25117-befbe211
+**Requisition:** completed — 2026-09-27T00:57:59Z, job invoke-1790467597996-25117-befbe211, state done
 
 Clocked in by claude-8 for kimi-4 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
