@@ -12,11 +12,50 @@ This report does not accept ⟨1⟩2 as a whole.
 |---|---|---|
 | 1. Three Lean/runtime correspondences | mathlib4 `8d98c63f97`: `Proof2.ChannelIdentity` selects current check name AND source identity; `Proof2.Revision3Rates` represents both-cell minimum 5, authorised Jeffreys estimate and its kernel construction; `Proof2.AccumulationAtRuntime` proves the state-taking outer-product recurrence, concatenation/carry law and positive-prior preservation. futon2 `202b5a026` records the bindings. | These are mathematical correspondences on admitted inputs, not a claim that Lean executed Clojure or that temporal filtering is wired. Raw-count results remain the unsmoothed case. Store admission and uniqueness precede the identity projection. |
 | 2. Likelihood precision | `202b5a026`: omission selects ζ=1; explicit nil returns invalid-zeta and no certificate. Registry explicitly says beta-zeta learning is absent and precision is fixed. | Existing support/endpoint rulings unchanged. No beta-learning law invented. |
-| 3. Tick-side exact filtering | **Not implemented.** The required temporal input producer is absent; see below. | Initialization, per-policy flight conditioning and arena microsteps are not substitutes for this path. |
+| 3. Tick-side exact filtering | **Completed at implementation level; no live claim.** Input join `464e47301`; compute/publication `2df5efcf5` + `18009f1d2`; next-selection posterior consumption `bd7d182dc`; closure controls `a3306e2ae`; scoped registry declaration `90af94845`. Reviewed/closed by claude-8, 2026-09-27. | One executed C3 step per update. Undeclared or inconsistent model/domain inputs initialize with a recorded reason; initialization is not filtering. No live witness since increment 2; wiring-map declarations remain with ⟨2⟩2b. |
 | 4. Arena absence through readers | `443a24b0f`, `3b76aa8a5`: missing A cells/models refuse, zero evidence has no posterior, refusal survives subsequent entity updates and carry, health/population predictions and trace. Prediction-error receipts preserve the cause. | Arena remains the declared tempered seven-status model. This does not connect counted token A to that carrier or claim exact temporal filtering. |
 | 5. Accumulation continuity and forwarding | `fff29cba1`: preserve initialization, bind entity/model lineage, require actually observed coordinates, reject changed predecessor while holding the existing append lock; configuration failures become receipts. Default flight judge forwards configuration and trace directory; its existing post-construction publisher remains the sole publisher. | No live seeded restart/migration or flight executed. Old tails without origin/lineage, or receipt-only tails, cannot silently initialize or skip. A failed publication is described explicitly below. |
 
-## Item 3: the unresolved producer
+## Item 3: implementation closure, 2026-09-27
+
+Claude-8 reports implementation closure at the revisions in row 3. The
+enactment record is the published posterior authority: the click trace and run
+record precede enactment. The next selection consumes the verified published
+posterior as q0. Linkage uses click-id plus a `:consumed-at` citation;
+occurrence-id retains its selection meaning. An execution witness admits the
+transition; either a true or false stamped C3 check supplies the observation.
+`:success` retains its enactment/E/W_c meaning.
+
+The committed closure controls at `a3306e2ae` cover three chronological
+selections with non-identity B and policy switches, previous-action and fresh-
+observation interventions, unchanged consumed posterior when only the next
+candidate changes, event replay/stale cursors, domain/model mismatches,
+unchecked-token marginalization, and retained contradictions. The registry at
+`90af94845` records `:realisation-scope :executed-c3-temporal-filter` and
+`:claim :hermetic-implementation`, with
+`:witness {:absent :no-live-flight-since-increment-2}`.
+
+Evidence references: temporal-consume `8ebc2de3`, temporal-update `33fe16f1`,
+temporal-input `b2aeb5e3` (closure registry lists these with test pin
+`a3306e2ae`); full-loop-runner `924964b8` is reported by claude-8 at
+`bd7d182dc`. This documentation update checked the committed registry and
+the closure report; it did not rerun tests or independently revalidate warrants.
+
+Limits: one executed C3 step per update; other checker laws and multiple
+attempts are not covered. Missing or inconsistent declarations initialize
+with typed reasons and do not establish temporal continuity. New admissions
+are covered by `3145da84b`; older interpretations are not retroactively
+declared. A retained contradiction does not publish a posterior or advance
+the cursor; a following selection may explicitly initialize, which is not
+counted as filtering. The Lean binding covers the exact kernel and ordering,
+not a new equivalence proof for all machineStep premises. Temporal map
+declarations and a live-flight witness remain separate obligations.
+
+This closure supersedes the implementation-status claims in the original
+producer analysis and the later item-3 proposal below; their requirements
+remain as the historical rationale, not outstanding implementation dispatches.
+
+## Item 3: original unresolved-producer analysis (superseded)
 
 `token_belief_carry/stage` explicitly stages initialization. Its v2 carry has
 no posterior. `token_belief_predecessor/input-receipt` v3 authorizes signed
