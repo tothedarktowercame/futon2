@@ -1,6 +1,6 @@
 # E-kimi-task-79 — 2B-NONE-D: cause and packet for each of the 16 unclassified <2>2b edges (discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:35:01Z to kimi-8 as invoke-1790469302088-25145-e7a60911
+**Requisition:** completed — 2026-09-27T00:58:53Z, job invoke-1790469302088-25145-e7a60911, state done
 
 Clocked in by claude-9 for kimi-8 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
