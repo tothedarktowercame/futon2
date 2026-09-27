@@ -22,6 +22,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.temporal-input :as temporal]
             [futon2.aif.temporal-update :as temporal-update]
+            [futon2.aif.zeta-posterior :as zeta]
             [futon2.aif.loaded-displacement :as displacement]
             [futon2.aif.interpretation-evidence]
             [futon2.aif.mission-criteria :as criteria]
@@ -805,6 +806,9 @@
     :trace-dir       the selection publisher's trace/index lock directory.
                      Defaults to the existing lane-futility trace directory.
                      Temporal absence never changes enactment success or gates it.
+    :zeta-prior      {:beta-prior positive-number :authority declaration};
+                     defaults to zeta/default-prior. Learning annotates the
+                     token-rates lane only and never gates enactment.
     :repo-root       for the grain gate's evidence files.
 
   Attempts retain the dispatched interpretation, its transition reading and
@@ -824,7 +828,7 @@
   a missing decision candidate is an absence on the record, not a refusal,
   and never the action id standing in for it."
   [{:keys [dispatch-step! check-fn interpretations fetch-run-record
-           publication-observation repair-id-fn record-dir repo-root trace-dir]
+           publication-observation repair-id-fn record-dir repo-root trace-dir zeta-prior]
     :or {check-fn (fn [check]
                      (let [observation (checks/observe {::attempt check})]
                        (or (get-in observation [:results ::attempt])
@@ -910,6 +914,10 @@
                                                {:pattern grain-p}
                                                {:absent :candidate-names-no-grain-pattern})
                               :attempts attempts
+                              :zeta-prior (or zeta-prior zeta/default-prior)
+                              :zeta-likelihood (zeta/retain-lane run-record (:target flight) attempts)
+                              :precision-family (or (get-in run-record [:decision :selection-certificate :precision-family])
+                                                    {:absent :joint-precision-family-missing})
                               :conformance {:deviations deviations}
                               :publication-observed pub}
                        (nil? grain-p)

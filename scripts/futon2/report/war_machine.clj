@@ -6549,6 +6549,7 @@
                                                                      (:observation-labels-view opts))})]
                         {:target (:target problem)
                          :route (:route lane)
+                         :token-rate-scoring (:cascade-scoring (meta (:ranked lane)))
                          :decision (select-keys (:decision lane) [:preference-schedule])
                          :refusal (when (:stopped-at lane) (:refusal lane))
                          :candidates (filterv #(seq (:precedence %)) (:candidates lane))
@@ -6883,6 +6884,8 @@
                                 :initial-belief-receipt initial-belief-receipt)
                 decision (assoc-in decision [:selection-certificate :precision-family]
                                    (precision-carry/family decision precision-model schedules))
+                decision (assoc-in decision [:selection-certificate :token-rate-lanes]
+                                   (into {} (map (juxt :target :token-rate-scoring)) lanes))
                 decision (assoc-in decision [:selection-certificate :token-belief-stage]
                                    token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]

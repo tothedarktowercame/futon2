@@ -6,7 +6,8 @@
             [futon2.aif.exact-belief-adapter :as exact]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.lane-futility :as lane]
-            [futon2.aif.temporal-input :as temporal])
+            [futon2.aif.temporal-input :as temporal]
+            [futon2.aif.zeta-posterior :as zeta])
   (:import [java.nio.file Files FileAlreadyExistsException]
            [java.nio.channels OverlappingFileLockException]
            [java.util UUID]))
@@ -136,7 +137,10 @@
     (cond-> (assoc record :temporal-receipt (or receipt {:status :published}))
       input (assoc :temporal-input input)
       posterior (assoc :temporal-posterior posterior)
-      cursor (assoc :temporal-cursor cursor))))
+      cursor (assoc :temporal-cursor cursor
+                    :zeta-posterior (zeta/trajectory-posterior
+                                     (conj (vec (sort-by #(count (get-in % [:temporal-cursor :consumed-event-ids])) published))
+                                           (assoc record :temporal-posterior posterior)))))))
 
 (defn- write-once! [path final]
   (let [file (io/file path) receipt (:temporal-receipt final)
@@ -167,7 +171,7 @@
    absence, so it needs no cursor lock. Reusing an initial cursor after an
    advance is stale, never a restart; contradictions remain recorded."
   [path record previous trace-dir]
-  (let [record (dissoc record :temporal-posterior :temporal-input :temporal-cursor :temporal-receipt)
+  (let [record (dissoc record :temporal-posterior :temporal-input :temporal-cursor :temporal-receipt :zeta-posterior)
         publish (fn []
                   (let [{:keys [records error]} (history (.getParent (io/file path)) (:flight record))]
                     (write-once! path (if error (assoc record :temporal-receipt error)

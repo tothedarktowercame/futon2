@@ -18,6 +18,8 @@
             [futon2.aif.temporal-update :as temporal]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.token-initialization-policy :as initialization]
+            [futon2.aif.zeta-posterior :as zeta]
+            [futon2.report.observation-labels-consume-test :as population]
             [futon2.report.cascade-decision-test :as decision-fixture]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
@@ -33,7 +35,7 @@
     (try (with-redefs [checks/repo-root (str root)] (f root))
          (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
 
-(defn- harness [root {:keys [first-pattern outcome theta stale? max-clicks]
+(defn- harness [root {:keys [first-pattern outcome theta stale? max-clicks observation-labels-path]
                       :or {first-pattern :write-a outcome true theta 1/2 max-clicks 3}}]
   (let [{:keys [repo interps check]} (fixture/fixture root)
         target fixture/target tokens [:a :b :open]
@@ -66,7 +68,8 @@
                                                 (real-rank belief actions options))]
                                   (wm/cascade-decision assembled
                                    (merge decision-fixture/live-c-opts opts
-                                          {:focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
+                                          {:observation-labels-path observation-labels-path
+                                           :focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
                                                                  conj (assoc (first (get-in decision-fixture/live-c-opts [:focus-inputs :relations]))
                                                                              :target target))
                                            :cascade-habit-path (str (io/file root "no-habit"))
@@ -226,3 +229,35 @@
        (is (= (:temporal-previous (receipt (second @calls)))
               (:temporal-previous (receipt (nth @calls 2)))))
        (is (= before (slurp path)))))))
+
+
+(deftest ^:slow token-rates-lane-zeta-published-and-replayed
+  (isolated
+   (fn [root]
+     (binding [population/*dir* root]
+       ;; Real admitted C3 population at the population fixture's pinned repo.
+       (with-redefs [checks/repo-root "/home/joe/code"] (#'population/fill! 5)))
+     (let [{:keys [run results calls]} (harness root {:max-clicks 2 :theta 1/4
+                                                    :observation-labels-path (str (io/file root "labels.edn"))})
+           _ (run)
+           records (mapv #(read! (:record-path %)) @results)
+           posterior (:zeta-posterior (last records))
+           sc (get-in (first @calls) [:decision :selection-certificate :token-rate-lanes fixture/target])]
+       (is (= 2 (count records)))
+       (println "BZ-PUBLISHED" (pr-str posterior))
+       (is (= :posterior (:basis posterior)))
+       (is (= :token-rates-lane (:scope posterior)))
+       (is (= #{ {:false-neg 1/12 :false-pos 1/12}}
+              (set (vals (get-in sc [:precision-model :rates])))))
+       (is (= (:rates-provenance sc) (get-in (first records) [:zeta-likelihood :rates-provenance])))
+       (is (= posterior (zeta/trajectory-posterior records)))
+       (is (= (:zeta-mean (:zeta-posterior (first records))) (:evaluated-at-zeta posterior)))
+       (is (= 1 (:beta-prior posterior)))
+       (is (= 2 (:trials posterior)))
+       (is (= (get-in (first @calls) [:decision :selection-certificate :precision-family])
+              (:precision-family (first records))))
+       (is (= :rates-provenance-missing
+              (:reason (zeta/retain-lane {} fixture/target (:attempts (first records))))))
+       (is (= :rates-provenance-missing
+              (:reason (zeta/trajectory-posterior (update records 0 dissoc :zeta-likelihood)))))
+       (is (= :ok (get-in (last records) [:temporal-posterior :status])))))))
