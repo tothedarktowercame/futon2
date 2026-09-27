@@ -2471,3 +2471,111 @@
       (is (string? md))
       (is (.contains md "NOT WIRED"))
       (is (not (.contains md "REFUSED"))))))
+
+;; ---------------------------------------------------------------------------
+;; C8 uncertain-ownership pressure (M-inbox-zero-claim-lifecycle N3)
+;; ---------------------------------------------------------------------------
+
+(deftest summarize-includes-pressure-zero-uncertain-repos
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true
+                  :max-tier :silent
+                  :max-pressure 0.0
+                  :snapshot-age-minutes 5.0
+                  :stale? false
+                  :uncertainty {:status "available"
+                                :drilldown "/storage/operator-backlog.edn"}
+                  :channels []
+                  :per-repo [{:repo "futon3c-d" :pressure 0.0 :count 10
+                              :max-age-days 1.2 :bytes 1000 :tier :silent
+                              :uncertain {:dirty-count 10 :untracked 3 :remainder 5}}]})]
+    (is (:available? summary))
+    (is (= 1 (:active-count summary)))
+    (is (= ["futon3c-d"] (mapv :repo (:queues summary))))
+    (is (= 10 (:uncertain-count (first (:queues summary)))))
+    (is (.contains (:needs-fixing (first (:queues summary))) "ownership-unknown"))
+    (is (.contains (:action (first (:queues summary))) "operator-backlog.edn"))))
+
+(deftest summarize-bounds-queues-and-reports-remainder
+  (let [repos (vec (for [i (range 10)]
+                     {:repo (str "futon" i) :pressure 1.0 :count 12
+                      :max-age-days 1.0 :bytes 10 :tier :advisory
+                      :uncertain {:dirty-count 12 :untracked 0 :remainder 7}}))
+        summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :advisory :max-pressure 1.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available" :drilldown "/storage/b.edn"}
+                  :channels [] :per-repo repos})]
+    (is (= 10 (:active-count summary)))
+    (is (= 8 (count (:queues summary))))
+    (is (= 2 (:queue-remainder summary)))))
+
+(deftest summarize-surfaces-missing-uncertainty-as-unavailable-not-zero
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :high :max-pressure 3.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "missing"}
+                  :channels []
+                  :per-repo [{:repo "futon4" :pressure 3.0 :count 48
+                              :max-age-days 2.0 :bytes 10 :tier :high}]})]
+    (is (= 1 (:active-count summary)))
+    (is (= "missing" (get-in summary [:uncertainty :status])))
+    (is (zero? (long (or (:uncertain-count (first (:queues summary))) 0)))
+        "missing feed is not an authoritative zero")))
+
+(deftest render-shows-ownership-unknown-and-remainder-drilldown
+  (let [md (wm/render-war-machine
+            {:self-watch (:self-watch sample-data)
+             :commit-hygiene {:available? true
+                              :queues [{:repo "futon3c-d" :tier :advisory
+                                        :pressure 0.0 :count 10 :max-age-days 1.0
+                                        :uncertain-count 10
+                                        :action "Review — detail: /storage/b.edn"}]
+                              :queue-remainder 2
+                              :drilldown "/storage/operator-backlog.edn"
+                              :active-count 3 :high-count 0 :stop-count 0
+                              :clustering-status :not-yet-grouped}
+             :loop-health (:loop-health sample-data)
+             :support-attack (:support-attack sample-data)
+             :mission-triage (:mission-triage sample-data)
+             :graph (:graph sample-data)
+             :now "2026-09-27" :days 14})]
+    (is (.contains md "10 (10 ownership-unknown)"))
+    (is (.contains md "+ 2 more repo(s)"))
+    (is (.contains md "/storage/operator-backlog.edn"))))
+
+(deftest producer-to-render-integration-via-real-snapshot-file
+  ;; Real mana snapshot JSON on disk (sweeper feed already merged by the
+  ;; futon0 producer) → scan-metabolic-balance → summarize → render.
+  (let [dir (java.nio.file.Files/createTempDirectory
+             "wm-c8-test-" (make-array java.nio.file.attribute.FileAttribute 0))
+        snap-path (str (.resolve dir "mana-snapshot.json"))
+        fixture {:generated-at "2026-09-27T19:00:00Z"
+                 :nominals {}
+                 :max-tier "silent"
+                 :max-pressure 0.0
+                 :uncertainty {:status "available" :stale? false
+                               :drilldown "/storage/operator-backlog.edn"}
+                 :per-repo [{:repo "futon3c-d" :abs-path "/home/joe/code/futon3c"
+                             :P 0.0 :count 10 :max-age-days 0.5 :total-bytes 100
+                             :tier "silent"
+                             :uncertain {:dirty-count 10 :untracked 3 :remainder 5}}]
+                 :sessions [] :pool {}}]
+    (spit snap-path (json/generate-string fixture))
+    (with-redefs [wm/mana-snapshot-path snap-path]
+      (let [scanned (wm/scan-metabolic-balance)
+            summary (#'wm/summarize-working-tree-hygiene scanned)
+            md (wm/render-war-machine
+                {:self-watch (:self-watch sample-data)
+                 :commit-hygiene summary
+                 :loop-health (:loop-health sample-data)
+                 :support-attack (:support-attack sample-data)
+                 :mission-triage (:mission-triage sample-data)
+                 :graph (:graph sample-data)
+                 :now "2026-09-27" :days 14})]
+        (is (:available? scanned))
+        (is (= 10 (get-in (first (:per-repo scanned)) [:uncertain :dirty-count])))
+        (is (= "available" (get-in scanned [:uncertainty :status])))
+        (is (= ["futon3c-d"] (mapv :repo (:queues summary))))
+        (is (.contains md "ownership-unknown"))
+        (is (.contains md "/storage/operator-backlog.edn"))))))

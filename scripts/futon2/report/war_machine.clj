@@ -4038,13 +4038,15 @@
                          60000.0)
               per-repo (->> (or (:per-repo snap) [])
                             (map (fn [r]
-                                   {:repo (or (:repo r)
-                                              (repo-label-from-path (:abs-path r)))
-                                    :pressure (or (:P r) 0.0)
-                                    :count (or (:count r) 0)
-                                    :max-age-days (or (:max-age-days r) 0.0)
-                                    :bytes (or (:total-bytes r) 0)
-                                    :tier (:tier r)}))
+                                   (cond-> {:repo (or (:repo r)
+                                                      (repo-label-from-path (:abs-path r)))
+                                            :pressure (or (:P r) 0.0)
+                                            :count (or (:count r) 0)
+                                            :max-age-days (or (:max-age-days r) 0.0)
+                                            :bytes (or (:total-bytes r) 0)
+                                            :tier (:tier r)}
+                                     (:uncertain r) (assoc :uncertain (:uncertain r))
+                                     (:uncertain-stale r) (assoc :uncertain-stale true))))
                             (sort-by :pressure #(compare %2 %1))
                             vec)
               sessions (->> (or (:sessions snap) [])
@@ -4075,6 +4077,7 @@
            :max-tier max-tier
            :max-pressure max-pressure
            :per-repo per-repo
+           :uncertainty (:uncertainty snap)
            :sessions sessions
            :pool (:pool snap)
            :generated-at (:generated-at snap)
@@ -4100,22 +4103,43 @@
      :stop-count 0
      :clustering-status :unavailable}
     (let [repos (or (:per-repo metabolic-balance) [])
+          drilldown (get-in metabolic-balance [:uncertainty :drilldown])
+          ;; A repo is operator-visible when it has pressure OR uncertain
+          ;; dirty paths: uncertain ownership never lands on a person (C8),
+          ;; so pressure-zero repos with uncertain dirt must still appear.
           active (->> repos
-                      (filter #(pos? (double (or (:pressure %) 0.0))))
-                      (mapv (fn [{:keys [repo pressure tier count max-age-days bytes]}]
-                              {:repo repo
-                               :pressure pressure
-                               :tier tier
-                               :count count
-                               :max-age-days max-age-days
-                               :bytes bytes
-                               :needs-fixing
-                               (format "%s has %d dirty paths, age %.1fd, %.2f pressure"
-                                       repo (or count 0) (double (or max-age-days 0.0))
-                                       (double (or pressure 0.0)))
-                               :action
-                               (format "Review %s for commit/disposition clustering"
-                                       repo)}))
+                      (filter #(or (pos? (double (or (:pressure %) 0.0)))
+                                   (pos? (long (get-in % [:uncertain :dirty-count] 0)))))
+                      (mapv (fn [{:keys [repo pressure tier count max-age-days bytes
+                                         uncertain uncertain-stale]}]
+                              (let [ucount (long (or (:dirty-count uncertain) 0))]
+                                (cond->
+                                 {:repo repo
+                                  :pressure pressure
+                                  :tier tier
+                                  :count count
+                                  :max-age-days max-age-days
+                                  :bytes bytes
+                                  :uncertain-count ucount
+                                  :needs-fixing
+                                  (if (pos? ucount)
+                                    (format (str "%s has %d dirty paths (%d ownership-unknown%s), "
+                                                 "age %.1fd, %.2f pressure")
+                                            repo (or count 0) ucount
+                                            (if uncertain-stale " [stale feed]" "")
+                                            (double (or max-age-days 0.0))
+                                            (double (or pressure 0.0)))
+                                    (format "%s has %d dirty paths, age %.1fd, %.2f pressure"
+                                            repo (or count 0) (double (or max-age-days 0.0))
+                                            (double (or pressure 0.0))))
+                                  :action
+                                  (if (and (pos? ucount) drilldown)
+                                    (format (str "Review %s for commit/disposition clustering; "
+                                                 "%d path(s) ownership-unknown — detail: %s")
+                                            repo ucount drilldown)
+                                    (format "Review %s for commit/disposition clustering"
+                                            repo))}
+                                 uncertain-stale (assoc :uncertain-stale true)))))
                       (sort-by (juxt (comp - tier-rank :tier) (comp - :pressure)))
                       vec)
           channels (or (:channels metabolic-balance) [])
@@ -4123,7 +4147,12 @@
           working-tree (some #(when (= :working-tree (:channel %)) %) channels)]
       {:available? true
        :clustering-status :not-yet-grouped
-       :queues (take 8 active)
+       ;; Bounded display: at most 8 queues, with the remainder reported
+       ;; explicitly and the drilldown path named, never silently dropped.
+       :queues (vec (take 8 active))
+       :queue-remainder (max 0 (- (count active) 8))
+       :drilldown drilldown
+       :uncertainty (:uncertainty metabolic-balance)
        :active-count (count active)
        :high-count (count (filter #(= :high (:tier %)) active))
        :stop-count (count (filter #(= :stop-the-line (:tier %)) active))
@@ -4433,17 +4462,26 @@
           (.append sb (render-table
                        ["Repo" "Tier" "Pressure" "Dirty" "Max age" "Action"]
                        [:left :left :right :right :right :left]
-                       (mapv (fn [{:keys [repo tier pressure count max-age-days action]}]
+                       (mapv (fn [{:keys [repo tier pressure count max-age-days action
+                                          uncertain-count]}]
                                [repo
                                 (name tier)
                                 ;; (or pressure 0), as at :4025, :4460 and
                                 ;; :4483. This site was the one that missed it,
                                 ;; and (double nil) throws.
                                 (format "%.2f" (double (or pressure 0)))
-                                (str count)
+                                (if (pos? (long (or uncertain-count 0)))
+                                  (str count " (" uncertain-count " ownership-unknown)")
+                                  (str count))
                                 (format "%.1fd" (double (or max-age-days 0.0)))
                                 action])
                              (:queues commit-hygiene))))
+          (when (pos? (long (or (:queue-remainder commit-hygiene) 0)))
+            (.append sb (str "\n… + " (:queue-remainder commit-hygiene)
+                             " more repo(s) over the reporting floor"
+                             (when-let [d (:drilldown commit-hygiene)]
+                               (str " — full detail: " d))
+                             "\n")))
           (.append sb "\n"))
 
         :else
