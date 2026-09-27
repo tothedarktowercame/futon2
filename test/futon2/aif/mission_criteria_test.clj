@@ -8,7 +8,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.observation-checks :as checks]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.construction-inputs :as construction-inputs]))
 
 (def mission
   (str/join "\n"
@@ -102,7 +102,7 @@
         sources {:wants {"M-test" [:hole/hcheckbox]}}
         cw (flight/click-wants f sources)
         opts (:flight (flight/judge-opts f cw))
-        input (wm/flight-assembly-input opts {:targets ["M-test" "M-other"]
+        input (construction-inputs/flight-assembly-input opts {:targets ["M-test" "M-other"]
                                               :sources {:wants {"M-test" [:hole/hcheckbox]}
                                                         :locators {"M-test" {:hole/hcheckbox {:class :C4}}}
                                                         :universes {"M-test" {:hole/hcheckbox false}}}})]

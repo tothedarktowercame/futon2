@@ -13,6 +13,7 @@
             [futon2.aif.target-field :as tf]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -469,7 +470,7 @@
   (let [captured (atom nil)
         entry (get (by-target (:feasible (delta-g-field ::real captured))) "M-shaped")
         view @captured
-        horizon (:value (wm/resolve-cascade-horizon view ["M-shaped"]))
+        horizon (:value (construction-inputs/resolve-cascade-horizon view ["M-shaped"]))
         problem (cp/base-problem view horizon "M-shaped")
         dg (:delta-g entry)
         baseline (wm/constructed-candidate-g problem {:precedence []})

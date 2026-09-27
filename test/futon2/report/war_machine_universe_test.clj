@@ -16,6 +16,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
             [futon2.aif.interpretation-construction :as ic]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -63,7 +64,7 @@
   (let [srcs (assoc (sources) :candidates
                     {target [{:precedence declared
                               :construction-receipt {:kind :declared-for-universe-test}}]})
-        r (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})]
+        r (construction-inputs/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})]
     (some-> (first (:problems r)) :cascade-problem (dissoc :precedences))))
 
 (deftest one-universe-g-pair-and-the-chain-is-taken
@@ -76,7 +77,7 @@
     (is (= g-chain (:value (wm/constructed-candidate-g p {:precedence chain}))))
     (is (< g-chain g-empty) [g-chain g-empty])
     (testing "the constructor TAKES the chain at the declared move cost 0"
-      (let [r (wm/assemble-cascade-problems-with-published
+      (let [r (construction-inputs/assemble-cascade-problems-with-published
                (empty-store) {:targets [target] :sources (sources)})
             c (first (mapcat :constructed-candidates (:problems r)))]
         (is (empty? (:refusals r)) (pr-str (:refusals r)))
@@ -122,7 +123,7 @@
       (let [srcs (-> (sources)
                      (assoc-in [:interpretations target :patterns]
                                (dissoc patterns :chain/four)))
-            r (wm/assemble-cascade-problems-with-published
+            r (construction-inputs/assemble-cascade-problems-with-published
                (empty-store) {:targets [target] :sources srcs})]
         (is (empty? (mapcat :constructed-candidates (:problems r))))
         (is (= :no-constructed-candidate (:kind (first (:refusals r))))
@@ -142,14 +143,14 @@
         p (let [srcs (extra (assoc (sources) :candidates
                                    {target [{:precedence chain
                                              :construction-receipt {:kind :declared-for-universe-test}}]}))]
-            (-> (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})
+            (-> (construction-inputs/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})
                 :problems first :cascade-problem (dissoc :precedences)))
         scored (wm/constructed-candidate-g p {:precedence chain})
         scorer-universe (conj tokens :x-idle)]
     (is (= (set scorer-universe) (set (:universe scored))))
     (is (= (:universe scored) (vec (sort-by pr-str (:universe scored)))) "recorded sorted")
     (is (number? (:value scored)))
-    (let [r (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources (extra (sources))})
+    (let [r (construction-inputs/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources (extra (sources))})
           c (first (mapcat :constructed-candidates (:problems r)))]
       (is (= chain (:precedence c)) (pr-str (:refusals r)))
       (is (= (:universe scored) (get-in c [:construction-receipt :g-of-best :universe]))))))

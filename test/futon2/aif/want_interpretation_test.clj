@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [futon2.aif.interpretation-construction]
             [futon2.aif.observation-checks]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
@@ -286,7 +287,7 @@
         arg (validate argue arg-resp (wi/merge-published s0 store ["M-futon-seams"]))
         rec (wi/publish! store (wi/issue! store (req argue)) arg-resp arg)
         {:keys [problems refusals]}
-        (futon2.report.war-machine/assemble-cascade-problems-with-published
+        (construction-inputs/assemble-cascade-problems-with-published
          store {:targets ["M-futon-seams"] :sources s0})]
     (is (= :valid (:status arg)) "ARGUE validates against the published DOCUMENT reading")
     (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis}

@@ -1,11 +1,11 @@
 (ns futon2.aif.flight-test
   "A flight: target fixed across clicks, stop-lines first, wants carried,
   closure, and a click that advances nothing ends the flight. The judge's
-  side (futon2.report.war-machine/flight-assembly-input) restricts
+  side (construction-inputs/flight-assembly-input) restricts
   assembly to the flight's target and wants."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight :as flight]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.construction-inputs :as construction-inputs]))
 
 (def target "M-test")
 (def wants [:a :b :c])
@@ -105,19 +105,19 @@
   (let [input {:targets [target "M-other" "T-occ-z"]
                :sources {:wants {target [:a] "M-other" [:z]} :horizon-steps 2}}
         f {:target target :wants [:a :b :c :d]}
-        out (wm/flight-assembly-input f input)]
+        out (construction-inputs/flight-assembly-input f input)]
     (is (= [target] (:targets out)))
     (is (= [:a :b :c :d] (get-in out [:sources :wants target])))
-    (is (= input (wm/flight-assembly-input nil input)) "no flight: unchanged")))
+    (is (= input (construction-inputs/flight-assembly-input nil input)) "no flight: unchanged")))
 
 (deftest a-flight-target-the-sources-never-declared-gets-a-context
   ;; bad case: M-futon-seams has no hand source and no checkbox, so the
   ;; tick's :context-of knows nothing of it and assembly refused it
   ;; :beta-not-declared
   (let [input {:targets ["M-other"] :sources {:context-of (fn [t] (when (= t "M-other") :OTHER))}}
-        out (wm/flight-assembly-input {:target "M-seams" :wants []} input)
+        out (construction-inputs/flight-assembly-input {:target "M-seams" :wants []} input)
         cf (get-in out [:sources :context-of])]
     (is (= :WM (cf "M-seams")))
     (is (= :OTHER (cf "M-other")) "a context the sources give still wins")
-    (is (= :X ((get-in (wm/flight-assembly-input {:target "M-seams" :wants [] :context :X} input)
+    (is (= :X ((get-in (construction-inputs/flight-assembly-input {:target "M-seams" :wants [] :context :X} input)
                        [:sources :context-of]) "M-seams")))))

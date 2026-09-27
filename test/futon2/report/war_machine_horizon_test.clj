@@ -4,7 +4,7 @@
   construction budget and move cost, each with its authority."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.interpretation-construction :as ic]
-            [futon2.report.war-machine :as wm])
+            [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -45,19 +45,19 @@
 
 (deftest declared-horizon-wins
   (is (= {:value 3 :authority {:source :cascade-sources :declarations nil}}
-         (wm/resolve-cascade-horizon {:horizon-steps 3} [target]))))
+         (construction-inputs/resolve-cascade-horizon {:horizon-steps 3} [target]))))
 
 (deftest computed-horizon-is-the-largest-interpretation-count
-  (let [h (wm/resolve-cascade-horizon (sources) [target "M-none"])]
+  (let [h (construction-inputs/resolve-cascade-horizon (sources) [target "M-none"])]
     (is (= 4 (:value h)))
     (is (= :computed (get-in h [:authority :source])))
     (is (= {target 4} (get-in h [:authority :per-target])))))
 
 (deftest nothing-admitted-is-horizon-1-not-2
-  (is (= 1 (:value (wm/resolve-cascade-horizon {} ["M-none"])))))
+  (is (= 1 (:value (construction-inputs/resolve-cascade-horizon {} ["M-none"])))))
 
 (deftest a-four-step-chain-constructs-at-the-computed-horizon
-  (let [r (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources (sources)})]
+  (let [r (construction-inputs/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources (sources)})]
     (is (= 4 (get-in r [:cascade-horizon :value])))
     (is (empty? (:refusals r)) (pr-str (:refusals r)))
     (is (= [[:chain/one :chain/two :chain/three :chain/four]]
@@ -66,7 +66,7 @@
 (deftest the-old-literal-t2-cuts-the-chain
   ;; bad case: the horizon the fallback literal gave. At T=2 the want is
   ;; beyond the horizon, so no plan reaches it
-  (let [r (wm/assemble-cascade-problems-with-published
+  (let [r (construction-inputs/assemble-cascade-problems-with-published
            (empty-store) {:targets [target] :sources (sources {:horizon-steps 2})})
         c (first (mapcat :constructed-candidates (:problems r)))]
     (is (= 2 (get-in r [:cascade-horizon :value])))
@@ -74,8 +74,8 @@
             (some #(= :beyond-horizon (:reason %)) (get-in c [:construction-receipt :unreached-wants]))))))
 
 (deftest construction-parameters-carry-their-authority
-  (is (= :none-found (get-in wm/construction-move-cost [:authority :ruling])))
-  (is (= {:max-moves 4 :max-expansions 20000} (:value (wm/construction-budget {}))))
+  (is (= :none-found (get-in construction-inputs/construction-move-cost [:authority :ruling])))
+  (is (= {:max-moves 4 :max-expansions 20000} (:value (construction-inputs/construction-budget {}))))
   (testing "a declared budget wins"
     (is (= {:value {:max-moves 9} :authority {:source :cascade-sources}}
-           (wm/construction-budget {:construction-budget {:max-moves 9}})))))
+           (construction-inputs/construction-budget {:construction-budget {:max-moves 9}})))))

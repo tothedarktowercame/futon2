@@ -7,6 +7,7 @@
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.mission-hole-wants :as holes]
             [futon2.aif.trace :as trace]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -45,7 +46,7 @@
 (defn file-count [root] (count (filter #(.isFile %) (file-seq (io/file root)))))
 (defn assembled-decision []
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
-        assembled (wm/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources sources})
+        assembled (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources sources})
         result (wm/cascade-decision assembled
                                    {:live-c {:sources live-sources}
                                     :cascade-habit-path (str (io/file *root* "habit.edn"))})]
@@ -116,7 +117,7 @@
 
 (deftest abstention-retains-hole-census-and-types-uncomputed-projection
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
-        assembled (wm/assemble-cascade-problems {:targets ["M-b"] :sources sources})
+        assembled (construction-inputs/assemble-cascade-problems {:targets ["M-b"] :sources sources})
         result (wm/cascade-decision assembled {})
         record (trace/trace-record {:decision (:decision result)})]
     (is (= :abstained (get-in record [:decision :status])))
@@ -134,7 +135,7 @@
                                [{:precedence [:p] :construction-receipt {:source :fixture}}]))
         omitted (assoc-in supplied [:candidates "M-b"] [])
         decide (fn [s] (wm/cascade-decision
-                        (wm/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources s})
+                        (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources s})
                         {:live-c {:sources live-sources}
                          :cascade-habit-path (str (io/file *root* "habit.edn"))}))
         before (decide supplied) after (decide omitted)

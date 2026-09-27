@@ -36,6 +36,7 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.interpretation-construction :as construction]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine :as wm]))
 
 (def fixture-dir "test/fixtures/click2-replay")
@@ -90,7 +91,7 @@
   ;; :no-constructed-candidate on :new-wanted-token-within-horizon.
   (let [sources (cascade-sources/with-context-fn (cascade-sources/load-declared))
         horizon (or (:horizon-steps sources) 2)
-        assembled (wm/assemble-cascade-problems
+        assembled (construction-inputs/assemble-cascade-problems
                    {:targets (vec (keys (:universes sources)))
                     :sources (assoc sources :horizon-steps horizon)})
         admissions (mapv #'wm/admit-cascade-problem (:problems assembled))
