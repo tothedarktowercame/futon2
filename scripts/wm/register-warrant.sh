@@ -20,7 +20,7 @@
 #   code-paths = the futon2/checks source files the test namespace requires
 # (override with CODE_PATHS="a.clj b.clj" if the heuristic misses).
 #
-# Environment: AUTHOR (required), AGENCY_URL (default http://localhost:7070),
+# Environment: AUTHOR (required), REGISTRY_DB (default local warrant-index.sqlite),
 # ARTIFACT_DIR (default /home/joe/code/storage/test-registry/artifacts).
 #
 # --pinned <commit>: register from a git worktree pinned at <commit> (a SIBLING
@@ -45,7 +45,7 @@ case "${1:-}" in
   *) [ $# -eq 1 ] || usage; NS="$1" ;;
 esac
 : "${AUTHOR:?Set AUTHOR=<agent-id> (required)}"
-AGENCY_URL="${AGENCY_URL:-http://localhost:7070}"
+REGISTRY_DB="${REGISTRY_DB:-/home/joe/code/storage/test-registry/warrant-index.sqlite}"
 ARTIFACT_DIR="${ARTIFACT_DIR:-/home/joe/code/storage/test-registry/artifacts}"
 
 # --- repo: the current directory's git toplevel, iff canonical -------------
@@ -122,7 +122,7 @@ edn_list() { printf '['; printf '"%s" ' "$@"; printf ']'; }
 CFG="$(mktemp /tmp/warrant-XXXXXX.edn)"
 {
   printf '{\n'
-  printf ':agency-url "%s"\n:origin "scripts/wm/register-warrant.sh"\n' "$AGENCY_URL"
+  printf ':registry-db "%s"\n:origin "scripts/wm/register-warrant.sh"\n' "$REGISTRY_DB"
   printf ':repo-root "%s"\n' "$ROOT"
   printf ':code-paths %s\n' "$(edn_list "${code_paths[@]}")"
   printf ':test-paths %s\n' "$(edn_list "$test_rel")"
@@ -133,5 +133,6 @@ CFG="$(mktemp /tmp/warrant-XXXXXX.edn)"
 
 echo "--- config ($CFG)"
 cat "$CFG"
+echo "--- local registry $REGISTRY_DB"
 echo "--- registering (this runs the namespace once, ~its suite time)"
 ( cd "$FUTON3C" && clojure -M -m futon3c.test-registry run "$CFG" )
