@@ -1,5 +1,6 @@
 (ns futon2.report.coverage-account-test
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.focus-receipt]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
@@ -44,11 +45,22 @@
    :stars {:value {:capabilities {:capability {:status :held}}}}})
 
 (defn file-count [root] (count (filter #(.isFile %) (file-seq (io/file root)))))
+(defn focus-inputs []
+  (update (futon2.aif.focus-receipt/read-inputs) :relations into
+          (for [target ["M-a" "M-b"]]
+            {:target target :facet "WM" :relation "focus"
+             :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
+             :effective-from "2026-01-01T00:00:00Z"})))
 (defn assembled-decision []
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
         assembled (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources sources})
+        ;; The synthetic targets have no relation in the real focus corpus, and
+        ;; an unresolved relation gets no scalar G (futon2 84f81cb42): the
+        ;; decision refuses :class-unknown-no-scalar-g. The fixture supplies a
+        ;; sourced relation for its own targets, as cascade_decision_test does.
         result (wm/cascade-decision assembled
-                                   {:live-c {:sources live-sources}
+                                   {:focus-inputs (focus-inputs)
+                                    :live-c {:sources live-sources}
                                     :cascade-habit-path (str (io/file *root* "habit.edn"))})]
     {:sources sources :result result}))
 
@@ -136,7 +148,8 @@
         omitted (assoc-in supplied [:candidates "M-b"] [])
         decide (fn [s] (wm/cascade-decision
                         (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources s})
-                        {:live-c {:sources live-sources}
+                        {:focus-inputs (focus-inputs)
+                         :live-c {:sources live-sources}
                          :cascade-habit-path (str (io/file *root* "habit.edn"))}))
         before (decide supplied) after (decide omitted)
         old (get-in before [:decision :live-c-coverage])
