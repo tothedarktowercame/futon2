@@ -97,6 +97,8 @@ LOG: C1 · claude-3 · mathlib4 9e19ee5b (`Proof2/ContainmentOrder.lean`, 14 dec
 
 LOG: C-R12-CODEX-I · codex-2 · Joe's direct instruction to implement roundup items 1–5. Delivery: mathlib4 8d98c63f97; futon2 202b5a026, 443a24b0f, fff29cba1, 3b76aa8a5. Three Lean builds warranted; likelihood precision, arena refusal continuity, accumulation lineage/publication and flight forwarding tested. See PROOF-2a-CODEX-ITEMS-1-5.md for exact warrants, tests, refusal consequences and limitations. Item 3 remains NOT IMPLEMENTED: current token receipt authorizes initialization, not a witnessed temporal update. This is an unresolved component, not an optional upgrade. No live migration, restart or flight. Item 6/BMR deferred by Joe. Independent review requested from claude-8 (Agency invoke-1790468775410-25132-eb1e3a60), who will review after ⟨2⟩3; no new helper dispatched.
 
+LOG: ITEMS-3-6-PROPOSAL · codex-2 · 2026-09-27, Joe requested documentation only. The section “Proposal for finishing items 3 and 6” in [PROOF-2a-CODEX-ITEMS-1-5.md](PROOF-2a-CODEX-ITEMS-1-5.md#proposal-for-finishing-items-3-and-6) specifies an enacted-token trajectory and exact next-selection consumer, plus an explicit accumulated-model/proposal declaration and BMR scoring consumer. It distinguishes weighted-model evidence from raw-scan likelihood and scoring from model adoption. The non-halting item-5 publication correction is a prerequisite. No implementation, dispatch, scope ruling or completion status changed.
+
 ### ⟨1⟩4. The machine's C_τ is explicit, its assumptions visible, and the preference audit exists.
 
 **Current supplement (codex-2 continuation):** the five compatibility checks

@@ -101,3 +101,260 @@ Final runtime warrants at futon2 `3b76aa8a5` (all warrant true, postcheck matche
 
 The final two warrants supersede earlier registrations made before the explicit
 missing-model correction; no obsolete warrant is used as evidence for that fix.
+
+# Proposal for finishing items 3 and 6
+
+Documentation only, requested by Joe on 2026-09-27. Source read at futon2
+`d1d529b3b`; this section proposes implementation, not a new authority ruling,
+accepted completion or production dispatch. Earlier sections remain delivery
+history. In particular, item 5's stale-predecessor throw still needs correction:
+refuse the accumulation update on the record without halting the run, and return
+that SAME receipt to every downstream reader. Item 6 must consume the published
+result after that correction, not the pre-publication proposal.
+
+## Recommended approach
+
+Finish two narrow paths with named consumers. For item 3, follow the actually
+enacted sequence and make its posterior the next selection's input. For item 6,
+score declared alternative priors against the accumulated parameters and record
+the result. Do not combine either with a new arena state representation, a new
+scorer, arbitrary channel/status merging, or automatic model-schema migration.
+
+There are two substantive choices to settle in the implementation specification:
+**what witnessed transition the token trajectory follows**, and **what likelihood
+and simpler models the accumulation's BMR comparison represents**. Below are
+concrete recommendations, including where existing evidence is insufficient.
+These choices belong in the relevant model declarations, not in another general
+agreement document or an extra chain of discovery dispatches.
+
+## Item 3: one posterior along the enacted trajectory
+
+### Boundary and data flow
+
+Use the existing target-qualified token carrier consumed by joint selection.
+The temporal chain belongs to a declared model/domain and execution stream;
+**it must not reset when the selected policy changes**. Existing flight steps
+are indexed by policy and therefore supply useful observations and computations,
+but cannot simply become the authority for this cross-policy trajectory.
+The seven-status arena remains separate. The per-policy F prefixes also remain
+separate: a posterior along the enacted sequence is not every candidate's F.
+
+At selection n, consume q_n and choose an action u_n. After verified execution,
+record its observed outcome o_(n+1). Before the next selection, compute:
+
+```
+q_pred(x) = sum_s B_u_n(x | s) q_n(s)
+Z         = sum_x A(o_(n+1) | x) q_pred(x)
+q_(n+1)   = A(o_(n+1) | x) q_pred(x) / Z       when Z > 0
+```
+
+Use `exact_belief_core/condition-predicted` through the existing manifest or
+finite-kernel adapter. Bind B to the **previous enacted action**, not the new
+candidate about to be ranked. Pin A to the actual observation mechanism/version;
+a changed A or B needs an explicit compatible model revision, not an unexplained
+hash substitution. Unknown coordinates are marginalized, as in flight
+conditioning; an unchecked token is not an observed false token.
+
+The producer should retain one replayable event with references to existing
+records rather than a second independent observation store:
+
+| Input | Producer/evidence |
+|---|---|
+| Previous q, predecessor occurrence, consumed-event cursor | Last published trajectory result; initial q0 only at a declared start |
+| u and the B used for it | Execution receipt joined to the action and model declaration, including ordered transition semantics |
+| Checked token subset, observed values, observation event ID | Actual post-execution check receipt, with source revision and check mechanism |
+| Domain and A/B identities | Existing interpretation/measurement receipts, checked against this trajectory |
+| Result and next-consumer reference | Exact-update receipt plus the next selection's retained input receipt |
+
+Prefer to extend the existing execution/check receipt producers and the token
+input receipt. A small pure temporal-join function is useful; a new orchestration
+service is not needed. Extract reusable arithmetic from `flight/conditioning-step`
+only if needed, while keeping its per-policy ownership unchanged.
+
+### Execution is the first concrete task
+
+Task-level execution evidence currently says that work ran with artifacts; it
+also explicitly does not establish the candidate-to-minted-action join. A
+successful command, selected candidate, or supplied pattern precedence alone
+cannot certify that the declared token transition was enacted.
+
+For each supported action class, bind its existing executor receipt to the
+specific transition interpretation it actually implements. A verified macro
+may have a declared B, but it must be labelled as a macro and its outcomes must
+be independently checked. If the executor only did one primitive, compose or
+select B for that primitive; do not attribute the whole proposed cascade to it.
+The closure fixture must expose this difference. An unsupported action records
+why this trajectory did not advance; it does not invent a transition.
+
+A fixed-domain fixture is the smallest complete implementation test, **not a
+fixed-domain waiver for production**. Production currently derives universes
+from assembled problems. Name the model domain independently of menu order,
+and handle target/domain change as either a proved mapping or a declared new
+trajectory. No carry across incompatible domains; no silent fresh-fact reset
+claiming continuity. A missing temporal result leaves this feature absent and
+the existing declared initialization route identifiable as initialization.
+It need not halt the whole WM run, but that run cannot witness temporal closure.
+
+### Two implementation increments, then one closure check
+
+1. **Produce and replay the temporal input.** Join actual executor/check records,
+   prior occurrence and model/domain; deduplicate by event identity, not just
+   equal observation values. Save the admitted inputs or typed absence. Do not
+   change selection until this join is demonstrably correct.
+2. **Compute, publish and consume.** Apply the exact kernel once; publish the
+   result and consumed cursor consistently; feed that exact posterior into the
+   existing next-selection input. Make replay idempotent. A repeated observation
+   with a new valid occurrence can be informative; replay of the same event is
+   not a new update. Reuse the publication receipt mechanism rather than adding
+   another lock or independent state file.
+3. **Close on a real producer-to-consumer test.** Three chronological selections,
+   two different enacted policies and non-identity B. Show that changing the
+   previous action or fresh observation changes the next consumed q. Show that
+   changing only the next candidate does not change the already computed q.
+
+Controls: initial evidence is not conditioned twice; repeated event ID is not
+counted twice; distinct same-valued observations are not deduplicated; a failed
+execution is not called enacted; policy switches retain the chain; altered
+predecessor/domain/model cannot masquerade as continuation; unchecked tokens
+are marginalized; impossible evidence yields a retained contradiction with no
+posterior and no silent restart. Reread the published result and the next
+selection receipt and compare their actual values/digests.
+
+**Acceptance:** the tests use real execution/check adapters with isolated
+artifacts, real update arithmetic and real persistence; only external transport
+may be replaced. The Lean binding covers the declared kernel/ordering, registry
+and wiring map name producer and consumer, and no runtime initialization path
+is counted as temporal filtering. A later live-run claim requires an explicitly
+identified live witness; these tests alone establish the implementation.
+
+## Item 6: BMR over a declared accumulated model
+
+### Settle the model before writing the adapter
+
+The current matrix contains increments o_c * mu_s for 14 scalar channels and
+seven entity statuses. Neither its shape nor that recurrence says whether it
+is one 98-category distribution, seven channel-given-status distributions, or
+14 status-given-channel distributions. They have different normalizers and
+therefore different reduction scores. `a4a`'s capability/mission reducer also
+uses a different prior and proposal family; do not reuse that family by renaming
+rows. Reuse the numerical `bmr/bayesian-model-reduction` primitive instead.
+
+**Recommended smallest model for these existing statistics:** seven independent
+Dirichlet factors over channel coordinates, one per status, with the explicitly
+declared weighted likelihood
+
+```
+L(theta; history) proportional to
+    product_(t,c,s) theta_(c|s) ^ (o_(t,c) * mu_(t,s))
+```
+
+This matches the accumulated sufficient statistics and gives a sum of seven
+factor scores. However, raw channels are simultaneous scalar signals, not a
+single categorical draw. This declaration is a **weighted/power-likelihood
+parameter model**, not automatically the measured token A or a calibrated
+categorical likelihood for raw scans. Its evidence interpretation must be
+stated in the registry. Common likelihood constants cancel in prior comparisons
+only when both models use the same data law and weighting. Do not normalize or
+rescale historical observations to make them fit; that changes the statistics.
+
+If the required claim is ordinary generative-model evidence for the raw scans,
+this recommendation is insufficient. Then specify the observation law and collect
+its sufficient statistics first (for example, a bounded-channel model requires
+bounds and exposure/failure statistics, not just these 98 positive counts).
+That is a substantive model change. Record it as such rather than calling the
+current adapter a completed A-learning consumer. The weighted-model option is
+adroit only if that explicitly limited claim is the intended item-6 obligation.
+
+### A concrete, bounded proposal family
+
+Start with **same-carrier positive-prior constraints**, not channel/status
+merges. One simple family is stronger concentration around a declared simpler
+reference profile: for each factor, alpha'_s = kappa'_s * r_s, where r_s is
+strictly positive and sums to one, and kappa'_s is a declared concentration.
+A common reference profile across statuses expresses the hypothesis that the
+channel profile depends less on status, but does **not** enforce exact equality
+or remove parameters. Label it a soft prior constraint, not a literal merge.
+
+The model declaration must enumerate a small finite family, its reference
+profiles/concentrations, its reason for treating them as simpler, and its author.
+Fix the family independently of the posterior being tested; do not manufacture
+a' by averaging the same posterior and call that independent model evidence.
+A stronger concentration is a design proposal here, not a Joe preference, an
+already authorized numerical setting, or automatic evidence of simplification.
+If genuine parameter tying/pruning is required, use its appropriate constrained
+model evidence; finite positive Dirichlet priors cannot silently implement a
+point constraint or a zero prior.
+
+Retain the existing signed delta-F convention. Compare with the kernel's -3
+threshold once on the **sum across factors**, not once per factor followed by
+an invented vote; document this as the current decision rule, not a newly
+calibrated threshold. Include the identity prior as a control, but an empty
+proposal family or identity-only run cannot witness a useful BMR consumer.
+
+### Implement the small consumer
+
+1. **Named-coordinate adapter and scorer.** Recover a from the immutable origin,
+   A from the newly published successful accumulation, and a' from the explicit
+   proposal declaration. Bind entity/revision, factorization and state digest.
+   Iterate each factor by declared names, never map insertion order. Compute
+   A' = A + a' - a and the sum of factor delta-F values with the existing kernel.
+   Validate matching coordinates and positive finite inputs/results at this
+   boundary; translate numerical failures into a typed unavailable result.
+2. **Attach one result and retain it everywhere.** A computed receipt names the
+   factors, origin, accumulation digest, proposal, score and rule outcome. An
+   unavailable accumulation produces an absence with its actual cause. Persist
+   the same result through scheduled, one-shot and flight receipts; add the
+   currently missing decision projection keys. No second scoring on readback,
+   fallback to an older accumulated state, or exception that stops selection.
+3. **Test the complete path.** Initialize and step the real accumulator, publish,
+   read that state into BMR, and reread the same reduction result from each
+   route's receipt. Force a publication race: the losing update's BMR must be
+   absent too, not a score over unpublished concentrations. This depends on
+   correcting item 5's throw and propagating its publication outcome.
+
+Controls: 98 distinct named values survive round-trip and map insertion reorder;
+missing/extra coordinates cannot be zipped away; factorized score differs from
+an intentionally wrong flat score; A'-a'=A-a; identity proposal yields zero;
+zero-data seed A=a yields zero for every valid proposal; nonpositive A' is
+unavailable; declared nontrivial alternatives have independently calculated
+scores and include an informative discrimination case. Floating score comparisons
+need a stated numerical tolerance; named-coordinate and receipt identity checks
+are exact. Missing inputs leave the selected action unchanged.
+
+**Acceptance has two distinct levels.** A declared proposal family scored from
+the actual accumulated state, retained and replayable on the production route,
+closes the *BMR scoring consumer*. It does not establish that the machine adopts
+a simpler model. If the plan/theorem requires structural adaptation, add a
+separate next-model consumer: nominate the scored proposal, apply it only at a
+model boundary with a declared state migration, then demonstrate that the next
+inference uses that revision. Record-only scoring must not close that stronger
+requirement. Do not silently narrow the theorem to obtain a pass.
+
+## Linear order and scope control
+
+1. Correct item 5's non-halting publication receipt propagation (prerequisite,
+   already identified; proposed here, not changed by this documentation turn).
+2. Implement item 3's execution/observation join and exact posterior consumer;
+   finish its discriminating producer-to-consumer test before opening another
+   implementation packet.
+3. Write item 6's short model/proposal declaration at its registry authority,
+   choosing the evidence claim explicitly; then implement the adapter/scorer
+   and receipt consumer in that order.
+4. Reconcile registry, map and plan against the actual closure tests. Mark the
+   scoring-consumer and model-adoption claims separately. No LoC threshold is
+   an acceptance criterion.
+
+Item 6 consumes the status-model accumulation, whereas item 3 consumes token
+belief. There is no mathematical dependency requiring one to be converted into
+the other. This is a sequential work order for clarity, not an instruction to
+force the two carriers together. Existing C_tau/preference and intermediate-
+progress obligations remain; neither completion would establish Joe's preference
+adequacy by itself.
+
+Sources: this file's delivery pins; `proof2/packets/C-R3s-D.md`,
+`proof2/packets/C-R17-BMR-D.md`, `proof2/packets/C-R17-FLIGHT-D.md`;
+`token_belief_carry.clj`, `token_belief_predecessor.clj`,
+`token_initialization_policy.clj`, `d_predecessor_task_authority.clj`,
+`flight.clj`, `exact_belief_core.clj`, `exact_belief_adapter.clj`,
+`machine_accumulation.clj`, `bmr.clj`, and `r17_offline.clj` under
+`src/futon2/aif/`. Proposals above are distinguished from these implementations.
