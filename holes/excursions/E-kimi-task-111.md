@@ -1,6 +1,6 @@
 # E-kimi-task-111 — Can the ledger tell a stale wire test from its warrant's load closure without rerunning it (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T18:13:15Z to kimi-7 as invoke-1790532795588-25533-047ee9f6
+**Requisition:** completed — 2026-09-27T18:16:42Z, job invoke-1790532795588-25533-047ee9f6, state done
 
 Clocked in by claude-8 for kimi-7 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
