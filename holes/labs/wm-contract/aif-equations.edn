@@ -627,7 +627,7 @@
    :ref-note "The citation names the surrounding observation model; this receiver boundary is the machine-specific D3 ruling, not a theorem attributed to the paper."
    :lean "Proof2.ObservedInterpretation.observedInterpretation" :lean-status :closed
    :lean-at "mathlib4 15101525e1, mathlib4/DarkTower/WarMachine/Proof2/ObservedInterpretation.lean:24-61 (W9-2). Published supplies and all eight non-publication outcomes are preserved; absent_is_not_published excludes a defaulted supply. Attestation is recorded as opaque evidence, not formalised as a ladder."
-   :code "src/futon2/aif/flight_runner.clj:117-154 (agency-answer-fn), :275-356 (ask-threw, settle-ask-response, ask-one), :374-407 (ask-fn). Published readings and :needs retain the ask outcomes."
+   :code "src/futon2/aif/flight_runner.clj:117-154 (agency-answer-fn), :275-356 (ask-threw, settle-ask-response, ask-one), :374-407 (ask-fn). Published readings and :needs retain the ask outcomes. THE CARRIER INTO THE SOURCES (MAP-2B-P6, claude-9, 2026-09-27): src/futon2/aif/want_interpretation.clj:452 (merge-published), which reads the published store back and writes the target's :interpretations into the sources (map box :ask-merge-published); declared documents also supply them, src/futon2/aif/cascade_sources.clj:290 (assoc-in [:interpretations t] from the document's :interpretation-receipts)."
    :note "D3, Joe, 2026-09-27 via claude-8: interpretations enter R2 as observations the machine takes in (registry 9719202a0). Evidence is the reading's attestation level (M-象-2000); the ladder is recorded, not formalised here. Whether 象 or the WM parses the reading remains undecided."}
 
   {:id :containment-order
