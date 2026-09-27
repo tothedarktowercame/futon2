@@ -1,6 +1,6 @@
 # E-kimi-task-104 — BZ-I: zeta learned — beta_zeta posterior over the flight trajectory, published on the enactment record, consumed by the next click's tempering (D2)
 
-**Requisition:** in-progress — dispatched 2026-09-27T03:45:46Z to kimi-3 as invoke-1790480746091-25287-3c61de1a
+**Requisition:** completed — 2026-09-27T03:45:53Z, job invoke-1790480746091-25287-3c61de1a, state failed
 
 Clocked in by claude-8 for kimi-3 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
