@@ -20,6 +20,7 @@
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.interpretation-evidence :as ievidence]
             [futon2.aif.mission-criteria :as criteria]
+            [futon2.aif.lifecycle-exits :as exits]
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.repair-proposals :as repairs]
@@ -79,6 +80,18 @@
         questioned (select-keys (reading/published-locator-questions store target)
                                 (remove (set (keys machine)) (map :token (:unlocated w))))
         observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
+        definition (try (read root "futon4" "holes/mission-lifecycle.md")
+                        (catch Exception _ nil))
+        secondary (when definition
+                    (exits/flight-exits target (or text "") definition
+                                        {:repo repo :path path :observe observe-loc}))
+        lifecycle-exits (if definition
+                          {:current-phase (:current-phase secondary)
+                           :supplied (:wants secondary) :not-started (:not-started secondary)
+                           :not-counted (vec (for [[t c] (:criteria-by-token secondary)
+                                                  :when (:not-counted c)]
+                                              (assoc (:not-counted c) :token t :phase (:phase c))))}
+                          {:absent :lifecycle-definition-unreadable})
         declined (reading/published-locator-declines store target mission-sha)
         text-constraints (criteria/constraints target (or text ""))
         read-constraints (reading/published-constraints store target mission-sha)
@@ -86,11 +99,12 @@
                                      (:unlocated w)))
         to-ask (vec (remove #(contains? declined (:token %)) still-unlocated))]
     {:wants (vec (distinct (remove (set (keys questioned))
-                                   (concat (get-in sources [:wants target]) (:wants w)))))
-     :locators (merge (:locators w) machine)
-     :universe (merge (:universe w) (into {} (for [[t l] machine] [t (boolean (observe-loc l))])))
+                                   (concat (get-in sources [:wants target]) (:wants w) (:wants secondary)))))
+     :locators (merge (:locators secondary) (:locators w) machine)
+     :universe (merge (:universe secondary) (:universe w) (into {} (for [[t l] machine] [t (boolean (observe-loc l))])))
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
               :repo repo :path path :text-read? (some? text)
+              :lifecycle-exits lifecycle-exits
               :criteria (count cs)
               :criteria-from (cond (seq stated) :mission-text (seq extracted) :machine-reading :else :none)
               :machine-located (vec (sort-by str (keys machine)))
@@ -123,6 +137,7 @@
                                     {:token t :text (:decl l)})))
               ;; token -> the criterion it was read from, for the D11 request
               :criteria-by-token (merge
+                                  (:criteria-by-token secondary)
                                   ;; a checkbox want's criterion is its own task
                                   ;; line, unchecked (its locator's :decl is the
                                   ;; checked form)
