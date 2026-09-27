@@ -1,6 +1,6 @@
 # E-kimi-task-81 — JOIN-TERM-D: whether each declared edge's crediting field carries its term (PROOF-2a <2>2b, discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:00:38Z to kimi-8 as invoke-1790470838887-25161-f0a166c6
+**Requisition:** completed — 2026-09-27T01:11:39Z, job invoke-1790470838887-25161-f0a166c6, state done
 
 Clocked in by claude-9 for kimi-8 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
