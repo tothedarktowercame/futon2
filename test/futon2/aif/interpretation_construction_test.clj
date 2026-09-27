@@ -125,6 +125,16 @@
   (doseq [edit [#(assoc-in % [:interpretations :P :theta] 1/2)
                 #(assoc-in % [:interpretations :Q :guard :or] [:q :r])]]
     (is (= :invalid-input (:kind (sut/construct (edit input))))))
+  ;; ITEM3-DECLARE-I (futon2 3145da84b): an admitted interpretation carries
+  ;; its declared :model-identity and :domain; the constructor reads nothing
+  ;; from them and must not refuse them (the case that broke wire
+  ;; ask-merge-published -> construct at the WIRE-25-A gate, 03:05Z).
+  (let [declared (-> input
+                     (assoc-in [:interpretations :P :model-identity]
+                               {:A "C3/cat-file-e@sha256:test" :B {:authority 'futon2.aif.cascade-model-manifest/pattern-kernel}})
+                     (assoc-in [:interpretations :P :domain] #{[:t :p] [:t :q]}))]
+    (is (= :constructed (:status (sut/construct declared)))
+        "declaration keys on an interpretation are not unsupported semantics"))
   (doseq [g [##Inf ##NaN :infinite {:status :missing :kind :missing-preference-spec}]]
     (is (= :nonfinite-g (:kind (sut/construct (assoc input :evaluate-g (constantly g))))))))
 

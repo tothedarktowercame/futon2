@@ -21,7 +21,11 @@
   ;; 3145da84b, ITEM3-DECLARE-I), which the constructor reads nothing from.
   ;; A closed set refused every declared interpretation as :invalid-input
   ;; (WIRE-25-A gate, wire ask-merge-published -> construct, 03:05Z).
+  ;; Unsupported semantics on a pattern (a :theta, a guard :or) stay an
+  ;; explicit :invalid-input: only the declaration keys are admitted.
   (and (map? p)
+       (contains? p :guard) (contains? p :produces)
+       (every? #{:guard :produces :model-identity :domain} (keys p))
        (= #{:needs :forbids} (set (keys (:guard p))))
        (every? set? [(:produces p) (get-in p [:guard :needs]) (get-in p [:guard :forbids])])))
 
