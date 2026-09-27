@@ -115,8 +115,8 @@
         (run-judge (fn [_] (wm/cascade-decision assembled cfix/live-c-opts))
                    {:target "M-autoclock-in"})
         [t] (get-in record [:decision :abstention :targets])]
-    (is (= :abstained (get-in record [:decision :abstention :status])))
     (is (= :missing-observation-locators (:kind t)))
+    (is (= :abstained (get-in record [:decision :abstention :status])))
     (is (= :missing-observation-locators
            (get-in result [:checkpoints :construction :sorry :judge-refusal-kind])))))
 

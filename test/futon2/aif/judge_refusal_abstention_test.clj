@@ -114,8 +114,8 @@
                              :live-c {:derived {:refusals [{:kind :source-not-available}]}})))
                    {:target "M-autoclock-in"})
         carrier (get-in record [:decision :abstention])]
-    (is (= :abstained (:status carrier)))
     (is (= :live-c-refused (get-in carrier [:targets 0 :kind])))
+    (is (= :abstained (:status carrier)))
     (is (= :live-c-refused
            (get-in result [:checkpoints :selection :sorry :judge-refusal :kind])))))
 
