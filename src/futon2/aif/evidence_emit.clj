@@ -175,12 +175,23 @@
        :text (tick-text tick)
        :at (or (:timestamp tick) (str (Instant/now)))})))
 
+(defn- execution-harness
+  "The published trace carries this run's minted id, independent of trigger.
+   Missing identity is unknown, never inferred from author, time or mode."
+  [tick]
+  (let [id (:run/id tick)]
+    (if (and (string? id) (not (str/blank? id)))
+      {:kind :war-machine :basis :producer-context :execution-id id}
+      {:kind :unknown :basis :producer-context
+       :reason "tick has no usable :run/id"})))
+
 (defn evidence-entry
   "Build the Evidence Landscape entry for one WM tick."
   [tick]
   {:type "coordination"
    :claim-type "step"
    :author "war-machine"
+   :harness (execution-harness tick)
    ;; ref/type must be a value the EvidenceEntry shape enum accepts ("war-machine"
    ;; is rejected with invalid-entry). The WM is semantically an agent; ref/id +
    ;; author + the wm-tick tag keep it cleanly filterable. (Review fix, claude-10.)

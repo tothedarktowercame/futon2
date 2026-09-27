@@ -1,6 +1,8 @@
 (ns futon2.aif.evidence-emit-test
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.string :as str]
+            [cheshire.core :as json]
+            [babashka.http-client :as http]
             [futon2.aif.evidence-emit :as evidence-emit]
             [futon2.aif.policy :as policy]))
 
@@ -132,3 +134,35 @@
                   evidence-emit/post-evidence! (fn [_]
                                                  (throw (ex-info "bus down" {})))]
       (is (nil? (evidence-emit/emit! sample-tick))))))
+
+(deftest execution-harness-identifies-the-published-run
+  (let [click (assoc sample-tick :run/id "run:click-1")
+        cron (-> sample-tick (assoc :run/id "run:cron-2")
+                 (assoc-in [:wm-version :trigger] :wallclock-cron))
+        stamp #(-> % evidence-emit/evidence-entry :harness)]
+    (is (= {:kind :war-machine :basis :producer-context :execution-id "run:click-1"}
+           (stamp click)))
+    (is (= {:kind :war-machine :basis :producer-context :execution-id "run:cron-2"}
+           (stamp cron)))
+    (is (not= (:execution-id (stamp click)) (:execution-id (stamp cron))))
+    (doseq [tick [(dissoc click :run/id) (dissoc cron :run/id)
+                 (assoc click :run/id " ") (assoc click :run/id 123)]]
+      (is (= :unknown (:kind (stamp tick))))
+      (is (not (str/blank? (:reason (stamp tick)))))
+      (is (not (contains? (stamp tick) :execution-id))))))
+
+(deftest post-body-carries-public-harness-key
+  (let [seen (atom nil)]
+    (with-redefs [evidence-emit/enabled? (constantly true)
+                  evidence-emit/evidence-base (constantly "http://emitter.test")
+                  http/post (fn [url opts]
+                              (reset! seen {:url url :body (json/parse-string (:body opts) true)})
+                              {:status 201})]
+      (evidence-emit/emit! (assoc sample-tick :run/id "run:post-3"))
+      (is (= "http://emitter.test/api/alpha/evidence" (:url @seen)))
+      (is (= {:kind "war-machine" :basis "producer-context" :execution-id "run:post-3"}
+             (get-in @seen [:body :harness])))
+      (is (not (contains? (:body @seen) :evidence/harness)))
+      (evidence-emit/emit! sample-tick)
+      (is (= "unknown" (get-in @seen [:body :harness :kind])))
+      (is (string? (get-in @seen [:body :harness :reason]))))))
