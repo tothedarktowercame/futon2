@@ -2649,3 +2649,82 @@
              :graph (:graph sample-data)
              :now "2026-09-27" :days 14})]
     (is (.contains md "Uncertain-ownership feed: available (stale)"))))
+
+(deftest ninth-uncertain-repo-paths-are-rendered
+  ;; Bounded table of 8 + COMPLETE rendered detail below it: the ninth
+  ;; uncertain repo's paths must appear in the markdown.
+  (let [repos (vec (for [i (range 9)]
+                     {:repo (str "futon" i) :pressure 1.0 :count 12
+                      :max-age-days 1.0 :bytes 10 :tier :advisory
+                      :uncertain {:dirty-count 12 :untracked 0 :remainder 7
+                                  :paths [{:path (str "ninth-marker-" i ".clj")
+                                           :mtime-ms 1}]}}))
+        summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :advisory :max-pressure 1.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available" :drilldown "/storage/b.edn"}
+                  :channels [] :per-repo repos})
+        md (wm/render-war-machine
+            {:self-watch (:self-watch sample-data)
+             :commit-hygiene summary
+             :loop-health (:loop-health sample-data)
+             :support-attack (:support-attack sample-data)
+             :mission-triage (:mission-triage sample-data)
+             :graph (:graph sample-data)
+             :now "2026-09-27" :days 14})]
+    (is (= 8 (count (:queues summary))))
+    (is (= 9 (count (:all-queues summary))))
+    (doseq [i (range 9)]
+      (is (.contains md (str "ninth-marker-" i ".clj"))
+          (str "repo " i " detail path rendered")))))
+
+(deftest unknown-pressure-and-age-render-as-question-mark
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :silent :max-pressure 0.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available" :drilldown "/storage/b.edn"}
+                  :channels []
+                  :per-repo [{:repo "sweep-only" :pressure nil :count nil
+                              :max-age-days nil :bytes nil :tier nil
+                              :abs-path "/x/sweep-only"
+                              :uncertain-only true
+                              :uncertain {:dirty-count 3 :untracked 0
+                                          :remainder 0
+                                          :paths [{:path "q.txt" :mtime-ms 1}]}}]})
+        row (first (:queues summary))
+        md (wm/render-war-machine
+            {:self-watch (:self-watch sample-data)
+             :commit-hygiene summary
+             :loop-health (:loop-health sample-data)
+             :support-attack (:support-attack sample-data)
+             :mission-triage (:mission-triage sample-data)
+             :graph (:graph sample-data)
+             :now "2026-09-27" :days 14})]
+    (is (nil? (:pressure row)) "semantic nil retained in data")
+    (is (.contains (:needs-fixing row) "pressure unavailable"))
+    (is (.contains (:needs-fixing row) "age unavailable"))
+    (is (not (.contains md "0.00")) "no fabricated zero pressure")
+    (is (not (.contains md "0.0d")) "no fabricated zero age")))
+
+(deftest incomplete-collection-is-rendered-not-implied-complete
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true :max-tier :advisory :max-pressure 1.0
+                  :snapshot-age-minutes 1.0 :stale? false
+                  :uncertainty {:status "available"
+                                :collection-complete? false :row-failures 2
+                                :backlog-written? false
+                                :drilldown "/storage/b.edn"}
+                  :channels []
+                  :per-repo [{:repo "futon2" :pressure 1.0 :count 12
+                              :max-age-days 1.0 :bytes 10 :tier :advisory}]})
+        md (wm/render-war-machine
+            {:self-watch (:self-watch sample-data)
+             :commit-hygiene summary
+             :loop-health (:loop-health sample-data)
+             :support-attack (:support-attack sample-data)
+             :mission-triage (:mission-triage sample-data)
+             :graph (:graph sample-data)
+             :now "2026-09-27" :days 14})]
+    (is (.contains md "Pressure completeness:"))
+    (is (.contains md "collection incomplete (2 repo(s) failed)"))
+    (is (.contains md "backlog write failed"))))

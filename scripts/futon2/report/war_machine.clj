@@ -4083,6 +4083,7 @@
            :max-tier max-tier
            :max-pressure max-pressure
            :per-repo per-repo
+           :pressure-coverage (:pressure-coverage snap)
            :uncertainty (:uncertainty snap)
            :sessions sessions
            :pool (:pool snap)
@@ -4142,17 +4143,20 @@
                                   :uncertain-count ucount
                                   :uncertain-paths upaths
                                   :needs-fixing
-                                  (if (and ucount (pos? ucount))
-                                    (format (str "%s has %s dirty paths (%d ownership-unknown%s), "
-                                                 "age %.1fd, %.2f pressure")
-                                            repo (if count (str count) "?") ucount
-                                            (if uncertain-stale " [stale feed]" "")
-                                            (double (or max-age-days 0.0))
-                                            (double (or pressure 0.0)))
-                                    (format "%s has %s dirty paths, age %.1fd, %.2f pressure"
-                                            repo (if count (str count) "?")
-                                            (double (or max-age-days 0.0))
-                                            (double (or pressure 0.0))))
+                                  (let [age-txt (if (some? max-age-days)
+                                                  (format "%.1fd" (double max-age-days))
+                                                  "age unavailable")
+                                        p-txt (if (some? pressure)
+                                                (format "%.2f pressure" (double pressure))
+                                                "pressure unavailable")]
+                                    (if (and ucount (pos? ucount))
+                                      (format "%s has %s dirty paths (%d ownership-unknown%s), %s, %s"
+                                              repo (if count (str count) "?") ucount
+                                              (if uncertain-stale " [stale feed]" "")
+                                              age-txt p-txt)
+                                      (format "%s has %s dirty paths, %s, %s"
+                                              repo (if count (str count) "?")
+                                              age-txt p-txt)))
                                   :action
                                   (if (and ucount (pos? ucount) drilldown)
                                     (format (str "Review %s for commit/disposition clustering; "
@@ -4174,6 +4178,9 @@
        ;; explicitly WITH its repo names, so no pressure queue is lost
        ;; behind the bound.
        :queues (vec (take 8 active))
+       ;; The complete active set, retained so rendered detail can cover
+       ;; every uncertain repo INCLUDING those past the display bound.
+       :all-queues active
        :queue-remainder (max 0 (- (count active) 8))
        :remainder-repos (mapv :display-name (drop 8 active))
        :drilldown drilldown
@@ -4491,17 +4498,18 @@
                                           max-age-days action uncertain-count]}]
                                [(or display-name repo)
                                 (if tier (name tier) "?")
-                                ;; (or pressure 0), as at :4025, :4460 and
-                                ;; :4483. This site was the one that missed it,
-                                ;; and (double nil) throws.
-                                (format "%.2f" (double (or pressure 0)))
+                                (if (some? pressure)
+                                  (format "%.2f" (double pressure))
+                                  "?")
                                 (cond
                                   (and uncertain-count (pos? uncertain-count))
                                   (str (or count "?") " (" uncertain-count
                                        " ownership-unknown)")
                                   (nil? count) "?"
                                   :else (str count))
-                                (format "%.1fd" (double (or max-age-days 0.0)))
+                                (if (some? max-age-days)
+                                  (format "%.1fd" (double max-age-days))
+                                  "?")
                                 action])
                              (:queues commit-hygiene))))
           (when (pos? (long (or (:queue-remainder commit-hygiene) 0)))
@@ -4520,10 +4528,26 @@
                                      (str " (" (name (or (:reason u) :invalid)) ")")
                                      :else "")
                                " — ownership-unknown counts may be absent or outdated.\n"))))
+          ;; Producer completeness is part of the rendered surface: a pass
+          ;; that lost rows or the backlog write says so here, never
+          ;; implying complete coverage.
+          (when-let [u (:uncertainty commit-hygiene)]
+            (let [issues (cond-> []
+                           (false? (:collection-complete? u))
+                           (conj (str "collection incomplete ("
+                                      (or (:row-failures u) "?")
+                                      " repo(s) failed)"))
+                           (false? (:backlog-written? u))
+                           (conj "backlog write failed"))]
+              (when (seq issues)
+                (.append sb (str "\nPressure completeness: "
+                                 (str/join "; " issues) ".\n")))))
           ;; Full per-file drilldown inside the rendered surface itself:
-          ;; every uncertain repo lists ALL of its dirty paths here, so the
-          ;; bounded table above never hides a filename.
-          (doseq [{:keys [display-name repo uncertain-paths]} (:queues commit-hygiene)
+          ;; EVERY uncertain repo — including those past the display bound —
+          ;; lists ALL of its dirty paths here, so neither the 8-queue
+          ;; bound nor the per-repo path sampling hides a filename.
+          (doseq [{:keys [display-name repo uncertain-paths]}
+                  (or (:all-queues commit-hygiene) (:queues commit-hygiene))
                   :when (seq uncertain-paths)]
             (.append sb (str "\n### Uncertain detail — " (or display-name repo)
                              " (ownership unknown, " (count uncertain-paths)
