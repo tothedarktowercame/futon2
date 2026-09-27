@@ -776,8 +776,10 @@
    :code "futon2 src/futon2/aif/cascade_model_manifest.clj:767 (preference-member), :735 (utility-weights), :809 (horizon-g-sparse*), :755 (outcome-risk-pointwise); src/futon2/aif/live_c.clj:324 (preference-schedule), :337 (family-schedule); src/futon2/aif/cascade_problems.clj:150-168 (assemble-one: :c-schedule, :lam, :mu, :want on the :cascade-spec); src/futon2/aif/cascade_sources.clj:267 (the declared schedule per target); src/futon2/aif/efe.clj:1221 (rank-cascade-actions -> horizon-g-sparse-cert). CONSUMERS: the per-problem lane's R5 step (futon2 scripts/futon2/report/war_machine.clj:5905-5935) and the constructor's :evaluate-g (constructed-candidate-g, :6065). NOT consumed by the joint selection, which scores the class family."
    :live-status {:implemented true
                  :consumed-by [:lane-r5 :constructor-evaluate-g]
-                 :map {:declared [[:want {:record :cascade-spec}]]
-                       :not-declared [:c-schedule :lam :mu :preference-member :horizon-g-sparse*]}
+                 :map {:declared [[:want {:record :cascade-spec}] :cascade-spec]
+                       :record-inputs {:cascade-spec [:want :c-schedule :lam :mu]}
+                       :note "MAP-2B-P3: assemble-one to rank-cascade-actions declares the whole spec carrier at record grain; its schedule and weight inputs are carried together, not separate field wires or a precomputed C_tau distribution."
+                       :not-declared [:preference-member :horizon-g-sparse*]}
                  :ledger {:verified []
                           :at "futon3c wm-wire-ledger.edn 68bc4d92 (163 wires, 5 verified / 73 hermetic / 85 unverified)"
                           :note "NO WIRE OF THIS FAMILY IS VERIFIED. The two ends are :witness / UNVERIFIED."}
