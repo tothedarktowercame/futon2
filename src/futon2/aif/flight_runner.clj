@@ -20,6 +20,7 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.task-execution-evidence]
             [futon2.aif.flight :as flight]
+            [futon2.aif.temporal-input :as temporal]
             [futon2.aif.loaded-displacement :as displacement]
             [futon2.aif.interpretation-evidence]
             [futon2.aif.mission-criteria :as criteria]
@@ -802,6 +803,10 @@
     :record-dir      where the record is written: <store>/flights/enactments.
     :repo-root       for the grain gate's evidence files.
 
+  Attempts retain the dispatched interpretation, its transition reading and
+  explicitly declared model/domain, plus click/target linkage. Missing model
+  declarations are typed absences; these annotations never gate enactment.
+
   The grain attempt is the step at the pattern whose interpretation declares
   :grain; grain-gate (candidate grain vs the grain the seat plans) runs
   before its commit is asked for, and a refusal is recorded on the attempt
@@ -855,7 +860,8 @@
                (for [[i p] (map-indexed vector precedence)
                      :let [step (assoc base-step :pattern p :n (inc i)
                                        :interpretation (get interps p))]]
-                 (if (= p grain-p)
+                 (merge (temporal/attempt-context click step)
+                  (if (= p grain-p)
                    (let [plan (dispatch-step! (assoc step :phase :plan))]
                      (if (or (:failed plan) (:declined plan))
                        (merge {:n (inc i) :pattern p :success false :phase :plan}
@@ -866,7 +872,7 @@
                                   {:grain (:grain plan) :grain-gate g})
                            {:n (inc i) :pattern p :success false :grain (:grain plan) :grain-gate g
                             :not-committed :grain-gate-refused}))))
-                   (step-attempt check-fn (inc i) p (dispatch-step! (assoc step :phase :commit))))))
+                   (step-attempt check-fn (inc i) p (dispatch-step! (assoc step :phase :commit)))))))
               deviations (vec (concat
                                (for [a attempts :when (:failed a)]
                                  {:kind :step-failed :pattern (:pattern a) :failed (:failed a)})

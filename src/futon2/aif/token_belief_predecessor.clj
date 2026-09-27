@@ -4,6 +4,7 @@
   (:require [futon2.aif.load-identity :as load-identity]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.token-initialization-policy :as policy]
+            [futon2.aif.temporal-input :as temporal]
             [futon2.aif.d-predecessor-task-authority :as task]))
 
 (load-identity/register! *ns* *file*)
@@ -24,7 +25,9 @@
              {:path path :status (if (nil? record) :absent :present)
               :record record :sha256 (evidence/value-digest record)}))
          candidate-paths)}
-    (:d-task-context trace) (assoc :task-context (:d-task-context trace))))
+    (:d-task-context trace) (assoc :task-context (:d-task-context trace))
+    (:temporal-previous trace) (assoc :temporal-previous (:temporal-previous trace))
+    (:temporal-enactment trace) (assoc :temporal-enactment (:temporal-enactment trace))))
 
 (defn- reject-candidate [{:keys [path status record] :as candidate}]
   (assoc candidate :admission :refused
@@ -106,15 +109,15 @@
          :invalid (keyword? (:kind a))
          false)))
 
-(defn input-receipt
+(defn- initialization-input-receipt
   "V3 authorizes only declared next-selection initialization from signed checks.
    The old execution admission remains separate (including for precision carry)."
   ([stage inspection]
-   (input-receipt stage inspection (production-authority (:task-context inspection))
+   (initialization-input-receipt stage inspection (production-authority (:task-context inspection))
                   (when (policy/enabled? (:observation-initialization stage))
                     (observation-authority (:task-context inspection)))))
   ([stage inspection admission]
-   (input-receipt stage inspection admission nil))
+   (initialization-input-receipt stage inspection admission nil))
   ([stage inspection admission observations]
    (let [legacy (legacy-input-receipt stage inspection admission)]
      (if-not (= :wm/token-belief-stage-v2 (:schema stage)) legacy
@@ -131,6 +134,20 @@
                 :observation-updates (:observation-updates outcome)
                 :continuation-belief (:continuation-belief outcome)))))))
 
+(defn input-receipt
+  "Retain the optional temporal join beside v3 initialization, never as q.
+   inspect-trace retains an explicitly supplied :temporal-previous envelope and
+   one :temporal-enactment attempt. No supplied attempt means typed absence.
+   This annotation grants no filtering or execution authority to initialization."
+  [stage inspection & authorities]
+  (let [receipt (apply initialization-input-receipt stage inspection authorities)]
+    (if (= :wm/token-belief-input-v3 (:schema receipt))
+      (assoc receipt :temporal-input
+             (if-let [attempt (:temporal-enactment inspection)]
+               (temporal/temporal-input (:temporal-previous inspection) attempt (:check attempt))
+               (temporal/absent :no-enactment-supplied nil)))
+      receipt)))
+
 (def legacy-unavailable-authority
   ;; Historical 2b receipt replay only; never used to admit a new predecessor.
   {:status :refused :kind :e2b/production-authority-unavailable
@@ -140,11 +157,14 @@
 (defn valid-input?
   "Replay each version under its own policy. V1/V2 preserve fresh initialization;
    V3 replays signed observation updates. External snapshot origin is checked
-   by the production reader, not by this retained-receipt replay."
+   by the production reader, not by this retained-receipt replay.
+   :temporal-input is a non-consumed annotation, outside this initialization
+   verdict; historical v3 receipts without it retain the same verdict."
   [receipt stage]
   ;; :policy-prefixes (F1b-admit-I) is the per-candidate prefix record the tick
   ;; writes beside the receipt; it is not part of the receipt being replayed
-  (let [receipt (dissoc receipt :policy-prefixes)
+  (let [receipt (cond-> (dissoc receipt :policy-prefixes)
+                  (= :wm/token-belief-input-v3 (:schema receipt)) (dissoc :temporal-input))
         inspection (:inspection receipt)
         candidates (:candidates inspection)]
     (and (= :previous-trace-only (:scope inspection))
@@ -162,6 +182,6 @@
            :wm/token-belief-input-v3
            (and (= :wm/token-belief-stage-v2 (:schema stage))
                 (valid-authority? (get-in receipt [:carry-admission :authority]) inspection)
-                (= receipt (input-receipt stage inspection (get-in receipt [:carry-admission :authority])
+                (= receipt (initialization-input-receipt stage inspection (get-in receipt [:carry-admission :authority])
                                           (:observation-authority receipt))))
            false))))
