@@ -177,3 +177,17 @@ Some prose **MAP exit: Met.**
         (is (empty? (:refusals assembled)))
         (is (= 1 (count (:problems assembled))))
         (println :verdict-universe (:universe w) :assembled assembled)))))
+
+(deftest a-verdict-line-with-prose-after-it-is-read-as-c4-observes-it
+  ;; The report and the check must agree on what counts as a verdict line.
+  (let [text (str "## HEAD\n\n**HEAD exit: Met.** The operator's anchor turn is quoted above.\n\n"
+                  "## MAP\n\n  **MAP exit: Not met.** (two questions open)\n\n"
+                  "## ARGUE\n\n**ARGUE exit: Met.**x\n\nText **DERIVE exit: Met.** mid-line.\n")
+        by-phase (into {} (map (juxt :phase identity)) (le/section-verdicts text))]
+    (is (= {:phase :HEAD :verdict :met :in-section? true} (:HEAD by-phase)))
+    (is (= {:phase :MAP :verdict :not-met :in-section? true} (:MAP by-phase)))
+    (is (nil? (:verdict (:ARGUE by-phase))) "a character glued to the verdict is not a verdict line")
+    (is (nil? (:verdict (:DERIVE by-phase))) "mid-line is not a verdict line")
+    (doseq [[phase expected] {:HEAD true :MAP false :ARGUE false :DERIVE false}]
+      (is (= expected (checks/decl-present? text (le/verdict-decl phase))) (name phase)))
+    (println :verdict-lines-with-prose (mapv #(select-keys (get by-phase %) [:phase :verdict]) [:HEAD :MAP :ARGUE :DERIVE]))))

@@ -64,7 +64,12 @@
   "Reporting only: one row per written verdict (duplicates retained), or a
   {:phase p :verdict nil} row when absent. :in-section? refers to the enclosing
   level-2 heading; misplaced rows retain its title, nil before any such section.
-  This does not constrain C4's whole-file observation."
+  This does not constrain C4's whole-file observation. A verdict line is read
+  exactly where C4 would observe its declaration: at the start of a line
+  (after optional indent), followed by end of line, whitespace or one of
+  : ( { [ -- so prose after the verdict on the same line is allowed, as in
+  \"**HEAD exit: Met.** The operator's anchor turn ...\" (claude-17's finding
+  on M-象-2000, 2026-09-27: the two readings must agree)."
   [mission-text]
   (let [{:keys [rows]}
         (reduce
@@ -72,7 +77,7 @@
            (if-let [[_ title] (re-matches #"^##\s+(.*)$" line)]
              (assoc state :heading title)
              (if-let [[_ phase verdict]
-                      (re-matches #"^\*\*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT) exit: (Met|Not met|Not started)\.\*\*\s*$" line)]
+                      (re-matches #"^\s*\*\*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT) exit: (Met|Not met|Not started)\.\*\*(?:$|[\s:({\[].*$)" line)]
                (let [p (keyword phase) own? (= p (phase-name heading))]
                  (update state :rows conj
                          (cond-> {:phase p :verdict (get {"Met" :met "Not met" :not-met
