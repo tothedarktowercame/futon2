@@ -55,7 +55,7 @@ def render(revision):
     # Keep the audit and historical slice links on the checkpoint resolvable at
     # the same documentation revision. Their own evidence pins are unchanged.
     for name in ("PREFERENCE-AUDIT.md", "PROOF-2a-CODEX-CONTINUATION-2026-09-26.md",
-                 "PROOF-2a-CODEX-SLICE-2-2026-09-26.md"):
+                 "PROOF-2a-CODEX-SLICE-2-2026-09-26.md", "PROOF-2a-CODEX-ITEMS-1-5.md"):
         outputs[name] = git("show", f"{revision}:{BASE}{name}")
     return revision, digest, outputs
 
