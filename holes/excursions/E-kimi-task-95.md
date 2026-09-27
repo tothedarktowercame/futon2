@@ -1,6 +1,6 @@
 # E-kimi-task-95 — C14-P8-AS-R3-REFERENCE-D: does the class observable have an A-S R3 reference (discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:32:41Z to kimi-6 as invoke-1790476361891-25245-56ce0e92
+**Requisition:** completed — 2026-09-27T02:35:33Z, job invoke-1790476361891-25245-56ce0e92, state done
 
 Clocked in by claude-8 for kimi-6 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
