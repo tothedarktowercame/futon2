@@ -21,6 +21,7 @@
             [futon2.aif.task-execution-evidence]
             [futon2.aif.flight :as flight]
             [futon2.aif.temporal-input :as temporal]
+            [futon2.aif.temporal-update :as temporal-update]
             [futon2.aif.loaded-displacement :as displacement]
             [futon2.aif.interpretation-evidence]
             [futon2.aif.mission-criteria :as criteria]
@@ -801,6 +802,9 @@
                      :repair-id-fn (fn [flight click] -> the repair id the
                      chosen action discharges, or nil).
     :record-dir      where the record is written: <store>/flights/enactments.
+    :trace-dir       the selection publisher's trace/index lock directory.
+                     Defaults to the existing lane-futility trace directory.
+                     Temporal absence never changes enactment success or gates it.
     :repo-root       for the grain gate's evidence files.
 
   Attempts retain the dispatched interpretation, its transition reading and
@@ -820,7 +824,7 @@
   a missing decision candidate is an absence on the record, not a refusal,
   and never the action id standing in for it."
   [{:keys [dispatch-step! check-fn interpretations fetch-run-record
-           publication-observation repair-id-fn record-dir repo-root]
+           publication-observation repair-id-fn record-dir repo-root trace-dir]
     :or {check-fn (fn [check] (if-let [f (get checks/checks (:class check))]
                                 (f check)
                                 {:status :refused :reason :no-mechanical-check}))
@@ -856,7 +860,7 @@
               cand-grain (when grain-p (get-in interps [grain-p :grain]))
               base-step {:target (:target flight) :candidate action-id}
               attempts
-              (vec
+              (mapv #(assoc % :executed (temporal/executed? %))
                (for [[i p] (map-indexed vector precedence)
                      :let [step (assoc base-step :pattern p :n (inc i)
                                        :interpretation (get interps p))]]
@@ -910,11 +914,13 @@
                        (nil? grain-p)
                        (assoc :grain-gate (gate/grain-gate {:grain nil} {:grain nil} repo-root)))
               path (when record-dir
-                     (io/file record-dir (str (:flight/id flight) "-" (:click-id click) ".edn")))]
-          (when path
-            (.mkdirs (.getParentFile path))
-            (spit path (with-out-str (clojure.pprint/pprint record))))
-          {:enactment record :record-path (some-> path .getCanonicalPath)})))))
+                     (io/file record-dir (str (:flight/id flight) "-" (:click-id click) ".edn")))
+              previous (temporal-update/previous-for-click flight click run-record (first attempts))
+              publication (when path (temporal-update/publish! path record previous trace-dir))]
+          {:enactment (or (:record publication) record)
+           :temporal-receipt (or (:receipt publication)
+                                 (temporal-update/absent :no-enactment-record-path))
+           :record-path (some-> path .getCanonicalPath)})))))
 
 (defn wc-verdict-fn
   "The flight's W_c call (M-wm-wiring step 11): after enact-fn writes the

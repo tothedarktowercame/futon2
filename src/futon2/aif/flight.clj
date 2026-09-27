@@ -522,7 +522,7 @@
                 wc (when (and wc-fn (:enactment enacted)) (at :wc #(wc-fn f enacted)))
                 f (cond-> f enacted (update :enactments (fnil conj [])
                                             (merge (assoc (if (:enactment enacted)
-                                                            (assoc (select-keys enacted [:record-path])
+                                                            (assoc (select-keys enacted [:record-path :temporal-receipt])
                                                                    ;; row 10: copied from the enactment
                                                                    ;; record, whose writer is
                                                                    ;; observe-publication-fn

@@ -37,7 +37,7 @@
 
 (defn attempt-context
   "Retain exactly the dispatched interpretation and its explicit model/domain.
-   These annotations cannot turn an unsuccessful attempt into execution."
+   These annotations cannot turn a failed dispatch into execution."
   [click step]
   (let [i (:interpretation step)]
     {:click-id (:click-id click) :target (:target step)
@@ -45,6 +45,14 @@
      :transition (transition-reading (:target step) (:pattern step) i)
      :model-identity (or (:model-identity i) (absent :no-model-identity nil))
      :domain (or (:domain i) (absent :no-domain nil))}))
+
+(defn executed?
+  "Execution for filtering is a commit with no dispatch failure/decline. The
+   outcome check may be false: conditioning only on successes would bias q.
+   This does not change :success, which remains the enactment/E/W_c verdict."
+  [attempt]
+  (and (some? (:commit attempt)) (not (:failed attempt)) (not (:declined attempt))
+       (not (:not-committed attempt))))
 
 (defn event-id
   "Digest of click, step index, semantic locator and the checker-resolved SHA.
@@ -88,7 +96,9 @@
    B must name the checked executed primitive, not its proposed cascade; A must
    name the actual checker. The scalar :produced/check protocol witnesses only
    a singleton produces set. Other executor shapes are absent, never guessed.
-   Occurrence/commit/locator linkage and the supplied cursor prevent using a
+   Occurrence is the selection instance, not its click id. :consumed-at
+   cites the previous record's value digest and names the consuming selection
+   and click. Commit/locator linkage and the supplied cursor prevent using a
    different or already-consumed observation. No required selection field, gate,
    new posterior update, IO, or atomic cursor publication is introduced here."
   [previous enacted observed]
@@ -114,9 +124,15 @@
                 (contains? consumed-event-ids initial-event-id)))
       (absent :no-consumed-event-cursor nil)
       (nil? enacted) (absent :no-enactment-supplied nil)
-      (not (and (true? (:success enacted)) (some? (:commit enacted))
+      (not (and (executed? enacted)
                 (some? (:pattern enacted)) (pos-int? (:n enacted))
-                (some? (:click-id enacted)) (= (:occurrence-id previous) (:click-id enacted))))
+                (some? (:click-id enacted))
+                (= (:click-id enacted) (get-in previous [:consumed-at :click-id]))
+                (some? (get-in previous [:consumed-at :occurrence-id]))
+                (= (get-in previous [:consumed-at :citation])
+                   (evidence/value-digest (:record previous)))
+                (or (= :posterior (:basis previous))
+                    (= (:occurrence-id previous) (get-in previous [:consumed-at :occurrence-id])))))
       (absent :execution-not-linked (select-keys enacted [:click-id :n :pattern :success]))
       (not (and tokens (= transition (transition-reading (:target enacted) (:pattern enacted)
                                                                         (:interpretation enacted)))))
@@ -127,7 +143,7 @@
       (not= (:produces transition) #{[(:target enacted) (:produced enacted)]})
       (absent :execution-transition-unwitnessed {:produced (:produced enacted)})
       (not (and (map? observed) (= observed (:check enacted))
-                (true? (:observed check-result)) (some? revision)))
+                (boolean? (:observed check-result)) (some? revision)))
       (absent :no-observed-outcome nil)
       (not (and (= revision (:commit enacted))
                 (= (:class locator) (:check check-result))

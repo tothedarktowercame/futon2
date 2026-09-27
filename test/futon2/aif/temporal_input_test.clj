@@ -33,7 +33,9 @@
 (defn- save! [root name value]
   (let [f (io/file root name)] (spit f (pr-str value)) (read-edn f)))
 
-(defn- fixture [root]
+(defn fixture
+  "Isolated artifacts, a real initialization receipt and stamped C3 checks."
+  [root]
   (let [repo (io/file root "artifacts")
         _ (.mkdirs repo)
         _ (git! repo "init" "-q")
@@ -56,14 +58,16 @@
         problem {:target target :cascade-problem {:facts facts :want #{:b} :interpretations interps}}
         init (receipts/initial-belief [problem])
         stage (carry/stage init (carry/domain-inputs [problem]) nil
-                           {:occurrence-id "click-a"
+                           {:occurrence-id "selection-a"
                             :observation-initialization {target {:policy initialization/disabled}}})
         receipt (predecessor/input-receipt stage (predecessor/inspect-trace nil) admission nil)
         initial-id (evidence/value-digest ["initial" start-sha initial-observation])
         previous {:basis :declared-initialization :trajectory-start? true
                   :record receipt :stage stage :initialization-authority (:initialization receipt)
-                  :occurrence-id "click-a" :domain domain :model-identity identity
-                  :initial-event-id initial-id :consumed-event-ids #{initial-id}}
+                  :occurrence-id "selection-a" :domain domain :model-identity identity
+                  :initial-event-id initial-id :consumed-event-ids #{initial-id}
+                  :consumed-at {:occurrence-id "selection-a" :click-id "click-a"
+                                :citation (evidence/value-digest receipt)}}
         executed (atom [])
         fail-check? (atom false)
         enact (flight/enact-fn
@@ -88,7 +92,8 @@
                                                             :candidate :not-an-executed-pattern
                                                             :precedence [pattern]}})]
                     (first (:attempts (read-edn (:record-path r))))))]
-    {:previous previous :stage stage :receipt receipt :execute execute :executed executed}))
+    {:previous previous :stage stage :receipt receipt :execute execute :executed executed
+     :repo repo :interps interps :check check}))
 
 (defn- posterior-after [input next-occurrence]
   (let [previous (:previous input)
@@ -100,10 +105,12 @@
         result (exact/exact-update states #(hash-map (contains? % token) 1)
                                   #(manifest/pattern-kernel pattern %) true q
                                   {:model-identity (:model-identity previous) :domain domain
-                                   :occurrence-id next-occurrence
+                                   :occurrence-id (get-in previous [:consumed-at :occurrence-id])
                                    :executed-action (get-in input [:enacted :pattern])
                                    :input-event (:consumed-event-id input)})]
-    {:basis :posterior :record result :occurrence-id next-occurrence
+    {:basis :posterior :record result :occurrence-id (get-in result [:model :occurrence-id])
+     :consumed-at {:occurrence-id (str "selection-" next-occurrence) :click-id next-occurrence
+                   :citation (evidence/value-digest result)}
      :domain domain :model-identity (:model-identity previous)
      :initial-event-id (:initial-event-id previous)
      :consumed-event-ids (conj (:consumed-event-ids previous) (:consumed-event-id input))}))
@@ -163,19 +170,21 @@
                    [(assoc-in next-previous [:record :posterior] {#{} 1}) b (:check b) :invalid-previous-posterior]
                    [(assoc next-previous :record receipt) b (:check b) :invalid-previous-posterior]
                    [next-previous (dissoc b :click-id) (:check b) :execution-not-linked]
-                   [next-previous (assoc b :success false) (:check b) :execution-not-linked]
+                   [next-previous (assoc b :failed :dispatch-failed) (:check b) :execution-not-linked]
                    [next-previous (dissoc b :interpretation) (:check b) :transition-not-determinable]
                    [next-previous (dissoc b :model-identity) (:check b) :model-identity-mismatch]
                    [next-previous (assoc b :domain #{}) (:check b) :domain-mismatch]
                    [next-previous b nil :no-observed-outcome]
                    [next-previous (assoc b :commit "another-revision") (:check b) :observation-not-linked]]]
             (is (= reason (:reason (temporal/temporal-input p step obs))) (str reason)))
-          (testing "a failed real C3 check is not execution"
-            (let [failed (execute "click-b" :write-b true)]
+          (testing "a false real check remains an observation of a committed execution"
+            (let [failed (execute "click-false" :write-b true)]
               (is (false? (get-in failed [:check :result :observed])))
               (is (false? (:success failed)))
-              (is (= :execution-not-linked
-                     (:reason (temporal/temporal-input next-previous failed (:check failed)))))))
+              (is (= :admitted
+                     (:status (temporal/temporal-input
+                               (assoc-in next-previous [:consumed-at :click-id] "click-false")
+                               failed (:check failed)))))))
           (testing "receipt annotation never changes the q consumed by selection"
             (let [inspection (predecessor/inspect-trace {:temporal-previous next-previous :temporal-enactment b})
                   annotated (predecessor/input-receipt stage inspection admission nil)]
