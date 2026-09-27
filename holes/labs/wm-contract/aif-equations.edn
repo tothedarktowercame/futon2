@@ -830,9 +830,12 @@
                        :note "MAP-2B-P3: assemble-one to rank-cascade-actions declares the whole spec carrier at record grain; its schedule and weight inputs are carried together, not separate field wires or a precomputed C_tau distribution."
                        :not-declared [:preference-member :horizon-g-sparse*]}
                  :ledger {:verified []
-                          :at "futon3c wm-wire-ledger.edn 68bc4d92 (163 wires, 5 verified / 73 hermetic / 85 unverified)"
-                          :note "NO WIRE OF THIS FAMILY IS VERIFIED. The two ends are :witness / UNVERIFIED."}
-                 :recorded-per-run {:absent :run-record-carries-no-c-schedule}}
+                          :witnessed-hermetically [[:construction-assemble-one :r4-kernel :cascade-spec]]
+                          :at "futon3c wm-wire-ledger.edn 0c528a7a (174 wires, 10 verified / 164 hermetic / 0 unverified)"
+                          :note "No wire of this family is VERIFIED by a live record. The spec carrier (schedule and weights inside it) is WITNESSED HERMETICALLY at 0c528a7a: real assemble-one to the real ranker, reader end [:cascade-scoring :spec-in] (futon2 e1138e819, futon3c 77df5d2d). Earlier: 68bc4d92 had both ends :witness / UNVERIFIED."}
+                 :recorded-per-run {:implemented "futon2 26ecd057 (CTAU-REC-I): the decision carries :preference-schedule (war_machine.clj token-preference-schedule / class-preference-schedule); test preference_schedule_decision_test, latest warrant test-registry-ee5dfdfc9be06bf2dbc3d313261f1419dab6cca19307c4965983ed51ab8ffe0d (2026-09-27 02:06Z at e1138e819)"
+                                    :observed {:absent :no-post-change-flight-record
+                                               :detail "No tick-run-record at futon2 HEAD carries :preference-schedule (the ten newest under data/wm-runs, grep 0 each, 2026-09-27 02:29Z); the first flight after 26ecd057 supplies it. C14-D ad561637f check 3."}}}
    :open [{:assumption "the production placement"
            :state "per target, from the declared source: :terminal for the four targets in resources/wm/cascade-sources/ that declare it; :every-step (defaulted, :schedule-not-declared) for a target with no source entry, which is what a flight over M-autoclock-in gets by the code as read. The run record does not state the placement. Not established: which placement the flights actually ran under."}
           {:assumption "the ordering under measured A at a stated placement, with ties and controls"
