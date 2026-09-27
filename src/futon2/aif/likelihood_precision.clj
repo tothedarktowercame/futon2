@@ -216,6 +216,9 @@
    :certificate-statuses
    {:identity-path :declared-fixed-vacuous
     :tempered-path :declared-fixed-applied
+    :posterior-path :learned-posterior-applied
+    :prior-path :declared-prior-mean
+    :unavailable-path :precision-basis-unavailable
     :absent :absent}
    :gaps ["no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})
 

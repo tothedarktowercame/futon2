@@ -1208,6 +1208,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                      ;; tempered at — a tempered run is distinguishable from
                      ;; an untempered one even when the numbers coincide.
                      :zeta (get m :zeta 1)
+                     :zeta-basis (or (:zeta-basis m) {:absent :zeta-basis-not-supplied})
                      :zeta-tempered? (and (not (zero-rates? (:rates m)))
                                           (not= 1 (get m :zeta 1)))
                      ;; R7 (claude-4 ruling 2026-09-18): the DECLARATION is
@@ -1219,9 +1220,14 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                      ;; :certificate-statuses so this cannot drift from the
                      ;; declaration (same discipline as WIRE-2's
                      ;; :computed-not-attached for F).
-                     :zeta-status (if (zero-rates? (:rates m))
-                                    (:identity-path lprec/zeta-certificate-statuses)
-                                    (:tempered-path lprec/zeta-certificate-statuses))
+                     :zeta-status (cond
+                                    (= :posterior (get-in m [:zeta-basis :basis]))
+                                    (:posterior-path lprec/zeta-certificate-statuses)
+                                    (= :prior-no-trials (get-in m [:zeta-basis :basis]))
+                                    (:prior-path lprec/zeta-certificate-statuses)
+                                    (:zeta-basis m) (:unavailable-path lprec/zeta-certificate-statuses)
+                                    (zero-rates? (:rates m)) (:identity-path lprec/zeta-certificate-statuses)
+                                    :else (:tempered-path lprec/zeta-certificate-statuses))
                      :universe-size (count (:rates m))}})))
 
 ;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====

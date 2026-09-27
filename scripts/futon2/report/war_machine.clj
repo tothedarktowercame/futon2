@@ -58,6 +58,7 @@
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
+            [futon2.aif.zeta-posterior :as zeta-posterior]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.belief :as belief]
             [futon2.aif.calibration-cycle :as calibration-cycle]
@@ -5871,7 +5872,7 @@
   no selection and no β needed. The constructor scores a candidate this
   way, with the same G selection uses (see `constructed-candidate-g`)."
   ([problem] (cascade-lane problem {}))
-  ([problem {:keys [through universe observation-labels]}]
+  ([problem {:keys [through universe observation-labels] :as lane-opts}]
   (let [{:keys [facts want interpretations repository precedences horizon-steps
                 cascade-spec beta]} problem
         route (atom [])
@@ -5980,12 +5981,13 @@
                   ;; locator coverage uses), not the candidate family's, so
                   ;; every evaluate-g call of one problem normalises ln Z
                   ;; over one universe and compared G's are commensurable.
-                  base-opts {:f-prefix-production? true
+                  base-opts (merge (select-keys lane-opts [:zeta :zeta-basis])
+                              {:f-prefix-production? true
                              :horizon-steps (get-in @state [:R13 :cascade-rollout])
                              :cascade-spec cascade-spec
                              :universe (or universe
                                            (cascade-problems/problem-tokens
-                                            facts want interpretations))}]
+                                            facts want interpretations))})]
               (cond
                 ;; no locators on the problem: previous behaviour, the
                 ;; certificate records :identity-default.
@@ -6542,22 +6544,6 @@
                                    :limitation "the corpus changed after C was derived: re-derive before scoring"})))
               preference-scales (live-c/family-scales problems)
               preference-schedule (live-c/family-schedule problems)
-              lanes
-              (mapv (fn [problem]
-                      (let [lane (cascade-lane (:cascade-problem problem)
-                                               {:observation-labels (observation-label-inputs
-                                                                     (:observation-labels-view opts))})]
-                        {:target (:target problem)
-                         :route (:route lane)
-                         :token-rate-scoring (:cascade-scoring (meta (:ranked lane)))
-                         :decision (select-keys (:decision lane) [:preference-schedule])
-                         :refusal (when (:stopped-at lane) (:refusal lane))
-                         :candidates (filterv #(seq (:precedence %)) (:candidates lane))
-                         :null-comparison
-                         {:role :per-target-diagnostic-baseline
-                          :used-for-joint-selection? false
-                          :candidates (filterv #(empty? (:precedence %)) (:candidates lane))}}))
-                    problems)
               ;; Admission has already paired each order with its own receipt.
               qualification (fn [target token] [target token])
               joint-candidates
@@ -6604,6 +6590,23 @@
                                   (token-predecessor/inspect-trace
                                    (:token-belief-predecessor-trace opts) opts))
               joint-q0 (:continuation-belief token-belief-input)
+              lanes
+              (mapv (fn [problem]
+                      (let [lane (cascade-lane (:cascade-problem problem)
+                                               (merge (zeta-posterior/lane-options token-belief-input)
+                                                      {:observation-labels (observation-label-inputs
+                                                                            (:observation-labels-view opts))}))]
+                        {:target (:target problem)
+                         :route (:route lane)
+                         :token-rate-scoring (:cascade-scoring (meta (:ranked lane)))
+                         :decision (select-keys (:decision lane) [:preference-schedule])
+                         :refusal (when (:stopped-at lane) (:refusal lane))
+                         :candidates (filterv #(seq (:precedence %)) (:candidates lane))
+                         :null-comparison
+                         {:role :per-target-diagnostic-baseline
+                          :used-for-joint-selection? false
+                          :candidates (filterv #(empty? (:precedence %)) (:candidates lane))}}))
+                    problems)
               joint-want (reduce (fn [acc p]
                                    (let [t (:target p)]
                                      (into acc (map (fn [w] [t w]))

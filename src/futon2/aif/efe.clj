@@ -1238,7 +1238,9 @@
                                    ;; and consumes that exact receipt at tau=0;
                                    ;; F's evidence input remains independent.
                                    (contains? state :belief-update-receipt)
-                                   (assoc :belief-update-receipt (:belief-update-receipt state))))
+                                   (assoc :belief-update-receipt (:belief-update-receipt state))
+                                   (contains? opts :zeta-basis)
+                                   (assoc :zeta-basis (or (:zeta-basis opts) {:absent :zeta-basis-not-supplied}))))
                                 f-raw (when (and (not fe-refusal?)
                                                  (not (contains? excluded-ids (:id action))))
                                         (get f-by-id (:id action)))
@@ -1396,10 +1398,14 @@
            :disposition-risk-events []
            :refused? false
            :f-exclusions f-exclusions
-           :cascade-scoring {:precision-model {:q0 q0 :rates rates :horizon T
+           :cascade-scoring {:precision-model (cond-> {:q0 q0 :rates rates :horizon T
                                                :preference-spec spec :zeta (get opts :zeta 1)
                                                :transition-semantics :first-enabled-union-theta-v1
                                                :z-semantics :per-step-redraw}
+                                                (contains? opts :zeta-basis)
+                                                (assoc :tempered-rates (or (get-in (first ranked) [:certificate :consumed-g :A])
+                                                                          {:absent :no-scored-likelihood})))
+                             :zeta-basis (or (:zeta-basis opts) {:absent :zeta-basis-not-supplied})
                              :universe universe
                              :horizon T
                              :spec spec

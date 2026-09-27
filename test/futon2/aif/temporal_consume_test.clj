@@ -19,6 +19,7 @@
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.token-initialization-policy :as initialization]
             [futon2.aif.zeta-posterior :as zeta]
+            [futon2.aif.likelihood-precision :as lprec]
             [futon2.report.observation-labels-consume-test :as population]
             [futon2.report.cascade-decision-test :as decision-fixture]
             [futon2.report.war-machine :as wm])
@@ -46,8 +47,8 @@
         locators (into {} (for [t tokens] [t {:class :C3 :repo "artifacts" :sha "HEAD" :path (name t)}]))
         facts #(into {} (map (fn [[t result]] [t (:observed result)]))
                      (:results (checks/observe locators)))
-        calls (atom []) paths (atom {}) results (atom []) q0s (atom [])
-        real-rank efe/rank-actions
+        calls (atom []) paths (atom {}) results (atom []) q0s (atom []) joint-rankings (atom []) lane-options (atom []) lane-rankings (atom [])
+        real-rank efe/rank-actions real-lane wm/cascade-lane
         source (fn [pattern]
                  {:universes {target (facts)} :locators {target locators}
                   :wants {target tokens} :horizon-steps 1
@@ -65,7 +66,15 @@
                                               (fn [belief actions options]
                                                 (when (:prediction-context options)
                                                   (swap! q0s conj (:cascade-belief belief)))
-                                                (real-rank belief actions options))]
+                                                (let [ranked (real-rank belief actions options)]
+                                                  (when (:prediction-context options)
+                                                    (swap! joint-rankings conj {:state belief :actions actions :opts options :ranked ranked}))
+                                                  ranked))
+                                              wm/cascade-lane
+                                              (fn [problem options]
+                                                (swap! lane-options conj options)
+                                                (let [lane (real-lane problem options)]
+                                                  (swap! lane-rankings conj (:ranked lane)) lane))]
                                   (wm/cascade-decision assembled
                                    (merge decision-fixture/live-c-opts opts
                                           {:observation-labels-path observation-labels-path
@@ -106,7 +115,7 @@
                            (when (and stale? (= "click-2" (:click-id c)))
                              (enact f (assoc c :click-id "racer")))
                            (let [r (enact f c)] (swap! results conj r) r))}))]
-    {:run run :click click :calls calls :results results :q0s q0s :interps interps}))
+    {:run run :click click :calls calls :results results :q0s q0s :interps interps :lane-options lane-options :joint-rankings joint-rankings :lane-rankings lane-rankings}))
 
 (defn- receipt [record] (get-in record [:decision :selection-certificate :token-belief-input]))
 (defn- stage [record] (get-in record [:decision :selection-certificate :token-belief-stage]))
@@ -261,3 +270,56 @@
        (is (= :rates-provenance-missing
               (:reason (zeta/trajectory-posterior (update records 0 dissoc :zeta-likelihood)))))
        (is (= :ok (get-in (last records) [:temporal-posterior :status])))))))
+
+
+(deftest ^:slow third-click-tempers-only-the-admitted-token-lane
+  (isolated
+   (fn [root]
+     (binding [population/*dir* root]
+       (with-redefs [checks/repo-root "/home/joe/code"] (#'population/fill! 5)))
+     (let [{:keys [run results calls lane-options joint-rankings lane-rankings]}
+           (harness root {:theta 1/4 :observation-labels-path (str (io/file root "labels.edn"))})
+           finished (run)
+           records (mapv #(read! (:record-path %)) @results)
+           published (:zeta-posterior (second records))
+           sc #(get-in % [:decision :selection-certificate :token-rate-lanes fixture/target])
+           third-sc (sc (nth @calls 2))
+           effective (lprec/tempered-rates (get-in third-sc [:precision-model :rates]) (:zeta-mean published))
+           courier (flight/judge-opts finished {:wants [:a :b :open]})]
+       (println "BZ-CONSUMED" (pr-str (select-keys third-sc [:zeta :zeta-basis :precision-model])))
+       (is (= 3 (count records)))
+       (is (= (:zeta-mean published) (:zeta third-sc)))
+       (is (= (select-keys published [:basis :trajectory-digest :zeta-mean]) (:zeta-basis third-sc)))
+       (is (= effective (get-in third-sc [:precision-model :tempered-rates])))
+       (is (= (:zeta-basis third-sc) (get-in (first (last @lane-rankings)) [:certificate :zeta-basis])))
+       (is (= :learned-posterior-applied (get-in (first (last @lane-rankings)) [:certificate :zeta-status])))
+       (let [refusal {:status :absent :reason :nonpositive-beta-post}]
+         (is (= refusal (:zeta-posterior (temporal/envelope (assoc (last records) :zeta-posterior refusal))))))
+       (is (not= effective (get-in third-sc [:precision-model :rates])))
+       (is (not (contains? (first @lane-options) :zeta)))
+       (is (= :prior-no-trials (get-in (sc (first @calls)) [:zeta-basis :basis])))
+       (is (= 1 (get-in (sc (first @calls)) [:zeta-basis :beta-prior])))
+       (is (every? #(not (contains? (:opts %) :zeta)) @joint-rankings))
+       (is (= {:absent :class-emission-not-tempered}
+              (get-in (nth @calls 2) [:decision :selection-certificate :precision-family :zeta-basis])))
+       (is (= (:zeta-posterior (last records)) (get-in courier [:flight :temporal-previous :zeta-posterior])))
+       ))))
+
+(deftest ^:slow rejected-domain-never-lifts-a-published-zeta
+  (isolated
+   (fn [root]
+     (binding [population/*dir* root]
+       (with-redefs [checks/repo-root "/home/joe/code"] (#'population/fill! 5)))
+     (let [{:keys [run calls click lane-options]}
+           (harness root {:max-clicks 2 :theta 1/4
+                          :observation-labels-path (str (io/file root "labels.edn"))})
+           f (run)
+           courier (flight/judge-opts f {:wants [:a :b :open]})]
+       ;; The third want is still open; rejection reaches the actual lane,
+       ;; rather than an unrelated all-wants-complete early return.
+       (is (= :posterior (get-in courier [:flight :temporal-previous :zeta-posterior :basis])))
+       (click (update-in courier [:flight :temporal-previous :domain] conj [fixture/target :foreign]))
+       (is (not (contains? (last @lane-options) :zeta)))
+       (is (= :domain-changed (:conditioning-status (receipt (last @calls)))))
+       (is (= {:absent :domain-changed}
+              (get-in (last @calls) [:decision :selection-certificate :token-rate-lanes fixture/target :zeta-basis])))))))

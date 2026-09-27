@@ -50,7 +50,8 @@
     (merge {:basis :posterior :record (:temporal-posterior record)}
            (select-keys (get-in record [:temporal-posterior :model])
                         [:occurrence-id :domain :model-identity])
-           (:temporal-cursor record))))
+           (:temporal-cursor record)
+           (select-keys record [:zeta-posterior]))))
 
 (defn read-receipt
   "Read the enactment bytes once and verify the courier's byte digest before

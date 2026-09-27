@@ -51,11 +51,13 @@
   "Freeze actual consumed policy E/G and the scorer's model; no second habit read."
   [decision model schedules]
   (let [candidates (get-in decision [:selection-certificate :candidates])]
-    (seal {:schema :wm/precision-family-v1 :context :WM :z-semantics :per-step-redraw
+    (seal (cond-> {:schema :wm/precision-family-v1 :context :WM :z-semantics :per-step-redraw
            :model model :candidates (mapv #(select-keys % [:id :g :habit]) candidates)
            :observation-schedules schedules
            :model-id (model-identity model candidates schedules)
-           :selected-action (:action decision)})))
+           :selected-action (:action decision)}
+            (= :class-emission (:kind model))
+            (assoc :zeta-basis {:absent :class-emission-not-tempered})))))
 
 (defn validate-binding!
   "Dispatch-created binding in minted space. Never infer an old candidate join

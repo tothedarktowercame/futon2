@@ -104,3 +104,24 @@
         (some #(when (= :absent (:status %)) %) trials)
         (when-not zeta (absent :previous-zeta-unavailable previous))
         (assoc (beta-posterior trials nil (:beta-prior prior) zeta) :prior-declaration prior))))
+
+
+(defn lane-options
+  "Only the existing temporal admission's verified receipt may supply ζ.
+   A rejected envelope's mean is never lifted. A declared trajectory start
+   has no trials; unavailable later publications keep their typed reason.
+   This annotates the lane and never changes the joint class-emission model."
+  [receipt]
+  (let [status (:conditioning-status receipt)
+        p (get-in receipt [:temporal-previous :zeta-posterior])]
+    (cond
+      (= :trajectory-start status)
+      {:zeta-basis (assoc default-prior :basis :prior-no-trials)}
+      (not= :temporal-posterior status)
+      {:zeta-basis {:absent (or status :no-temporal-envelope)}}
+      (and (= :posterior (:basis p)) (positive? (:zeta-mean p)))
+      {:zeta (:zeta-mean p)
+       :zeta-basis (select-keys p [:basis :trajectory-digest :zeta-mean])}
+      (= :prior-no-trials (:basis p))
+      {:zeta-basis (select-keys p [:basis :beta-prior])}
+      :else {:zeta-basis {:absent (or (:reason p) :zeta-posterior-unavailable)}})))
