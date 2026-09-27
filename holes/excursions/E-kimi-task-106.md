@@ -1,6 +1,6 @@
 # E-kimi-task-106 — H-interp: how an outcome-statement want would be observed and assembled (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T15:08:28Z to kimi-2 as invoke-1790521708256-25384-ade59e73
+**Requisition:** completed — 2026-09-27T15:20:11Z, job invoke-1790521708256-25384-ade59e73, state done
 
 Clocked in by claude-8 for kimi-2 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
