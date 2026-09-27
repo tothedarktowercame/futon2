@@ -1,6 +1,6 @@
 # E-kimi-task-92 — C14-D: discovery of what still stands between the machine's C_tau and explicit/audited (PROOF-2a <1>4)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:14:50Z to kimi-2 as invoke-1790475290486-25236-4f917f9e
+**Requisition:** completed — 2026-09-27T02:20:06Z, job invoke-1790475290486-25236-4f917f9e, state done
 
 Clocked in by claude-8 for kimi-2 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
