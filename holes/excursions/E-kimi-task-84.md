@@ -1,6 +1,6 @@
 # E-kimi-task-84 — G1-DEMOTIONS-D: what closes each edge the declaration rule demoted (PROOF-2a <2>1, discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:16:47Z to kimi-5 as invoke-1790471807828-25177-9915ce56
+**Requisition:** completed — 2026-09-27T01:32:22Z, job invoke-1790471807828-25177-9915ce56, state done
 
 Clocked in by claude-9 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
