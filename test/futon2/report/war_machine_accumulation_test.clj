@@ -9,11 +9,12 @@
   (:import [java.nio.file Files] [java.nio.file.attribute FileAttribute]))
 (def entity "e")
 (def obs {:c0 1.0 :c1 0.0})
+(def envelope {:channels (update-vals obs #(hash-map :variant :observed :value %))})
 (def beliefs {entity {:spawned 1.0 :refined 0.0}})
 (def init {:authority :declared :prior 1.0 :model/revision "v1"})
 (defn step [previous id]
   (wm/accumulation-step-for-tick {:previous-record previous :tick-id id :entity-id entity
-                                  :observation obs :belief-pre beliefs :belief-post beliefs
+                                  :observation obs :observation-envelope envelope :belief-pre beliefs :belief-post beliefs
                                   :initialization init}))
 (defn record [id result]
   {:run/id id :accumulation-state (:state result) :observation obs :mu-post beliefs
@@ -32,7 +33,7 @@
     (is (= :support-mismatch
            (refusal #(wm/accumulation-step-for-tick
                       {:previous-record ar :tick-id "bad" :entity-id entity
-                       :observation {:c0 1.0} :belief-pre beliefs :belief-post beliefs
+                       :observation {:c0 1.0} :observation-envelope {:channels (select-keys (:channels envelope) [:c0])} :belief-pre beliefs :belief-post beliefs
                        :initialization init}))))))
 
 (def ^:dynamic *dir* nil)
@@ -44,7 +45,7 @@
 (def decision {:action {:kind :cascade-candidate :target :fixture} :chosen-action-mass 1})
 (defn inputs []
   {:enabled? true :trace-dir (str *dir*) :tick-id "next" :entity-id entity
-   :observation obs :belief-pre beliefs :belief-post beliefs :initialization init})
+   :observation obs :observation-envelope envelope :belief-pre beliefs :belief-post beliefs :initialization init})
 (defn judged [input]
   (let [r (wm/accumulation-outcome-for-tick input)]
     (wm/with-accumulation-receipt
@@ -115,7 +116,7 @@
                          [:single-entity-belief-missing #(assoc % :entity-id "missing")]
                          [:accumulation-initialization-required #(dissoc % :initialization)]
                          [:prior-not-positive #(assoc-in % [:initialization :prior] 0)]
-                         [:invalid-increment #(assoc-in % [:observation :c0] -1)]]]
+                         [:accumulation-observation-unavailable #(assoc-in % [:observation :c0] -1)]]]
     (is (= kind (get-in (judged (modify (inputs))) [:decision :accumulation :reason]))))
   (let [r (step nil "old")]
     (publish {:run/id "different" :observation obs :belief beliefs :accumulation-state (:state r)})
@@ -140,3 +141,50 @@
     (is (= "2026-09-26-1790380800" a))
     (is (= "2026-09-26-1790380801" b))
     (is (not= a b))))
+
+(deftest origin-and-lineage-survive-and-cannot-be-rebound
+  (let [first-record (record "first" (step nil "first"))]
+    (is (= {:authority :declared :prior 1.0}
+           (get-in (step first-record "next") [:state :initialization])))
+    (doseq [input [(assoc (inputs) :entity-id "another"
+                        :belief-pre {"another" (beliefs entity)} :belief-post {"another" (beliefs entity)})
+                   (assoc-in (inputs) [:initialization :model/revision] "v2")]]
+      (is (= :accumulation-lineage-mismatch
+             (refusal #(wm/accumulation-step-for-tick (assoc input :previous-record first-record))))))))
+
+(deftest two-publishers-cannot-commit-from-the-same-predecessor
+  ;; Both read the actual same disk state before either publishes. The
+  ;; append-lock validation must reject the second without writing its state.
+  (let [a (judged (assoc (inputs) :tick-id "a"))
+        b (judged (assoc (inputs) :tick-id "b"))]
+    (publish a)
+    (is (= :accumulation-stale-predecessor (refusal #(publish b))))
+    (is (= ["a"] (mapv :run/id (:records (trace/read-history-strict 12 :dir (str *dir*))))))))
+
+(deftest receipt-only-tail-does-not-reinitialize-or-skip
+  (publish (judged (assoc (inputs) :tick-id "a")))
+  (publish (judged (assoc (inputs) :tick-id "b" :enabled? false)))
+  (is (= :accumulation-migration-required
+         (get-in (judged (assoc (inputs) :tick-id "c")) [:accumulation-receipt :reason]))))
+
+(deftest default-flight-judge-forwards-configuration-with-one-publisher
+  (let [captured (atom nil)]
+    (with-redefs [wm/accumulation-config (constantly {:accumulation-entity-id entity
+                                                    :accumulation-initialization init})
+                  wm/generate-war-machine (fn [days opts] (reset! captured [days opts]))]
+      (#'runner/default-selection-judge {:trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}} 3)
+      (is (= 3 (first @captured)))
+      (is (= {:accumulation-entity-id entity :accumulation-initialization init
+              :trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}
+              :trace? false :include-advisory-lanes? false :defer-render? true}
+             (second @captured))))))
+
+(deftest unreadable-configuration-is-a-recorded-absence
+  (with-redefs-fn {#'wm/accumulation-config-path (str (io/file *dir* "no-config.edn"))}
+    (fn []
+      (let [config (wm/accumulation-config)
+            refusal (:accumulation-configuration-refusal config)]
+        (is (= :accumulation-configuration-invalid (:reason refusal)))
+        (is (= {:receipt refusal}
+               (wm/accumulation-outcome-for-tick
+                (assoc (inputs) :configuration-refusal refusal))))))))

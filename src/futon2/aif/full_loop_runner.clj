@@ -3897,6 +3897,16 @@
     (:refresh m)
     {:absent :no-refresh-record}))
 
+(defn- default-selection-judge [opts days]
+  (wm/generate-war-machine
+   days
+   (merge (wm/accumulation-config)
+          (select-keys opts [:accumulate-strategic-habit? :run-id
+                             :loaded-code-identity :cascade-habit-path
+                             :observation-labels-path :flight :trace-dir])
+          ;; Construction publishes below. Do not publish twice.
+          {:trace? false :include-advisory-lanes? false :defer-render? true})))
+
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
@@ -4828,17 +4838,7 @@
             (filterv #(and (= :awaiting-validation (:repair/status %))
                            (map? (:repair/verification %)))
                      validation-lines)
-            selection-judge (or (:judge-fn opts)
-                                (fn [days]
-                                  (wm/generate-war-machine
-                                   days
-                                   ;; :flight: inside a flight the judge assembles only
-                                   ;; the flight's target (futon2.aif.flight-runner)
-                                   (assoc (select-keys opts [:accumulate-strategic-habit?
-                                                            :run-id :loaded-code-identity :cascade-habit-path :observation-labels-path
-                                                            :flight])
-                                          :include-advisory-lanes? false
-                                          :defer-render? true))))
+            selection-judge (or (:judge-fn opts) #(default-selection-judge opts %))
             judgement0-base
             (try
             (run-phase!
@@ -5122,7 +5122,10 @@
           ;; Cascade habit reinforcement requires observed token outcomes at close;
           ;; neither selection nor successful construction reinforces it.
           (let [trace-path (when-not repair-action?
-                             ((or (:trace-fn opts) trace/write-trace!)
+                             ((or (:trace-fn opts)
+                                  (fn [record] (if-let [dir (:trace-dir opts)]
+                                                 (trace/write-trace! record :dir dir)
+                                                 (trace/write-trace! record))))
                               (assoc judgement :d-task-context @d-task-context :trace/reason
                                      {:kind :routing-rule
                                       :rule :constructed-selection-persisted

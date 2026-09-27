@@ -645,6 +645,21 @@
                    :at (str (Instant/now))
                    :reason reason}))))
 
+(declare read-history-strict)
+
+(defn- validate-accumulation-predecessor! [dir record]
+  (when (:accumulation-state record)
+    (let [history (read-history-strict 1 :dir dir)
+          previous (peek (:records history))
+          actual (or (:run/id previous) (:timestamp previous))
+          expected (get-in record [:accumulation-update-input :previous-id])]
+      (when-not (= :ok (:status history))
+        (throw (ex-info "Accumulation publication history unavailable" history)))
+      (when-not (= expected actual)
+        (throw (ex-info "Accumulation predecessor changed before publication"
+                        {:refusal :accumulation-stale-predecessor
+                         :expected expected :actual actual}))))))
+
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
    the daily trace file. Creates the trace directory if absent. Returns
@@ -670,7 +685,8 @@
         path (daily-path dir date-str)
         written-path (do
                        (io/make-parents path)
-                       (lane-futility/append-indexed-trace! dir path record))]
+                       (lane-futility/append-indexed-trace!
+                        dir path record #(validate-accumulation-predecessor! dir record)))]
     (if return-record?
       {:path written-path :record record}
       written-path)))

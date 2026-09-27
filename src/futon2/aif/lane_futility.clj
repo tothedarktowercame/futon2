@@ -199,17 +199,19 @@
   "Append RECORD to PATH and advance the exact futility index under one
    cross-process lock. If prior trace/index coherence is absent, reconstruct it
    from the authoritative corpus before appending."
-  [trace-dir path record]
+  ([trace-dir path record] (append-indexed-trace! trace-dir path record (constantly nil)))
+  ([trace-dir path record validate!]
   (with-index-lock
     trace-dir
     (fn []
+      (validate!)
       (let [state (current-index-state! trace-dir)]
         (spit path (str (pr-str record) "\n") :append true)
         (write-index-state!
          trace-dir
          (assoc (add-record-to-index state record)
                 :fingerprint (corpus-fingerprint trace-dir))))
-      path)))
+      path))))
 
 (defn indexed-futility-summary
   "Return the exact all-history summary using a validated persistent index."

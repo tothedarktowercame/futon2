@@ -24,6 +24,7 @@
   (let [os (get-in carried [:support :observation]) ss (get-in carried [:support :state])]
     (cond
       (not (:ok carried)) (refuse :missing-carried-state [:carried])
+      (or (nil? id) (= id previous-id)) (refuse :invalid-tick-identity [:id])
       (not= previous-id (:last-tick carried)) (refuse :carry-chain-gap [:previous-id])
       (not= (set os) (set (keys observation))) (refuse :support-mismatch [:observation])
       (not= (set ss) (set (keys belief))) (refuse :support-mismatch [:belief])
@@ -32,6 +33,8 @@
       :else
       {:ok true :schema schema :support (:support carried) :last-tick id
        :previous-tick previous-id
+       :initialization (:initialization carried)
+       :lineage (:lineage carried)
        :concentrations
        (into {} (for [o os]
                   [o (into {} (for [s ss]

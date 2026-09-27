@@ -109,13 +109,17 @@
   "/home/joe/code/futon2/holes/labs/wm-contract/machine-accumulation-config.edn")
 
 (defn accumulation-config []
-  (let [x (clojure.edn/read-string (slurp accumulation-config-path))]
-    (when-not (and (= :wm/accumulation-live-config-v1 (:schema x))
-                   (:accumulation-entity-id x) (:accumulation-initialization x))
-      (throw (ex-info "Accumulation configuration missing or malformed"
-                      {:refusal :accumulation-configuration-invalid
-                       :path accumulation-config-path})))
-    (select-keys x [:accumulation-entity-id :accumulation-initialization])))
+  (try
+    (let [x (clojure.edn/read-string (slurp accumulation-config-path))]
+      (when-not (and (= :wm/accumulation-live-config-v1 (:schema x))
+                     (:accumulation-entity-id x) (:accumulation-initialization x))
+        (throw (ex-info "Accumulation configuration missing or malformed"
+                        {:refusal :accumulation-configuration-invalid})))
+      (select-keys x [:accumulation-entity-id :accumulation-initialization]))
+    (catch Exception e
+      {:accumulation-configuration-refusal
+       {:status :absent :reason :accumulation-configuration-invalid
+        :path accumulation-config-path :error (ex-message e)}})))
 
 ;; A one-shot production JVM dereferences this at most once, on the first tick
 ;; after the learned-prior flip. Test/report JVMs may call judge repeatedly;
@@ -1527,10 +1531,16 @@
 
 (defn accumulation-step-for-tick
   "Bind one trace-producing tick to the declared R17 recurrence."
-  [{:keys [previous-record tick-id entity-id observation belief-pre belief-post initialization]}]
+  [{:keys [previous-record tick-id entity-id observation observation-envelope belief-pre belief-post initialization]}]
   (let [previous-id (some-> previous-record trace-record-identity)
         _ (when-not (and tick-id entity-id)
             (throw (ex-info "Accumulation identity missing" {:refusal :accumulation-identity-missing})))
+        _ (when-not (and (= (set (keys observation)) (set (keys (:channels observation-envelope))))
+                         (every? (fn [[ch v]]
+                                   (= {:variant :observed :value v}
+                                      (get-in observation-envelope [:channels ch]))) observation))
+            (throw (ex-info "Accumulation requires observed coordinates"
+                            {:refusal :accumulation-observation-unavailable})))
         pre (get belief-pre entity-id ::missing)
         post (get belief-post entity-id ::missing)
         _ (when (or (= ::missing pre) (= ::missing post))
@@ -1550,6 +1560,17 @@
             (throw (ex-info "Accumulation initialization refused"
                             {:refusal (get-in carried [:refusal :kind])
                              :detail (:refusal carried)})))
+        lineage {:entity/id entity-id :model/revision (:model/revision initialization)}
+        _ (when-not (some? (:model/revision lineage))
+            (throw (ex-info "Accumulation model revision missing"
+                            {:refusal :accumulation-model-revision-missing})))
+        _ (when (and previous-record (not= lineage (:lineage carried)))
+            (throw (ex-info "Accumulation entity or model changed"
+                            {:refusal :accumulation-lineage-mismatch})))
+        _ (when-not (= :declared (get-in carried [:initialization :authority]))
+            (throw (ex-info "Accumulation origin authority missing"
+                            {:refusal :accumulation-origin-missing})))
+        carried (assoc carried :lineage lineage)
         input {:tick-id tick-id :previous-id previous-id :entity/id entity-id
                :observation observation :belief-pre pre :belief-post post
                :state-support (vec (sort (keys post)))
@@ -1566,8 +1587,10 @@
   "Read accumulation's own strict predecessor, then record one update or typed
    absence. Never supplies inputs to selection. Hash UTF-8 pr-str of the exact
    returned state (no newline), the same state retained by trace-record."
-  [{:keys [enabled? trace-dir] :as input}]
-  (if-not enabled?
+  [{:keys [enabled? trace-dir configuration-refusal] :as input}]
+  (if configuration-refusal
+    {:receipt configuration-refusal}
+    (if-not enabled?
     {:receipt {:status :absent :reason :accumulation-not-configured}}
     (try
       (let [history (trace/read-history-strict 12 :dir trace-dir)]
@@ -1585,7 +1608,7 @@
       (catch Exception e
         {:receipt {:status :absent :reason (or (:refusal (ex-data e)) :accumulation-failed)
                    :detail (ex-data e)
-                   :error {:class (.getName (class e)) :message (ex-message e)}}}))))
+                   :error {:class (.getName (class e)) :message (ex-message e)}}})))))
 
 (defn with-accumulation-receipt
   "Attach the already computed outcome beside an unchanged selection."
@@ -7114,7 +7137,7 @@
   ([scan-data {:keys [trace? trace-dir scan-id
                       step-portfolio? eval-invariant-fallback?
                       wm-version run-id
-                      accumulation-entity-id accumulation-initialization]
+                      accumulation-entity-id accumulation-initialization accumulation-configuration-refusal]
                :as judge-opts
                :or {trace? false
                     step-portfolio? true eval-invariant-fallback? true}}]
@@ -7385,10 +7408,12 @@
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
         accumulation (accumulation-outcome-for-tick
-                      {:enabled? (or trace? accumulation-entity-id) :trace-dir wm-trace-dir
+                      {:configuration-refusal accumulation-configuration-refusal
+                       :enabled? (or trace? accumulation-entity-id) :trace-dir wm-trace-dir
                        :tick-id (or run-id scan-id (:scan-id scan-data))
                        :entity-id accumulation-entity-id
-                       :observation observation :belief-pre wm-belief-pre
+                       :observation observation :observation-envelope (obs/observation-envelope observation)
+                       :belief-pre wm-belief-pre
                        :belief-post wm-belief :initialization accumulation-initialization})
         route2 (-> route1
                    (route-tag :R7 "futon2.aif.precision/update-precision-state")
