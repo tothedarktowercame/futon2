@@ -1,6 +1,6 @@
 # E-kimi-task-75 — PROOF-2a <2>3 lane A2: one wire — the enact test box receives a present publication observation (flight_enact_test case with a discharged repair obligation), then re-kind
 
-**Requisition:** in-progress — dispatched 2026-09-27T00:09:05Z to kimi-1 as invoke-1790467745651-25121-e0b3a524
+**Requisition:** completed — 2026-09-27T00:27:14Z, job invoke-1790467745651-25121-e0b3a524, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
