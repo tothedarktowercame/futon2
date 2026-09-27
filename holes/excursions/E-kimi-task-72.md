@@ -1,6 +1,6 @@
 # E-kimi-task-72 — PROOF-2a <2>3 lane A: six first-layer wire tests, the publication and enactment-carry group (measurement, locators, increment, repair/publication, publication-observed x2)
 
-**Requisition:** in-progress — dispatched 2026-09-26T23:45:51Z to kimi-1 as invoke-1790466351556-25097-4b2f542c
+**Requisition:** completed — 2026-09-27T00:06:46Z, job invoke-1790466351556-25097-4b2f542c, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
