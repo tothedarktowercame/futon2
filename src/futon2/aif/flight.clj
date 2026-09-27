@@ -82,16 +82,28 @@
         observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
         definition (try (read root "futon4" "holes/mission-lifecycle.md")
                         (catch Exception _ nil))
+        ;; A definition that cannot be read, or that does not yield the eight
+        ;; phase exits, adds no wants and is a typed absence on the record: it
+        ;; never stops the wants step (claude-8, after EXIT-WANTS-WIRE-I: a
+        ;; thrown :invalid-lifecycle-definition aborted the click at :wants).
         secondary (when definition
-                    (exits/flight-exits target (or text "") definition
-                                        {:repo repo :path path :observe observe-loc}))
-        lifecycle-exits (if definition
+                    (try (exits/flight-exits target (or text "") definition
+                                             {:repo repo :path path :observe observe-loc})
+                         (catch clojure.lang.ExceptionInfo e
+                           (if (= :invalid-lifecycle-definition (:kind (ex-data e)))
+                             {::invalid (select-keys (ex-data e) [:kind :expected])}
+                             (throw e)))))
+        invalid (::invalid secondary)
+        secondary (when-not invalid secondary)
+        lifecycle-exits (cond
+                          invalid {:absent :lifecycle-definition-invalid :detail invalid}
+                          definition
                           {:current-phase (:current-phase secondary)
                            :supplied (:wants secondary) :not-started (:not-started secondary)
                            :not-counted (vec (for [[t c] (:criteria-by-token secondary)
                                                   :when (:not-counted c)]
                                               (assoc (:not-counted c) :token t :phase (:phase c))))}
-                          {:absent :lifecycle-definition-unreadable})
+                          :else {:absent :lifecycle-definition-unreadable})
         declined (reading/published-locator-declines store target mission-sha)
         text-constraints (criteria/constraints target (or text ""))
         read-constraints (reading/published-constraints store target mission-sha)

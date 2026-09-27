@@ -97,3 +97,22 @@
         (is (= "ARGUE" (:misplaced-under c)))
         (is (false? (get-in w [:universe (:token c)])))
         (println :misplaced c :wants (:wants w))))))
+
+(deftest a-definition-that-does-not-yield-eight-exits-adds-nothing
+  ;; The bad case behind four failing namespaces after 535d649a9: fixtures whose
+  ;; read-text answers every path with the mission text made definition-exits
+  ;; throw, and the click aborted at the wants step.
+  (let [absent (atom nil) invalid (atom nil)]
+    (with-flight "fixture" derive-text nil
+      (fn [_ w] (reset! absent w)))
+    (with-flight "fixture" derive-text derive-text
+      (fn [_ w] (reset! invalid w)))
+    (is (= {:absent :lifecycle-definition-unreadable}
+           (get-in @absent [:source :lifecycle-exits])))
+    (is (= :lifecycle-definition-invalid
+           (get-in @invalid [:source :lifecycle-exits :absent])))
+    (is (= (:wants @absent) (:wants @invalid)))
+    (is (= (:locators @absent) (:locators @invalid)))
+    (is (= (:universe @absent) (:universe @invalid)))
+    (println :invalid-definition (get-in @invalid [:source :lifecycle-exits])
+             :wants (:wants @invalid))))
