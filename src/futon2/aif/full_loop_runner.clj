@@ -730,7 +730,8 @@
                     ;; quantities. No historical checkpoints or trace lookup.
                     :decision (assoc (select-keys decision
                                                   [:selection-law :selection-certificate
-                                                   :initial-belief-receipt :enumeration-completeness :measured-a :accumulation])
+                                                   :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
+                                                   :accumulation-bmr])
                                      :g-term-decomposition (decomposition/from-result result)
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
@@ -3911,9 +3912,13 @@
 (defn- reconcile-selection-publication [cell record]
   (if-not (contains? record :accumulation-receipt)
     cell
-    (-> cell
+    (cond-> (-> cell
         (assoc-in [:judgment :controller-decision :accumulation] (:accumulation-receipt record))
-        (assoc-in [:ground :decision :accumulation] (:accumulation-receipt record)))))
+        (assoc-in [:ground :decision :accumulation] (:accumulation-receipt record)))
+      ;; ITEM6-CONSUMER-I: the SAME BMR receipt rides beside it.
+      (contains? record :bmr-receipt)
+      (-> (assoc-in [:judgment :controller-decision :accumulation-bmr] (:bmr-receipt record))
+          (assoc-in [:ground :decision :accumulation-bmr] (:bmr-receipt record))))))
 
 (defn- default-selection-judge [opts days]
   (wm/generate-war-machine

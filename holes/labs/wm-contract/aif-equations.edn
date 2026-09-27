@@ -512,7 +512,37 @@
    :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
    :declared-model {:status :provisional :revisitable true
                     :factorisation :channel-given-status :factors 7 :categories-per-factor 14
-                    :statement "For this prototype, each status s indexes an independent Dirichlet parameter \u03b8_(\u00b7|s) over the fourteen channel labels, updated with weighted exponents o_c \u03bc_s and scored by summing the seven factors' log-normalizer differences; this is a declared weighted parameter model, not a generative likelihood of raw scans, and it does not close the BMR model claim in PROOF-2a."}
+                    :statement "For this prototype, each status s indexes an independent Dirichlet parameter \u03b8_(\u00b7|s) over the fourteen channel labels, updated with weighted exponents o_c \u03bc_s and scored by summing the seven factors' log-normalizer differences; this is a declared weighted parameter model, not a generative likelihood of raw scans, and it does not close the BMR model claim in PROOF-2a."
+                    :proposal-family {:schema :wm/accumulation-bmr-proposal-family-v1
+                                      :id :wm/accumulation-bmr-proposal-family-v1
+                                      :label "prototyping our way forward, not closure of the proof"
+                                      :status :provisional
+                                      :revisitable true
+                                      :author "kimi-4, ITEM6-CONSUMER-I, 2026-09-27"
+                                      :fixed-independently-of-posterior true
+                                      :kind :soft-prior-constraint
+                                      :reference-profile :uniform-channels
+                                      :reason "Same-carrier positive-prior constraints, fixed BEFORE any posterior is consulted: for each status factor s the reduced prior is a'_s = kappa'_s * r with r the uniform channel profile (1/14 each, the declared initialization's own profile) and kappa'_s = k * sum_c a[c,s] (k times the ORIGIN concentration). A stronger concentration around a common reference profile expresses the hypothesis that the channel profile depends less on status; it is NOT equality, NOT a merge, and NOT evidence of simplification by itself. Deltas are a' - a per cell and must be positive for every cell; a multiplier that makes any cell delta non-positive is refused by the adapter, never adjusted."
+                                      :rule {:threshold -3 :applied false :sum-compared-once true}
+                                      :control :identity
+                                      :proposals [{:id :identity
+                                                   :kind :soft-prior-constraint
+                                                   :reference-profile :uniform-channels
+                                                   :concentration-multiplier 1
+                                                   :author "kimi-4, ITEM6-CONSUMER-I, 2026-09-27"
+                                                   :reason "Control: a' = a exactly; the BMR score of the identity proposal is exactly 0. The nominal multiplier 1 reproduces a only because the declared origin is the uniform scalar broadcast; the consumer special-cases identity rather than relying on that coincidence."}
+                                                  {:id :common-profile-k2
+                                                   :kind :soft-prior-constraint
+                                                   :reference-profile :uniform-channels
+                                                   :concentration-multiplier 2
+                                                   :author "kimi-4, ITEM6-CONSUMER-I, 2026-09-27"
+                                                   :reason "a'_s = 2 * sum_c a[c,s] * r: twice the origin's concentration on the uniform channel profile -- a stronger belief that the channel profile depends less on status."}
+                                                  {:id :common-profile-k4
+                                                   :kind :soft-prior-constraint
+                                                   :reference-profile :uniform-channels
+                                                   :concentration-multiplier 4
+                                                   :author "kimi-4, ITEM6-CONSUMER-I, 2026-09-27"
+                                                   :reason "a'_s = 4 * sum_c a[c,s] * r: four times the origin's concentration on the uniform channel profile -- the same hypothesis stated more strongly."}]}}
    :rationale "Seven factors preserve the observation-given-state orientation of A: each status indexes a channel distribution, and the existing accumulator adds o_c * mu_s to that channel/status cell. The recurrence alone does not choose a factorisation. On the same ITEM6-NORMALIZER-D fixture and positive soft-prior proposal, the joint 98-category, seven-column and fourteen-row readings score 0.071195702167 / 0.016404153337 / 0.007604599385 nats, respectively (roughly a tenfold range); the choice must therefore be explicit. Channels are simultaneous scalar signals, not mutually exclusive observed categories, so this is a weighted parameter model, not a generative likelihood of raw scans. No existing consumer establishes one of these machine-matrix readings: bmr takes a caller-chosen vector; a4a uses pair-joint scoring and per-row moments over a different capability/mission model. Source: holes/labs/wm-contract/ITEM6-NORMALIZER-D.md, futon2 8d58215f5, sections 1-5."
    :ruling {:by "Joe" :date "2026-09-27" :status :provisional :revisitable true
             :words "If we record the rationale for the 7 factors log-normalizer differences being used, then yes, we can use that for now, and if we want to revisit it later we can revisit it later."

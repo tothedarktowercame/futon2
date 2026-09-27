@@ -56,8 +56,8 @@
 (defn publish [j]
   (:record (trace/write-trace! j :dir (str *dir*) :date-str "2026-09-26" :return-record? true)))
 (defn same-selection [a b]
-  (is (= (pr-str (dissoc (:decision a) :accumulation))
-         (pr-str (dissoc (:decision b) :accumulation)))))
+  (is (= (pr-str (dissoc (:decision a) :accumulation :accumulation-bmr))
+         (pr-str (dissoc (:decision b) :accumulation :accumulation-bmr)))))
 (defn assert-absent [kind input]
   (let [off (judged (assoc input :enabled? false)) j (judged input)
         saved (#'runner/persist-run-record!
@@ -238,3 +238,76 @@
     (spit (io/file *dir* "wm-trace-2026-09-25.edn") "{:broken")
     (is (thrown-with-msg? RuntimeException #"EOF" (publish pending)))
     (is (not (.exists (io/file *dir* "wm-trace-2026-09-26.edn"))))))
+
+;; ---------------------------------------------------------------------
+;; ITEM6-CONSUMER-I: the BMR score receipt rides the same publication and
+;; reconciliation routes as the accumulation receipt. Prototype label:
+;; record-only scoring; adoption deferred; a typed absence, never a gate.
+
+(def init-rational {:authority :declared :prior 1 :model/revision "v1"})
+(defn inputs-rational [] (assoc (inputs) :initialization init-rational))
+
+(deftest losing-publisher-gets-the-bmr-absence-not-a-score
+  ;; Sibling of two-publishers-record-the-losing-update-without-stopping:
+  ;; the losing update of a publication race gets the ABSENCE, never a
+  ;; score over unpublished concentrations.
+  (let [a (judged (assoc (inputs-rational) :tick-id "a"))
+        b (judged (assoc (inputs-rational) :tick-id "b"))
+        winner (publish a)]
+    (is (= :scored (get-in winner [:bmr-receipt :status])))
+    (is (= 0 (:delta-f (first (filter #(= :identity (:id %))
+                                      (get-in winner [:bmr-receipt :proposals]))))))
+    (let [saved (publish b)
+          receipt (:bmr-receipt saved)
+          returned (trace/reconcile-accumulation b saved)]
+      (is (= :absent (:status receipt)))
+      (is (= :accumulation-stale-predecessor (:reason receipt)))
+      (is (= (:accumulation-receipt saved) (:cause receipt)))
+      (is (not (contains? receipt :proposals)))
+      (is (= receipt (get-in saved [:decision :accumulation-bmr])
+             (:bmr-receipt returned) (get-in returned [:decision :accumulation-bmr])))
+      (doseq [record [saved returned] k [:accumulation-state :accumulation-update-input :accumulation-initialization]]
+        (is (not (contains? record k))))
+      (same-selection b saved))))
+
+(deftest configuration-refusal-carries-its-cause-into-the-bmr-absence
+  (let [refusal {:status :absent :reason :accumulation-configuration-invalid :detail :fixture}
+        j (wm/with-accumulation-receipt
+           {:run/id "cfg" :decision decision :observation obs :belief beliefs}
+           {:receipt refusal})
+        saved (publish j)]
+    (is (= :absent (get-in saved [:bmr-receipt :status])))
+    (is (= :accumulation-configuration-invalid (get-in saved [:bmr-receipt :reason])))
+    (is (= refusal (get-in saved [:bmr-receipt :cause])))
+    (is (not (contains? (:bmr-receipt saved) :proposals)))
+    (is (= (:bmr-receipt saved) (get-in saved [:decision :accumulation-bmr])))))
+
+(deftest scored-bmr-receipt-is-the-same-on-every-route
+  ;; As the item-5 test does for the accumulation receipt: the returned
+  ;; judgement, the one-shot receipt and the flight run record carry the
+  ;; SAME BMR receipt, computed once under the append lock.
+  (let [j (judged (assoc (inputs-rational) :tick-id "first"))
+        publication (#'wm/write-trace-and-clock! j (str *dir*) true)
+        record (:record publication)
+        returned (:judgement publication)
+        receipt (:bmr-receipt record)
+        once (#'tick/tick-run-record "first" "start" {} {:entries-read 0 :entries-limit 0}
+              returned "offline" true)]
+    (is (= :scored (:status receipt)))
+    (is (= 3 (count (:proposals receipt))))
+    (is (= {:threshold -3 :applied false :sum-compared-once true} (:rule receipt)))
+    (is (= receipt (:bmr-receipt returned)
+           (get-in returned [:decision :accumulation-bmr])
+           (get-in once [:decision :accumulation-bmr])))
+    (let [cell (#'runner/reconcile-selection-publication
+                {:judgment {:controller-decision (:decision j)} :ground {:decision (:decision j)}}
+                record)
+          saved (#'runner/persist-run-record!
+                 {:run-record-dir (str (io/file *dir* "runs"))}
+                 "flight" "2026-09-27T00:00:00Z"
+                 {:outcome :offline-no-selection :trace-path (:path publication)
+                  :checkpoints {:selection cell}})
+          disk (edn/read-string (slurp (:run-record saved)))]
+      (is (= receipt (get-in cell [:judgment :controller-decision :accumulation-bmr])
+             (get-in cell [:ground :decision :accumulation-bmr])
+             (get-in disk [:decision :accumulation-bmr]))))))

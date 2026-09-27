@@ -229,7 +229,7 @@
      :inputIssues (long (count (:issues input-status)))
      :preferenceLayers (long (count preference-stack))
      :traceWritten (boolean trace-written?)
-     :decision (select-keys (:decision result) [:accumulation])
+     :decision (select-keys (:decision result) [:accumulation :accumulation-bmr])
      :selectorSeam selector-seam
      :route route
      :route-verdict verdict}))
