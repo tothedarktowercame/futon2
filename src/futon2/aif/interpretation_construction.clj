@@ -23,9 +23,14 @@
   ;; (WIRE-25-A gate, wire ask-merge-published -> construct, 03:05Z).
   ;; Unsupported semantics on a pattern (a :theta, a guard :or) stay an
   ;; explicit :invalid-input: only the declaration keys are admitted.
+  ;; :forces and :seat-declared are the two notes the admission producer
+  ;; itself attaches (want_interpretation.clj, validate-response and
+  ;; declare-model); the constructor reads nothing from either. Refusing
+  ;; them refused every admitted record that carried one (red since
+  ;; d688cd5aa, found by FUTON2-RED-D).
   (and (map? p)
        (contains? p :guard) (contains? p :produces)
-       (every? #{:guard :produces :model-identity :domain} (keys p))
+       (every? #{:guard :produces :model-identity :domain :forces :seat-declared} (keys p))
        (= #{:needs :forbids} (set (keys (:guard p))))
        (every? set? [(:produces p) (get-in p [:guard :needs]) (get-in p [:guard :forbids])])))
 

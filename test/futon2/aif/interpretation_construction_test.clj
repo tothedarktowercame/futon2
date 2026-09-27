@@ -135,6 +135,18 @@
                      (assoc-in [:interpretations :P :domain] #{[:t :p] [:t :q]}))]
     (is (= :constructed (:status (sut/construct declared)))
         "declaration keys on an interpretation are not unsupported semantics"))
+  ;; The admission producer's own two notes (want_interpretation.clj
+  ;; validate-response and declare-model). Refused from d688cd5aa until
+  ;; FUTON2-RED-D; the same records with :theta beside the note stay refused.
+  (doseq [[k v] [[:forces "the reader's note"]
+                 [:seat-declared {:model-identity {:A "seat"} :domain #{[:t :p]}}]]]
+    (let [noted (assoc-in input [:interpretations :P k] v)]
+      (is (= :constructed (:status (sut/construct noted))) (str k " is a note, not semantics"))
+      (is (= (mapv :precedence (:candidates (sut/construct input)))
+             (mapv :precedence (:candidates (sut/construct noted))))
+          (str k " changes no candidate"))
+      (is (= :invalid-input (:kind (sut/construct (assoc-in noted [:interpretations :P :theta] 1/2))))
+          (str ":theta beside " k " is still refused"))))
   (doseq [g [##Inf ##NaN :infinite {:status :missing :kind :missing-preference-spec}]]
     (is (= :nonfinite-g (:kind (sut/construct (assoc input :evaluate-g (constantly g))))))))
 
