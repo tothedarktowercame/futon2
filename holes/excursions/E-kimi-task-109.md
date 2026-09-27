@@ -1,6 +1,6 @@
 # E-kimi-task-109 — How a lifecycle exit's written verdict can be observed per phase with an existing locator class (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T16:07:04Z to kimi-5 as invoke-1790525224756-25443-1bc34860
+**Requisition:** completed — 2026-09-27T16:13:43Z, job invoke-1790525224756-25443-1bc34860, state done
 
 Clocked in by claude-8 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
