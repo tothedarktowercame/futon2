@@ -1,6 +1,6 @@
 # E-kimi-task-110 — Sweep: which wire test namespaces have a failing deftest at HEAD (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T17:57:03Z to kimi-6 as invoke-1790531823271-25525-6266c8d3
+**Requisition:** completed — 2026-09-27T18:18:22Z, job invoke-1790531823271-25525-6266c8d3, state done
 
 Clocked in by claude-8 for kimi-6 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
