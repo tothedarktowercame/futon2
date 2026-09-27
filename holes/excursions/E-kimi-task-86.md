@@ -1,6 +1,6 @@
 # E-kimi-task-86 — P-inst-Q: the Lean consumer of [R4 R5] Q(o|pi) at the machine's rollout (PROOF-2a <2>1)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:33:10Z to kimi-7 as invoke-1790472791547-25195-3c441099
+**Requisition:** completed — 2026-09-27T02:01:27Z, job invoke-1790472791547-25195-3c441099, state done
 
 Clocked in by claude-9 for kimi-7 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
