@@ -1,6 +1,6 @@
 # E-kimi-task-90 — ITEM6-CONSUMER-I: declared proposal family + BMR score receipt computed from the published accumulation under the append lock, retained on every route (PROOF-2a <1>2 item 6, prototype label)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:11:16Z to kimi-4 as invoke-1790475076712-25232-f599cd9e
+**Requisition:** completed — 2026-09-27T02:36:00Z, job invoke-1790475076712-25232-f599cd9e, state done
 
 Clocked in by claude-8 for kimi-4 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
