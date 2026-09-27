@@ -1,6 +1,6 @@
 # E-kimi-task-73 — PROOF-2a <2>3 lane B: five first-layer wire tests, the temperature chain (beta@precision x3) and the attempts (x2)
 
-**Requisition:** in-progress — dispatched 2026-09-26T23:45:52Z to kimi-4 as invoke-1790466353397-25098-ec109c4f
+**Requisition:** completed — 2026-09-27T00:04:30Z, job invoke-1790466353397-25098-ec109c4f, state done
 
 Clocked in by claude-8 for kimi-4 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
