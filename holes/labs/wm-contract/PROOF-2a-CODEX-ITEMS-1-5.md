@@ -405,3 +405,49 @@ Source commit `2d2a8fd04` was reported to claude-8 so ⟨2⟩3 warrants could re
 Registered focused warrant at `2d2a8fd04`:
 `test-registry-468b54a8d15e8459da29e1bb76840e8ea0fa8801b7bcf5f84094e30d15b96f12`
 (`warrant? true`, postcheck matched; real accumulation/publication/receipt tests).
+
+
+## Item 4 review correction — local omissions, 2026-09-27
+
+Source commit `445820342`, on claude-8's independent review finding. One refused
+entity previously refused every population prediction, and a refused channel
+emptied the judge's entire error map. Valid entities could consequently stop
+receiving updates indefinitely without the run halting.
+
+Population predictors now omit invalid/refused entities with explicit
+`:omitted` records (`:entity-id`, `:cause`, `:reason :belief-unavailable`).
+They compute from valid entities only; an all-invalid population returns typed
+absence without numeric moments. The original belief map is retained. The
+judge collects valid channels independently of refused channels, records the
+prediction entity omissions in its micro-step trace, and does not terminate
+its micro-loop merely because some channel was refused. Existing attribution
+continues to omit refused entities while updating valid ones.
+
+Unknown observation types leave belief coordinates unchanged and produce typed
+omitted-event receipts. The population update retains these transiently in
+metadata, and `trace-record` explicitly persists them as
+`:belief-event-omissions` (metadata alone would not survive EDN serialization).
+An unknown event does not create a new entity. Impossible evidence and invalid
+models still refuse their entity. **No recovery or reinitialization rule was
+added:** refused entities remain refused pending Joe's ruling.
+
+Validation: belief-refusal-continuity 5 tests / 57 assertions; belief 78 / 2030;
+arena-attribution 4 / 59, all passed. The new real-dependency cases construct
+impossible categorical evidence, show surviving population predictions, then
+show a valid entity updating with the refused entity unchanged. The judge
+regression evaluates its actual error-selection and attribution bindings with
+one refused channel and one valid channel. Unknown-type tests check unchanged
+belief, a later valid update, and explicit trace receipt persistence.
+Check-parens and diff whitespace checks passed. clj-kondo found no errors or
+new warnings (the existing redundant-let warning at belief_test.clj:85 remains).
+
+Pre-commit process check: {'time': '2026-09-27T01:41:07.530687+00:00', 'matching-launchers': []}.
+This checks launcher processes, not a flight witness or a JVM reload. The
+source commit touched only belief, trace, judge and their three focused tests;
+other lanes' flight-runner/temporal-input edits were left untouched.
+
+Registered warrants at `445820342` (all `warrant? true`, postcheck matched):
+
+- belief-refusal-continuity: `test-registry-69320db1021d312f1dac85da91a2ec59f90aef29854a995b68cd999c70dae4ea`
+- belief: `test-registry-5e263fa53e2a5eef58267836d1a90601da4a2684eecbe62beb56bd805c1d106b`
+- arena-attribution: `test-registry-0e181a9415335d26bd6e195ccc45715bef760bc5e41bce7da2e7299292c3978b`
