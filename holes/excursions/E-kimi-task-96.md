@@ -1,6 +1,6 @@
 # E-kimi-task-96 — HG2-D: H-G-target part 2 composition — mixture law mechanics and function boundary (discovery)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:44:55Z to kimi-1 as invoke-1790477095589-25250-6e7f5e3f
+**Requisition:** completed — 2026-09-27T02:49:20Z, job invoke-1790477095589-25250-6e7f5e3f, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
