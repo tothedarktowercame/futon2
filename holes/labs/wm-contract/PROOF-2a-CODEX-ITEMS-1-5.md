@@ -4,6 +4,8 @@ Author: codex-2, 2026-09-27. Implementation on Joe's direct instruction;
 independent review remains with claude-8. Item 6 (BMR) was explicitly deferred.
 This report does not accept ⟨1⟩2 as a whole.
 
+**Item 5 correction delivered at `2d2a8fd04` (2026-09-27):** stale-predecessor publication now records an accumulation absence and continues the run. The disputed state is omitted; returned and persisted receipts use the published outcome. This supersedes the throwing behavior described in the original delivery below. Independent review remains outstanding.
+
 ## Changes and remaining work
 
 | Item | Implementation | Limit |
@@ -107,10 +109,10 @@ missing-model correction; no obsolete warrant is used as evidence for that fix.
 Documentation only, requested by Joe on 2026-09-27. Source read at futon2
 `d1d529b3b`; this section proposes implementation, not a new authority ruling,
 accepted completion or production dispatch. Earlier sections remain delivery
-history. In particular, item 5's stale-predecessor throw still needs correction:
-refuse the accumulation update on the record without halting the run, and return
-that SAME receipt to every downstream reader. Item 6 must consume the published
-result after that correction, not the pre-publication proposal.
+history. In particular, the item-5 stale-predecessor correction described here has since been implemented
+at `2d2a8fd04` (review outstanding): record the refusal without halting the run,
+and return that SAME receipt to downstream readers. Item 6 must consume the
+published result, not the pre-publication proposal.
 
 ## Recommended approach
 
@@ -332,8 +334,8 @@ requirement. Do not silently narrow the theorem to obtain a pass.
 
 ## Linear order and scope control
 
-1. Correct item 5's non-halting publication receipt propagation (prerequisite,
-   already identified; proposed here, not changed by this documentation turn).
+1. Review item 5's non-halting publication receipt propagation (prerequisite;
+   subsequently implemented at `2d2a8fd04`, after this proposal was written).
 2. Implement item 3's execution/observation join and exact posterior consumer;
    finish its discriminating producer-to-consumer test before opening another
    implementation packet.
@@ -358,3 +360,48 @@ Sources: this file's delivery pins; `proof2/packets/C-R3s-D.md`,
 `flight.clj`, `exact_belief_core.clj`, `exact_belief_adapter.clj`,
 `machine_accumulation.clj`, `bmr.clj`, and `r17_offline.clj` under
 `src/futon2/aif/`. Proposals above are distinguished from these implementations.
+
+
+## Item 5 correction — 2d2a8fd04
+
+Joe directed implementation after reading the proposal. The append's finalizer
+runs under the existing trace/index lock. A changed predecessor replaces the
+optimistic accumulation receipt with `:status :absent`, reason
+`:accumulation-stale-predecessor`, and expected/actual predecessor IDs. It removes
+`:accumulation-state`, `:accumulation-update-input` and initialization from that
+record, while preserving the selected action. Both competing runs can publish;
+only the first can claim the accumulated state.
+
+The writer returns the exact finalized record. WM reconciles its returned
+judgement from it (including when a later rationale write fails). The one-shot
+receipt therefore sees the same outcome. Flight updates both its pending
+selection checkpoint and retained checkpoint before persisting the run receipt.
+Scheduled execution emits evidence from the exact published record. An injected
+legacy test writer may still return only a path; production uses record-returning
+publication. No candidate is rescored or reselected by this correction.
+
+This does not hide independent storage/index failures. A corrupt authoritative
+corpus cannot produce the required exact futility index; its existing error
+remains reported rather than publishing a fabricated coherent index. The tests
+separate that case from a healthy corpus whose predecessor changed. A refused
+accumulation tail also remains explicit on the next read: there is no automatic
+skip, reinitialization or seeded-tail migration.
+
+Validation: accumulation/receipt propagation 14 tests and 77 assertions; trace
+40/131; futility index 5/18; WM 89/511; scheduled flight entry 4/17. Total 152/754,
+all passing, one namespace at a time. The race test computes both updates against
+the same actual disk predecessor before either publishes. It then checks both
+records, absence of disputed state, unchanged selection, one-shot receipt,
+flight checkpoint and the reread persisted flight run record. The corruption
+control retains the independent index error. clj-kondo: no errors/warnings on
+changed files; Emacs check-parens and git diff --check passed.
+
+Immediately before the source commit, a `/proc/*/cmdline` scan at
+2026-09-27T00:47:54.558021Z found no matching WM scheduled, one-shot, flight,
+outer-loop or full-loop launcher arguments. This is a contemporaneous process
+check, not a claim of a production flight witness or a shared-JVM reload.
+Source commit `2d2a8fd04` was reported to claude-8 so ⟨2⟩3 warrants could resume.
+
+Registered focused warrant at `2d2a8fd04`:
+`test-registry-468b54a8d15e8459da29e1bb76840e8ea0fa8801b7bcf5f84094e30d15b96f12`
+(`warrant? true`, postcheck matched; real accumulation/publication/receipt tests).
