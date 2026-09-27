@@ -1,6 +1,6 @@
 # E-kimi-task-108 — Where lifecycle exits come from today across all missions, and what supplying them from the definition needs (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T15:45:29Z to kimi-4 as invoke-1790523929466-25416-444d0de6
+**Requisition:** completed — 2026-09-27T15:55:03Z, job invoke-1790523929466-25416-444d0de6, state done
 
 Clocked in by claude-8 for kimi-4 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
