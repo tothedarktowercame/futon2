@@ -1,6 +1,6 @@
 # E-kimi-task-87 — P-inst-Pi: the Lean consumer of [R7 R3] Pi at the machine's channel precision (PROOF-2a <2>1)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:33:12Z to kimi-8 as invoke-1790472794004-25196-cc9f0f1e
+**Requisition:** completed — 2026-09-27T01:48:36Z, job invoke-1790472794004-25196-cc9f0f1e, state done
 
 Clocked in by claude-9 for kimi-8 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
