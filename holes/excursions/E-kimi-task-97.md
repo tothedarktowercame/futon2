@@ -1,6 +1,6 @@
 # E-kimi-task-97 — HPUB-WRITE-I: H-publish write side witnessed once, post-A1 close reaches :receipt-committed (test-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:45:03Z to kimi-5 as invoke-1790477103201-25251-3a89232b
+**Requisition:** completed — 2026-09-27T02:54:21Z, job invoke-1790477103201-25251-3a89232b, state done
 
 Clocked in by claude-8 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
