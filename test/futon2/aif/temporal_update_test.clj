@@ -8,6 +8,10 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight-runner :as runner]
+            [futon2.aif.exact-belief-adapter :as exact]
+            [futon2.aif.cascade-model-manifest :as manifest]
+            [futon2.aif.temporal-input :as input]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.lane-futility :as lane]
             [futon2.aif.temporal-input-test :as fixture]
@@ -75,6 +79,23 @@
               (mapv #(get-in % [:temporal-receipt :status]) [a b c])))
        (is (= [2 3 4] (mapv #(count (get-in % [:temporal-cursor :consumed-event-ids]))
                             [record-a record-b record-c])))
+       (testing "initial evidence is already consumed, not a second update"
+         (let [start (get-in record-a [:temporal-input :previous])
+               initial (:initial-event-id start) event (get-in record-a [:temporal-input :consumed-event-id])]
+           (is (= #{initial} (:consumed-event-ids start)))
+           (is (not= initial event))
+           (is (= #{initial event} (get-in record-a [:temporal-cursor :consumed-event-ids])))
+           (is (= (get-in start [:record :continuation-belief]) (get-in record-a [:temporal-posterior :prior])))))
+       (testing "same Boolean at the same token at two revisions updates twice"
+         (let [a (get-in record-a [:attempts 0]) c (get-in record-c [:attempts 0])]
+           (is (= true (get-in a [:check :result :observed]) (get-in c [:check :result :observed])))
+           (is (= (get-in a [:check :path]) (get-in c [:check :path])))
+           (is (not= (get-in a [:check :result :evidence :resolved-sha])
+                     (get-in c [:check :result :evidence :resolved-sha])))
+           (is (not= (get-in record-a [:temporal-input :consumed-event-id])
+                     (get-in record-c [:temporal-input :consumed-event-id])))
+           (is (= (get-in record-b [:temporal-posterior :posterior])
+                  (get-in record-c [:temporal-posterior :prior])))))
        (is (= (get-in record-a [:temporal-posterior :posterior])
               (get-in record-b [:temporal-posterior :prior])))
        (is (= (point #{[fixture/target :a]}) (get-in record-a [:temporal-posterior :posterior])))
@@ -147,3 +168,43 @@
        (is (not (contains? r :temporal-cursor)))
        (is (= :temporal-contradiction (get-in next-attempt [:temporal-receipt :reason])))
        (println "TEMPORAL-CONTRADICTION" (pr-str (:temporal-receipt r)))))))
+
+(deftest ^:slow unchecked-token-keeps-its-nondegenerate-predictive-marginal
+  (isolated
+   (fn [root]
+     (let [{:keys [previous execute check repo]} (fixture/fixture root
+                         {:write-b {:guard {:needs #{} :forbids #{}} :theta 1/2}})
+           b (execute "seed-b" :write-b)
+           ;; A real check of a after executing b does not reveal b. This seed
+           ;; uses the general exact adapter, not the flight's narrower
+           ;; produced-token observation protocol. It is an actual posterior,
+           ;; never a renamed initialization or a claim of seed publication.
+           a-check (check {:class :C3 :repo "artifacts" :sha (:commit b) :path "a"})
+           transition (:transition b)
+           seed (exact/exact-update fixture/states
+                  #(hash-map (contains? % [fixture/target :a]) 1)
+                  #(manifest/pattern-kernel transition %)
+                  (:observed a-check) (get-in previous [:record :continuation-belief])
+                  {:domain fixture/domain :model-identity (:model-identity previous)
+                   :occurrence-id "seed-selection"})
+           file (io/file root "seed.edn")
+           _ (spit file (pr-str seed))
+           prior (assoc previous :basis :posterior :record (read! file)
+                         :trajectory-start? false :occurrence-id "seed-selection"
+                         :consumed-at {:click-id "observe-a" :occurrence-id "observe-a-selection"
+                                       :citation (evidence/value-digest seed)})
+           a (execute "observe-a" :write-a)
+           admitted (input/temporal-input prior a (:check a))
+           update (temporal/compute admitted)
+           _ (spit (io/file root "update.edn") (pr-str update))
+           retained (read! (io/file root "update.edn"))
+           marginal (fn [q token] (reduce + (for [[state mass] q :when (contains? state token)] mass)))]
+       (is (.isDirectory repo))
+       (is (= :ok (:status seed)))
+       (is (= :admitted (:status admitted)))
+       (is (= :ok (:status retained)))
+       (is (= 1/2 (marginal (:predicted-state retained) [fixture/target :b])
+                  (marginal (:posterior retained) [fixture/target :b])))
+       (is (= 1 (marginal (:posterior retained) [fixture/target :a])))
+       (is (= (:posterior retained) (input/previous-belief
+                                    (assoc prior :record retained :occurrence-id "observe-a-selection"))))))))

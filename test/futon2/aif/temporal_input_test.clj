@@ -34,8 +34,9 @@
   (let [f (io/file root name)] (spit f (pr-str value)) (read-edn f)))
 
 (defn fixture
-  "Isolated artifacts, a real initialization receipt and stamped C3 checks."
-  [root]
+  "Isolated artifacts, real initialization and stamped C3 checks. Optional
+   pattern declarations are fixture inputs, retained by the real executor."
+  [root & [pattern-declarations]]
   (let [repo (io/file root "artifacts")
         _ (.mkdirs repo)
         _ (git! repo "init" "-q")
@@ -51,6 +52,7 @@
                           :model-identity identity :domain domain}
                  :write-b {:guard {:needs #{:a} :forbids #{}} :produces #{:b}
                           :model-identity identity :domain domain}}
+        interps (merge-with merge interps pattern-declarations)
         locator (fn [token sha] {:class :C3 :repo "artifacts" :sha sha :path (name token)})
         check (fn [loc] (get-in (checks/observe {:token loc}) [:results :token]))
         initial-observation (checks/observe (into {} (for [t [:a :b]] [t (locator t start-sha)])))
@@ -119,7 +121,7 @@
   (let [root (.toFile (Files/createTempDirectory "temporal-input-" (make-array FileAttribute 0)))]
     (try
       (with-redefs [checks/repo-root (str root)]
-        (let [{:keys [previous stage receipt execute executed]} (fixture root)
+        (let [{:keys [previous stage receipt execute executed interps check]} (fixture root)
               a (execute "click-a" :write-a)
               input-a (save! root "input-a.edn" (temporal/temporal-input previous a (:check a)))
               next-previous (save! root "posterior-a.edn" (posterior-after input-a "click-b"))
@@ -185,6 +187,20 @@
                      (:status (temporal/temporal-input
                                (assoc-in next-previous [:consumed-at :click-id] "click-false")
                                failed (:check failed)))))))
+          (testing "a real executor failure cannot become an enacted temporal input"
+            (let [enact (flight/enact-fn
+                         {:interpretations (constantly interps) :check-fn check
+                          :record-dir (str (io/file root "failed-execution"))
+                          :dispatch-step! (fn [_] {:failed {:reason :fixture-transport-failed}})})
+                  result (enact {:flight/id "failed" :target target}
+                                {:click-id "failed" :chosen {:id :failed :precedence [:write-a]}})
+                  attempt (first (:attempts (read-edn (:record-path result))))]
+              (is (false? (:executed attempt)))
+              (is (false? (:success attempt)))
+              (is (= :execution-not-linked
+                     (:reason (temporal/temporal-input
+                               (assoc-in next-previous [:consumed-at :click-id] "failed")
+                               attempt (:check attempt)))))))
           (testing "receipt annotation never changes the q consumed by selection"
             (let [inspection (predecessor/inspect-trace {:temporal-previous next-previous :temporal-enactment b})
                   annotated (predecessor/input-receipt stage inspection admission nil)]

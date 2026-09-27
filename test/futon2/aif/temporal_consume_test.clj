@@ -33,8 +33,8 @@
     (try (with-redefs [checks/repo-root (str root)] (f root))
          (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
 
-(defn- harness [root {:keys [first-pattern outcome theta stale?]
-                      :or {first-pattern :write-a outcome true theta 1/2}}]
+(defn- harness [root {:keys [first-pattern outcome theta stale? max-clicks]
+                      :or {first-pattern :write-a outcome true theta 1/2 max-clicks 3}}]
   (let [{:keys [repo interps check]} (fixture/fixture root)
         target fixture/target tokens [:a :b :open]
         domain (set (map #(vector target %) tokens))
@@ -97,7 +97,7 @@
               (flight/run!
                (flight/start {:target target} {:kind :operator-declared :wants tokens :declared-by :test}
                              {:id "consume-fixture"})
-               {:max-clicks 3 :click-fn click :sources-fn #(source first-pattern)
+               {:max-clicks max-clicks :click-fn click :sources-fn #(source first-pattern)
                 :observe-fn (fn [_ _] (facts)) :fetch-run-record fetch
                 :enact-fn (fn [f c]
                            (when (and stale? (= "click-2" (:click-id c)))
@@ -211,3 +211,18 @@
   (let [absence {:status :absent :reason :temporal-stale-predecessor :detail {:expected :old}}]
     (is (= absence (get-in (flight/judge-opts {:enactments [{:temporal-receipt absence}]} {})
                            [:flight :temporal-previous])))))
+
+(deftest ^:slow changing-only-the-next-candidate-cannot-change-the-consumed-posterior
+  (isolated
+   (fn [root]
+     (let [{:keys [run click calls q0s results]} (harness root {:max-clicks 1})
+           f (run) opts (flight/judge-opts f {:wants [:a :b :open]})
+           path (:record-path (first @results)) before (slurp path)
+           b (click opts) c (click opts)]
+       (is (= [:write-b] (get-in b [:chosen :precedence])))
+       (is (= [:write-open] (get-in c [:chosen :precedence])))
+       (is (= (get-in (read! path) [:temporal-posterior :posterior])
+              (second @q0s) (nth @q0s 2)))
+       (is (= (:temporal-previous (receipt (second @calls)))
+              (:temporal-previous (receipt (nth @calls 2)))))
+       (is (= before (slurp path)))))))
