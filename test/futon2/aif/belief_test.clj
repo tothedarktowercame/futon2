@@ -1111,9 +1111,9 @@
       (doseq [s belief/status-set]
         (is (< (Math/abs (- (double (get p s))
                             (double (get result s 0.0)))) 1e-9)))))
-  (testing "unknown event type passes through unchanged"
+  (testing "unknown observation is refused"
     (let [p (belief/uniform-prior)]
-      (is (= p (belief/categorical-filter-step
+      (is (= {:status :refused :reason :unknown-observation} (belief/categorical-filter-step
                 p {:type :not-a-status :weight 1.0}
                 belief/observation-model-v1
                 belief/transition-model-v1
@@ -1127,16 +1127,16 @@
                   {:weight 1.0})]
       (is (< (:falsified result) (:strengthened result))
           "strengthened observation should rank strengthened above falsified")))
-  (testing "fail-closed: malformed A throws"
+  (testing "fail-closed: malformed A is a typed refusal"
     (let [bad-A (assoc-in belief/observation-model-v1
                           [:strengthened :strengthened] -1.0)]
-      (is (thrown? Exception
-                   (belief/categorical-filter-step
+      (is (= :invalid-observation-model
+                   (:reason (belief/categorical-filter-step
                     (belief/uniform-prior)
                     {:type :strengthened :weight 1.0}
                     bad-A
                     belief/transition-model-v1
-                    {:weight 1.0}))))))
+                    {:weight 1.0})))))))
 
 (deftest aif-likelihood-mode-test
   (testing ":aif mode produces valid posteriors"

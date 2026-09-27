@@ -248,6 +248,8 @@
                      observed-malformed?
                      (conj {:member :observed :status :not-finite :value observed}))]
      (cond
+       (= :refused (:status prediction))
+       (merge stamp {:status :refused :reason :belief-unavailable :cause prediction})
        ;; Malformed or missing model output, or a non-numeric observation:
        ;; refuse loudly rather than score a substituted value.
        (seq offending)

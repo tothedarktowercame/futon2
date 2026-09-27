@@ -48,16 +48,18 @@
         p (/ 1.0 n)]
     (zipmap status-set (repeat p))))
 
+(defn belief-refusal? [x] (= :refused (:status x)))
+(defn- belief-refusal [reason] {:status :refused :reason reason})
+
 (defn- normalise
-  "Renormalise a posterior so probabilities sum to 1.0. If the input
-   sums to zero (degenerate), returns a uniform prior — the apparatus
-   should never produce a zero-sum posterior in normal operation, but
-   this floor prevents NaN propagation."
+  "A zero-mass update has no posterior. Never replace it with a fresh prior."
   [posterior]
-  (let [s (reduce + (vals posterior))]
-    (if (zero? s)
-      (uniform-prior)
-      (into {} (for [[k v] posterior] [k (/ v s)])))))
+  (if (belief-refusal? posterior)
+    posterior
+    (let [s (reduce + (vals posterior))]
+      (if (pos? s)
+        (update-vals posterior #(/ % s))
+        (belief-refusal :impossible-observation)))))
 
 (defn initial-belief-state
   "Construct a fresh belief state with uniform priors for the given
@@ -250,6 +252,8 @@
   [A]
   (and (map? A)
        (= status-set (set (keys A)))
+       (every? #(and (map? %) (= status-set (set (keys %)))
+                     (every? (fn [p] (and (number? p) (Double/isFinite (double p)) (<= 0 p 1))) (vals %))) (vals A))
        (every? (fn [s]
                  (let [column (into {} (for [[o row] A] [o (double (get row s 0.0))]))]
                    (valid-distribution? column)))
@@ -262,7 +266,8 @@
   (and (map? B)
        (= status-set (set (keys B)))
        (every? (fn [s]
-                 (valid-distribution? (get B s)))
+                 (and (= status-set (set (keys (get B s))))
+                      (valid-distribution? (get B s))))
                status-set)))
 
 (defn valid-initial-prior?
@@ -313,14 +318,18 @@
    The tempered likelihood A[o|s]^κ(w) is applied as in the :a-matrix
    mode, but A is now the normalised observation model."
   [A observed w q-predicted]
-  (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))
-        likelihoods (into {}
-                          (for [s status-set]
-                            [s (Math/pow (double (get-in A [observed s] 0.0)) kappa)]))]
-    (normalise
-     (into {}
-           (for [[s prior] q-predicted]
-             [s (* (double prior) (double (get likelihoods s 0.0)))])))))
+  (cond
+    (belief-refusal? q-predicted) q-predicted
+    (not (valid-initial-prior? q-predicted)) (belief-refusal :invalid-prior)
+    (not (and (number? w) (Double/isFinite (double w)) (<= 0 w)))
+    (belief-refusal :invalid-observation-weight)
+    (not (valid-observation-model? A)) (belief-refusal :invalid-observation-model)
+    :else
+    (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))]
+      (normalise
+       (into {} (for [[s prior] q-predicted
+                      :let [a (get-in A [observed s])]]
+                  [s (* prior (Math/pow (double a) kappa))]))))))
 
 (defn categorical-filter-step
   "One complete prediction-update cycle of the categorical filter:
@@ -334,16 +343,13 @@
                                        transition-model-v1
                                        {:weight (:weight event 1.0)}))
   ([q event A B {:keys [weight] :or {weight 1.0}}]
-   (let [observed (:type event)
-         w        (double (or weight 1.0))]
-     (when-not (valid-observation-model? A)
-       (throw (ex-info "Invalid observation model A (fail-closed)" {:A A})))
-     (when-not (valid-transition-model? B)
-       (throw (ex-info "Invalid transition model B (fail-closed)" {:B B})))
-     (if (contains? status-set observed)
-       (->> (predict-step B q)
-            (update-step A observed w))
-       q))))
+   (cond
+     (belief-refusal? q) q
+     (not (valid-initial-prior? q)) (belief-refusal :invalid-prior)
+     (not (valid-observation-model? A)) (belief-refusal :invalid-observation-model)
+     (not (valid-transition-model? B)) (belief-refusal :invalid-transition-model)
+     (not (contains? status-set (:type event))) (belief-refusal :unknown-observation)
+     :else (update-step A (:type event) weight (predict-step B q)))))
 
 (defn likelihood-vector
   "Likelihood over true statuses for one observed event of type
@@ -402,7 +408,9 @@
                      :or {likelihood-mode :legacy}}]
    (let [{:keys [type weight]} event
          w (double (or weight 1.0))]
-     (if (contains? status-set type)
+     (if (belief-refusal? posterior)
+       posterior
+       (if (contains? status-set type)
        (case likelihood-mode
          :legacy
          (normalise
@@ -418,7 +426,7 @@
                                    (or observation-model observation-model-v1)
                                    (or transition-model transition-model-v1)
                                    {:weight w}))
-       posterior))))
+       posterior)))))
 
 (defn update-belief
   "Apply an evidence event (carrying :entity-id) to the full belief
@@ -622,6 +630,12 @@
    :foreclosed   -0.5
    :falsified    -1.0})
 
+(defn belief-absence
+  "A refused entity cannot contribute a numeric population prediction."
+  [belief]
+  (when-let [[eid posterior] (first (filter (fn [[_ p]] (not (valid-initial-prior? p))) belief))]
+    {:status :refused :reason :belief-unavailable :entity-id eid :cause posterior}))
+
 (defn entity-expected-health
   "Compute predicted health contribution from one entity's posterior.
    Returns a value in [0, 1] after rescaling from the raw weighted-sum
@@ -631,11 +645,13 @@
    per-entity belief-update attribution weights each entity by its
    health-deviation, so this per-entity quantity is needed at the judge site."
   [posterior]
+  (if-not (valid-initial-prior? posterior)
+    (if (belief-refusal? posterior) posterior (belief-refusal :invalid-prior))
   (let [raw (reduce + (for [[s p] posterior]
                         (* (double p)
                            (double (get annotation-health-status-weights s 0.0)))))]
     ;; rescale [-1, 1] → [0, 1]
-    (max 0.0 (min 1.0 (/ (+ raw 1.0) 2.0)))))
+    (max 0.0 (min 1.0 (/ (+ raw 1.0) 2.0))))))
 
 (defn predict-annotation-health
   "Predict observation distribution for the `:annotation-health` channel
@@ -648,6 +664,7 @@
    Empty belief returns `{:mean 0.0 :variance 1.0}` — maximally uncertain;
    no entities to predict from."
   [belief]
+  (if-let [absence (belief-absence belief)] absence
   (if (empty? belief)
     {:mean 0.0 :variance 1.0}
     (let [n (count belief)
@@ -663,7 +680,7 @@
           variance (if (pos? max-entropy)
                      (/ mean-entropy max-entropy)
                      0.0)]
-      {:mean mean :variance variance})))
+      {:mean mean :variance variance}))))
 
 ;; ---------------------------------------------------------------------------
 ;; v0.11: three additional likelihood models — `:sorry-count-norm`,
@@ -707,10 +724,11 @@
    capped at 1.0). From belief: sum of per-entity open-mass, divided by 10,
    capped. Higher belief mass on open statuses → higher predicted value."
   [belief]
+  (if-let [absence (belief-absence belief)] absence
   (if (empty? belief)
     {:mean 0.0 :variance 1.0}
     {:mean (min 1.0 (/ (reduce + (map (comp entity-open-mass second) belief)) 10.0))
-     :variance (mean-entropy-variance belief)}))
+     :variance (mean-entropy-variance belief)})))
 
 (defn predict-mission-health
   "Predict observation distribution for `:mission-health`. From belief:
@@ -718,11 +736,12 @@
    + `:addressed`. Higher concentration on healthy statuses → higher
    predicted mission-health."
   [belief]
+  (if-let [absence (belief-absence belief)] absence
   (if (empty? belief)
     {:mean 0.0 :variance 1.0}
     (let [n (count belief)]
       {:mean (/ (reduce + (map (comp entity-healthy-mass second) belief)) (double n))
-       :variance (mean-entropy-variance belief)})))
+       :variance (mean-entropy-variance belief)}))))
 
 (defn predict-active-repo-ratio
   "Predict observation distribution for `:active-repo-ratio`. From belief:
@@ -730,11 +749,12 @@
    `:foreclosed` + `:falsified`. Entities not yet declared dead count as
    active. Higher non-dormant mass → higher predicted ratio."
   [belief]
+  (if-let [absence (belief-absence belief)] absence
   (if (empty? belief)
     {:mean 0.0 :variance 1.0}
     (let [n (count belief)]
       {:mean (/ (reduce + (map (comp entity-nondormant-mass second) belief)) (double n))
-       :variance (mean-entropy-variance belief)})))
+       :variance (mean-entropy-variance belief)}))))
 
 ;; ---------------------------------------------------------------------------
 ;; E-support-coverage Cycle 3 (cg-a5d2e756, 2026-05-26):
@@ -829,12 +849,13 @@
 
    E-support-coverage Cycle 3."
   [belief entity-tags]
+  (if-let [absence (belief-absence belief)] absence
   (let [cohort (entities-with-tag-prefix belief entity-tags "supports-")]
     (if (empty? cohort)
       {:mean 0.0 :variance 1.0}
       (let [n (count cohort)]
         {:mean (/ (reduce + (map (comp entity-healthy-mass second) cohort)) (double n))
-         :variance (mean-entropy-variance cohort)}))))
+         :variance (mean-entropy-variance cohort)})))))
 
 (defn predict-attack-coverage
   "Predict observation distribution for the `:attack-coverage` channel.
@@ -845,12 +866,13 @@
 
    E-support-coverage Cycle 3."
   [belief entity-tags]
+  (if-let [absence (belief-absence belief)] absence
   (let [cohort (entities-with-tag-prefix belief entity-tags "attacks-")]
     (if (empty? cohort)
       {:mean 0.0 :variance 1.0}
       (let [n (count cohort)]
         {:mean (/ (reduce + (map (comp entity-healthy-mass second) cohort)) (double n))
-         :variance (mean-entropy-variance cohort)}))))
+         :variance (mean-entropy-variance cohort)})))))
 
 (defn- coupled-repos
   [coupling-edges]
@@ -875,13 +897,14 @@
    averaging non-dormant belief mass over that cohort. Empty bridge/cohort
    returns maximal uncertainty."
   [belief entity-repos coupling-edges]
+  (if-let [absence (belief-absence belief)] absence
   (let [cohort (entities-in-coupled-repos belief entity-repos coupling-edges)]
     (if (empty? cohort)
       {:mean 0.0 :variance 1.0}
       (let [n (count cohort)]
         {:mean (/ (reduce + (map (comp entity-nondormant-mass second) cohort))
                   (double n))
-         :variance (mean-entropy-variance cohort)}))))
+         :variance (mean-entropy-variance cohort)})))))
 
 (defn- tick-result-tags
   [tick-results]
@@ -908,13 +931,14 @@
    open/active belief mass over that cohort. Open tick entities predict
    firing constraint warnings."
   [belief entity-ticks tick-results]
+  (if-let [absence (belief-absence belief)] absence
   (let [cohort (entities-with-tick-tags belief entity-ticks tick-results)]
     (if (empty? cohort)
       {:mean 0.0 :variance 1.0}
       (let [n (count cohort)]
         {:mean (/ (reduce + (map (comp entity-open-mass second) cohort))
                   (double n))
-         :variance (mean-entropy-variance cohort)}))))
+         :variance (mean-entropy-variance cohort)})))))
 
 (def channels-with-likelihood
   "Set of observation channels for which an R3a likelihood model exists.
