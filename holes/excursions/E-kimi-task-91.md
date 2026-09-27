@@ -1,6 +1,6 @@
 # E-kimi-task-91 — H13-D: discovery of what still stands between the Holes table and no open row (PROOF-2a <1>3)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:14:48Z to kimi-1 as invoke-1790475288156-25235-1a99d621
+**Requisition:** completed — 2026-09-27T02:29:51Z, job invoke-1790475288156-25235-1a99d621, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
