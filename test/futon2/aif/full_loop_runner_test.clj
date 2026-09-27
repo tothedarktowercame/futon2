@@ -27,6 +27,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
@@ -6489,3 +6490,15 @@
     (is (= target (:entity/id record)))
     (is (= record (limb-evidence/validate-standing-decision record)))
     (is (not (str/includes? filled "<")))))
+
+(deftest dispatch-carries-current-run-harness
+  (doseq [id ["run-one" nil " "]]
+    (let [sent (atom nil)]
+      (with-redefs-fn {#'runner/post-json! (fn [_ payload] (reset! sent payload) {})}
+        #(runner/dispatch! {:agency-base "http://agency" :run-id id}
+                           "seat" "wm-full-loop" "mission" "no-op"))
+      (if (= id "run-one")
+        (is (= {:kind :war-machine :basis :producer-context :execution-id id} (:harness @sent)))
+        (do (is (= :unknown (get-in @sent [:harness :kind])))
+            (is (string? (get-in @sent [:harness :reason])))
+            (is (not (contains? (:harness @sent) :execution-id))))))))

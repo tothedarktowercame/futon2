@@ -1232,13 +1232,17 @@
                :transient-exhausted))))))))
 
 (defn dispatch!
-  [{:keys [agency-base d-task-dispatch-state]} agent caller mission prompt]
+  [{:keys [agency-base d-task-dispatch-state run-id]} agent caller mission prompt]
   (let [captured (some-> d-task-dispatch-state deref)
         prompt (if (= :captured (:status captured))
                  (str (d-task/prompt-binding (:dispatch captured)) "\n" prompt) prompt)
         response
         (post-json! (str agency-base "/api/alpha/bell")
                     {:agent-id agent :caller caller :mission-id (str mission)
+                     :harness (if (and (string? run-id) (not (str/blank? run-id)))
+                                {:kind :war-machine :basis :producer-context :execution-id run-id}
+                                {:kind :unknown :basis :producer-context
+                                 :reason "runner has no usable :run-id"})
                      :type "request" :mode "work" :prompt prompt})]
     (when-let [job-id (:job-id response)]
       (println "[wm-cancel] Ctrl-C alone does NOT cancel the Agency job.")
