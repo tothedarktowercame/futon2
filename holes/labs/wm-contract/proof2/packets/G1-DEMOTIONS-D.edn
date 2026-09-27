@@ -1,0 +1,152 @@
+{:packet :G1-DEMOTIONS-D
+ :kind :discovery-only
+ :date "2026-09-27"
+ :author :kimi-5
+ :inputs {:p4ng "62af31d"
+          :mathlib4 "0e976af61e"
+          :registry "git show HEAD:holes/labs/wm-contract/aif-equations.edn (as-of 2026-09-26, 22997a93)"}
+ :census {:imported 17 :term-present-not-imported 11 :absent 11 :consumer-unplaced 1 :registry-edges 40}
+ :edges
+ [{:edge [:R16 :R2] :term :world :importer :observe :cause :h
+   :reached ["DarkTower.WarMachine.Proof2.ActionAtMachine"]
+   :lean-carrier "binder `world : S` of machineObservationLaw (ObservationAtMachine.lean:44, R2's own module); `sPrev : S` of observationAfter (ObservationProcess.lean:34)"
+   :closure :none-correctly-absent
+   :note "registry :enters-through {:world :sPrev} already records this; only a re-host ruling changes it"}
+  {:edge [:R2 :R4] :term :interp :importer :co-application-kernel :cause :m
+   :reached ["DarkTower.WarMachine.Proof2.ObservationAtMachine"]
+   :lean-carrier "CascadeTransition.InterpretedPattern (CascadeTransition.lean:22); consumer binder `pat : ι → InterpretedPattern V` (CoApplicationKernel.lean:99); CoApplicationKernel already imports CascadeTransition"
+   :closure :generator-g2-read-exogenous-lean
+   :packet :P-gen-interp
+   :note "existing :lean-term {:interp \"pat\"} names the consumer's own module, which G1 refuses; exogenous :lean is a documented G0 non-source"}
+  {:edge [:R2 :R7] :term :ref-label :importer :adjudication-rates :cause :m
+   :reached ["DarkTower.WarMachine.Proof2.ObservationAtMachine"]
+   :lean-carrier "Record.admitted : Option Admitted (AdjudicationCounts.lean:79,87-91) — R7's own module"
+   :closure :registry-ruling-carrier-is-r7-local
+   :packet :ruling}
+  {:edge [:R2 :R7] :term :ref-label :importer :channel-identity :cause :m
+   :reached ["DarkTower.WarMachine.Proof2.ObservationAtMachine"]
+   :lean-carrier "currentPopulation's `labels : List (Label κ V)`; Label.record.admitted (ChannelIdentity.lean:12-18) — R7's own module"
+   :closure :registry-ruling-carrier-is-r7-local
+   :packet :ruling}
+  {:edge [:R3a :R7] :term :eps :importer :precision :cause :m
+   :reached ["DarkTower.WarMachine.Proof2.StatePredictionErrorAtMachine"]
+   :registry-declaration "sensoryPredictionError (module DarkTower.WarMachine.SensoryPredictionError, not reached)"
+   :lean-carrier "machineChannelPrecision consumes machineStatePredictionError (ChannelPrecisionAtMachine.lean:84) — the registry's :state-prediction-error row, same node R3a"
+   :closure :registry-repoint-source-row
+   :packet :P-repoint-eps
+   :note "secondary grain mismatch: :precision formal Π_k is channel-indexed; machineChannelPrecision is over state errors at x : S"}
+  {:edge [:R4 :R1] :term :A :importer :belief-state :cause :h
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.A, ForwardModel.A field (PolicyRollout.lean:28), via machineStep"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R1] :term :B :importer :belief-state :cause :h-p
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.B u, ForwardModel.B field (PolicyRollout.lean:25) — free field; cascade-grain definer coApplyKernel (CoApplicationKernel) not reached"
+   :closure :needs-ruling-or-cascade-grain-instantiation :packet :ruling}
+  {:edge [:R4 :R2] :term :A :importer :observe :cause :h
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.A inside observationAfter M world u = ∑_s M.B u sPrev s * M.A s o (ObservationProcess.lean:35)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R2] :term :B :importer :observe :cause :h-p
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.B u (PolicyRollout.lean:25), same situation as [R4 R1] :B"
+   :closure :needs-ruling-or-cascade-grain-instantiation :packet :ruling}
+  {:edge [:R4 :R3] :term :A :importer :state-belief-update :cause :h
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "exactUpdate M.A (M.B u) (obs (t+1)) μ (BeliefStepAtMachine.lean:58)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R3] :term :B :importer :state-belief-update :cause :h-p
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.B u (BeliefStepAtMachine.lean:58)"
+   :closure :needs-ruling-or-cascade-grain-instantiation :packet :ruling}
+  {:edge [:R4 :R3a] :term :A :importer :state-prediction-error :cause :h
+   :reached ["DarkTower.WarMachine.Proof2.RolloutAtMachine" "DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.A via machineStates/errorAtStates (StatePredictionErrorAtMachine.lean:110-120)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R3a] :term :B :importer :state-prediction-error :cause :h-p
+   :reached ["DarkTower.WarMachine.Proof2.RolloutAtMachine" "DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "M.B u via machineStates"
+   :closure :needs-ruling-or-cascade-grain-instantiation :packet :ruling}
+  {:edge [:R4 :R5] :term :Q-o-pi :importer :risk :cause :p
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :registry-declaration "Proof2.RolloutAtMachine.machineRollout (owner RolloutAtMachine, not reached)"
+   :lean-carrier "outcomeRisk's free binder Q : PredictiveOutcomeKernel PolicyIndex Obs (OutcomeRiskKL.lean:33-37); MachineQ.machinePredictiveOutcomeKernel (MachineQ.lean:205) builds a Q kernel without machineRollout"
+   :closure :instantiation-module-or-registry-repoint
+   :packet :P-inst-Q}
+  {:edge [:R4 :R5] :term :Q-o-pi :importer :ambiguity :cause :p
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "ambiguity's predictedState kernel binder (Holes.lean:7221-25)"
+   :closure :same-packet-as-risk
+   :packet :P-inst-Q}
+  {:edge [:R4 :R5] :term :A :importer :ambiguity :cause :h
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "ambiguity's `A : observationKernel` binder (Holes.lean:7223), from GenerativeModel.observation (Holes.lean:7115)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R7] :term :A :importer :likelihood-precision :cause :h
+   :reached ["DarkTower.WarMachine.Proof2.RolloutAtMachine" "DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "token-grain A is tokenLikelihood r, r : AdjudicationRates V from adjudicationRatesOf (AdjudicationCounts.lean:333)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R4 :R8] :term :A :importer :policy-free-energy :cause :h
+   :reached ["DarkTower.WarMachine.TokenObservation"]
+   :lean-carrier "Step.A : S → O → ℝ field (PrefixFreeEnergyAtMachine.lean:87), used in stepF (:105)"
+   :hint "tokenLikelihood" :packet :P-hint-A}
+  {:edge [:R5 :R6] :term :G :importer :policy-posterior :cause :p
+   :reached ["DarkTower.WarMachine.Holes" "DarkTower.WarMachine.OutcomeRiskKL"]
+   :registry-declaration "machineExpectedFreeEnergy (MachineQ.lean:280, owner MachineQ, not reached)"
+   :lean-carrier "machinePosteriorE's free binder G : PolicyIndex → EReal (PolicyPosteriorAtMachine.lean:870); machineAction's grade : PolicyIndex → Holes.ExpectedFreeEnergyValue (ActionAtMachine.lean:88-89)"
+   :closure :instantiation-module-grade-from-machineExpectedFreeEnergy
+   :packet :P-inst-G}
+  {:edge [:R6 :R16] :term :pi :importer :action :cause :w
+   :reached ["DarkTower.WarMachine.Proof2.PolicyPosteriorAtMachine"]
+   :registry-declaration "machinePolicySet (MachinePolicySet.lean:40, owner MachinePolicySet, not reached)"
+   :lean-carrier "PolicyInputs.policies : List PolicyIndex (ObservationAtMachine.lean:31) into machineAction"
+   :closure :held-on-W11-1-rebind-ruling}
+  {:edge [:R6 :R4] :term :r :importer :co-application-kernel :cause :p
+   :reached ["DarkTower.WarMachine.Proof2.PolicyPosteriorAtMachine"]
+   :registry-declaration "containmentOrder (ContainmentOrder.lean:68, owner Proof2.ContainmentOrder, not reached)"
+   :lean-carrier "coApplyKernel's FREE binder r : ι → ι → Prop (CoApplicationKernel.lean:99); CoApplicationKernel imports CascadeTransition + CascadeOrder only"
+   :closure :import-containmentOrder-and-instantiate
+   :packet :P-inst-r
+   :premise-correction "requisition listed this as (w) W9-1-in-flight; W9-1 LANDED (mathlib4 0e976af61e) and did not instantiate r"}
+  {:edge [:R6 :R4] :term :pi :importer :forward-model :cause :w
+   :reached ["DarkTower.WarMachine.Proof2.PolicyPosteriorAtMachine"]
+   :lean-carrier "machineRollout's π : PolicyIndex with π ∈ (inputsAt t μ).policies (RolloutAtMachine.lean:79-86)"
+   :closure :held-on-W11-1-rebind-ruling}
+  {:edge [:R6 :R8] :term :pi :importer :policy-free-energy :cause :w
+   :reached ["DarkTower.WarMachine.Proof2.PolicyPosteriorAtMachine"]
+   :lean-carrier "prefixF's π : PolicyKey M P (PrefixFreeEnergyAtMachine.lean:159)"
+   :closure :held-on-W11-1-rebind-ruling}
+  {:edge [:R7 :R3] :term :Pi :importer :belief-update :cause :p
+   :reached ["DarkTower.WarMachine.Proof2.AdjudicationCounts"]
+   :registry-declaration "Proof2.ChannelPrecisionAtMachine.machineChannelPrecision (not reached)"
+   :lean-carrier "beliefUpdate's free binder prec : Channel → ℝ (LaplaceBeliefUpdate.lean:33); BeliefStepAtMachine.lean:196-199 records machineStep takes no precision and the edge's real content is the counted A"
+   :closure :instantiation-module-channelPrecision-into-beliefUpdate-or-registry-repoint-to-counted-A
+   :packet :P-inst-Pi}]
+ :packets
+ [{:id :P-hint-A :kind :registry-only
+   :change "add :lean-term {:A \"tokenLikelihood\"} to rows :belief-state :observe :state-belief-update :state-prediction-error :ambiguity :likelihood-precision :policy-free-energy"
+   :closes 7}
+  {:id :P-repoint-eps :kind :registry-only
+   :change "[R3a→R7] :eps source row :prediction-error → :state-prediction-error"
+   :closes 1}
+  {:id :P-gen-interp :kind :generator-clause-plus-fixture
+   :change "G2: read an exogenous entry's :lean as its source module"
+   :closes 1}
+  {:id :P-inst-r :kind :lean-import-plus-instantiation
+   :change "CoApplicationKernel imports Proof2.ContainmentOrder; add coApplyKernel pat (containmentOrder pat) instantiation + theorems"
+   :closes 1 :note "prerequisite for B option (a)"}
+  {:id :P-inst-G :kind :new-lean-instantiation-module
+   :change "grade := machineExpectedFreeEnergy model reading belief Cdist positivePreference"
+   :closes 1}
+  {:id :P-inst-Q :kind :new-lean-instantiation-module-or-ruling
+   :change "Q from machineRollout's predictedOutcome; or re-point edge to machinePredictiveOutcomeKernel"
+   :closes 2}
+  {:id :P-inst-Pi :kind :new-lean-instantiation-module-or-ruling
+   :change "prec := ChannelPrecision.channelPrecision of the sensory-error window into beliefUpdate; or re-point term to counted-A"
+   :closes 1}]
+ :premise-corrections
+ ["[R6→R4] :r is (p), not (w): W9-1 landed at mathlib4 0e976af61e and left r a free argument of coApplyKernel"
+  ":eps is a clean (m): machineChannelPrecision consumes the STATE prediction error; the re-point target row already exists"
+  "A and B are not one case: A closes with one hint (tokenLikelihood) on all 7 edges; B has no reachable declarer (free ForwardModel.B field; coApplyKernel unreached)"
+  ":interp is a generator limit (G0: exogenous :lean unread), not a Lean import gap — CoApplicationKernel already imports CascadeTransition"
+  "census measured at mathlib4 0e976af61e (requisition said b79b4ab666); counts identical"]}
