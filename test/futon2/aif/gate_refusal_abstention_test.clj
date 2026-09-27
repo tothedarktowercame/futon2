@@ -7,6 +7,7 @@
   :missing-observation-locators; live pin: that click's repair finding's
   :failure-data (fixture header: path and sha)."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
@@ -24,7 +25,8 @@
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
 (use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false] (f))))
 
-(def live (edn/read-string (slurp "test/fixtures/gate-refusal/fifth-flight-failure-data.edn")))
+(def live (edn/read-string
+           (slurp (io/resource "fixtures/gate-refusal/fifth-flight-failure-data.edn"))))
 
 (defn- run [judge-throws & [flight]]
   (let [findings (atom [])

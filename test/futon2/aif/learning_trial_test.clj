@@ -1,5 +1,6 @@
 (ns futon2.aif.learning-trial-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.cascade-selection :as selection]
@@ -13,7 +14,8 @@
   (when-let [n (find-ns 'futon2.aif.learning-trial)]
     (when-let [f (ns-resolve n 'receipt)] (f input))))
 
-(def fixture (edn/read-string (slurp "test/fixtures/learning-trial/1789964661.edn")))
+(def fixture (edn/read-string
+              (slurp (io/resource "fixtures/learning-trial/1789964661.edn"))))
 (def updater ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012])
 (defn inputs []
   (let [{:keys [action terms source-record]} fixture
