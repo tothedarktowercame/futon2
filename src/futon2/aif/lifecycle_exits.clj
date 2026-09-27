@@ -121,20 +121,24 @@
   "Read the first bold Status line. A plain PHASE (date) names the phase.
   In semicolon composites, take the latest lifecycle phase explicitly marked
   complete, current or pending: 'HEAD complete; IDENTIFY pending' means IDENTIFY,
-  whose exit is not yet met. Other status prose (including COMPLETE alone)
-  is not interpreted as a phase. mission-registry's status regex is private."
+  whose exit is not yet met. Complete/DONE means DOCUMENT reached; arrows name their destination.
+  Other status prose is not interpreted as a phase. mission-registry's status regex is private."
   [mission-text]
   (if-let [line (first (filter #(re-find #"^\s*\*\*Status:\*\*" %)
                               (str/split-lines mission-text)))]
     (let [body (str/trim (str/replace-first line #"^\s*\*\*Status:\*\*\s*" ""))
-          parts (str/split body #";")
-          pattern (if (> (count parts) 1)
-                    #"^\s*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT)\s+(?:complete|current|pending)\b"
+          body (str/replace body #"^\*\*" "")
+          parts (str/split body #";|→")
+          pattern (if (and (> (count parts) 1) (not (str/includes? body "→")))
+                    #"^\s*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT)\s+(?i:complete|current|pending)\b"
                     #"^\s*(HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE|DOCUMENT)(?:\s|$)")
           named (set (keep #(some-> (re-find pattern %) second keyword) parts))]
-      (if-let [phase (last (filter named phases))]
-        {:phase phase}
-        {:absent :status-phase-unrecognised :line line}))
+      (cond
+        (re-find #"(?i)^(?:complete|done)\b" body) {:phase :DOCUMENT :state :complete}
+        (re-find #"(?i)^(?:blocked|deferred|nonstarter|re-opened)\b" body)
+        {:absent :status-phase-unrecognised :line line}
+        (seq named) {:phase (last (filter named phases))}
+        :else {:absent :status-phase-unrecognised :line line}))
     {:absent :status-line-missing}))
 
 (defn flight-exits

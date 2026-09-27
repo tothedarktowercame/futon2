@@ -258,8 +258,30 @@ Some prose **MAP exit: Met.**
         r (le/flight-exits "M-futon-seams" text @definition
                            {:repo "futon3c" :path "holes/missions/M-futon-seams.md"
                             :sha mission-pin :observe (constantly false)})]
-    (is (= :status-phase-unrecognised (get-in r [:current-phase :absent])) "COMPLETE is not a lifecycle phase")
-    (is (empty? (:wants r)))
-    (is (= [:HEAD :IDENTIFY] (mapv :phase (:not-started r))))
+    (is (= {:phase :DOCUMENT :state :complete} (:current-phase r)))
+    (is (= 2 (count (:wants r))))
+    (is (empty? (:not-started r)))
     (println :seams-pin mission-pin :current-phase (:current-phase r)
              :supplied-wants (:wants r) :not-started (:not-started r))))
+
+
+(deftest lifecycle-status-vocabulary-and-census
+  (doseq [status ["Complete" "COMPLETE" "DONE" "**COMPLETE (date)**"]]
+    (is (= {:phase :DOCUMENT :state :complete} (le/current-phase (str "**Status:** " status)))))
+  (doseq [[status phase] [["INSTANTIATE complete" :INSTANTIATE]
+                          ["INSTANTIATE near complete — work" :INSTANTIATE]
+                          ["MAP → DERIVE iterating" :DERIVE]]]
+    (is (= {:phase phase} (le/current-phase (str "**Status:** " status)))))
+  (doseq [status ["BLOCKED" "DEFERRED" "NONSTARTER" "RE-OPENED" "OPEN — HEAD through VERIFY drafted"]]
+    (is (= :status-phase-unrecognised (:absent (le/current-phase (str "**Status:** " status))))))
+  (let [records (for [repo ["futon2" "futon3c"]
+                      :let [sha (str/trim (:out (shell/sh "git" "-C" (str "../" repo) "rev-parse" "HEAD")))
+                            paths (str/split-lines (:out (shell/sh "git" "-C" (str "../" repo)
+                                                                  "ls-tree" "-r" "--name-only" sha "holes/missions")))]
+                      path paths :when (re-find #"/M-[^/]+\.md$" path)
+                      :let [text (pinned repo sha path)]
+                      :when (:lifecycle-shaped? (le/lifecycle-shaped? text))]
+                  (le/current-phase text))]
+    (println :status-census {:phase (count (filter :phase records))
+                             :absent (count (filter :absent records))
+                             :unrecognised (frequencies (map :line (filter #(= :status-phase-unrecognised (:absent %)) records)))})))
