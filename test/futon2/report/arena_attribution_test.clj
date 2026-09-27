@@ -6,6 +6,7 @@
             [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is]]
             [futon2.aif.belief :as belief]
+            [futon2.aif.free-energy :as fe]
             [futon2.report.war-machine :as wm]))
 
 (def read-pin "6ee56279ceff666f9d49dd51c43dd132ee1e3632")
@@ -23,7 +24,7 @@
     (binding [*ns* (:ns (meta #'wm/judge))]
       (eval (list 'fn ['belief 'aggregated-signed-error 'event-weight]
                   (list 'let (into '[step 0 error-mag 0.5 anneal-factor 1.0
-                                     driver-record {} triple-omissions []
+                                     predictions {} driver-record {} triple-omissions []
                                      triple-refusals [] driver-omissions []
                                      driver-rejections []] bindings)
                         '{:events events :belief belief' :step-entry step-entry}))))))
@@ -85,3 +86,27 @@
         (is (zero? (:events-applied step-entry)))
         (is (= {:a :impossible-observation :b :impossible-observation}
                (:entity-attribution-omitted step-entry)))))))
+
+(deftest refused-channel-does-not-suppress-a-valid-channel-at-judge-site
+  (let [source (slurp (io/resource "futon2/report/war_machine.clj"))
+        start (.indexOf source "                raw-errors (into")
+        end (.indexOf source "                ;; R7:" start)
+        bindings (read-string (str "[" (subs source start end) "]"))
+        read-errors (binding [*ns* (:ns (meta #'wm/judge))]
+                      (eval (list 'fn ['triples] (list 'let bindings 'raw-errors))))
+        refused (impossible-posterior)
+        prediction (belief/predict-mission-health {:valid (belief/uniform-prior)
+                                                   :refused refused})
+        present (fe/compute-prediction-error 0.9 prediction)
+        triples {:mission-health present
+                 :annotation-health (fe/compute-prediction-error 0.5 refused)}
+        errors (read-errors triples)
+        driver (belief/r3d-aggregate-driver errors)
+        updated (@current {:valid (belief/uniform-prior) :refused refused}
+                          (:driver driver) 0.1)]
+    (is (= :refused (get-in triples [:annotation-health :status])))
+    (is (= #{:mission-health} (set (keys errors))))
+    (is (= :present (:status driver)))
+    (is (pos? (:driver driver)))
+    (is (not= (belief/uniform-prior) (get-in updated [:belief :valid])))
+    (is (= refused (get-in updated [:belief :refused])))))

@@ -488,6 +488,9 @@
     ;; harvester turn a refusal into a work item rather than a standing red.
     ;; Present-only: no key means every channel's triple was complete, which
     ;; is a different claim from "the producer did not report".
+    (seq (:futon2.aif.belief/omitted-events (meta (:belief judge-output))))
+    (assoc :belief-event-omissions
+           (:futon2.aif.belief/omitted-events (meta (:belief judge-output))))
     (seq (:prediction-triple-events judge-output))
     (assoc :prediction-triple-events (:prediction-triple-events judge-output))
     ;; AC2 (same ruling, same condition): the typed records the R3d belief

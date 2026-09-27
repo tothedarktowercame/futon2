@@ -7287,16 +7287,11 @@
                                             :when (= :absent (:status r))] r))
                 triple-refusals (vec (for [[_ r] triples
                                            :when (= :refused (:status r))] r))
-                ;; Omit the absent channels; refuse the WHOLE update when any
-                ;; channel is refused, so no channel is scored against a
-                ;; likelihood the model failed to produce. An empty errors map
-                ;; passes precision state through unchanged and drives no
-                ;; belief event, which is what refusing the update means here.
-                raw-errors (if (seq triple-refusals)
-                             {}
-                             (into {} (for [[ch r] triples
-                                            :when (= :present (:status r))]
-                                        [ch r])))
+                ;; Channel-local absence/refusal cannot suppress valid channels.
+                ;; Preserve each typed outcome in the step/trace below.
+                raw-errors (into {} (for [[ch r] triples
+                                         :when (= :present (:status r))]
+                                     [ch r]))
                 ;; R7: the same resolver feeds behaviour and the provenance
                 ;; stamp. Precision is variance-only; need remains :salience.
                 prec-state' (precision/update-precision-state
@@ -7399,11 +7394,15 @@
                              (seq driver-rejections)
                              (assoc :belief-aggregation-rejected
                                     (count driver-rejections))
+                             (some (comp seq :omitted val) predictions)
+                             (assoc :prediction-entity-omissions
+                                    (into {} (keep (fn [[ch p]]
+                                                     (when (seq (:omitted p)) [ch (:omitted p)]))
+                                                   predictions)))
                              (seq attribution-omitted)
                              (assoc :entity-attribution-omitted attribution-omitted))
                 micro-trace' (conj micro-trace step-entry)]
-            (if (or (seq triple-refusals)
-                    (>= (inc step) r3-max-steps)
+            (if (or (>= (inc step) r3-max-steps)
                     (< error-mag r3-error-eps))
               {:belief belief'
                :precision-state prec-state'

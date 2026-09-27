@@ -1111,9 +1111,9 @@
       (doseq [s belief/status-set]
         (is (< (Math/abs (- (double (get p s))
                             (double (get result s 0.0)))) 1e-9)))))
-  (testing "unknown observation is refused"
+  (testing "unknown observation is omitted"
     (let [p (belief/uniform-prior)]
-      (is (= {:status :refused :reason :unknown-observation} (belief/categorical-filter-step
+      (is (= p (belief/categorical-filter-step
                 p {:type :not-a-status :weight 1.0}
                 belief/observation-model-v1
                 belief/transition-model-v1
