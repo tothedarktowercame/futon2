@@ -121,7 +121,7 @@
     (is (= :R14 (get-in d [:distinct-from :policy-precision-gamma :item])))
     (is (contains? (:distinct-from d) :legacy-weight-exponent-kappa))
     ;; the gaps are named, not papered over
-    (is (= 2 (count (:gaps d))))
+    (is (= 1 (count (:gaps d))))
     ;; the wiring entry names the demonstration and the fixed status
     (is (contains? (:wiring d) :tempered-rates))
     (is (string? (:demonstration (:wiring d))))))
@@ -245,3 +245,16 @@
     (is (not= g1 g0))
     (is (> (Math/abs (- (double g3) (double g1))) 1e-4)
         "the effect is measurable, not epsilon")))
+
+(deftest explicit-nil-precision-is-not-the-omitted-default
+  (doseq [rate [0 1/10]]
+    (let [base {:rates {"t0" {:false-neg rate :false-pos rate}}
+                :q0 {#{} 1} :precedence-fn (constantly []) :horizon 1
+                :spec (m/preference-spec {:want #{"t0"} :evidence #{}
+                                          :lam 1 :mu 0 :zeroed #{}})}
+          missing (m/horizon-g-sparse-cert (assoc base :zeta nil))]
+      (is (number? (m/horizon-g-sparse base)))
+      (is (= (m/horizon-g-sparse base)
+             (m/horizon-g-sparse (assoc base :zeta 1))))
+      (is (= :invalid-zeta (get-in missing [:g :kind])))
+      (is (nil? (:certificate missing))))))

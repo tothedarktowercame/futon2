@@ -10,8 +10,9 @@
   tokenLikelihood_checkable, so no likelihood matrix is evaluated, the
   ambiguity term is identically 0, and ζ multiplies nothing — declared
   FIXED-VACUOUS on that path; see `zeta-declaration` and its
-  :certificate-statuses). No production caller SOURCES real rates from
-  futon2.aif.observation-rates yet; that sourcing is the next WIRE slice.
+  :certificate-statuses). Production now sources rates from the A-S Revision 3 label reader through
+  observation-rates and measured-a-version (CONSUME-I, 2026-09-26). This does
+  not supply a precision-learning law; the fixed declaration remains explicit.
 
   What this namespace does NOT do: choose a prior or update law for ζ. Parr
    2022 B.14–B.19 gamma-prior/fixed-point machinery is pinned in futon2 only
@@ -216,8 +217,7 @@
    {:identity-path :declared-fixed-vacuous
     :tempered-path :declared-fixed-applied
     :absent :absent}
-   :gaps ["no production caller SOURCES real adjudication rates yet: futon2.aif.observation-rates is built with zero live consumers, and until a tick caller passes :adjudication-rates the live run still defaults to the identity kernel (an explicit default now, not a hardcode) — that sourcing is the next WIRE slice"
-          "no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})
+   :gaps ["no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})
 
 (def zeta-certificate-statuses
   "The GCertificate's ζ-provenance vocabulary, EXTRACTED from

@@ -813,9 +813,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    iterated. The infinite-risk step records :risk :infinite and stops,
    matching the scalar path's early return. Returns {:g <scalar, :infinite
    or typed refusal> :steps <vector or nil>}."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe zeta] :as m} record?]
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe] :as m} record?]
   (let [bad (rate-bad-token rates)
-        zeta (or zeta 1)
+        zeta (get m :zeta 1)
         ;; R7 (declared FIXED ζ): temper the per-token observation kernel ONCE,
         ;; up front, with likelihood-precision's audited law — tempering each
         ;; token's Bernoulli (fn,fp) pair is exactly row-wise A^ζ/Z for the
@@ -835,6 +835,10 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
     (cond
       bad {:g {:status :missing :kind :invalid-adjudication-rate
                :token bad :value (get rates bad)} :steps nil}
+      ;; Omitted configuration selects the declared default; explicit nil is
+      ;; unavailable, never the numeric value 1 (nor an identity-kernel claim).
+      (nil? zeta)
+      {:g {:status :missing :kind :invalid-zeta :zeta zeta} :steps nil}
       ;; A declared fixed ζ ≠ 1 with the identity observation kernel is a
       ;; configuration error: ζ multiplies nothing here, and silently ignoring
       ;; it would hide that (zai-55/zai-30 ruling, 2026-09-18).
