@@ -16,7 +16,12 @@
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
 (defn- union-of [f xs] (reduce set/union #{} (map f xs)))
 (defn- pattern? [p]
-  (and (= #{:guard :produces} (set (keys p)))
+  ;; The required shape, not a closed key set: an admitted interpretation
+  ;; also carries its declared :model-identity and :domain (futon2
+  ;; 3145da84b, ITEM3-DECLARE-I), which the constructor reads nothing from.
+  ;; A closed set refused every declared interpretation as :invalid-input
+  ;; (WIRE-25-A gate, wire ask-merge-published -> construct, 03:05Z).
+  (and (map? p)
        (= #{:needs :forbids} (set (keys (:guard p))))
        (every? set? [(:produces p) (get-in p [:guard :needs]) (get-in p [:guard :forbids])])))
 
