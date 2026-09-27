@@ -38,6 +38,7 @@
             [clojure.test :refer [deftest is]]
             [clojure.walk :as walk]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
 
@@ -187,7 +188,16 @@
            {:live-c {:derived {:want #{[target :test-covers-missing-total-repos]}
                                :weights {[target :test-covers-missing-total-repos] 1}
                                :lam 1 :entries [] :gaps [] :refusals nil
-                               :signature "wm01-bindings-live-c"}}})
+                               :signature "wm01-bindings-live-c"}}
+            ;; Proof 1.3 (84f81cb42): the synthetic target has no corpus
+            ;; relation, and an unresolved relation gets no scalar G
+            ;; (:class-unknown-no-scalar-g) -- so the fixture injects a
+            ;; relation row for its own target, as cascade_decision_test does.
+            :focus-inputs (assoc (focus-receipt/read-inputs)
+                                 :relations [{:target target :facet "WM"
+                                              :relation "focus"
+                                              :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
+                                              :effective-from "2026-01-01T00:00:00Z"}])})
         decision (:decision r)]
     (is (map? decision))
     (is (not= :abstained (:status decision)) "the occurrence yields a decision")
