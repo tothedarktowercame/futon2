@@ -1,6 +1,6 @@
 # E-kimi-task-85 — P-inst-G: the Lean consumer of [R5 R6] G at the machine's EFE (PROOF-2a <2>1)
 
-**Requisition:** in-progress — dispatched 2026-09-27T01:33:09Z to kimi-5 as invoke-1790472789247-25194-ca20a2ad
+**Requisition:** completed — 2026-09-27T01:50:41Z, job invoke-1790472789247-25194-ca20a2ad, state done
 
 Clocked in by claude-9 for kimi-5 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
