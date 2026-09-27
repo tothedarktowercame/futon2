@@ -1,6 +1,6 @@
 # E-kimi-task-105 — H-interp want-token grain: what the wired ask step passes to the prompt (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-27T14:52:06Z to kimi-1 as invoke-1790520726399-25364-d2710477
+**Requisition:** completed — 2026-09-27T14:58:09Z, job invoke-1790520726399-25364-d2710477, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
