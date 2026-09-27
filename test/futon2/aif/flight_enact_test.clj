@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.flight :as flight]
-            [futon2.aif.flight-runner :as fr])
+            [futon2.aif.flight-runner :as fr]
+            [futon2.aif.full-loop-runner :as runner])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -45,6 +46,38 @@
     (is (= {:absent :no-repair-obligation-for-target :target "M-t"} (:publication-observed enactment)) "no repair id for the target: publication does not apply (step 12)")
     (is (= enactment (edn/read-string (slurp record-path))) "the record is written where the flight's records go")
     (is (.startsWith ^String record-path (.getCanonicalPath (io/file dir))))))
+
+(def discharged-repair-entry
+  {:status :receipt-committed :repair/id "occ-t" :repair/discharged? true})
+
+(deftest a-discharged-repair-obligation-is-observed-as-published
+  ;; The target HAS a repair obligation (:repair-id-fn answers "occ-t")
+  ;; and the click's run record — written by the real persist-run-record!
+  ;; — carries its discharge under :repair/publication, so the real
+  ;; observe-publication-fn (enact-fn's step-12 default, no override)
+  ;; returns {:observed true ...} and enact-fn carries that present value
+  ;; onto the enactment.
+  (let [dir (temp-dir)
+        rr-dir (temp-dir)
+        saved (#'runner/persist-run-record!
+               {:run-record-dir rr-dir} "run-pub" "2026-09-26T00:00:00Z"
+               {:outcome :offline-no-selection
+                :repair/publication [discharged-repair-entry]})
+        record (edn/read-string (slurp (:run-record saved)))
+        f (fr/enact-fn {:dispatch-step! (fn [_] {:commit "c-a" :produced :t/a
+                                                 :check {:class :fixture :token :t/a}})
+                        :check-fn (fn [check] {:observed (= :t/a (:token check))})
+                        :interpretations (constantly interps)
+                        :fetch-run-record (fn [id] (when (= id "run-pub") record))
+                        :repair-id-fn (constantly "occ-t")
+                        :record-dir dir})
+        {:keys [enactment]} (f flight-0 {:click-id "run-pub"
+                                         :chosen {:candidate :cand/x :precedence [:p/a :p/b]}})]
+    (is (= [discharged-repair-entry] (:repair/publication record))
+        "the real writer put the discharge on the run record")
+    (is (= {:observed true :at "run-pub" :evidence discharged-repair-entry}
+           (:publication-observed enactment))
+        "the receipt committed: a present observation, evidence and all, crosses onto the enactment (step 12)")))
 
 (deftest a-failed-step-is-a-deviation-not-dropped
   (let [{:keys [enactment]} ((enact (temp-dir) (atom []) :p/a) flight-0 click)]
