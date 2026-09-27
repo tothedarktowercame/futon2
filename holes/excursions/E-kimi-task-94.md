@@ -1,6 +1,6 @@
 # E-kimi-task-94 — C14-P1-LEDGER-LABELS-I: Figure 6A C_tau edges carry wire-ledger status (p4ng generator)
 
-**Requisition:** in-progress — dispatched 2026-09-27T02:32:33Z to kimi-3 as invoke-1790476353753-25244-ba4b2d64
+**Requisition:** completed — 2026-09-27T02:44:49Z, job invoke-1790476353753-25244-ba4b2d64, state done
 
 Clocked in by claude-8 for kimi-3 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
