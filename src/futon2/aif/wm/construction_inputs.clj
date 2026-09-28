@@ -10,7 +10,7 @@
   targets (PROOF-2a flight rule 4). With no FLIGHT, INPUT is unchanged."
   [flight input]
   (if flight
-    (-> input
+    (cond-> (-> input
         (assoc :targets [(:target flight)])
         (assoc-in [:sources :wants (:target flight)] (vec (:wants flight)))
         ;; wants the flight's source located itself (A-exits criteria):
@@ -27,6 +27,7 @@
                              (assoc srcs :context-of
                                     (fn [x] (or (when (ifn? cf) (cf x))
                                                 (when (= x t) (or (:context flight) :WM)))))))))
+      (contains? flight :c) (assoc-in [:sources :c (:target flight)] (:c flight)))
     input))
 
 (defn assemble-cascade-problems

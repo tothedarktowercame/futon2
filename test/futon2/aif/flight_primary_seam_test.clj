@@ -4,9 +4,11 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.flight :as flight]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.outcome-wants :as outcome-wants])
+            [futon2.aif.outcome-wants :as outcome-wants]
+            [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -38,7 +40,64 @@
     (is (= :no-admitted-locator (:reason (first waiting))))
     (is (= (get-in (outcome document :p0-reconstruction) [:locator :would-be])
            (:would-be (first waiting))))
-    (is (= #{:wants :locators :universe :source} (set (keys actual))))))
+    (is (= #{:wants :locators :universe :c :source} (set (keys actual))))))
+
+(defn- assembled-fixture [document]
+  (let [source-result (result document)
+        target (:target document)
+        token (first (:wants source-result))
+        flight {:target target :wants (:wants source-result)
+                :locators (:locators source-result) :universe (:universe source-result)
+                :c (:c source-result)}
+        input {:targets [target]
+               :sources {:universes {target (:universe source-result)}
+                         :wants {target (:wants source-result)}
+                         :locators {target (:locators source-result)}
+                         :interpretations {target {:patterns {:p {:guard {:needs #{} :forbids #{}}
+                                                                  :produces #{token}}}}}
+                         :candidates {target [{:precedence [:p]
+                                              :construction-receipt {:kind :fixture}}]}
+                         :horizon-steps 1 :context-of (constantly :WM)
+                         :beta-by-context {:WM 1}}}
+        assembled (cascade-problems/assemble
+                   (construction-inputs/flight-assembly-input flight input))]
+    (get-in assembled [:problems 0 :cascade-problem :cascade-spec])))
+
+(deftest primary-seam-c-reaches-assembled-scoring-spec
+  (let [document (fixture)
+        mined (outcome document :mined-graph)
+        token (:token (outcome-wants/outcome-criterion (:target document) mined))
+        spec (assembled-fixture document)
+        c (:c spec)
+        mined-c (first (filter #(= token (:token %)) (:outcomes c)))]
+    (is (contains? (:want spec) token))
+    (is (= :derived (:status c)))
+    (is (= :primary-seam (:source c)))
+    (is (= (get-in document [:extractor :weighting]) (:weighting c)))
+    (is (= (:source-outcome mined) (:source-outcome mined-c)))))
+
+(deftest missing-extractor-is-distinct-from-extractor-unstated
+  (let [c (:c (result (dissoc (fixture) :extractor)))]
+    (is (= {:absent :not-in-seam-document} (:weighting c)))
+    (is (not= {:status :uniform-declared-constant} c))))
+
+(deftest served-by-is-joined-by-source-outcome
+  (let [document (-> (fixture)
+                     (assoc-in [:outcomes 0 :source-outcome] :o-mined)
+                     (assoc-in [:extractor :served-by]
+                               [{:instance :right :serves [{:outcome :o-mined :via :shared}]}
+                                {:instance :wrong :serves [{:outcome :o-other :via :other}]}]))
+        actual (result document)
+        token (first (:wants actual))
+        outcome-c (first (filter #(= token (:token %)) (get-in actual [:c :outcomes])))]
+    (is (= [:right] (mapv :instance (:served-by outcome-c))))))
+
+(deftest a-exits-flight-assembly-does-not-add-c
+  (let [target "M-a-exits"
+        assembled (construction-inputs/flight-assembly-input
+                   {:target target :wants [:w] :want-source {:kind :a-exits}}
+                   {:targets [target] :sources {:wants {target [:w]}}})]
+    (is (nil? (get-in assembled [:sources :c target])))))
 
 (deftest injected-observer-supplies-the-mined-graph-value
   (let [actual (result (fixture) (constantly false))

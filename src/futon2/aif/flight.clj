@@ -220,6 +220,7 @@
 (defn- primary-seam-result [document observe read]
   (let [target (:target document)
         outcomes (:outcomes document)
+        extractor (:extractor document)
         criterion (fn [outcome]
                     (assoc (outcome-wants/outcome-criterion target outcome)
                            :provenance (:provenance outcome)))
@@ -248,10 +249,35 @@
         wants (outcome-wants/wants target admitted published observe-loc)
         criteria-by-token (into {} (map (fn [outcome]
                                          (let [c (criterion outcome)] [(:token c) c])))
-                                outcomes)]
+                                outcomes)
+        served-by (:served-by extractor)
+        served-by-for (fn [source-outcome]
+                        (if extractor
+                          (if (sequential? served-by)
+                            (filterv (fn [entry]
+                                       (some #(= source-outcome (:outcome %))
+                                             (:serves entry)))
+                                     served-by)
+                            [])
+                          {:absent :not-in-seam-document}))
+        c {:status :derived
+           :source :primary-seam
+           :read (or read {:absent :not-read-from-git})
+           :weighting (if extractor
+                        (:weighting extractor)
+                        {:absent :not-in-seam-document})
+           :outcomes (mapv (fn [outcome]
+                             (let [criterion (criterion outcome)
+                                   source-outcome (or (:source-outcome outcome)
+                                                      {:absent :not-extracted})]
+                               {:token (:token criterion)
+                                :source-outcome source-outcome
+                                :served-by (served-by-for source-outcome)}))
+                           admitted)}]
     {:wants (:wants wants)
      :locators (:locators wants)
      :universe (:universe wants)
+     :c c
      :source (cond-> {:kind :primary-seam
                       :via "futon2.aif.outcome-wants"
                       :document-source (:source document)
@@ -311,11 +337,13 @@
   "The wants for the flight's next click: the want source's wants plus every
   want carried from earlier clicks, in first-seen order."
   [flight sources]
-  (let [{:keys [wants source locators universe]} (source-wants (:want-source flight) flight sources)]
-    {:wants (vec (distinct (concat wants (:carried-wants flight))))
-     :source source
-     :locators (or locators {})
-     :universe (or universe {})}))
+  (let [{:keys [wants source locators universe] :as result}
+        (source-wants (:want-source flight) flight sources)]
+    (cond-> {:wants (vec (distinct (concat wants (:carried-wants flight))))
+             :source source
+             :locators (or locators {})
+             :universe (or universe {})}
+      (contains? result :c) (assoc :c (:c result)))))
 
 (defn judge-opts
   "What the flight passes the tick's judge: the fixed target and the wants
@@ -328,6 +356,8 @@
             :universe (:universe wants)
             :want-source (:source wants)
             :click (inc (count (:clicks flight)))}}
+    (contains? wants :c)
+    (assoc-in [:flight :c] (:c wants))
     (seq (:enactments flight))
     (assoc-in [:flight :temporal-previous]
               (temporal-update/read-receipt (:temporal-receipt (peek (:enactments flight)))))))

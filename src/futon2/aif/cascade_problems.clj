@@ -163,10 +163,12 @@
                       :c-schedule schedule
                       :observation-schedule (get-in sources [:observation-schedules target]
                                                     {:status :held :reason :observation-placement-not-declared})
-                      :cascade-spec {:want (set want) :c-schedule schedule
-                                     :lam (get-in scales [:lam :value])
-                                     :mu (get-in scales [:mu :value])
-                                     :preference-scales scales}
+                      :cascade-spec (cond-> {:want (set want) :c-schedule schedule
+                                             :lam (get-in scales [:lam :value])
+                                             :mu (get-in scales [:mu :value])
+                                             :preference-scales scales}
+                                      (contains? (get sources :c {}) target)
+                                      (assoc :c (get-in sources [:c target])))
                       :preference-scales scales
                       :beta beta
                       :locators locators
