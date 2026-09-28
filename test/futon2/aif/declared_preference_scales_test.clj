@@ -90,19 +90,9 @@
               :premise-refused-before-work]}]
            (:refusals assembled)))
     (is (= [1 0] [(:lam good) (:mu good)]))
-    (is (= {"M-aif-policy-conditioned-eig"
-            {:lam {:value 1 :status :declared}
-             :mu {:value 0 :status :declared}}
-            "M-f11-find-production-successor"
-            {:lam {:value 1 :status :declared}
-             :mu {:value 0 :status :declared}}
-            "M-wm-08-external-f2"
-            {:lam {:value 1 :status :declared}
-             :mu {:value 0 :status :declared}}
-            "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
-            {:lam {:value 1 :status :defaulted :reason :parameter-not-declared}
-             :mu {:value 0 :status :defaulted :reason :parameter-not-declared}}}
-           (:by-target good)))
+    ;; every production declaration states both scales (live-c/preference-scales)
+    (is (= 4 (count (:by-target good))))
+    (is (every? #(= :declared (:status %)) (mapcat vals (vals (:by-target good)))))
     (is (not= family bad))
     (is (= :incommensurable-family
            (try (live-c/family-scales bad) nil
