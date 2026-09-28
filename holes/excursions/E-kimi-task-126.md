@@ -1,6 +1,6 @@
 # E-kimi-task-126 — CREEP-D: account of PROOF-2 sections complete then reopened (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-28T20:44:52Z to kimi-2 as invoke-1790628292365-26258-b545e0a1
+**Requisition:** completed — 2026-09-28T20:52:31Z, job invoke-1790628292365-26258-b545e0a1, state done
 
 Clocked in by claude-1 for kimi-2 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
