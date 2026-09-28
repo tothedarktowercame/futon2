@@ -101,17 +101,20 @@
   (delay
     (some-> "wm/cohort-contracts.edn" io/resource slurp edn/read-string)))
 
-(defn recorded-contract [first-event]
+(defn recorded-contract
+  "The contract a recorded attempt is read under. Only a full revision in the
+  declared set selects the earlier contract; any other record, including one
+  with no full revision, is read under the current contract, as it was before
+  the earlier contract could be selected at all."
+  [first-event]
   (let [contracts @cohort-contracts
         revision (get-in first-event [:payload :judgment :code-state :git-sha])
-        boundary (get-in contracts [:boundary :commit])]
-    (when (and (= :wm/cohort-contracts-v1 (:schema contracts))
-               (string? revision) (re-matches #"[0-9a-f]{40}" revision))
-      {:kind (if (contains? (:pre-enriched-fold contracts) revision)
-               :pre-enriched-fold
-               :enriched-fold-v1)
-       :source-revision revision
-       :boundary boundary})))
+        full? (and (string? revision) (some? (re-matches #"[0-9a-f]{40}" revision)))]
+    {:kind (if (and full? (contains? (:pre-enriched-fold contracts) revision))
+             :pre-enriched-fold
+             :enriched-fold-v1)
+     :source-revision (if full? revision {:absent :no-full-revision-recorded})
+     :boundary (get-in contracts [:boundary :commit])}))
 
 (defn recorded-checkpoint-cell-errors [p contract checkpoint cell]
   (checkpoint-cell-errors* p checkpoint cell
@@ -1080,7 +1083,6 @@
           (conj :preregistration-sha256)
           (not= (get-in p [:stopping-rule :target]) (:stopping-target activation))
           (conj :stopping-target)
-          (nil? contract) (conj :recorded-revision)
           (not (.isDirectory attempt-dir)) (conj :attempt-directory)
           (not (pos-int? ordinal)) (conj :ordinal)
           (not= checkpoint-order types) (conj :checkpoint-order)

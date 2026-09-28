@@ -386,12 +386,24 @@
         (is (= [{:sequence 3 :checkpoint :construction
                  :errors [[:invalid-fold-output :nil-fold-output]]}]
                (:event-errors data))))))
-  (testing "missing and abbreviated recorded revisions are refused"
-    (doseq [[revision present?] [[nil false] ["07a6b7ece" true]]]
+  (testing "a record with no full revision cannot select the earlier contract"
+    ;; an absent :git-sha key is already refused by the time-step's own check
+    (doseq [[revision present?] [["head" true] ["72d9beba7" true]]]
       (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
         (rewrite-time-step-revision! attempt-dir revision present?)
-        (is (some #{:recorded-revision}
-                  (:failed (refusal-data binding attempt)))))))
+        (rewrite-construction! attempt-dir legacy-construction)
+        (let [data (refusal-data binding attempt)]
+          (is (= [:events] (:failed data)))
+          (is (= [{:sequence 3 :checkpoint :construction
+                   :errors [[:invalid-fold-output :nil-fold-output]]}]
+                 (:event-errors data)))))))
+  (testing "and is otherwise read under the current contract, with the absence typed"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir "head" true)
+      (is (= {:kind :enriched-fold-v1
+              :source-revision {:absent :no-full-revision-recorded}
+              :boundary "9dd4fd8dc1f20a842b65b975762df60f4296e83d"}
+             (:recorded-contract (cohort/closed-execution-qualified binding attempt))))))
   (testing "legacy mode does not relax unrelated construction requirements"
     (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
       (rewrite-time-step-revision! attempt-dir legacy-revision true)
