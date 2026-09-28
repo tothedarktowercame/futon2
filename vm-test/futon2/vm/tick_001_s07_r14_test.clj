@@ -29,7 +29,7 @@
             [futon2.aif.cascade-selection :as cs]
             [futon2.aif.policy :as policy]
             [futon2.aif.controller-authority :as controller-authority]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 ;; G at T = 3 from R5 (06-R5.edn :computed :G), reproduced by claude-4.
 (def G-at-T
@@ -172,7 +172,7 @@
          {:guard {:needs #{:summary-without-total-repos-throws}
                   :forbids #{:test-covers-missing-total-repos}}
           :produces #{:test-covers-missing-total-repos}}}
-        lane (wm/cascade-lane
+        lane (wm-cd/cascade-lane
               {:facts {:summary-without-total-repos-throws true
                        :active-repo-ratio-absent-default-is-0 true
                        :coupling-density-reads-same-key-with-default true

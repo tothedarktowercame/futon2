@@ -3,7 +3,7 @@
   (:require [clojure.pprint :as pp]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.cascade-sources :as sources]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (let [[directory horizon-text] *command-line-args*
       horizon (when horizon-text (parse-long horizon-text))]
@@ -12,7 +12,7 @@
         targets (vec (sort (keys (:universes loaded))))
         assembled (problems/assemble
                    {:targets targets :sources (sources/with-context-fn (assoc loaded :horizon-steps horizon))})
-        admissions (mapv #'wm/admit-cascade-problem (:problems assembled))]
+        admissions (mapv #'wm-cd/admit-cascade-problem (:problems assembled))]
     (pp/pprint {:observed-at (str (java.time.Instant/now))
                 :horizon horizon :source-directory directory
                 :source-files (:files loaded)

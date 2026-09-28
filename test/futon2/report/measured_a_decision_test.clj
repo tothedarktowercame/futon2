@@ -13,7 +13,7 @@
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def ^:dynamic ^:private c3-labels nil)
 (def ^:private c3-subjects {:C3 10})
@@ -43,7 +43,7 @@
   (merge fixture/live-c-opts extra))
 
 (defn- decision [extra-opts]
-  (:decision (wm/cascade-decision (assembled) (opts extra-opts))))
+  (:decision (wm-cd/cascade-decision (assembled) (opts extra-opts))))
 
 (defn- contract []
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -94,7 +94,7 @@
 (deftest without-a-store-the-lane-is-unmeasured
   ;; No configured store preserves the historical unmeasured default.
   (let [problem (get-in (assembled) [:problems 0 :cascade-problem])
-        lane (wm/cascade-lane problem)
+        lane (wm-cd/cascade-lane problem)
         prov (get-in (first (:ranked lane)) [:certificate :rates-provenance])
         ma (:measured-a (decision {}))]
     (is (nil? (:stopped-at lane)) (pr-str (:refusal lane)))
@@ -130,7 +130,7 @@
              :rates-sha (wm/sha256-hex (wm/canonical-pr (:rates sourced)))
              :source (:source sourced)
              :classes [:C3]}))
-        d (with-redefs [wm/measured-a-version zero-kernel-digesting]
+        d (with-redefs [wm-cd/measured-a-version zero-kernel-digesting]
             (decision {}))
         ma (:measured-a d)]
     (is (some? (:rates-sha ma))

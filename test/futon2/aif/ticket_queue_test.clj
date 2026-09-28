@@ -9,7 +9,7 @@
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.live-c :as live-c]
             [futon2.aif.focus-receipt :as focus-receipt]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -138,7 +138,7 @@
                                                      :effective-from "2026-01-01T00:00:00Z"}])
                               :live-c {:sources {} :sources-now {}
                                        :derived {:want #{} :weights {} :lam 1 :entries [] :gaps [] :refusals nil :signature (live-c/signature-of {})}}})
-            result (wm/cascade-decision assembled opts)
+            result (wm-cd/cascade-decision assembled opts)
             d (:decision result)]
         (is (= "M-main" (get-in d [:action :target])))
         (is (= :universe-not-admitted (get-in assembled [:refusals 0 :kind])))
@@ -146,7 +146,7 @@
         (is (= :universe-not-admitted (get-in (receipt d) [:entries 0 :refusals 0 :kind])))
         (is (some #(= "T-missing" (:target %)) (:dropped-candidates result)))
         (let [all-refused (problems/assemble {:targets ["T-missing"] :sources {:horizon-steps 2}})
-              r (wm/cascade-decision all-refused opts)]
+              r (wm-cd/cascade-decision all-refused opts)]
           (is (= :abstained (get-in r [:decision :status])))
           (is (= :no-admitted-front-entry (get-in r [:decision :selection-certificate :ticket-queue :status]))))))))
 

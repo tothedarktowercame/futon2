@@ -11,7 +11,7 @@
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-reader-test :as population]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -36,13 +36,13 @@
   (cp/assemble {:targets [fixture/tick-1-target]
                 :sources (locfix/locate-all fixture/tick-1-sources)}))
 (defn- decision [opts]
-  (wm/cascade-decision (assembled) (merge fixture/live-c-opts opts)))
+  (wm-cd/cascade-decision (assembled) (merge fixture/live-c-opts opts)))
 (defn- scoring [lane] (:cascade-scoring (meta (:ranked lane))))
 (defn- score [r]
   (pr-str (select-keys (:decision r) [:action :softmax-weights :selection-law])))
 (defn- captured [opts after-lane]
-  (let [lanes (atom []) real wm/cascade-lane
-        result (with-redefs [wm/cascade-lane
+  (let [lanes (atom []) real wm-cd/cascade-lane
+        result (with-redefs [wm-cd/cascade-lane
                             (fn [p o] (let [lane (real p o)]
                                         (swap! lanes conj lane) (after-lane) lane))]
                  (decision opts))]
@@ -119,10 +119,10 @@
   (fill! 5)
   (let [view (reader/read-rates-inputs (path) (labels/loaded-identities))
         p (get-in (assembled) [:problems 0 :cascade-problem])
-        lanes (atom []) real wm/cascade-lane
+        lanes (atom []) real wm-cd/cascade-lane
         opts {:observation-labels-view view :constructor-scored-with :same-observation-labels-snapshot}]
     (io/delete-file (path))
-    (with-redefs [wm/cascade-lane (fn [p o] (let [r (real p o)] (swap! lanes conj r) r))]
+    (with-redefs [wm-cd/cascade-lane (fn [p o] (let [r (real p o)] (swap! lanes conj r) r))]
       (is (number? (:value (wm/constructed-candidate-g p {:precedence []} opts))))
       (let [d (:decision (decision opts))]
         (is (= :same-observation-labels-snapshot (get-in d [:selection-certificate :observation-labels :constructor-scored-with])))

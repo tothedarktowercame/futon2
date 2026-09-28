@@ -27,7 +27,7 @@
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- tmp-dir []
   (str (java.nio.file.Files/createTempDirectory
@@ -61,7 +61,7 @@
         tmp (tmp-dir)]
     (with-redefs-fn {#'mr/load-missions (fn [& _] {:missions []})
                      #'mr/load-tickets (fn [& _] {:tickets []})
-                     (ns-resolve ns 'select-and-record-cascade!)
+                     #'wm-cd/select-and-record-cascade!
                      (fn [_ opts] (reset! captured opts) (throw (ex-info "stop" {::stop true})))}
       #(try ((ns-resolve ns 'judge) {} (merge {:cascade-sources-dir tmp :cascade-proposals-dir tmp
                                                 :repair-obligations-root tmp
@@ -83,7 +83,7 @@
          assembled (problems/assemble {:targets [fixture/tick-1-target]
                                        :sources (locators/locate-all fixture/tick-1-sources)})
          d (binding [receipts/*habit-reads* reads]
-             (:decision ((deref (ns-resolve ns 'select-and-record-cascade!))
+             (:decision ((deref #'wm-cd/select-and-record-cascade!)
                          assembled
                          (merge fixture/live-c-opts
                                 {:cascade-habit-path (str (io/file (tmp-dir) "absent.edn"))}

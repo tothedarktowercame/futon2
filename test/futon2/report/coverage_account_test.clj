@@ -9,7 +9,7 @@
             [futon2.aif.mission-hole-wants :as holes]
             [futon2.aif.trace :as trace]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -58,7 +58,7 @@
         ;; an unresolved relation gets no scalar G (futon2 84f81cb42): the
         ;; decision refuses :class-unknown-no-scalar-g. The fixture supplies a
         ;; sourced relation for its own targets, as cascade_decision_test does.
-        result (wm/cascade-decision assembled
+        result (wm-cd/cascade-decision assembled
                                    {:focus-inputs (focus-inputs)
                                     :live-c {:sources live-sources}
                                     :cascade-habit-path (str (io/file *root* "habit.edn"))})]
@@ -130,7 +130,7 @@
 (deftest abstention-retains-hole-census-and-types-uncomputed-projection
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
         assembled (construction-inputs/assemble-cascade-problems {:targets ["M-b"] :sources sources})
-        result (wm/cascade-decision assembled {})
+        result (wm-cd/cascade-decision assembled {})
         record (trace/trace-record {:decision (:decision result)})]
     (is (= :abstained (get-in record [:decision :status])))
     (is (= (:mission-hole-coverage sources) (:mission-hole-coverage record)))
@@ -146,7 +146,7 @@
                      (assoc-in [:candidates "M-b"]
                                [{:precedence [:p] :construction-receipt {:source :fixture}}]))
         omitted (assoc-in supplied [:candidates "M-b"] [])
-        decide (fn [s] (wm/cascade-decision
+        decide (fn [s] (wm-cd/cascade-decision
                         (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources s})
                         {:focus-inputs (focus-inputs)
                          :live-c {:sources live-sources}

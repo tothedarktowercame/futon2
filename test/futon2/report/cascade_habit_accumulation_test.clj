@@ -12,7 +12,7 @@
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.locator-fixtures :as locators]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -69,10 +69,10 @@
                      {:decision (policy/select-action-cascades (fields work?) opts)})
             opts {:beta 2 :cascade-habit-path path}
             before (atom [])
-            after (with-redefs [wm/cascade-decision select]
+            after (with-redefs [wm-cd/cascade-decision select]
                     (mapv (fn [tick]
                             (let [_ (swap! before conj (pr-str (select tick opts)))
-                                  r (wm/select-and-record-cascade! tick opts)]
+                                  r (wm-cd/select-and-record-cascade! tick opts)]
                               (reinforcement/close! path (:decision r) :grounded-change
                                                     (outcome-fixture/comparison (:decision r) true))
                               (pr-str r))) ticks))
@@ -115,8 +115,8 @@
             ;; The focus receipt (improve-7a) stamps wall-clock :as-of; pin it.
             opts (assoc fixture/live-c-opts :cascade-habit-path path
                         :focus-as-of "2026-09-21T18:00:00Z")
-            before (wm/cascade-decision assembled opts)
-            after (wm/select-and-record-cascade! assembled opts)]
+            before (wm-cd/cascade-decision assembled opts)
+            after (wm-cd/select-and-record-cascade! assembled opts)]
         ;; Lane route telemetry includes wall-clock timestamps on each run.
         ;; Compare the complete live decision, including its certificate.
         (is (= (pr-str (:decision before)) (pr-str (:decision after))))

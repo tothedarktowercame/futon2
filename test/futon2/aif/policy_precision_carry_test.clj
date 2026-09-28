@@ -15,7 +15,7 @@
             [futon2.aif.trace :as trace]
             [futon2.aif.policy-precision-carry :as carry]
             [futon2.report.cascade-decision-test :as tick]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -133,7 +133,7 @@
      (with-redefs [task/default-root (str path "-missing-task-store")]
        (let [assembled (problems/assemble {:targets [tick/tick-1-target]
                                           :sources (locators/locate-all tick/tick-1-sources)})
-             decision (:decision (wm/cascade-decision assembled (assoc tick/live-c-opts :cascade-habit-path path)))
+             decision (:decision (wm-cd/cascade-decision assembled (assoc tick/live-c-opts :cascade-habit-path path)))
              state (get-in decision [:selection-certificate :policy-precision-state])
              frozen (get-in decision [:selection-certificate :precision-family])]
          (is (= :precision-no-admitted-predecessor (:reason state)))
@@ -148,7 +148,7 @@
 
 (deftest abstention-does-not-drop-a-learned-rate
   (let [state (advance nil admission family)
-        result (wm/cascade-decision {:problems [] :refusals [{:target "target" :kind :no-constructed-candidate}]}
+        result (wm-cd/cascade-decision {:problems [] :refusals [{:target "target" :kind :no-constructed-candidate}]}
                  {:token-belief-predecessor-trace
                   {:decision {:selection-certificate {:policy-precision-state state}}}})
         retained (get-in result [:decision :selection-certificate :policy-precision-state])]

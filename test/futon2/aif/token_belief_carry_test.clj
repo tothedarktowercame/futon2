@@ -12,7 +12,7 @@
             [futon2.aif.token-belief-carry :as carry]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def absent-habit-path "resources/fixtures/d-token-carry/absent-habit.edn")
 
@@ -25,7 +25,7 @@
     (throw (ex-info "Conservativity fixture requires an absent habit store"
                     {:path absent-habit-path})))
   (with-redefs [habit/default-path absent-habit-path]
-    (:decision (wm/cascade-decision
+    (:decision (wm-cd/cascade-decision
                 (assembled)
                 (assoc fixture/live-c-opts
                        :cascade-habit-path absent-habit-path

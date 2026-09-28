@@ -10,7 +10,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assemble*
   "cp/assemble with every token given a fixture C3 locator (P5 locator
@@ -91,7 +91,7 @@
       (is (= target (:target problem)))
       (is (= [receipt receipt receipt] (mapv :construction-receipt (:constructed-candidates problem)))
           "each candidate's construction receipt travels with the problem")
-      (let [lane (wm/cascade-lane (:cascade-problem problem))]
+      (let [lane (wm-cd/cascade-lane (:cascade-problem problem))]
         (is (and (nil? (:refusal lane)) (nil? (:stopped-at lane)))
             "the real cascade-lane accepts the assembled problem end-to-end")
         (is (= [:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9] (mapv :node (:route lane)))

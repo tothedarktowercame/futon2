@@ -6,7 +6,7 @@
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.interpretation-construction :as sut]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def interpretations
   {:P {:guard {:needs #{} :forbids #{}} :produces #{:q}}
@@ -67,7 +67,7 @@
                               :locators {(:target input) (zipmap (keys observation) (repeat {:class :C4}))}
                               :candidates {(:target input) candidates}
                               :horizon-steps 2 :beta-by-context {:WM 1} :context-of (constantly :WM)}})
-        admit #'wm/admit-cascade-problem
+        admit #'wm-cd/admit-cascade-problem
         result (admit (first (:problems assembled)))]
     (is (empty? (:refusals assembled)))
     (is (seq (:constructed-candidates (:problem result))))

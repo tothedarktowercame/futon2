@@ -41,7 +41,8 @@
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp]
          '[futon2.aif.observation-rates :as observation-rates]
-         '[futon2.report.war-machine :as wm])
+         '[futon2.report.war-machine :as wm]
+         '[futon2.aif.wm.cascade-decision :as wm-cd])
 
 (def contract
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -151,7 +152,7 @@
 (defn e3 []
   (heading "E3. Would a non-zero kernel for a checkable class move G?")
   (let [p (problem :locators (locators :C4))
-        production (wm/cascade-lane p)
+        production (wm-cd/cascade-lane p)
         ;; design (a), simulated: a class with a measured rate takes it; the
         ;; zero kernel stays only where nothing was measured.
         design-a (with-redefs [observation-rates/token-likelihood-rates
@@ -161,7 +162,7 @@
                                                       (assoc measured-grep-kernel :basis :measured)
                                                       {:false-neg 0 :false-pos 0 :basis :checkable})]))
                                        token-classes))]
-                    (wm/cascade-lane p))]
+                    (wm-cd/cascade-lane p))]
     (println "\nproduction (checkable zero kernel):")
     (println "  stopped-at:" (:stopped-at production) " refusal:" (:refusal production))
     (println "  ranked [cascade-id G-efe]:" (ranked-g production))

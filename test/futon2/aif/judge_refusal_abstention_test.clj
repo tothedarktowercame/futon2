@@ -17,7 +17,7 @@
             [futon2.aif.locator-fixtures :as loc]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cfix]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -110,7 +110,7 @@
                                 :sources (loc/locate-all cfix/tick-1-sources)})
         {:keys [result record]}
         (run-judge (fn [_]
-                     (wm/cascade-decision
+                     (wm-cd/cascade-decision
                       assembled
                       (assoc cfix/live-c-opts
                              :live-c {:derived {:refusals [{:kind :source-not-available}]}})))

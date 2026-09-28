@@ -25,7 +25,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.efe :as efe]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def T 3)
 
@@ -211,7 +211,7 @@
          {:guard {:needs #{:summary-without-total-repos-throws}
                   :forbids #{:test-covers-missing-total-repos}}
           :produces #{:test-covers-missing-total-repos}}}
-        lane (wm/cascade-lane
+        lane (wm-cd/cascade-lane
               {:facts {:summary-without-total-repos-throws true
                        :active-repo-ratio-absent-default-is-0 true
                        :coupling-density-reads-same-key-with-default true

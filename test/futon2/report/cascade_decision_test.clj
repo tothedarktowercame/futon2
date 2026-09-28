@@ -15,7 +15,7 @@
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.live-c :as lc]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assemble*
   "cp/assemble with every token given a fixture C3 locator (P5 locator
@@ -166,7 +166,7 @@
   ;; the per-target refusal kinds are exercised, not the refuse-all rule)
   (let [assembled (assemble* {:targets [:A :B]
                                 :sources {:horizon-steps 3}})
-        r (wm/cascade-decision assembled live-c-opts)]
+        r (wm-cd/cascade-decision assembled live-c-opts)]
     (is (= :abstained (get-in r [:decision :status]))
         "no assembled problem ⇒ the abstention")
     (is (= 2 (count (get-in r [:decision :refusals])))
@@ -178,7 +178,7 @@
 (deftest h5a-tick-1-decision
   (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
-        r (wm/cascade-decision assembled live-c-opts)
+        r (wm-cd/cascade-decision assembled live-c-opts)
         decision (:decision r)]
     (is (= (into {} (map (fn [[token locator]] [[tick-1-target token] locator]))
                          (get-in (first (:problems assembled)) [:cascade-problem :locators]))
@@ -237,14 +237,14 @@
         assembled (assemble* {:targets [tick-1-target b-target]
                                 :sources sources})
         without-projection
-        (wm/cascade-decision
+        (wm-cd/cascade-decision
          assembled
          {:focus-inputs (:focus-inputs live-c-opts)
           :live-c {:derived {:want #{:star/no-target}
                              :weights {:star/no-target 1}
                              :lam 1 :entries [] :gaps [] :refusals nil
                              :signature "no-projectable-live-c"}}})
-        r (wm/cascade-decision assembled live-c-opts)
+        r (wm-cd/cascade-decision assembled live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
     ;; PROOF-wm-works 1.3 build 2/3 (2026-09-22): the joint decision now
@@ -279,7 +279,7 @@
         stripped (update-in assembled
                             [:problems 0 :constructed-candidates 2]
                             dissoc :construction-receipt)
-        r (wm/cascade-decision stripped live-c-opts)
+        r (wm-cd/cascade-decision stripped live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
     (is (= [{:target tick-1-target
@@ -319,9 +319,9 @@
     (is (thrown-with-msg?
          clojure.lang.ExceptionInfo
          #"cascade decision refused"
-         (wm/cascade-decision merged live-c-opts)))
+         (wm-cd/cascade-decision merged live-c-opts)))
     (is (= :incommensurable-family
-           (try (wm/cascade-decision merged live-c-opts)
+           (try (wm-cd/cascade-decision merged live-c-opts)
                 (catch clojure.lang.ExceptionInfo e
                   (:kind (ex-data e)))))
         "different T across problems refuses, typed, with the values")))
@@ -352,8 +352,8 @@
               :live-c {:derived (assoc live-c-fixture
                                       :want #{[:A :done]}
                                       :weights {[:A :done] 1})}}
-        r (wm/cascade-decision assembled opts)
-        both (wm/cascade-decision
+        r (wm-cd/cascade-decision assembled opts)
+        both (wm-cd/cascade-decision
               (assoc-in assembled [:problems 1 :cascade-problem :facts :open] true) opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])
@@ -402,7 +402,7 @@
   ;; real corpus, so the freshness guard fires.
   (let [assembled (assemble* {:targets [tick-1-target]
                               :sources tick-1-sources})
-        call (fn [] (wm/cascade-decision
+        call (fn [] (wm-cd/cascade-decision
                      assembled
                      {:live-c {:derived live-c-fixture
                                :sources-now (lc/read-sources)}}))]
@@ -419,7 +419,7 @@
   ;; decision refuses with it — no silent uniform fallback.
   (let [assembled (assemble* {:targets [tick-1-target]
                               :sources tick-1-sources})
-        e (try (wm/cascade-decision
+        e (try (wm-cd/cascade-decision
                 assembled
                 {:live-c {:sources {:wholeness {:refusal {:kind :source-missing
                                                           :path "/nonexistent"}}
@@ -443,7 +443,7 @@
                           :weights {(keyword "alive" (name tick-1-target)) 1})]
       (is (= #{pair} (:want (lc/cascade-spec matching #{pair} #{pair})))
           "mission token projects through that mission's own declared want"))
-    (let [decision (wm/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})]
+    (let [decision (wm-cd/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})]
       (is (map? decision)
           "a grain mismatch does not halt the decision")
       (is (some? (get-in decision [:decision :action]))
@@ -453,7 +453,7 @@
         (is (some? c) "candidates were scored")))
     ;; and the grain mismatch is RECORDED, not silent: uniform-because-no-overlap
     ;; must never be mistaken for C-was-derived-and-agreed.
-    (let [spec-c (-> (wm/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})
+    (let [spec-c (-> (wm-cd/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})
                      (get-in [:decision :token-qualification]))]
       (is (= :target-token-pair (:scheme spec-c))
           "the decision states the qualification scheme its outcomes use"))))
@@ -465,7 +465,7 @@
         marked (mapv (fn [i p] (assoc-in p [:construction-receipt :test-marker] i))
                      (range) pairs)
         reordered (assoc-in assembled [:problems 0 :constructed-candidates] (vec (reverse marked)))
-        r (wm/cascade-decision reordered live-c-opts)
+        r (wm-cd/cascade-decision reordered live-c-opts)
         candidates (keys (get-in r [:decision :selection-law :posterior]))]
     (is (= (count pairs) (count candidates)))
     (is (every? #(seq (:precedence %)) candidates))
@@ -488,7 +488,7 @@
              [:empty-orders (update-in assembled [:problems 0 :constructed-candidates]
                                        #(mapv (fn [p] (assoc p :precedence [])) %))]
              [:no-pairs (assoc-in assembled [:problems 0 :constructed-candidates] [])]]]
-      (let [r (wm/cascade-decision broken live-c-opts)
+      (let [r (wm-cd/cascade-decision broken live-c-opts)
             declines (:dropped-candidates r)]
         (is (= :abstained (get-in r [:decision :status])) (str label))
         (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])))

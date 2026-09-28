@@ -37,7 +37,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.interpretation-construction :as construction]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def fixture-dir "test/fixtures/click2-replay")
 
@@ -94,7 +94,7 @@
         assembled (construction-inputs/assemble-cascade-problems
                    {:targets (vec (keys (:universes sources)))
                     :sources (assoc sources :horizon-steps horizon)})
-        admissions (mapv #'wm/admit-cascade-problem (:problems assembled))
+        admissions (mapv #'wm-cd/admit-cascade-problem (:problems assembled))
         refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
         by-target (into {} (map (juxt :target identity)) refusals)]
     (doseq [target click2-targets]

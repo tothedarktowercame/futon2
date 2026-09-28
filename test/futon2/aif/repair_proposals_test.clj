@@ -5,7 +5,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-proposals :as supply]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -109,7 +109,7 @@
                                                                            :construction-receipt {:kind :hand-admitted}}]}]
                        :refusals []}
             recorded (proposals/record-supply assembled {} supplied)
-            result (wm/cascade-decision recorded {})]
+            result (wm-cd/cascade-decision recorded {})]
         (is (= 1 (count (:proposals supplied))))
         (is (empty? (:problems recorded)))
         (is (= :repair-closure-observation-unavailable (get-in recorded [:refusals 0 :reason])))

@@ -4,7 +4,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-rates :as rates]
             [futon2.aif.cascade-model-manifest :as manifest]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def contract
   {:schema :wm/observation-contract-v1
@@ -233,7 +233,7 @@
         cert manifest/horizon-g-sparse-cert
         lane (with-redefs [manifest/horizon-g-sparse-cert
                            (fn [m] (swap! seen conj m) (cert m))]
-               (wm/cascade-lane (lane-problem)))]
+               (wm-cd/cascade-lane (lane-problem)))]
     {:lane lane :models @seen}))
 
 (def ^:private measuring-labels

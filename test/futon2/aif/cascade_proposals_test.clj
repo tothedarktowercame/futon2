@@ -6,7 +6,7 @@
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.cascade-sources :as sources]
             [futon2.aif.mission-hole-wants :as wants]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -101,7 +101,7 @@
             no-evidence (proposals/record-supply assembled source {:proposals [] :declines []})
             supply (:record (proposals/generate-retrieval! "M-proposal" :mission root options))
             supplied (proposals/record-supply assembled source supply)
-            decision (wm/cascade-decision supplied {})]
+            decision (wm-cd/cascade-decision supplied {})]
         (is (empty? (:candidates want)))
         (is (empty? (get-in want [:interpretation :patterns])))
         (is (some #(= :no-evidenced-proposal (:reason %)) (:dropped-candidates no-evidence)))

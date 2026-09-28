@@ -22,7 +22,7 @@
             [futon2.aif.likelihood-precision :as lprec]
             [futon2.report.observation-labels-consume-test :as population]
             [futon2.report.cascade-decision-test :as decision-fixture]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -48,7 +48,7 @@
         facts #(into {} (map (fn [[t result]] [t (:observed result)]))
                      (:results (checks/observe locators)))
         calls (atom []) paths (atom {}) results (atom []) q0s (atom []) joint-rankings (atom []) lane-options (atom []) lane-inputs (atom []) lane-rankings (atom [])
-        real-rank efe/rank-actions real-lane wm/cascade-lane
+        real-rank efe/rank-actions real-lane wm-cd/cascade-lane
         source (fn [pattern]
                  {:universes {target (facts)} :locators {target locators}
                   :wants {target tokens} :horizon-steps 1
@@ -70,13 +70,13 @@
                                                   (when (:prediction-context options)
                                                     (swap! joint-rankings conj {:state belief :actions actions :opts options :ranked ranked}))
                                                   ranked))
-                                              wm/cascade-lane
+                                              wm-cd/cascade-lane
                                               (fn [problem options]
                                                 (swap! lane-options conj options)
                                                 (swap! lane-inputs conj [problem options])
                                                 (let [lane (real-lane problem options)]
                                                   (swap! lane-rankings conj (:ranked lane)) lane))]
-                                  (wm/cascade-decision assembled
+                                  (wm-cd/cascade-decision assembled
                                    (merge decision-fixture/live-c-opts opts
                                           {:observation-labels-path observation-labels-path
                                            :focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
@@ -301,7 +301,7 @@
        (is (= {:basis :prior-no-trials :beta-prior 1 :authority :joe-ruling-2026-09-27}
               (:zeta-basis (sc (first @calls)))))
        (let [[problem opts] (first @lane-inputs)
-             omitted (wm/cascade-lane problem (dissoc opts :zeta))
+             omitted (wm-cd/cascade-lane problem (dissoc opts :zeta))
              old-g (mapv :G-efe (:ranked omitted))
              new-g (mapv :G-efe (first @lane-rankings))]
          (is (seq old-g))

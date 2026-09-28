@@ -6,6 +6,7 @@
             [futon2.aif.interpretation-construction]
             [futon2.aif.observation-checks]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
+            [futon2.aif.wm.cascade-decision :as wm-cd]
             [futon2.report.war-machine]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
@@ -157,7 +158,7 @@
 (defn- validate [want resp sources]
   (wi/validate-response (req want) resp
                         {:sources sources :constraints [owner-constraint]
-                         :admit #'futon2.report.war-machine/admit-cascade-problem
+                         :admit #'wm-cd/admit-cascade-problem
                          ;; the two library files' bytes, pinned: the receipt
                          ;; sha check must not depend on live futon3
                          :code-root library-root}))
@@ -236,7 +237,7 @@
 (defn- validate-hand [resp]
   (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} resp
                         {:sources (hand-sources) :constraints []
-                         :admit #'futon2.report.war-machine/admit-cascade-problem
+                         :admit #'wm-cd/admit-cascade-problem
                          :code-root library-root}))
 
 (deftest a-hand-unit-validates-with-its-keys-normalised

@@ -25,6 +25,7 @@
 ;; (assemble-cascade-problems-with-published), so facts, repository, c-schedule,
 ;; cascade-spec, preference scales and beta are the lane's (cascade_problems.clj:154-168).
 (require '[futon2.report.war-machine :as wm]
+         '[futon2.aif.wm.cascade-decision :as wm-cd]
          '[futon2.aif.interpretation-construction :as ic]
          '[futon2.aif.cascade-model-manifest :as cascade-manifest]
          '[futon2.aif.efe]
@@ -125,7 +126,7 @@
   the identical computation."
   [problem prec]
   (let [fam (family problem prec)
-        lane (wm/cascade-lane (assoc problem :precedences fam) {:through :R5})]
+        lane (wm-cd/cascade-lane (assoc problem :precedences fam) {:through :R5})]
     (if (:refusal lane)
       {:refusal (:refusal lane) :stopped-at (:stopped-at lane)}
       (let [cands (:candidates lane)
@@ -321,7 +322,7 @@
 (let [{:keys [problem]} (assembled [:t4] chain)
       prefix [:chain/one :chain/two :chain/three]
       fam [[:chain/one] prefix chain]
-      lane (wm/cascade-lane (assoc problem :precedences fam) {:through :R5})
+      lane (wm-cd/cascade-lane (assoc problem :precedences fam) {:through :R5})
       cands (:candidates lane)
       id->prec (into {} (map (fn [c] [(:id c) (mapv :id (:precedence c))]) cands))
       g-of (fn [prec] (some (fn [e] (when (= prec (get id->prec (:cascade-id e))) (:G-efe e))) (:ranked lane)))

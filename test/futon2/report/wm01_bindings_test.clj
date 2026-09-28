@@ -40,7 +40,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target :wm-tick-001-observation-crash)
 
@@ -131,7 +131,7 @@
   (let [a (assembled*)
         problem (-> a :problems first :cascade-problem)
         _ (is (some? problem) "assembled problem exists for the target")
-        lane (wm/cascade-lane problem)
+        lane (wm-cd/cascade-lane problem)
         ;; the lane either completes or returns a typed refusal; for this
         ;; fixture it must COMPLETE (the decision is the occurrence).
         _ (is (nil? (:stopped-at lane)) (str "lane stopped: " (:refusal lane)))
@@ -179,7 +179,7 @@
         "machine-model's specialized vocabulary is absent from the lane data")))
 
 (deftest decision-law-and-revision-bindings
-  (let [r (wm/cascade-decision
+  (let [r (wm-cd/cascade-decision
            (assembled*)
            ;; WIRE-3: inject a derived live C whose want token is in this
            ;; fixture's joint domain (the derivation itself is covered in

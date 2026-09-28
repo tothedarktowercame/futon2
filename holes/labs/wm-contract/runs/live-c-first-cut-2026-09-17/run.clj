@@ -12,6 +12,7 @@
          '[futon2.aif.cascade-model-manifest :as manifest]
          '[futon2.aif.cascade-policy :as cascade-policy]
          '[futon2.report.war-machine :as wm]
+         '[futon2.aif.wm.cascade-decision :as wm-cd]
          '[clojure.set :as set])
 
 
@@ -26,7 +27,7 @@
                    {:targets (vec (distinct (concat (cp/substrate-targets)
                                                     (keys (:universes declared)))))
                     :sources (assoc declared :horizon-steps (:value horizon))})
-        before (try (wm/cascade-decision assembled {}) 
+        before (try (wm-cd/cascade-decision assembled {})
                     (catch Exception e {:threw (ex-data e)}))
         problems (:problems assembled)
         ;; ---- the live C, derived now

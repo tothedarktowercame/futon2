@@ -8,7 +8,7 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.ticket-queue :as queue]
             [futon2.aif.token-belief-predecessor :as predecessor]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target "M-aif-policy-conditioned-eig")
 (def source-resource "wm/cascade-sources/M-aif-policy-conditioned-eig.edn")
@@ -48,7 +48,7 @@
 
 (defn decide [src dir]
   (let [assembled (problems/assemble {:targets [target] :sources (assoc src :horizon-steps 2)})
-        result (wm/cascade-decision
+        result (wm-cd/cascade-decision
                 assembled
                 {:ticket-queue queue/empty-declaration
                  :cascade-habit-path (str (io/file dir "absent-habit.edn"))

@@ -10,7 +10,7 @@
             [futon2.aif.policy-prefix-admission :as adm]
             [futon2.aif.policy-prefix-evidence :as ppe]
             [futon2.report.cascade-decision-test :as cdt]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def cand {:id :c1 :target "M-a" :precedence [{:id :p/a}]})
 (def k (adm/candidate-key cand))
@@ -68,7 +68,7 @@
 
 (defn- tick-decision [opts]
   (let [assembled (@#'cdt/assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})]
-    (:decision (wm/cascade-decision assembled (merge cdt/live-c-opts opts)))))
+    (:decision (wm-cd/cascade-decision assembled (merge cdt/live-c-opts opts)))))
 
 (defn- steps-for [candidate f]
   {:step {:status :present :policy-key (adm/candidate-key candidate)

@@ -29,7 +29,7 @@
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.served-by-reading :as served]
             [futon2.aif.want-interpretation :as wi]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn click-summary
   "What the flight needs from one run's RESULT (run-opportunity-core!'s
@@ -389,7 +389,7 @@
   id, never retried silently: :no-criterion, :request-refused,
   :not-answered, :unparseable-response, :declined, :rejected."
   [{:keys [store admit] :as opts}]
-  (let [opts (assoc opts :admit (or admit (var-get #'wm/admit-cascade-problem)))]
+  (let [opts (assoc opts :admit (or admit (var-get #'wm-cd/admit-cascade-problem)))]
     (fn [flight wants sources]
       (let [opts (assoc opts :constraints (constraints-for opts wants))
             target (:target flight)

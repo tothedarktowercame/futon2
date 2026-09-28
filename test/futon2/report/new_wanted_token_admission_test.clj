@@ -3,12 +3,12 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.scoring-input-receipts :as receipts]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn fixture []
   (edn/read-string (slurp (io/resource "fixtures/new-wanted-token/1789964661.edn"))))
 
-(defn admit [p] (#'wm/admit-cascade-problem p))
+(defn admit [p] (#'wm-cd/admit-cascade-problem p))
 
 (defn candidate-decline [r]
   (first (filter #(= :candidate-admission (:stage %)) (:declines r))))
@@ -60,7 +60,7 @@
 
 (deftest all-refused-uses-existing-abstention
   (let [f2 (last (:problems (fixture)))
-        r (wm/cascade-decision {:problems [f2] :refusals []} {})]
+        r (wm-cd/cascade-decision {:problems [f2] :refusals []} {})]
     (is (= :abstained (get-in r [:decision :status])))
     (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])))
     (is (= :no-constructed-candidate (get-in r [:decision :refusals 0 :kind])))
@@ -72,5 +72,5 @@
   (let [ps (:problems (fixture))
         mixed (assoc-in ps [2 :cascade-problem :horizon-steps] 3)]
     (is (= :incommensurable-family
-           (try (wm/cascade-decision {:problems mixed :refusals []} {})
+           (try (wm-cd/cascade-decision {:problems mixed :refusals []} {})
                 (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))

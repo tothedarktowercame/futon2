@@ -13,7 +13,7 @@
             [futon2.aif.token-initialization-policy :as policy]
             [futon2.aif.token-outcome :as outcome]
             [futon2.aif.token-outcome-test :as want]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -71,12 +71,12 @@
        (is (= 1 (count (:problems assembled))))
        (with-redefs [predecessor/production-authority (fn [_] execution)
                      predecessor/observation-authority (fn [_] signed)]
-         (let [first-decision (:decision (wm/cascade-decision assembled opts))
+         (let [first-decision (:decision (wm-cd/cascade-decision assembled opts))
                prior (get-in first-decision [:selection-certificate :token-belief-stage :prospective-carry])
                trace {:decision first-decision :d-task-context expected}
                reads (atom [])
                second-decision (binding [receipts/*habit-reads* reads]
-                                 (:decision (wm/cascade-decision assembled
+                                 (:decision (wm-cd/cascade-decision assembled
                                            (assoc opts :prospective-token-carry prior
                                                   :token-belief-predecessor-trace trace))))]
            (f (assoc env :signed signed :execution execution :current current
@@ -163,7 +163,7 @@
       (let [off (assoc-in assembled [:problems 0 :cascade-problem :token-initialization :policy] policy/disabled)
             decision (with-redefs [predecessor/observation-authority
                                   (fn [_] (throw (ex-info "OFF must not read signed authority" {})))]
-                       (:decision (wm/cascade-decision off (assoc opts :prospective-token-carry prior
+                       (:decision (wm-cd/cascade-decision off (assoc opts :prospective-token-carry prior
                                                                   :token-belief-predecessor-trace trace))))
             input (get-in decision [:selection-certificate :token-belief-input])]
         (is (= :observation-initialization-disabled (:reason input)))

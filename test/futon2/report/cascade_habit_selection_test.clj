@@ -6,7 +6,7 @@
             [futon2.aif.locator-fixtures :as locators]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.cascade-habit-read-test :as store]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (deftest selection-does-not-reinforce
   (store/with-store
@@ -15,7 +15,7 @@
      (let [before (slurp path)
            assembled (problems/assemble {:targets [fixture/tick-1-target]
                                          :sources (locators/locate-all fixture/tick-1-sources)})
-           result (wm/select-and-record-cascade! assembled (assoc fixture/live-c-opts :cascade-habit-path path))]
+           result (wm-cd/select-and-record-cascade! assembled (assoc fixture/live-c-opts :cascade-habit-path path))]
        (is (some? (get-in result [:decision :action])))
        (is (= before (slurp path)) "selection leaves the habit store byte-identical")
        (is (not (.exists (io/file (str path ".lock")))))))))

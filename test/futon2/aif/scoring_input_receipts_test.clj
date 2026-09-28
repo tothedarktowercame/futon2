@@ -10,7 +10,7 @@
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.cascade-habit-read-test :as store-fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -22,7 +22,7 @@
          (let [assembled (problems/assemble
                           {:targets [fixture/tick-1-target]
                            :sources (locators/locate-all fixture/tick-1-sources)})
-               decision (:decision (wm/select-and-record-cascade!
+               decision (:decision (wm-cd/select-and-record-cascade!
                                     assembled (assoc fixture/live-c-opts :cascade-habit-path path)))
                saved (#'runner/persist-run-record!
                       {:run-record-dir (str dir) :habit-reads/state reads}
@@ -111,4 +111,3 @@
          (habit/record-selection! path {:action candidate}))
        (is (= [0 0 1] (mapv #(get-in % [:receipt :state :samples]) @log)))
        (is (= [:selection-scoring :selection-update :selection-update] (mapv :purpose @log)))))))
-

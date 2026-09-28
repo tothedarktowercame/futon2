@@ -11,7 +11,7 @@
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy :as policy]
             [futon2.report.cascade-decision-test :as tick]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -71,7 +71,7 @@
       (spit mission "# M-present\n\nStatus: ACTIVE\n")
       (let [assembled (cp/assemble {:targets [tick/tick-1-target]
                                     :sources (locfix/locate-all tick/tick-1-sources)})
-            result (wm/cascade-decision assembled
+            result (wm-cd/cascade-decision assembled
                                         {:live-c {:sources live-sources :sources-now live-sources}
                                          :focus-inputs (:focus-inputs tick/live-c-opts)
                                          :focus-as-of "2026-09-21T12:00:00Z"})

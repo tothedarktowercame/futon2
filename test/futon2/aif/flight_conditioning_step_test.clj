@@ -20,7 +20,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.policy-prefix-admission :as admission]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -46,7 +46,7 @@
   false-neg 1/10, false-pos 1/5)."
   [{:keys [locators] :as opts}]
   (let [ls (vec (or (:labels opts) (labels :C4 10 1 5 1)))]
-    (wm/measured-a-version [{:target target :cascade-problem {:locators (or locators {:t {:class :C4}})}}]
+    (wm-cd/measured-a-version [{:target target :cascade-problem {:locators (or locators {:t {:class :C4}})}}]
                            {target {:labels ls
                                     :subjects (frequencies (map :token-class ls))}})))
 

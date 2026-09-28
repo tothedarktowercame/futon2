@@ -10,7 +10,7 @@
             [futon2.aif.enactment-fold-source :as src]
             [futon2.aif.policy-prefix-admission :as adm]
             [futon2.report.cascade-decision-test :as cdt]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -82,10 +82,10 @@
 (deftest the-tick-records-the-prefix
   (let [assemble* @#'cdt/assemble*
         assembled (assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})
-        base (:decision (wm/cascade-decision assembled cdt/live-c-opts))
+        base (:decision (wm-cd/cascade-decision assembled cdt/live-c-opts))
         k (adm/candidate-key (:action base))
         s1 (step k "run-1" {#{} 1} {#{:t} 1})
-        with (:decision (wm/cascade-decision assembled
+        with (:decision (wm-cd/cascade-decision assembled
                                              (assoc cdt/live-c-opts :conditioning-steps
                                                     {:steps [(wrap s1)] :read [] :unread []})))
         chosen (get-in base [:action :id])]

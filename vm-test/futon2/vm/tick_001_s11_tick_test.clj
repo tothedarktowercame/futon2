@@ -20,7 +20,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 ;; --- tick 1's problem, from the p4ng records 01-R2 … 07-R14 ---------------
 
@@ -100,7 +100,7 @@
 (deftest s11-tick
   ;; 1. The lane runs the node sequence in the model's order, one route tag
   ;;    per node, each naming the real function.
-  (let [lane (wm/cascade-lane problem)
+  (let [lane (wm-cd/cascade-lane problem)
         route (:route lane)]
     (is (= [:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9] (mapv :node route))
         "the cascade lane routes R1 → R6 → R13 → R4 → R5 → R14 → R16 → R9, in order")
@@ -197,11 +197,11 @@
                      :cascade-policies :cascade-lane]))
         "no removed flat key is present on the judgement")))
   ;; 6. Typed refusals stop the lane with the route so far; nothing defaults.
-  (let [no-beta (wm/cascade-lane (dissoc problem :beta))]
+  (let [no-beta (wm-cd/cascade-lane (dissoc problem :beta))]
     (is (and (= :R14 (:stopped-at no-beta))
              (contains? no-beta :refusal))
         "a missing β is a typed refusal at R14 — never defaulted"))
-  (let [no-T (wm/cascade-lane (dissoc problem :horizon-steps))]
+  (let [no-T (wm-cd/cascade-lane (dissoc problem :horizon-steps))]
     (is (and (= :R13 (:stopped-at no-T))
              (contains? no-T :refusal)
              (= [:R1 :R6 :R13] (mapv :node (:route no-T))))

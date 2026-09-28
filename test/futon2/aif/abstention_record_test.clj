@@ -23,7 +23,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def click2-targets
   "The four admitted targets of CLICK2-D Part 2, each declined
@@ -45,7 +45,7 @@
         assembled (construction-inputs/assemble-cascade-problems
                    {:targets (vec (keys (:universes sources)))
                     :sources (assoc sources :horizon-steps horizon)})
-        admissions (mapv #'wm/admit-cascade-problem (:problems assembled))
+        admissions (mapv #'wm-cd/admit-cascade-problem (:problems assembled))
         refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
         dropped (vec (concat (:dropped-candidates assembled)
                              (map (fn [r] {:target (:target r) :stage :assembly

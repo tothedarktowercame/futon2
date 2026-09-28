@@ -23,7 +23,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as cp]
             [futon2.aif.policy :as policy]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 ;; --- the tick's tokens, interpretations and cascades (03-R6.edn) ---------
 
@@ -219,7 +219,7 @@
 
   ;; R10 wiring (s11): the tick's cascade lane routes THIS node — the real
   ;; candidate-space constructor — under :R6 on this tick's problem.
-  (let [lane (wm/cascade-lane
+  (let [lane (wm-cd/cascade-lane
               {:facts (-> (into {} (map (fn [t] [t true]) q0))
                           (assoc :test-covers-missing-total-repos false))
                :want want

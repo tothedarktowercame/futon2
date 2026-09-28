@@ -7,7 +7,7 @@
             [futon2.aif.locator-fixtures :as locators]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.cascade-habit-read-test :as stores]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -18,7 +18,7 @@
        (let [assembled (problems/assemble
                         {:targets [fixture/tick-1-target]
                          :sources (locators/locate-all fixture/tick-1-sources)})
-             result (wm/cascade-decision assembled (assoc fixture/live-c-opts :cascade-habit-path path))
+             result (wm-cd/cascade-decision assembled (assoc fixture/live-c-opts :cascade-habit-path path))
              cs (get-in result [:decision :selection-certificate :candidates])]
          (is (seq cs) (pr-str result))
          (doseq [c cs]

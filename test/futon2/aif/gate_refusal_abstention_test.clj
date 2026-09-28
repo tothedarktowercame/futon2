@@ -18,7 +18,7 @@
             [futon2.aif.locator-fixtures :as loc]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cfix]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -114,7 +114,7 @@
                           {:class :C4 :repo "futon2" :sha "fixture" :path "fixture/p"})
         assembled (cp/assemble {:targets [cfix/tick-1-target] :sources sources})
         {:keys [result record]}
-        (run-judge (fn [_] (wm/cascade-decision assembled cfix/live-c-opts))
+        (run-judge (fn [_] (wm-cd/cascade-decision assembled cfix/live-c-opts))
                    {:target "M-autoclock-in"})
         [t] (get-in record [:decision :abstention :targets])]
     (is (= :missing-observation-locators (:kind t)))

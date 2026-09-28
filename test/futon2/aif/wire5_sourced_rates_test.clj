@@ -19,7 +19,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-rates :as rates]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def contract
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -73,7 +73,7 @@
 (defn- g-of
   "First ranked candidate's G for the problem, running the REAL cascade-lane."
   [p]
-  (let [lane (wm/cascade-lane p)]
+  (let [lane (wm-cd/cascade-lane p)]
     (is (nil? (:stopped-at lane)) (str "lane stopped: " (:refusal lane)))
     (mapv (juxt :cascade-id :G-efe) (:ranked lane))))
 
@@ -85,7 +85,7 @@
       ;; sourced kernel IS the exact-zero kernel, so G cannot move yet.
       (is (= before after)
           "sourced checkable kernel = identity kernel numerically"))
-    (let [sourced (wm/cascade-lane (problem :locators (locators problem-tokens :C3)))
+    (let [sourced (wm-cd/cascade-lane (problem :locators (locators problem-tokens :C3)))
           scoring (:cascade-scoring (meta (:ranked sourced)))
           cert (get-in (first (:ranked sourced)) [:certificate :rates-provenance])]
       (testing "family meta says SOURCED, with the producer named"
@@ -96,14 +96,14 @@
       (testing "every candidate's certificate distinguishes sourced from default"
         (is (= :futon2.aif.observation-rates/sourced-rates (:source cert)))
         (is (every? #(= :checkable %) (vals (:basis cert)))))
-      (let [default (wm/cascade-lane (problem))
+      (let [default (wm-cd/cascade-lane (problem))
             default-cert (get-in (first (:ranked default))
                                  [:certificate :rates-provenance])]
         (is (= {:status :identity-default} default-cert)
             "a problem without locators still records the identity default")))))
 
 (deftest lane-stops-at-r5-when-a-judgement-class-has-no-admitted-rate
-  (let [lane (wm/cascade-lane (problem :locators (locators problem-tokens :J)))]
+  (let [lane (wm-cd/cascade-lane (problem :locators (locators problem-tokens :J)))]
     (is (= :R5 (:stopped-at lane)))
     (is (= :unsupported-class (get-in lane [:refusal :kind])))
     (is (= :J (get-in lane [:refusal :class])))

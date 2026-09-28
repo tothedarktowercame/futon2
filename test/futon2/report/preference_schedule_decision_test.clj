@@ -8,7 +8,7 @@
             [futon2.aif.live-c :as live-c]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assembled [declaration]
   (let [target (or (:target declaration) fixture/tick-1-target)
@@ -51,7 +51,7 @@
            [nil :every-step :defaulted]]]
     (testing (str source)
       (let [p (problem (assembled declaration))
-            lane (wm/cascade-lane p)
+            lane (wm-cd/cascade-lane p)
             spec (get-in (meta (:ranked lane)) [:cascade-scoring :spec])
             record (get-in lane [:decision :preference-schedule])
             universe (get-in (meta (:ranked lane)) [:cascade-scoring :universe])]
@@ -67,7 +67,7 @@
 
 (deftest missing-schedule-does-not-introduce-a-scorer-default
   (let [p (update (problem (assembled nil)) :cascade-spec dissoc :c-schedule)
-        lane (wm/cascade-lane p)
+        lane (wm-cd/cascade-lane p)
         spec (get-in (meta (:ranked lane)) [:cascade-scoring :spec])
         record (get-in lane [:decision :preference-schedule])]
     (is (not (contains? spec :c-schedule)))
@@ -76,12 +76,12 @@
 
 (deftest scales-come-from-scored-spec-not-default-definitions
   (let [p (update (problem (assembled nil)) :cascade-spec assoc :lam 7/3 :mu 2/5)
-        lane (wm/cascade-lane p)]
+        lane (wm-cd/cascade-lane p)]
     (is (= [7/3 2/5]
            ((juxt :lam :mu) (get-in lane [:decision :preference-schedule]))))))
 
 (deftest joint-record-carries-class-and-retains-lane-token-receipt
-  (let [result (wm/cascade-decision (assembled nil) fixture/live-c-opts)
+  (let [result (wm-cd/cascade-decision (assembled nil) fixture/live-c-opts)
         record (get-in result [:decision :preference-schedule])]
     (is (= :class (:family record)))
     (is (= :terminal (:placement record)))
@@ -94,19 +94,19 @@
 (deftest writes-do-not-change-scores
   (doseq [declaration [(declared-source) nil]]
     (let [p (problem (assembled declaration))
-          with-write (wm/cascade-lane p)
-          without-write (with-redefs [wm/token-preference-schedule (constantly nil)]
-                          (wm/cascade-lane p))]
+          with-write (wm-cd/cascade-lane p)
+          without-write (with-redefs [wm-cd/token-preference-schedule (constantly nil)]
+                          (wm-cd/cascade-lane p))]
       (is (some? (get-in with-write [:decision :preference-schedule])))
       (is (nil? (get-in without-write [:decision :preference-schedule])))
       (is (= (pr-str (:ranked with-write)) (pr-str (:ranked without-write))))
       (is (= (pr-str (dissoc (:decision with-write) :preference-schedule))
              (pr-str (dissoc (:decision without-write) :preference-schedule))))))
   (let [a (assembled nil)
-        with-write (:decision (wm/cascade-decision a fixture/live-c-opts))
-        without-write (with-redefs [wm/token-preference-schedule (constantly nil)
-                                   wm/class-preference-schedule (constantly nil)]
-                        (:decision (wm/cascade-decision a fixture/live-c-opts)))
+        with-write (:decision (wm-cd/cascade-decision a fixture/live-c-opts))
+        without-write (with-redefs [wm-cd/token-preference-schedule (constantly nil)
+                                   wm-cd/class-preference-schedule (constantly nil)]
+                        (:decision (wm-cd/cascade-decision a fixture/live-c-opts)))
         score #(pr-str (select-keys % [:action :softmax-weights :selection-law]))]
     (is (some? (:preference-schedule with-write)))
     (is (nil? (:preference-schedule without-write)))

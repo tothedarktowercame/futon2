@@ -18,7 +18,7 @@
             [futon2.aif.policy :as policy]
             [futon2.aif.ticket-queue :as queue]
             [futon2.aif.token-belief-predecessor :as predecessor]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def root (or (System/getenv "FUTON2_RECORD_ROOT") "/home/joe/code/futon2"))
 (defn record [run]
@@ -86,7 +86,7 @@
                    efe/rank-actions (fn [s actions options]
                                       (let [r (rank s actions options)]
                                         (reset! seen {:state s :actions actions :options options :ranked r}) r))]
-       (assoc (wm/cascade-decision a o) :scorer @seen)))))
+       (assoc (wm-cd/cascade-decision a o) :scorer @seen)))))
 (defn posterior [r] (get-in r [:decision :selection-law :posterior]))
 (defn choice [r] (select-keys (get-in r [:decision :action]) [:target :id]))
 (defn scores [r] (mapv :g (get-in r [:decision :selection-certificate :candidates])))
@@ -286,7 +286,7 @@
     (let [s (sources/with-context-fn (sources/load-declared))
           a (cp/assemble {:targets (vec (sort (keys (:universes s))))
                           :sources (assoc s :horizon-steps 2)})
-          admissions (mapv #'wm/admit-cascade-problem (:problems a))]
+          admissions (mapv #'wm-cd/admit-cascade-problem (:problems a))]
       {:declaration-files (:files s)
        :declared-targets (count (:universes s))
        :assembled-targets (count (:problems a))
