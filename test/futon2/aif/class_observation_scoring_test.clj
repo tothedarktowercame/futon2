@@ -361,7 +361,14 @@
   (let [inputs (focus/read-inputs)
         established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
         retained (focus/discover inputs "2026-09-30T00:00:00Z"
-                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})]
+                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
+        findings-dir (.toFile (java.nio.file.Files/createTempDirectory
+                               "class-scoring-findings"
+                               (make-array java.nio.file.attribute.FileAttribute 0)))]
+    ;; Supply the finding this assertion consumes. The live findings directory is
+    ;; generated state and is deliberately absent from warrant worktrees.
+    (spit (io/file findings-dir (str (subs t 2) ".edn"))
+          (pr-str {:target "M-aif-policy-conditioned-eig"}))
     ;; the real ticket has BOTH a Parent line and a finding: ticket wins, kind recorded
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "holes/tickets"
@@ -370,7 +377,7 @@
     ;; findings-only: the finding fallback supplies the parent, kind says so
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "/nonexistent"
-                                    :findings-dir "data/wm-repair-obligations/findings"})]
+                                    :findings-dir (.getPath findings-dir)})]
       (is (= :finding-target (:kind (:derived-via c)))) (pr-str c))))
 
 ;; codex-20 corrections on bf6ee6f3: cwd-independence, replay-evidence, family stop.
