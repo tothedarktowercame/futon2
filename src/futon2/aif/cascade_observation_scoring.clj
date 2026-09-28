@@ -89,7 +89,8 @@
       (om/refuse! :conflicting-observation-options {}))))
 
 (defn- score-candidate [q0 candidate opts preference]
-  (let [{:keys [observation-model horizon-steps observation prediction-context]} opts
+  (let [{:keys [observation-model horizon-steps observation prediction-context
+                upstream-initialization-conditioning]} opts
         steps (loop [tau 1 q q0 result []]
                 (if (> tau horizon-steps)
                   result
@@ -133,7 +134,12 @@
                                                 steps)}
                                :D q0}
                                (= :class-emission (:kind observation-model))
-                               (assoc :A observation-model))
+                               (assoc :A observation-model)
+                               (contains? opts :upstream-initialization-conditioning)
+                               (assoc :Q {:form :upstream-initialization-conditioning
+                                          :initial-belief q0
+                                          :steps (mapv #(select-keys % [:tau :belief]) steps)
+                                          :conditioning upstream-initialization-conditioning}))
                              :c {:form :step-indexed :schedule (get-in opts [:cascade-spec :c-schedule])
                                  :steps (mapv (fn [step] {:tau (:tau step)
                                                          :distribution (get-in preference [(:tau step) :distribution])}) steps)}
