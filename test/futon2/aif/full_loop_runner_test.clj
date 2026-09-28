@@ -27,6 +27,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
             [futon2.aif.pattern-registry :as patterns]
@@ -59,7 +60,8 @@
 
 (defn- without-live-wm-status
   [f]
-  (binding [runner/*wm-status-reporting?* false
+  (binding [runner/*runtime-defaults* (runtime/production-defaults {})
+            runner/*wm-status-reporting?* false
             runner/*r16-park-fn*
             (fn [_ finding]
               {:ok true :id (str "test-park/" (:repair/id finding))

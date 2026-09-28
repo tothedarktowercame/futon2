@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.intrinsic-values :as iv]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
@@ -58,7 +59,7 @@
 (declare attempt-brief render-attempt-brief)
 
 (defn- run-once! [trigger flags]
-  (let [result (runner/run-opportunity! (runner-opts trigger flags))]
+  (let [result (runtime/run-opportunity! (runner-opts trigger flags))]
     ;; Elide :checkpoints from the stdout echo: they are durable on disk in
     ;; the cohort dir, and pp/pprint on a multi-MB result grinds the
     ;; pretty-writer STM for an hour+ post-close (attempt-056, 2026-07-25 —
@@ -660,7 +661,7 @@
       "canary" (let [flags (option-map rest)
                      out (or (:out flags) (canary-path))]
                  (print-value
-                  (runner/run-opportunity!
+                  (runtime/run-opportunity!
                    (assoc (runner-opts :duree-click-on-demand flags)
                           :cohort? false :canary-out out))))
       "once" (run-once! :duree-click-on-demand (option-map rest))

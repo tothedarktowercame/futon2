@@ -62,8 +62,7 @@
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
-            [futon2.report.cascade-lane :as cascade]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.cascade-lane :as cascade])
   (:import [java.nio.file Files]
            [java.security MessageDigest]
            [java.time Instant]
@@ -74,6 +73,23 @@
 
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
+
+(def ^:dynamic *runtime-defaults*
+  "Production functions supplied by futon2.aif.full-loop-runtime. Tests and
+  other direct callers may instead pass the same keys in their option map."
+  nil)
+
+(defn runtime-default
+  "Resolve a runner function supplied explicitly or by the composition root."
+  [opts default-key]
+  (or (get opts default-key)
+      (get *runtime-defaults* default-key)
+      (throw
+       (ex-info
+        (str "Missing full-loop runtime default " default-key)
+        {:failure-kind :missing-runtime-default
+         :missing-default default-key
+         :supplied-by 'futon2.aif.full-loop-runtime}))))
 
 ;; No default cast (Joe, 2026-09-25: "This nonsense about default casts must
 ;; be stopped"). The seats were literals here (zai-5, codex-7, codex-1, from
@@ -718,7 +734,7 @@
                                              (habit-reinforcement/evaluate decision (:outcome result) nil))
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
-                                  (or (:scan-render-fn raw-opts) wm/render-war-machine))
+                                  (runtime-default raw-opts :scan-render-fn))
                     ;; This tick's accounts travel with its retained decision;
                     ;; never reconstruct them from a newer trace or corpus.
                     :mission-hole-coverage (or (:mission-hole-coverage decision)
@@ -3924,16 +3940,6 @@
       (-> (assoc-in [:judgment :controller-decision :accumulation-bmr] (:bmr-receipt record))
           (assoc-in [:ground :decision :accumulation-bmr] (:bmr-receipt record))))))
 
-(defn- default-selection-judge [opts days]
-  (wm/generate-war-machine
-   days
-   (merge (wm/accumulation-config)
-          (select-keys opts [:accumulate-strategic-habit? :run-id
-                             :loaded-code-identity :cascade-habit-path
-                             :observation-labels-path :flight :trace-dir])
-          ;; Construction publishes below. Do not publish twice.
-          {:trace? false :include-advisory-lanes? false :defer-render? true})))
-
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
@@ -3964,7 +3970,8 @@
         selection-persisted? (atom false)
         dispatched-turns (atom 0)
         standing-readback-state (atom nil)
-        effective-configuration (atom (wm/effective-run-configuration opts))
+        effective-configuration
+        (atom ((runtime-default opts :effective-run-configuration-fn) opts))
         reviewer-of-record (participants/observe! opts)
         closing? (atom false)
         roster-result (try
@@ -3997,7 +4004,8 @@
                                        (keyword repair-reviewer)
                                        author reviewer repair-reviewer])
                          :code-state (assoc code-state
-                                            :resolved-mode-flags (wm/arena-mode-flags)
+                                            :resolved-mode-flags
+                                            ((runtime-default opts :mode-flags-fn))
                                             :configuration-digest
                                             (sha256
                                              (select-keys opts
@@ -4865,7 +4873,7 @@
             (filterv #(and (= :awaiting-validation (:repair/status %))
                            (map? (:repair/verification %)))
                      validation-lines)
-            selection-judge (or (:judge-fn opts) #(default-selection-judge opts %))
+            selection-judge (runtime-default opts :judge-fn)
             judgement0-base
             (try
             (run-phase!
@@ -4902,7 +4910,7 @@
                     ;; the :failure-kind, not :untyped-failure
                     (throw (or (phase-kind-failure e) e))))))
             judgement0 judgement0-base
-            mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
+            mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             entry ordinary-entry
             historical-action? (= :revalidate-historical-repair
