@@ -70,7 +70,8 @@
                                 [target (cond
                                           (keyword? emission) {emission 1}
                                           (map? emission) emission
-                                          (nil? emission) {:stop-the-line 1}
+                                          ;; an undeclared class stays nil and is
+                                          ;; reported as an invalid row below
                                           :else emission)])))
                        targets)
             valid-row? (fn [row]

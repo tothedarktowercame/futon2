@@ -113,6 +113,9 @@
     (is (= :stochastic-class-emission (:reason (d/verdict :A stochastic))))
     (is (= :class-emission-fields-missing
            (:reason (d/verdict :A {:kind :class-emission}))))
+    (is (= :invalid-class-emission-row
+           (:reason (d/verdict :A (update model :target-class dissoc target))))
+        "a target with no declared class is not read as stop-the-line")
     (is (= :missing (:status (d/verdict :A {:kind :something-else}))))
     (is (= :unsupported-a-shape
            (:reason (d/verdict :A {:kind :something-else}))))))
@@ -174,7 +177,8 @@
         result {:outcome :offline-selection-replay
                 :checkpoints {:selection {:judgment {:controller-decision decision}}}}]
     (try
-      (let [written (#'runner/persist-run-record! {:run-record-dir (.getPath dir)}
+      (let [written (#'runner/persist-run-record! {:run-record-dir (.getPath dir)
+                                                  :scan-render-fn (fn [& _] nil)}
                                                  "offline-tick-001" "2026-09-19T00:00:00Z" result)
             record (edn/read-string (slurp (:run-record written)))
             census (get-in record [:decision :g-term-decomposition])
