@@ -123,14 +123,17 @@
                              :node-evaluations (mapv :node-evaluation steps)
                              :steps steps
                              :consumed-g
-                             {:C {:form :step-indexed
-                                  :schedule (get-in opts [:cascade-spec :c-schedule])
-                                  :steps (mapv (fn [step]
-                                                 {:tau (:tau step)
-                                                  :distribution
-                                                  (get-in preference [(:tau step) :probabilities])})
-                                               steps)}
-                              :D q0}
+                             (cond->
+                              {:C {:form :step-indexed
+                                   :schedule (get-in opts [:cascade-spec :c-schedule])
+                                   :steps (mapv (fn [step]
+                                                  {:tau (:tau step)
+                                                   :distribution
+                                                   (get-in preference [(:tau step) :probabilities])})
+                                                steps)}
+                               :D q0}
+                               (= :class-emission (:kind observation-model))
+                               (assoc :A observation-model))
                              :c {:form :step-indexed :schedule (get-in opts [:cascade-spec :c-schedule])
                                  :steps (mapv (fn [step] {:tau (:tau step)
                                                          :distribution (get-in preference [(:tau step) :distribution])}) steps)}

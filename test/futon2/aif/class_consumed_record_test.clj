@@ -24,7 +24,7 @@
 (defn score-projection [ranked]
   (mapv #(select-keys % [:cascade-id :controller-score :rank :posterior]) ranked))
 
-(deftest class-score-records-consumed-c-and-d
+(deftest class-score-records-consumed-a-c-and-d
   (let [ranked (ranked-fixture)
         candidates (mapv :action ranked)
         census (decomposition/census ranked candidates)]
@@ -38,15 +38,25 @@
                (mapv :tau (get-in consumed [:C :steps]))))
         (doseq [{:keys [tau distribution]} (get-in consumed [:C :steps])]
           (is (= (get-in model [:class-preference tau]) distribution)))
-        (is (not (contains? consumed :A)))
+        (is (identical? model (:A consumed)))
         (is (not (contains? consumed :Q)))))
     (doseq [policy (:policies census)]
+      (is (= :present (get-in policy [:terms :A :status])))
+      (is (= :deterministic-class-emission
+             (get-in policy [:terms :A :reason])))
       (is (= :present (get-in policy [:terms :C :status])))
       (is (= :present (get-in policy [:terms :D :status])))
       (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
-             (get-in policy [:terms :A])))
-      (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
              (get-in policy [:terms :Q]))))))
+
+(deftest live-selection-completes-with-class-a-in-its-census
+  (let [decision (fixture/decision nil)
+        policies (get-in decision [:selection-certificate :g-term-decomposition :policies])]
+    (is (seq policies))
+    (doseq [policy policies]
+      (is (= :present (get-in policy [:terms :A :status])))
+      (is (= :deterministic-class-emission
+             (get-in policy [:terms :A :reason]))))))
 
 (deftest census-does-not-infer-deleted-d-from-prediction
   (let [entry (first (ranked-fixture))
