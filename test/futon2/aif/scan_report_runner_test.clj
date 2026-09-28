@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.full-loop-runner-test :as fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.report.scan-report-test :as scan-test]
@@ -45,7 +46,7 @@
                                                            :decision (:decision fixture/judgement))]
                                       {:render-data (assoc scan-test/input :judgement judgement)
                                        :judgement judgement}))]
-                       (runner/run-opportunity! opts))
+                       (runtime/run-opportunity! opts))
               record (edn/read-string (slurp (:run-record result)))
               ref (:scan-report record)]
           (is (= 1 @calls) "selection uses one generation")

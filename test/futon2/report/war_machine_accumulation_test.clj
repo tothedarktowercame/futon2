@@ -4,6 +4,7 @@
             [futon2.aif.trace :as trace]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-runtime :as runtime]
             [futon2.run-tick-once :as tick]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files] [java.nio.file.attribute FileAttribute]))
@@ -61,7 +62,8 @@
 (defn assert-absent [kind input]
   (let [off (judged (assoc input :enabled? false)) j (judged input)
         saved (#'runner/persist-run-record!
-               {:run-record-dir (str (io/file *dir* "runs"))}
+               {:run-record-dir (str (io/file *dir* "runs"))
+                   :scan-render-fn (fn [& _] nil)}
                "refused" "2026-09-26T00:00:00Z"
                {:outcome :offline-no-selection
                 :checkpoints {:selection {:judgment {:decision (:decision j)}}}})
@@ -126,7 +128,8 @@
   (let [j (judged (assoc (inputs) :enabled? false)) receipt (:accumulation-receipt j)
         once (#'tick/tick-run-record "one" "start" {} {:entries-read 0 :entries-limit 0} j "offline" false)
         saved (#'runner/persist-run-record!
-               {:run-record-dir (str (io/file *dir* "runs"))}
+               {:run-record-dir (str (io/file *dir* "runs"))
+                   :scan-render-fn (fn [& _] nil)}
                "flight-offline" "2026-09-26T00:00:00Z"
                {:outcome :offline-no-selection
                 :checkpoints {:selection {:judgment {:decision (:decision j)}}}})
@@ -182,7 +185,8 @@
     (with-redefs [wm/accumulation-config (constantly {:accumulation-entity-id entity
                                                     :accumulation-initialization init})
                   wm/generate-war-machine (fn [days opts] (reset! captured [days opts]))]
-      (#'runner/default-selection-judge {:trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}} 3)
+      ((:judge-fn (runtime/production-defaults
+                   {:trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}})) 3)
       (is (= 3 (first @captured)))
       (is (= {:accumulation-entity-id entity :accumulation-initialization init
               :trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}
@@ -219,7 +223,8 @@
                   (:record flight))
             receipt (get-in flight [:record :accumulation-receipt])
             saved (#'runner/persist-run-record!
-                   {:run-record-dir (str (io/file *dir* "runs"))} "flight" "2026-09-27T00:00:00Z"
+                   {:run-record-dir (str (io/file *dir* "runs"))
+                   :scan-render-fn (fn [& _] nil)} "flight" "2026-09-27T00:00:00Z"
                    {:outcome :offline-no-selection :trace-path (:path flight)
                     :checkpoints {:selection cell}})
             disk (edn/read-string (slurp (:run-record saved)))]
@@ -303,7 +308,8 @@
                 {:judgment {:controller-decision (:decision j)} :ground {:decision (:decision j)}}
                 record)
           saved (#'runner/persist-run-record!
-                 {:run-record-dir (str (io/file *dir* "runs"))}
+                 {:run-record-dir (str (io/file *dir* "runs"))
+                   :scan-render-fn (fn [& _] nil)}
                  "flight" "2026-09-27T00:00:00Z"
                  {:outcome :offline-no-selection :trace-path (:path publication)
                   :checkpoints {:selection cell}})
