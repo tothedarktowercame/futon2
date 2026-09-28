@@ -1,5 +1,6 @@
 (ns futon2.aif.preference-family-test
   (:require [clojure.test :refer [deftest is]]
+            [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.g-term-decomposition :as g]
             [futon2.aif.live-c :as lc]
@@ -46,13 +47,30 @@
 
 (deftest declarations-supply-schedule-through-production-merge
   (let [loaded (sources/load-declared)
-        assembled (problems/assemble {:targets (keys (:universes loaded))
-                                      :sources (assoc (sources/with-context-fn loaded) :horizon-steps 2)})
-        declared (lc/family-schedule (:problems assembled))
+        production-sources (assoc (sources/with-context-fn loaded) :horizon-steps 2)
+        all-assembled (problems/assemble {:targets (keys (:universes loaded))
+                                          :sources production-sources})
+        assembled-problems (:problems all-assembled)
+        scoped-targets (for [[target universe] (:universes loaded)
+                             :when (and (= schedule (get-in loaded [:preference-schedules target]))
+                                        (every? boolean? (vals universe)))]
+                         target)
+        assembled (problems/assemble {:targets scoped-targets :sources production-sources})
+        scoped (:problems assembled)
+        schedules-by-target (into {}
+                                  (map (juxt :target
+                                             #(get-in % [:cascade-problem :c-schedule])))
+                                  assembled-problems)
+        declared-targets (set (for [[target s] schedules-by-target :when (= schedule s)] target))
+        differing-targets (set (for [[target s] schedules-by-target :when (not= schedule s)] target))
+        full-refusal (try (lc/family-schedule assembled-problems) nil
+                          (catch clojure.lang.ExceptionInfo e
+                            {:message (.getMessage e) :data (ex-data e)}))
+        declared (lc/family-schedule scoped)
         pair ["M-expressions-of-interest" :change-authored-and-bound]
         live (lc/cascade-spec {:want #{:closed/M-expressions-of-interest}
                               :weights {:closed/M-expressions-of-interest 1}}
-                             #{pair} #{pair} (lc/family-scales (:problems assembled)) declared)
+                             #{pair} #{pair} (lc/family-scales scoped) declared)
         merged (wm-cd/merge-live-cascade-spec #{pair} live)
         ranked (efe/rank-actions {:cascade-belief {#{} 1}}
                                  [{:kind :cascade-candidate :id :probe :precedence []}]
@@ -62,8 +80,19 @@
     (is (= 2 (:C-steps-count verdict)))
     (is (empty? (:refusals assembled)))
     (is (= schedule declared (:c-schedule merged)))
+    (is (= "incompatible preference schedules" (:message full-refusal)))
+    (is (= :incommensurable-family (get-in full-refusal [:data :kind])))
+    (is (= (set (vals schedules-by-target))
+           (set (get-in full-refusal [:data :preference-schedules]))))
+    (is (and (seq declared-targets) (seq differing-targets)
+             (empty? (set/intersection declared-targets differing-targets)))
+        (str "declarations with different schedules: " (pr-str differing-targets)))
     (is (every? #(= schedule (get-in % [:cascade-problem :cascade-spec :c-schedule]))
-                (:problems assembled)))
+                scoped))
     (is (= :invalid-preference-schedule
            (try (lc/preference-schedule {:c-schedule (assoc-in schedule [:placement :value] :random)}) nil
-                (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
+                (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))
+    (println "PREFERENCE-SCHEDULE-FAMILY"
+             (pr-str {:declared-targets declared-targets
+                      :differing-targets differing-targets
+                      :refusal full-refusal}))))
