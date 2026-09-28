@@ -7,7 +7,13 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.c-vector :as cv]
+            [futon2.aif.enact :as enact]
+            [futon2.aif.evidence-emit :as evidence-emit]
             [futon2.aif.outer-loop :as outer-loop]
+            [futon2.aif.trace :as trace]
+            [futon2.report.war-machine :as wm]
+            [futon2.run-tick-once :as tick]
             [wm-scheduled-run :as run]))
 
 (deftest unset-is-the-tick
@@ -57,3 +63,30 @@
                 (with-out-str (run/flight-plan! "plan" {:trigger :wallclock-cron :seed 9 :seat "kimi-6"})))]
       (is (= {:trigger :wallclock-cron :seed 9 :seat "kimi-6"} @got))
       (is (= {:selection {:chosen "M-a"} :plan {:placement {:target-source :chosen}}} (edn/read-string out))))))
+
+(deftest judgement-only-runner-never-enacts-a-passing-gate
+  (let [selected {:type :advance-mission :target "A"}
+        would-pass {:type :advance-mission :target "B"}
+        judgement {:mode :test
+                   :decision {:action selected :controller-score 1.0}
+                   :ranked-actions [{:action would-pass :rank 2
+                                     :act-gate {:verdict :pass}}]}
+        published (atom nil)]
+    (with-redefs [tick/mint-run-id (constantly "judgement-only-test")
+                  trace/wm-version-stamp (constantly {:revision "test"})
+                  wm/arena-mode-flags (constantly {})
+                  run/trigger-from-env (constantly :unspecified)
+                  cv/maybe-refresh! (constantly {:entries []})
+                  wm/accumulation-config (constantly {})
+                  wm/generate-war-machine (fn [_ _] {:judgement judgement})
+                  trace/write-trace! (fn [record & _]
+                                       (reset! published record)
+                                       {:path "test-trace.edn" :record record})
+                  trace/reconcile-accumulation (fn [j _] j)
+                  evidence-emit/enabled? (constantly false)
+                  enact/close-loop! (fn [& _]
+                                      (throw (ex-info "judgement-only runner enacted" {})))]
+      (with-out-str (run/run-judgement-only! 14))
+      (is (= selected (get-in @published [:decision :action])))
+      (is (not (contains? @published :realized-outcome)))
+      (is (not (contains? @published :enactment))))))

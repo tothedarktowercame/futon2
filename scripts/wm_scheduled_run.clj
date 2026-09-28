@@ -1,5 +1,5 @@
 (ns wm-scheduled-run
-  "Scheduled-execution entrypoint for the WM AIF apparatus (R10 graduation).
+  "Judgement-only scheduled entrypoint for the WM AIF apparatus (R10 graduation).
 
    One-shot invocation: scans the futon stack, runs the AIF judgement
    layer, persists a per-call trace record via `futon2.aif.trace`, and
@@ -24,20 +24,9 @@
             [futon2.aif.trace :as trace]
             [futon2.run-tick-once :as tick]
             [futon2.aif.c-vector :as cv]
-            [futon2.aif.enact :as enact]
-            [futon2.aif.fold-realized :as fr]
             [futon2.report.war-machine :as wm]
             [futon2.wm-trigger :as trigger])
   (:import (java.time Instant)))
-
-(defn- live-wire?
-  "R16 enactment switch for THIS runner (Joe-ratified ON, 2026-07-02).
-   `FUTON_WM_LIVE_WIRE=0` (or `false`) disables — the operator-visible
-   escape hatch. The `fold-realized/*live-wire?*` dynamic var keeps its
-   global default (false) for every other consumer; we bind it only
-   around this runner's enactment step."
-  []
-  (not (contains? #{"0" "false"} (System/getenv "FUTON_WM_LIVE_WIRE"))))
 
 (defn- summarise
   "One-line summary of a WM run for stdout/cron logs."
@@ -90,19 +79,14 @@
   (let [plan-from-field! (requiring-resolve 'futon2.aif.outer-loop/plan-from-field!)]
     (pp/pprint (plan-from-field! opts))))
 
-(defn -main
-  "Entrypoint. Optional first arg: scan-window-days (default 14). With
-  FUTON_WM_FLIGHT=plan the flight path runs instead of the tick (see
-  `flight-plan!`); unset, this is the tick."
-  [& args]
-  (try
-    (when-let [mode (flight-mode)]
-      (flight-plan! mode {:trigger (trigger-from-env)
-                          :seed (some-> (System/getenv "FUTON_WM_FLIGHT_SEED") parse-long)
-                          :seat (System/getenv "FUTON_WM_FLIGHT_SEAT")})
-      (System/exit 0))
+(defn run-judgement-only!
+  "Generate and publish one judgement without enacting it. Enactment is owned
+   by the full-loop selected-entry route: the posterior-selected action of
+   ActionAtMachine.machineAction. Since 2026-09-28 this diagnostic runner is
+   judgement-only ([R6 R16], R6R16-D); the 2026-07-02 live-wire ratification is
+   carried by the full loop."
+  [days]
     (let [run-id (tick/mint-run-id)
-          days (if (seq args) (Integer/parseInt (first args)) 14)
           ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
           ;; + WHICH config produced this tick — git sha/dirty of this one-shot
           ;; JVM's checkout, the arena-resolved mode flags (the same fns the
@@ -111,7 +95,6 @@
           ;; trace-write time minutes later: in the shared live tree a mid-run
           ;; commit would otherwise shift the recorded sha off the loaded code
           ;; (observed on the first stamped tick, 2026-07-04 07:00Z).
-          ;; :live-wire? joins below once resolved.
           ;; :trigger (README-clicks-and-ticks): which clock fired this run —
           ;; :wallclock-cron (tick, set in the crontab line), :duree-click-*
           ;; (click, set by the click-loop driver), else :unspecified. Lets
@@ -129,20 +112,12 @@
           ;; static floor; never throws the run.
           belly (try (cv/maybe-refresh!) (catch Exception _ {:entries []}))
           {:keys [judgement]} (wm/generate-war-machine days (assoc (wm/accumulation-config) :run-id run-id))
-          ;; R16 close-the-loop (live-wired 2026-07-02): act-gates over the
-          ;; judged actions; first :pass is ENACTED (artifact-only — escrow
-          ;; impl #2 else fold-engine impl #1) and the :realized-outcome
-          ;; record rides the trace to R14's γ next tick. Tick = epoch-ms
-          ;; (γ dedups on it). Guarded inside close-loop!: any failure
-          ;; returns the judgement unchanged.
-          wired? (live-wire?)
-          judgement (if wired?
-                      (binding [fr/*live-wire?* true]
-                        (enact/close-loop! judgement (System/currentTimeMillis)))
-                      judgement)
+          ;; R16 enactment is owned by the full-loop selected-entry route, which
+          ;; enacts the posterior-selected [:decision :action]. This runner is
+          ;; judgement-only since 2026-09-28 ([R6 R16], R6R16-D). The 2026-07-02
+          ;; live-wire ratification is carried by the full loop.
           ;; `(trace/wm-version-of record)` recovers the stamp built above.
-          judgement (assoc judgement :wm-version
-                           (assoc version-stamp :live-wire? wired?))
+          judgement (assoc judgement :wm-version version-stamp)
           publication (trace/write-trace!
                       (assoc judgement :trace/reason
                              {:kind :routing-rule
@@ -177,7 +152,21 @@
                                (str " expectedG=" (:gate-coverage-score-delta e)
                                     " expectedG-src="
                                     (or (some-> (:predicted-via e) name) "unknown"))))))))
+      {:judgement judgement :publication publication :belly belly}))
+
+(defn -main
+  "Entrypoint. Optional first arg: scan-window-days (default 14). With
+  FUTON_WM_FLIGHT=plan the flight path runs instead of the tick (see
+  `flight-plan!`); unset, this publishes a judgement and enacts nothing."
+  [& args]
+  (try
+    (when-let [mode (flight-mode)]
+      (flight-plan! mode {:trigger (trigger-from-env)
+                          :seed (some-> (System/getenv "FUTON_WM_FLIGHT_SEED") parse-long)
+                          :seat (System/getenv "FUTON_WM_FLIGHT_SEAT")})
       (System/exit 0))
+    (run-judgement-only! (if (seq args) (Integer/parseInt (first args)) 14))
+    (System/exit 0)
     (catch Throwable t
       (binding [*out* *err*]
         (println (str (Instant/now)) "ERROR" (.getMessage t)))
