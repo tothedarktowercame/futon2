@@ -1,9 +1,11 @@
 (ns futon2.test-support.runner-fixture
   "Report-free fixtures shared by full-loop runner tests."
   (:require [clojure.java.io :as io]
+            [clojure.test :refer [is]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace])
   (:import [java.nio.file Files]
@@ -18,18 +20,39 @@
    :fpi-dark? false
    :fpi-posterior? false})
 
-(defn with-hermetic-traces [f]
+(defn- production-file-set [dir]
+  (let [d (io/file dir)]
+    (if (.isDirectory d)
+      ;; path -> length: an append to an existing daily trace changes a length
+      (into (sorted-map) (map (fn [^java.io.File x] [(.getPath x) (.length x)]))
+            (filter #(.isFile ^java.io.File %) (file-seq d)))
+      (sorted-map))))
+
+(defn with-hermetic-traces
+  "Temporary trace, run-record, learning-ledger and morning-brief roots for a
+  runner test namespace, and a check that the production trace and brief
+  file sets did not change. A futon3c test that drove the runner without this
+  fixture wrote two fixture ticks into the live trace on 2026-09-28."
+  [f]
   (let [root (.toFile (Files/createTempDirectory "wm-runner-trace-suite-"
                                                 (make-array FileAttribute 0)))
         run-record-root (.toFile (Files/createTempDirectory
                                   "wm-runner-record-suite-"
-                                  (make-array FileAttribute 0)))]
+                                  (make-array FileAttribute 0)))
+        live-trace @#'trace/default-trace-dir
+        live-brief morning-brief/default-root
+        before [(production-file-set live-trace) (production-file-set live-brief)]]
     (try
       (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
                        #'runner/default-run-record-dir (.getPath run-record-root)
                        #'learning-ledger/default-root
-                       (str (io/file root "learning-ledger"))}
+                       (str (io/file root "learning-ledger"))
+                       #'morning-brief/default-root
+                       (str (io/file root "morning-brief"))}
         f)
+      (is (= before [(production-file-set live-trace)
+                      (production-file-set live-brief)])
+          "the suite must not add, remove or grow production trace or morning-brief files")
       (finally
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))
         (doseq [file (reverse (file-seq run-record-root))]
