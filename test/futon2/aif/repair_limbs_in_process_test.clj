@@ -111,7 +111,7 @@
                                :path "resources/wm/eig/held-out-split.edn"
                                :decl "HELD-OUT-SPLIT-DECLARED"}}
             :acceptance {:token :restoration-accepted
-                         :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                         :locator {:class :C4 :repo "futon2" :sha "0798f96a"
                                    :path (str "holes/tickets/" t ".md")
                                    :decl "**Status:** DONE"}}
             :after-revision "0798f96ad2082a8f80c8a850c8e1138c036213f9"})]
