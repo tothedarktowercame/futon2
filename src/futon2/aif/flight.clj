@@ -18,11 +18,13 @@
             [clojure.string :as str]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-policy :as policy]
+            [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.interpretation-evidence :as ievidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.lifecycle-exits :as exits]
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.observation-checks :as checks]
+            [futon2.aif.outcome-wants :as outcome-wants]
             [futon2.aif.repair-proposals :as repairs]
             [futon2.aif.temporal-update :as temporal-update])
   (:import [java.util UUID]))
@@ -170,6 +172,47 @@
                                         (for [[t qs] questioned]
                                           {:token t :reason :owner-question :questions qs})))
               :lifecycle lifecycle}}))
+
+(defmethod source-wants :primary-seam [{:keys [document observe]} _flight _sources]
+  (let [target (:target document)
+        outcomes (:outcomes document)
+        criterion (fn [outcome]
+                    (assoc (outcome-wants/outcome-criterion target outcome)
+                           :provenance (:provenance outcome)))
+        wait-reason (fn [outcome]
+                      (let [locator (:locator outcome)]
+                        (cond
+                          (some #(= {:absent :unconfirmed} (:confirmed %))
+                                (get-in outcome [:provenance :steps]))
+                          :unconfirmed-classification
+
+                          (or (= :no-admitted-locator (:absent locator))
+                              (not (contains? cascade-problems/checkable-classes
+                                              (:class locator))))
+                          :no-admitted-locator)))
+        waiting (keep (fn [outcome]
+                        (when-let [reason (wait-reason outcome)]
+                          (merge (select-keys (criterion outcome) [:token :stated :role])
+                                 {:reason reason}
+                                 (select-keys (:locator outcome) [:would-be :why]))))
+                      outcomes)
+        admitted (remove wait-reason outcomes)
+        published (into {} (map (fn [outcome]
+                                  [(:token (criterion outcome)) (:locator outcome)]))
+                        admitted)
+        observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
+        wants (outcome-wants/wants target admitted published observe-loc)
+        criteria-by-token (into {} (map (fn [outcome]
+                                         (let [c (criterion outcome)] [(:token c) c])))
+                                outcomes)]
+    {:wants (:wants wants)
+     :locators (:locators wants)
+     :universe (:universe wants)
+     :source {:kind :primary-seam
+              :via "futon2.aif.outcome-wants"
+              :document-source (:source document)
+              :unlocated (vec waiting)
+              :criteria-by-token criteria-by-token}}))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a
 ;; reader can never mistake it for wants the machine read from the mission.
