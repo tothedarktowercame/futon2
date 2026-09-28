@@ -1,6 +1,6 @@
 # E-kimi-task-122 — Producer groups 54 55 56: producer tests and their wire-test readers (M-warrant-limit)
 
-**Requisition:** in-progress — dispatched 2026-09-28T19:47:31Z to kimi-2 as invoke-1790624851042-26188-635c9d5f
+**Requisition:** completed — 2026-09-28T20:04:53Z, job invoke-1790624851042-26188-635c9d5f, state done
 
 Clocked in by claude-8 for kimi-2 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
