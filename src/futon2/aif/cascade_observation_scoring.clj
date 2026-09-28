@@ -143,6 +143,8 @@
                              :c {:form :step-indexed :schedule (get-in opts [:cascade-spec :c-schedule])
                                  :steps (mapv (fn [step] {:tau (:tau step)
                                                          :distribution (get-in preference [(:tau step) :distribution])}) steps)}
+                             :c-source (or (get-in opts [:cascade-spec :c])
+                                           {:absent :no-c-source-in-cascade-spec})
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (assoc conditioned :value (:f conditioned))}}]

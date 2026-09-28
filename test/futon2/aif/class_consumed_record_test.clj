@@ -68,6 +68,20 @@
                 state candidates (dissoc opts :upstream-initialization-conditioning))]
     (is (every? #(not (contains? (get-in % [:certificate :consumed-g]) :Q)) ranked))))
 
+(deftest class-score-records-c-source-receipt-or-typed-absence
+  (let [{:keys [state candidates opts]} (fixture-run)
+        receipt {:status :class-observation
+                 :source "declared test class preference"
+                 :live-c-recorded {:signature "fixture"}}
+        with-source (scoring/rank-cascade-actions
+                     state candidates (assoc-in opts [:cascade-spec :c] receipt))
+        without-source (scoring/rank-cascade-actions
+                        state candidates (update opts :cascade-spec dissoc :c))]
+    (is (every? #(= receipt (get-in % [:certificate :c-source])) with-source))
+    (is (every? #(= {:absent :no-c-source-in-cascade-spec}
+                    (get-in % [:certificate :c-source]))
+                without-source))))
+
 (deftest live-selection-completes-with-class-a-in-its-census
   (let [decision (fixture/decision nil)
         policies (get-in decision [:selection-certificate :g-term-decomposition :policies])]

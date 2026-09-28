@@ -133,8 +133,8 @@
         (is (zero? (:exit check)) (pr-str check))
         (is (str/includes? (:out check) "SELFTEST PASS"))
         ;; Anchor the verdict: the old "VALID" substring also matched INVALID.
-        (is (re-find #"(?m)^\s+INVALID \(3/5 ok\)\s*$" (:out check)) (:out check))
-        (is (= {"c-source" "absent" "rates-provenance" "ok"
+        (is (re-find #"(?m)^\s+INVALID \(4/5 ok\)\s*$" (:out check)) (:out check))
+        (is (= {"c-source" "ok" "rates-provenance" "ok"
                 "posterior" "ok" "u37" "ok" "g-terms" "missing"}
                (into {} (map (fn [line]
                                (let [[_ field verdict] (re-find #"^\s+(\S+)\s+(\S+)" line)]
@@ -147,6 +147,17 @@
                           :injected-sources [:live-c :enumeration-corpus :locators]
                           :run-record record :checker check
                           :store-counts {:before before :after after}})))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest class-c-source-without-source-is-not-accepted
+  (let [dir (temp-dir)
+        record (io/file dir "missing-class-source.edn")]
+    (try
+      (spit record (pr-str {:decision {:c-source {:status :class-observation}}}))
+      (let [check (shell/sh "bb" "scripts/wm_run_validity.bb" (str record))]
+        (is (zero? (:exit check)) (pr-str check))
+        (is (re-find #"(?m)^\s+c-source\s+bad\s+" (:out check)) (:out check))
+        (is (str/includes? (:out check) "class observation has no non-blank source")))
       (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
 
 (deftest no-selection-does-not-borrow-historical-quantities

@@ -279,7 +279,7 @@
    :scoring (into (sorted-map)
                   (map-indexed
                    (fn [i entry]
-                     [i (assoc (select-keys (:certificate entry) [:c :rates-provenance])
+                     [i (assoc (select-keys (:certificate entry) [:c :c-source :rates-provenance])
                                :id (:action entry))])
                    ranked))
    :candidates (mapv #(assoc % :f-consumed (cascade-selection/f-consumed-record %))

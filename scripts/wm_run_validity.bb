@@ -112,20 +112,40 @@
   ;; "bad" -- a verdict about C's source computed from something that is not
   ;; C's source (PROOF-2 AR-45). The absence is typed instead, and the
   ;; schedule is reported beside it rather than judged.
-  (let [p (find-field r :c)
-        v (get-found r p)
-        status (:status v)]
-    (cond
-      (nil? p) {:field :c-source :verdict :missing}
-      (preference-schedule? v)
-      {:field :c-source :verdict :absent :at p
-       :note (str (pr-str {:c-provenance {:absent :no-c-provenance-on-record}})
-                  "  " (pr-str {:c :preference-schedule :steps (count (:steps v))}))}
-      (= :derived status) {:field :c-source :verdict :ok :at p}
-      (= :derived-no-overlap status)
-      {:field :c-source :verdict :flagged :at p
-       :note "typed no-overlap: uniform spec scored this decision"}
-      :else {:field :c-source :verdict :bad :at p :note (pr-str status)})))
+  (let [source-p (find-field r :c-source)]
+    (if source-p
+      (let [v (get-found r source-p)
+            status (:status v)]
+        (cond
+          (:absent v) {:field :c-source :verdict :absent :at source-p
+                       :note (pr-str v)}
+          (= :derived status) {:field :c-source :verdict :ok :at source-p}
+          (= :class-observation status)
+          (if (and (string? (:source v)) (not (str/blank? (:source v))))
+            {:field :c-source :verdict :ok :at source-p
+             :note "declared class preference"}
+            {:field :c-source :verdict :bad :at source-p
+             :note "class observation has no non-blank source"})
+          (= :derived-no-overlap status)
+          {:field :c-source :verdict :flagged :at source-p
+           :note "typed no-overlap: uniform spec scored this decision"}
+          :else {:field :c-source :verdict :bad :at source-p :note (pr-str status)}))
+      ;; Older records carry no :c-source key. Preserve their existing
+      ;; schedule/provenance verdicts exactly.
+      (let [p (find-field r :c)
+            v (get-found r p)
+            status (:status v)]
+        (cond
+          (nil? p) {:field :c-source :verdict :missing}
+          (preference-schedule? v)
+          {:field :c-source :verdict :absent :at p
+           :note (str (pr-str {:c-provenance {:absent :no-c-provenance-on-record}})
+                      "  " (pr-str {:c :preference-schedule :steps (count (:steps v))}))}
+          (= :derived status) {:field :c-source :verdict :ok :at p}
+          (= :derived-no-overlap status)
+          {:field :c-source :verdict :flagged :at p
+           :note "typed no-overlap: uniform spec scored this decision"}
+          :else {:field :c-source :verdict :bad :at p :note (pr-str status)})))))
 
 (defn check-rates [r]
   (let [p (find-field r :rates-provenance)]
@@ -197,7 +217,7 @@
 
 (def field-keys
   "The record key each field is found by, for near-miss reporting."
-  {:c-source :c :rates-provenance :rates-provenance
+  {:c-source :c-source :rates-provenance :rates-provenance
    :posterior :selection-certificate :u37 :enumeration-completeness
    :g-terms :g-term-decomposition})
 
