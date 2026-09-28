@@ -91,7 +91,16 @@
             input (get-in second [:selection-certificate :token-belief-input])
             updates (into {} (map (juxt :token identity)) (:observation-updates input))
             q0 (get-in second [:selection-certificate :precision-family :model :q0])]
-        (is (= 1 (:predicted (clojure.core/first (filter #(= updater (:token %)) (:wanted prediction))))))
+        (let [declared-prediction (->> (get-in first [:action :precedence])
+                                       (filter #(contains? (:produces %) updater))
+                                       clojure.core/first
+                                       :theta)
+              updater-prediction (:predicted
+                                  (clojure.core/first
+                                   (filter #(= updater (:token %))
+                                           (:wanted prediction))))]
+          ;; The selected action declares the updater's prediction rate.
+          (is (= declared-prediction updater-prediction)))
         (is (= :observed-initialization (:conditioning-status input)))
         (is (= [:updated false] ((juxt :status :observed) (updates updater))))
         (is (= :not-updated (:status (updates unknown))))
