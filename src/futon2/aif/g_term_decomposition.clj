@@ -9,8 +9,7 @@
    than one candidate: a verdict that could not come out the other way
    (stop-the-line finding, STOP-THE-LINE-2026-09-20.md)."
   (:require [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.conditioned-trajectory :as trajectory]
-            [futon2.aif.token-initialization-policy :as initialization]))
+            [futon2.aif.conditioned-trajectory :as trajectory]))
 
 (def terms [:A :C :D :E :F :Q])
 
@@ -106,7 +105,11 @@
 
     :else {:status :missing :value value :reason :unsupported-a-shape}))
 
-(defn- upstream-q-classification [value]
+(defn- upstream-q-classification
+  "Classify from what the producer recorded: the updates, the belief they were
+   applied to, and the belief the scorer started from. The census does not
+   recompute the producer's work."
+  [value]
   (let [initial (:initial-belief value)
         applied (get-in value [:conditioning :applied-to])
         updates (get-in value [:conditioning :observation-updates])]
@@ -117,9 +120,6 @@
 
       (not (and (vector? updates) (every? #(contains? % :status) updates)))
       {:status :missing :value value :reason :q-updates-malformed}
-
-      (not (same-belief? initial (initialization/replay-updates applied updates)))
-      {:status :missing :value value :reason :q-initial-belief-not-reproduced}
 
       :else
       (let [updated (filter #(= :updated (:status %)) updates)]

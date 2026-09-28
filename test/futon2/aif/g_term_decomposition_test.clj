@@ -116,7 +116,7 @@
            (filter #(= :upstream-initialization-conditioning (:form %)))
            last))))
 
-(deftest upstream-initialization-q-is-replayed-before-classification
+(deftest upstream-initialization-q-is-classified-from-the-record
   (let [open-q (captured-class-q #(carry-fixture/decision nil))
         conditioned-q (captured-class-q
                        #(observation-fixture/with-two-ticks (fn [_] nil)))
@@ -129,21 +129,13 @@
                               [{:status :updated :token :already-true :observed true}]))
         malformed (assoc-in conditioned-q [:conditioning :observation-updates 0]
                             (dissoc (get-in conditioned-q [:conditioning :observation-updates 0])
-                                    :status))
-        states (keys (:initial-belief conditioned-q))
-        altered (if (>= (count states) 2)
-                  (let [[a b] states]
-                    (-> conditioned-q
-                        (update-in [:initial-belief a] - 1/100)
-                        (update-in [:initial-belief b] + 1/100)))
-                  (assoc conditioned-q :initial-belief {#{} 1}))]
+                                    :status))]
     (is (= :open-loop-no-conditioning (:reason (d/verdict :Q open-q))))
     (is (= :observation-conditioned (:reason (d/verdict :Q conditioned-q))))
     (is (= :conditioning-vacuous (:reason (d/verdict :Q vacuous))))
     (is (= :q-beliefs-not-recorded
            (:reason (d/verdict :Q (update conditioned-q :conditioning dissoc :applied-to)))))
     (is (= :q-updates-malformed (:reason (d/verdict :Q malformed))))
-    (is (= :q-initial-belief-not-reproduced (:reason (d/verdict :Q altered))))
     (is (= :unsupported-q-form
            (:reason (d/verdict :Q (assoc conditioned-q :form :something-else)))))))
 
