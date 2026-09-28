@@ -37,6 +37,10 @@
 # never compared. LAND <commit> in the live checkout before anyone checks, or
 # the check correctly refuses :stale-sha.
 set -euo pipefail
+# A caller inside a git hook, bisect or worktree command exports these; test
+# fixtures that run git in a temporary directory then write to the caller's
+# repository instead (futon2 identity overwritten 2026-09-28 01:05Z).
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 
 usage() { sed -n '2,28p' "$0"; exit 2; }
 PINNED=""
