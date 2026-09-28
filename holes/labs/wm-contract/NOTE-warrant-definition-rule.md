@@ -29,6 +29,20 @@ A warrant depends on these, and is stale when any of them differs from what was 
 The set in 2 is computed again at check time from the current source and compared with the
 recorded set, so a new method or a new reference is seen. The file list stays on every warrant.
 
+## Item 3 is not applied (2026-09-28)
+Recording calls replaces function objects in the test JVM. The test trees hold 52 `identical?`
+forms, some comparing function objects, so a recorded run can differ from an ordinary one; the
+safe form is a second run per test, which doubles the cost the rule exists to reduce
+(`/home/joe/code/storage/test-registry/reach-d6/REPORT.md`). Records rest on items 1, 2, 4, 4a, 5, 6.
+
+## The test that keeps the whole-file rule
+An edit to an unreached definition can stop its file loading, and every warrant that does not
+reach the edit stays current. `futon3c.diagramprover.wm-wire-everything-loads-test` loads every
+file the wire tests load, keeps the whole-file rule (`FILE_RULE_NAMESPACES`, futon3c 252860bf),
+and is therefore rerun on any change: one run. It also covers a load-time call that throws.
+It does not cover a load-time call that returns a different value from a file in which the
+test reaches nothing.
+
 ## What the rule does not see
 Code built and run through `eval`; Java interop that loads code; a load-time side effect in a
 file from which nothing is reached or called. The call recorder cannot record calls to
