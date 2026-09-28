@@ -21,6 +21,8 @@ A warrant depends on these, and is stale when any of them differs from what was 
 3. Every definition the run called, including calls made while files were loading, and
    every definition reachable from those.
 4. For each file with a definition in 2 or 3: the text of that file outside its definitions.
+4a. For each file with a top-level form that refers to a definition in 2 or 3: the text of
+   that file outside its definitions, and what its top-level forms refer to (futon3c 54da3836).
 5. A file the source reading cannot analyse: whole.
 6. A test that reaches a name computed at run time keeps the present whole-file rule.
 
