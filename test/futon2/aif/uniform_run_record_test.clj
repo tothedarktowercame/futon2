@@ -83,7 +83,8 @@
                           (#'wm/carry-enumeration-completeness result)))
             decision (:decision projected)
             written (#'runner/persist-run-record!
-                     {:run-record-dir (str (io/file dir "records"))}
+                     {:run-record-dir (str (io/file dir "records"))
+                      :scan-render-fn (fn [& _] nil)}
                      "offline-tick-001-validity" "2026-09-19T00:00:00Z"
                      {:outcome :offline-selection-replay
                       :checkpoints {:selection {:judgment {:controller-decision decision}}}})
@@ -157,7 +158,8 @@
   (let [dir (temp-dir)]
     (try
       (let [written (#'runner/persist-run-record!
-                     {:run-record-dir (str dir)} "offline-no-selection" "2026-09-19T00:00:00Z"
+                     {:run-record-dir (str dir) :scan-render-fn (fn [& _] nil)}
+                     "offline-no-selection" "2026-09-19T00:00:00Z"
                      {:outcome :offline-no-selection
                       :backtrace {:decision {:selection-law {:posterior {:a 1/2 :b 1/2}}
                                              :c {:status :derived}}}})

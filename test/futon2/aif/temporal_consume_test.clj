@@ -85,7 +85,8 @@
                                            :cascade-habit-path (str (io/file root "no-habit"))
                                            :token-belief-context {:occurrence-id (str "selection-" n)}}))))
                       saved (#'loop-runner/persist-run-record!
-                             {:run-record-dir (str (io/file root "runs")) :click-id id}
+                             {:run-record-dir (str (io/file root "runs")) :click-id id
+                              :scan-render-fn (fn [& _] nil)}
                              id "2026-09-27T03:00:00Z"
                              {:outcome :offline-no-selection
                               :checkpoints {:selection {:judgment {:controller-decision decision}}}})

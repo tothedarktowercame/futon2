@@ -57,7 +57,8 @@
         sc (scoring lane) rates (get-in sc [:precision-model :rates])
         token (first (keys rates))
         saved (#'runner/persist-run-record!
-               {:run-record-dir (str (io/file *dir* "records"))}
+               {:run-record-dir (str (io/file *dir* "records"))
+                :scan-render-fn (fn [& _] nil)}
                "offline-label-consume" "2026-09-26T00:00:00Z"
                {:outcome :offline-no-selection
                 :checkpoints {:selection {:judgment {:controller-decision d}}}})

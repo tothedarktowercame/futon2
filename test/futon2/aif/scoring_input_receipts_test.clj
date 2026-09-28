@@ -25,7 +25,8 @@
                decision (:decision (wm-cd/select-and-record-cascade!
                                     assembled (assoc fixture/live-c-opts :cascade-habit-path path)))
                saved (#'runner/persist-run-record!
-                      {:run-record-dir (str dir) :habit-reads/state reads}
+                      {:run-record-dir (str dir) :habit-reads/state reads
+                       :scan-render-fn (fn [& _] nil)}
                       "scoring-fixture" "2026-09-21"
                       {:outcome :incomplete
                        :checkpoints {:selection {:judgment {:controller-decision decision}}}})]

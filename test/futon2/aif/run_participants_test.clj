@@ -12,7 +12,9 @@
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
                      "participants-test" (make-array java.nio.file.attribute.FileAttribute 0)))]
     (try
-      (let [result (#'runner/persist-run-record! (assoc opts :run-record-dir (.getPath dir))
+      (let [result (#'runner/persist-run-record! (assoc opts
+                                                       :run-record-dir (.getPath dir)
+                                                       :scan-render-fn (fn [& _] nil))
                     "2026-09-19-participants-test" "2026-09-19T00:00:00Z"
                     {:outcome :incomplete :checkpoints {}})]
         (edn/read-string (slurp (:run-record result))))
@@ -78,6 +80,7 @@
         (fn []
           (let [result (runner/run-opportunity!
                         {:author "author" :reviewer "configured" :repair-reviewer "repair"
+                         :scan-render-fn (fn [& _] nil)
                          :run-record-dir (.getPath dir)})
                 record (edn/read-string (slurp (:run-record result)))]
             (is (= "repair" (:identity (participants/read-role record :reviewer-of-record))))

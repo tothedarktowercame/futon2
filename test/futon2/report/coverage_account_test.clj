@@ -105,7 +105,8 @@
   (let [{:keys [result]} (assembled-decision)
         decision (:decision result)
         saved (#'runner/persist-run-record!
-               {:run-record-dir (.getPath *root*)} "coverage-test" "2026-09-21T00:00:00Z"
+               {:run-record-dir (.getPath *root*) :scan-render-fn (fn [& _] nil)}
+               "coverage-test" "2026-09-21T00:00:00Z"
                {:outcome :incomplete :data {:failure-stage :construction}
                 :checkpoints {:selection {:judgment {:controller-decision decision}}}})
         record (edn/read-string (slurp (:run-record saved)))]

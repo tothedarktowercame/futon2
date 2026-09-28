@@ -30,7 +30,8 @@
          #'runner/run-opportunity-core! (fn [_] (read-fn) {:outcome :incomplete :checkpoints {}})}
         (fn []
           (edn/read-string (slurp (:run-record (runner/run-opportunity!
-                                               {:run-record-dir (.getPath dir)})))))))))
+                                               {:run-record-dir (.getPath dir)
+                                                :scan-render-fn (fn [& _] nil)})))))))))
 
 (defn snapshot-sha [text]
   (evidence/sha256 (.getBytes text java.nio.charset.StandardCharsets/UTF_8)))

@@ -17,7 +17,8 @@
         (#'fixture/fill! 5)
         (let [decision (:decision (#'fixture/decision {:observation-labels-path (#'fixture/path)}))
               saved (#'runner/persist-run-record!
-                     {:run-record-dir (str (io/file root "records"))}
+                     {:run-record-dir (str (io/file root "records"))
+                      :scan-render-fn (fn [& _] nil)}
                      "offline-conditioning" "2026-09-26T00:00:00Z"
                      {:outcome :offline-no-selection
                       :checkpoints {:selection {:judgment {:controller-decision decision}}}})

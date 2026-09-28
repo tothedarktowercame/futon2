@@ -63,7 +63,8 @@
   (let [dir (temp-dir)
         rr-dir (temp-dir)
         saved (#'runner/persist-run-record!
-               {:run-record-dir rr-dir} "run-pub" "2026-09-26T00:00:00Z"
+               {:run-record-dir rr-dir :scan-render-fn (fn [& _] nil)}
+               "run-pub" "2026-09-26T00:00:00Z"
                {:outcome :offline-no-selection
                 :repair/publication [discharged-repair-entry]})
         record (edn/read-string (slurp (:run-record saved)))

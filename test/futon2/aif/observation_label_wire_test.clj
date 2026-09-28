@@ -118,6 +118,7 @@
   (let [provenance (live-provenance)
         saved (#'runner/persist-run-record!
                {:run-record-dir (str (io/file *dir* "records"))
+                :scan-render-fn (fn [& _] nil)
                 :observation-labels-path (path)
                 :declaration-reads/state (atom (:occurrences provenance))}
                "offline-label-wire" "2026-09-26T00:00:00Z"

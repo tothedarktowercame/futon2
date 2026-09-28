@@ -80,7 +80,8 @@
      (let [decision {:action (second (fixture/menu))}
            r (reinforcement/close! path decision :grounded-change (comparison decision true))
            saved (#'runner/persist-run-record!
-                  {:run-record-dir (str (.getParentFile (io/file path)))} "habit" "2026-09-21"
+                  {:run-record-dir (str (.getParentFile (io/file path)))
+                   :scan-render-fn (fn [& _] nil)} "habit" "2026-09-21"
                   {:outcome :grounded-change :habit-reinforcement r
                    :checkpoints {:selection {:judgment {:controller-decision decision}}}})
            record (edn/read-string (slurp (:run-record saved)))]

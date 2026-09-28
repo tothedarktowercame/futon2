@@ -165,7 +165,8 @@
         result {:outcome :offline-selection-replay
                 :checkpoints {:selection {:judgment {:controller-decision decision}}}}]
     (try
-      (let [written (#'runner/persist-run-record! {:run-record-dir (.getPath dir)}
+      (let [written (#'runner/persist-run-record! {:run-record-dir (.getPath dir)
+                                                   :scan-render-fn (fn [& _] nil)}
                                                  "evaluation-trace-test" "2026-09-19T00:00:00Z" result)
             record (edn/read-string (slurp (:run-record written)))
             cert (get-in record [:decision :selection-certificate])

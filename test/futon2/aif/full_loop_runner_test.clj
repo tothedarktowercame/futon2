@@ -598,6 +598,9 @@
    :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
                           :git-dirty? false :repo-heads {}})
    :mode-flags-fn (fn [] {})
+   :scan-render-fn (fn [& _] nil)
+   :effective-run-configuration-fn
+   (:effective-run-configuration-fn (runtime/production-defaults {}))
    :version-stamp-fn identity
    :mission-fn (fn [target] {:id target})
    :construct-fn runner/construct-for-decision
