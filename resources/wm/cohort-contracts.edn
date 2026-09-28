@@ -1,0 +1,9 @@
+{:schema :wm/cohort-contracts-v1
+ :boundary {:commit "9dd4fd8dc1f20a842b65b975762df60f4296e83d"
+            :subject "Enforce enriched fold construction contract"}
+ :derived-by "git merge-base --is-ancestor <revision> <boundary>, run 2026-09-28 over the 18 activated cohorts under /home/joe/run4 (storage/test-registry/cohort-version-d/REPORT.md)"
+ :pre-enriched-fold
+ #{"72d9beba7252ae362635d77fd81d213e6e22378d" "810be2a9a19d70b054d9ef7ceb43a2349b7a923d"
+   "2bcefdd84c6036f0773874ab3dc12ba4881b8044" "9ed275221a20433bf046c5e6f6781bbf7266407a"
+   "c9c6d6ce341cb8bb5751aeff908435a552e1c25d" "995307a7c1c34c368a4865ca8a678d4d55a73c6e"
+   "38de06f5806f9b1f1c850c10cd5343e7ba03d470" "16c215c5bf615741715dc92bce47817fbd96e9e1"}}

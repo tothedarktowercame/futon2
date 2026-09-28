@@ -50,7 +50,7 @@
 (defn cell? [x]
   (or (grounded-term? x) (typed-sorry? x)))
 
-(defn checkpoint-cell-errors [p checkpoint cell]
+(defn- checkpoint-cell-errors* [p checkpoint cell fold-contract?]
   (cond
     (typed-sorry? cell) []
     (not (grounded-term? cell)) [:not-a-flight-cell]
@@ -68,7 +68,7 @@
           missing-code (mapv (fn [k] [:missing-code-state-key k])
                              (sort (remove code-present code-required)))
           wiring-errors
-          (when (= :construction checkpoint)
+          (when (and fold-contract? (= :construction checkpoint))
             (let [wiring (:wiring judgment)
                   fold-output (:fold-output judgment)
                   validation (fold/validate-fold-output-v1 fold-output)
@@ -93,6 +93,29 @@
                               [:fold-correspondence (:finding finding)])
                             (:findings correspondence))))))]
       (into (into missing-top missing-code) wiring-errors))))
+
+(defn checkpoint-cell-errors [p checkpoint cell]
+  (checkpoint-cell-errors* p checkpoint cell true))
+
+(def ^:private cohort-contracts
+  (delay
+    (some-> "wm/cohort-contracts.edn" io/resource slurp edn/read-string)))
+
+(defn recorded-contract [first-event]
+  (let [contracts @cohort-contracts
+        revision (get-in first-event [:payload :judgment :code-state :git-sha])
+        boundary (get-in contracts [:boundary :commit])]
+    (when (and (= :wm/cohort-contracts-v1 (:schema contracts))
+               (string? revision) (re-matches #"[0-9a-f]{40}" revision))
+      {:kind (if (contains? (:pre-enriched-fold contracts) revision)
+               :pre-enriched-fold
+               :enriched-fold-v1)
+       :source-revision revision
+       :boundary boundary})))
+
+(defn recorded-checkpoint-cell-errors [p contract checkpoint cell]
+  (checkpoint-cell-errors* p checkpoint cell
+                           (not= :pre-enriched-fold (:kind contract))))
 
 (defn preregistration-errors [p]
   (cond-> []
@@ -993,7 +1016,7 @@
     (catch clojure.lang.ExceptionInfo e (throw e))
     (catch Throwable _ (throw (ex-info "Invalid cohort evidence" {:reason reason})))))
 
-(defn closed-execution
+(defn- validate-closed-execution
   "Validate BINDING against its immutable preregistration, activation, and
   ledger, then return the qualified identity of one exact closed attempt.
   This is read-only and deliberately does not require remaining capacity."
@@ -1006,7 +1029,9 @@
         files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
                    (sort-by #(.getName %)) vec)
         events (mapv #(read-one-file % :invalid-cohort-event) files)
-        authority-judgment (get-in (first events) [:payload :judgment])
+        first-event (first events)
+        contract (recorded-contract first-event)
+        authority-judgment (get-in first-event [:payload :judgment])
         authority-present? (contains? authority-judgment :execution-authority)
         stored-authority (:execution-authority authority-judgment)
         expected-authority (when authority-present?
@@ -1034,7 +1059,8 @@
                            (= sequence (:event/sequence event))
                            (= checkpoint (:checkpoint/type event)))
                       errors (if envelope?
-                               (checkpoint-cell-errors p checkpoint (:payload event))
+                               (recorded-checkpoint-cell-errors
+                                p contract checkpoint (:payload event))
                                [:event-envelope])]
                   (when (seq errors)
                     {:sequence sequence :checkpoint checkpoint :errors errors}))))
@@ -1054,6 +1080,7 @@
           (conj :preregistration-sha256)
           (not= (get-in p [:stopping-rule :target]) (:stopping-target activation))
           (conj :stopping-target)
+          (nil? contract) (conj :recorded-revision)
           (not (.isDirectory attempt-dir)) (conj :attempt-directory)
           (not (pos-int? ordinal)) (conj :ordinal)
           (not= checkpoint-order types) (conj :checkpoint-order)
@@ -1070,14 +1097,33 @@
                       (cond-> {:reason :closed-execution-unavailable
                                :failed (vec failed)}
                         (seq event-errors) (assoc :event-errors event-errors)))))
-    (merge
-     (if authority-present?
-       (execution-provenance stored-authority attempt-id)
-       {:kind :runner-execution
-        :identity-version 0
-        :id (str (name (:cohort-id binding)) "--" attempt-id)
-        :legacy-id (str (name (:cohort-id binding)) "--" attempt-id)
-        :cohort-id (:cohort-id binding)
-        :cohort-sha256 (:sha256 binding)
-        :attempt-id attempt-id})
-     {:outcome (get-in close [:judgment :outcome])})))
+    (let [execution
+          (merge
+           (if authority-present?
+             (execution-provenance stored-authority attempt-id)
+             {:kind :runner-execution
+              :identity-version 0
+              :id (str (name (:cohort-id binding)) "--" attempt-id)
+              :legacy-id (str (name (:cohort-id binding)) "--" attempt-id)
+              :cohort-id (:cohort-id binding)
+              :cohort-sha256 (:sha256 binding)
+              :attempt-id attempt-id})
+           {:outcome (get-in close [:judgment :outcome])})
+          fold-output (get-in (nth events 2) [:payload :judgment :fold-output])]
+      {:execution execution
+       :recorded-contract contract
+       :fold-output (if (= :pre-enriched-fold (:kind contract))
+                      {:absent :recorded-before-fold-contract}
+                      {:status :validated :sha256 (sha256 (pr-str fold-output))})})))
+
+(defn closed-execution
+  "Validate one exact closed attempt under its recorded contract and return
+  its stable execution identity/provenance map."
+  [binding attempt-id]
+  (:execution (validate-closed-execution binding attempt-id)))
+
+(defn closed-execution-qualified
+  "Return stable execution identity plus the recorded contract and the typed
+  fold-output qualification, from the same single validation and read."
+  [binding attempt-id]
+  (validate-closed-execution binding attempt-id))

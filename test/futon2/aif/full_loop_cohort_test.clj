@@ -27,7 +27,7 @@
           :trigger :wallclock-cron
           :machine-state {:tick 1}
           :agent-roster []
-          :code-state {:git-sha "abc"
+          :code-state {:git-sha "07a6b7eceb57a912698e7c670426f0c0f1663956"
                        :git-dirty? false
                        :resolved-mode-flags {}
                        :configuration-digest "test"}
@@ -311,6 +311,92 @@
     nil
     (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
+(def legacy-revision "72d9beba7252ae362635d77fd81d213e6e22378d")
+(def enriched-revision "07a6b7eceb57a912698e7c670426f0c0f1663956")
+
+(def execution-keys
+  #{:kind :identity-version :id :legacy-id :cohort-id :cohort-sha256
+    :attempt-id :outcome})
+
+(defn- rewrite-time-step-revision! [attempt-dir revision present?]
+  (let [file (io/file attempt-dir "001-time-step.edn")
+        event (edn/read-string (slurp file))
+        path [:payload :judgment :code-state]]
+    (spit file (pr-str (if present?
+                         (assoc-in event (conj path :git-sha) revision)
+                         (update-in event path dissoc :git-sha))))))
+
+(defn- rewrite-construction! [attempt-dir judgment]
+  (let [file (io/file attempt-dir "003-construction.edn")
+        event (edn/read-string (slurp file))]
+    (spit file (pr-str (assoc event :payload (term judgment))))))
+
+(def legacy-construction
+  {:mission "M-x" :cascade {} :sorries [] :patterns [] :deposit nil :wiring nil})
+
+(def enriched-construction
+  (assoc legacy-construction
+         :fold-output {:fold/refused true
+                       :why "No grounded construction evidence"
+                       :refusal/class :construction-evidence-unavailable}))
+
+(deftest recorded-contract-governs-closed-execution-reading
+  (testing "write path still refuses a missing fold output"
+    (let [root (tmp-root)
+          _ (cohort/activate! prereg-path root)
+          attempt (:attempt/id (open! root "clock/write-contract"))]
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"invalid checkpoint cell"
+           (cohort/append-checkpoint!
+            prereg-path root attempt :construction (term legacy-construction))))))
+  (testing "an earlier contract opens with typed fold absence"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir legacy-revision true)
+      (rewrite-construction! attempt-dir legacy-construction)
+      (let [execution (cohort/closed-execution binding attempt)
+            qualified (cohort/closed-execution-qualified binding attempt)]
+        (is (= execution-keys (set (keys execution))))
+        (is (= execution (:execution qualified)))
+        (is (= {:kind :pre-enriched-fold
+                :source-revision legacy-revision
+                :boundary "9dd4fd8dc1f20a842b65b975762df60f4296e83d"}
+               (:recorded-contract qualified)))
+        (is (= {:absent :recorded-before-fold-contract}
+               (:fold-output qualified))))))
+  (testing "a post-boundary record retains the stable execution keys"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir enriched-revision true)
+      (rewrite-construction! attempt-dir enriched-construction)
+      (is (= execution-keys
+             (set (keys (cohort/closed-execution binding attempt)))))
+      (is (= :enriched-fold-v1
+             (get-in (cohort/closed-execution-qualified binding attempt)
+                     [:recorded-contract :kind])))))
+  (testing "post-boundary missing fold output remains refused"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir enriched-revision true)
+      (rewrite-construction! attempt-dir (assoc legacy-construction :fold-output nil))
+      (let [data (refusal-data binding attempt)]
+        (is (= [:events] (:failed data)))
+        (is (= [{:sequence 3 :checkpoint :construction
+                 :errors [[:invalid-fold-output :nil-fold-output]]}]
+               (:event-errors data))))))
+  (testing "missing and abbreviated recorded revisions are refused"
+    (doseq [[revision present?] [[nil false] ["07a6b7ece" true]]]
+      (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+        (rewrite-time-step-revision! attempt-dir revision present?)
+        (is (some #{:recorded-revision}
+                  (:failed (refusal-data binding attempt)))))))
+  (testing "legacy mode does not relax unrelated construction requirements"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir legacy-revision true)
+      (rewrite-construction! attempt-dir (dissoc legacy-construction :mission))
+      (let [data (refusal-data binding attempt)]
+        (is (= [:events] (:failed data)))
+        (is (= [{:sequence 3 :checkpoint :construction
+                 :errors [[:missing-judgment-key :mission]]}]
+               (:event-errors data)))))))
+
 (deftest closed-execution-refusal-names-each-failed-condition
   (testing "wrong activation preregistration digest"
     (let [{:keys [binding attempt attempt-dir]} (closed-fixture)
@@ -377,7 +463,8 @@
                          :trigger :wallclock-cron
                          :machine-state {:tick 1}
                          :agent-roster []
-                         :code-state {:git-sha "abc" :git-dirty? false
+                         :code-state {:git-sha "07a6b7eceb57a912698e7c670426f0c0f1663956"
+                                      :git-dirty? false
                                       :resolved-mode-flags {}
                                       :configuration-digest "test"}
                          :semantic-epoch :epoch-1
@@ -628,7 +715,7 @@
                                 :trigger :instrumented-campaign-repair
                                 :machine-state {:tick 1}
                                 :agent-roster []
-                                :code-state {:git-sha "abc"
+                                :code-state {:git-sha "07a6b7eceb57a912698e7c670426f0c0f1663956"
                                              :git-dirty? false
                                              :resolved-mode-flags {}
                                              :configuration-digest "test"}
