@@ -72,6 +72,13 @@
                (:construction-kind (runner/construct-for-decision entry)))))
       (is (nil? (runner/historical-revalidation-entry
                  obligation record {:author "zai-2" :repair-reviewer "zai-2"})))
+      (is (= [] (runner/historical-admission-failures
+                 obligation record {:author "zai-2" :repair-reviewer "codex-10"})))
+      (is (= [:repair-reviewer] (runner/historical-admission-failures
+                                 obligation record {:author "zai-2" :repair-reviewer "codex-12"})))
+      (is (= [:repair-reviewer :distinct-actors]
+             (runner/historical-admission-failures
+              obligation record {:author "zai-2" :repair-reviewer "zai-2"})))
       (is (= :awaiting-validation (:repair/status record)))
       (is (= :awaiting-validation (:repair/status (first (repair/open-obligations (.getPath store)))))))
     (let [copy (io/file store "verification-evidence/verify-1.edn")]

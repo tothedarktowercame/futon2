@@ -115,6 +115,7 @@
       (is (= action (get-in result [:checkpoints :selection :judgment :selected-action])))
       (if mismatch?
         (do (is (empty? @executed))
-            (is (= :historical-verification-admission-invalid (get-in result [:data :failure-kind]))))
+            (is (= :historical-verification-admission-invalid (get-in result [:data :failure-kind])))
+            (is (= [:repair-id] (get-in result [:data :error-data :failed]))))
         (do (is (= [target] (mapv :obligation @executed)))
             (is (= :historical-verification-awaiting-validation (:outcome result))))))))

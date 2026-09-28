@@ -682,6 +682,8 @@
              (fn [{:keys [kept omitted]} k v]
                (cond
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
+                 (and (vector? v) (<= (count v) 32) (every? scalar? v))
+                 {:kept (assoc kept k v) :omitted omitted}
                  (map? v) (let [accepted (into {} (filter (comp scalar? val)) v)
                                 rejected (remove (comp scalar? val) v)]
                             {:kept (assoc kept k accepted)
@@ -1643,18 +1645,46 @@
                    {:from :independent-review :to :successor-validation}]
      :policy-holes []}))
 
+(defn historical-admission-failures
+  "The names of the admission conditions that do not hold, in the order they
+  are checked; empty when the admission matches the obligation and the casting."
+  [obligation admission casting]
+  (cond-> []
+    (not= :open (:repair/status obligation)) (conj :obligation-status)
+    (not= :machine-failure (:repair/class obligation)) (conj :obligation-class)
+    (not= :wm/historical-repair-admission-v1 (:schema admission)) (conj :admission-schema)
+    (not= (:repair/id obligation) (:repair/id admission)) (conj :repair-id)
+    (not= :awaiting-validation (:repair/status admission)) (conj :admission-status)
+    (not= (get-in admission [:actors :author]) (:author casting)) (conj :author)
+    (not= (get-in admission [:actors :reviewer]) (:repair-reviewer casting))
+    (conj :repair-reviewer)
+    (= (:author casting) (:repair-reviewer casting)) (conj :distinct-actors)))
+
+(defn historical-transition-failures
+  "The names of the transition conditions that do not hold, in the order they
+  are checked; empty when the transition is the one the admission announced."
+  [obligation admission execution-identity transition]
+  (let [artifact (:verification-artifact transition)]
+    (cond-> []
+      (not= :wm/historical-repair-admission-v1 (:schema transition)) (conj :transition-schema)
+      (not= (:repair/id obligation) (:repair/id transition)) (conj :repair-id)
+      (not= :awaiting-validation (:repair/status transition)) (conj :transition-status)
+      (not= execution-identity (:verification-attempt transition)) (conj :verification-attempt)
+      (not= (:verification-id admission) (:verification-id transition)) (conj :verification-id)
+      (not= (:verification-artifact admission) (:verification-source transition))
+      (conj :verification-source)
+      (not (and (= #{:path :sha256} (set (keys artifact)))
+                (string? (:path artifact))
+                (not (str/blank? (:path artifact)))
+                (string? (:sha256 artifact))
+                (re-matches #"[0-9a-f]{64}" (:sha256 artifact))))
+      (conj :verification-artifact))))
+
 (defn historical-revalidation-entry
   "Admit a verified historical repair as a distinct selectable action. This
   does not execute it or relax ordinary author invariants."
   [obligation admission casting]
-  (when (and (= :open (:repair/status obligation))
-             (= :machine-failure (:repair/class obligation))
-             (= :wm/historical-repair-admission-v1 (:schema admission))
-             (= (:repair/id obligation) (:repair/id admission))
-             (= :awaiting-validation (:repair/status admission))
-             (= (get-in admission [:actors :author]) (:author casting))
-             (= (get-in admission [:actors :reviewer]) (:repair-reviewer casting))
-             (not= (:author casting) (:repair-reviewer casting)))
+  (when (empty? (historical-admission-failures obligation admission casting))
     {:rank 0 :action {:type :revalidate-historical-repair
                       :target (:repair/id obligation)
                       :repair-obligation obligation
@@ -5231,13 +5261,23 @@
                     (measurement/begin! attempt-evidence-dir (:judgment construction-cell)
                                         #(str (Instant/now)) author)))
           (when historical-action?
-            (when-not (historical-revalidation-entry
-                       stop-line historical-admission
-                       {:author author :repair-reviewer repair-reviewer})
+            (when-let [failed (seq (historical-admission-failures
+                                    stop-line historical-admission
+                                    {:author author :repair-reviewer repair-reviewer}))]
               (throw (ex-info "Selected historical admission does not match obligation or actors"
                               {:outcome :historical-verification-refused
                                :failure-kind :historical-verification-admission-invalid
                                :failure-stage :construction
+                               :failed (vec failed)
+                               :admission-author
+                               (or (get-in historical-admission [:actors :author])
+                                   {:absent :no-author-on-admission})
+                               :admission-reviewer
+                               (or (get-in historical-admission [:actors :reviewer])
+                                   {:absent :no-reviewer-on-admission})
+                               :casting-author (or author {:absent :no-author-cast})
+                               :casting-repair-reviewer
+                               (or repair-reviewer {:absent :no-repair-reviewer-cast})
                                :repair-obligation stop-line})))
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"
@@ -5251,24 +5291,14 @@
                               {:execution-identity execution-identity
                                :obligation stop-line
                                :candidate historical-admission})]
-              (when-not (and (= :wm/historical-repair-admission-v1 (:schema transition))
-                             (= (:repair/id stop-line) (:repair/id transition))
-                             (= :awaiting-validation (:repair/status transition))
-                             (= execution-identity (:verification-attempt transition))
-                             (= (:verification-id historical-admission)
-                                (:verification-id transition))
-                             (= (:verification-artifact historical-admission)
-                                (:verification-source transition))
-                             (let [artifact (:verification-artifact transition)]
-                               (and (= #{:path :sha256} (set (keys artifact)))
-                                    (string? (:path artifact))
-                                    (not (str/blank? (:path artifact)))
-                                    (string? (:sha256 artifact))
-                                    (re-matches #"[0-9a-f]{64}" (:sha256 artifact)))))
+              (when-let [failed (seq (historical-transition-failures
+                                      stop-line historical-admission
+                                      execution-identity transition))]
                 (throw (ex-info "Historical verification transition malformed"
                                 {:outcome :historical-verification-refused
                                  :failure-kind :historical-verification-transition-invalid
                                  :failure-stage :construction
+                                 :failed (vec failed)
                                  :repair-obligation stop-line})))
               (checkpoint! :dispatch
                            (sorry :historical-verification-no-author-dispatch

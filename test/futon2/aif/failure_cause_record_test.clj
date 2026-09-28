@@ -56,7 +56,13 @@
                  [:failure :detail])))
   (let [record (run-record
                 (ex-info "long detail" {:body (apply str (repeat 301 "x"))}))]
-    (is (= {:omitted [:body]} (get-in record [:failure :detail])))))
+    (is (= {:omitted [:body]} (get-in record [:failure :detail]))))
+  (let [record (run-record
+                (ex-info "named conditions"
+                         {:failed [:repair-reviewer :distinct-actors]
+                          :mixed [:a (Object.)]}))]
+    (is (= {:failed [:repair-reviewer :distinct-actors] :omitted [:mixed]}
+           (get-in record [:failure :detail])))))
 
 (deftest the-eighth-flights-throw-carries-its-cause
   (let [{:keys [result finding]}
