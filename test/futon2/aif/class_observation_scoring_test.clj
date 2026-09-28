@@ -79,7 +79,45 @@
 (defn- steps-of [entry]
   (get-in entry [:certificate :steps]))
 
-(deftest reference-input-g-and-unique-maximum
+(deftest scorer-separates-a-candidate-that-never-reaches-acceptance
+  (let [target "stated-target"
+        start [target :start]
+        intermediate [target :intermediate]
+        accepted [target :accepted]
+        never-step (cpol/token-interpretation
+                    :never-accepts
+                    {:guard {:needs #{start} :forbids #{intermediate}}
+                     :produces #{intermediate}})
+        acceptance-step (cpol/token-interpretation
+                         :accepts
+                         {:guard {:needs #{start} :forbids #{accepted}}
+                          :produces #{accepted}})
+        candidates [{:kind :cascade-candidate :id :C1 :target target
+                     :precedence [(assoc never-step :target target)]}
+                    {:kind :cascade-candidate :id :C2 :target target
+                     :precedence [(assoc acceptance-step :target target)]}]
+        q0 {#{start} 1}
+        universe #{start intermediate accepted}
+        acceptance #{accepted}
+        model (class-model {:universe universe :acceptance acceptance :horizon 4
+                            :target-class {target :focused}})
+        ranked (rank q0 candidates model 4 acceptance)
+        by-id (into {} (map (juxt :cascade-id identity)) ranked)
+        g1 (:controller-score (by-id :C1))
+        g2 (:controller-score (by-id :C2))]
+    (is (< (Math/abs (- g1 (Math/log 20))) 0.001) (str "G(C1)=" g1 " expected ln20"))
+    (is (< (Math/abs (- g2 (Math/log (/ 1 0.55)))) 0.001)
+        (str "G(C2)=" g2 " expected ln(1/.55)"))
+    (is (< g2 g1))
+    (doseq [entry ranked
+            step (steps-of entry)
+            :when (< (:tau step) 4)]
+      (is (zero? (:g step)) (str "intermediate tau " (:tau step) " g=" (:g step))))))
+
+(deftest reference-input-both-candidates-reach-acceptance
+  ;; Since 97e17e10f completed the ticket, the live reference facts let both
+  ;; routes reach acceptance. RED-DIAG-3 and RED-FIX-4 established that this
+  ;; is the current recorded episode rather than the older separation case.
   (let [{:keys [candidates q0 universe]} (reference-family)
         acceptance #{[t :restoration-accepted]}
         model (class-model {:universe universe :acceptance acceptance :horizon 4})
@@ -88,17 +126,15 @@
         g1 (:controller-score (by-id :C1))
         g2 (:controller-score (by-id :C2))]
     (is (vector? ranked) (pr-str (if (map? ranked) (dissoc ranked :candidates) ranked)))
-    ;; C1 never reaches acceptance: exactly one terminal ln 20, not H x ln 20.
-    (is (< (Math/abs (- g1 (Math/log 20))) 0.001) (str "G(C1)=" g1 " expected ln20"))
-    ;; C2 reaches restoration on the focused target.
+    (is (< (Math/abs (- g1 (Math/log (/ 1 0.55)))) 0.001)
+        (str "G(C1)=" g1 " expected ln(1/.55)"))
     (is (< (Math/abs (- g2 (Math/log (/ 1 0.55)))) 0.001) (str "G(C2)=" g2 " expected ln(1/.55)"))
-    ;; unique maximum: strictly lower G, every intermediate step exactly 0.
-    (is (< g2 g1))
+    (doseq [entry ranked]
+      (is (= {:focused 1} (:prediction (last (steps-of entry))))))
     (doseq [entry ranked
             step (steps-of entry)
             :when (< (:tau step) 4)]
-      (is (zero? (:g step)) (str "intermediate tau " (:tau step) " g=" (:g step))))
-    (is (every? #(pos? (:g %)) (filter #(= 4 (:tau %)) (steps-of (by-id :C1)))))))
+      (is (zero? (:g step)) (str "intermediate tau " (:tau step) " g=" (:g step))))))
 
 (deftest two-step-never-accepted-is-one-ln20-not-two
   ;; A two-step rollout that never accepts: only the terminal step carries
