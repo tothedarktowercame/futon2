@@ -18,6 +18,13 @@
 (def ^:dynamic ^:private c3-labels nil)
 (def ^:private c3-subjects {:C3 10})
 (def ^:dynamic ^:private labels-opt nil)
+(def ^:dynamic ^:private unstamped-receipt nil)
+
+(defn- observed-check [path]
+  (let [r (checks/observe
+           {:subject {:repo "futon2" :sha population/pin :path path :class :C3}})]
+    (or (get-in r [:results :subject])
+        (get-in r [:refused :subject]))))
 
 (use-fixtures :each
   (fn [f]
@@ -28,11 +35,19 @@
       (try
         (store/init! path)
         (store/record! path
-                       (mapv #(checks/check-path-exists {:repo "futon2" :sha population/pin :path %})
-                             (concat population/present-paths population/absent-paths)) ids {})
+                       (mapv observed-check
+                             (concat population/present-paths population/absent-paths))
+                       ids {})
+        (let [unstamped (store/record!
+                         path
+                         [(checks/check-path-exists
+                           {:repo "futon2" :sha population/pin
+                            :path (first population/present-paths)})]
+                         ids {})]
         (binding [c3-labels (:labels (reader/read-rates-inputs path ids))
-                  labels-opt {:observation-labels-path (str path)}]
-          (f))
+                    labels-opt {:observation-labels-path (str path)}
+                    unstamped-receipt unstamped]
+            (f)))
         (finally (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
 
 (defn- assembled []
@@ -53,6 +68,11 @@
   [ma]
   (and (contains? ma :rates)
        (= (:rates-sha ma) (wm-cd/sha256-hex (wm-cd/canonical-pr (:rates ma))))))
+
+(deftest unstamped-check-result-is-refused
+  (is (= :check-mechanism-unwitnessed
+         (get-in unstamped-receipt [:refusals 0 :kind]))
+      "a direct, unstamped check result cannot enter the measured population"))
 
 (deftest sourced-rates-reach-the-decision-as-a-version
   (let [d (decision labels-opt)
