@@ -167,7 +167,10 @@
     (is (= "run-w" (:click-id entry)))
     (is (clojure.string/starts-with? (:record-path entry) (:store opts)) "the enactment record is under the store")
     (is (= [] (get-in entry [:wc :verdict])) "the checker the flag named ran")
-    (is (= {:absent :no-repair-obligation-for-target :target "M-futon-seams"} (:publication-observed entry)))))
+    (is (= {:absent :no-repair-obligation-for-target :target "M-futon-seams"} (:publication-observed entry)))
+    (is (some? (:step entry)) "the enactment carries its conditioning step")
+    (is (not= :no-run-record (get-in entry [:step :reason]))
+        "the conditioning step was given the click's run record (FPI-LIVE-D)")))
 
 (deftest a-decision-with-no-dispatch-is-recorded-not-thrown
   (let [[opts r] (wired-run {})]

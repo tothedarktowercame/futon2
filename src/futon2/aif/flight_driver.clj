@@ -215,6 +215,13 @@
         run-record-dir (or run-record-dir runner/default-run-record-dir)
         record-path (fn [click-id] (str (io/file run-record-dir (str "tick-run-record-" click-id ".edn"))))
         f (flight-for (assoc opts :id (:flight-id planned)))
+        ;; the click's run record by click id: the enactment reads it, and the
+        ;; flight's conditioning step needs it too (FPI-LIVE-D: without it every
+        ;; step was :no-run-record and F_pi admission could never admit one)
+        fetch-run-record (fn [click-id]
+                           (let [p (io/file (record-path click-id))]
+                             (when (.isFile p)
+                               (clojure.edn/read-string {:default tagged-literal} (slurp p)))))
         dispatch-step! (or dispatch-step!
                            (when dispatch-seat
                              (fr/agency-dispatch-step! (cond-> {:seat dispatch-seat :opts (runner/config {})}
@@ -223,10 +230,7 @@
                    (fr/agency-answer-fn (cond-> {:seat seat :caller "wm-flight" :opts (runner/config {})}
                                           library-root (assoc :library-root library-root))))
         enact (fr/enact-fn (cond-> {:interpretations (fn [fl] (:patterns (wi/read-published store (:target fl))))
-                                    :fetch-run-record (fn [click-id]
-                                                        (let [p (io/file (record-path click-id))]
-                                                          (when (.isFile p)
-                                                            (clojure.edn/read-string {:default tagged-literal} (slurp p)))))
+                                    :fetch-run-record fetch-run-record
                                     :record-dir (str (io/file store "flights" "enactments"))}
                              dispatch-step! (assoc :dispatch-step! dispatch-step!)))
         wc (fr/wc-verdict-fn (cond-> {:click-record-path record-path}
@@ -259,6 +263,7 @@
                               :click-fn (or click-fn (fr/http-click-fn (merge {:caller "wm-flight" :run-record-dir run-record-dir}
                                                                                (select-keys opts [:author :reviewer :repair-reviewer]))))
                               :enact-fn enact
+                              :fetch-run-record fetch-run-record
                               :wc-fn wc
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
