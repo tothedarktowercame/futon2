@@ -27,6 +27,7 @@
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
             [futon2.aif.zeta-posterior :as zeta-posterior])
@@ -360,6 +361,42 @@
 
 (defn- observation-label-inputs [view]
   (when-not (:status view) (select-keys view [:labels :subjects :prior])))
+
+(def ^:private token-a-bmr-prototype-prior
+  {:alpha 1
+   :beta 1
+   :authority "claude-1 2026-09-28: uniform parent prior for the item 6 (c) prototype score; Joe: build (c) as a prototype"})
+
+(defn- authorised-prior?
+  [{:keys [alpha beta authority]}]
+  (and (or (integer? alpha) (ratio? alpha))
+       (pos? alpha)
+       (or (integer? beta) (ratio? beta))
+       (pos? beta)
+       (string? authority)
+       (not (str/blank? authority))))
+
+(defn- token-a-bmr-receipt
+  "Write-only item 6(c) prototype score from the decision's label snapshot.
+   Every failure is data: this receipt can neither refuse nor change selection."
+  [view]
+  (if (or (nil? view) (:status view))
+    {:status :absent :reason :no-observation-labels}
+    (try
+      (let [{:keys [labels subjects]} (observation-label-inputs view)
+            view-prior (:prior view)
+            from-view? (authorised-prior? view-prior)
+            prior (if from-view? view-prior token-a-bmr-prototype-prior)
+            rates (observation-rates/rates-by-class (vec labels) (or subjects {}) prior)]
+        (if (:status rates)
+          {:status :absent :reason :rates-refused :refusal rates}
+          (assoc (token-a-bmr/score rates prior)
+                 :prior-source (if from-view? :view :prototype-default))))
+      (catch Throwable t
+        {:status :absent
+         :reason :token-a-bmr-unavailable
+         :error {:class (.getName (class t))
+                 :message (ex-message t)}}))))
 
 (defn- observation-label-certificate [view opts]
   (merge (select-keys view [:snapshot-sha256 :identities :subjects :excluded
@@ -1078,9 +1115,11 @@
                 measured-a (measured-a-version problems
                               (zipmap (map :target problems)
                                       (repeat (observation-label-inputs
-                                                (:observation-labels-view opts)))))]
+                                                (:observation-labels-view opts)))))
+                token-a-bmr (token-a-bmr-receipt (:observation-labels-view opts))]
             {:decision (assoc emitted
                               :measured-a measured-a
+                              :token-a-bmr token-a-bmr
                               :preference-schedule (class-preference-schedule class-model)
                               :live-c-coverage (:live-c-coverage live-spec)
                               :token-qualification

@@ -4,6 +4,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.walk :as walk]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.observation-labels :as labels]
             [futon2.aif.observation-label-store :as store]
@@ -12,6 +13,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.observation-rates :as observation-rates]
+            [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
@@ -172,3 +174,44 @@
     (is (= (score without-write) (score with-write))
         "the existing decision score is byte-identical with and without
          the write")))
+
+(def ^:private token-a-label-view
+  {:labels (vec (concat
+                 (repeat 20 {:token-class :C3 :recorded false :admitted :absent})
+                 (repeat 5 {:token-class :C3 :recorded true :admitted :present})))
+   :subjects {:C3 25}})
+
+(deftest token-a-reduction-score-is-written-from-the-same-label-view
+  (let [d (decision {:observation-labels-view token-a-label-view})
+        receipt (:token-a-bmr d)
+        prior (:prior receipt)
+        rates (observation-rates/rates-by-class (:labels token-a-label-view)
+                                                (:subjects token-a-label-view)
+                                                prior)
+        expected (token-a-bmr/score rates prior)]
+    (is (= :wm/token-a-bmr-v1 (:schema receipt)))
+    (is (false? (:applied receipt)))
+    (is (= :prototype-default (:prior-source receipt)))
+    (is (= (get-in expected [:error-free [:C3 :false-pos] :delta-f])
+           (get-in receipt [:error-free [:C3 :false-pos] :delta-f])))))
+
+(deftest token-a-reduction-is-absent-without-a-label-view
+  (is (= {:status :absent :reason :no-observation-labels}
+         (:token-a-bmr (decision {})))))
+
+(deftest token-a-reduction-failure-is-write-only
+  (let [ordinary (decision {:observation-labels-view token-a-label-view})
+        unavailable (with-redefs [token-a-bmr/score
+                                  (fn [& _]
+                                    (throw (ex-info "planted token-A BMR failure" {})))]
+                      (decision {:observation-labels-view token-a-label-view}))]
+    (is (= :token-a-bmr-unavailable
+           (get-in unavailable [:token-a-bmr :reason])))
+    (let [stable (fn [x]
+                   (walk/postwalk #(if (map? %)
+                                     (dissoc (into {} %) :as-of :at :occurrence-id)
+                                     %)
+                                  x))]
+      (is (= (stable (select-keys ordinary [:action :chosen-action :selection-certificate]))
+             (stable (select-keys unavailable [:action :chosen-action :selection-certificate])))
+        "the chosen action and selection certificate are identical"))))
