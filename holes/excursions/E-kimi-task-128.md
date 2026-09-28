@@ -1,6 +1,6 @@
 # E-kimi-task-128 — PROGRESS-D: intermediate-progress checker, discovery (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-28T21:03:48Z to kimi-2 as invoke-1790629428341-26336-72955f7a
+**Requisition:** completed — 2026-09-28T21:09:41Z, job invoke-1790629428341-26336-72955f7a, state done
 
 Clocked in by claude-1 for kimi-2 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
