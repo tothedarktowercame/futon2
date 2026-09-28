@@ -3,11 +3,14 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.cascade-observation-scoring :as scoring]
             [futon2.aif.efe :as efe]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.g-term-decomposition :as d]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
-            [futon2.aif.policy :as policy])
+            [futon2.aif.policy :as policy]
+            [futon2.aif.token-belief-carry-test :as carry-fixture]
+            [futon2.aif.token-observation-initialization-test :as observation-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -97,6 +100,52 @@
   (first (filter #(and (map? %) (= :class-emission (:kind %)))
                  (tree-seq coll? seq
                            ((requiring-resolve 'futon2.aif.token-belief-carry-test/decision) nil)))))
+
+(defn- captured-class-q [run!]
+  (let [calls (atom [])
+        score scoring/rank-cascade-actions]
+    (with-redefs [scoring/rank-cascade-actions
+                  (fn [state candidates opts]
+                    (let [ranked (score state candidates opts)]
+                      (swap! calls conj ranked)
+                      ranked))]
+      (run!)
+      (->> @calls
+           (mapcat identity)
+           (keep #(get-in % [:certificate :consumed-g :Q]))
+           (filter #(= :upstream-initialization-conditioning (:form %)))
+           last))))
+
+(deftest upstream-initialization-q-is-replayed-before-classification
+  (let [open-q (captured-class-q #(carry-fixture/decision nil))
+        conditioned-q (captured-class-q
+                       #(observation-fixture/with-two-ticks (fn [_] nil)))
+        applied (get-in conditioned-q [:conditioning :applied-to])
+        vacuous-belief (into {} (map (fn [[state mass]] [(conj state :already-true) mass])) applied)
+        vacuous (-> conditioned-q
+                    (assoc :initial-belief vacuous-belief)
+                    (assoc-in [:conditioning :applied-to] vacuous-belief)
+                    (assoc-in [:conditioning :observation-updates]
+                              [{:status :updated :token :already-true :observed true}]))
+        malformed (assoc-in conditioned-q [:conditioning :observation-updates 0]
+                            (dissoc (get-in conditioned-q [:conditioning :observation-updates 0])
+                                    :status))
+        states (keys (:initial-belief conditioned-q))
+        altered (if (>= (count states) 2)
+                  (let [[a b] states]
+                    (-> conditioned-q
+                        (update-in [:initial-belief a] - 1/100)
+                        (update-in [:initial-belief b] + 1/100)))
+                  (assoc conditioned-q :initial-belief {#{} 1}))]
+    (is (= :open-loop-no-conditioning (:reason (d/verdict :Q open-q))))
+    (is (= :observation-conditioned (:reason (d/verdict :Q conditioned-q))))
+    (is (= :conditioning-vacuous (:reason (d/verdict :Q vacuous))))
+    (is (= :q-beliefs-not-recorded
+           (:reason (d/verdict :Q (update conditioned-q :conditioning dissoc :applied-to)))))
+    (is (= :q-updates-malformed (:reason (d/verdict :Q malformed))))
+    (is (= :q-initial-belief-not-reproduced (:reason (d/verdict :Q altered))))
+    (is (= :unsupported-q-form
+           (:reason (d/verdict :Q (assoc conditioned-q :form :something-else)))))))
 
 (deftest a-verdict-dispatches-on-the-recorded-likelihood-kind
   (let [identity-a {:x {:false-neg 0 :false-pos 0}}

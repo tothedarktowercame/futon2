@@ -945,6 +945,7 @@
                                         :upstream-initialization-conditioning
                                         {:observation-updates (:observation-updates token-belief-input)
                                          :conditioning-status (:conditioning-status token-belief-input)
+                                         :reason (:reason token-belief-input)
                                          :applied-to (get-in token-belief-stage [:initialization :value])}
                                         :prediction-context {:occurrence-id (str "class-score-" (java.time.Instant/now))
                                                              :tau T}

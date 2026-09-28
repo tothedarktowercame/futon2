@@ -46,6 +46,7 @@
         (is (identical? model (:A consumed)))
         (is (= {:observation-updates (:observation-updates token-input)
                 :conditioning-status (:conditioning-status token-input)
+                :reason (:reason token-input)
                 :applied-to (get-in decision [:selection-certificate :token-belief-stage
                                               :initialization :value])}
                (get-in consumed [:Q :conditioning])))
@@ -58,8 +59,8 @@
       (is (= :present (get-in policy [:terms :C :status])))
       (is (= :present (get-in policy [:terms :D :status])))
       (let [q (get-in policy [:terms :Q])]
-        (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
-               q))))))
+        (is (= :present (:status q)))
+        (is (= :open-loop-no-conditioning (:reason q)))))))
 
 (deftest scorer-without-upstream-conditioning-records-no-q
   (let [{:keys [state candidates opts]} (fixture-run)
@@ -91,12 +92,15 @@
                                (last @ranked-results))
                 conditioning {:observation-updates (:observation-updates input)
                               :conditioning-status (:conditioning-status input)
+                              :reason (:reason input)
                               :applied-to (get-in second [:selection-certificate :token-belief-stage
                                                          :initialization :value])}]
             (is (= :observed-initialization (:conditioning-status conditioning)))
             (is (some #(and (= :updated (:status %)) (false? (:observed %)))
                       (:observation-updates conditioning)))
             (is (every? #(= conditioning (:conditioning %)) q-values))
+            (is (every? #(= :observation-conditioned
+                            (:reason (decomposition/verdict :Q %))) q-values))
             (println "CLASS-Q-SIGNED-FALSE" (pr-str (first q-values)))))))))
 
 (deftest census-does-not-infer-deleted-d-from-prediction

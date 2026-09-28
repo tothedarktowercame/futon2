@@ -9,7 +9,8 @@
    than one candidate: a verdict that could not come out the other way
    (stop-the-line finding, STOP-THE-LINE-2026-09-20.md)."
   (:require [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.conditioned-trajectory :as trajectory]))
+            [futon2.aif.conditioned-trajectory :as trajectory]
+            [futon2.aif.token-initialization-policy :as initialization]))
 
 (def terms [:A :C :D :E :F :Q])
 
@@ -105,6 +106,28 @@
 
     :else {:status :missing :value value :reason :unsupported-a-shape}))
 
+(defn- upstream-q-classification [value]
+  (let [initial (:initial-belief value)
+        applied (get-in value [:conditioning :applied-to])
+        updates (get-in value [:conditioning :observation-updates])]
+    (cond
+      (not (and (model/normalized-exact? initial)
+                (model/normalized-exact? applied)))
+      {:status :missing :value value :reason :q-beliefs-not-recorded}
+
+      (not (and (vector? updates) (every? #(contains? % :status) updates)))
+      {:status :missing :value value :reason :q-updates-malformed}
+
+      (not (same-belief? initial (initialization/replay-updates applied updates)))
+      {:status :missing :value value :reason :q-initial-belief-not-reproduced}
+
+      :else
+      (let [updated (filter #(= :updated (:status %)) updates)]
+        (cond
+          (empty? updated) [true :open-loop-no-conditioning]
+          (same-belief? initial applied) [true :conditioning-vacuous]
+          :else [false :observation-conditioned])))))
+
 (defn verdict
   "Classify a recorded consumed value. Missing evidence has no verdict; it
    must never count as a degenerate value (or a non-degenerate witness).
@@ -116,7 +139,7 @@
    Missing or inconsistent update evidence has no verdict."
   ([term value] (verdict term value nil))
   ([term value ctx]
-  (if (or (nil? value) (and (= term :Q) (not (q-evidence? value)))
+  (if (or (nil? value) (and (= term :Q) (nil? (:form value)) (not (q-evidence? value)))
           (and (= term :C) (or (not (seq (:steps value)))
                                                         (some #(nil? (:distribution %)) (:steps value)))))
     (if (= term :F)
@@ -144,14 +167,17 @@
                      uniform? (apply == habits)]
                  [uniform? (if uniform? :uniform-habit :informative-habit)])
             :F [(zero? value) (if (zero? value) :zero-consumed-f :nonzero-consumed-f)]
-            :Q (let [consumed (filter #(and (= :value (:status %))
-                                            (true? (:consumed %)))
-                                     (:observation-updates value))]
-                 (cond
-                   (empty? consumed) [true :open-loop-no-conditioning]
-                   (every? #(same-belief? (:predicted-belief %) (:post-belief %)) consumed)
-                   [true :conditioning-vacuous]
-                   :else [false :observation-conditioned])))]
+            :Q (case (:form value)
+                 nil (let [consumed (filter #(and (= :value (:status %))
+                                                  (true? (:consumed %)))
+                                            (:observation-updates value))]
+                       (cond
+                         (empty? consumed) [true :open-loop-no-conditioning]
+                         (every? #(same-belief? (:predicted-belief %) (:post-belief %)) consumed)
+                         [true :conditioning-vacuous]
+                         :else [false :observation-conditioned]))
+                 :upstream-initialization-conditioning (upstream-q-classification value)
+                 {:status :missing :value value :reason :unsupported-q-form}))]
       (if (map? classification)
         classification
         (let [[degenerate? reason] classification]
