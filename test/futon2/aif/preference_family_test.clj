@@ -1,6 +1,5 @@
 (ns futon2.aif.preference-family-test
   (:require [clojure.test :refer [deftest is]]
-            [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.g-term-decomposition :as g]
             [futon2.aif.live-c :as lc]
@@ -63,7 +62,12 @@
                                   assembled-problems)
         declared-targets (set (for [[target s] schedules-by-target :when (= schedule s)] target))
         differing-targets (set (for [[target s] schedules-by-target :when (not= schedule s)] target))
-        full-refusal (try (lc/family-schedule assembled-problems) nil
+        ;; The refusal case is built here, so it does not depend on which
+        ;; declarations happen to be open when the test runs.
+        other-schedule (assoc-in schedule [:placement :value] :every-step)
+        mixed (conj (vec scoped)
+                    (assoc-in (first scoped) [:cascade-problem :c-schedule] other-schedule))
+        full-refusal (try (lc/family-schedule mixed) nil
                           (catch clojure.lang.ExceptionInfo e
                             {:message (.getMessage e) :data (ex-data e)}))
         declared (lc/family-schedule scoped)
@@ -82,11 +86,9 @@
     (is (= schedule declared (:c-schedule merged)))
     (is (= "incompatible preference schedules" (:message full-refusal)))
     (is (= :incommensurable-family (get-in full-refusal [:data :kind])))
-    (is (= (set (vals schedules-by-target))
+    (is (seq scoped) "at least one loaded declaration carries the terminal schedule")
+    (is (= #{schedule other-schedule}
            (set (get-in full-refusal [:data :preference-schedules]))))
-    (is (and (seq declared-targets) (seq differing-targets)
-             (empty? (set/intersection declared-targets differing-targets)))
-        (str "declarations with different schedules: " (pr-str differing-targets)))
     (is (every? #(= schedule (get-in % [:cascade-problem :cascade-spec :c-schedule]))
                 scoped))
     (is (= :invalid-preference-schedule
