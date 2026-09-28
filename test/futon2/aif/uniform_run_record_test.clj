@@ -120,17 +120,21 @@
           (is (= :missing (:status census)))
           (is (= (set (map :id policies)) (set (map :id (:policies census)))))
           (doseq [p (:policies census)]
-            (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
+            ;; F-ABS records the law's intentional omission, rather than
+            ;; describing an absent F as a lost consumed value.
+            (is (= {:status :absent :value nil :reason :omitted-from-law}
                    (get-in p [:terms :F])))
             (doseq [term [:A :C :D :E :Q]]
               (is (= :present (get-in p [:terms term :status])) (str term)))))
-        (is (every? #(= :derived-no-overlap (get-in % [:c :status]))
+        ;; The joint class observation model records the scorer's preference
+        ;; schedule at :c; live-C provenance is no longer stored at this path.
+        (is (every? #(= :step-indexed (get-in % [:c :form]))
                     (vals (get-in carried [:selection-certificate :scoring]))))
         (is (zero? (:exit check)) (pr-str check))
         (is (str/includes? (:out check) "SELFTEST PASS"))
         ;; Anchor the verdict: the old "VALID" substring also matched INVALID.
         (is (re-find #"(?m)^\s+INVALID \(3/5 ok\)\s*$" (:out check)) (:out check))
-        (is (= {"c-source" "flagged" "rates-provenance" "ok"
+        (is (= {"c-source" "absent" "rates-provenance" "ok"
                 "posterior" "ok" "u37" "ok" "g-terms" "missing"}
                (into {} (map (fn [line]
                                (let [[_ field verdict] (re-find #"^\s+(\S+)\s+(\S+)" line)]
