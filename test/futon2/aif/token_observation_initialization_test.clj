@@ -100,6 +100,8 @@
                                    (filter #(= updater (:token %))
                                            (:wanted prediction))))]
           ;; The selected action declares the updater's prediction rate.
+          (is (and (number? declared-prediction) (< 0 declared-prediction 1))
+              "the declared rate is present and is not certainty")
           (is (= declared-prediction updater-prediction)))
         (is (= :observed-initialization (:conditioning-status input)))
         (is (= [:updated false] ((juxt :status :observed) (updates updater))))
