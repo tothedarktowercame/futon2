@@ -12,7 +12,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner]
-            [futon2.aif.full-loop-runner-test :as fixture]
+            [futon2.test-support.runner-fixture :as fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.locator-fixtures :as loc]

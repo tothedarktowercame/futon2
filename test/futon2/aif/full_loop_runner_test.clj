@@ -1,7 +1,6 @@
 (ns futon2.aif.full-loop-runner-test
   (:require [futon2.aif.parameter-novelty-test :as novelty-fixture]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.attempt-learning-test :as attempt-fixture]
             [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -34,27 +33,14 @@
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.trace :as trace]
+            [futon2.test-support.runner-fixture :as runner-fixture]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]
            [java.time Instant]))
 
-(defn with-hermetic-traces [f]
-  ;; Cross-run tripwire reads must not scan the production daily trace.
-  (let [root (.toFile (Files/createTempDirectory "wm-runner-trace-suite-"
-                                                (make-array FileAttribute 0)))
-        run-record-root (.toFile (Files/createTempDirectory
-                                  "wm-runner-record-suite-"
-                                  (make-array FileAttribute 0)))]
-    (try
-      (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
-                       #'runner/default-run-record-dir (.getPath run-record-root)
-                       #'learning-ledger/default-root (str (io/file root "learning-ledger"))} f)
-      (finally
-        (doseq [file (reverse (file-seq root))] (io/delete-file file true))
-        (doseq [file (reverse (file-seq run-record-root))]
-          (io/delete-file file true))))))
+(def with-hermetic-traces runner-fixture/with-hermetic-traces)
 
 (use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)
 
@@ -584,36 +570,9 @@
     (is (= (digest/sha256 (pr-str (:patterns j))) (:cascade-sha256 correspondence)))))
 
 (defn isolated-runner-opts []
-  (merge (hermetic/runner-repair-options)
-  {:cohort? false
-   ;; the fixture's cast, named here: the runner has no default cast
-   :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
-   :phase-log-fn (fn [_])
-   :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                       :codex-7 {:status "idle" :invoke-ready? true}
-                       :codex-1 {:status "idle" :invoke-ready? true}})
-   :judge-fn (fn [_] {:judgement judgement})
-   :refresh-fn (fn [])
-   :substrate-preflight-fn (fn [_] {:route :test})
-   :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
-                          :git-dirty? false :repo-heads {}})
-   :mode-flags-fn (fn [] {})
-   :scan-render-fn (fn [& _] nil)
-   :effective-run-configuration-fn
-   (:effective-run-configuration-fn (runtime/production-defaults {}))
-   :version-stamp-fn identity
-   :mission-fn (fn [target] {:id target})
-   :construct-fn runner/construct-for-decision
-   :construction-wiring-fn enriched-test-fold
-   :author-artifact-observer-fn synthetic-artifact-binding
-   :r16-park-fn (fn [_ finding]
-                  {:ok true :id (str "test-park/" (:repair/id finding))
-                   :status :parked})
-   :delivery-qa-fn
-   (fn [_ item]
-     {:morning-brief/addendum-id
-      (str "qa-" (:attempt-id item))})
-   :queue-fn identity}))
+  (assoc (runner-fixture/isolated-runner-opts)
+         :effective-run-configuration-fn
+         (:effective-run-configuration-fn (runtime/production-defaults {}))))
 
 (def feature-card-claim
   {:built "Build-time feature cards now survive grounding into Morning Brief."
