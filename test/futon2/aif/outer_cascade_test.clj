@@ -246,3 +246,58 @@
         (is (= {"t-a" {:absent :delta-g-malformed}
                 "t-b" {:absent :no-evaluator-supplied}}
                (:g s2)))))))
+
+(defn receipt [record-id target delta]
+  {:record-id record-id :delta delta
+   :policy-key [:pattern-cascade target [] {}]})
+
+(defn fold-with [& receipts]
+  {:enactment-records (into {} (map (juxt :record-id identity)) receipts)})
+
+(deftest target-habit-empty-and-failed-receipts-reproduce-uniform
+  (let [ordinary (oc/select {:field three-target-field :seed 17})]
+    (doseq [fold [(fold-with) (fold-with (receipt ["click-0" :c] "t-a" 0))]]
+      (let [selection (:target-selection
+                       (oc/select {:field three-target-field :seed 17
+                                   :enactment-fold fold}))]
+        (is (= (:posterior (:target-selection ordinary)) (:posterior selection)))
+        (is (= (:chosen-target ordinary) (:chosen selection)))
+        (is (= {:basis :target-habit-prior :alpha 1
+                :counts {"t-a" 0 "t-b" 0 "t-c" 0} :unjoined []}
+               (:E selection)))))))
+
+(deftest target-habit-counts-admitted-receipts-at-target-grain
+  (let [f (update three-target-field :feasible #(mapv (fn [e] (dissoc e :delta-g)) %))
+        fold (fold-with (receipt ["click-1" :c] "t-a" 1)
+                        (receipt ["click-2" :c] "t-a" 1))
+        selection (:target-selection (oc/select {:field f :seed 3 :enactment-fold fold}))]
+    (is (= {"t-a" 3/5 "t-b" 1/5 "t-c" 1/5} (:posterior selection)))
+    (is (= {"t-a" 2 "t-b" 0 "t-c" 0} (get-in selection [:E :counts])))))
+
+(deftest target-habit-ignores-failed-and-records-unjoined-admitted-receipts
+  (let [base (fold-with (receipt ["click-1" :c] "t-a" 1))
+        extras (fold-with (receipt ["click-1" :c] "t-a" 1)
+                          (receipt ["click-2" :c] "t-b" 0)
+                          (receipt ["click-z" :c] "M-z" 1))
+        opts {:field (update three-target-field :feasible #(mapv (fn [e] (dissoc e :delta-g)) %))
+              :seed 9}]
+    (is (= (get-in (oc/select (assoc opts :enactment-fold base)) [:target-selection :posterior])
+           (get-in (oc/select (assoc opts :enactment-fold extras)) [:target-selection :posterior])))
+    (is (= [["click-z" :c]]
+           (get-in (oc/select (assoc opts :enactment-fold extras))
+                   [:target-selection :E :unjoined])))))
+
+(deftest target-habit-mixes-with-delta-g-using-e-of-d
+  (let [fold (fold-with (receipt ["click-1" :c] "t-a" 1)
+                        (receipt ["click-2" :c] "t-a" 1)
+                        (receipt ["click-3" :c] "t-b" 1))
+        p (get-in (oc/select {:field three-target-field :seed 5
+                              :enactment-fold fold})
+                  [:target-selection :posterior])
+        ea 3/6 eb 2/6 ec 1/6
+        wa (* ea (Math/exp 0.0))
+        wb (* eb (Math/exp -2.0))
+        ed (+ ea eb)]
+    (is (< (Math/abs (- (double (* ed (/ wa (+ wa wb)))) (get p "t-a"))) 1e-12))
+    (is (< (Math/abs (- (double (* ed (/ wb (+ wa wb)))) (get p "t-b"))) 1e-12))
+    (is (= ec (get p "t-c")))))

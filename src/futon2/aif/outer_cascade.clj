@@ -6,8 +6,11 @@
   ELIGIBLE ones, feasibility acting as policy support and not as a value term.
   It is the mixture law's degenerate case, and says so on the record:
 
-    E  uniform over the support, `{:basis :uniform-no-data}`: nothing sums the
-       enactment habit to target grain, and no enactment has passed W_c;
+    E  absent an enactment fold, uniform over the support with basis
+       `:uniform-no-data`. Given a fold, admitted (`:delta 1`) receipts are
+       joined by their policy key's mission slot to targets in the support.
+       With n_t joined receipts, E_t = (n_t + 1) / Σ_s(n_s + 1). Admitted
+       receipts outside the support are recorded by id as unjoined;
     G  per-target (H-G-TARGET part 2, HG2-Ib): each eligible entry's :delta-g
        (HG2-Ia) is either a recorded value {:delta Δ :universe U} or a typed
        absence, never a number standing in. Over D = {t : ΔG_t recorded},
@@ -28,6 +31,7 @@
   hardly vary the choice; SplittableRandom mixes the seed.)
 
   Pure: no file, store, clock or environment access. The seed is the caller's."
+  (:require [futon2.aif.enactment-habit :as enactment-habit])
   (:import [java.util SplittableRandom]))
 
 (defn- support-of
@@ -80,32 +84,66 @@
       {:delta (:value dg) :universe (:universe dg)}
       :else {:absent :delta-g-malformed})))
 
+(defn- e-masses [targets e-basis]
+  (case (:basis e-basis)
+    :uniform-no-data
+    (into (sorted-map) (map (fn [t] [t (/ 1 (count targets))])) targets)
+
+    :target-habit-prior
+    (let [counts (:counts e-basis)
+          denominator (reduce + (map #(inc (get counts % 0)) targets))]
+      (into (sorted-map)
+            (map (fn [t] [t (/ (inc (get counts t 0)) denominator)]))
+            targets))))
+
 (defn- mixture-posterior
   "The mixture law over ENTRIES (the eligible support) with basis E-BASIS
-  (uniform: E_t = 1/n each). Returns {:posterior sorted-map :g sorted-map
+  (uniform or target-habit prior). Returns {:posterior sorted-map :g sorted-map
   :g-defined-on sorted-vector}. D = {t : ΔG_t recorded as a value}; for t ∈ D,
   p(t) = E(D)·E_t·e^(−ΔG_t)/Σ_{s∈D} E_s·e^(−ΔG_s) as a double; for t ∉ D,
   p(t) = E_t as an exact ratio. D empty ⇒ the posterior is E alone."
   [entries e-basis]
-  (when-not (= :uniform-no-data (:basis e-basis))
-    (throw (ex-info "mixture-posterior: only the :uniform-no-data basis exists"
+  (when-not (contains? #{:uniform-no-data :target-habit-prior} (:basis e-basis))
+    (throw (ex-info "mixture-posterior: unsupported E basis"
                     {:basis e-basis})))
   (let [n (count entries)
         g (into (sorted-map) (map (fn [e] [(:target e) (g-of e)])) entries)
-        d (into [] (comp (filter #(contains? (val %) :delta)) (map key)) g)]
+        d (into [] (comp (filter #(contains? (val %) :delta)) (map key)) g)
+        e (e-masses (keys g) e-basis)]
     (if (or (zero? n) (empty? d))
-      {:posterior (into (sorted-map) (map (fn [t] [t (/ 1 n)])) (keys g))
+      {:posterior e
        :g g :g-defined-on d}
-      (let [e-d (/ (count d) n)
-            w (into {} (map (fn [t] [t (Math/exp (- (double (get-in g [t :delta]))))])) d)
+      (let [e-d (reduce + (map e d))
+            w (into {} (map (fn [t] [t (* (e t) (Math/exp (- (double (get-in g [t :delta])))))]) d))
             z (reduce + (vals w))]
         {:posterior (into (sorted-map)
                           (map (fn [[t gv]]
                                  (if (contains? gv :delta)
                                    [t (double (* e-d (/ (get w t) z)))]
-                                   [t (/ 1 n)])))
+                                   [t (e t)])))
                           g)
          :g g :g-defined-on d}))))
+
+(defn- target-habit-basis [support enactment-fold]
+  (let [support-set (set support)
+        admitted (filter (fn [[_ receipt]] (= 1 (:delta receipt)))
+                         (:enactment-records enactment-fold))
+        targets (map (fn [[record-id receipt]]
+                       [record-id (:mission (#'enactment-habit/key->view
+                                             (:policy-key receipt)))])
+                     admitted)
+        joined (filter (comp support-set second) targets)]
+    {:basis :target-habit-prior
+     :alpha 1
+     :counts (into (sorted-map)
+                   (map (fn [target]
+                          [target (count (filter #(= target (second %)) joined))]))
+                   support)
+     :unjoined (->> targets
+                    (remove (comp support-set second))
+                    (map first)
+                    (sort-by pr-str)
+                    vec)}))
 
 (defn- selection-inputs [entries opts]
   (merge
@@ -127,7 +165,9 @@
   :publication-observed, :clock-lineage verbatim as inputs, including typed
   absences. These are not value terms in the draw; :law-uses names :eligible
   and :delta-g. The posterior is the mixture over E (uniform, no data) and the
-  per-target ΔG values (see mixture-posterior): :law is :E-only when no entry
+  per-target ΔG values (see mixture-posterior). Optional :enactment-fold
+  supplies the target-grain habit prior; absent it, the prior and record remain
+  the original uniform-no-data basis. :law is :E-only when no entry
   carries a ΔG value, :mixed otherwise, with :g the per-target record and
   :g-defined-on the support's D."
   [opts]
@@ -135,9 +175,12 @@
         entries (support-of field)
         support (mapv :target entries)
         n (count support)
+        e-basis (if (some? (:enactment-fold opts))
+                  (target-habit-basis support (:enactment-fold opts))
+                  {:basis :uniform-no-data})
         {:keys [posterior g g-defined-on]}
         (if (pos? n)
-          (mixture-posterior entries {:basis :uniform-no-data})
+          (mixture-posterior entries e-basis)
           {:posterior (sorted-map) :g (sorted-map) :g-defined-on []})
         seeded? (integer? seed)
         d (when (and (pos? n) seeded?) (draw posterior seed))
@@ -149,7 +192,7 @@
               :law-uses [:eligible :delta-g]
               :support support
               :posterior posterior
-              :E {:basis :uniform-no-data}
+              :E e-basis
               :law (if (seq g-defined-on) :mixed :E-only)
               :g g
               :g-defined-on g-defined-on
