@@ -3162,8 +3162,15 @@
                 (sort-by key claim-patterns))
         support-claims (filter #(= :support (:type %)) claims)
         attack-claims (filter #(= :attack (:type %)) claims)
-        covered? #(pos? (:evidence-count %))]
+        covered? #(pos? (:evidence-count %))
+        exposure (fn [xs]
+                   (let [n (count xs)]
+                     (if (pos? n)
+                       {:covered (count (filter covered? xs)) :claims n}
+                       {:status :absent :reason :no-claims})))]
     {:claims claims
+     :scan-exposures {:support (exposure support-claims)
+                      :attack (exposure attack-claims)}
      :support-coverage (if (seq support-claims)
                          (/ (double (count (filter covered? support-claims)))
                             (count support-claims))
@@ -6525,6 +6532,7 @@
                      :critical-path (get-in portfolio-step [:structure :critical-path] [])}
                     :else nil)
                   :observation observation
+                  :scan-exposures (get-in scan-data [:support-attack :scan-exposures])
                   :belief wm-belief
                   :belief-pre wm-belief-pre
                   :accumulation-state (:state accumulation)

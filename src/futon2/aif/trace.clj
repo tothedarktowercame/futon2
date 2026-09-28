@@ -469,6 +469,8 @@
     :live-c-coverage (or (get-in judge-output [:decision :live-c-coverage])
                         {:status :absent :reason :coverage-not-recorded})
     :mode (:mode judge-output)}
+    (contains? judge-output :scan-exposures)
+    (assoc :scan-exposures (:scan-exposures judge-output))
     (contains? judge-output :horizon-steps)
     ;; Row 15 depth capture. A present nil is the observed scorer input, not a
     ;; missing value: it selects EFE's single-step path.
