@@ -14,7 +14,6 @@
             [futon2.aif.observation-model :as om]
             [futon2.aif.scoring-input-receipts :as ir]
             [futon2.aif.trace :as trace]
-            [futon2.report.war-machine :as war-machine]
             [futon2.aif.focus-receipt :as focus]
             [futon2.aif.preference-audit :as preference-audit]))
 

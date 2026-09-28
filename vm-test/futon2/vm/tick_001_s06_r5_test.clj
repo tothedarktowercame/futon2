@@ -25,7 +25,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.efe :as efe]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def T 3)
 

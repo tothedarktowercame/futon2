@@ -6,7 +6,7 @@
   class-level admission) shows a class measured and the others absent."
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- locators [token-classes]
   (into {} (map (fn [[t class]] [t {:class class :repo "futon2" :sha "fixture"

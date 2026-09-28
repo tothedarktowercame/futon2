@@ -13,7 +13,7 @@
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def ^:dynamic ^:private c3-labels nil)
 (def ^:private c3-subjects {:C3 10})
@@ -52,7 +52,7 @@
   "F1a-2b: the record's :rates-sha is the digest of the record's own :rates."
   [ma]
   (and (contains? ma :rates)
-       (= (:rates-sha ma) (wm/sha256-hex (wm/canonical-pr (:rates ma))))))
+       (= (:rates-sha ma) (wm-cd/sha256-hex (wm-cd/canonical-pr (:rates ma))))))
 
 (deftest sourced-rates-reach-the-decision-as-a-version
   (let [d (decision labels-opt)
@@ -68,7 +68,7 @@
                         (:rates sourced))]
     (is (= :sourced (:status sourced)) "the fixture's records source rates")
     (is (= :wm/measured-a-v1 (:schema ma)))
-    (is (= (wm/sha256-hex (wm/canonical-pr qualified)) (:rates-sha ma))
+    (is (= (wm-cd/sha256-hex (wm-cd/canonical-pr qualified)) (:rates-sha ma))
         "the decision's :rates-sha is the digest of what sourced-rates
          returns for the same records")
     (is (= :futon2.aif.observation-rates/sourced-rates (:source ma))
@@ -127,7 +127,7 @@
                          (get-in (first problems) [:cascade-problem :locators])
                          (contract))]
             {:schema :wm/measured-a-v1
-             :rates-sha (wm/sha256-hex (wm/canonical-pr (:rates sourced)))
+             :rates-sha (wm-cd/sha256-hex (wm-cd/canonical-pr (:rates sourced)))
              :source (:source sourced)
              :classes [:C3]}))
         d (with-redefs [wm-cd/measured-a-version zero-kernel-digesting]

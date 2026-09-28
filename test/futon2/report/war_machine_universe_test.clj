@@ -17,7 +17,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -52,7 +52,7 @@
                               :receipts (into {} (for [k (keys patterns)] [k {:source :test}]))}}
     :beta-by-context {:WM {:beta 1}} :context-of (constantly :WM)
     :construction {:construct ic/construct :budget {:max-moves 4 :max-expansions 20000}
-                   :move-cost 0 :evaluate-g wm/constructed-candidate-g}}
+                   :move-cost 0 :evaluate-g wm-cd/constructed-candidate-g}}
    extra))
 
 (defn- problem
@@ -71,10 +71,10 @@
   ;; bad case (a): with :universe supplied, G(empty) and G(chain) over the
   ;; AR-40 fixture are 16.3434 and 15.3434 and the chain is TAKEN.
   (let [p (problem chain)
-        g-empty (:value (wm/constructed-candidate-g p {:precedence []}))
-        g-chain (:value (wm/constructed-candidate-g p {:precedence chain}))]
+        g-empty (:value (wm-cd/constructed-candidate-g p {:precedence []}))
+        g-chain (:value (wm-cd/constructed-candidate-g p {:precedence chain}))]
     (is (= g-baseline g-empty))
-    (is (= g-chain (:value (wm/constructed-candidate-g p {:precedence chain}))))
+    (is (= g-chain (:value (wm-cd/constructed-candidate-g p {:precedence chain}))))
     (is (< g-chain g-empty) [g-chain g-empty])
     (testing "the constructor TAKES the chain at the declared move cost 0"
       (let [r (construction-inputs/assemble-cascade-problems-with-published
@@ -113,8 +113,8 @@
   ;; value <= 0 → :acting-worth-more, construction.clj) declines it at any
   ;; move cost >= 0.
   (let [p (problem prefix3)
-        g-empty (:value (wm/constructed-candidate-g p {:precedence []}))
-        g-prefix (:value (wm/constructed-candidate-g p {:precedence prefix3}))]
+        g-empty (:value (wm-cd/constructed-candidate-g p {:precedence []}))
+        g-prefix (:value (wm-cd/constructed-candidate-g p {:precedence prefix3}))]
     (is (= g-baseline g-empty))
     (is (= g-baseline g-prefix))
     (is (zero? (- g-empty g-prefix)) [g-empty g-prefix])
@@ -145,7 +145,7 @@
                                              :construction-receipt {:kind :declared-for-universe-test}}]}))]
             (-> (construction-inputs/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})
                 :problems first :cascade-problem (dissoc :precedences)))
-        scored (wm/constructed-candidate-g p {:precedence chain})
+        scored (wm-cd/constructed-candidate-g p {:precedence chain})
         scorer-universe (conj tokens :x-idle)]
     (is (= (set scorer-universe) (set (:universe scored))))
     (is (= (:universe scored) (vec (sort-by pr-str (:universe scored)))) "recorded sorted")

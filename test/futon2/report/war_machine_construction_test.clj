@@ -9,7 +9,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.interpretation-construction :as ic]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target "M-aif-policy-conditioned-eig")
 
@@ -26,7 +26,7 @@
              :construction {:construct ic/construct
                             :budget {:max-moves 4 :max-expansions 20000}
                             :move-cost 0
-                            :evaluate-g wm/constructed-candidate-g})))
+                            :evaluate-g wm-cd/constructed-candidate-g})))
 
 (defn- only-target [srcs] (cp/assemble {:targets [target] :sources srcs}))
 
@@ -44,8 +44,8 @@
 (deftest constructed-g-beats-the-empty-cascade
   ;; the constructor takes a plan only if the lane's G prefers it
   (let [problem (-> (only-target (sources)) :problems first :cascade-problem (dissoc :precedences))
-        g-plan (:value (wm/constructed-candidate-g problem {:precedence [:aif/two-layer-calibration]}))
-        g-empty (:value (wm/constructed-candidate-g problem {:precedence []}))]
+        g-plan (:value (wm-cd/constructed-candidate-g problem {:precedence [:aif/two-layer-calibration]}))
+        g-empty (:value (wm-cd/constructed-candidate-g problem {:precedence []}))]
     (is (< g-plan g-empty) [g-plan g-empty])))
 
 (deftest positive-move-cost-declines-the-plan

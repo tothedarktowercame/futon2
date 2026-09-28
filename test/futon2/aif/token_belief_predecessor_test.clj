@@ -9,7 +9,7 @@
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cascade-fixture]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn decision [previous prior]
   (with-redefs [habit/default-path fixture/absent-habit-path]

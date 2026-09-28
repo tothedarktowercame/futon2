@@ -10,7 +10,7 @@
             [futon2.aif.enactment-fold-source :as src]
             [futon2.aif.policy-prefix-admission :as adm]
             [futon2.report.cascade-decision-test :as cdt]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

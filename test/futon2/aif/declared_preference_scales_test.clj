@@ -6,7 +6,7 @@
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.live-c :as live-c]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target "M-expressions-of-interest")
 (defn declaration []
@@ -32,7 +32,7 @@
                  :signature "test"}
         spec (live-c/cascade-spec derived want want
                                   (live-c/family-scales (:problems assembled)))]
-    (wm/merge-live-cascade-spec want spec)))
+    (wm-cd/merge-live-cascade-spec want spec)))
 
 (deftest declared-scales-reach-production-spec-and-weights
   (let [d (declaration)

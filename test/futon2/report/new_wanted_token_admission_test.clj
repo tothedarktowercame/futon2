@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.scoring-input-receipts :as receipts]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn fixture []
   (edn/read-string (slurp (io/resource "fixtures/new-wanted-token/1789964661.edn"))))

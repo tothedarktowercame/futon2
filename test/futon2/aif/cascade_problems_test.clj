@@ -10,7 +10,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assemble*
   "cp/assemble with every token given a fixture C3 locator (P5 locator

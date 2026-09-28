@@ -5,7 +5,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-proposals :as supply]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

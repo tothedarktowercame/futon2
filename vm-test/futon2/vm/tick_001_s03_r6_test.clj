@@ -23,7 +23,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as cp]
             [futon2.aif.policy :as policy]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 ;; --- the tick's tokens, interpretations and cascades (03-R6.edn) ---------
 

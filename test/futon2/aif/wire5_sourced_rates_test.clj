@@ -19,7 +19,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-rates :as rates]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def contract
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))

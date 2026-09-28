@@ -15,7 +15,7 @@
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.live-c :as lc]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assemble*
   "cp/assemble with every token given a fixture C3 locator (P5 locator
@@ -94,7 +94,7 @@
   ;; the way through selection at every temperature.
   (let [token [:M-a :closed]
         outcome #{token}
-        merged (wm/merge-live-cascade-spec
+        merged (wm-cd/merge-live-cascade-spec
                 #{token}
                 {:want #{}
                  :weights {}

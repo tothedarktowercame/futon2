@@ -6,7 +6,7 @@
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.cascade-sources :as sources]
             [futon2.aif.mission-hole-wants :as wants]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

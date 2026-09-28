@@ -15,7 +15,7 @@
             [futon2.aif.trace :as trace]
             [futon2.aif.policy-precision-carry :as carry]
             [futon2.report.cascade-decision-test :as tick]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 

@@ -23,7 +23,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def click2-targets
   "The four admitted targets of CLICK2-D Part 2, each declined

@@ -29,7 +29,7 @@
             [futon2.aif.cascade-selection :as cs]
             [futon2.aif.policy :as policy]
             [futon2.aif.controller-authority :as controller-authority]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 ;; G at T = 3 from R5 (06-R5.edn :computed :G), reproduced by claude-4.
 (def G-at-T

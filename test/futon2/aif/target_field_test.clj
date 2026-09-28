@@ -14,7 +14,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -473,10 +473,10 @@
         horizon (:value (construction-inputs/resolve-cascade-horizon view ["M-shaped"]))
         problem (cp/base-problem view horizon "M-shaped")
         dg (:delta-g entry)
-        baseline (wm/constructed-candidate-g problem {:precedence []})
-        best (wm/constructed-candidate-g problem {:precedence [:survey/list-callers]})]
+        baseline (wm-cd/constructed-candidate-g problem {:precedence []})
+        best (wm-cd/constructed-candidate-g problem {:precedence [:survey/list-callers]})]
     (is (= :ready (:next-step entry)))
-    (is (identical? wm/constructed-candidate-g (get-in view [:construction :evaluate-g])))
+    (is (identical? wm-cd/constructed-candidate-g (get-in view [:construction :evaluate-g])))
     (is (= :WM ((:context-of view) "M-shaped")))
     (is (= 1 (:beta problem)))
     (is (= (:facts problem) (get-in view [:universes "M-shaped"])))

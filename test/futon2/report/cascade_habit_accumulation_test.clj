@@ -12,7 +12,7 @@
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.locator-fixtures :as locators]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

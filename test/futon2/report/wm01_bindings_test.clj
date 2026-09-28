@@ -40,7 +40,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target :wm-tick-001-observation-crash)
 

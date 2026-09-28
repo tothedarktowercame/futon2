@@ -18,7 +18,7 @@
             [futon2.aif.locator-fixtures :as loc]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cfix]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

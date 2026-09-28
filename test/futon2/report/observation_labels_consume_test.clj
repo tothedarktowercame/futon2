@@ -11,7 +11,7 @@
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-reader-test :as population]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -99,7 +99,7 @@
   (let [none (decision {}) missing (decision {:observation-labels-path (path)})]
     ;; Captured before this change at 243d3740, over this same real fixture.
     (is (= "0519bdf876aa2c44dab9be8825a5bfb5182f1e59d0fc8a8f3eda75710fefccfc"
-           (wm/sha256-hex (score none))))
+           (wm-cd/sha256-hex (score none))))
     (is (= (score none) (score missing)))
     (is (= {:status :absent :reason :no-label-store-configured}
            (select-keys (get-in none [:decision :selection-certificate :observation-labels]) [:status :reason])))
@@ -123,7 +123,7 @@
         opts {:observation-labels-view view :constructor-scored-with :same-observation-labels-snapshot}]
     (io/delete-file (path))
     (with-redefs [wm-cd/cascade-lane (fn [p o] (let [r (real p o)] (swap! lanes conj r) r))]
-      (is (number? (:value (wm/constructed-candidate-g p {:precedence []} opts))))
+      (is (number? (:value (wm-cd/constructed-candidate-g p {:precedence []} opts))))
       (let [d (:decision (decision opts))]
         (is (= :same-observation-labels-snapshot (get-in d [:selection-certificate :observation-labels :constructor-scored-with])))
         (is (= (:snapshot-sha256 view) (get-in d [:selection-certificate :observation-labels :snapshot-sha256])))))

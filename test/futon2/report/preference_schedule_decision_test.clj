@@ -8,7 +8,7 @@
             [futon2.aif.live-c :as live-c]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assembled [declaration]
   (let [target (or (:target declaration) fixture/tick-1-target)
@@ -85,7 +85,7 @@
         record (get-in result [:decision :preference-schedule])]
     (is (= :class (:family record)))
     (is (= :terminal (:placement record)))
-    (is (= wm/class-preference-weights (:weights record)))
+    (is (= wm-cd/class-preference-weights (:weights record)))
     (is (= "scripts/futon2/report/war_machine.clj:class-preference-weights" (:site record)))
     (is (= [:token :every-step :defaulted]
            ((juxt :family :placement :source)

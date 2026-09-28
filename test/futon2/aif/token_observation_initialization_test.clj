@@ -13,7 +13,7 @@
             [futon2.aif.token-initialization-policy :as policy]
             [futon2.aif.token-outcome :as outcome]
             [futon2.aif.token-outcome-test :as want]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 

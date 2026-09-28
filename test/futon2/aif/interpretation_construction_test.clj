@@ -6,7 +6,7 @@
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.interpretation-construction :as sut]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def interpretations
   {:P {:guard {:needs #{} :forbids #{}} :produces #{:q}}

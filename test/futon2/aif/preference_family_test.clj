@@ -6,7 +6,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.cascade-sources :as sources]
             [futon2.aif.cascade-problems :as problems]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def schedule {:placement {:value :terminal :status :declared}
                :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}})
@@ -53,7 +53,7 @@
         live (lc/cascade-spec {:want #{:closed/M-expressions-of-interest}
                               :weights {:closed/M-expressions-of-interest 1}}
                              #{pair} #{pair} (lc/family-scales (:problems assembled)) declared)
-        merged (wm/merge-live-cascade-spec #{pair} live)
+        merged (wm-cd/merge-live-cascade-spec #{pair} live)
         ranked (efe/rank-actions {:cascade-belief {#{} 1}}
                                  [{:kind :cascade-candidate :id :probe :precedence []}]
                                  {:horizon-steps 2 :cascade-spec merged})

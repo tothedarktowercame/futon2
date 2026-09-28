@@ -9,7 +9,7 @@
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.live-c :as live-c]
             [futon2.aif.focus-receipt :as focus-receipt]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 

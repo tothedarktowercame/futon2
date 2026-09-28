@@ -4,7 +4,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-rates :as rates]
             [futon2.aif.cascade-model-manifest :as manifest]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def contract
   {:schema :wm/observation-contract-v1

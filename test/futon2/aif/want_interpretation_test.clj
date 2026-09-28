@@ -7,7 +7,6 @@
             [futon2.aif.observation-checks]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.aif.wm.cascade-decision :as wm-cd]
-            [futon2.report.war-machine]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.interpretation-request :as ireq]
@@ -132,7 +131,7 @@
      :beta-by-context {:WM {:beta 1}} :context-of (constantly :WM)
      :construction {:construct futon2.aif.interpretation-construction/construct
                     :budget {:max-moves 4 :max-expansions 20000} :move-cost 0
-                    :evaluate-g futon2.report.war-machine/constructed-candidate-g}}))
+                    :evaluate-g wm-cd/constructed-candidate-g}}))
 
 (def library-root
   "Pinned copies of the library files the first flight's readings cite
@@ -232,7 +231,7 @@
    :beta-by-context {:WM {:beta 1}} :context-of (constantly :WM)
    :construction {:construct futon2.aif.interpretation-construction/construct
                   :budget {:max-moves 4 :max-expansions 20000} :move-cost 0
-                  :evaluate-g futon2.report.war-machine/constructed-candidate-g}})
+                  :evaluate-g wm-cd/constructed-candidate-g}})
 
 (defn- validate-hand [resp]
   (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} resp

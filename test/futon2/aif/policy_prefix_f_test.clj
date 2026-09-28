@@ -10,7 +10,7 @@
             [futon2.aif.policy-prefix-admission :as adm]
             [futon2.aif.policy-prefix-evidence :as ppe]
             [futon2.report.cascade-decision-test :as cdt]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def cand {:id :c1 :target "M-a" :precedence [{:id :p/a}]})
 (def k (adm/candidate-key cand))

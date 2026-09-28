@@ -37,7 +37,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.interpretation-construction :as construction]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def fixture-dir "test/fixtures/click2-replay")
 

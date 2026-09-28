@@ -10,7 +10,7 @@
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.cascade-habit-read-test :as store-fixture]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
