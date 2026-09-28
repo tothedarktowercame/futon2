@@ -80,3 +80,36 @@
     (is (= -3.0 (:threshold result)))
     (is (false? (:applied result)))
     (is (= prior (:prior result)))))
+
+(defn- sourced [rates classes]
+  {:status :sourced :source :fixture :rates rates :class-of classes})
+
+(deftest adopt-only-favoured-error-free-cells
+  (let [score (token-a-bmr/score {:C (class-rates 0 10 0 20)
+                                  :D (class-rates 1 10 1 20)} prior)
+        input (sourced {:a {:false-neg 1/11 :false-pos 1/21}
+                        :b {:false-neg 2/11 :false-pos 2/21}}
+                       {:a :C :b :D})
+        result (token-a-bmr/adopt-error-free input score)]
+    (is (= 0 (get-in result [:rates :a :false-pos])))
+    (is (= 1/11 (get-in result [:rates :a :false-neg])))
+    (is (= {:false-neg 2/11 :false-pos 2/21} (get-in result [:rates :b])))
+    (is (= {:reduction :error-free
+            :cells [[:C :false-pos]]
+            :tokens {:a [:false-pos]}}
+           (:adoption result)))))
+
+(deftest adoption-obeys-the-minus-three-boundary
+  (let [score (token-a-bmr/score {:C (class-rates 0 1 0 19)} prior)
+        input (sourced {:a {:false-neg 0 :false-pos 1/20}} {:a :C})
+        result (token-a-bmr/adopt-error-free input score)]
+    (is (= 1/20 (get-in result [:rates :a :false-pos])))
+    (is (= [] (get-in result [:adoption :cells])))))
+
+(deftest absent-score-does-not-change-rates
+  (let [input (sourced {:a {:false-neg 1/10 :false-pos 1/20}} {:a :C})
+        result (token-a-bmr/adopt-error-free
+                input {:status :absent :reason :no-observation-labels})]
+    (is (= (:rates input) (:rates result)))
+    (is (= {:status :absent :reason :no-observation-labels}
+           (:adoption result)))))

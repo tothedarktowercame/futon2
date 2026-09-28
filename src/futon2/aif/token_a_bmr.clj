@@ -26,6 +26,45 @@
 
 (def ^:private cell-kinds [:false-neg :false-pos])
 
+(defn adopt-error-free
+  "Apply only favoured error-free cell reductions to a sourced-rates result.
+
+   A [class kind] cell is adopted when SCORE gives it a numeric :delta-f at
+   or below SCORE's threshold. Impossible, excluded, unscored, and
+   above-threshold cells are unchanged. The pooled reduction is never read.
+   A typed absent/refused score leaves SOURCED unchanged and records why."
+  [sourced score]
+  (if (or (:status score) (:kind score) (not (map? (:error-free score))))
+    (assoc sourced :adoption
+           {:status :absent
+            :reason (or (:reason score) (:kind score) (:status score)
+                        :score-unavailable)})
+    (let [threshold (get score :threshold bmr/acceptance-threshold)
+          cells (->> (:error-free score)
+                     (keep (fn [[[class kind] cell]]
+                             (when (and (number? (:delta-f cell))
+                                        (<= (:delta-f cell) threshold))
+                               [class kind])))
+                     (sort-by pr-str)
+                     vec)
+          adopted (set cells)
+          tokens (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+                       (keep (fn [[token class]]
+                               (let [kinds (->> cell-kinds
+                                                (filter #(contains? adopted [class %]))
+                                                vec)]
+                                 (when (seq kinds) [token kinds]))))
+                       (:class-of sourced))
+          rates (reduce-kv
+                 (fn [rs token kinds]
+                   (reduce #(assoc-in %1 [token %2] 0) rs kinds))
+                 (:rates sourced) tokens)]
+      (assoc sourced
+             :rates rates
+             :adoption {:reduction :error-free
+                        :cells cells
+                        :tokens tokens}))))
+
 (defn- valid-prior?
   [{:keys [alpha beta authority]}]
   (and (or (integer? alpha) (ratio? alpha))

@@ -181,6 +181,37 @@
                  (repeat 5 {:token-class :C3 :recorded true :admitted :present})))
    :subjects {:C3 25}})
 
+(def ^:private authorised-token-a-label-view
+  (assoc token-a-label-view :prior
+         {:alpha 1 :beta 1 :authority "TOKEN-A-ADOPT-I decision fixture"}))
+
+(defn- c3-rate-provenance [decision]
+  (get-in decision [:selection-certificate :token-rate-lanes
+                    fixture/tick-1-target :rates-provenance]))
+
+(deftest favoured-error-free-cell-is-used-and-certified
+  (let [d (decision {:observation-labels-view authorised-token-a-label-view})
+        provenance (c3-rate-provenance d)
+        adoption (:adoption provenance)]
+    (is (= [[:C3 :false-pos]] (:cells adoption)))
+    (is (= :error-free (:reduction adoption)))
+    (is (every? zero?
+                (map :false-pos (vals (:effective-rates provenance)))))
+    (is (every? pos?
+                (map :false-neg (vals (:effective-rates provenance)))))
+    (is (true? (get-in d [:token-a-bmr :applied])))
+    (is (= [[:C3 :false-pos]] (get-in d [:token-a-bmr :adopted-cells])))))
+
+(deftest unauthorised-prior-never-adopts
+  (let [d (decision {:observation-labels-view token-a-label-view})
+        provenance (c3-rate-provenance d)]
+    (is (= {:status :absent :reason :prior-not-authorised}
+           (:adoption provenance)))
+    (is (every? zero?
+                (map :false-pos (vals (:effective-rates provenance))))
+        "the absent-prior raw rates remain unchanged at their measured zero")
+    (is (false? (get-in d [:token-a-bmr :applied])))))
+
 (deftest token-a-reduction-score-is-written-from-the-same-label-view
   (let [d (decision {:observation-labels-view token-a-label-view})
         receipt (:token-a-bmr d)

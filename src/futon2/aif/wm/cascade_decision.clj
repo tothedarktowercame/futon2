@@ -35,6 +35,15 @@
 (defn- observation-contract []
   (clojure.edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
 
+(defn- authorised-prior?
+  [{:keys [alpha beta authority]}]
+  (and (or (integer? alpha) (ratio? alpha))
+       (pos? alpha)
+       (or (integer? beta) (ratio? beta))
+       (pos? beta)
+       (string? authority)
+       (not (str/blank? authority))))
+
 (defn- lane-step
   "Run one cascade-lane node call. A typed refusal — an ex-info thrown by the
   node function or a returned {:status … :kind …} refusal map — is returned
@@ -211,6 +220,18 @@
                             (observation-rates/sourced-rates
                              labels (or (:subjects observation-labels) {}) (:prior observation-labels)
                              locators (observation-contract)))
+                  adopted (when sourced
+                            (if (authorised-prior? (:prior observation-labels))
+                              (token-a-bmr/adopt-error-free
+                               sourced
+                               (token-a-bmr/score
+                                (observation-rates/rates-by-class
+                                 labels (or (:subjects observation-labels) {})
+                                 (:prior observation-labels))
+                                (:prior observation-labels)))
+                              (assoc sourced :adoption
+                                     {:status :absent
+                                      :reason :prior-not-authorised})))
                   ;; H-VALUE-G-D (2026-09-25): the scored universe is the
                   ;; PROBLEM's declared token universe (facts, want, every
                   ;; interpreted pattern's guard and produces — the same set
@@ -236,20 +257,22 @@
                 ;; Returning it here makes lane-step stop the lane at R5 —
                 ;; it is never merged into opts where it would be ignored
                 ;; and silently default to the identity kernel.
-                (not= :sourced (:status sourced))
-                sourced
+                (not= :sourced (:status adopted))
+                adopted
                 :else
                 (efe/rank-actions {:cascade-belief (get @state :R1)}
                                   (:candidates (get @state :R4))
                                   (merge base-opts
-                                         {:adjudication-rates (:rates sourced)
+                                         {:adjudication-rates (:rates adopted)
                                           :rates-provenance
-                                          {:source (:source sourced)
-                                           :basis (:basis sourced)
+                                          {:source (:source adopted)
+                                           :basis (:basis adopted)
                                            :labels (if (some :admitted labels)
                                                      {:admitted (count (filter :admitted labels))}
                                                      :none-admitted)
-                                           :measurement (:measurement sourced)
+                                           :measurement (:measurement adopted)
+                                           :adoption (:adoption adopted)
+                                           :effective-rates (:rates adopted)
                                            :contract :wm/observation-contract-v1}}))))))
     (when (= :R5 through) (reset! halted true))
     ;; R14 — selection at the DECLARED β (no default: a missing β is
@@ -366,15 +389,6 @@
   {:alpha 1
    :beta 1
    :authority "claude-1 2026-09-28: uniform parent prior for the item 6 (c) prototype score; Joe: build (c) as a prototype"})
-
-(defn- authorised-prior?
-  [{:keys [alpha beta authority]}]
-  (and (or (integer? alpha) (ratio? alpha))
-       (pos? alpha)
-       (or (integer? beta) (ratio? beta))
-       (pos? beta)
-       (string? authority)
-       (not (str/blank? authority))))
 
 (defn- token-a-bmr-receipt
   "Write-only item 6(c) prototype score from the decision's label snapshot.
@@ -1116,7 +1130,18 @@
                               (zipmap (map :target problems)
                                       (repeat (observation-label-inputs
                                                 (:observation-labels-view opts)))))
-                token-a-bmr (token-a-bmr-receipt (:observation-labels-view opts))]
+                adopted-cells (->> lanes
+                                   (mapcat #(get-in % [:token-rate-scoring
+                                                       :rates-provenance :adoption :cells]))
+                                   distinct
+                                   (sort-by pr-str)
+                                   vec)
+                token-a-bmr-score (token-a-bmr-receipt
+                                   (:observation-labels-view opts))
+                token-a-bmr (cond-> token-a-bmr-score
+                              (= :wm/token-a-bmr-v1 (:schema token-a-bmr-score))
+                              (assoc :applied (boolean (seq adopted-cells))
+                                     :adopted-cells adopted-cells))]
             {:decision (assoc emitted
                               :measured-a measured-a
                               :token-a-bmr token-a-bmr
