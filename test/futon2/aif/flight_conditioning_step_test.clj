@@ -20,6 +20,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.policy-prefix-admission :as admission]
+            [futon2.aif.state-prediction-error :as prediction-error]
             [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -52,7 +53,8 @@
 
 (defn- run-record [{:keys [theta measured-a] :as opts}]
   {:decision
-   {:measured-a (or measured-a (produced-measured-a opts))
+   {:horizon-steps (if (contains? opts :horizon) (:horizon opts) 2)
+    :measured-a (or measured-a (produced-measured-a opts))
     ;; the belief holds :u, a token the step does not check
     :initial-belief-receipt {:value {#{[target :u]} 1}}
     :selection-certificate
@@ -96,7 +98,32 @@
       (is (contains? (manifest/token-likelihood rates #{:u :t} #{:t}) :status)
           "without the restriction the kernel refuses the unchecked state token :u"))
     (is (= 11/20 (:p-o step)))
+    (is (= :wm/state-prediction-error-v1 (get-in step [:state-prediction-error :schema])))
+    (is (= :rollout-marginals (get-in step [:state-prediction-error :at])))
     (is (= (- (Math/log (double 11/20))) (:f step)) "f = -ln P(o)")))
+
+(deftest epsilon-is-write-only-and-uses-rollout-not-posterior
+  (let [step (:step (fly {}))
+        without-value (:step (fly {:horizon nil}))
+        captured (with-redefs [prediction-error/state-prediction-error
+                               (fn [x] {:status :captured :input x})]
+                   (:step (fly {})))
+        input (get-in captured [:state-prediction-error :input])]
+    (is (= (dissoc step :state-prediction-error)
+           (dissoc without-value :state-prediction-error))
+        "recording epsilon changes no existing conditioning or decision field")
+    (is (= :horizon-not-recorded (get-in without-value [:state-prediction-error :reason])))
+    (is (= :log-undefined (get-in step [:state-prediction-error :reason])))
+    (is (= (:s-current input)
+           (manifest/rollout (constantly [(assoc (pattern 1/2) :id :p/a)]) {#{:u} 1} 1))
+        "s_tau is the policy rollout marginal")
+    (is (not= (:s-current input) (:q captured))
+        "s_tau is not the observation-conditioned posterior")))
+
+(deftest epsilon-refuses-outside-the-scored-horizon
+  (let [error (:state-prediction-error (:step (fly {:horizon 1})))]
+    (is (= {:status :absent :reason :out-of-horizon :tau 1 :horizon 1}
+           (select-keys error [:status :reason :tau :horizon])))))
 
 (deftest the-producer-writes-what-the-step-reads
   (let [ma (produced-measured-a {})]

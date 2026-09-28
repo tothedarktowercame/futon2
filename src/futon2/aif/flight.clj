@@ -29,6 +29,7 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.outcome-wants :as outcome-wants]
             [futon2.aif.repair-proposals :as repairs]
+            [futon2.aif.state-prediction-error :as prediction-error]
             [futon2.aif.temporal-update :as temporal-update])
   (:import [java.util UUID]))
 
@@ -530,13 +531,27 @@
                     s-prev (if previous chain-q (target-marginal target (get-in run-record [:decision :initial-belief-receipt :value])))
                     rates-v (select-keys rates V)
                     lik (fn [st obs] (manifest/token-likelihood rates-v (set/intersection st V) obs))
-                    pushed (manifest/rollout (constantly pats) s-prev 1)]
+                    pushed (manifest/rollout (constantly pats) s-prev 1)
+                    horizon (or (get-in run-record [:decision :horizon-steps])
+                                (get-in run-record [:decision :R13 :cascade-rollout]))]
                 (cond
                   (empty? s-prev) (absent :no-initial-belief)
                   (and (map? pushed) (contains? pushed :status)) (absent :transition-refused {:refusal pushed})
                   :else
                   (let [p-o (reduce + 0 (for [[st mass] pushed] (* mass (lik st o))))
-                        q (manifest/exact-update lik pushed o)]
+                        q (manifest/exact-update lik pushed o)
+                        s-next (manifest/rollout (constantly pats) s-prev 2)
+                        carrier (set/union (set (keys s-prev)) (set (keys pushed)) (set (keys s-next)))
+                        transition (fn [from to] (get (manifest/cascade-kernel pats from) to 0))
+                        epsilon (prediction-error/state-prediction-error
+                                 {:horizon horizon
+                                  :carrier carrier
+                                  :likelihood #(lik % o)
+                                  :transition-in transition
+                                  :transition-out transition
+                                  :s-prev s-prev
+                                  :s-current pushed
+                                  :s-next s-next})]
                     {:schema :wm/conditioning-step-v1
                      :status :present
                      :policy-key policy-key
@@ -547,6 +562,7 @@
                      :b {:precedence (vec precedence)
                          :digest (ievidence/sha256 (.getBytes (pr-str [(vec precedence) (select-keys interps precedence)]) "UTF-8"))}
                      :s-prev {:value s-prev :source (if chain-q :chain :initial-belief)}
+                     :state-prediction-error epsilon
                      :q q
                      :p-o p-o
                      :f (if (zero? p-o) :contradiction (- (Math/log (double p-o))))}))))))))))
