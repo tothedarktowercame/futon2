@@ -1,6 +1,6 @@
 # E-kimi-task-130 — PROGRESS-I: intermediate-progress checker as a pure function
 
-**Requisition:** in-progress — dispatched 2026-09-28T21:12:22Z to kimi-2 as invoke-1790629942852-26373-13db056f
+**Requisition:** completed — 2026-09-28T21:12:51Z, job invoke-1790629942852-26373-13db056f, state failed
 
 Clocked in by claude-1 for kimi-2 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
