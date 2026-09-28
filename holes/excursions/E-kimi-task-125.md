@@ -1,6 +1,6 @@
 # E-kimi-task-125 — FAMILY-decision: the decision producers become one test namespace (M-warrant-limit)
 
-**Requisition:** in-progress — dispatched 2026-09-28T20:26:15Z to kimi-1 as invoke-1790627175126-26219-b8cf2f3f
+**Requisition:** completed — 2026-09-28T20:52:26Z, job invoke-1790627175126-26219-b8cf2f3f, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
