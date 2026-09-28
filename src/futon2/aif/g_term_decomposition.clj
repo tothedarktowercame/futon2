@@ -41,6 +41,69 @@
                    false))
                (:observation-updates value))))
 
+(defn- class-a-classification
+  "Classify the class-emission rows declared by VALUE.  The model records the
+   finite class universe and the terminal class associated with each accepted
+   target.  A terminal class may be a keyword (the production point mass) or
+   an explicit probability row; the latter keeps stochastic records
+   distinguishable.  Missing declarations have no verdict."
+  [value]
+  (let [required [:universe :horizon :class-universe :acceptance :target-class]
+        missing (filterv #(not (contains? value %)) required)]
+    (cond
+      (seq missing)
+      {:status :missing :value value :reason :class-emission-fields-missing
+       :missing-fields missing}
+
+      (not (and (set? (:universe value)) (pos-int? (:horizon value))
+                (sequential? (:class-universe value)) (seq (:class-universe value))
+                (set? (:acceptance value)) (map? (:target-class value))))
+      {:status :missing :value value :reason :invalid-class-emission-shape}
+
+      :else
+      (let [classes (set (:class-universe value))
+            targets (set (map first (:acceptance value)))
+            rows (into {:ending/not-yet-evaluated {:ending/not-yet-evaluated 1}
+                        :stop-the-line {:stop-the-line 1}}
+                       (map (fn [target]
+                              (let [emission (get (:target-class value) target)]
+                                [target (cond
+                                          (keyword? emission) {emission 1}
+                                          (map? emission) emission
+                                          (nil? emission) {:stop-the-line 1}
+                                          :else emission)])))
+                       targets)
+            valid-row? (fn [row]
+                         (and (map? row) (seq row)
+                              (every? #(and (contains? classes (key %))
+                                            (number? (val %))
+                                            (not (neg? (val %)))) row)
+                              (== 1 (reduce + (vals row)))))
+            invalid (into {} (remove (comp valid-row? val)) rows)]
+        (if (seq invalid)
+          {:status :missing :value value :reason :invalid-class-emission-row
+           :invalid-rows invalid}
+          (let [deterministic? (every? #(= [1] (vec (filter pos? (vals %))))
+                                      (vals rows))]
+            [deterministic? (if deterministic?
+                              :deterministic-class-emission
+                              :stochastic-class-emission)]))))))
+
+(defn- a-classification [value]
+  (cond
+    (and (map? value) (= :class-emission (:kind value)))
+    (class-a-classification value)
+
+    (and (map? value) (seq value)
+         (every? (fn [[_ cell]]
+                   (and (map? cell) (number? (:false-neg cell))
+                        (number? (:false-pos cell)))) value))
+    (let [identity? (every? #(and (zero? (:false-neg %))
+                                  (zero? (:false-pos %))) (vals value))]
+      [identity? (if identity? :identity-kernel :non-identity-kernel)])
+
+    :else {:status :missing :value value :reason :unsupported-a-shape}))
+
 (defn verdict
   "Classify a recorded consumed value. Missing evidence has no verdict; it
    must never count as a degenerate value (or a non-degenerate witness).
@@ -63,11 +126,9 @@
       {:status :missing :value nil :reason :consumed-value-not-recorded})
     (if (and (= term :E) (not (seq (remove nil? (:all-habits ctx)))))
       {:status :missing :value value :reason :habit-vector-not-supplied}
-    (let [[degenerate? reason]
+    (let [classification
           (case term
-            :A (let [identity? (every? #(and (zero? (:false-neg %))
-                                             (zero? (:false-pos %))) (vals value))]
-                 [identity? (if identity? :identity-kernel :non-identity-kernel)])
+            :A (a-classification value)
             :C (let [distributions (map :distribution (:steps value))
                      constant? (every? #(if (and (contains? (first distributions) :universe)
                                                   (contains? % :universe))
@@ -90,9 +151,12 @@
                    (every? #(same-belief? (:predicted-belief %) (:post-belief %)) consumed)
                    [true :conditioning-vacuous]
                    :else [false :observation-conditioned])))]
-      (cond-> {:status :present :value value
-       :verdict (if degenerate? :degenerate :non-degenerate) :reason reason}
-        (= term :C) (assoc :C-steps-count (count (:steps value)))))))))
+      (if (map? classification)
+        classification
+        (let [[degenerate? reason] classification]
+          (cond-> {:status :present :value value
+                   :verdict (if degenerate? :degenerate :non-degenerate) :reason reason}
+            (= term :C) (assoc :C-steps-count (count (:steps value)))))))))))
 
 (defn census
   "Join scoring's consumed A/C/D/Q to selection's consumed E/F, by position

@@ -93,6 +93,46 @@
                 {:horizon-steps T :cascade-spec spec})]
     {:ranked ranked :decision (policy/select-action-cascades ranked {:beta 1})}))
 
+(defn class-model-from-decision []
+  (first (filter #(and (map? %) (= :class-emission (:kind %)))
+                 (tree-seq coll? seq
+                           ((requiring-resolve 'futon2.aif.token-belief-carry-test/decision) nil)))))
+
+(deftest a-verdict-dispatches-on-the-recorded-likelihood-kind
+  (let [identity-a {:x {:false-neg 0 :false-pos 0}}
+        noisy-a {:x {:false-neg 1/4 :false-pos 0}}
+        model (class-model-from-decision)
+        target (ffirst (:acceptance model))
+        stochastic (assoc-in model [:target-class target] {:focused 1/2 :related 1/2})]
+    (is (= :identity-kernel (:reason (d/verdict :A identity-a))))
+    (is (= :non-identity-kernel (:reason (d/verdict :A noisy-a))))
+    (is (= {:status :present :value model :verdict :degenerate
+            :reason :deterministic-class-emission}
+           (d/verdict :A model)))
+    (is (= :non-degenerate (:verdict (d/verdict :A stochastic))))
+    (is (= :stochastic-class-emission (:reason (d/verdict :A stochastic))))
+    (is (= :class-emission-fields-missing
+           (:reason (d/verdict :A {:kind :class-emission}))))
+    (is (= :missing (:status (d/verdict :A {:kind :something-else}))))
+    (is (= :unsupported-a-shape
+           (:reason (d/verdict :A {:kind :something-else}))))))
+
+(deftest census-completes-with-a-recorded-class-emission
+  (let [model (class-model-from-decision)
+        q {#{} 1}
+        q-evidence {:initial-belief q :steps [{:tau 1 :belief q}]
+                    :observation-updates []}
+        ranked [{:action :class-candidate :controller-score 1
+                 :certificate {:consumed-g
+                               {:A model
+                                :C {:form :step-indexed
+                                    :steps [{:distribution {:focused 1}}]}
+                                :D q :Q q-evidence}}}]
+        census (d/census ranked [{:id :class-candidate :habit 1 :f 0}])]
+    (is (= :present (:status census)))
+    (is (= :deterministic-class-emission
+           (get-in census [:policies 0 :terms :A :reason])))))
+
 (deftest each-term-can-distinguish-nondegenerate-input
   (doseq [[term value] {:A {:token {:false-neg 1/4 :false-pos 1/3}}
                        :C {:form :step-indexed
