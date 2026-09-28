@@ -258,7 +258,9 @@
                                        (some #(= source-outcome (:outcome %))
                                              (:serves entry)))
                                      served-by)
-                            [])
+                            ;; the extractor's own absence, e.g. :no-instances-anchor,
+                            ;; not [] (which would read as "nothing serves it")
+                            served-by)
                           {:absent :not-in-seam-document}))
         c {:status :derived
            :source :primary-seam

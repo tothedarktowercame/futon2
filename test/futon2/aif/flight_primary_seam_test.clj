@@ -92,6 +92,11 @@
         outcome-c (first (filter #(= token (:token %)) (get-in actual [:c :outcomes])))]
     (is (= [:right] (mapv :instance (:served-by outcome-c))))))
 
+(deftest extractor-served-by-absence-is-carried-not-emptied
+  (let [c (:c (result (fixture)))]
+    (is (seq (:outcomes c)))
+    (is (every? #(= {:absent :no-instances-anchor} (:served-by %)) (:outcomes c)))))
+
 (deftest a-exits-flight-assembly-does-not-add-c
   (let [target "M-a-exits"
         assembled (construction-inputs/flight-assembly-input
