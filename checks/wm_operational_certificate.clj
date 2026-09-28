@@ -5,10 +5,15 @@
             [clojure.pprint :as pprint]
             [clojure.string :as str]))
 
-(def topology-svg "/home/joe/code/p4ng/aif-control-map-paper.svg")
-(def topology-data "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn")
+(def ^:dynamic topology-svg "/home/joe/code/p4ng/aif-control-map-paper.svg")
+(def ^:dynamic topology-data "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn")
 (def expected-svg-sha256 "568938d213c23c79f42a01a36547ced622deec64a3591f847c3e72a234b538ec")
 (def expected-data-sha256 "64485bb0165fe4abdaf799b59853c05efb0e09fbaf293bf9511d91e5098f509d")
+;; Pair-set pins read from p4ng 3f3dc185b192687f2a6eb49bc0681fe9eb030c6d.
+(def expected-drawn-pairs-sha256
+  "b4349a9dfefb692ec31bd1d4b68635916f00f042fe26f97efb0fb1745dae5f68")
+(def expected-measured-pairs-sha256
+  "ba0aceaf467aa733e4172490ad1007deca6353703a6ddee65e287d5ecc673e2c")
 
 (defn sha256-bytes [^bytes bs]
   (let [d (java.security.MessageDigest/getInstance "SHA-256")]
@@ -17,6 +22,8 @@
 (defn node-str [x] (if (keyword? x) (name x) (str x)))
 (defn pair [x] [(node-str (:from x)) (node-str (:to x))])
 (defn hop-pair [x] [(node-str (:fromNode x)) (node-str (:toNode x))])
+(defn pair-set-sha256 [pairs]
+  (sha256-bytes (.getBytes (pr-str (vec (sort pairs))) "UTF-8")))
 
 (defn topology []
   (let [m (edn/read-string (slurp topology-data))
@@ -148,8 +155,10 @@
         undeclared (filterv #(= :undeclared (:topology/layer %)) traversed)
         svg-hash (file-sha256 topology-svg)
         data-hash (file-sha256 topology-data)
-        topology-pinned? (and (= expected-svg-sha256 svg-hash)
-                              (= expected-data-sha256 data-hash))
+        drawn-pairs-hash (pair-set-sha256 original)
+        measured-pairs-hash (pair-set-sha256 measured)
+        topology-pinned? (and (= expected-drawn-pairs-sha256 drawn-pairs-hash)
+                              (= expected-measured-pairs-sha256 measured-pairs-hash))
         route-present? (seq route)
         run-time? (string? (:startedAt run))
         resource-identity-matches? (or (nil? (:run/id resource))
@@ -176,6 +185,10 @@
                 :content-sha256 svg-hash :expected-sha256 expected-svg-sha256
                 :edge-data "p4ng/empirics-futon/control-map-edges.edn"
                 :edge-data-sha256 data-hash :edge-data-expected-sha256 expected-data-sha256
+                :drawn-pairs-sha256 drawn-pairs-hash
+                :drawn-pairs-expected-sha256 expected-drawn-pairs-sha256
+                :measured-pairs-sha256 measured-pairs-hash
+                :measured-pairs-expected-sha256 expected-measured-pairs-sha256
                 :pin-valid? topology-pinned?}
      :traversal {:hops traversed
                  :counts {:total (count traversed)

@@ -1,7 +1,7 @@
 (ns wm-operational-certificate-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [checks.wm-operational-certificate :as cert]))
 
 (def run-path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn")
@@ -11,6 +11,71 @@
                 (.toPath (io/file run-path))))
 (def run-record (edn/read-string (String. run-bytes "UTF-8")))
 (defn edn-bytes [x] (.getBytes (pr-str x) "UTF-8"))
+
+(def drawn-pairs
+  [[:R1 :R4] [:R2 :R3] [:R3 :R1] [:R1 :R3] [:R1 :R3a]
+   [:R2 :R3a] [:R3a :R7] [:R3a :R3] [:R2 :R8] [:R6 :R4]
+   [:R14 :R6] [:R4 :R5] [:R5 :R6] [:R6 :R13] [:R11 :R16]
+   [:R13 :R14] [:R14 :R16] [:R16 :R2] [:R6 :R11] [:R7 :R3]
+   [:R7 :R8] [:R7 :R14] [:R8 :R5] [:R9 :R16] [:R10 :R8]
+   [:R12 :R7] [:R15 :R13] [:R15 :R16] [:R20 :R7]])
+
+(def measured-pairs
+  [[:R20 :R12] [:R12 :R2] [:R2 :R7] [:R2 :R3a]
+   [:R3a :R7] [:R3 :R8] [:R6 :R14] [:R14 :TRACE]])
+
+(def stated-topology
+  {:note "fields outside the consumed pair sets are provenance only"
+   :edges (mapv (fn [[from to]] {:from from :to to :status :drawn}) drawn-pairs)
+   :route-measured-drawn (mapv (fn [[from to]] {:from from :to to}) measured-pairs)})
+
+(defn with-topology [m f]
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "wm-certificate-topology-"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        svg (io/file dir "map.svg")
+        data (io/file dir "edges.edn")]
+    (spit svg "<svg><!-- provenance changes do not alter topology --></svg>")
+    (spit data (pr-str m))
+    (binding [cert/topology-svg (.getPath svg)
+              cert/topology-data (.getPath data)]
+      (f))))
+
+(deftest topology-pin-covers-exactly-the-consumed-pair-sets
+  (testing "unread fields, comments, and a non-drawn edge do not change the verdict"
+    (with-topology
+      (-> stated-topology
+          (assoc :note "a changed note")
+          (update :edges conj {:from :R99 :to :R100 :status :proposed
+                               :comment "not drawn"}))
+      (fn []
+        (let [c (cert/certificate run-bytes clean-resource false)]
+          (is (= :pass (:verdict c)))
+          (is (true? (get-in c [:topology :pin-valid?])))
+          (is (= cert/expected-drawn-pairs-sha256
+                 (get-in c [:topology :drawn-pairs-sha256])))
+          (is (= cert/expected-measured-pairs-sha256
+                 (get-in c [:topology :measured-pairs-sha256])))))))
+  (testing "removing a drawn edge fails the pin"
+    (with-topology
+      (update stated-topology :edges pop)
+      #(let [c (cert/certificate run-bytes clean-resource false)]
+         (is (= :fail (:verdict c)))
+         (is (false? (get-in c [:topology :pin-valid?]))))))
+  (testing "adding a measured edge fails the pin"
+    (with-topology
+      (update stated-topology :route-measured-drawn conj {:from :R99 :to :R100})
+      #(let [c (cert/certificate run-bytes clean-resource false)]
+         (is (= :fail (:verdict c)))
+         (is (false? (get-in c [:topology :pin-valid?]))))))
+  (testing "a traversed hop in neither pair set remains undeclared"
+    (with-topology
+      stated-topology
+      #(let [c (cert/certificate run-bytes clean-resource true)]
+         (is (= :fail (:verdict c)))
+         (is (= 1 (get-in c [:traversal :counts :undeclared])))
+         (is (= ["R99" "R100"]
+                (-> c :traversal :undeclared-hops first cert/hop-pair)))))))
 
 (deftest mapped-partial-route-certifies-and-exposes-coverage
   (let [c (cert/certificate run-bytes clean-resource false)]
