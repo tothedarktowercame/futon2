@@ -1,11 +1,11 @@
 (ns futon2.aif.repair-obligation-test
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pp]
-            [clojure.java.shell :as shell]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.test-support.git-fixture :as git-fixture]
             [futon2.aif.tripwire :as tripwire]))
 
 (defn- temp-root []
@@ -102,25 +102,27 @@
 (deftest dismiss-repaired-elsewhere-proof-controls
   (let [repo (temp-root)
         git (fn [& args]
-              (let [r (apply shell/sh "git" "-C" repo args)]
+              (let [r (apply git-fixture/git-result repo args)]
                 (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
                 (str/trim (:out r))))]
-    (git "init") (git "config" "user.email" "fixture@example.invalid")
-    (git "config" "user.name" "fixture")
+    (git "init")
     ;; The fixing commit: its content carries the diagnosis anchor.
     (spit (io/file repo "schedule.clj")
           "(ns schedule)\n;; resolves :incommensurable-family by adopting the family schedule\n")
     (git "add" "schedule.clj")
-    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:43:00Z" "-m" "adopt the family schedule")
+    (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+         "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:43:00Z" "-m" "adopt the family schedule")
     ;; An unrelated commit that does not speak to the diagnosis.
     (spit (io/file repo "unrelated.txt") "nothing about schedules\n")
     (git "add" "unrelated.txt")
-    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:45:00Z" "-m" "unrelated")
+    (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+         "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:45:00Z" "-m" "unrelated")
     ;; A side-branch commit that never landed.
     (git "checkout" "-b" "side")
     (spit (io/file repo "side.clj") ";; :incommensurable-family\n")
     (git "add" "side.clj")
-    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:46:00Z" "-m" "side fix")
+    (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+         "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:46:00Z" "-m" "side fix")
     (git "checkout" "master")
     (let [fix-sha (git "rev-parse" "HEAD~1")
           unrelated-sha (git "rev-parse" "HEAD")
@@ -940,17 +942,19 @@
         repo (temp-root)
         path "repair-spec.md"
         file (java.io.File. repo path)]
-    (is (zero? (:exit (shell/sh "git" "-C" repo "init" "-q"))))
-    (is (zero? (:exit (shell/sh "git" "-C" repo "config"
-                                "user.email" "repair-test@example.invalid"))))
-    (is (zero? (:exit (shell/sh "git" "-C" repo "config"
-                                "user.name" "Repair Test"))))
+    (is (zero? (:exit (git-fixture/git-result repo "init" "-q"))))
     (spit file "declared repair contract\n")
-    (is (zero? (:exit (shell/sh "git" "-C" repo "add" path))))
-    (is (zero? (:exit (shell/sh "git" "-C" repo "commit" "-q"
-                                "-m" "Add repair spec"))))
+    (is (zero? (:exit (git-fixture/git-result repo "add" path))))
+    (is (zero? (:exit (git-fixture/git-result
+                       repo "-c" "user.name=Repair Test"
+                       "-c" "user.email=repair-test@example.invalid"
+                       "commit" "-q" "-m" "Add repair spec"))))
+    (is (= "Repair Test"
+           (str/trim (:out (git-fixture/git-result repo "show" "-s" "--format=%an" "HEAD")))))
+    (is (= "repair-test@example.invalid"
+           (str/trim (:out (git-fixture/git-result repo "show" "-s" "--format=%ae" "HEAD")))))
     (let [sha (str/trim
-               (:out (shell/sh "git" "-C" repo "rev-parse" "HEAD")))
+               (:out (git-fixture/git-result repo "rev-parse" "HEAD")))
           obligation (shaped-obligation :spec-document {:machine-repo repo})
           evidence {:path path :git-sha sha}
           implementation (repair/record-implementation!
@@ -1329,7 +1333,7 @@
   ;; (claude-5's probes, 2026-09-24). Neither commit addresses its finding.
   (let [repo (temp-root)
         git (fn [& args]
-              (let [r (apply shell/sh "git" "-C" repo args)]
+              (let [r (apply git-fixture/git-result repo args)]
                 (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
                 (str/trim (:out r))))
         fire (fn [root finding sha]
@@ -1340,19 +1344,20 @@
                   root (:repair/id finding)
                   {:authority "fixture" :reason :repaired-elsewhere
                    :actor "test" :commit sha})))]
-    (git "init") (git "config" "user.email" "fixture@example.invalid")
-    (git "config" "user.name" "fixture")
+    (git "init")
     (.mkdirs (io/file repo "src/futon2/aif"))
     (spit (io/file repo "src/futon2/aif/full_loop_runner.clj") "(ns futon2.aif.full-loop-runner)\n")
     (git "add" ".")
-    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T10:00:00Z" "-m" "seed")
+    (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+         "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T10:00:00Z" "-m" "seed")
     ;; (1) a commit that touches a file the finding names, about something else
     (spit (io/file repo "src/futon2/aif/full_loop_runner.clj")
           "(ns futon2.aif.full-loop-runner)\n;; tidy a docstring typo\n")
     ;; (2) and mentions the schema key every finding in the store carries
     (spit (io/file repo "notes.clj") "(def x {:repair/status :open})\n")
     (git "add" ".")
-    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-21T09:00:00Z"
+    (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+         "-c" "commit.gpgsign=false" "commit" "--date=2026-09-21T09:00:00Z"
          "-m" "fix a typo in a docstring")
     (let [sha (git "rev-parse" "HEAD")
           base {:repair/schema-version 3 :repair/class :machine-failure

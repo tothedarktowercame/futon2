@@ -11,8 +11,8 @@
             [futon2.aif.observation-checks :as checks]
             [clojure.test :refer [deftest is]]
             [futon2.aif.accepted-increment :as ai]
-            [futon2.aif.cascade-sources :as cs]
-            [futon2.aif.learning-trial-ledger :as ledger]))
+            [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.test-support.git-fixture :as git-fixture]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
@@ -41,8 +41,7 @@
         _ (.mkdirs dir)
         _ (.deleteOnExit dir)
         git (fn [& args]
-              (apply clojure.java.shell/sh
-                     (concat ["git" "-C" (.getAbsolutePath dir)] args)))
+              (apply git-fixture/git-result dir args))
         ticket-dir (io/file dir "holes/tickets")
         eig-dir (io/file dir "resources/wm/eig")
         rec-dir (io/file dir "resources/wm/rechecks")
@@ -69,10 +68,9 @@
         _ (spit (io/file eig-dir "held-out-split.edn")
                 (slurp (io/file "/home/joe/code/futon2/resources/wm/eig/held-out-split.edn")))
         _ (git "init" "-q")
-        _ (git "config" "user.email" "fixture@test")
-        _ (git "config" "user.name" "fixture")
         _ (git "add" "-A")
-        _ (git "commit" "-q" "-m" "fixture: post-repair state")
+        _ (git "-c" "user.name=fixture" "-c" "user.email=fixture@test"
+               "commit" "-q" "-m" "fixture: post-repair state")
         head (-> (git "rev-parse" "HEAD") :out str/trim)]
     {:dir dir :repo (.getName dir) :head head}))
 

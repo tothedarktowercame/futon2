@@ -1,25 +1,23 @@
 (ns futon2.aif.repair-discharge-test
   (:require [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as digest]
             [futon2.aif.repair-discharge :as discharge]
             [futon2.aif.repair-discharge-evidence :as evidence]
             [futon2.aif.repair-discharge-receipt :as receipt]
-            [futon2.aif.repair-obligation :as repair])
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.test-support.git-fixture :as git-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
 (defn tmp [] (.getPath (.toFile (Files/createTempDirectory "repair-stage-test-" (make-array FileAttribute 0)))))
 (defn git [repo & args]
-  (let [r (apply shell/sh "git" "-C" repo args)]
-    (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
-    (str/trim (:out r))))
+  (apply git-fixture/git! repo args))
 (defn commit! [repo file text]
   (spit (io/file repo file) text)
   (git repo "add" "--" file)
-  (git repo "commit" "-m" file)
+  (git repo "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+       "commit" "-m" file)
   (git repo "rev-parse" "HEAD"))
 (defn job [id agent prompt]
   {:job-id id :agent-id agent :state "done" :result "FULL_LOOP_REVIEW: APPROVE"
@@ -27,8 +25,7 @@
 
 (defn fixture []
   (let [root (tmp) repo (tmp)
-        _ (git repo "init") _ (git repo "config" "user.email" "fixture@example.invalid")
-        _ (git repo "config" "user.name" "fixture")
+        _ (git repo "init")
         source "fixture evaluator bytes\n"
         code (commit! repo "evaluator.clj" source)
         finding {:repair/id "repair-fixture" :repair/schema-version 3 :repair/class :machine-failure

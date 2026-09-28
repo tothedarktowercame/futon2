@@ -1,18 +1,18 @@
 (ns futon2.aif.lifecycle-exits-test
   (:require [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.lifecycle-exits :as le]
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.observation-checks :as checks]
-            [futon2.aif.cascade-problems :as cp]))
+            [futon2.aif.cascade-problems :as cp]
+            [futon2.test-support.git-fixture :as git-fixture]))
 
 (def definition-pin "3ae47f1b92d62230700deb9e8b1847a1c9c8b287")
 (def mission-pin "827188aa273503c138257b9b1e3148c25f392090")
 (defn pinned [repo sha path]
-  (let [r (shell/sh "git" "-C" (.getCanonicalPath (io/file ".." repo))
-                    "show" (str sha ":" path))]
+  (let [r (git-fixture/git-result (.getCanonicalPath (io/file ".." repo))
+                                  "show" (str sha ":" path))]
     (when-not (zero? (:exit r)) (throw (ex-info "Pinned source unavailable" r)))
     (:out r)))
 (def definition (delay (pinned "futon4" definition-pin "holes/mission-lifecycle.md")))
@@ -88,13 +88,11 @@
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "exit-verdict-" (make-array java.nio.file.attribute.FileAttribute 0)))
         git (fn [& args]
-              (let [r (apply shell/sh "git" "-C" (str root) args)]
+              (let [r (apply git-fixture/git-result root args)]
                 (when-not (zero? (:exit r)) (throw (ex-info "Fixture git failed" r)))
                 (:out r)))]
     (try
       (git "init")
-      (git "config" "user.name" "fixture")
-      (git "config" "user.email" "fixture@example.invalid")
       (doseq [[file text]
               {"good.md" "## MAP
 **MAP exit: Met.**
@@ -120,7 +118,8 @@ Some prose **MAP exit: Met.**
 "}]
         (spit (io/file root file) text))
       (git "add" "--" "good.md" "not-met.md" "instance.md" "paragraph.md" "misplaced.md" "wiring.md")
-      (git "commit" "-m" "Written verdict fixtures")
+      (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+           "commit" "-m" "Written verdict fixtures")
       (with-redefs [checks/repo-root (.getParent root)]
         (f {:repo (.getName root) :root root}))
       (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
@@ -213,12 +212,13 @@ Some prose **MAP exit: Met.**
 ## ARGUE
 **MAP exit: Met.**
 "
-            git (fn [& args] (let [r (apply shell/sh "git" "-C" (str root) args)]
+            git (fn [& args] (let [r (apply git-fixture/git-result root args)]
                               (when-not (zero? (:exit r)) (throw (ex-info "fixture git" r)))))
             _ (spit (io/file root "reached.md") text)
             _ (spit (io/file root "bad.md") bad)
             _ (git "add" "--" "reached.md" "bad.md")
-            _ (git "commit" "-m" "Phase fixtures")
+            _ (git "-c" "user.name=fixture" "-c" "user.email=fixture@example.invalid"
+                   "commit" "-m" "Phase fixtures")
             opts {:repo repo :path "reached.md" :observe #(:observed (checks/check-decl-in-file %))}
             w (le/flight-exits "fixture" text @definition opts)
             b (le/flight-exits "fixture" bad @definition (assoc opts :path "bad.md"))
@@ -275,9 +275,9 @@ Some prose **MAP exit: Met.**
   (doseq [status ["BLOCKED" "DEFERRED" "NONSTARTER" "RE-OPENED" "OPEN — HEAD through VERIFY drafted"]]
     (is (= :status-phase-unrecognised (:absent (le/current-phase (str "**Status:** " status))))))
   (let [records (for [repo ["futon2" "futon3c"]
-                      :let [sha (str/trim (:out (shell/sh "git" "-C" (str "../" repo) "rev-parse" "HEAD")))
-                            paths (str/split-lines (:out (shell/sh "git" "-C" (str "../" repo)
-                                                                  "ls-tree" "-r" "--name-only" sha "holes/missions")))]
+                      :let [sha (str/trim (:out (git-fixture/git-result (str "../" repo) "rev-parse" "HEAD")))
+                            paths (str/split-lines (:out (git-fixture/git-result (str "../" repo)
+                                                                             "ls-tree" "-r" "--name-only" sha "holes/missions")))]
                       path paths :when (re-find #"/M-[^/]+\.md$" path)
                       :let [text (pinned repo sha path)]
                       :when (:lifecycle-shaped? (le/lifecycle-shaped? text))]

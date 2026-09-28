@@ -1,14 +1,14 @@
 (ns futon2.aif.finding-ticket-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.finding-ticket :as publisher]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.ticket-queue :as queue]))
+            [futon2.aif.ticket-queue :as queue]
+            [futon2.test-support.git-fixture :as git-fixture]))
 
 (defn- fixture [kind]
   (edn/read-string (slurp (io/file "test/fixtures/finding-ticket" (str kind ".edn")))))
@@ -157,10 +157,7 @@
     (is (= "/home/joe/code/futon2/holes/tickets" ticket-dir))))
 
 (defn- git! [repo & args]
-  (let [result (apply sh/sh "git" "-C" (str repo) args)]
-    (when-not (zero? (:exit result))
-      (throw (ex-info "Git fixture command failed" result)))
-    (str/trim (:out result))))
+  (apply git-fixture/git! repo args))
 
 (deftest publication-commits-only-ticket-and-recovers-from-index-lock
   (doseq [locked? [false true]]
@@ -194,7 +191,7 @@
                 (is (= :committed (:status (:publication/git (publisher/publish! store id opts))))))
               (is (= :committed (get-in receipt [:publication/git :status]))))
             (is (= (slurp (ticket-path opts record))
-                   (:out (sh/sh "git" "-C" (str repo) "show" (str "HEAD:" relative)))))
+                   (:out (git-fixture/git-result repo "show" (str "HEAD:" relative)))))
             (is (= relative (git! repo "diff-tree" "--no-commit-id" "--name-only" "-r" "HEAD")))
             (is (= "unrelated.txt" (git! repo "diff" "--cached" "--name-only")))
             (is (= (str "Publish repair ticket T-" id " (finding " id ")")

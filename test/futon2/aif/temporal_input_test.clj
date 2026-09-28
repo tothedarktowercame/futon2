@@ -2,8 +2,6 @@
   "Real isolated git executions/checks; filtering runs only inside this test."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.java.shell :as sh]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.d-predecessor-task-authority :as task]
@@ -15,7 +13,8 @@
             [futon2.aif.temporal-input :as temporal]
             [futon2.aif.token-belief-carry :as carry]
             [futon2.aif.token-belief-predecessor :as predecessor]
-            [futon2.aif.token-initialization-policy :as initialization])
+            [futon2.aif.token-initialization-policy :as initialization]
+            [futon2.test-support.git-fixture :as git-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -25,9 +24,7 @@
 (def admission {:authority task/authority :scope task/scope :status :refused :kind :no-predecessor})
 
 (defn- git! [repo & args]
-  (let [{:keys [exit out err]} (apply sh/sh "git" "-C" (str repo) args)]
-    (when-not (zero? exit) (throw (ex-info "Isolated git fixture failed" {:args args :err err})))
-    (str/trim out)))
+  (apply git-fixture/git! repo args))
 
 (defn- read-edn [path] (edn/read-string (slurp path)))
 (defn- save! [root name value]
@@ -40,9 +37,9 @@
   (let [repo (io/file root "artifacts")
         _ (.mkdirs repo)
         _ (git! repo "init" "-q")
-        _ (git! repo "config" "user.name" "Temporal fixture")
-        _ (git! repo "config" "user.email" "temporal@example.invalid")
-        _ (git! repo "commit" "--allow-empty" "-qm" "declared start")
+        _ (git! repo "-c" "user.name=Temporal fixture"
+                "-c" "user.email=temporal@example.invalid"
+                "commit" "--allow-empty" "-qm" "declared start")
         start-sha (git! repo "rev-parse" "HEAD")
         descriptor (checks/loaded-check :C3)
         identity {:A (str (:mechanism-name descriptor) "@" (:mechanism-sha descriptor))

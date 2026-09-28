@@ -12,7 +12,8 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.bulletin :as bulletin]
-            [futon2.aif.morning-brief :as brief]))
+            [futon2.aif.morning-brief :as brief]
+            [futon2.test-support.git-fixture :as git-fixture]))
 
 (defn- temp-dir [prefix]
   (.toFile (java.nio.file.Files/createTempDirectory
@@ -24,7 +25,7 @@
   only the author date -- a fixture that set just the author date produced
   commits the collector could not see."
   [dir at & args]
-  (let [env (cond-> (into {} (System/getenv))
+  (let [env (cond-> (git-fixture/environment)
               at (assoc "GIT_AUTHOR_DATE" at "GIT_COMMITTER_DATE" at))
         {:keys [exit err]} (apply shell/sh (concat args [:dir dir :env env]))]
     (when-not (zero? exit)
@@ -48,19 +49,19 @@
                   (io/make-parents f)
                   (spit f text)))]
     (sh! dir nil "git" "init" "-q")
-    (sh! dir nil "git" "config" "user.email" "t@example.invalid")
-    (sh! dir nil "git" "config" "user.name" "fixture")
     (write board (board-edn [[:X1 :open :D "any" "the first row"]
                              [:J9 :needs-joe :J "joe" "a ruling only Joe makes"]]))
     (sh! dir nil "git" "add" "-A")
-    (sh! dir "2026-03-01T09:00:00" "git" "commit" "-q" "-m" "board: first rows")
+    (sh! dir "2026-03-01T09:00:00" "git" "-c" "user.name=fixture"
+         "-c" "user.email=t@example.invalid" "commit" "-q" "-m" "board: first rows")
     (write board (board-edn [[:X1 :done-unreviewed :D "any" "the first row"]
                              [:J9 :needs-joe :J "joe" "a ruling only Joe makes"]
                              [:X2 :open :D "any" "a row added during the day"]]))
     (write "holes/labs/demo/runs/DEMO-run/README.md"
            "# DEMO-run\n\nThe demo run found two of three arms distinguishable.\n")
     (sh! dir nil "git" "add" "-A")
-    (sh! dir "2026-03-02T10:00:00" "git" "commit" "-q" "-m" "demo: work the X1 row")
+    (sh! dir "2026-03-02T10:00:00" "git" "-c" "user.name=fixture"
+         "-c" "user.email=t@example.invalid" "commit" "-q" "-m" "demo: work the X1 row")
     {:dir (.getPath dir) :board board}))
 
 (defn- fixture-config [{:keys [dir board]} out-dir brief-root]
@@ -227,7 +228,8 @@
           first-run (bulletin/generate! cfg)
           text-1 (slurp (:file first-run))]
       (sh! (:dir repo) nil "git" "add" "--" "holes/labs/demo/bulletins")
-      (sh! (:dir repo) "2026-03-02T23:00:00" "git" "commit" "-q"
+      (sh! (:dir repo) "2026-03-02T23:00:00" "git"
+           "-c" "user.name=fixture" "-c" "user.email=t@example.invalid" "commit" "-q"
            "-m" "bulletin: the day's digest" "--" "holes/labs/demo/bulletins")
       (is (= 2 (count (bulletin/day-commits (:dir repo) "2026-03-02")))
           "the day really does now hold the bulletin's own commit")
