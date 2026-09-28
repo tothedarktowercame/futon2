@@ -12,6 +12,17 @@
 (defn declaration []
   (edn/read-string (slurp (io/resource "wm/cascade-sources/M-expressions-of-interest.edn"))))
 
+(defn admitted-declaration []
+  ;; Scale propagation needs an admitted problem.  Production deliberately
+  ;; removed these tokens' phantom witnesses; this fixture supplies real,
+  ;; checkable C4 locators whose absent declaration leaves each fact false.
+  (assoc (declaration) :locators
+         (into {}
+               (for [token (:facts (declaration))]
+                 [token {:class :C4 :repo "futon2" :sha "HEAD"
+                         :path "test/futon2/aif/declared_preference_scales_test.clj"
+                         :decl "DECLARED-SCALES-FIXTURE-TOKEN-NOT-PRESENT"}]))))
+
 (defn load-one [d]
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
                       "declared-scales" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -35,7 +46,7 @@
     (wm-cd/merge-live-cascade-spec want spec)))
 
 (deftest declared-scales-reach-production-spec-and-weights
-  (let [d (declaration)
+  (let [d (admitted-declaration)
         one (spec-from d)
         two (spec-from (assoc-in d [:lam :value] 2))
         mu (spec-from (assoc-in d [:mu :value] 3))
@@ -72,9 +83,26 @@
         family (:problems assembled)
         good (live-c/family-scales family)
         bad (assoc-in family [0 :cascade-problem :preference-scales :lam :value] 2)]
-    (is (empty? (:refusals assembled)))
+    (is (= [{:target target :kind :universe-not-admitted :missing :locators
+             :tokens-without-checkable-locator
+             [:change-authored-and-bound
+              :obligation-resolved-through-the-account
+              :premise-refused-before-work]}]
+           (:refusals assembled)))
     (is (= [1 0] [(:lam good) (:mu good)]))
-    (is (every? #(= :declared (:status %)) (mapcat vals (vals (:by-target good)))))
+    (is (= {"M-aif-policy-conditioned-eig"
+            {:lam {:value 1 :status :declared}
+             :mu {:value 0 :status :declared}}
+            "M-f11-find-production-successor"
+            {:lam {:value 1 :status :declared}
+             :mu {:value 0 :status :declared}}
+            "M-wm-08-external-f2"
+            {:lam {:value 1 :status :declared}
+             :mu {:value 0 :status :declared}}
+            "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+            {:lam {:value 1 :status :defaulted :reason :parameter-not-declared}
+             :mu {:value 0 :status :defaulted :reason :parameter-not-declared}}}
+           (:by-target good)))
     (is (not= family bad))
     (is (= :incommensurable-family
            (try (live-c/family-scales bad) nil
