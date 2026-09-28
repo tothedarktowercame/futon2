@@ -372,6 +372,11 @@
       (is (= :enriched-fold-v1
              (get-in (cohort/closed-execution-qualified binding attempt)
                      [:recorded-contract :kind])))))
+  (testing "a construction that was not reached has no fold output to report"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (rewrite-time-step-revision! attempt-dir enriched-revision true)
+      (is (= {:absent :construction-not-reached}
+             (:fold-output (cohort/closed-execution-qualified binding attempt))))))
   (testing "post-boundary missing fold output remains refused"
     (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
       (rewrite-time-step-revision! attempt-dir enriched-revision true)

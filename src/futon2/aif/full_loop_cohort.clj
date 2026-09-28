@@ -1112,8 +1112,14 @@
           fold-output (get-in (nth events 2) [:payload :judgment :fold-output])]
       {:execution execution
        :recorded-contract contract
-       :fold-output (if (= :pre-enriched-fold (:kind contract))
+       ;; A construction checkpoint that is a typed sorry carries no fold
+       ;; output under either contract; that is an absence, not a value to hash.
+       :fold-output (cond
+                      (= :pre-enriched-fold (:kind contract))
                       {:absent :recorded-before-fold-contract}
+                      (nil? fold-output)
+                      {:absent :construction-not-reached}
+                      :else
                       {:status :validated :sha256 (sha256 (pr-str fold-output))})})))
 
 (defn closed-execution
