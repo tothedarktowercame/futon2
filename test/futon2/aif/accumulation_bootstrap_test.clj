@@ -74,9 +74,10 @@
                   :initialization (:accumulation-initialization config)})]
     (is (= :bootstrapped (:status result)))
     (is (= :accumulation-bootstrap (:record/kind record)))
-    (is (= "tail" (:run/id record)
-           (get-in record [:accumulation-state :last-tick])
-           (get-in record [:bootstrap :predecessor-id])))
+    (is (= "tail" (get-in record [:bootstrap :predecessor-id])))
+    (is (= (:run/id record) (get-in record [:accumulation-state :last-tick])))
+    (is (apply distinct? (map :run/id (:records history)))
+        "the bootstrap must not share the predecessor's run id")
     (is (java.util.Arrays/equals
          before (java.util.Arrays/copyOfRange after 0 (alength before))))
     (is (= 2 (count (:records history))))

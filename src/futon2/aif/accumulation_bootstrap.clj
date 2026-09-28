@@ -71,6 +71,11 @@
     (let [observation-support (vec (sort observation-support))
           state-support (vec (sort state-support))
           initialization (:accumulation-initialization config)
+          ;; Its own identity: reusing the predecessor's :run/id makes readers
+          ;; that join by run id (run_narrative/load-run,
+          ;; cross_ledger_identity) refuse the predecessor as ambiguous.
+          bootstrap-id (str (.format (LocalDate/now ZoneOffset/UTC) date-format)
+                            "-accumulation-bootstrap-of-" tail-id)
           initialized (accumulation/initialize
                        observation-support state-support (:prior initialization))]
       (if-not (:ok initialized)
@@ -78,14 +83,14 @@
         (let [lineage {:entity/id (:accumulation-entity-id config)
                        :model/revision (:model/revision initialization)}
               state (-> initialized
-                        (assoc :last-tick tail-id
+                        (assoc :last-tick bootstrap-id
                                :lineage lineage))]
           {:record
            {:record/kind :accumulation-bootstrap
-            ;; The bootstrap is a carry proxy, not a tick.  Keeping the
-            ;; predecessor identity is required by machine-accumulation/step:
-            ;; its previous-id must equal the carried state's :last-tick.
-            :run/id tail-id
+            ;; The bootstrap is a carry proxy, not a tick.  The next tick's
+            ;; previous-id is this record's :run/id, which machine-accumulation/step
+            ;; requires to equal the carried state's :last-tick.
+            :run/id bootstrap-id
             :bootstrap {:by (:by authority)
                         :authority (:authority authority)
                         :predecessor-id tail-id
