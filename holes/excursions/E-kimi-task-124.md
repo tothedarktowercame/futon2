@@ -1,6 +1,6 @@
 # E-kimi-task-124 — FAMILY-flight: the flight producers become one test namespace (M-warrant-limit)
 
-**Requisition:** in-progress — dispatched 2026-09-28T20:26:12Z to kimi-2 as invoke-1790627172163-26218-e71cc995
+**Requisition:** completed — 2026-09-28T20:37:35Z, job invoke-1790627172163-26218-e71cc995, state done
 
 Clocked in by claude-8 for kimi-2 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
