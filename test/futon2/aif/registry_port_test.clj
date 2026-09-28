@@ -34,6 +34,18 @@
   {:entry #(get entries %)
    :latest-namespace (fn [_] latest)
    :latest-command (fn [_] latest)
+   :current-or-request
+   (fn [{:keys [namespace repo]}]
+     (if latest
+       (let [record (read-string (get-in latest [:evidence/body :payload-edn]))]
+         (if (:warrant? record)
+           {:status :current :entry-id (:evidence/id latest)
+            :ran-at (:ran-at record) :git-head "fixture-head"}
+           {:status :missing :kind :not-passing
+            :data {:namespace namespace :repo repo :reason :not-passing
+                   :found-entry-id (:evidence/id latest)}}))
+       {:status :missing :kind :no-current-warrant
+        :data {:namespace namespace :repo repo :reason :absent}}))
    :runs (fn [{:keys [author since]}]
            (filterv (fn [e]
                       (let [r (read-string (get-in e [:evidence/body :payload-edn]))]
@@ -67,20 +79,35 @@
                      :config (str "test-registry-" (apply str (repeat 64 "0")))})
                    [:evidence :reason])))
     (port/install! (implementation {(:evidence/id fail) fail} fail))
-    (is (= :not-a-warrant
+    (is (= :not-passing
            (get-in (checks/check-registered-run
                     {:repo "futon2" :namespace test-namespace})
-                   [:evidence :reason])))))
+                   [:evidence :kind])))))
 
-(deftest c8-reports-current-content-drift
+(deftest c8-carries-stale-request-fields
   (let [record (assoc (run-record true "stale" "codex-3"
                                   "2026-09-27T01:00:00Z" "2026-09-27T01:01:00Z")
                       :code-files {code-path (apply str (repeat 64 "0"))})
         stale (entry record)]
-    (port/install! (implementation {(:evidence/id stale) stale} stale))
+    (port/install! (assoc (implementation {(:evidence/id stale) stale} stale)
+                          :current-or-request
+                          (fn [_] {:status :missing :kind :no-current-warrant
+                                   :data {:reason :stale :request-id "request-1"
+                                          :run-requested-at "2026-09-28T00:00:00Z"
+                                          :found-entry-id (:evidence/id stale)}})))
     (let [result (checks/check-registered-run {:repo "futon2" :namespace test-namespace})]
-      (is (= :content-moved (get-in result [:evidence :reason])))
-      (is (= [code-path] (get-in result [:evidence :moved-paths]))))))
+      (is (false? (:observed result)))
+      (is (= {:reason :stale :request-id "request-1"
+              :run-requested-at "2026-09-28T00:00:00Z"
+              :found-entry-id (:evidence/id stale)}
+             (select-keys (:evidence result)
+                          [:reason :request-id :run-requested-at :found-entry-id]))))))
+
+(deftest c8-port-without-current-operation-refuses
+  (port/install! (dissoc (implementation {} nil) :current-or-request))
+  (is (= :registry-port-unset
+         (:kind (checks/check-registered-run
+                 {:repo "futon2" :namespace test-namespace})))))
 
 (deftest increment-query-distinguishes-empty-and-storage-failure
   (let [inside-a (entry (run-record true "a" "wm-author"

@@ -338,17 +338,18 @@
 (defn local-registry-latest
   "Resolve the newest run through the supplied local registry port."
   [_base locator]
-  (let [entry (if (string? locator)
-                (registry-port/call :latest-namespace locator)
+  (let [namespace-locator? (and (map? locator) (string? (:namespace locator)))
+        entry (if namespace-locator?
+                (registry-port/call :current-or-request
+                                    (select-keys locator [:namespace :repo]))
                 (registry-port/call :latest-command (vec (:command locator))))]
     (cond
       (registry-port/failure? entry)
       (refuse (:kind entry) (merge {:check :C8} (:data entry)))
+      namespace-locator? (assoc entry :currentness-answer true)
       (nil? entry) :absent
       :else {:entry-id (:evidence/id entry)
-             :resolved-by (if (string? locator)
-                            :namespace-lookup
-                            :command-lookup)})))
+             :resolved-by :command-lookup})))
 
 (def ^:dynamic *registry-latest*
   "The seam C8 resolves a locator through: (fn [base locator] -> {:entry-id …}
@@ -484,7 +485,9 @@
   (or (c8-locator-refusal m)
       (let [by-command? (and (not (contains? m :config)) (c8-command-present? command))
             lookup (when-not (contains? m :config)
-                     (if by-command? {:command (vec command)} namespace))
+                     (if by-command?
+                       {:command (vec command)}
+                       {:namespace namespace :repo repo}))
             located (if (contains? m :config)
                       (locate-record config)
                       ;; No :config: ask the registry which record covers this
@@ -494,7 +497,22 @@
                       ;; behind an earlier green one.
                       (*registry-latest* (agency-base) lookup))
             resolved-by (if by-command? :command-lookup :namespace-lookup)]
-        (if (:status located) located
+        (if (and (:status located) (not (:currentness-answer located)))
+          located
+          (if (and (:currentness-answer located) (= :current (:status located)))
+            {:observed true :check :C8
+             :evidence {:repo repo :root (str repo-root "/" repo)
+                        :namespace namespace :resolved-by :namespace-lookup
+                        :warrant-id (:entry-id located)
+                        :ran-at (:ran-at located) :git-head (:git-head located)}}
+            (if (and (:currentness-answer located) (= :missing (:status located)))
+              (let [data (:data located)]
+                {:observed false :check :C8
+                 :evidence (merge {:repo repo :root (str repo-root "/" repo)
+                                   :namespace namespace :resolved-by :namespace-lookup
+                                   :kind (:kind located)}
+                                  (select-keys data [:reason :request-id :run-requested-at
+                                                     :found-entry-id :request-state]))})
           (if (= :absent located)
             ;; the registry answered and holds no run for this locator
             {:observed false :check :C8
@@ -555,7 +573,7 @@
                                      (= :failed (results-verdict results)) :run-recorded-failures
                                      (seq moved) :content-moved)]
                         {:observed (nil? reason) :check :C8
-                         :evidence (cond-> evidence reason (assoc :reason reason))}))))))))))
+                         :evidence (cond-> evidence reason (assoc :reason reason))}))))))))))))
 
 (defn locator-refusal
   "Is LOCATOR admissible for its class's check? nil when it is, else the

@@ -204,7 +204,8 @@
                                         :namespace "futon2.aif.observation-checks-test"})]
         (is (true? (:observed r)) (pr-str (:evidence r)))
         (is (= 1 (count @asked)) "the lookup is asked exactly once")
-        (is (= "futon2.aif.observation-checks-test" (second (first @asked))))
+        (is (= {:namespace "futon2.aif.observation-checks-test" :repo "futon2"}
+               (second (first @asked))))
         (is (= :namespace-lookup (get-in r [:evidence :resolved-by])))
         (is (= entry-id (get-in r [:evidence :warrant-id])))))))
 
