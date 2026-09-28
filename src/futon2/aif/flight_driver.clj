@@ -237,7 +237,10 @@
         write! (fn [flown]
                  (let [path (io/file store "flights" (str (:flight/id flown) ".edn"))]
                    (.mkdirs (.getParentFile path))
-                   (spit path (with-out-str (pp/pprint {:plan planned :flight flown})))
+                   ;; :run-record-dir lets a reader find each click's run record
+                   ;; (tick-run-record-<click-id>.edn) from the flight file alone
+                   (spit path (with-out-str (pp/pprint {:plan planned :flight flown
+                                                        :run-record-dir (.getCanonicalPath (io/file run-record-dir))})))
                    path))
         ;; WM-SPIKE-FIX-III: an aborted run! still has its record written
         ;; (:status :aborted, the step named), then the error goes on

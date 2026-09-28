@@ -184,4 +184,6 @@
     (is (some? e) "the error still reaches the caller (exit 1)")
     (is (= :aborted (get-in rec [:flight :status])))
     (is (= :click (get-in rec [:flight :aborted :step])))
-    (is (= "java.net.http.HttpTimeoutException" (get-in rec [:flight :aborted :class])))))
+    (is (= "java.net.http.HttpTimeoutException" (get-in rec [:flight :aborted :class])))
+    (is (string? (:run-record-dir rec)) "the record names where its clicks' run records are")
+    (is (= (.getCanonicalPath (io/file (:run-record-dir rec))) (:run-record-dir rec)))))

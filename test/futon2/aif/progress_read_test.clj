@@ -126,3 +126,14 @@
           (is false "expected typed ex-info")
           (catch clojure.lang.ExceptionInfo e
             (is (= kind (:kind (ex-data e))))))))))
+
+(deftest the-envelope-names-its-run-record-directory
+  (let [{:keys [root runs envelope]} (records!)
+        with-dir (write-edn! (io/file root "flight-with-dir.edn")
+                             (assoc envelope :run-record-dir (str runs)))
+        without-dir (write-edn! (io/file root "flight-without-dir.edn") envelope)]
+    (is (= :token-consumed
+           (get-in (progress-read/check-flight-file with-dir) [:check :clicks 0 :progress])))
+    (is (= :run-record-dir-not-on-flight-record
+           (try (progress-read/check-flight-file without-dir) nil
+                (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))

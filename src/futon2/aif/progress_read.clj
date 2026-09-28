@@ -96,8 +96,14 @@
 
 (defn check-flight-file
   "Read a persisted flight envelope and return the assembled checker input and
-  pure progress-check verdict."
-  [flight-path run-record-dir]
-  (let [envelope (edn/read-string {:default tagged-literal} (slurp flight-path))
-        input (flight-clicks envelope run-record-dir)]
-    {:input input :check (progress-check/check-flight input)}))
+  pure progress-check verdict. RUN-RECORD-DIR defaults to the envelope's own
+  :run-record-dir (written by flight-driver since 2026-09-28); an older
+  envelope without it needs the directory passed."
+  ([flight-path] (check-flight-file flight-path nil))
+  ([flight-path run-record-dir]
+   (let [envelope (edn/read-string {:default tagged-literal} (slurp flight-path))
+         dir (or run-record-dir (:run-record-dir envelope))]
+     (when-not dir
+       (malformed! :run-record-dir-not-on-flight-record {:path (str flight-path)}))
+     (let [input (flight-clicks envelope dir)]
+       {:input input :check (progress-check/check-flight input)}))))
