@@ -26,7 +26,8 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.enact :as enact]
             [futon2.aif.fold-realized :as fr]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm]
+            [futon2.wm-trigger :as trigger])
   (:import (java.time Instant)))
 
 (defn- live-wire?
@@ -65,15 +66,10 @@
          " decision=" action-desc
          " trace=" trace-path)))
 
-(defn trigger-from-env
-  "Which clock fired this run: FUTON_WM_TRIGGER as a keyword (:wallclock-cron,
-  :duree-click-*, ...), else :unspecified. The tick's version stamp and the
-  flight path's selection record both read it here."
-  ([] (trigger-from-env #(System/getenv %)))
-  ([getenv]
-   (if-let [t (getenv "FUTON_WM_TRIGGER")]
-     (keyword t)
-     :unspecified)))
+(def trigger-from-env
+  "Which clock fired this run; defined in `futon2.wm-trigger` so that a reader
+  of the trigger alone does not load the tick."
+  trigger/trigger-from-env)
 
 (defn flight-mode
   "FUTON_WM_FLIGHT: nil (unset or blank) is the tick, unchanged. \"plan\" chooses a

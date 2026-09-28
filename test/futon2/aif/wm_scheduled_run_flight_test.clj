@@ -33,6 +33,12 @@
       (is (empty? (filter #(re-find #"flight|outer|target-field" (str (ns-name (val %))))
                           (ns-aliases 'wm-scheduled-run)))))))
 
+(deftest the-scripts-trigger-reader-is-the-one-in-wm-trigger
+  ;; wire tests read futon2.wm-trigger so they do not load the tick; this pins
+  ;; that the script calls that same function
+  (is (identical? run/trigger-from-env
+                  @(requiring-resolve 'futon2.wm-trigger/trigger-from-env))))
+
 (deftest the-trigger-is-read-as-the-tick-always-read-it
   (is (= :unspecified (run/trigger-from-env (constantly nil))))
   (is (= :wallclock-cron (run/trigger-from-env {"FUTON_WM_TRIGGER" "wallclock-cron"})))
