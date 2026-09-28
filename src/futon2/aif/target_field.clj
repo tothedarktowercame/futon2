@@ -53,7 +53,7 @@
             [futon2.aif.mission-registry :as mr]
             [futon2.aif.served-by-reading :as served]
             [futon2.aif.want-interpretation :as wi]
-            [futon2.report.war-machine :as wm]))
+            [futon2.aif.wm.construction-inputs :as wm-inputs]))
 
 (def lifecycle-phases
   "The phases of futon4/holes/mission-lifecycle.md, HEAD optional."
@@ -360,9 +360,9 @@
                     (let [input {:target target :want wants :observation universe
                                  :interpretations patterns
                                  :interpretation-receipts (get-in view [:interpretations target :receipts])
-                                 :budget (:value (wm/construction-budget sources))
-                                 :horizon (:value (wm/resolve-cascade-horizon view [target]))
-                                 :move-cost (:value wm/construction-move-cost)}
+                                 :budget (:value (wm-inputs/construction-budget sources))
+                                 :horizon (:value (wm-inputs/resolve-cascade-horizon view [target]))
+                                 :move-cost (:value wm-inputs/construction-move-cost)}
                           r (ic/support input)]
                       (if (= :supported (:status r))
                         (step t :ready {:support (count (:family r)) :open-wants open

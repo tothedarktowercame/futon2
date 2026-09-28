@@ -29,7 +29,8 @@
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.served-by-reading :as served]
             [futon2.aif.want-interpretation :as wi]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.wm.construction-inputs :as wm-inputs]))
 
 (defn click-summary
   "What the flight needs from one run's RESULT (run-opportunity-core!'s
@@ -243,15 +244,15 @@
   wants, locators and observations, and the published interpretations."
   [store flight wants sources]
   (let [target (:target flight)]
-    (-> (wm/flight-assembly-input {:target target :wants (:wants wants)
+    (-> (wm-inputs/flight-assembly-input {:target target :wants (:wants wants)
                                    :locators (:locators wants) :universe (:universe wants)}
                                   {:targets [target] :sources sources})
         :sources
         (wi/merge-published store [target])
         (assoc :construction {:construct ic/construct
-                              :budget (:value (wm/construction-budget sources))
-                              :move-cost (:value wm/construction-move-cost)
-                              :evaluate-g wm/constructed-candidate-g}))))
+                              :budget (:value (wm-inputs/construction-budget sources))
+                              :move-cost (:value wm-inputs/construction-move-cost)
+                              :evaluate-g wm-cd/constructed-candidate-g}))))
 
 (defn- issue-request
   "Issue the request for WANT, or return {::refused refusal}: the

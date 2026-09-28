@@ -41,7 +41,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.mission-reading :as reading]
             [futon2.aif.want-interpretation :as wi]
-            [futon2.report.war-machine :as wm])
+            [futon2.aif.wm.construction-inputs :as wm-inputs])
   (:import [java.util UUID])
   (:gen-class))
 
@@ -144,7 +144,7 @@
         view (fr/target-view store f cw sources)
         universe (get-in view [:universes target])
         unproduced (wi/unproduced-wants (:wants cw) universe (get-in view [:interpretations target :patterns]))
-        horizon (wm/resolve-cascade-horizon view [target])]
+        horizon (wm-inputs/resolve-cascade-horizon view [target])]
     {:flight-id id
      :requisition target
      :answering-seat seat
@@ -187,7 +187,8 @@
      :published-already (get-in view [:machine-interpretations target] [])
      :store store
      :horizon horizon
-     :construction-parameters {:budget (wm/construction-budget sources) :move-cost wm/construction-move-cost}
+     :construction-parameters {:budget (wm-inputs/construction-budget sources)
+                               :move-cost wm-inputs/construction-move-cost}
      :clicks {:max (or max-clicks 4)
               :run-ids (str "<date>-" id "-click-<n>")
               :via "POST /api/alpha/wm/click with flight-edn: an ordinary click (budget consume + cast-seat preflight); runner/run-opportunity! in the serving JVM"}
