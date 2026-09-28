@@ -1762,6 +1762,7 @@
  ;; Holes.lean declaration carries each.
  :holes
  [{:edge [:R4 :R7] :equation :likelihood-precision :status :implemented-awaiting-live-witness
+   :ruling "RULING D2 (Joe, 2026-09-27 ~01:25Z, via claude-8): zeta is to be LEARNED, not fixed: 'if we have a knob, we need to have a basis for it'; zeta = 1 'is not a baseline but sounds like a kludge'. Not to be marked realised by boxing tempered-rates at zeta = 1, nor by a declared zeta != 1 run. (Kept verbatim from the pre-reconciliation finding, futon2 d168c62a6^, by claude-1 2026-09-28.)"
    :finding "RECONCILED 2026-09-28: the beta_zeta posterior update and its publish/carry/consume path are implemented hermetically, so this is no longer a missing-code edge. The :likelihood-precision row records :realised true, realised code in zeta_posterior.clj, temporal_update.clj, flight_runner.clj, the War Machine cascade lane, efe.clj and cascade_model_manifest.clj, and implementation commits 65dd9d025 and f7684f966. What remains owed is only the row's live witness {:absent :no-live-flight-since-bz-i}; the implementation claim is not itself a live-flight claim."
    :evidence "holes/labs/wm-contract/aif-equations.edn :likelihood-precision :realised-code/:realised/:implementation-commits/:live-status; futon2 65dd9d02508bc299a5048b55368b30781e580b7a; futon2 f7684f96667763ea62a7610e3d012ab65a0fbf73; registry reconciliation basis futon2 7db0807ed; /home/joe/code/storage/proof-2a/status-d2/REPORT.md section <2>2d"
    :reconciled {:by "codex-proof2e for claude-1" :date "2026-09-28"
