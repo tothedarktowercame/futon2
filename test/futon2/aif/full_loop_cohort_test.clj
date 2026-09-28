@@ -288,6 +288,56 @@
       (is (thrown? clojure.lang.ExceptionInfo
                    (cohort/closed-execution binding attempt))))))
 
+(defn- closed-fixture []
+  (let [root (tmp-root)
+        raw (slurp prereg-path)
+        binding {:preregistration prereg-path :data-root root
+                 :cohort-id (:cohort/id (edn/read-string raw))
+                 :sha256 (#'cohort/sha256 raw)}
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/refusal-detail"))]
+    (append-required! root attempt)
+    (cohort/close-attempt!
+     prereg-path root attempt
+     (term {:outcome :agent-unavailable :grounded? false
+            :artifact-only? false :duration-ms 1
+            :resource-use {:agent-turns 0}}))
+    {:root root :binding binding :attempt attempt
+     :attempt-dir (io/file root (name (:cohort-id binding)) attempt)}))
+
+(defn- refusal-data [binding attempt]
+  (try
+    (cohort/closed-execution binding attempt)
+    nil
+    (catch clojure.lang.ExceptionInfo e (ex-data e))))
+
+(deftest closed-execution-refusal-names-each-failed-condition
+  (testing "wrong activation preregistration digest"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)
+          activation (io/file (.getParentFile attempt-dir) "activation.edn")
+          value (edn/read-string (slurp activation))]
+      (spit activation (pr-str (assoc value :preregistration-sha256
+                                      (apply str (repeat 64 "0")))))
+      (is (= [:preregistration-sha256]
+             (:failed (refusal-data binding attempt))))))
+  (testing "missing checkpoint file"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)]
+      (io/delete-file (io/file attempt-dir "005-build.edn"))
+      (is (= [:checkpoint-order :checkpoint-files :events]
+             (:failed (refusal-data binding attempt))))))
+  (testing "construction checkpoint without fold output"
+    (let [{:keys [binding attempt attempt-dir]} (closed-fixture)
+          file (io/file attempt-dir "003-construction.edn")
+          event (edn/read-string (slurp file))
+          construction {:mission "M-x" :cascade {} :sorries [] :patterns []
+                        :deposit nil :wiring nil :fold-output nil}]
+      (spit file (pr-str (assoc event :payload (term construction))))
+      (let [data (refusal-data binding attempt)]
+        (is (= [:events] (:failed data)))
+        (is (= [{:sequence 3 :checkpoint :construction
+                 :errors [[:invalid-fold-output :nil-fold-output]]}]
+               (:event-errors data)))))))
+
 (deftest execution-authority-binds-canonical-data-root
   (let [base (tmp-root)
         raw (slurp prereg-path)

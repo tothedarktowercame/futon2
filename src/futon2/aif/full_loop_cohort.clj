@@ -1016,36 +1016,60 @@
         expected-files (mapv (fn [sequence checkpoint]
                                (format "%03d-%s.edn" sequence (name checkpoint)))
                              (range 1 (inc (count checkpoint-order))) checkpoint-order)
-        valid-event? (fn [sequence checkpoint event]
-                       (and (= #{:event/schema-version :cohort/id :attempt/id
-                                 :attempt/ordinal :event/sequence :checkpoint/type
-                                 :recorded-at :payload}
-                               (set (keys event)))
-                            (= 1 (:event/schema-version event))
-                            (= (:cohort-id binding) (:cohort/id event))
-                            (= attempt-id (:attempt/id event))
-                            (= ordinal (:attempt/ordinal event))
-                            (= sequence (:event/sequence event))
-                            (= checkpoint (:checkpoint/type event))
-                            (empty? (checkpoint-cell-errors p checkpoint (:payload event)))))
-        close (:payload (last events))]
-    (when-not (and (string? attempt-id) (re-matches #"attempt-\d{3}" attempt-id)
-                   (= #{:cohort/id :activated-at :preregistration-path
-                        :preregistration-sha256 :stopping-target}
-                      (set (keys activation)))
-                   (= (:cohort-id binding) (:cohort/id activation))
-                   (= (:sha256 binding) (:preregistration-sha256 activation))
-                   (= (get-in p [:stopping-rule :target]) (:stopping-target activation))
-                   (.isDirectory attempt-dir) (pos-int? ordinal)
-                   (= checkpoint-order types)
-                   (= expected-files (mapv #(.getName %) files))
-                   (every? true? (map valid-event? (range 1 (inc (count events)))
-                                      checkpoint-order events))
-                   (or (not authority-present?)
-                       (= expected-authority stored-authority))
-                   (grounded-term? close) (empty? (grounded-close-errors close)))
+        event-errors
+        (->> events
+             (map-indexed
+              (fn [index event]
+                (let [sequence (inc index)
+                      checkpoint (nth checkpoint-order index nil)
+                      envelope?
+                      (and (= #{:event/schema-version :cohort/id :attempt/id
+                                :attempt/ordinal :event/sequence :checkpoint/type
+                                :recorded-at :payload}
+                              (set (keys event)))
+                           (= 1 (:event/schema-version event))
+                           (= (:cohort-id binding) (:cohort/id event))
+                           (= attempt-id (:attempt/id event))
+                           (= ordinal (:attempt/ordinal event))
+                           (= sequence (:event/sequence event))
+                           (= checkpoint (:checkpoint/type event)))
+                      errors (if envelope?
+                               (checkpoint-cell-errors p checkpoint (:payload event))
+                               [:event-envelope])]
+                  (when (seq errors)
+                    {:sequence sequence :checkpoint checkpoint :errors errors}))))
+             (remove nil?) vec)
+        close (:payload (last events))
+        failed
+        (cond-> []
+          (not (and (string? attempt-id) (re-matches #"attempt-\d{3}" attempt-id)))
+          (conj :attempt-id-syntax)
+          (not= #{:cohort/id :activated-at :preregistration-path
+                  :preregistration-sha256 :stopping-target}
+                (set (keys activation)))
+          (conj :activation-keys)
+          (not= (:cohort-id binding) (:cohort/id activation))
+          (conj :cohort-id)
+          (not= (:sha256 binding) (:preregistration-sha256 activation))
+          (conj :preregistration-sha256)
+          (not= (get-in p [:stopping-rule :target]) (:stopping-target activation))
+          (conj :stopping-target)
+          (not (.isDirectory attempt-dir)) (conj :attempt-directory)
+          (not (pos-int? ordinal)) (conj :ordinal)
+          (not= checkpoint-order types) (conj :checkpoint-order)
+          (not= expected-files (mapv #(.getName %) files)) (conj :checkpoint-files)
+          (seq event-errors) (conj :events)
+          (not (or (not authority-present?)
+                   (= expected-authority stored-authority)))
+          (conj :execution-authority)
+          (not (and (grounded-term? close)
+                    (empty? (grounded-close-errors close))))
+          (conj :grounded-close))]
+    (when (seq failed)
       (throw (ex-info "Closed cohort execution unavailable"
-                      {:reason :closed-execution-unavailable})))
+                      (cond-> {:reason :closed-execution-unavailable
+                               :failed (vec failed)}
+                        (seq event-errors) (assoc :event-errors event-errors)))))
     (merge
      (if authority-present?
        (execution-provenance stored-authority attempt-id)
