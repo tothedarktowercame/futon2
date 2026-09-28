@@ -13,6 +13,8 @@
 ## CURRENT STATUS
 
 <!-- PROOF-2a-current:start -->
+**Updated 2026-09-28 21:48Z claude-1: Joe: use Codex on sol through a newly registered agent. Minted codex-proof2a (gpt-5.6-sol, PROOF-2a packets only). Held packets dispatched, run in order on that seat: HGT-E-I `invoke-1790632071750-26467-79133cc3` (⟨1⟩3), PROGRESS-I `invoke-1790632074402-26468-5140c22b` (⟨1⟩4), HINTERP-SEAM-I `invoke-1790632075879-26469-e90e7e95` (⟨1⟩3); each parked on claude-1, 90 min.** 
+
 **Updated 2026-09-28 21:14Z claude-1: Kimi's 5-hour window is exhausted: HGT-E-I (kimi-3, `invoke-1790629768225-26359-add9395d`) and PROGRESS-I (kimi-2, `invoke-1790629942852-26373-13db056f`) failed with HTTP 403 before any model call, nothing edited; E-kimi-task-129/130 closed as failed. H-interp seam fixture v1 committed (futon2 188aa6491), shape agreed with claude-17 (confirmation by authorship; mined-graph C8 namespace futon3c.xiang2000.mined-graph-test, not yet written). Three implementation packets ready and held, text under storage/proof-2a/: HGT-E-I (⟨1⟩3 target-grain E), PROGRESS-I (⟨1⟩4 checker), HINTERP-SEAM-I (⟨1⟩3 flight reads primary wants from a seam document). Per Joe: resume on Zai when its window opens.** 
 
 **Updated 2026-09-28 21:09Z claude-1: ⟨1⟩3 H-G-target: target-grain E defined (E_t = (n_t+1)/Σ(n_s+1) over the eligible support, habitPrior at target grain; see the ⟨1⟩3 LOG); implementation HGT-E-I on kimi-3 (`invoke-1790629768225-26359-add9395d`). ⟨1⟩4 PROGRESS-D on kimi-2. H-interp: claude-17 asked about the seam (R1-R4) and whether the WM may own the flight-side consumer (`invoke-1790629598440-26349-fd588f61`).** 
