@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight-driver :as fd]
+            [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.outer-loop :as outer-loop]
             [futon2.aif.outer-cascade :as cascade]
@@ -60,7 +61,9 @@
              (:placement p)))
       (is (= (:target-selection r) (:target-selection p)) "and the plan carries the selection on every plan")
       (is (= {"M-futon-seams" {:absent :no-target-grain-g}} (get-in p [:target-selection :g])))
-      (is (= {:basis :uniform-no-data} (get-in p [:target-selection :E]))))
+      (is (= {:basis :target-habit-prior :alpha 1
+              :counts {"M-futon-seams" 0} :unjoined []}
+             (get-in p [:target-selection :E]))))
     (testing "the chosen entry rides beside it, and the plan is a plan"
       (is (= :ask-interpretation (get-in p [:resolved-steps :field-entry :next-step])))
       (is (false? (:run? p))))
@@ -130,15 +133,58 @@
            (dissoc (:target-selection result) :inputs)))
     (is (= (get-in baseline [:plan :requisition]) (get-in result [:plan :requisition])))))
 
+(defn- receipt [record-id target]
+  {:record-id record-id :delta 1
+   :policy-key [:pattern-cascade target [] {}]})
+
+(deftest caller-supplied-enactment-fold-reaches-target-selection
+  (let [store (store-dir)
+        fold {:enactment-records
+              {[:click-1 :c] (receipt [:click-1 :c] "M-futon-seams")
+               [:click-2 :c] (receipt [:click-2 :c] "M-futon-seams")}}
+        result (outer-loop/plan-from-field!
+                (assoc (entry-opts store) :enactment-fold fold))]
+    (is (= :target-habit-prior
+           (get-in result [:target-selection :E :basis])))
+    (is (= {"M-futon-seams" 2}
+           (get-in result [:target-selection :E :counts])))))
+
+(deftest loaded-store-flights-supply-the-enactment-fold
+  (let [store (store-dir)
+        flights (io/file store "flights")
+        _ (.mkdirs flights)
+        record {:flight {:enactments
+                         [{:increment (receipt [:click-1 :c] "M-futon-seams")}]}}
+        _ (spit (io/file flights "flight-one.edn") (pr-str record))
+        result (outer-loop/plan-from-field! (entry-opts store))]
+    (is (= :target-habit-prior
+           (get-in result [:target-selection :E :basis])))
+    (is (= {"M-futon-seams" 1}
+           (get-in result [:target-selection :E :counts])))))
+
+(deftest nil-store-and-no-caller-fold-retain-uniform-selection
+  (let [opts (assoc (entry-opts (store-dir))
+                    :load-field-fn
+                    (fn [] {:field field
+                            :opts {:sources {} :store nil
+                                   :code-root "/nonexistent"}}))
+        result (with-redefs [fd/plan (fn [_] {:planned true})]
+                 (outer-loop/plan-from-field! opts))]
+    (is (= {:basis :uniform-no-data}
+           (get-in result [:target-selection :E])))))
+
 (deftest missing-chosen-location-is-data-not-an-empty-mission
   (doseq [[f missing] [[(assoc field :considered []) [:considered-entry]]
                        [(assoc-in field [:considered 0 :path] "  ") [:path]]
                        [(assoc-in field [:considered 0 :repo] "") [:repo]]
                        [(update-in field [:considered 0] dissoc :repo :path) [:repo :path]]]]
     (let [called (atom false)
-          expected (cascade/select {:field f :seed 42 :trigger :wallclock-cron})
+          store (store-dir)
+          expected (cascade/select {:field f :seed 42 :trigger :wallclock-cron
+                                    :enactment-fold (fold-source/fold-from-flights
+                                                     (str (io/file store "flights")))})
           r (with-redefs [fd/plan (fn [_] (reset! called true) :unexpected-plan)]
-              (outer-loop/plan-from-field! (entry-opts (store-dir) {:field f})))]
+              (outer-loop/plan-from-field! (entry-opts store {:field f})))]
       (is (= {:absent :chosen-target-not-in-field
               :chosen-target "M-futon-seams" :missing missing} (:plan r)))
       (is (= (:target-selection expected) (:target-selection r)))

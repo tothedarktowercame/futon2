@@ -10,7 +10,9 @@
   `plan-from-field!` PLANS. It calls `flight-driver/plan`, which sends nothing
   and writes nothing; running the flight is not here (no flight before the
   spike is belled)."
-  (:require [clojure.string :as str]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [futon2.aif.enactment-fold-source :as enactment-fold-source]
             [futon2.aif.flight-driver :as driver]
             [futon2.aif.outer-cascade :as outer-cascade]
             [futon2.aif.target-field :as target-field]))
@@ -28,14 +30,28 @@
   entry for it (the feasible entry does not carry them). Missing entries or
   blank locations produce :chosen-target-not-in-field without calling the planner.
   :enactment-records, :publication-observed and :clock-lineage are forwarded
-  to selection for recording only; their producers remain caller-owned."
+  to selection for recording only. :enactment-fold is the one forwarded input
+  that changes the law: a caller-supplied fold wins; otherwise a non-blank
+  loaded :store is folded from its flights/ directory. With neither, selection
+  retains its uniform-no-data prior."
   [{:keys [trigger seed seat load-field-fn plan-opts]
     :or {load-field-fn target-field/load-field} :as selection-opts}]
   (let [{:keys [field opts]} (load-field-fn)
         seed (if (integer? seed) seed (System/currentTimeMillis))
+        store (:store opts)
+        fold-supplied? (contains? selection-opts :enactment-fold)
+        store-supplied? (and (string? store) (not (str/blank? store)))
+        enactment-fold (cond
+                         fold-supplied? (:enactment-fold selection-opts)
+                         store-supplied?
+                         (enactment-fold-source/fold-from-flights
+                          (str (io/file store "flights"))))
         chosen (outer-cascade/select
-                (merge (select-keys selection-opts [:enactment-records :publication-observed :clock-lineage])
-                       {:field field :seed seed :trigger trigger}))
+                (cond-> (merge (select-keys selection-opts
+                                            [:enactment-records :publication-observed :clock-lineage])
+                               {:field field :seed seed :trigger trigger})
+                  (or fold-supplied? store-supplied?)
+                  (assoc :enactment-fold enactment-fold)))
         target (:chosen-target chosen)
         entry (first (filter #(= target (:target %)) (:feasible field)))
         considered (first (filter #(= target (:target %)) (:considered field)))
