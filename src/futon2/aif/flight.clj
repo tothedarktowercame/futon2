@@ -14,7 +14,10 @@
   `run!` calls the injected click and observe functions; `judge-opts` reads
   the last enactment publication through its digest-checked citation."
   (:refer-clojure :exclude [run!])
-  (:require [clojure.set :as set]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-policy :as policy]
@@ -173,7 +176,48 @@
                                           {:token t :reason :owner-question :questions qs})))
               :lifecycle lifecycle}}))
 
-(defmethod source-wants :primary-seam [{:keys [document observe]} _flight _sources]
+(defn- git-primary-seam
+  [{:keys [repo path code-root rev]
+    :or {code-root "/home/joe/code" rev "HEAD"}}]
+  (let [repo-dir (str (io/file code-root repo))
+        git (fn [& args]
+              (apply sh/sh "env" "-u" "GIT_DIR" "-u" "GIT_WORK_TREE"
+                     "git" "-C" repo-dir args))
+        resolved (git "rev-parse" "--verify" (str rev "^{commit}"))
+        read-sha (some-> (:out resolved) str/trim not-empty)
+        shown (when (zero? (:exit resolved)) (git "show" (str read-sha ":" path)))
+        absent (fn [reason]
+                 {:absence {:absent reason :repo repo :path path :read-sha read-sha}})]
+    (cond
+      (not (zero? (:exit resolved)))
+      (absent :seam-document-unreadable)
+
+      (not (zero? (:exit shown)))
+      (absent :no-seam-document)
+
+      :else
+      (let [text (:out shown)
+            bytes (.getBytes ^String text "UTF-8")
+            parsed (try {:document (edn/read-string {:default tagged-literal} text)}
+                        (catch Exception _ {:unreadable true}))
+            document (:document parsed)
+            read {:repo repo :path path :sha read-sha
+                  :sha256 (ievidence/sha256 bytes)}]
+        (cond
+          (:unreadable parsed)
+          (assoc (absent :seam-document-unreadable) :read read)
+
+          (not= :wm/primary-wants-seam-v1 (:schema document))
+          (assoc (absent :seam-schema-mismatch) :read read)
+
+          :else
+          (let [ancestor (git "merge-base" "--is-ancestor"
+                              (str (get-in document [:source :commit])) read-sha)]
+            (if (zero? (:exit ancestor))
+              {:document document :read read}
+              (assoc (absent :seam-source-not-ancestor) :read read))))))))
+
+(defn- primary-seam-result [document observe read]
   (let [target (:target document)
         outcomes (:outcomes document)
         criterion (fn [outcome]
@@ -208,11 +252,22 @@
     {:wants (:wants wants)
      :locators (:locators wants)
      :universe (:universe wants)
-     :source {:kind :primary-seam
-              :via "futon2.aif.outcome-wants"
-              :document-source (:source document)
-              :unlocated (vec waiting)
-              :criteria-by-token criteria-by-token}}))
+     :source (cond-> {:kind :primary-seam
+                      :via "futon2.aif.outcome-wants"
+                      :document-source (:source document)
+                      :unlocated (vec waiting)
+                      :criteria-by-token criteria-by-token}
+               read (assoc :read read))}))
+
+(defmethod source-wants :primary-seam [{:keys [document observe] :as source} _flight _sources]
+  (if document
+    (primary-seam-result document observe nil)
+    (let [{:keys [document read absence]} (git-primary-seam source)]
+      (if document
+        (primary-seam-result document observe read)
+        {:wants [] :locators {} :universe {}
+         :source (merge {:kind :primary-seam} absence
+                        (when read {:read read}))}))))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a
 ;; reader can never mistake it for wants the machine read from the mission.

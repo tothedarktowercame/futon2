@@ -1,8 +1,14 @@
 (ns futon2.aif.flight-primary-seam-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.flight :as flight]
-            [futon2.aif.outcome-wants :as outcome-wants]))
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.outcome-wants :as outcome-wants])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (def fixture-path "test/fixtures/h-interp/primary-wants-seam-v1.edn")
 
@@ -71,3 +77,101 @@
     (is (= [10126 10419]
            (get-in (result document)
                    [:source :criteria-by-token token :provenance :quote :span])))))
+
+(defn- temp-dir []
+  (.toFile (Files/createTempDirectory "primary-seam-git" (make-array FileAttribute 0))))
+
+(defn- git! [repo & args]
+  (let [result (apply sh/sh "env" "-u" "GIT_DIR" "-u" "GIT_WORK_TREE"
+                      "git" "-C" (str repo) args)]
+    (when-not (zero? (:exit result))
+      (throw (ex-info "test git command failed" {:args args :result result})))
+    (str/trim (:out result))))
+
+(def seam-path "holes/missions/seam/M-x.primary-wants.edn")
+
+(defn- git-seam-source [repo]
+  {:kind :primary-seam :code-root (str (.getParentFile repo))
+   :repo (.getName repo) :path seam-path :observe (constantly false)})
+
+(defn- committed-seam-repo
+  ([] (committed-seam-repo identity))
+  ([transform]
+   (let [repo (temp-dir)]
+     (git! repo "init")
+     (git! repo "config" "user.name" "Primary Seam Test")
+     (git! repo "config" "user.email" "primary-seam@example.invalid")
+     (git! repo "commit" "--allow-empty" "-m" "base")
+     (let [base (git! repo "rev-parse" "HEAD")
+           document (-> (fixture)
+                        (assoc :target "M-x")
+                        (assoc-in [:source :commit] base)
+                        transform)
+           file (io/file repo seam-path)]
+       (.mkdirs (.getParentFile file))
+       (spit file (pr-str document))
+       (git! repo "add" "--" seam-path)
+       (git! repo "commit" "-m" "add seam")
+       {:repo repo :file file :document document
+        :head (git! repo "rev-parse" "HEAD")}))))
+
+(defn- git-result [repo]
+  (flight/source-wants (git-seam-source repo) {:target "M-x"} {}))
+
+(deftest committed-seam-is-read-at-head-with-byte-receipt
+  (let [{:keys [repo file head document]} (committed-seam-repo)
+        actual (git-result repo)
+        expected (result document)
+        bytes (.getBytes (slurp file) "UTF-8")]
+    (is (= (:wants expected) (:wants actual)))
+    (is (= (get-in expected [:source :unlocated])
+           (get-in actual [:source :unlocated])))
+    (is (= {:repo (.getName repo) :path seam-path :sha head
+            :sha256 (evidence/sha256 bytes)}
+           (get-in actual [:source :read])))))
+
+(deftest absent-path-is-a-typed-no-seam-document
+  (let [{:keys [repo head]} (committed-seam-repo)
+        actual (flight/source-wants
+                (assoc (git-seam-source repo) :path "holes/missions/seam/missing.edn")
+                {:target "M-x"} {})]
+    (is (= [] (:wants actual)))
+    (is (= {:kind :primary-seam :absent :no-seam-document
+            :repo (.getName repo) :path "holes/missions/seam/missing.edn"
+            :read-sha head}
+           (:source actual)))))
+
+(deftest wrong-schema-is-typed
+  (let [{:keys [repo]} (committed-seam-repo #(assoc % :schema :wrong))
+        actual (git-result repo)]
+    (is (= [] (:wants actual)))
+    (is (= :seam-schema-mismatch (get-in actual [:source :absent])))))
+
+(deftest source-commit-must-be-an-ancestor-of-read-head
+  (let [repo (temp-dir)
+        _ (git! repo "init")
+        _ (git! repo "config" "user.name" "Primary Seam Test")
+        _ (git! repo "config" "user.email" "primary-seam@example.invalid")
+        _ (git! repo "commit" "--allow-empty" "-m" "base")
+        tree (git! repo "rev-parse" "HEAD^{tree}")
+        orphan (git! repo "commit-tree" tree "-m" "orphan")
+        document (-> (fixture) (assoc :target "M-x")
+                     (assoc-in [:source :commit] orphan))
+        file (io/file repo seam-path)
+        _ (.mkdirs (.getParentFile file))
+        _ (spit file (pr-str document))
+        _ (git! repo "add" "--" seam-path)
+        _ (git! repo "commit" "-m" "add non-ancestor seam")
+        actual (git-result repo)]
+    (is (= [] (:wants actual)))
+    (is (= :seam-source-not-ancestor (get-in actual [:source :absent])))))
+
+(deftest uncommitted-working-tree-edit-is-not-read
+  (let [{:keys [repo file document]} (committed-seam-repo)
+        committed (git-result repo)
+        _ (spit file (pr-str (assoc document :schema :working-tree-only)))
+        actual (git-result repo)]
+    (is (= (:wants committed) (:wants actual)))
+    (is (nil? (get-in actual [:source :absent])))
+    (is (= :wm/primary-wants-seam-v1
+           (:schema (edn/read-string (git! repo "show" (str "HEAD:" seam-path))))))))
