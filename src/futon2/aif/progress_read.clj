@@ -22,8 +22,13 @@
       {:absent reason}
       (if-let [path (:record-path entry)]
         (let [record (read-edn path)]
-          (if (= ::unreadable record)
-            {:absent :enactment-record-unreadable}
+          (cond
+            (= ::unreadable record) {:absent :enactment-record-unreadable}
+            ;; a record without an attempts vector is not evidence of no
+            ;; production: check-flight reads #{} as that
+            (not (and (map? record) (sequential? (:attempts record))))
+            {:absent :enactment-record-no-attempts}
+            :else
             (into #{} (comp (filter #(true? (:success %))) (map :produced))
                   (:attempts record))))
         {:absent :no-enactment-record-path}))
@@ -49,7 +54,7 @@
       (let [record (read-edn path)
             chosen (when (map? record) (get-in record [:decision :chosen]))]
         (cond
-          (= ::unreadable record) {:absent :run-record-missing}
+          (= ::unreadable record) {:absent :run-record-unreadable}
           (or (nil? chosen) (= :absent (:status chosen)))
           {:absent :no-chosen-action}
           (not (contains? chosen :candidate))

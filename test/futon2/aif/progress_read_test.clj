@@ -75,12 +75,20 @@
     (is (= {:absent :no-enactment-record-path}
            (get-in (progress-read/flight-clicks no-path runs) [0 :produced])))
     (is (= {:absent :enactment-record-unreadable}
-           (get-in (progress-read/flight-clicks unreadable runs) [0 :produced])))))
+           (get-in (progress-read/flight-clicks unreadable runs) [0 :produced])))
+    (let [no-attempts (write-edn! (io/file root "no-attempts.edn") {:schema :wm/enactment-v1})
+          env (assoc-in envelope [:flight :enactments 0]
+                        {:click-id "c1" :record-path no-attempts})]
+      (is (= {:absent :enactment-record-no-attempts}
+             (get-in (progress-read/flight-clicks env runs) [0 :produced]))))))
 
 (deftest missing-run-record-is-a-typed-absence
   (let [{:keys [envelope runs]} (records!)
         _ (.delete (io/file runs "tick-run-record-c1.edn"))]
     (is (= {:absent :run-record-missing}
+           (get-in (progress-read/flight-clicks envelope runs) [0 :needs])))
+    (spit (io/file runs "tick-run-record-c1.edn") "{")
+    (is (= {:absent :run-record-unreadable}
            (get-in (progress-read/flight-clicks envelope runs) [0 :needs])))))
 
 (deftest chosen-candidate-absence-arms-are-typed
