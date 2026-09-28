@@ -85,9 +85,19 @@
                           {:covered 4 :claims 4})]
                  "entity" prior)
         score (scan-model/score learned prior (hand-set))]
-    (is (or (number? (get-in score [:reductions :support :hand-set :delta-f]))
-            (true? (get-in score [:reductions :support :hand-set
-                                  :impossible-under-reduced]))))
+    ;; theta = 1.0 at :strengthened, 5/5 covered: reduced log evidence 0,
+    ;; full log B(6,1) - log B(1,1) = log(1/6)
+    (is (< (Math/abs (- (Math/log (/ 1.0 6))
+                        (get-in score [:reductions :support :hand-set :delta-f])))
+           1.0e-9))
+    ;; one uncovered claim at theta = 1.0 is impossible, not an infinite delta-F
+    (is (true? (get-in (scan-model/score
+                        (scan-model/learn
+                         [(record (mu [:strengthened 1]) {:covered 4 :claims 5}
+                                  {:covered 4 :claims 4})]
+                         "entity" prior)
+                        prior (hand-set))
+                       [:reductions :support :hand-set :impossible-under-reduced])))
     (is (= :hand-set-not-comparable
            (get-in (scan-model/score learned prior {})
                    [:reductions :support :hand-set :status])))))

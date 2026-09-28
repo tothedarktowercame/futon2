@@ -105,7 +105,8 @@
 (defn- point-term [theta success failure]
   (cond
     (and (zero? theta) (pos? success)) ::impossible
-    (and (= 1 theta) (pos? failure)) ::impossible
+    ;; == not =: the hand-set rows are doubles, and (= 1 1.0) is false
+    (and (== 1 theta) (pos? failure)) ::impossible
     :else (+ (if (zero? success) 0.0 (* success (Math/log (double theta))))
              (if (zero? failure) 0.0 (* failure (Math/log (- 1.0 (double theta))))))))
 
