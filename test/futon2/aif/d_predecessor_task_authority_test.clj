@@ -13,8 +13,18 @@
             [clojure.edn :as edn])
   (:import (java.nio.file Files) (java.time Instant) (java.util UUID)))
 
+(def ^:dynamic *git-environment* (into {} (System/getenv)))
+
+(def ^:private git-routing-environment-keys
+  ["GIT_DIR" "GIT_WORK_TREE" "GIT_INDEX_FILE" "GIT_COMMON_DIR"])
+
+(defn- isolated-git-environment []
+  (apply dissoc *git-environment* git-routing-environment-keys))
+
 (defn git! [repo & args]
-  (let [r (apply shell/sh "git" "-C" (str repo) args)]
+  (let [r (apply shell/sh
+                 (concat ["git" "-C" (str repo)] args
+                         [:env (isolated-git-environment)]))]
     (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
     (str/trim (:out r))))
 
@@ -27,13 +37,17 @@
     (try
       (.mkdirs repo)
       (git! repo "init" "-q")
-      (git! repo "config" "user.name" "D fixture")
-      (git! repo "config" "user.email" "d-fixture@example.invalid")
+      (when-not (.isDirectory (io/file repo ".git"))
+        (throw (ex-info "fixture git init escaped its repository"
+                        {:repo (str repo)
+                         :expected-git-dir (str (io/file repo ".git"))})))
       (spit (io/file repo "base.txt") "base\n")
       (doseq [[path text] (:before-files opts)]
         (let [file (io/file repo path)] (io/make-parents file) (spit file text)))
       (git! repo "add" ".")
-      (git! repo "commit" "-qm" "before")
+      (git! repo "-c" "user.name=D fixture"
+            "-c" "user.email=d-fixture@example.invalid"
+            "commit" "-qm" "before")
       (let [before {:repo (str repo) :head (git! repo "rev-parse" "HEAD")
                     :observed-at-ms (System/currentTimeMillis)}
             action (or (:action opts) {:kind :cascade-candidate :id :C0 :target target
@@ -56,7 +70,9 @@
                                     :universe (or (:universe opts) #{[target :artifact]}) :declaration-reads pins :before before})
             _ (spit (io/file repo "created.clj") "(ns created)\n")
             _ (git! repo "add" "created.clj")
-            _ (git! repo "commit" "-qm" "execute task")
+            _ (git! repo "-c" "user.name=D fixture"
+                    "-c" "user.email=d-fixture@example.invalid"
+                    "commit" "-qm" "execute task")
             commit (git! repo "rev-parse" "HEAD")
             author {:job-id "author-job" :agent-id "author" :state "done"
                     :result (str "FULL_LOOP_AUTHOR: DONE " commit)
@@ -144,7 +160,9 @@
       (let [record (task/claim inputs)]
         (spit (io/file repo "unrelated.txt") "unrelated\n")
         (git! repo "add" "unrelated.txt")
-        (git! repo "commit" "-qm" "unrelated concurrent work")
+        (git! repo "-c" "user.name=D fixture"
+              "-c" "user.email=d-fixture@example.invalid"
+              "commit" "-qm" "unrelated concurrent work")
         (is (not= :admitted
                   (:status (task/verify record expected
                                         (assoc-in jobs ["author-job" :result]
@@ -229,3 +247,40 @@
                  (get-in result [:verification :kind])))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest hostile-git-routing-environment-cannot-escape-fixture-repository
+  (let [dir (.toFile (Files/createTempDirectory
+                      "d-task-git-isolation-"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        probe (io/file dir "probe")
+        fixture (io/file dir "fixture")]
+    (try
+      (.mkdirs probe)
+      (.mkdirs fixture)
+      (git! probe "init" "-q")
+      (git! probe "config" "user.name" "Probe owner")
+      (git! probe "config" "user.email" "probe@example.invalid")
+      (spit (io/file probe "probe.txt") "unchanged\n")
+      (git! probe "add" "probe.txt")
+      (git! probe "-c" "user.name=Probe owner"
+            "-c" "user.email=probe@example.invalid"
+            "commit" "-qm" "probe base")
+      (let [probe-head (git! probe "rev-parse" "HEAD")
+            hostile-env (assoc (into {} (System/getenv))
+                               "GIT_DIR" (str (io/file probe ".git"))
+                               "GIT_WORK_TREE" (str probe))]
+        (binding [*git-environment* hostile-env]
+          (git! fixture "init" "-q")
+          (is (.isDirectory (io/file fixture ".git")))
+          (spit (io/file fixture "fixture.txt") "isolated\n")
+          (git! fixture "add" "fixture.txt")
+          (git! fixture "-c" "user.name=D fixture"
+                "-c" "user.email=d-fixture@example.invalid"
+                "commit" "-qm" "fixture commit")
+          (is (seq (git! fixture "rev-parse" "HEAD"))))
+        (is (= "Probe owner" (git! probe "config" "user.name")))
+        (is (= "probe@example.invalid" (git! probe "config" "user.email")))
+        (is (= probe-head (git! probe "rev-parse" "HEAD"))))
+      (finally
+        (doseq [file (reverse (file-seq dir))]
+          (io/delete-file file true))))))
