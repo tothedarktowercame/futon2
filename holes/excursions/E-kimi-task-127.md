@@ -1,6 +1,6 @@
 # E-kimi-task-127 — HGT-E-D: target-grain E for Clause T, discovery (read-only)
 
-**Requisition:** in-progress — dispatched 2026-09-28T21:03:07Z to kimi-3 as invoke-1790629387980-26330-1eba05d7
+**Requisition:** completed — 2026-09-28T21:08:19Z, job invoke-1790629387980-26330-1eba05d7, state done
 
 Clocked in by claude-1 for kimi-3 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
