@@ -30,6 +30,15 @@
          :missing-revision {:class :C4 :repo "repo" :sha "unavailable"
                             :path "created.clj" :decl "(ns created)"}))
 
+(deftest replay-updates-applies-only-admitted-observations
+  ;; {a}:1/2, {b}:1/2 --observe x--> {a,x}:1/2, {b,x}:1/2
+  ;;                    --observe not-a--> {x}:1/2, {b,x}:1/2.
+  (is (= {#{:x} 1/2 #{:b :x} 1/2}
+         (policy/replay-updates {#{:a} 1/2 #{:b} 1/2}
+                                [{:status :updated :token :x :observed true}
+                                 {:status :not-updated :token :ignored :observed true}
+                                 {:status :updated :token :a :observed false}]))))
+
 (defn with-two-ticks [f]
   (fixture/with-artifact
    {:target target :locators fixture-locators

@@ -16,6 +16,15 @@
 (defn enabled? [context]
   (some #(true? (get-in % [:policy :enabled])) (vals context)))
 
+(defn replay-updates
+  "Apply the admitted observation updates to an exact belief."
+  [belief updates]
+  (reduce (fn [q {:keys [token observed]}]
+            (reduce-kv (fn [out state mass]
+                         (update out ((if observed conj disj) state token) (fnil + 0) mass)) {} q))
+          belief
+          (filter #(= :updated (:status %)) updates)))
+
 (defn- refusal [kind & [detail]]
   {:status :refused :kind kind :detail detail})
 
@@ -87,11 +96,7 @@
                                        {:status :not-updated :kind :observation-missing}
                                        :else (token-update token (get-in projection [:observations token]) current)))))
                           (sort-by pr-str universe)))
-        accepted (filter #(= :updated (:status %)) updates)
-        belief (reduce (fn [q {:keys [token observed]}]
-                         (reduce-kv (fn [out state mass]
-                                      (update out ((if observed conj disj) state token) (fnil + 0) mass)) {} q))
-                       (get-in stage [:initialization :value]) accepted)]
+        belief (replay-updates (get-in stage [:initialization :value]) updates)]
     {:status (if bad :refused :processed) :kind bad
      :placement :next-selection :temporal-order :same-revision-only
      :unknown-policy :fresh-initialization :observation-updates updates
