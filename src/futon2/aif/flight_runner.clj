@@ -422,7 +422,9 @@
       :else {:kind (:kind f)
              :stage (if (contains? f :stage) (:stage f) {:absent :stage-not-on-record})
              :error (if (contains? f :error) (:error f) {:absent :error-not-on-record})
-             :cause (if (contains? f :cause) (:cause f) {:absent :cause-not-on-record})})))
+             :cause (if (contains? f :cause) (:cause f) {:absent :cause-not-on-record})
+             :detail (if (contains? f :detail) (:detail f)
+                         {:absent :detail-not-on-record})})))
 
 (defn record-summary
   "What the flight needs from a click's RUN RECORD (tick-run-record-<run-id>)
@@ -432,7 +434,7 @@
   tick's close kind as :outcome, the :via of the route edge into
   FULL_LOOP_CLOSE (held_out_observations' reading), else
   {:absent :no-terminal-outcome-on-run-record} (WM-CAST-I); and why it
-  closed as :failure {:kind :stage :error :cause}, from the record's
+  closed as :failure {:kind :stage :error :cause :detail}, from the record's
   :failure (full-loop-runner run-record-failure, the close map's
   :failure-kind :failure-stage :error :cause), each part typed absent when
   the record lacks it (a cause on a record written before WM-CAUSE-ON-

@@ -35,6 +35,29 @@
            (reduce (fn [cause i] (RuntimeException. (str "c" i) cause))
                    nil (range n 0 -1))))
 
+(defn- run-record [throwable]
+  (let [{:keys [result]} (run throwable)]
+    (edn/read-string (slurp (:run-record result)))))
+
+(deftest run-record-retains-bounded-error-detail
+  (let [body (apply str (repeat 400 "x"))
+        record (run-record
+                (ex-info "Agency dispatch failed"
+                         {:status 503
+                          :response {:error "agent-not-found" :agent "zai-2"}
+                          :body body
+                          :stream (Object.)}))]
+    (is (= {:status 503
+            :response {:error "agent-not-found" :agent "zai-2"}
+            :omitted [:body :stream]}
+           (get-in record [:failure :detail]))))
+  (is (= {:absent :no-error-data}
+         (get-in (run-record (RuntimeException. "no ex-data"))
+                 [:failure :detail])))
+  (let [record (run-record
+                (ex-info "long detail" {:body (apply str (repeat 301 "x"))}))]
+    (is (= {:omitted [:body]} (get-in record [:failure :detail])))))
+
 (deftest the-eighth-flights-throw-carries-its-cause
   (let [{:keys [result finding]}
         (run (ex-info (:failure-error live) (:failure-data live)

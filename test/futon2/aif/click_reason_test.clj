@@ -27,7 +27,8 @@
    :failure {:kind :substrate-unreachable
              :stage :selection
              :error "substrate-2 mission registry unreachable"
-             :cause {:cause [{:class "java.net.ConnectException" :message "Connection refused"}]}}})
+             :cause {:cause [{:class "java.net.ConnectException" :message "Connection refused"}]}
+             :detail {:kind :substrate-unreachable}}})
 
 (defn- entry
   "The click entry record-click writes over RUN-RECORD, through
@@ -65,7 +66,9 @@
     (is (= {:kind :substrate-unreachable
             :stage :selection
             :error "substrate-2 mission registry unreachable"
-            :cause {:cause [{:class "java.net.ConnectException" :message "Connection refused"}]}}
+            :cause {:cause [{:class "java.net.ConnectException" :message "Connection refused"}]}
+            :detail {:kind :substrate-unreachable
+                     :failure-kind :substrate-unreachable}}
            (:failure record)
            (:failure e)))
     (is (= :incomplete (:outcome e)))))
@@ -88,7 +91,8 @@
 (deftest a-failure-recorded-before-the-cause-was
   ;; the bad case: a kind with no cause (a record written before ac06a830)
   ;; types the cause, neither nil nor the whole :failure absent
-  (let [f (:failure (entry (update eighth-shaped-record :failure dissoc :cause)))]
+  (let [f (:failure (entry (update eighth-shaped-record :failure dissoc :cause :detail)))]
     (is (= :substrate-unreachable (:kind f)))
     (is (= {:absent :cause-not-on-record} (:cause f)))
+    (is (= {:absent :detail-not-on-record} (:detail f)))
     (is (= "substrate-2 mission registry unreachable" (:error f)))))

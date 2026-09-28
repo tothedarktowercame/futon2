@@ -671,12 +671,32 @@
       (assoc :candidate (get-in decision [:selection-law :candidate])))
     {:status :absent :reason :no-chosen-action}))
 
+(defn- failure-detail [error-data]
+  (let [scalar? (fn [v]
+                  (or (keyword? v) (number? v) (boolean? v) (nil? v)
+                      (and (string? v) (<= (count v) 300))))]
+    (if-not (seq error-data)
+      {:absent :no-error-data}
+      (let [{:keys [kept omitted]}
+            (reduce-kv
+             (fn [{:keys [kept omitted]} k v]
+               (cond
+                 (scalar? v) {:kept (assoc kept k v) :omitted omitted}
+                 (map? v) (let [accepted (into {} (filter (comp scalar? val)) v)
+                                rejected (remove (comp scalar? val) v)]
+                            {:kept (assoc kept k accepted)
+                             :omitted (into omitted (map key rejected))})
+                 :else {:kept kept :omitted (conj omitted k)}))
+             {:kept {} :omitted []} error-data)]
+        (cond-> kept
+          (seq omitted) (assoc :omitted (vec (sort omitted))))))))
+
 (defn- run-record-failure
   "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
   the flight's click entry can say why (record-summary reads only the run
   record). Read from the close map (RESULT's :data, as the close catch
-  writes it: :failure-kind :failure-stage :error :cause), as
-  {:kind :stage :error :cause}; {:absent :no-failure} when the close carries
+  writes it: :failure-kind :failure-stage :error :cause :error-data), as
+  {:kind :stage :error :cause :detail}; {:absent :no-failure} when the close carries
   no failure kind. A close no exception reached has no cause to give."
   [result]
   (let [d (:data result)]
@@ -684,7 +704,8 @@
       {:kind kind
        :stage (or (:failure-stage d) {:absent :no-failure-stage})
        :error (if (str/blank? (str (:error d))) {:absent :no-error-message} (:error d))
-       :cause (if (contains? d :cause) (:cause d) {:absent :close-without-exception})}
+       :cause (if (contains? d :cause) (:cause d) {:absent :close-without-exception})
+       :detail (failure-detail (:error-data d))}
       {:absent :no-failure})))
 
 (defn- persist-run-record!
