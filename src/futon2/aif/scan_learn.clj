@@ -292,11 +292,20 @@
     {:state (prior-state) :receipts [] :admitted 0 :skipped []}
     (vec records)))
 
+(def carrier-epoch
+  "No trace file dated before this can carry :scan-exposures: the first
+   carrier (futon2 3d9418e3e) landed 2026-09-28 23:18Z, and that day's live
+   file holds only the accumulation bootstrap. Recovery reads from here on,
+   not the whole corpus (651 MB on 2026-09-29), which a live tick must not
+   parse in the serving JVM."
+  "2026-09-28")
+
 (defn fold-trace-dir
-  "Strictly read and deterministically replay every trace record under DIR.
-   Strict-reader absences/refusals pass through unchanged."
+  "Strictly read and deterministically replay every trace record under DIR
+   dated on or after `carrier-epoch`. Strict-reader absences/refusals pass
+   through unchanged."
   [dir]
-  (let [history (trace/read-history-strict Long/MAX_VALUE :dir dir)]
+  (let [history (trace/read-history-strict-since carrier-epoch :dir dir)]
     (if (= :ok (:status history))
       (fold (:records history))
       history)))

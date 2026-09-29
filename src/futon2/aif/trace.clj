@@ -957,6 +957,29 @@
           {:status :absent :reason :trace-read-failed :path (str root)
            :error {:class (.getName (class e)) :message (ex-message e)}})))))
 
+(defn read-history-strict-since
+  "Strictly read, oldest first, every daily file whose date is on or after
+   DATE-STR (yyyy-MM-dd), validating every form as `read-history-strict` does.
+   Used where a reader's records cannot exist before a known date, so the
+   whole corpus need not be parsed."
+  [date-str & {:keys [dir] :or {dir default-trace-dir}}]
+  (let [root (io/file dir)]
+    (if-not (.isDirectory root)
+      {:status :absent :reason :trace-dir-missing :path (str root)}
+      (try
+        (loop [files (filter #(>= (compare (subs (.getName %) 9 19) date-str) 0)
+                             (trace-files dir))
+               records []]
+          (if (empty? files)
+            {:status :ok :records records}
+            (let [result (strict-file-records (first files))]
+              (if (= :ok (:status result))
+                (recur (rest files) (into records (:records result)))
+                result))))
+        (catch Exception e
+          {:status :absent :reason :trace-read-failed :path (str root)
+           :error {:class (.getName (class e)) :message (ex-message e)}})))))
+
 (defn reduce-traces
   "Chronologically reduce the trace corpus without retaining it in memory.
   At most one daily file's parsed records is resident at a time."

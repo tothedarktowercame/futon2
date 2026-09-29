@@ -1,5 +1,6 @@
 (ns futon2.report.war-machine-accumulation-test
-  (:require [clojure.test :refer [deftest is use-fixtures]]
+  (:require [clojure.repl]
+            [clojure.test :refer [deftest is use-fixtures]]
             [clojure.edn :as edn] [clojure.java.io :as io]
             [futon2.aif.trace :as trace]
             [futon2.aif.scan-learn :as scan-learn]
@@ -411,3 +412,23 @@
       (is (= receipt (get-in cell [:judgment :controller-decision :accumulation-bmr])
              (get-in cell [:ground :decision :accumulation-bmr])
              (get-in disk [:decision :accumulation-bmr]))))))
+
+(deftest scan-learner-is-enabled-exactly-as-accumulation-is
+  ;; The production route calls judge with :trace? false and the accumulation
+  ;; entity configured (full_loop_runtime.clj); gating on trace? alone left the
+  ;; learner off on every production click.
+  (let [judge-form (read-string (clojure.repl/source-fn 'futon2.report.war-machine/judge))
+        forms (tree-seq coll? seq judge-form)
+        learner-gate (some (fn [f]
+                             (when (and (seq? f) (= 'when (first f))
+                                        (seq? (nth f 2 nil))
+                                        (= 'scan-learn-outcome-for-tick (first (nth f 2))))
+                               (second f)))
+                           forms)
+        accumulation-gate (some (fn [f]
+                                  (when (and (seq? f) (= 'accumulation-outcome-for-tick (first f)))
+                                    (get (second f) :enabled?)))
+                                forms)]
+    (is (some? learner-gate))
+    (is (= '(or trace? accumulation-entity-id) learner-gate))
+    (is (= accumulation-gate learner-gate))))

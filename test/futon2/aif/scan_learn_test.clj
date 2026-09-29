@@ -193,3 +193,23 @@
       (finally
         (doseq [file (reverse (file-seq dir))]
           (io/delete-file file true))))))
+
+(deftest fold-trace-dir-reads-only-from-the-carrier-epoch
+  ;; A file dated before the epoch is not read at all: a record in it that
+  ;; carries exposures is not admitted, and a malformed form there does not
+  ;; refuse the fold.
+  (let [dir (.toFile (Files/createTempDirectory
+                       "scan-learn-epoch" (make-array FileAttribute 0)))]
+    (try
+      (trace/write-trace! record-a :dir (str dir) :date-str "2026-09-01")
+      (trace/write-trace! record-b :dir (str dir) :date-str "2026-09-29")
+      ;; after the writes: the writer's own index rebuild reads every file
+      (spit (io/file dir "wm-trace-2026-09-02.edn") "{:unbalanced \n")
+      (let [folded (scan-learn/fold-trace-dir (str dir))]
+        (is (= "2026-09-28" scan-learn/carrier-epoch))
+        (is (= (:state (scan-learn/fold (:records (trace/read-history-strict 1 :dir (str dir)))))
+               (:state folded)))
+        (is (= 1 (:admitted folded))))
+      (finally
+        (doseq [file (reverse (file-seq dir))]
+          (io/delete-file file true))))))

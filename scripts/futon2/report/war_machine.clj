@@ -6397,7 +6397,10 @@
                               (get-in scan-data [:graph :scan-exposures])
                               (get-in scan-data [:frames :scan-exposures])
                               (get-in scan-data [:annotation-graph :scan-exposures]))
-        scan-learning (when trace?
+        ;; same enablement as accumulation below: the production route runs
+        ;; the judge with :trace? false and publishes the trace itself
+        ;; (full_loop_runtime.clj), with the accumulation entity configured
+        scan-learning (when (or trace? accumulation-entity-id)
                         (scan-learn-outcome-for-tick
                           {:trace-dir wm-trace-dir
                            :run/id (or run-id scan-id (:scan-id scan-data))
