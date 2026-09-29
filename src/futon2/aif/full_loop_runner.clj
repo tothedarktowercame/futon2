@@ -1338,42 +1338,81 @@
                        :status (:status r)})))
     (:job (json/parse-string (:body r) true))))
 
+(declare transport-failure-kind)
+
+(def default-job-read-outage-ms
+  "How long poll-job! keeps retrying job-status reads that fail in transport
+  before it gives up on Agency. A single read has a 10 s limit; click
+  wm-click-625b7a3f (2026-09-29) lost a live author job to one such timeout
+  while the job kept running."
+  (* 10 60 1000))
+
+(defn- read-job-or-transport-failure
+  "The job, or {::transport-failure kind ::exception e} when the read failed
+  in transport. Any other failure is thrown unchanged."
+  [opts job-id]
+  (try
+    (read-job! opts job-id)
+    (catch Exception e
+      (if-let [kind (transport-failure-kind e)]
+        {::transport-failure kind ::exception e}
+        (throw e)))))
+
 (defn poll-job!
   "Wait for the Agency terminal state. Silence is observable evidence, never
-  permission to abandon or replace a live author/reviewer job."
+  permission to abandon or replace a live author/reviewer job. A job-status
+  read that fails in transport is the same kind of evidence: it is recorded
+  and retried until reads have failed continuously for
+  :job-read-outage-ms (default `default-job-read-outage-ms`), and only then
+  is the last failure thrown."
   [{:keys [poll-ms] :as opts} job-id]
   (let [clock (or (:now-ms-fn opts) #(System/currentTimeMillis))
         pause (or (:poll-sleep-fn opts) #(Thread/sleep %))
         first-poll-ms (clock)
-        threshold (or (:agent-silence-ms opts) default-agent-budget-ms)]
-    (loop [reported-activity nil]
-      (let [job (read-job! opts job-id)
-            now (clock)
-            activity (or (job-last-activity-ms job) first-poll-ms)
-            silent-for (max 0 (- now activity))]
-        (report-wm-wait! opts job first-poll-ms)
-        (if (contains? terminal-states (:state job))
-          job
-          (let [stalled? (and (>= silent-for threshold)
-                              (not= activity reported-activity))]
-            (when stalled?
-              (let [record {:kind :stalled-job :job-id job-id
-                            :job-state (:state job) :silent-for-ms silent-for
-                            :observed-at (str (Instant/ofEpochMilli now))
-                            :activity-basis (if (job-last-activity-ms job)
-                                              :agency-timestamp :first-poll)
-                            :waiting? true}
-                    phase (some-> (:wm-phase-state opts) deref)]
-                (when-let [state (:job-liveness/state opts)]
-                  (swap! state conj record))
-                ;; The ruling makes this observation non-halting even when the
-                ;; legacy opt-in tripwire halt switch is set.
-                (binding [tripwire/*halt-on-witness?* false]
-                  (emit-phase! opts (:context phase)
-                               {:phase (or (:phase phase) :agent-wait)
-                                :transition :liveness :job-liveness record}))))
+        threshold (or (:agent-silence-ms opts) default-agent-budget-ms)
+        outage-limit (or (:job-read-outage-ms opts) default-job-read-outage-ms)]
+    (loop [reported-activity nil outage-start nil]
+      (let [read (read-job-or-transport-failure opts job-id)
+            now (clock)]
+        (if-let [kind (::transport-failure read)]
+          (let [outage-start (or outage-start now)]
+            (when (>= (- now outage-start) outage-limit)
+              (throw (::exception read)))
+            (when-let [state (:job-liveness/state opts)]
+              (swap! state conj {:kind :job-read-transport-failure
+                                 :job-id job-id :transport kind
+                                 :error-class (.getName (class (::exception read)))
+                                 :outage-ms (- now outage-start)
+                                 :observed-at (str (Instant/ofEpochMilli now))
+                                 :waiting? true}))
             (pause (or poll-ms 2000))
-            (recur (if stalled? activity reported-activity))))))))
+            (recur reported-activity outage-start))
+          (let [job read
+                activity (or (job-last-activity-ms job) first-poll-ms)
+                silent-for (max 0 (- now activity))]
+            (report-wm-wait! opts job first-poll-ms)
+            (if (contains? terminal-states (:state job))
+              job
+              (let [stalled? (and (>= silent-for threshold)
+                                  (not= activity reported-activity))]
+                (when stalled?
+                  (let [record {:kind :stalled-job :job-id job-id
+                                :job-state (:state job) :silent-for-ms silent-for
+                                :observed-at (str (Instant/ofEpochMilli now))
+                                :activity-basis (if (job-last-activity-ms job)
+                                                  :agency-timestamp :first-poll)
+                                :waiting? true}
+                        phase (some-> (:wm-phase-state opts) deref)]
+                    (when-let [state (:job-liveness/state opts)]
+                      (swap! state conj record))
+                    ;; The ruling makes this observation non-halting even when the
+                    ;; legacy opt-in tripwire halt switch is set.
+                    (binding [tripwire/*halt-on-witness?* false]
+                      (emit-phase! opts (:context phase)
+                                   {:phase (or (:phase phase) :agent-wait)
+                                    :transition :liveness :job-liveness record}))))
+                (pause (or poll-ms 2000))
+                (recur (if stalled? activity reported-activity) nil)))))))))
 
 (defn author-infrastructure-failure?
   "True only for an artifact-free Agency invocation failure. These failures

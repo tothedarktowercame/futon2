@@ -3668,6 +3668,47 @@
       (is (= :first-poll (:activity-basis (first @state))))
       (is (= 10 (:silent-for-ms (first @state)))))))
 
+(deftest transient-job-read-timeout-does-not-end-the-wait
+  ;; wm-click-625b7a3f (2026-09-29): one 10 s job-status read timed out and
+  ;; the click closed build-failed while the author job kept running.
+  (let [clock (atom 0) reads (atom 0) state (atom [])
+        timeout (fn [] (throw (ex-info "Agency job read failed" {}
+                                       (java.net.http.HttpTimeoutException.
+                                        "request timed out"))))]
+    (with-redefs [runner/read-job!
+                  (fn [_ _] (case (swap! reads inc)
+                              1 {:job-id "j" :state "running"}
+                              2 (timeout)
+                              3 (timeout)
+                              {:job-id "j" :state "done"}))
+                  runner/emit-phase! (fn [& _])]
+      (is (= "done" (:state (runner/poll-job!
+                             {:poll-ms 1 :job-liveness/state state
+                              :now-ms-fn #(deref clock)
+                              :poll-sleep-fn (fn [_] (swap! clock + 1000))}
+                             "j"))))
+      (is (= [:job-read-transport-failure :job-read-transport-failure]
+             (mapv :kind @state)))
+      (is (= :transport-timeout (:transport (first @state))))))
+  (testing "a continuous outage past the limit is thrown, not waited forever"
+    (let [clock (atom 0)]
+      (with-redefs [runner/read-job!
+                    (fn [_ _] (throw (java.net.http.HttpTimeoutException.
+                                      "request timed out")))]
+        (is (thrown? java.net.http.HttpTimeoutException
+                     (runner/poll-job!
+                      {:poll-ms 1 :job-read-outage-ms 5000
+                       :now-ms-fn #(deref clock)
+                       :poll-sleep-fn (fn [_] (swap! clock + 1000))}
+                      "j"))))))
+  (testing "a non-transport read failure is still thrown at once"
+    (with-redefs [runner/read-job!
+                  (fn [_ _] (throw (ex-info "Agency job read failed"
+                                            {:outcome :dispatch-failed :status 500})))]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"job read failed"
+                            (runner/poll-job! {:poll-ms 1 :poll-sleep-fn (fn [_])}
+                                              "j"))))))
+
 (deftest wm-phase-status-is-visible-and-opportunity-end-clears-it
   (is (= {:source "wm-full-loop"
           :status "invoking"
