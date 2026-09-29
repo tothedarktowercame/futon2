@@ -19,7 +19,14 @@ Per click:
    single-flight boundary) and read the click's last-result.
 3. The click CARRIED a tick when its run id appears in data/wm-trace. That is
    the count toward --ticks.
-4. A failed click (build-failed, error, service-failed, ...) or a failed
+4. A click that selected nothing (abstained) gets a debugger page,
+   data/wm-click-loop/debugger/<click-id>.md: every refused target and what it
+   was refused on, and whether that changed since the previous abstention. The
+   page goes to the repair seat, which debugs why nothing was selectable
+   (read-only evaluation in the serving JVM allowed) and fixes the cause.
+   When the named refusals change, or the unadmitted-universe count falls,
+   the obstruction has moved and the repair count starts again.
+   A failed click (build-failed, error, service-failed, ...) or a failed
    reload goes to the repair seat with the evidence. The repair is judged by
    the world: a commit tagged with the repair id, clj-kondo with no errors on
    the files it changed, and a clean reload. A seat that finds no apparatus
@@ -27,6 +34,7 @@ Per click:
 5. The loop stops when the click budget or the tick target is reached, when
    --stall clicks in a row carry nothing without failing (the wall repeats),
    when --max-repairs repairs of one fault do not produce a carrying click,
+   when a repair seat answers that an abstention is correct (a human decides),
    or when the stop file exists. Every stop bells --owner once.
 
 State: data/wm-click-loop/ledger.jsonl (one line per event), loop.log beside it.
@@ -60,12 +68,18 @@ EVAL = F3C / "scripts" / "proof-eval.sh"
 TERMINAL = {"done", "failed", "error", "cancelled", "timeout", "timed-out"}
 # Outcomes that are the machine deciding, not the apparatus breaking. They are
 # never sent to repair; a run of them without a tick is the stall stop.
-DECIDED = {"abstained", "ok", "grounded-change", "grounded-no-change", "artifact-only",
+DECIDED = {"ok", "grounded-change", "grounded-no-change", "artifact-only",
            "guardrail-refusal", "policy-nondiscrimination", "cohort-complete"}
 # A seat or a shared service was unavailable: waiting fixes it, code does not.
 # The loop pauses, and these count toward the stall stop like DECIDED ones.
 WAIT = {"agent-unavailable", "substrate-unavailable"}
 WAIT_SECONDS = 900
+# A click that selected nothing is a defect to debug (Joe, 2026-09-29: "I would
+# view abstained clicks as a problem to be fixed rather than a pattern to learn
+# from ... write the trace into something like a Debugger and then debug it
+# live"). The loop writes a debugger page and sends it to the repair seat.
+DEBUG = {"abstained", "no-selection"}
+DEBUGGER = STATE / "debugger"
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F3C, "src/futon3c/wm")]
 
@@ -247,6 +261,59 @@ def fire(n: int, args) -> dict:
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out)}
 
 
+# ---------------------------------------------------------------- debugger
+
+UNIVERSES = "universe-not-admitted/universes"
+
+
+def moved(before: dict, after: dict) -> bool:
+    """The obstruction moved: a different set of targets refused for something
+    other than an unadmitted universe, or at least 5 fewer unadmitted-universe
+    refusals. The field gains or loses a few missions between clicks by
+    itself (286 -> 289 today), so a small drift in that count is not movement."""
+    if before["named"] != after["named"]:
+        return True
+    return after["counts"].get(UNIVERSES, 0) <= before["counts"].get(UNIVERSES, 0) - 5
+
+
+def debugger_page(c: dict, previous: dict | None) -> tuple[Path, dict]:
+    """Write the click's debugger page; return (path, summary). The summary's
+    signature is what must change for an abstention to count as moved."""
+    DEBUGGER.mkdir(parents=True, exist_ok=True)
+    rr = (c.get("last-result") or {}).get("run-record")
+    r = sh("bb", F2 / "scripts" / "wm_click_debugger.bb", rr, timeout=600) if rr else None
+    try:
+        d = json.loads(r.stdout) if r and r.returncode == 0 else {}
+    except ValueError:
+        d = {}
+    named = sorted((x["target"], x["refusal"]) for x in d.get("targets", [])
+                   if not x["refusal"].startswith("universe-not-admitted/universes"))
+    sig = {"counts": d.get("counts", {}), "named": named}
+    lines = [f"# Debugger: {c['click-id']} ({c['outcome']})", "",
+             f"run record: {rr}", f"click log: {c['log']}", f"run id: {c.get('run-id')}", "",
+             f"failure: {json.dumps(d.get('failure'))}",
+             f"chosen: {json.dumps(d.get('chosen'))}",
+             f"open stop-lines: {json.dumps(d.get('open-stop-lines'))}", "",
+             "## Refusals by kind", *[f"- {k}: {v}" for k, v in sorted(sig["counts"].items())], "",
+             "## Targets refused for something other than an unadmitted universe",
+             *[f"- {x['target']}  {x['refusal']}  declines={x['declines']}"
+               for x in d.get("targets", []) if not x["refusal"].startswith("universe-not-admitted/universes")],
+             "", "## First 15 targets refused as universe-not-admitted/universes",
+             *[f"- {x['target']}" for x in d.get("targets", [])
+               if x["refusal"].startswith("universe-not-admitted/universes")][:15], ""]
+    if not d:
+        lines += ["(the run record could not be read by wm_click_debugger.bb:",
+                  (r.stderr[-1500:] if r else "no run record path") + ")", ""]
+    if previous:
+        lines += ["## Compared with the previous abstention",
+                  f"previous page: {previous['page']}",
+                  "CHANGED -- the obstruction moved." if moved(previous["signature"], sig) else
+                  "UNCHANGED -- same refusal counts and the same named targets.", ""]
+    page = DEBUGGER / f"{c['click-id']}.md"
+    page.write_text("\n".join(lines))
+    return page, {"page": str(page), "signature": sig}
+
+
 # ---------------------------------------------------------------- repair
 
 def seat_registered(seat: str) -> bool:
@@ -287,7 +354,8 @@ The runner is futon2/src/futon2/aif/full_loop_runner.clj; the service is
 futon3c/src/futon3c/wm/runner_service.clj.
 
 NOT DEFECTS -- report VERDICT: no-defect and change nothing:
-  - the machine abstaining, refusing a target, or opening a repair obligation;
+  - the machine opening a repair obligation (an abstention IS a defect to
+    debug; see HOW TO DEBUG above when there is a debugger page);
   - an author's build legitimately failing review or its own tests (that is
     the machine's work, and its repair obligations handle it);
   - a provider quota or capacity refusal (waiting fixes it, code does not).
@@ -316,8 +384,42 @@ Your final message is the reply; do not bell anyone.
 """
 
 
-def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str]) -> str:
+DEBUG_GUIDE = """HOW TO DEBUG THIS ABSTENTION
+
+You are the repair seat of wm_click_repair_loop.py (futon2/scripts). The click
+above selected nothing. Joe (2026-09-29): an abstained click is a problem to be
+fixed, not a pattern to learn from. The debugger page above lists every target
+the judge refused and what it was refused on. Your job is to find why the
+machine had nothing it could select, and fix that cause in the code.
+
+Start with the targets refused for something other than an unadmitted
+universe (e.g. no-constructed-candidate with empty declines: the record does
+not even say why no candidate was built). Follow the refusal to the code that
+produces it (grep the refusal kind under futon2/src/futon2/aif: cascade_problems,
+wm/cascade_decision, target_field, decision_gate) and to the inputs it read.
+Then ask whether the ~290 universe-not-admitted refusals are right.
+
+DEBUG LIVE: you may evaluate READ-ONLY forms in the serving JVM to watch the
+judge's functions on today's inputs: write the form to a file and run
+  cd /home/joe/code/futon3c && scripts/proof-eval.sh -f /tmp/<form>.clj
+Wrap forms in try and print the cause chain. Never call anything that fires a
+click, dispatches a job, or writes stores (runner entry points write real trip
+reports and read the real repair store); never reload a namespace.
+
+A fix is code, not data surgery: do not edit mission files, ledgers or stores to
+make a refusal disappear. If the right fix is that a target genuinely has no
+admissible action and some OTHER target should be constructible, fix whatever
+stops that one. If the abstention is correct and nothing in code should change,
+say so with the evidence: that is VERDICT: no-defect, and it will stop the loop
+for a human decision.
+"""
+
+
+def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
+                  page: Path | None = None) -> str:
     parts = [f"REPAIR REQUEST {tag}", "", f"FAILURE: {reason}", ""]
+    if page:
+        parts += ["== debugger page " + str(page) + " ==", page.read_text(), "", DEBUG_GUIDE, ""]
     if click:
         parts += ["== last-result ==", json.dumps(click.get("last-result"), indent=1), "",
                   f"click log: {click.get('log')}", "== click log tail ==",
@@ -372,11 +474,12 @@ def kondo_errors(commits: list[tuple[Path, str]]) -> str:
     return r.stdout[-2000:] if r.returncode >= 3 else ""
 
 
-def repair(args, reason: str, click: dict | None, prior: list[str]) -> tuple[str, str]:
+def repair(args, reason: str, click: dict | None, prior: list[str],
+           page: Path | None = None) -> tuple[str, str]:
     """Send one repair job and judge it. Returns (verdict, detail)."""
     tag = f"wm-click-loop-repair-{uuid.uuid4().hex[:8]}"
     ensure_seat(args.repair_seat, args.seat_model)
-    job = dispatch(args.repair_seat, repair_packet(tag, reason, click, prior))
+    job = dispatch(args.repair_seat, repair_packet(tag, reason, click, prior, page))
     log(f"repair {tag}: job {job} to {args.repair_seat}: {reason[:160]}")
     record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
     j = wait_job(job, args.repair_timeout)
@@ -444,6 +547,7 @@ def run(args) -> int:
         ok, text, since = reload_changed(since)
 
     spent = ticks = quiet = 0
+    last_abstention: dict | None = None
     while spent < args.clicks and ticks < args.ticks:
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
@@ -469,15 +573,26 @@ def run(args) -> int:
                 log(f"click {c['n']}: {c['outcome']}; waiting {WAIT_SECONDS}s before the next click")
                 time.sleep(WAIT_SECONDS)
             continue
-        # The apparatus failed. Repair, reload, click again.
+        page = None
+        if c["outcome"] in DEBUG:
+            page, summary = debugger_page(c, last_abstention)
+            if last_abstention and moved(last_abstention["signature"], summary["signature"]):
+                log(f"click {c['n']}: the abstention moved since {last_abstention['page']}; repair count reset")
+                fault_repairs = []
+            last_abstention = summary
+            record({"event": "debugger", "click-id": c["click-id"], "page": str(page),
+                    "counts": summary["signature"]["counts"]})
+            log(f"click {c['n']}: debugger page {page}")
+        # The apparatus failed, or the machine had nothing to select. Repair,
+        # reload, click again.
         if len(fault_repairs) >= args.max_repairs:
-            return stop(args, f"{len(fault_repairs)} repairs did not produce a carrying click; "
-                              f"last outcome {c['outcome']}", 1)
+            return stop(args, f"{len(fault_repairs)} repairs did not produce a carrying click or move "
+                              f"the obstruction; last outcome {c['outcome']}", 1)
         reason = f"click {c['click-id']} ended {c['outcome']} (wm_click.sh rc={c['rc']})"
-        verdict, detail = repair(args, reason, c, fault_repairs)
+        verdict, detail = repair(args, reason, c, fault_repairs, page)
         fault_repairs.append(f"{reason} -> {detail}")
-        if verdict == "cannot-repair":
-            return stop(args, f"repair seat cannot repair: {detail[:300]}", 1)
+        if verdict == "cannot-repair" or (page and verdict == "no-defect"):
+            return stop(args, f"repair seat answered {verdict}: {detail[:300]}", 1)
         ok, text, since = reload_changed(since)
         while not ok:
             if len(fault_repairs) >= args.max_repairs:
