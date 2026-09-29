@@ -3657,6 +3657,39 @@
            :ticks-firing (count (filter :fired? tick-results))}
     (some? sorry-count) (assoc :total-sorrys sorry-count)))
 
+(defn- graph-scan-exposures
+  "Exact finite populations behind the graph scan's normalized channels."
+  [ws-commits repos coupling tick-results sorry-count]
+  (let [workstreams [:stack :consulting :portfolio :mathematics]
+        counts (into {} (map (fn [k] [k (get ws-commits k 0)])) workstreams)
+        total (reduce + (vals counts))
+        n (count repos)
+        active (count (filter :active? repos))
+        edges (count coupling)
+        possible (/ (* n (dec n)) 2)]
+    {:workstream-commits
+     (if (pos? total)
+       {:counts counts :total total}
+       {:status :absent :reason :no-workstream-commits})
+     :active-repos
+     (if (pos? n)
+       {:active active :repositories n}
+       {:status :absent :reason :no-repositories})
+     :coupling
+     (cond
+       (< n 2) {:status :absent :reason :fewer-than-two-repositories}
+       (> edges possible) {:status :refused :reason :edges-exceed-possible
+                           :edges edges :possible possible}
+       :else {:edges edges :possible possible})
+     :ticks
+     (if (seq tick-results)
+       {:fired (count (filter :fired? tick-results)) :eligible (count tick-results)}
+       {:status :absent :reason :no-tick-results})
+     :sorrys
+     (if (some? sorry-count)
+       {:count sorry-count}
+       {:status :absent :reason :sorry-registry-unreadable})}))
+
 (defn scan-graph
   "Build the strategic state graph.
 
@@ -3694,7 +3727,8 @@
         stack-pct (/ (double (:stack ws-commits 0)) total-commits)
         consulting-pct (/ (double (:consulting ws-commits 0)) total-commits)
         portfolio-pct (/ (double (:portfolio ws-commits 0)) total-commits)
-        math-pct (/ (double (:mathematics ws-commits 0)) total-commits)]
+        math-pct (/ (double (:mathematics ws-commits 0)) total-commits)
+        sorry-count (open-sorry-census)]
     {:nodes {:repos repos
              :sorrys sorrys
              :workstreams workstreams
@@ -3708,8 +3742,9 @@
                                      :consulting consulting-pct
                                      :portfolio portfolio-pct
                                      :mathematics math-pct}}
+     :scan-exposures (graph-scan-exposures ws-commits repos coupling tick-results sorry-count)
      :summary (graph-summary repos coupling tick-results
-                             (open-sorry-census))})))
+                             sorry-count)})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 9: Pattern Library
@@ -6532,7 +6567,8 @@
                      :critical-path (get-in portfolio-step [:structure :critical-path] [])}
                     :else nil)
                   :observation observation
-                  :scan-exposures (get-in scan-data [:support-attack :scan-exposures])
+                  :scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
+                                         (get-in scan-data [:graph :scan-exposures]))
                   :belief wm-belief
                   :belief-pre wm-belief-pre
                   :accumulation-state (:state accumulation)

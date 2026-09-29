@@ -1,6 +1,7 @@
 (ns futon2.aif.scan-model-test
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
+            [futon2.aif.observation :as observation]
             [futon2.aif.scan-model :as scan-model]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm]))
@@ -41,6 +42,69 @@
                (:scan-exposures scan)))
         ;; Existing numeric consumers retain their old zero projection.
         (is (= 0.0 (:support-coverage scan) (:attack-coverage scan)))))))
+
+(deftest graph-scan-exposures-are-exact-and-persisted
+  (let [repos [{:workstream :stack :commits 3 :active? true}
+               {:workstream :consulting :commits 2 :active? true}
+               {:workstream :portfolio :commits 0 :active? false}
+               {:workstream :mathematics :commits 1 :active? true}]
+        coupling [{:from :a :to :b} {:from :b :to :c}]
+        graph (with-redefs-fn {#'wm/repo-nodes (fn [_] repos)
+                               #'wm/sorry-nodes (constantly [])
+                               #'wm/workstream-nodes (constantly [])
+                               #'wm/mission-nodes (constantly [])
+                               #'wm/temporal-coupling-edges (fn [_] coupling)
+                               #'wm/workstream-dependency-edges (constantly [])
+                               #'wm/evidence-flow-edges (fn [_] [])
+                               #'wm/open-sorry-census (constantly 7)}
+                #(wm/scan-graph 30 []))
+        support-attack {:support {:covered 3 :claims 5}
+                        :attack {:covered 1 :claims 4}}
+        exposures (merge support-attack (:scan-exposures graph))
+        traced (trace/trace-record {:belief {} :belief-pre {}
+                                    :observation {} :decision nil
+                                    :scan-exposures exposures})]
+    (is (= {:workstream-commits
+            {:counts {:stack 3 :consulting 2 :portfolio 0 :mathematics 1} :total 6}
+            :active-repos {:active 3 :repositories 4}
+            :coupling {:edges 2 :possible 6}
+            :ticks {:status :absent :reason :no-tick-results}
+            :sorrys {:count 7}}
+           (:scan-exposures graph)))
+    (is (= exposures (:scan-exposures traced)))
+    (is (= support-attack (select-keys (:scan-exposures traced) [:support :attack])))
+    (is (= (observation/observe {:graph graph})
+           (observation/observe {:graph (dissoc graph :scan-exposures)}))
+        "the exact receipt is write-only for the observation vector")))
+
+(deftest graph-scan-exposure-refusals-are-typed
+  (let [exposures #'wm/graph-scan-exposures]
+    (testing "zero commits keeps the old max-one ratios separate"
+      (is (= {:status :absent :reason :no-workstream-commits}
+             (:workstream-commits (exposures {} [{:active? false}] [] [] 0))))
+      (let [graph (with-redefs-fn {#'wm/repo-nodes (fn [_] [{:workstream :stack :commits 0 :active? false}])
+                                     #'wm/sorry-nodes (constantly [])
+                                     #'wm/workstream-nodes (constantly [])
+                                     #'wm/mission-nodes (constantly [])
+                                     #'wm/temporal-coupling-edges (fn [_] [])
+                                     #'wm/workstream-dependency-edges (constantly [])
+                                     #'wm/evidence-flow-edges (fn [_] [])
+                                     #'wm/open-sorry-census (constantly 0)}
+                    #(wm/scan-graph 30 []))]
+        (is (= {:stack 0.0 :consulting 0.0 :portfolio 0.0 :mathematics 0.0}
+               (get-in graph [:dynamics :commit-percentages])))))
+    (is (= {:status :absent :reason :no-repositories}
+           (:active-repos (exposures {} [] [] [] 0))))
+    (is (= {:status :absent :reason :fewer-than-two-repositories}
+           (:coupling (exposures {} [{:active? true}] [] [] 0))))
+    (is (= {:status :refused :reason :edges-exceed-possible :edges 2 :possible 1}
+           (:coupling (exposures {} [{:active? true} {:active? true}] [:e1 :e2] [] 0))))
+    (is (= {:status :absent :reason :no-tick-results}
+           (:ticks (exposures {} [{:active? true}] [] [] 0))))
+    (is (= {:fired 1 :eligible 2}
+           (:ticks (exposures {} [{:active? true}] [] [{:fired? true} {:fired? false}] 0))))
+    (is (= {:status :absent :reason :sorry-registry-unreadable}
+           (:sorrys (exposures {} [{:active? true}] [] [] nil))))))
 
 (deftest learn-uses-mu-pre-and-fractional-counts
   (let [records [(record (mu [:spawned 1/2] [:refined 1/2])
