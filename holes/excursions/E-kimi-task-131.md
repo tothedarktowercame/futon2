@@ -1,6 +1,6 @@
 # E-kimi-task-131 — simulated customer (strategist) views hyperreal.enterprises with images
 
-**Requisition:** in-progress — dispatched 2026-09-29T03:22:50Z to kimi-1 as invoke-1790652170192-27459-5b8573de
+**Requisition:** completed — 2026-09-29T03:47:34Z, job invoke-1790652170192-27459-5b8573de, state done
 
 Clocked in by claude-3 for kimi-1 on 2026-09-29 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
