@@ -15,8 +15,13 @@
 (defn judge-attribution [source]
   ;; Read the contiguous, production let bindings including the real belief
   ;; update and the present-only step entry. Resolve them in judge's namespace.
-  (let [start (.indexOf source "                ;; R3d v0.17")
-        end (.indexOf source "                micro-trace' " start)
+  (let [legacy-start (.indexOf source "                ;; R3d v0.17")
+        start (if (neg? legacy-start)
+                (.indexOf source "            entity-health ")
+                legacy-start)
+        end (if (neg? legacy-start)
+              (.indexOf source "            micro-trace' " start)
+              (.indexOf source "                micro-trace' " start))
         section (subs source start end)
         bindings (read-string (str "[" section "]"))]
     (assert (some #{'events} bindings))
@@ -26,7 +31,7 @@
                   (list 'let (into '[step 0 error-mag 0.5 anneal-factor 1.0
                                      predictions {} driver-record {} triple-omissions []
                                      triple-refusals [] driver-omissions []
-                                     driver-rejections []] bindings)
+                                     driver-rejections [] excluded #{}] bindings)
                         '{:events events :belief belief' :step-entry step-entry}))))))
 
 (def historical
@@ -89,11 +94,12 @@
 
 (deftest refused-channel-does-not-suppress-a-valid-channel-at-judge-site
   (let [source (slurp (io/resource "futon2/report/war_machine.clj"))
-        start (.indexOf source "                raw-errors (into")
-        end (.indexOf source "                ;; R7:" start)
+        start (.indexOf source "            raw-errors (into")
+        end (.indexOf source "            prec-state' " start)
         bindings (read-string (str "[" (subs source start end) "]"))
         read-errors (binding [*ns* (:ns (meta #'wm/judge))]
-                      (eval (list 'fn ['triples] (list 'let bindings 'raw-errors))))
+                      (eval (list 'fn ['triples]
+                                  (list 'let (into '[excluded #{}] bindings) 'raw-errors))))
         refused (impossible-posterior)
         prediction (belief/predict-mission-health {:valid (belief/uniform-prior)
                                                    :refused refused})
@@ -110,3 +116,44 @@
     (is (pos? (:driver driver)))
     (is (not= (belief/uniform-prior) (get-in updated [:belief :valid])))
     (is (= refused (get-in updated [:belief :refused])))))
+
+(defn- loop-fixture [exclude-channels]
+  (let [errors (into {}
+                     (for [ch belief/channels-with-likelihood]
+                       [ch {:status :present :error 0.0 :observed 0.5 :precision 1.0}]))
+        errors (assoc errors
+                      :support-coverage {:status :present :error 0.8 :observed 0.8 :precision 1.0}
+                      :sorry-count-norm {:status :present :error -0.4 :observed 0.4 :precision 1.0})]
+    (with-redefs [belief/predict-observation (fn [& _] {})
+                  fe/channel-prediction-error (fn [_ ch _] (get errors ch))]
+      (wm/r3-inner-loop
+       (cond-> {:initial-belief {:proxy (belief/uniform-prior)}
+                :initial-precision-state {}
+                :observation {}
+                :entity-tags {}
+                :prediction-context {}
+                :max-steps 1
+                :error-eps 1.0e-3}
+         (some? exclude-channels) (assoc :exclude-channels exclude-channels))))))
+
+(deftest extracted-r3-loop-default-and-channel-exclusion
+  (let [implicit (loop-fixture nil)
+        explicit (loop-fixture #{})
+        excluded (loop-fixture #{:support-coverage})]
+    (is (= implicit explicit) "the default is exactly the explicit empty exclusion")
+    (is (not= (:belief explicit) (:belief excluded)) "support drives the fixture's sign")
+    (is (contains? (:prediction-errors explicit) :support-coverage))
+    (is (not (contains? (:prediction-errors excluded) :support-coverage)))
+    (is (= [:support-coverage]
+           (get-in excluded [:micro-step-trace 0 :excluded-channels])))
+    (is (not (contains? (first (:micro-step-trace excluded)) :prediction-triple-omitted))
+        "exclusion is not observation absence")))
+
+(deftest excluding-all-r3-channels-applies-no-event
+  (let [initial {:proxy (belief/uniform-prior)}
+        result (loop-fixture belief/channels-with-likelihood)]
+    (is (= initial (:belief result)))
+    (is (empty? (:prediction-errors result)))
+    (is (zero? (get-in result [:micro-step-trace 0 :events-applied])))
+    (is (= :no-channel-supplied
+           (get-in result [:micro-step-trace 0 :aggregated-driver-unknown])))))

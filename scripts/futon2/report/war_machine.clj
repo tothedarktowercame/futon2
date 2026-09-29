@@ -6089,6 +6089,79 @@
 
 (def sha256-hex cd/sha256-hex)
 
+(defn r3-inner-loop
+  "Run the strategic-belief R3 micro-steps. Excluded observed channels do not
+  enter precision or the aggregate driver; they remain explicitly recorded."
+  [{:keys [initial-belief initial-precision-state observation entity-tags
+           prediction-context max-steps error-eps exclude-channels]
+    :or {exclude-channels #{}}}]
+  (let [excluded (clojure.set/intersection (set belief/channels-with-likelihood)
+                                            (set exclude-channels))]
+    (loop [step 0 belief initial-belief prec-state initial-precision-state micro-trace []]
+      (let [predictions (belief/predict-observation belief entity-tags prediction-context)
+            triples (into {} (for [ch belief/channels-with-likelihood]
+                               [ch (fe/channel-prediction-error observation ch (get predictions ch))]))
+            triple-omissions (vec (for [[_ r] triples :when (= :absent (:status r))] r))
+            triple-refusals (vec (for [[_ r] triples :when (= :refused (:status r))] r))
+            raw-errors (into {} (for [[ch r] triples
+                                      :when (and (= :present (:status r))
+                                                 (not (contains? excluded ch)))]
+                                  [ch r]))
+            prec-state' (precision/update-precision-state
+                         prec-state raw-errors {:salience-mode (arena-salience-mode)})
+            weighted-errors (into {} (for [[ch err-map] raw-errors]
+                                       [ch (precision/weighted-error prec-state' ch err-map)]))
+            driver-record (belief/r3d-aggregate-driver weighted-errors)
+            aggregated-signed-error (:driver driver-record)
+            aggregated-magnitude (if (some? aggregated-signed-error)
+                                   (Math/abs aggregated-signed-error) 0.0)
+            driver-omissions (vec (:omitted driver-record))
+            driver-rejections (vec (:rejected driver-record))
+            ann-error (get weighted-errors :annotation-health)
+            error-mag (Math/abs (double (:error ann-error 0.0)))
+            anneal-factor (max 0.0 (- 1.0 (/ (double step) max-steps)))
+            base-weight (min 1.0 aggregated-magnitude)
+            event-weight (* base-weight anneal-factor 0.1)
+            entity-health (mapv (fn [[eid p]] [eid (belief/entity-expected-health p)]) belief)
+            attribution-omitted (into {} (for [[eid h] entity-health :when (not (number? h))]
+                                           [eid (:reason h)]))
+            events (when (pos? event-weight)
+                     (let [event-type (if (pos? aggregated-signed-error) :strengthened :foreclosed)
+                           incons (into {} (for [[eid h] entity-health :when (number? h)]
+                                             [eid (if (pos? aggregated-signed-error) (- 1.0 h) h)]))
+                           total (reduce + 0.0 (vals incons))
+                           n (count incons)
+                           norm (if (pos? total) (/ (* event-weight n) total) 0.0)]
+                       (->> (filter #(contains? incons %) (keys belief))
+                            (mapv (fn [eid] {:entity-id eid :type event-type
+                                             :weight (* (double (get incons eid 0.0)) norm)})))))
+            belief' (if (seq events) (apply-arena-belief-events belief events) belief)
+            step-entry (cond-> (merge {:step step :error-magnitude error-mag}
+                                      (when (some? aggregated-signed-error)
+                                        {:aggregated-signed-error aggregated-signed-error})
+                                      {:anneal-factor anneal-factor
+                                       :events-applied (count events)
+                                       :event-weight event-weight})
+                         (seq excluded) (assoc :excluded-channels (vec (sort excluded)))
+                         (nil? aggregated-signed-error)
+                         (assoc :aggregated-driver-unknown (:reason driver-record))
+                         (seq triple-omissions) (assoc :prediction-triple-omitted (count triple-omissions))
+                         (seq triple-refusals) (assoc :prediction-triple-refused (count triple-refusals))
+                         (seq driver-omissions) (assoc :belief-aggregation-omitted (count driver-omissions))
+                         (seq driver-rejections) (assoc :belief-aggregation-rejected (count driver-rejections))
+                         (some (comp seq :omitted val) predictions)
+                         (assoc :prediction-entity-omissions
+                                (into {} (keep (fn [[ch p]] (when (seq (:omitted p)) [ch (:omitted p)]))
+                                               predictions)))
+                         (seq attribution-omitted) (assoc :entity-attribution-omitted attribution-omitted))
+            micro-trace' (conj micro-trace step-entry)]
+        (if (or (>= (inc step) max-steps) (< error-mag error-eps))
+          {:belief belief' :precision-state prec-state' :prediction-errors weighted-errors
+           :micro-step-trace micro-trace'
+           :prediction-triple-events (into triple-omissions triple-refusals)
+           :belief-aggregation-events (into driver-omissions driver-rejections)}
+          (recur (inc step) belief' prec-state' micro-trace'))))))
+
 
 
 
@@ -6255,161 +6328,18 @@
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace
                 prediction-triple-events belief-aggregation-events]}
-        (loop [step 0
-               belief wm-belief-after-brief
-               prec-state prev-precision-state
-               micro-trace []]
-          (let [predictions (belief/predict-observation
-                             belief
-                             wm-entity-tags
-                             {:entity-repos wm-entity-repos
-                              :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
-                              :entity-ticks wm-entity-ticks
-                              :tick-results (get-in scan-data [:graph :dynamics :ticks])})
-                ;; AC1 (Joe's 2026-09-02 ruling on C130 2): read each channel
-                ;; through the observation envelope instead of substituting 0.0
-                ;; for a channel this tick never observed. The producer returns
-                ;; one of three typed records per channel.
-                triples (into {}
-                              (for [ch belief/channels-with-likelihood]
-                                [ch (fe/channel-prediction-error
-                                     observation ch (get predictions ch))]))
-                triple-omissions (vec (for [[_ r] triples
-                                            :when (= :absent (:status r))] r))
-                triple-refusals (vec (for [[_ r] triples
-                                           :when (= :refused (:status r))] r))
-                ;; Channel-local absence/refusal cannot suppress valid channels.
-                ;; Preserve each typed outcome in the step/trace below.
-                raw-errors (into {} (for [[ch r] triples
-                                         :when (= :present (:status r))]
-                                     [ch r]))
-                ;; R7: the same resolver feeds behaviour and the provenance
-                ;; stamp. Precision is variance-only; need remains :salience.
-                prec-state' (precision/update-precision-state
-                             prec-state raw-errors
-                             {:salience-mode (arena-salience-mode)})
-                weighted-errors (into {}
-                                      (for [[ch err-map] raw-errors]
-                                        [ch (precision/weighted-error
-                                             prec-state' ch err-map)]))
-                ;; v0.25 R3d sign-aggregation: flag-gated.
-                ;; OFF (default): annotation-health weighted-error alone (byte-identical pre-v0.16).
-                ;; ON: 8-channel signed precision-weighted average (belief/r3d-aggregate-driver).
-                ;; AC2 (Joe's 2026-09-02 ruling on C130 2): the aggregator now
-                ;; returns a typed record. :present carries a driver; :unknown
-                ;; means no channel could contribute one, and then this tick
-                ;; applies NO belief event rather than moving belief by a
-                ;; fabricated zero. Malformed entries are rejected one at a
-                ;; time and the surviving channels still aggregate -- the
-                ;; collection is never refused as a whole.
-                driver-record (belief/r3d-aggregate-driver weighted-errors)
-                aggregated-signed-error (:driver driver-record)
-                aggregated-magnitude (if (some? aggregated-signed-error)
-                                       (Math/abs aggregated-signed-error)
-                                       0.0)
-                driver-omissions (vec (:omitted driver-record))
-                driver-rejections (vec (:rejected driver-record))
-                ann-error (get weighted-errors :annotation-health)
-                error-mag (Math/abs (double (:error ann-error 0.0)))
-                ;; Anneal event weight by step: step 0 = full; step K-1 = small
-                anneal-factor (max 0.0 (- 1.0 (/ (double step) r3-max-steps)))
-                base-weight (min 1.0 aggregated-magnitude)
-                event-weight (* base-weight anneal-factor 0.1)
-                ;; R3d v0.17 (sorry/r3d-per-entity-attribution): per-entity
-                ;; attribution by CONTRIBUTION, not uniform. The aggregate signal
-                ;; is distributed unequally — each entity's update is weighted by
-                ;; how INCONSISTENT its current belief is with the error direction
-                ;; (the entities the signal is actually "about" move most;
-                ;; entities already consistent with the observation barely move).
-                ;; Weights are normalised so the MEAN equals event-weight, so the
-                ;; aggregate magnitude is preserved while attribution is honest.
-                ;; This fixes the stated dishonesty ("the aggregate signal can't
-                ;; legitimately be attributed equally to every entity") using the
-                ;; per-entity expected-health that predict-annotation-health
-                ;; already computes — no new event streams required.
-                ;; A refused posterior has no numeric contribution. Keep its
-                ;; identity/reason on the step, and leave its belief untouched.
-                entity-health (mapv (fn [[eid p]]
-                                      [eid (belief/entity-expected-health p)])
-                                    belief)
-                attribution-omitted (into {} (for [[eid h] entity-health
-                                                   :when (not (number? h))]
-                                               [eid (:reason h)]))
-                events (when (pos? event-weight)
-                         (let [event-type (if (pos? aggregated-signed-error)
-                                            :strengthened :foreclosed)
-                               incons (into {}
-                                            (for [[eid h] entity-health
-                                                  :when (number? h)]
-                                              [eid (if (pos? aggregated-signed-error)
-                                                     (- 1.0 h)   ; healthier-than-predicted: surprise lives in low-health entities
-                                                     h)]))       ; unhealthier: surprise lives in high-health entities
-                               total (reduce + 0.0 (vals incons))
-                               n (count incons)
-                               norm (if (pos? total) (/ (* event-weight n) total) 0.0)]
-                           (->> (filter #(contains? incons %) (keys belief))
-                                (mapv (fn [eid]
-                                        {:entity-id eid :type event-type
-                                         :weight (* (double (get incons eid 0.0)) norm)})))))
-                belief' (if (seq events)
-                          (apply-arena-belief-events belief events)
-                          belief)
-                ;; Present-only: a tick with nothing absent and nothing
-                ;; refused writes the same step entry it wrote before AC1.
-                ;; AC2: `:aggregated-signed-error` is present-only and keeps
-                ;; its original position, so a step where every channel
-                ;; contributed writes the same map, in the same order, as
-                ;; before. No key means the aggregator reported :unknown --
-                ;; a different claim from a driver that measured zero, and
-                ;; `:aggregated-driver-unknown` says which reason.
-                step-entry (cond-> (merge {:step step
-                                           :error-magnitude error-mag}
-                                          (when (some? aggregated-signed-error)
-                                            {:aggregated-signed-error
-                                             aggregated-signed-error})
-                                          {:anneal-factor anneal-factor
-                                           :events-applied (count events)
-                                           :event-weight event-weight})
-                             (nil? aggregated-signed-error)
-                             (assoc :aggregated-driver-unknown
-                                    (:reason driver-record))
-                             (seq triple-omissions)
-                             (assoc :prediction-triple-omitted
-                                    (count triple-omissions))
-                             (seq triple-refusals)
-                             (assoc :prediction-triple-refused
-                                    (count triple-refusals))
-                             (seq driver-omissions)
-                             (assoc :belief-aggregation-omitted
-                                    (count driver-omissions))
-                             (seq driver-rejections)
-                             (assoc :belief-aggregation-rejected
-                                    (count driver-rejections))
-                             (some (comp seq :omitted val) predictions)
-                             (assoc :prediction-entity-omissions
-                                    (into {} (keep (fn [[ch p]]
-                                                     (when (seq (:omitted p)) [ch (:omitted p)]))
-                                                   predictions)))
-                             (seq attribution-omitted)
-                             (assoc :entity-attribution-omitted attribution-omitted))
-                micro-trace' (conj micro-trace step-entry)]
-            (if (or (>= (inc step) r3-max-steps)
-                    (< error-mag r3-error-eps))
-              {:belief belief'
-               :precision-state prec-state'
-               :prediction-errors weighted-errors
-               :micro-step-trace micro-trace'
-               ;; The typed absence/refusal records themselves, carried out of
-               ;; the loop so the trace can persist them (AC8 sweeps them).
-               ;; This is the TERMINAL step's records, matching what AC1's
-               ;; sibling stream carries; the per-step counts in
-               ;; `micro-step-trace` are what covers the earlier steps.
-               :prediction-triple-events (into triple-omissions triple-refusals)
-               ;; AC2: same, for the belief aggregator's own omissions and
-               ;; per-entry rejections.
-               :belief-aggregation-events (into driver-omissions
-                                                driver-rejections)}
-              (recur (inc step) belief' prec-state' micro-trace'))))
+        (r3-inner-loop
+         {:initial-belief wm-belief-after-brief
+          :initial-precision-state prev-precision-state
+          :observation observation
+          :entity-tags wm-entity-tags
+          :prediction-context {:entity-repos wm-entity-repos
+                               :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
+                               :entity-ticks wm-entity-ticks
+                               :tick-results (get-in scan-data [:graph :dynamics :ticks])}
+          :max-steps r3-max-steps
+          :error-eps r3-error-eps
+          :exclude-channels #{}})
         wm-belief belief
         scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
                               (get-in scan-data [:loop-health :scan-exposures])
