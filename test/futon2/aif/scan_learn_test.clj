@@ -1,6 +1,10 @@
 (ns futon2.aif.scan-learn-test
-  (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.scan-learn :as scan-learn]))
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
+            [futon2.aif.scan-learn :as scan-learn]
+            [futon2.aif.trace :as trace])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (defn- close? [x y]
   (< (Math/abs (- (double x) (double y))) 1.0e-12))
@@ -120,3 +124,72 @@
            (get-in state [:concentrations :support :strengthened])))
     (is (= [1/10 19/10]
            (get-in state [:concentrations :support :spawned])))))
+
+(def record-a
+  {:run/id "a" :scan-exposures {:support {:covered 5 :claims 5}}})
+
+(def record-b
+  {:run/id "b" :scan-exposures {:support {:covered 0 :claims 5}}})
+
+(deftest fold-equals-explicit-steps
+  (let [first-step (scan-learn/step (scan-learn/prior-state) record-a)
+        second-step (scan-learn/step (:state first-step) record-b)
+        folded (scan-learn/fold [record-a record-b])]
+    (is (= (:q (:state second-step)) (get-in folded [:state :q])))
+    (is (= (:concentrations (:state second-step))
+           (get-in folded [:state :concentrations])))
+    (is (= [(:receipt first-step) (:receipt second-step)] (:receipts folded)))
+    (is (= 2 (:admitted folded)))))
+
+(deftest fold-preserves-given-order
+  (let [ab (scan-learn/fold [record-a record-b])
+        ba (scan-learn/fold [record-b record-a])]
+    (is (not= (get-in ab [:state :q]) (get-in ba [:state :q]))
+        "online prediction and learning make the supplied order observable")
+    (is (= ["a" "b"] (mapv :run/id (:receipts ab))))
+    (is (= ["b" "a"] (mapv :run/id (:receipts ba))))))
+
+(deftest fold-skips-pre-carrier-and-bootstrap-records
+  (let [records [{:run/id "old" :observation {}}
+                 {:record/kind :accumulation-bootstrap}
+                 record-a]
+        folded (scan-learn/fold records)
+        expected (scan-learn/fold [record-a])]
+    (is (= (:state expected) (:state folded)))
+    (is (= 1 (:admitted folded)))
+    (is (= [{:index 0 :run/id "old" :reason :no-scan-exposures}
+            {:index 1 :run/id nil :reason :no-scan-exposures}]
+           (:skipped folded)))
+    (is (= 1 (count (:receipts folded))))))
+
+(deftest fold-keeps-duplicate-receipt
+  (let [folded (scan-learn/fold [record-a record-a])]
+    (is (= 1 (:admitted folded)))
+    (is (= 2 (count (:receipts folded))))
+    (is (= {:status :duplicate :run/id "a"}
+           (second (:receipts folded))))))
+
+(deftest fold-skips-carrier-record-without-run-id
+  (let [folded (scan-learn/fold [{:scan-exposures {:support {:covered 1 :claims 1}}}])]
+    (is (= 0 (:admitted folded)))
+    (is (= [{:index 0 :run/id nil :reason :run-id-missing}]
+           (:skipped folded)))
+    (is (empty? (:receipts folded)))))
+
+(deftest fold-trace-dir-uses-strict-history
+  (let [dir (.toFile (Files/createTempDirectory
+                       "scan-learn-fold" (make-array FileAttribute 0)))]
+    (try
+      (doseq [[day record] [["2026-09-28" record-a]
+                            ["2026-09-29" record-b]]]
+        (trace/write-trace! record :dir (str dir) :date-str day))
+      (let [disk-records (:records (trace/read-history-strict
+                                     Long/MAX_VALUE :dir (str dir)))]
+        (is (= (scan-learn/fold disk-records)
+               (scan-learn/fold-trace-dir (str dir)))))
+      (let [missing (io/file dir "missing")]
+        (is (= {:status :absent :reason :trace-dir-missing :path (str missing)}
+               (scan-learn/fold-trace-dir (str missing)))))
+      (finally
+        (doseq [file (reverse (file-seq dir))]
+          (io/delete-file file true))))))

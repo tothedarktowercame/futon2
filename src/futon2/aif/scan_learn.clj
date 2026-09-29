@@ -12,7 +12,8 @@
    are no trial.  This namespace never reads production :mu-pre or :mu-post."
   (:require [futon2.aif.belief :as belief]
             [futon2.aif.bmr :as bmr]
-            [futon2.aif.scan-bins :as scan-bins]))
+            [futon2.aif.scan-bins :as scan-bins]
+            [futon2.aif.trace :as trace]))
 
 (def schema :wm/scan-learn-v1)
 (def delta 1/10)
@@ -256,3 +257,46 @@
                      :run/id run-id
                      :error {:class (.getName (class e))
                              :message (ex-message e)}}})))))
+
+(defn fold
+  "Replay RECORDS in their given order from `prior-state`.
+
+   Pre-carrier records and bootstrap records without `:scan-exposures` are
+   skipped rather than converted to negative evidence.  Records that reach
+   `step` retain every receipt, including duplicates and refusals."
+  [records]
+  (reduce-kv
+    (fn [{:keys [state receipts admitted skipped]} index record]
+      (let [run-id (:run/id record)]
+        (cond
+          (not (map? (:scan-exposures record)))
+          {:state state :receipts receipts :admitted admitted
+           :skipped (conj skipped {:index index :run/id run-id
+                                   :reason :no-scan-exposures})}
+
+          (nil? run-id)
+          {:state state :receipts receipts :admitted admitted
+           :skipped (conj skipped {:index index :run/id nil
+                                   :reason :run-id-missing})}
+
+          :else
+          (let [result (step state {:run/id run-id
+                                    :scan-exposures (:scan-exposures record)})
+                next-state (:state result)
+                admitted? (> (count (:admitted-run-ids next-state))
+                             (count (:admitted-run-ids state)))]
+            {:state next-state
+             :receipts (conj receipts (:receipt result))
+             :admitted (if admitted? (inc admitted) admitted)
+             :skipped skipped}))))
+    {:state (prior-state) :receipts [] :admitted 0 :skipped []}
+    (vec records)))
+
+(defn fold-trace-dir
+  "Strictly read and deterministically replay every trace record under DIR.
+   Strict-reader absences/refusals pass through unchanged."
+  [dir]
+  (let [history (trace/read-history-strict Long/MAX_VALUE :dir dir)]
+    (if (= :ok (:status history))
+      (fold (:records history))
+      history)))
