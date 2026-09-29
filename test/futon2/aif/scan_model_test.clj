@@ -1,10 +1,46 @@
 (ns futon2.aif.scan-model-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.repl :as repl]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.observation :as observation]
             [futon2.aif.scan-model :as scan-model]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm]))
+
+(defn- judge-scan-exposure-form []
+  (let [judge-form (read-string (repl/source-fn 'futon2.report.war-machine/judge))]
+    (some (fn [form]
+            (when (and (seq? form)
+                       (= 'merge (first form))
+                       (some #(= '(get-in scan-data [:support-attack :scan-exposures]) %)
+                             (rest form)))
+              form))
+          (tree-seq coll? seq judge-form))))
+
+(deftest judge-merges-every-scan-exposure-into-the-trace
+  (let [parts {:support-attack {:support :support-value :attack :attack-value}
+               :loop-health {:loop-health :loop-value}
+               :mission-triage {:mission-health :mission-value}
+               :graph {:workstream-commits :commits-value
+                       :active-repos :active-value
+                       :coupling :coupling-value
+                       :ticks :ticks-value
+                       :sorrys :sorrys-value}
+               :frames {:depositing-signal :depositing-value}
+               :annotation-graph {:annotation :annotation-value}}
+        scan-data (update-vals parts #(hash-map :scan-exposures %))
+        merge-form (judge-scan-exposure-form)
+        exposures (eval `(let [~'scan-data '~scan-data] ~merge-form))
+        traced (trace/trace-record {:belief {} :belief-pre {}
+                                    :observation {} :decision nil
+                                    :scan-exposures exposures})]
+    (is (some? merge-form) "the test found the merge expression in judge itself")
+    (is (= #{:support :attack :workstream-commits :active-repos :coupling
+             :ticks :sorrys :annotation :loop-health :mission-health
+             :depositing-signal}
+           (set (keys (:scan-exposures traced)))))
+    (is (= (apply merge (vals parts)) (:scan-exposures traced))
+        "the constructed values, not just the key names, cross the trace boundary")))
 
 (def prior {:alpha 1 :beta 1 :authority "scan-model-test"})
 (def statuses (vec (sort belief/status-set)))
