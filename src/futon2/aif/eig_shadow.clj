@@ -99,3 +99,66 @@
                 :empirical (empirical-layer held-out)
                 :controller-effect :none}]
     (assoc packet :packet-sha256 (identity/digest packet))))
+
+(defn calibrated-packet
+  "Join a model-relative default-off shadow to the separately witnessed
+  held-out calibration packet. This is a reporting boundary, never a score:
+  it accepts only an intact shadow digest and a passing empirical window, and
+  records the three selection effects as unchanged because the shadow's own
+  replay already proved byte-value identity. A held or failing empirical
+  layer remains a typed refusal rather than being promoted by this join."
+  [shadow calibration]
+  (let [shadow-digest (identity/digest (dissoc shadow :packet-sha256))]
+    (cond
+      (not= :wm/eig-shadow-packet-v1 (:schema shadow))
+      (refuse! :shadow-schema-invalid {})
+
+      (not= shadow-digest (:packet-sha256 shadow))
+      (refuse! :shadow-digest-mismatch {})
+
+      (not= :record-only-default-off (:mode shadow))
+      (refuse! :shadow-not-default-off {})
+
+      (not= :byte-value-identical (get-in shadow [:selection-replay :status]))
+      (refuse! :off-replay-not-identical {})
+
+      (not= :wm/eig-held-out-calibration-v1 (:schema calibration))
+      (refuse! :calibration-schema-invalid {})
+
+      (or (not= :wm/eig-shadow-packet-v1
+                (get-in calibration [:split :model :prediction-source]))
+          (not= :a4a/dirichlet-posterior-v1
+                (get-in calibration [:split :model :theta]))
+          (not= a4a/updater-id (get-in shadow [:model :updater-id])))
+      (refuse! :calibration-model-mismatch
+               {:calibration-model (get-in calibration [:split :model])
+                :shadow-updater (get-in shadow [:model :updater-id])})
+
+      (or (not= :passing (:status calibration))
+          (not (true? (get-in calibration [:claims :calibration-evidence-present?]))))
+      (refuse! :held-out-calibration-not-passing
+               {:status (:status calibration)
+                :failing-reasons (:failing-reasons calibration)})
+
+      :else
+      (let [packet {:schema :wm/eig-shadow-calibration-packet-v1
+                    :mode :record-only-default-off
+                    :model (:model shadow)
+                    :model-relative (:model-relative shadow)
+                    :shared-update (:shared-update shadow)
+                    :empirical {:status :observed
+                                :ticket/id (:ticket/id calibration)
+                                :split (:split calibration)
+                                :window (:window calibration)
+                                :metrics (:metrics calibration)
+                                :bounds (:bounds calibration)
+                                :rows (:rows calibration)}
+                    :selection-effects
+                    {:winner :unchanged
+                     :abstain :unchanged
+                     :scale :unchanged
+                     :basis {:status :byte-value-identical
+                             :sha256 (get-in shadow [:selection-replay :sha256])}}
+                    :controller-effect :none
+                    :sources {:shadow-packet-sha256 (:packet-sha256 shadow)}}]
+        (assoc packet :packet-sha256 (identity/digest packet))))))

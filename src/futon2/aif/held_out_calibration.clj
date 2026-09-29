@@ -288,7 +288,8 @@
              :ticket/id (:ticket/id declaration)
              :split {:schema (:schema declaration)
                      :registered-at (:registered-at declaration)
-                     :starting-point (:starting-point declaration)}
+                     :starting-point (:starting-point declaration)
+                     :model (:model declaration)}
              :status (if passing? :passing :failing)
              :failing-reasons failing-reasons
              :metrics {:mean-log-loss mean-log-loss

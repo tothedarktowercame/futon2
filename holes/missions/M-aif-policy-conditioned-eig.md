@@ -242,7 +242,7 @@ named in
   risk adapter no longer hard-codes a twelve-outcome carrier; it requires a
   non-empty unique support and exact Q/C support agreement instead. This does
   not enable EIG in selection or claim R13/R4/R5 deployment.
-- [ ] **Collect a default-off EIG shadow and calibration packet.** Prior
+- [x] **Collect a default-off EIG shadow and calibration packet.** Prior
   entropy, expected posterior entropy, EIG, degeneracy reasons and later
   realised information gain persisted without affecting selection, reported with
   held-out log-loss/Brier results and predicted-versus-realised entropy
@@ -261,3 +261,12 @@ named in
   Missing held-out evidence is retained as a typed held empirical layer rather
   than promoted to calibration. This task remains open until a preregistered
   held-out run supplies the persisted empirical packet and replay artifacts.
+
+  **Completed 2026-09-29:** the preregistered two-run window is closed and its
+  persisted `resources/wm/eig/held-out-calibration.edn` packet passes the
+  declared log-loss and Brier bounds while retaining predicted-versus-realised
+  entropy reduction. `eig-shadow/calibrated-packet` now joins that empirical
+  layer to an integrity-checked `:wm/eig-shadow-packet-v1`, refuses held or
+  failing calibration, and records winner, abstain and scale as unchanged from
+  the byte-value-identical feature-off replay. The join remains record-only;
+  it neither changes selection nor authorises replacement of the proxy.

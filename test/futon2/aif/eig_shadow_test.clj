@@ -1,5 +1,7 @@
 (ns futon2.aif.eig-shadow-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.a4a :as a4a]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.eig-shadow :as shadow]))
@@ -57,3 +59,38 @@
   (is (= :off-replay-selection-drift
          (:eig-shadow/refusal
           (refusal #(shadow/collect (assoc base :selection-after {:winner :wait})))))))
+
+(deftest passing-held-out-calibration-joins-the-default-off-shadow
+  (let [shadow-packet (shadow/collect base)
+        calibration (edn/read-string
+                     (slurp (io/resource "wm/eig/held-out-calibration.edn")))
+        packet (shadow/calibrated-packet shadow-packet calibration)]
+    (is (= :wm/eig-shadow-calibration-packet-v1 (:schema packet)))
+    (is (= :observed (get-in packet [:empirical :status])))
+    (is (= (:metrics calibration) (get-in packet [:empirical :metrics])))
+    (is (= {:winner :unchanged :abstain :unchanged :scale :unchanged}
+           (select-keys (:selection-effects packet) [:winner :abstain :scale])))
+    (is (= (get-in shadow-packet [:model-relative :prior-entropy])
+           (get-in packet [:model-relative :prior-entropy])))
+    (is (= (:packet-sha256 packet)
+           (identity/digest (dissoc packet :packet-sha256))))))
+
+(deftest calibration-join-fails-closed
+  (let [shadow-packet (shadow/collect base)
+        calibration (edn/read-string
+                     (slurp (io/resource "wm/eig/held-out-calibration.edn")))]
+    (is (= :shadow-digest-mismatch
+           (:eig-shadow/refusal
+            (refusal #(shadow/calibrated-packet
+                       (assoc-in shadow-packet [:model :id] "tampered") calibration)))))
+    (is (= :held-out-calibration-not-passing
+           (:eig-shadow/refusal
+            (refusal #(shadow/calibrated-packet
+                       shadow-packet
+                       (assoc calibration :status :failing
+                              :failing-reasons [:mean-brier-outside-bounds]))))))
+    (is (= :calibration-model-mismatch
+           (:eig-shadow/refusal
+            (refusal #(shadow/calibrated-packet
+                       shadow-packet
+                       (assoc-in calibration [:split :model :theta] :other))))))))

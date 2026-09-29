@@ -58,7 +58,11 @@
   {:kind :git-commit,
    :sha "e153bb7e",
    :described
-   "the commit recording the supersession decision; the window opens after it"}},
+   "the commit recording the supersession decision; the window opens after it"},
+  :model
+  {:theta :a4a/dirichlet-posterior-v1,
+   :policy-family :wm/pattern-cascade,
+   :prediction-source :wm/eig-shadow-packet-v1}},
  :status :passing,
  :failing-reasons [],
  :metrics
