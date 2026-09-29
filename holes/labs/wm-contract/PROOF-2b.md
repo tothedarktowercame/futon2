@@ -58,76 +58,121 @@ states the requirements that rule that out and a design that meets them.
 
 ## Requirements
 
-Numbered RQ-n so they are not confused with the AIF model's R-numbers (R1–R19); they are not an adaptation of those rows.
+Numbered RQ-n so they are not confused with the AIF model's R-numbers
+(R1–R19); they are not an adaptation of those rows. Each has a metric
+computed from a named record, a threshold, and the record field it needs.
+The measurement design, with today's values and the commands, is
+`NOTE-PROOF-2b-measurable-outcomes-2026-09-29.md` (codex-proof2a, 3631f87a0).
+A **campaign** is 20 clicks through the click loop. "Today" is 2026-09-29.
 
-Each is a property of every click or of the machine's model, checkable from
-the record. Where Joe said it, his words are quoted.
+**The action receipt comes first.** RQ-2, RQ-6, RQ-7, RQ-8 and RQ-9 join on
+one record: each click ends in exactly one **terminal receipt**, either an
+`:action-receipt` (click id, target id and kind, action kind, G terms,
+outcome, and for a mutating action the commit sha and reviewer) or a
+`:failure` (`:id :kind :source :at`). Both go in the run record and, by
+digest, in the click binding; the click loop's ledger cites the failure id.
+It is built as step ⟨0⟩0.
 
-**RQ-1. The field is all unfinished work.** Every unfinished Mission,
-Excursion and Ticket in FUTON is a target on every click, plus the standing
-Algorithm targets (RQ-6). The decision and the target-field report enumerate
-the same set. "The machine should have all unfinished Missions, Excursions,
-and Tickets to choose from. The 'five targets' is at best a placeholder for a
-complete target, and we should be getting a failure signal on that basis."
-*Check:* the click record's field equals the enumerators' count at HEAD; a
-shortfall is a typed failure that goes to repair.
+**RQ-1. The field is all unfinished work.** Joe: "The machine should have
+all unfinished Missions, Excursions, and Tickets to choose from."
+*Metric:* each click persists a `:target-field` manifest: ID sets
+`:missions :excursions :tickets :algorithms` and the enumerator's HEAD sha,
+copied verbatim to the run record and the target-field report. `missing` =
+enumerated at HEAD − decision's set; `extra` = decision's set − enumerated.
+*Threshold:* `missing = extra = ∅`, and the decision and report digests are
+equal, on every click of a campaign. Set equality, not count equality.
+*Today:* not recorded. By a read-only census, 221 missions + 373 excursions +
+43 tickets are live; the decision enumerated 264 (no excursions) and admitted 5.
 
-**RQ-2. Every click acts.** A click ends with an action taken and its outcome
-recorded (a commit, a written artifact, an observation). Selecting nothing is
-not an outcome; an empty action set is a configuration error and goes to
-repair. "Imagine if YOU decided to abstain from work when I asked."
-*Check:* no click record without an enacted action or a typed failure with a
-repair route.
+**RQ-2. Every click ends in an action or a routed failure.** Joe: "Imagine
+if YOU decided to abstain from work when I asked."
+*Metric:* `completion = (action receipts + failures with a repair dispatch)
+/ clicks`.
+*Threshold:* 100% per campaign, and at least one enacted action in the
+campaign (a campaign cannot pass by failing 20 times).
+*Today:* 6 click bindings, 5 abstained and 1 build-failed; 0 enacted actions.
 
-**RQ-3. Standing curiosity.** "The machine should represent a standing
-curiosity about the world, about its own behaviour, about the FUTON stack."
-Uncertainty about a target counts in favour of acting on it: an action that
-would resolve it has positive epistemic value, and G includes that term for
-every action in the field.
-*Check:* on the record, each candidate action's G shows its epistemic term;
-a target whose facts are unknown has a gathering action with nonzero
-information gain.
+**RQ-3. Uncertainty about a target counts in favour of acting on it.** Joe:
+"a standing curiosity about the world, about its own behaviour, about the
+FUTON stack."
+*Metric:* every candidate records `:G {:risk :ambiguity :information-gain
+:novelty :total}`, and the total equals the declared combination within
+1e-12. For every target whose knowledge state is `:unknown`, count the
+candidate gathering actions with information gain > 0. A paired control
+holds risk, ambiguity and habit equal and compares an unread target with a
+known one.
+*Threshold:* every click, all candidates decomposed and every unknown target
+with at least one gathering action with IG > 0. The paired control, once per
+release: the unread target has the lower G.
+*Today:* no candidate decomposition on a click that chose nothing; no
+knowledge-state field.
 
-**RQ-4. A generative model of itself.** "The machine should have a generative
-model of itself (this is standard AIF stuff) that includes its curiosity."
-Hidden states cover the tasks (RQ-1), the stack (the existing 417 claims), and
-the machine's own behaviour: how its action kinds turn out, which repairs
-held, where it gets stuck.
-*Check:* the model's state factors name these three groups; the record
-carries the posterior over each factor the chosen action touched.
+**RQ-4. The model covers the tasks, the stack and the machine itself.** Joe:
+"The machine should have a generative model of itself ... that includes its
+curiosity."
+*Metric:* each click records a versioned factor manifest with a normalised
+posterior over every factor, covering the RQ-1 task IDs, a pinned stack-claim
+list, and the machine's declared action and failure kinds; each action
+receipt names the factors it observed, with their prior and posterior.
+*Threshold:* per click, coverage 100% of the three populations and
+normalisation error ≤ 1e-12; every enacted action has a factor transition or
+a typed no-update. Per campaign, a nonzero transition in each factor family
+exercised.
+*Today:* `:mu-post` over 417 stack claims and the scan learner's seven
+statuses; no task or self factors.
 
-**RQ-5. The model grows as well as shrinks.** A new task file, or an
-observation no state explains (a new failure kind), adds a state or factor
-instance with a stated prior (expansion). BMR keeps its present job of
-removing structure that does not earn its complexity (reduction).
-*Check:* a mission created between two clicks is in the second click's model
-without anyone declaring it.
+**RQ-5. The model grows as well as shrinks.**
+*Metric:* consecutive factor manifests are diffed. An expansion event names
+its trigger (new task, or an observation whose highest likelihood under the
+old model is below 1e-6) and the new factor or state IDs. A reduction event
+carries BMR's ΔF, the threshold, and the IDs before and after.
+*Threshold:* once per release, two planted controls: a new task file adds
+exactly its factor with prior `unread` on the next click; a planted
+unexplained observation yields exactly one expansion event. Removal only with
+ΔF ≤ −3.
+*Today:* BMR reduces parameters in the scan model; no factor-level expansion
+or reduction is recorded.
 
-**RQ-6. Algorithms are targets.** Standing A- targets are always in the field:
-e.g. a Tornhill pass (`futon0/analysis/audits/tornhill.py`: hotspots,
-complexity trend, change coupling) whose output is a cleanup the machine then
-makes, and `write-algorithm`, which writes a new algorithm and runs it
-("then run the new algorithm, etc., providing a paper trail of actions").
-They compete in G with the tasks; they are what the machine does when no
-task action is better, and so RQ-2 always has something to take.
-*Check:* the field lists the A- targets on every click; an A- run leaves a
-commit and a record.
+**RQ-6. Algorithms are targets.** Standing A- targets (a Tornhill pass,
+`futon0/analysis/audits/tornhill.py`; `write-algorithm`, which writes a new
+algorithm and runs it) are in the field on every click.
+*Metric:* the RQ-1 manifest's `:algorithms` set equals a HEAD-pinned
+algorithm registry; an algorithm action's receipt names its artifact, commit
+and reviewer.
+*Threshold:* per click, set difference ∅. Per acceptance campaign, one
+successful Tornhill run and one `write-algorithm` run, each with artifact,
+commit and a reviewer distinct from the author.
+*Today:* no algorithm registry or A- targets.
 
-**RQ-7. Forward motion is the measure.** A PROOF-2b step is accepted on what
-the live machine did: actions taken, wants closed, commits reviewed. Wiring
-evidence (wire tests, Lean imports, map entries) is written afterwards, for
-what the machine actually used, and never gates a live step.
+**RQ-7. Campaigns change the state of the work.** (Replaces "forward
+motion", which named no observable.)
+*Metric:* per campaign, counts joined to action receipts: enacted actions;
+wants flipped false → true; task knowledge or lifecycle steps; algorithm
+runs; reviewed commits caused by an action; repairs closed. Wiring commits
+count only if a later action receipt cites the wire. Counts are reported
+separately, with denominators, not combined into a score.
+*Threshold:* RQ-2 met, and at least one of {want closed, task advanced,
+reviewed action commit} > 0.
+*Today:* 0 on every count. Want and task transitions are not recorded.
 
-**RQ-8. A paper trail for every action.** Each action has a record (target,
-action kind, G terms, outcome) and, when it changes code or documents, a
-commit. The trail is what makes RQ-4's self-model learnable.
+**RQ-8. Every action leaves a complete receipt.**
+*Metric:* `paper_trail = complete action receipts / enacted actions`, with
+each commit sha resolving (`git cat-file -e <sha>^{commit}`) and the reviewer
+distinct from the author.
+*Threshold:* 100% per campaign; zero enacted actions does not satisfy it.
+*Today:* no action receipt exists; the binding has click id, outcome and run
+path, and no commit or reviewer join.
 
-**RQ-9. Failures are signals with a route.** A coverage shortfall, a crashed
-action, a refused read: each is typed, recorded, and sent to repair by the
-click loop (`scripts/wm_click_repair_loop.py`). Nothing is dropped to "not
-generated" silently, as the schedule gate did.
+**RQ-9. Every failure is typed and routed to repair.**
+*Metric:* `untyped = failures without :id and :kind`; `route = failures with
+a ledger repair dispatch citing the id / failures`; `closure = dispatches
+with a terminal judgment / dispatches`; dispatch latency in seconds.
+*Threshold:* per campaign, `untyped = 0`, route and closure 100%, latency ≤
+5 min. A no-defect judgment is allowed if it closes the same failure id.
+*Today:* the click-loop ledger has 4 abstained clicks, of which 1 was
+dispatched and judged (latency 2 s). The other 3 predate the loop's
+debugger change (e1a9dd563), and ended at the old stall stop.
 
----
 
 ## Design: active inference adapted to FUTON
 
@@ -190,81 +235,94 @@ parameters and over those added states once they have data.
 
 ## Plan
 
-Structured as PROOF-2a was (numbered claims with an acceptance someone can
-check), but every step's acceptance is a live result. Dispatches are logged
-under their step.
+Structured as PROOF-2a was (numbered claims with an acceptance checkable
+from the record), but every acceptance is a live result or a planted control
+on live code. Dispatches are logged under their step.
 
-### ⟨0⟩ Restore what the data slip removed (hours)
+### ⟨0⟩ The receipt, and what the data slip removed (hours to a day)
+
+⟨0⟩0. The terminal receipt (see Requirements): every click writes exactly
+one `:action-receipt` or `:failure` to the run record and, by digest, the
+binding; the click loop's ledger cites the failure id.
+ACCEPT: over the next 5 live clicks, each click id has exactly one terminal
+receipt, and each failure id appears in a ledger dispatch.
 
 ⟨0⟩1. The T-repair cascade source declares `:c-schedule` like the other four,
-so mission-derived universes are generated again (zai-1's smallest change;
-about 20 missions with checkbox holes return to the field).
-ACCEPT: the next click record shows `:targets-added` > 0 and a selection
-among more than five targets.
+so mission-derived universes are generated again (zai-1's smallest change).
+ACCEPT: one run record with `[:mission-hole-coverage :targets-added] > 0`
+and a selection certificate with `:eligible-target-count > 5`, both under the
+same enumerator sha.
 
-⟨0⟩2. The schedule-agreement gate reports its refusal as a typed failure on
-the click record, not `:coverage-not-recorded` (RQ-9).
-ACCEPT: planting a disagreeing schedule yields the typed failure and a repair
-dispatch from the loop.
+⟨0⟩2. The schedule-agreement gate's refusal is a typed failure
+(`:schedule-disagreement`), not `:coverage-not-recorded`.
+ACCEPT: a planted disagreeing schedule yields that failure id; the ledger
+shows its dispatch within 5 minutes and a terminal judgment.
 
 ### ⟨1⟩ The machine always acts (days)
 
-⟨1⟩1. One enumeration: the decision's targets are exactly the target-field
-report's considered set (missions, tickets and excursions) plus A- targets.
-ACCEPT: live click record field count = enumerators' count at HEAD.
+⟨1⟩1. One enumeration: the decision's set and the target-field report's set
+are the same (missions, tickets, excursions, plus A- targets).
+ACCEPT: RQ-1 on one live click: persisted ID sets and HEAD sha, `missing =
+extra = ∅`, report digest = decision digest.
 
-⟨1⟩2. `read-criteria` is an action: selecting it for a task dispatches a job
-that reads the task file and writes the task's wants, facts and locators as
-a cascade source (committed, reviewed). ACCEPT: a live click takes it on an
-`unread` excursion, and the next click admits that excursion with a universe.
+⟨1⟩2. `read-criteria` is an action: selecting it dispatches a job that reads
+the task file and commits the task's wants, facts and locators as a cascade
+source, reviewed.
+ACCEPT: an excursion recorded as `:unknown`; a `read-criteria` action receipt
+naming it with commit and reviewer; the next click's manifest contains that
+excursion with a universe at the recorded sha.
 
-⟨1⟩3. Tornhill as an A- target: running it produces the hotspot report and
-proposes one cleanup, which a following click can enact. ACCEPT: one live
-run, its report committed, one cleanup commit reviewed.
+⟨1⟩3. Tornhill as an A- target.
+ACCEPT: one Tornhill action receipt recording the report digest, a proposed
+cleanup id, and (on the same or a later click) the cleanup's commit, reviewer
+and review verdict, all resolving in git.
 
-⟨1⟩4. `write-algorithm`: writes a new A- target (a script plus its
-declaration), reviewed, and the field includes it on the next click.
-ACCEPT: one live instance with its paper trail.
+⟨1⟩4. `write-algorithm`.
+ACCEPT: a `write-algorithm` receipt recording the new algorithm's id, path,
+commit and reviewer; the next click's `:algorithms` set contains that id.
 
-⟨1⟩5. The empty-support case is a configuration error routed to repair.
-ACCEPT: a planted empty field produces the typed error; no click record ends
-without an action or such an error.
+⟨1⟩5. The empty field is a configuration error.
+ACCEPT: a planted empty field yields one `:empty-target-field` failure,
+routed per RQ-9; across the next campaign, every click id has exactly one
+terminal receipt (RQ-2).
 
-At the end of ⟨1⟩, with a crude G (for instance the existing risk term plus
-a constant bonus for gathering actions), every click does something. That is
-the first milestone Joe sees.
+With a crude G at the end of ⟨1⟩ (the existing risk term plus a constant
+bonus for gathering actions), RQ-1, RQ-2, RQ-6, RQ-8 and RQ-9 can be met on
+a campaign. That is the first result Joe sees.
 
 ### ⟨2⟩ The self-model (weeks)
 
-⟨2⟩1. Task and self factors as hidden states with beliefs carried click to
-click, beside `:mu-post`. ACCEPT: the record carries the posteriors; a task's
-belief moves after an action on it.
+⟨2⟩1. Task and self factors as hidden states, carried click to click beside
+`:mu-post`.
+ACCEPT: RQ-4 on one campaign: normalised prior and posterior for every
+factor-manifest ID, and a named task factor whose posterior moves
+(L1 distance > 1e-12) after an action receipt that names it.
 
-⟨2⟩2. Epistemic and novelty terms of G computed from those beliefs and the
-Dirichlet A counts, replacing ⟨1⟩'s constant bonus. ACCEPT: the record shows
-the terms; on a field with one well-known and one unread task of equal risk,
-the unread one scores better (RQ-3), live or on a recorded field.
+⟨2⟩2. Information-gain and novelty terms of G from those beliefs and the
+Dirichlet A counts, replacing ⟨1⟩'s constant bonus.
+ACCEPT: RQ-3 on one campaign, and the paired control (identical risk,
+ambiguity and habit): G of the unread target < G of the known one.
 
-⟨2⟩3. Expansion (RQ-5). ACCEPT: a mission created between clicks appears in
-the next model with prior `unread`; a planted unexplained observation opens a
-recorded state.
+⟨2⟩3. Expansion.
+ACCEPT: RQ-5's two planted controls, with the pre- and post-shas pinned.
 
-⟨2⟩4. Lean: the self-model's factor structure and G decomposition stated,
-with a correspondence to the running code at the level PROOF-2a reached for
-the scan model. Written for what ⟨2⟩1–3 built, after they run (RQ-7).
+⟨2⟩4. Lean: the self-model's factor structure and G decomposition.
+ACCEPT: named Lean declarations and registry rows; compiled checks run on
+fixtures exported from the running Clojure model's records, with the schema
+version bound. Written after ⟨2⟩1–3 run (RQ-7's rule: wiring evidence
+follows use).
 
-### ⟨3⟩ Evidence of forward motion (ongoing)
+### ⟨3⟩ Campaigns (ongoing)
 
-⟨3⟩1. A campaign of N clicks through the click loop. Reported per campaign:
-actions taken by kind, wants closed, commits reviewed, tasks moved from
-`unread`, algorithms run, repairs. ACCEPT: every click acts (RQ-2), and the
-counts of wants closed and tasks read are nonzero.
+⟨3⟩1. Campaigns of 20 clicks through the click loop, reported with RQ-7's
+counts and their denominators.
+ACCEPT: RQ-2 and RQ-7 met on a campaign.
 
-⟨3⟩2. A flight on one mission to completion, the PROOF-2a theorem's case,
-now as one thing the machine does rather than the only thing the plan aims
-at.
+⟨3⟩2. A flight on one mission to completion, the PROOF-2a theorem's case.
+ACCEPT: a flight id whose mission criterion is met at a pinned sha, with a
+progress-check verdict per click and every click's action receipt joined by
+click id.
 
----
 
 ## Residuals from PROOF-2a (carried over, not gating)
 
@@ -297,6 +355,8 @@ they are.
    code. Do those count against the ordinary click budget as clicks do now?
 
 ## LOG
+
+LOG: 2026-09-29 (claude-1). Requirements and ACCEPT lines rewritten to the measurable versions in codex-proof2a's note (3631f87a0): RQ-4 and RQ-7 reworded (their old nouns named no observable); the terminal receipt added as ⟨0⟩0, since five requirements join on it; set equality, not count equality, for the field; campaign = 20 clicks. Checked: the note's binding tally (6 today: 5 abstained, 1 build-failed) matches claude-1's own count.
 
 LOG: 2026-09-29 (claude-1). Drafted from the 2026-09-29 session: Joe's
 requirements (field coverage, no abstention, A- targets incl. Tornhill and
