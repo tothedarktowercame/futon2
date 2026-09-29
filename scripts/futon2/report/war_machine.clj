@@ -64,6 +64,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
+            [futon2.aif.scan-bins :as scan-bins]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.policy-free-energy :as policy-free-energy]
@@ -3052,7 +3053,8 @@
    (scan-loop-health days
                      (or (fetch-evidence :limit 2000 :since (since-str days)) [])))
   ([days entries]
-  (let [since (since-str days)
+  (let [entries-present? (some? entries)
+        since (since-str days)
         ;; Filter entries to window
         window-entries (filter (fn [e]
                                  (when-let [d (parse-iso-date (:evidence/at e))]
@@ -3085,6 +3087,10 @@
                   0.0)]
     {:arrows arrows
      :overall overall
+     :scan-exposures
+     {:loop-health (if entries-present?
+                     (scan-bins/bin scan-bins/unit-5-v1 overall)
+                     {:status :absent :reason :loop-evidence-unavailable})}
      :healthy-count (count healthy)
      :total-count (count arrows)
      :loop-complete? (= (count healthy) (count arrows))})))
@@ -3249,7 +3255,25 @@
                      abandon-penalty (/ (double (count (or abandoned []))) (max 1 active))
                      block-penalty (/ (double blocked) total)]
                  (max 0.0 (- completion-ratio (* 0.5 abandon-penalty) (* 0.3 block-penalty))))
-               0.0)})))
+               0.0)
+     :scan-exposures
+     {:mission-health
+      (if (pos? total)
+        (assoc (scan-bins/bin
+                 scan-bins/unit-5-v1
+                 (let [completion-ratio (/ (double completed) total)
+                       abandon-penalty (/ (double (count (or abandoned []))) (max 1 active))
+                       block-penalty (/ (double blocked) total)]
+                   (max 0.0 (- completion-ratio (* 0.5 abandon-penalty) (* 0.3 block-penalty)))))
+               :components {:total total
+                            :completed completed
+                            :blocked blocked
+                            :abandoned (count (or abandoned []))})
+        {:status :absent :reason :no-missions
+         :components {:total total
+                      :completed completed
+                      :blocked blocked
+                      :abandoned (count (or abandoned []))}})}})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 5: Sessions
@@ -3891,7 +3915,7 @@
   []
   (try
     (let [dir (java.io.File. frames-dir)]
-      (when (.exists dir)
+      (if (.exists dir)
         (let [frame-files (->> (.listFiles dir)
                                (filter #(str/ends-with? (.getName %) ".edn"))
                                (sort-by #(.getName %))
@@ -3910,9 +3934,10 @@
               daily-frames (filterv #(= :daily-scan (:frame/type %)) frames)
               latest (last frames)
               ;; Extract depositing signal from cardinal directions
-              depositing-signal (if-let [cd (:frame/cardinal-direction latest)]
-                                  (get cd :depositing 0.0)
-                                  0.0)
+              depositing-present? (contains? (:frame/cardinal-direction latest) :depositing)
+              depositing-signal (if depositing-present?
+                                   (get-in latest [:frame/cardinal-direction :depositing])
+                                   0.0)
               ;; Compute trend: average cardinal direction across daily frames
               cardinal-trend (when (seq daily-frames)
                                (reduce (fn [acc frame]
@@ -3939,12 +3964,27 @@
                                               :frame/mode :frame/cardinal-direction
                                               :frame/constraints])
            :depositing-signal depositing-signal
+           :scan-exposures
+           {:depositing-signal
+            (if depositing-present?
+              (scan-bins/bin scan-bins/unit-5-v1 depositing-signal)
+              {:status :absent :reason :no-depositing-signal})}
            :cardinal-trend cardinal-avg
            ;; Pipeline status from latest frame
            :pipeline-status (get-in latest [:frame/constraints :income-deadline :status])
            ;; Daily scan streak
-           :scan-streak (get-in latest [:frame/constraints :daily-scan-streak :completed] 0)})))
-    (catch Exception _ nil)))
+           :scan-streak (get-in latest [:frame/constraints :daily-scan-streak :completed] 0)})
+        {:depositing-signal 0.0
+         :scan-exposures
+         {:depositing-signal {:status :absent :reason :frames-source-missing}}}))
+    (catch Exception e
+      {:depositing-signal 0.0
+       :scan-exposures
+       {:depositing-signal
+        {:status :absent
+         :reason :frames-source-unreadable
+         :error {:class (.getName (class e))
+                 :message (ex-message e)}}}})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 11: Metabolic Balance
@@ -6572,7 +6612,10 @@
                     :else nil)
                   :observation observation
                   :scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
+                                         (get-in scan-data [:loop-health :scan-exposures])
+                                         (get-in scan-data [:mission-triage :scan-exposures])
                                          (get-in scan-data [:graph :scan-exposures])
+                                         (get-in scan-data [:frames :scan-exposures])
                                          (get-in scan-data [:annotation-graph :scan-exposures]))
                   :belief wm-belief
                   :belief-pre wm-belief-pre
@@ -6929,7 +6972,7 @@
           ;; fetching it twice made an opportunity pay the same query twice.
           mission-snapshot (fetch-missions)
           self-watch (scan-self-watch days evidence-snapshot-result)
-          loop-health (scan-loop-health days evidence-snapshot)
+          loop-health (scan-loop-health days (:entries evidence-snapshot-result))
           support-attack (scan-support-attack days evidence-snapshot)
           mission-triage (scan-mission-triage days (or mission-snapshot []))
           graph (scan-graph days evidence-snapshot)

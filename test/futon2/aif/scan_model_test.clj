@@ -160,6 +160,72 @@
       (is (= {:health 0.0 :anomaly-count 0 :section-count 0}
              (select-keys scan [:health :anomaly-count :section-count]))))))
 
+(deftest scalar-bin-exposures-are-persisted-without-changing-observation
+  (let [loop-scan (wm/scan-loop-health 30 [])
+        mission-scan (wm/scan-mission-triage
+                       30
+                       [{:mission/status "complete" :mission/repo "test"}]
+                       [])
+        frame-dir (.toFile (java.nio.file.Files/createTempDirectory
+                             "wm-scan-bins" (make-array java.nio.file.attribute.FileAttribute 0)))
+        frame-file (java.io.File. frame-dir "2099-01-01.edn")]
+    (spit frame-file
+          (pr-str {:frame/id "frame-1"
+                   :frame/type :daily-scan
+                   :frame/cardinal-direction {:depositing 0.8}}))
+    (let [frame-scan (with-redefs-fn {#'wm/frames-dir (.getPath frame-dir)}
+                       wm/scan-frames)
+          other {:support {:covered 1 :claims 2}}
+          exposures (merge other
+                           (:scan-exposures loop-scan)
+                           (:scan-exposures mission-scan)
+                           (:scan-exposures frame-scan))
+          scan-data {:loop-health loop-scan
+                     :mission-triage mission-scan
+                     :frames frame-scan}
+          traced (trace/trace-record {:belief {} :belief-pre {}
+                                      :observation (observation/observe scan-data)
+                                      :decision nil
+                                      :scan-exposures exposures})]
+      (is (= (:overall loop-scan)
+             (get-in exposures [:loop-health :value])))
+      (is (= 0 (get-in exposures [:loop-health :bin])))
+      (is (= :wm/scan-bins-unit-5-v1
+             (get-in exposures [:loop-health :schema])))
+      (is (= {:schema :wm/scan-bins-unit-5-v1 :bin 4 :value 1.0
+              :components {:total 1 :completed 1 :blocked 0 :abandoned 0}}
+             (:mission-health exposures)))
+      (is (= {:schema :wm/scan-bins-unit-5-v1 :bin 4 :value 0.8}
+             (:depositing-signal exposures)))
+      (is (= exposures (:scan-exposures traced)))
+      (is (= other (select-keys (:scan-exposures traced) [:support])))
+      (is (= (observation/observe scan-data)
+             (observation/observe
+               (update-vals scan-data #(dissoc % :scan-exposures))))
+          "the binned carriers are write-only for the observation vector"))))
+
+(deftest scalar-bin-missing-sources-are-typed-absences
+  (let [loop-scan (wm/scan-loop-health 30 nil)
+        mission-scan (wm/scan-mission-triage 30 [] [])
+        frame-dir (.toFile (java.nio.file.Files/createTempDirectory
+                             "wm-scan-bins-empty" (make-array java.nio.file.attribute.FileAttribute 0)))
+        frame-scan (with-redefs-fn {#'wm/frames-dir (.getPath frame-dir)}
+                     wm/scan-frames)
+        scan-data {:loop-health loop-scan
+                   :mission-triage mission-scan
+                   :frames frame-scan}]
+    (is (= {:status :absent :reason :loop-evidence-unavailable}
+           (get-in loop-scan [:scan-exposures :loop-health])))
+    (is (= {:status :absent :reason :no-missions
+            :components {:total 0 :completed 0 :blocked 0 :abandoned 0}}
+           (get-in mission-scan [:scan-exposures :mission-health])))
+    (is (= {:status :absent :reason :no-depositing-signal}
+           (get-in frame-scan [:scan-exposures :depositing-signal])))
+    (is (= {:loop-health (:overall loop-scan)
+            :mission-health 0.0 :depositing-signal 0.0}
+           (select-keys (observation/observe scan-data)
+                        [:loop-health :mission-health :depositing-signal])))))
+
 (deftest learn-uses-mu-pre-and-fractional-counts
   (let [records [(record (mu [:spawned 1/2] [:refined 1/2])
                          {:covered 2 :claims 5}
