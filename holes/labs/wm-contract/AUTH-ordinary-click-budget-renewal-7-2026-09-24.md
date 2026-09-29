@@ -115,3 +115,18 @@ clicks are published, are not in L, and cannot be selected into it later
 (A19/A21); and (b) the preregistered sequence L-v1 once L-REG and READY
 have landed and been reviewed. Whether (a) fires tonight depends on the
 board reading at the time, taken from the store, not from this note.
+
+## Joe's grant to claude-1, 2026-09-29 — twenty clicks, allocated
+
+Joe, 2026-09-29, heard directly by claude-1 in its operator buffer, after
+claude-1 recommended running the machine so the PROOF-2a item 6 (b) scan
+learner accumulates live ticks: "OK let's run 20 ticks, you can do repairs
+between them". Recorded here per this document's rule (a draw raises
+`allocated` in `ordinary_click_budget.clj`, no new document). `allocated`
+goes from 15 to **35**: the fifteen above (8 consumed by 2026-09-26, 7
+unspent in claude-8's lane) plus these twenty (claude-1's lane). The ledger's
+`:caller` says which lane spent which. Purpose: twenty ordinary clicks, with
+repairs between them, so the write-only scan learner, per-channel BMR and
+proxy shadow record at least 20 carrying ticks (the 6B-4 exposure floor)
+before design packet 6 is proposed. These clicks are outside any PROOF-2
+preregistered sequence L and cannot be selected into it later.
