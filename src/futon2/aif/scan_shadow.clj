@@ -59,15 +59,25 @@
    log space and returns a normalised status→double map. Zero prior mass stays
    zero. A non-finite or empty normaliser is a typed refusal."
   [{:keys [mu-excl learner-state exposures adopted]}]
-  (if (empty? adopted)
-    mu-excl
+  (cond
+    (empty? adopted) mu-excl
+
+    ;; A status missing from either side would otherwise get likelihood 1
+    ;; (log 0.0) or be dropped from the row without anyone seeing it.
+    (not (and (map? mu-excl) (every? number? (vals mu-excl))))
+    {:status :refused :reason :mu-excl-not-a-distribution}
+
+    (not= (set (keys mu-excl)) (set (:statuses learner-state)))
+    {:status :refused :reason :status-set-mismatch}
+
+    :else
     (let [{:keys [log-likelihoods]}
           (scan-learn/status-log-likelihoods learner-state exposures adopted)
           log-weights (into {}
                             (for [[status mass] mu-excl]
                               [status (if (pos? mass)
                                         (+ (Math/log (double mass))
-                                           (get log-likelihoods status 0.0))
+                                           (get log-likelihoods status))
                                         Double/NEGATIVE_INFINITY)]))
           log-z (log-sum-exp (vals log-weights))]
       (if-not (finite? log-z)

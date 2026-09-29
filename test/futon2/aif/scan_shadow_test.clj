@@ -92,3 +92,14 @@
                :adopted [:support]})]
     (is (= 0.0 (:a row)))
     (is (close? 1.0 (:b row)))))
+
+(deftest mismatched-or-refused-rows-are-refused-not-imputed
+  (let [args {:learner-state worked-state :exposures worked-exposures
+              :adopted [:support]}]
+    (is (= {:status :refused :reason :status-set-mismatch}
+           (scan-shadow/shadow-row (assoc args :mu-excl {:a 1/2 :b 1/4 :c 1/4}))))
+    (is (= {:status :refused :reason :status-set-mismatch}
+           (scan-shadow/shadow-row (assoc args :mu-excl {:a 1.0}))))
+    (is (= {:status :refused :reason :mu-excl-not-a-distribution}
+           (scan-shadow/shadow-row
+             (assoc args :mu-excl {:status :refused :reason :impossible}))))))
