@@ -56,6 +56,18 @@
     (is (> (get-in learned-row [:tied :delta-f]) -3))
     (is (= :learned (:chosen-model learned-row)))))
 
+(deftest weak-evidence-is-inconclusive-not-learned
+  ;; Beta(1,1) priors, counts a=[3,1], b=[1,3]: full = 2 ln(1/20) ~ -5.99,
+  ;; tied = ln B(5,5) - ln B(1,1) = ln(1/630) ~ -6.45, delta-F ~ +0.46.
+  (let [prior {:statuses [:a :b]
+               :concentrations {:support {:a [1 1] :b [1 1]}}}
+        learned (state-with prior :support {:a [4 2] :b [2 4]})
+        row (get-in (scan-bmr/score prior learned {:support 20})
+                    [:channels :support])]
+    (is (< -3 (get-in row [:tied :delta-f]) 3))
+    (is (= :inconclusive (:chosen-model row)))
+    (is (false? (:eligible row)))))
+
 (deftest double-one-with-fractional-failure-is-impossible
   (let [prior {:statuses [:strengthened]
                :concentrations {:support {:strengthened [19/10 1/10]}}}

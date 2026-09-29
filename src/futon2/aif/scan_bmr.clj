@@ -11,9 +11,12 @@
    channel and therefore cancel from every Delta-F; only beta-function and
    point-log-likelihood terms are retained here.  Results are recorded only.
 
-   At or above the exposure floor, tied is chosen when favoured (and takes
-   precedence if both reductions clear the threshold), otherwise hand-set is
-   chosen when its finite Delta-F is favoured, otherwise learned is chosen.
+   Tied is chosen when favoured (and takes precedence if both reductions
+   clear the threshold), otherwise hand-set when its finite Delta-F is
+   favoured; learned only when it beats tied by Delta-F >= +3 and the
+   hand-set row is impossible, absent, or also beaten by +3; otherwise the
+   channel is :inconclusive and not eligible.  Eligibility also needs the
+   exposure floor.
    An impossible hand-set row is evidence against that row, not an adoption.
    Below the floor the same comparison is recorded but is never eligible."
   (:require [futon2.aif.belief :as belief]
@@ -108,9 +111,18 @@
         tied-favoured? (<= (:delta-f tied) bmr/acceptance-threshold)
         hand-favoured? (and (number? (:delta-f hand-set))
                             (<= (:delta-f hand-set) bmr/acceptance-threshold))
+        ;; The full model must win by the same margin a reduction needs:
+        ;; between -3 and +3 the evidence favours neither, and adopting the
+        ;; learned row there would replace a production row on weak data.
+        full-clear? (fn [delta-f] (>= delta-f (- bmr/acceptance-threshold)))
+        learned-favoured? (and (full-clear? (:delta-f tied))
+                               (or (:impossible-under-hand-set hand-set)
+                                   (= :no-hand-set-row (:status hand-set))
+                                   (full-clear? (:delta-f hand-set))))
         chosen (cond tied-favoured? :tied
                      hand-favoured? :hand-set
-                     :else :learned)
+                     learned-favoured? :learned
+                     :else :inconclusive)
         ticks (get channel-ticks key 0)]
     {:counts counts
      :n-admitted-ticks ticks
@@ -118,7 +130,7 @@
      :tied tied
      :hand-set hand-set
      :chosen-model chosen
-     :eligible (and (>= ticks exposure-floor) (some? chosen))}))
+     :eligible (and (>= ticks exposure-floor) (not= :inconclusive chosen))}))
 
 (defn score
   "Compare learned, tied, and declared hand-set models for every learned key.
