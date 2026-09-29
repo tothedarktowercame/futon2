@@ -172,6 +172,32 @@
       (Math/log (/ (double (nth concentrations i))
                    (double (reduce + concentrations)))))))
 
+(defn status-log-likelihoods
+  "Return the integrated posterior-predictive log likelihood by status.
+
+   EXPOSED keys use exactly `outcome` and `log-predictive`, the same functions
+   as `step`. A requested key whose exposure is absent, refused, or malformed
+   contributes zero and is listed under :unused rather than being imputed."
+  [state exposures keys]
+  (let [outcomes (into {}
+                       (keep (fn [key]
+                               (when-let [o (outcome key (get exposures key))]
+                                 [key o])))
+                       keys)
+        used (vec (filter #(contains? outcomes %) keys))
+        unused (vec (remove #(contains? outcomes %) keys))]
+    {:log-likelihoods
+     (into {}
+           (for [status (:statuses state)]
+             [status
+              (reduce + 0.0
+                      (for [key used]
+                        (log-predictive
+                          (get-in state [:concentrations key status])
+                          (get outcomes key))))]))
+     :used used
+     :unused unused}))
+
 (defn- predicted-q [state]
   (let [ss (:statuses state)
         u (/ 1 (count ss))
