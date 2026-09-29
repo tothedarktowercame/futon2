@@ -949,7 +949,7 @@
    :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 24 :checked-at "mathlib4 85a9726a38"}
    :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
    :code "src/futon2/aif/scan_learn.clj:175-199 (status-log-likelihoods)" :code-at "futon2 969f59fef7"
-   :limits ["Absent/refused/malformed classification and :unused receipt vectors are runtime boundaries."]
+   :limits ["Absent/refused/malformed classification and :unused receipt vectors are runtime boundaries." "The Proof2 binding theorem is rfl (definitional); the Clojure-to-Lean correspondence is by reading the cited code lines, not executed."]
    :production-correspondence {:statement "machineStatusLogLikelihoods_eq identifies the outcome-first machine sum with scanStatusLogLikelihood."}}
 
   {:id :scan-filter-step :defines :scan-q :node :SCAN :class :stack-defined
@@ -960,8 +960,8 @@
    :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 35 :checked-at "mathlib4 85a9726a38"}
    :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
    :code "src/futon2/aif/scan_learn.clj:201-285 (predicted-q, step)" :code-at "futon2 969f59fef7"
-   :limits ["This is the learner's write-only q, not production mu." "Duplicate ids, no-observed-channel and invalid JVM normalizer are machine-only arms."]
-   :production-correspondence {:statement "machineScanStep_eq binds the admitted posterior arm; ScanLearning.scanAccumulate_conc separately states every used-key write."}}
+   :limits ["This is the learner's write-only q, not production mu." "Duplicate ids, no-observed-channel and invalid JVM normalizer are machine-only arms." "The Proof2 binding theorem is rfl (definitional); the Clojure-to-Lean correspondence is by reading the cited code lines, not executed."]
+   :production-correspondence {:statement "machineScanStep_eq binds the admitted posterior arm only; ScanLearning.scanAccumulate_conc separately states every used-key write, and their composition into one step is not stated."}}
 
   {:id :scan-model-reduction :defines :scan-bmr :node :SCAN :class :stack-defined
    :imports [:a-conc] :realised true :applied false
@@ -971,7 +971,7 @@
    :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 44 :checked-at "mathlib4 85a9726a38"}
    :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
    :code "src/futon2/aif/scan_bmr.clj:32-148 (evidence, point-evidence, score-channel, score)" :code-at "futon2 969f59fef7"
-   :limits ["Record-only; no chosen model changes production." "Lean reals need no JVM finite-double arm."]
+   :limits ["Record-only; no chosen model changes production." "Lean reals need no JVM finite-double arm." "The Proof2 binding theorem is rfl (definitional); the Clojure-to-Lean correspondence is by reading the cited code lines, not executed."]
    :production-correspondence {:statement "machineScanBmr_choice and machineScanBmr_eligible bind the one-channel recorded decision."}}
 
   {:id :scan-shadow-update :defines :scan-mu-shadow :node :SCAN :class :stack-defined
@@ -982,7 +982,7 @@
    :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 59 :checked-at "mathlib4 85a9726a38"}
    :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
    :code "src/futon2/aif/scan_shadow.clj:20-89 (adoption, shadow-row)" :code-at "futon2 969f59fef7"
-   :limits ["Recorded, not applied; trace :applied is false." "Adoption classification and non-finite JVM refusal remain runtime boundaries."]
+   :limits ["Recorded, not applied; trace :applied is false." "Adoption classification and non-finite JVM refusal remain runtime boundaries." "The Proof2 binding theorem is rfl (definitional); the Clojure-to-Lean correspondence is by reading the cited code lines, not executed."]
    :production-correspondence {:statement "machineScanShadow_eq binds the pure row; ScanShadow proves empty identity, zero preservation, adopted-only dependence and normalization."}}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
