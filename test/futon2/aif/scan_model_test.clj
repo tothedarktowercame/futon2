@@ -226,6 +226,20 @@
            (select-keys (observation/observe scan-data)
                         [:loop-health :mission-health :depositing-signal])))))
 
+(deftest missing-frames-source-stays-absent-in-the-envelope
+  (let [missing (java.io.File. (System/getProperty "java.io.tmpdir")
+                               (str "wm-no-frames-" (random-uuid)))
+        frame-scan (with-redefs-fn {#'wm/frames-dir (.getPath missing)}
+                     wm/scan-frames)
+        observed (observation/observe {:frames frame-scan})]
+    (is (= {:status :absent :reason :frames-source-missing}
+           (get-in frame-scan [:scan-exposures :depositing-signal])))
+    (is (= 0.0 (:depositing-signal observed)))
+    ;; before SCAN-CARRIER-BINS-I a missing source returned nil, so the
+    ;; envelope marked the channel absent; it must still do so
+    (is (= :absent (get-in (observation/observation-envelope observed)
+                           [:channels :depositing-signal :variant])))))
+
 (deftest learn-uses-mu-pre-and-fractional-counts
   (let [records [(record (mu [:spawned 1/2] [:refined 1/2])
                          {:covered 2 :claims 5}

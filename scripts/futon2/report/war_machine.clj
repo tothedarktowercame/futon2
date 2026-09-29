@@ -3974,12 +3974,13 @@
            :pipeline-status (get-in latest [:frame/constraints :income-deadline :status])
            ;; Daily scan streak
            :scan-streak (get-in latest [:frame/constraints :daily-scan-streak :completed] 0)})
-        {:depositing-signal 0.0
-         :scan-exposures
+        ;; no :depositing-signal key: observation's envelope reads its
+        ;; absence from [:frames :depositing-signal]; a 0.0 here would turn a
+        ;; missing source into an observed zero
+        {:scan-exposures
          {:depositing-signal {:status :absent :reason :frames-source-missing}}}))
     (catch Exception e
-      {:depositing-signal 0.0
-       :scan-exposures
+      {:scan-exposures
        {:depositing-signal
         {:status :absent
          :reason :frames-source-unreadable
