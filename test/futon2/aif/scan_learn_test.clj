@@ -125,6 +125,32 @@
     (is (= [1/10 19/10]
            (get-in state [:concentrations :support :spawned])))))
 
+(deftest channel-ticks-count-admitted-carriers-not-trials
+  (let [initial (scan-learn/prior-state)
+        tick-a {:run/id "count-a"
+                :scan-exposures {:support {:covered 40 :claims 50}
+                                 :attack {:covered 3 :claims 4}}}
+        tick-b {:run/id "count-b"
+                :scan-exposures {:support {:covered 1 :claims 2}
+                                 :active-repos {:active 2 :repositories 3}}}
+        after-a (:state (scan-learn/step initial tick-a))
+        after-b (:state (scan-learn/step after-a tick-b))
+        duplicate (:state (scan-learn/step after-b tick-b))
+        no-observed (:state
+                      (scan-learn/step
+                        duplicate
+                        {:run/id "no-observed"
+                         :scan-exposures
+                         {:support {:status :absent :reason :no-claims}}}))]
+    (is (= {:support 2 :attack 1 :workstream-commits 0 :active-repos 1
+            :coupling 0 :ticks 0 :sorrys 0 :annotation 0 :loop-health 0
+            :mission-health 0 :depositing-signal 0}
+           (:channel-ticks after-b)))
+    (is (= (:channel-ticks after-b) (:channel-ticks duplicate)))
+    (is (= (:channel-ticks duplicate) (:channel-ticks no-observed)))
+    (is (= 1 (get-in after-a [:channel-ticks :support]))
+        "50 claims constitute one admitted channel tick")))
+
 (def record-a
   {:run/id "a" :scan-exposures {:support {:covered 5 :claims 5}}})
 

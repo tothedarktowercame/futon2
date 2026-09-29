@@ -28,6 +28,7 @@
 (def ^:private exposure-keys
   [:support :attack :workstream-commits :active-repos :coupling :ticks :sorrys
    :annotation :loop-health :mission-health :depositing-signal])
+(def ^:private zero-channel-ticks (zipmap exposure-keys (repeat 0)))
 
 (def ^:private models
   {:support {:family :binomial :fields [:covered :claims]
@@ -137,6 +138,7 @@
    :authority authority
    :statuses statuses
    :q (zipmap statuses (repeat (/ 1 (count statuses))))
+   :channel-ticks zero-channel-ticks
    :concentrations
    (into {}
          (for [key exposure-keys
@@ -245,7 +247,13 @@
                               st (:statuses state))))
                         (-> state
                             (assoc :q q)
-                            (update :admitted-run-ids conj run-id))
+                            (update :admitted-run-ids conj run-id)
+                            (update :channel-ticks
+                                    (fn [ticks]
+                                      (reduce (fn [m key]
+                                                (update m key (fnil inc 0)))
+                                              (merge zero-channel-ticks ticks)
+                                              used))))
                         used)]
                   {:state next-state
                    :receipt {:run/id run-id :q-prior q-prior :q q

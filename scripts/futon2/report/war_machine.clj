@@ -65,6 +65,7 @@
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
             [futon2.aif.scan-bins :as scan-bins]
+            [futon2.aif.scan-bmr :as scan-bmr]
             [futon2.aif.scan-learn :as scan-learn]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
@@ -1622,8 +1623,27 @@
                   result (scan-learn/step state {:run/id id
                                                  :scan-exposures scan-exposures})
                   next-state (:state result)
+                  current-prior (scan-learn/prior-state)
+                  prior-fields [:schema :delta :kappa :rho :statuses]
+                  differing-fields
+                  (vec (filter #(not= (get next-state %) (get current-prior %))
+                               prior-fields))
+                  bmr-result
+                  (if (seq differing-fields)
+                    {:status :refused :reason :prior-mismatch
+                     :fields differing-fields}
+                    (try
+                      (update (scan-bmr/score current-prior next-state
+                                              (:channel-ticks next-state))
+                              :channels
+                              #(update-vals % (fn [channel] (dissoc channel :counts))))
+                      (catch Exception e
+                        {:status :refused :reason :scan-bmr-unavailable
+                         :error {:class (.getName (class e))
+                                 :message (ex-message e)}})))
                   receipt (cond-> (assoc (:receipt result)
                                          :previous-id previous-id
+                                         :bmr bmr-result
                                          :state-sha256
                                          (load-identity/sha256
                                            (.getBytes (pr-str next-state) "UTF-8")))

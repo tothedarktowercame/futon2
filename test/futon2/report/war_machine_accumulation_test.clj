@@ -3,6 +3,7 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [clojure.edn :as edn] [clojure.java.io :as io]
             [futon2.aif.trace :as trace]
+            [futon2.aif.scan-bmr :as scan-bmr]
             [futon2.aif.scan-learn :as scan-learn]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.full-loop-runner :as runner]
@@ -289,7 +290,36 @@
     (is (= (:concentrations expected)
            (get-in second-record [:scan-learn-state :concentrations])))
     (is (= "scan-a" (get-in second-record [:scan-learn-receipt :previous-id])))
-    (is (not (get-in second-record [:scan-learn-receipt :recovered-by-fold])))))
+    (is (not (get-in second-record [:scan-learn-receipt :recovered-by-fold])))
+    (is (false? (get-in second-record [:scan-learn-receipt :bmr :applied])))
+    (is (= (get-in second-record [:scan-learn-state :channel-ticks :support])
+           (get-in second-record
+                   [:scan-learn-receipt :bmr :channels :support
+                    :n-admitted-ticks])
+           2))
+    (is (every? #(not (contains? % :counts))
+                (vals (get-in second-record [:scan-learn-receipt :bmr :channels]))))))
+
+(deftest scan-bmr-refuses-a-mismatched-carried-prior-without-losing-state
+  (let [mismatched (assoc (scan-learn/prior-state) :kappa 99)]
+    (trace/write-trace! (scan-judgement
+                          scan-a
+                          {:state mismatched
+                           :receipt {:run/id "scan-a" :previous-id nil}})
+                        :dir (str *dir*) :date-str "2026-09-29")
+    (let [outcome (scan-outcome scan-b)]
+      (is (map? (:state outcome)))
+      (is (= 99 (get-in outcome [:state :kappa])))
+      (is (= {:status :refused :reason :prior-mismatch :fields [:kappa]}
+             (get-in outcome [:receipt :bmr]))))))
+
+(deftest scan-bmr-exceptions-do-not-remove-the-learned-state
+  (with-redefs [scan-bmr/score (fn [& _] (throw (ex-info "bmr fixture" {})))]
+    (let [outcome (scan-outcome scan-a)]
+      (is (map? (:state outcome)))
+      (is (= :scan-bmr-unavailable (get-in outcome [:receipt :bmr :reason])))
+      (is (= "clojure.lang.ExceptionInfo"
+             (get-in outcome [:receipt :bmr :error :class]))))))
 
 (deftest scan-learner-recovers-a-gap-by-full-fold
   (publish-scan scan-a (scan-outcome scan-a))
