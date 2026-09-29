@@ -6099,18 +6099,34 @@
                                             (set exclude-channels))]
     (loop [step 0 belief initial-belief prec-state initial-precision-state micro-trace []]
       (let [predictions (belief/predict-observation belief entity-tags prediction-context)
+            ;; AC1 (Joe's 2026-09-02 ruling on C130 2): read each channel
+            ;; through the observation envelope instead of substituting 0.0
+            ;; for a channel this tick never observed. The producer returns
+            ;; one of three typed records per channel.
             triples (into {} (for [ch belief/channels-with-likelihood]
                                [ch (fe/channel-prediction-error observation ch (get predictions ch))]))
             triple-omissions (vec (for [[_ r] triples :when (= :absent (:status r))] r))
             triple-refusals (vec (for [[_ r] triples :when (= :refused (:status r))] r))
+            ;; Channel-local absence/refusal cannot suppress valid channels.
+            ;; Preserve each typed outcome in the step/trace below. An
+            ;; excluded channel was observed; it is left out of precision and
+            ;; the driver (PROOF-2a 6B-8) and recorded as :excluded-channels.
             raw-errors (into {} (for [[ch r] triples
                                       :when (and (= :present (:status r))
                                                  (not (contains? excluded ch)))]
                                   [ch r]))
+            ;; R7: the same resolver feeds behaviour and the provenance
+            ;; stamp. Precision is variance-only; need remains :salience.
             prec-state' (precision/update-precision-state
                          prec-state raw-errors {:salience-mode (arena-salience-mode)})
             weighted-errors (into {} (for [[ch err-map] raw-errors]
                                        [ch (precision/weighted-error prec-state' ch err-map)]))
+            ;; AC2 (Joe's 2026-09-02 ruling on C130 2): the aggregator
+            ;; returns a typed record. :present carries a driver; :unknown
+            ;; means no channel could contribute one, and then this tick
+            ;; applies NO belief event rather than moving belief by a
+            ;; fabricated zero. Malformed entries are rejected one at a
+            ;; time and the surviving channels still aggregate.
             driver-record (belief/r3d-aggregate-driver weighted-errors)
             aggregated-signed-error (:driver driver-record)
             aggregated-magnitude (if (some? aggregated-signed-error)
@@ -6119,9 +6135,16 @@
             driver-rejections (vec (:rejected driver-record))
             ann-error (get weighted-errors :annotation-health)
             error-mag (Math/abs (double (:error ann-error 0.0)))
+            ;; Anneal event weight by step: step 0 = full; step K-1 = small
             anneal-factor (max 0.0 (- 1.0 (/ (double step) max-steps)))
             base-weight (min 1.0 aggregated-magnitude)
             event-weight (* base-weight anneal-factor 0.1)
+            ;; R3d v0.17 (sorry/r3d-per-entity-attribution): per-entity
+            ;; attribution by CONTRIBUTION, not uniform. Each entity's update
+            ;; is weighted by how INCONSISTENT its current belief is with the
+            ;; error direction; weights are normalised so the MEAN equals
+            ;; event-weight. A refused posterior has no numeric contribution:
+            ;; keep its identity/reason on the step, leave its belief untouched.
             entity-health (mapv (fn [[eid p]] [eid (belief/entity-expected-health p)]) belief)
             attribution-omitted (into {} (for [[eid h] entity-health :when (not (number? h))]
                                            [eid (:reason h)]))
@@ -6136,6 +6159,10 @@
                             (mapv (fn [eid] {:entity-id eid :type event-type
                                              :weight (* (double (get incons eid 0.0)) norm)})))))
             belief' (if (seq events) (apply-arena-belief-events belief events) belief)
+            ;; Present-only: a step with nothing absent, refused or excluded
+            ;; writes the same map, in the same order, as before AC1/AC2. No
+            ;; :aggregated-signed-error key means the aggregator reported
+            ;; :unknown, and :aggregated-driver-unknown says which reason.
             step-entry (cond-> (merge {:step step :error-magnitude error-mag}
                                       (when (some? aggregated-signed-error)
                                         {:aggregated-signed-error aggregated-signed-error})
@@ -6156,6 +6183,9 @@
                          (seq attribution-omitted) (assoc :entity-attribution-omitted attribution-omitted))
             micro-trace' (conj micro-trace step-entry)]
         (if (or (>= (inc step) max-steps) (< error-mag error-eps))
+          ;; The typed absence/refusal and aggregator records are the
+          ;; TERMINAL step's; the per-step counts in micro-step-trace cover
+          ;; the earlier steps (AC8 sweeps them).
           {:belief belief' :precision-state prec-state' :prediction-errors weighted-errors
            :micro-step-trace micro-trace'
            :prediction-triple-events (into triple-omissions triple-refusals)

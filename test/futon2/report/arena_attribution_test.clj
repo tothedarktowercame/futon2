@@ -144,6 +144,9 @@
     (is (not= (:belief explicit) (:belief excluded)) "support drives the fixture's sign")
     (is (contains? (:prediction-errors explicit) :support-coverage))
     (is (not (contains? (:prediction-errors excluded) :support-coverage)))
+    (is (contains? (:precision-state explicit) :support-coverage))
+    (is (not (contains? (:precision-state excluded) :support-coverage))
+        "an excluded channel does not enter the precision update")
     (is (= [:support-coverage]
            (get-in excluded [:micro-step-trace 0 :excluded-channels])))
     (is (not (contains? (first (:micro-step-trace excluded)) :prediction-triple-omitted))
