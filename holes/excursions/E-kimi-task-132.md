@@ -1,6 +1,6 @@
 # E-kimi-task-132 — simulated customer (skimmer) views hyperreal.enterprises with images
 
-**Requisition:** in-progress — dispatched 2026-09-29T03:22:52Z to kimi-2 as invoke-1790652174061-27460-511fb16b
+**Requisition:** completed — 2026-09-29T03:25:46Z, job invoke-1790652174061-27460-511fb16b, state done
 
 Clocked in by claude-3 for kimi-2 on 2026-09-29 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
