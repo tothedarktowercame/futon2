@@ -3668,9 +3668,13 @@
         edges (count coupling)
         possible (/ (* n (dec n)) 2)]
     {:workstream-commits
-     (if (pos? total)
-       {:counts counts :total total}
-       {:status :absent :reason :no-workstream-commits})
+     (cond
+       ;; a fifth workstream would count in the ratios' total but not here
+       (seq (remove (set workstreams) (keys ws-commits)))
+       {:status :refused :reason :undeclared-workstream
+        :workstreams (vec (sort (remove (set workstreams) (keys ws-commits))))}
+       (pos? total) {:counts counts :total total}
+       :else {:status :absent :reason :no-workstream-commits})
      :active-repos
      (if (pos? n)
        {:active active :repositories n}

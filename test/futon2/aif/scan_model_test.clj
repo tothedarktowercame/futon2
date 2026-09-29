@@ -82,6 +82,8 @@
     (testing "zero commits keeps the old max-one ratios separate"
       (is (= {:status :absent :reason :no-workstream-commits}
              (:workstream-commits (exposures {} [{:active? false}] [] [] 0))))
+      (is (= {:status :refused :reason :undeclared-workstream :workstreams [:teaching]}
+             (:workstream-commits (exposures {:stack 3 :teaching 2} [{:active? true}] [] [] 0))))
       (let [graph (with-redefs-fn {#'wm/repo-nodes (fn [_] [{:workstream :stack :commits 0 :active? false}])
                                      #'wm/sorry-nodes (constantly [])
                                      #'wm/workstream-nodes (constantly [])
