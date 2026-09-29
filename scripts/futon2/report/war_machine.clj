@@ -6572,7 +6572,8 @@
                     :else nil)
                   :observation observation
                   :scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
-                                         (get-in scan-data [:graph :scan-exposures]))
+                                         (get-in scan-data [:graph :scan-exposures])
+                                         (get-in scan-data [:annotation-graph :scan-exposures]))
                   :belief wm-belief
                   :belief-pre wm-belief-pre
                   :accumulation-state (:state accumulation)
@@ -6718,9 +6719,22 @@
           health (if (pos? sections)
                    (max 0.0 (- 1.0 (min 1.0 (/ (double anomalies) sections))))
                    0.0)]
-      {:health health :anomaly-count anomalies :section-count sections})
-    (catch Exception _
-      {:health 0.0 :anomaly-count 0 :section-count 0})))
+      {:health health
+       :anomaly-count anomalies
+       :section-count sections
+       :scan-exposures
+       {:annotation (if (pos? sections)
+                      {:anomalies anomalies :sections sections}
+                      {:status :absent :reason :no-sections})}})
+    (catch Exception e
+      {:health 0.0
+       :anomaly-count 0
+       :section-count 0
+       :scan-exposures
+       {:annotation {:status :absent
+                     :reason :annotation-source-unreadable
+                     :error {:class (.getName (class e))
+                             :message (ex-message e)}}}})))
 
 (defn- mode-vocabulary-record
   [mode rationales]

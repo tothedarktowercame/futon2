@@ -108,6 +108,58 @@
     (is (= {:status :absent :reason :sorry-registry-unreadable}
            (:sorrys (exposures {} [{:active? true}] [] [] nil))))))
 
+(defn- annotation-scan [anomalies sections]
+  (with-redefs [clojure.core/slurp
+                (constantly (pr-str {:lift-anomalies (range anomalies)
+                                     :sections (range sections)}))]
+    (wm/scan-annotation-graph)))
+
+(deftest annotation-scan-exposures-are-exact-and-persisted
+  (let [scan (annotation-scan 3 10)
+        other {:support {:covered 3 :claims 5}
+               :attack {:covered 1 :claims 4}
+               :workstream-commits {:counts {:stack 1 :consulting 0
+                                              :portfolio 0 :mathematics 0}
+                                    :total 1}}
+        exposures (merge other (:scan-exposures scan))
+        traced (trace/trace-record {:belief {} :belief-pre {}
+                                    :observation {} :decision nil
+                                    :scan-exposures exposures})]
+    (is (= {:annotation {:anomalies 3 :sections 10}}
+           (:scan-exposures scan)))
+    (is (= exposures (:scan-exposures traced)))
+    (is (= other (dissoc (:scan-exposures traced) :annotation)))
+    (is (= {:health 0.7 :anomaly-count 3 :section-count 10}
+           (select-keys scan [:health :anomaly-count :section-count])))
+    (is (= (observation/observe {:annotation-graph scan})
+           (observation/observe {:annotation-graph (dissoc scan :scan-exposures)}))
+        "the exact receipt does not change the observation vector")))
+
+(deftest annotation-exposures-preserve-unprojected-counts-and-typed-absence
+  (testing "anomalies are not clipped to sections"
+    (let [scan (annotation-scan 12 10)]
+      (is (= {:anomalies 12 :sections 10}
+             (get-in scan [:scan-exposures :annotation])))
+      (is (= {:health 0.0 :anomaly-count 12 :section-count 10}
+             (select-keys scan [:health :anomaly-count :section-count])))))
+  (testing "zero sections keeps the legacy fields and names the absent carrier"
+    (let [scan (annotation-scan 3 0)]
+      (is (= {:status :absent :reason :no-sections}
+             (get-in scan [:scan-exposures :annotation])))
+      (is (= {:health 0.0 :anomaly-count 3 :section-count 0}
+             (select-keys scan [:health :anomaly-count :section-count])))))
+  (testing "unreadable source keeps the catch arm's legacy zero projection"
+    (let [scan (with-redefs [clojure.core/slurp
+                             (fn [& _] (throw (java.io.IOException. "annotation fixture unreadable")))]
+                 (wm/scan-annotation-graph))]
+      (is (= {:status :absent
+              :reason :annotation-source-unreadable
+              :error {:class "java.io.IOException"
+                      :message "annotation fixture unreadable"}}
+             (get-in scan [:scan-exposures :annotation])))
+      (is (= {:health 0.0 :anomaly-count 0 :section-count 0}
+             (select-keys scan [:health :anomaly-count :section-count]))))))
+
 (deftest learn-uses-mu-pre-and-fractional-counts
   (let [records [(record (mu [:spawned 1/2] [:refined 1/2])
                          {:covered 2 :claims 5}
