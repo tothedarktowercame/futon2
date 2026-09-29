@@ -928,7 +928,62 @@
    :open [{:assumption "whether the class C is Joe's preference"
            :state "the WEIGHTS are his ruling of 2026-09-22 (authored). The class ASSIGNMENT is not: a target's class is its corpus relation row (focus/associated/useful-elsewhere), which is a declared relation and not a judgement of whether adjacent work is necessary or irrelevant; the code names useful-elsewhere :unrelated and PROOF-wm-works calls that class elsewhere. Whether that reading is what Joe means is NOT ESTABLISHED. See PREFERENCE-AUDIT.md rows 2 and 11; the class-assignment rule's authority is unstated (agent-built, codex-20 handoff B)."}
           {:assumption "no scoring record was read"
-           :state "CTAU-D read no class-scoring run record, so nothing here witnesses the class C being consumed on a live tick; the VERIFIED wires above are the relation and class hops, not the score."}]}]
+           :state "CTAU-D read no class-scoring run record, so nothing here witnesses the class C being consumed on a live tick; the VERIFIED wires above are the relation and class hops, not the score."}]}
+
+  {:id :scan-integrated-predictive :defines :scan-predictive :node :SCAN :class :stack-defined
+   :imports [:a-conc :o] :realised true
+   :formal "ln P(n|alpha) = ln(N!/prod n_o!) + ln B(alpha+n) - ln B(alpha); one-hot n reduces to ln(alpha_o/sum alpha)"
+   :eq "Dirichlet-multinomial posterior predictive; Beta-Binomial is its two-outcome instance"
+   :lean "DarkTower.WarMachine.ScanLearning.dirichletMultinomialLogPredictive" :lean-status :closed
+   :lean-source {:path "DarkTower/WarMachine/ScanLearning.lean" :line 42 :checked-at "mathlib4 85a9726a38"}
+   :lean-at "mathlib4 85a9726a38 (ScanLearning.lean)"
+   :code "src/futon2/aif/scan_learn.clj:154-173 (log-multinomial-coefficient, log-predictive)"
+   :code-at "futon2 969f59fef7" :limits ["Common finite outcome carrier per invocation; malformed exposure decoding is outside Lean."]
+   :production-correspondence {:statement "The Lean definition reuses Holes.logMultivariateBeta and its categorical theorem states the runtime categorical arm."}}
+
+  {:id :scan-status-likelihood :defines :scan-status-ll :node :SCAN :class :stack-defined
+   :imports [:scan-predictive] :realised true
+   :formal "ell(s) = sum over used keys k of ln P(n_k|alpha_k,s); unused keys contribute zero"
+   :eq "product over used channel predictives, represented in log space"
+   :lean "DarkTower.WarMachine.ScanLearning.scanStatusLogLikelihood" :lean-status :closed
+   :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 24 :checked-at "mathlib4 85a9726a38"}
+   :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
+   :code "src/futon2/aif/scan_learn.clj:175-199 (status-log-likelihoods)" :code-at "futon2 969f59fef7"
+   :limits ["Absent/refused/malformed classification and :unused receipt vectors are runtime boundaries."]
+   :production-correspondence {:statement "machineStatusLogLikelihoods_eq identifies the outcome-first machine sum with scanStatusLogLikelihood."}}
+
+  {:id :scan-filter-step :defines :scan-q :node :SCAN :class :stack-defined
+   :imports [:scan-status-ll :a-conc] :realised true
+   :formal "q'(s) proportional to exp(ell(s)) sum_s0 B_rho(s0,s) q(s0), followed by alpha_k,o,s += n_k,o q'(s)"
+   :eq "learned scan filter with B_rho=(1-rho)I+rho Uniform and fractional Dirichlet accumulation"
+   :lean "DarkTower.WarMachine.ScanLearning.scanPosterior" :lean-status :closed
+   :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 35 :checked-at "mathlib4 85a9726a38"}
+   :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
+   :code "src/futon2/aif/scan_learn.clj:201-285 (predicted-q, step)" :code-at "futon2 969f59fef7"
+   :limits ["This is the learner's write-only q, not production mu." "Duplicate ids, no-observed-channel and invalid JVM normalizer are machine-only arms."]
+   :production-correspondence {:statement "machineScanStep_eq binds the admitted posterior arm; ScanLearning.scanAccumulate_conc separately states every used-key write."}}
+
+  {:id :scan-model-reduction :defines :scan-bmr :node :SCAN :class :stack-defined
+   :imports [:a-conc] :realised true :applied false
+   :formal "Compare status-specific, tied-uniform and hand-set evidence; tied/hand-set require DeltaF<=-3, learned requires both available reductions beaten by >=3; exposure floor 20"
+   :eq "DeltaF=ln evidence(full)-ln evidence(reduced), with exact point-model impossibility"
+   :lean "DarkTower.WarMachine.ScanModelReduction.scanBmrChoice" :lean-status :closed
+   :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 44 :checked-at "mathlib4 85a9726a38"}
+   :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
+   :code "src/futon2/aif/scan_bmr.clj:32-148 (evidence, point-evidence, score-channel, score)" :code-at "futon2 969f59fef7"
+   :limits ["Record-only; no chosen model changes production." "Lean reals need no JVM finite-double arm."]
+   :production-correspondence {:statement "machineScanBmr_choice and machineScanBmr_eligible bind the one-channel recorded decision."}}
+
+  {:id :scan-shadow-update :defines :scan-mu-shadow :node :SCAN :class :stack-defined
+   :imports [:scan-status-ll :scan-bmr] :realised true :applied false
+   :formal "mu_shadow(s) proportional to mu_excl(s) exp(sum over used intersection adopted of ln P(n_k|alpha_k,s)); tied keys add no likelihood"
+   :eq "identity-transition exact Bayes update after excluding adopted/tied legacy driver channels"
+   :lean "DarkTower.WarMachine.ScanShadow.scanShadow" :lean-status :closed
+   :lean-source {:path "DarkTower/WarMachine/Proof2/ScanLearningAtMachine.lean" :line 59 :checked-at "mathlib4 85a9726a38"}
+   :lean-at "mathlib4 85a9726a38 (Proof2/ScanLearningAtMachine.lean)"
+   :code "src/futon2/aif/scan_shadow.clj:20-89 (adoption, shadow-row)" :code-at "futon2 969f59fef7"
+   :limits ["Recorded, not applied; trace :applied is false." "Adoption classification and non-finite JVM refusal remain runtime boundaries."]
+   :production-correspondence {:statement "machineScanShadow_eq binds the pure row; ScanShadow proves empty identity, zero preservation, adopted-only dependence and normalization."}}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
