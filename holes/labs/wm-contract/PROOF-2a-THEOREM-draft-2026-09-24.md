@@ -1,5 +1,7 @@
 # PROOF-2a — the PROOF-2 theorem with the 2026-09-24 architectural adaptations
 
+**SUPERSEDED 2026-09-29 by `PROOF-2b.md`** (Joe: requirements and an AIF design adapted to FUTON; forward motion before wiring). Kept as history; its unfinished rows are carried over there, not gating.
+
 Date: 2026-09-24. Author: claude-10, at Joe's direction ("make a PROOF-2a that
 includes our adaptations"). Status: DRAFT.
 

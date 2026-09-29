@@ -1,5 +1,7 @@
 # PROOF-2a: the plan, as a structured proof
 
+**SUPERSEDED 2026-09-29 by `PROOF-2b.md`** (Joe: requirements and an AIF design adapted to FUTON; forward motion before wiring). Kept as history; its unfinished rows are carried over there, not gating.
+
 *Beside `PROOF-2a-THEOREM-draft-2026-09-24.md`, which states the theorem. This file is the plan to reach the state in which the theorem can be witnessed, written in Lamport's structured style: numbered steps, each a claim with a checkable acceptance, its dependencies, and its dispatch log. Every dispatch is entered under its step before it goes out; every reviewed return updates the current table and the step's log line. Joe, 2026-09-26: the proof is to be understandable from this summary, and dispatches are to be logged into it, not to occur reactively.*
 
 **Conventions.** `⟨n⟩m` is step m at depth n. `ACCEPT:` a predicate someone can check from the record. `DEPENDS:` steps that must be ACCEPTED first. `PAR:` what the step parallelises over, and which seats may take it (Claude seats for map and prover work; Kimi seats, one unique task each via `futon3c/scripts/kimi-task.sh` with a test-registry or `lake build` warrant as acceptance, for per-row, per-edge and per-lane work). `STATUS:` refers to the current table. Completion is Completed or Not completed; Activity is Active only for a currently running named job. The older PENDING / IN FLIGHT / ACCEPTED wording in LOGs is historical. `LOG:` packet · seat · job · outcome · shas.
