@@ -602,6 +602,8 @@
     (assoc :scan-learn-receipt (:scan-learn-receipt judge-output))
     (contains? judge-output :scan-learn-state)
     (assoc :scan-learn-state (:scan-learn-state judge-output))
+    (contains? judge-output :scan-shadow)
+    (assoc :scan-shadow (:scan-shadow judge-output))
     ;; I3: one keyword per tick, not per candidate, and inside the flag so the
     ;; default record stays byte-identical. Storing the prediction itself means
     ;; REPLAY does not need the mode — but READING does: under
@@ -775,9 +777,12 @@
                     {:status :absent :reason :scan-learn-stale-predecessor
                      :expected expected :actual actual})]
       (if refusal
-        (-> record
-            (dissoc :scan-learn-state)
-            (assoc :scan-learn-receipt refusal))
+        (cond-> (-> record
+                    (dissoc :scan-learn-state)
+                    (assoc :scan-learn-receipt refusal))
+          (= :scan-learn-stale-predecessor (:reason refusal))
+          (assoc :scan-shadow {:status :absent
+                               :reason :scan-shadow-stale-predecessor}))
         record))))
 
 (defn reconcile-scan-learn
@@ -790,7 +795,13 @@
       (assoc :scan-learn-state (:scan-learn-state record))
 
       (not (contains? record :scan-learn-state))
-      (dissoc :scan-learn-state))))
+      (dissoc :scan-learn-state)
+
+      (contains? record :scan-shadow)
+      (assoc :scan-shadow (:scan-shadow record))
+
+      (not (contains? record :scan-shadow))
+      (dissoc :scan-shadow))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to

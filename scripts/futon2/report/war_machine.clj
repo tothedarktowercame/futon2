@@ -67,6 +67,7 @@
             [futon2.aif.scan-bins :as scan-bins]
             [futon2.aif.scan-bmr :as scan-bmr]
             [futon2.aif.scan-learn :as scan-learn]
+            [futon2.aif.scan-shadow :as scan-shadow]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.policy-free-energy :as policy-free-energy]
@@ -1650,18 +1651,25 @@
                             recovery
                             (assoc :recovered-by-fold true
                                    :recovered-admitted (:admitted recovery)))]
-              {:state next-state :receipt receipt})))))
+              (cond-> {:state next-state :receipt receipt}
+                (and (:scan-learn-state previous) (not recovery))
+                (assoc :predecessor
+                       {:state state
+                        :bmr (get-in previous [:scan-learn-receipt :bmr])})))))))
     (catch Exception e
       {:receipt {:status :absent :reason :scan-learn-unavailable
                  :error {:class (.getName (class e))
                          :message (ex-message e)}}})))
 
 (defn with-scan-learn-outcome
-  "Attach an already computed write-only scan learner outcome."
-  [judgement outcome]
-  (cond-> judgement
-    outcome (assoc :scan-learn-receipt (:receipt outcome))
-    (:state outcome) (assoc :scan-learn-state (:state outcome))))
+  "Attach an already computed write-only scan learner outcome and shadow."
+  ([judgement outcome]
+   (with-scan-learn-outcome judgement outcome nil))
+  ([judgement outcome shadow]
+   (cond-> judgement
+     outcome (assoc :scan-learn-receipt (:receipt outcome))
+     (:state outcome) (assoc :scan-learn-state (:state outcome))
+     (some? shadow) (assoc :scan-shadow shadow))))
 
 (defn- selected-mission-focus
   "The mission THIS tick selected, as a focus map, or nil when the decision is
@@ -6192,6 +6200,43 @@
            :belief-aggregation-events (into driver-omissions driver-rejections)}
           (recur (inc step) belief' prec-state' micro-trace'))))))
 
+(defn scan-shadow-for-tick
+  "Compute the proxy's write-only scan shadow from predecessor learner state."
+  [{:keys [entity-id terminal-belief scan-learning scan-exposures r3-input]}]
+  (try
+    (if-not (:predecessor scan-learning)
+      {:status :absent :reason :no-predecessor-scan-state}
+      (let [{:keys [state bmr]} (:predecessor scan-learning)
+            adoption (scan-shadow/adoption bmr)]
+        (cond
+          (:status adoption) adoption
+          (not (contains? terminal-belief entity-id))
+          {:status :absent :reason :proxy-not-in-belief}
+          :else
+          (let [excluded (:exclude-channels adoption)
+                rerun? (seq excluded)
+                mu-excl (if rerun?
+                          (get-in (r3-inner-loop (assoc r3-input :exclude-channels excluded))
+                                  [:belief entity-id])
+                          (get terminal-belief entity-id))
+                mu-shadow (scan-shadow/shadow-row
+                           {:mu-excl mu-excl
+                            :learner-state state
+                            :exposures scan-exposures
+                            :adopted (:adopted adoption)})]
+            (cond-> {:schema :wm/scan-shadow-v1
+                     :applied false
+                     :entity-id entity-id
+                     :previous-id (get-in scan-learning [:receipt :previous-id])
+                     :adopted (:adopted adoption)
+                     :tied (:tied adoption)
+                     :excluded-channels (vec (sort excluded))
+                     :mu-shadow mu-shadow}
+              rerun? (assoc :mu-excl mu-excl))))))
+    (catch Exception e
+      {:status :refused :reason :scan-shadow-unavailable
+       :error {:class (.getName (class e)) :message (ex-message e)}})))
+
 
 
 
@@ -6355,21 +6400,24 @@
         prev-precision-state
         (or (:precision-state prev-trace-record)
             (precision/initial-precision-state))
+        ;; Inner loop input is retained exactly for the write-only shadow
+        ;; rerun below; production always excludes no channels.
+        r3-input
+        {:initial-belief wm-belief-after-brief
+         :initial-precision-state prev-precision-state
+         :observation observation
+         :entity-tags wm-entity-tags
+         :prediction-context {:entity-repos wm-entity-repos
+                              :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
+                              :entity-ticks wm-entity-ticks
+                              :tick-results (get-in scan-data [:graph :dynamics :ticks])}
+         :max-steps r3-max-steps
+         :error-eps r3-error-eps
+         :exclude-channels #{}}
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace
                 prediction-triple-events belief-aggregation-events]}
-        (r3-inner-loop
-         {:initial-belief wm-belief-after-brief
-          :initial-precision-state prev-precision-state
-          :observation observation
-          :entity-tags wm-entity-tags
-          :prediction-context {:entity-repos wm-entity-repos
-                               :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
-                               :entity-ticks wm-entity-ticks
-                               :tick-results (get-in scan-data [:graph :dynamics :ticks])}
-          :max-steps r3-max-steps
-          :error-eps r3-error-eps
-          :exclude-channels #{}})
+        (r3-inner-loop r3-input)
         wm-belief belief
         scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
                               (get-in scan-data [:loop-health :scan-exposures])
@@ -6385,6 +6433,14 @@
                           {:trace-dir wm-trace-dir
                            :run/id (or run-id scan-id (:scan-id scan-data))
                            :scan-exposures scan-exposures}))
+        scan-shadow-result
+        (when accumulation-entity-id
+          (scan-shadow-for-tick
+           {:entity-id accumulation-entity-id
+            :terminal-belief wm-belief
+            :scan-learning scan-learning
+            :scan-exposures scan-exposures
+            :r3-input r3-input}))
         accumulation (accumulation-outcome-for-tick
                       {:configuration-refusal accumulation-configuration-refusal
                        :enabled? (or trace? accumulation-entity-id) :trace-dir wm-trace-dir
@@ -6722,7 +6778,7 @@
         result0-unasserted (with-scan-learn-outcome
                             (with-accumulation-receipt
                               (carry-mission-focus result0-unfocused mission-focus) accumulation)
-                            scan-learning)
+                            scan-learning scan-shadow-result)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
         result0 (cond-> (assoc (carry-enumeration-completeness result0-unasserted)

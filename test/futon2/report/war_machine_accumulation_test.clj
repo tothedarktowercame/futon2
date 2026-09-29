@@ -3,8 +3,10 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [clojure.edn :as edn] [clojure.java.io :as io]
             [futon2.aif.trace :as trace]
+            [futon2.aif.belief :as belief]
             [futon2.aif.scan-bmr :as scan-bmr]
             [futon2.aif.scan-learn :as scan-learn]
+            [futon2.aif.scan-shadow :as scan-shadow]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -290,6 +292,10 @@
     (is (= (:concentrations expected)
            (get-in second-record [:scan-learn-state :concentrations])))
     (is (= "scan-a" (get-in second-record [:scan-learn-receipt :previous-id])))
+    (is (= (:scan-learn-state second-record)
+           (get-in (scan-outcome scan-c) [:predecessor :state])))
+    (is (= (get-in second-record [:scan-learn-receipt :bmr])
+           (get-in (scan-outcome scan-c) [:predecessor :bmr])))
     (is (not (get-in second-record [:scan-learn-receipt :recovered-by-fold])))
     (is (false? (get-in second-record [:scan-learn-receipt :bmr :applied])))
     (is (= (get-in second-record [:scan-learn-state :channel-ticks :support])
@@ -330,6 +336,7 @@
         saved (publish-scan scan-b outcome)
         expected (:state (scan-learn/fold [scan-a scan-b]))]
     (is (true? (get-in outcome [:receipt :recovered-by-fold])))
+    (is (not (contains? outcome :predecessor)))
     (is (= 1 (get-in outcome [:receipt :recovered-admitted])))
     (is (= expected (:scan-learn-state saved)))))
 
@@ -368,6 +375,79 @@
            (select-keys attached [:decision :belief :observation :accumulation-state])))
     (is (= {:learned :state} (:scan-learn-state attached)))
     (is (= {:status :learned} (:scan-learn-receipt attached)))))
+
+(deftest scan-shadow-wiring-is-write-only-and-reruns-only-for-exclusions
+  (let [proxy "proxy"
+        mu (belief/uniform-prior)
+        learner-state (scan-learn/prior-state)
+        base {:decision decision :belief {proxy mu} :observation {:x 1}}
+        no-adoption {:state {:next true}
+                     :receipt {:previous-id "previous"}
+                     :predecessor {:state learner-state :bmr {:channels {}}}}
+        no-rerun (wm/scan-shadow-for-tick
+                  {:entity-id proxy :terminal-belief (:belief base)
+                   :scan-learning no-adoption :scan-exposures {}
+                   :r3-input {:same :arguments}})]
+    (is (= mu (:mu-shadow no-rerun)))
+    (is (not (contains? no-rerun :mu-excl)))
+    (is (= "previous" (:previous-id no-rerun)))
+    (let [captured (atom nil)
+          rerun-row (assoc mu :spawned 0.2 :refined 0.0)
+          expected-shadow {:shadow true}
+          r3-input {:initial-belief (:belief base) :exclude-channels #{}}
+          adopted (assoc-in no-adoption
+                            [:predecessor :bmr :channels :support]
+                            {:eligible true :chosen-model :learned})
+          result (with-redefs [wm/r3-inner-loop
+                               (fn [args]
+                                 (reset! captured args)
+                                 {:belief {proxy rerun-row}})
+                               scan-shadow/shadow-row
+                               (fn [args]
+                                 (is (= rerun-row (:mu-excl args)))
+                                 expected-shadow)]
+                   (wm/scan-shadow-for-tick
+                    {:entity-id proxy :terminal-belief (:belief base)
+                     :scan-learning adopted
+                     :scan-exposures {:support {:covered 1 :claims 2}}
+                     :r3-input r3-input}))]
+      (is (= (assoc r3-input :exclude-channels #{:support-coverage}) @captured))
+      (is (= [:support] (:adopted result)))
+      (is (= [:support-coverage] (:excluded-channels result)))
+      (is (= rerun-row (:mu-excl result)))
+      (is (= expected-shadow (:mu-shadow result))))
+    (let [failure (with-redefs [scan-shadow/shadow-row
+                                (fn [_] (throw (ex-info "shadow fixture" {})))]
+                    (wm/scan-shadow-for-tick
+                     {:entity-id proxy :terminal-belief (:belief base)
+                      :scan-learning no-adoption :scan-exposures {}
+                      :r3-input {}}))
+          attached (wm/with-scan-learn-outcome base no-adoption failure)]
+      (is (= :scan-shadow-unavailable (:reason failure)))
+      (is (= (select-keys base [:decision :belief :observation])
+             (select-keys attached [:decision :belief :observation])))
+      (is (= (:state no-adoption) (:scan-learn-state attached))))
+    (is (= {:status :absent :reason :no-predecessor-scan-state}
+           (wm/scan-shadow-for-tick
+            {:entity-id proxy :terminal-belief (:belief base)
+             :scan-learning {:receipt {:status :learned}}})))
+    (is (not (contains? (wm/with-scan-learn-outcome base no-adoption nil)
+                        :scan-shadow)))))
+
+(deftest stale-scan-publication-invalidates-its-shadow
+  (let [a (scan-outcome scan-a)
+        b (scan-outcome scan-b)]
+    (publish-scan scan-a a)
+    (let [judgement (assoc (scan-judgement scan-b b)
+                           :scan-shadow {:schema :wm/scan-shadow-v1})
+          saved (:record (trace/write-trace! judgement
+                                              :dir (str *dir*)
+                                              :date-str "2026-09-29"
+                                              :return-record? true))
+          reconciled (trace/reconcile-scan-learn judgement saved)]
+      (is (= {:status :absent :reason :scan-shadow-stale-predecessor}
+             (:scan-shadow saved)))
+      (is (= (:scan-shadow saved) (:scan-shadow reconciled))))))
 
 ;; ---------------------------------------------------------------------
 ;; ITEM6-CONSUMER-I: the BMR score receipt rides the same publication and
@@ -462,3 +542,22 @@
     (is (some? learner-gate))
     (is (= '(or trace? accumulation-entity-id) learner-gate))
     (is (= accumulation-gate learner-gate))))
+
+(deftest judge-wires-the-shadow-only-for-the-accumulation-entity
+  (let [judge-form (read-string (clojure.repl/source-fn 'futon2.report.war-machine/judge))
+        forms (tree-seq coll? seq judge-form)
+        shadow-gate (some (fn [f]
+                            (when (and (seq? f) (= 'when (first f))
+                                       (= 'accumulation-entity-id (second f))
+                                       (seq? (nth f 2 nil))
+                                       (= 'scan-shadow-for-tick (first (nth f 2))))
+                              f))
+                          forms)
+        attachment (some (fn [f]
+                           (when (and (seq? f)
+                                      (= 'with-scan-learn-outcome (first f))
+                                      (= 'scan-shadow-result (last f)))
+                             f))
+                         forms)]
+    (is (some? shadow-gate))
+    (is (some? attachment))))

@@ -114,6 +114,13 @@
       (is (contains? r :cascade-problems))
       (is (contains? r :mode)))))
 
+(deftest scan-shadow-is-persisted-present-only
+  (let [shadow {:schema :wm/scan-shadow-v1 :applied false}
+        present (trace/trace-record (assoc sample-judge-output :scan-shadow shadow))
+        absent (trace/trace-record sample-judge-output)]
+    (is (= shadow (:scan-shadow present)))
+    (is (not (contains? absent :scan-shadow)))))
+
 (deftest route-roundtrips-in-hop-order-test
   (let [route [{:node :R20 :via "scan" :at "2026-09-01T00:00:01Z"}
                {:node :R12 :via "inventory" :at "2026-09-01T00:00:02Z"}
