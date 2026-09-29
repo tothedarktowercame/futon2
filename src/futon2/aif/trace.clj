@@ -777,12 +777,18 @@
                     {:status :absent :reason :scan-learn-stale-predecessor
                      :expected expected :actual actual})]
       (if refusal
+        ;; The shadow was computed from the same predecessor, so it falls
+        ;; with the state whatever the refusal; a record without a shadow
+        ;; does not gain one (present-only).
         (cond-> (-> record
                     (dissoc :scan-learn-state)
                     (assoc :scan-learn-receipt refusal))
-          (= :scan-learn-stale-predecessor (:reason refusal))
-          (assoc :scan-shadow {:status :absent
-                               :reason :scan-shadow-stale-predecessor}))
+          (contains? record :scan-shadow)
+          (assoc :scan-shadow
+                 {:status :absent
+                  :reason (if (= :scan-learn-stale-predecessor (:reason refusal))
+                            :scan-shadow-stale-predecessor
+                            :scan-shadow-publication-history-unavailable)}))
         record))))
 
 (defn reconcile-scan-learn

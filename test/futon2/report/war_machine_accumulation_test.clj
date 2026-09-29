@@ -346,6 +346,8 @@
     (publish-scan scan-a a)
     (let [stale (publish-scan scan-b b)]
       (is (not (contains? stale :scan-learn-state)))
+      (is (not (contains? stale :scan-shadow))
+          "a stale publication without a shadow does not gain one")
       (is (= {:status :absent :reason :scan-learn-stale-predecessor
               :expected nil :actual "scan-a"}
              (:scan-learn-receipt stale))))
