@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is use-fixtures]]
             [clojure.edn :as edn] [clojure.java.io :as io]
             [futon2.aif.trace :as trace]
+            [futon2.aif.scan-learn :as scan-learn]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -243,6 +244,99 @@
     (spit (io/file *dir* "wm-trace-2026-09-25.edn") "{:broken")
     (is (thrown-with-msg? RuntimeException #"EOF" (publish pending)))
     (is (not (.exists (io/file *dir* "wm-trace-2026-09-26.edn"))))))
+
+;; ---------------------------------------------------------------------
+;; ITEM6B SCAN-LIVE-CARRY-I: write-only raw-scan learner carry.
+
+(def scan-a {:run/id "scan-a"
+             :scan-exposures {:support {:covered 5 :claims 5}}})
+(def scan-b {:run/id "scan-b"
+             :scan-exposures {:support {:covered 0 :claims 5}}})
+(def scan-c {:run/id "scan-c"
+             :scan-exposures {:attack {:covered 4 :claims 4}}})
+
+(defn scan-outcome [tick]
+  (wm/scan-learn-outcome-for-tick
+    {:trace-dir (str *dir*)
+     :run/id (:run/id tick)
+     :scan-exposures (:scan-exposures tick)}))
+
+(defn scan-judgement [tick outcome]
+  (wm/with-scan-learn-outcome
+    {:run/id (:run/id tick)
+     :scan-exposures (:scan-exposures tick)
+     :decision decision :observation {} :belief {} :belief-pre {}
+     }
+    outcome))
+
+(defn publish-scan [tick outcome]
+  (:record (trace/write-trace! (scan-judgement tick outcome)
+                               :dir (str *dir*) :date-str "2026-09-29"
+                               :return-record? true)))
+
+(deftest scan-learner-carries-through-two-publications
+  (let [first-record (publish-scan scan-a (scan-outcome scan-a))
+        second-record (publish-scan scan-b (scan-outcome scan-b))
+        expected (:state (scan-learn/fold [scan-a scan-b]))]
+    (is (= (:scan-learn-state first-record)
+           (:state (scan-learn/fold [scan-a]))))
+    (is (= (identity/sha256
+             (.getBytes (pr-str (:scan-learn-state first-record)) "UTF-8"))
+           (get-in first-record [:scan-learn-receipt :state-sha256])))
+    (is (= expected (:scan-learn-state second-record)))
+    (is (= (:q expected) (get-in second-record [:scan-learn-state :q])))
+    (is (= (:concentrations expected)
+           (get-in second-record [:scan-learn-state :concentrations])))
+    (is (= "scan-a" (get-in second-record [:scan-learn-receipt :previous-id])))
+    (is (not (get-in second-record [:scan-learn-receipt :recovered-by-fold])))))
+
+(deftest scan-learner-recovers-a-gap-by-full-fold
+  (publish-scan scan-a (scan-outcome scan-a))
+  (trace/write-trace! {:run/id "pre-carrier-gap" :decision decision
+                       :observation {} :belief {} :belief-pre {}}
+                      :dir (str *dir*) :date-str "2026-09-29")
+  (let [outcome (scan-outcome scan-b)
+        saved (publish-scan scan-b outcome)
+        expected (:state (scan-learn/fold [scan-a scan-b]))]
+    (is (true? (get-in outcome [:receipt :recovered-by-fold])))
+    (is (= 1 (get-in outcome [:receipt :recovered-admitted])))
+    (is (= expected (:scan-learn-state saved)))))
+
+(deftest scan-learner-stale-publication-drops-state-and-next-tick-recovers
+  (let [a (scan-outcome scan-a)
+        b (scan-outcome scan-b)]
+    (publish-scan scan-a a)
+    (let [stale (publish-scan scan-b b)]
+      (is (not (contains? stale :scan-learn-state)))
+      (is (= {:status :absent :reason :scan-learn-stale-predecessor
+              :expected nil :actual "scan-a"}
+             (:scan-learn-receipt stale))))
+    (let [outcome (scan-outcome scan-c)
+          saved (publish-scan scan-c outcome)
+          expected (:state (scan-learn/fold [scan-a scan-b scan-c]))]
+      (is (true? (get-in outcome [:receipt :recovered-by-fold])))
+      (is (= 2 (get-in outcome [:receipt :recovered-admitted])))
+      (is (= expected (:scan-learn-state saved))))))
+
+(deftest scan-learner-exceptions-are-recorded-not-thrown
+  (with-redefs [scan-learn/step (fn [& _] (throw (ex-info "fixture" {:kind :fixture})))]
+    (let [outcome (scan-outcome scan-a)]
+      (is (nil? (:state outcome)))
+      (is (= :absent (get-in outcome [:receipt :status])))
+      (is (= :scan-learn-unavailable (get-in outcome [:receipt :reason])))
+      (is (= "clojure.lang.ExceptionInfo" (get-in outcome [:receipt :error :class]))))))
+
+(deftest scan-learner-attachment-is-write-only
+  (let [control {:decision decision
+                 :belief {"entity" {:spawned 1.0}}
+                 :observation {:loop-health 0.5}
+                 :accumulation-state {:control :same}}
+        outcome {:state {:learned :state} :receipt {:status :learned}}
+        attached (wm/with-scan-learn-outcome control outcome)]
+    (is (= (select-keys control [:decision :belief :observation :accumulation-state])
+           (select-keys attached [:decision :belief :observation :accumulation-state])))
+    (is (= {:learned :state} (:scan-learn-state attached)))
+    (is (= {:status :learned} (:scan-learn-receipt attached)))))
 
 ;; ---------------------------------------------------------------------
 ;; ITEM6-CONSUMER-I: the BMR score receipt rides the same publication and

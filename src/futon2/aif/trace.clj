@@ -598,6 +598,10 @@
            :accumulation-update-input (:accumulation-update-input judge-output))
     (:accumulation-initialization judge-output)
     (assoc :accumulation-initialization (:accumulation-initialization judge-output))
+    (contains? judge-output :scan-learn-receipt)
+    (assoc :scan-learn-receipt (:scan-learn-receipt judge-output))
+    (contains? judge-output :scan-learn-state)
+    (assoc :scan-learn-state (:scan-learn-state judge-output))
     ;; I3: one keyword per tick, not per candidate, and inside the flag so the
     ;; default record stays byte-identical. Storing the prediction itself means
     ;; REPLAY does not need the mode — but READING does: under
@@ -706,22 +710,26 @@
         (assoc :bmr-receipt receipt)
         (assoc-in [:decision :accumulation-bmr] receipt))))
 
+(declare reconcile-scan-learn)
+
 (defn reconcile-accumulation
   "Copy the publication's accumulation outcome into its caller's judgement.
    No selection fields are changed. A refused update cannot retain its state."
   [judgement record]
-  (if-not (contains? record :accumulation-receipt)
-    judgement
-    (let [receipt (:accumulation-receipt record)]
-      (reduce (fn [out k]
-                (if (contains? record k) (assoc out k (get record k)) (dissoc out k)))
-              (cond-> (-> judgement
-                          (assoc :accumulation-receipt receipt)
-                          (assoc-in [:decision :accumulation] receipt))
-                (contains? record :bmr-receipt)
-                (assoc-in [:decision :accumulation-bmr] (:bmr-receipt record)))
-              [:accumulation-state :accumulation-update-input :accumulation-initialization
-               :bmr-receipt]))))
+  (let [reconciled
+        (if-not (contains? record :accumulation-receipt)
+          judgement
+          (let [receipt (:accumulation-receipt record)]
+            (reduce (fn [out k]
+                      (if (contains? record k) (assoc out k (get record k)) (dissoc out k)))
+                    (cond-> (-> judgement
+                                (assoc :accumulation-receipt receipt)
+                                (assoc-in [:decision :accumulation] receipt))
+                      (contains? record :bmr-receipt)
+                      (assoc-in [:decision :accumulation-bmr] (:bmr-receipt record)))
+                    [:accumulation-state :accumulation-update-input :accumulation-initialization
+                     :bmr-receipt])))]
+    (reconcile-scan-learn reconciled record)))
 
 (defn- finalize-accumulation [dir record]
   (cond
@@ -751,13 +759,47 @@
     (with-bmr-receipt record)
     :else record))
 
+(defn- finalize-scan-learn [dir record]
+  (if-not (:scan-learn-state record)
+    record
+    (let [history (read-history-strict 1 :dir dir)
+          previous (peek (:records history))
+          actual (or (:run/id previous) (:timestamp previous))
+          expected (get-in record [:scan-learn-receipt :previous-id])
+          refusal (cond
+                    (not= :ok (:status history))
+                    {:status :absent :reason :scan-learn-publication-history-unavailable
+                     :cause history}
+
+                    (not= expected actual)
+                    {:status :absent :reason :scan-learn-stale-predecessor
+                     :expected expected :actual actual})]
+      (if refusal
+        (-> record
+            (dissoc :scan-learn-state)
+            (assoc :scan-learn-receipt refusal))
+        record))))
+
+(defn reconcile-scan-learn
+  "Copy the scan learner publication outcome back to the returned judgement."
+  [judgement record]
+  (if-not (contains? record :scan-learn-receipt)
+    judgement
+    (cond-> (assoc judgement :scan-learn-receipt (:scan-learn-receipt record))
+      (contains? record :scan-learn-state)
+      (assoc :scan-learn-state (:scan-learn-state record))
+
+      (not (contains? record :scan-learn-state))
+      (dissoc :scan-learn-state))))
+
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
    the daily trace file. Creates the trace directory if absent. Returns
    the path written. With `:return-record? true`, return
    `{:path <path> :record <exact-record-written>}`; the default return value and
-   return option does not affect persisted bytes. Accumulation is finalized
-   under the append lock; a stale update becomes an absence without state.
+   return option does not affect persisted bytes. Accumulation and scan
+   learning are finalized under the append lock; a stale update becomes an
+   absence without state.
    This lets a post-write witness cite the
    record's own timestamp/run id without constructing a second record.
 
@@ -779,7 +821,9 @@
         publication (do
                        (io/make-parents path)
                        (lane-futility/append-indexed-trace!
-                        dir path record #(finalize-accumulation dir %)))]
+                        dir path record #(->> %
+                                             (finalize-accumulation dir)
+                                             (finalize-scan-learn dir))))]
     (if return-record?
       publication
       (:path publication))))

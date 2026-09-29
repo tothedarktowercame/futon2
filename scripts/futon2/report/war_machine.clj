@@ -65,6 +65,7 @@
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
             [futon2.aif.scan-bins :as scan-bins]
+            [futon2.aif.scan-learn :as scan-learn]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.policy-free-energy :as policy-free-energy]
@@ -1598,6 +1599,49 @@
   (-> judgement
       (assoc :accumulation-receipt (:receipt outcome))
       (assoc-in [:decision :accumulation] (:receipt outcome))))
+
+(defn scan-learn-outcome-for-tick
+  "Advance the raw-scan learner from the strict immediate predecessor.
+
+   A predecessor without carried state triggers an exact full-history replay;
+   normal ticks remain O(1).  This receipt/state is write-only and never
+   supplies selection, observation, accumulation, or strategic belief."
+  [{:keys [trace-dir run/id scan-exposures]}]
+  (try
+    (let [history (trace/read-history-strict 1 :dir trace-dir)]
+      (if-not (= :ok (:status history))
+        {:receipt history}
+        (let [previous (peek (:records history))
+              previous-id (or (:run/id previous) (:timestamp previous))
+              recovery (when-not (:scan-learn-state previous)
+                         (scan-learn/fold-trace-dir trace-dir))]
+          (if (and recovery (not (:state recovery)))
+            {:receipt recovery}
+            (let [state (or (:scan-learn-state previous) (:state recovery)
+                            (scan-learn/prior-state))
+                  result (scan-learn/step state {:run/id id
+                                                 :scan-exposures scan-exposures})
+                  next-state (:state result)
+                  receipt (cond-> (assoc (:receipt result)
+                                         :previous-id previous-id
+                                         :state-sha256
+                                         (load-identity/sha256
+                                           (.getBytes (pr-str next-state) "UTF-8")))
+                            recovery
+                            (assoc :recovered-by-fold true
+                                   :recovered-admitted (:admitted recovery)))]
+              {:state next-state :receipt receipt})))))
+    (catch Exception e
+      {:receipt {:status :absent :reason :scan-learn-unavailable
+                 :error {:class (.getName (class e))
+                         :message (ex-message e)}}})))
+
+(defn with-scan-learn-outcome
+  "Attach an already computed write-only scan learner outcome."
+  [judgement outcome]
+  (cond-> judgement
+    outcome (assoc :scan-learn-receipt (:receipt outcome))
+    (:state outcome) (assoc :scan-learn-state (:state outcome))))
 
 (defn- selected-mission-focus
   "The mission THIS tick selected, as a focus map, or nil when the decision is
@@ -6347,6 +6391,17 @@
                                                 driver-rejections)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
+        scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
+                              (get-in scan-data [:loop-health :scan-exposures])
+                              (get-in scan-data [:mission-triage :scan-exposures])
+                              (get-in scan-data [:graph :scan-exposures])
+                              (get-in scan-data [:frames :scan-exposures])
+                              (get-in scan-data [:annotation-graph :scan-exposures]))
+        scan-learning (when trace?
+                        (scan-learn-outcome-for-tick
+                          {:trace-dir wm-trace-dir
+                           :run/id (or run-id scan-id (:scan-id scan-data))
+                           :scan-exposures scan-exposures}))
         accumulation (accumulation-outcome-for-tick
                       {:configuration-refusal accumulation-configuration-refusal
                        :enabled? (or trace? accumulation-entity-id) :trace-dir wm-trace-dir
@@ -6612,12 +6667,7 @@
                      :critical-path (get-in portfolio-step [:structure :critical-path] [])}
                     :else nil)
                   :observation observation
-                  :scan-exposures (merge (get-in scan-data [:support-attack :scan-exposures])
-                                         (get-in scan-data [:loop-health :scan-exposures])
-                                         (get-in scan-data [:mission-triage :scan-exposures])
-                                         (get-in scan-data [:graph :scan-exposures])
-                                         (get-in scan-data [:frames :scan-exposures])
-                                         (get-in scan-data [:annotation-graph :scan-exposures]))
+                  :scan-exposures scan-exposures
                   :belief wm-belief
                   :belief-pre wm-belief-pre
                   :accumulation-state (:state accumulation)
@@ -6686,8 +6736,10 @@
         ;; U21: the last of the three terminal projections, applied in its own
         ;; step so the two S4/U11 projections above keep the exact shape their
         ;; rows built and reviewed.
-        result0-unasserted (with-accumulation-receipt
-                           (carry-mission-focus result0-unfocused mission-focus) accumulation)
+        result0-unasserted (with-scan-learn-outcome
+                            (with-accumulation-receipt
+                              (carry-mission-focus result0-unfocused mission-focus) accumulation)
+                            scan-learning)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
         result0 (cond-> (assoc (carry-enumeration-completeness result0-unasserted)
