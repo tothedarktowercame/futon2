@@ -397,7 +397,14 @@ universe (e.g. no-constructed-candidate with empty declines: the record does
 not even say why no candidate was built). Follow the refusal to the code that
 produces it (grep the refusal kind under futon2/src/futon2/aif: cascade_problems,
 wm/cascade_decision, target_field, decision_gate) and to the inputs it read.
-Then ask whether the ~290 universe-not-admitted refusals are right.
+
+COVERAGE IS A REQUIREMENT (Joe, 2026-09-29): the War Machine ranges over ALL
+unfinished Missions, Excursions and Tickets in FUTON. A target field in which
+only a handful of targets are admitted is a placeholder, not a complete field,
+and is a DEFECT however correct each refusal is under today's declarations.
+So a universe-not-admitted refusal on an unfinished mission is never
+VERDICT: no-defect. If admitting it needs more than code (a declaration only
+Joe can make), answer VERDICT: cannot-repair and say exactly what is missing.
 
 DEBUG LIVE: you may evaluate READ-ONLY forms in the serving JVM to watch the
 judge's functions on today's inputs: write the form to a file and run
@@ -409,9 +416,10 @@ reports and read the real repair store); never reload a namespace.
 A fix is code, not data surgery: do not edit mission files, ledgers or stores to
 make a refusal disappear. If the right fix is that a target genuinely has no
 admissible action and some OTHER target should be constructible, fix whatever
-stops that one. If the abstention is correct and nothing in code should change,
-say so with the evidence: that is VERDICT: no-defect, and it will stop the loop
-for a human decision.
+stops that one. VERDICT: no-defect on an abstention is allowed only when every unfinished
+Mission, Excursion and Ticket was admitted to the field and each admitted one
+was refused for a reason that is true of the task itself (its wants already
+hold, say). It stops the loop for a human decision.
 """
 
 
