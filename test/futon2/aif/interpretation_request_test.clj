@@ -76,7 +76,9 @@
           (is (= (pr-str action) (pr-str (get-in r [:target :action]))))
           (is (citations-match? r))
           (is (not (str/includes? (get-in r [:retrieval :query]) "NOT-QUERY")))
-          (is (= ["embedding" "tier0"] (mapv :kind @calls)))
+          ;; retriever runs execute concurrently: invocation order is
+          ;; nondeterministic; the request's runs stay in configured order
+          (is (= ["embedding" "tier0"] (sort (mapv :kind @calls))))
           (is (= [:unjudged :unjudged]
                  (mapv #(get-in % [:candidates 0 :judgment]) (get-in r [:retrieval :runs]))))
           (is (= 0 @constructors))
@@ -103,7 +105,7 @@
                                             [{:pattern "family/result"}]))))
           r (if both? (finding run) (run))
           partial (if both? (:request r) r)]
-      (is (= ["embedding" "tier0"] @calls))
+      (is (= ["embedding" "tier0"] (sort @calls)))
       (is (= 2 (count (get-in partial [:retrieval :runs]))))
       (is (seq (get-in partial [:retrieval :runs 0 :failures])))
       (if both?
@@ -226,3 +228,37 @@
           (is (= 2 (get @pin-counts (first lib-paths))))
           (is (= 2 (get @pin-counts (second lib-paths))))
           (is (not= (lib-pins r1) (lib-pins r3))))))))
+
+(deftest retriever-runs-run-concurrently-in-configured-order
+  ;; (a) two 1s retrievers finish in < 1.6s, runs in configured order with
+  ;; the same content as sequential; (b) one throwing retriever records its
+  ;; own failure and leaves the other run unaffected.
+  (let [{:keys [action identity entry opts]} (fixture :advance-mission "## IDENTIFY\nHave a spec; want a tested implementation.\n")
+        opts (assoc opts :resolve-fn (constantly entry))
+        t0 (System/nanoTime)
+        r (request/prepare! action identity
+                            (assoc opts :retrieve-fn
+                                   (fn [q] (Thread/sleep 1000)
+                                     [{:pattern (str "family/" (:kind q)) :score 1}])))
+        ms (/ (double (- (System/nanoTime) t0)) 1e6)]
+    (is (< ms 1600.0))
+    (is (= ["embedding" "tier0"] (mapv :retriever (get-in r [:retrieval :runs]))))
+    (is (= ["family/embedding" "family/tier0"]
+           (mapv #(get-in % [:candidates 0 :pattern]) (get-in r [:retrieval :runs]))))
+    (is (= (mapv :source-id (get-in r [:retrieval :runs 0 :parameters :library-sources] []))
+           (mapv :source-id (get-in r [:retrieval :runs 1 :parameters :library-sources] []))))
+    (let [t1 (System/nanoTime)
+          r2 (request/prepare! action identity
+                               (assoc opts :retrieve-fn
+                                      (fn [q] (Thread/sleep 1000)
+                                        (when (= "embedding" (:kind q))
+                                          (throw (ex-info "controlled retriever failure" {})))
+                                        [{:pattern "family/ok" :score 1}])))
+          ms2 (/ (double (- (System/nanoTime) t1)) 1e6)]
+      (is (< ms2 1600.0))
+      (is (= :interpretation/retriever-failed
+             (get-in r2 [:retrieval :runs 0 :failures 0 :kind])))
+      (is (= "controlled retriever failure"
+             (get-in r2 [:retrieval :runs 0 :failures 0 :reason])))
+      (is (= [] (get-in r2 [:retrieval :runs 1 :failures])))
+      (is (= "family/ok" (get-in r2 [:retrieval :runs 1 :candidates 0 :pattern]))))))

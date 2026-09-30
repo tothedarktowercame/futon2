@@ -152,7 +152,9 @@
   "Pin each of PATHS into DIR, once per (DIR, library revision). REVISION-FN
    pins the key: it is called on the first library path (all library files
    share one repo HEAD). REGISTER! performs the per-request registration
-   (on-capture, sources/pins) for each pin, memo hit or miss. Cached pins
+   (on-capture, sources/pins) for each pin, memo hit or miss, with the pin's
+   index in PATHS so registration order stays deterministic when the
+   retriever runs execute concurrently. Cached pins
    drop :bytes: library pins are read for :snapshot/:source-id/:byte-count
    only, and retaining ~1415 files' bytes per revision serves nothing."
   [dir paths revision-fn register!]
@@ -162,11 +164,11 @@
           key [(str (.getCanonicalFile (io/file dir))) rev]
           cached (get @!library-pins-memo key)]
       (if cached
-        (mapv register! cached)
+        (vec (map-indexed (fn [i p] (register! i p)) cached))
         (let [fresh (mapv (fn [path] (dissoc (pin! dir path revision-fn) :bytes)) paths)]
           (swap! !library-pins-memo
                  (fn [m] (assoc (if (< (count m) 32) m {}) key fresh)))
-          (mapv register! fresh))))))
+          (vec (map-indexed (fn [i p] (register! i p)) fresh)))))))
 
 (defn- captured-request!
   "Pin target and retrieval inputs; return unjudged candidates only.
@@ -198,23 +200,40 @@
                   {:identity identity :action action :sources [(:source target-pin)]})
          query (str/join "\n\n" (map :quote citations))
          sources (atom [(:source target-pin)])
-         pins (atom [target-pin])
-         register! (fn [p] (on-capture (:source p)) (swap! sources conj (:source p)) (swap! pins conj p) p)
-         capture! (fn [path] (register! (pin! dir path revision-fn)))
+         ;; pins carry a sort key ([0]=target, [1 run 0/1]=run code/index,
+         ;; [2 i]=library i): the retriever runs capture concurrently, so the
+         ;; request's observable pin order is sorted, not arrival order
+         pins (atom [[[0] target-pin]])
+         register! (fn [k p] (on-capture (:source p)) (swap! sources conj (:source p)) (swap! pins conj [k p]) p)
+         ;; both retriever runs name the same implementation/index files;
+         ;; under concurrency each path is pinned once (a shared delay), and
+         ;; each run still registers its own pin and records its own failure
+         pin-delays (atom {})
+         capture! (fn [k path]
+                    (let [d (or (get @pin-delays path)
+                                (get (swap! pin-delays
+                                            #(if (contains? % path) %
+                                                 (assoc % path (delay (pin! dir path revision-fn)))))
+                                     path))]
+                      (register! k @d)))
          library-pins (delay
                         (mapv (fn [p]
                                 (let [f (io/file (:canonical-path p))]
                                   {:snapshot (:snapshot p) :source-id (get-in p [:source :id])
                                    :relative (str (.getName (.getParentFile f)) "/" (.getName f))}))
-                              (pinned-library dir (library-fn) revision-fn register!)))
-         runs (mapv
-               (fn [{:keys [kind implementation index k]}]
-                 (let [partial (atom {:retriever (name kind) :version "unavailable"
-                                      :index-source {:status :none :reason :capture-failed}
-                                      :parameters {:k k :scope (if (= kind :tier0) :whole-index :embedding-index)}
-                                      :candidates [] :failures []})]
-                   (try
-                     (let [code (capture! implementation) idx (capture! index)
+                              (pinned-library dir (library-fn) revision-fn
+                                              (fn [i p] (register! [2 i] p)))))
+         ;; the retriever subprocesses (~3.8s cold start each) run
+         ;; concurrently; pmap preserves configured order, and each run keeps
+         ;; its own partial/failure accounting and per-subprocess timeout
+         runs (vec (pmap
+                    (fn [[r {:keys [kind implementation index k]}]]
+                      (let [partial (atom {:retriever (name kind) :version "unavailable"
+                                           :index-source {:status :none :reason :capture-failed}
+                                           :parameters {:k k :scope (if (= kind :tier0) :whole-index :embedding-index)}
+                                           :candidates [] :failures []})]
+                        (try
+                          (let [code (capture! [1 r 0] implementation) idx (capture! [1 r 1] index)
                            _ (swap! partial assoc :version (get-in code [:source :sha256])
                                     :index-source (get-in idx [:source :id])
                                     :parameters (assoc (:parameters @partial)
@@ -234,18 +253,19 @@
                        (let [normalized (normalize-rows (vec rows) library)]
                          (assoc @partial :candidates (:candidates normalized)
                                 :row-failures (:failures normalized))))
-                     (catch Exception e
-                       (assoc @partial :failures [{:kind (or (:interpretation/refusal (ex-data e))
-                                                                           :interpretation/retriever-failed)
-                                                    :reason (.getMessage e) :details (ex-data e)}])))))
-               retriever-specs)
+                          (catch Exception e
+                            (assoc @partial :failures [{:kind (or (:interpretation/refusal (ex-data e))
+                                                                                :interpretation/retriever-failed)
+                                                        :reason (.getMessage e) :details (ex-data e)}])))))
+                    (map-indexed vector retriever-specs)))
          request {:schema :wm/interpretation-request-v1 :identity identity
                   :target {:id (:target action) :kind kind :action action
                            :source (get-in target-pin [:source :id]) :citations citations :pinned-at pinned-at :tension-rule (:tension-rule tension)}
                   :sources (vec (vals (into (sorted-map) (map (juxt :id clojure.core/identity)) @sources)))
-                  :captured-bytes (reduce + (map :byte-count (vals (into {} (map (juxt :snapshot clojure.core/identity)) @pins))))
+                  :captured-bytes (reduce + (map :byte-count (vals (into {} (map (fn [[_ p]] [(:snapshot p) p])) @pins))))
                   :source-paths (mapv #(assoc (select-keys % [:requested-path :canonical-path])
-                                             :source-id (get-in % [:source :id])) @pins)
+                                             :source-id (get-in % [:source :id]))
+                                      (mapv second (sort-by first @pins)))
                   :retrieval {:query query :citations citations :runs runs}}]
      (need! (= #{:embedding :tier0} (set (map :kind retriever-specs)))
             :interpretation/retriever-set-invalid {:request request})
