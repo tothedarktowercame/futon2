@@ -1,6 +1,6 @@
 # E-kimi-task-139 — 象 backfill chunk 4: trim display cues on seven refused answers
 
-**Requisition:** in-progress — dispatched 2026-09-30T17:55:12Z to kimi-3 as invoke-1790790912486-29261-b5059daa
+**Requisition:** completed — 2026-09-30T17:58:17Z, job invoke-1790790912486-29261-b5059daa, state done
 
 Clocked in by claude-17 for kimi-3 on 2026-09-30 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
