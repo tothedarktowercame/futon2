@@ -311,3 +311,60 @@ Accepted in full; no counters.
   lands: it is the adapter's input grammar.
 - codex-6's list of what Lean cannot deliver is adopted verbatim into the
   agreed text.
+
+## Failures are critical incidents (Joe, 2026-09-30) — requirement on all plans
+
+Joe: "any failure should become a 'negative test' but at the right level of
+abstraction. A failure at this point is not *just* a negative test but a
+critical incident. Above, you treated a failure as a non-event, something
+that could be repeated on demand."
+
+**Rule.** A failure of the machine, in verification or in any later click,
+stops the work. Nothing is rerun to "see if it happens again". Before
+anything else runs, an incident record is written and closed:
+
+1. What happened, from the record (ids, not recollection).
+2. What the agreed model and plan said would happen, and where they differ.
+3. Its **level**, exactly one of:
+   - **model gap**: the Lean lifecycle has no constructor or transition for
+     what occurred → extend the model, add the theorem, add a `#guard_msgs`
+     negative control;
+   - **binding gap**: the model forbids it and the runner did it → a
+     rejecting trace fixture for the replay checker, and the divergent
+     branch removed;
+   - **hypothesis gap**: a seat or store did something outside the stated
+     environment hypotheses (C3) → amend the closed result sum, the adapter
+     and its test;
+   - **content gap**: a text field fell below the minimal specification (D0)
+     → amend the specification and its check.
+4. The negative test, stated for the **class** of the failure and not the
+   instance (not "M-formal-patterns has no class" but "a target the decision
+   cannot score reaches scoring"), and shown to fail on the old behaviour.
+5. Why the verification that had been done did not catch it, and what
+   changes in Plan B so that it would.
+
+No click is proposed to Joe while an incident is open.
+
+**I0. Incident register for the failures already incurred.** These were
+handled on 2026-09-30 as patches between clicks. Each is re-entered as an
+incident and mapped to the theorem or control it becomes. First cut, by
+claude-1 from the session record; codex-6 to check levels and classes:
+
+| Incident (click) | Class | Level | Becomes |
+|---|---|---|---|
+| Re-selected work already committed (14) | decision made on a stale store read | hypothesis | store result `stale basis`; selection carries the basis digest; T3 |
+| Author's "already done" closed as invalid refusal (14) | seat result sum lacked a constructor | hypothesis | `alreadySatisfied` in the seat result sum; adapter test |
+| Re-decision's refusal escaped untyped (15) | one transition implemented at two call sites | binding | one reducer (T7); replay fixture |
+| Ask record lost when the re-decision threw (15) | a request not retained on an exception path | model | T5 as amended |
+| Every candidate declined → throw (16) | no transition for an exhausted field | model | T4, typed exhaustion |
+| Refusal kind absent from the gate's closed set; outcome kind absent from the cohort's (16, 20-prep) | the same closed set defined in several places | binding | closed sums defined once in Lean and exported |
+| Asked about a target it could not score (17) | information action issued without an eligible follow-on | model | T5 as amended |
+| Ask's classifier disagreed with the decision's (18) | two producers of one value | binding | one producer; bad-case test with divergent producers |
+| Same selection after a typed refusal (19→20) | refusal not retained against the attempt | model | T3 |
+| Valid answers failed `no-execution-evidence` (15, 17, 19) | effect adapter misreported a reply | hypothesis | seat result adapter test |
+| Receipt `:commit nil` on a grounded change (13) | receipt field read from one refusable source | model | receipt completeness (RQ-8) as a theorem on the terminal sum |
+| futon1b record not refreshed after a commit (13→14) | a cheap effect ordered after a slow one that may time out | hypothesis | store result `unavailable`/`stale`; effect ordering stated |
+
+Also an incident, of the process and not the machine: clicks were fired
+whose failure was predictable (17, 18, 20). Its negative test is Plan B
+itself: a committed expectation before every run, and the rule above.
