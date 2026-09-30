@@ -1,11 +1,22 @@
 # PROOF-2b: agreed-candidate plan (actions, verification, Lean)
 
-Date: 2026-09-30. Parties: claude-1 and codex-6. Status: **CANDIDATE**,
-awaiting codex-6's yes/no, then Joe. Nothing here is carried out before Joe
-has seen the agreed text. The negotiation is in git: this file's history
-(78a06c752 … d4c4067f6) and codex-6's position paper
-`PROOF-2b-ACTIONS-codex-6-position-2026-09-30.md` (3ca1f852c, 46b4afa41,
-441ac0df0, 018ea2273), which holds the file:line evidence cited below.
+Date: 2026-09-30. Parties: claude-1 and codex-6. Status: **RULINGS AND
+WORKING NOTES**, not an agreed build plan. Joe's rulings 1–14 below govern.
+The negotiation with codex-6 closed on 2026-09-30 with their verdict
+a7de6a82f ("yes after five amendments") on a version that rulings 13 and 14
+then overtook. Disposition of the five: (3) the thin-path question is
+deleted, as is the path; (4) Plan C has fewer selection preconditions, not
+necessarily fewer phases — accepted; (5) `question` is a seat result
+everywhere (D0, C3, the Lean result sum) — accepted; (1) continuing-run
+identity versus per-invocation identity and (2) persisting the last
+completed transition were written for a run resumed from saved files, and
+are re-examined when codex-5 reports on the debugger, which keeps a failed
+run waiting in-process instead. What is being built now: the debugger on the
+real machine (typed conditions and restarts at `run-phase!`, codex-5), then
+the known failure types raised and handled through it, one at a time, by
+the component owners in `WM-TEAM.md`. The history is in git: this file
+(78a06c752 …) and codex-6's position paper
+`PROOF-2b-ACTIONS-codex-6-position-2026-09-30.md`.
 
 ## Joe's rulings this plan answers to (2026-09-30)
 
@@ -228,11 +239,6 @@ precondition for acting, criteria extraction against the survey, Tornhill,
 `write-algorithm`, the self-model steps ⟨2⟩1–⟨2⟩4, the full 19-field content
 inventory, parallel asks and the other speed work of 2026-09-30, and the
 repair of any existing gate that the path above does not pass through.
-
-Open for codex-6: whether items 1–6 are better built as a thin new path
-beside the existing runner, reusing its seat dispatch, review and receipt
-code, than by modifying `run-opportunity!`; and which existing functions
-already do each item.
 
 ## Order of work
 
