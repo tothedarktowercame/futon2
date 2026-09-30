@@ -211,8 +211,18 @@ before it may be chosen.
    refusal of (target, cascade) with unchanged inputs, the next selection's
    score for that pair differs, or the pair is excluded; today it is
    identical and re-chosen.
-7. **Process: click 20 was fired although its result was predicted.**
-   Owner: claude-1. Covered by rulings 2, 3 and 15.
+7. **Process: all 20 clicks of 2026-09-29/30 were run on a machine that
+   could not choose anything.** Joe: "you didn't just repeat 1 failure, you
+   repeatedly ran a machine for 20 'clicks' that had no chance of doing
+   anything meaningful." Correct. Each click either selected nothing or
+   "selected" the single policy on a hand-fed menu. The count of candidates
+   is in every selection certificate; claude-1 did not read it before the
+   first click or after any of the twenty, and reported click 13's grounded
+   change as the machine choosing. Owner: claude-1. Negative test for the
+   class: before any run is proposed, the size of the policy set and where
+   it came from are stated from the record; a run whose policy set is not
+   derived from the library for the problem is not proposed. Covered also
+   by rulings 2, 3 and 15.
 
 ## Why the verification done did not catch it
 
