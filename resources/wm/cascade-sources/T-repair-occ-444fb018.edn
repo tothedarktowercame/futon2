@@ -15,6 +15,11 @@
  :beta {:value 1 :status :declared}
  :lam {:value 1 :status :declared}
  :mu {:value 0 :status :declared}
+ ;; Added 2026-09-30 (claude-1, PROOF-2b <0>1): without it this source's
+ ;; schedule defaulted, the declared sources disagreed, and
+ ;; mission-hole-wants/merge-into-sources generated no mission targets.
+ :c-schedule {:placement {:value :terminal :status :declared}
+              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}
  :facts [:admission/task-stated
          :repair/obstruction-observed-cleared
          :repair/split-declared-valid
