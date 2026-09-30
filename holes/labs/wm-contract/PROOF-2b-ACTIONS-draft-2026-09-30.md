@@ -228,3 +228,47 @@ Responses so far:
 **Order**, pending codex-6's view on Plan C: matrix → Plan C (C1–C4) →
 codex-6's dependency order 1–7 re-derived from the model → Record 1 → ⟨2⟩
 rows → Record 2.
+
+## Correction to "The XXXX requirement" (Joe, 2026-09-30, later the same day)
+
+Joe: "The XXXX requirement might not actually work b/c you need well
+specified tasks and agent behaviour. Probably XXXX would not work. But ...
+[there has been no] effort to even show why XXXX everywhere would *not* work
+and what it would minimally need to be replaced with in order to work
+effectively."
+
+claude-1 misread the earlier sentence as "the machine must work for any
+content". That section's T0 and "parametric in content" are WITHDRAWN as
+requirements. XXXX is a question, and answering it is the first deliverable:
+
+**D0. The minimal content specification.** For every text field on the path
+from task file to terminal receipt: who reads it, what breaks when it is
+"XXXX", and the least structure that must replace "XXXX" for the machine to
+work effectively. The result is two short specifications, a minimal **task
+specification** and a minimal **agent contract**, and these become the
+hypotheses of the Lean model (Plan C, C3) and the fixtures of Plan B.
+
+First cut, from what clicks 13–20 showed. NOT from a full read of the code;
+the full inventory is the action, and codex-6 has been asked for the list of
+places where control flow reads text.
+
+| Field | Read by | With "XXXX" | Least that must replace it |
+|---|---|---|---|
+| Task status line | field enumeration | Works: an unreadable status counts as open (Joe's rule). Every task is in the field for ever. | A closed/cancelled/superseded marker from a fixed set. |
+| Task acceptance criteria | want derivation (`mission_hole_wants`) | Fails: no criteria, no wants, no universe, target not admitted. | At least one criterion with a stable id, and for effectiveness a way to check it that is not the agent ticking its own box (a locator or command whose result the machine reads). |
+| Task relation to current focus | classification → the risk term of G | Fails: class `:unknown`, no G, target declined (clicks 15, 17). | One value from {focus, associated, elsewhere}, or a stated default class for a task that says nothing. |
+| Interpretation (which pattern produces which want) | cascade construction | Fails: the answer is validated against the library and rejected. | A pattern id that exists, and a claim that it produces the want; or, more simply, an action kind and a want id. Whether an interpretation is needed at all before the first action is an open question. |
+| Pattern text | the author prompt | The tick runs, the author has no method: agent behaviour is unspecified. | What to do and what counts as done, in the terms of the task's criterion. |
+| Author prompt | the author seat | The seat cannot act. | Target repo and path, the criterion, the permitted scope, the reply grammar. |
+| Author reply | outcome classification | Fails typed (unparseable); nothing changes. | An outcome from a fixed set, and for a change the repo and commit sha; for a refusal, a reason kind and the input it names. |
+| Reviewer reply | close | Fails typed. | A verdict from a fixed set, and the sha reviewed. |
+| Refusal reason | (nothing reads it today) | No effect, which is the click 19/20 defect. | A reason kind plus the named missing input, recorded against (target, action, input-digest) per codex-6's A7. |
+
+Reading of this first cut: "XXXX" survives in one field of nine. Five fields
+need a value from a small fixed set or an id; three need real content (a
+checkable criterion, a method, a prompt). The three are where "well specified
+tasks and agent behaviour" is required, and none of the three has a written
+minimum today.
+
+Order, revised: D0 → matrix → Plan C, whose hypotheses are D0's two
+specifications → Plan A rows derived from the model → readiness records.
