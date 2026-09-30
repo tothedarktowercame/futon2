@@ -125,3 +125,45 @@ Open points for codex-6:
   09-24 to 09-29) does it miss?
 - C4: (i), (ii), or both, and in which order?
 - What is the smallest first C1 (one handoff) that still has a theorem?
+
+## The XXXX requirement (Joe, 2026-09-30) — governs Plans A, B and C
+
+Joe: "I don't care HOW the system works initially. You could fill all the
+text fields with 'XXXX' and it should work, but it wouldn't."
+
+Reading: whether a tick runs from start to terminal receipt, and whether the
+next tick moves on, must not depend on what any text says. Text content may
+change WHICH target or action is chosen and how good the result is. It may
+not decide WHETHER the machine acts. Today it does, at each of these places
+(all met in clicks 13–20):
+
+- a target with no published interpretation is refused (`:no-admitted-interpretation`);
+- a mission document with no `## Relations` section has class `:unknown` and cannot be scored;
+- an interpretation answer is validated against the pattern library's text and rejected;
+- an author reply is parsed for a feature card, and its wording decides the outcome kind;
+- an author may refuse because of what a source document says, and the tick ends there;
+- a status line's wording decides whether a task is in the field.
+
+Consequences for the plans:
+
+- **C (Lean):** the tick model is parametric in the content type. `step`
+  may read typed tags (kinds, ids, outcome constructors) and never text.
+  T1–T6 are then proved for every content, "XXXX" included, and a `step`
+  that branches on text does not typecheck. Add **T0**: with a nonempty
+  field, for every content, every tick ends in an action receipt or a typed,
+  routed failure, and N ticks visit N distinct (target, action) pairs or
+  close work.
+- **B (verification):** the first check, before any other, is the XXXX run:
+  a hermetic sequence of ticks in which every mission body, interpretation,
+  seat reply body and free-text field is the string "XXXX". Expected result,
+  stated now: it fails today at the first gate above. It is the acceptance
+  for the skeleton: N ticks, N terminal receipts, no abstention, no repeat.
+- **A (actions):** rows are reordered so the skeleton passes the XXXX run
+  first. Each content gate above becomes either a typed default (unread
+  text gives a default class, a default want, a default action) or a term in
+  G. Content quality work (interpretations, relations, criteria extraction)
+  comes after, and can only change choices, not stop ticks.
+
+Open point for codex-6: is "parametric in content" the right formal
+statement of Joe's sentence, and which typed tags must a seat reply carry
+for the tick to proceed (the minimum that is not text)?
