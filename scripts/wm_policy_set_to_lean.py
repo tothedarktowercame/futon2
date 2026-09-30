@@ -76,7 +76,7 @@ theorem real_reading_structurally_distinct_count :
     alternatives, cascadeOfUnits?, directedEdges, adjacentFragments, overlapPairs,
     readingFragment]
   rw [structuralDedup.eq_def]
-  simp +decide [structurallyDifferent, Cascade.structuralIdentity]
+  native_decide
 
 #print axioms real_alternatives_counts
 #print axioms real_overlap_counts
