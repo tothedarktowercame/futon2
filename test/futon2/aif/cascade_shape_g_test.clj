@@ -208,9 +208,11 @@
 (deftest ^:slow all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
         results (mapv shape-g/score-policy policies)]
-    (is (= {:reported-count 81 :distinct-count 33} (meta policies)))
-    (is (= 33 (count policies)))
-    (is (= 33 (count (filter #(= :computed (:status %)) results))))
+    ;; S20: the WebArxana artifact read a HEAD-template definition as work;
+    ;; its 12 reported / 6 distinct policies are no longer admissible input.
+    (is (= {:reported-count 69 :distinct-count 27} (meta policies)))
+    (is (= 27 (count policies)))
+    (is (= 27 (count (filter #(= :computed (:status %)) results))))
     (is (zero? (count (remove #(Double/isFinite (double (:g %))) results))))
     (is (every? #(< (Math/abs (- (:g %) (+ (:risk %) (:ambiguity %)
                                              (- (:information-gain %)))))

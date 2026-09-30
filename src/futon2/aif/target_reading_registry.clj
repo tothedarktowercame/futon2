@@ -18,6 +18,24 @@
 
 (def ^:private digest-pattern #"[0-9a-f]{64}")
 
+;; Joe, 2026-09-30: this sentence defines HEAD; it is not itself a HEAD.
+(def head-template-definition
+  "The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.")
+
+(defn source-text-template-only?
+  "True only when SOURCE is a HEAD heading plus the template definition and
+  whitespace. A substantive line alongside the definition keeps the HEAD."
+  [source]
+  (when (string? source)
+    (let [content (->> (str/split-lines source)
+                       (remove #(re-matches #"(?i)^\s*##\s+HEAD\s*$" %))
+                       (map str/trim)
+                       (remove str/blank?))]
+      (and (seq content)
+           (every? #(= head-template-definition
+                       (-> % (str/replace #"^\*|\*$" "") str/trim))
+                   content)))))
+
 (defn- sha256 [x]
   (identity/sha256 (.getBytes (pr-str x) "UTF-8")))
 
@@ -50,9 +68,13 @@
     (str/replace (subs text start end) #"(?s)\s+$" "")))
 
 (defn excerpt-digest
-  "SHA-256 of the UTF-8 bytes of the mission text handed to 象."
+  "SHA-256 of the UTF-8 bytes of the mission text handed to 象, or a typed
+  absence when the HEAD contains only its template definition."
   [path]
-  (identity/sha256 (.getBytes (excerpt (slurp path)) "UTF-8")))
+  (let [source (excerpt (slurp path))]
+    (if (source-text-template-only? source)
+      {:status :absent :kind :target-head-template-only :source-path (str path)}
+      (identity/sha256 (.getBytes source "UTF-8")))))
 
 (defn- target-key [target-id]
   (identity/sha256 (.getBytes (str target-id) "UTF-8")))
@@ -118,7 +140,9 @@
                           (not (map? analysis)) (conj :analysis)
                           (nil? validator-version) (conj :validator-version)
                           (and request-digest (not= excerpt-digest request-digest))
-                          (conj :request-excerpt-digest))
+                          (conj :request-excerpt-digest)
+                          (source-text-template-only? (:source_text request))
+                          (conj :source-text-template-only))
          checked (when (empty? invalid-fields) (validation analysis))]
      (cond
        (seq invalid-fields)

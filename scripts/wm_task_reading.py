@@ -13,6 +13,22 @@ import re
 
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.M)
 OPEN_ITEM = re.compile(r"^\s*[-*]\s+\[\s\]\s+\S.*$", re.M)
+# Joe, 2026-09-30: this sentence defines HEAD; it is not itself a HEAD.
+HEAD_TEMPLATE_DEFINITION = (
+    "The mission's live operator-shape, captured before IDENTIFY hardens it "
+    "into a tractable gap statement."
+)
+
+
+def head_is_template_only(source):
+    lines = source.splitlines()
+    content = [line.strip() for line in lines
+               if not re.match(r"^##\s+HEAD\s*$", line.strip(), re.I)]
+    substantive = [line for line in content if line]
+    return bool(substantive) and all(
+        line.strip("*").strip() == HEAD_TEMPLATE_DEFINITION
+        for line in substantive
+    )
 
 
 def choose_item(text, line=None):
@@ -111,6 +127,8 @@ def build_mission_request(path, target=None):
     source = text[start:end].rstrip()
     if not source:
         raise ValueError("mission reading source is empty")
+    if source_kind == "head-section" and head_is_template_only(source):
+        raise ValueError("head-is-template-only")
     request = request_base(path, source, start, target)
     request["task"]["source_kind"] = source_kind
     return request

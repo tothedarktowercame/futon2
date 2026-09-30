@@ -2,12 +2,15 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as sut]))
 
 (def d1 (apply str (repeat 64 "1")))
 (def d2 (apply str (repeat 64 "2")))
+(def template-head
+  "## HEAD\n\n*The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.*")
 
 (defn temp-root []
   (.toFile (java.nio.file.Files/createTempDirectory
@@ -100,6 +103,37 @@
         (is (= (get-in request [:task :excerpt_sha256])
                (sut/excerpt-digest file)))))))
 
+(deftest template-only-head-is-not-a-reading-source
+  (let [dir (temp-root) file (io/file dir "template.md") out (io/file dir "request.json")]
+    (spit file (str "# Mission\n\n" template-head "\n\n## IDENTIFY\nLater.\n"))
+    (let [run (shell/sh "python3" "scripts/wm_task_reading.py" (.getPath file)
+                        "--mission-head" "--out" (.getPath out))]
+      (is (not (zero? (:exit run))))
+      (is (re-find #"head-is-template-only" (:err run)))
+      (is (not (.exists out))))
+    (is (= :target-head-template-only (:kind (sut/excerpt-digest file))))))
+
+(deftest template-line-with-real-head-content-remains-readable
+  (let [dir (temp-root) file (io/file dir "substantive.md") out (io/file dir "request.json")
+        text (str "# Mission\n\n" template-head "\nJoe wants the actual system repaired.\n")]
+    (spit file text)
+    (let [run (shell/sh "python3" "scripts/wm_task_reading.py" (.getPath file)
+                        "--mission-head" "--out" (.getPath out))
+          request (json/parse-string (slurp out) true)]
+      (is (zero? (:exit run)) (:err run))
+      (is (= (str/trimr (subs text (.indexOf text "## HEAD"))) (:source_text request)))
+      (is (string? (sut/excerpt-digest file))))))
+
+(deftest publish-refuses-template-only-source-text
+  (let [root (temp-root)
+        result (sut/publish! root (assoc (publication "M-template" d1)
+                                         :request {:source_text template-head
+                                                   :task {:target_id "M-template"
+                                                          :excerpt_sha256 d1}}))]
+    (is (= :refused (:status result)))
+    (is (= :invalid-target-reading (:kind result)))
+    (is (some #{:source-text-template-only} (:invalid-fields result)))))
+
 (deftest edits-outside-head-do-not-stale-the-reading
   (let [root (temp-root) file (io/file root "M-head.md")
         before "# M\nBefore metadata.\n\n## HEAD\nJoe's unchanged words.\n\n## MAP\nOld map.\n"
@@ -127,7 +161,7 @@
 
 (def lab-root "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 
-(deftest import-seven-current-lab-readings-into-temp-registry
+(deftest import-six-current-lab-readings-and-refuse-template-head
   ;; S7 measured that analyses 02..08 correspond to current substrate targets;
   ;; 01-M-xiang-2000 is not in that set. This imports only into TEMP-ROOT.
   (let [root (temp-root)
@@ -135,7 +169,7 @@
                "04-M-web-arxana-ui-improvements" "05-M-self-documenting-stack"
                "06-M-war-machine-aif-completion" "07-M-essays-diachronic-model"
                "08-M-value-creation-loop"]
-        targets
+        rows
         (mapv (fn [stem]
                 (let [request (json/parse-string
                                (slurp (io/file lab-root (str stem ".request.json"))) true)
@@ -152,10 +186,14 @@
                                             :source-file-digest (get-in request [:task :content_sha256])
                                             :request request
                                             :analysis analysis :validator-version 1})]
-                  (is (= :current-candidate (:status result)) stem)
-                  {:target-id target :excerpt-digest current-digest}))
+                  {:stem stem :result result :target-id target
+                   :excerpt-digest current-digest}))
               stems)
-        report (sut/coverage root targets)]
+        accepted (filterv #(= :current-candidate (get-in % [:result :status])) rows)
+        refused (filterv #(= :refused (get-in % [:result :status])) rows)
+        report (sut/coverage root (mapv #(select-keys % [:target-id :excerpt-digest]) accepted))]
     (println "TARGET-READING-LAB-COVERAGE" (pr-str report))
-    (is (= 7 (+ (:current report) (:stale report))))
-    (is (zero? (:absent report)))))
+    (is (= 6 (:current report)))
+    (is (= ["04-M-web-arxana-ui-improvements"] (mapv :stem refused)))
+    (is (some #{:source-text-template-only}
+              (get-in refused [0 :result :invalid-fields])))))

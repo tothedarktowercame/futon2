@@ -81,6 +81,7 @@
       (kinds :target-item-line-absent) :source-path-absent
       (kinds :target-source-conflict) :source-path-absent
       (kinds :target-source-kind-unsupported) :source-kind-unsupported
+      (kinds :target-head-template-only) :head-template-only
       (kinds :target-source-unreadable) :source-unreadable
       (kinds :stale-target-reading) :stale
       (kinds :no-current-target-reading) :absent
@@ -95,6 +96,7 @@
      :source-path-absent (get counts :source-path-absent 0)
      :source-unreadable (get counts :source-unreadable 0)
      :source-kind-unsupported (get counts :source-kind-unsupported 0)
+     :head-template-only (get counts :head-template-only 0)
      :graph-refused (get counts :graph-refused 0)}))
 
 (defn families-for-field
@@ -123,12 +125,14 @@
 
              :else
              (try
-               (let [digest (reading-registry/excerpt-digest source-path)
-                     reading (reading-registry/current-reading
-                              reading-root target-id digest)]
-                 (target-family/policy-family
-                  {:reading reading :graph (:graph loaded)
-                   :retraction retraction}))
+               (let [digest (reading-registry/excerpt-digest source-path)]
+                 (if (map? digest)
+                   (failed-field-family target-id (dissoc digest :status))
+                   (let [reading (reading-registry/current-reading
+                                  reading-root target-id digest)]
+                     (target-family/policy-family
+                      {:reading reading :graph (:graph loaded)
+                       :retraction retraction}))))
                (catch Exception e
                  (failed-field-family
                   target-id {:kind :target-source-unreadable

@@ -76,8 +76,24 @@
                (mapv #(get-in % [:failures 0 :kind]) (rest (:families result)))))
         (is (= {:targets 3 :current 1 :stale 1 :absent 0
                 :source-path-absent 1 :source-unreadable 0
-                :source-kind-unsupported 0 :graph-refused 0}
+                :source-kind-unsupported 0 :head-template-only 0
+                :graph-refused 0}
                (:coverage result)))))))
+
+(deftest template-only-head-is-a-counted-field-failure
+  (let [root (temp-dir "field-template-root-")
+        graph (graph-file (temp-dir "field-template-graph-"))
+        file (io/file root "M-template.md")]
+    (spit file (str "# Mission\n\n## HEAD\n\n*"
+                    reading-registry/head-template-definition "*\n"))
+    (let [result (sut/families-for-field
+                  {:target-sources [{:target-id "M-template" :source-kind :head
+                                     :source-path (.getPath file)}]
+                   :reading-root root :graph-path graph})]
+      (is (= :failed (get-in result [:families 0 :status])))
+      (is (= :target-head-template-only
+             (get-in result [:families 0 :failures 0 :kind])))
+      (is (= 1 (get-in result [:coverage :head-template-only]))))))
 
 (deftest source-kinds-not-yet-readable-are-counted
   (let [graph (graph-file (temp-dir "field-source-kind-graph-"))

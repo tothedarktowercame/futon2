@@ -186,23 +186,30 @@
                  a (json/parse-string
                     (slurp (io/file lab-root (str stem ".request.json.analysis.json"))) true)
                  target (get-in request [:task :target_id]) excerpt-digest (digest (:source_text request))
-                 _ (registry/publish! registry-root
-                                      {:target-id target :source-path (get-in request [:task :file_path])
-                                       :excerpt-digest excerpt-digest
-                                       :source-file-digest (get-in request [:task :content_sha256])
-                                       :request request :analysis a :validator-version 1})
-                 current (registry/current-reading registry-root target excerpt-digest)
-                 family (sut/policy-family {:reading current :graph graph})
+                 published (registry/publish! registry-root
+                                              {:target-id target :source-path (get-in request [:task :file_path])
+                                               :excerpt-digest excerpt-digest
+                                               :source-file-digest (get-in request [:task :content_sha256])
+                                               :request request :analysis a :validator-version 1})
+                 current (when (= :current-candidate (:status published))
+                           (registry/current-reading registry-root target excerpt-digest))
+                 family (when current (sut/policy-family {:reading current :graph graph}))
                  old (json/parse-string (slurp (io/file lab-root (str stem ".retractions.json"))) true)
                  reading-reported (+ (count (:cascades (analysis/analysis->cascades a {:mode :alternatives})))
                                      (count (:cascades (analysis/analysis->cascades a {:mode :overlap}))))]
-             {:target target :reported (:reported-count family) :distinct (:distinct-count family)
-              :by-kind (frequencies (map :kind (:policies family)))
-              :reading-reported reading-reported
-              :old-retractions (count (:retractions old))
-              :current-retractions (count (filter #(= :retraction (:kind %)) (:policies family)))
-              :failures (mapv :kind (:failures family))}))
+             (if family
+               {:target target :status :computed
+                :reported (:reported-count family) :distinct (:distinct-count family)
+                :by-kind (frequencies (map :kind (:policies family)))
+                :reading-reported reading-reported
+                :old-retractions (count (:retractions old))
+                :current-retractions (count (filter #(= :retraction (:kind %)) (:policies family)))
+                :failures (mapv :kind (:failures family))}
+               {:target target :status :refused
+                :failures (:invalid-fields published)})))
          stems)]
     (println "TARGET-POLICY-FAMILIES" (pr-str rows))
     (is (= 7 (count rows)))
-    (is (every? #(pos? (:distinct %)) rows))))
+    (is (= 6 (count (filter #(= :computed (:status %)) rows))))
+    (is (= ["M-web-arxana-ui-improvements"]
+           (mapv :target (filter #(= :refused (:status %)) rows))))))

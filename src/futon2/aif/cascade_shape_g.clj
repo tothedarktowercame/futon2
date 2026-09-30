@@ -18,6 +18,7 @@
             [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.analysis-cascade :as analysis]
+            [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
@@ -346,6 +347,8 @@
          (mapcat
     (fn [analysis-file]
       (let [stem (str/replace (.getName (io/file analysis-file)) #"\.request\.json\.analysis\.json$" "")
+            request-file (io/file dir (str stem ".request.json"))
+            request (when (.isFile request-file) (read-json request-file))
             target stem analysis-map (read-json analysis-file)
             modes (:rows
                    (reduce (fn [{:keys [seen] :as acc} p]
@@ -366,9 +369,10 @@
                              :adjustment (str "retraction-" (:rank r))
                              :cascade {:nodes (:nodes r) :edges (:edges r)
                                        :precedence (:nodes r)}}))]
-        (map-indexed (fn [i p] (assoc p :target target :analysis analysis-map
-                                      :reported-id (str stem "/" (inc i))))
-                     (concat modes retractions))))
+        (when-not (reading-registry/source-text-template-only? (:source_text request))
+          (map-indexed (fn [i p] (assoc p :target target :analysis analysis-map
+                                        :reported-id (str stem "/" (inc i))))
+                       (concat modes retractions)))))
     (sort-by #(.getName (io/file %))
              (filter #(and (.isFile (io/file %))
                            (str/ends-with? (.getName (io/file %))
