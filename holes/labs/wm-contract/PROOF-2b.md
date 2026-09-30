@@ -164,8 +164,10 @@ A question with a task-state update and terminal receipt is a valid completed
 run, but is not by itself forward motion or acceptance of PROOF-2b. Its answer
 must be consumable by a later run. The reliability claim requires the machine
 to continue operating and complete work across missions, excursions and
-tickets; the quantitative acceptance threshold for that cross-kind claim is
-specified separately rather than inferred from the first-run milestone.
+tickets. Capability validation requires at least one closed mission, one
+closed excursion and one closed ticket; the three closures may occur in
+separate campaigns. That finite validation does not establish reliable
+long-term behaviour, which is assessed over subsequent operation.
 
 **RQ-8. Every action leaves a complete receipt.**
 *Metric:* `paper_trail = complete action receipts / enacted actions`, with

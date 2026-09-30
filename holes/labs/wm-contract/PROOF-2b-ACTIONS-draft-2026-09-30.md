@@ -168,6 +168,14 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     excursions and tickets, not merely by producing well-typed questions or
     by making one run succeed.
 
+18. **Capability requires cross-kind closures; reliability requires more.**
+    The finite PROOF-2b capability validation requires the machine to close
+    at least one mission, one excursion and one ticket. These closures may
+    occur in separate campaigns. They are a floor demonstrating capability,
+    not evidence by themselves of reliable long-term behaviour. Operational
+    reliability is evaluated over subsequent campaigns and must not be
+    reported as established by the three validation closures.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -246,7 +254,10 @@ next choice takes that result into account. Nothing else is required of the
 first-run milestone. A question may be that result, provided the task state
 and receipt retain it and a later run can consume its answer. This milestone
 does not accept PROOF-2b: acceptance additionally requires sustained completion
-across missions, excursions and tickets. Each item below is on the path only because the run cannot
+across missions, excursions and tickets. Capability validation requires one
+closure of each kind, which may be accumulated across separate campaigns;
+long-term reliability remains a distinct operational claim. Each item below
+is on the path only because the run cannot
 happen, or cannot be trusted per rulings 3, 4 and 6, without it.
 
 1. **Field**: every open task, by the open/closed rule. No admission gate.
