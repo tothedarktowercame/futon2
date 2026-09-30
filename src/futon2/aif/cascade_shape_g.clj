@@ -22,7 +22,8 @@
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
-            [futon2.aif.matched-observation-evidence :as matched]))
+            [futon2.aif.matched-observation-evidence :as matched]
+            [futon2.aif.retraction-cascade :as retraction-cascade]))
 
 (defn- pattern-key [s]
   (keyword (str/replace (str s) #"^:" "")))
@@ -418,8 +419,8 @@
                           (for [r (:retractions (read-json rp))]
                             {:mission stem :kind :retraction
                              :adjustment (str "retraction-" (:rank r))
-                             :cascade {:nodes (:nodes r) :edges (:edges r)
-                                       :precedence (:nodes r)}}))]
+                             :cascade (retraction-cascade/from-retraction
+                                       target analysis-map r)}))]
         (when-not (reading-registry/source-text-template-only? (:source_text request))
           (map-indexed (fn [i p] (assoc p :target target :analysis analysis-map
                                         :reported-id (str stem "/" (inc i))))

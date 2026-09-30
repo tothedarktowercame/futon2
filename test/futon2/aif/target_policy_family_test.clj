@@ -6,6 +6,7 @@
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.aif.pattern-retraction :as pattern-retraction]
             [futon2.aif.target-policy-family :as sut]
             [futon2.aif.target-reading-registry :as registry]))
 
@@ -168,6 +169,31 @@
             (make-array java.nio.file.attribute.FileAttribute 0))))
 
 (defn digest [text] (identity/sha256 (.getBytes text "UTF-8")))
+
+(deftest lab-reader-and-policy-family-share-retraction-structures
+  (let [stem "05-M-self-documenting-stack"
+        target stem
+        a (json/parse-string
+           (slurp (io/file lab-root (str stem ".request.json.analysis.json"))) true)
+        stored (json/parse-string
+                (slurp (io/file lab-root (str stem ".retractions.json"))) true)
+        seeds (set (for [sentence (:sentences a) fragment (:fragments sentence)
+                         ref (:pattern_refs fragment)] (:id ref)))
+        nodes (set (concat seeds (mapcat :nodes (:retractions stored))))
+        graph {:pattern-ids (vec nodes)
+               :edges (vec (mapcat :edges (:retractions stored)))}
+        reading {:status :current-candidate :target-id target :analysis a
+                 :excerpt-digest (apply str (repeat 64 "1"))}
+        family (with-redefs [pattern-retraction/retractions (fn [& _] stored)]
+                 (sut/policy-family {:reading reading :graph graph}))
+        from-family (set (map shape-g/structural-identity
+                              (filter #(= :retraction (:kind %)) (:policies family))))
+        from-lab (set (map shape-g/structural-identity
+                           (filter #(and (= stem (:mission %))
+                                         (= :retraction (:kind %)))
+                                   (shape-g/materialize-policies lab-root))))]
+    (is (= from-family from-lab))
+    (is (seq from-lab))))
 
 (deftest ^:slow seven-real-policy-families-report-current-graph-differences
   (let [dir (temp-dir) graph-copy (io/file dir "graph.json")

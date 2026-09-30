@@ -229,22 +229,34 @@
 
 (deftest ^:slow all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
-        results (mapv shape-g/score-policy policies)]
+        results (mapv shape-g/score-policy policies)
+        computed (filterv #(= :computed (:status %)) results)
+        refused (filterv #(= :refused (:status %)) results)]
     ;; S20: the WebArxana artifact read a HEAD-template definition as work;
     ;; its 12 reported / 6 distinct policies are no longer admissible input.
     (is (= {:reported-count 69 :distinct-count 27} (meta policies)))
     (is (= 27 (count policies)))
-    ;; The fixed lab retractions predate S18's authored-direction conversion;
-    ;; their widest recorded partial order is 7, so all 27 remain admissible.
-    ;; The current graph/provider census separately has three width-13 refusals.
-    (is (= 27 (count (filter #(= :computed (:status %)) results))))
-    (is (zero? (count (filter #(= :frontier-too-wide-for-exact-enumeration
-                                  (:kind %)) results))))
-    (is (zero? (count (remove #(Double/isFinite (double (:g %))) results))))
+    ;; S23 sends the fixed retractions through the same authored-direction /
+    ;; overlap conversion as production. Two Xiang and three War Machine
+    ;; retractions exceed the exact-enumeration width limit.
+    (is (= 22 (count computed)))
+    (is (= {:frontier-too-wide-for-exact-enumeration 5}
+           (frequencies (map :kind refused))))
+    (is (zero? (count (remove #(Double/isFinite (double (:g %))) computed))))
     (is (every? #(< (Math/abs (- (:g %) (+ (:risk %) (:ambiguity %)
                                              (- (:information-gain %)))))
                     1.0e-12)
-                results))
+                computed))
     (is (every? #(and (= :computed (:f-status %))
-                      (Double/isFinite (double (:f %)))) results))
-    (is (every? #(= (:horizon %) (count (:preference-at-each-step %))) results))))
+                      (Double/isFinite (double (:f %)))) computed))
+    (is (every? #(= (:horizon %) (count (:preference-at-each-step %))) computed))))
+
+(deftest lab-retractions-never-direct-an-unauthored-edge
+  (let [retractions (filter #(= :retraction (:kind %))
+                            (shape-g/materialize-policies artifacts))
+        unauthored (for [policy retractions
+                         edge (get-in policy [:cascade :edges])
+                         :when (nil? (:authored-direction edge))]
+                     edge)]
+    (is (seq unauthored))
+    (is (every? #(= :overlap (:kind %)) unauthored))))
