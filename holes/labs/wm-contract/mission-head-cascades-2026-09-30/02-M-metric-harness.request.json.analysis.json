@@ -1,0 +1,888 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-2",
+  "reusable_cues": [
+    {
+      "start": 686,
+      "end": 712,
+      "text": "throughput is not progress",
+      "intent": "warn",
+      "rationale": "Compact marker of the anti-glibness discipline; reusable wherever volume is mistaken for evidence."
+    },
+    {
+      "start": 1993,
+      "end": 2010,
+      "text": "named, not buried",
+      "intent": "clarify",
+      "rationale": "Short test for whether open tensions were surfaced; reusable in exit-criterion and review contexts."
+    },
+    {
+      "start": 962,
+      "end": 983,
+      "text": "*finding to pinpoint*",
+      "intent": "reframe",
+      "rationale": "Marks the absence-as-evidence reframe of a flat metric; reusable across metric-harness discussions."
+    },
+    {
+      "start": 1109,
+      "end": 1148,
+      "text": "underwrites the superpod scale decision",
+      "intent": "assert",
+      "rationale": "Names the working-economy role of a mission as evidence for a scale decision; reusable across scale-gating missions."
+    }
+  ],
+  "created_at": "2026-09-30T09:18:08.733310+00:00",
+  "source_text": "## HEAD\n\n- **Operator-voice anchor (Joe, 2026-06-22):** *\"If we do one paper end-to-end we should\n  already have metrics, and those metrics should improve if we do 10 papers end to end.\n  If they are not improving then we should be able to pinpoint why.\"* The point is **not**\n  \"100 papers completed.\"\n- **What's already felt to be true:** Phase 2 is cross-paper/holistic, so the substrate\n  should *compound* — a held-out paper grounds better as the corpus grows. The\n  comprehension floor is already corpus-relative; G-coverage was designed to rise with\n  corpus-fraction. The progress signal is a **slope**, and it should already be latent at\n  n=1.\n- **Anti-glibness discipline:** throughput is not progress. A pile of graphs, or \"N\n  papers done,\" hides whether the holistic claim is real. Every headline number must be\n  defined at n=1, expected to rise n=1→10, and **decomposed per stage** so a flat curve\n  names the culprit. A flat/falling metric is a *finding to pinpoint*, never something to\n  paper over with volume (the mark5 lesson, generalized).\n- **Working-economy position:** this mission **underwrites the superpod scale decision** —\n  we only pay for archive-scale once the small run shows the slope is real and diagnosable.\n  It is underwritten by the corrected full-pipeline contract + the already-built stages.\n- **Carried-forward tensions:** (i) the S7 macro-collapse cause is still open — paper-level\n  lens vs fixed-vs-data-driven vocab (mark5 D1, Diagnostic 1); (ii) the **S4 expository\n  GPU run has never been exercised**; (iii) the **S6 paper-graph(B) assembler is unbuilt**;\n  (iv) the embedding/macro-vocab rework is **deferred** (separate work, not this mission).\n- **Provenance:** this conversation (2026-06-22→23), as the post-mortem of mark5. Intake =\n  operator principle stated after reviewing the readiness docs + the mark5 results.\n\n**Exit criterion (HEAD):** Joe recognises this as the faithful shape of \"what we need next\ntime\"; the four tensions are named, not buried.\n\n---",
+  "source_sha256": "8455b41acde9b09b77093ced5a8cdb1105219f32299c23cb2ba2745122f6607f",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [],
+      "unresolved_reason": "Markdown section heading; no dialogue move."
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 9,
+          "end": 55,
+          "text": "- **Operator-voice anchor (Joe, 2026-06-22):**",
+          "intent": "attribute",
+          "target": "the principle quoted below, pinned to Joe and dated 2026-06-22",
+          "rationale": "The bullet opens by naming whose voice the anchor is and when it was said, framing the quote as operator warrant rather than agent inference.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 13,
+              "end": 52,
+              "text": "Operator-voice anchor (Joe, 2026-06-22)"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "vsatelier/decision-provenance",
+              "rationale": "The fragment pins the mission's motivating principle to a named source and date, exactly the auditable chain from lived operator statement to mission decision that decision-provenance requires.",
+              "status": "candidate",
+              "source_sha256": "d95f0c2279e9b49ce56e9afc3c57149ac211c1f577ce0117fb13b5b0f2686d58"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 100,
+          "end": 185,
+          "text": "already have metrics, and those metrics should improve if we do 10 papers end to end.",
+          "intent": "propose",
+          "target": "the metric-slope principle: metrics exist at n=1 and improve by n=10",
+          "rationale": "The quoted operator principle states the mission's core expectation: end-to-end capability should be measurable at the first paper and strictly better at the tenth.",
+          "relations": [
+            "condition",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 132,
+              "end": 154,
+              "text": "metrics should improve"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/progress-signal",
+              "rationale": "The fragment defines progress as an accumulating measurable signal across repetitions, which is exactly the progress-signal pattern's evidence-accumulation account of mission health.",
+              "status": "candidate",
+              "source_sha256": "66407647b1ef3fe8a1cf196f3814cb170a3bf4c21a5fb5db362370971b9c36d4"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "futon-theory/counter-ratchet",
+              "reason": "Counter-ratchet is the invariant that a counter only moves one way; this fragment is about an expected improvement slope, not about the ratchet mechanism itself.",
+              "query": "counter ratchet only moves one way"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 188,
+          "end": 253,
+          "text": "If they are not improving then we should be able to pinpoint why.",
+          "intent": "require",
+          "target": "diagnosability: a flat slope must localise its cause",
+          "rationale": "The conditional turns non-improvement into a requirement on the metric design: failure to improve must be explainable, not just observable.",
+          "relations": [
+            "condition",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 240,
+              "end": 252,
+              "text": "pinpoint why"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "measurement/error-needs-structure-to-teach",
+              "rationale": "A flat metric without the structure to say why teaches nothing; the fragment demands the number carry enough derivation to pinpoint the cause, which is the pattern's core claim.",
+              "status": "candidate",
+              "source_sha256": "64ef6a39b265091746ba4ed4ebfbf8c1d56df95742239ad62eef636a6dadd9e8"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "process-coherence/stuck-means-signal",
+              "reason": "Stuck-means-signal governs futile retry loops whose correct output is an alert; this fragment is about metric diagnosability across experimental runs, not about stopping repetition.",
+              "query": "each repetition should measurably improve; if it does not, find out why"
+            }
+          ]
+        },
+        {
+          "start": 256,
+          "end": 276,
+          "text": "The point is **not**",
+          "intent": "negate",
+          "target": "the misreading of the mission as a throughput target",
+          "rationale": "Sets up the explicit rejection of the volume reading completed in s5; the emphasis on 'not' marks a boundary the operator wants drawn.",
+          "relations": [
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 269,
+              "end": 276,
+              "text": "**not**"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 279,
+          "end": 302,
+          "text": "\"100 papers completed.\"",
+          "intent": "reject",
+          "target": "paper-count as the mission's success measure",
+          "rationale": "The quoted straw-goal is the volume reading the HEAD disowns: completing N papers is explicitly not the point.",
+          "relations": [
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 280,
+              "end": 290,
+              "text": "100 papers"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/honest-map-over-flattering-counter",
+              "rationale": "A completion count the team can inflate by doing more easy papers is a flattering counter; the operator refuses it as the success measure in favour of an honest slope.",
+              "status": "candidate",
+              "source_sha256": "8015679fd94aa3063947311c48781b7ed1c6d2ed96083cef0b4e8926b22e306e"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 303,
+          "end": 390,
+          "text": "- **What's already felt to be true:** Phase 2 is cross-paper/holistic, so the substrate",
+          "intent": "assert",
+          "target": "the prior belief that Phase 2's cross-paper character implies a compounding substrate",
+          "rationale": "Labelled as what is 'felt to be true', this is the mission's stated prior: holism at Phase 2 should make the substrate compound rather than merely accumulate.",
+          "relations": [
+            "context",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 314,
+              "end": 337,
+              "text": "already felt to be true"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 393,
+          "end": 465,
+          "text": "should *compound* — a held-out paper grounds better as the corpus grows.",
+          "intent": "assert",
+          "target": "the compounding prediction: grounding of a held-out paper improves with corpus size",
+          "rationale": "The operational content of the prior: corpus growth should make each new held-out paper easier to ground, which is what 'compound' means here.",
+          "relations": [
+            "condition",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 430,
+              "end": 464,
+              "text": "grounds better as the corpus grows"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "reason": "Top retrieval hit for compounding/held-out phrasing, but it governs pre-validating a paid run, not the belief that grounding improves with corpus growth.",
+              "query": "substrate should compound; held-out case grounds better as corpus grows"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s8",
+      "fragments": [
+        {
+          "start": 472,
+          "end": 556,
+          "text": "comprehension floor is already corpus-relative; G-coverage was designed to rise with",
+          "intent": "report",
+          "target": "existing design facts: the comprehension floor and G-coverage are already corpus-relative",
+          "rationale": "Reports that two instruments were already built to vary with corpus fraction, supporting the claim that the slope is latent in the current design.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 495,
+              "end": 518,
+              "text": "already corpus-relative"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s9",
+      "fragments": [
+        {
+          "start": 559,
+          "end": 646,
+          "text": "corpus-fraction. The progress signal is a **slope**, and it should already be latent at",
+          "intent": "propose",
+          "target": "the form of the progress signal: a slope, latent from the first paper",
+          "rationale": "Names the mission's unit of progress explicitly: not a level or a count but a slope, present (latent) even at n=1.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 580,
+              "end": 610,
+              "text": "progress signal is a **slope**"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/progress-signal",
+              "rationale": "Defining the progress signal as a slope detectable from the first observation is the evidence-accumulation account: health is read off accumulating evidence, not off a final count.",
+              "status": "candidate",
+              "source_sha256": "66407647b1ef3fe8a1cf196f3814cb170a3bf4c21a5fb5db362370971b9c36d4"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s10",
+      "fragments": [
+        {
+          "start": 649,
+          "end": 653,
+          "text": "n=1.",
+          "intent": "clarify",
+          "target": "the earliest point at which the slope must exist",
+          "rationale": "Completes s9's claim: the slope is required to be latent already at a single paper, so the metric harness cannot defer measurability to scale.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 649,
+              "end": 652,
+              "text": "n=1"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s11",
+      "fragments": [
+        {
+          "start": 654,
+          "end": 737,
+          "text": "- **Anti-glibness discipline:** throughput is not progress. A pile of graphs, or \"N",
+          "intent": "warn",
+          "target": "the glibness failure mode: mistaking throughput for progress",
+          "rationale": "Names the discipline of the section: volume artefacts (graphs, counts) are not evidence the holistic claim is real.",
+          "relations": [
+            "rationale",
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 686,
+              "end": 712,
+              "text": "throughput is not progress"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/honest-map-over-flattering-counter",
+              "rationale": "Throughput is the flattering counter par excellence — always movable upward by more work; the fragment refuses to let it stand in for the territory, which is the pattern's truthful-move demand.",
+              "status": "candidate",
+              "source_sha256": "8015679fd94aa3063947311c48781b7ed1c6d2ed96083cef0b4e8926b22e306e"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s12",
+      "fragments": [
+        {
+          "start": 740,
+          "end": 825,
+          "text": "papers done,\" hides whether the holistic claim is real. Every headline number must be",
+          "intent": "warn",
+          "target": "the concealment risk: volume hides whether the holistic claim holds",
+          "rationale": "Completes the warning from s11 and pivots to the requirement on headline numbers developed in s13.",
+          "relations": [
+            "condition",
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 754,
+              "end": 794,
+              "text": "hides whether the holistic claim is real"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s13",
+      "fragments": [
+        {
+          "start": 828,
+          "end": 913,
+          "text": "defined at n=1, expected to rise n=1→10, and **decomposed per stage** so a flat curve",
+          "intent": "require",
+          "target": "the three-part spec on every headline metric: defined at n=1, rising to n=10, decomposed per stage",
+          "rationale": "The anti-glibness discipline made operational: each number must exist at the smallest run, be expected to grow, and be faceted by pipeline stage.",
+          "relations": [
+            "action",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 875,
+              "end": 895,
+              "text": "decomposed per stage"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "system-coherence/facet-before-aggregating",
+              "rationale": "Requiring per-stage decomposition of every headline number is facet-before-aggregating applied to pipeline metrics: the aggregate slope conceals the stage-level heterogeneity that diagnosis depends on.",
+              "status": "candidate",
+              "source_sha256": "d100e788cb4c3435578301332ce89cae54804b45ff87b28871c3e866f7676489"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s14",
+      "fragments": [
+        {
+          "start": 916,
+          "end": 1003,
+          "text": "names the culprit. A flat/falling metric is a *finding to pinpoint*, never something to",
+          "intent": "reframe",
+          "target": "the epistemic status of a flat or falling metric",
+          "rationale": "A non-rising curve is reframed from embarrassment to evidence: it is a finding whose cause must be named, not a result to hide.",
+          "relations": [
+            "rationale",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 962,
+              "end": 983,
+              "text": "*finding to pinpoint*"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "plos-npt-with-small-n/absence-as-evidence",
+              "rationale": "Treating a flat/falling metric as the finding rather than a failure to bury is exactly absence-as-evidence: the null is mined for what it demonstrates instead of apologised for.",
+              "status": "candidate",
+              "source_sha256": "27ef9f67861acab3ae7ec3074fb7636513f927109268e155b517d8e38e2fd876"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s15",
+      "fragments": [
+        {
+          "start": 1006,
+          "end": 1061,
+          "text": "paper over with volume (the mark5 lesson, generalized).",
+          "intent": "generalize",
+          "target": "the mark5 lesson, lifted from one post-mortem to a standing discipline",
+          "rationale": "The parenthetical elevates a specific post-mortem lesson into the general anti-glibness rule for this mission's metrics.",
+          "relations": [
+            "rationale",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1034,
+              "end": 1059,
+              "text": "mark5 lesson, generalized"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "writing-coherence/citation-density-load-bearing-claim",
+              "reason": "The mark5 reference is a provenance parenthetical inside the author's own document, not an external citation cashing a load-bearing claim.",
+              "query": "cite the source of a lesson being generalized"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s16",
+      "fragments": [
+        {
+          "start": 1062,
+          "end": 1152,
+          "text": "- **Working-economy position:** this mission **underwrites the superpod scale decision** —",
+          "intent": "assert",
+          "target": "the mission's economic role: it carries the evidence for the superpod scale decision",
+          "rationale": "States what the mission is for in resource terms: its output is the warrant for (or against) paying for archive-scale compute.",
+          "relations": [
+            "context",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 1109,
+              "end": 1148,
+              "text": "underwrites the superpod scale decision"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s17",
+      "fragments": [
+        {
+          "start": 1155,
+          "end": 1244,
+          "text": "we only pay for archive-scale once the small run shows the slope is real and diagnosable.",
+          "intent": "propose",
+          "target": "the spending gate: archive-scale only after a small run demonstrates a real, diagnosable slope",
+          "rationale": "The working-economy rule: large spend is conditional on small-scale evidence, making the metric harness the gate on the scale decision.",
+          "relations": [
+            "condition",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 1158,
+              "end": 1189,
+              "text": "only pay for archive-scale once"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "rationale": "Paying for archive-scale only after a small real run shows quality in-band is the smoke-before-the-paid-run discipline at mission scale: cheap evidence first, scale only when the signal holds.",
+              "status": "candidate",
+              "source_sha256": "45bf2e6d4fe6d78a00fc06010ad6ea2eaa8af2760399124f9e24ec418ef7e1f6"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s18",
+      "fragments": [
+        {
+          "start": 1247,
+          "end": 1333,
+          "text": "It is underwritten by the corrected full-pipeline contract + the already-built stages.",
+          "intent": "report",
+          "target": "what the mission rests on: the corrected contract and the already-built stages",
+          "rationale": "Symmetric to s16: the mission underwrites the scale decision and is itself underwritten by existing corrected artefacts, so it is not starting from zero.",
+          "relations": [
+            "dependency",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1273,
+              "end": 1305,
+              "text": "corrected full-pipeline contract"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s19",
+      "fragments": [
+        {
+          "start": 1334,
+          "end": 1425,
+          "text": "- **Carried-forward tensions:** (i) the S7 macro-collapse cause is still open — paper-level",
+          "intent": "report-problem",
+          "target": "tension (i): the S7 macro-collapse cause remains unresolved",
+          "rationale": "Opens the explicit tension list; the first carried-forward unknown is the cause of the S7 macro-collapse.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1338,
+              "end": 1362,
+              "text": "Carried-forward tensions"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "plos-npt-with-small-n/research-questions-stated-early",
+              "rationale": "Enumerating the open tensions up front in the HEAD is the state-questions-early move: the reader can make a scope-fit judgement before reading the body, on the author's terms.",
+              "status": "candidate",
+              "source_sha256": "8c6d47c714893bc8e723fa126c22547afd13a379ad529c81d3ffb6b3931940bf"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s20",
+      "fragments": [
+        {
+          "start": 1428,
+          "end": 1513,
+          "text": "lens vs fixed-vs-data-driven vocab (mark5 D1, Diagnostic 1); (ii) the **S4 expository",
+          "intent": "report-problem",
+          "target": "tensions (i) detail and (ii): vocab-lens question and the unexercised S4 GPU run",
+          "rationale": "Continues the enumeration: the open (i) is specified as a lens/vocab fork with provenance, and (ii) names an instrument that has never been run.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1436,
+              "end": 1462,
+              "text": "fixed-vs-data-driven vocab"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s21",
+      "fragments": [
+        {
+          "start": 1516,
+          "end": 1605,
+          "text": "GPU run has never been exercised**; (iii) the **S6 paper-graph(B) assembler is unbuilt**;",
+          "intent": "report-problem",
+          "target": "tensions (ii) and (iii): unexercised S4 run and unbuilt S6 assembler",
+          "rationale": "Two named gaps in the substrate are put on record rather than buried: an instrument never exercised and a component never built.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1528,
+              "end": 1548,
+              "text": "never been exercised"
+            },
+            {
+              "start": 1595,
+              "end": 1602,
+              "text": "unbuilt"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s22",
+      "fragments": [
+        {
+          "start": 1608,
+          "end": 1696,
+          "text": "(iv) the embedding/macro-vocab rework is **deferred** (separate work, not this mission).",
+          "intent": "defer",
+          "target": "tension (iv): the embedding/macro-vocab rework, explicitly out of scope",
+          "rationale": "The fourth item is named and then properly deferred with a scope marker, so the tension is recorded without being smuggled into this mission's work.",
+          "relations": [
+            "context",
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 1649,
+              "end": 1676,
+              "text": "**deferred** (separate work"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "writing-coherence/hedged-lift",
+              "rationale": "The deferral is done properly: the item is named, marked deferred, and given a disposition ('separate work, not this mission') — commit/defer/cut, with defer chosen explicitly.",
+              "status": "candidate",
+              "source_sha256": "a58ce7caf31dc207a3f7b81b246570f7f6e182c49dfb309685fbe1d91fc68ed9"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s23",
+      "fragments": [
+        {
+          "start": 1697,
+          "end": 1787,
+          "text": "- **Provenance:** this conversation (2026-06-22→23), as the post-mortem of mark5. Intake =",
+          "intent": "report",
+          "target": "the provenance of the HEAD: the 2026-06-22→23 conversation as mark5 post-mortem",
+          "rationale": "Records where the HEAD's content comes from, so the operator principle is traceable to a specific review of readiness docs and mark5 results.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1757,
+              "end": 1777,
+              "text": "post-mortem of mark5"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "vsatelier/decision-provenance",
+              "rationale": "The fragment records the auditable chain from the mark5 post-mortem conversation to this mission HEAD, which is decision-provenance's requirement that decisions trace to the stories that motivated them.",
+              "status": "candidate",
+              "source_sha256": "d95f0c2279e9b49ce56e9afc3c57149ac211c1f577ce0117fb13b5b0f2686d58"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s24",
+      "fragments": [
+        {
+          "start": 1790,
+          "end": 1871,
+          "text": "operator principle stated after reviewing the readiness docs + the mark5 results.",
+          "intent": "report",
+          "target": "the intake: an operator principle stated after reviewing readiness docs and mark5 results",
+          "rationale": "Completes the provenance record by characterising the intake event — an operator principle grounded in a document review, not an agent inference.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1836,
+              "end": 1870,
+              "text": "readiness docs + the mark5 results"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s25",
+      "fragments": [
+        {
+          "start": 1873,
+          "end": 1963,
+          "text": "**Exit criterion (HEAD):** Joe recognises this as the faithful shape of \"what we need next",
+          "intent": "propose",
+          "target": "the HEAD's exit criterion: operator recognition of a faithful shape",
+          "rationale": "Declares the exit condition up front and in the operator's voice: the HEAD succeeds when Joe recognises it, not when an artefact count is met.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 1875,
+              "end": 1896,
+              "text": "Exit criterion (HEAD)"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "musn/declare-scope",
+              "rationale": "Stating a clear, up-front exit condition for the HEAD section is declare-scope's required third element, here with recognition by the operator as the test.",
+              "status": "candidate",
+              "source_sha256": "91a27524fc377ee99a4bdea1de6cd408173d3b17fad44e941fb78943a274520d"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s26",
+      "fragments": [
+        {
+          "start": 1964,
+          "end": 2011,
+          "text": "time\"; the four tensions are named, not buried.",
+          "intent": "clarify",
+          "target": "the second half of the exit criterion: tensions surfaced, not hidden",
+          "rationale": "Completes the exit criterion with its structural test — faithfulness includes the four tensions being visible in the HEAD.",
+          "relations": [
+            "goal",
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 1993,
+              "end": 2010,
+              "text": "named, not buried"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s27",
+      "fragments": [],
+      "unresolved_reason": "Horizontal rule closing the section; no dialogue move."
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/02-M-metric-harness.request.json",
+  "request_sha256": "8b1158f1d8cba595d2266125154fee93a8c157f5352945c719d18a91227c14b0"
+}

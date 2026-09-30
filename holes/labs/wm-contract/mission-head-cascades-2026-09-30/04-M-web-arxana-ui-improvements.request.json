@@ -1,0 +1,32 @@
+{
+ "source_text": "## HEAD\n\n*The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.*",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 7,
+   "text": "## HEAD"
+  },
+  {
+   "id": "s2",
+   "start": 8,
+   "end": 113,
+   "text": "\n*The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.*"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-web-arxana-ui-improvements",
+  "file_path": "/home/joe/code/futon4/holes/missions/M-web-arxana-ui-improvements.md",
+  "content_sha256": "624350faea5ab9bc7e1b91b3bb671f0eb1d41826c2d7d3c69da953c200cb7143",
+  "section": {
+   "source_start": 2254,
+   "source_end": 2367
+  },
+  "source_kind": "head-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/04-M-web-arxana-ui-improvements.request.json.analysis.json"
+}

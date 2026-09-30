@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-4",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T09:11:58.139408+00:00",
+  "source_text": "## HEAD\n\n*The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.*",
+  "source_sha256": "9403f7a8a7299f14fe3131366fdf3aaef173ffe8e31c073fa69366f9e8425fb5",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "## HEAD",
+          "intent": "frame",
+          "target": "the section this heading opens",
+          "rationale": "A bare section marker naming this block as the mission's HEAD — the live operator-shape section, distinct from the hardened gap statement IDENTIFY will produce. It carries no demand of its own; it frames how everything under it must be read.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3,
+              "end": 7,
+              "text": "HEAD"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 8,
+          "end": 113,
+          "text": "\n*The mission's live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.*",
+          "intent": "frame",
+          "target": "the epistemic status of the HEAD section",
+          "rationale": "An italic gloss fixing the evidential standing of the section: this is the operator's live voice, captured upstream of the IDENTIFY phase, before that process hardens it into a tractable gap statement. Two moves in one: capture the operator turn as a processable observation, and observe the authority itself rather than the later stand-in. It asserts provenance and timing, not that any desired outcome has happened.",
+          "relations": [
+            "context",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 24,
+              "end": 43,
+              "text": "live operator-shape"
+            },
+            {
+              "start": 45,
+              "end": 77,
+              "text": "captured before IDENTIFY hardens"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "problems/operator-turns-become-inference-observations",
+              "rationale": "The sentence performs exactly this capture: the mission's operator-shape is taken as a first-class observation with its wording preserved, before automation consumes it — the turn is the grounded material, not a summary of it.",
+              "status": "candidate",
+              "source_sha256": "28cd96e29b84e7698a16ee0c4c020d345c49228dfb1fda6d8bd999ff46707ce9"
+            },
+            {
+              "id": "hygiene/observe-the-authority",
+              "rationale": "Capturing the shape *before IDENTIFY hardens it* is the observe-the-authority discipline: the live operator voice is the thing the later gap statement is about, and the HEAD pins that authority down so the hardened statement cannot silently become the stand-in for it.",
+              "status": "candidate",
+              "source_sha256": "f43c2229b97e9162b4b62af0093f5d15854423b1fc810cd0da4ccdc5ed568bef"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "apparatus/model-upstream-and-coupled",
+              "reason": "That pattern puts a *formal, enforced* model upstream; the HEAD is deliberately pre-formal — its whole point is to exist before the tractable statement exists, so there is no coupled model to cite yet.",
+              "query": "preserve the live shape of intent upstream of formalization"
+            },
+            {
+              "id": "invariant-coherence/shape-first-identify",
+              "reason": "Shape-first governs what IDENTIFY should do once it starts (generalise a candidate into a protocol family before MAP); this sentence is about capture *prior* to IDENTIFY, not about the generalisation move inside it.",
+              "query": "capture the raw operator voice before process hardens it into a formal statement"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/04-M-web-arxana-ui-improvements.request.json",
+  "request_sha256": "d04b0b64fc031dbbf8331b61ac49d2ebbfc105d6ce25abc92b64481aaa80fd77"
+}

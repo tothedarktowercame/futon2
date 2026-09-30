@@ -9,6 +9,7 @@
 (def fixture-root "test/fixtures/analysis-cascade")
 (def analysis-root (str (System/getProperty "user.home")
                         "/.emacs-graph/session-turn-analysis"))
+(def published-analysis-name #"turn-.*\.json\.analysis\.json")
 
 (defn read-analysis [path]
   (json/parse-string (slurp path) true))
@@ -100,6 +101,25 @@
       (is (every? #(= (:text %) (subs source (:start %) (:end %)))
                   (:sentences request))))))
 
+(deftest mission-request-prefers-head-and-records-opening-fallback
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "wm-mission-reading" (make-array java.nio.file.attribute.FileAttribute 0)))
+        with-head (io/file dir "M-head.md")
+        no-head (io/file dir "M-opening.md")
+        run (fn [file]
+              (let [out (io/file dir (str (.getName file) ".json"))
+                    result (shell/sh "python3" "scripts/wm_task_reading.py"
+                                     (.getPath file) "--mission-head" "--out" (.getPath out))]
+                (is (zero? (:exit result)) (:err result))
+                (read-analysis out)))]
+    (spit with-head "# M-head\nMetadata.\n\n## HEAD\nJoe's words.\n\n## MAP\nLater.\n")
+    (spit no-head "# M-opening\nOperator anchor.\n\n## MAP\nLater.\n")
+    (let [head (run with-head) opening (run no-head)]
+      (is (= "head-section" (get-in head [:task :source_kind])))
+      (is (= "## HEAD\nJoe's words." (:source_text head)))
+      (is (= "opening-before-first-section" (get-in opening [:task :source_kind])))
+      (is (= "# M-opening\nOperator anchor." (:source_text opening))))))
+
 (defn corpus-report [files mode]
   (let [rows (mapv (fn [file]
                      (let [analysis (read-analysis file)
@@ -124,7 +144,9 @@
 (deftest all-real-analyses-report-cascade-scale
   (let [files (->> (.listFiles (io/file analysis-root))
                    (filter #(and (.isFile %)
-                                 (.endsWith (.getName %) ".analysis.json")))
+                                 (re-matches published-analysis-name (.getName %))
+                                 (let [analysis (read-analysis %)]
+                                   (and (:request_file analysis) (:status analysis)))))
                    (sort-by #(.getName %)))
         report {:alternatives (corpus-report files :alternatives)
                 :overlap (corpus-report files :overlap)}]

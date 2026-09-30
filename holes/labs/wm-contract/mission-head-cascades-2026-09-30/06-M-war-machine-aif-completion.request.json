@@ -1,0 +1,128 @@
+{
+ "source_text": "# Mission: M-war-machine-aif-completion\n\n<!-- engine: structural header, AI-written -->\n**Date:** 2026-05-17\n**Status:** OPEN — exit criterion #2 satisfied; HEAD-as-escrow scaffold (claude-1, PM pass for the futon-stack-as-Hyperreal-business mission cluster); awaiting Joe verbatims via simulated `eoi-engine` `eoi-inward-mission` flash. **Exit criterion source:** §0 of `~/code/futon7/holes/M-descriptive-essay-of-the-stack.md`, criterion #2.\n**Bar (lifted verbatim from §0):** *\"War Machine ≥ ukrn-services-simulation coherence — concretely: ~12 clojure notebooks (substrate + dynamics + engagement on v2 side; belief + kernel + forward model + EFE + trace on v3 side); test harness with regression baselines; figure-rendering pipeline; R1-R12 (or F1-F10) completeness contract satisfied. Today's War Machine is `:π-display`-only — a reading surface, no belief state, no predictive forward model, no EFE-scored action ranking. The gap is substantial — weeks of work, not hours.\"*\n**Timebox:** estimated 3-4 weeks; final cap is Joe's call at §1.5 verbatim authoring.\n**Owner:** Joe (futon7); engineering ownership undefined pending Q-CL1 (see §3.1).\n**Sequencing role:** Sibling to `M-stack-essay` and `M-stack-essay-code-alignment` in the mission cluster; predecessor for `M-stack-morphogenetic-rewrite`. **Hard predecessor:** none in the cluster; outside the cluster, depends on `M-interim-director`'s arm-G work (substrate-2 already operational) and on Arms A/B/F producing live data the forward model can train on / score against.\n**Cross-ref:**\n- `~/code/ukrn-services-simulation/README.md` + `notebooks/ukrn_v3_*.clj` — the predecessor exemplar; the bar this mission graduates the War Machine to\n- `~/code/ukrn-services-simulation/docs/aif-completeness.md` — R1-R12 contract; companion to F1-F10 below\n- `~/code/futon0/docs/stack-fitness-completeness.md` — F1-F10 stack-fitness contract; the homeostat analogue of R1-R12\n- `~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md` §2.5 (math trajectory L1-L5), §2.6 (stack-fitness trajectory L1-L5) — these levels are this mission's *sub-deliverable map*\n- `~/code/futon2/scripts/futon2/report/war_machine.clj` — current War Machine surface (2850 lines, single namespace `futon2.report.war-machine`). 13 `scan-*` projection functions; AIF observer at lines 1803–2060 (`observation-channels`, `observe`, `sense->vector`, `preferences`, `avoided-states`, `mode-prior`, `pragmatic-weights`, `compute-free-energy`, `infer-mode`); plus `evaluate-mark2-batches`, `scan-aif-heads`, `load-invariant-inventory`, `enrich-support-attack`, `judge`. **Precision on the §0 Bar quote:** \"no belief state\" understates current state — there is a mode-prior + mode-inference observer. The accurate baseline is: **`:π-display`-only at the policy/action layer** (no forward model `(state, action) → predicted-state`, no EFE-scored action ranking); a mode-inference observer already exists. The completion gap is forward-model + action-space + EFE-scored policy ranking + test harness + regression fixtures, not \"AIF substrate from scratch.\"\n- `~/code/futon3c/src/futon3c/portfolio/observe.clj` — 16-channel portfolio surface\n- `~/code/futon3/holes/war-bulletin-9.md` — strategic context (WR-16: operationalised exploit-loops as observation channels)\n- `~/code/futon4/README-rewriting.md` — typed-rewrite discipline; the WM's belief updates are operadic-by-construction (Q-SA3)\n\n**Authors:** Joe (verbatim answers, pending); claude-1 (engine-side ordering and minimal structural connective tissue, 2026-05-17 PM scaffold).",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 39,
+   "text": "# Mission: M-war-machine-aif-completion"
+  },
+  {
+   "id": "s2",
+   "start": 40,
+   "end": 87,
+   "text": "\n<!-- engine: structural header, AI-written -->"
+  },
+  {
+   "id": "s3",
+   "start": 88,
+   "end": 108,
+   "text": "**Date:** 2026-05-17"
+  },
+  {
+   "id": "s4",
+   "start": 109,
+   "end": 443,
+   "text": "**Status:** OPEN — exit criterion #2 satisfied; HEAD-as-escrow scaffold (claude-1, PM pass for the futon-stack-as-Hyperreal-business mission cluster); awaiting Joe verbatims via simulated `eoi-engine` `eoi-inward-mission` flash. **Exit criterion source:** §0 of `~/code/futon7/holes/M-descriptive-essay-of-the-stack.md`, criterion #2."
+  },
+  {
+   "id": "s5",
+   "start": 444,
+   "end": 981,
+   "text": "**Bar (lifted verbatim from §0):** *\"War Machine ≥ ukrn-services-simulation coherence — concretely: ~12 clojure notebooks (substrate + dynamics + engagement on v2 side; belief + kernel + forward model + EFE + trace on v3 side); test harness with regression baselines; figure-rendering pipeline; R1-R12 (or F1-F10) completeness contract satisfied. Today's War Machine is `:π-display`-only — a reading surface, no belief state, no predictive forward model, no EFE-scored action ranking. The gap is substantial — weeks of work, not hours.\"*"
+  },
+  {
+   "id": "s6",
+   "start": 982,
+   "end": 1067,
+   "text": "**Timebox:** estimated 3-4 weeks; final cap is Joe's call at §1.5 verbatim authoring."
+  },
+  {
+   "id": "s7",
+   "start": 1068,
+   "end": 1150,
+   "text": "**Owner:** Joe (futon7); engineering ownership undefined pending Q-CL1 (see §3.1)."
+  },
+  {
+   "id": "s8",
+   "start": 1151,
+   "end": 1535,
+   "text": "**Sequencing role:** Sibling to `M-stack-essay` and `M-stack-essay-code-alignment` in the mission cluster; predecessor for `M-stack-morphogenetic-rewrite`. **Hard predecessor:** none in the cluster; outside the cluster, depends on `M-interim-director`'s arm-G work (substrate-2 already operational) and on Arms A/B/F producing live data the forward model can train on / score against."
+  },
+  {
+   "id": "s9",
+   "start": 1536,
+   "end": 1550,
+   "text": "**Cross-ref:**"
+  },
+  {
+   "id": "s10",
+   "start": 1551,
+   "end": 1702,
+   "text": "- `~/code/ukrn-services-simulation/README.md` + `notebooks/ukrn_v3_*.clj` — the predecessor exemplar; the bar this mission graduates the War Machine to"
+  },
+  {
+   "id": "s11",
+   "start": 1703,
+   "end": 1808,
+   "text": "- `~/code/ukrn-services-simulation/docs/aif-completeness.md` — R1-R12 contract; companion to F1-F10 below"
+  },
+  {
+   "id": "s12",
+   "start": 1809,
+   "end": 1927,
+   "text": "- `~/code/futon0/docs/stack-fitness-completeness.md` — F1-F10 stack-fitness contract; the homeostat analogue of R1-R12"
+  },
+  {
+   "id": "s13",
+   "start": 1928,
+   "end": 2120,
+   "text": "- `~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md` §2.5 (math trajectory L1-L5), §2.6 (stack-fitness trajectory L1-L5) — these levels are this mission's *sub-deliverable map*"
+  },
+  {
+   "id": "s14",
+   "start": 2121,
+   "end": 3086,
+   "text": "- `~/code/futon2/scripts/futon2/report/war_machine.clj` — current War Machine surface (2850 lines, single namespace `futon2.report.war-machine`). 13 `scan-*` projection functions; AIF observer at lines 1803–2060 (`observation-channels`, `observe`, `sense->vector`, `preferences`, `avoided-states`, `mode-prior`, `pragmatic-weights`, `compute-free-energy`, `infer-mode`); plus `evaluate-mark2-batches`, `scan-aif-heads`, `load-invariant-inventory`, `enrich-support-attack`, `judge`. **Precision on the §0 Bar quote:** \"no belief state\" understates current state — there is a mode-prior + mode-inference observer. The accurate baseline is: **`:π-display`-only at the policy/action layer** (no forward model `(state, action) → predicted-state`, no EFE-scored action ranking); a mode-inference observer already exists. The completion gap is forward-model + action-space + EFE-scored policy ranking + test harness + regression fixtures, not \"AIF substrate from scratch.\""
+  },
+  {
+   "id": "s15",
+   "start": 3087,
+   "end": 3170,
+   "text": "- `~/code/futon3c/src/futon3c/portfolio/observe.clj` — 16-channel portfolio surface"
+  },
+  {
+   "id": "s16",
+   "start": 3171,
+   "end": 3295,
+   "text": "- `~/code/futon3/holes/war-bulletin-9.md` — strategic context (WR-16: operationalised exploit-loops as observation channels)"
+  },
+  {
+   "id": "s17",
+   "start": 3296,
+   "end": 3422,
+   "text": "- `~/code/futon4/README-rewriting.md` — typed-rewrite discipline; the WM's belief updates are operadic-by-construction (Q-SA3)"
+  },
+  {
+   "id": "s18",
+   "start": 3423,
+   "end": 3567,
+   "text": "\n**Authors:** Joe (verbatim answers, pending); claude-1 (engine-side ordering and minimal structural connective tissue, 2026-05-17 PM scaffold)."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-war-machine-aif-completion",
+  "file_path": "/home/joe/code/futon7/holes/M-war-machine-aif-completion.md",
+  "content_sha256": "d5f490fccb2d28a830c1eceb511ae4705e98e7732461d45f866e9682fb9bb0d7",
+  "section": {
+   "source_start": 0,
+   "source_end": 3567
+  },
+  "source_kind": "opening-before-first-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/06-M-war-machine-aif-completion.request.json.analysis.json"
+}

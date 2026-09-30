@@ -1,0 +1,74 @@
+{
+ "source_text": "## HEAD\n\nThe \"killer idea\" (golden-walk-ledger.md §THE KILLER IDEA), made operational:\nmine the math corpus **structure-first** — concepts are the index, papers are\noccurrence sites — and run a **Distributed-Proofreaders** loop over it:\nmine → measure loss → fix the worst class → re-mine, anytime, never perfect.\nNamed for the volunteer book-digitisation model: systematic per-type passes,\neach pass clearing one defect class, quality a property of the revision\nprocess rather than any single snapshot (the Moran-1971 *because*-clause\nlesson, futon5a/essays/moran-1971-agent-cascades).",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 7,
+   "text": "## HEAD"
+  },
+  {
+   "id": "s2",
+   "start": 8,
+   "end": 86,
+   "text": "\nThe \"killer idea\" (golden-walk-ledger.md §THE KILLER IDEA), made operational:"
+  },
+  {
+   "id": "s3",
+   "start": 87,
+   "end": 164,
+   "text": "mine the math corpus **structure-first** — concepts are the index, papers are"
+  },
+  {
+   "id": "s4",
+   "start": 165,
+   "end": 236,
+   "text": "occurrence sites — and run a **Distributed-Proofreaders** loop over it:"
+  },
+  {
+   "id": "s5",
+   "start": 237,
+   "end": 313,
+   "text": "mine → measure loss → fix the worst class → re-mine, anytime, never perfect."
+  },
+  {
+   "id": "s6",
+   "start": 314,
+   "end": 390,
+   "text": "Named for the volunteer book-digitisation model: systematic per-type passes,"
+  },
+  {
+   "id": "s7",
+   "start": 391,
+   "end": 462,
+   "text": "each pass clearing one defect class, quality a property of the revision"
+  },
+  {
+   "id": "s8",
+   "start": 463,
+   "end": 535,
+   "text": "process rather than any single snapshot (the Moran-1971 *because*-clause"
+  },
+  {
+   "id": "s9",
+   "start": 536,
+   "end": 586,
+   "text": "lesson, futon5a/essays/moran-1971-agent-cascades)."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-distributed-proofreaders",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-distributed-proofreaders.md",
+  "content_sha256": "fec9906a121074f84ddc61d2e66c56f8cbe62b512b55c196da1ac17bf11047e5",
+  "section": {
+   "source_start": 408,
+   "source_end": 994
+  },
+  "source_kind": "head-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/03-M-distributed-proofreaders.request.json.analysis.json"
+}

@@ -1,0 +1,50 @@
+{
+ "source_text": "# Mission: Essays Diachronic Model — Golden/Live Dataset Discipline and XTDB Lifecycle Semantics\n\n**Date:** 2026-05-14\n**Status:** OPEN — specified; implementation not yet started (previous status: specified, implementation pending)\n**Parent mission:** `M-essays-edit-cycle.md`\n**Owner:** futon4 / WebArxana / futon1a",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 96,
+   "text": "# Mission: Essays Diachronic Model — Golden/Live Dataset Discipline and XTDB Lifecycle Semantics"
+  },
+  {
+   "id": "s2",
+   "start": 97,
+   "end": 118,
+   "text": "\n**Date:** 2026-05-14"
+  },
+  {
+   "id": "s3",
+   "start": 119,
+   "end": 232,
+   "text": "**Status:** OPEN — specified; implementation not yet started (previous status: specified, implementation pending)"
+  },
+  {
+   "id": "s4",
+   "start": 233,
+   "end": 277,
+   "text": "**Parent mission:** `M-essays-edit-cycle.md`"
+  },
+  {
+   "id": "s5",
+   "start": 278,
+   "end": 317,
+   "text": "**Owner:** futon4 / WebArxana / futon1a"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-essays-diachronic-model",
+  "file_path": "/home/joe/code/futon4/holes/missions/M-essays-diachronic-model.md",
+  "content_sha256": "be274a0532af060091e7d4c3f3f09f8c795a25d25c7589d488a13f618fda2f0f",
+  "section": {
+   "source_start": 0,
+   "source_end": 317
+  },
+  "source_kind": "opening-before-first-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/07-M-essays-diachronic-model.request.json.analysis.json"
+}

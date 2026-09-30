@@ -1,0 +1,506 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象 (kimi), M-G-wm-wiring mission-head cascade",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T09:15:33.383080+00:00",
+  "source_text": "# Mission: M-self-documenting-stack\n\n> **Naming history (Joe 2026-05-20)**: started life narrowly as `M-autonomous-doc-maintenance` (single-axis: doc-freshness). IDENTIFY-time mission survey revealed a parallel gap — *mission discoverability* — that the same apparatus naturally serves; both are aspects of the same broader goal (\"I want the futon stack to be *deeply* self-documenting\"). File renamed to `M-self-documenting-stack` to reflect the actual scope. POC scope (LC1 only) ratified by Joe same-day; Deliverables A + B and the chain-link applications #3-#7 are explicit follow-on missions, not extensions of this one.\n\n**Status:** OPEN — INSTANTIATE (recovery pass 2026-05-21). **POC scope: LC1 (Deliverable C — mission-discoverability surface) only.** LC1 code/tests/build are now recovered after review; manual browser walk-through + DOCUMENT pass remain before closure. A + B + chain-link applications #3-#7 are follow-on missions inheriting this mission's shape-naming + protocol-family framing.\n**Owner:** codex-5 (LC1 recovery + closure pass 2026-05-21); claude-2 (framing-author; original LC1 author)\n**Co-owners (for follow-ons, not this POC):** claude-4 (VSATARCS-side; peripheral wrapping when A becomes a follow-on); claude-1 or claude-13 (futon3c-side; peripheral-spec compliance for A); WM-side ownership for B\n**Driver:** Joe (operator; framing-extender; POC-close-decider)\n**Authors:** claude-2 IDENTIFY draft 2026-05-20, following M-vsatarcs-writer Option B live cycle which proved the per-cycle apparatus works but exposed the gap to autonomy. Joe-driven extension same-day to absorb mission-discoverability per his felt need (\"a search box where I could start typing 'self documenting stack' and get a summary of the relevant missions\"). Joe scoping decision 2026-05-20: ship LC1 as POC; follow-on missions inherit the framing; mission closes as POC when LC1 ready. codex-5 recovery pass 2026-05-21 after external review surfaced LC1 blockers/gaps (broken embedding helper, missing warm corpus, per-request JVM shell-out, missing D11/D12/DL1 closures).",
+  "source_sha256": "03e76d566d3dd5e2513bf511913aa16032db0e7e34cecd77bbaea3b0e7bc5396",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 35,
+          "text": "# Mission: M-self-documenting-stack",
+          "intent": "identify-mission",
+          "target": "the mission document itself",
+          "rationale": "Heading names the mission this HEAD anchors; the cascade attaches to this identity.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 11,
+              "end": 35,
+              "text": "M-self-documenting-stack"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 76,
+          "end": 160,
+          "text": "started life narrowly as `M-autonomous-doc-maintenance` (single-axis: doc-freshness)",
+          "intent": "record-naming-provenance",
+          "target": "the mission's former identity",
+          "rationale": "Keeps the original narrow name on the record so the broadening is auditable rather than silently rewritten.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 102,
+              "end": 130,
+              "text": "M-autonomous-doc-maintenance"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 162,
+          "end": 285,
+          "text": "IDENTIFY-time mission survey revealed a parallel gap — *mission discoverability* — that the same apparatus naturally serves",
+          "intent": "discover-parallel-gap",
+          "target": "mission discoverability",
+          "rationale": "The IDENTIFY-phase survey is credited as the moment a second gap surfaced that the same apparatus serves — scope growth is traced to a discovery event, not drift.",
+          "relations": [
+            "context",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 184,
+              "end": 214,
+              "text": "survey revealed a parallel gap"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "war-machine/advanceability",
+              "reason": "Advanceability governs whether an open mission is an admissible autonomous target given open holes; this fragment is about discovering a second gap during IDENTIFY, not about ranking or admissibility.",
+              "query": "the previous cycle worked but exposed the next gap"
+            }
+          ]
+        },
+        {
+          "start": 389,
+          "end": 459,
+          "text": "File renamed to `M-self-documenting-stack` to reflect the actual scope",
+          "intent": "rename-to-match-scope",
+          "target": "the mission file",
+          "rationale": "The rename keeps the mission's name honest about its discovered scope — the container follows the surveyed content.",
+          "relations": [
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 394,
+              "end": 431,
+              "text": "renamed to `M-self-documenting-stack`"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-scoping",
+              "rationale": "Mission-scoping explicitly allows scope revision as discovery proceeds; renaming the file to reflect actual scope is the record of such a revision.",
+              "status": "candidate",
+              "source_sha256": "d36c1c9b1ebb92a5c2d7b52e36543468dde80db902bf63499cf71b055ec16d49"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 461,
+          "end": 625,
+          "text": "POC scope (LC1 only) ratified by Joe same-day; Deliverables A + B and the chain-link applications #3-#7 are explicit follow-on missions, not extensions of this one.",
+          "intent": "bound-poc-scope",
+          "target": "this mission's POC boundary",
+          "rationale": "Joe ratifies a deliberately narrow POC and pushes A, B and #3-#7 out as follow-ons — bounding this mission so it can close, and recording the exclusion explicitly.",
+          "relations": [
+            "action",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 461,
+              "end": 481,
+              "text": "POC scope (LC1 only)"
+            },
+            {
+              "start": 569,
+              "end": 596,
+              "text": "explicit follow-on missions"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-scoping",
+              "rationale": "Bounded success criteria, explicit inclusions/exclusions and a ratified boundary are exactly what mission-scoping requires; 'follow-ons, not extensions' is the exclusion clause.",
+              "status": "candidate",
+              "source_sha256": "d36c1c9b1ebb92a5c2d7b52e36543468dde80db902bf63499cf71b055ec16d49"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 627,
+          "end": 684,
+          "text": "**Status:** OPEN — INSTANTIATE (recovery pass 2026-05-21)",
+          "intent": "record-lifecycle-state",
+          "target": "the mission's state machine position",
+          "rationale": "Declares the current lifecycle state with a dated transition note, making the mission's position auditable.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 639,
+              "end": 657,
+              "text": "OPEN — INSTANTIATE"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-lifecycle",
+              "rationale": "Mission-lifecycle requires state transitions recorded in the doc header with timestamp and attribution; this Status line is exactly that practice.",
+              "status": "candidate",
+              "source_sha256": "78eee0c50b9af03f21a6225c21799b5c724ae873dfd95aee9724be5aac787001"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 686,
+          "end": 760,
+          "text": "**POC scope: LC1 (Deliverable C — mission-discoverability surface) only.**",
+          "intent": "restate-poc-boundary",
+          "target": "LC1 / Deliverable C",
+          "rationale": "Re-anchors the scope boundary in the Status field so a reader of the header alone cannot mistake the mission for the broader goal.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 699,
+              "end": 702,
+              "text": "LC1"
+            },
+            {
+              "start": 753,
+              "end": 757,
+              "text": "only"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 814,
+          "end": 879,
+          "text": "manual browser walk-through + DOCUMENT pass remain before closure",
+          "intent": "name-remaining-closure-work",
+          "target": "the two remaining closure steps",
+          "rationale": "Names the concrete remaining increments standing between the recovered build and closure — the mission's next holes are articulated.",
+          "relations": [
+            "goal",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 858,
+              "end": 879,
+              "text": "remain before closure"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-machine/advanceability",
+              "rationale": "An open mission is advanceable only with a concrete next hole; naming the walk-through and DOCUMENT pass articulates exactly the remaining holes.",
+              "status": "candidate",
+              "source_sha256": "250684c49db812dee46a9e08bbba0c3e02682fe3f0784b1325436a955fbfe43d"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 881,
+          "end": 1006,
+          "text": "A + B + chain-link applications #3-#7 are follow-on missions inheriting this mission's shape-naming + protocol-family framing",
+          "intent": "defer-follow-ons-inheriting-framing",
+          "target": "deliverables A, B and chain-links #3-#7",
+          "rationale": "Deferred work is not dropped but re-homed as follow-on missions that inherit this mission's framing — the cascade continues outside this HEAD's boundary.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 923,
+              "end": 952,
+              "text": "follow-on missions inheriting"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 1008,
+          "end": 1115,
+          "text": "**Owner:** codex-5 (LC1 recovery + closure pass 2026-05-21); claude-2 (framing-author; original LC1 author)",
+          "intent": "assign-ownership",
+          "target": "codex-5 and claude-2",
+          "rationale": "Binds present ownership (recovery/closure) to codex-5 while preserving claude-2's authorship role — execution ownership and framing authorship are distinguished.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1010,
+              "end": 1016,
+              "text": "Owner:"
+            },
+            {
+              "start": 1019,
+              "end": 1026,
+              "text": "codex-5"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-scoping",
+              "rationale": "Mission-scoping requires explicit ownership so work can be completed, reviewed and handed off without ambiguity; this line is the ownership clause.",
+              "status": "candidate",
+              "source_sha256": "d36c1c9b1ebb92a5c2d7b52e36543468dde80db902bf63499cf71b055ec16d49"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 1116,
+          "end": 1331,
+          "text": "**Co-owners (for follow-ons, not this POC):** claude-4 (VSATARCS-side; peripheral wrapping when A becomes a follow-on); claude-1 or claude-13 (futon3c-side; peripheral-spec compliance for A); WM-side ownership for B",
+          "intent": "assign-conditional-future-ownership",
+          "target": "claude-4, claude-1/claude-13, and WM-side for B",
+          "rationale": "Pre-assigns ownership of the deferred follow-ons while explicitly excluding them from this POC — future seams are staffed without diluting the current boundary.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 1129,
+              "end": 1157,
+              "text": "for follow-ons, not this POC"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-scoping",
+              "rationale": "The parenthetical 'for follow-ons, not this POC' is the bounded-ownership discipline of mission-scoping applied to the cascade's future missions.",
+              "status": "candidate",
+              "source_sha256": "d36c1c9b1ebb92a5c2d7b52e36543468dde80db902bf63499cf71b055ec16d49"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 1332,
+          "end": 1395,
+          "text": "**Driver:** Joe (operator; framing-extender; POC-close-decider)",
+          "intent": "name-close-decider",
+          "target": "Joe as operator and closure authority",
+          "rationale": "Names the operator as the single locus where POC closure will be decided — the close act is routed through a recorded human decider, not agent self-declaration.",
+          "relations": [
+            "context",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 1377,
+              "end": 1394,
+              "text": "POC-close-decider"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "orchestration/consent-gate",
+              "rationale": "Closure of the POC is the consequential act here, and the header installs a recorded operator-approval locus (Joe as close-decider) at exactly that seam.",
+              "status": "candidate",
+              "source_sha256": "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 1445,
+          "end": 1567,
+          "text": "following M-vsatarcs-writer Option B live cycle which proved the per-cycle apparatus works but exposed the gap to autonomy",
+          "intent": "derive-mission-from-prior-cycle",
+          "target": "the M-vsatarcs-writer Option B live cycle",
+          "rationale": "The mission's existence is justified by a prior cycle's double result: apparatus proven, autonomy gap exposed — the new mission is the named successor to that finding.",
+          "relations": [
+            "context",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 1499,
+              "end": 1535,
+              "text": "proved the per-cycle apparatus works"
+            },
+            {
+              "start": 1540,
+              "end": 1567,
+              "text": "exposed the gap to autonomy"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1569,
+          "end": 1762,
+          "text": "Joe-driven extension same-day to absorb mission-discoverability per his felt need (\"a search box where I could start typing 'self documenting stack' and get a summary of the relevant missions\")",
+          "intent": "bind-operator-felt-need",
+          "target": "Joe's search-box felt need",
+          "rationale": "The scope extension is anchored to a quoted operator need in the operator's own words — the mission binds a felt intent, verbatim, into its record.",
+          "relations": [
+            "rationale",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 1653,
+              "end": 1692,
+              "text": "a search box where I could start typing"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "coordination/intent-to-mission-binding",
+              "rationale": "Intent-to-mission-binding requires binding work to an explicit mission reference; here the binding runs the other way — the mission is reshaped to bind Joe's verbatim intent, keeping intent and mission mutually traceable.",
+              "status": "candidate",
+              "source_sha256": "9eb0d26661b50bdeb78edf6873156dd80c3697f76aa4da42be84392be5a02488"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1764,
+          "end": 1890,
+          "text": "Joe scoping decision 2026-05-20: ship LC1 as POC; follow-on missions inherit the framing; mission closes as POC when LC1 ready",
+          "intent": "record-scoping-decision-with-closure-criterion",
+          "target": "the 2026-05-20 scoping decision",
+          "rationale": "Records the dated operator decision and its closure criterion ('closes as POC when LC1 ready') — a verifiable done-when attached to the boundary.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 1797,
+              "end": 1812,
+              "text": "ship LC1 as POC"
+            },
+            {
+              "start": 1862,
+              "end": 1890,
+              "text": "closes as POC when LC1 ready"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-scoping",
+              "rationale": "'Done when X is true' is mission-scoping's success-criteria rule; the closure criterion for the POC is stated in exactly that shape.",
+              "status": "candidate",
+              "source_sha256": "d36c1c9b1ebb92a5c2d7b52e36543468dde80db902bf63499cf71b055ec16d49"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1892,
+          "end": 2077,
+          "text": "codex-5 recovery pass 2026-05-21 after external review surfaced LC1 blockers/gaps (broken embedding helper, missing warm corpus, per-request JVM shell-out, missing D11/D12/DL1 closures)",
+          "intent": "record-recovery-trigger",
+          "target": "the external review's blocker list",
+          "rationale": "Explains why a recovery pass exists: external review surfaced named defects, and the pass is scoped to closing exactly those, with the list kept in the record.",
+          "relations": [
+            "context",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 1931,
+              "end": 1968,
+              "text": "external review surfaced LC1 blockers"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "reason": "That pattern is about cheap pre-validation of a metered LLM/GPU run; the recovery here follows an external human review of recovered code, not a paid-corpus smoke test.",
+              "query": "recovery pass after external review surfaced blockers"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/05-M-self-documenting-stack.request.json",
+  "request_sha256": "d8d65267ecf7a3677acd642ed1baa6cf2a5709207defab73d66d9748229e0235"
+}

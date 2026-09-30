@@ -1,0 +1,178 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-3",
+  "reusable_cues": [
+    {
+      "start": 149,
+      "end": 179,
+      "text": "implementation not yet started",
+      "intent": "report-status",
+      "rationale": "The explicit 'specified but not started' phrasing is a reusable cue for a mission at the specified state of its lifecycle."
+    }
+  ],
+  "created_at": "2026-09-30T09:15:26.734273+00:00",
+  "source_text": "# Mission: Essays Diachronic Model — Golden/Live Dataset Discipline and XTDB Lifecycle Semantics\n\n**Date:** 2026-05-14\n**Status:** OPEN — specified; implementation not yet started (previous status: specified, implementation pending)\n**Parent mission:** `M-essays-edit-cycle.md`\n**Owner:** futon4 / WebArxana / futon1a",
+  "source_sha256": "f5822ea8b50fc8516e2b29bea4ba2f2df3bbe87d7a64d990f96b015b0dead831",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 11,
+          "end": 96,
+          "text": "Essays Diachronic Model — Golden/Live Dataset Discipline and XTDB Lifecycle Semantics",
+          "intent": "declare",
+          "target": "the mission's identity and twofold scope: golden/live dataset discipline and XTDB lifecycle semantics",
+          "rationale": "The title line names the mission and binds its scope: a dataset discipline separating golden from live, plus explicit lifecycle semantics in XTDB. As operator-voice anchor it states intent, not achievement.",
+          "relations": [
+            "goal",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 37,
+              "end": 67,
+              "text": "Golden/Live Dataset Discipline"
+            },
+            {
+              "start": 72,
+              "end": 96,
+              "text": "XTDB Lifecycle Semantics"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "sidecar/fact-lifecycle-event-types",
+              "rationale": "The promised XTDB lifecycle semantics match this pattern's demand that state changes be modeled as explicit lifecycle event types rather than implicit overwrites.",
+              "status": "candidate",
+              "source_sha256": "83232f9ef4c5c45f73feec70a5d7d7cbf2006b0375271ee01cbe8ad4f8a2a5e3"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/golden-is-curated-not-raw",
+              "reason": "That pattern governs hand-curated golden sets for mining evaluation; the mission's golden/live split is a dataset-immutability discipline for replay, not exemplar curation.",
+              "query": "golden/live dataset discipline with lifecycle event semantics"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [],
+      "unresolved_reason": "Date line only; provenance metadata, no interpretable move."
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 131,
+          "end": 232,
+          "text": "OPEN — specified; implementation not yet started (previous status: specified, implementation pending)",
+          "intent": "report-status",
+          "target": "the mission's current state: specified, with implementation not yet started, and its previous status recorded",
+          "rationale": "The banner states the mission's position in its lifecycle and even carries the prior status, keeping the state history auditable rather than silently overwritten.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 149,
+              "end": 179,
+              "text": "implementation not yet started"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-lifecycle",
+              "rationale": "Recording both the current state (specified, not started) and the previous status instantiates the explicit-state-machine discipline this pattern prescribes for missions.",
+              "status": "candidate",
+              "source_sha256": "78eee0c50b9af03f21a6225c21799b5c724ae873dfd95aee9724be5aac787001"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "process-coherence/status-refresh-before-work",
+              "reason": "That pattern tells a worker to distrust and re-derive a stale banner before starting; this line is the operator's own fresh status declaration, not a possibly-stale cache being consumed.",
+              "query": "mission status: specified, implementation not started"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 253,
+          "end": 277,
+          "text": "`M-essays-edit-cycle.md`",
+          "intent": "inherit",
+          "target": "the parent mission M-essays-edit-cycle, from which this mission descends",
+          "rationale": "Declares the upstream mission edge: this mission's scope continues work specified in M-essays-edit-cycle, making the lineage explicit.",
+          "relations": [
+            "dependency",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 253,
+              "end": 277,
+              "text": "`M-essays-edit-cycle.md`"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 289,
+          "end": 317,
+          "text": "futon4 / WebArxana / futon1a",
+          "intent": "assign",
+          "target": "ownership, spread across the futon4, WebArxana, and futon1a components",
+          "rationale": "Names the owning components so responsibility for the mission's deliverables is locatable; ownership here is a set of cooperating subsystems rather than one authority.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 289,
+              "end": 317,
+              "text": "futon4 / WebArxana / futon1a"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "apparatus/one-authority-per-question",
+              "reason": "That pattern demands a single authority per question; the owner line names three cooperating components, which is component-level ownership, not competing authorities over one decision.",
+              "query": "assign mission ownership to responsible components"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/07-M-essays-diachronic-model.request.json",
+  "request_sha256": "e7a254872919d6662d7540e5aeac58dc9079b6719376989cc6556b6e27e7f728"
+}

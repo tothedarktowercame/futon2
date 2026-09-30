@@ -8,14 +8,18 @@ This remains provisional pending M-象-cascade's connected-cascade/retraction ma
 
 ## Corpus comparison
 
-The final gate read every `*.analysis.json` present under `~/.emacs-graph/session-turn-analysis` at 08:59Z. There were 923 by then (seven more than the 916 cited when this packet was written).
+The corrected gate reads only published `turn-*.json.analysis.json` records
+that carry both `request_file` and `status`; bare
+`turn-*.analysis.json` drafts are excluded. At the final 09:24Z gate there were 891 such
+records (the live count continued to grow after the 880 reported by
+M-象-cascade).
 
 | mode | analyses yielding 0 / 1 / 2+ cascades | node-count distribution | edge-count distribution | bare singleton cascades | fragment failures |
 |---|---:|---|---|---:|---:|
-| alternatives | 556 / 240 / 127 | 1:334, 2:169, 3:63, 4:3, 5:2, 7:1 | 0:334, 1:169, 2:63, 3:3, 4:2, 6:1 | 334 | 2413 |
-| overlap | 556 / 256 / 111 | 1:312, 2:160, 3:53, 4:13, 5:2, 7:1 | 0:312, 1:160, 2:43, 3:13, 4:11, 5:1, 6:1 | 312 | 2413 |
+| alternatives | 521 / 240 / 130 | 1:341, 2:169, 3:63, 4:3, 5:2, 7:1 | 0:341, 1:169, 2:63, 3:3, 4:2, 6:1 | 341 | 2317 |
+| overlap | 521 / 256 / 114 | 1:319, 2:160, 3:53, 4:13, 5:2, 7:1 | 0:319, 1:160, 2:43, 3:13, 4:11, 5:1, 6:1 | 319 | 2317 |
 
-Overlap therefore preserves more co-applicable nodes in a single arrangement and removes 22 bare singletons. The 556 zero-cascade analyses and 2413 fragments without a validated ref remain counted failures; the mode does not turn them into outcomes.
+Overlap therefore preserves more co-applicable nodes in a single arrangement and removes 22 bare singletons. The 521 zero-cascade analyses and 2317 fragments without a validated ref remain counted failures; the mode does not turn them into outcomes.
 
 Plant control: in a scratch copy I discarded fragment/role data, made every
 edge `:precedes`, and alphabetised the nodes. The namespace exited 1 at

@@ -1,0 +1,182 @@
+{
+ "source_text": "## HEAD\n\n- **Operator-voice anchor (Joe, 2026-06-22):** *\"If we do one paper end-to-end we should\n  already have metrics, and those metrics should improve if we do 10 papers end to end.\n  If they are not improving then we should be able to pinpoint why.\"* The point is **not**\n  \"100 papers completed.\"\n- **What's already felt to be true:** Phase 2 is cross-paper/holistic, so the substrate\n  should *compound* — a held-out paper grounds better as the corpus grows. The\n  comprehension floor is already corpus-relative; G-coverage was designed to rise with\n  corpus-fraction. The progress signal is a **slope**, and it should already be latent at\n  n=1.\n- **Anti-glibness discipline:** throughput is not progress. A pile of graphs, or \"N\n  papers done,\" hides whether the holistic claim is real. Every headline number must be\n  defined at n=1, expected to rise n=1→10, and **decomposed per stage** so a flat curve\n  names the culprit. A flat/falling metric is a *finding to pinpoint*, never something to\n  paper over with volume (the mark5 lesson, generalized).\n- **Working-economy position:** this mission **underwrites the superpod scale decision** —\n  we only pay for archive-scale once the small run shows the slope is real and diagnosable.\n  It is underwritten by the corrected full-pipeline contract + the already-built stages.\n- **Carried-forward tensions:** (i) the S7 macro-collapse cause is still open — paper-level\n  lens vs fixed-vs-data-driven vocab (mark5 D1, Diagnostic 1); (ii) the **S4 expository\n  GPU run has never been exercised**; (iii) the **S6 paper-graph(B) assembler is unbuilt**;\n  (iv) the embedding/macro-vocab rework is **deferred** (separate work, not this mission).\n- **Provenance:** this conversation (2026-06-22→23), as the post-mortem of mark5. Intake =\n  operator principle stated after reviewing the readiness docs + the mark5 results.\n\n**Exit criterion (HEAD):** Joe recognises this as the faithful shape of \"what we need next\ntime\"; the four tensions are named, not buried.\n\n---",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 7,
+   "text": "## HEAD"
+  },
+  {
+   "id": "s2",
+   "start": 8,
+   "end": 97,
+   "text": "\n- **Operator-voice anchor (Joe, 2026-06-22):** *\"If we do one paper end-to-end we should"
+  },
+  {
+   "id": "s3",
+   "start": 98,
+   "end": 185,
+   "text": "  already have metrics, and those metrics should improve if we do 10 papers end to end."
+  },
+  {
+   "id": "s4",
+   "start": 186,
+   "end": 276,
+   "text": "  If they are not improving then we should be able to pinpoint why.\"* The point is **not**"
+  },
+  {
+   "id": "s5",
+   "start": 277,
+   "end": 302,
+   "text": "  \"100 papers completed.\""
+  },
+  {
+   "id": "s6",
+   "start": 303,
+   "end": 390,
+   "text": "- **What's already felt to be true:** Phase 2 is cross-paper/holistic, so the substrate"
+  },
+  {
+   "id": "s7",
+   "start": 391,
+   "end": 469,
+   "text": "  should *compound* — a held-out paper grounds better as the corpus grows. The"
+  },
+  {
+   "id": "s8",
+   "start": 470,
+   "end": 556,
+   "text": "  comprehension floor is already corpus-relative; G-coverage was designed to rise with"
+  },
+  {
+   "id": "s9",
+   "start": 557,
+   "end": 646,
+   "text": "  corpus-fraction. The progress signal is a **slope**, and it should already be latent at"
+  },
+  {
+   "id": "s10",
+   "start": 647,
+   "end": 653,
+   "text": "  n=1."
+  },
+  {
+   "id": "s11",
+   "start": 654,
+   "end": 737,
+   "text": "- **Anti-glibness discipline:** throughput is not progress. A pile of graphs, or \"N"
+  },
+  {
+   "id": "s12",
+   "start": 738,
+   "end": 825,
+   "text": "  papers done,\" hides whether the holistic claim is real. Every headline number must be"
+  },
+  {
+   "id": "s13",
+   "start": 826,
+   "end": 913,
+   "text": "  defined at n=1, expected to rise n=1→10, and **decomposed per stage** so a flat curve"
+  },
+  {
+   "id": "s14",
+   "start": 914,
+   "end": 1003,
+   "text": "  names the culprit. A flat/falling metric is a *finding to pinpoint*, never something to"
+  },
+  {
+   "id": "s15",
+   "start": 1004,
+   "end": 1061,
+   "text": "  paper over with volume (the mark5 lesson, generalized)."
+  },
+  {
+   "id": "s16",
+   "start": 1062,
+   "end": 1152,
+   "text": "- **Working-economy position:** this mission **underwrites the superpod scale decision** —"
+  },
+  {
+   "id": "s17",
+   "start": 1153,
+   "end": 1244,
+   "text": "  we only pay for archive-scale once the small run shows the slope is real and diagnosable."
+  },
+  {
+   "id": "s18",
+   "start": 1245,
+   "end": 1333,
+   "text": "  It is underwritten by the corrected full-pipeline contract + the already-built stages."
+  },
+  {
+   "id": "s19",
+   "start": 1334,
+   "end": 1425,
+   "text": "- **Carried-forward tensions:** (i) the S7 macro-collapse cause is still open — paper-level"
+  },
+  {
+   "id": "s20",
+   "start": 1426,
+   "end": 1513,
+   "text": "  lens vs fixed-vs-data-driven vocab (mark5 D1, Diagnostic 1); (ii) the **S4 expository"
+  },
+  {
+   "id": "s21",
+   "start": 1514,
+   "end": 1605,
+   "text": "  GPU run has never been exercised**; (iii) the **S6 paper-graph(B) assembler is unbuilt**;"
+  },
+  {
+   "id": "s22",
+   "start": 1606,
+   "end": 1696,
+   "text": "  (iv) the embedding/macro-vocab rework is **deferred** (separate work, not this mission)."
+  },
+  {
+   "id": "s23",
+   "start": 1697,
+   "end": 1787,
+   "text": "- **Provenance:** this conversation (2026-06-22→23), as the post-mortem of mark5. Intake ="
+  },
+  {
+   "id": "s24",
+   "start": 1788,
+   "end": 1871,
+   "text": "  operator principle stated after reviewing the readiness docs + the mark5 results."
+  },
+  {
+   "id": "s25",
+   "start": 1872,
+   "end": 1963,
+   "text": "\n**Exit criterion (HEAD):** Joe recognises this as the faithful shape of \"what we need next"
+  },
+  {
+   "id": "s26",
+   "start": 1964,
+   "end": 2011,
+   "text": "time\"; the four tensions are named, not buried."
+  },
+  {
+   "id": "s27",
+   "start": 2012,
+   "end": 2016,
+   "text": "\n---"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-metric-harness",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-metric-harness.md",
+  "content_sha256": "f62b55f0a2c44e78375881598d7b1df0d294b9feb660a65857ddf55504781f60",
+  "section": {
+   "source_start": 973,
+   "source_end": 2989
+  },
+  "source_kind": "head-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/02-M-metric-harness.request.json.analysis.json"
+}

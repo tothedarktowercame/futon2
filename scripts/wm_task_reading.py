@@ -53,15 +53,8 @@ def sentence_rows(source):
     return rows
 
 
-def build_request(path, target=None, item_line=None):
-    path = Path(path).resolve()
+def request_base(path, source, source_start, target):
     raw = path.read_bytes()
-    text = raw.decode()
-    item = choose_item(text, item_line)
-    section_start, section_end = containing_section(text, item)
-    source = text[section_start:section_end].rstrip()
-    item_start = item.start() - section_start
-    item_end = item.end() - section_start
     return {
         "source_text": source,
         "offset_unit": "unicode-codepoint",
@@ -73,12 +66,53 @@ def build_request(path, target=None, item_line=None):
             "target_id": target or path.stem,
             "file_path": str(path),
             "content_sha256": hashlib.sha256(raw).hexdigest(),
-            "item": {"start": item_start, "end": item_end,
-                     "line": text.count("\n", 0, item.start()) + 1,
-                     "text": text[item.start():item.end()]},
-            "section": {"source_start": section_start, "source_end": section_end},
+            "section": {"source_start": source_start,
+                        "source_end": source_start + len(source)},
         },
     }
+
+
+def build_request(path, target=None, item_line=None):
+    path = Path(path).resolve()
+    text = path.read_text()
+    item = choose_item(text, item_line)
+    section_start, section_end = containing_section(text, item)
+    source = text[section_start:section_end].rstrip()
+    item_start = item.start() - section_start
+    item_end = item.end() - section_start
+    request = request_base(path, source, section_start, target)
+    request["task"]["item"] = {
+        "start": item_start, "end": item_end,
+        "line": text.count("\n", 0, item.start()) + 1,
+        "text": text[item.start():item.end()],
+    }
+    request["task"]["source_kind"] = "open-item-section"
+    return request
+
+
+def build_mission_request(path, target=None):
+    """Read a mission's operator-voice HEAD, or its opening when absent."""
+    path = Path(path).resolve()
+    text = path.read_text()
+    heads = [h for h in HEADING.finditer(text)
+             if len(h.group(1)) == 2 and h.group(2).strip().lower() == "head"]
+    if heads:
+        heading = heads[0]
+        start = heading.start()
+        end = next((h.start() for h in HEADING.finditer(text)
+                    if h.start() > start and len(h.group(1)) <= 2), len(text))
+        source_kind = "head-section"
+    else:
+        start = 0
+        end = next((h.start() for h in HEADING.finditer(text)
+                    if len(h.group(1)) == 2), len(text))
+        source_kind = "opening-before-first-section"
+    source = text[start:end].rstrip()
+    if not source:
+        raise ValueError("mission reading source is empty")
+    request = request_base(path, source, start, target)
+    request["task"]["source_kind"] = source_kind
+    return request
 
 
 def main():
@@ -86,10 +120,16 @@ def main():
     parser.add_argument("file", type=Path)
     parser.add_argument("--target")
     parser.add_argument("--item-line", type=int)
+    parser.add_argument("--mission-head", action="store_true",
+                        help="read HEAD, or the opening before the first ## heading")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     try:
-        request = build_request(args.file, args.target, args.item_line)
+        if args.mission_head and args.item_line is not None:
+            raise ValueError("--item-line cannot be combined with --mission-head")
+        request = (build_mission_request(args.file, args.target)
+                   if args.mission_head
+                   else build_request(args.file, args.target, args.item_line))
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(request, ensure_ascii=False, indent=2) + "\n")
         print(args.out)

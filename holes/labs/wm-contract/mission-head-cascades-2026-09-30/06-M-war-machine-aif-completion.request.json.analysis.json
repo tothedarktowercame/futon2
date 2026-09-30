@@ -1,0 +1,1167 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象 (sonnet), M-G-wm-wiring mission-head reading",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T09:16:19.889349+00:00",
+  "source_text": "# Mission: M-war-machine-aif-completion\n\n<!-- engine: structural header, AI-written -->\n**Date:** 2026-05-17\n**Status:** OPEN — exit criterion #2 satisfied; HEAD-as-escrow scaffold (claude-1, PM pass for the futon-stack-as-Hyperreal-business mission cluster); awaiting Joe verbatims via simulated `eoi-engine` `eoi-inward-mission` flash. **Exit criterion source:** §0 of `~/code/futon7/holes/M-descriptive-essay-of-the-stack.md`, criterion #2.\n**Bar (lifted verbatim from §0):** *\"War Machine ≥ ukrn-services-simulation coherence — concretely: ~12 clojure notebooks (substrate + dynamics + engagement on v2 side; belief + kernel + forward model + EFE + trace on v3 side); test harness with regression baselines; figure-rendering pipeline; R1-R12 (or F1-F10) completeness contract satisfied. Today's War Machine is `:π-display`-only — a reading surface, no belief state, no predictive forward model, no EFE-scored action ranking. The gap is substantial — weeks of work, not hours.\"*\n**Timebox:** estimated 3-4 weeks; final cap is Joe's call at §1.5 verbatim authoring.\n**Owner:** Joe (futon7); engineering ownership undefined pending Q-CL1 (see §3.1).\n**Sequencing role:** Sibling to `M-stack-essay` and `M-stack-essay-code-alignment` in the mission cluster; predecessor for `M-stack-morphogenetic-rewrite`. **Hard predecessor:** none in the cluster; outside the cluster, depends on `M-interim-director`'s arm-G work (substrate-2 already operational) and on Arms A/B/F producing live data the forward model can train on / score against.\n**Cross-ref:**\n- `~/code/ukrn-services-simulation/README.md` + `notebooks/ukrn_v3_*.clj` — the predecessor exemplar; the bar this mission graduates the War Machine to\n- `~/code/ukrn-services-simulation/docs/aif-completeness.md` — R1-R12 contract; companion to F1-F10 below\n- `~/code/futon0/docs/stack-fitness-completeness.md` — F1-F10 stack-fitness contract; the homeostat analogue of R1-R12\n- `~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md` §2.5 (math trajectory L1-L5), §2.6 (stack-fitness trajectory L1-L5) — these levels are this mission's *sub-deliverable map*\n- `~/code/futon2/scripts/futon2/report/war_machine.clj` — current War Machine surface (2850 lines, single namespace `futon2.report.war-machine`). 13 `scan-*` projection functions; AIF observer at lines 1803–2060 (`observation-channels`, `observe`, `sense->vector`, `preferences`, `avoided-states`, `mode-prior`, `pragmatic-weights`, `compute-free-energy`, `infer-mode`); plus `evaluate-mark2-batches`, `scan-aif-heads`, `load-invariant-inventory`, `enrich-support-attack`, `judge`. **Precision on the §0 Bar quote:** \"no belief state\" understates current state — there is a mode-prior + mode-inference observer. The accurate baseline is: **`:π-display`-only at the policy/action layer** (no forward model `(state, action) → predicted-state`, no EFE-scored action ranking); a mode-inference observer already exists. The completion gap is forward-model + action-space + EFE-scored policy ranking + test harness + regression fixtures, not \"AIF substrate from scratch.\"\n- `~/code/futon3c/src/futon3c/portfolio/observe.clj` — 16-channel portfolio surface\n- `~/code/futon3/holes/war-bulletin-9.md` — strategic context (WR-16: operationalised exploit-loops as observation channels)\n- `~/code/futon4/README-rewriting.md` — typed-rewrite discipline; the WM's belief updates are operadic-by-construction (Q-SA3)\n\n**Authors:** Joe (verbatim answers, pending); claude-1 (engine-side ordering and minimal structural connective tissue, 2026-05-17 PM scaffold).",
+  "source_sha256": "6525cdb93a5640f03ac85365d30053a187f1901592b5f7ba48b547e2ad6bedb9",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 39,
+          "text": "# Mission: M-war-machine-aif-completion",
+          "intent": "name-mission",
+          "target": "the mission document",
+          "rationale": "Names the mission and its id; the rest of the head describes what this mission intends to do to the War Machine.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 11,
+              "end": 39,
+              "text": "M-war-machine-aif-completion"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "war-room/wr-5-war-machine-is-not-a-mission",
+              "reason": "WR-5 says the War Machine is continuously running infrastructure and that new scans, channels or modes are maintenance, not new missions. This document frames the completion work as a mission with a 3-4 week timebox. The head does not mention WR-5, so the two are left side by side here, not reconciled.",
+              "query": "mission header declares status, owner, timebox and exit criterion"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 41,
+          "end": 87,
+          "text": "<!-- engine: structural header, AI-written -->",
+          "intent": "mark-machine-authorship",
+          "target": "the header block that follows",
+          "rationale": "An HTML comment saying the header was written by a machine engine, not by Joe. So the fields below (status, bar, owner) are scaffold text; only the quoted Bar is stated to come from elsewhere.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 73,
+              "end": 83,
+              "text": "AI-written"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "capability/hinge-capability-extraction",
+              "reason": "That pattern separates agent-view from operator-turn evidence in a mining pipeline's tags. This comment marks authorship of a document header; it is not a tag on an extracted hinge.",
+              "query": "header marks the text as machine-written scaffold, distinct from operator words"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 88,
+          "end": 108,
+          "text": "**Date:** 2026-05-17",
+          "intent": "record-date",
+          "target": "the creation date of the scaffold",
+          "rationale": "Gives the date the head was written, the same date as the PM scaffold named in the Status and Authors lines.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 98,
+              "end": 108,
+              "text": "2026-05-17"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 109,
+          "end": 155,
+          "text": "**Status:** OPEN — exit criterion #2 satisfied",
+          "intent": "report-status",
+          "target": "the mission's status and its exit criterion #2",
+          "rationale": "The status line calls the mission open and says exit criterion #2 is satisfied. No artifact is named here that shows the criterion met, so as a source for this reading it is a claim by the scaffold, not an outcome.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 121,
+              "end": 125,
+              "text": "OPEN"
+            },
+            {
+              "start": 128,
+              "end": 155,
+              "text": "exit criterion #2 satisfied"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "process-coherence/status-refresh-before-work",
+              "reason": "That pattern tells whoever takes up a mission to re-derive its status from the body and dependencies instead of trusting the banner. It bears on how to read this line, but the fragment itself only states a status, so it is not an instance.",
+              "query": "exit criterion satisfied claim in mission status line"
+            },
+            {
+              "id": "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad",
+              "reason": "WR-25 keeps unanchored good news from moving numerical posteriors until an artifact supports it. Its subject is posterior updates in a buyer-probability model; the criterion claim here has no such model behind it.",
+              "query": "exit criterion satisfied claim in mission status line"
+            }
+          ]
+        },
+        {
+          "start": 157,
+          "end": 258,
+          "text": "HEAD-as-escrow scaffold (claude-1, PM pass for the futon-stack-as-Hyperreal-business mission cluster)",
+          "intent": "declare-head-as-escrow",
+          "target": "the mission HEAD as a placeholder written by claude-1",
+          "rationale": "Says the head is a scaffold held in escrow, written by claude-1 in a PM pass, not a finished statement of Joe's intentions.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 157,
+              "end": 180,
+              "text": "HEAD-as-escrow scaffold"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern",
+              "rationale": "The document uses the WR-15 name for itself. WR-15 lets a mission HEAD hold intentions in escrow and name every not-yet-committed piece as a tension, instead of pretending a predecessor's schema is settled. Here the pending pieces are Joe's verbatims and the Q-CL1 ownership question; the header does not say the escrow is about a predecessor's data shape, which is what WR-15 describes.",
+              "status": "candidate",
+              "source_sha256": "55e3b139f2111fddecba78cc79d3d678fc89fe3cf3405cfee8022366c7102da0"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 260,
+          "end": 337,
+          "text": "awaiting Joe verbatims via simulated `eoi-engine` `eoi-inward-mission` flash.",
+          "intent": "await-operator-voice",
+          "target": "Joe's own first-person answers, not yet given",
+          "rationale": "The Joe-voiced content is still missing; a simulated flash from the engine stands in for it. Nothing in this head is Joe answering the mission's questions.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 260,
+              "end": 282,
+              "text": "awaiting Joe verbatims"
+            },
+            {
+              "start": 287,
+              "end": 296,
+              "text": "simulated"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "structure/whose-question-is-this",
+              "rationale": "The pattern says an answer must be given in the operator's first person, and that an answer in anyone else's voice is a category error. The head keeps Joe's answers marked as pending instead of writing them in the scaffold's voice, which is consistent with that; the pattern is about hinge-pool questions, not mission escrow.",
+              "status": "candidate",
+              "source_sha256": "ec1657a0a2995da11b18e3ee847b4915725486a8f25685b68ed4961a80519de9"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 338,
+          "end": 443,
+          "text": "**Exit criterion source:** §0 of `~/code/futon7/holes/M-descriptive-essay-of-the-stack.md`, criterion #2.",
+          "intent": "point-to-exit-criterion-source",
+          "target": "criterion #2 in §0 of M-descriptive-essay-of-the-stack",
+          "rationale": "The exit criterion is defined in another document; this line only says where.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 340,
+              "end": 361,
+              "text": "Exit criterion source"
+            },
+            {
+              "start": 365,
+              "end": 370,
+              "text": "§0 of"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "musn/declare-scope",
+              "reason": "It asks for a scope line with in-bounds, out-of-bounds and an exit condition stated up front. Here the exit condition is only cited by location, and no out-of-bounds is given.",
+              "query": "mission header declares status, owner, timebox and exit criterion"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 444,
+          "end": 478,
+          "text": "**Bar (lifted verbatim from §0):**",
+          "intent": "mark-verbatim-quotation",
+          "target": "the Bar text that follows",
+          "rationale": "Says the quoted Bar is copied word for word from §0, so its wording belongs to that source and not to the scaffold.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 451,
+              "end": 466,
+              "text": "lifted verbatim"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 479,
+          "end": 790,
+          "text": "*\"War Machine ≥ ukrn-services-simulation coherence — concretely: ~12 clojure notebooks (substrate + dynamics + engagement on v2 side; belief + kernel + forward model + EFE + trace on v3 side); test harness with regression baselines; figure-rendering pipeline; R1-R12 (or F1-F10) completeness contract satisfied.",
+          "intent": "set-target-bar",
+          "target": "what the War Machine has to match: the ukrn-services-simulation exemplar",
+          "rationale": "Sets the target by comparison with an existing system: notebooks, a test harness with regression baselines, a figure pipeline, and a completeness contract met.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 495,
+              "end": 529,
+              "text": "ukrn-services-simulation coherence"
+            },
+            {
+              "start": 690,
+              "end": 710,
+              "text": "regression baselines"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+              "rationale": "The bar is defined by an external application (ukrn-services-simulation) that this mission takes as its predecessor exemplar; s10 says so directly. WR-11 is the ruling that such a predecessor should be treated as an operational blueprint and its relationship recorded in the spine.",
+              "status": "candidate",
+              "source_sha256": "e34e45b3d6f83e1a3b8c81d35345b8646d198b8929a1625aec7a8ce0b159b3cc"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 791,
+          "end": 928,
+          "text": "Today's War Machine is `:π-display`-only — a reading surface, no belief state, no predictive forward model, no EFE-scored action ranking.",
+          "intent": "state-current-baseline",
+          "target": "the War Machine as it stands on 2026-05-17",
+          "rationale": "Says the present system only displays: no belief state, no predictive forward model, no EFE-scored ranking of actions. The claim about belief state is corrected in the s14 precision note.",
+          "relations": [
+            "contrast",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 814,
+              "end": 831,
+              "text": "`:π-display`-only"
+            },
+            {
+              "start": 870,
+              "end": 897,
+              "text": "no predictive forward model"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "problems/r4-forward-model",
+              "rationale": "Names the same gap: R4 asks for a pure (state, action) to next-state-distribution function that the agent uses to score candidate actions before acting. The fragment says that function does not exist yet.",
+              "status": "candidate",
+              "source_sha256": "bccdeda4a2ea2647e32ede6f9c9a0fb10e998bb3522fcb43622feb3f8089f3ee"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "war-room/wr-18-war-machine-is-demonstrated-not-hypothesised",
+              "reason": "WR-18 (2026-05-31, after this head) says to treat the War Machine as demonstrated infrastructure that drove a full mission lifecycle. It concerns whether the system does real work, not whether it has a forward model, and it postdates the document.",
+              "query": "current state is a reading surface with no forward model, no belief, no action ranking"
+            }
+          ]
+        },
+        {
+          "start": 929,
+          "end": 981,
+          "text": "The gap is substantial — weeks of work, not hours.\"*",
+          "intent": "estimate-effort",
+          "target": "the completion work",
+          "rationale": "An effort estimate of weeks, not hours, given in prose with no breakdown.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 954,
+              "end": 967,
+              "text": "weeks of work"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 995,
+          "end": 1014,
+          "text": "estimated 3-4 weeks",
+          "intent": "estimate-effort",
+          "target": "the mission's duration",
+          "rationale": "A calendar range only, with no split between AI and human effort and no confidence level.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1005,
+              "end": 1014,
+              "text": "3-4 weeks"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "control/effort-estimation",
+              "reason": "It prescribes an estimate with tokens, hours per person, and a confidence level. The header gives only a range of weeks, so it does not follow that schema.",
+              "query": "estimate effort in weeks with the final cap left to the operator"
+            }
+          ]
+        },
+        {
+          "start": 1016,
+          "end": 1066,
+          "text": "final cap is Joe's call at §1.5 verbatim authoring",
+          "intent": "defer-to-operator",
+          "target": "the final time cap",
+          "rationale": "The hard limit is not set here; it is left for Joe to decide when he writes his verbatims at §1.5.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 1029,
+              "end": 1039,
+              "text": "Joe's call"
+            },
+            {
+              "start": 1048,
+              "end": 1066,
+              "text": "verbatim authoring"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 1068,
+          "end": 1091,
+          "text": "**Owner:** Joe (futon7)",
+          "intent": "declare-owner",
+          "target": "ownership of the mission",
+          "rationale": "Names Joe, under futon7, as owner of the mission.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1079,
+              "end": 1091,
+              "text": "Joe (futon7)"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1093,
+          "end": 1149,
+          "text": "engineering ownership undefined pending Q-CL1 (see §3.1)",
+          "intent": "leave-question-open",
+          "target": "who does the engineering",
+          "rationale": "Says engineering ownership is not yet decided and points to question Q-CL1 in §3.1 as what would settle it.",
+          "relations": [
+            "dependency",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 1115,
+              "end": 1138,
+              "text": "undefined pending Q-CL1"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "system-coherence/bind-open-questions-to-closure-mechanisms",
+              "rationale": "The pattern says an open question belongs in a document only if bound to a named way of closing it. Here the question is named (Q-CL1, §3.1); whether §3.1 names a role, event or evidence that closes it is not visible in this head.",
+              "status": "candidate",
+              "source_sha256": "2fef15e6e68fa1fb5385a20ea78db4602c169fa8dfb6748a090e3549b42df588"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s8",
+      "fragments": [
+        {
+          "start": 1151,
+          "end": 1306,
+          "text": "**Sequencing role:** Sibling to `M-stack-essay` and `M-stack-essay-code-alignment` in the mission cluster; predecessor for `M-stack-morphogenetic-rewrite`.",
+          "intent": "declare-mission-relationships",
+          "target": "this mission's place among its siblings and successor",
+          "rationale": "Says where the mission sits: beside two cluster siblings, and before M-stack-morphogenetic-rewrite.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 1172,
+              "end": 1182,
+              "text": "Sibling to"
+            },
+            {
+              "start": 1258,
+              "end": 1273,
+              "text": "predecessor for"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "The pattern asks for missions to be linked by explicit typed relationships (blocks, enables, shares, parent-child) so dependencies are visible. This line gives sibling and predecessor relations in prose.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1307,
+          "end": 1449,
+          "text": "**Hard predecessor:** none in the cluster; outside the cluster, depends on `M-interim-director`'s arm-G work (substrate-2 already operational)",
+          "intent": "declare-hard-predecessor",
+          "target": "what must exist before this mission can proceed",
+          "rationale": "Says nothing inside the cluster blocks this mission, and that outside it the mission depends on M-interim-director's arm-G work. The parenthesis 'substrate-2 already operational' is the scaffold's own claim.",
+          "relations": [
+            "dependency",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 1309,
+              "end": 1325,
+              "text": "Hard predecessor"
+            },
+            {
+              "start": 1405,
+              "end": 1415,
+              "text": "arm-G work"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "The pattern says a blocked mission must cite its specific blocker. This line names the blocker (arm-G work of M-interim-director) and says there is none inside the cluster.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1450,
+          "end": 1535,
+          "text": "and on Arms A/B/F producing live data the forward model can train on / score against.",
+          "intent": "declare-data-dependency",
+          "target": "live data from Arms A, B and F",
+          "rationale": "The forward model, which does not exist yet, needs live data from three arms for training or scoring, so its completion depends on those arms.",
+          "relations": [
+            "dependency",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 1457,
+              "end": 1467,
+              "text": "Arms A/B/F"
+            },
+            {
+              "start": 1478,
+              "end": 1487,
+              "text": "live data"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "A shared-resource dependency: the mission cannot finish a step until other missions' arms produce data, which the pattern's 'shares' and 'blocked-by' relations are for.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s9",
+      "fragments": [
+        {
+          "start": 1536,
+          "end": 1550,
+          "text": "**Cross-ref:**",
+          "intent": "label-cross-references",
+          "target": "the list that follows",
+          "rationale": "Heading for the eight file references below.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1538,
+              "end": 1547,
+              "text": "Cross-ref"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s10",
+      "fragments": [
+        {
+          "start": 1551,
+          "end": 1624,
+          "text": "- `~/code/ukrn-services-simulation/README.md` + `notebooks/ukrn_v3_*.clj`",
+          "intent": "point-to-source",
+          "target": "the ukrn-services-simulation README and v3 notebooks",
+          "rationale": "Points to where the exemplar lives.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "A file pointer; the words carry no communicative cue beyond naming the path.",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1627,
+          "end": 1702,
+          "text": "the predecessor exemplar; the bar this mission graduates the War Machine to",
+          "intent": "name-predecessor-exemplar",
+          "target": "ukrn-services-simulation as predecessor and bar",
+          "rationale": "Says the external simulation is the predecessor exemplar and the level the War Machine is being raised to.",
+          "relations": [
+            "context",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 1631,
+              "end": 1651,
+              "text": "predecessor exemplar"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+              "rationale": "The fragment names an external application as the predecessor exemplar an inward mission is authored from, which is the situation WR-11 rules on: treat it as an operational blueprint and carry the relationship back into the spine.",
+              "status": "candidate",
+              "source_sha256": "e34e45b3d6f83e1a3b8c81d35345b8646d198b8929a1625aec7a8ce0b159b3cc"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s11",
+      "fragments": [
+        {
+          "start": 1703,
+          "end": 1763,
+          "text": "- `~/code/ukrn-services-simulation/docs/aif-completeness.md`",
+          "intent": "point-to-source",
+          "target": "the ukrn aif-completeness document",
+          "rationale": "Points to the completeness contract's document.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "A file pointer; the path is the content.",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1766,
+          "end": 1808,
+          "text": "R1-R12 contract; companion to F1-F10 below",
+          "intent": "name-completeness-contract",
+          "target": "the R1-R12 contract",
+          "rationale": "Says the R1-R12 list is a contract and that F1-F10 is its companion, listed next.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1766,
+              "end": 1781,
+              "text": "R1-R12 contract"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "problems/r1-belief-state",
+              "reason": "The library's R-nodes are minted from futon-aif-completeness.md, a futon analogue. This line cites ukrn's aif-completeness.md and does not say the two lists are the same, so it is not treated as R1.",
+              "query": "completeness contract enumerating required parts of an active inference agent"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s12",
+      "fragments": [
+        {
+          "start": 1809,
+          "end": 1861,
+          "text": "- `~/code/futon0/docs/stack-fitness-completeness.md`",
+          "intent": "point-to-source",
+          "target": "the stack-fitness completeness document",
+          "rationale": "Points to the F1-F10 contract's document.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "A file pointer; the path is the content.",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 1864,
+          "end": 1927,
+          "text": "F1-F10 stack-fitness contract; the homeostat analogue of R1-R12",
+          "intent": "name-completeness-contract",
+          "target": "the F1-F10 contract",
+          "rationale": "Says F1-F10 is the stack-fitness contract and plays the role for the stack that R1-R12 plays for the AIF agent.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 1899,
+              "end": 1917,
+              "text": "homeostat analogue"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s13",
+      "fragments": [
+        {
+          "start": 1928,
+          "end": 2064,
+          "text": "- `~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md` §2.5 (math trajectory L1-L5), §2.6 (stack-fitness trajectory L1-L5)",
+          "intent": "point-to-source",
+          "target": "two trajectory sections of the proxy-metric inventory",
+          "rationale": "Points to two sections that each define a five-level trajectory.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 2003,
+              "end": 2024,
+              "text": "math trajectory L1-L5"
+            },
+            {
+              "start": 2033,
+              "end": 2063,
+              "text": "stack-fitness trajectory L1-L5"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 2067,
+          "end": 2120,
+          "text": "these levels are this mission's *sub-deliverable map*",
+          "intent": "define-deliverable-map",
+          "target": "the levels L1-L5",
+          "rationale": "Says the levels in those sections are how this mission's deliverables are divided.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 2100,
+              "end": 2119,
+              "text": "sub-deliverable map"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s14",
+      "fragments": [
+        {
+          "start": 2121,
+          "end": 2266,
+          "text": "- `~/code/futon2/scripts/futon2/report/war_machine.clj` — current War Machine surface (2850 lines, single namespace `futon2.report.war-machine`).",
+          "intent": "point-to-code-witness",
+          "target": "the current war_machine.clj",
+          "rationale": "Points to the file that is the current War Machine, with its size, so the baseline claims below can be checked against it.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 2179,
+              "end": 2206,
+              "text": "current War Machine surface"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "pattern-discipline/pattern-to-code-receipts",
+              "reason": "It links commits back to the pattern claims they apply, by footer and witness. This line describes existing code by file and size and cites no pattern or commit.",
+              "query": "operationalised exploit loops as observation channels"
+            }
+          ]
+        },
+        {
+          "start": 2267,
+          "end": 2602,
+          "text": "13 `scan-*` projection functions; AIF observer at lines 1803–2060 (`observation-channels`, `observe`, `sense->vector`, `preferences`, `avoided-states`, `mode-prior`, `pragmatic-weights`, `compute-free-energy`, `infer-mode`); plus `evaluate-mark2-batches`, `scan-aif-heads`, `load-invariant-inventory`, `enrich-support-attack`, `judge`.",
+          "intent": "inventory-existing-code",
+          "target": "the functions already in war_machine.clj",
+          "rationale": "Lists what the file already contains, by name and line range: 13 scan functions and an AIF observer with named parts, plus other functions.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 2301,
+              "end": 2332,
+              "text": "AIF observer at lines 1803–2060"
+            },
+            {
+              "start": 2455,
+              "end": 2474,
+              "text": "compute-free-energy"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "cascade-construction/read-what-exists-first",
+              "rationale": "The pattern says to find the implementation by searching for it, not assume it, and keep its sources. The list of functions with line ranges is a record of having read the implementation.",
+              "status": "candidate",
+              "source_sha256": "04b442f40edd33be35382de2355944a0135c50dbefce4a7ec5967378ec21d81e"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 2603,
+          "end": 2732,
+          "text": "**Precision on the §0 Bar quote:** \"no belief state\" understates current state — there is a mode-prior + mode-inference observer.",
+          "intent": "correct-earlier-claim",
+          "target": "the Bar quote's 'no belief state'",
+          "rationale": "Corrects the quoted Bar against the code: there is a mode prior and a mode-inference observer, so 'no belief state' is too strong.",
+          "relations": [
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 2656,
+              "end": 2681,
+              "text": "understates current state"
+            },
+            {
+              "start": 2708,
+              "end": 2731,
+              "text": "mode-inference observer"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "cascade-construction/read-what-exists-first",
+              "rationale": "This is the pattern's disagreement case: the requirement text (the §0 Bar) says one thing and the implementation says another, and the disagreement is written down.",
+              "status": "candidate",
+              "source_sha256": "04b442f40edd33be35382de2355944a0135c50dbefce4a7ec5967378ec21d81e"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "problems/r1-belief-state",
+              "reason": "R1 asks for a hidden-state belief distribution carried across ticks with mean and precision both represented. The fragment says a mode prior and mode inference exist; it does not say they meet R1.",
+              "query": "current state is a reading surface with no forward model, no belief, no action ranking"
+            }
+          ]
+        },
+        {
+          "start": 2733,
+          "end": 2935,
+          "text": "The accurate baseline is: **`:π-display`-only at the policy/action layer** (no forward model `(state, action) → predicted-state`, no EFE-scored action ranking); a mode-inference observer already exists.",
+          "intent": "restate-baseline",
+          "target": "the War Machine's actual state",
+          "rationale": "Restates the baseline more narrowly: display-only at the policy and action layer, no forward model, no EFE-scored ranking, but a mode-inference observer is present.",
+          "relations": [
+            "contrast",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 2761,
+              "end": 2805,
+              "text": "`:π-display`-only at the policy/action layer"
+            },
+            {
+              "start": 2863,
+              "end": 2891,
+              "text": "no EFE-scored action ranking"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "problems/r4-forward-model",
+              "rationale": "The missing piece is described with the R4 contract's shape, a function from (state, action) to a predicted next state used to score actions before taking them.",
+              "status": "candidate",
+              "source_sha256": "bccdeda4a2ea2647e32ede6f9c9a0fb10e998bb3522fcb43622feb3f8089f3ee"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 2936,
+          "end": 3086,
+          "text": "The completion gap is forward-model + action-space + EFE-scored policy ranking + test harness + regression fixtures, not \"AIF substrate from scratch.\"",
+          "intent": "scope-remaining-work",
+          "target": "the work this mission has to do",
+          "rationale": "Lists the five things still missing and rules out starting the AIF machinery from nothing. This is the scaffold's claim about scope, not a finished plan.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 2940,
+              "end": 2954,
+              "text": "completion gap"
+            },
+            {
+              "start": 3053,
+              "end": 3086,
+              "text": "not \"AIF substrate from scratch.\""
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "enrichment/extend-not-rewrite",
+              "rationale": "The pattern says that when most of the required function already exists in a tested script, add to it instead of writing a replacement. Here the mode-inference observer is kept and only the missing parts are named; the doc does not say the existing code is tested or that 80% exists.",
+              "status": "candidate",
+              "source_sha256": "69ab2d3d04c4c015f3071e13d6ff5c5ed920ba80d8b76ed073d6d8c277483291"
+            },
+            {
+              "id": "problems/r6-candidate-action-space-and-selection",
+              "rationale": "R6 states the problem of a candidate action space and selection. 'Action-space' is one of the listed gaps, so this problem node is where that item lands.",
+              "status": "candidate",
+              "source_sha256": "e023ac231c84a9f8d99fb8bf9c6d63a03d90e1d798c5d18d142557643adff661"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s15",
+      "fragments": [
+        {
+          "start": 3087,
+          "end": 3170,
+          "text": "- `~/code/futon3c/src/futon3c/portfolio/observe.clj` — 16-channel portfolio surface",
+          "intent": "point-to-code-witness",
+          "target": "the portfolio observe.clj",
+          "rationale": "Points to the existing portfolio observation code and says it has 16 channels.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3142,
+              "end": 3170,
+              "text": "16-channel portfolio surface"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "war-machine/half-blind-observation",
+              "reason": "It asks every observation channel to report its coverage as well as its findings. The line only names a 16-channel surface and says nothing about coverage.",
+              "query": "sixteen channel portfolio observation surface"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s16",
+      "fragments": [
+        {
+          "start": 3171,
+          "end": 3212,
+          "text": "- `~/code/futon3/holes/war-bulletin-9.md`",
+          "intent": "point-to-source",
+          "target": "War Bulletin 9",
+          "rationale": "Points to the bulletin.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "A file pointer; the path is the content.",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 3215,
+          "end": 3295,
+          "text": "strategic context (WR-16: operationalised exploit-loops as observation channels)",
+          "intent": "cite-ruling",
+          "target": "WR-16 as context for the mission",
+          "rationale": "Names WR-16 as the strategic reason to treat exploit-loop state as observation channels the War Machine reads.",
+          "relations": [
+            "context",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 3241,
+              "end": 3270,
+              "text": "operationalised exploit-loops"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+              "rationale": "The document names WR-16 directly. The ruling says operationalised exploit-loops that emit typed state on a cadence should be wired into the War Machine as first-class AIF observation channels.",
+              "status": "candidate",
+              "source_sha256": "8e7d00e9cd98dd1a92512b81527ebb60992578569b77778928bc8f81c272b81c"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s17",
+      "fragments": [
+        {
+          "start": 3296,
+          "end": 3333,
+          "text": "- `~/code/futon4/README-rewriting.md`",
+          "intent": "point-to-source",
+          "target": "the rewriting README",
+          "rationale": "Points to the typed-rewrite README.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "A file pointer; the path is the content.",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 3336,
+          "end": 3422,
+          "text": "typed-rewrite discipline; the WM's belief updates are operadic-by-construction (Q-SA3)",
+          "intent": "claim-design-property",
+          "target": "how the War Machine's belief updates are built",
+          "rationale": "Says belief updates are meant to follow the typed-rewrite discipline, and marks the claim with question id Q-SA3. It states a design intent, not something shown to hold.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 3390,
+              "end": 3414,
+              "text": "operadic-by-construction"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "war-room/wr-12-essay-health-is-the-aif-observation-channel",
+              "reason": "WR-12 makes typed annotation and interest-network events the observation channel for cross-mission posterior updates. This fragment is about the form of the belief update (typed rewrites), not which channel feeds it.",
+              "query": "belief updates typed rewrites operadic by construction"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s18",
+      "fragments": [
+        {
+          "start": 3424,
+          "end": 3567,
+          "text": "**Authors:** Joe (verbatim answers, pending); claude-1 (engine-side ordering and minimal structural connective tissue, 2026-05-17 PM scaffold).",
+          "intent": "attribute-voices",
+          "target": "who wrote which part of this head",
+          "rationale": "Splits authorship by voice: Joe's answers are still pending; claude-1 wrote the ordering and connecting structure. So the operator's own words are not yet in this document except in the quoted Bar.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3442,
+              "end": 3467,
+              "text": "verbatim answers, pending"
+            },
+            {
+              "start": 3505,
+              "end": 3541,
+              "text": "minimal structural connective tissue"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "structure/whose-question-is-this",
+              "rationale": "The pattern treats an answer in anyone else's voice as a category error. The authors line keeps Joe's answers separate and marked pending and limits the scaffold to structure.",
+              "status": "candidate",
+              "source_sha256": "ec1657a0a2995da11b18e3ee847b4915725486a8f25685b68ed4961a80519de9"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "capability/hinge-capability-extraction",
+              "reason": "It separates agent and operator voices when tagging capabilities in a mining pipeline. This line attributes authorship of a document; nothing is being tagged.",
+              "query": "authors listed with pending verbatim answers from the operator"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/06-M-war-machine-aif-completion.request.json",
+  "request_sha256": "9b87ba923f59063b6d1a9c50afc57be08cb8c448d80e86cf8fcdf99e4f5a1053"
+}

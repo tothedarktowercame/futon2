@@ -1,0 +1,62 @@
+{
+ "source_text": "# Mission: M-self-documenting-stack\n\n> **Naming history (Joe 2026-05-20)**: started life narrowly as `M-autonomous-doc-maintenance` (single-axis: doc-freshness). IDENTIFY-time mission survey revealed a parallel gap — *mission discoverability* — that the same apparatus naturally serves; both are aspects of the same broader goal (\"I want the futon stack to be *deeply* self-documenting\"). File renamed to `M-self-documenting-stack` to reflect the actual scope. POC scope (LC1 only) ratified by Joe same-day; Deliverables A + B and the chain-link applications #3-#7 are explicit follow-on missions, not extensions of this one.\n\n**Status:** OPEN — INSTANTIATE (recovery pass 2026-05-21). **POC scope: LC1 (Deliverable C — mission-discoverability surface) only.** LC1 code/tests/build are now recovered after review; manual browser walk-through + DOCUMENT pass remain before closure. A + B + chain-link applications #3-#7 are follow-on missions inheriting this mission's shape-naming + protocol-family framing.\n**Owner:** codex-5 (LC1 recovery + closure pass 2026-05-21); claude-2 (framing-author; original LC1 author)\n**Co-owners (for follow-ons, not this POC):** claude-4 (VSATARCS-side; peripheral wrapping when A becomes a follow-on); claude-1 or claude-13 (futon3c-side; peripheral-spec compliance for A); WM-side ownership for B\n**Driver:** Joe (operator; framing-extender; POC-close-decider)\n**Authors:** claude-2 IDENTIFY draft 2026-05-20, following M-vsatarcs-writer Option B live cycle which proved the per-cycle apparatus works but exposed the gap to autonomy. Joe-driven extension same-day to absorb mission-discoverability per his felt need (\"a search box where I could start typing 'self documenting stack' and get a summary of the relevant missions\"). Joe scoping decision 2026-05-20: ship LC1 as POC; follow-on missions inherit the framing; mission closes as POC when LC1 ready. codex-5 recovery pass 2026-05-21 after external review surfaced LC1 blockers/gaps (broken embedding helper, missing warm corpus, per-request JVM shell-out, missing D11/D12/DL1 closures).",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 35,
+   "text": "# Mission: M-self-documenting-stack"
+  },
+  {
+   "id": "s2",
+   "start": 36,
+   "end": 625,
+   "text": "\n> **Naming history (Joe 2026-05-20)**: started life narrowly as `M-autonomous-doc-maintenance` (single-axis: doc-freshness). IDENTIFY-time mission survey revealed a parallel gap — *mission discoverability* — that the same apparatus naturally serves; both are aspects of the same broader goal (\"I want the futon stack to be *deeply* self-documenting\"). File renamed to `M-self-documenting-stack` to reflect the actual scope. POC scope (LC1 only) ratified by Joe same-day; Deliverables A + B and the chain-link applications #3-#7 are explicit follow-on missions, not extensions of this one."
+  },
+  {
+   "id": "s3",
+   "start": 626,
+   "end": 1007,
+   "text": "\n**Status:** OPEN — INSTANTIATE (recovery pass 2026-05-21). **POC scope: LC1 (Deliverable C — mission-discoverability surface) only.** LC1 code/tests/build are now recovered after review; manual browser walk-through + DOCUMENT pass remain before closure. A + B + chain-link applications #3-#7 are follow-on missions inheriting this mission's shape-naming + protocol-family framing."
+  },
+  {
+   "id": "s4",
+   "start": 1008,
+   "end": 1115,
+   "text": "**Owner:** codex-5 (LC1 recovery + closure pass 2026-05-21); claude-2 (framing-author; original LC1 author)"
+  },
+  {
+   "id": "s5",
+   "start": 1116,
+   "end": 1331,
+   "text": "**Co-owners (for follow-ons, not this POC):** claude-4 (VSATARCS-side; peripheral wrapping when A becomes a follow-on); claude-1 or claude-13 (futon3c-side; peripheral-spec compliance for A); WM-side ownership for B"
+  },
+  {
+   "id": "s6",
+   "start": 1332,
+   "end": 1395,
+   "text": "**Driver:** Joe (operator; framing-extender; POC-close-decider)"
+  },
+  {
+   "id": "s7",
+   "start": 1396,
+   "end": 2078,
+   "text": "**Authors:** claude-2 IDENTIFY draft 2026-05-20, following M-vsatarcs-writer Option B live cycle which proved the per-cycle apparatus works but exposed the gap to autonomy. Joe-driven extension same-day to absorb mission-discoverability per his felt need (\"a search box where I could start typing 'self documenting stack' and get a summary of the relevant missions\"). Joe scoping decision 2026-05-20: ship LC1 as POC; follow-on missions inherit the framing; mission closes as POC when LC1 ready. codex-5 recovery pass 2026-05-21 after external review surfaced LC1 blockers/gaps (broken embedding helper, missing warm corpus, per-request JVM shell-out, missing D11/D12/DL1 closures)."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-self-documenting-stack",
+  "file_path": "/home/joe/code/futon7/holes/M-self-documenting-stack.md",
+  "content_sha256": "8c43549b7c859545de5bd420a54aaf1a06532ee3faf644a3171aebddeb2599a4",
+  "section": {
+   "source_start": 0,
+   "source_end": 2078
+  },
+  "source_kind": "opening-before-first-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/05-M-self-documenting-stack.request.json.analysis.json"
+}

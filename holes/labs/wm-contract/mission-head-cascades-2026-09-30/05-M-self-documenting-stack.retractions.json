@@ -1,0 +1,268 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "futon-theory/mission-lifecycle",
+          "futon-theory/mission-scoping",
+          "orchestration/consent-gate",
+          "war-machine/advanceability"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 8,
+      "how": 1,
+      "next-in-session": 3,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 11,
+      "edges": [
+        {
+          "a": "coordination/assignment-binding",
+          "b": "futon-theory/mission-scoping",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-F8sjMa.json.analysis.json#s1.0",
+              "reason": "That pattern is about emitting an exclusive G4 assignment evidence record binding agent-id to task-id; Joe's move is mission-level ownership scoping in prose, not a gate-checked assignment record."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "coordination/assignment-binding",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-1QzzO5.json.analysis.json -> live/turn-9umMUN.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-vttPhQ.json.analysis.json -> live/turn-0eoQWs.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        }
+      ],
+      "nodes": [
+        "coordination/assignment-binding",
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "orchestration/consent-gate",
+        "war-machine/advanceability"
+      ],
+      "rank": 1,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 11,
+      "edges": [
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-vttPhQ.json.analysis.json -> live/turn-0eoQWs.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-mRXZUN.json.analysis.json -> live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-scoping",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-1GNPpj.json.analysis.json -> live/turn-F8sjMa.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "orchestration/consent-gate",
+        "peeragogy/use-or-make",
+        "war-machine/advanceability"
+      ],
+      "rank": 2,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 11,
+      "edges": [
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-vttPhQ.json.analysis.json -> live/turn-0eoQWs.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "social/explicit-exit-over-abandonment",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json#s1.0",
+              "reason": "About exiting subsystems via lifecycle states rather than abandoning them; Joe is advancing a mission document forward through phases, not retiring a subsystem."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-scoping",
+          "b": "social/explicit-exit-over-abandonment",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-7o7zDa.json.analysis.json -> live/turn-5PJcyp.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "orchestration/consent-gate",
+        "social/explicit-exit-over-abandonment",
+        "war-machine/advanceability"
+      ],
+      "rank": 3,
+      "size": 5,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "futon-theory/mission-lifecycle",
+    "futon-theory/mission-scoping",
+    "orchestration/consent-gate",
+    "war-machine/advanceability"
+  ],
+  "refused_no_edges": [
+    "coordination/intent-to-mission-binding"
+  ],
+  "all_reading_seeds": [
+    "coordination/intent-to-mission-binding",
+    "futon-theory/mission-lifecycle",
+    "futon-theory/mission-scoping",
+    "orchestration/consent-gate",
+    "war-machine/advanceability"
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "apparatus/new-failure-class-is-a-design-defect",
+          "ukrns/publication-cadence",
+          "war-machine/operational-not-decorative"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 8,
+      "how": 1,
+      "next-in-session": 3,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 11,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "apparatus/new-failure-class-is-a-design-defect",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block008/claude-3-turn-2.json.analysis.json -> 2026-08-22_2026-09-21_block008/claude-3-turn-3.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "ukrns/publication-cadence",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-l8ZcTX.json.analysis.json -> live/turn-G32zp8.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "apparatus/new-failure-class-is-a-design-defect",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block001/codex-10-turn-236.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block018/claude-7-turn-40.json.analysis.json -> 2026-08-22_2026-09-21_block018/claude-7-turn-44.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "peeragogy/use-or-make",
+          "b": "war-machine/operational-not-decorative",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block027/claude-8-turn-5.json.analysis.json -> 2026-08-22_2026-09-21_block027/claude-8-turn-9.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "apparatus/new-failure-class-is-a-design-defect",
+        "peeragogy/use-or-make",
+        "ukrns/publication-cadence",
+        "war-machine/operational-not-decorative"
+      ],
+      "rank": 1,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 11,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "apparatus/new-failure-class-is-a-design-defect",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block008/claude-3-turn-2.json.analysis.json -> 2026-08-22_2026-09-21_block008/claude-3-turn-3.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "ukrns/publication-cadence",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-l8ZcTX.json.analysis.json -> live/turn-G32zp8.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "apparatus/new-failure-class-is-a-design-defect",
+          "b": "relationship-coherence/rupture-repair",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-brsHd5.json.analysis.json"
+            },
+            {
+              "at": "live/turn-on8hJV.json.analysis.json -> live/turn-brsHd5.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "relationship-coherence/rupture-repair",
+          "b": "war-machine/operational-not-decorative",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-AIxeop.json.analysis.json -> live/turn-AL0y9C.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "apparatus/new-failure-class-is-a-design-defect",
+        "relationship-coherence/rupture-repair",
+        "ukrns/publication-cadence",
+        "war-machine/operational-not-decorative"
+      ],
+      "rank": 2,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 12,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-23.json.analysis.json -> 2026-08-22_2026-09-21_block009/claude-13-turn-25.json.analysis.json"
+            },
+            {
+              "at": "live/turn-2z2EPI.json.analysis.json -> live/turn-4cK2SO.json.analysis.json"
+            },
+            {
+              "at": "live/turn-2z2EPI.json.analysis.json"
+            },
+            {
+              "at": "live/turn-VR7PGI.json.analysis.json"
+            },
+            {
+              "at": "live/turn-ZEmJP6.json.analysis.json -> live/turn-mRXZUN.json.analysis.json"
+            },
+            {
+              "at": "live/turn-fhk3Ki.json.analysis.json -> live/turn-Thay7e.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "ukrns/publication-cadence",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-l8ZcTX.json.analysis.json -> live/turn-G32zp8.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "apparatus/new-failure-class-is-a-design-defect",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block001/codex-10-turn-236.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block018/claude-7-turn-40.json.analysis.json -> 2026-08-22_2026-09-21_block018/claude-7-turn-44.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "apparatus/new-failure-class-is-a-design-defect",
+          "b": "relationship-coherence/rupture-repair",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-brsHd5.json.analysis.json"
+            },
+            {
+              "at": "live/turn-on8hJV.json.analysis.json -> live/turn-brsHd5.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "relationship-coherence/rupture-repair",
+          "b": "war-machine/operational-not-decorative",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-AIxeop.json.analysis.json -> live/turn-AL0y9C.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "apparatus/new-failure-class-is-a-design-defect",
+        "peeragogy/use-or-make",
+        "relationship-coherence/rupture-repair",
+        "ukrns/publication-cadence",
+        "war-machine/operational-not-decorative"
+      ],
+      "rank": 3,
+      "size": 6,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "apparatus/new-failure-class-is-a-design-defect",
+    "ukrns/publication-cadence",
+    "war-machine/operational-not-decorative"
+  ],
+  "refused_no_edges": [],
+  "all_reading_seeds": [
+    "apparatus/new-failure-class-is-a-design-defect",
+    "ukrns/publication-cadence",
+    "war-machine/operational-not-decorative"
+  ]
+}

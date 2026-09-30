@@ -1,0 +1,307 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-3",
+  "reusable_cues": [
+    {
+      "start": 259,
+      "end": 278,
+      "text": "fix the worst class",
+      "intent": "iterate",
+      "rationale": "Worst-class-first repair is a reusable cue for a defect-class elimination loop."
+    }
+  ],
+  "created_at": "2026-09-30T09:13:02.180150+00:00",
+  "source_text": "## HEAD\n\nThe \"killer idea\" (golden-walk-ledger.md §THE KILLER IDEA), made operational:\nmine the math corpus **structure-first** — concepts are the index, papers are\noccurrence sites — and run a **Distributed-Proofreaders** loop over it:\nmine → measure loss → fix the worst class → re-mine, anytime, never perfect.\nNamed for the volunteer book-digitisation model: systematic per-type passes,\neach pass clearing one defect class, quality a property of the revision\nprocess rather than any single snapshot (the Moran-1971 *because*-clause\nlesson, futon5a/essays/moran-1971-agent-cascades).",
+  "source_sha256": "af54b8ad9e7b894698d53413f0ad433fe8603a6f1adb5c0ec7079657cde9fc42",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [],
+      "unresolved_reason": "Section marker only; no interpretable move."
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 9,
+          "end": 86,
+          "text": "The \"killer idea\" (golden-walk-ledger.md §THE KILLER IDEA), made operational:",
+          "intent": "operationalize",
+          "target": "the killer idea from golden-walk-ledger.md, now to be made operational in this mission",
+          "rationale": "The HEAD declares intent: a previously recorded idea is to become working infrastructure, not stay an essay. This is the mission's anchor claim, stated as operator voice, not evidence the idea is yet operational.",
+          "relations": [
+            "goal",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 69,
+              "end": 85,
+              "text": "made operational"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-machine/operational-not-decorative",
+              "rationale": "The phrase 'made operational' sets the test this pattern names: the artifact must change behaviour when it fails, not merely document the idea.",
+              "status": "candidate",
+              "source_sha256": "f395d5b7fa939c379bd9eb83f666a1cd60c79c92606b5afeed33621f08ed437e"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 87,
+          "end": 152,
+          "text": "mine the math corpus **structure-first** — concepts are the index",
+          "intent": "reframe",
+          "target": "the mining order: corpus structure before corpus text, with concepts as the primary index",
+          "rationale": "The first operational move inverts the usual mining order: instead of indexing papers and extracting concepts, concepts are the index and papers become secondary sites where a concept occurs.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 108,
+              "end": 127,
+              "text": "**structure-first**"
+            },
+            {
+              "start": 130,
+              "end": 152,
+              "text": "concepts are the index"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "workday/external-project-index",
+              "reason": "That pattern makes an external index the system of record for projects; here the move is about inverting what indexes what inside one corpus, not designating an external register.",
+              "query": "index by concepts, documents are occurrence sites"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 165,
+          "end": 235,
+          "text": "occurrence sites — and run a **Distributed-Proofreaders** loop over it",
+          "intent": "commission",
+          "target": "a Distributed-Proofreaders loop run over the concept-indexed corpus",
+          "rationale": "Completes the inversion (papers demoted to occurrence sites) and commissions the named loop as the engine that works over that structure.",
+          "relations": [
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 194,
+              "end": 222,
+              "text": "**Distributed-Proofreaders**"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 237,
+          "end": 313,
+          "text": "mine → measure loss → fix the worst class → re-mine, anytime, never perfect.",
+          "intent": "iterate",
+          "target": "the mine/measure/fix/re-mine loop, run continuously without a perfection gate",
+          "rationale": "The loop's shape: each cycle measures loss, eliminates the single worst defect class, and re-mines; 'anytime, never perfect' makes quality emergent from iteration rather than a launch condition.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 244,
+              "end": 256,
+              "text": "measure loss"
+            },
+            {
+              "start": 259,
+              "end": 278,
+              "text": "fix the worst class"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "apparatus/new-failure-class-is-a-design-defect",
+              "rationale": "Fixing the worst defect class per pass mirrors this pattern's discipline: treat failure classes as defects to eliminate systematically, with the shrinking class census as the metric.",
+              "status": "candidate",
+              "source_sha256": "8581bc611d9feae1c4727be6311522e6e34117c7e2015408af67dc7951c789ca"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "mmca/perceivable-target",
+              "reason": "That pattern asks whether the system itself can perceive its regulation target; this loop is steered by an external operator measuring loss, so self-perception of the objective is not the crux.",
+              "query": "iterative loop: measure the loss, fix the worst defect class, re-run, never perfect"
+            },
+            {
+              "id": "snatch/re-enter-after-observed-repair",
+              "reason": "That pattern governs re-entering a paused line of work after an observed repair; the HEAD's loop is a continuous mining cadence, not a suspend/resume discipline.",
+              "query": "iterative loop: measure the loss, fix the worst defect class, re-run, never perfect"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 314,
+          "end": 389,
+          "text": "Named for the volunteer book-digitisation model: systematic per-type passes",
+          "intent": "name",
+          "target": "the loop's name, borrowed from the volunteer book-digitisation model of per-type passes",
+          "rationale": "The naming imports a proven social model: many volunteers each clearing one error type across the whole corpus, which legitimises the per-defect-class pass structure.",
+          "relations": [
+            "rationale",
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 328,
+              "end": 361,
+              "text": "volunteer book-digitisation model"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 391,
+          "end": 462,
+          "text": "each pass clearing one defect class, quality a property of the revision",
+          "intent": "ground-quality",
+          "target": "where quality lives: in the revision process, one cleared defect class per pass",
+          "rationale": "The epistemic claim of the HEAD: quality is not a snapshot property but accrues from the revision process itself, pass by pass.",
+          "relations": [
+            "rationale",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 410,
+              "end": 426,
+              "text": "one defect class"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "ukrns/publication-cadence",
+              "rationale": "The living-document-versus-snapshot distinction matches: the HEAD subordinates any frozen snapshot to the continuously revised artefact, exactly the cadence this pattern makes declarable.",
+              "status": "candidate",
+              "source_sha256": "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "invariant-coherence/state-snapshot-witness",
+              "reason": "That pattern elevates periodic point-in-time snapshots as the queryable evidence; the HEAD explicitly demotes snapshots in favour of the process, so citing it would invert the claim.",
+              "query": "quality is a property of the revision process not a single snapshot"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s8",
+      "fragments": [
+        {
+          "start": 463,
+          "end": 535,
+          "text": "process rather than any single snapshot (the Moran-1971 *because*-clause",
+          "intent": "contrast",
+          "target": "revision process contrasted against any single snapshot, per the Moran-1971 because-clause",
+          "rationale": "The contrast half of the quality claim, with its cited warrant: Moran-1971's because-clause lesson is the named source for trusting process over snapshot.",
+          "relations": [
+            "contrast",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 483,
+              "end": 502,
+              "text": "any single snapshot"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s9",
+      "fragments": [
+        {
+          "start": 536,
+          "end": 586,
+          "text": "lesson, futon5a/essays/moran-1971-agent-cascades).",
+          "intent": "cite",
+          "target": "the Moran-1971 lesson at futon5a/essays/moran-1971-agent-cascades",
+          "rationale": "The evidence pointer closing the because-clause citation; it grounds the process-over-snapshot claim in a named essay rather than asserting it bare.",
+          "relations": [
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 544,
+              "end": 584,
+              "text": "futon5a/essays/moran-1971-agent-cascades"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/03-M-distributed-proofreaders.request.json",
+  "request_sha256": "c554940ae54a92da5b6d1628b7e55881fc209b7df48a927a5fcb20992e68c807"
+}

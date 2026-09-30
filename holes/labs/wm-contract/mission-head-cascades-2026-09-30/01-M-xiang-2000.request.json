@@ -1,0 +1,110 @@
+{
+ "source_text": "## HEAD\n\n**Operator-voice anchor** (Joe, 2026-09-26, `*claude-repl:claude-14*`, verbatim):\n\n> Right, well speaking of 象, I had been discussing a 象-2000 implementation of\n> McCarthy's Elephant-2000 ideas, and the xlate stuff that feeds into feed.html\n> would be a great data source.  The result of being able to rewind to a given\n> place in a development cycle etc. (e.g. to right before red tape started) and\n> debug how it came to be would be very cool.\n\n**Provenance:** operator turn in the claude-14 REPL, 2026-09-26 ~02:50 UTC,\nfollowing a discussion of the @why graph and the pattern-mining run. Earlier\n象-2000 discussion: the 象/ pattern family (futon3 `10643d9`, `b871428`),\nseeded from turn-Ogz2uU (2026-09-23): \"we have XTDB, so we have an as-of\ndatabase; this is basically the infrastructure needed to build Elephant 2000\".\n\n**HEAD exit: Met.**\nThe operator's anchor turn is recorded verbatim above.\n\n---",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 7,
+   "text": "## HEAD"
+  },
+  {
+   "id": "s2",
+   "start": 8,
+   "end": 90,
+   "text": "\n**Operator-voice anchor** (Joe, 2026-09-26, `*claude-repl:claude-14*`, verbatim):"
+  },
+  {
+   "id": "s3",
+   "start": 91,
+   "end": 169,
+   "text": "\n> Right, well speaking of 象, I had been discussing a 象-2000 implementation of"
+  },
+  {
+   "id": "s4",
+   "start": 170,
+   "end": 249,
+   "text": "> McCarthy's Elephant-2000 ideas, and the xlate stuff that feeds into feed.html"
+  },
+  {
+   "id": "s5",
+   "start": 250,
+   "end": 328,
+   "text": "> would be a great data source.  The result of being able to rewind to a given"
+  },
+  {
+   "id": "s6",
+   "start": 329,
+   "end": 408,
+   "text": "> place in a development cycle etc. (e.g. to right before red tape started) and"
+  },
+  {
+   "id": "s7",
+   "start": 409,
+   "end": 454,
+   "text": "> debug how it came to be would be very cool."
+  },
+  {
+   "id": "s8",
+   "start": 455,
+   "end": 531,
+   "text": "\n**Provenance:** operator turn in the claude-14 REPL, 2026-09-26 ~02:50 UTC,"
+  },
+  {
+   "id": "s9",
+   "start": 532,
+   "end": 608,
+   "text": "following a discussion of the @why graph and the pattern-mining run. Earlier"
+  },
+  {
+   "id": "s10",
+   "start": 609,
+   "end": 680,
+   "text": "象-2000 discussion: the 象/ pattern family (futon3 `10643d9`, `b871428`),"
+  },
+  {
+   "id": "s11",
+   "start": 681,
+   "end": 753,
+   "text": "seeded from turn-Ogz2uU (2026-09-23): \"we have XTDB, so we have an as-of"
+  },
+  {
+   "id": "s12",
+   "start": 754,
+   "end": 832,
+   "text": "database; this is basically the infrastructure needed to build Elephant 2000\"."
+  },
+  {
+   "id": "s13",
+   "start": 833,
+   "end": 853,
+   "text": "\n**HEAD exit: Met.**"
+  },
+  {
+   "id": "s14",
+   "start": 854,
+   "end": 908,
+   "text": "The operator's anchor turn is recorded verbatim above."
+  },
+  {
+   "id": "s15",
+   "start": 909,
+   "end": 913,
+   "text": "\n---"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-象-2000",
+  "file_path": "/home/joe/code/futon3c/holes/missions/M-象-2000.md",
+  "content_sha256": "e74b6e40418b5092cbd3e601724cbe6cac532a1be064f815152fd5486b772386",
+  "section": {
+   "source_start": 894,
+   "source_end": 1807
+  },
+  "source_kind": "head-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/01-M-xiang-2000.request.json.analysis.json"
+}

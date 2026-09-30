@@ -1,0 +1,545 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T09:20:43.467729+00:00",
+  "source_text": "## HEAD\n\n**Operator-voice anchor** (Joe, 2026-09-26, `*claude-repl:claude-14*`, verbatim):\n\n> Right, well speaking of 象, I had been discussing a 象-2000 implementation of\n> McCarthy's Elephant-2000 ideas, and the xlate stuff that feeds into feed.html\n> would be a great data source.  The result of being able to rewind to a given\n> place in a development cycle etc. (e.g. to right before red tape started) and\n> debug how it came to be would be very cool.\n\n**Provenance:** operator turn in the claude-14 REPL, 2026-09-26 ~02:50 UTC,\nfollowing a discussion of the @why graph and the pattern-mining run. Earlier\n象-2000 discussion: the 象/ pattern family (futon3 `10643d9`, `b871428`),\nseeded from turn-Ogz2uU (2026-09-23): \"we have XTDB, so we have an as-of\ndatabase; this is basically the infrastructure needed to build Elephant 2000\".\n\n**HEAD exit: Met.**\nThe operator's anchor turn is recorded verbatim above.\n\n---",
+  "source_sha256": "f43905d0a037a9a17d54b4fe905c490c3b369b0535a2ec28c915bea5a6647cf1",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "## HEAD",
+          "intent": "frame",
+          "target": "the HEAD section of the mission file",
+          "rationale": "Structural section marker; it frames everything below as the mission's opening position rather than contributing operator content.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "pure structural heading; there is no operator move to cue",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 9,
+          "end": 90,
+          "text": "**Operator-voice anchor** (Joe, 2026-09-26, `*claude-repl:claude-14*`, verbatim):",
+          "intent": "cite",
+          "target": "the operator turn that anchors the mission",
+          "rationale": "The HEAD declares what it is anchored to: a verbatim operator turn with seat and date. The mission binds itself to the source bytes of a specific turn rather than to a paraphrase of intent.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 11,
+              "end": 32,
+              "text": "Operator-voice anchor"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "pattern-interpretation/cite-the-source-bytes",
+              "rationale": "The anchor is quoted verbatim and labelled verbatim: the mission's authority is derived by citing the exact source bytes of the turn, not by summarising them.",
+              "status": "candidate",
+              "source_sha256": "6e0ccc53582f2413cf03deae983af553d91fa1cd86e952dda18c1ae8f5d01337"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 94,
+          "end": 169,
+          "text": "Right, well speaking of 象, I had been discussing a 象-2000 implementation of",
+          "intent": "recall",
+          "target": "the prior 象-2000 discussion",
+          "rationale": "Joe opens by locating the move in an ongoing conversation ('speaking of 象', 'I had been discussing') — context-setting before the proposal, not the proposal itself.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 145,
+              "end": 166,
+              "text": "象-2000 implementation"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 172,
+          "end": 203,
+          "text": "McCarthy's Elephant-2000 ideas,",
+          "intent": "cite",
+          "target": "McCarthy's Elephant-2000 as the named lineage",
+          "rationale": "Joe names the intellectual family the implementation belongs to. 象-2000 is presented as a member of the Elephant-2000 family, not a novel invention.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 183,
+              "end": 202,
+              "text": "Elephant-2000 ideas"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "invariant-coherence/protocol-family-naming",
+              "rationale": "象-2000 is named as a protocol-family instance: Elephant-2000 is the family shape, 象-2000 the local implementation.",
+              "status": "candidate",
+              "source_sha256": "abd189ac12c6393e3224f8f1df410b4f07c65268dafa36608639f9b0146f3677"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 208,
+          "end": 249,
+          "text": "the xlate stuff that feeds into feed.html",
+          "intent": "identify",
+          "target": "the existing xlate-to-feed.html pipeline",
+          "rationale": "Joe points at an existing, running seam — the xlate pipeline — as the resource for the new work, rather than commissioning fresh instrumentation.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 229,
+              "end": 249,
+              "text": "feeds into feed.html"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "peripherals/read-existing-seam-before-implementing",
+              "rationale": "The move is to build on the seam that already exists and already feeds a surface (feed.html), fitting the new capability to existing infrastructure instead of forking it.",
+              "status": "candidate",
+              "source_sha256": "e3220d4d4f3d32402cede9c348c930c2f41745e0e3f634158c87ad13bad84392"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 252,
+          "end": 281,
+          "text": "would be a great data source.",
+          "intent": "endorse",
+          "target": "xlate as the data source for 象-2000",
+          "rationale": "Joe's judgement on the identified seam: it is not merely usable but 'great'. The endorsement is what converts the xlate pipeline from background plumbing into the mission's named input.",
+          "relations": [
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 263,
+              "end": 280,
+              "text": "great data source"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        },
+        {
+          "start": 283,
+          "end": 328,
+          "text": "The result of being able to rewind to a given",
+          "intent": "project",
+          "target": "the rewind capability",
+          "rationale": "Joe names the desired capability: rewinding to an arbitrary earlier point. This is the leading edge of the goal clause that completes across the next two lines.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 311,
+              "end": 328,
+              "text": "rewind to a given"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "象/双时并记",
+              "rationale": "Rewinding to a given place is exactly the as-of query over bitemporal records: valid time and system time let the cycle be re-entered at any point.",
+              "status": "candidate",
+              "source_sha256": "fa89a2e8378e63a659d5c3341e1877358ee85d1f21c9b82d44c38a8cb5d1d00f"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 331,
+          "end": 408,
+          "text": "place in a development cycle etc. (e.g. to right before red tape started) and",
+          "intent": "specify",
+          "target": "the granularity and use of the rewind",
+          "rationale": "Joe grounds the abstract rewind in a concrete scenario — re-entering the cycle right before red tape started. The parenthetical is doing the work: rewind exists so a specific historical moment can be re-inhabited.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 374,
+              "end": 403,
+              "text": "right before red tape started"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "象/视图出于史",
+              "rationale": "A rewound state is a view rebuilt from history, not a snapshot that was saved in advance: the cycle position before red tape is reconstructible because the history is the source of truth.",
+              "status": "candidate",
+              "source_sha256": "0025012e4fd9667fa96d31ca1b3eff36878cbd1e03b027e89dcea8b1861242fb"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 411,
+          "end": 454,
+          "text": "debug how it came to be would be very cool.",
+          "intent": "value",
+          "target": "causal debugging over rewound history",
+          "rationale": "The point of the rewind is diagnosis: 'debug how it came to be' asks for the causal chain that produced a state, and 'very cool' is Joe's explicit value signal on that capability.",
+          "relations": [
+            "goal",
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 417,
+              "end": 434,
+              "text": "how it came to be"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/rapid-debugging",
+              "rationale": "The rewind is valued as a debugging instrument: trace how a state came to be from its evidence, which is invariant-4 debugging applied to development history.",
+              "status": "candidate",
+              "source_sha256": "b82a568181478aef9c8db2c8fe55106790b4631f47bc759380a36ff82c826310"
+            },
+            {
+              "id": "pattern-coherence/causal-clarity",
+              "rationale": "'How it came to be' is a request to make the causal chain behind a state explicit rather than leaving it implicit in the record.",
+              "status": "candidate",
+              "source_sha256": "ebba4e1b0106fb8057b755a35ab3ae734a00bf83d198ef496b7241c41f20554d"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "invariant-coherence/state-snapshot-witness",
+              "reason": "About periodic point-in-time projections kept as standing evidence; the anchor wants rewind-and-debug over full event history, not a snapshot cadence.",
+              "query": "as-of database rewind time travel history"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s8",
+      "fragments": [
+        {
+          "start": 456,
+          "end": 531,
+          "text": "**Provenance:** operator turn in the claude-14 REPL, 2026-09-26 ~02:50 UTC,",
+          "intent": "cite",
+          "target": "the provenance of the anchor turn",
+          "rationale": "The HEAD records where the anchor came from — seat, time — so the mission's authority trace is inspectable. This is the recording of what was consulted.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 458,
+              "end": 468,
+              "text": "Provenance"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "math-strategy/corpus-trust-protocol",
+              "rationale": "The mission records exactly which artifact it consulted (operator turn, claude-14 REPL, timestamp) so later readers can trust the citation per artifact.",
+              "status": "candidate",
+              "source_sha256": "abc4ae2ef5108e97e5c02ebbded211bf0f7e76571f81311de1749d685c22ab34"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s9",
+      "fragments": [
+        {
+          "start": 532,
+          "end": 608,
+          "text": "following a discussion of the @why graph and the pattern-mining run. Earlier",
+          "intent": "situate",
+          "target": "the conversational context of the anchor turn",
+          "rationale": "Locates the anchor within its session — it followed the @why graph and pattern-mining discussion — connective tissue between the provenance block and the lineage block that follows.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 562,
+              "end": 572,
+              "text": "@why graph"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s10",
+      "fragments": [
+        {
+          "start": 609,
+          "end": 680,
+          "text": "象-2000 discussion: the 象/ pattern family (futon3 `10643d9`, `b871428`),",
+          "intent": "cite",
+          "target": "the 象/ pattern family as prior art",
+          "rationale": "The lineage of the idea is cited by commit hash rather than re-explained: the 象/ family already exists in the library and the mission stands on it.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 632,
+              "end": 649,
+              "text": "象/ pattern family"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "象/象不忘",
+              "rationale": "The past discussion is cited by reference (family name plus commit hashes) instead of being repeated — the past need not be restated, only cited.",
+              "status": "candidate",
+              "source_sha256": "b9e9aae1ae48ebd909ae7bb8e3ec943558df636d5094451d0b534b08637ab779"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s11",
+      "fragments": [
+        {
+          "start": 681,
+          "end": 753,
+          "text": "seeded from turn-Ogz2uU (2026-09-23): \"we have XTDB, so we have an as-of",
+          "intent": "trace",
+          "target": "the seed turn Ogz2uU",
+          "rationale": "The lineage is traced one step further back, to the specific turn that seeded the family, and the seed's own words begin to be quoted.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 681,
+              "end": 704,
+              "text": "seeded from turn-Ogz2uU"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s12",
+      "fragments": [
+        {
+          "start": 754,
+          "end": 832,
+          "text": "database; this is basically the infrastructure needed to build Elephant 2000\".",
+          "intent": "quote",
+          "target": "the seed turn's rationale: XTDB as-of as the Elephant-2000 substrate",
+          "rationale": "The quoted seed states the load-bearing claim: the as-of database is already the infrastructure Elephant 2000 needs. The mission HEAD inherits this rationale rather than re-arguing it.",
+          "relations": [
+            "rationale"
+          ],
+          "display_cues": [
+            {
+              "start": 811,
+              "end": 830,
+              "text": "build Elephant 2000"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "象/双时并记",
+              "rationale": "The quoted claim is precisely 双时并记's premise: with bitemporal as-of records (XTDB), the rewind substrate already exists.",
+              "status": "candidate",
+              "source_sha256": "fa89a2e8378e63a659d5c3341e1877358ee85d1f21c9b82d44c38a8cb5d1d00f"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "enrichment/rational-reconstruction",
+              "reason": "Rational reconstruction rebuilds rationale after the fact; the HEAD holds the seed's verbatim words and wants causal debugging on recorded history, not reconstruction of intent.",
+              "query": "Elephant 2000 McCarthy as-of bitemporal"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s13",
+      "fragments": [
+        {
+          "start": 834,
+          "end": 853,
+          "text": "**HEAD exit: Met.**",
+          "intent": "declare",
+          "target": "the HEAD exit gate status",
+          "rationale": "The mission declares its own opening gate satisfied: the anchor turn exists and is recorded. A status declaration, not an operator request.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 836,
+              "end": 851,
+              "text": "HEAD exit: Met."
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s14",
+      "fragments": [
+        {
+          "start": 854,
+          "end": 908,
+          "text": "The operator's anchor turn is recorded verbatim above.",
+          "intent": "affirm",
+          "target": "the scope of what the HEAD claims",
+          "rationale": "The HEAD closes by scoping its own claim: it records the anchor verbatim and nothing more. It asserts provenance of the desire, not that any desired outcome has happened.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 884,
+              "end": 901,
+              "text": "recorded verbatim"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "pattern-interpretation/cite-the-source-bytes",
+              "rationale": "The closing sentence restates the discipline: the claim is backed by the recorded bytes above, verbatim, with nothing extrapolated beyond them.",
+              "status": "candidate",
+              "source_sha256": "6e0ccc53582f2413cf03deae983af553d91fa1cd86e952dda18c1ae8f5d01337"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s15",
+      "fragments": [
+        {
+          "start": 910,
+          "end": 913,
+          "text": "---",
+          "intent": "frame",
+          "target": "section boundary",
+          "rationale": "Structural separator closing the HEAD section.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [],
+          "no_surface_cue": "pure structural separator; no operator move to cue",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/01-M-xiang-2000.request.json",
+  "request_sha256": "47ec599186b9a79e28841e6327329db64affa1a36d22484b5bef41856081afad"
+}

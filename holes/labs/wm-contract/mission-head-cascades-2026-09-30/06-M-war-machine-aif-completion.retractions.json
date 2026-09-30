@@ -1,0 +1,952 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "cascade-construction/read-what-exists-first",
+          "enrichment/extend-not-rewrite",
+          "futon-theory/mission-dependency",
+          "problems/r4-forward-model",
+          "problems/r6-candidate-action-space-and-selection",
+          "structure/whose-question-is-this",
+          "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 8,
+      "how": 1,
+      "next-in-session": 3,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 35,
+      "edges": [
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "problems/r6-candidate-action-space-and-selection",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "problems/r6-candidate-action-space-and-selection"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "war-room/wr-19-tension-must-generate-not-only-rank"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "cascade-construction/hand-over-when-acting-is-worth-more",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-6TxxZn.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/hand-over-when-acting-is-worth-more",
+          "b": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block027/codex-13-turn-8.json.analysis.json -> 2026-08-22_2026-09-21_block027/codex-13-turn-13.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block016/claude-1-turn-105.json.analysis.json#s1.1",
+              "reason": "Read it: peer-learning groups should choose deliberately between making new things and using existing ones, since production is the default. It is a general choice between reuse and making; Joe names the specific documents to read."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-gPgyUE.json.analysis.json#s1.0",
+              "reason": "That pattern directs reading of canonical infrastructure seams before building a peripheral; Joe is pointing at a prior design document for a memory store, not at integration seams."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-12.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block027/claude-8-turn-9.json.analysis.json"
+            },
+            {
+              "at": "live/turn-ldaVpd.json.analysis.json#s1.0",
+              "reason": "Top hit for the reuse phrasing, but it governs extending code rather than rewriting it; the move here challenges a new infrastructure requirement given an existing channel \u2014 a use-vs-make demand, not an extension strategy."
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block029/claude-4-turn-268.json.analysis.json -> 2026-08-22_2026-09-21_block029/claude-4-turn-269.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "structure/whose-question-is-this",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-BaST4i.json.analysis.json#s1.0",
+              "reason": "That pattern asks who owns a question; Joe is not relocating ownership, he is informing of a commission he made and affirming the goal."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-rWbYPW.json.analysis.json -> live/turn-5wo21f.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-dependency",
+          "b": "war-room/wr-0-organise-without-apparatus",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block023/claude-15-turn-168.json.analysis.json -> 2026-08-22_2026-09-21_block024/claude-15-turn-195.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "peeragogy/use-or-make",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-VcZG8X.json.analysis.json"
+            },
+            {
+              "at": "live/turn-fhk3Ki.json.analysis.json#s1.0",
+              "reason": "WR-4 is about inhabiting/understanding a domain before building; Joe is past exploration and is naming a concrete port with a stated purpose."
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "peripherals/read-existing-seam-before-implementing",
+          "b": "problems/r4-forward-model",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-19.json.analysis.json#s4.0",
+              "reason": "A problem node in the same R family; naming it would be label-matching, the sentence is about the schematic's limits."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "war-room/wr-19-tension-must-generate-not-only-rank",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-19-tension-must-generate-not-only-rank.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-4-inhabit-before-building",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-4-inhabit-before-building.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+            "to": "war-room/wr-4-inhabit-before-building"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "aif/candidate-pattern-action-space",
+        "cascade-construction/hand-over-when-acting-is-worth-more",
+        "cascade-construction/read-what-exists-first",
+        "enrichment/extend-not-rewrite",
+        "exotic/immutable-vision-mutable-plan",
+        "futon-theory/mission-dependency",
+        "peeragogy/use-or-make",
+        "peripherals/read-existing-seam-before-implementing",
+        "problems/r4-forward-model",
+        "problems/r6-candidate-action-space-and-selection",
+        "structure/whose-question-is-this",
+        "system-coherence/bind-open-questions-to-closure-mechanisms",
+        "war-room/wr-0-organise-without-apparatus",
+        "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-19-tension-must-generate-not-only-rank",
+        "war-room/wr-4-inhabit-before-building"
+      ],
+      "rank": 1,
+      "size": 17,
+      "weak_edges": 0
+    },
+    {
+      "cost": 35,
+      "edges": [
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "problems/r6-candidate-action-space-and-selection",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "problems/r6-candidate-action-space-and-selection"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "war-room/wr-19-tension-must-generate-not-only-rank"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block016/claude-1-turn-105.json.analysis.json#s1.1",
+              "reason": "Read it: peer-learning groups should choose deliberately between making new things and using existing ones, since production is the default. It is a general choice between reuse and making; Joe names the specific documents to read."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-gPgyUE.json.analysis.json#s1.0",
+              "reason": "That pattern directs reading of canonical infrastructure seams before building a peripheral; Joe is pointing at a prior design document for a memory store, not at integration seams."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-12.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block027/claude-8-turn-9.json.analysis.json"
+            },
+            {
+              "at": "live/turn-ldaVpd.json.analysis.json#s1.0",
+              "reason": "Top hit for the reuse phrasing, but it governs extending code rather than rewriting it; the move here challenges a new infrastructure requirement given an existing channel \u2014 a use-vs-make demand, not an extension strategy."
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block029/claude-4-turn-268.json.analysis.json -> 2026-08-22_2026-09-21_block029/claude-4-turn-269.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "structure/whose-question-is-this",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-BaST4i.json.analysis.json#s1.0",
+              "reason": "That pattern asks who owns a question; Joe is not relocating ownership, he is informing of a commission he made and affirming the goal."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-rWbYPW.json.analysis.json -> live/turn-5wo21f.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-dependency",
+          "b": "war-room/wr-0-organise-without-apparatus",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block023/claude-15-turn-168.json.analysis.json -> 2026-08-22_2026-09-21_block024/claude-15-turn-195.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/recorded-handoff",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block008/claude-13-turn-464.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "orchestration/recorded-handoff",
+          "b": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-13-turn-6.json.analysis.json -> 2026-08-22_2026-09-21_block027/codex-13-turn-8.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "peeragogy/use-or-make",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-VcZG8X.json.analysis.json"
+            },
+            {
+              "at": "live/turn-fhk3Ki.json.analysis.json#s1.0",
+              "reason": "WR-4 is about inhabiting/understanding a domain before building; Joe is past exploration and is naming a concrete port with a stated purpose."
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "peripherals/read-existing-seam-before-implementing",
+          "b": "problems/r4-forward-model",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-19.json.analysis.json#s4.0",
+              "reason": "A problem node in the same R family; naming it would be label-matching, the sentence is about the schematic's limits."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "war-room/wr-19-tension-must-generate-not-only-rank",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-19-tension-must-generate-not-only-rank.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-4-inhabit-before-building",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-4-inhabit-before-building.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+            "to": "war-room/wr-4-inhabit-before-building"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "aif/candidate-pattern-action-space",
+        "cascade-construction/read-what-exists-first",
+        "enrichment/extend-not-rewrite",
+        "exotic/immutable-vision-mutable-plan",
+        "futon-theory/mission-dependency",
+        "orchestration/recorded-handoff",
+        "peeragogy/use-or-make",
+        "peripherals/read-existing-seam-before-implementing",
+        "problems/r4-forward-model",
+        "problems/r6-candidate-action-space-and-selection",
+        "structure/whose-question-is-this",
+        "system-coherence/bind-open-questions-to-closure-mechanisms",
+        "war-room/wr-0-organise-without-apparatus",
+        "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-19-tension-must-generate-not-only-rank",
+        "war-room/wr-4-inhabit-before-building"
+      ],
+      "rank": 2,
+      "size": 17,
+      "weak_edges": 0
+    },
+    {
+      "cost": 37,
+      "edges": [
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "problems/r6-candidate-action-space-and-selection",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "problems/r6-candidate-action-space-and-selection"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "aif/candidate-pattern-action-space",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "aif/candidate-pattern-action-space",
+            "to": "war-room/wr-19-tension-must-generate-not-only-rank"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "cascade-construction/hand-over-when-acting-is-worth-more",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-6TxxZn.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/hand-over-when-acting-is-worth-more",
+          "b": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block027/codex-13-turn-8.json.analysis.json -> 2026-08-22_2026-09-21_block027/codex-13-turn-13.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block016/claude-1-turn-105.json.analysis.json#s1.1",
+              "reason": "Read it: peer-learning groups should choose deliberately between making new things and using existing ones, since production is the default. It is a general choice between reuse and making; Joe names the specific documents to read."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-gPgyUE.json.analysis.json#s1.0",
+              "reason": "That pattern directs reading of canonical infrastructure seams before building a peripheral; Joe is pointing at a prior design document for a memory store, not at integration seams."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "cascade-construction/read-what-exists-first",
+          "b": "process/built-but-not-wired-invisibility",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block016/claude-1-turn-109.json.analysis.json -> 2026-08-22_2026-09-21_block016/claude-1-turn-114.json.analysis.json"
+            },
+            {
+              "at": "live/turn-Tgmnta.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "peeragogy/use-or-make",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-12.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block027/claude-8-turn-9.json.analysis.json"
+            },
+            {
+              "at": "live/turn-ldaVpd.json.analysis.json#s1.0",
+              "reason": "Top hit for the reuse phrasing, but it governs extending code rather than rewriting it; the move here challenges a new infrastructure requirement given an existing channel \u2014 a use-vs-make demand, not an extension strategy."
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "enrichment/extend-not-rewrite",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block029/claude-4-turn-268.json.analysis.json -> 2026-08-22_2026-09-21_block029/claude-4-turn-269.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "structure/whose-question-is-this",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-BaST4i.json.analysis.json#s1.0",
+              "reason": "That pattern asks who owns a question; Joe is not relocating ownership, he is informing of a commission he made and affirming the goal."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "exotic/immutable-vision-mutable-plan",
+          "b": "system-coherence/bind-open-questions-to-closure-mechanisms",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-rWbYPW.json.analysis.json -> live/turn-5wo21f.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-dependency",
+          "b": "war-room/wr-0-organise-without-apparatus",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block023/claude-15-turn-168.json.analysis.json -> 2026-08-22_2026-09-21_block024/claude-15-turn-195.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "peripherals/read-existing-seam-before-implementing",
+          "b": "problems/r4-forward-model",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-19.json.analysis.json#s4.0",
+              "reason": "A problem node in the same R family; naming it would be label-matching, the sentence is about the schematic's limits."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "process/built-but-not-wired-invisibility",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "process/built-but-not-wired-invisibility",
+            "to": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/process/built-but-not-wired-invisibility.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "direction": {
+            "from": "war-room/wr-19-tension-must-generate-not-only-rank",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-19-tension-must-generate-not-only-rank.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-0-organise-without-apparatus",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-4-inhabit-before-building",
+            "to": "war-room/wr-0-organise-without-apparatus"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-4-inhabit-before-building.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-27-a-loop-is-born-instrumented-for-its-gain.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-4-inhabit-before-building",
+          "direction": {
+            "from": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+            "to": "war-room/wr-4-inhabit-before-building"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "aif/candidate-pattern-action-space",
+        "cascade-construction/hand-over-when-acting-is-worth-more",
+        "cascade-construction/read-what-exists-first",
+        "enrichment/extend-not-rewrite",
+        "exotic/immutable-vision-mutable-plan",
+        "futon-theory/mission-dependency",
+        "peeragogy/use-or-make",
+        "peripherals/read-existing-seam-before-implementing",
+        "problems/r4-forward-model",
+        "problems/r6-candidate-action-space-and-selection",
+        "process/built-but-not-wired-invisibility",
+        "structure/whose-question-is-this",
+        "system-coherence/bind-open-questions-to-closure-mechanisms",
+        "war-room/wr-0-organise-without-apparatus",
+        "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-19-tension-must-generate-not-only-rank",
+        "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+        "war-room/wr-4-inhabit-before-building"
+      ],
+      "rank": 3,
+      "size": 19,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "cascade-construction/read-what-exists-first",
+    "enrichment/extend-not-rewrite",
+    "futon-theory/mission-dependency",
+    "problems/r4-forward-model",
+    "problems/r6-candidate-action-space-and-selection",
+    "structure/whose-question-is-this",
+    "system-coherence/bind-open-questions-to-closure-mechanisms",
+    "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+    "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+  ],
+  "refused_no_edges": [
+    "war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern"
+  ],
+  "all_reading_seeds": [
+    "cascade-construction/read-what-exists-first",
+    "enrichment/extend-not-rewrite",
+    "futon-theory/mission-dependency",
+    "problems/r4-forward-model",
+    "problems/r6-candidate-action-space-and-selection",
+    "structure/whose-question-is-this",
+    "system-coherence/bind-open-questions-to-closure-mechanisms",
+    "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+    "war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern",
+    "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+ "source_text": "# M-value-creation-loop — the prospective pattern cascade as build strategy\n\n**Date:** 2026-06-16\n**Status:** OPEN — IDENTIFY (minted from a live design conversation, Joe + claude-2,\nin the session that built kit-intake / kit-outbox / mint 3-state consumption).\n**Name:** provisional — Joe's to set (candidates: M-value-creation-loop /\nM-prospective-cascade / M-generative-build-cascade).\n**Owner:** TBD (Joe's call). Drafted by claude-2.",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 75,
+   "text": "# M-value-creation-loop — the prospective pattern cascade as build strategy"
+  },
+  {
+   "id": "s2",
+   "start": 76,
+   "end": 97,
+   "text": "\n**Date:** 2026-06-16"
+  },
+  {
+   "id": "s3",
+   "start": 98,
+   "end": 182,
+   "text": "**Status:** OPEN — IDENTIFY (minted from a live design conversation, Joe + claude-2,"
+  },
+  {
+   "id": "s4",
+   "start": 183,
+   "end": 261,
+   "text": "in the session that built kit-intake / kit-outbox / mint 3-state consumption)."
+  },
+  {
+   "id": "s5",
+   "start": 262,
+   "end": 335,
+   "text": "**Name:** provisional — Joe's to set (candidates: M-value-creation-loop /"
+  },
+  {
+   "id": "s6",
+   "start": 336,
+   "end": 388,
+   "text": "M-prospective-cascade / M-generative-build-cascade)."
+  },
+  {
+   "id": "s7",
+   "start": 389,
+   "end": 438,
+   "text": "**Owner:** TBD (Joe's call). Drafted by claude-2."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-value-creation-loop",
+  "file_path": "/home/joe/code/futon7/holes/missions/M-value-creation-loop.md",
+  "content_sha256": "a4e5d1f8d1522fee095a0b287193ac6077138b7cb905bd5d74ad03330433d39c",
+  "section": {
+   "source_start": 0,
+   "source_end": 438
+  },
+  "source_kind": "opening-before-first-section"
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/08-M-value-creation-loop.request.json.analysis.json"
+}

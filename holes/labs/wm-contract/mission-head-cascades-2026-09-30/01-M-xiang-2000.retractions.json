@@ -1,0 +1,788 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "invariant-coherence/protocol-family-naming",
+          "math-strategy/corpus-trust-protocol",
+          "pattern-coherence/causal-clarity",
+          "peripherals/read-existing-seam-before-implementing",
+          "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+          "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "\u8c61/\u8c61\u4e0d\u5fd8"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 8,
+      "how": 1,
+      "next-in-session": 3,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 25,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block025/claude-20-turn-35.json.analysis.json -> 2026-08-22_2026-09-21_block025/claude-20-turn-51.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-4cK2SO.json.analysis.json -> live/turn-BI6luN.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "invariant-coherence/protocol-family-naming",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block000/claude-13-turn-118.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-L2e5uG.json.analysis.json -> 2026-09-22_2026-09-26_block001/claude-1-turn-18-20260923195901.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "translation/bind-to-the-source",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-QMNU0A.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "math-strategy/corpus-trust-protocol",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-bHZV4Z.json.analysis.json -> live/turn-3ecbrN.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/consent-gate",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-9umMUN.json.analysis.json -> live/turn-4OobXs.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "pattern-coherence/causal-clarity",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-A8Ioc3.json.analysis.json"
+            },
+            {
+              "at": "live/turn-qPSWtV.json.analysis.json -> live/turn-A8Ioc3.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "translation/bind-to-the-source",
+          "b": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "direction": {
+            "from": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+            "to": "translation/bind-to-the-source"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u7ffb\u8bd1\u5951\u7ea6.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+          "b": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "direction": {
+            "from": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+            "to": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            },
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why",
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u8c61\u4e0d\u5fd8",
+            "to": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u8c61\u4e0d\u5fd8.flexiarg"
+            }
+          ],
+          "kind_used": "how",
+          "kinds": [
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+            "to": "\u8c61/\u8c61\u4e0d\u5fd8"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+        "invariant-coherence/protocol-family-naming",
+        "math-strategy/corpus-trust-protocol",
+        "orchestration/consent-gate",
+        "pattern-coherence/causal-clarity",
+        "peripherals/read-existing-seam-before-implementing",
+        "translation/bind-to-the-source",
+        "workshop/open-proposals-named-adoption",
+        "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+        "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+        "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+        "\u8c61/\u8c61\u4e0d\u5fd8"
+      ],
+      "rank": 1,
+      "size": 13,
+      "weak_edges": 0
+    },
+    {
+      "cost": 25,
+      "edges": [
+        {
+          "a": "agent/state-is-hypothesis",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-BI6luN.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "agent/state-is-hypothesis",
+          "b": "translation/revise-the-source-under-pressure",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-ITQTdg.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "invariant-coherence/protocol-family-naming",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block000/claude-13-turn-118.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-L2e5uG.json.analysis.json -> 2026-09-22_2026-09-26_block001/claude-1-turn-18-20260923195901.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "translation/bind-to-the-source",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-QMNU0A.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "math-strategy/corpus-trust-protocol",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-bHZV4Z.json.analysis.json -> live/turn-3ecbrN.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/consent-gate",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-9umMUN.json.analysis.json -> live/turn-4OobXs.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "pattern-coherence/causal-clarity",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-A8Ioc3.json.analysis.json"
+            },
+            {
+              "at": "live/turn-qPSWtV.json.analysis.json -> live/turn-A8Ioc3.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "translation/bind-to-the-source",
+          "b": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "direction": {
+            "from": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+            "to": "translation/bind-to-the-source"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u7ffb\u8bd1\u5951\u7ea6.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "translation/choose-the-equivalence-check",
+          "b": "translation/revise-the-source-under-pressure",
+          "direction": {
+            "from": "translation/revise-the-source-under-pressure",
+            "to": "translation/choose-the-equivalence-check"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/translation/revise-the-source-under-pressure.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "translation/choose-the-equivalence-check",
+          "b": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "direction": {
+            "from": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+            "to": "translation/choose-the-equivalence-check"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u7ffb\u8bd1\u5951\u7ea6.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+          "b": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "direction": {
+            "from": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+            "to": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            },
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why",
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u8c61\u4e0d\u5fd8",
+            "to": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u8c61\u4e0d\u5fd8.flexiarg"
+            }
+          ],
+          "kind_used": "how",
+          "kinds": [
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+            "to": "\u8c61/\u8c61\u4e0d\u5fd8"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/state-is-hypothesis",
+        "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+        "invariant-coherence/protocol-family-naming",
+        "math-strategy/corpus-trust-protocol",
+        "orchestration/consent-gate",
+        "pattern-coherence/causal-clarity",
+        "peripherals/read-existing-seam-before-implementing",
+        "translation/bind-to-the-source",
+        "translation/choose-the-equivalence-check",
+        "translation/revise-the-source-under-pressure",
+        "workshop/open-proposals-named-adoption",
+        "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+        "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+        "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+        "\u8c61/\u8c61\u4e0d\u5fd8"
+      ],
+      "rank": 2,
+      "size": 15,
+      "weak_edges": 0
+    },
+    {
+      "cost": 26,
+      "edges": [
+        {
+          "a": "agent/state-is-hypothesis",
+          "b": "peripherals/read-existing-seam-before-implementing",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-BI6luN.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "agent/state-is-hypothesis",
+          "b": "translation/revise-the-source-under-pressure",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-ITQTdg.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "invariant-coherence/protocol-family-naming",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block000/claude-13-turn-118.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-L2e5uG.json.analysis.json -> 2026-09-22_2026-09-26_block001/claude-1-turn-18-20260923195901.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "proof-search/typed-hole-as-frontier",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-09-22_2026-09-26_block001/claude-1-turn-12.json.analysis.json -> live/turn-TAZQYL.json.analysis.json"
+            },
+            {
+              "at": "live/turn-hVCUAL.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+          "b": "translation/bind-to-the-source",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-QMNU0A.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "math-strategy/corpus-trust-protocol",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-bHZV4Z.json.analysis.json -> live/turn-3ecbrN.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "pattern-coherence/causal-clarity",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-A8Ioc3.json.analysis.json"
+            },
+            {
+              "at": "live/turn-qPSWtV.json.analysis.json -> live/turn-A8Ioc3.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "proof-search/typed-hole-as-frontier",
+          "b": "workshop/open-proposals-named-adoption",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-69tvuN.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "translation/bind-to-the-source",
+          "b": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "direction": {
+            "from": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+            "to": "translation/bind-to-the-source"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u7ffb\u8bd1\u5951\u7ea6.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "translation/choose-the-equivalence-check",
+          "b": "translation/revise-the-source-under-pressure",
+          "direction": {
+            "from": "translation/revise-the-source-under-pressure",
+            "to": "translation/choose-the-equivalence-check"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/translation/revise-the-source-under-pressure.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "translation/choose-the-equivalence-check",
+          "b": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "direction": {
+            "from": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+            "to": "translation/choose-the-equivalence-check"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u7ffb\u8bd1\u5951\u7ea6.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+          "b": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "direction": {
+            "from": "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+            "to": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            },
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u53cc\u65f6\u5e76\u8bb0.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why",
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u8c61\u4e0d\u5fd8",
+            "to": "\u8c61/\u7ffb\u8bd1\u5951\u7ea6"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u8c61\u4e0d\u5fd8.flexiarg"
+            }
+          ],
+          "kind_used": "how",
+          "kinds": [
+            "how"
+          ]
+        },
+        {
+          "a": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+          "b": "\u8c61/\u8c61\u4e0d\u5fd8",
+          "direction": {
+            "from": "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+            "to": "\u8c61/\u8c61\u4e0d\u5fd8"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/state-is-hypothesis",
+        "cascade-construction/add-a-pattern-when-an-item-fits-no-class",
+        "invariant-coherence/protocol-family-naming",
+        "math-strategy/corpus-trust-protocol",
+        "orchestration/consent-gate",
+        "pattern-coherence/causal-clarity",
+        "peripherals/read-existing-seam-before-implementing",
+        "proof-search/typed-hole-as-frontier",
+        "translation/bind-to-the-source",
+        "translation/choose-the-equivalence-check",
+        "translation/revise-the-source-under-pressure",
+        "workshop/open-proposals-named-adoption",
+        "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+        "\u8c61/\u7ffb\u8bd1\u5951\u7ea6",
+        "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+        "\u8c61/\u8c61\u4e0d\u5fd8"
+      ],
+      "rank": 3,
+      "size": 16,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "invariant-coherence/protocol-family-naming",
+    "math-strategy/corpus-trust-protocol",
+    "pattern-coherence/causal-clarity",
+    "peripherals/read-existing-seam-before-implementing",
+    "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+    "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+    "\u8c61/\u8c61\u4e0d\u5fd8"
+  ],
+  "refused_no_edges": [
+    "futon-theory/rapid-debugging",
+    "pattern-interpretation/cite-the-source-bytes"
+  ],
+  "all_reading_seeds": [
+    "futon-theory/rapid-debugging",
+    "invariant-coherence/protocol-family-naming",
+    "math-strategy/corpus-trust-protocol",
+    "pattern-coherence/causal-clarity",
+    "pattern-interpretation/cite-the-source-bytes",
+    "peripherals/read-existing-seam-before-implementing",
+    "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
+    "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
+    "\u8c61/\u8c61\u4e0d\u5fd8"
+  ]
+}

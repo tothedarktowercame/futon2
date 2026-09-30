@@ -1,0 +1,316 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "coordination/artifact-registration",
+          "hygiene/route-to-who-can-act",
+          "problems/operator-turns-become-inference-observations"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 8,
+      "how": 1,
+      "next-in-session": 3,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 12,
+      "edges": [
+        {
+          "a": "coordination/artifact-registration",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block014/claude-15-turn-124.json.analysis.json -> 2026-08-22_2026-09-21_block014/claude-15-turn-126.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "inbox-zero/escalate-by-who-can-act",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block022/codex-16-turn-21.json.analysis.json#s1.1",
+              "reason": "Read: tier ladder for hygiene outliers ending at Joe. Same routing idea, but the ladder and its commit/seat mechanics are specific to hygiene findings; hygiene/route-to-who-can-act is the general form."
+            },
+            {
+              "at": "live/turn-UtTh6n.json.analysis.json#s1.1",
+              "reason": "That pattern is about hygiene findings routed with deadlines as a standing pipeline; this is a one-off operator instruction inside a conversation, not a finding emitted by a hygiene pass."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block004/claude-13-turn-283.json.analysis.json -> 2026-08-22_2026-09-21_block004/claude-13-turn-285.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "inbox-zero/escalate-by-who-can-act",
+          "b": "problems/operator-turns-become-inference-observations",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-09-22_2026-09-26_block005/claude-12-turn-84.json.analysis.json -> live/turn-mJnSVt.json.analysis.json"
+            },
+            {
+              "at": "live/turn-R4xoNZ.json.analysis.json -> 2026-09-22_2026-09-26_block005/claude-12-turn-84.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "coordination/artifact-registration",
+        "hygiene/route-to-who-can-act",
+        "inbox-zero/escalate-by-who-can-act",
+        "problems/operator-turns-become-inference-observations",
+        "system-coherence/turn-design-into-checks"
+      ],
+      "rank": 1,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 12,
+      "edges": [
+        {
+          "a": "coordination/artifact-registration",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block014/claude-15-turn-124.json.analysis.json -> 2026-08-22_2026-09-21_block014/claude-15-turn-126.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "orchestration/recorded-handoff",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block010/claude-13-turn-137.json.analysis.json -> 2026-08-22_2026-09-21_block011/claude-13-turn-152.json.analysis.json"
+            },
+            {
+              "at": "live/turn-5emFRr.json.analysis.json#s1.0",
+              "reason": "That pattern models the dispatch artefact itself (handoff as a modeled object); Joe's move here is the routing decision \u2014 who must act \u2014 not the instrumentation of the dispatch."
+            },
+            {
+              "at": "live/turn-aWKb9y.json.analysis.json#s6.0",
+              "reason": "That pattern is the heavyweight modeled-object handoff (spec, gates, job-id, commit trailers recorded in a mission doc). Joe's move is a lightweight in-conversation relay of questions, with no modeled dispatch object."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block004/claude-13-turn-283.json.analysis.json -> 2026-08-22_2026-09-21_block004/claude-13-turn-285.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/recorded-handoff",
+          "b": "problems/operator-turns-become-inference-observations",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-R4xoNZ.json.analysis.json -> 2026-09-22_2026-09-26_block005/claude-12-turn-84.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "coordination/artifact-registration",
+        "hygiene/route-to-who-can-act",
+        "orchestration/recorded-handoff",
+        "problems/operator-turns-become-inference-observations",
+        "system-coherence/turn-design-into-checks"
+      ],
+      "rank": 2,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 12,
+      "edges": [
+        {
+          "a": "coordination/artifact-registration",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block014/claude-15-turn-124.json.analysis.json -> 2026-08-22_2026-09-21_block014/claude-15-turn-126.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "process/built-but-not-wired-invisibility",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block004/claude-13-turn-278.json.analysis.json -> 2026-08-22_2026-09-21_block004/claude-13-turn-283.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "hygiene/route-to-who-can-act",
+          "b": "system-coherence/turn-design-into-checks",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block004/claude-13-turn-283.json.analysis.json -> 2026-08-22_2026-09-21_block004/claude-13-turn-285.json.analysis.json"
+            }
+          ],
+          "kind_used": "next-in-session",
+          "kinds": [
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "problems/operator-turns-become-inference-observations",
+          "b": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "direction": {
+            "from": "problems/operator-turns-become-inference-observations",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/problems/operator-turns-become-inference-observations.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "process/built-but-not-wired-invisibility",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "process/built-but-not-wired-invisibility",
+            "to": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/process/built-but-not-wired-invisibility.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-27-a-loop-is-born-instrumented-for-its-gain.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "coordination/artifact-registration",
+        "hygiene/route-to-who-can-act",
+        "problems/operator-turns-become-inference-observations",
+        "process/built-but-not-wired-invisibility",
+        "system-coherence/turn-design-into-checks",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+      ],
+      "rank": 3,
+      "size": 7,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "coordination/artifact-registration",
+    "hygiene/route-to-who-can-act",
+    "problems/operator-turns-become-inference-observations"
+  ],
+  "refused_no_edges": [],
+  "all_reading_seeds": [
+    "coordination/artifact-registration",
+    "hygiene/route-to-who-can-act",
+    "problems/operator-turns-become-inference-observations"
+  ]
+}

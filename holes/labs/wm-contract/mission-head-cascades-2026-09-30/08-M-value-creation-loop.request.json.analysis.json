@@ -1,0 +1,262 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-4",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T09:16:35.685501+00:00",
+  "source_text": "# M-value-creation-loop — the prospective pattern cascade as build strategy\n\n**Date:** 2026-06-16\n**Status:** OPEN — IDENTIFY (minted from a live design conversation, Joe + claude-2,\nin the session that built kit-intake / kit-outbox / mint 3-state consumption).\n**Name:** provisional — Joe's to set (candidates: M-value-creation-loop /\nM-prospective-cascade / M-generative-build-cascade).\n**Owner:** TBD (Joe's call). Drafted by claude-2.",
+  "source_sha256": "b11d1af5a52b5de4c5cc57504f84ae0484249a1c90a402d2285bbcb68776589d",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 75,
+          "text": "# M-value-creation-loop — the prospective pattern cascade as build strategy",
+          "intent": "frame",
+          "target": "the mission and its stated thesis",
+          "rationale": "The title line names the mission and states its thesis — the prospective pattern cascade used as a build strategy. It frames how the whole document should be read; it asserts an intent, not an achieved outcome.",
+          "relations": [
+            "context",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 30,
+              "end": 57,
+              "text": "prospective pattern cascade"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "cascades/on-the-fly-cascade",
+              "reason": "On-the-fly is about deriving cascade edges per query against current problem state; the title instead names a *prospective* cascade as a build strategy — the cascade is the plan, not a per-query slice — so the retrieval pattern does not fit.",
+              "query": "prospective pattern cascade as the strategy for building"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 76,
+          "end": 97,
+          "text": "\n**Date:** 2026-06-16",
+          "intent": "frame",
+          "target": "the document's date",
+          "rationale": "A bare date stamp fixing when this HEAD was written; pure provenance context with no move of its own.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 87,
+              "end": 97,
+              "text": "2026-06-16"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 98,
+          "end": 182,
+          "text": "**Status:** OPEN — IDENTIFY (minted from a live design conversation, Joe + claude-2,",
+          "intent": "report",
+          "target": "the mission's lifecycle state and its origin in a live conversation",
+          "rationale": "Declares the mission OPEN at IDENTIFY and records that it was minted from a live design conversation between named participants — the operator's talk captured into a processable structure while still warm, with attribution.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 110,
+              "end": 125,
+              "text": "OPEN — IDENTIFY"
+            },
+            {
+              "start": 141,
+              "end": 165,
+              "text": "live design conversation"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "problems/operator-turns-become-inference-observations",
+              "rationale": "Minting the mission from a live Joe + claude-2 design conversation is exactly this capture: the operator's turn becomes a structure the process can consume, with the participants named rather than summarised away.",
+              "status": "candidate",
+              "source_sha256": "28cd96e29b84e7698a16ee0c4c020d345c49228dfb1fda6d8bd999ff46707ce9"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "inbox-zero/promote-at-turn-end",
+              "reason": "Promote-at-turn-end commits the files a turn touched behind gates; minting a mission from a live conversation shares the capture-while-warm motive but is content capture, not file promotion, so the mechanism does not apply.",
+              "query": "mint a mission from a live design conversation while it is still warm"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 183,
+          "end": 261,
+          "text": "in the session that built kit-intake / kit-outbox / mint 3-state consumption).",
+          "intent": "report",
+          "target": "the originating session's provenance",
+          "rationale": "Names the concrete session and artifacts (kit-intake / kit-outbox / mint 3-state consumption) this mission was minted from — a provenance record that lets later gates and readers join the mission back to the work that motivated it.",
+          "relations": [
+            "context",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 209,
+              "end": 239,
+              "text": "kit-intake / kit-outbox / mint"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "coordination/artifact-registration",
+              "rationale": "Recording which session built which named artifacts gives the mission a stable provenance join-key, the same discipline artifact registration requires so later validation can refer to the product of execution.",
+              "status": "candidate",
+              "source_sha256": "0452b0ecaf7d17c5b68175b2ff85c3a94a54080665c5831346225b9499bf7296"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 262,
+          "end": 335,
+          "text": "**Name:** provisional — Joe's to set (candidates: M-value-creation-loop /",
+          "intent": "delegate",
+          "target": "the mission's final name",
+          "rationale": "The drafter marks the name provisional and explicitly reserves the decision to Joe, listing candidates rather than deciding. A judgement call routed to the person who can make it instead of being settled by the drafting agent.",
+          "relations": [
+            "condition",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 286,
+              "end": 298,
+              "text": "Joe's to set"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "hygiene/route-to-who-can-act",
+              "rationale": "Naming is routed to the operator as a judgement a person must make; the agent delivers the finding (candidate names) to exactly the party able to act rather than deciding itself.",
+              "status": "candidate",
+              "source_sha256": "6cd9f49425f5f57eef2d6a1c558b9a0490a07d3109f128774b2cc931d6602193"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 336,
+          "end": 388,
+          "text": "M-prospective-cascade / M-generative-build-cascade).",
+          "intent": "report",
+          "target": "the candidate mission names",
+          "rationale": "The continuation listing the three candidate names Joe is to choose among; it supplies the evidence the routed decision needs and carries no move of its own beyond that.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 360,
+              "end": 386,
+              "text": "M-generative-build-cascade"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 389,
+          "end": 438,
+          "text": "**Owner:** TBD (Joe's call). Drafted by claude-2.",
+          "intent": "delegate",
+          "target": "mission ownership and drafting attribution",
+          "rationale": "Ownership is left TBD as Joe's call while drafting is attributed to claude-2 — again routing the decision to who can act, and fixing authorship so the operator-voice anchor and the drafter are not conflated.",
+          "relations": [
+            "condition",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 400,
+              "end": 416,
+              "text": "TBD (Joe's call)"
+            },
+            {
+              "start": 418,
+              "end": 437,
+              "text": "Drafted by claude-2"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "hygiene/route-to-who-can-act",
+              "rationale": "Owner selection is routed to Joe with the drafting attribution attached as evidence, rather than the drafter assuming ownership by default.",
+              "status": "candidate",
+              "source_sha256": "6cd9f49425f5f57eef2d6a1c558b9a0490a07d3109f128774b2cc931d6602193"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/08-M-value-creation-loop.request.json",
+  "request_sha256": "dfe1c8a1cb0aa74aeb3bf7294d2dedd4bfab22c1177986a1d6a1e9ac4d721bf7"
+}
