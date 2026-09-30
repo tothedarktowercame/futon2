@@ -224,6 +224,38 @@ before it may be chosen.
    derived from the library for the problem is not proposed. Covered also
    by rulings 2, 3 and 15.
 
+8. **No one alerted Joe.** Joe: "there are certain critical parameters.
+   The number of missions being chosen from is one, that was the first
+   facade that I noticed ... Now the policy space has been reduced to 1
+   item, which is the most degenerate facade I have heard of — and no one
+   alerted me." The values were in the records and in no report. Level:
+   model gap (the machine has tripwires and none watches these) and
+   process. Owners: records (the report), controller (the tripwire),
+   claude-1 (stating them). Negative test: a run whose critical parameters
+   are degenerate raises an alert addressed to Joe and is not reported as a
+   selection.
+
+### The critical parameters, and their values at click 20
+
+| Parameter | Design | Click 20 (record) |
+|---|---|---|
+| Open tasks that exist | all of them | about 637 by the 2026-09-29 census (221 missions, 373 excursions, 43 tickets) |
+| Tasks the decision enumerates | the same set | missions and tickets only; 195 mission-derived targets added; excursions absent |
+| Targets that reach scoring | every enumerated target | 3 (the only ones with any interpretation) |
+| Targets with a score | every one reaching scoring | 1 (two declined: class unknown) |
+| Patterns a cascade may draw on | the library slice for the problem (library about 1,415) | 2 |
+| Policies compared | many per target | 1 |
+| Preference along the horizon (Cτ) | stated for every step | blank for steps 1–3 |
+| Terms of G in use | risk, ambiguity, information gain | risk only |
+
+History of the first of these, as far as the records and `PROOF-2b.md`
+show: five hand-written target files from 2026-09-17, four of whose targets
+were later finished; 2 to 21 targets with candidates on 09-20/21; one target
+in almost every record from 09-22.
+
+These eight numbers are to head every report claude-1 makes about a run,
+before anything else is said about it.
+
 ## Why the verification done did not catch it
 
 Every test of selection supplied candidates; none asserted how many
