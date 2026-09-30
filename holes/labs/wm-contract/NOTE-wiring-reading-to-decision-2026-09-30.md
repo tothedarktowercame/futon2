@@ -380,3 +380,137 @@ That is worse than an explicit abstention because the record would name the
 wrong evidence.  The coherent in-place replacement is the whole
 interpretation-admission/scoring/certificate segment, retaining the one outer
 decision, selector, authority gate and recording seam.
+
+## 8. Sources for non-mission targets
+
+This section reads the field at futon2 `5d8c01f6b`.  The bounded inventory
+used one substrate mission query (limit 1000, the bound in
+`mission_registry.clj:443-445`) and local ticket, proposal, repair and declared
+source reads.  It made no WM click.
+
+### 8.1 Ticket targets
+
+There are two ticket inputs at enumeration.  The primary-checkout ticket
+registry returns records with `:id`, `:kind`, `:path`, `:title`, status text and
+class, and optional parent (`mission_registry.clj:606-631`).  The queue has a
+much narrower contract: every entry has exactly `:ticket` and `:inserted-at`,
+and no path, line, body or foreign-store identity (`ticket_queue.clj:20-35`).
+The report has the full registry records in `loaded-tickets`, but reduces them
+to IDs in `substrate-tickets` and passes only those IDs to the source
+declaration (`war_machine.clj:6537,6556-6574`).  Thus the field currently loses
+paths it has already read.
+
+Two real examples establish both shapes:
+
+* `T-car3-phase2-impl` is a registry ticket with `:kind :ticket`, path
+  `/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md`, title, live
+  status text/class, and parent `M-agency-hardening`.
+* `T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade`
+  is a queue entry with only that `:ticket` and
+  `:inserted-at "2026-09-22T05:13:31.542488602Z"`.  Independently, its
+  declared cascade source records the path and byte hash of
+  `resources/wm/cascade-sources/T-repair-occ-444fb018.edn`; `load-declared`
+  already retains `{:path :sha256 :target}` for every declaration
+  (`cascade_sources.clj:254-295`).
+
+For the 55 primary-checkout tickets, the smallest source declaration is the
+already-read ticket `:path` plus an item line when the ticket has an open
+checkbox. `wm_task_reading.py` then reads the containing section and records
+the exact item offsets (`wm_task_reading.py:76-91`).  A ticket without an open
+checkbox should use its whole opening as inline text; it must not be assigned a
+fabricated line.  The one queue-only target above can use the exact declared
+EDN bytes as inline text.  All **56/56** current ticket targets have a source
+under this rule; **0** have no text anywhere.
+
+### 8.2 Proposal targets
+
+Persisted retrieval proposals live in a `proposal.edn` bundle beside captured
+evidence bytes.  The bundle contains the request and target, and each derived
+proposal carries target, pattern, retrieval evidence and a proposal digest
+(`cascade_proposals.clj:50-70`).  Loading checks the captured byte pins and
+re-derives proposals (`cascade_proposals.clj:72-102`), but returns only the
+proposal rows and a top-level list of bundle files (`:104-123`); it does not
+join a bundle path back onto each proposal.
+
+All 31 targets whose field source kind is currently `:proposal` instead come
+from open repair findings.  A repair proposal carries `:repair/id`, failure
+kind/stage, discharge contract, backtrace status, and a `:finding-source`
+containing the exact EDN path and sha256 (`repair_proposals.clj:34-68`).  For
+example:
+
+* `T-repair-attempt-047-review-execution-evidence-missing` points to
+  `data/wm-repair-obligations/findings/repair-attempt-047-review-execution-evidence-missing.edn`
+  and records failure stage `:reviewer-wait`, failure kind
+  `:review-execution-evidence-missing`, its discharge contract, and retained
+  backtrace.
+* `T-repair-attempt-048-agent-unavailable` points to the corresponding finding
+  EDN and records stage `:agent-readiness`, kind `:agent-unavailable`, its
+  discharge contract, and retained backtrace.
+
+These structured findings are not Markdown item sections.  Their smallest
+honest reading source is inline text equal to the exact finding-file bytes,
+with the already-recorded `:finding-source :sha256` as its byte identity.  A
+retrieval proposal would use the exact captured request target/query text and
+its proposal-bundle pin.  All **31/31** current proposal-kind targets have an
+existing finding-source file; **0** have no text anywhere.
+
+### 8.3 The declared target and pathless mission
+
+The sole `:declared` row is `M-wm-08-external-f2`.  It is not an open mission
+record, but `load-declared` has already retained its exact source path and
+sha256:
+`resources/wm/cascade-sources/M-wm-08-external-f2.edn`.  S15 passed only
+declared target IDs, so that known path was lost.  As with a repair finding,
+its source is inline text equal to the exact EDN bytes, identified by the
+loader's sha256.
+
+The pathless mission is `M-ukrns-wp`.  Its substrate entity has name
+`mission|M-ukrns-wp` but no stored `:provenance/path`, status, or retained open
+items.  `substrate-entity->entry` reads the path only from
+`:provenance/path` (`mission_registry.clj:407-431`); it correctly returns nil
+rather than scanning for a similarly named file.  No current
+`M-ukrns-wp.md` exists in the canonical checkouts or under `/home/joe/npt`.
+Mentions in futon7 describe a historical npt mission but do not supply its
+bytes.  This target therefore remains a counted `:target-source-path-absent`
+failure until its authoritative text or provenance path is restored.
+
+### 8.4 Source identity supplied to the reading registry
+
+For a Markdown ticket item the declaration is `(path, item-line)`, and the
+reading digest is the sha256 of the exact containing-section UTF-8 text handed
+to 象 (`wm_task_reading.py:56-91`).  A mission remains `(path, HEAD)` via
+`build_mission_request` (`:94-116`).  For declared sources and repair findings
+the declaration is `(inline-text, source-byte-sha256, source-description)`.
+The inline reading's stable registry identity is the sha256 of the exact UTF-8
+`source_text`, matching the request's `excerpt_sha256`
+(`wm_task_reading.py:56-72` and `target_reading_registry.clj:52-55`); the
+source-file sha256 is retained separately so a reserialization cannot pretend
+to be the same source.
+
+This yields the present source census:
+
+| Field kind | Targets | Resolvable text | No text found |
+|---|---:|---:|---:|
+| ticket | 56 | 56 | 0 |
+| proposal | 31 | 31 | 0 |
+| declared | 1 | 1 | 0 |
+| mission without path | 1 | 0 | 1 |
+
+“Resolvable” means the exact referenced file exists now.  It does not mean a
+reading has been run.  The one unresolved mission remains a counted failure;
+the system must not substitute one of the documents that merely mentions it.
+
+### 8.5 Implementation handoffs
+
+1. **Retain already-read file sources in the field.** Join live ticket records,
+   declared `:files`, and proposal `:finding-source`/bundle provenance into
+   `:target-sources`, with source kind (`:item-section` or `:inline-bytes`),
+   path, optional item line, and byte pin. Bad case: two records claim the same
+   target with different paths or hashes; assembly returns a typed source
+   conflict rather than choosing one by enumeration order.
+2. **Build and register both source forms.** Extend the request builder and
+   registry lookup to accept the declared item-section or byte-pinned inline
+   source, compute `excerpt_sha256` over exactly what 象 sees, and reject a
+   changed file or inline digest. Bad case: editing one byte of a repair
+   finding leaves its prior reading current, or a ticket without a checkbox is
+   assigned a guessed item line.
