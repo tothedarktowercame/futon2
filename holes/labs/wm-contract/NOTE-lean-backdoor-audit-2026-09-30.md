@@ -401,3 +401,192 @@ tests against real parsers/stores, loaded-code identity, and honest external
 participants. A proof over a caller-supplied value proves only a conditional.
 The conformance record is what must establish the antecedent; otherwise the
 same backdoor remains under a stronger theorem.
+
+## Addendum: the bidirectional countable-world requirement
+
+Joe's closing requirement is stronger than “the supplied object satisfies its
+laws.” Every carrier and parameter must denote a real, countable population;
+and every relevant real population must enter the model through a value that
+can change selection, prediction, learning, or action. The census date below
+is 2026-09-30. Counts headed “live supplied” are from the incident and its click
+20 record summary. `unknown` means the record did not expose a recomputable
+count; it must not be read as zero.
+
+### A. Model → world
+
+The polymorphic type names are harmless only after an instantiation record
+gives them the following meanings. `Fintype` says Lean can enumerate the
+chosen carrier; it does not prove that the carrier equals the world population.
+`DecidableEq` and `LinearOrder` are computational instances, not world facts;
+their conformance obligation is that equality/order operates on canonical ids
+without merging or inventing entities.
+
+| Lean input | Required real reading | How to count today | World count | Live supplied | Finding |
+|---|---|---|---:|---:|---|
+| `M` | open mission identities represented by policy keys | canonical open-task census; `PolicyKey.mission` distinct count in selection certificate | 221 open missions | 1 mission in the selected singleton; 195 mission-derived targets reported upstream | **handful / carrier not proved equal** |
+| `P` | pattern identities in the pinned library slice, with provenance to the full library | `find /home/joe/code/futon3/library -name '*.flexiarg'`; group by family; distinct `shown` ids | 1,431 files / 120 families | 2 patterns | **hand-picked handful** |
+| `V` | tokens/criteria that describe the selected task state and observable progress | canonical parser over acceptance items and emitted token vocabulary; record distinct token ids | acceptance count unknown | unknown; two patterns and one quoted want are reported, not a token census | **no auditable carrier reading** |
+| `S` | possible task/model states over those tokens, or the explicitly represented reachable subset | enumerate canonical state ids in the model artifact; compare reachable-state closure | not yet counted | unknown | **no run-record reading** |
+| `O` | closed observable result classes and their values | schema enumeration plus distinct observation ids in record | minimum six agent results: changed, already-satisfied, question, refused, invalid, timeout; model also used five class observations | five class labels in C; author result effectively DONE/REFUSE | **wrong/partial observable population** |
+| `U` / `Action` | executable initial and follow-up action identities over every open task | distinct typed `(target, action-kind, seat/method, digest)` candidates | at least 637 initial task actions before questions/repairs | one head action from one policy | **collapsed to 1** |
+| `PolicyIndex` | extensionally distinct candidate action traces/cascades for the current field | selection certificate policy list, quotient by recorded bounded action trace | construction-dependent; at least one initial action per 637 open tasks | 1 | **collapsed to 1** |
+| cascade `nodes`, `edges`, `precedence` | library patterns and problem-derived relations in one candidate | count ids/edges/order entries in construction receipt | depends on query-time slice | 2 nodes/patterns; edge/order census not stated | **hand-picked input; provenance absent** |
+| policy `menu` / `policies` | exact output of construction over the pinned field/problem/library | count and hash exact constructed family | not yet recomputed; must cover 637 open tasks | 1; historical maximum 24 over 21 targets | **facade witnessed** |
+| target field / `Target` ids | all open missions, excursions and tickets | canonical census by kind and exact id equality | 221 + 373 + 43 = **637** | excursions absent; 195 mission-derived targets added; 3 reached scoring; 1 scored | **population discarded before model** |
+| target `recordedUniverse` | criteria/tokens relevant to that target | record explicit token ids and source spans per target | unknown pending canonical acceptance census | unknown | **no auditable reading** |
+| `Model.initial` / belief `μ` / `q₀` | distribution over represented current task states derived from event history | count state support and replay event prefix | 76 run records available | support/count unknown | **not recomputable from cited record** |
+| transition `interpretation` / `B`, `guard`, theta | outcome-count-derived or pinned interpreted effects for each applicable pattern/action | rows, support sizes, source counts, pattern pins in record | at least every constructed action/pattern | two target-specific interpretations; refusal made no visible next-score change | **handful and no observed update** |
+| observation model `A` | probabilities of typed observable results conditional on state/action | schema rows and sufficient outcome counts | outcome census presently 1 grounded change, 3 author refusals, remainder to classify | class-preference observation used; agent reply contract DONE/REFUSE | **models a different population** |
+| preference `C`, `want`, `evidence`, `zeroed`, `lam`, `mu` | task acceptance criteria, evidence predicates, impossible outcomes, and declared separations | parser spans plus complete numeric table in record | acceptance items unknown | one quoted want; C ranks focus class, not completion | **name/content mismatch** |
+| Cτ schedule `c`, `C`, horizon `T` | preference at every modeled future step through the first meaningful consequence | count schedule rows and non-placeholder rows | 4 steps in live observation model | 4 rows, only step 4 meaningful; steps 1–3 `not-yet-evaluated = 1` | **1 of 4 meaningful** |
+| habit `E`, enactment records, alpha | outcome history by task-kind/action/seat and stated habit patterns | replay 76 records; count distinct cells/events; record alpha | 76 completed run records; outcomes incompletely classified | selection did not read them; singleton makes habit irrelevant | **world history absent from choice** |
+| `F` | observed-data/variational fit per candidate from an identified evidence stream | per-policy finite/source/status fields | one value per candidate when enabled | `not-supplied` (`class-model-unconditioned-at-selection`) | **absent** |
+| precision `gamma` / channel precision / epsilon | confidence derived from counts for each observation channel | channel count/support and numeric derivation in record | unknown | unknown | **no real reading in incident record** |
+| temperature `tau` / options | declared controller temperature derived by the selected mode | one options structure and result per selection | 1 per selection | value not stated in incident; immaterial on singleton | **not auditable here** |
+| `head`, `plan` | actual bounded action sequence each policy denotes | distinct head ids and full action traces through T | at least one initial action per open task | one selected head; complete traces absent | **name only / no extensional census** |
+| `world`, `obs`, `inputsAt`, time `t` | ordered real event stream and model inputs at each transition | event ids and hashes in run record; replay length | 76 records, outcomes not fully classified | current run inputs only; prior refusal did not visibly enter next score | **history not connected** |
+| risk-admissibility and distribution hypotheses | checks over the exact recorded rows, not proof terms supplied independently | recompute nonnegativity, row sums, support, and preferred-zero coverage | one check per recorded row | mathematical rows pass where present | protected mathematically; **provenance still owed** |
+| `CandidateFamily.nonempty/nodup/admissible/scored` | facts about the exact construction output | recompute over exact family | construction-dependent | singleton satisfies all four | **hypotheses too weak for coverage** |
+| positive horizon, habit, temperature, scales | operational lower/upper bounds justified by sensitivity, not merely `> 0` | record values and fixture deltas | one set per run | incompletely recorded in incident | **positivity permits near-zero/extreme facade** |
+| certificate declared nodes/connections/families | exact contract-manifest populations | hash manifest; exact list comparison | stack claims 417; seven record families; connections not counted | not stated for click 20 | **self-declaration risk** |
+| certificate ruling/exclusions | exact authorized ruling and excluded ids | canonical ruling bytes/hash and id count | operator-defined | not applicable/stated | no live reading unless bytes carried |
+
+Two distinctions prevent misleading multiplication of counts. `S` is not
+automatically all `2^|V|` mathematical token sets: the real reading must name
+the reachable state carrier actually represented. Likewise policies are
+counted extensionally by their bounded traces/cascades, not by aliases or ids.
+The construction must state these choices; otherwise the carrier has no world
+interpretation.
+
+### B. World → model
+
+This completes and extends the incident table. “Changes behaviour” means the
+quantity can change a score, posterior, eligibility, belief, or dispatched
+action—not merely appear in an id or receipt.
+
+| Countable world population | Today / live supply | Model entry and effect |
+|---|---|---|
+| Open missions | 221 / 195 mission-derived targets upstream, 1 scored | `PolicyKey.mission` is a name (`CascadePolicySet.lean:13-19`); arbitrary menu membership controls eligibility (`:35-41`). **Present as a name only for admitted keys; no census equality.** |
+| Open excursions | 373 / 0 in decision | **Absent.** No named carrier or field-construction theorem on the selection path. |
+| Open tickets | 43 / enumerated count not stated, none in selected policy | Same arbitrary target/menu route; **not proved covered and behaviorally absent at click 20.** |
+| Closed tasks | unknown / not read by selection | Could enter habit/enactment records (`EnactmentHabit.lean:102-152`) but no closed-task constructor exists. **Absent from current selection.** |
+| Acceptance items on open tasks | unknown / one quoted mission want | `PreferenceSpec.want/evidence` changes utility (`TokenPreference.lean:27-49`) and mission weighting changes C (`MissionPreference.lean:178-205`), but neither is derived from all acceptance items. **Behavioral when supplied; census absent.** |
+| Pattern files and families | 1,431 / 120; live 2 | `Policy.cascade`, firing order, guards, and interpretations change kernels/G (`CascadeEFE.lean:48-99`), but the library is nowhere an input to `cascadePolicySet`. **Two present behaviorally; full population absent.** |
+| Query-time retrieval results and exclusions | count not recorded / prompt-only | No carrier in policy construction. **Absent**, although these are the population needed to explain library coverage. |
+| Derived cascade edges and precedences | unknown / one two-pattern cascade | Edge/preference data changes admissibility and firing (`CascadeEFEPolicies.lean:15-27`; `CascadeEFE.lean:54-56`). **Behavioral, caller-supplied, not census-derived.** |
+| Agent seats | 56 / 3 fixed | No seat carrier appears in the audited selector types or count keys. **Absent** from Lean selection; present operationally outside it. |
+| Completed run records | 76 / not read by selection | Enactment records can change `habitCounts` and prior (`EnactmentHabit.lean:140-152,224-264`). The live selector did not bind the 76-record population. **Model seam exists; runtime absent.** |
+| Typed outcomes of completed runs | 1 grounded change, 3 author refusals, others unclassified / refusal not learned visibly | Observation/belief functions can change trajectory (`ObservationAtMachine.lean:47-52`; `RolloutAtMachine.lean:77-91`), but the audited result vocabulary does not contain the six agent-result constructors. **Generic model seam; real vocabulary absent.** |
+| Refusal dependencies/input digests | at least the click 19 refusal / unchanged reselected click 20 | No audited Lean carrier keys refusal by dependencies/digest. **Absent.** This is why a normalized posterior can repeat it. |
+| Stack claims | 417 / `:mu-post` covers them according to incident | Belief/state carriers can affect rollout and error (`RolloutAtMachine.lean:77-91`; `StatePredictionErrorAtMachine.lean:77-126`). **Behavioral in its separate model, but no theorem connects its census to task/cascade selection.** |
+| Repair findings | 153 / not used | Certificate states can name gaps (`CertificateStates.lean:27-43,74-76`) but selection has no repair-finding population or learned effect. **Present as possible names only; behaviorally absent.** |
+| Horizon steps | 4 / 4 rows, 1 meaningful | Schedule `c : Fin T → ...` changes score (`CascadeEFEPolicies.lean:20-27`) and `T` changes rollout (`RolloutAtMachine.lean:77-91,219-224`). **Behavioral but degenerately supplied.** |
+| Observable result kinds | minimum 6 / effectively 2 for author, 5 unrelated class labels in C | `O` and observation kernel change prediction/G (`CascadeEFE.lean:58-62,127-145`). **Behavioral carrier instantiated to the wrong things.** |
+| Policy/action alternatives | at least 637 initial actions; cascade count construction-dependent / 1 | Lists directly determine posterior and action (`ObservationAtMachine.lean:30-42`; `ActionAtMachine.lean:88-98`). **Behavioral but catastrophically under-covered.** |
+| Preference criteria and evidence predicates | unknown / one want, class preference | Preference changes risk/G (`CascadeEFE.lean:130-145`), but completion/progress criteria are absent. **Behavioral surrogate, real population absent.** |
+| Reviewer/author jobs and replies | counts in 76 records, not fully classified / one repeated refusal | Not represented as a seat/result population in these Lean modules. **Absent** from selection model and only indirectly named by external records. |
+| Record families | seven required / unknown completeness at click 20 | Exact family ordering affects `CensusComplete` (`CertificateStates.lean:66-117`) but not selection. **Present and checkable, not behavior-changing.** |
+
+Additional countable populations missing from the incident's first cut are:
+query-time retrieval candidates and exclusions; extensionally distinct policy
+traces; typed agent-result kinds; refusal dependency/digest keys; and
+construction/observation sufficient-statistic cells. These must be counted
+because they determine whether hundreds of names become genuine alternatives
+and whether outcomes can change the next choice.
+
+### C. Lean form of census and meaningful coverage
+
+`CertificateStates.CensusComplete` supplies the structural precedent: compare
+the ids in the model artifact with an independently declared universe, require
+no duplicates, and require exact order/set correspondence
+(`CertificateStates.lean:99-117`). For selection the declaration must not come
+from the same constructor being checked. In words, the required types and
+predicates are:
+
+1. `WorldCensus`: pinned lists of open task ids by kind, library pattern ids and
+   families, seat ids, prior run/event ids, closed task ids, repair ids,
+   criterion ids per task, and the closed result vocabulary.
+2. `ModelCensus`: the model carriers and provenance maps actually supplied:
+   targets, actions, policy keys/traces, patterns/edges, seats/count cells,
+   observation values, criterion tokens, event ids, and horizon rows.
+3. `CensusComplete world model`: every list is duplicate-free; every model id
+   maps to exactly one world id; every required world id maps to at least one
+   model item or a typed, authorized exclusion; and no model item is extra.
+4. `MeaningfulAt x`: removing or varying model item `x` changes a reachable
+   transition, observation distribution, preference comparison, learned
+   statistic, posterior, or action—or `x` has a typed proof that it is
+   irrelevant to this run under a declared rule. Merely appearing in
+   `PolicyKey.mission`, a certificate description, or provenance string does
+   not satisfy this.
+5. `CoverageComplete`: `CensusComplete` plus `MeaningfulAt` for every mapped
+   item and a non-collapse clause: if two world items have distinguishable
+   authorized consequences within the horizon, their model images cannot be
+   extensionally identical.
+6. `SelectionConformant`: policies are exactly `constructPolicies` over the
+   covered model, C and A are constructed from the covered criteria/result
+   vocabulary, and belief/habit/counts are folds over the covered event prefix.
+
+Required negative controls instantiate otherwise lawful models and show
+`CoverageComplete` fails: 637 tasks mapped to one action; 1,431 patterns mapped
+to two hand-picked patterns without exclusions; 56 seats mapped to three fixed
+seats; 76 run records mapped to an empty event prefix; six result kinds mapped
+to DONE/REFUSE; four horizon rows with three behaviorally constant placeholder
+rows; and two differently named policies with equal traces/kernels.
+
+The run record must permit independent recomputation. It therefore carries:
+
+- canonical snapshot identity and hashes for the three open-task stores,
+  closed-task set, pattern library/family manifest, seat roster, run/event
+  prefix, repair findings, and contract/result schema;
+- exact source census lists, not counts alone;
+- every model census list and both directions of the provenance mapping;
+- typed exclusions with rule ids, evidence, and affected source hashes;
+- construction query, ranked retrieval slice, parameters/version, cascades,
+  edges, precedence, bounded policy traces, and extensional equivalence classes;
+- complete A, B, Cτ, belief, G, F, habit/count, precision, temperature, and
+  posterior inputs and outputs—not only selected values;
+- before/after sufficient statistics for every consumed event; and
+- the checker version, source digest, per-row census result, first mismatch,
+  and overall `CoverageComplete` result.
+
+Counts are a report summary; exact id equality and recomputation are the
+acceptance test. A record that says `637` but supplies one id 637 times fails
+Nodup and exact-image checks.
+
+### D. Critical parameters for every-run alerting
+
+The alert addressed to Joe must head every run report with the following
+values and the independently counted denominators. Alert and stop before
+claiming a selection if any equality/coverage check fails:
+
+1. Open tasks by kind and total; enumerated targets by kind; targets with at
+   least one initial action; targets reaching scoring; targets scored.
+2. Pattern-library files and families; retrieved slice size; typed exclusions;
+   patterns entering construction; patterns in the selected cascade.
+3. Constructed policies, distinct policy keys, extensional policy-trace
+   classes, distinct head actions, and posterior effective support. A support
+   of one is always prominently reported; it is acceptable only with an
+   independently checked proof that the covered world offers exactly one
+   distinguishable authorized action—not because admission removed the rest.
+4. Seat roster by type; eligible seats for the selected action; seats included
+   in learned behavior counts; selected author/reviewer and their distinction.
+5. Historical events available, events folded, outcome counts by the closed
+   result vocabulary, and before/after count-state digests. Report unchanged
+   refusal eligibility as a critical failure.
+6. Acceptance criteria available for the selected task, criteria represented
+   in C, Cτ horizon rows, non-placeholder rows, and first reward-discriminating
+   step versus chosen horizon.
+7. Observation result kinds in the contract versus modeled rows; transition
+   rows effective/informative/typed-degenerate; distinct observation rows.
+8. Per-policy G terms, F status/source, habit mass, precision, temperature,
+   posterior mass, and any finite-term exclusions.
+9. Belief support size and event-prefix digest; repair findings available and
+   represented/actionable; certificate declared versus manifest counts.
+10. `CensusComplete`, `CoverageComplete`, construction-conformance, and loaded-
+    code/source-digest status, with the first failing population named.
+
+The incident's eight critical parameters are therefore retained and expanded,
+not replaced. The alert watches ratios and provenance as well as raw counts:
+`1 policy` is diagnostic because it is `1 / many covered alternatives`, while
+`1 policy` after a proved exact census of a genuinely one-action world would
+not be a facade.
