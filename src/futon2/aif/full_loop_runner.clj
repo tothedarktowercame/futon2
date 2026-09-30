@@ -323,7 +323,9 @@
 (defn emit-phase!
   "Emit one line-oriented phase event to stdout and the durable operator log."
   [opts context event]
-  (let [record (merge {:at (str (Instant/now))} context event)
+  ;; the fresh timestamp goes last: a context carrying an earlier :at made
+  ;; end lines report their start time (click 13, 2026-09-30)
+  (let [record (assoc (merge context event) :at (str (Instant/now)))
         _ (report-wm-phase! opts context event)
         _ (tripwire/observe! opts record)
         line (pr-str record)]
