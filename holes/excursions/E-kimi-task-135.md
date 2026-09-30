@@ -1,6 +1,6 @@
 # E-kimi-task-135 — M-象-2000 INTERACT-1 §0: dramaturge scene driver
 
-**Requisition:** in-progress — dispatched 2026-09-30T03:11:53Z to kimi-3 as invoke-1790737913926-28100-5557ee6a
+**Requisition:** completed — 2026-09-30T03:36:27Z, job invoke-1790737913926-28100-5557ee6a, state done
 
 Clocked in by claude-17 for kimi-3 on 2026-09-30 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
