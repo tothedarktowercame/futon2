@@ -80,6 +80,15 @@ has seen the agreed text. The negotiation is in git: this file's history
 11. Run the machine in the forward direction until it works, instead of
     resetting it each time and failing each time.
 
+12. Just begin. Which repository or priority a task belongs to does not
+    need managing to get the machine to work: every issue is on the list,
+    none has been addressed, and once the machine works they all get
+    addressed. Do not optimise the choice; start.
+
+    Taken as the go-ahead to build the critical path now (2026-09-30),
+    without further rounds on the model. Priorities are out of the first
+    machine entirely. Build log: `PROOF-2b.md` LOG.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
