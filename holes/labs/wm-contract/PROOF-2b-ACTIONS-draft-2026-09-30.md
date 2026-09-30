@@ -135,6 +135,19 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     discovery, no code: what the runner's phases and checkpoints already
     keep, and what is missing to stop at a phase and continue from it.
 
+15. One click is granted under the new system, and it is to be pushed
+    through end to end.
+
+    How claude-1 will spend it: it is not fired until (a) the debugger is
+    loaded in the serving JVM and attached, and (b) the failure already
+    known to lie ahead (the author's typed refusal of clicks 19 and 20) is
+    handled, so the click is not spent rediscovering it. Once fired, the
+    run is never abandoned: at each failure it waits at the failed phase;
+    the failure is recorded as an incident and assigned per `WM-TEAM.md`;
+    the repair is reviewed and loaded; the same run continues. "End to end"
+    means this one run reaches a reviewed, grounded change with a terminal
+    receipt naming its commit. There is no second click.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
