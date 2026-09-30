@@ -80,7 +80,9 @@ CHECK_FORM = r"""
 (do (require '[futon2.aif.mission-registry :as reg] '[futon2.aif.mission-hole-wants :as mhw]
              '[cheshire.core :as json])
     (let [ids (set %s)
-          ms (filter #(ids (str (:id %%))) (:missions (reg/load-missions)))]
+          ;; the FILE scan: the zero-arg read is the futon1b store, which a
+          ;; watcher updates some time after the commit lands
+          ms (filter #(ids (str (:id %%))) (:missions (reg/load-missions reg/default-code-root)))]
       (json/generate-string
        (for [m ms]
          {:id (str (:id m)) :status-line (:status-line m)
