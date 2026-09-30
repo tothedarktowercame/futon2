@@ -66,6 +66,7 @@ def request_base(path, source, source_start, target):
             "target_id": target or path.stem,
             "file_path": str(path),
             "content_sha256": hashlib.sha256(raw).hexdigest(),
+            "excerpt_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
             "section": {"source_start": source_start,
                         "source_end": source_start + len(source)},
         },

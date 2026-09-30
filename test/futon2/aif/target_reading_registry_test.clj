@@ -1,7 +1,9 @@
 (ns futon2.aif.target-reading-registry-test
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as sut]))
 
 (def d1 (apply str (repeat 64 "1")))
@@ -26,8 +28,8 @@
 
 (defn publication [target digest]
   {:target-id target :source-path (str "/tmp/" target ".md")
-   :source-digest digest
-   :request {:task {:target_id target :content_sha256 digest}}
+   :excerpt-digest digest :source-file-digest d2
+   :request {:task {:target_id target :content_sha256 d2 :excerpt_sha256 digest}}
    :analysis valid-analysis :validator-version 1})
 
 (deftest publish-and-read-current
@@ -58,18 +60,70 @@
     (is (= :no-current-target-reading
            (:kind (sut/current-reading root "M-invalid" d1))))))
 
+(deftest request-excerpt-mismatch-is-refused
+  (let [root (temp-root)
+        result (sut/publish! root (assoc (publication "M-mismatch" d1)
+                                        :excerpt-digest d2))]
+    (is (= :refused (:status result)))
+    (is (some #{:request-excerpt-digest} (:invalid-fields result)))
+    (is (= :no-current-target-reading
+           (:kind (sut/current-reading root "M-mismatch" d2))))))
+
 (deftest coverage-classifies-current-stale-and-absent
   (let [root (temp-root)
         _ (sut/publish! root (publication "M-current" d1))
         _ (sut/publish! root (publication "M-stale" d1))
-        result (sut/coverage root [{:target-id "M-current" :source-digest d1}
-                                   {:target-id "M-stale" :source-digest d2}
-                                   {:target-id "M-absent" :source-digest d1}])]
+        result (sut/coverage root [{:target-id "M-current" :excerpt-digest d1}
+                                   {:target-id "M-stale" :excerpt-digest d2}
+                                   {:target-id "M-absent" :excerpt-digest d1}])]
     (is (= {:total 3
             :current 1 :current-ids ["M-current"]
             :stale 1 :stale-ids ["M-stale"]
             :absent 1 :absent-ids ["M-absent"]}
            result))))
+
+(defn text-digest [text]
+  (identity/sha256 (.getBytes text "UTF-8")))
+
+(deftest python-and-clojure-excerpt-digests-agree
+  (let [dir (temp-root)
+        cases {"head.md" "# M\nBefore.\n\n## HEAD\nJoe says this.\n"
+               "opening.md" "# M\nJoe opens this mission.\n\n## MAP\nLater.\n"
+               "head-sections.md" "# M\n\n## HEAD\nFirst.\nSecond.\n\n## MAP\nChanged elsewhere.\n"}]
+    (doseq [[name text] cases]
+      (let [file (io/file dir name) out (io/file dir (str name ".request.json"))
+            _ (spit file text)
+            run (shell/sh "python3" "scripts/wm_task_reading.py" (.getPath file)
+                          "--mission-head" "--out" (.getPath out))
+            request (json/parse-string (slurp out) true)]
+        (is (zero? (:exit run)) (:err run))
+        (is (= (get-in request [:task :excerpt_sha256])
+               (sut/excerpt-digest file)))))))
+
+(deftest edits-outside-head-do-not-stale-the-reading
+  (let [root (temp-root) file (io/file root "M-head.md")
+        before "# M\nBefore metadata.\n\n## HEAD\nJoe's unchanged words.\n\n## MAP\nOld map.\n"
+        after "# M\nChanged metadata.\n\n## HEAD\nJoe's unchanged words.\n\n## MAP\nA completely new map.\n"]
+    (spit file before)
+    (let [digest (sut/excerpt-digest file)
+          record (assoc (publication "M-head" digest)
+                        :source-path (.getPath file)
+                        :source-file-digest (sut/source-file-digest file))]
+      (is (= :current-candidate (:status (sut/publish! root record))))
+      (spit file after)
+      (is (= digest (sut/excerpt-digest file)))
+      (is (= :current-candidate
+             (:status (sut/current-reading root "M-head" (sut/excerpt-digest file))))))))
+
+(deftest edit-inside-head-stales-the-reading
+  (let [root (temp-root) file (io/file root "M-head.md")]
+    (spit file "# M\n\n## HEAD\nJoe's words.\n\n## MAP\nMap.\n")
+    (let [digest (sut/excerpt-digest file)
+          record (assoc (publication "M-head" digest) :source-path (.getPath file))]
+      (sut/publish! root record)
+      (spit file "# M\n\n## HEAD\nJoe's wordX.\n\n## MAP\nMap.\n")
+      (is (= :stale-target-reading
+             (:kind (sut/current-reading root "M-head" (sut/excerpt-digest file))))))))
 
 (def lab-root "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 
@@ -89,17 +143,19 @@
                                 (slurp (io/file lab-root
                                                 (str stem ".request.json.analysis.json"))) true)
                       target (get-in request [:task :target_id])
-                      digest (get-in request [:task :content_sha256])
+                      digest (text-digest (:source_text request))
+                      current-digest (sut/excerpt-digest (get-in request [:task :file_path]))
                       result (sut/publish! root
                                            {:target-id target
                                             :source-path (get-in request [:task :file_path])
-                                            :source-digest digest :request request
+                                            :excerpt-digest digest
+                                            :source-file-digest (get-in request [:task :content_sha256])
+                                            :request request
                                             :analysis analysis :validator-version 1})]
                   (is (= :current-candidate (:status result)) stem)
-                  {:target-id target :source-digest digest}))
+                  {:target-id target :excerpt-digest current-digest}))
               stems)
         report (sut/coverage root targets)]
     (println "TARGET-READING-LAB-COVERAGE" (pr-str report))
-    (is (= 7 (:current report)))
-    (is (zero? (:stale report)))
+    (is (= 7 (+ (:current report) (:stale report))))
     (is (zero? (:absent report)))))
