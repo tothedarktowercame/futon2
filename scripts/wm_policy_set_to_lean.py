@@ -69,9 +69,17 @@ theorem real_reading_reported_count : (allReadingCascades realReading).length = 
   have ho := congrArg List.length real_overlap_counts
   simpa [allReadingCascades] using congrArg₂ (· + ·) ha ho
 
+theorem real_reading_structurally_distinct_count :
+    (structuralDedup (allReadingCascades realReading)).length = 1 := by
+  simp +decide [allReadingCascades, readingCascades, readingFactsB, rawReadingCascades,
+    realReading, realLibrary, supportedUnits, fragmentUnitsAux, unitsAt, unitsAtAux,
+    alternatives, cascadeOfUnits?, structuralDedup, structurallyDifferent,
+    Cascade.structuralIdentity, directedEdges, adjacentFragments, overlapPairs, readingFragment]
+
 #print axioms real_alternatives_counts
 #print axioms real_overlap_counts
 #print axioms real_reading_reported_count
+#print axioms real_reading_structurally_distinct_count
 
 end DarkTower.WarMachine.CascadeSpecExamples
 '''
