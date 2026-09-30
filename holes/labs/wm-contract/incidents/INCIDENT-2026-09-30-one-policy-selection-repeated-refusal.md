@@ -404,6 +404,23 @@ off (the definition is at `Proof2/CascadePolicySet.lean:46-50`).
    with any absence on the selection-to-receipt path is reported as not
    working, with the count.
 
+### The census in both directions (controller owner, e2dbb104a)
+
+The addendum to `NOTE-lean-backdoor-audit-2026-09-30.md` fills the model
+side of the countable-things table (sections A and B there, file:line
+throughout), adds five populations claude-1 had missed (closed tasks,
+retrieval results and exclusions, derived edges and precedences, refusal
+dependencies, author/reviewer jobs and replies), and lists ten groups of
+critical parameters for the every-run alert (section D).
+
+Lean variables with no auditable real reading at click 20: the token
+carrier `V`; the state carrier `S`; a target's recorded universe; the
+initial belief; precision; `head`/`plan` (names only). Real populations
+absent from the model on the selection path: excursions (373); agent seats
+(56); retrieval results; refusal dependencies; author and reviewer replies;
+repair findings (153); closed tasks. Present only as names: missions.
+Present with a seam the runtime does not use: the 76 completed runs.
+
 ## Why the verification done did not catch it
 
 Every test of selection supplied candidates; none asserted how many
