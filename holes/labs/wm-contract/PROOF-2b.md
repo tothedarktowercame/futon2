@@ -83,6 +83,10 @@ enumerated at HEAD − decision's set; `extra` = decision's set − enumerated.
 equal, on every click of a campaign. Set equality, not count equality.
 *Today:* not recorded. By a read-only census, 221 missions + 373 excursions +
 43 tickets are live; the decision enumerated 264 (no excursions) and admitted 5.
+*Open vs closed* (Joe, 2026-09-30): a task is open unless its file says it
+is closed, cancelled, superseded or abandoned. A missing or unreadable
+status line means open, not unknown-and-excluded. A draft is open. Phase
+words ("DERIVE-1 DONE", "v0 complete") do not close a task.
 
 **RQ-2. Every click ends in an action or a routed failure.** Joe: "Imagine
 if YOU decided to abstain from work when I asked."
@@ -98,11 +102,12 @@ FUTON stack."
 *Metric:* every candidate records `:G {:risk :ambiguity :information-gain
 :novelty :total}`, and the total equals the declared combination within
 1e-12. For every target whose knowledge state is `:unknown`, count the
-candidate gathering actions with information gain > 0. A paired control
+candidate read-or-check actions (`read-criteria`, `observe`) with
+information gain > 0. A paired control
 holds risk, ambiguity and habit equal and compares an unread target with a
 known one.
 *Threshold:* every click, all candidates decomposed and every unknown target
-with at least one gathering action with IG > 0. The paired control, once per
+with at least one read-or-check action with IG > 0. The paired control, once per
 release: the unread target has the lower G.
 *Today:* no candidate decomposition on a click that chose nothing; no
 knowledge-state field.
@@ -199,7 +204,8 @@ decision.
 
 For each task, the action that moves its knowledge state on:
 `read-criteria` (read the file, write its wants and facts: this creates the
-universe the admission gate used to demand), `ask-interpretation`, `observe`
+universe the admission gate used to demand; the seat interprets the task
+as it reads it), `observe`
 (run the locator checks), `construct-and-enact` (the existing cascade path),
 `close`. For each A- target, `run`. `write-algorithm` is one of the A-
 targets. Every action runs as an Agency job with author ≠ reviewer where it
@@ -260,6 +266,18 @@ shows its dispatch within 5 minutes and a terminal judgment.
 
 ### ⟨1⟩ The machine always acts (days)
 
+⟨1⟩0. The status classifier follows the open/closed rule under RQ-1.
+Today (`mission_registry.clj` `live-mission?`, reused by
+`live-excursion?`): of 385 excursions, 326 classify `:unknown`. 231 of
+those have no status line; 95 have one the parser does not read, mostly
+bold or mid-line (`**Date:** … · **Status:** ✅ **CLOSED**`). At least
+E-KL-refinements, E-have-want-pairs and E-precision-over-policies say
+CLOSED there and are counted live. `:draft` is counted closed.
+ACCEPT: planted files, one each: bold CLOSED, mid-line CANCELLED, SUPERSEDED,
+no status line, draft, "DERIVE-1 DONE". The first three classify closed,
+the last three open. The census count of open excursions is recorded with
+its sha.
+
 ⟨1⟩1. One enumeration: the decision's set and the target-field report's set
 are the same (missions, tickets, excursions, plus A- targets).
 ACCEPT: RQ-1 on one live click: persisted ID sets and HEAD sha, `missing =
@@ -287,7 +305,7 @@ routed per RQ-9; across the next campaign, every click id has exactly one
 terminal receipt (RQ-2).
 
 With a crude G at the end of ⟨1⟩ (the existing risk term plus a constant
-bonus for gathering actions), RQ-1, RQ-2, RQ-6, RQ-8 and RQ-9 can be met on
+bonus for read-or-check actions), RQ-1, RQ-2, RQ-6, RQ-8 and RQ-9 can be met on
 a campaign. That is the first result Joe sees.
 
 ### ⟨2⟩ The self-model (weeks)
@@ -344,17 +362,25 @@ they are.
 
 ---
 
-## Open questions for Joe
+## Answered questions
 
-1. Excursions: all 373 live ones in the field from ⟨1⟩1, or only those with
-   a status line (as Clause T required of missions)?
-2. `read-criteria` writes cascade sources that the machine then acts on. Is
-   a reviewed commit enough authority for that, or should a new task's
-   first interpretation come to you?
-3. Budget: ⟨1⟩ spends clicks on gathering actions that change documents, not
-   code. Do those count against the ordinary click budget as clicks do now?
+1. Excursions (Joe, 2026-09-30): all open excursions are in the field
+   unless Joe says otherwise; closed or cancelled is "otherwise". So open
+   vs closed has to be read correctly: the rule is under RQ-1, the fix
+   is ⟨1⟩0.
+2. Interpretation (Joe, 2026-09-30): no external approval. The machine
+   reads a task and works on it by its own interpretation. `read-criteria`
+   commits go through the same author ≠ reviewer path as any click commit;
+   nothing comes to Joe. `ask-interpretation` is dropped from the action
+   list: an agent seat reads and interprets as part of `read-criteria`.
+3. Budget (settled by claude-1, since the question used a term Joe had not
+   seen): "gathering" meant a click whose chosen action reads a task or
+   runs a check instead of changing code. Every click counts once against
+   the budget, whatever its action.
 
 ## LOG
+
+LOG: 2026-09-30 (claude-1). Joe answered the three open questions: all open excursions are in the field; no external approval of interpretations; the budget question used an undefined term, now replaced by "read-or-check action", and every click counts once. Added the open/closed rule under RQ-1 and step ⟨1⟩0, because a read-only census in the serving JVM found 326 of 385 excursions classed `:unknown`: 95 of them have a status line the parser misses, some of which say CLOSED, and `:draft` is treated as closed.
 
 LOG: 2026-09-29 (claude-1). Requirements and ACCEPT lines rewritten to the measurable versions in codex-proof2a's note (3631f87a0): RQ-4 and RQ-7 reworded (their old nouns named no observable); the terminal receipt added as ⟨0⟩0, since five requirements join on it; set equality, not count equality, for the field; campaign = 20 clicks. Checked: the note's binding tally (6 today: 5 abstained, 1 build-failed) matches claude-1's own count.
 
