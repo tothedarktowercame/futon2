@@ -107,6 +107,23 @@ has seen the agreed text. The negotiation is in git: this file's history
     the binding of effects to the existing runner's phases, deleting the
     old control flow phase by phase (Plan C, C4), not new parallel code.
 
+14. Delete the thin path; it is dangerous. Each failure of the REAL machine
+    is a critical incident, and there are enough tools to address it. What
+    is needed is the debugger: not a thin path, cheat codes, optimisations
+    or anything else. After months of work, IT has to work.
+
+    Done 2026-09-30: handoff F1 cancelled (invoke-…28830, operator-cancelled),
+    `wm/forward.clj` and its test deleted uncommitted. The sections "The
+    small model" and "Critical path" below are NOT a build plan: no separate
+    chooser, controller or path is built from them. The work is:
+
+    **The debugger on the real machine.** Run the regular click; at a
+    failure it stops at the failed phase with its state kept and
+    inspectable; the failure is handled as an incident (ruling 6) with the
+    existing tools; the same run continues from that phase. First step is
+    discovery, no code: what the runner's phases and checkpoints already
+    keep, and what is missing to stop at a phase and continue from it.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
