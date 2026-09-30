@@ -1,6 +1,7 @@
 (ns futon2.aif.wm.construction-inputs
   "Construction inputs shared by the report and flight assembly."
   (:require [futon2.aif.cascade-problems :as cascade-problems]
+            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.want-interpretation :as want-interpretation]))
 
 (defn flight-assembly-input
@@ -38,9 +39,35 @@
   today's mission files. Admission refusals remain on the same assembly."
   [{:keys [sources] :as input}]
   (assoc (cascade-problems/assemble input)
+         :target-sources (vec (or (:target-sources input) []))
          :mission-hole-coverage
          (or (:mission-hole-coverage sources)
              {:status :absent :reason :source-coverage-not-supplied})))
+
+(defn target-source-declarations
+  "Describe the already-enumerated TARGETS from the records which enumerated
+  them. Mission paths are copied from LOADED-MISSIONS. No other source kind
+  guesses a path from its target id. The category priority matches the field's
+  enumeration order: substrate mission/ticket, declared source, then proposal."
+  [targets {:keys [loaded-missions declared-targets proposal-targets ticket-targets]}]
+  (let [missions (into {} (map (juxt :id identity)
+                               (mission-registry/open-missions loaded-missions)))
+        declared (set declared-targets)
+        proposals (set proposal-targets)
+        tickets (set ticket-targets)]
+    (mapv (fn [target]
+            (let [mission (get missions target)
+                  kind (cond mission :mission
+                             (tickets target) :ticket
+                             (declared target) :declared
+                             (proposals target) :proposal
+                             :else :unknown)
+                  path (when (= :mission kind) (:path mission))]
+              {:target-id target
+               :source-kind kind
+               :source-path path
+               :source-absent (when-not path :target-source-path-absent)}))
+          targets)))
 
 (def construction-move-cost
   {:value 0

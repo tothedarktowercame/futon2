@@ -10,6 +10,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (defn- assemble*
@@ -75,6 +76,42 @@
    :horizon-steps 3
    :beta-by-context {:tick-1 {:beta 1}}
    :context-of (fn [_] :tick-1)})
+
+(deftest assembled-field-carries-one-source-row-per-target
+  (let [m1 "M-one"
+        m2 "M-two"
+        ticket "T-three"
+        targets [m1 m2 ticket]
+        rows (construction-inputs/target-source-declarations
+              targets
+              {:loaded-missions {:missions [{:id m1 :path "/repo/M-one.md"}
+                                             {:id m2 :path "/repo/M-two.md"}]}
+               :ticket-targets [ticket]})
+        assembled (construction-inputs/assemble-cascade-problems
+                   {:targets targets :target-sources rows
+                    :sources {:horizon-steps 1}})
+        landed (concat (:problems assembled) (:refusals assembled))]
+    (is (= [{:target-id m1 :source-kind :mission :source-path "/repo/M-one.md"
+             :source-absent nil}
+            {:target-id m2 :source-kind :mission :source-path "/repo/M-two.md"
+             :source-absent nil}
+            {:target-id ticket :source-kind :ticket :source-path nil
+             :source-absent :target-source-path-absent}]
+           (:target-sources assembled)))
+    (is (= (frequencies targets)
+           (frequencies (map :target-id (:target-sources assembled))))
+        "every enumerated target has exactly one source row")
+    (is (= (set (map :target landed))
+           (set (map :target-id (:target-sources assembled))))
+        "problem and refusal targets are covered by the source declaration")))
+
+(deftest mission-source-without-path-is-a-typed-absence
+  ;; Bad case: the mission id resembles a file name, but no filename
+  ;; convention is authority for a source path.
+  (is (= [{:target-id "M-no-path" :source-kind :mission :source-path nil
+           :source-absent :target-source-path-absent}]
+         (construction-inputs/target-source-declarations
+          ["M-no-path"] {:loaded-missions {:missions [{:id "M-no-path"}]}}))))
 
 (defn- kinds
   [result]

@@ -6534,6 +6534,7 @@
         ;; cascade's targets take this doc (they were two reads of the same
         ;; registry, one substrate read apart, in this let)
         loaded-missions (mission-registry/load-missions)
+        loaded-tickets (mission-registry/load-tickets)
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
                             (mission-hole-wants/merge-into-sources
@@ -6551,21 +6552,25 @@
         ticket-queue-declaration
         (ticket-queue/validate! (if (contains? judge-opts :ticket-queue)
                                   (:ticket-queue judge-opts) (ticket-queue/read-declaration)))
-        raw-cascade-assembled
-        (assemble-cascade-problems-with-published
-         (or (:machine-interpretations-dir judge-opts) want-interpretation/default-store)
-         ;; The targets are the substrate's missions AND every target that has
-         ;; a declared source. A declared target was previously invisible
-         ;; unless it also existed as a substrate mission, so a fully located
-         ;; target with an unmet want could not be considered at all -- the
-         ;; machine ignored work it had been given because a registry did not
-         ;; list it.
-         (flight-assembly-input
-          (:flight judge-opts)
-         {:targets (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions)
-                                          (keys (:universes cascade-sources))
-                                          (map :target (:proposals cascade-proposal-supply))
-                                          (map :ticket (:entries ticket-queue-declaration)))))
+        substrate-tickets (map :id (filter mission-registry/live-ticket?
+                                           (:tickets loaded-tickets)))
+        cascade-targets
+        (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets)
+                               (keys (:universes cascade-sources))
+                               (map :target (:proposals cascade-proposal-supply))
+                               (map :ticket (:entries ticket-queue-declaration)))))
+        flight-cascade-assembly-input
+        (flight-assembly-input
+         (:flight judge-opts)
+         {:targets cascade-targets
+          :target-sources
+          (construction-inputs/target-source-declarations
+           cascade-targets
+           {:loaded-missions loaded-missions
+            :declared-targets (keys (:universes cascade-sources))
+            :proposal-targets (map :target (:proposals cascade-proposal-supply))
+            :ticket-targets (concat substrate-tickets
+                                    (map :ticket (:entries ticket-queue-declaration)))})
           ;; the horizon is resolved after the flight's input and the
           ;; published interpretations are merged (resolve-cascade-horizon)
           :sources (cond-> cascade-sources
@@ -6584,7 +6589,24 @@
                              :budget (:value (construction-budget cascade-sources))
                              :move-cost (:value construction-move-cost)
                              :evaluate-g (fn [problem candidate]
-                                           (constructed-candidate-g problem candidate judge-opts))}))}))
+                                           (constructed-candidate-g problem candidate judge-opts))}))})
+        cascade-assembly-input
+        ;; A flight narrows :targets. Its declaration must narrow with it so
+        ;; every enumerated target still has exactly one source row.
+        (update flight-cascade-assembly-input :target-sources
+                (fn [rows]
+                  (let [targets (set (:targets flight-cascade-assembly-input))]
+                    (filterv #(targets (:target-id %)) rows))))
+        raw-cascade-assembled
+        (assemble-cascade-problems-with-published
+         (or (:machine-interpretations-dir judge-opts) want-interpretation/default-store)
+         ;; The targets are the substrate's missions AND every target that has
+         ;; a declared source. A declared target was previously invisible
+         ;; unless it also existed as a substrate mission, so a fully located
+         ;; target with an unmet want could not be considered at all -- the
+         ;; machine ignored work it had been given because a registry did not
+         ;; list it.
+         cascade-assembly-input)
         ;; The tick-level horizon, common to the compared family, recorded
         ;; on the judgement (selection and abstention) with its authority.
         cascade-horizon (:cascade-horizon raw-cascade-assembled)

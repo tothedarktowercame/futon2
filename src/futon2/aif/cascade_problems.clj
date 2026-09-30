@@ -43,11 +43,13 @@
   enumeration itself is the tick's existing substrate read. The one-arg
   arity takes the mission registry doc already loaded (WM-MISSION-READ-ONCE-I:
   the selection reads it once), as open-missions' one-arg arity does."
-  ([] (substrate-targets (registry/load-missions)))
+  ([] (substrate-targets (registry/load-missions) (registry/load-tickets)))
   ([loaded-missions]
+   (substrate-targets loaded-missions (registry/load-tickets)))
+  ([loaded-missions loaded-tickets]
    (vec (concat (map :id (registry/open-missions loaded-missions))
                 (map :id (filter registry/live-ticket?
-                                 (:tickets (registry/load-tickets))))))))
+                                 (:tickets loaded-tickets)))))))
 
 (defn- refusal
   [target kind missing & [more]]
