@@ -80,6 +80,61 @@ never reaches the constructor or the seat.
 
 All other findings below are downstream of this one.
 
+### Did the specification record the principle? (Joe's question, 2026-09-30)
+
+Joe: "the specification either did not write down what I said should be in
+there, or it was changed after the fact."
+
+Read: `SPEC-cascade-policy-semantics-2026-09-15.md` (eight commits, all
+2026-09-15) and the Lean policy-set modules.
+
+- **The principle IS written down.** §1: "Joe's operator statement requires
+  concretely constructed cascades over real patterns, their links and
+  mission usage ... not a hand-picked graph". Stage 0 (commit 0fe3ed681):
+  "`Π_k = Construct(x, c_k, retained evidence)` is a finite candidate family
+  at a construction step ... A finite list is a computational snapshot, not
+  permission to pin the same authored subset across problems. Constructor
+  coverage/termination is an obligation; an empty search result is not
+  proof that no better extension exists." The header says Joe's Stage-0
+  statements override §4 where they conflict.
+- **The same document also gets the order wrong.** §4, "resolutions from
+  claude-20" (commit 8769a52e0): "No interpretation for a firing pattern
+  means a policy-hole: scoring reports typed missing input, never an
+  invented B; absent interpretations must be supplied even for partial
+  constructions under Stage 0." That makes the interpretation an input
+  scoring cannot do without, so a cascade with an uninterpreted pattern has
+  no G and cannot be selected. Joe's order is select, then interpret.
+- **The code then went further than either.** The spec says a missing
+  interpretation is reported by scoring as a hole in that policy. The code
+  (2026-09-17 hand-written per-target sources; 2026-09-24 interpretation
+  requests) uses it as an admission gate before construction: no
+  interpretation, no pattern in the pool, no target in the field. That is
+  not in the specification. The header of the spec also says "No
+  Lean/runtime change is authorized or claimed by this note."
+- **The Lean does not state the principle at all.** `cascadePolicySet
+  (menu : List (PolicyKey M P))` takes the menu of policies as given; nothing
+  says where the menu comes from or that it is derived per problem from the
+  library. `MachinePolicySet.lean` is marked NON-CONFORMANT in its own
+  header (2026-09-17). Interpretations appear as `ObservedInterpretation`
+  with `published` and `absent` cases. So "meets the specification" could
+  be true of the Lean while the machine selects among one policy: the Lean
+  proves properties of G over whatever policy set it is handed.
+
+So: written down in the spec, contradicted by a later-recorded resolution in
+the same spec, absent from the Lean, and overridden in the code.
+
+### The order of operations (Joe, 2026-09-30)
+
+"Go ahead and interpret a pattern, after you select it. Don't gate
+selection on there already being an interpretation. Look at how M-象-cascade
+works." M-象-cascade (`futon3c/holes/missions/M-象-cascade.md`): a continually
+maintained cascade that coalesces and searches hierarchically, so common
+patterns are found quickly and rarer ones by a path from those; and a
+background corpus of IF/THEN interpretations read from Joe's turns as
+semantic parses. There, an interpretation belongs to a pattern and is
+available in the background; it is not something a target must already own
+before it may be chosen.
+
 ## In active inference terms
 
 | Part | What the theory has | What the record shows |
