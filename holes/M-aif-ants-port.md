@@ -1,6 +1,6 @@
 # M-aif-ants-port — Port the modern AIF (R1–R19) into the ant forager
 
-**Status:** SPEC / DERIVE (2026-07-14). Owner: Claude. Build: staged Zai handoffs, Claude reviews each.
+**Status:** OPEN — SPEC / DERIVE (2026-07-14). Owner: Claude. Build: staged Zai handoffs, Claude reviews each.
 **Context:** [[project_m_sci_reproduction_complete]] cyberants post-mortem. This is **Port 1** of a
 two-port plan (Port 2 = AIF-as-tokamak-controller for MetaCAs, blocked on this).
 
@@ -237,3 +237,11 @@ being reusable as domain-agnostic `aif/{forward,efe,precision,rollout}`).
 For each returned slice: `git show <sha>`, re-run the named tests + kondo + parens locally, spot-check the
 claimed numbers against artifacts, state what was checked. Fix small findings directly; re-dispatch only
 substantial new work. ([[feedback_zai_bell_handoff_economics]], workspace CLAUDE.md handoff protocol.)
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] `test/ants/aif/forward_test.clj` passes a fixed-seed 50-tick equality between the live world step and the shared pure forward kernel.
+- [ ] Ant traces expose mode-indexed C, Gaussian KL risk, Gaussian-entropy ambiguity, and separately named engineering augmentations, with the Slice 2 and Slice 3 tests green.
+- [ ] A planted two-step-payoff test shows horizon 3 beating the greedy policy, and the emitted per-tick `:F` decreases on a convergent fixture.
+- [ ] The six-arm ant harness runs independent seeds on viable snowdrift, patchy, and sparse environments and records yield, starvation, confidence intervals, and manipulation checks.
+- [ ] The mission records whether action-dependent epistemic ablations change outcomes inside the viable environment window, without attributing canonical ambiguity or engineering augmentations to EFE.

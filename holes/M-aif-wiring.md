@@ -1,7 +1,7 @@
 # Mission: The AIF criteria wiring diagram — R1–R18 on a brain (M-aif-wiring)
 
 **Date:** 2026-06-24
-**Status:** **IDENTIFY** (new mission; successor home for the R14–R18 gaps surfaced by the now-closed M-wm-policies). *Name provisional — Joe may rename.*
+**Status:** OPEN — **IDENTIFY** (new mission; successor home for the R14–R18 gaps surfaced by the now-closed M-wm-policies). *Name provisional — Joe may rename.*
 **Owner:** Joe + claude-6
 **Repos:** futon2 (`docs/futon-aif-completeness.md` — the R1–R18 contract; `src/futon2/aif/*` — the apparatus), futon3c (`src/futon3c/portfolio/*` — the sibling AIF surface; the live R17 instance)
 **Cross-ref:** [[M-wm-policies]] (CLOSED 2026-06-24 — created R13, surfaced R14–R18; its closure punted their next-phases to "their own homes"; this is that home) · [[M-aif2]] · [[E-aif2-partB]] (the triangulation that surfaced R14–R18) · the **AIF∩morphogenesis deep-research** report (`futon3c/holes/excursions/deep-research-AIF-morphogenesis.md` — the canonical-component source; **first-pass**, ~10/25 claims verified before the run was killed) · [[E-prove-salingaros-cascade-scorer]] (the R18 proof) · [[E-deep-research-hardening]] (why the component list isn't yet authoritative) · reference image `~/Downloads/brain.jpeg` (Friston's active-inference-on-a-brain)
@@ -175,7 +175,7 @@ Click any node → a panel teaches **(1) what that piece of Active Inference doe
 
 **Redraw decisions for v0.2** (eyeball v0.1 first): split γ-precision from channel-precision into distinct nodes? Promote R18 from a lens-node to a genuine per-node colour overlay (its true form)? Render R15 as a real nested subgraph containing a *second copy* of the core loop (the upper level parameterising the lower)?
 
-### tl;dr
+## Acceptance checklist (2026-09-30)
 
 - [ ] An AIF wiring diagram maps the R criteria to Friston components and brain regions, distinguishing verified code connections from provisional mappings.
 - [ ] Named AIF quantities carry real-or-analogical grounding metadata checked by a failing-test control.

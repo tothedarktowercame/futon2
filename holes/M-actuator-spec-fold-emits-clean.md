@@ -1,5 +1,7 @@
 # Spec: extend the fold to emit the CLean wiring (embedded `:clean` + loader gate)
 
+**Status:** CLOSED — acceptance implemented in futon2 `8bdff6524` and futon3c `4ecf5eb5`
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Idea (Joe):** the
 CLean wiring is the *curriculum* the build must match; making it well-formed is a
 **deposit gate** — a fold can't deposit a blueprint whose CANALIZE isn't valid.

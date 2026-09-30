@@ -1,5 +1,7 @@
 # Spec: the live driver for the operational witness (`witness-live`)
 
+**Status:** CLOSED — live read-only witness and positive/negative substrate tests implemented in `ab0ad6cbc`
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Extends:**
 `futon2/src/futon2/aif/actuator_a6.clj` (it already holds `rank-graph` / `apply-star-status`
 / the `:discharge` read). **Requires** `futon2.aif.operational-witness` (the PURE relations).

@@ -1,5 +1,7 @@
 # Spec: substrate-2 access consistency for the A3 provable witness
 
+**Status:** CLOSED — sanctioned same-node Drawbridge write/read smoke documented in futon1a `e60e1ab1`
+
 **Owner/reviewer:** claude-4. **Blocks:** the A3 provable-match witness (endpoints
 must be WRITTEN to substrate-2 and PROVEN via a query against the *same* node).
 

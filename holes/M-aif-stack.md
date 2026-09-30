@@ -1,7 +1,7 @@
 # Mission: M-aif-stack — three implementations, one framework, one yardstick
 
 **Opened:** 2026-08-01. **Owner:** Claude (claude-4), operator Joe.
-**Status:** SPEC. Opening act dispatched (Slice 5 re-specified, below).
+**Status:** OPEN — SPEC. Opening act dispatched (Slice 5 re-specified, below).
 
 ## Why this mission exists
 
@@ -643,3 +643,10 @@ found it.** The next move is not a bigger grid. It is scaling food density and
 ant energetics with board area so the colonies survive, then re-measuring. Until
 then `E-aif-ants-epistemics` keeps its premise flagged as unconfirmed rather than
 rewritten.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] The ant authority experiment runs inside a declared viability window and reports static faithfulness, causal contrasts, baseline identity rates, and per-arm manipulation checks.
+- [ ] A War Machine intervention report measures which named AIF quantities change selected actions and realized coding outcomes.
+- [ ] AIF² has a real consumer of its score and an intervention report measuring that score's causal authority.
+- [ ] A comparative write-up applies the same external completeness yardstick and static-plus-causal method to ants, the War Machine, and AIF².

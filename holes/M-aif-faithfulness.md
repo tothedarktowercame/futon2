@@ -1,7 +1,7 @@
 # Mission: AIF faithfulness — retire the badge debt, node by node
 
 **Date:** 2026-07-03
-**Status:** ACTIVE (2026-07-04: Joe ratified the §3 scope boundary and took ALL
+**Status:** OPEN — ACTIVE (2026-07-04: Joe ratified the §3 scope boundary and took ALL
 five bucket-1 verdicts — see §2.1 verdict ledger; Week-0 wave dispatched same day)
 **Owner:** claude-12 (acting, per Joe's 2026-07-04 go-ahead; framed by Joe + claude-7)
 **Parent audit:** `holes/E-r18-faithfulness-audit.md` + `data/r18-badges.edn` — the
@@ -455,3 +455,10 @@ mission close) remain Joe's.
   parallelizable across 2–3 agents.
 - **Total: 2–4 weeks at current belled-work cadence, ~5 operator decisions.**
   The months-scale work is all behind the §3 boundary, by construction.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] Every scheduled tick records the producing revision, dirty state, trace schema, and effective mode flags, and `wm-version-of` resolves them without timestamp correlation.
+- [ ] The state-of-the-WM document and achievement ledger show ticks, decisions, abstentions, gate verdicts, enactments, outcomes, policy precision, and channel trajectories segmented by WM version.
+- [ ] `data/r18-badges.edn` and `holes/aif-wiring-explainer.html` agree that every in-scope quantity is a principled approximation or better, or is renamed, relocated, or deleted under its recorded disposition.
+- [ ] The close audit reruns the 16-quantity adversarial badge check and contains no undispositioned analogical quantity.
