@@ -25,6 +25,7 @@ def main():
         refs = ", ".join(f"⟨{number[p]}, by decide⟩" for p in f["refs"])
         fragments.append(f"    ⟨[{refs}]⟩")
     body = f'''import DarkTower.WarMachine.CascadeSpec
+import Mathlib.Tactic
 
 /-! GENERATED FILE — DO NOT EDIT.
 Source: {args.json}
@@ -76,7 +77,7 @@ theorem real_reading_structurally_distinct_count :
     alternatives, cascadeOfUnits?, directedEdges, adjacentFragments, overlapPairs,
     readingFragment]
   rw [structuralDedup.eq_def]
-  kernel_decide
+  norm_num [structurallyDifferent, Cascade.structuralIdentity]
 
 #print axioms real_alternatives_counts
 #print axioms real_overlap_counts
