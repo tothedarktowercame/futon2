@@ -15,16 +15,15 @@
     "size": 620
   },
   "graph": {
-    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
-    "edges": 3115,
-    "inputs": 4654,
+    "digest": "700aa658df431ad78817ad9f4e43552320d58ed711c1437126c4c334c728bd04",
+    "edges": 3119,
+    "inputs": 4662,
     "patterns": 1431
   },
   "params": {
     "k": 3,
     "weights": {
       "co-cited": 2,
-      "co-rejected": 8,
       "how": 1,
       "next-in-session": 3,
       "rejected-beside": 3,
@@ -104,8 +103,7 @@
         "war-machine/operational-not-decorative"
       ],
       "rank": 1,
-      "size": 5,
-      "weak_edges": 0
+      "size": 5
     },
     {
       "cost": 11,
@@ -179,8 +177,7 @@
         "war-machine/operational-not-decorative"
       ],
       "rank": 2,
-      "size": 5,
-      "weak_edges": 0
+      "size": 5
     },
     {
       "cost": 12,
@@ -289,8 +286,7 @@
         "war-machine/operational-not-decorative"
       ],
       "rank": 3,
-      "size": 6,
-      "weak_edges": 0
+      "size": 6
     }
   ],
   "seeds": [
@@ -303,5 +299,6 @@
     "apparatus/new-failure-class-is-a-design-defect",
     "ukrns/publication-cadence",
     "war-machine/operational-not-decorative"
-  ]
+  ],
+  "elapsed_seconds": 0.267
 }

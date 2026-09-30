@@ -1,5 +1,5 @@
 {
- "records": 4654,
+ "records": 4662,
  "patterns": 1431,
  "summary": [
   {
@@ -25,14 +25,14 @@
   },
   {
    "through": "rejected-beside",
-   "edges": 300,
+   "edges": 303,
    "giant": 565,
    "components": 579,
    "singletons": 554
   },
   {
    "through": "next-in-session",
-   "edges": 1688,
+   "edges": 1689,
    "giant": 620,
    "components": 537,
    "singletons": 520
@@ -10264,6 +10264,16 @@
   },
   {
    "a": "apparatus/every-wait-has-a-deadline",
+   "b": "translation/test-by-reproducing-behaviour",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "live/turn-6FqDNh.json.analysis.json -> live/turn-GkSCpT.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "apparatus/every-wait-has-a-deadline",
    "b": "ukrns/diagnose-before-prescribing",
    "kind": "next-in-session",
    "evidence": [
@@ -16515,6 +16525,9 @@
    "evidence": [
     {
      "at": "2026-08-22_2026-09-21_block001/claude-13-turn-181.json.analysis.json -> 2026-08-22_2026-09-21_block002/claude-13-turn-182.json.analysis.json"
+    },
+    {
+     "at": "live/turn-PtMmVy.json.analysis.json -> live/turn-O9eRug.json.analysis.json"
     }
    ]
   },
@@ -26323,6 +26336,17 @@
    ]
   },
   {
+   "a": "data-mining/smoke-before-the-paid-run",
+   "b": "translation/test-by-reproducing-behaviour",
+   "kind": "rejected-beside",
+   "evidence": [
+    {
+     "at": "live/turn-GkSCpT.json.analysis.json#s1.0",
+     "reason": "Surfaced for 'use normal run as the test'; it is about metered LLM/GPU passes with pre-declared quality bands, not exercising a code path in an ordinary test run."
+    }
+   ]
+  },
+  {
    "a": "data-mining/the-first-checkpoint-is-a-quality-probe",
    "b": "orchestration/consent-gate",
    "kind": "rejected-beside",
@@ -26642,6 +26666,17 @@
     {
      "at": "2026-08-22_2026-09-21_block008/claude-12-turn-23.json.analysis.json#s1.0",
      "reason": "Not retroactive: the recording is demanded at decision time."
+    }
+   ]
+  },
+  {
+   "a": "futon-theory/reverse-morphogenesis",
+   "b": "writing-coherence/hedged-lift",
+   "kind": "rejected-beside",
+   "evidence": [
+    {
+     "at": "live/turn-O9eRug.json.analysis.json#s4.0",
+     "reason": "Surfaced on 'hedge a suggestion'. It governs written lift claims (commit, defer properly, or cut); Joe's 'might be able to' marks a spoken conjecture offered for exploration, not a lift claim in a report. The hedge is load-bearing here, not a defect to fix."
     }
    ]
   },
@@ -27209,6 +27244,17 @@
     {
      "at": "live/turn-RcH36J.json.analysis.json#s1.0",
      "reason": "A mathematical-writing pattern about giving a complete intrinsic description of an object (as a quotient, fibration, etc.) inside a research paper. The retrieval hit is lexical -- 'structure', 'complete description' -- not a match of move: Joe is asking about tooling/addressability for a data structure in a software system, not asking how to characterize a mathematical object in a proof."
+    }
+   ]
+  },
+  {
+   "a": "math-informal/try-a-simpler-case",
+   "b": "translation/test-by-reproducing-behaviour",
+   "kind": "rejected-beside",
+   "evidence": [
+    {
+     "at": "live/turn-GkSCpT.json.analysis.json#s1.0",
+     "reason": "Surfaced twice; it prescribes reducing a problem's parameters when stuck, not choosing the ordinary test path as the behaviour check."
     }
    ]
   },

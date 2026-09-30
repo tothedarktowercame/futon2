@@ -19,16 +19,15 @@
     "size": 620
   },
   "graph": {
-    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
-    "edges": 3115,
-    "inputs": 4654,
+    "digest": "700aa658df431ad78817ad9f4e43552320d58ed711c1437126c4c334c728bd04",
+    "edges": 3119,
+    "inputs": 4662,
     "patterns": 1431
   },
   "params": {
     "k": 3,
     "weights": {
       "co-cited": 2,
-      "co-rejected": 8,
       "how": 1,
       "next-in-session": 3,
       "rejected-beside": 3,
@@ -244,8 +243,7 @@
         "\u8c61/\u8c61\u4e0d\u5fd8"
       ],
       "rank": 1,
-      "size": 13,
-      "weak_edges": 0
+      "size": 13
     },
     {
       "cost": 25,
@@ -491,8 +489,7 @@
         "\u8c61/\u8c61\u4e0d\u5fd8"
       ],
       "rank": 2,
-      "size": 15,
-      "weak_edges": 0
+      "size": 15
     },
     {
       "cost": 26,
@@ -757,8 +754,7 @@
         "\u8c61/\u8c61\u4e0d\u5fd8"
       ],
       "rank": 3,
-      "size": 16,
-      "weak_edges": 0
+      "size": 16
     }
   ],
   "seeds": [
@@ -784,5 +780,6 @@
     "\u8c61/\u53cc\u65f6\u5e76\u8bb0",
     "\u8c61/\u89c6\u56fe\u51fa\u4e8e\u53f2",
     "\u8c61/\u8c61\u4e0d\u5fd8"
-  ]
+  ],
+  "elapsed_seconds": 2.017
 }
