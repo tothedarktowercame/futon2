@@ -63,18 +63,21 @@
 {{LEAN}}
 
 <h2>Examples</h2>
-<p>All seven policy sets were produced by the same code from the same pinned graph. Three are shown in full and four are folded.</p>
+<p>Seven policy sets were produced by the same code from the same pinned graph. Six are from real text: three are shown in full and three are folded. The seventh is not a valid example and is set apart below.</p>
 {{WEB}}
 {{ESS}}
 {{SDS}}
-<h3>The other four</h3>
+<h3>The other three</h3>
 {{REST}}
+<h3>A reading of something that is not a HEAD</h3>
+<p>Joe pointed this one out. The HEAD section of M-web-arxana-ui-improvements contains only the sentence “The mission’s live operator-shape, captured before IDENTIFY hardens it into a tractable gap statement.” That is the template’s definition of what a HEAD is; the mission has no HEAD. The request script took the section at face value, 象 cited two patterns for the definition, and the construction produced six policies from it. In the joint run of 30 September one of those six was the best-scoring single policy of all 27. The correct outcome for this target is a counted failure, “no HEAD”, and an empty policy set. It is the only mission file found with this shape; the fix is requested.</p>
+{{NOHEAD}}
 
 <h2>What the examples show that is wrong or unsettled</h2>
 <ol>
 <li><strong>Retraction arrows mostly come from the alphabet.</strong> The pattern graph is undirected except where a pattern’s own text names another. The scorer currently turns every graph edge into “precedes”, pointing from the alphabetically earlier pattern name to the later one. Those edges are the dashed brown arrows. Which units are roots, and therefore the risk figure, follows from that. A fix is with Codex-4: an edge with an authored direction keeps it; any other graph edge becomes an overlap.</li>
 <li><strong>Retractions of one seed set are near-copies.</strong> For M-self-documenting-stack the three retractions differ by one connector. Claude-17 measured that asking for 6 or 10 gives 6 or 10, all at nearly the same cost, with no sign of settling. So k decides how many near-copies a target gets, and k has no stated source.</li>
-<li><strong>A reading can be a reading of boilerplate.</strong> M-web-arxana-ui-improvements has an empty HEAD; the policy set was built from the template sentence.</li>
+<li><strong>A definition of a HEAD was read as a HEAD.</strong> See M-web-arxana-ui-improvements above. Nothing between the mission file and the policy set checks that the text read is the operator’s own statement. The Lean definition of a reading does not require it either.</li>
 <li><strong>Every success probability is one half,</strong> because no pattern has recorded trials. Expected information gain is therefore the same (0.31) for every policy, and habit is neutral for every policy. Differences in G come from risk and ambiguity only.</li>
 <li><strong>The preference is synthetic.</strong> “More units done is better” was written for this scorer. It is not the preference from Joe’s ruling of 22 September that the real decision scores with, nor the one derived from mission wants that the real decision records without scoring. Which of the three should score cascades is an open question for Joe.</li>
 <li><strong>Coverage.</strong> Seven readings exist. The field has 288 targets; 192 missions with a file have no reading, and 89 targets (tickets, proposals) have no file the machine knows of.</li>

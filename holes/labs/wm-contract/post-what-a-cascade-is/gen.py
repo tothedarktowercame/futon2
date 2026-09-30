@@ -114,10 +114,11 @@ pin = D['pin_raw']
 npol = sum(len(t['policies']) for t in D['targets'])
 body = open('/tmp/claude-1/post/body.html').read()
 ex = {
- 'WEB': target_block('M-web-arxana-ui-improvements', '<p>The smallest example, and an awkward one. This mission’s HEAD section contains only the template sentence that every mission file starts with, so the reading is a reading of boilerplate. 象 cited two patterns for that one sentence. The policy set is still six cascades.</p>'),
+ 'WEB': target_block('M-distributed-proofreaders', '<p>A short HEAD in the operator’s voice. 象 cited three patterns across its fragments, giving one reading cascade, and the graph gives three retractions around them.</p>'),
  'ESS': target_block('M-essays-diachronic-model', '<p>A short opening paragraph. One of the two cited patterns has no edges in the pattern graph, so it cannot seed a retraction; the retraction that remains is a single pattern.</p>'),
  'SDS': target_block('M-self-documenting-stack', '<p>A longer opening. This is the target the joint run chose on 30 September, through its three retractions. Look at how the three differ.</p>'),
- 'REST': '\n'.join('<details><summary>' + E(n) + '</summary>' + target_block(n, '', False) + '</details>' for n in ['M-distributed-proofreaders', 'M-value-creation-loop', 'M-metric-harness', 'M-war-machine-aif-completion']),
+ 'REST': '\n'.join('<details><summary>' + E(n) + '</summary>' + target_block(n, '', False) + '</details>' for n in ['M-value-creation-loop', 'M-metric-harness', 'M-war-machine-aif-completion']),
+ 'NOHEAD': '<details><summary>M-web-arxana-ui-improvements (not a valid example: kept to show the defect)</summary>' + target_block('M-web-arxana-ui-improvements', '', False) + '</details>',
  'PIN': f'{pin["pattern-id-count"]:,} library patterns, {pin["edge-count"]:,} edges, {pin["nodes-without-edges"]} patterns with no edge, largest connected part {pin["giant-component-size"]}; built from {pin["inputs"]["analyses"]:,} analysed turns plus {pin["inputs"]["authored-relations"]["why"]} authored “why” and {pin["inputs"]["authored-relations"]["how"]} authored “how” relations; file digest <code>{pin["sha256"][:12]}…</code>',
  'NPOL': str(npol), 'LEAN': LEAN, 'STATUS': STATUS,
 }
