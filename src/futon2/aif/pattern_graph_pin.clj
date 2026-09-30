@@ -33,16 +33,29 @@
      :evidence (vec (sort-by pr-str (or evidence [])))}))
 
 (defn- normalized-graph [raw]
-  (let [raw-edges (vec (:edges raw))
+  (let [pattern-ids (vec (sort (distinct (:pattern_ids raw))))
+        raw-edges (vec (:edges raw))
         removed (filterv #(= "co-rejected" (:kind %)) raw-edges)
         edges (->> raw-edges
                    (remove #(= "co-rejected" (:kind %)))
                    (map canonical-edge)
                    (sort-by (juxt :a :b :kind :evidence)) vec)
         nodes (vec (sort (set (mapcat (juxt :a :b) edges))))]
-    {:nodes nodes :edges edges
+    {:pattern-ids pattern-ids :nodes nodes :edges edges
      :reported-node-count (:patterns raw)
      :removed-edges {:co-rejected (count removed)}}))
+
+(defn- graph-refusal [raw graph]
+  (let [declared (set (:pattern-ids graph))
+        endpoints (set (:nodes graph))
+        outside (vec (sort (remove declared endpoints)))]
+    (cond
+      (not (vector? (:pattern_ids raw)))
+      {:status :refused :kind :graph-without-pattern-ids}
+
+      (seq outside)
+      {:status :refused :kind :graph-endpoint-outside-pattern-ids
+       :count (count outside) :endpoints outside})))
 
 (defn- component-sizes [nodes edges]
   (let [adj (reduce (fn [m {:keys [a b]}]
@@ -70,6 +83,7 @@
     {:schema :wm/pattern-graph-pin-v1
      :sha256 (file-sha256 graph-path)
      :node-count reported
+     :pattern-id-count (count (:pattern-ids graph))
      :edge-count (count (:edges graph))
      :giant-component-size (reduce max 0 component-sizes)
      :nodes-without-edges (max 0 (- reported (count (:nodes graph))))
@@ -93,10 +107,15 @@
 (defn pin!
   "Pin GRAPH-PATH's current bytes and effective (co-rejected-free) topology."
   [graph-path]
-  (let [raw (json/parse-string (slurp graph-path) true)
-        graph (normalized-graph raw)
-        pin (pin-value graph-path raw graph)]
-    (atomic-write! (pin-file graph-path) pin)))
+  (try
+    (let [raw (json/parse-string (slurp graph-path) true)
+          graph (normalized-graph raw)]
+      (if-let [refusal (graph-refusal raw graph)]
+        refusal
+        (atomic-write! (pin-file graph-path) (pin-value graph-path raw graph))))
+    (catch Exception e
+      {:status :refused :kind :graph-unreadable :path (str graph-path)
+       :message (ex-message e)})))
 
 (defn load-pinned
   "Load the effective graph only when its adjacent pin matches its bytes."
@@ -108,23 +127,24 @@
       {:status :refused :kind :graph-unreadable :path (str graph-path)
        :reason :graph-file-missing}
 
-      (not (.isFile pin-path))
-      {:status :refused :kind :graph-pin-missing :path (.getPath pin-path)}
-
       :else
       (try
-        (let [actual (file-sha256 graph-file)
-              pin (edn/read-string (slurp pin-path))]
-          (if (not= actual (:sha256 pin))
-            {:status :refused :kind :graph-pin-mismatch
-             :path (str graph-path) :expected (:sha256 pin) :actual actual}
-            (let [raw (json/parse-string (slurp graph-file) true)
-                  graph (normalized-graph raw)
-                  observed (pin-value graph-file raw graph)]
-              (if (= (dissoc pin :sha256) (dissoc observed :sha256))
-                {:status :loaded :graph graph :pin pin}
-                {:status :refused :kind :graph-pin-mismatch
-                 :path (str graph-path) :expected pin :actual observed}))))
+        (let [raw (json/parse-string (slurp graph-file) true)
+              graph (normalized-graph raw)]
+          (if-let [refusal (graph-refusal raw graph)]
+            (assoc refusal :path (str graph-path))
+            (if-not (.isFile pin-path)
+              {:status :refused :kind :graph-pin-missing :path (.getPath pin-path)}
+              (let [actual (file-sha256 graph-file)
+                    pin (edn/read-string (slurp pin-path))]
+                (if (not= actual (:sha256 pin))
+                  {:status :refused :kind :graph-pin-mismatch
+                   :path (str graph-path) :expected (:sha256 pin) :actual actual}
+                  (let [observed (pin-value graph-file raw graph)]
+                    (if (= (dissoc pin :sha256) (dissoc observed :sha256))
+                      {:status :loaded :graph graph :pin pin}
+                      {:status :refused :kind :graph-pin-mismatch
+                       :path (str graph-path) :expected pin :actual observed})))))))
         (catch Exception e
           {:status :refused :kind :graph-unreadable :path (str graph-path)
            :message (ex-message e)})))))

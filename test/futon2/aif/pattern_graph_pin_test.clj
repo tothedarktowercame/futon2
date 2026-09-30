@@ -10,7 +10,7 @@
             (make-array java.nio.file.attribute.FileAttribute 0))))
 
 (def fixture
-  {:records 12 :patterns 5
+  {:records 12 :patterns 5 :pattern_ids ["p/a" "p/b" "p/c" "p/d" "p/isolated"]
    :summary [{:through "why" :edges 1} {:through "how" :edges 0}]
    :edges [{:a "p/a" :b "p/b" :kind "why" :evidence [{:file "p/a.flexiarg"}]}
            {:a "p/b" :b "p/c" :kind "co-cited" :evidence [{:at "turn-1"}]}
@@ -27,9 +27,11 @@
         loaded (sut/load-pinned file)]
     (is (= :loaded (:status loaded)))
     (is (= pin (:pin loaded)))
-    (is (= {:node-count 5 :edge-count 2 :giant-component-size 3
+    (is (= ["p/a" "p/b" "p/c" "p/d" "p/isolated"]
+           (get-in loaded [:graph :pattern-ids])))
+    (is (= {:node-count 5 :pattern-id-count 5 :edge-count 2 :giant-component-size 3
             :nodes-without-edges 2 :removed-edges {:co-rejected 1}}
-           (select-keys pin [:node-count :edge-count :giant-component-size
+           (select-keys pin [:node-count :pattern-id-count :edge-count :giant-component-size
                              :nodes-without-edges :removed-edges])))
     (is (= #{"why" "co-cited"} (set (map :kind (get-in loaded [:graph :edges])))))
     (is (= #{1 2} (set (map :weight (get-in loaded [:graph :edges])))))))
@@ -49,6 +51,28 @@
     (is (= :refused (:status result)))
     (is (= :graph-pin-missing (:kind result)))))
 
+(deftest graph-without-pattern-ids-is-typed
+  (let [file (write-graph! (temp-dir) (dissoc fixture :pattern_ids))
+        pinned (sut/pin! file)
+        result (sut/load-pinned file)]
+    (is (= :graph-without-pattern-ids (:kind pinned)))
+    (is (= :refused (:status result)))
+    (is (= :graph-without-pattern-ids (:kind result)))))
+
+(deftest graph-endpoint-outside-pattern-ids-is-typed
+  (let [file (write-graph! (temp-dir) (update fixture :pattern_ids pop))
+        pinned (sut/pin! file)
+        result (sut/load-pinned file)]
+    ;; p/isolated was popped, so make the missing id an endpoint instead.
+    (is (map? pinned))
+    (is (= :loaded (:status result)))
+    (let [bad (write-graph! (temp-dir) (update fixture :pattern_ids
+                                             #(vec (remove #{"p/c"} %))))
+          refusal (sut/load-pinned bad)]
+      (is (= :refused (:status refusal)))
+      (is (= :graph-endpoint-outside-pattern-ids (:kind refusal)))
+      (is (= 1 (:count refusal))))))
+
 (deftest real-graph-copy-can-be-pinned
   (let [source (io/file "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")]
     (if-not (.isFile source)
@@ -61,6 +85,6 @@
               loaded (sut/load-pinned copy)]
           (println "PATTERN-GRAPH-REAL" (pr-str pin))
           (is (= :loaded (:status loaded)))
+          (is (= (:pattern-id-count pin) (count (get-in loaded [:graph :pattern-ids]))))
           (is (pos? (:node-count pin)))
           (is (pos? (:edge-count pin))))))))
-
