@@ -2,6 +2,13 @@
 
 **Date:** 2026-09-02
 **Status:** OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] Worklist rows U6–U9 have green acceptance states for per-node tests, per-tool R2/R16 pairs, the reporting gate, and the R7 precision table.
+- [ ] One real zaif decision passes the reporting gate with every report claim re-derived from Z1 queries and typed records.
+- [ ] `aif-equations.edn` and the U6 artifact publish the honest list of R-nodes exercised by zaif versus named stubs.
+- [ ] The pending chip-board Lean certificate is independently rerun after commit `80d874b8` and records its final validated or refused status.
 **Owner:** claude-1. Driver: Joe.
 **Home:** futon2/holes/ (successor edition to `M-zaif-harness.md`, 2026-07-11, which stays
 the v0 record; this document does not rewrite it).

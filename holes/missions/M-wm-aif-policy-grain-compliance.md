@@ -1,7 +1,15 @@
 # Mission: War Machine AIF policy-grain compliance
 
 **Date:** 2026-07-23  
-**Status:** INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  
+**Status:** OPEN — INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A non-threshold candidate source yields at least two foldable same-mission cascades, including the incumbent, with deterministic identity and explicit wiring differences.
+- [ ] Cascade scores are recomputed from each enacted prefix, and discarded suffix telemetry cannot change the prefix ranking.
+- [ ] A versioned `:cascade-prior-state` increments exactly once on the preregistered successful event and not on cancellation or failed construction.
+- [ ] A dark end-to-end shadow reports non-degenerate support, construction failure rates, separately named `E_scheduler`/cascade-score/`E_cascade`, deterministic replay, and feature-off byte identity.
+- [ ] Operator-gated activation occurs only after the shadow corpus satisfies the Slice 4 live criteria and baseline/schema documentation is updated.
 **Owner:** Joe + Codex  
 **Cross-references:** `M-aif-faithfulness`, `M-wm-policies`,
 `M-G-over-cascades`, `M-wm-strategic-mission-selection`, p4ng

@@ -1,6 +1,15 @@
 # Mission: Reflective Discipline (PSR / PUR / PAR as tangent vectors)
 
-**Status:** IDENTIFY (2026-04-28)
+**Status:** OPEN — IDENTIFY (2026-04-28)
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A typed `:psr`/`:pur`/`:par` schema and cross-edge contract reconciles the existing `discipline.clj` record shape and settles its storage boundary.
+- [ ] The existing lab Markdown corpus is imported as typed hyperedges with extractable mission, pattern, and commit references.
+- [ ] A reviewed sample of 10–20 imported records confirms or revises the schema without losing the original historical text.
+- [ ] The War Machine exposes an operator-facing surface for entering new PSR/PUR/PAR records into the typed substrate.
+- [ ] Witness staleness propagates to dependent PUR records, with pre-existing var/test/namespace vertices carrying `:source-file`.
+- [ ] One real PSR → action → PUR → PAR session is queryable as typed evidence, and `futon4/holes/mission-lifecycle.md` points to it.
 **Owner:** Joe
 **Cross-refs (joint extension of two missions):**
 - `futon3/holes/missions/M-live-geometric-stack.md` — the

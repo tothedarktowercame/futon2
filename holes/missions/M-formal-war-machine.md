@@ -1,7 +1,14 @@
 # M-formal-war-machine: a behavioural contract for the control loop
 
-**Status:** CHARTERED 2026-08-25 (Joe + claude-13). Begins at IDENTIFY: the gap
-is crisp, so `HEAD` is skipped per `futon4/holes/mission-lifecycle.md`.
+**Status:** OPEN — CHARTERED 2026-08-25 (Joe + claude-13). Begins at IDENTIFY: the gap is crisp, so `HEAD` is skipped per `futon4/holes/mission-lifecycle.md`.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] Figure 4 is rendered from typed edge data, and a check rejects an SVG whose edges differ from that data.
+- [ ] A Lean emitter produces a contract containing the War Machine stages, R-nodes, transitions, and eleven interfaces.
+- [ ] Clojure loads the emitted contract, and mutation tests reject changed transitions and missing interfaces.
+- [ ] A qualification record reports non-vacuity with a positive witness count and binds the running artifact to the qualified contract digest.
+- [ ] The five unmet constraints remain explicit tested hole records rather than green or absent clauses.
 
 **One-line:** Adapt the APM demonstration's Lean-to-Clojure specification chain
 to the War Machine, so that the control loop's stages, transitions and

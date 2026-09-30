@@ -1,6 +1,14 @@
 # M-u88-contextual-preferences — OPEN — fixture episode milestone pending
 
-Status: OPEN — fixture episode milestone pending
+**Status:** OPEN — fixture episode milestone pending
+
+## Acceptance checklist (2026-09-30)
+
+- [x] `derive-binding`, `apply-event`, and `replay-episode` derive the frozen fixture episode with typed prerequisite and event refusals. (evidence: “Fixture-episode milestone, 2026-09-12” in this file)
+- [x] `futon2.aif.contextual-preferences-test` passes 9 tests / 152 assertions and the API exposes no `mark-done` operation. (evidence: replay validation recorded in this file)
+- [ ] Independent review confirms all eleven fixture transitions, exact-replay idempotence, and conflicting-reuse refusal.
+- [ ] The closing record restates that no selector, ranking, preference mass, transport, live interaction, adoption, or registry/worklist write entered the fixture interpreter.
+- [ ] Joe records the adoption or closure disposition for worklist item `:U88`.
 
 Activation date: 2026-09-11
 

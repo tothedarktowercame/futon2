@@ -1,9 +1,15 @@
 # M-wm-tripwires — invariant tripwires for the live War Machine
 
-- **Status:** DERIVE (drafted 2026-07-16, claude-6 from Joe's directive;
-  ratification = Joe). Implementation = codex (runner expert), invariant spec
-  + review = claude-6 (adversarial reviewer of record for the full-loop
-  runner, four verdict rounds 2026-07-16).
+**Status:** OPEN — DERIVE (drafted 2026-07-16, claude-6 from Joe's directive; ratification = Joe). Implementation = codex (runner expert), invariant spec + review = claude-6 (adversarial reviewer of record for the full-loop runner, four verdict rounds 2026-07-16).
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] The retro-trip calibration identifies every named incident class and publishes coverage plus a versioned blind-spot map.
+- [ ] Every trip report durably records the invariant, witness, in-flight context, selected entry, and applicable stop-lines without changing non-tripping semantics.
+- [ ] The action ladder degrades safely from park-and-summon to stop-line to record without recursive trips, and every wire is individually disableable.
+- [ ] T13 derives the authored commit from repository observation and emits a typed artifact-binding mismatch when narration disagrees.
+- [ ] A model-revision discharge closes the resolved T7 live finding with implementation and independent-review evidence.
+- [ ] Joe-gated promotion follows a reviewed live shadow run, with the compiled default remaining `:record` until that decision.
 - **Joe's framing:** "a supplementary harness for the war machine made up of
   invariant tripwires. The whole laser-beam-in-the-museum thing. THEN we run
   it live. Net effect: instead of waiting for broken runs to complete, we

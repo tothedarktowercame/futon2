@@ -1,7 +1,16 @@
 # Mission: Pattern-organized strategic mission selection
 
 **Date:** 2026-07-23  
-**Status:** DERIVE — typed candidate-projection kernel built dark; direct memory/cascade route now primary  
+**Status:** OPEN — DERIVE — typed candidate-projection kernel built dark; direct memory/cascade route now primary
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] The reviewed typed relation corpus retrieves concrete witnessed WM episodes and retracts support on the next projection when evidence is retracted.
+- [ ] Outer-loop control cascades preserve explicit transition, dependency, policy, and budget holes while explaining every proposed mission from recalled episodes.
+- [ ] The strategic forward model separates executable support from useful-progress probability and reports explicit missingness without epsilon floors.
+- [ ] Strategic policies report `ln E_S`, strategic score, support reasons, memories used, and the score-only counterfactual winner over complete policy identities.
+- [ ] The R15 return path records selection frequency, witnessed usefulness, changed relations, and recurring unrepresented control needs under their distinct update channels.
+- [ ] A live flip demonstrates better held-out independently judged mission ranking while preserving operator/completion exclusions and separately visible terms.
 **Owner:** Joe + Codex  
 **Cross-references:** `M-wm-aif-policy-grain-compliance`,
 `M-wm-three-factor-mission-value`, `M-action-vocabulary`, p4ng R5/R6/R12/R13/R15/R17''',
