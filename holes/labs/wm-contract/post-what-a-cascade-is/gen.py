@@ -35,35 +35,33 @@ def svg(p):
     W, H, GX, GY = 190, 58, 22, 46
     maxn = max(len(v) for v in layers.values())
     LM = 64
-    width = LM + maxn * (W + GX) + GX; height = (max(layers) + 1) * (H + GY) + GY + 14
+    width = LM + maxn * (W + GX) + GX; height = (max(layers) + 1) * (H + GY) + GY + 26
     pos = {}
     for d, row in layers.items():
         off = LM + (width - LM - (len(row) * (W + GX) - GX)) / 2
         for k, i in enumerate(row):
-            pos[i] = (off + k * (W + GX), GY / 2 + 14 + d * (H + GY))
-    authored = {}
-    for e in (p.get('raw_edges') or []):
-        authored[frozenset((e['a'], e['b']))] = (e.get('direction') is not None, e.get('kind-used') or '')
+            pos[i] = (off + k * (W + GX), GY / 2 + 26 + d * (H + GY))
     o = [f'<svg viewBox="0 0 {width:.0f} {height:.0f}" width="{min(width,1100):.0f}" role="img" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;font-family:inherit">',
-         '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>'
-         '<marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b5651d"/></marker></defs>']
+         '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>']
     for d in layers:
-        y = GY / 2 + 14 + d * (H + GY) + H / 2
+        y = GY / 2 + 26 + d * (H + GY) + H / 2
         o.append(f'<text x="4" y="{y:.0f}" font-size="10" fill="#777">round {d+1}+</text>')
-    kinds = {(e['from'], e['to']): e['kind'] for e in p['edges']}
+    gk = {(e['from'], e['to']): (e.get('graph_kind') or '') for e in p['edges']}
     for a, b in desc:
         (x1, y1), (x2, y2) = pos[a], pos[b]
-        key = frozenset((a, b)); is_ret = p['kind'] == 'retraction'
-        auth, gk = authored.get(key, (True, ''))
-        col, mark, dash = ('#333', 'ah', '') if (auth or not is_ret) else ('#b5651d', 'ag', ' stroke-dasharray="5 3"')
-        o.append(f'<line x1="{x1+W/2:.0f}" y1="{y1+H:.0f}" x2="{x2+W/2:.0f}" y2="{y2:.0f}" stroke="{col}" stroke-width="1.3"{dash} marker-end="url(#{mark})"/>')
-        lab = gk if is_ret else ''
+        o.append(f'<line x1="{x1+W/2:.0f}" y1="{y1+H:.0f}" x2="{x2+W/2:.0f}" y2="{y2:.0f}" stroke="#333" stroke-width="1.3" marker-end="url(#ah)"/>')
+        lab = gk.get((a, b), '') if p['kind'] == 'retraction' else ''
         if lab:
-            o.append(f'<text x="{x1+W/2+0.72*(x2-x1)+5:.0f}" y="{y1+H+0.72*(y2-y1-H)+3:.0f}" font-size="9" fill="{col}">{E(lab)}</text>')
+            o.append(f'<text x="{x1+W/2+0.72*(x2-x1)+5:.0f}" y="{y1+H+0.72*(y2-y1-H)+3:.0f}" font-size="9" fill="#333">{E(lab)}</text>')
     for e in p['edges']:
         if e['kind'] == 'overlap' and e['from'] in pos and e['to'] in pos:
             (x1, y1), (x2, y2) = pos[e['from']], pos[e['to']]
-            o.append(f'<line x1="{x1+W:.0f}" y1="{y1+H/2:.0f}" x2="{x2:.0f}" y2="{y2+H/2:.0f}" stroke="#2a6f97" stroke-width="1.3" stroke-dasharray="2 3"/>')
+            if y1 == y2:
+                xa, xb = sorted((x1, x2)); xa += W / 2; xb += W / 2
+                lift = 12 + min(20, (xb - xa) / (W + GX) * 5)
+                o.append(f'<path d="M{xa:.0f},{y1:.0f} Q{(xa+xb)/2:.0f},{y1-lift*1.6:.0f} {xb:.0f},{y1:.0f}" fill="none" stroke="#2a6f97" stroke-width="1.2" stroke-dasharray="3 3"/>')
+            else:
+                o.append(f'<line x1="{x1+W/2:.0f}" y1="{y1+H:.0f}" x2="{x2+W/2:.0f}" y2="{y2:.0f}" stroke="#2a6f97" stroke-width="1.2" stroke-dasharray="3 3"/>')
     roots = set(p['roots'])
     for u in units:
         x, y = pos[u['id']]; ns, name = short(u['pattern'])
@@ -83,16 +81,15 @@ def policy_block(t, p, n):
             'reading-overlap': 'read from the text, all cited patterns of a fragment together',
             'retraction': 'cut from the pattern graph around the reading’s patterns'}[p['kind']]
     npat = len({u['pattern'] for u in p['units']})
-    auth = [e for e in (p.get('raw_edges') or []) if e.get('direction')]
-    extra = ''
-    if p['kind'] == 'retraction':
-        tot = len(p.get('raw_edges') or [])
-        extra = f' Of its {tot} graph edges, {len(auth)} carry an authored direction; the rest are drawn dashed in brown.'
-    return (f'<h4>Policy {n}: {E(kind)}</h4>'
-            f'<p>{len(p["units"])} units over {npat} distinct patterns; {len(p["descent"])} ordering edges; {len(p["roots"])} root{"s" if len(p["roots"])!=1 else ""}.{extra}</p>'
-            f'<div class="table-scroll">{svg(p)}</div>'
-            f'<table class="terms"><tr><th>F (fit)</th><th>G</th><th>risk</th><th>ambiguity</th><th>information gain</th></tr>'
-            f'<tr><td>{fnum(p["F"])}</td><td>{fnum(p["G"])}</td><td>{fnum(g["risk"])}</td><td>{fnum(g["ambiguity"])}</td><td>{fnum(g["expected-information-gain"])}</td></tr></table>')
+    nov = sum(1 for e in p['edges'] if e['kind'] == 'overlap')
+    desc = (f'<p>{len(p["units"])} units over {npat} distinct patterns; {len(p["descent"])} <em>precedes</em> edge{"s" if len(p["descent"])!=1 else ""} (black arrows); '
+            f'{nov} <em>overlap</em> relation{"s" if nov!=1 else ""} (blue dashed); {len(p["roots"])} root{"s" if len(p["roots"])!=1 else ""}.</p>')
+    if g:
+        terms = (f'<table class="terms"><tr><th>F (fit)</th><th>G</th><th>risk</th><th>ambiguity</th><th>information gain</th></tr>'
+                 f'<tr><td>{fnum(p["F"])}</td><td>{fnum(p["G"])}</td><td>{fnum(g["risk"])}</td><td>{fnum(g["ambiguity"])}</td><td>{fnum(g["expected-information-gain"])}</td></tr></table>')
+    else:
+        terms = f'<p><strong>F and G not computed.</strong> With {len(p["roots"])} units attemptable in the first round, the exact scorer enumerates every subset that could succeed and ran out of memory. No approximate figure is substituted.</p>'
+    return f'<h4>Policy {n}: {E(kind)}</h4>' + desc + f'<div class="table-scroll">{svg(p)}</div>' + terms
 
 def target_block(name, note, featured=True):
     t = T[name]

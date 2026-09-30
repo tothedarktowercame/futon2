@@ -347,6 +347,36 @@ before it may be chosen.
    co-application cascade gets neutral habit 1; and no pattern has recorded
    trials, so the information term is the same for every policy.
 
+11. **Retraction arrangements were directed by the alphabet, and k acts as a
+   vote count.** (a) `pattern-retraction/render-tree` emits each edge with
+   its endpoints sorted by name; `cascade-shape-g/normalize-edge` read the
+   first as "from" and ignored the recorded authored direction, so every
+   retraction's ordering, roots, first action and risk followed pattern
+   names. claude-17 prompted the check. Fixed in 3a247262a: authored
+   direction is kept, any other graph edge is an overlap. Of 98 edges in
+   the 16 lab retractions, 22 have an authored direction. (b) After the
+   fix most retractions have no ordering at all, every unit is a root, and
+   G scores them well below the chain read from the same text (0.89-1.04
+   against 1.66-2.05): the model rewards attempting everything at once and
+   nothing in it says whether that is possible. (c) The exact scorer
+   enumerates subsets of the enabled frontier; three retractions with 13
+   roots exhausted the heap (cascade_model_manifest.clj:396). In the
+   serving JVM that would be an out-of-memory, not a refusal. (d) The
+   retraction tool returns k near-copies at nearly equal cost for every k
+   measured (3, 6, 10; claude-17,
+   futon3c/holes/excursions/E-象-spec-wiring.md), and the selector pools
+   probability over policies sharing a first action, so k decided the
+   seven-target choice. k is a default with no stated source. Joe
+   (2026-09-30): the pooling question is premature until the cascades and
+   their specification can be seen; see the post at
+   zone.hyperreal.enterprises/2026-09-30-what-a-cascade-is.html. (e) Joe,
+   reading that post: the M-web-arxana-ui-improvements "HEAD" is the
+   template's definition of a HEAD, not a HEAD; its six policies should
+   not exist. Level: model gap. Owner: selection. Negative tests: renaming
+   patterns leaves roots and G unchanged (3a247262a); a frontier too wide
+   to enumerate is a typed refusal (owed); a template-only HEAD is a
+   counted failure with an empty policy set (owed).
+
 ### The critical parameters, and their values at click 20
 
 | Parameter | Design | Click 20 (record) |

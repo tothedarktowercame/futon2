@@ -31,9 +31,7 @@
                     _ (registry/publish! root {:target-id t :source-path (get-in req [:task :file_path])
                                                :excerpt-digest d :source-file-digest (get-in req [:task :content_sha256])
                                                :request req :analysis a :validator-version 1})
-                    family (fam/policy-family {:reading (registry/current-reading root t d) :graph graph})
-                    r (sel/select-over-families [family] {:beta 1 :enactment-fold nil :novelty-inputs {}})
-                    by-id (into {} (map (juxt :policy-id identity)) (:ranked r))]
+                    family (fam/policy-family {:reading (registry/current-reading root t d) :graph graph})]
                 {:target t :source_path (get-in req [:task :file_path]) :source_kind (get-in req [:task :source_kind])
                  :source_text (:source_text req)
                  :fragments (vec (map-indexed (fn [i f] {:index i :text (:text f) :relations (:relations f)
@@ -44,20 +42,24 @@
                  :failures (:failures family) :retraction_params (get-in family [:provenance :retraction])
                  :policies
                  (mapv (fn [p]
-                         (let [e (by-id (:policy-id p))
-                               {:keys [units descent patterns]} (get-in e [:action :precedence :co-apply])
-                               arr (get-in e [:action :arrangement])]
+                         (let [cand (sg/arranged->candidate t (:policy-id p) (:cascade p))
+                               {:keys [units descent patterns]} (get-in cand [:precedence :co-apply])
+                               arr (:arrangement cand)
+                               roots (vec (remove (set (map second descent)) units))
+                               too-wide? (> (count roots) 10)
+                               sc (when-not too-wide? (sg/score-policy p))]
                            {:policy_id (:policy-id p) :kind (name (:kind p))
                             :units (mapv (fn [u] {:id (s u) :pattern (str (:pattern-id (patterns u)))
-                                                  :fragment (when (vector? u) (second u))
-                                                  :theta (str (:theta (patterns u)))
-                                                  :theta_status (name (get-in (patterns u) [:theta-record :status] :unknown))}) units)
+                                                  :fragment (when (vector? u) (second u))}) units)
                             :descent (mapv (fn [[a b]] [(s a) (s b)]) descent)
-                            :edges (mapv (fn [ed] {:from (s (:from ed)) :to (s (:to ed)) :kind (name (or (:kind ed) :precedes))}) (:edges arr))
+                            :edges (mapv (fn [ed] {:from (s (:from ed)) :to (s (:to ed)) :kind (name (or (:kind ed) :precedes))
+                                                   :graph_kind (some-> (or (:kind-used ed) (:graph-kind ed)) name)}) (:edges arr))
                             :raw_edges (when (= :retraction (:kind p)) (get-in p [:cascade :edges]))
-                            :roots (mapv s (remove (set (map second descent)) units))
-                            :F (:f e) :G (:controller-score e) :g_terms (select-keys (get-in e [:certificate :g-terms]) [:risk :ambiguity :expected-information-gain])
-                            :horizon (:horizon-steps e)}))
+                            :unit_order_rule (some-> (get-in p [:cascade :unit-order-rule]) name)
+                            :roots (mapv s roots)
+                            :score_status (if too-wide? "not-computed-frontier-too-wide" (name (:status sc)))
+                            :F (:f sc) :G (:g sc)
+                            :g_terms (when sc {:risk (:risk sc) :ambiguity (:ambiguity sc) :expected-information-gain (:information-gain sc)})}))
                        (:policies family))}))
             stems)]
        (spit "/tmp/claude-1/post/examples.json"
