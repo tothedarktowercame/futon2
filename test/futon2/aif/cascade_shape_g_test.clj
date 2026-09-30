@@ -1,6 +1,7 @@
 (ns futon2.aif.cascade-shape-g-test
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.analysis-cascade :as analysis]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.cascade-observation-scoring :as scorer]
@@ -66,18 +67,34 @@
 
 (declare fit-analysis)
 
-(deftest repeated-pattern-citations-are-one-node
-  (let [cascade {:nodes [{:pattern "p/a" :fragment-index 1}
-                         {:pattern "p/a" :fragment-index 4}]
-                 :edges [{:from "p/a" :to "p/a" :kind :precedes
-                          :from-fragment 1 :to-fragment 4}]}
-        candidate (shape-g/arranged->candidate "t" "repeated" cascade)
-        [pattern-node] (vals (get-in candidate [:precedence :co-apply :patterns]))
-        fit (shape-g/fit-evidence cascade (fit-analysis ["p/a" "p/a"]))]
-    (is (= 1 (count (get-in candidate [:precedence :co-apply :patterns]))))
-    (is (= "p/a" (:occurrence-id pattern-node)))
-    (is (= 2 (count (get-in fit [:nodes 0 :reading-evidence])))
-        "fragment multiplicity strengthens fit evidence, not execution length")))
+(deftest repeated-pattern-citations-remain-ordered-occurrences
+  (let [a (fit-analysis ["p/a" "p/b" "p/a"])
+        cascade (first (:cascades (analysis/analysis->cascades a)))
+        score (with-redefs [ledger/pattern-theta
+                            (fn [_] {:status :no-recorded-trials})]
+                (shape-g/score-arranged "t" "repeated" cascade))
+        co (get-in score [:candidate :precedence :co-apply])
+        raw-info (get-in score [:scorer-result 0 :certificate :g-terms
+                                :raw :expected-information-gain])
+        roots (remove (set (map second (:descent co))) (:units co))]
+    (is (= [["p/a" 0] ["p/b" 1] ["p/a" 2]] (:units co)))
+    (is (= [[["p/a" 0] ["p/b" 1]]
+            [["p/b" 1] ["p/a" 2]]]
+           (:descent co)))
+    (is (= [["p/a" 0]] (vec roots)))
+    (is (= 3 (count (:patterns co))))
+    (is (Double/isFinite (double (:g score))))
+    (is (== 2.0 (/ raw-info (:information-gain score)))
+        "parameter information is normalized by two distinct pattern ids")))
+
+(deftest cyclic-arrangement-is-refused-before-scoring
+  (let [cascade {:nodes [{:pattern "p/a"} {:pattern "p/b"}]
+                 :edges [{:from "p/a" :to "p/b" :kind :precedes}
+                         {:from "p/b" :to "p/a" :kind :precedes}]}
+        result (shape-g/score-arranged "t" "cycle" cascade)]
+    (is (= :refused (:status result)))
+    (is (= :cyclic-arrangement (:kind result)))
+    (is (= (first (:cycle result)) (last (:cycle result))))))
 
 (defn- fit-analysis [accepted-patterns]
   {:sentences [{:fragments (mapv (fn [i p]

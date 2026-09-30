@@ -34,21 +34,57 @@
    :to (or (:to edge) (:b edge))
    :kind (or (:kind edge) (:kind_used edge) (:kind-used edge) :precedes)})
 
+(defn- node-occurrence-id [node]
+  (let [pattern (or (:pattern node) (:id node) node)]
+    (or (:occurrence-id node)
+        (when (and (map? node) (contains? node :fragment-index))
+          [pattern (:fragment-index node)])
+        pattern)))
+
 (defn- occurrence-arrangement [{:keys [nodes edges]}]
-  (let [by-pattern (group-by #(or (:pattern %) (:id %) %) nodes)
-        patterns (vec (distinct (map #(or (:pattern %) (:id %) %) nodes)))
-        occurrences
-        (mapv (fn [pattern]
-                (let [citations (get by-pattern pattern)]
-                  {:occurrence-id pattern :pattern pattern
-                   :roles (vec (distinct (mapcat :roles (filter map? citations))))
-                   :fragment-indices (vec (distinct (keep :fragment-index
-                                                          (filter map? citations))))}))
-              patterns)
+  (let [occurrences
+        (mapv (fn [node]
+                (let [pattern (or (:pattern node) (:id node) node)]
+                  {:occurrence-id (node-occurrence-id node) :pattern pattern
+                   :roles (vec (distinct (:roles node)))
+                   :fragment-indices (vec (keep identity [(:fragment-index node)]))}))
+              nodes)
+        by-pattern-fragment
+        (into {} (for [node nodes :when (and (map? node)
+                                             (contains? node :fragment-index))]
+                   [[(or (:pattern node) (:id node)) (:fragment-index node)]
+                    (node-occurrence-id node)]))
+        occurrence-ids (set (map :occurrence-id occurrences))
+        endpoint (fn [edge side]
+                   (let [pattern (get edge side)
+                         fragment (get edge (keyword (str (name side) "-fragment")))]
+                     (or (get by-pattern-fragment [pattern fragment])
+                         (when (occurrence-ids pattern) pattern)
+                         pattern)))
         occurrence-edges
-        (->> edges (map normalize-edge) (remove #(= (:from %) (:to %))) distinct vec)]
+        (->> edges
+             (map #(merge % (normalize-edge %)))
+             (map #(assoc % :from (endpoint % :from) :to (endpoint % :to)))
+             distinct vec)]
     {:nodes occurrences :edges occurrence-edges
      :precedence (mapv :occurrence-id occurrences)}))
+
+(defn- directed-cycle [nodes edges]
+  (let [outgoing (group-by :from (remove #(= :overlap (:kind %)) edges))
+        found (volatile! nil)
+        state (atom {})]
+    (letfn [(visit [node path]
+              (when-not @found
+                (case (get @state node)
+                  :done nil
+                  :visiting (let [start (.indexOf ^java.util.List path node)]
+                              (vreset! found (conj (subvec path start) node)))
+                  (do (swap! state assoc node :visiting)
+                      (doseq [edge (get outgoing node)]
+                        (visit (:to edge) (conj path node)))
+                      (swap! state assoc node :done)))))]
+      (doseq [node nodes] (visit node []))
+      @found)))
 
 (defn- topo-order [nodes edges fallback]
   (let [ids (set nodes)
@@ -139,13 +175,18 @@
   evidence; production-shaped callers normally use the declared ledger."
   ([target id cascade] (score-arranged target id cascade nil))
   ([target id cascade ledger-root]
-   (let [read-theta ledger/pattern-theta
+   (let [occurrence-shape (occurrence-arrangement cascade)
+         cycle (directed-cycle (mapv :occurrence-id (:nodes occurrence-shape))
+                               (:edges occurrence-shape))]
+     (if cycle
+       {:status :refused :kind :cyclic-arrangement :cycle cycle
+        :policy-id id :target target}
+       (let [read-theta ledger/pattern-theta
          candidate (if ledger-root
                      (with-redefs [ledger/pattern-theta #(read-theta % ledger-root)]
                        (arranged->candidate target id cascade))
                      (arranged->candidate target id cascade))
          patterns (candidate-patterns candidate)
-         occurrence-shape (occurrence-arrangement cascade)
          terminals (terminal-patterns occurrence-shape)
          acceptance (set (map #(done-token target %) terminals))
          universe (set (mapcat (fn [p]
@@ -187,7 +228,7 @@
                  :scorer-result ranked}]
      (if (and entry (Double/isFinite (double (:g result))))
        result
-       (assoc result :status :refused :reason (or (:kind ranked) :non-finite-g))))))
+       (assoc result :status :refused :reason (or (:kind ranked) :non-finite-g))))))))
 
 (defn read-json [path]
   (json/parse-string (slurp path) true))
@@ -255,8 +296,10 @@
   "Score one materialized policy, attaching circumstance fit as F and adding
   its stated uncertainty to the scorer's ambiguity term."
   [policy]
-  (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy))
-        fit (fit-evidence (:cascade policy) (:analysis policy))
+  (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy))]
+    (if (= :refused (:status base))
+      base
+      (let [fit (fit-evidence (:cascade policy) (:analysis policy))
         ambiguity (+ (double (:ambiguity base)) (:fit-ambiguity fit))
         g (- (+ (double (:risk base)) ambiguity)
              (double (:information-gain base)))
@@ -268,7 +311,7 @@
            :scorer-g (:g base) :scorer-ambiguity (:ambiguity base)
            :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
            :selection-candidate carrier
-           :selection-law (selection/law-receipt [carrier]))))
+           :selection-law (selection/law-receipt [carrier]))))))
 
 (defn policy-shape-stats [policy]
   (let [candidate (arranged->candidate (:target policy) (:policy-id policy)

@@ -72,10 +72,19 @@
          (fn [family]
            (let [target (:target-id family)
                  ready? (= :computed (:status family))
-                 scored (if ready?
-                          (mapv (fn [p] [p (shape-g/score-policy p)]) (:policies family))
-                          [])
-                 failures (mapv #(annotate-failure target %) (:failures family))]
+                 attempted (if ready?
+                             (mapv (fn [p] [p (shape-g/score-policy p)]) (:policies family))
+                             [])
+                 scored (filterv #(= :computed (:status (second %))) attempted)
+                 score-failures
+                 (mapv (fn [[p score]]
+                         (annotate-failure
+                          target (merge {:kind (or (:kind score) :policy-scoring-refused)
+                                         :policy-id (:policy-id p)}
+                                        (select-keys score [:cycle :reason]))))
+                       (remove #(= :computed (:status (second %))) attempted))
+                 failures (into (mapv #(annotate-failure target %) (:failures family))
+                                score-failures)]
              {:target-id target
               :distinct-count (:distinct-count family)
               :scored scored

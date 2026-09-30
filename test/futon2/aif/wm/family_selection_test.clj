@@ -100,3 +100,23 @@
     (is (= #{["T-a" :no-current-target-reading]
              ["T-b" :stale-target-reading]}
            (set (map (juxt :target-id :kind) (:failures result)))))))
+
+(deftest cyclic-policy-is-counted-and-never-ranked
+  (let [cyclic-policy (assoc (fixture-policy "T-cycle" 0)
+                             :cascade {:nodes [{:pattern "p/a"} {:pattern "p/b"}]
+                                       :edges [{:from "p/a" :to "p/b" :kind :precedes}
+                                               {:from "p/b" :to "p/a" :kind :precedes}]})
+        cyclic-family {:status :computed :target-id "T-cycle"
+                       :policies [cyclic-policy] :distinct-count 1
+                       :failures [] :failure-count 0}
+        result (sut/select-over-families [cyclic-family (computed-family "T-ready" 1)]
+                                         {:beta 1 :enactment-fold nil
+                                          :novelty-inputs {}})]
+    (is (= :selected (:status result)))
+    (is (= 1 (count (:ranked result))))
+    (is (= "T-ready" (get-in result [:decision :action :target])))
+    (is (= 1 (:failure-count result)))
+    (is (= :cyclic-arrangement (get-in result [:failures 0 :kind])))
+    (is (= "T-cycle" (get-in result [:failures 0 :target-id])))
+    (is (= (first (get-in result [:failures 0 :cycle]))
+           (last (get-in result [:failures 0 :cycle]))))))
