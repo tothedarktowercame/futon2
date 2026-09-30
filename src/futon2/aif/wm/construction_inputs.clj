@@ -31,7 +31,9 @@
     input))
 
 (defn assemble-cascade-problems
-  "Assemble the tick's sources and retain its mission-hole census unchanged.
+  "Assemble the tick's sources, including per-target :query-time-slices,
+  and retain its mission-hole census unchanged. A slice remains available to
+  cascade-problems even when its target has no interpretation operators yet.
   Supplied sources without a census are marked absent, never recomputed from
   today's mission files. Admission refusals remain on the same assembly."
   [{:keys [sources] :as input}]

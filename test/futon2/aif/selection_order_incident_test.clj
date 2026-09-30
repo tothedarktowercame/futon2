@@ -22,8 +22,8 @@
 
 (defn fixture-input
   "Five open targets with query-time library candidates and deliberately no
-   published target-specific interpretation.  :library-slices is the input
-   the incident says must enter construction; today's assembly ignores it."
+   published target-specific interpretation.  :query-time-slices is the input
+   the incident says must enter construction and assembly must retain it."
   []
   {:targets targets
    :sources
@@ -35,7 +35,16 @@
                                :work/closed {:class :C4 :fixture true}}])
                          targets))
     :interpretations (into {} (map (fn [t] [t {:patterns {} :receipts {}}]) targets))
-    :library-slices (into {} (map (fn [t] [t library-slice]) targets))
+    :query-time-slices
+    (into {} (map (fn [t]
+                    [t {:schema :wm/query-time-library-slice-v1
+                        :target t
+                        :query "close the target"
+                        :candidates library-slice
+                        :failures []
+                        :slice-size (count library-slice)
+                        :library-size 100}])
+                  targets))
     :horizon-steps 2
     :beta-by-context {:WM {:beta 1}}
     :context-of (constantly :WM)}})

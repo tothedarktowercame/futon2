@@ -16,10 +16,10 @@
 
   Refusal kinds, first applicable wins:
     1 :universe-not-admitted        no admitted fact universe for the target
-    2 :no-admitted-interpretation   no admitted interpretations (or a
-                                    candidate pattern without one); the
-                                    failing clause is included when the
-                                    source gives one
+    2 :no-query-time-slice         neither admitted interpretations nor a
+                                    query-time library slice for the target
+      :no-admitted-interpretation   a constructed candidate names a pattern
+                                    without an admitted interpretation
     3 :want-not-declared            no want for the target
     4 :no-constructed-candidate     no constructed cascade (a non-empty
                                     precedence carrying a construction
@@ -146,6 +146,7 @@
   (let [universe (get-in sources [:universes target])
         interp (get-in sources [:interpretations target])
         patterns (:patterns interp)
+        slice (get-in sources [:query-time-slices target])
         want (get-in sources [:wants target])
         scales (or (get-in sources [:preference-scales target])
                    (live-c/preference-scales {}))
@@ -173,7 +174,8 @@
                       :beta beta
                       :locators locators
                       :token-initialization (get-in sources [:token-initialization target])}]
-    problem))
+    (cond-> problem
+      (and (map? slice) (not (seq patterns))) (assoc :query-time-slice slice))))
 
 (defn base-problem
   "Assemble the candidate-independent problem, or its first typed refusal:
@@ -181,16 +183,16 @@
    assemble-one's responsibility; no precedences are invented here."
   [sources horizon target]
   (let [problem (base-problem-data sources horizon target)
-        {:keys [facts interpretations want beta locators]} problem
-        unlocated (when (and (map? facts) (map? interpretations))
+        {:keys [facts interpretations query-time-slice want beta locators]} problem
+        unlocated (when (and (map? facts)
+                             (or (map? interpretations) (map? query-time-slice)))
                     (unlocated-tokens locators (problem-tokens facts want interpretations)))]
     (cond
       (not (and (map? facts) (seq facts)))
       (refusal target :universe-not-admitted :universes)
-      (not (and (map? interpretations) (seq interpretations)))
-      (refusal target :no-admitted-interpretation :interpretations
-               (when-let [clause (get-in sources [:interpretations target :refused :clause])]
-                 {:clause clause}))
+      (and (not (and (map? interpretations) (seq interpretations)))
+           (not (map? query-time-slice)))
+      (refusal target :no-query-time-slice :query-time-slices)
       (not (and (sequential? (get-in sources [:wants target])) (seq want)))
       (refusal target :want-not-declared :wants)
       unlocated
@@ -210,6 +212,11 @@
         universe (:facts base)
         interp (get-in sources [:interpretations target])
         patterns (:interpretations base)
+        slice (:query-time-slice base)
+        slice-pool (mapv #(select-keys % [:pattern :slice-rank :rank :retriever-rank
+                                          :retriever :provenance :raw :judgment])
+                         (:candidates slice))
+        slice-patterns (mapv :pattern slice-pool)
         want (get-in sources [:wants target])
         beta (:beta base)
         ctx-fn (:context-of sources)
@@ -236,16 +243,16 @@
         ;; admitted interpretation.
         uninterpreted (seq (remove (set (keys patterns))
                                    (distinct (mapcat :precedence constructed))))
-        unlocated (when (and (map? universe) (map? patterns))
+        unlocated (when (and (map? universe)
+                             (or (map? patterns) (map? slice)))
                     (unlocated-tokens locators (problem-tokens universe want patterns)))]
     (cond
       (not (and (map? universe) (seq universe)))
       (refusal target :universe-not-admitted :universes)
 
-      (not (and (map? patterns) (seq patterns)))
-      (refusal target :no-admitted-interpretation :interpretations
-               (when-let [clause (:clause (:refused interp))]
-                 {:clause clause}))
+      (and (not (and (map? patterns) (seq patterns)))
+           (not (map? slice)))
+      (refusal target :no-query-time-slice :query-time-slices)
 
       uninterpreted
       (refusal target :no-admitted-interpretation :interpretations
@@ -262,6 +269,25 @@
       unlocated
       (refusal target :universe-not-admitted :locators
                {:tokens-without-checkable-locator (vec unlocated)})
+
+      (and (not (seq patterns)) (map? slice) (nil? beta))
+      (refusal target :beta-not-declared :beta-by-context
+               {:context (when (ifn? ctx-fn) (ctx-fn target))})
+
+      (and (not (seq patterns)) (map? slice))
+      {:target target
+       :cascade-problem
+       (assoc base
+              :precedences []
+              :pattern-pool slice-pool
+              :pattern-operators {:status :absent
+                                  :reason :interpretation-owed-after-selection
+                                  :patterns slice-patterns})
+       :constructed-candidates []
+       :interpretation-receipts {}
+       :query-time-slice slice
+       :slice-size (:slice-size slice)
+       :library-size (:library-size slice)}
 
       (and (empty? constructed) (:construction-refusal built))
       (refusal target :no-constructed-candidate :construction
@@ -300,6 +326,8 @@
     {:targets [target …]            mission/ticket identities
                                       (see `substrate-targets`)
      :sources {:universes {target {fact true|false|:unknown}}
+               :query-time-slices {target {:candidates [{:pattern pattern-id …}]
+                                            :slice-size n :library-size n}}
                :interpretations {target {:patterns {pattern-id
                                             {:guard {:needs #{} :forbids #{}}
                                              :produces #{}}}

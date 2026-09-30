@@ -111,17 +111,13 @@
                                                      :sources (dissoc full-sources
                                                                       :universes)})))))
       "the refusal records which source was absent")
-  ;; 2 :no-admitted-interpretation — with the failing clause when given
+  ;; 2 :no-query-time-slice — without either interpretation operators or
+  ;; a retrieved library slice, assembly names the input now required.
   (let [r (assemble* {:targets [target]
-                        :sources (-> full-sources
-                                     (assoc-in [:interpretations target]
-                                               {:patterns {}
-                                                :refused {:clause
-                                                          "D3 not approved: f⁺ over observed f⁻"}}))})]
-    (is (= [:no-admitted-interpretation] (kinds r)))
-    (is (= "D3 not approved: f⁺ over observed f⁻"
-           (get-in (first (:refusals r)) [:clause]))
-        "the failing clause from the source is included"))
+                      :sources (assoc-in full-sources
+                                         [:interpretations target :patterns] {})})]
+    (is (= [:no-query-time-slice] (kinds r)))
+    (is (= :query-time-slices (get-in r [:refusals 0 :missing]))))
   ;; 2 also fires for a candidate pattern with no admitted interpretation
   (is (= [:no-admitted-interpretation]
          (kinds (assemble*
@@ -267,7 +263,7 @@
     (is (some? (:constructor-refusal (first refusals))))))
 
 (deftest base-problem-extraction-preserves-assembly
-  ;; Captured from the unmodified assembly at 90af94845c, before HG2-Ic.
+  ;; Captured assembly shape, updated by S2 only for the typed missing-slice refusal.
   ;; Includes competing missing-candidate / missing-beta refusals.
   (let [s (locfix/locate-all full-sources)
         variants [s (dissoc s :universes) (dissoc s :interpretations)
@@ -276,12 +272,56 @@
         printed (pr-str (mapv #(cp/assemble {:sources % :targets [target]}) variants))
         digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
                         (.getBytes printed "UTF-8"))]
-    (is (= "38f8b5d4a53e8494a5c29a14df0672b54d4db5ce83d2f6d594f8f2f9f9e1b28c"
+    (is (= "163ebd2771963294e582feb81266feffb990804fe8f1f07cfc5c22195158047c"
            (apply str (map #(format "%02x" %) digest))))
     (is (= (dissoc (get-in (cp/assemble {:sources s :targets [target]})
                            [:problems 0 :cascade-problem]) :precedences)
            (cp/base-problem s 3 target)))
-    (is (= [:universe-not-admitted :no-admitted-interpretation :want-not-declared
+    (is (= [:universe-not-admitted :no-query-time-slice :want-not-declared
             :beta-not-declared]
            (mapv #(:kind (cp/base-problem (dissoc s %) 3 target))
                  [:universes :interpretations :wants :beta-by-context])))))
+
+
+(deftest query-time-slices-survive-assembly-before-interpretation
+  (let [targets (mapv #(keyword (str "slice-target-" %)) (range 5))
+        slice-for (fn [t]
+                    {:schema :wm/query-time-library-slice-v1
+                     :target t :query "close target"
+                     :candidates [{:pattern :library/inspect :slice-rank 1
+                                   :retriever "embedding" :retriever-rank 1
+                                   :provenance {:source :fixture}
+                                   :judgment :unjudged}]
+                     :failures [] :slice-size 1 :library-size 1415})
+        sources (-> full-sources
+                    (assoc :universes (into {} (map (fn [t] [t universe]) targets))
+                           :interpretations (into {} (map (fn [t] [t {:patterns {}}]) targets))
+                           :query-time-slices (into {} (map (fn [t] [t (slice-for t)]) targets))
+                           :wants (into {} (map (fn [t] [t want]) targets))
+                           :candidates {}
+                           :context-of (constantly :tick-1)))
+        assembled (assemble* {:targets targets :sources sources})]
+    (is (empty? (:refusals assembled)))
+    (is (= targets (mapv :target (:problems assembled))))
+    (is (= (repeat 5 1) (map :slice-size (:problems assembled))))
+    (is (= (repeat 5 1415) (map :library-size (:problems assembled))))
+    (is (every? #(= :interpretation-owed-after-selection
+                    (get-in % [:cascade-problem :pattern-operators :reason]))
+                (:problems assembled)))
+    (is (every? #(= [:library/inspect]
+                    (mapv :pattern (get-in % [:cascade-problem :pattern-pool])))
+                (:problems assembled)))
+    (is (every? #(= {:source :fixture}
+                    (get-in % [:cascade-problem :pattern-pool 0 :provenance]))
+                (:problems assembled)))))
+
+(deftest interpretation-backed-assembly-is-unchanged-by-slice-support
+  (let [before (assemble* {:targets [target] :sources full-sources})
+        with-unread-slice
+        (assemble* {:targets [target]
+                    :sources (assoc-in full-sources [:query-time-slices target]
+                                       {:schema :wm/query-time-library-slice-v1
+                                        :target target :query "unused"
+                                        :candidates [{:pattern :library/not-admitted}]
+                                        :failures [] :slice-size 1 :library-size 1})})]
+    (is (= before with-unread-slice))))
