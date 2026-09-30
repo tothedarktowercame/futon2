@@ -154,6 +154,44 @@ already defined?" The framing is withdrawn. The answers:
   the background), and the interpretation for the chosen target, made after
   selection, updates it.
 
+### The domain of G (Joe, 2026-09-30) — governing statement
+
+Joe: "G is defined over policies, and policies are cascades. ... G should be
+defined over cascades full stop. If it goes via an interpretation that is an
+implementation detail which I prefer to leave to you. But the domain of
+definition is pattern cascades (which have multiple patterns in them in a
+specific geometric arrangement)."
+
+Requirement: **G is total on pattern cascades.** Every cascade that can be
+formed from library patterns for a problem has a G. There is no cascade for
+which G is "missing input", and none is kept out of the policy set because
+some piece of machinery has not run for it yet. G depends on the
+arrangement of the patterns (which stand on which, which overlap, their
+precedence), not only on which patterns are present; the Lean already says
+a composition-blind score cannot separate what cascade G separates
+(`GOverCascades`, `compositionBlind_cannot_separate`).
+
+Implementation decision (claude-1's, as delegated): G for a cascade is
+computed from each pattern's documented meaning, composed according to the
+cascade's arrangement. The interpretation of the chosen cascade's patterns
+for the chosen target happens after selection and refines the belief; it is
+never a precondition for a cascade having a G. How a pattern's documented
+meaning is read into the computation is settled with the selection and
+controller owners and with M-象-cascade's owner; it does not come back to
+Joe as a question.
+
+Consequences:
+- Selection handoff 4 is: make G total over the constructed cascades.
+  Negative test: any cascade the constructor can form from the slice has a
+  numeric G; a typed "no G" for a constructible cascade fails.
+- Lean: G's domain is the cascades constructed over the library, with no
+  absence case in the domain. `ObservedInterpretation`'s `absent` case and
+  the `:class-unknown-no-scalar-g` refusal are where the current model
+  makes G partial; both are findings for the controller owner's audit.
+- claude-1's earlier wording "a cascade whose pattern has no
+  interpretation" described a one-pattern cascade; cascades have several
+  patterns in an arrangement, and the policy set is many such cascades.
+
 ### How large the policy set has ever been (from all run records)
 
 Joe: "whoever fed cascadePolicySet with the degenerate badly designed system
