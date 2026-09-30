@@ -72,14 +72,11 @@ existing list-based rollout fold the resulting transitions. The shape is
 therefore observable to G, but shared substructure is still replayed through
 a list.
 
-Repeated citations are represented as **separate node occurrences**. An
-occurrence is identified by pattern, fragment, and position; each occurrence
-gets its own done token while all occurrences of a pattern read the same
-pattern-level theta. This retains the reading's nine nodes for
-M-self-documenting-stack, including five mission-scoping occurrences. Treating
-them as one node would shorten the rollout, collapse relations from distinct
-fragments, and change G; the first implementation did that silently, and this
-correction removes it.
+Repeated citations are represented as **one pattern node** with several fit
+evidence entries. Thus M-self-documenting-stack's five mission-scoping
+citations strengthen that node's fit receipt without requiring the same
+pattern to succeed five times. Edges between two citations of that same
+pattern become internal fit evidence rather than self-dependencies.
 
 Rejected patterns remain available adjustments, but are not counted here:
 the artifacts do not state whether a rejection should replace a particular
@@ -87,7 +84,7 @@ accepted occurrence or be added at a particular relation. Counting the
 annotation fork as a policy was the original error. A later constructor must
 materialise the actual swap/add structure before it can be scored.
 
-## Results
+## S4 results before the S5a information amendment
 
 The “initial” row is the first distinct fragment-derived arrangement in the
 stable artifact order. Lower G is preferred.
@@ -128,6 +125,47 @@ fragment evidence, that policy has lower F and G than the same two-node edge
 with its connector never read against the circumstance. The latter records
 that connector under `:interpretation-owed`; it is the concrete post-selection
 象 request, rather than a pre-selection admission condition.
+
+## S5a: parameter information enters G
+
+`cascade_observation_scoring.clj` now records and consumes
+`G = risk + ambiguity - expected-information-gain`. Information therefore has
+the preference-increasing sign: an otherwise identical unexplored policy has
+lower G. The Beta information kernel is the existing
+`parameter_novelty/beta-information`; distinct patterns are counted once even
+when several fragments cite one pattern. This implements Requirements Q4's
+three booleans (`Requirements.lean:148-149`). The closest existing Lean
+decomposition is `GNonPointMassDecomposition.lean:59-63`, while
+`EpistemicValue.lean:16-44` explicitly distinguishes state information already
+inside risk+ambiguity from parameter novelty. The controller owner therefore
+needs a theorem for the extended law: subtracting nonnegative expected
+parameter information from the existing cascade EFE, plus the paired result
+that larger information lowers G when risk and ambiguity are equal.
+
+Across the 33 policies, term ranges are: risk **0.387251–4.637124**;
+ambiguity (including circumstance-fit ambiguity) **0.425083–15.757219**;
+expected information gain **0.306853–5.830204**. Every certificate satisfies
+the stated combination within 1e-12.
+
+| mission | minimizing adjustment | patterns / nodes / longest chain | F | risk | ambiguity | information | G |
+|---|---|---:|---:|---:|---:|---:|---:|
+| M-象-2000 | alternatives-5 | 8 / 8 / 8 | 1.381881 | 4.426403 | 3.400664 | 2.454823 | 5.372244 |
+| M-metric-harness | alternatives-1 | 10 / 10 / 9 | 1.746752 | 4.637124 | 4.250830 | 3.068528 | 5.819426 |
+| M-distributed-proofreaders | alternatives-1 | 3 / 3 / 3 | 1.260543 | 0.387251 | 1.275249 | 0.920558 | 0.741942 |
+| M-web-arxana-ui-improvements | overlap-1 | 2 / 2 / 1 | 0.903868 | 0.544266 | 0.850166 | 0.613706 | 0.780726 |
+| M-self-documenting-stack | retraction-3 | 5 / 5 / 2 | 1.807736 | 1.625415 | 2.893479 | 1.534264 | 2.984630 |
+| M-war-machine-aif-completion | alternatives-3 | 9 / 9 / 7 | 1.870966 | 4.531764 | 3.825747 | 2.761675 | 5.595835 |
+| M-essays-diachronic-model | alternatives-1 | 2 / 2 / 2 | 0.903868 | 0.544266 | 0.850166 | 0.613706 | 0.780726 |
+| M-value-creation-loop | alternatives-1 | 3 / 3 / 3 | 0.891446 | 3.074890 | 1.275249 | 0.920558 | 3.429581 |
+
+Joe's node-count inference is right. Spearman rank correlation between G and
+the reported node count was **0.855298** at commit `2c1d182be`; after collapsing
+repeat citations and consuming parameter information it is **0.937956**.
+S5a does not solve that cross-mission size bias. S5b must make C reward graded
+progress without enumerating the token powerset; its Lean obligation is Q9:
+a step-indexed preference schedule whose preference increases with progress
+and strictly prefers completion, together with the earlier-progress paired
+ordering.
 
 ## Reproduction
 

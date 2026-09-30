@@ -1,7 +1,8 @@
 (ns futon2.aif.cascade-shape-g-test
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.cascade-shape-g :as shape-g]))
+            [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.learning-trial-ledger :as ledger]))
 
 (def artifacts "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 
@@ -36,17 +37,20 @@
     (is (empty? (get-in pb [:guard :clauses 0 :present]))
         "overlap co-advances shared state; it is not an enabling edge")))
 
-(deftest repeated-pattern-citations-remain-separate-nodes
+(declare fit-analysis)
+
+(deftest repeated-pattern-citations-are-one-node
   (let [cascade {:nodes [{:pattern "p/a" :fragment-index 1}
                          {:pattern "p/a" :fragment-index 4}]
                  :edges [{:from "p/a" :to "p/a" :kind :precedes
                           :from-fragment 1 :to-fragment 4}]}
         candidate (shape-g/arranged->candidate "t" "repeated" cascade)
-        [first-occurrence second-occurrence] (:precedence candidate)]
-    (is (= 2 (count (:precedence candidate))))
-    (is (not= (:occurrence-id first-occurrence) (:occurrence-id second-occurrence)))
-    (is (contains? (get-in second-occurrence [:guard :clauses 0 :present])
-                   ["t" :pattern-done (:occurrence-id first-occurrence)]))))
+        [pattern-node] (:precedence candidate)
+        fit (shape-g/fit-evidence cascade (fit-analysis ["p/a" "p/a"]))]
+    (is (= 1 (count (:precedence candidate))))
+    (is (= "p/a" (:occurrence-id pattern-node)))
+    (is (= 2 (count (get-in fit [:nodes 0 :reading-evidence])))
+        "fragment multiplicity strengthens fit evidence, not execution length")))
 
 (defn- fit-analysis [accepted-patterns]
   {:sentences [{:fragments (mapv (fn [i p]
@@ -69,6 +73,19 @@
            (get-in unknown [:selection-law :law])))
     (is (= ["p/b"] (get-in unknown [:fit :interpretation-owed])))))
 
+(deftest unexplored-parameter-lowers-g
+  (let [cascade {:nodes [{:pattern "p/a"}] :edges []}
+        unexplored (with-redefs [ledger/pattern-theta
+                                (fn [_] {:status :no-recorded-trials})]
+                     (shape-g/score-arranged "t" "unexplored" cascade))
+        explored (with-redefs [ledger/pattern-theta
+                              (fn [_] {:status :recorded-trials :theta 1/2
+                                       :trials-count 20 :successes 10})]
+                   (shape-g/score-arranged "t" "explored" cascade))]
+    (is (< (:g unexplored) (:g explored))
+        "dropping the information subtraction makes this fail")
+    (is (> (:information-gain unexplored) (:information-gain explored)))))
+
 (deftest ^:slow all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
         results (mapv shape-g/score-policy policies)]
@@ -76,6 +93,10 @@
     (is (= 33 (count policies)))
     (is (= 33 (count (filter #(= :computed (:status %)) results))))
     (is (zero? (count (remove #(Double/isFinite (double (:g %))) results))))
+    (is (every? #(< (Math/abs (- (:g %) (+ (:risk %) (:ambiguity %)
+                                             (- (:information-gain %)))))
+                    1.0e-12)
+                results))
     (is (every? #(and (= :computed (:f-status %))
                       (Double/isFinite (double (:f %)))) results))
     (is (every? #(= (:horizon %) (count (:preference-at-each-step %))) results))))

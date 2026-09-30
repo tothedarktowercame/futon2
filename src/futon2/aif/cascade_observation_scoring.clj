@@ -6,7 +6,8 @@
    next prediction, not substituted into the prediction being evaluated."
   (:require [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]
-            [futon2.aif.observation-model :as om]))
+            [futon2.aif.observation-model :as om]
+            [futon2.aif.parameter-novelty :as novelty]))
 
 (def max-horizon 10)
 (def max-candidates 16)
@@ -88,6 +89,22 @@
               (and (contains? opts :zeta) (not= 1 (:zeta opts))))
       (om/refuse! :conflicting-observation-options {}))))
 
+(defn candidate-information-gain
+  "Expected information from one Bernoulli observation of each distinct
+  pattern parameter. A recorded-trials theta carries its Beta posterior;
+  an unexplored pattern carries the declared Jeffreys Beta(1/2,1/2) prior.
+  This is subtracted in G: information expected from acting favours acting."
+  [candidate]
+  (reduce + 0.0
+          (for [[_ p] (into {} (map (juxt #(or (:pattern-id %) (:id %)) identity)
+                                      (:precedence candidate)))
+                :let [r (:theta-record p)
+                      [a b] (if (= :recorded-trials (:status r))
+                              [(+ 1/2 (:successes r))
+                               (+ 1/2 (- (:trials-count r) (:successes r)))]
+                              [1/2 1/2])]]
+            (:nats (novelty/beta-information a b)))))
+
 (defn- score-candidate [q0 candidate opts preference]
   (let [{:keys [observation-model horizon-steps observation prediction-context
                 upstream-initialization-conditioning]} opts
@@ -111,7 +128,11 @@
         predicted (:belief (peek steps))
         conditioned (om/query observation-model {:op :condition :belief predicted
                                                  :observation observation :context prediction-context})
-        g (reduce + (map :g steps))
+        risk (reduce + 0.0 (map :risk steps))
+        ambiguity (reduce + 0.0 (map :ambiguity steps))
+        information-gain (if (= :beta-pattern (:parameter-information-mode opts))
+                           (candidate-information-gain candidate) 0.0)
+        g (- (+ risk ambiguity) information-gain)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
                :observation-model observation-model
@@ -145,6 +166,10 @@
                                                          :distribution (get-in preference [(:tau step) :distribution])}) steps)}
                              :c-source (or (get-in opts [:cascade-spec :c])
                                            {:absent :no-c-source-in-cascade-spec})
+                             :g-terms {:risk risk :ambiguity ambiguity
+                                       :expected-information-gain information-gain
+                                       :combination :risk-plus-ambiguity-minus-information-gain
+                                       :units :nats}
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (assoc conditioned :value (:f conditioned))}}]

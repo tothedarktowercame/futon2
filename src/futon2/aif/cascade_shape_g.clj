@@ -12,19 +12,17 @@
   Beta(1/2,1/2) prior when the learning ledger has no trials.  The existing
   scorer remains the authority for rollout, step-indexed C, risk, ambiguity,
   and G.  Parameter information is computed with parameter-novelty's
-  canonical Beta kernel and reported beside G; the existing scorer does not
-  consume that term.  This is therefore still the current list rollout, with
+  canonical Beta kernel and subtracted by the existing scorer. This remains a list rollout, with
   structure compiled into guards, rather than the future recursive fold."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [clojure.set :as set]
+            [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.analysis-cascade :as analysis]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
-            [futon2.aif.matched-observation-evidence :as matched]
-            [futon2.aif.parameter-novelty :as novelty]))
+            [futon2.aif.matched-observation-evidence :as matched]))
 
 (def ^:private class-universe
   [:focused :related :unrelated :stop-the-line :ending/not-yet-evaluated])
@@ -42,27 +40,18 @@
    :kind (or (:kind edge) (:kind_used edge) (:kind-used edge) :precedes)})
 
 (defn- occurrence-arrangement [{:keys [nodes edges]}]
-  (let [occurrences
-        (mapv (fn [i n]
-                (let [pattern (or (:pattern n) (:id n) n)]
-                  {:occurrence-id [pattern (or (:fragment-index n) i) i]
-                   :pattern pattern :roles (vec (:roles n))
-                   :fragment-index (:fragment-index n)}))
-              (range) nodes)
-        lookup (fn [pattern fragment]
-                 (or (:occurrence-id
-                      (first (filter #(and (= pattern (:pattern %))
-                                           (or (nil? fragment)
-                                               (= fragment (:fragment-index %))))
-                                     occurrences)))
-                     [pattern fragment 0]))
+  (let [by-pattern (group-by #(or (:pattern %) (:id %) %) nodes)
+        patterns (vec (distinct (map #(or (:pattern %) (:id %) %) nodes)))
+        occurrences
+        (mapv (fn [pattern]
+                (let [citations (get by-pattern pattern)]
+                  {:occurrence-id pattern :pattern pattern
+                   :roles (vec (distinct (mapcat :roles (filter map? citations))))
+                   :fragment-indices (vec (distinct (keep :fragment-index
+                                                          (filter map? citations))))}))
+              patterns)
         occurrence-edges
-        (mapv (fn [e]
-                (let [n (normalize-edge e)]
-                  (assoc n
-                         :from (lookup (:from n) (:from-fragment e))
-                         :to (lookup (:to n) (:to-fragment e)))))
-              edges)]
+        (->> edges (map normalize-edge) (remove #(= (:from %) (:to %))) distinct vec)]
     {:nodes occurrences :edges occurrence-edges
      :precedence (mapv :occurrence-id occurrences)}))
 
@@ -125,7 +114,7 @@
         all (set (map #(or (:occurrence-id %) (:pattern %) (:id %) %) nodes))
         sources (set (map :from (remove #(= :overlap (:kind %))
                                         (map normalize-edge edges))))]
-    (if (seq goal) goal (set/difference all sources))))
+    (if (seq goal) goal (cset/difference all sources))))
 
 (defn score-arranged
   "Return finite G and its recorded terms for one arranged cascade.
@@ -165,6 +154,7 @@
          ranked (scorer/rank-cascade-actions
                  {:cascade-belief {#{} 1}} [candidate]
                  {:horizon-steps horizon :observation-model model
+                  :parameter-information-mode :beta-pattern
                   :prediction-context {:occurrence-id (str id) :tau horizon}
                   :observation observation
                   :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
@@ -172,15 +162,7 @@
                                  :c-schedule (vec (range 1 (inc horizon)))}})
          entry (when (vector? ranked) (first ranked))
          steps (get-in entry [:certificate :steps])
-         priors (map :theta-record precedence)
-         information (reduce + 0.0
-                             (map (fn [r]
-                                    (let [[a b] (if (= :recorded-trials (:status r))
-                                                  [(+ 1/2 (:successes r))
-                                                   (+ 1/2 (- (:trials-count r) (:successes r)))]
-                                                  [1/2 1/2])]
-                                      (:nats (novelty/beta-information a b))))
-                                  priors))
+         information (get-in entry [:certificate :g-terms :expected-information-gain])
          result {:status (if entry :computed :refused)
                  :policy-id id :target target :candidate candidate
                  :horizon horizon :terminals terminals
@@ -220,7 +202,7 @@
                                    m (:pattern_refs f)))
                          {} (map-indexed vector fragments))
         rejected (set (map :id (mapcat :pattern_rejections fragments)))
-        patterns (mapv #(or (:pattern %) (:id %) %) (:nodes cascade))
+        patterns (vec (distinct (map #(or (:pattern %) (:id %) %) (:nodes cascade))))
         nodes (mapv (fn [pattern]
                       (let [evidence (get accepted pattern)
                             status (cond (seq evidence) :accepted
@@ -257,7 +239,8 @@
   (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy))
         fit (fit-evidence (:cascade policy) (:analysis policy))
         ambiguity (+ (double (:ambiguity base)) (:fit-ambiguity fit))
-        g (+ (double (:risk base)) ambiguity)
+        g (- (+ (double (:risk base)) ambiguity)
+             (double (:information-gain base)))
         computed-f {:status :computed :value (:f fit) :source :xiang-reading-fit
                     :evidence fit}
         carrier {:id (:policy-id policy) :habit 1.0 :g g :f (:f fit)
@@ -267,6 +250,21 @@
            :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
            :selection-candidate carrier
            :selection-law (selection/law-receipt [carrier]))))
+
+(defn policy-shape-stats [policy]
+  (let [candidate (arranged->candidate (:target policy) (:policy-id policy)
+                                       (:cascade policy))
+        nodes (vec (get-in candidate [:arrangement :nodes]))
+        edges (vec (get-in candidate [:arrangement :edges]))
+        precedence (vec (get-in candidate [:arrangement :precedence]))
+        incoming (group-by :to (remove #(= :overlap (:kind %)) edges))
+        depth (reduce (fn [d n]
+                        (assoc d n (inc (reduce max 0 (map #(get d (:from %) 0)
+                                                           (incoming n))))))
+                      {} precedence)]
+    {:distinct-patterns (count (set (map :pattern nodes)))
+     :nodes (count nodes)
+     :longest-dependency-chain (reduce max 0 (vals depth))}))
 
 (defn materialize-policies
   "Read S3c's fixed artifacts.  Returns both analysis arrangements and graph
