@@ -2,18 +2,17 @@
   "Score an arranged pattern cascade through the existing bounded scorer.
 
   This adapter is deliberately structural.  Each node produces its own done
-  token.  A directed non-overlap edge makes the destination require the
-  source's done token; an overlap edge gives both endpoints a shared token
-  which both operators produce.  Consequently equal node orders with
-  different edges generate different B operators before
+  token. Directed non-overlap edges become the descent relation of the
+  existing co-application kernel; an overlap edge gives both endpoints a
+  shared token which both operators produce. Consequently equal node orders
+  with different edges generate different transition distributions before
   cascade-observation-scoring/rank-cascade-actions evaluates them.
 
   Claude-1's modelling choices are the token reading above and the Jeffreys
   Beta(1/2,1/2) prior when the learning ledger has no trials.  The existing
   scorer remains the authority for rollout, step-indexed C, risk, ambiguity,
   and G.  Parameter information is computed with parameter-novelty's
-  canonical Beta kernel and subtracted by the existing scorer. This remains a list rollout, with
-  structure compiled into guards, rather than the future recursive fold."
+  canonical Beta kernel and subtracted by the existing scorer."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.set :as cset]
@@ -30,9 +29,6 @@
 (defn- done-token [target pattern] [target :pattern-done pattern])
 (defn- overlap-token [target a b]
   [target :overlap (vec (sort [(str a) (str b)]))])
-(defn- edge-token [target from to kind]
-  [target :edge-done from to kind])
-
 (defn- normalize-edge [edge]
   {:from (or (:from edge) (:a edge))
    :to (or (:to edge) (:b edge))
@@ -88,25 +84,30 @@
                          (overlap-token target from to)))
         theta-records (into {} (for [{:keys [pattern]} nodes]
                                  [pattern (ledger/pattern-theta (pattern-key pattern))]))
-        precedence
+        patterns
         (mapv (fn [occurrence-id]
                 (let [p (:pattern (by-id occurrence-id))
                       theta-rec (theta-records p)
                       theta (if (= :recorded-trials (:status theta-rec))
                               (:theta theta-rec) 1/2)
                       needs (set (map #(done-token target (:from %)) (incoming occurrence-id)))
-                      produces (into (conj (set (shared occurrence-id))
-                                           (done-token target occurrence-id))
-                                     (for [{:keys [from to kind]} (incoming occurrence-id)]
-                                       (edge-token target from to kind)))]
+                      produces (conj (set (shared occurrence-id))
+                                     (done-token target occurrence-id))]
                   {:id occurrence-id
                    :pattern-id p :occurrence-id occurrence-id :target target
                    :guard {:status :interpreted
                            :clauses [{:present needs :absent #{}}]}
                    :produces produces :theta theta :theta-record theta-rec}))
-              order)]
-    {:kind :cascade-candidate :id id :target target :precedence precedence
+              order)
+        pattern-map (into {} (map (juxt :id identity)) patterns)
+        descent (mapv (juxt :from :to) (remove #(= :overlap (:kind %)) edges))]
+    {:kind :cascade-candidate :id id :target target
+     :precedence {:co-apply {:units order :descent descent :patterns pattern-map}}
      :arrangement {:nodes nodes :edges edges :precedence order}}))
+
+(defn- candidate-patterns [candidate]
+  (let [{:keys [units patterns]} (get-in candidate [:precedence :co-apply])]
+    (mapv patterns units)))
 
 (defn- terminal-patterns [{:keys [nodes edges]}]
   (let [goal (set (for [n nodes
@@ -143,16 +144,16 @@
                      (with-redefs [ledger/pattern-theta #(read-theta % ledger-root)]
                        (arranged->candidate target id cascade))
                      (arranged->candidate target id cascade))
-         precedence (:precedence candidate)
+         patterns (candidate-patterns candidate)
          occurrence-shape (occurrence-arrangement cascade)
          terminals (terminal-patterns occurrence-shape)
          acceptance (set (map #(done-token target %) terminals))
          universe (set (mapcat (fn [p]
                                  (concat (:produces p)
                                          (mapcat :present (get-in p [:guard :clauses]))))
-                               precedence))
-         horizon (max 1 (min scorer/max-horizon (count precedence)))
-         progress-tokens (set (filter #(contains? #{:pattern-done :edge-done} (second %))
+                               patterns))
+         horizon (max 1 (min scorer/max-horizon (count patterns)))
+         progress-tokens (set (filter #(= :pattern-done (second %))
                                       universe))
          preference (progress-preference (count progress-tokens) horizon)
          model {:schema :wm/observation-model-v1 :backend :exact-enumeration

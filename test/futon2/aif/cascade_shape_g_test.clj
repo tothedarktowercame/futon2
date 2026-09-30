@@ -1,6 +1,7 @@
 (ns futon2.aif.cascade-shape-g-test
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.learning-trial-ledger :as ledger]))
@@ -29,11 +30,36 @@
                   ((juxt :g :risk :ambiguity :information-gain) r)))
       (is (= (:horizon r) (count (:preference-at-each-step r)))))))
 
+(deftest arrangement-changes-the-co-application-transition
+  (let [chain (shape-g/arranged->candidate "target" "chain" same-order-a)
+        independent (shape-g/arranged->candidate
+                     "target" "independent" (assoc same-order-a :edges []))
+        chain-distribution (manifest/rollout (constantly (:precedence chain)) {#{} 1} 1)
+        independent-distribution (manifest/rollout
+                                  (constantly (:precedence independent)) {#{} 1} 1)
+        all-done #{["target" :pattern-done "p/a"]
+                   ["target" :pattern-done "p/b"]
+                   ["target" :pattern-done "p/c"]}
+        chain-score (shape-g/score-arranged "target" "chain" same-order-a)
+        independent-score (shape-g/score-arranged
+                           "target" "independent" (assoc same-order-a :edges []))]
+    (is (= 0 (get chain-distribution all-done 0)))
+    (is (= 1/8 (get independent-distribution all-done)))
+    (is (not= chain-distribution independent-distribution)
+        "plain first-enabled precedence makes this assertion fail")
+    (is (not= (:g chain-score) (:g independent-score)))
+    (is (not= (get-in chain-score [:scorer-result 0 :certificate :g-terms])
+              (get-in independent-score [:scorer-result 0 :certificate :g-terms])))
+    (is (= :co-application-frontier-theta-v1
+           (get-in chain-score
+                   [:scorer-result 0 :certificate :node-evaluations 0 :model :semantics])))))
+
 (deftest overlap-is-a-shared-advance-token
   (let [c (assoc same-order-a :edges [{:from "p/a" :to "p/b" :kind :overlap}])
         candidate (shape-g/arranged->candidate "t" "overlap" c)
-        pa (first (:precedence candidate))
-        pb (second (:precedence candidate))]
+        {:keys [units patterns]} (get-in candidate [:precedence :co-apply])
+        pa (patterns (first units))
+        pb (patterns (second units))]
     (is (= 1 (count (set/intersection (:produces pa) (:produces pb)))))
     (is (empty? (get-in pb [:guard :clauses 0 :present]))
         "overlap co-advances shared state; it is not an enabling edge")))
@@ -46,9 +72,9 @@
                  :edges [{:from "p/a" :to "p/a" :kind :precedes
                           :from-fragment 1 :to-fragment 4}]}
         candidate (shape-g/arranged->candidate "t" "repeated" cascade)
-        [pattern-node] (:precedence candidate)
+        [pattern-node] (vals (get-in candidate [:precedence :co-apply :patterns]))
         fit (shape-g/fit-evidence cascade (fit-analysis ["p/a" "p/a"]))]
-    (is (= 1 (count (:precedence candidate))))
+    (is (= 1 (count (get-in candidate [:precedence :co-apply :patterns]))))
     (is (= "p/a" (:occurrence-id pattern-node)))
     (is (= 2 (count (get-in fit [:nodes 0 :reading-evidence])))
         "fragment multiplicity strengthens fit evidence, not execution length")))
