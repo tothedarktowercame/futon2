@@ -603,6 +603,12 @@
 
 (defn live-ticket? [ticket] (= :live (:status-class ticket)))
 
+(defn- first-open-checkbox-line [lines]
+  (some (fn [[index line]]
+          (when (re-find #"^\s*[-*+]\s+\[\s\]" line)
+            (inc index)))
+        (map-indexed vector lines)))
+
 (defn load-tickets
   "Immediate primary-checkout holes/tickets/T-*.md only. Same mission scan
    fences before ID deduplication; bare holes/T-* discovery notes excluded."
@@ -624,6 +630,7 @@
                       lines (str/split-lines (slurp path))
                       status (ticket-status-text lines)]
                   {:id id :kind :ticket :path path
+                   :item-line (first-open-checkbox-line lines)
                    :title (mission-title-from-lines id lines)
                    :status-line status :status-class (classify-ticket-status status)
                    :parent (some #(when (re-find #"(?i)parent" %)

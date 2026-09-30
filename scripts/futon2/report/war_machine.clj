@@ -6567,6 +6567,9 @@
           (construction-inputs/target-source-declarations
            cascade-targets
            {:loaded-missions loaded-missions
+            :loaded-tickets loaded-tickets
+            :declared-files (:files cascade-sources)
+            :proposals (:proposals cascade-proposal-supply)
             :declared-targets (keys (:universes cascade-sources))
             :proposal-targets (map :target (:proposals cascade-proposal-supply))
             :ticket-targets (concat substrate-tickets

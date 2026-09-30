@@ -86,17 +86,19 @@
               targets
               {:loaded-missions {:missions [{:id m1 :path "/repo/M-one.md"}
                                              {:id m2 :path "/repo/M-two.md"}]}
+               :loaded-tickets {:tickets [{:id ticket :path "/repo/T-three.md"
+                                           :item-line 17 :status-class :live}]}
                :ticket-targets [ticket]})
         assembled (construction-inputs/assemble-cascade-problems
                    {:targets targets :target-sources rows
                     :sources {:horizon-steps 1}})
         landed (concat (:problems assembled) (:refusals assembled))]
-    (is (= [{:target-id m1 :source-kind :mission :source-path "/repo/M-one.md"
+    (is (= [{:target-id m1 :source-kind :head :source-path "/repo/M-one.md"
              :source-absent nil}
-            {:target-id m2 :source-kind :mission :source-path "/repo/M-two.md"
+            {:target-id m2 :source-kind :head :source-path "/repo/M-two.md"
              :source-absent nil}
-            {:target-id ticket :source-kind :ticket :source-path nil
-             :source-absent :target-source-path-absent}]
+            {:target-id ticket :source-kind :item-section :source-path "/repo/T-three.md"
+             :item-line 17 :source-absent nil}]
            (:target-sources assembled)))
     (is (= (frequencies targets)
            (frequencies (map :target-id (:target-sources assembled))))
@@ -108,10 +110,59 @@
 (deftest mission-source-without-path-is-a-typed-absence
   ;; Bad case: the mission id resembles a file name, but no filename
   ;; convention is authority for a source path.
-  (is (= [{:target-id "M-no-path" :source-kind :mission :source-path nil
+  (is (= [{:target-id "M-no-path" :source-kind :head :source-path nil
            :source-absent :target-source-path-absent}]
          (construction-inputs/target-source-declarations
           ["M-no-path"] {:loaded-missions {:missions [{:id "M-no-path"}]}}))))
+
+(deftest non-mission-sources-retain-the-records-already-read
+  (let [ticket "T-ticket"
+        proposal "T-repair"
+        declared "M-declared"
+        rows (construction-inputs/target-source-declarations
+              [ticket proposal declared]
+              {:loaded-tickets {:tickets [{:id ticket :path "/repo/T-ticket.md"
+                                           :item-line 23 :status-class :live}]}
+               :ticket-targets [ticket]
+               :proposals [{:target proposal
+                            :evidence {:finding-source {:path "/store/finding.edn"
+                                                       :sha256 "finding-pin"}}}]
+               :proposal-targets [proposal]
+               :declared-files [{:target declared :path "/resources/declared.edn"
+                                 :sha256 "declared-pin"}]
+               :declared-targets [declared]})]
+    (is (= [{:source-kind :item-section :source-path "/repo/T-ticket.md"
+             :item-line 23 :target-id ticket :source-absent nil}
+            {:source-kind :inline-bytes :source-path "/store/finding.edn"
+             :source-sha256 "finding-pin" :source-origin :repair-proposal
+             :target-id proposal :source-absent nil}
+            {:source-kind :inline-bytes :source-path "/resources/declared.edn"
+             :source-sha256 "declared-pin" :source-origin :declared
+             :target-id declared :source-absent nil}]
+           rows))))
+
+(deftest conflicting-source-claims-are-retained-and-refused
+  (let [rows (construction-inputs/target-source-declarations
+              ["T-conflict"]
+              {:loaded-tickets
+               {:tickets [{:id "T-conflict" :path "/repo/first.md" :item-line 3
+                            :status-class :live}
+                           {:id "T-conflict" :path "/repo/second.md" :item-line 4
+                            :status-class :live}]}
+               :ticket-targets ["T-conflict"]})
+        row (first rows)]
+    (is (= :target-source-conflict (:source-absent row)))
+    (is (= #{"/repo/first.md" "/repo/second.md"}
+           (set (map :source-path (:claims row)))))))
+
+(deftest ticket-without-an-item-line-is-not-given-one
+  (is (= :target-item-line-absent
+         (-> (construction-inputs/target-source-declarations
+              ["T-no-line"]
+              {:loaded-tickets {:tickets [{:id "T-no-line" :path "/repo/T-no-line.md"
+                                           :status-class :live}]}
+               :ticket-targets ["T-no-line"]})
+             first :source-absent))))
 
 (defn- kinds
   [result]

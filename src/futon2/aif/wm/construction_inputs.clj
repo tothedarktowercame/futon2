@@ -46,27 +46,69 @@
 
 (defn target-source-declarations
   "Describe the already-enumerated TARGETS from the records which enumerated
-  them. Mission paths are copied from LOADED-MISSIONS. No other source kind
-  guesses a path from its target id. The category priority matches the field's
-  enumeration order: substrate mission/ticket, declared source, then proposal."
-  [targets {:keys [loaded-missions declared-targets proposal-targets ticket-targets]}]
+  them. Sources are copied from records already read by the report; no path or
+  item line is guessed from a target id. Conflicting byte authorities produce
+  one typed conflict row retaining every claim."
+  [targets {:keys [loaded-missions loaded-tickets declared-files proposals
+                   declared-targets proposal-targets ticket-targets]}]
   (let [missions (into {} (map (juxt :id identity)
                                (mission-registry/open-missions loaded-missions)))
+        tickets-by-id (group-by :id (filter mission-registry/live-ticket?
+                                            (:tickets loaded-tickets)))
+        declared-by-id (group-by :target declared-files)
+        proposals-by-id (group-by :target proposals)
         declared (set declared-targets)
         proposals (set proposal-targets)
         tickets (set ticket-targets)]
     (mapv (fn [target]
             (let [mission (get missions target)
-                  kind (cond mission :mission
-                             (tickets target) :ticket
-                             (declared target) :declared
-                             (proposals target) :proposal
-                             :else :unknown)
-                  path (when (= :mission kind) (:path mission))]
-              {:target-id target
-               :source-kind kind
-               :source-path path
-               :source-absent (when-not path :target-source-path-absent)}))
+                  ticket-claims (mapv (fn [ticket]
+                                        {:source-kind :item-section
+                                         :source-path (:path ticket)
+                                         :item-line (:item-line ticket)})
+                                      (get tickets-by-id target))
+                  declared-claims (mapv (fn [{:keys [path sha256]}]
+                                          {:source-kind :inline-bytes :source-path path
+                                           :source-sha256 sha256 :source-origin :declared})
+                                        (get declared-by-id target))
+                  proposal-claims
+                  (vec (for [proposal (get proposals-by-id target)
+                             :let [{:keys [path sha256]} (get-in proposal [:evidence :finding-source])]
+                             :when path]
+                         {:source-kind :inline-bytes :source-path path
+                          :source-sha256 sha256 :source-origin :repair-proposal}))
+                  ;; A target's enumerating category says which text defines it.
+                  ;; Other records may describe a cascade or repair concerning
+                  ;; the same target without becoming a competing source claim.
+                  claims (cond
+                           mission [{:source-kind :head :source-path (:path mission)}]
+                           (and (tickets target) (seq ticket-claims)) ticket-claims
+                           (and (declared target) (seq declared-claims)) declared-claims
+                           (and (proposals target) (seq proposal-claims)) proposal-claims
+                           :else [])
+                  authorities (set (map (juxt :source-path :source-sha256) claims))]
+              (cond
+                (> (count authorities) 1)
+                {:target-id target :source-kind :conflict :source-path nil
+                 :source-absent :target-source-conflict :claims claims}
+
+                (seq claims)
+                (let [claim (first claims)]
+                  (assoc claim :target-id target :source-absent
+                         (cond
+                           (nil? (:source-path claim)) :target-source-path-absent
+                           (and (= :item-section (:source-kind claim))
+                                (nil? (:item-line claim))) :target-item-line-absent
+                           :else nil)))
+
+                :else
+                (let [kind (cond (tickets target) :item-section
+                                 (declared target) :inline-bytes
+                                 (proposals target) :inline-bytes
+                                 mission :head
+                                 :else :unknown)]
+                  {:target-id target :source-kind kind :source-path nil
+                   :source-absent :target-source-path-absent}))))
           targets)))
 
 (def construction-move-cost

@@ -75,8 +75,21 @@
         (is (= [:stale-target-reading :target-source-path-absent]
                (mapv #(get-in % [:failures 0 :kind]) (rest (:families result)))))
         (is (= {:targets 3 :current 1 :stale 1 :absent 0
-                :source-path-absent 1 :source-unreadable 0 :graph-refused 0}
+                :source-path-absent 1 :source-unreadable 0
+                :source-kind-unsupported 0 :graph-refused 0}
                (:coverage result)))))))
+
+(deftest source-kinds-not-yet-readable-are-counted
+  (let [graph (graph-file (temp-dir "field-source-kind-graph-"))
+        result (sut/families-for-field
+                {:target-sources [{:target-id "T-item" :source-kind :item-section
+                                   :source-path "/not/read-as-head.md" :item-line 8}]
+                 :reading-root (temp-dir "field-source-kind-reading-")
+                 :graph-path graph})]
+    (is (= :failed (get-in result [:families 0 :status])))
+    (is (= :target-source-kind-unsupported
+           (get-in result [:families 0 :failures 0 :kind])))
+    (is (= 1 (get-in result [:coverage :source-kind-unsupported])))))
 
 (deftest graph-refusal-precedes-every-reading-lookup
   (let [root (temp-dir "field-refused-reading-")

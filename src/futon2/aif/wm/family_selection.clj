@@ -78,6 +78,9 @@
       (kinds :graph-without-pattern-ids) :graph-refused
       (kinds :graph-endpoint-outside-pattern-ids) :graph-refused
       (kinds :target-source-path-absent) :source-path-absent
+      (kinds :target-item-line-absent) :source-path-absent
+      (kinds :target-source-conflict) :source-path-absent
+      (kinds :target-source-kind-unsupported) :source-kind-unsupported
       (kinds :target-source-unreadable) :source-unreadable
       (kinds :stale-target-reading) :stale
       (kinds :no-current-target-reading) :absent
@@ -91,6 +94,7 @@
      :absent (get counts :absent 0)
      :source-path-absent (get counts :source-path-absent 0)
      :source-unreadable (get counts :source-unreadable 0)
+     :source-kind-unsupported (get counts :source-kind-unsupported 0)
      :graph-refused (get counts :graph-refused 0)}))
 
 (defn families-for-field
@@ -105,13 +109,17 @@
         graph-failure (dissoc loaded :status :graph :pin)
         families
         (mapv
-         (fn [{:keys [target-id source-path source-absent]}]
+         (fn [{:keys [target-id source-kind source-path source-absent]}]
            (cond
              (not graph-ok?)
              (failed-field-family target-id graph-failure)
 
              source-absent
              (failed-field-family target-id {:kind source-absent})
+
+             (not (contains? #{nil :head} source-kind))
+             (failed-field-family target-id {:kind :target-source-kind-unsupported
+                                             :source-kind source-kind})
 
              :else
              (try
