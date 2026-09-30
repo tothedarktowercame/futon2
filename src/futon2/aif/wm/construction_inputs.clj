@@ -63,9 +63,11 @@
     (mapv (fn [target]
             (let [mission (get missions target)
                   ticket-claims (mapv (fn [ticket]
-                                        {:source-kind :item-section
-                                         :source-path (:path ticket)
-                                         :item-line (:item-line ticket)})
+                                        (let [item? (or (some? (:item-line ticket))
+                                                        (= :item-section (:source-kind ticket)))]
+                                          (cond-> {:source-kind (if item? :item-section :head)
+                                                   :source-path (:path ticket)}
+                                            item? (assoc :item-line (:item-line ticket)))))
                                       (get tickets-by-id target))
                   declared-claims (mapv (fn [{:keys [path sha256]}]
                                           {:source-kind :inline-bytes :source-path path

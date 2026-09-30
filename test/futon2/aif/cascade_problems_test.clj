@@ -160,9 +160,28 @@
          (-> (construction-inputs/target-source-declarations
               ["T-no-line"]
               {:loaded-tickets {:tickets [{:id "T-no-line" :path "/repo/T-no-line.md"
+                                           :source-kind :item-section
                                            :status-class :live}]}
                :ticket-targets ["T-no-line"]})
              first :source-absent))))
+
+(deftest ticket-own-file-without-item-line-is-a-head-source
+  (is (= {:source-kind :head :source-path "/repo/T-own.md"
+          :target-id "T-own" :source-absent nil}
+         (first (construction-inputs/target-source-declarations
+                 ["T-own"]
+                 {:loaded-tickets {:tickets [{:id "T-own" :path "/repo/T-own.md"
+                                              :status-class :live}]}
+                  :ticket-targets ["T-own"]})))))
+
+(deftest ticket-with-parent-item-line-remains-an-item-section
+  (is (= {:source-kind :item-section :source-path "/repo/parent.md"
+          :item-line 42 :target-id "T-item" :source-absent nil}
+         (first (construction-inputs/target-source-declarations
+                 ["T-item"]
+                 {:loaded-tickets {:tickets [{:id "T-item" :path "/repo/parent.md"
+                                              :item-line 42 :status-class :live}]}
+                  :ticket-targets ["T-item"]})))))
 
 (defn- kinds
   [result]
