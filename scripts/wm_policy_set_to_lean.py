@@ -73,8 +73,10 @@ theorem real_reading_structurally_distinct_count :
     (structuralDedup (allReadingCascades realReading)).length = 1 := by
   simp +decide [allReadingCascades, readingCascades, readingFactsB, rawReadingCascades,
     realReading, realLibrary, supportedUnits, fragmentUnitsAux, unitsAt, unitsAtAux,
-    alternatives, cascadeOfUnits?, structuralDedup, structurallyDifferent,
-    Cascade.structuralIdentity, directedEdges, adjacentFragments, overlapPairs, readingFragment]
+    alternatives, cascadeOfUnits?, directedEdges, adjacentFragments, overlapPairs,
+    readingFragment]
+  rw [structuralDedup]
+  simp +decide [structurallyDifferent, Cascade.structuralIdentity]
 
 #print axioms real_alternatives_counts
 #print axioms real_overlap_counts
