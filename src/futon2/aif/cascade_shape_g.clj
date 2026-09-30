@@ -39,6 +39,31 @@
    :to (or (:to edge) (:b edge))
    :kind (or (:kind edge) (:kind_used edge) (:kind-used edge) :precedes)})
 
+(defn- occurrence-arrangement [{:keys [nodes edges]}]
+  (let [occurrences
+        (mapv (fn [i n]
+                (let [pattern (or (:pattern n) (:id n) n)]
+                  {:occurrence-id [pattern (or (:fragment-index n) i) i]
+                   :pattern pattern :roles (vec (:roles n))
+                   :fragment-index (:fragment-index n)}))
+              (range) nodes)
+        lookup (fn [pattern fragment]
+                 (or (:occurrence-id
+                      (first (filter #(and (= pattern (:pattern %))
+                                           (or (nil? fragment)
+                                               (= fragment (:fragment-index %))))
+                                     occurrences)))
+                     [pattern fragment 0]))
+        occurrence-edges
+        (mapv (fn [e]
+                (let [n (normalize-edge e)]
+                  (assoc n
+                         :from (lookup (:from n) (:from-fragment e))
+                         :to (lookup (:to n) (:to-fragment e)))))
+              edges)]
+    {:nodes occurrences :edges occurrence-edges
+     :precedence (mapv :occurrence-id occurrences)}))
+
 (defn- topo-order [nodes edges fallback]
   (let [ids (set nodes)
         directed (remove #(= :overlap (:kind %)) edges)
@@ -61,25 +86,29 @@
 (defn arranged->candidate
   "Compile CASCADE into the existing scorer's candidate shape."
   [target id cascade]
-  (let [nodes0 (mapv #(or (:pattern %) (:id %) %) (:nodes cascade))
-        edges (mapv normalize-edge (:edges cascade))
-        nodes (vec (distinct (concat nodes0 (mapcat (juxt :from :to) edges))))
-        fallback (vec (or (:precedence cascade) nodes))
-        order (topo-order nodes edges fallback)
+  (let [{:keys [nodes edges precedence]} (occurrence-arrangement cascade)
+        by-id (into {} (map (juxt :occurrence-id identity)) nodes)
+        node-ids (mapv :occurrence-id nodes)
+        fallback precedence
+        order (topo-order node-ids edges fallback)
         incoming (group-by :to (remove #(= :overlap (:kind %)) edges))
         overlaps (filter #(= :overlap (:kind %)) edges)
-        shared (fn [p] (for [{:keys [from to]} overlaps
-                             :when (or (= p from) (= p to))]
+        shared (fn [occurrence-id] (for [{:keys [from to]} overlaps
+                                        :when (or (= occurrence-id from) (= occurrence-id to))]
                          (overlap-token target from to)))
-        theta-records (into {} (for [p nodes] [p (ledger/pattern-theta (pattern-key p))]))
+        theta-records (into {} (for [{:keys [pattern]} nodes]
+                                 [pattern (ledger/pattern-theta (pattern-key pattern))]))
         precedence
-        (mapv (fn [p]
-                (let [theta-rec (theta-records p)
+        (mapv (fn [occurrence-id]
+                (let [p (:pattern (by-id occurrence-id))
+                      theta-rec (theta-records p)
                       theta (if (= :recorded-trials (:status theta-rec))
                               (:theta theta-rec) 1/2)
-                      needs (set (map #(done-token target (:from %)) (incoming p)))
-                      produces (conj (set (shared p)) (done-token target p))]
-                  {:id (pattern-key p) :pattern-id p :target target
+                      needs (set (map #(done-token target (:from %)) (incoming occurrence-id)))
+                      produces (conj (set (shared occurrence-id))
+                                     (done-token target occurrence-id))]
+                  {:id occurrence-id
+                   :pattern-id p :occurrence-id occurrence-id :target target
                    :guard {:status :interpreted
                            :clauses [{:present needs :absent #{}}]}
                    :produces produces :theta theta :theta-record theta-rec}))
@@ -90,8 +119,8 @@
 (defn- terminal-patterns [{:keys [nodes edges]}]
   (let [goal (set (for [n nodes
                         :when (and (map? n) (some #{"goal"} (:roles n)))]
-                    (:pattern n)))
-        all (set (map #(or (:pattern %) (:id %) %) nodes))
+                    (or (:occurrence-id n) (:pattern n))))
+        all (set (map #(or (:occurrence-id %) (:pattern %) (:id %) %) nodes))
         sources (set (map :from (remove #(= :overlap (:kind %))
                                         (map normalize-edge edges))))]
     (if (seq goal) goal (set/difference all sources))))
@@ -109,7 +138,8 @@
                        (arranged->candidate target id cascade))
                      (arranged->candidate target id cascade))
          precedence (:precedence candidate)
-         terminals (terminal-patterns cascade)
+         occurrence-shape (occurrence-arrangement cascade)
+         terminals (terminal-patterns occurrence-shape)
          acceptance (set (map #(done-token target %) terminals))
          universe (set (mapcat (fn [p]
                                  (concat (:produces p)
@@ -169,8 +199,9 @@
   "Read S3c's fixed artifacts.  Returns both analysis arrangements and graph
   retractions; the result is data and performs no scoring or writes."
   [dir]
-  (vec
-   (mapcat
+  (let [reported
+        (vec
+         (mapcat
     (fn [analysis-file]
       (let [stem (str/replace (.getName (io/file analysis-file)) #"\.request\.json\.analysis\.json$" "")
             target stem analysis-map (read-json analysis-file)
@@ -193,10 +224,27 @@
                              :adjustment (str "retraction-" (:rank r))
                              :cascade {:nodes (:nodes r) :edges (:edges r)
                                        :precedence (:nodes r)}}))]
-        (map-indexed (fn [i p] (assoc p :target target :policy-id (str stem "/" (inc i))))
+        (map-indexed (fn [i p] (assoc p :target target :reported-id (str stem "/" (inc i))))
                      (concat modes retractions))))
     (sort-by #(.getName (io/file %))
              (filter #(and (.isFile (io/file %))
                            (str/ends-with? (.getName (io/file %))
                                            ".request.json.analysis.json"))
-                     (file-seq (io/file dir)))))))
+                     (file-seq (io/file dir))))))
+        structure (fn [p]
+                    (let [c (:cascade p)]
+                      {:mission (:mission p)
+                       :node-sequence (mapv #(or (:pattern %) (:id %) %) (:nodes c))
+                       :edges (mapv #(select-keys (normalize-edge %)
+                                                  [:from :to :kind]) (:edges c))}))
+        distinct-policies
+        (:rows (reduce (fn [{:keys [seen] :as acc} p]
+                         (let [shape (structure p)]
+                           (if (contains? seen shape)
+                             acc
+                             (-> acc (update :seen conj shape) (update :rows conj p)))))
+                       {:seen #{} :rows []} reported))]
+    (with-meta
+      (mapv (fn [i p] (assoc p :policy-id (str (:mission p) "/distinct-" (inc i))))
+            (range) distinct-policies)
+      {:reported-count (count reported) :distinct-count (count distinct-policies)})))

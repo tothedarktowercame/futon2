@@ -36,10 +36,23 @@
     (is (empty? (get-in pb [:guard :clauses 0 :present]))
         "overlap co-advances shared state; it is not an enabling edge")))
 
+(deftest repeated-pattern-citations-remain-separate-nodes
+  (let [cascade {:nodes [{:pattern "p/a" :fragment-index 1}
+                         {:pattern "p/a" :fragment-index 4}]
+                 :edges [{:from "p/a" :to "p/a" :kind :precedes
+                          :from-fragment 1 :to-fragment 4}]}
+        candidate (shape-g/arranged->candidate "t" "repeated" cascade)
+        [first-occurrence second-occurrence] (:precedence candidate)]
+    (is (= 2 (count (:precedence candidate))))
+    (is (not= (:occurrence-id first-occurrence) (:occurrence-id second-occurrence)))
+    (is (contains? (get-in second-occurrence [:guard :clauses 0 :present])
+                   ["t" :pattern-done (:occurrence-id first-occurrence)]))))
+
 (deftest ^:slow all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
         results (mapv #(shape-g/score-arranged (:target %) (:policy-id %) (:cascade %)) policies)]
-    (is (= 81 (count policies)))
-    (is (= 81 (count (filter #(= :computed (:status %)) results))))
+    (is (= {:reported-count 81 :distinct-count 33} (meta policies)))
+    (is (= 33 (count policies)))
+    (is (= 33 (count (filter #(= :computed (:status %)) results))))
     (is (zero? (count (remove #(Double/isFinite (double (:g %))) results))))
     (is (every? #(= (:horizon %) (count (:preference-at-each-step %))) results))))
