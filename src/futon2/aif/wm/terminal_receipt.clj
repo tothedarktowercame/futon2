@@ -58,9 +58,13 @@
 (defn action-receipt
   "The :action-receipt for a selected-and-enacted RECORD: click id, target
   and its kind, the action kind and G terms the decision already records
-  (verbatim), the close's outcome, and for a mutating action the commit sha
-  from the d-task-enactment revision pair and the participants'
-  reviewer-of-record. Absent values stay typed-absent, never invented."
+  (verbatim), the close's outcome, and for a mutating action the grounded
+  commit as {:repo .. :sha ..} — the record's :grounded-commit (what the
+  close observed: the artifact binding's repo and the authored commit, which
+  may live in a repo other than futon2, e.g. click 13's futon7 891001d),
+  else a bare {:sha ..} from the d-task-enactment revision pair. No commit
+  anywhere is the typed absence {:absent :no-grounded-commit}, never nil or
+  an invented value. The participants' reviewer-of-record beside it."
   [record]
   {:kind :action-receipt
    :click-id (:click/id record)
@@ -71,7 +75,12 @@
                     {:absent :no-recorded-action-kind})
    :G (get-in record [:decision :g-term-decomposition])
    :outcome (:outcome record)
-   :commit (get-in record [:d-task-enactment :verification :revision-pair :after])
+   :commit (or (:grounded-commit record)
+               (when-let [sha (get-in record
+                                      [:d-task-enactment :verification
+                                       :revision-pair :after])]
+                 {:sha sha})
+               {:absent :no-grounded-commit})
    :reviewer (get-in record [:participants :roles :reviewer-of-record :identity])})
 
 (defn failure-receipt

@@ -714,12 +714,32 @@
        :detail (failure-detail (:error-data d))}
       {:absent :no-failure})))
 
+(defn grounded-commit-for
+  "PROOF-2b (click 13, tick-run-record-2026-09-30-1790737908): the grounded
+  commit of a closed RESULT as {:repo .. :sha ..}, for the terminal action
+  receipt. Read from the close map's own grounds — the artifact binding's
+  repo and its observed authored commit (set only when the observation was
+  valid, so never a guess; click 13's was futon7 891001d while the receipt
+  said :commit nil, because the d-task enactment's verification had refused
+  and carried no revision pair), else the close's :repo/:commit. Nil when
+  the result names no commit: the receipt then records a typed absence."
+  [result]
+  (let [repo (or (get-in result [:data :artifact-binding :repo])
+                 (get-in result [:data :repo]))
+        binding-commit (get-in result [:data :artifact-binding :commit])
+        sha (or (when (and (string? binding-commit) (re-matches #"[0-9a-f]{7,40}" binding-commit)) binding-commit)
+                (get-in result [:data :commit]))]
+    (when (and sha (string? sha) (re-matches #"[0-9a-f]{7,40}" sha))
+      (cond-> {:sha sha}
+        (not (str/blank? (str repo))) (assoc :repo repo)))))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
         route (if (seq observed)
                 observed
-                (observed-route (terminal-fallback-route result)))]
+                (observed-route (terminal-fallback-route result)))
+        grounded-commit (grounded-commit-for result)]
     (if (seq route)
       (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
@@ -844,6 +864,8 @@
                      ;; The outcome is the close's own, threaded in here;
                      ;; terminal-receipt reads only what the record holds
                      ;; and throws on a record that is both or neither.
+                     grounded-commit
+                     (assoc :grounded-commit grounded-commit)
                      true
                      (terminal-receipt/attach (:outcome result)))]
         (io/make-parents target)

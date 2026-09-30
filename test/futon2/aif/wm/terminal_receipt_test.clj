@@ -60,7 +60,7 @@
     (is (= :cascade-candidate (:action-kind r)))
     (is (= (get-in selected-record [:decision :g-term-decomposition]) (:G r)))
     (is (= :grounded-change (:outcome r)))
-    (is (= "0798f96ad2082a8f80c8a" (:commit r)))
+    (is (= {:sha "0798f96ad2082a8f80c8a"} (:commit r)))
     (is (= "codex-13" (:reviewer r)))))
 
 (deftest abstained-yields-failure
