@@ -5106,7 +5106,11 @@
             interpretation-ask-fn (or (:interpretation-ask-fn opts)
                                       (get *runtime-defaults* :interpretation-ask-fn))
             interpretation-ask-selection
-            (when (and interpretation-ask-fn (nil? (:flight opts)))
+            ;; the classifier does a fresh focus read: build it only when
+            ;; there is a refusal to ask about, not on every click
+            (when (and interpretation-ask-fn (nil? (:flight opts))
+                       (seq (no-admitted-interpretation-refusals
+                             (:decision judgement0-base))))
               (interpretable-refusal
                (:decision judgement0-base)
                (or (:interpretation-ask-classify-fn opts)
