@@ -1,7 +1,11 @@
 (ns futon2.aif.wm.family-selection-test
-  (:require [clojure.test :refer [deftest is use-fixtures]]
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.wm.family-selection :as sut])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -26,6 +30,95 @@
                   :pattern_refs [{:id pattern :status "candidate"
                                   :rationale "fixture fit"
                                   :source_sha256 (apply str (repeat 64 "a"))}]}]}]})
+
+(defn- temp-dir [prefix]
+  (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0))))
+
+(defn- graph-file [dir]
+  (let [file (io/file dir "graph.json")]
+    (spit file (json/generate-string
+                {:records 1 :patterns 2 :pattern_ids ["p/a" "p/b"]
+                 :summary [{:through "why" :edges 1}
+                           {:through "how" :edges 0}]
+                 :edges [{:a "p/a" :b "p/b" :kind "why" :evidence []}]}))
+    (graph-pin/pin! file)
+    file))
+
+(defn- reading-publication [target source digest]
+  {:target-id target :source-path (.getPath source)
+   :excerpt-digest digest
+   :request {:task {:target_id target :excerpt_sha256 digest}}
+   :analysis (analysis "p/a") :validator-version 1})
+
+(deftest field-families-count-current-stale-and-path-absent
+  (let [root (temp-dir "field-reading-root-")
+        graph (graph-file (temp-dir "field-graph-"))
+        current-file (io/file root "M-current.md")
+        stale-file (io/file root "M-stale.md")]
+    (spit current-file "# Current\n\n## HEAD\nCurrent work.\n")
+    (spit stale-file "# Stale\n\n## HEAD\nEarlier work.\n")
+    (let [current-digest (reading-registry/excerpt-digest current-file)
+          stale-digest (reading-registry/excerpt-digest stale-file)]
+      (reading-registry/publish!
+       root (reading-publication "M-current" current-file current-digest))
+      (reading-registry/publish!
+       root (reading-publication "M-stale" stale-file stale-digest))
+      (spit stale-file "# Stale\n\n## HEAD\nChanged work.\n")
+      (let [result (sut/families-for-field
+                    {:target-sources
+                     [{:target-id "M-current" :source-path (.getPath current-file)}
+                      {:target-id "M-stale" :source-path (.getPath stale-file)}
+                      {:target-id "T-no-path" :source-path nil
+                       :source-absent :target-source-path-absent}]
+                     :reading-root root :graph-path graph})]
+        (is (= [:computed :failed :failed] (mapv :status (:families result))))
+        (is (= [:stale-target-reading :target-source-path-absent]
+               (mapv #(get-in % [:failures 0 :kind]) (rest (:families result)))))
+        (is (= {:targets 3 :current 1 :stale 1 :absent 0
+                :source-path-absent 1 :source-unreadable 0 :graph-refused 0}
+               (:coverage result)))))))
+
+(deftest graph-refusal-precedes-every-reading-lookup
+  (let [root (temp-dir "field-refused-reading-")
+        graph (graph-file (temp-dir "field-refused-graph-"))
+        calls (atom 0)]
+    (spit graph " " :append true)
+    (with-redefs [reading-registry/current-reading
+                  (fn [& _] (swap! calls inc) (throw (ex-info "must not read" {})))]
+      (let [result (sut/families-for-field
+                    {:target-sources (mapv #(hash-map :target-id (str "T-" %)
+                                                     :source-path "/not/read")
+                                          (range 3))
+                     :reading-root root :graph-path graph})]
+        (is (zero? @calls))
+        (is (= 3 (count (:families result))))
+        (is (every? #(= :graph-pin-mismatch (get-in % [:failures 0 :kind]))
+                    (:families result)))
+        (is (= 3 (get-in result [:coverage :graph-refused])))))))
+
+(deftest field-loads-the-pinned-graph-once
+  (let [calls (atom 0)]
+    (with-redefs [graph-pin/load-pinned
+                  (fn [_] (swap! calls inc)
+                    {:status :refused :kind :graph-pin-missing :path "/tmp/missing.pin"})]
+      (sut/families-for-field
+       {:target-sources (mapv #(hash-map :target-id (str "T-" %)
+                                        :source-path "/not/read")
+                             (range 7))
+        :reading-root (temp-dir "field-once-reading-") :graph-path "/missing"})
+      (is (= 1 @calls)))))
+
+(deftest unreadable-target-source-is-counted
+  (let [graph (graph-file (temp-dir "field-unreadable-graph-"))
+        result (sut/families-for-field
+                {:target-sources [{:target-id "M-gone"
+                                   :source-path "/path/which/does/not/exist.md"}]
+                 :reading-root (temp-dir "field-unreadable-reading-")
+                 :graph-path graph})]
+    (is (= :failed (get-in result [:families 0 :status])))
+    (is (= :target-source-unreadable
+           (get-in result [:families 0 :failures 0 :kind])))
+    (is (= 1 (get-in result [:coverage :source-unreadable])))))
 
 (defn- fixture-policy [target n]
   (let [pattern (str target "/p" n)]

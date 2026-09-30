@@ -6,7 +6,10 @@
   neutral fallback explicitly."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.aif.policy :as policy]
+            [futon2.aif.target-policy-family :as target-family]
+            [futon2.aif.target-reading-registry :as reading-registry]))
 
 (identity/register! *ns* *file*)
 
@@ -60,6 +63,73 @@
    :kernel :co-application-frontier-theta-v1
    :habit {:value 1 :status :declared-neutral
            :provenance neutral-co-apply-habit}})
+
+(defn- failed-field-family [target failure]
+  {:status :failed :target-id target :policies []
+   :reported-count 0 :distinct-count 0
+   :failures [(assoc failure :target-id target)] :failure-count 1})
+
+(defn- family-coverage-kind [family]
+  (let [kinds (set (map :kind (:failures family)))]
+    (cond
+      (kinds :graph-pin-mismatch) :graph-refused
+      (kinds :graph-pin-missing) :graph-refused
+      (kinds :graph-unreadable) :graph-refused
+      (kinds :graph-without-pattern-ids) :graph-refused
+      (kinds :graph-endpoint-outside-pattern-ids) :graph-refused
+      (kinds :target-source-path-absent) :source-path-absent
+      (kinds :target-source-unreadable) :source-unreadable
+      (kinds :stale-target-reading) :stale
+      (kinds :no-current-target-reading) :absent
+      :else :current)))
+
+(defn- field-coverage [families]
+  (let [counts (frequencies (map family-coverage-kind families))]
+    {:targets (count families)
+     :current (get counts :current 0)
+     :stale (get counts :stale 0)
+     :absent (get counts :absent 0)
+     :source-path-absent (get counts :source-path-absent 0)
+     :source-unreadable (get counts :source-unreadable 0)
+     :graph-refused (get counts :graph-refused 0)}))
+
+(defn families-for-field
+  "Form one policy-family result per target source row, in field order.
+  The pinned graph is loaded once before any source or reading lookup."
+  [{:keys [target-sources reading-root graph-path retraction]}]
+  (let [loaded (graph-pin/load-pinned graph-path)
+        graph-ok? (= :loaded (:status loaded))
+        graph-summary (if graph-ok?
+                        (select-keys loaded [:status :pin])
+                        (dissoc loaded :graph :pin))
+        graph-failure (dissoc loaded :status :graph :pin)
+        families
+        (mapv
+         (fn [{:keys [target-id source-path source-absent]}]
+           (cond
+             (not graph-ok?)
+             (failed-field-family target-id graph-failure)
+
+             source-absent
+             (failed-field-family target-id {:kind source-absent})
+
+             :else
+             (try
+               (let [digest (reading-registry/excerpt-digest source-path)
+                     reading (reading-registry/current-reading
+                              reading-root target-id digest)]
+                 (target-family/policy-family
+                  {:reading reading :graph (:graph loaded)
+                   :retraction retraction}))
+               (catch Exception e
+                 (failed-field-family
+                  target-id {:kind :target-source-unreadable
+                             :source-path source-path
+                             :message (ex-message e)})))))
+         target-sources)]
+    {:graph graph-summary
+     :families families
+     :coverage (field-coverage families)}))
 
 (defn select-over-families
   "Score every policy in each computed family, then call
