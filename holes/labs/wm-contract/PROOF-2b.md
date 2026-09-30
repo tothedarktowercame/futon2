@@ -173,7 +173,12 @@ separate campaigns. That finite validation does not establish reliable
 long-term behaviour, which is assessed over subsequent operation. A nonzero
 closure count is insufficient if the machine is too slow or token-expensive;
 the rolling report also includes unresolved questions, repeated refusals and
-backlog change.
+backlog change. Efficiency is calibrated with a paired benchmark: one bounded
+mission, excursion and ticket are preregistered with acceptance criteria and
+pinned starting commits, completed directly in an interactive agent session,
+then replayed by the War Machine from the same state in isolated worktrees.
+Both arms record outcome, elapsed time and tokens; the machine arm does not
+receive the direct transcript or patch.
 
 **RQ-8. Every action leaves a complete receipt.**
 *Metric:* `paper_trail = complete action receipts / enacted actions`, with

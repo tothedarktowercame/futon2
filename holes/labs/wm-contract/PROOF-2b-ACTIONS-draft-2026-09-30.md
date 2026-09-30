@@ -188,6 +188,18 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     nonzero. Absolute or comparative efficiency thresholds remain to be set
     from measured runs, not invented here.
 
+20. **Measure efficiency with paired, pinned work.** Preregister one bounded
+    mission, one excursion and one ticket, including their acceptance criteria
+    and the exact repository commits from which work begins. Complete each in
+    an ordinary interactive agent session while recording outcome, elapsed
+    wall-clock time and token usage. Then run the War Machine on the same item
+    from the same pinned state in a separate isolated worktree and record the
+    same measures. Do not destructively rewind the main worktree, and do not
+    give the War Machine the direct session transcript or its resulting patch.
+    Compare like-for-like successful outcomes and report orchestration overhead
+    explicitly. The paired sample calibrates efficiency thresholds; it does
+    not replace the rolling 100-click operational report.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -498,6 +510,11 @@ open question under D1. No row's acceptance uses a click.
   real enumerator.
 - Loaded-code identity by source digests, read without reloading.
 - Expectations committed before each run.
+- A preregistered paired benchmark: one mission, excursion and ticket, each
+  completed once in a direct interactive session and once by the War Machine
+  from the same pinned commits in isolated worktrees. Capture acceptance
+  result, wall-clock time and tokens for both; withhold the direct transcript
+  and patch from the machine run.
 
 ## Records for Joe
 
