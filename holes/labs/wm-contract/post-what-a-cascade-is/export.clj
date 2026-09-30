@@ -46,8 +46,8 @@
                                {:keys [units descent patterns]} (get-in cand [:precedence :co-apply])
                                arr (:arrangement cand)
                                roots (vec (remove (set (map second descent)) units))
-                               too-wide? (> (count roots) 10)
-                               sc (when-not too-wide? (sg/score-policy p))]
+                               sc (sg/score-policy p)
+                               ok? (= :computed (:status sc))]
                            {:policy_id (:policy-id p) :kind (name (:kind p))
                             :units (mapv (fn [u] {:id (s u) :pattern (str (:pattern-id (patterns u)))
                                                   :fragment (when (vector? u) (second u))}) units)
@@ -57,9 +57,10 @@
                             :raw_edges (when (= :retraction (:kind p)) (get-in p [:cascade :edges]))
                             :unit_order_rule (some-> (get-in p [:cascade :unit-order-rule]) name)
                             :roots (mapv s roots)
-                            :score_status (if too-wide? "not-computed-frontier-too-wide" (name (:status sc)))
-                            :F (:f sc) :G (:g sc)
-                            :g_terms (when sc {:risk (:risk sc) :ambiguity (:ambiguity sc) :expected-information-gain (:information-gain sc)})}))
+                            :score_status (if ok? "computed" (name (or (:kind sc) (:status sc))))
+                            :refusal (when-not ok? (select-keys sc [:kind :units :roots :bound :limit]))
+                            :F (when ok? (:f sc)) :G (when ok? (:g sc))
+                            :g_terms (when ok? {:risk (:risk sc) :ambiguity (:ambiguity sc) :expected-information-gain (:information-gain sc)})}))
                        (:policies family))}))
             stems)]
        (spit "/tmp/claude-1/post/examples.json"

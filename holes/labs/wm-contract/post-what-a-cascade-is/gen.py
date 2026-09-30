@@ -88,7 +88,9 @@ def policy_block(t, p, n):
         terms = (f'<table class="terms"><tr><th>F (fit)</th><th>G</th><th>risk</th><th>ambiguity</th><th>information gain</th></tr>'
                  f'<tr><td>{fnum(p["F"])}</td><td>{fnum(p["G"])}</td><td>{fnum(g["risk"])}</td><td>{fnum(g["ambiguity"])}</td><td>{fnum(g["expected-information-gain"])}</td></tr></table>')
     else:
-        terms = f'<p><strong>F and G not computed.</strong> With {len(p["roots"])} units attemptable in the first round, the exact scorer enumerates every subset that could succeed and ran out of memory. No approximate figure is substituted.</p>'
+        r = p.get('refusal') or {}
+        terms = (f'<p><strong>Refused, not scored.</strong> The arrangement allows up to {r.get("bound", len(p["roots"]))} units to be attemptable at once; '
+                 f'the exact scorer enumerates every subset of those, and the limit is {r.get("limit", 9)}. The policy is counted as a failure for its target and is not ranked. No approximate figure is substituted.</p>')
     return f'<h4>Policy {n}: {E(kind)}</h4>' + desc + f'<div class="table-scroll">{svg(p)}</div>' + terms
 
 def target_block(name, note, featured=True):
