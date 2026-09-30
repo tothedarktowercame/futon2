@@ -359,7 +359,10 @@
 (defn write-atomic! [^java.io.File f x]
   (.mkdirs (.getParentFile f))
   (let [tmp (io/file (.getParentFile f) (str "." (.getName f) "." (System/nanoTime) ".tmp"))]
-    (spit tmp (with-out-str (pp/pprint x)))
+    ;; pr-str, not pprint: a 4.1 MB published record took 19.9 s to pprint
+    ;; and 0.19 s to pr-str (measured 2026-09-30), and every publish
+    ;; rewrites the whole target file inside the click
+    (spit tmp (str (pr-str x) "\n"))
     (Files/move (.toPath tmp) (.toPath f)
                 (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE StandardCopyOption/REPLACE_EXISTING]))))
 
