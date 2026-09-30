@@ -231,3 +231,254 @@ I would agree only after all of the following are present:
 Subject to these amendments, I agree with the governing rule: author and
 agree actions first, verify them without clicks second, and do not use clicks
 as defect discovery.
+
+## Addendum: position on Plan C and the XXXX requirement
+
+I agree that Plan C takes priority over implementation Plan A. The lifecycle
+model must determine what Plan A implements. I agree with both bindings in C4,
+with the table-driven lifecycle as the authority and trace replay as an
+independent runtime check. Several theorem statements need tightening before
+they can serve as the specification.
+
+### What the existing Lean already provides
+
+The claim that there is no tick-lifecycle transition model in the four named
+modules is correct.
+
+- `Holes.lean:103-119` has typed `Click`, `Attempt`, and bounded `Cohort`
+  carriers. These provide identity/order vocabulary, not lifecycle states or
+  transitions.
+- `Holes.lean:7471-7487` has a `TickRunRecord`, but it is a census-like record
+  of a completed run and `wmRunsOnce` remains an external-attestation `sorry`.
+  It has neither a terminal-receipt sum nor a function that produces one.
+- `Holes.lean:7662-7727` is the closest binding precedent: recorded routes are
+  reduced to hops, a decidable conformance predicate accepts or rejects them,
+  and planted empty/unmapped/refuted cases are proved rejected. C4's replay
+  checker should copy this shape while strengthening the input from route
+  nodes to complete lifecycle events and effects.
+- `CertificateStates.lean:27-53` supplies closed validation and
+  selection/enaction sums, including typed absence/divergence/refusal. Its
+  refusal reasons are `String`, however, so C1 should reuse the sum-of-cases
+  design but replace control-significant strings with closed inductive types.
+  `CensusComplete` (`CertificateStates.lean:99-125`) is reusable for exact
+  event/receipt-field coverage.
+- `MachineAction.lean:23-64,139-148,204-221` contains executable candidate
+  selection, enactment, and abstention functions plus concrete disagreement
+  witnesses. It is historical and explicitly does not describe the current
+  selector (`MachineAction.lean:12-18`), so C1 may reuse its finite/executable
+  style and test patterns, not its production law.
+- `F12Conformance.lean` provides conformance structures, executable witnesses,
+  and counterexamples for alternative readings. It concerns cascade
+  organisation, not tick control flow.
+- Existing `*Negative.lean` files use `#guard_msgs` to assert that a bad
+  declaration fails elaboration. That is the correct meaning of C2's negative
+  controls. A comment saying a theorem “fails to prove” is not itself a test.
+
+The new lifecycle module should import small stable types where appropriate,
+not import the 8,000-line `Holes.lean` as its architecture. In particular it
+should not inherit open-world `String` reason codes or the historical
+`MachineAction.machineAction` as current behavior.
+
+### Smallest first C1
+
+The first handoff should model only the selection boundary through its next
+control decision. It is small enough to review and already proves a property
+that failed in clicks 13–20:
+
+1. closed types for `TargetId`, `ActionId`, `InputDigest`, `FailureId`,
+   `RefusalKind`, `JudgeOutcome`, `ControlRequest`, and `TerminalFailure`;
+2. a `SelectionState` carrying the field, refusal memory, and phase;
+3. an executable `selectionStep : SelectionState → JudgeOutcome →
+   SelectionState × ControlRequest`, with explicit cases for selected,
+   abstained-with-refusals, typed throw, and otherwise-unclassified throw;
+4. theorems that `selectionStep` never returns an untyped control result, that
+   every refusal is retained, and that an unchanged refused
+   `(target, action, inputDigest)` cannot be dispatched again when an eligible
+   alternative exists;
+5. `#guard_msgs` negative controls for a variant that drops a refusal and one
+   that repeats an unchanged refused attempt.
+
+The otherwise-unclassified runtime throw is an explicit input constructor and
+must become a typed `unexpectedRunnerFailure`; exhaustiveness of Lean's match
+does not prove that a Clojure exception was classified unless C4 binds that
+exception boundary.
+
+Subsequent slices add ask/read, author, review, publication, and terminal
+receipt phases one at a time. Only after those slices compose should C1 mean a
+whole tick. Starting with a monolithic whole-tick `step` would recreate the
+large branch structure now under review and make conformance failures hard to
+localize.
+
+### Amendments to T0-T6
+
+**T0: amend substantially.** Parametricity in content is the right direction,
+but “N ticks visit N distinct pairs or close work” is false without a bound:
+there may be fewer than N eligible pairs, inputs may change and make a prior
+pair eligible, or the environment may refuse. State it over a fixed finite
+field and fixed input digests: before the finite set of eligible pairs is
+exhausted, each non-closing tick either terminally records a new pair or emits
+a typed routed failure. At exhaustion it emits a typed exhaustion failure.
+Every tick has exactly one terminal action/failure receipt for every content
+value. Do not require “no abstention”; require that abstention is never a bare
+terminal state and is converted to an action request or typed routed failure.
+
+**T1: amend.** A one-step transition does not imply that a tick ends. Define a
+finite event interpreter (`run : State → List Event → Result`) or a
+well-founded multi-step relation. T1 can prove receipt exclusivity and
+terminal-state invariance. Termination requires either a finite supplied event
+list ending in timeout/cancellation or explicit fairness/deadline hypotheses;
+Lean cannot prove a seat that never replies will produce a receipt unless the
+environment supplies a timeout event.
+
+**T2: agree with amendment.** Prove that every constructor of the closed
+`RefusalKind` maps to typed abstention handling or a routed failure, and that
+the catch-all external exception constructor maps to
+`unexpectedRunnerFailure`. “Never `:untyped-failure`” should follow because
+there is no untyped output constructor. C4, not this theorem, proves coverage
+of actual Clojure exceptions.
+
+**T3: agree with amendment.** A refusal kind must carry or compute the exact
+dependency keys it names. The theorem should compare those keys' digests, not
+an informal “input that r names.” It also needs the eligible-alternative
+hypothesis. When no alternative exists, the required result is a typed routed
+exhaustion failure.
+
+**T4: amend.** Replace “acts or asks” with “issues an action request or ends in
+a typed routed failure.” `read-criteria` itself is an action, and a readable
+target should not be represented as an exceptional ask after abstention.
+Define `scorable` and `readable` as typed predicates in the model.
+
+**T5: reject as worded.** It conflicts with the purpose of `read-criteria`: an
+unread target may not yet be scoreable as a constructive cascade. An ask/read
+may be issued only for a target in the pinned field with an eligible
+information-gathering action. Its request and outcome must be retained on
+every subsequent path, including exception, timeout, refusal, and successful
+publication. The theorem should say that, not “a target the decision can
+score.”
+
+**T6: amend.** Strict decrease on every non-grounded tick is too strong when an
+external store returns stale, a review requests revision, or input digests
+change. Use a lexicographic measure for one fixed-input episode: remaining
+untried eligible pairs, remaining bounded retries, and remaining phase budget.
+Every internal transition decreases it; an external-input change starts a new
+episode; budget exhaustion produces a routed failure. No theorem excludes an
+infinite environment that withholds every response without a timeout/fairness
+hypothesis.
+
+Add two theorems:
+
+- **T7, effect discipline:** `step` is pure and emits a finite typed effect
+  request; only a matching typed effect result advances the state. This is the
+  seam that makes a table-driven Clojure interpreter feasible and prevents
+  hidden writes or dispatches inside lifecycle decisions.
+- **T8, terminal stability and effect uniqueness:** once terminal, further
+  events leave the same receipt and emit no effects; before terminal, one
+  transition cannot request two mutually exclusive terminal publications.
+  This makes “exactly one terminal receipt” robust under duplicate delivery
+  and retry.
+
+### Explicit environment hypotheses (C3)
+
+C3 should distinguish safety from liveness. T2, T3, T5, T7 and T8 should be
+safety theorems with no assumption that a seat behaves well. A seat result is
+a closed sum including changed artifact evidence, already-satisfied evidence,
+typed refusal, invalid response, timeout, cancellation, and transport failure.
+A store result is a closed sum including atomic success, conflict/stale basis,
+refusal, unreadable, and unavailable. Review is approve, request changes,
+refuse, invalid, timeout, or transport failure.
+
+Liveness claims require named assumptions: every requested external effect
+eventually yields one of those result constructors, deadlines produce timeout
+events, the eligible field is finite for an episode, retry budgets are finite,
+and atomic success means the returned digest is subsequently readable. A
+bounded stale lag is unnecessary for safety and insufficient for liveness
+unless the retry/deadline relationship is stated.
+
+### C4 binding choice and order
+
+Use both bindings, in this order:
+
+1. Define the Lean reducer, event/effect wire schema, theorem suite, and
+   rejecting trace fixtures.
+2. Build trace replay first because it can check hermetic traces from the
+   current runner and reveal where the runner diverges before replacement.
+   Replay must compare every state, requested effect, effect result, terminal
+   receipt, and digest; route-only conformance is insufficient.
+3. Export a versioned finite lifecycle transition table (or an equivalent
+   generated reducer artifact) with its Lean source/schema hash. Make Clojure
+   interpret that table for lifecycle control. Clojure adapters perform the
+   requested filesystem, git, Agency, and review effects and return only typed
+   result events. Delete the old competing lifecycle branches when each phase
+   is replaced.
+4. Keep replay in the verification path and optionally at runtime as a
+   fail-closed check. It detects schema drift, adapter misreporting, and an
+   interpreter that did not follow the authoritative transition.
+
+Trace conformance alone is retrospective and cannot make bad control behavior
+impossible; it can only reject or report it after it was emitted. A
+table-driven controller alone still trusts effect adapters and serialization.
+Together they give the intended separation: Lean governs lifecycle choices,
+and replay checks that the implementation and effect reports followed them.
+
+The exported artifact must be generated and hash-checked, not a hand-copied
+second transition table. Some transitions depend on finite searches or typed
+predicates rather than a literal phase/event matrix; in those cases export an
+executable reducer or keep those computations as separately proven functions
+called by table entries. “Table-driven” must not mean erasing semantic
+conditions into prose cells.
+
+### The XXXX requirement
+
+“Parametric in content” is correct only if the control kernel cannot inspect
+content. Use an abstract payload type with no equality/order/decoding
+capability supplied to `step`; better, keep free text outside lifecycle state
+entirely and pass only opaque evidence references plus typed tags. Merely
+writing `{Content : Type}` is insufficient: a function can still branch if it
+receives `DecidableEq Content`, a decoder, or a content-derived Boolean.
+
+Minimum seat-result control tags should be a closed sum, not words parsed by
+the kernel:
+
+- `changed` with target/action ids, artifact reference, basis and result
+  digests, and author identity;
+- `alreadySatisfied` with check/evidence reference;
+- `refused` with a typed refusal kind and dependency keys;
+- `invalid`, `timeout`, `cancelled`, and `transportFailure` with typed reason
+  codes/evidence references.
+
+Review adds reviewer identity and approve/request-changes/refuse/invalid/
+timeout/transport constructors. Human text may travel as an opaque payload for
+audit, but an adapter outside the proved kernel must produce the typed result.
+C4 must test that adapter, because Lean cannot prove an arbitrary textual reply
+was tagged honestly.
+
+The draft's proposed XXXX acceptance “N terminal receipts, no abstention, no
+repeat” should read: exactly one terminal action-or-failure receipt per tick;
+no bare abstention or unrecorded stop; no repeat of the same pair at the same
+input digest before typed exhaustion; and no protected external write outside
+the hermetic stores. With every seat reply body set to `XXXX`, an adapter may
+legitimately return `invalid`; the lifecycle must route that typed failure, not
+pretend a grounded action occurred.
+
+### What Lean cannot deliver
+
+In addition to the draft's caveats, Lean cannot prove any of the following
+without a separately checked binding or hypothesis:
+
+- that every runtime branch, exception, side effect, and serializer is covered
+  by the exported event schema;
+- that a Clojure effect adapter performed the filesystem, git, Agency, store,
+  or review action it reports;
+- that the live target field is complete, finite, current, or honestly hashed;
+- that textual content was classified into the correct typed constructor;
+- that an external seat/store eventually replies, or that wall-clock routing
+  meets five minutes;
+- that an action is useful, semantically correct, or selected by good AIF
+  values merely because lifecycle safety holds;
+- that a compiled checker ran on every accepted tick, or that the checked
+  trace was complete and came from that tick.
+
+Those are C4 adapter, provenance, test, and operational acceptance obligations.
+The Lean result can prove that the modeled reducer has no bad lifecycle
+transition under its explicit hypotheses; it cannot turn an unbound model into
+a theorem about the running Clojure system.
