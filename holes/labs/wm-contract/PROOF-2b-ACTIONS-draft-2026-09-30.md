@@ -112,18 +112,20 @@ provide it is WITHDRAWN. Nothing provides it. It is built, from this:
 - **What it is a model of**: the open tasks, the completed work, and agent
   behaviour. Nothing else.
 - **Tasks.** Every open mission, excursion and ticket is in it and is
-  wanted. Per task: its kind, the project it belongs to (from its path),
-  and a state: untouched / question outstanding / in progress / refused on
+  wanted. Per task: its kind and a state: untouched / question outstanding / in progress / refused on
   a stated basis / closed.
 - **Outcomes** of handing a task to an agent: closed / progressed / asked a
   question / refused / no usable reply.
-- **Agent behaviour.** Counts of outcomes per (task kind, project, seat),
+- **Agent behaviour.** Counts of outcomes per (task kind, seat),
   starting flat and updated after every run (Dirichlet counts). Completed
   work is where these counts come from.
 - **Preferences (C).** Closed is preferred to progressed, progressed to a
-  question, a question to a refusal, a refusal to no usable reply. Tasks in
-  Joe's stated priorities weigh more: finishing the War Machine; work that
-  serves the consulting business. Cτ: until a run has completed end to
+  question, a question to a refusal, a refusal to no usable reply. Tasks that
+  serve Joe's stated priorities weigh more: finishing the War Machine; work
+  that serves the consulting business. HOW a task is known to serve a
+  priority is not yet specified (claude-1 first wrote "project, from its
+  file path", meaning the repository; that was an invention and is
+  removed). Until it is specified, priorities do not enter the score. Cτ: until a run has completed end to
   end, an outcome that completes a run outweighs everything else, so the
   first choices favour tasks most likely to close.
 - **Curiosity.** A cell of the counts with little data has more to teach,
