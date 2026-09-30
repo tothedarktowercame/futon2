@@ -234,3 +234,14 @@
         "an untyped re-decision failure is recorded as today")
     (is (= true (:published (:interpretation-ask record))))
     (is (= "job-1" (:job-id (:interpretation-ask record))))))
+
+(deftest an-unrecognised-ex-info-redecision-failure-keeps-the-ask-record
+  ;; (f) the re-decision threw an ex-info that is neither a judge nor a gate
+  ;; refusal: it is rethrown as before, and the ask record is still on the
+  ;; run record
+  (let [store (io/file (temp-dir "click-ask-store"))
+        {:keys [record]}
+        (run-click (publishing-ask-fn store)
+                   (fn [] (throw (ex-info "not a refusal" {:something :else}))))]
+    (is (= true (:published (:interpretation-ask record))))
+    (is (= "job-1" (:job-id (:interpretation-ask record))))))

@@ -5022,9 +5022,16 @@
                     (reset! pending-selection cell)
                     (swap! checkpoints assoc :selection cell)
                     (throw (judge-refusal-abstention r e)))
-                  ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
-                  ;; the :failure-kind, not :untyped-failure
-                  (throw (or (phase-kind-failure e) e)))))
+                  (do
+                    ;; an ex-info that is neither refusal still keeps the ask
+                    (when ask-record
+                      (swap! checkpoints update :selection
+                             (fn [cell]
+                               (assoc-in (or cell (sorry :no-selection {}))
+                                         [:sorry :interpretation-ask] ask-record))))
+                    ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
+                    ;; the :failure-kind, not :untyped-failure
+                    (throw (or (phase-kind-failure e) e))))))
             judgement0-base
             (try
             (run-phase!
