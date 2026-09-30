@@ -169,6 +169,44 @@
         distribution (update-vals weights #(/ % total))]
     (into {} (for [tau (range 1 (inc horizon))] [tau distribution]))))
 
+;; Measured 2026-09-30 on unordered fixtures in the tooling JVM: widths 5..9
+;; scored in 0.43, 0.47, 0.56, 0.80 and 1.59 seconds; width 10 took 2.90
+;; seconds. Exact enumeration is therefore admitted through width 9.
+(def exact-enumeration-frontier-limit 9)
+
+(defn- reachable-from [outgoing start]
+  (loop [todo (seq (get outgoing start)) seen #{}]
+    (if-let [node (first todo)]
+      (if (seen node)
+        (recur (next todo) seen)
+        (recur (concat (next todo) (get outgoing node)) (conj seen node)))
+      seen)))
+
+(defn- maximum-antichain-bound
+  "Width of the directed arrangement's partial order, via Dilworth's
+  n-minus-maximum-matching construction. Overlap edges impose no order."
+  [units edges]
+  (let [directed (remove #(= :overlap (:kind %)) edges)
+        outgoing (reduce (fn [m {:keys [from to]}] (update m from (fnil conj []) to))
+                         {} directed)
+        reachable (into {} (map (fn [u] [u (reachable-from outgoing u)]) units))]
+    (letfn [(augment [left matched seen]
+              (some (fn [right]
+                      (when-not (@seen right)
+                        (vswap! seen conj right)
+                        (let [prior (get matched right)]
+                          (if (nil? prior)
+                            [true (assoc matched right left)]
+                            (when-let [[_ rematched] (augment prior matched seen)]
+                              [true (assoc rematched right left)])))))
+                    (get reachable left)))]
+      (- (count units)
+         (count (reduce (fn [matched left]
+                          (if-let [[_ next-matched] (augment left matched (volatile! #{}))]
+                            next-matched
+                            matched))
+                        {} units))))))
+
 (defn score-arranged
   "Return finite G and its recorded terms for one arranged cascade.
 
@@ -177,11 +215,24 @@
   ([target id cascade] (score-arranged target id cascade nil))
   ([target id cascade ledger-root]
    (let [occurrence-shape (occurrence-arrangement cascade)
+         units (mapv :occurrence-id (:nodes occurrence-shape))
          cycle (directed-cycle (mapv :occurrence-id (:nodes occurrence-shape))
-                               (:edges occurrence-shape))]
-     (if cycle
+                               (:edges occurrence-shape))
+         directed (remove #(= :overlap (:kind %)) (:edges occurrence-shape))
+         roots (count (remove (set (map :to directed)) units))
+         bound (when-not cycle
+                 (maximum-antichain-bound units (:edges occurrence-shape)))]
+     (cond
+       cycle
        {:status :refused :kind :cyclic-arrangement :cycle cycle
         :policy-id id :target target}
+
+       (> bound exact-enumeration-frontier-limit)
+       {:status :refused :kind :frontier-too-wide-for-exact-enumeration
+        :policy-id id :target target :units (count units) :roots roots
+        :bound bound :limit exact-enumeration-frontier-limit}
+
+       :else
        (let [read-theta ledger/pattern-theta
          candidate (if ledger-root
                      (with-redefs [ledger/pattern-theta #(read-theta % ledger-root)]

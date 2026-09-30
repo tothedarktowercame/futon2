@@ -96,6 +96,28 @@
     (is (= :cyclic-arrangement (:kind result)))
     (is (= (first (:cycle result)) (last (:cycle result))))))
 
+(deftest wide-frontier-is-refused-before-exact-enumeration
+  (let [cascade {:nodes (mapv #(str "p/" %) (range 13)) :edges []}
+        started (System/nanoTime)
+        result (with-redefs [scorer/rank-cascade-actions
+                             (fn [& _] (throw (ex-info "scorer must not run" {})))
+                             manifest/rollout
+                             (fn [& _] (throw (ex-info "enumeration must not run" {})))]
+                 (shape-g/score-arranged "t" "wide" cascade))
+        elapsed-ms (/ (- (System/nanoTime) started) 1.0e6)]
+    (is (= {:status :refused
+            :kind :frontier-too-wide-for-exact-enumeration
+            :policy-id "wide" :target "t" :units 13 :roots 13
+            :bound 13 :limit shape-g/exact-enumeration-frontier-limit}
+           result))
+    (is (< elapsed-ms 1000.0))))
+
+(deftest five-independent-units-remain-exactly-scorable
+  (let [cascade {:nodes (mapv #(str "p/" %) (range 5)) :edges []}
+        result (shape-g/score-arranged "t" "five" cascade)]
+    (is (= :computed (:status result)))
+    (is (Double/isFinite (double (:g result))))))
+
 (defn- fit-analysis [accepted-patterns]
   {:sentences [{:fragments (mapv (fn [i p]
                                    {:start i :end (inc i) :text p :relations ["action"]
@@ -212,7 +234,12 @@
     ;; its 12 reported / 6 distinct policies are no longer admissible input.
     (is (= {:reported-count 69 :distinct-count 27} (meta policies)))
     (is (= 27 (count policies)))
+    ;; The fixed lab retractions predate S18's authored-direction conversion;
+    ;; their widest recorded partial order is 7, so all 27 remain admissible.
+    ;; The current graph/provider census separately has three width-13 refusals.
     (is (= 27 (count (filter #(= :computed (:status %)) results))))
+    (is (zero? (count (filter #(= :frontier-too-wide-for-exact-enumeration
+                                  (:kind %)) results))))
     (is (zero? (count (remove #(Double/isFinite (double (:g %))) results))))
     (is (every? #(< (Math/abs (- (:g %) (+ (:risk %) (:ambiguity %)
                                              (- (:information-gain %)))))

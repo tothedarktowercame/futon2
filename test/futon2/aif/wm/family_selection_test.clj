@@ -242,3 +242,23 @@
     (is (= "T-cycle" (get-in result [:failures 0 :target-id])))
     (is (= (first (get-in result [:failures 0 :cycle]))
            (last (get-in result [:failures 0 :cycle]))))))
+
+(deftest wide-policy-is-counted-while-ordinary-sibling-is-ranked
+  (let [wide (assoc (fixture-policy "T-mixed" 0)
+                    :policy-id "T-mixed/wide"
+                    :cascade {:nodes (mapv #(hash-map :pattern (str "p/" %)) (range 13))
+                              :edges []})
+        ordinary (assoc (fixture-policy "T-mixed" 1) :policy-id "T-mixed/ordinary")
+        family {:status :computed :target-id "T-mixed"
+                :policies [wide ordinary] :distinct-count 2
+                :failures [] :failure-count 0}
+        result (sut/select-over-families [family]
+                                         {:beta 1 :enactment-fold nil
+                                          :novelty-inputs {}})]
+    (is (= :selected (:status result)))
+    (is (= ["T-mixed/ordinary"] (mapv :policy-id (:ranked result))))
+    (is (= 1 (:failure-count result)))
+    (is (= {:target-id "T-mixed"
+            :kind :frontier-too-wide-for-exact-enumeration
+            :policy-id "T-mixed/wide"}
+           (select-keys (first (:failures result)) [:target-id :kind :policy-id])))))
