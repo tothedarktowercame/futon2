@@ -482,3 +482,157 @@ Those are C4 adapter, provenance, test, and operational acceptance obligations.
 The Lean result can prove that the modeled reducer has no bad lifecycle
 transition under its explicit hypotheses; it cannot turn an unbound model into
 a theorem about the running Clojure system.
+
+## Second addendum: text-dependent control-flow audit
+
+The preceding Plan C addendum answers the formal question: Joe's requirement
+is not satisfied merely by declaring `step {Content : Type}`. The precise
+condition is **content noninterference for lifecycle control**. For any two
+payload assignments over the same typed ids, tags, evidence references and
+environment events, the reducer must emit the same lifecycle phases, effect
+requests, and terminal-receipt kind. Payload may affect scoring and the
+substance of an action, but it may not make the tick disappear, become a bare
+abstention, or retry the same unchanged attempt.
+
+This does not mean the system can never parse text. An adapter may turn a wire
+document or seat response into a closed typed event. The lifecycle reducer
+must handle every parser result, including invalid/unparseable, and the C4
+binding must prove that every adapter result enters that reducer. It also does
+not require identical selected targets for different text: Joe explicitly
+allows content to change which action is chosen.
+
+### Current sites where text changes tick control
+
+The following is the tick path and its direct input producers, not every
+content parser in both repositories.
+
+1. **Exception prose decides whether a judge exception is a typed refusal.**
+   `full_loop_runner.clj:547-570` requires `ex-message` to equal the literal
+   `"cascade decision refused"`. The same typed `ex-data` under different
+   exception prose misses `judge-refusal` and takes another close path. This
+   should dispatch on a typed exception/event constructor only.
+
+2. **Mission and ticket status prose decides field membership.**
+   `enumeration_completeness.clj:121-165` regexes a `Status` line and words
+   such as `DRAFT`, `DONE`, `SUPERSEDED`, and `JOE'S CALL` into
+   live/draft/terminal classes. The older live-C path separately recognizes
+   only a line beginning `**Status:` and words `CLOSED|COMPLETE`
+   (`live_c.clj:119-151`). These are two textual classifiers with different
+   vocabularies. Under the XXXX rule, absence or unrecognized text must default
+   to open, while closure must arrive as a typed lifecycle tag/provenance
+   record if it is to remove work from the field.
+
+3. **Checkbox syntax decides whether a mission yields a readable want.**
+   `mission_hole_wants.clj:33-38` accepts only unchecked-task text matching a
+   checkbox regex. `click_ask.clj:91-108` then returns
+   `:no-mission-hole-want` when that text-derived pick is absent. Thus replacing
+   the body with XXXX can prevent the current recovery action from existing.
+
+4. **Mission headings, bullets, verdict words, and phase prose create or omit
+   criteria.** `mission_criteria.clj:65-122` recognizes `Met`, `Not met`,
+   headings, exit markers and bullet shapes; `mission_criteria.clj:175-197`
+   derives dependency edges from “closes through” prose. These may legitimately
+   affect extracted criteria, but an empty/unrecognized extraction currently
+   removes the inputs required by later admission. C1 must instead yield an
+   unread/default task action plus a typed extraction result.
+
+5. **A `## Relations` heading and embedded M- ids decide target class.**
+   `focus_receipt.clj:137-175` parses that section and follows its textual ids.
+   The decision consumes that classification at
+   `cascade_decision.clj:881-903`; unknown class can remove each candidate and
+   ultimately throw/abstain at `cascade_decision.clj:1000-1065`. Relations may
+   change G or the selected target, but lack of recognized prose must not erase
+   the readable/default action.
+
+6. **Interpretation reply text decides publish/decline/reject.**
+   `want_interpretation.clj:437-452` searches prose for exactly one fenced EDN
+   block, and `flight_runner.clj:302-336` turns parse/decline/validation results
+   into pending, not-answered, unparseable, declined, rejected, or published.
+   `want_interpretation.clj:251-305` also validates textual/library-derived
+   fields and can reject publication. These are valid adapter outcomes, but
+   none may end the lifecycle without a typed receipt and refusal-memory
+   update.
+
+7. **Enactment reply text decides whether a step commits, declines, or fails.**
+   `flight_runner.clj:182-245` parses a fenced response from the seat; arbitrary
+   reason prose is carried as the decline. `flight_runner.clj:831-955` turns
+   the parsed `:failed`/`:declined` shape into success or failed attempts and
+   controls later plan/commit phases. The typed result must be produced at the
+   adapter boundary and include the attempted pair and input digest; the
+   reducer must not inspect the reason text.
+
+8. **Author marker prose selects done, refusal, or unverifiable.**
+   `full_loop_runner.clj:2019-2031` regexes `FULL_LOOP_AUTHOR: DONE|REFUSE`.
+   The free-text refusal reason then decides whether refusal is accepted via a
+   nonblank check (`full_loop_runner.clj:2203-2228`). XXXX therefore changes
+   the outcome even when the job and repository observations are otherwise the
+   same.
+
+9. **Feature-card position and prose shape decide whether the build proceeds.**
+   `full_loop_runner.clj:2034-2159` searches result summaries, full results and
+   event text for a marker and EDN, requires nonblank prose fields, and requires
+   `:things-to-try` strings containing `->`. Failure triggers build-cure or
+   build failure at `full_loop_runner.clj:2943-3005`. These fields can remain
+   audit payload, but prose quality cannot be a prerequisite for terminalizing
+   an otherwise grounded action.
+
+10. **The words “already true/satisfied/holds/landed/met/done” change refusal
+    classification.** `full_loop_runner.clj:2164-2228` searches `:built` and
+    `:want-coverage` strings and chooses `:already-satisfied`,
+    `:guardrail-refusal`, or `:invalid-author-refusal`. This is a direct XXXX
+    violation. `alreadySatisfied` must be a typed reply constructor with an
+    evidence reference that is checked independently.
+
+11. **Reviewer prose decides approval and repair routing.**
+    `task_execution_evidence.clj:25-34` regexes
+    `FULL_LOOP_REVIEW: APPROVE|REQUEST_CHANGES|REJECT`; the runner branches on
+    that value during adjudication and repair creation
+    (`full_loop_runner.clj:5944-6106,6229-6256`). The review wire response needs
+    a typed verdict separate from its explanatory text.
+
+12. **Some transport classification still depends on exception text.**
+    `full_loop_runner.clj:3902-3977` explicitly recognizes an enumerated set of
+    bare `SocketException` messages. This is narrower and unrelated to mission
+    prose, but it still violates the strongest content-independent lifecycle
+    statement. The adapter should translate exception class/cause into a typed
+    transport event; unknown exceptions must map to typed
+    `unexpectedRunnerFailure`, never fall through untyped.
+
+Several other regexes read paths, SHA syntax, EDN/JSON wire encodings and
+declared status keywords. Those are representation decoders, not necessarily
+violations. The test is what happens when decoding fails: the result must be a
+closed typed event consumed by the lifecycle reducer, not loss of the target,
+an unrecorded exception, or a bare abstention.
+
+### Minimum non-text seat wire contract
+
+The minimum is a structured envelope whose discriminant is not recovered from
+prose:
+
+```text
+SeatResult =
+  | changed(targetId, actionId, inputDigest, artifactRef, resultDigest,
+            authorId)
+  | alreadySatisfied(targetId, actionId, inputDigest, evidenceRef, authorId)
+  | refused(targetId, actionId, inputDigest, refusalKind, dependencyKeys,
+            authorId)
+  | invalid(targetId, actionId, inputDigest, invalidKind, jobId)
+  | timedOut(targetId, actionId, inputDigest, jobId)
+  | cancelled(targetId, actionId, inputDigest, jobId)
+  | transportFailed(targetId, actionId, inputDigest, transportKind, jobId)
+```
+
+For a code-changing `changed`, the artifact reference must identify repository
+and commit; it is evidence to validate, not authority by assertion. Review has
+its own structured envelope with target/action/input/artifact digests,
+reviewer id, and one of `approved`, `changesRequested`, `refused`, `invalid`,
+`timedOut`, `cancelled`, or `transportFailed`. The author and reviewer ids must
+be machine-issued identities, not names parsed from reply prose.
+
+Opaque text may accompany every constructor as commentary. It must not choose
+the constructor inside the Lean-governed reducer. During migration, a parser
+may be the adapter that constructs it, but the XXXX test must exercise every
+parser failure constructor and show that all of them produce exactly one typed
+terminal receipt or a bounded next action. A parser that maps arbitrary XXXX
+to `invalid` is acceptable; a tick that stops because XXXX lacks a magic phrase
+is not.
