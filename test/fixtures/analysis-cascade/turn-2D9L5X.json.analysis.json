@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "human_approved": false,
+  "labeller": "kimi-2",
+  "reusable_cues": [
+    {
+      "start": 45,
+      "end": 76,
+      "text": "something that makes more sense",
+      "intent": "redirect",
+      "rationale": "Operator phrase inviting a rename/replacement toward a more accurate description, granting the agent latitude to pick it; generalizes to any rename-to-fit instruction."
+    },
+    {
+      "start": 165,
+      "end": 194,
+      "text": "a record of what we are doing",
+      "intent": "propose",
+      "rationale": "Success criterion phrasing for documentation requests: the point of writing something up is a shared record of ongoing joint work."
+    }
+  ],
+  "created_at": "2026-09-25T20:15:29.227870+00:00",
+  "source_text": "You can change the requisition for kimi-2 to something that makes more sense, like E-convert-operator-turns-to-patterns (which you can also write up so that we have a record of what we are doing)",
+  "source_sha256": "dfd2266e43231b228713e058be78996bb09cbfb15a207cb59dda3b6a30037a05",
+  "offset_unit": "unicode-codepoints-zero-based-end-exclusive",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 119,
+          "text": "You can change the requisition for kimi-2 to something that makes more sense, like E-convert-operator-turns-to-patterns",
+          "intent": "redirect",
+          "target": "The requisition/mission id under which kimi-2 is being dispatched (M-futon-seams), to be renamed to a descriptive excursion id",
+          "rationale": "Joe grants claude-12 discretionary latitude ('You can change') to rename the requisition to a title that states what the work actually is, supplying a concrete exemplar (E-convert-operator-turns-to-patterns). The move is a truth-telling rename of a dispatch object, delegated with an example rather than a mandate.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 45,
+              "end": 76,
+              "text": "something that makes more sense"
+            },
+            {
+              "start": 78,
+              "end": 119,
+              "text": "like E-convert-operator-turns-to-patterns"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "writing-coherence/meta-title",
+              "reason": "Nearest naming pattern, but it titles a section by what it says within a document; Joe's move renames a live dispatch object (mission/requisition) and delegates the choice, which is a coordination act, not a prose-titling rule.",
+              "query": "rename the ticket so the title tells the truth"
+            },
+            {
+              "id": "orchestration/recorded-handoff",
+              "reason": "Surfaced on the requisition query; that pattern models the handoff lifecycle with trailers and gates, while Joe is only renaming the object, not restructuring the handoff protocol.",
+              "query": "rename the mission to one that says what the work is"
+            }
+          ]
+        },
+        {
+          "start": 120,
+          "end": 195,
+          "text": "(which you can also write up so that we have a record of what we are doing)",
+          "intent": "propose",
+          "target": "A write-up of the operator-turns-to-patterns activity itself, so the joint work leaves a durable record",
+          "rationale": "A parenthetical extension ('you can also'): alongside the rename, Joe asks that the activity be written up, with the explicit success criterion that 'we have a record of what we are doing' — the trail of the work matters to the operators, not only its output.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 165,
+              "end": 194,
+              "text": "a record of what we are doing"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "agent/trail-enables-return",
+              "rationale": "Fits the THEN: record the moves and decisions of an ongoing activity as a durable, queryable trail so the work can be revisited later — Joe's stated purpose ('a record of what we are doing') is exactly the persistent-structure-over-ephemeral-navigation BECAUSE, here applied to the joint operator/agent activity rather than a single agent's navigation.",
+              "status": "candidate",
+              "source_sha256": "30909dc8a4e083e1c7361955d00bbe4ed418835b9bf0f2bc5e4c5db36d942c28"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "corps/working-where-others-can-see",
+              "reason": "Close on visibility, but that pattern moves a private research workflow into shared team surfaces to enable coordination; Joe wants a written record of an activity already happening in shared machinery, not a visibility migration.",
+              "query": "leave a paper trail, document the activity as you go"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/.emacs-graph/session-turn-analysis/turn-2D9L5X.json",
+  "request_sha256": "557d36ce285d5cf75b1bd0be04baf88a4ba859e0256a1da9c40a848d16c5c992"
+}

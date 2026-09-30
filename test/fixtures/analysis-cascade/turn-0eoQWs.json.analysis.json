@@ -1,0 +1,172 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "human_approved": false,
+  "labeller": "象",
+  "reusable_cues": [
+    {
+      "start": 193,
+      "end": 224,
+      "text": "Excursion to follow INSTANTIATE",
+      "intent": "defer",
+      "rationale": "Naming a concrete successor artifact (an Excursion) plus the phase it follows is a reusable 'defer properly with a forward pointer' shape; generalises to 'X to follow <phase>'."
+    }
+  ],
+  "created_at": "2026-09-27T16:08:47.522707+00:00",
+  "source_text": "I'd say that this passes VERIFY and could go to codex-4 for INSTANTIATE. NB. claude-8 War MAchine requirements don't have to be built in this first pass, but we can write them down as an as an Excursion to follow INSTANTIATE.",
+  "source_sha256": "7212d948689491368757355fd29455e7faf8470a8a347e5a620b43a0504a86e9",
+  "offset_unit": "unicode-codepoints-zero-based-end-exclusive",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 72,
+          "text": "I'd say that this passes VERIFY and could go to codex-4 for INSTANTIATE.",
+          "intent": "approve",
+          "target": "the artifact under review, and its routing to codex-4 for the INSTANTIATE phase",
+          "rationale": "The speaker declares a gate judgement (VERIFY passes) and immediately routes the work to a named agent (codex-4) for the next named phase (INSTANTIATE) — an explicit lifecycle transition with a stated successor rather than an unrecorded handoff.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 18,
+              "end": 31,
+              "text": "passes VERIFY"
+            },
+            {
+              "start": 48,
+              "end": 71,
+              "text": "codex-4 for INSTANTIATE"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-lifecycle",
+              "rationale": "Mission Lifecycle (State Machine): the move is exactly a declared state transition — VERIFY judged passed, INSTANTIATE named as the successor state with an assigned owner — leaving the auditable trail the pattern asks for instead of letting the mission drift.",
+              "status": "candidate",
+              "source_sha256": "78eee0c50b9af03f21a6225c21799b5c724ae873dfd95aee9724be5aac787001"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "agent/handoff-preserves-context",
+              "reason": "That pattern governs how much context must travel with a handoff; here the move is the gate judgement and phase routing itself, and no context-packaging decision is being made.",
+              "query": "route verified work to the next agent in a pipeline"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 73,
+          "end": 76,
+          "text": "NB.",
+          "intent": "qualify",
+          "target": "the approval in s1 — flags that a scope caveat follows",
+          "rationale": "A bare nota-bene marker: its whole function is to signal that the next sentence qualifies the approval just given. It carries no content of its own but is a real communicative move (attention flag for a caveat).",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 73,
+              "end": 76,
+              "text": "NB."
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 77,
+          "end": 225,
+          "text": "claude-8 War MAchine requirements don't have to be built in this first pass, but we can write them down as an as an Excursion to follow INSTANTIATE.",
+          "intent": "constrain",
+          "target": "scope of the INSTANTIATE pass — claude-8's War Machine requirements are excluded",
+          "rationale": "The speaker explicitly declares what is out of bounds for this pass (the WM requirements) so the INSTANTIATE work is not blocked by them, pairing the approval in s1 with a scope limit.",
+          "relations": [
+            "condition",
+            "contrast"
+          ],
+          "display_cues": [
+            {
+              "start": 128,
+              "end": 152,
+              "text": "built in this first pass"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "musn/declare-scope",
+              "rationale": "Declare Scope and Exit Condition: the move states out-of-bounds scope up front ('don't have to be built in this first pass'), which is exactly the pattern's demand that in-bounds and out-of-bounds be declared before work proceeds.",
+              "status": "candidate",
+              "source_sha256": "91a27524fc377ee99a4bdea1de6cd408173d3b17fad44e941fb78943a274520d"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 154,
+          "end": 225,
+          "text": "but we can write them down as an as an Excursion to follow INSTANTIATE.",
+          "intent": "defer",
+          "target": "the excluded WM requirements",
+          "rationale": "Rather than dropping the excluded requirements, the speaker defers them properly: they are to be written down as a named Excursion scheduled after a named phase — a forward pointer the work can later chase, not a vague 'later'.",
+          "relations": [
+            "action",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 165,
+              "end": 180,
+              "text": "write them down"
+            },
+            {
+              "start": 193,
+              "end": 224,
+              "text": "Excursion to follow INSTANTIATE"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "writing-coherence/hedged-lift",
+              "rationale": "Commit, Defer Properly, or Cut endorses exactly this branch: a scope exclusion is legitimate when it defers with a concrete forward pointer (a named Excursion following INSTANTIATE) instead of a vague disclaimer. Transposed from prose to project planning, this is the proper-deferral move.",
+              "status": "candidate",
+              "source_sha256": "a58ce7caf31dc207a3f7b81b246570f7f6e182c49dfb309685fbe1d91fc68ed9"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "ukrns/separate-direct-indirect-and-out-of-scope-levers",
+              "reason": "That sketch partitions policy levers by causal distance in a UKRNS governance context; the move here is scheduling deferred requirements, not classifying levers.",
+              "query": "defer out-of-scope requirements to a later excursion"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/.emacs-graph/session-turn-analysis/turn-0eoQWs.json",
+  "request_sha256": "cc57e854fcd4064924cd2e2a81a6c96d4d3efadab851b16ddc27fa9e0ea1013e"
+}

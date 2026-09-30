@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "human_approved": false,
+  "labeller": "象",
+  "reusable_cues": [
+    {
+      "start": 79,
+      "end": 91,
+      "text": "which is why",
+      "intent": "explain",
+      "rationale": "Derivation marker: the requirement that follows is presented as forced by the constraint just stated. Generalises across design reasoning."
+    }
+  ],
+  "created_at": "2026-09-26T11:39:47.282197+00:00",
+  "source_text": "The thing is, we can't necessarily afford to run things before the agent acts, which is why we need to create the ability to rewind.",
+  "source_sha256": "f4e8f49f7ae6907296f56a7b973c2d5cc36c90f4cb4aa7525974a0a669c1c66c",
+  "offset_unit": "unicode-codepoints-zero-based-end-exclusive",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 132,
+          "text": "The thing is, we can't necessarily afford to run things before the agent acts, which is why we need to create the ability to rewind.",
+          "intent": "constrain",
+          "target": "the design space for agent action: pre-action simulation is unaffordable, so reversibility (rewind) is required instead",
+          "rationale": "Joe derives a design requirement from an affordability constraint: if you cannot run/simulate outcomes before the agent acts, the only safety you can buy is the ability to rewind after. Reversibility substitutes for foresight. trail-enables-return covers the rewind requirement itself (traces that allow backtracking so mistakes are recoverable); the substitution move — rewind INSTEAD of pre-hoc gating/simulation — has no name, proposed as operator/if-you-cant-see-ahead-make-it-reversible (parent agent/trail-enables-return).",
+          "relations": [
+            "condition",
+            "rationale",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 45,
+              "end": 77,
+              "text": "run things before the agent acts"
+            },
+            {
+              "start": 103,
+              "end": 131,
+              "text": "create the ability to rewind"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "agent/trail-enables-return",
+              "rationale": "The rewind ability Joe commissions is the pattern's conclusion: traces enabling backtracking so an agent that cannot pre-verify its acts can still recover from their outcomes.",
+              "status": "candidate",
+              "source_sha256": "30909dc8a4e083e1c7361955d00bbe4ed418835b9bf0f2bc5e4c5db36d942c28"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "orchestration/consent-gate",
+              "reason": "The consent-gate is the pre-hoc strategy Joe is explicitly pricing out: gating irreversible acts BEFORE they fire. Joe's constraint says pre-action checking is unaffordable here, so he buys reversibility instead — the boundary between the two patterns is exactly pre-hoc gate vs post-hoc rewind.",
+              "query": "irreversible action, rollback, recover from agent mistakes"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/.emacs-graph/session-turn-analysis/turn-1hDrqF.json",
+  "request_sha256": "c4778003b4051a82a994d36ced386af024cd81bdbad2afe7dca491f4652ed5ec"
+}
