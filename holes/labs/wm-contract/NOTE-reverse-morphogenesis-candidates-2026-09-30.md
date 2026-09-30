@@ -61,12 +61,47 @@ ignored (canonical repos only).
 WM-related in the six: M-futon-seams, M-wm-policies, M-typed-holes (+
 M-capability-star-map closed by a WM pilot) — satisfies "at least 3".
 
-Notable EXCLUSION: **M-apm-demonstration** has by far the most recorded
-operator turns of any mission (1,519) but its canonical file
-(futon3c/holes/missions/M-apm-demonstration.md) reads
-`**Status:** OPEN — HEAD complete; IDENTIFY draft pending operator
-acceptance` — phase words, not closure, so it fails Joe's rule today. It
-is the single biggest reverse-morphogenesis dataset the moment it closes.
+Notable EXCLUSION **(superseded by the addendum below)**: M-apm-demonstration fails the mission-grain rule (status reads OPEN), but its HEAD phase is complete and it becomes the TOP entry once any grain counts.
+
+### ADDENDUM (claude-1, same day): the completed unit, not the completed mission
+
+The closed/complete-the-whole-file rule is Joe's rule for what is still in
+the FIELD. For reverse morphogenesis the unit is COMPLETED WORK at any
+grain — a closed mission, a completed PHASE with a recorded exit, an
+accepted/ticked criterion, a closed ticket or excursion. The six
+completed units with the most recorded operator turns (turns = operator
+turns carrying that mission-id; analysed = strict (session,turn) join;
+dates = first→last recorded turn):
+
+| unit | grain | the line that shows it is complete | turns | analysed | to analyse |
+|---|---|---|---|---|---|
+| **M-apm-demonstration** (futon3c) | phase — HEAD complete | `**Status:** OPEN — HEAD complete; IDENTIFY draft pending operator acceptance (2026-08-14)` — the HEAD exit is recorded; only IDENTIFY pends | **1,519** (08-14 → 08-27) | 336 | 1,183 |
+| **M-象-2000** (futon3c) | phase — VERIFY passed | `**Status:** OPEN — INSTANTIATE (VERIFY passed, Joe 2026-09-27; builder codex-4)` | 289 (09-26 → 09-30) | 137 | 152 |
+| **M-futon-seams** (futon3c) | mission | `**Status:** **COMPLETE (2026-09-24)** — all eight phase exits met …` | 283 (09-24 → 09-28) | **144** | 139 |
+| **M-wm-wiring** (futon3c) — WM | phase — five exits met | `**Status:** OPEN — HEAD, IDENTIFY, MAP, DERIVE, ARGUE met (Joe's read, 2026-09-25 ~23:55Z: "it looks good to me"); VERIFY entered …` | 250 (09-25 → 09-27) | 61 | 189 |
+| **M-wm-policies** (futon2) — WM | mission | `**Status:** CLOSED — **CLOSED (Joe, 2026-06-24).** All 4 completion criteria MET + live-verified …` | 201 (06-09 → 06-24) | 1 | ~200 |
+| **M-learning-loop** (futon5a) | phase/criteria — criteria 3–4 accepted | `**Status:** OPEN — INSTANTIATE (pipeline live; … **criteria 3–4 ACCEPTED by operator 2026-07-22** — see checkpoint; …)` | 210 (07-06 → 07-22) | 1 | 209 |
+
+War Machine related in the widened six: **M-wm-wiring, M-wm-policies,
+M-futon-seams** (the PROOF-2 worked example) — three, as required. The
+best-recorded WM unit at phase grain is **M-wm-wiring** (250 turns, five
+recorded phase exits); the best-analysed unit overall is still
+**M-futon-seams** (144), with M-象-2000 (137) and M-apm-demonstration
+(336 analysed — the largest analysed set of all) close behind.
+
+Grain-3 units (a single ticked acceptance item with its ticking commit in
+the record) were NOT separately enumerated: joining ticked boxes to their
+commits needs a per-file git walk plus the turn-commits pull, which this
+pass did not spend queries on — the closest verified examples are
+M-learning-loop's accepted criteria (quoted above) and M-futon-seams's
+eight phase-exit verdicts against lifecycle.edn. Closed tickets/excursions
+were not enumerated either (no ticket/excursion entries carried a
+mission-id join in the walk). Both remain open for a follow-up pass.
+
+This addendum also changes the §4 price tag: the six completed UNITS need
+**~2,070 turns analysed** (1,183 + 152 + 139 + 189 + 200 + 209), roughly
+69–173 seat-hours at 2–5 minutes each — dominated by M-apm-demonstration,
+which is also already one-fifth analysed.
 
 The 象 analysis corpus: 3,769 batch analyses
 (/home/joe/code/storage/operator-turns/batches, 2026-08-22→2026-09-21,
