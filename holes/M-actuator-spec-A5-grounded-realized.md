@@ -1,5 +1,7 @@
 # Spec: A5 — ground the realized outcome in the substrate (build-match dial → γ)
 
+**Status:** CLOSED — Implemented with substrate-dial discrimination tests in `723cacfde`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Extends:**
 `futon2/src/futon2/aif/fold_realized.clj`; connects it to
 `futon2/src/futon2/aif/actuator_a3.clj` (build-match). **Pays down:** R14 (γ fed a *real*

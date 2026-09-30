@@ -1,5 +1,7 @@
 # Spec: A4 minimal — the write + discharge record (short-term memory)
 
+**Status:** CLOSED — Implemented and covered by discharge-record and idempotency tests in `359a1ad61`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Extends:**
 `futon2/src/futon2/aif/actuator_a3.clj`. **Pays down:** R16-EXEC-REACH (the byte the
 loop never wrote). **Explicitly NOT in scope:** capability-star `:status`, EFE

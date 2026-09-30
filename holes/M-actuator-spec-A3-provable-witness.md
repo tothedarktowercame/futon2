@@ -1,5 +1,7 @@
 # Spec: A3's real acceptance — the provable-match substrate-2 witness
 
+**Status:** CLOSED — Implemented with unit and live witness coverage in `c9e1dbcba` and `6ceadc472`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews the ungameability).
 **Extends:** `src/futon2/aif/actuator_a3.clj`. **Foundation (verified):** authed
 Drawbridge `submit-tx` writes + `q` proves on the same live node (smoke test PASS,

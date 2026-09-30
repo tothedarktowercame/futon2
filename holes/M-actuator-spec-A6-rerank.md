@@ -1,5 +1,7 @@
 # Spec: A6 — re-observe → recommendation moves (direct re-ranking) + A7 falsifier
 
+**Status:** CLOSED — Implemented with positive and negative closure-falsifier tests in `4da934687`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **New ns:**
 `futon2/src/futon2/aif/actuator_a6.clj`. **Pays down:** R13 (a discharge visibly re-orders the
 queue). **Built against the LOCKED contract** with claude-5: claude-4/A6 owns

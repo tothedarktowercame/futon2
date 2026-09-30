@@ -1,5 +1,7 @@
 # Spec: A5 two-sided expected leg (γ can commit, not just hedge)
 
+**Status:** CLOSED — Implemented with two-sided and labelled-fallback tests in `a3cbc5694`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Extends:**
 `futon2/src/futon2/aif/fold_realized.clj` (`realized-outcome-grounded`). **Pays down:** R14
 (γ gets a signal that swings both ways). **Distinct from** the R12/R13 re-ranking known-gap

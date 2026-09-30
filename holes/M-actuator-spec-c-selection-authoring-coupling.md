@@ -1,5 +1,7 @@
 # Spec (c): couple SELECTION → AUTHORING so the system always runs forward
 
+**Status:** CLOSED — Dispatcher and guard tests landed in `085aee68a`, mission-scoped authoring in futon3c `44408071`, and `futon6/data/fold-turns/ft-learning-loop-010.edn` records the accepted live result.
+
 **Owner/reviewer:** claude-4 (author ≠ reviewer; Codex builds, claude-4 reviews)
 **Date:** 2026-07-06
 **Tracks:** `futon2/holes/aif-wiring-actuator.html` — this closes the missing

@@ -1,5 +1,7 @@
 # Spec: build-match — does the build match the CLean structural spec?
 
+**Status:** CLOSED — Implemented with whole-spine, missing-interior, and invalid-CLean tests in `fdbc52786`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Extends:**
 `futon2/src/futon2/aif/actuator_a3.clj`. **Idea (Joe):** A3 proves only the *boundary*
 (the terminal endpoints inhabited). The CLean is the *structure*, so the build must match

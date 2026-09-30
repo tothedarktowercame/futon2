@@ -1,5 +1,7 @@
 # Spec: automated code build-match (built-code ⟼ sorry-registry) — the living pipeline dashboard
 
+**Status:** CLOSED — Implemented with derived-dashboard, readiness-flip, and faithfulness-gap tests in `4d2836a71` and `898a8c9fd`.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews). **Idea (Joe):** the CLean
 `futon6/holes/clean/aif-grounded-loop.clean.edn` describes the pipeline *itself* (7 boxes =
 R-stages). We build-matched it by hand (2/7 ready) but the readiness `:grade` was **curated**.
