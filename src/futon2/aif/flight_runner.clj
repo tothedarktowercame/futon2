@@ -119,12 +119,15 @@
       (str/join "\n" (keep :text (filter #(= "text" (:type %)) (:events job)))))))
 
 (defn agency-answer-fn
-  "An answer function that asks SEAT through Agency: a bell (mode work, the
-  flight's target as the requisition) carrying the want-interpretation
-  prompt, then a poll to a terminal state (a whistle would block the flight
-  for the minutes an answer takes; a bellback has no return path to the
-  machine's persona). Returns {:seat :job-id :state :text :library-root}.
-  OPTS are the runner's (:agency-base, poll settings).
+  "An answer function that asks SEAT through Agency: a bell (mode brief —
+  an interpretation/reading answer is a reply with no tool use, so the
+  work-mode no-execution check would fail it; see futon3c
+  codex-task-no-execution?, which only fires for mode work — carrying the
+  flight's target as the requisition), then a poll to a terminal state (a
+  whistle would block the flight for the minutes an answer takes; a bellback
+  has no return path to the machine's persona). Returns {:seat :job-id
+  :state :text :library-root}. OPTS are the runner's (:agency-base, poll
+  settings).
 
   poll! is runner/poll-job!, which waits until the job reaches a terminal
   state (it records stalls and keeps waiting), so a real answer is settled
@@ -145,7 +148,9 @@
           requisition (requisition-line (:target issued)
                                         (str (name (or (:kind issued) :interpretation)) " request "
                                              (:request-id issued)))
-          sent (dispatch! opts seat caller (:target issued) (str requisition (prompt-fn issued)))
+          sent (dispatch! (assoc opts :invoke-mode "brief")
+                          seat caller (:target issued)
+                          (str requisition (prompt-fn issued)))
           job-id (:job-id sent)]
       (if-not job-id
         {:seat seat :state :not-dispatched :text nil :dispatch sent :library-root root}

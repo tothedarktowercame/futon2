@@ -1305,7 +1305,7 @@
    use, and the Agency's work-mode no-execution gate
    futon3c codex-task-no-execution? would fail it); absent means \"work\",
    the enactment default that requires execution evidence."
-  [{:keys [agency-base d-task-dispatch-state run-id invoke-mode] :as opts} agent caller mission prompt]
+  [{:keys [agency-base d-task-dispatch-state run-id invoke-mode]} agent caller mission prompt]
   (let [captured (some-> d-task-dispatch-state deref)
         prompt (if (= :captured (:status captured))
                  (str (d-task/prompt-binding (:dispatch captured)) "\n" prompt) prompt)
