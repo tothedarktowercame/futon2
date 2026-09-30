@@ -328,6 +328,11 @@ def do_chunk(seat: str, chunk: dict) -> None:
             res = check(chunk, before)
         except Exception as e:
             res = {"ok": False, "problems": [f"checker error: {e}"], "shas": []}
+        if j.get("state") != "done":
+            # a failed job's missing commit is not "all KEEP" (r005, 2026-09-30:
+            # store-busy job passed the review check within a minute)
+            res = {**res, "ok": False,
+                   "problems": [f"job ended {j.get('state')} ({j.get('terminal-code')})"] + res["problems"]}
         verdict = "pass" if res["ok"] else "fail"
         record({"chunk": chunk["chunk"], "seat": seat, "job": job, "attempt": attempt,
                 "job-state": j.get("state"), "verdict": verdict, **res})
