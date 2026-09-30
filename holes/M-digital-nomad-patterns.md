@@ -1,6 +1,6 @@
 # M-digital-nomad-patterns — a pattern language for moving on the professional landscape
 
-**Status:** IDENTIFY (2026-07-27). **Owner:** Joe + claude-4.
+**Status:** OPEN — IDENTIFY (2026-07-27). **Owner:** Joe + claude-4.
 **Spawned from:** the zaif-transplant application (p4ng appendix) plus the
 landscape probe — the observation that the probe's output is a *terrain*, and
 navigating a terrain is what pattern languages are for.
@@ -275,3 +275,11 @@ CONSULTANCY FUNDS THE PRODUCT — engagements are revenue + dogfood + case
 studies + the relationships the etik corpus later capitalizes. Pattern
 tempo split, now explicit: Owner-Of-The-Problem/Live-Yardstick = weeks;
 Author-The-Yardstick = the slow asset the fast lanes pay for.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] Eight generalized nomad patterns exist under `futon3/library/nomad/`. (evidence: `holes/M-digital-nomad-patterns.md` §“Canonical home”)
+- [ ] Three “Letter From The Future” artifacts exist for the funder, collaborator, and thesis-adjacent addressees, with invariant clauses and divergent bets identified.
+- [ ] The competitor and opportunity roster is redrawn by thesis rather than field and records the held-out-control room.
+- [ ] An inventory maps existing self-certifying artifacts to the three letters.
+- [ ] The pattern language produces both a Gowers engagement letter and a distinct Hong-style adjacent-ridge plan whose differences follow the named patterns.

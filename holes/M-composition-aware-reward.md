@@ -1,9 +1,9 @@
 # M-composition-aware-reward
 
-**Status: IDENTIFY complete (evidence below) → DERIVE/INSTANTIATE chartered
+**Status:** OPEN — IDENTIFY complete (evidence below) → DERIVE/INSTANTIATE chartered
 2026-07-11. Operator-armed (Joe): build R1+R2 as mission work through the
 zai lane, reviewed per CONTROL-LAYER.md; then batch 5 runs under the result
-and we compare.**
+and we compare.
 
 ## HEAD
 
@@ -128,3 +128,10 @@ any composition evidence); its VALUES await labels. No further reward-side
 iteration is warranted — the 0.034 gap is closed by fold outcomes, not
 features. Routed to the operator's open decisions: label grain + batch 5
 under v1.2 (which both mints labels AND field-tests the shape).
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] The greedy reward-v1 canary returns an argmax larger than one and within ±2 of obligation count for each of the three named batch-4 missions with at least two obligations.
+- [x] The recorded reward-v1 leave-one-out S3 score is 0.889, above its 0.787 shuffle null. (evidence: `holes/M-composition-aware-reward.md` §“INSTANTIATE — OUTCOME”)
+- [x] All reward-v1 hard checks, including the single-pattern degeneracy gate, pass in the recorded 22-test run. (evidence: `holes/M-composition-aware-reward.md` §“INSTANTIATE — OUTCOME”)
+- [x] `reward_v0.py` remains unchanged and the scoreboard remains on v0 pending an operator flip. (evidence: `holes/M-composition-aware-reward.md` §“INSTANTIATE — OUTCOME”)

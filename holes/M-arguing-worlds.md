@@ -1,5 +1,7 @@
 # Mission: M-arguing-worlds
 
+**Status:** OPEN — v0 built and reviewed PASS; grounded closure-fold retrial and frame decision remain open.
+
 *Run the falsifiable test on the conceptual core of FutonZero: does **arguing across
 competing possible-world buildouts** beat simply taking the single best buildout?
 If yes, the endogenous engine of the learning loop is dialectic, not self-play.
@@ -235,3 +237,10 @@ yardstick. The v0 negative stands as recorded; the grounded retrial is now build
 signal — gated on enough diverse buildouts reaching real closures (the same diversity precheck applies),
 and, like [[M-pattern-posteriors]], it can only *discriminate* once **failed** folds are recorded (today the
 ledger is success-only — see that mission's survivorship-bias finding).
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The v0 run contains at least three genuinely diverse buildouts and records the diversity check. (evidence: `holes/M-arguing-worlds.md` §“v0 result”, commit `2eca617`)
+- [x] `src/futon2/aif/arguing_worlds.clj` provides a referee protocol with a legible result and a realized-`G(π)` yardstick outside the wholeness score. (evidence: `holes/M-arguing-worlds.md` §“v0 result”)
+- [ ] A preregistered grounded retrial compares dialectic and single-best buildouts against recorded closure-fold outcomes, including failed folds.
+- [ ] The resulting frame decision and rationale are recorded and `futon2/docs/futonzero-alphazero.md` §1 no longer labels the question “open, early”.

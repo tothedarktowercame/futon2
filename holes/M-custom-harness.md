@@ -1,5 +1,7 @@
 # M-custom-harness — EXPLORE: futonic agent harnesses and memory substrates
 
+**Status:** OPEN — (2026-07-04, end of day): VERIFY COMPLETE (§14); slices 1–3 are live and verified, while DOCUMENT remains open. Parked follow-ons are subject-ref linking, B2 flight-native, and A1/A2 triggers.
+
 *Question:* if a model endpoint such as Z.AI provides no native filesystem access,
 no built-in memories, and no automatic project bootstrap, what should a Futon-native
 agent harness provide instead?
@@ -1178,3 +1180,9 @@ lifecycle are harness-wide invariants.** A tool that can start a process
 must own the whole tree's death. Second entry in the "real use finds
 what staged tests cannot" series; both found by operator observation of
 live agents within hours of the capability existing.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] Harness slices 1–3 expose the boot, memory, coordination, pattern, tool-history, mission-context, and ledger-rehydration surfaces and are live-verified. (evidence: `holes/M-custom-harness.md` §§13.5a–d)
+- [x] The three-condition comparison records groundedness, elapsed time, tool rounds, citations, and false claims for tools-only, file-bootstrap, and graph-bootstrap agents. (evidence: `holes/M-custom-harness.md` §14)
+- [ ] A DOCUMENT section names the durable operator-facing harness surfaces, their limits, and the accepted graph-plus-files conclusion from VERIFY.

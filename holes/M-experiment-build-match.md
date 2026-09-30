@@ -1,7 +1,7 @@
 # M-experiment-build-match — register experiments the way we already register folds
 
 **Opened:** 2026-08-01. **Owner:** Claude (claude-4). **Operator:** Joe.
-**Status:** SPEC. Deliberately named after `M-actuator-spec-build-match.md`,
+**Status:** OPEN — SPEC. Deliberately named after `M-actuator-spec-build-match.md`,
 which is the same idea one domain over.
 
 ## The observation
@@ -324,3 +324,11 @@ too"*. A schema change is an amendment to every registration it touches.
 Concretely, tonight's schema changed three times (`ReplicationPlan (ι)`, the
 stop-rule generalisation, `:on-violation`) while two registrations were live.
 Neither records which version it holds.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A Slice-5 confirmation registration exists in the experiment-shaped CLean EDN schema and names its arms, axes, scenarios, seeds, stop rule, and decision rule.
+- [ ] Rendering that registration produces Lean whose navigability obligations fail for a constant-score treatment axis and pass for the valid confirmation design.
+- [ ] A schema derived from the same registration makes the harness refuse an unregistered arm before the run starts.
+- [ ] A registered operational-witness relation compares `(scenario, arm, seed)` and rejects a run artifact whose tuple or design differs from the registration.
+- [ ] Registrations and amendments carry a schema version, and a version change is recorded without mutating an in-flight registration.

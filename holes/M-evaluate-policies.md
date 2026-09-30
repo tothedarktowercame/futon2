@@ -1,7 +1,7 @@
 # Mission: Evaluate policies honestly — make R5's score what it says it is
 
 **Date:** 2026-07-03
-**Status:** ALL PHASES THROUGH DOCUMENT complete 2026-07-03 — single day, operator
+**Status:** OPEN — ALL PHASES THROUGH DOCUMENT complete 2026-07-03 — single day, operator
 gates passed in-session at every transition. HEAD (4 intake passes) → IDENTIFY (§6) →
 MAP (§7, Q1–Q8; prosthetic-C + epistemic-pole-inert headline facts) → DERIVE (§8,
 D1–D8) → ARGUE (§9 = the 11-pp exhibit: cascades + recorded fold + DarkTower PASS +
@@ -1461,3 +1461,10 @@ regenerated line-exact.
 **Deploy**: next hourly cron tick (fresh process) self-deploys; rollback = env hatch.
 Remaining evidence steps: live-tick confirmation for BOTH flips → badge raise + regen;
 C9 before/after burn-in census; E7; C10.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] IDENTIFY through DOCUMENT and both operator-approved production flips are recorded with their verification evidence. (evidence: `holes/M-evaluate-policies.md` §§6–15)
+- [ ] A post-flip live tick confirms both risk and ambiguity modes, and the regenerated badges and explainer cite that live evidence.
+- [ ] The C9 before/after burn-in census and E7 post-merge re-census are archived in named artifacts.
+- [ ] Joe's C10 decision records whether `M-G-over-cascades` closure closes this mission.

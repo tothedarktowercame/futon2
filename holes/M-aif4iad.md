@@ -1,7 +1,7 @@
 # M-aif4iad: Equip Institutional Systems with AIF Heads
 
 **Date:** 2026-03-31
-**Status:** IDENTIFY (mission proposal)
+**Status:** OPEN — IDENTIFY (mission proposal)
 **Cross-ref:**
 
 * `M-aif-head` (Mission Peripheral AIF head) 
@@ -298,3 +298,11 @@ Survey questions for the MAP phase:
 ## Compact summary
 
 This mission extends the AIF-head pattern from individual peripherals to institutional systems. It combines IAD’s structural account of institutions with AIF’s adaptive dynamics, enabling systems to monitor their own performance, diagnose structural failures, and revise their topology by introducing new roles, channels, or nested structures when necessary.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A named artifact represents institutional boundaries, channels, rules-in-use, monitoring structures, and nested enterprises in one unified model.
+- [ ] The model records explicit expectations for capability, coordination, or resource flow and computes divergence from an observed or simulated outcome in a worked example.
+- [ ] The worked example adjusts a rule, gate, or channel and records the diagnosed institutional failure mode.
+- [ ] A worked example diagnoses a structural rather than parametric failure and proposes or instantiates a new role, channel, monitoring surface, or nested enterprise.
+- [ ] The result labels viable and non-viable configurations and distinguishes structural description, adaptive dynamics, and simulated, empirical, or speculative evidence.
