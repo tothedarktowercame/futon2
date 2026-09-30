@@ -364,3 +364,44 @@
 (defn valid? [decision receipt]
   (try (= receipt (build decision (:inputs receipt) (:context receipt)))
        (catch Exception _ false)))
+
+(defn decision-focus
+  "The focus context a decision taken at DECISION-AS-OF classifies against
+  (codex-20 corrections 2 and 3): the discovery from the window covering the
+  decision time; else, after all windows, the latest legitimately established
+  prior focus retained and evaluated at the decision time; else :unknown
+  carrying the decision time. Shared by the cascade decision and the WM ask's
+  target classifier, so both read the same focus (click 18, 2026-09-30: the
+  ask discovered at now with no retention and classified every target
+  :unknown). Returns {:info the focus context, :established the prior
+  discovery, :established-as-of the retention or covering time}."
+  [inputs decision-as-of]
+  (let [decision-instant (java.time.Instant/parse decision-as-of)
+        covering-as-of (some (fn [w]
+                               (when (and (not (.isAfter (java.time.Instant/parse (:from w))
+                                                         decision-instant))
+                                          (not (.isAfter decision-instant
+                                                         (java.time.Instant/parse (:valid-through w)))))
+                                 (:valid-through w)))
+                             (:windows inputs))
+        retention-as-of (when (nil? covering-as-of)
+                          (let [ended (for [w (:windows inputs)
+                                            :when (.isBefore (java.time.Instant/parse (:valid-through w))
+                                                             decision-instant)]
+                                        (inst-ms (java.time.Instant/parse (:valid-through w))))]
+                            (when (seq ended)
+                              (str (java.time.Instant/ofEpochMilli (reduce max ended))))))
+        established (discover inputs (or covering-as-of retention-as-of decision-as-of) nil)]
+    {:established established
+     :established-as-of (or retention-as-of covering-as-of)
+     :info (if (some? covering-as-of)
+             (discover inputs decision-as-of nil)
+             (if (= :unknown (:status established))
+               (assoc established :as-of decision-as-of)
+               (discover inputs decision-as-of {:focus (:focus established)
+                                                :as-of retention-as-of})))}))
+
+(defn decision-focus-info
+  "The focus context alone (see decision-focus)."
+  [inputs decision-as-of]
+  (:info (decision-focus inputs decision-as-of)))

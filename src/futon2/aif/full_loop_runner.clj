@@ -1488,13 +1488,16 @@
   ([{:keys [focus-inputs focus-as-of]}]
    (let [inputs (or focus-inputs (focus-receipt/read-inputs))
          as-of (or focus-as-of (str (Instant/now)))
-         discovery (focus-receipt/discover inputs as-of nil)
+         ;; the SAME focus the decision classifies against (retained
+         ;; prior focus when no window covers now); a bare discover at now
+         ;; made every target :unknown (click 18)
+         discovery (focus-receipt/decision-focus-info inputs as-of)
          f2-root (str missions/default-code-root "/futon2")
          ctx {:code-root missions/default-code-root
               :ticket-dir (str f2-root "/holes/tickets")
               :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}]
      (fn [target]
-       (:class (focus-receipt/classify-target inputs discovery as-of target ctx))))))
+       (:class (focus-receipt/classify-target inputs discovery (:as-of discovery) target ctx))))))
 
 (defn- no-admitted-interpretation-refusals
   "The :no-admitted-interpretation refusals of an abstained decision, in the

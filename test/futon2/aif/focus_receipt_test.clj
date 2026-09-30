@@ -134,3 +134,19 @@
         second-r (focus/discover inputs "2026-10-05T00:00:00Z" first-r)]
     (is (= :retained (:status second-r)))
     (is (= "2026-09-22T17:31:44Z" (:retained-evidence-as-of second-r)))))
+
+(deftest decision-focus-retains-past-the-last-window-for-every-consumer
+  ;; click 18 (2026-09-30): the WM ask classified with a bare discover at
+  ;; now, got no focus, and skipped every target as :unknown -- including
+  ;; ones with a relation row. decision-focus-info is the context the
+  ;; cascade decision classifies against; the ask now uses it too.
+  (let [as-of "2026-09-30T00:00:00Z"
+        info (focus/decision-focus-info inputs as-of)
+        bare (focus/discover inputs as-of nil)
+        target (:target (first (:relations inputs)))]
+    (is (= :retained (:status info)))
+    (is (some? (:focus info)))
+    (is (not= :unknown (:class (focus/classify-target inputs info (:as-of info) target)))
+        "a target with a relation row classifies under the decision's focus")
+    (is (= :unknown (:class (focus/classify-target inputs bare as-of target)))
+        "the bad case: a bare discover past the last window classifies it :unknown")))
