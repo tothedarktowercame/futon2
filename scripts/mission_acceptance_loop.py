@@ -170,7 +170,43 @@ commit sha. Do not bell anyone.
 """
 
 
+REVIEW_GUIDE = """REVIEW OF MISSION CLOSURES
+
+Another agent just marked each mission below CLOSED (or SUPERSEDED /
+ABANDONED) while writing dispositions. Joe's rule (2026-09-30): a mission
+is OPEN unless its file says it is finished, closed, archived, cancelled,
+superseded or abandoned, or every acceptance condition it states is
+demonstrably met. A status that itself says work remains ("... remain
+before closure", "slices 1-3 done" of more, "awaiting", "pending",
+"SCOPED", "wave 1") is OPEN. When unsure, OPEN.
+
+For EACH mission below, read the file and decide:
+- KEEP: the closure meets the rule. Change nothing.
+- REOPEN: rewrite its first Status line, at the start of a line, as
+    **Status:** OPEN — <the text after the dash, kept verbatim>
+  and add the section
+    ## Acceptance checklist (2026-09-30)
+  with 2 to 6 `- [ ] <one observable condition>` items taken from the
+  mission's own stated remaining work (conditions a reviewer can check by
+  looking; never activities). Never delete or flip an existing box.
+
+Touch only the listed files; commit with explicit paths, message containing
+<TAG> (never `git commit -a`, never amend). Final message: one line per
+mission, `<id> KEEP <one-phrase reason>` or `<id> REOPEN n-items`, then the
+commit sha (or "no commit" if all KEEP). Do not bell anyone.
+"""
+
+
+def review_packet(chunk: dict) -> str:
+    tag = f"mission-accept-{chunk['chunk']}"
+    lines = [f"- {m['id']}: {m['path']}  (status now: {m['status-line']!r})" for m in chunk["missions"]]
+    return (REVIEW_GUIDE.replace("<TAG>", tag)
+            + f"\nREPO: {chunk['repo']}\nTAG: {tag}\nMISSIONS ({len(lines)}):\n" + "\n".join(lines) + "\n")
+
+
 def packet(chunk: dict) -> str:
+    if chunk.get("review"):
+        return review_packet(chunk)
     tag = f"mission-accept-{chunk['chunk']}"
     lines = [f"- {m['id']}: {m['path']}  (current status: {m['status-line']!r})" for m in chunk["missions"]]
     return (GUIDE.replace("<TAG>", tag)
@@ -208,14 +244,14 @@ def check(chunk: dict, before_class: dict) -> dict:
     tag = f"mission-accept-{chunk['chunk']}"
     shas = w.git(repo, "log", "--since=1 day ago", "-F", f"--grep={tag}", "--format=%H").split()
     problems, closed_live = [], []
-    if not shas:
+    if not shas and not chunk.get("review"):
         return {"ok": False, "problems": ["no commit carries the tag"], "shas": []}
     paths = {str(Path(m["path"]).relative_to(repo)) for m in chunk["missions"]}
     for sha in shas:
         touched = set(w.git(repo, "show", "--name-only", "--format=", sha).split())
         if touched - paths:
             problems.append(f"{sha[:9]} touches files outside the chunk: {sorted(touched - paths)}")
-    base = shas[-1] + "^"
+    base = shas[-1] + "^" if shas else "HEAD"
     for p in sorted(paths):
         old = w.git(repo, "show", f"{base}:{p}")
         new = (repo / p).read_text(errors="replace")
@@ -243,6 +279,35 @@ def check(chunk: dict, before_class: dict) -> dict:
     return {"ok": not problems, "problems": problems, "closed-live": closed_live,
             "shas": shas, "open": sum(1 for r in rows if r["status-class"] == "open"),
             "holes": sum(r["holes"] for r in rows if r["status-class"] == "open")}
+
+
+def review_plan(args) -> int:
+    """Chunks of the missions the survey closed that were live before it."""
+    rows = [json.loads(l) for l in LEDGER.read_text().splitlines() if l.strip()]
+    last = {r["chunk"]: r for r in rows}
+    closed_ids = {c.split(":")[0] for r in last.values() if r.get("verdict") == "pass"
+                  for c in r.get("closed-live", [])}
+    doc = json.loads(CHUNKS.read_text())
+    by_seat_of = {r["chunk"]: r.get("seat") for r in last.values()}
+    ms = edn_json(MISSIONS_FORM)
+    now_by_id = {m["id"]: m for m in ms}
+    by_repo: dict[str, list] = {}
+    for c in doc["chunks"]:
+        for m in c["missions"]:
+            if m["id"] in closed_ids and m["id"] in now_by_id:
+                row = dict(now_by_id[m["id"]], closed_by=by_seat_of.get(c["chunk"]))
+                row["status-class"] = m["status-class"]  # the class BEFORE the survey
+                by_repo.setdefault(c["repo"], []).append(row)
+    n = 0
+    new = [c for c in doc["chunks"] if not c.get("review")]
+    for repo, rows in sorted(by_repo.items()):
+        for i in range(0, len(rows), 10):
+            n += 1
+            new.append({"chunk": f"r{n:03d}", "repo": repo, "review": True, "missions": rows[i:i + 10]})
+    doc["chunks"] = new
+    CHUNKS.write_text(json.dumps(doc, indent=1))
+    print(f"{len(closed_ids)} closures -> {n} review chunks")
+    return 0
 
 
 def done_chunks() -> set[str]:
@@ -327,8 +392,9 @@ def main() -> int:
     r.add_argument("--seats", default="codex-1")
     r.add_argument("--only", default="")
     sub.add_parser("status")
+    sub.add_parser("review-plan")
     a = ap.parse_args()
-    return {"plan": plan, "run": run, "status": status}[a.cmd](a)
+    return {"plan": plan, "run": run, "status": status, "review-plan": review_plan}[a.cmd](a)
 
 
 if __name__ == "__main__":
