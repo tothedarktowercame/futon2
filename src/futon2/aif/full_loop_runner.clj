@@ -32,6 +32,7 @@
             [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
+            [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
@@ -346,22 +347,46 @@
   ([opts context phase thunk]
    (run-phase! opts context phase thunk nil))
   ([opts context phase thunk result->event]
-   (let [started (System/currentTimeMillis)]
-     (emit-phase! opts context {:phase phase :transition :start})
-     (try
-       (let [result (thunk)
-             detail (if result->event (or (result->event result) {}) {})]
-         (emit-phase! opts context
-                      (merge {:phase phase :transition :end :outcome :ok
-                              :duration-ms (- (System/currentTimeMillis) started)}
-                             detail))
-         result)
-       (catch Throwable e
-         (emit-phase! opts context {:phase phase :transition :end :outcome :error
-                                    :duration-ms (- (System/currentTimeMillis) started)
-                                    :error-class (.getName (class e))
-                                    :error (.getMessage e)})
-         (throw e))))))
+   (loop []
+     (let [started (System/currentTimeMillis)
+           _ (emit-phase! opts context {:phase phase :transition :start})
+           attempt
+           (try
+             (let [result (thunk)
+                   detail (if result->event (or (result->event result) {}) {})]
+               (emit-phase! opts context
+                            (merge {:phase phase :transition :end :outcome :ok
+                                    :duration-ms (- (System/currentTimeMillis) started)}
+                                   detail))
+               {:outcome :ok :value result})
+             (catch Throwable e
+               (emit-phase! opts context
+                            {:phase phase :transition :end :outcome :error
+                             :duration-ms (- (System/currentTimeMillis) started)
+                             :error-class (.getName (class e))
+                             :error (.getMessage e)})
+               {:outcome :error :throwable e}))]
+       (if (= :ok (:outcome attempt))
+         (:value attempt)
+         (let [throwable (:throwable attempt)]
+           (if-not (and (debugger/attached?)
+                        (debugger/stoppable-failure? throwable))
+             (throw throwable)
+             (let [{:keys [action value]}
+                   (debugger/await-restart!
+                    (assoc context :run-id (:run-id opts) :phase phase)
+                    throwable)]
+               (case action
+                 :retry (recur)
+                 :use-value
+                 (let [detail (if result->event (or (result->event value) {}) {})]
+                   (emit-phase! opts context
+                                (merge {:phase phase :transition :end :outcome :ok
+                                        :duration-ms (- (System/currentTimeMillis) started)
+                                        :debugger/restart :use-value}
+                                       detail))
+                   value)
+                 :abort (throw throwable))))))))))
 
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
