@@ -370,6 +370,19 @@ uncounted until they are counted from the one canonical checkout.
 This table, completed in both directions, is a closing condition of the
 incident, and its counts head every run report.
 
+### The Lean audit (controller owner, 781234b1f)
+
+`NOTE-lean-backdoor-audit-2026-09-30.md`: eight groups of inputs the Lean
+takes on trust, the degenerate value that satisfies each, which of those the
+live machine supplied, the closure for each, and twelve ordered handoffs
+(policy construction first). Its central finding: normalisation and
+non-emptiness, which the Lean does require, do not exclude a normalised
+singleton, a constant, an identity kernel, a flat belief, or a preference
+delayed to the last step. Spot-checked by claude-1: `CascadeEFE.lean:58-62`
+(the `Model` structure, including `interpretation : P → Option …`, which is
+where G is partial) matches; the `cascadePolicySet` citation is a few lines
+off (the definition is at `Proof2/CascadePolicySet.lean:46-50`).
+
 ## Why the verification done did not catch it
 
 Every test of selection supplied candidates; none asserted how many
