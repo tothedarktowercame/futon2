@@ -555,3 +555,41 @@
                                                       :class-preference {4 joe-c}}}}}}
         audit (preference-audit/build {:selection-certificate cert})]
     (is (= :held (:status audit)) (pr-str audit))))
+
+(defn- coapply-pattern [id token]
+  {:id id :pattern-id id :theta 1/2 :produces #{token}
+   :theta-record {:status :no-recorded-trials}
+   :guard {:status :interpreted :clauses [{:present #{} :absent #{}}]}})
+
+(defn- coapply-score [precedence]
+  (let [patterns [(coapply-pattern :a [:fixture :a-done])
+                  (coapply-pattern :b [:fixture :b-done])
+                  (coapply-pattern :c [:fixture :c-done])]
+        acceptance #{[:fixture :c-done]}
+        model (class-model {:universe #{[:fixture :a-done]
+                                        [:fixture :b-done]
+                                        [:fixture :c-done]}
+                            :acceptance acceptance :horizon 3
+                            :target-class {:fixture :focused}})]
+    (rank {#{} 1}
+          [{:kind :cascade-candidate :id :fixture :target :fixture
+            :precedence (if (= :vector precedence)
+                          patterns
+                          {:co-apply {:units [:a :b :c]
+                                      :descent (:descent precedence)
+                                      :patterns (when-not (:missing-patterns? precedence)
+                                                  (into {} (map (juxt :id identity)) patterns))}})}]
+          model 3 acceptance)))
+
+(deftest bounded-scorer-accepts-co-application-carriers
+  (let [independent (coapply-score {:descent []})
+        vector-result (coapply-score :vector)
+        chain-result (coapply-score {:descent [[:a :b] [:b :c]]})
+        malformed (coapply-score {:descent [] :missing-patterns? true})]
+    (is (vector? independent) (pr-str independent))
+    (is (= :co-application-frontier-theta-v1
+           (get-in independent [0 :certificate :node-evaluations 0 :model :semantics])))
+    (is (= (get-in vector-result [0 :certificate :g-terms])
+           (get-in chain-result [0 :certificate :g-terms]))
+        "the list and co-application kernels agree under the full-chain condition")
+    (is (= :invalid-bounded-candidates (:kind malformed)))))

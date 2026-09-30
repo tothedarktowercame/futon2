@@ -21,13 +21,29 @@
     (throw (ex-info "observation route refused" result)))
   result)
 
+(defn- precedence-patterns
+  "Return the pattern maps consumed by either supported transition carrier.
+  The co-application carrier itself still travels unchanged to rollout."
+  [precedence]
+  (cond
+    (vector? precedence) precedence
+    (and (map? precedence)
+         (= #{:co-apply} (set (keys precedence)))
+         (vector? (get-in precedence [:co-apply :units]))
+         (vector? (get-in precedence [:co-apply :descent]))
+         (map? (get-in precedence [:co-apply :patterns])))
+    (let [{:keys [units patterns]} (:co-apply precedence)
+          values (mapv patterns units)]
+      (when (every? map? values) values))
+    :else nil))
+
 (defn- candidate-tokens [candidates]
   (into #{} (mapcat (fn [p]
                      (concat (:produces p) (get-in p [:guard :needs])
                              (get-in p [:guard :forbids])
                              (mapcat :present (get-in p [:guard :clauses]))
                              (mapcat :absent (get-in p [:guard :clauses])))))
-        (mapcat :precedence candidates)))
+        (mapcat #(precedence-patterns (:precedence %)) candidates)))
 
 (defn- validate-inputs! [q0 candidates opts]
   (let [{:keys [observation-model horizon-steps prediction-context cascade-spec]} opts
@@ -46,8 +62,15 @@
                        ;; model does not pay (PROOF-wm-works 1.3 build 2/3).
                        (if (contains? #{:class-emission :progress-count} (:kind observation-model))
                          Long/MAX_VALUE max-candidates))
-                   (every? #(and (= :cascade-candidate (:kind %))
-                                 (some? (:id %)) (vector? (:precedence %))) candidates)
+                   (every? #(let [precedence (:precedence %)
+                                  patterns (precedence-patterns precedence)]
+                              (and (= :cascade-candidate (:kind %))
+                                   (some? (:id %))
+                                   (some? patterns)
+                                   (or (vector? precedence)
+                                       (= (count patterns)
+                                          (count (get-in precedence [:co-apply :units]))))))
+                           candidates)
                    ;; Id uniqueness guards the token path's id-keyed posterior
                    ;; record; joint families legitimately reuse :C1/:C2 per
                    ;; target, and the class path keys by the full candidate.
@@ -99,7 +122,7 @@
   [candidate]
   (reduce + 0.0
           (for [[_ p] (into {} (map (juxt #(or (:pattern-id %) (:id %)) identity)
-                                      (:precedence candidate)))
+                                      (precedence-patterns (:precedence candidate))))
                 :let [r (:theta-record p)
                       [a b] (if (= :recorded-trials (:status r))
                               [(+ 1/2 (:successes r))
@@ -136,7 +159,7 @@
                           (candidate-information-gain candidate) 0.0)
         normalize? (= :per-step-capacity-and-pattern (:g-normalization opts))
         pattern-count (max 1 (count (set (map #(or (:pattern-id %) (:id %))
-                                                (:precedence candidate)))))
+                                                (precedence-patterns (:precedence candidate))))))
         outcome-count (max 2 (count (get-in preference [1 :probabilities])))
         observation-capacity (Math/log (double outcome-count))
         risk (if normalize? (/ raw-risk horizon-steps observation-capacity) raw-risk)
