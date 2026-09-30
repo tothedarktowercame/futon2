@@ -104,7 +104,7 @@ def target_block(name, note, featured=True):
         o.append(f'<tr><td>{f["index"]}</td><td>{E(f["text"].strip()[:160])}{"…" if len(f["text"].strip())>160 else ""}</td><td>{E(", ".join(f["relations"] or []))}</td><td>{"<br>".join(E(r) for r in f["refs"])}</td><td>{"<br>".join(E(r) for r in f["rejections"])}</td></tr>')
     o.append('</table></details>')
     fl = '; '.join(f'{E(f["kind"])} ({E(", ".join(f.get("seeds") or []))})' for f in t['failures']) or 'none'
-    o.append(f'<p>Policy set: {t["reported"]} cascades reported, {t["distinct"]} structurally distinct. Counted failures: {fl}.</p>')
+    o.append(f'<p>Policy set: {t["distinct"]} structurally distinct polic{"y" if t["distinct"]==1 else "ies"} ({t["reported"]} reported before duplicates are removed; see the note on reported counts below). Counted failures: {fl}.</p>')
     for n, p in enumerate(t['policies'], 1):
         o.append(policy_block(t, p, n))
     return '\n'.join(o)
