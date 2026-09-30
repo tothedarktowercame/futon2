@@ -313,8 +313,13 @@ def review_plan(args) -> int:
 def done_chunks() -> set[str]:
     if not LEDGER.exists():
         return set()
-    return {json.loads(l)["chunk"] for l in LEDGER.read_text().splitlines()
-            if l.strip() and json.loads(l).get("verdict") == "pass"}
+    last = {}
+    for l in LEDGER.read_text().splitlines():
+        if l.strip():
+            r = json.loads(l)
+            last[r["chunk"]] = r.get("verdict")
+    # the LAST row decides: a pass later voided is not done
+    return {c for c, v in last.items() if v == "pass"}
 
 
 def do_chunk(seat: str, chunk: dict) -> None:
