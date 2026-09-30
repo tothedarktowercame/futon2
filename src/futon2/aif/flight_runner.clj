@@ -5,6 +5,7 @@
 
   Kept apart from futon2.aif.flight so the flight core stays pure and its
   tests need no runner."
+  (:import [java.util.concurrent Executors])
   (:require [babashka.http-client]
             [cheshire.core]
             [clojure.edn]
@@ -350,8 +351,7 @@
       entry)))
 
 (defn- ask-one
-  [{:keys [store answer-fn request-options] :as opts} flight wants sources want]
-  (let [target (:target flight)
+  [{:keys [store answer-fn request-options] :as opts} flight wants sources want]  (let [target (:target flight)
         view (target-view store flight wants sources)
         criterion (get-in wants [:source :criteria-by-token want])
         base {:want want}]
@@ -380,15 +380,72 @@
                        :declared (vec extra) :read (vec read)})))
     (vec read)))
 
+(def ^:private default-interpretation-seats
+  "Seats the ask step draws from when the flight's opts name none. One seat
+  is a correct default: the asks still run concurrently and Agency queues
+  them per seat."
+  ["codex-proof2c"])
+
+(def ^:private default-interpretation-ask-parallelism 3)
+
+(defn- answer-fn-for
+  "The answer fn one want's ask uses: the flight's per-seat :answer-fns map
+  first, else its single :answer-fn (every want to that one seat), else an
+  Agency ask for SEAT built here."
+  [{:keys [answer-fns answer-fn agency-opts]} seat]
+  (or (get answer-fns seat)
+      answer-fn
+      (agency-answer-fn {:seat seat :caller "wm-flight"
+                         :opts (or agency-opts (runner/config {}))})))
+
+(defn- ask-batch!
+  "Ask TODO wants CONCURRENTLY, bounded by :interpretation-ask-parallelism
+  (default 3); want i draws seat (nth SEATS (mod i (count SEATS))), SEATS
+  from :interpretation-seats (default [\"codex-proof2c\"]). Results keep want
+  order. Click 17 measured six sequential asks at 25-43 s seat time each
+  while the local work between them is ~10 s: parallel, one target's ask
+  step is about one seat round trip. The chain-settling revalidation loop in
+  ask-fn still runs afterwards, sequentially, over the ordered outcomes."
+  [opts flight wants sources todo]
+  (if (or (empty? todo) (= 1 (count todo)))
+    (mapv #(ask-one (assoc opts :answer-fn
+                           (answer-fn-for opts (first default-interpretation-seats)))
+                    flight wants sources %)
+          todo)
+    (let [seats (vec (or (:interpretation-seats opts) default-interpretation-seats))
+          parallelism (max 1 (long (or (:interpretation-ask-parallelism opts)
+                                       default-interpretation-ask-parallelism)))
+          pool (Executors/newFixedThreadPool
+                (min (long parallelism) (count todo)))
+          indexed (map-indexed vector todo)
+          futures (into {}
+                        (for [[i want] indexed]
+                          [i (.submit pool ^java.util.concurrent.Callable
+                                      (fn []
+                                        (ask-one (assoc opts :answer-fn
+                                                        (answer-fn-for opts (nth seats
+                                                                                 (mod i (count seats)))))
+                                                 flight wants sources want)))]))]
+      (try
+        (mapv (fn [[i _]] (deref (get futures i))) indexed)
+        (finally
+          (.shutdownNow pool))))))
+
 (defn ask-fn
   "The flight's ask step: for each want no admitted or published
   interpretation produces, issue a request (want-interpretation/issue! and
   request!), get an answer (ANSWER-FN, e.g. agency-answer-fn), parse it
-  against the reply grammar, validate it, and publish it when valid. Wants
-  are asked in order and each sees what the previous one published; after a
-  publication, answers rejected earlier are validated again (the same
-  answers, no new request) until nothing changes, so a chain whose wants
-  are listed out of order (ARGUE before DOCUMENT) settles in one step.
+  against the reply grammar, validate it, and publish it when valid. The
+  first pass asks the wants CONCURRENTLY, bounded by opts
+  :interpretation-ask-parallelism (default 3), each want to a seat drawn
+  round-robin from opts :interpretation-seats (default [\"codex-proof2c\"]);
+  publishes for one target are serialised by want-interpretation (a
+  per-target lock), so parallel asks cannot lose each other's
+  interpretations. After the first pass, answers rejected earlier are
+  validated again against the view the others' publications produced (the
+  same answers, no new request) until nothing changes, so a chain whose
+  wants are listed out of order (ARGUE before DOCUMENT) settles in one
+  step. Results keep want order in :asked.
   Owner constraints are those the want source read from the mission text
   (mission-criteria/constraints); a declared one must match a read one.
   Everything that is not a publication is also a flight :need with the job
@@ -402,7 +459,7 @@
             view (target-view store flight wants sources)
             todo (wi/unproduced-wants (:wants wants) (get-in view [:universes target])
                                       (get-in view [:interpretations target :patterns]))
-            first-pass (mapv #(ask-one opts flight wants sources %) todo)
+            first-pass (ask-batch! opts flight wants sources todo)
             asked (loop [entries first-pass]
                     (let [view (target-view (:store opts) flight wants sources)
                           after (mapv #(if (::retry %) (revalidate opts view %) %) entries)]

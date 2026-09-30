@@ -99,8 +99,11 @@
     (is (empty? (:needs r)))
     (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis}
            (set (keys (:patterns published)))))
-    (is (= {:seat "kimi-6" :job-id "job-1"}
-           (get-in published [:receipts :writing-coherence/plain-language-thesis :answered-by])))))
+    ;; the asks run concurrently (ask-fn ask-batch!), so the stub's job-id
+    ;; counter order is not want order any more: assert the answerer by seat
+    ;; and that a job id was recorded
+    (is (= "kimi-6" (get-in published [:receipts :writing-coherence/plain-language-thesis :answered-by :seat])))
+    (is (string? (get-in published [:receipts :writing-coherence/plain-language-thesis :answered-by :job-id])))))
 
 (deftest what-is-not-a-publication-is-a-need
   (testing "unparseable, with the job id"
@@ -226,7 +229,11 @@
   (let [store (temp-dir "ask-store")
         calls (atom 0) clicks (atom 0)
         stub (stub-answer #(reply-for (by-want %)))
-        answer (fn [issued] (if (= 2 (swap! calls inc)) (throw (pinned-timeout)) (stub issued)))
+        ;; the asks run concurrently: key the throw to the WANT, not to the
+        ;; call-order counter
+        answer (fn [issued] (if (= document (get-in issued [:want :token]))
+                              (do (swap! calls inc) (throw (pinned-timeout)))
+                              (stub issued)))
         f (flight/run! (seams-flight)
                        {:ask-fn (fr/ask-fn {:store (.getCanonicalPath store) :answer-fn answer
                                             :code-root (.getCanonicalPath (io/file "test/fixtures/want-interp-library"))
@@ -238,7 +245,8 @@
         asked (:asked (first (:asks f)))
         threw (first (filter #(= :ask-threw (:outcome %)) asked))]
     (is (= 2 (count asked)))
-    (is (not= :ask-threw (:outcome (first asked))) "the first want's entry stands")
+    (is (not= :ask-threw (:outcome (some #(when (= argue (:want %)) %) asked)))
+        "the non-throwing want's entry stands")
     (is (= {:kind :ask-threw :class "java.net.http.HttpTimeoutException" :message "request timed out"}
            (select-keys (:refusal threw) [:kind :class :message])))
     (is (some #(= :ask-threw (:kind %)) (:needs f)) "and it is a need")

@@ -94,7 +94,21 @@
     (if (.exists dest)
       (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
              :interpretation/source-changed {:path path})
-      (Files/write (.toPath dest) bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE])))
+      (try (Files/write (.toPath dest) bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
+           (catch java.nio.file.FileAlreadyExistsException _
+             ;; two concurrent REQUESTS for the same source raced the
+             ;; CREATE_NEW (9f01b5a1a dedupes only within one request). The
+             ;; loser accepts the winner's snapshot when it holds these same
+             ;; bytes — re-reading a few times, because the file is visible
+             ;; (CREATE_NEW) before the winner's WRITE has flushed and a
+             ;; mid-write read sees truncated bytes; a genuine mismatch
+             ;; (corrupt/replaced snapshot) still refuses.
+             (need! (some true? (repeatedly 5
+                                            (fn []
+                                              (Thread/sleep 2)
+                                              (= digest (evidence/sha256
+                                                         (Files/readAllBytes (.toPath dest)))))))
+                    :interpretation/source-changed {:path path}))))
     {:requested-path (.getAbsolutePath file) :canonical-path path :byte-count (alength bs)
      :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision version}
      :bytes bs :snapshot (.getAbsolutePath dest)}))

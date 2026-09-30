@@ -350,6 +350,21 @@
 
 (defn- target-file [store target] (io/file store (str target ".edn")))
 
+(defonce ^:private publish-locks
+  (java.util.concurrent.ConcurrentHashMap.))
+
+(defn- publish-lock
+  "Per-target monitor serialising the read-modify-write in publish!: the ask
+  step (flight-runner ask-fn) issues one target's wants CONCURRENTLY, and
+  two unserialised publishes each rewrite the whole target file from the
+  prior they read — whichever renames last erases the other's
+  interpretations."
+  [store target]
+  (let [k (str (.getCanonicalPath (io/file (str store))) "/" target)]
+    (.computeIfAbsent publish-locks ^String k
+                      (reify java.util.function.Function
+                        (apply [_ _] (Object.))))))
+
 (defn read-published
   "The machine-published interpretations for TARGET, or nil."
   [store target]
@@ -449,7 +464,12 @@
   (when-not (= :valid (:status validated))
     (throw (ex-info "only a validated response is published"
                     {:interpretation/refusal :want/not-validated :status (:status validated)})))
-  (let [request-id (:request-id request)
+  ;; the per-target monitor from the publish-locks map, bound outside the
+  ;; locking form (the map lookup is not a fresh object; kondo's
+  ;; :suspicious-lock cannot see past the call)
+  (let [lock (publish-lock store (str (:target request)))]
+    (locking lock
+      (let [request-id (:request-id request)
         issued (issued-request store request-id)
         _ (when-not (and issued (= (:target issued) (:target validated))
                          (= (get-in issued [:want :token]) (:want validated)))
@@ -484,8 +504,8 @@
                                                   :at (now)}))
                      (assoc-in [:records request-id] (dissoc request :request-id))
                      (assoc-in [:records response-id] response))]
-      (when-not existing (write-atomic! (target-file store target) record))
-      record)))
+        (when-not existing (write-atomic! (target-file store target) record))
+        record)))))
 
 (defn merge-published
   "SOURCES with each of TARGETS' machine-published interpretations merged
