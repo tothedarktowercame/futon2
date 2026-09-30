@@ -8,7 +8,7 @@
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.mission-registry :as registry])
-  (:import [java.nio.file Files StandardOpenOption]
+  (:import [java.nio.file Files StandardCopyOption StandardOpenOption]
            [java.time Instant]
            [java.util.concurrent TimeUnit]))
 
@@ -94,21 +94,29 @@
     (if (.exists dest)
       (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
              :interpretation/source-changed {:path path})
-      (try (Files/write (.toPath dest) bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
-           (catch java.nio.file.FileAlreadyExistsException _
-             ;; two concurrent REQUESTS for the same source raced the
-             ;; CREATE_NEW (9f01b5a1a dedupes only within one request). The
-             ;; loser accepts the winner's snapshot when it holds these same
-             ;; bytes — re-reading a few times, because the file is visible
-             ;; (CREATE_NEW) before the winner's WRITE has flushed and a
-             ;; mid-write read sees truncated bytes; a genuine mismatch
-             ;; (corrupt/replaced snapshot) still refuses.
-             (need! (some true? (repeatedly 5
-                                            (fn []
-                                              (Thread/sleep 2)
-                                              (= digest (evidence/sha256
-                                                         (Files/readAllBytes (.toPath dest)))))))
-                    :interpretation/source-changed {:path path}))))
+      ;; write the snapshot to a TEMP file and ATOMICALLY MOVE it into
+      ;; place: a snapshot that is visible at DEST is therefore always
+      ;; COMPLETE, so a thread losing the race (the move finds DEST
+      ;; already present, or on POSIX replaces it with identical bytes)
+      ;; can compare digests on a single read and never sees the winner's
+      ;; half-written file. This replaces a time-bounded re-read, which
+      ;; under load gave up while the winner was still writing and
+      ;; refused :interpretation/source-changed for bytes that matched
+      ;; (2026-09-30 flake: flight-ask-test saw :request-refused needs;
+      ;; in production that silently loses an ask).
+      (let [tmp (io/file dir (str "." (.getName dest) "." (System/nanoTime) ".tmp"))]
+        (try
+          (Files/write (.toPath tmp) bs (into-array StandardOpenOption
+                                                    [StandardOpenOption/CREATE_NEW
+                                                     StandardOpenOption/WRITE]))
+          (Files/move (.toPath tmp) (.toPath dest)
+                      (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
+          (catch java.nio.file.FileAlreadyExistsException _
+            ;; another request moved the same snapshot in first
+            (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
+                   :interpretation/source-changed {:path path}))
+          (finally
+            (Files/deleteIfExists (.toPath tmp))))))
     {:requested-path (.getAbsolutePath file) :canonical-path path :byte-count (alength bs)
      :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision version}
      :bytes bs :snapshot (.getAbsolutePath dest)}))
