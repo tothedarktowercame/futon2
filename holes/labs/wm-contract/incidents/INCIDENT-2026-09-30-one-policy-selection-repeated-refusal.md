@@ -256,6 +256,51 @@ in almost every record from 09-22.
 These eight numbers are to head every report claude-1 makes about a run,
 before anything else is said about it.
 
+### The requirement that closes the facade question (Joe, 2026-09-30)
+
+Joe: "each variable in the Lean model needs an interpretation in terms of
+real countable things, and the requirement should be that all countable
+things need to be taken into account at some point in the model in a
+meaningful way, or we have a facade on our hands again."
+
+Two directions, both required:
+
+- **Model → world.** Every variable, parameter and index set in the Lean
+  model names the real, countable thing it stands for, and how to count it
+  (a command or a record field). A variable with no such reading, or whose
+  real count is 1 where the thing has hundreds, is a finding.
+- **World → model.** Every countable thing the machine exists to deal with
+  appears somewhere in the model in a way that can change what the machine
+  does. A thing that is counted in the world and absent from the model, or
+  present only as a name, is a finding.
+
+First cut of the countable things, with today's counts (claude-1; the
+model-side column is for the controller owner's audit to fill, with
+file:line):
+
+| Countable thing | Count today | How counted | Where it should enter the model |
+|---|---|---|---|
+| Open missions | 221 | 2026-09-29 census | the field; one task each |
+| Open excursions | 373 | same | the field; today absent from the decision |
+| Open tickets | 43 | same | the field |
+| Acceptance items on open tasks | not yet counted reliably | checkbox count per open task file | wants / criteria; preference C |
+| Patterns in the library | 1,431 files in 120 families | `find futon3/library -name '*.flexiarg'` | the pool cascades are built from; today 2 |
+| Agent seats | 56 registered (29 codex, 12 claude, 10 kimi, 4 zai, 1 wm) | `GET /api/alpha/agents` | who can act; agent-behaviour counts; today 3 fixed seats |
+| Completed runs | 76 run records | `data/wm-runs` | what the model learns from; today not read by selection |
+| Outcomes of those runs | 1 grounded change, 3 author refusals, … | run records | likelihood / transition counts |
+| Stack claims | 417 | `:mu-post` | stack factors (the one population the model does cover) |
+| Repair findings | 153 files | `data/wm-repair-obligations/findings` | failures the machine has had; self factors |
+| Steps in a horizon | 4 | the observation model | Cτ: a preference at every step; today 1 of 4 |
+| Closed tasks | not yet counted | closed/cancelled status | completed work; outcome counts |
+
+A quick file count of mission and excursion files gave much larger numbers
+than the census because the glob also matched worktree copies; the census
+figures are used, and the acceptance-item and closed-task rows are left
+uncounted until they are counted from the one canonical checkout.
+
+This table, completed in both directions, is a closing condition of the
+incident, and its counts head every run report.
+
 ## Why the verification done did not catch it
 
 Every test of selection supplied candidates; none asserted how many
