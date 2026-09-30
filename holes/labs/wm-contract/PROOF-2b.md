@@ -266,6 +266,16 @@ every state is below a stated floor opens a new state for the factor it came
 from, recorded as an expansion event. Reduction: BMR, as built, over
 parameters and over those added states once they have data.
 
+The categorical outcome model with Dirichlet counts keyed by `(task-kind,
+action-kind, seat)` is the generative model and is updated from every typed run
+result. BMR is not an alternative to it: BMR is optional downstream comparison
+or compression after evidence exists. It cannot gate action, suppress a new
+task factor, replace the posterior update, or perform the expansion step.
+PROOF-2a's BMR rule was narrower: after at least 20 admitted observations for
+a scan channel, it compared learned, status-tied and hand-set likelihood rows
+and permitted adoption at `ΔF <= -3`. Generalising that channel-level rule into
+the machine's generative model was a scope error.
+
 ---
 
 ## Plan

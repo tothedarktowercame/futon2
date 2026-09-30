@@ -203,6 +203,22 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     completed real work. No benchmark candidate may shape the implementation
     or pre-click verification.
 
+21. **The generative model precedes BMR.** The working generative model for
+    task choice is the categorical outcome model whose Dirichlet counts are
+    keyed by `(task-kind, action-kind, seat)` and updated from every typed run
+    result. BMR is optional downstream model comparison or compression after
+    sufficient evidence; it neither supplies the model nor substitutes for
+    posterior learning. It may not gate action, remove a newly encountered
+    task, or prevent model expansion. Any reduction names the compared models,
+    evidence window and delta-free-energy threshold and preserves a replayable
+    unreduced state.
+
+    Historical provenance: PROOF-2a Plan item 6B-4 used BMR narrowly to choose
+    among learned, status-tied and hand-set likelihood rows per scan channel,
+    after an exposure floor of 20 admitted ticks and with `ΔF <= -3`. That
+    channel-level adoption rule was not an alternative definition of the War
+    Machine's generative model. Treating it as one was a scope error.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -239,7 +255,7 @@ provide it is WITHDRAWN. Nothing provides it. It is built, from this:
   a stated basis / closed.
 - **Outcomes** of handing a task to an agent: closed / progressed / asked a
   question / refused / no usable reply.
-- **Agent behaviour.** Counts of outcomes per (task kind, seat),
+- **Agent behaviour.** Counts of outcomes per (task kind, action kind, seat),
   starting flat and updated after every run (Dirichlet counts). Completed
   work is where these counts come from.
 - **Preferences (C).** Closed is preferred to progressed, progressed to a
