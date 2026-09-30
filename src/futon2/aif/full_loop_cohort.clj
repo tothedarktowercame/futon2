@@ -31,7 +31,7 @@
   checkpoint. :cohort-complete is NOT here — it is a scheduler-level signal
   returned by run-opportunity! when the cohort is exhausted, not an attempt
   outcome. See tripwire.clj for the T3 exemption."
-  #{:grounded-change :grounded-no-change :artifact-only :abstained :no-selection
+  #{:grounded-change :already-satisfied :grounded-no-change :artifact-only :abstained :no-selection
     :agent-unavailable :guardrail-refusal :dispatch-failed :build-failed
     :substrate-unavailable :incomplete :cancelled
     :historical-verification-awaiting-validation

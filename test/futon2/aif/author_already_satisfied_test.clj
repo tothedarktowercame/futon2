@@ -63,3 +63,9 @@
           {:result "FULL_LOOP_AUTHOR: REFUSE out of scope\n"}
           "/home/joe/code/futon7"
           (constantly true)))))
+
+(deftest already-satisfied-is-a-valid-cohort-close-outcome
+  ;; demo clicks run as cohort clicks; an outcome missing here fails
+  ;; close-attempt! :unknown-outcome and opens a machine-failure finding
+  (is (contains? @(requiring-resolve 'futon2.aif.full-loop-cohort/outcome-kinds)
+                 :already-satisfied)))
