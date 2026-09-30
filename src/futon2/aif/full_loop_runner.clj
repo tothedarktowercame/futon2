@@ -2030,24 +2030,6 @@
       "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
       {:verdict :unverifiable})))
 
-(defn- throw-if-author-refused! [author-job target stage]
-  ;; Shared HEAD movement cannot establish an artifact for a refusing author.
-  ;; A contradictory artifact claim is a failure, never an environmental hold.
-  (let [{:keys [verdict reason]} (author-verdict author-job)]
-    (when (= :refuse verdict)
-      (if (and (not (str/blank? reason))
-               (nil? (:artifact-ref author-job)))
-        (throw (ex-info "Author refused with a typed reason"
-                        {:outcome :guardrail-refusal
-                         :failure-kind :guardrail-refusal
-                         :failure-stage stage
-                         :refusal-reason reason
-                         :target target :author-job author-job}))
-        (throw (ex-info "Author refusal lacks a reason or claims an artifact"
-                        {:outcome :build-failed
-                         :failure-kind :invalid-author-refusal
-                         :failure-stage stage
-                         :target target :author-job author-job}))))))
 
 (def ^:private feature-card-keys
   [:built :want-coverage :matches-intent? :things-to-try
@@ -2178,6 +2160,105 @@
 
 (defn- valid-feature-card [job]
   (:card (feature-card-validation job)))
+
+(defn- already-satisfied-card?
+  "The author's feature card states the want already holds: :want-coverage
+  or :built saying it is already true/satisfied/landed (click 14: {:built
+  \"none: PSR already landed\" :want-coverage \"already true\"}). The card is
+  the reply grammar the author prompt already asks for; no new marker."
+  [job]
+  (when-let [card (valid-feature-card job)]
+    (boolean (some (fn [k]
+                     (let [v (str (get card k))]
+                       (and (not (str/blank? v))
+                            (re-find #"(?i)already\s+(true|satisfied|holds|landed|met|done)" v))))
+                   [:want-coverage :built]))))
+
+(defn- commit-exists-in?
+  "True when SHA names an existing commit in REPO (git cat-file)."
+  [repo sha]
+  (and (string? sha) (string? repo) (not (str/blank? repo))
+       (not (str/blank? sha))
+       (zero? (:exit (git repo "cat-file" "-e" (str sha "^{commit}"))))))
+
+(defn author-refusal-classification
+  "PROOF-2b (click 14, tick-run-record-2026-09-30-1790742487): the typed
+  classification of an author's REFUSE. The author answered correctly — a
+  feature card stating the want already holds and :artifact-ref naming the
+  commit that made it hold (futon7 891001d) — but the old logic read only
+  the verdict and closed :invalid-author-refusal with a repair finding.
+  Reporting already-satisfied work, naming the commit that made it hold, is
+  a valid answer:
+    card says already + a commit that EXISTS (cat-file in the named repo,
+      else find-commit-repo over the primary repos) ->
+      {:outcome :already-satisfied :grounded-commit {:repo .. :sha ..}};
+    a typed reason and no artifact claim -> :guardrail-refusal (as before);
+    anything else — including already-true with no commit, or a commit
+      that does not exist — -> :invalid-author-refusal (as before).
+  EXISTS-FN is the injectable commit check ([repo sha] -> boolean) so tests
+  stub the git call; REPO names where to look when the job does not."
+  ([job] (author-refusal-classification job nil nil))
+  ([job repo] (author-refusal-classification job repo nil))
+  ([job repo exists-fn]
+   (let [{:keys [verdict reason]} (author-verdict job)
+         artifact-ref (:artifact-ref job)
+         exists-fn (or exists-fn commit-exists-in?)]
+     (when (= :refuse verdict)
+       (let [already? (already-satisfied-card? job)]
+         (cond
+           (and already? artifact-ref)
+           (let [found (or (when repo
+                             (when (exists-fn repo artifact-ref) repo))
+                           (some (fn [r] (when (exists-fn r artifact-ref) r))
+                                 (primary-repos)))]
+             (if found
+               {:outcome :already-satisfied
+                :grounded-commit {:repo (.getName (io/file (str found)))
+                                  :sha artifact-ref}}
+               ;; a claimed commit that does not exist is not evidence
+               {:outcome :invalid-author-refusal}))
+
+           ;; already-true with NO commit named: a claim without evidence
+           already? {:outcome :invalid-author-refusal}
+
+           (and (not (str/blank? reason))
+                (nil? artifact-ref))
+           {:outcome :guardrail-refusal :refusal-reason reason}
+
+           :else {:outcome :invalid-author-refusal}))))))
+
+(defn throw-if-author-refused!
+  "Shared HEAD movement cannot establish an artifact for a refusing author,
+  so a refusal never continues the build. The typed classification
+  (author-refusal-classification) decides how it closes: a card-stated
+  already-satisfied want naming an EXISTING commit closes
+  :already-satisfied with that commit as the grounded commit (click 14);
+  a reasoned refusal with no artifact claim is the guardrail refusal; a
+  contradictory or unsupported claim stays :invalid-author-refusal."
+  [author-job target stage]
+  (when-let [classification (author-refusal-classification
+                             author-job
+                             (get-in author-job [:artifact-binding :repo]))]
+    (case (:outcome classification)
+      :guardrail-refusal
+      (throw (ex-info "Author refused with a typed reason"
+                      {:outcome :guardrail-refusal
+                       :failure-kind :guardrail-refusal
+                       :failure-stage stage
+                       :refusal-reason (:refusal-reason classification)
+                       :target target :author-job author-job}))
+      :already-satisfied
+      (throw (ex-info "Author reported the want already satisfied by an existing commit"
+                      {:outcome :already-satisfied
+                       :failure-kind :already-satisfied
+                       :failure-stage stage
+                       :grounded-commit (:grounded-commit classification)
+                       :target target :author-job author-job}))
+      (throw (ex-info "Author refusal lacks a reason or claims an artifact"
+                      {:outcome :build-failed
+                       :failure-kind :invalid-author-refusal
+                       :failure-stage stage
+                       :target target :author-job author-job})))))
 
 (defn- review-execution-gate [files job]
   (task-execution/review-execution-gate files job))
@@ -4341,7 +4422,12 @@
                                          (or (:failure-kind data) outcome)))
                        finding
                        (when-not (or (= :grounded-change outcome)
-                                     admitted-verification?)
+                                     admitted-verification?
+                                     ;; PROOF-2b click 14: the author
+                                     ;; reported the want already satisfied
+                                     ;; by an existing commit — a correct
+                                     ;; answer, not a machine failure
+                                     (= :already-satisfied outcome))
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
@@ -6173,7 +6259,9 @@
                        {:target (or (:target failure)
                                     (some-> @checkpoints :selection :judgment
                                             :selected-mission))
-                        :commit (:commit failure)
+                        :commit (or (:commit failure)
+                                    (get-in failure [:grounded-commit :sha]))
+                        :grounded-commit (:grounded-commit failure)
                         :artifact-binding (:artifact-binding failure)
                         :witness (:witness failure)
                         :author-job (:author-job failure)
