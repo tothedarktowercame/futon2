@@ -178,7 +178,9 @@ mission, excursion and ticket are preregistered with acceptance criteria and
 pinned starting commits, completed directly in an interactive agent session,
 then replayed by the War Machine from the same state in isolated worktrees.
 Both arms record outcome, elapsed time and tokens; the machine arm does not
-receive the direct transcript or patch.
+receive the direct transcript or patch. Benchmark candidates are selected only
+after the regular machine has completed real work, so the implementation and
+its pre-click verification cannot be tuned around them.
 
 **RQ-8. Every action leaves a complete receipt.**
 *Metric:* `paper_trail = complete action receipts / enacted actions`, with

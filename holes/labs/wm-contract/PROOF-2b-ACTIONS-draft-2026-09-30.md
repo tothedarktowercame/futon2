@@ -198,7 +198,10 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     give the War Machine the direct session transcript or its resulting patch.
     Compare like-for-like successful outcomes and report orchestration overhead
     explicitly. The paired sample calibrates efficiency thresholds; it does
-    not replace the rolling 100-click operational report.
+    not replace the rolling 100-click operational report. Candidate selection
+    and both benchmark arms are deferred until after the regular machine has
+    completed real work. No benchmark candidate may shape the implementation
+    or pre-click verification.
 
 ### What ruling 11 changes
 
@@ -510,11 +513,9 @@ open question under D1. No row's acceptance uses a click.
   real enumerator.
 - Loaded-code identity by source digests, read without reloading.
 - Expectations committed before each run.
-- A preregistered paired benchmark: one mission, excursion and ticket, each
-  completed once in a direct interactive session and once by the War Machine
-  from the same pinned commits in isolated worktrees. Capture acceptance
-  result, wall-clock time and tokens for both; withhold the direct transcript
-  and patch from the machine run.
+
+The paired efficiency benchmark in ruling 20 follows a working machine; it is
+not part of pre-click verification and no candidates are selected here.
 
 ## Records for Joe
 
