@@ -304,6 +304,30 @@ before it may be chosen.
    are degenerate raises an alert addressed to Joe and is not reported as a
    selection.
 
+10. **The unwired shape scorer does not let the arrangement change what
+   happens.** `cascade_shape_g.clj` compiles a cascade to a precedence list
+   in topological order (`topo-order`) and rolls it out with the
+   first-enabled kernel. First-enabled retries the first unfinished pattern
+   until it succeeds, so when the order is topological every requirement is
+   already met by the time its pattern comes up: the guards never block
+   anything and the cascade runs as a queue, whatever its edges. Lean
+   (mathlib4 03aedf7d9, `no_enabling_only_separation_three_nodes`) proves
+   this for all eight forward-edge arrangements of three nodes at theta 1/2
+   over three rounds; `projection_erases_fixture_shape` proves chain and
+   shortcut have the same distribution over done patterns. The general
+   statement (any size, any topological order) is claude-1's argument and
+   is not proved. The arrangement reached G only because each edge was
+   counted as a progress token in C (30ca29d57), which is a term added by
+   hand. claude-1 reported that result to Joe as "G is sensitive to shape"
+   and explained it with parallel progress that the kernel does not have.
+   Level: model gap. Owner: selection. The co-application kernel
+   (`cascade-model-manifest/co-apply-kernel`, Lean
+   `Proof2.CoApplicationKernel`), in which every enabled pattern attempts
+   each round, already exists and is not used by this scorer. Negative
+   test: two arrangements of the same patterns, one a chain and one with no
+   edges, must have different distributions over done patterns with edge
+   tokens removed.
+
 ### The critical parameters, and their values at click 20
 
 | Parameter | Design | Click 20 (record) |
