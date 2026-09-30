@@ -71,7 +71,56 @@ has seen the agreed text. The negotiation is in git: this file's history
   gating). Plan C is unchanged in form and smaller: fewer phases to model.
   Incidents and the verification plan are unchanged.
 
+10. Joe's preference now: the machine runs end to end without getting hung
+    up on irrelevant details. Cτ must be taken into account: there are no
+    outcomes of any kind until the machine works, so until then the only
+    thing worth preferring is progress toward a first complete run. Work
+    that does not shorten that path is not on it, however correct.
+
+## Critical path to a first end-to-end run (ruling 10; governs the order below)
+
+One complete run means: a task is chosen from the open field, an agent is
+handed it, the agent's result is reviewed, one receipt is written, and the
+next choice takes that result into account. Nothing else is required of the
+first run. Each item below is on the path only because the run cannot
+happen, or cannot be trusted per rulings 3, 4 and 6, without it.
+
+1. **Field**: every open task, by the open/closed rule. No admission gate.
+2. **Choice**: one softmax over the field from a default preference ("this
+   task closed" is preferred to "open"), Joe's few stated priorities, and
+   outcome counts, which start flat. Flat scores are not a reason to stop:
+   the habit prior or a draw decides.
+3. **Act**: hand the task to an author seat with a plain prompt (the task
+   file; "make progress, commit, report; or say what you need to know").
+4. **Result**: exactly one typed result (changed / already satisfied /
+   refused / question / invalid / timed out). A question or refusal is
+   recorded on the task and is an outcome, not a stop.
+5. **Review** by a different seat, for a change.
+6. **Receipt and update**: one terminal receipt; counts updated; a refused
+   or unanswered attempt is not re-chosen while its inputs are unchanged.
+7. **Lean**: this six-phase loop as the lifecycle model, with the safety
+   theorems (one receipt; every result typed; no unchanged repeat; a
+   non-empty field always yields an action or a typed failure).
+8. **Verification without a click**: the loop run hermetically over a
+   captured snapshot of the real open field with stub seats, several ticks
+   in sequence, expectations committed first; then the record goes to Joe.
+
+Off the critical path until a first run has happened (kept in this plan,
+ordered after it): wants derived from checkboxes, interpretation requests
+and their validation, relation/class extraction, cascade construction as a
+precondition for acting, criteria extraction against the survey, Tornhill,
+`write-algorithm`, the self-model steps ⟨2⟩1–⟨2⟩4, the full 19-field content
+inventory, parallel asks and the other speed work of 2026-09-30, and the
+repair of any existing gate that the path above does not pass through.
+
+Open for codex-6: whether items 1–6 are better built as a thin new path
+beside the existing runner, reusing its seat dispatch, review and receipt
+code, than by modifying `run-opportunity!`; and which existing functions
+already do each item.
+
 ## Order of work
+
+The critical path above first. Then, for everything off it:
 
 D1 → D0 → I0 → M → Plan C → Plan A → Plan B → Record 1 → ⟨2⟩ rows → Record 2.
 Handoff size rule: one behaviour with one named bad-case test.
