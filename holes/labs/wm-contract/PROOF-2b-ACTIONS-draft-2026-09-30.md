@@ -27,6 +27,50 @@ has seen the agreed text. The negotiation is in git: this file's history
 8. The logs so far do not show where the actual difficulty is. Joe wants
    evidence of the form "this step is too hard, what do you suggest?".
 
+9. (Answer to the open question, later the same day.) Every open mission,
+   excursion or ticket is wanted; any one of them would be fine to work on.
+   Choosing on "formal wants" is the self-constructed difficulty: the
+   machine spends its effort deciding among 600 open tasks, then completes
+   nothing. An agent may choose among the open tasks; better, an active
+   inference model of the open tasks, the completed work and agent
+   behaviour should make the choice easy. Joe's own choosing is a small
+   model of a few related priorities plus familiar patterns, many of which
+   are available in written form. An agent can always ask what a task means
+   in context.
+
+### What ruling 9 changes
+
+- **No admission gate.** The field is every open task, and each has at
+  least one action from the start: hand it to an agent with "make progress
+  on this, or say what you need to know". A question is a valid outcome and
+  is recorded on the task. Wants, class, relations and interpretations
+  become evidence that sharpens the scores when present; their absence
+  removes nothing. This is `PROOF-2b.md`'s own Design section (one softmax
+  over the whole field, support never empty), which was not what got built.
+- **What active inference says about the behaviour so far.** Not acting is a
+  policy, and it has the worst expected free energy available: it realises
+  none of the preferred outcomes (risk) and observes nothing (zero epistemic
+  value). Not knowing how a task will go is a reason to act on it, because
+  acting is what resolves that uncertainty, and it is the only way the
+  model's counts over task kinds and agent behaviour get any data. When the
+  scores of many options are close, the posterior over policies is flat and
+  the choice falls to the prior over policies, i.e. habit: here, Joe's
+  stated priorities and written patterns. The machine instead treated
+  "cannot score this" as "may not act on this", which inverts the theory.
+- **The model is small.** Per task: a knowledge/progress state and outcome
+  counts. Shared: a few priorities from Joe (stated preferences), counts
+  per (task kind, action, seat) → outcome learned from completed work, and
+  the written patterns as the habit prior. No per-task formal translation
+  is required before the first action.
+- **Consequences for the rest of this plan.** D1b is no longer a side
+  measurement: handing an open task to an agent with a plain prompt IS the
+  machine's first action kind. Plan A rows (4)–(5) become: the whole-field
+  softmax with that action, then counts learned from outcomes. D0's
+  code-demands column is mostly a removal list (ask-on-abstain, the
+  interpretation validation gate, class-unknown declines, feature-card
+  gating). Plan C is unchanged in form and smaller: fewer phases to model.
+  Incidents and the verification plan are unchanged.
+
 ## Order of work
 
 D1 → D0 → I0 → M → Plan C → Plan A → Plan B → Record 1 → ⟨2⟩ rows → Record 2.
@@ -56,7 +100,7 @@ time, and the agent's own words where it could not. Two parts:
 
 D1 decides how much of D0's agent-side structure is needed at all.
 
-**Open question for Joe (asked 2026-09-30, unanswered):** in the REPL Joe
+**Question put to Joe, ANSWERED by ruling 9 (yes, and the model should make it easy):** in the REPL Joe
 chooses the task. The machine chooses among about 600, and its scoring reads
 only tasks already turned into formal wants, a class and a validated
 interpretation; producing that form is where nearly all of today's failing
