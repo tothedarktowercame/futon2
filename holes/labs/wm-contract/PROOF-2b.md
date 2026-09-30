@@ -222,6 +222,13 @@ changes code, as clicks do now.
 - **C** (preferences): Joe's stated preferences stay (focused work to
   completion; Cτ from PROOF-2a ⟨1⟩4). Curiosity is not a preference; it is
   the epistemic and novelty terms of G, so it cannot be tuned away by C.
+  For task actions the authoritative outcome order is `closed > progressed >
+  question > refusal > no usable reply`. Until the first end-to-end run,
+  Cτ makes completing that run dominate. Predicted likelihood of completion
+  is evidence used to score those outcomes, not a substitute preference.
+  Legacy cascade preferences do not independently choose or gate a task;
+  cascade analysis may only inform the predicted outcome of an eligible
+  action.
 
 ### Selection
 

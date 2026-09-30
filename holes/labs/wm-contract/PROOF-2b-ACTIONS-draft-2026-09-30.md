@@ -148,6 +148,16 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     means this one run reaches a reviewed, grounded change with a terminal
     receipt naming its commit. There is no second click.
 
+16. **Outcome preferences are the selection authority.** Use the small-model
+    ordering `closed > progressed > question > refusal > no usable reply`.
+    Until the first end-to-end run completes, Cτ makes an outcome that
+    completes that run dominate the other outcomes. Predicted likelihood of
+    completion is evidence for scoring these outcomes; it is not a replacement
+    objective. A cascade may contribute evidence about an action's predicted
+    outcome, but no legacy cascade preference model chooses independently or
+    gates an otherwise eligible task. Such a parallel chooser would be an
+    operational facade.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -195,7 +205,8 @@ provide it is WITHDRAWN. Nothing provides it. It is built, from this:
   file path", meaning the repository; that was an invention and is
   removed). Until it is specified, priorities do not enter the score. Cτ: until a run has completed end to
   end, an outcome that completes a run outweighs everything else, so the
-  first choices favour tasks most likely to close.
+  first choices favour tasks most likely to complete the run. Likelihood is a
+  prediction used to evaluate the outcome preference, not itself C.
 - **Curiosity.** A cell of the counts with little data has more to teach,
   so trying it scores better (information gain). Not knowing how a task
   will go counts for choosing it.
@@ -226,10 +237,12 @@ first run. Each item below is on the path only because the run cannot
 happen, or cannot be trusted per rulings 3, 4 and 6, without it.
 
 1. **Field**: every open task, by the open/closed rule. No admission gate.
-2. **Choice**: one softmax over the field from a default preference ("this
-   task closed" is preferred to "open"), Joe's few stated priorities, and
-   outcome counts, which start flat. Flat scores are not a reason to stop:
-   the habit prior or a draw decides.
+2. **Choice**: one softmax over the field using the outcome order `closed >
+   progressed > question > refusal > no usable reply`, predicted from outcome
+   counts that start flat. Until the first run completes, completing that run
+   dominates via Cτ. Flat scores are not a reason to stop: the habit prior or
+   a draw decides. Legacy cascade preferences neither choose nor gate; cascade
+   analysis can only supply evidence to the outcome prediction.
 3. **Act**: hand the task to an author seat with a plain prompt (the task
    file; "make progress, commit, report; or say what you need to know").
 4. **Result**: exactly one typed result (changed / already satisfied /
