@@ -113,7 +113,7 @@ pin = D['pin_raw']
 npol = sum(len(t['policies']) for t in D['targets'])
 body = open('/tmp/claude-1/post/body.html').read()
 ex = {
- 'WEB': target_block('M-distributed-proofreaders', '<p>A short HEAD in the operator’s voice. 象 cited three patterns across its fragments, giving one reading cascade, and the graph gives three retractions around them.</p>'),
+ 'WEB': target_block('M-distributed-proofreaders', '<p>A short HEAD in the operator’s voice. 象 cited three patterns across its fragments, giving one reading cascade, and the graph gives three retractions around them. This is the policy set that has been written out in Lean and checked against the definitions: four members.</p>'),
  'ESS': target_block('M-essays-diachronic-model', '<p>A short opening paragraph. One of the two cited patterns has no edges in the pattern graph, so it cannot seed a retraction; the retraction that remains is a single pattern.</p>'),
  'SDS': target_block('M-self-documenting-stack', '<p>A longer opening. This is the target the joint run chose on 30 September, through its three retractions. Look at how the three differ.</p>'),
  'REST': '\n'.join('<details><summary>' + E(n) + '</summary>' + target_block(n, '', False) + '</details>' for n in ['M-value-creation-loop', 'M-metric-harness', 'M-war-machine-aif-completion']),
