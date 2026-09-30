@@ -89,6 +89,24 @@ has seen the agreed text. The negotiation is in git: this file's history
     without further rounds on the model. Priorities are out of the first
     machine entirely. Build log: `PROOF-2b.md` LOG.
 
+13. If the forward machine works, it should be no different from the
+    regular machine being run in a debugger.
+
+    Correction this forces (claude-1, same day): handoff F1 was dispatched
+    as "a new thin path beside the existing runner". That is a second
+    machine, and at the end the regular one would still not run. There is
+    ONE machine. The step function is the regular machine's controller:
+    its phases are the regular run's phases, its effects are carried out by
+    the regular runner's own functions (selection, dispatch, wait, review,
+    close, record), and "forward" is what a debugger gives: execute one
+    phase, save the state, stop at a failure with everything inspectable,
+    continue from that phase after the repair. The no-gate choice is a
+    change to the regular machine's selection, not a separate chooser.
+    F1's result is kept only as that controller: its built-in chooser
+    becomes a requested effect answered by the regular selection, and F2 is
+    the binding of effects to the existing runner's phases, deleting the
+    old control flow phase by phase (Plan C, C4), not new parallel code.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
