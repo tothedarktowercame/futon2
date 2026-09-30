@@ -158,6 +158,16 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     gates an otherwise eligible task. Such a parallel chooser would be an
     operational facade.
 
+17. **A first run is a milestone, not the success criterion.** A run that
+    ends in a properly recorded question, updates the task state and writes
+    its terminal receipt counts as a first end-to-end run: the lifecycle has
+    run. It is not thereby a successful War Machine or acceptance of
+    PROOF-2b. An answer must make the question actionable by a later run; the
+    machine must continue rather than stop after asking once. Reliable
+    long-term behaviour is demonstrated by completing work across missions,
+    excursions and tickets, not merely by producing well-typed questions or
+    by making one run succeed.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -233,7 +243,10 @@ task; the model does not wait for them.
 One complete run means: a task is chosen from the open field, an agent is
 handed it, the agent's result is reviewed, one receipt is written, and the
 next choice takes that result into account. Nothing else is required of the
-first run. Each item below is on the path only because the run cannot
+first-run milestone. A question may be that result, provided the task state
+and receipt retain it and a later run can consume its answer. This milestone
+does not accept PROOF-2b: acceptance additionally requires sustained completion
+across missions, excursions and tickets. Each item below is on the path only because the run cannot
 happen, or cannot be trusted per rulings 3, 4 and 6, without it.
 
 1. **Field**: every open task, by the open/closed rule. No admission gate.
@@ -469,6 +482,7 @@ open question under D1. No row's acceptance uses a click.
   lifecycle and its binding, skeleton rows, D0 boundary fixtures, and
   conditions 3–9 of 3ca1f852c. It states that it makes no claim about
   curiosity, self-model coverage, structure learning or good AIF choice,
+  does not establish reliable completion of missions, excursions and tickets,
   and is not acceptance of PROOF-2b.
 - **Record 2, model/selection verification**: ⟨2⟩ and RQ-3/4/5.
 

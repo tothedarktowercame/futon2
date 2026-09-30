@@ -160,6 +160,13 @@ separately, with denominators, not combined into a score.
 reviewed action commit} > 0.
 *Today:* 0 on every count. Want and task transitions are not recorded.
 
+A question with a task-state update and terminal receipt is a valid completed
+run, but is not by itself forward motion or acceptance of PROOF-2b. Its answer
+must be consumable by a later run. The reliability claim requires the machine
+to continue operating and complete work across missions, excursions and
+tickets; the quantitative acceptance threshold for that cross-kind claim is
+specified separately rather than inferred from the first-run milestone.
+
 **RQ-8. Every action leaves a complete receipt.**
 *Metric:* `paper_trail = complete action receipts / enacted actions`, with
 each commit sha resolving (`git cat-file -e <sha>^{commit}`) and the reviewer
