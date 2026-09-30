@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.learning-trial-ledger :as ledger]))
 
 (def artifacts "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
@@ -85,6 +86,81 @@
     (is (< (:g unexplored) (:g explored))
         "dropping the information subtraction makes this fail")
     (is (> (:information-gain unexplored) (:information-gain explored)))))
+
+(defn- progress-fixture [id first-produces]
+  {:kind :cascade-candidate :id id :target "t"
+   :precedence [{:id :first :pattern-id :first :target "t"
+                 :guard {:status :interpreted :clauses [{:present #{} :absent #{}}]}
+                 :produces first-produces :theta 1
+                 :theta-record {:status :recorded-trials :trials-count 1 :successes 1}}
+                {:id :last :pattern-id :last :target "t"
+                 :guard {:status :interpreted :clauses [{:present first-produces :absent #{}}]}
+                 :produces #{:p1 :p2 :want} :theta 1
+                 :theta-record {:status :recorded-trials :trials-count 1 :successes 1}}]})
+
+(deftest progress-is-preferred-at-every-step-without-token-truncation
+  (let [tokens (set (concat [:p1 :p2 :want] (map #(keyword (str "extra-" %)) (range 9))))
+        weights (into {} (for [n (range 4) met? [false true]]
+                           [[n met?] (/ (* (bit-shift-left 1 n) (if met? 2 1)) 45)]))
+        model {:schema :wm/observation-model-v1 :backend :exact-enumeration
+               :kind :progress-count :universe tokens :horizon 2
+               :progress-tokens #{:p1 :p2 :want} :want #{:want}
+               :progress-preference {1 weights 2 weights}
+               :provenance {:status :synthetic :calibrated false :source "progress fixture"}}
+        opts {:horizon-steps 2 :observation-model model
+              :prediction-context {:occurrence-id "progress" :tau 2}
+              :observation {:status :observed :occurrence-id "progress" :tau 2
+                            :present #{:want} :absent #{}}
+              :g-normalization :per-step-capacity-and-pattern
+              :cascade-spec {:want #{:want} :evidence #{} :zeroed #{}
+                             :c {:source :graded-progress}
+                             :c-schedule [1 2]}}
+        early (first (scorer/rank-cascade-actions
+                      {:cascade-belief {#{} 1}}
+                      [(progress-fixture "early" #{:p1 :p2})] opts))
+        late (first (scorer/rank-cascade-actions
+                     {:cascade-belief {#{} 1}}
+                     [(progress-fixture "late" #{:p1})] opts))]
+    (is (< (:controller-score early) (:controller-score late))
+        "restoring a not-yet placeholder makes early progress invisible")
+    (is (= #{:p1 :p2 :want} (first (keys (get-in early [:prediction :belief]))))
+        "both policies reach the same terminal progress state")
+    (is (= 12 (count (:universe model)))
+        "the compact count observation admits more than the ten-token powerset bound")
+    (is (every? (fn [step]
+                  (every? vector? (keys (:distribution step))))
+                (get-in early [:certificate :consumed-g :C :steps]))
+        "no step uses ending/not-yet-evaluated as its preferred outcome")))
+
+(defn- chain-cascade [n]
+  (let [patterns (mapv #(str "p/" %) (range n))]
+    {:nodes (mapv #(hash-map :pattern %) patterns)
+     :edges (mapv (fn [[a b]] {:from a :to b :kind :precedes})
+                  (partition 2 1 patterns))}))
+
+(defn- fit-analysis-with-status [n status]
+  {:sentences
+   [{:fragments
+     (mapv (fn [i]
+             (let [p (str "p/" i)]
+               (cond-> {:start i :end (inc i) :text p :relations ["action"]}
+                 (= :accepted status)
+                 (assoc :pattern_refs [{:id p :rationale "stated good fit"}])
+                 (= :rejected status)
+                 (assoc :pattern_rejections [{:id p :reason "stated poor fit"
+                                              :query p}]))))
+           (range n))}]})
+
+(deftest cross-mission-size-control-prefers-fit-and-steady-progress
+  (let [poor-short (shape-g/score-policy
+                    {:target "t" :policy-id "poor-3" :cascade (chain-cascade 3)
+                     :analysis (fit-analysis-with-status 3 :rejected)})
+        good-long (shape-g/score-policy
+                   {:target "t" :policy-id "good-9" :cascade (chain-cascade 9)
+                    :analysis (fit-analysis-with-status 9 :accepted)})]
+    (is (< (+ (:f good-long) (:g good-long))
+           (+ (:f poor-short) (:g poor-short)))
+        "a short but poorly fitting policy must not win merely because it is short")))
 
 (deftest ^:slow all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)

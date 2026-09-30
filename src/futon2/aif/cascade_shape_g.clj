@@ -24,15 +24,14 @@
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.matched-observation-evidence :as matched]))
 
-(def ^:private class-universe
-  [:focused :related :unrelated :stop-the-line :ending/not-yet-evaluated])
-
 (defn- pattern-key [s]
   (keyword (str/replace (str s) #"^:" "")))
 
 (defn- done-token [target pattern] [target :pattern-done pattern])
 (defn- overlap-token [target a b]
   [target :overlap (vec (sort [(str a) (str b)]))])
+(defn- edge-token [target from to kind]
+  [target :edge-done from to kind])
 
 (defn- normalize-edge [edge]
   {:from (or (:from edge) (:a edge))
@@ -96,8 +95,10 @@
                       theta (if (= :recorded-trials (:status theta-rec))
                               (:theta theta-rec) 1/2)
                       needs (set (map #(done-token target (:from %)) (incoming occurrence-id)))
-                      produces (conj (set (shared occurrence-id))
-                                     (done-token target occurrence-id))]
+                      produces (into (conj (set (shared occurrence-id))
+                                           (done-token target occurrence-id))
+                                     (for [{:keys [from to kind]} (incoming occurrence-id)]
+                                       (edge-token target from to kind)))]
                   {:id occurrence-id
                    :pattern-id p :occurrence-id occurrence-id :target target
                    :guard {:status :interpreted
@@ -115,6 +116,20 @@
         sources (set (map :from (remove #(= :overlap (:kind %))
                                         (map normalize-edge edges))))]
     (if (seq goal) goal (cset/difference all sources))))
+
+(defn- progress-preference
+  "A compact C over [completed-pattern-count want-met?].  It strictly
+  prefers each additional completed pattern and gives a further preference
+  to satisfying the want.  This is O(n), rather than the 2^n token
+  powerset, so it does not inherit observation-model/max-tokens = 10."
+  [n horizon]
+  (let [outcomes (for [done (range (inc n)) met? [false true]] [done met?])
+        weights (into {} (for [[done met? :as outcome] outcomes]
+                           [outcome (Math/exp (+ (* 4.0 (/ done (max 1 n)))
+                                                  (if met? 2.0 0.0)))]))
+        total (reduce + (vals weights))
+        distribution (update-vals weights #(/ % total))]
+    (into {} (for [tau (range 1 (inc horizon))] [tau distribution]))))
 
 (defn score-arranged
   "Return finite G and its recorded terms for one arranged cascade.
@@ -137,16 +152,13 @@
                                          (mapcat :present (get-in p [:guard :clauses]))))
                                precedence))
          horizon (max 1 (min scorer/max-horizon (count precedence)))
-         preference (into {} (for [tau (range 1 (inc horizon))]
-                               [tau (if (= tau horizon)
-                                      {:focused 9/10 :related 1/40 :unrelated 1/40
-                                       :stop-the-line 1/40 :ending/not-yet-evaluated 1/40}
-                                      {:focused 1/40 :related 1/40 :unrelated 1/40
-                                       :stop-the-line 1/40 :ending/not-yet-evaluated 9/10})]))
+         progress-tokens (set (filter #(contains? #{:pattern-done :edge-done} (second %))
+                                      universe))
+         preference (progress-preference (count progress-tokens) horizon)
          model {:schema :wm/observation-model-v1 :backend :exact-enumeration
-                :kind :class-emission :universe universe :horizon horizon
-                :class-universe class-universe :acceptance acceptance
-                :target-class {target :focused} :class-preference preference
+                :kind :progress-count :universe universe :horizon horizon
+                :progress-tokens progress-tokens :want acceptance
+                :progress-preference preference
                 :provenance {:status :synthetic :calibrated false
                              :source "cascade_shape_g arrangement model"}}
          observation {:status :observed :occurrence-id (str id) :tau horizon
@@ -155,20 +167,20 @@
                  {:cascade-belief {#{} 1}} [candidate]
                  {:horizon-steps horizon :observation-model model
                   :parameter-information-mode :beta-pattern
+                  :g-normalization :per-step-capacity-and-pattern
                   :prediction-context {:occurrence-id (str id) :tau horizon}
                   :observation observation
                   :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
                                  :c {:source :terminal-and-progress-preference}
                                  :c-schedule (vec (range 1 (inc horizon)))}})
          entry (when (vector? ranked) (first ranked))
-         steps (get-in entry [:certificate :steps])
          information (get-in entry [:certificate :g-terms :expected-information-gain])
          result {:status (if entry :computed :refused)
                  :policy-id id :target target :candidate candidate
                  :horizon horizon :terminals terminals
                  :preference-at-each-step preference
-                 :risk (when entry (reduce + 0.0 (map :risk steps)))
-                 :ambiguity (when entry (reduce + 0.0 (map :ambiguity steps)))
+                 :risk (get-in entry [:certificate :g-terms :risk])
+                 :ambiguity (get-in entry [:certificate :g-terms :ambiguity])
                  :information-gain information
                  :g (:controller-score entry)
                  :scorer-result ranked}]
@@ -217,13 +229,19 @@
         covered (set (mapcat #(map :fragment-index (:reading-evidence %)) nodes))
         total (count fragments)
         coverage-p (/ (+ (count covered) 1/2) (+ total 1))
-        node-f (reduce + 0.0 (map #(matched/surprisal (:probability %)) nodes))
+        node-f (if (seq nodes)
+                 (/ (reduce + 0.0 (map #(matched/surprisal (:probability %)) nodes))
+                    (count nodes))
+                 0.0)
         coverage-f (matched/surprisal coverage-p)
-        fit-ambiguity (reduce + 0.0
-                              (map (fn [{:keys [probability]}]
-                                     (+ (binary-entropy (double probability))
-                                        (- 1.0 (double probability))))
-                                   nodes))]
+        fit-ambiguity (if (seq nodes)
+                        (/ (reduce + 0.0
+                                   (map (fn [{:keys [probability]}]
+                                          (+ (binary-entropy (double probability))
+                                             (- 1.0 (double probability))))
+                                        nodes))
+                           (count nodes))
+                        0.0)]
     {:status :computed :nodes nodes
      :coverage {:covered (count covered) :total total
                 :share (if (zero? total) 0 (/ (count covered) total))

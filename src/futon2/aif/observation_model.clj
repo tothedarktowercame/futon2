@@ -72,19 +72,20 @@
 (defn validate!
   "Validate a declared bounded model. No rate, independence or authority default."
   [{:keys [schema backend kind universe rates components provenance parameters
-            horizon class-universe acceptance target-class class-preference] :as model}]
+            horizon class-universe acceptance target-class class-preference
+            progress-tokens want progress-preference] :as model}]
   (when-not (= :wm/observation-model-v1 schema)
     (refuse! :invalid-model-schema {}))
   (when-not (= :exact-enumeration backend)
     (refuse! :unsupported-observation-backend {:backend backend}))
-  (when-not (if (= :class-emission kind)
+  (when-not (if (contains? #{:class-emission :progress-count} kind)
               ;; The class model never enumerates the token powerset -- its
               ;; risk lives over at most five classes -- so the enumeration
               ;; backend's token bound does not apply; only set-ness does.
               (set? universe)
               (and (set? universe) (<= 1 (count universe) max-tokens)))
     (refuse! :observation-universe-out-of-bounds
-             {:limit (when-not (= :class-emission kind) max-tokens)}))
+             {:limit (when-not (contains? #{:class-emission :progress-count} kind) max-tokens)}))
   (when-not (and (= :synthetic (:status provenance))
                  (false? (:calibrated provenance))
                  (string? (:source provenance)) (seq (:source provenance)))
@@ -127,6 +128,28 @@
                                     (= 1 (reduce + (vals pref)))))
                              class-preference))
         (refuse! :invalid-class-preference {:class-preference class-preference})))
+    :progress-count
+    (do
+      (when-not (and (pos-int? horizon) (<= horizon 10))
+        (refuse! :invalid-progress-horizon {:horizon horizon}))
+      (when-not (and (set? progress-tokens) (set/subset? progress-tokens universe)
+                     (set? want) (set/subset? want universe))
+        (refuse! :invalid-progress-domain
+                 {:progress-tokens progress-tokens :want want}))
+      (when-not (and (map? progress-preference)
+                     (= (set (range 1 (inc horizon))) (set (keys progress-preference)))
+                     (every? (fn [[_ pref]]
+                               (and (map? pref) (seq pref)
+                                    (every? (fn [[[n met?] p]]
+                                              (and (int? n) (<= 0 n (count progress-tokens))
+                                                   (boolean? met?) (number? p)
+                                                   (Double/isFinite (double p))
+                                                   (<= 0 p 1))) pref)
+                                    (< (Math/abs (- 1.0 (double (reduce + (vals pref)))))
+                                       1.0e-10)))
+                             progress-preference))
+        (refuse! :invalid-progress-preference
+                 {:progress-preference progress-preference})))
     (refuse! :unknown-observation-model {:kind-declared kind}))
   model)
 
@@ -248,13 +271,23 @@
                                                        (reduce + (vals preference)))}))
   preference)
 
+(defn- progress-outcome [{:keys [progress-tokens want]} state]
+  [(count (set/intersection progress-tokens state))
+   (set/subset? want state)])
+
+(defn- progress-predictive [model belief]
+  (reduce (fn [out [state mass]]
+            (update out (progress-outcome model state) (fnil + 0) mass))
+          {} belief))
+
 (defmulti evaluate
   "Backend dispatch. query validates and records the model around this method."
   (fn [model _request] (:backend model)))
 
 (defmethod evaluate :exact-enumeration
   [model {:keys [op state belief event observation context preference tau target]}]
-  (if (= :class-emission (:kind model))
+  (cond
+    (= :class-emission (:kind model))
     (case op
       :score
       (do
@@ -293,6 +326,25 @@
           {:posterior belief :f {:value 0.0 :status :not-supplied
                                  :reason :class-model-unconditioned-at-selection}})
       (refuse! :unsupported-observation-query {:op op}))
+    (= :progress-count (:kind model))
+    (case op
+      :score
+      (do
+        (belief! model belief)
+        (let [tau (or tau (:horizon model))
+              pref (get-in model [:progress-preference tau])
+              prediction (progress-predictive model belief)
+              risk (m/outcome-risk (ordered prediction) pref)]
+          {:prediction prediction :risk risk :ambiguity 0.0
+           :g-evaluation :progress-count :tau tau
+           :g (if (= :infinite risk) ##Inf (double risk))}))
+      :condition
+      (do
+        (belief! model belief)
+        {:posterior belief :f {:value 0.0 :status :not-supplied
+                               :reason :progress-model-unconditioned-at-selection}})
+      (refuse! :unsupported-observation-query {:op op}))
+    :else
   (case op
     :row (do (state! model state) {:distribution (row model state)})
     :likelihood (do (state! model state) (event! model event)

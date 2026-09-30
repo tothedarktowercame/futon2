@@ -55,16 +55,14 @@ relevance for accepted refs, so every receipt records that term as
 `:absent :numeric-scores-not-in-analysis-artifact`; no score is reconstructed
 or invented.
 
-The preference is present at every bounded horizon step. Before the terminal
-step it prefers `:ending/not-yet-evaluated`; at the terminal step it prefers
-the target's completion class. The generated B still contains each node's
-progress token, but the existing class-emission observation route collapses
-those tokens to a class before C. Thus this packet does not yet consume a
-graded preference over individual progress tokens. The token observation
-route cannot represent the largest policy here because it is capped at ten
-tokens. This is a precise remaining gap against the requested “progress
-tokens present” reading of C, rather than an invented claim that class C is
-the same thing.
+S5b replaces the terminal-class placeholder described in the original S4
+measurement. The observation route is now `:progress-count`: it emits
+`[completed-progress-token-count want-met?]` without enumerating the token
+powerset. `observation_model.clj` still caps powerset enumeration at **10**
+tokens, while this compact route accepts the actual token set without that
+cap; the regression exercises 12 tokens. C strictly increases with completed
+progress and gives an additional preference to the want being met at every
+tau. There is no `:ending/not-yet-evaluated` outcome in this route.
 
 This is also not yet the recursive catamorphism in
 `NOTE-g-as-fold-2026-09-30.md`. It compiles edges into guards, then lets the
@@ -174,3 +172,64 @@ finite G for every distinct
 policy, the per-step preference schedule, overlap-token semantics, and the
 same-order/different-edge falsifier. The scorer's own namespace remains the
 independent regression gate.
+
+
+## S5b: graded progress C and cross-mission normalization
+
+The existing scorer now consumes the compact progress-count observation
+through the same `observation-model/query` seam and the same forward-model
+rollout. No second EFE or selector was added. Each pattern completion and each
+directed arrangement edge is a progress token; the latter keeps arrangements
+observable when node order is equal. C is a normalized distribution on
+`[count want-met?]`, with log weight `4*(count/total)+2*want-met`. Thus every
+additional token strictly increases preference, and satisfying the want adds
+another strict preference, at every bounded tau.
+
+Comparing policies with different observation supports requires choosing a
+unit. By claude-1's delegated modelling choice, risk is normalized per horizon
+step and per `ln(|O|)`, the information capacity of that policy's compact
+outcome support; ambiguity is per horizon step; parameter information is per
+distinct pattern. F is the mean node surprisal plus coverage surprisal, so a
+long reading does not pay the same fit cost repeatedly merely for naming more
+patterns. The rejected alternative was raw horizon and node sums: those made
+G mostly a measure of reading length (Spearman 0.937956 after S5a). This
+normalization preserves the existing KL risk and only changes the unit in
+which policies with different finite outcome spaces are compared.
+
+Across the 33 distinct policies, the new term ranges are: risk
+**1.481533–2.297642**, ambiguity **0.425083–0.973700**, and expected
+information **0.306853–0.306853**. Every certificate still records raw and
+normalized terms and satisfies `G = risk + ambiguity - information` within
+1e-12.
+
+| mission | minimizing adjustment | patterns / nodes / longest chain | F | risk | ambiguity | information | G |
+|---|---|---:|---:|---:|---:|---:|---:|
+| M-象-2000 | retraction-1 | 13 / 13 / 5 | 1.126952 | 1.481533 | 0.779574 | 0.306853 | 1.954254 |
+| M-metric-harness | alternatives-1 | 10 / 10 / 9 | 0.798508 | 2.064915 | 0.425083 | 0.306853 | 2.183145 |
+| M-distributed-proofreaders | alternatives-1 | 3 / 3 / 3 | 1.049822 | 1.852182 | 0.425083 | 0.306853 | 1.970412 |
+| M-web-arxana-ui-improvements | alternatives-4 | 1 / 1 / 1 | 0.798508 | 1.768694 | 0.425083 | 0.306853 | 1.886924 |
+| M-self-documenting-stack | retraction-1 | 5 / 5 / 2 | 0.916065 | 1.717916 | 0.578696 | 0.306853 | 1.989759 |
+| M-war-machine-aif-completion | retraction-2 | 17 / 17 / 3 | 1.371379 | 1.532343 | 0.786525 | 0.306853 | 2.012015 |
+| M-essays-diachronic-model | alternatives-1 | 2 / 2 / 2 | 0.798508 | 1.512409 | 0.425083 | 0.306853 | 1.630639 |
+| M-value-creation-loop | alternatives-1 | 3 / 3 / 3 | 0.680725 | 1.852182 | 0.425083 | 0.306853 | 1.970412 |
+
+Spearman correlation of G with node count is **0.937956 before S5b** and
+**0.220279 after S5b**. G no longer mostly measures size in this corpus,
+although the remaining positive association is visible and recorded.
+
+The cross-mission control compares a rejected, poor-fit 3-pattern chain with
+an accepted, steady-progress 9-pattern chain. Their `F + G` values are
+**7.152438** and **1.749006**, respectively, so the good 9-pattern policy is
+preferred. That is the intended answer: observed circumstance fit and steady
+progress outweigh brevity. The earlier-progress fixture holds terminal state
+fixed and gives the policy that produces two of three progress tokens at tau 1
+lower G than one that produces only one. Replacing progress C with the former
+not-yet placeholder makes that ordering and the no-placeholder assertion fail.
+
+For the Lean controller, Q9 needs (1) a step-indexed progress preference whose
+log preference is strictly monotone in completed progress at every tau, (2) a
+theorem that want-met is strictly preferred at equal progress, and (3) the
+paired policy theorem: equal terminal belief plus pointwise earlier progress
+implies no greater cumulative normalized risk, strict when one step differs.
+The compact observation also needs a refinement statement that count emission
+preserves progress ordering without enumerating the token powerset.

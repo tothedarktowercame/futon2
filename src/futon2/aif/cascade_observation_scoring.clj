@@ -44,17 +44,19 @@
                        ;; independently over at most five classes -- the
                        ;; enumeration cap guards powerset cost that this
                        ;; model does not pay (PROOF-wm-works 1.3 build 2/3).
-                       (if (= :class-emission (:kind observation-model)) Long/MAX_VALUE max-candidates))
+                       (if (contains? #{:class-emission :progress-count} (:kind observation-model))
+                         Long/MAX_VALUE max-candidates))
                    (every? #(and (= :cascade-candidate (:kind %))
                                  (some? (:id %)) (vector? (:precedence %))) candidates)
                    ;; Id uniqueness guards the token path's id-keyed posterior
                    ;; record; joint families legitimately reuse :C1/:C2 per
                    ;; target, and the class path keys by the full candidate.
-                   (or (= :class-emission (:kind observation-model))
+                   (or (contains? #{:class-emission :progress-count} (:kind observation-model))
                        (= (count candidates) (count (set (map :id candidates))))))
       (om/refuse! :invalid-bounded-candidates
-                  {:limit (when-not (= :class-emission (:kind observation-model)) max-candidates)}))
-    (when (= :class-emission (:kind observation-model))
+                  {:limit (when-not (contains? #{:class-emission :progress-count}
+                                               (:kind observation-model)) max-candidates)}))
+    (when (contains? #{:class-emission :progress-count} (:kind observation-model))
       ;; The class scorer still rolls B through the token transition model,
       ;; so B's token domain holds: set-shaped q0 states, q0 support and
       ;; candidate tokens inside the declared universe, and the model's
@@ -79,7 +81,7 @@
                    ;; The want/evidence/zeroed subset-of-universe check is
                    ;; the token preference's domain rule; the class model's
                    ;; preference lives over classes, so only the shape holds.
-                   (or (= :class-emission (:kind observation-model))
+                   (or (contains? #{:class-emission :progress-count} (:kind observation-model))
                        (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
                                                (into #{} cat (:zeroed cascade-spec))) universe)))
       (om/refuse! :invalid-observation-preference {}))
@@ -128,10 +130,18 @@
         predicted (:belief (peek steps))
         conditioned (om/query observation-model {:op :condition :belief predicted
                                                  :observation observation :context prediction-context})
-        risk (reduce + 0.0 (map :risk steps))
-        ambiguity (reduce + 0.0 (map :ambiguity steps))
-        information-gain (if (= :beta-pattern (:parameter-information-mode opts))
-                           (candidate-information-gain candidate) 0.0)
+        raw-risk (reduce + 0.0 (map :risk steps))
+        raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
+        raw-information (if (= :beta-pattern (:parameter-information-mode opts))
+                          (candidate-information-gain candidate) 0.0)
+        normalize? (= :per-step-capacity-and-pattern (:g-normalization opts))
+        pattern-count (max 1 (count (set (map #(or (:pattern-id %) (:id %))
+                                                (:precedence candidate)))))
+        outcome-count (max 2 (count (get-in preference [1 :probabilities])))
+        observation-capacity (Math/log (double outcome-count))
+        risk (if normalize? (/ raw-risk horizon-steps observation-capacity) raw-risk)
+        ambiguity (if normalize? (/ raw-ambiguity horizon-steps) raw-ambiguity)
+        information-gain (if normalize? (/ raw-information pattern-count) raw-information)
         g (- (+ risk ambiguity) information-gain)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
@@ -169,6 +179,13 @@
                              :g-terms {:risk risk :ambiguity ambiguity
                                        :expected-information-gain information-gain
                                        :combination :risk-plus-ambiguity-minus-information-gain
+                                       :normalization (if normalize?
+                                                        {:risk :per-horizon-step-and-log-outcome-support
+                                                         :ambiguity :per-horizon-step
+                                                         :information :per-distinct-pattern}
+                                                        :none)
+                                       :raw {:risk raw-risk :ambiguity raw-ambiguity
+                                             :expected-information-gain raw-information}
                                        :units :nats}
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
@@ -186,7 +203,7 @@
   (let [model (:observation-model opts)]
     (try
       (validate-inputs! (:cascade-belief state) candidates opts)
-      (let [preference (if (= :class-emission (:kind model))
+      (let [preference (if (contains? #{:class-emission :progress-count} (:kind model))
                          ;; PROOF-wm-works 1.3 build 2/3: the class model
                          ;; carries its own per-tau class preference (Joe's
                          ;; ruling at the horizon, unit mass on
@@ -195,7 +212,10 @@
                          ;; token-subset construction bound to
                          ;; TokenPreference.preference and stays untouched.
                          (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
-                                    [tau {:probabilities (get-in model [:class-preference tau])}]))
+                                    [tau {:probabilities (get-in model [(if (= :class-emission (:kind model))
+                                                                         :class-preference
+                                                                         :progress-preference)
+                                                                       tau])}]))
                          (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
                                     (let [member (checked (m/preference-member (:cascade-spec opts) (:universe model)
                                                                               (:horizon-steps opts) tau))
