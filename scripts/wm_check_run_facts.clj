@@ -16,6 +16,16 @@
   (let [missing (filter #(or (not (contains? facts %)) (nr? (get facts %))) ks)]
     (str ".nr \"not recomputable: " (str/join "," missing) "\"")))
 (defn ev-known [body] (str ".known { Requirements.click20 with " body " }"))
+(defn choice [x] (format "⟨%d, %d⟩" (id (x "target")) (id (x "cascade"))))
+(defn target-construction [xs]
+  (str "[" (str/join ", "
+                     (for [x xs]
+                       (format "{ targets := %s, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d }"
+                               (fs (x "targets")) (fs (x "slice")) (fs (x "pool"))
+                               (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")))) "]"))
+(def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
+               "question" ".question" "refused" ".refused" "invalid" ".invalid"
+               "timedOut" ".timedOut"})
 
 (def deps
   {:q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
@@ -48,14 +58,33 @@
                                 (facts "horizonLength") (nat-fs (facts "preferenceSteps"))
                                 (bool-lit (g "risk")) (bool-lit (g "ambiguity"))
                                 (bool-lit (g "informationGain")))))
+        :q2 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, targetConstruction := %s, libraryPatternCount := %d, constructorPatternCount := %d"
+                              (fs (facts "openMissions")) (fs (facts "openExcursions"))
+                              (fs (facts "openTickets")) (target-construction (facts "targetConstruction"))
+                              (facts "libraryPatternCount") (facts "constructorPatternCount")))
+        :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
+        :q6 (ev-known (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
+                              (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                              (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
+                              (id (facts "currentInputDigest"))))
         :q7 (ev-known (str "pathAbsenceCount := " (facts "pathAbsenceCount")))
-        ;; The current exporter cannot make these arms known. Keeping this
-        ;; explicit makes a schema extension fail here instead of being guessed.
-        (throw (ex-info "known field group has no Lean encoder" {:requirement q}))))))
+        :q8 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, enumeratedTasks := %s, targetsReachingScoring := %s, targetsWithG := %s, libraryPatternCount := %d, targetConstruction := %s, constructedCascades := %s, comparedPolicies := %s, seatsAvailable := %s, seatsUsed := %s"
+                              (fs (facts "openMissions")) (fs (facts "openExcursions"))
+                              (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))
+                              (fs (facts "targetsReachingScoring")) (fs (facts "targetsWithG"))
+                              (facts "libraryPatternCount") (target-construction (facts "targetConstruction"))
+                              (fs (facts "constructedCascades")) (fs (facts "comparedPolicies"))
+                              (fs (facts "seatsAvailable")) (fs (facts "seatsUsed"))))
+        :q9 (ev-known (format "completionPreferencePairs := %d, completionPairsStrictlyPreferred := %d"
+                              (facts "completionPreferencePairs") (facts "completionPairsStrictlyPreferred")))
+        :q10 (ev-known (format "differentArrangementPairs := %d, arrangementPairsDistinguishedByG := %d"
+                               (facts "differentArrangementPairs") (facts "arrangementPairsDistinguishedByG")))))))
 
 (defn lean-source [export definition-name]
   (let [facts (get export "facts")]
     (str "import DarkTower.WarMachine.RequirementsReader\n"
+         "set_option maxRecDepth 100000\n"
+         "set_option maxHeartbeats 5000000\n"
          "open DarkTower.WarMachine\n"
          "open DarkTower.WarMachine.Requirements\n"
          "open DarkTower.WarMachine.RequirementsReader\n"

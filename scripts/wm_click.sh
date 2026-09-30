@@ -350,3 +350,22 @@ newest = max(Path(sys.argv[1]).glob("*.edn"),
 if newest is not None:
     subprocess.run(["ls", "-l", str(newest)], check=True)
 PY
+
+# A written run is not a successful click until the independently evaluated
+# Q1--Q10 verdict exists.  This is deliberately unconditional: no environment
+# variable can disable the post-run check.
+run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
+verdict_file="$run_record.requirements.edn"
+if [ ! -f "$run_record" ]; then
+  echo "ALERT FOR JOE"
+  echo "requirements NOT CHECKED: run record missing after completed click: $run_record"
+  exit 1
+fi
+python3 "$F2/scripts/wm_run_alert.py" --run-record "$run_record"
+requirements_status=$?
+if [ ! -f "$verdict_file" ]; then
+  echo "ALERT FOR JOE"
+  echo "requirements NOT CHECKED: verdict file absent after post-run check: $verdict_file"
+  exit 1
+fi
+exit "$requirements_status"

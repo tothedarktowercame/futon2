@@ -18,7 +18,9 @@
    "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
    "gTerms" "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice"
-   "currentInputDigest" "seatsAvailable" "seatsUsed"])
+   "currentInputDigest" "seatsAvailable" "seatsUsed"
+   "completionPreferencePairs" "completionPairsStrictlyPreferred"
+   "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
 
 (defn not-recomputable [s] {"not-recomputable" s})
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
@@ -216,7 +218,11 @@
                                   (if (:seats snap) (sorted-ids (:seats snap))
                                       (nr "Agency roster snapshot unavailable")))
                "seatsUsed" (if (seq used) (sorted-ids used)
-                               (nr "participant seat ids absent"))}
+                               (nr "participant seat ids absent"))
+               "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
+               "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
+               "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
+               "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
