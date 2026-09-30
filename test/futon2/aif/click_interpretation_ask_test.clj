@@ -11,6 +11,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.interpretation-request :as ireq]
             [futon2.aif.policy :as policy]
@@ -291,3 +292,16 @@
             :skipped-unknown-class ["M-unknown-one" "M-unknown-two"]}
            (:interpretation-ask record))
         "the record says, typed, that no refused target can be scored")))
+
+(deftest an-unstubbed-click-spreads-its-asks-over-seats
+  ;; a single :answer-fn sends every want to one seat, which Agency queues;
+  ;; production passes seats so ask-fn builds one answer fn per seat
+  (let [seen (atom nil)]
+    (with-redefs [fr/ask-fn
+                  (fn [opts] (reset! seen opts) (fn [& _] {:asked []}))]
+      ((click-ask/click-ask-fn
+        {:mission-hole-sources [{:target "M-x" :want [:hole/h1] :holes [{:kind :unchecked-task :line 1 :text "- [ ] x"}]}]
+         :cascade-sources {}})
+       {} {:target "M-x" :kind :no-admitted-interpretation}))
+    (is (nil? (:answer-fn @seen)) "no single answer fn in production")
+    (is (= click-ask/default-ask-seats (:interpretation-seats @seen)))))

@@ -409,7 +409,8 @@
   [opts flight wants sources todo]
   (if (or (empty? todo) (= 1 (count todo)))
     (mapv #(ask-one (assoc opts :answer-fn
-                           (answer-fn-for opts (first default-interpretation-seats)))
+                           (answer-fn-for opts (first (or (seq (:interpretation-seats opts))
+                                                          default-interpretation-seats))))
                     flight wants sources %)
           todo)
     (let [seats (vec (or (:interpretation-seats opts) default-interpretation-seats))

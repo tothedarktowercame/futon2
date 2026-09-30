@@ -27,6 +27,12 @@
 
 (def default-ask-seat "codex-proof2c")
 
+(def default-ask-seats
+  "Seats a click's asks are spread over. ask-fn issues a target's wants
+  concurrently, but Agency queues jobs per seat, so one seat would still
+  answer them one after another (click 17: six asks, ~3.5 min of seat time)."
+  ["codex-proof2c" "codex-proof2a" "codex-proof2b"])
+
 (defn- mission-hole-pick
   "The mission-hole-wants entry for TARGET from the given candidate PICKS
   (the tick's own derivation by default), else nil."
@@ -64,7 +70,8 @@
   :cascade-sources replace the registry and declared-source reads with fixed
   values, and :ask-options is merged into ask-fn's options (a pinned
   :code-root and :request-options, as flight-ask-test does)."
-  [{:keys [machine-interpretations-dir interpretation-seat interpretation-answer-fn
+  [{:keys [machine-interpretations-dir interpretation-seat interpretation-seats
+           interpretation-answer-fn
            cascade-sources-dir mission-code-root mission-hole-sources
            cascade-sources ask-options]
     :or {interpretation-seat default-ask-seat}}]
@@ -86,12 +93,17 @@
                                   target)]
       (if-not pick
         {:target target :outcome :no-mission-hole-want :published false}
-        (let [answer-fn (or interpretation-answer-fn
-                            (fr/agency-answer-fn {:seat interpretation-seat
-                                                  :caller "wm-click"
-                                                  :opts (runner/config {})}))]
+        (let [;; a stub answers every want; otherwise ask-fn builds one
+              ;; Agency answer fn per seat and spreads the wants over them
+              answering (if interpretation-answer-fn
+                          {:answer-fn interpretation-answer-fn}
+                          {:interpretation-seats (or interpretation-seats
+                                                     (when (not= interpretation-seat default-ask-seat)
+                                                       [interpretation-seat])
+                                                     default-ask-seats)
+                           :agency-opts (runner/config {})})]
           (try
-            (let [res ((fr/ask-fn (merge {:store store :answer-fn answer-fn}
+            (let [res ((fr/ask-fn (merge {:store store} answering
                                          (or ask-options {})))
                        {:target target} (wants-for pick) sources)
                   asked (:asked res)
