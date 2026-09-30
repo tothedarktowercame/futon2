@@ -1258,3 +1258,12 @@ exactly one node (R16) is exercised, R5 and R14 are partial-and-inert, and R17
 is stubbed by design — which is what U6's statement predicted. Which arm the
 WM's own pipeline prefers is a property of the R4 plant, not of the arms; the
 negative control that establishes this is C489 §4, and no ruling is drawn.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] Operator marks are decorated at evidence ingest and queryable by tag. (evidence: §B0, futon3c `6c7ff4d`, `71ed872`, `d6d6170`, `c41ef33`)
+- [x] The zaif profile hydrates mission-conditioned inputs and records paired arm decisions with replayable input snapshots. (evidence: §D-1, futon3c `f709a1e`, `8445de9`, `e849705`)
+- [ ] The query library stores replayable query provenance and reproducibly derives γ, C-channel, and actand precision views from futon1b.
+- [ ] The controller's task belief is populated so γ affects `:act`, and scored arm choices determine runner behaviour rather than remaining record-only.
+- [ ] The preregistered Z3 cohort report scores asks, corrections, retrievals, yields, outcomes, and paired constant divergence from durable records.
+- [ ] False-pass detection emits a typed record when a timed-out, failed, or outputless test pipeline is claimed green.

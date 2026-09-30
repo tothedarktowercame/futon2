@@ -1,7 +1,7 @@
 # Mission: Wire G Through the War Machine (M-G-wm-wiring)
 
 **Date:** 2026-09-15
-**Status:** HEAD. Campaign chartered by Joe (emacs-repl, 2026-09-15): "we need to get real evidence that it can be completed… a new M-G-wm-wiring.md campaign that indexes into these checklist items as its (complex) gap, and that develops a strategy for working through them in a reasonable order that will get us to completion."
+**Status:** OPEN — HEAD. Campaign chartered by Joe (emacs-repl, 2026-09-15): "we need to get real evidence that it can be completed… a new M-G-wm-wiring.md campaign that indexes into these checklist items as its (complex) gap, and that develops a strategy for working through them in a reasonable order that will get us to completion."
 **Owner:** Joe. Build/review seats to be assigned per stage (current active: claude-20 lead/F13, codex-26 spec+Lean, codex-27 kernel, zai-7/zai-8 Zaif-fitness + verification).
 **Repos:** p4ng (the checklist, `CHECKLIST-fundamentals.md`, revision 4 = `b2c7d1d`), futon2 (wm-contract lab; runtime), mathlib4/DarkTower/WarMachine (the Lean model), futon3/library (flexiargs, buffer-cleaner exercise).
 **Cross-ref:** [[M-G-over-cascades]] (the definition this mission operationalises in production), the ratified checklist revision 4 (`p4ng b2c7d1d`, SHA256 466a2e19…), SPEC-cascade-policy-semantics-2026-09-15.md, ZAIF-FITNESS-acceptance-draft.md, the buffer-cleaner exercise (futon2/holes/labs/wm-contract/buffer-cleaner-adapter/ + declarations in futon3/library/buffer-cleaner/).
@@ -82,3 +82,12 @@ The campaign's gap is the set of checklist items that stand between "canonical L
 - [ ] CP5a: buffer-cleaner end-to-end: G computed over the real packet, both wirings, rule-verdict checked — *codex-26 + zai-7, verified by zai-8.*
 - [ ] CP5b: mission/ticket-domain cascade-G scorer live, replacing the transitional controller — *claude-20 (F13).*
 - [ ] CP6: qualifying run with Lean-computed certificate; `#ck-R5` and the E05 G-slice closed — *all seats + Joe's acceptance.*
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] CP0 records worked examples settling episode grain, fuel, mid-run transitions, and yield without adopting an unresolved axis as a default.
+- [ ] The repaired probability kernel has an independent acceptance receipt, and the finite Lean G model passes all eight theorems with no sorries or new axioms.
+- [ ] Production `find` and `organise` runs carry source-bound interpretations and ordinary constructed-cascade receipts.
+- [ ] Measured A, B coverage, current belief, Q(s|π)/Q(o|π), and matched Q/C are consumed by the runtime scorer for a real candidate family.
+- [ ] The buffer-cleaner and mission/ticket domains select from full cascade-identity candidates using independently correspondence-checked runtime G scores.
+- [ ] A timestamped production run carries a Lean-validated runtime certificate and cannot emit `:cascade-g-not-computed` on its qualifying path.

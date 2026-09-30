@@ -1,6 +1,6 @@
 # M-wm-three-factor-mission-value — wire the central × strategic × doable value into the WM enrichment
 
-**Status:** IDENTIFY → handoff, reviewed by claude-6.
+**Status:** CLOSED — IDENTIFY → handoff, reviewed by claude-6. Acceptance implementation and tests landed in `568c44d51`.
 **Owner mission:** `~/code/futon7/holes/M-war-machine-aif-completion.md`
 **Date:** 2026-07-18. Operator: Joe. Ground Control: claude-6.
 **Reference prototype (WORKS live in the serving JVM):** `/tmp/wm-policy-proto3.clj`.

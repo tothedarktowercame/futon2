@@ -1,7 +1,7 @@
 # Mission: Policy-conditioned expected information gain (M-aif-policy-conditioned-eig)
 
 **Date:** 2026-07-13
-**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**
+**Status:** OPEN — **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**
 **Owner:** Joe + unassigned implementation owner
 **Primary repo:** futon2
 **Related missions:** `M-aif-faithfulness`,
@@ -270,3 +270,12 @@ named in
   failing calibration, and records winner, abstain and scale as unchanged from
   the byte-value-identical feature-off replay. The join remains record-only;
   it neither changes selection nor authorises replacement of the proxy.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The finite EIG kernel checks Bayesian coherence and passes zero-information, `ln 2`, and relabelling controls. (evidence: `src/futon2/aif/epistemic_value.clj`)
+- [x] Hypothetical and realised A4a observations use one posterior updater, and risk and EIG accept one typed predictive payload boundary. (evidence: §B2 completed 2026-09-21/22)
+- [x] The default-off shadow joins a passing held-out calibration packet while leaving selection byte-identical. (evidence: `resources/wm/eig/held-out-calibration.edn`, §B2 completed 2026-09-29)
+- [ ] The first versioned θ domain and policy family declare a complete evidence alphabet and normalized `Q(o|π,θ)` including failure, timeout, conflict, and missing evidence.
+- [ ] At least two policies produce distinct predicted evidence or update magnitudes through the same updater used after real observations.
+- [ ] A prospective shadow report records calibration, realised information gain, winner/abstain/scale effects, and the evidence required for an honest R18 update and operator replacement decision.

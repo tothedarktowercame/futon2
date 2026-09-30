@@ -1,6 +1,6 @@
 # M-f11-find-production-successor — OPEN — repair-024 successor
 
-Status: OPEN — first continuous-backlog item
+**Status:** OPEN — OPEN — first continuous-backlog item
 
 Authority: Joe directed the commissioned WM backlog to run continuously on
 2026-09-12. Claude-15's in-lane disposition makes this ordinary F11 work item
@@ -131,3 +131,8 @@ F11 carrier controls. The old remainder probe is a historical pre-ruling
 classifier for `def find ... := sorry`; it is superseded by this applied gate,
 not counted as a test of the amended signature. Ordinary F11 acceptance is
 therefore complete. The separate repair-024 successor disposition is unchanged.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] F11's applied-interface acceptance and fresh 24-pattern observation are recorded with runtime validation evidence. (evidence: §Applied-interface acceptance receipt and §Fresh 24-pattern applied observation)
+- [ ] Repair-024 has either a strict successful production successor link or a durable typed terminal failure that explicitly leaves the repair unresolved.

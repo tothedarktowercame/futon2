@@ -1,7 +1,7 @@
 # Mission: Turn mission gaps into epistemic affordances (M-aif-gap-epistemic-affordance)
 
 **Date:** 2026-07-13
-**Status:** **IDENTIFY — dependent on M-aif-policy-conditioned-eig**
+**Status:** OPEN — **IDENTIFY — dependent on M-aif-policy-conditioned-eig**
 **Owner:** Joe + unassigned implementation owner
 **Primary repo:** futon2
 **Related missions:** `M-aif-policy-conditioned-eig`, `M-aif-faithfulness`,
@@ -168,3 +168,11 @@ both would double-price gap attention.
 The gap lookup remains useful engineering attention. It is not yet epistemic
 value. Until a typed question and policy-conditioned evidence model exist, Box
 1's `gap-exploration-bonus` residual remains real.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A preregistered first gap-question family names its hypotheses, evidence alphabet, relevant policies, corpus split, and primary calibration metric.
+- [ ] A machine-readable reason-bearing relation excludes policies that cannot produce evidence about each priced gap.
+- [ ] The shared EIG kernel and shared posterior updater produce zero for an uninformative relevant policy and distinct EIG for policies with distinct predicted evidence.
+- [ ] Prospective records compare predicted evidence and entropy reduction with realised outcomes and report log loss, Brier score, calibration, failures, timeouts, and unavailable agents.
+- [ ] A dark replacement report records scale and winner/abstain effects, and any live flip removes the old gap lookup from selection atomically.

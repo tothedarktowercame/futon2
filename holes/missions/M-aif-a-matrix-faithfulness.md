@@ -1,7 +1,7 @@
 # Mission: Make the belief-update observation model A faithful (M-aif-a-matrix-faithfulness)
 
 **Date:** 2026-07-13  
-**Status:** **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**
+**Status:** OPEN — **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**
 **Owner:** Joe + unassigned implementation owner  
 **Primary repo:** futon2  
 **Related missions:** `M-aif-faithfulness` (parent badge audit),
@@ -867,3 +867,11 @@ Structural constraints checked against completion criteria. The riskiest
 commitment (does A produce better beliefs?) is addressed by the simulation
 spike design. C11 and C12 are deferred to INSTANTIATE as integration-level
 criteria.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] Production records a validated A/B/D manifest and uses the declared categorical filter without silently falling back to legacy semantics. (evidence: Stage 1 status and `src/futon2/aif/belief.clj`)
+- [ ] A preregistered exogenous corpus contains multiple event classes, sequential histories, carried non-uniform priors, and independent status outcomes with coverage and imbalance reported.
+- [ ] Held-out evaluation compares legacy, hand-set A, and fitted A/B/D using log loss, multiclass Brier score, calibration, entropy, and status error.
+- [ ] Sensitivity results include smoothing priors, sparse-class handling, deduplication, and uncertainty intervals.
+- [ ] The R18 report separates formal fidelity from empirical grounding, and a replayable end-to-end witness covers prediction, update, provenance, contradiction, and lifecycle-adjacent cases.

@@ -1,6 +1,6 @@
 # M-wm-substrate-1a-to-1b-port — port futon2 WM substrate reads off the retired futon1a onto live futon1b
 
-**Status:** IDENTIFY → handoff to codex-3, reviewed by claude-6.
+**Status:** CLOSED — IDENTIFY → handoff to codex-3, reviewed by claude-6. Acceptance implementation and hermetic tests landed in `b6e70912a`.
 **Owner mission:** `~/code/futon7/holes/M-war-machine-aif-completion.md`
 **Date:** 2026-07-17. Operator: Joe. Ground Control: claude-6.
 
