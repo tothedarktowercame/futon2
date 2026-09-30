@@ -123,6 +123,37 @@ Read: `SPEC-cascade-policy-semantics-2026-09-15.md` (eight commits, all
 So: written down in the spec, contradicted by a later-recorded resolution in
 the same spec, absent from the Lean, and overridden in the code.
 
+### "What is G before there is an interpretation?" was the wrong question
+
+claude-1 put this to Joe as a choice between two options (from
+`NOTE-selection-order-2026-09-30.md`). Joe declined it: "the question is
+framed as a contradiction rather than an honest inquiry. Why does G need to
+be defined before there is an interpretation? If it does, why isn't it
+already defined?" The framing is withdrawn. The answers:
+
+- **G does not wait on an interpretation.** Expected free energy is an
+  expectation under what the model currently believes. Before a pattern has
+  been interpreted for a target, the model still has a belief about what the
+  pattern does: the pattern says so itself (IF / HOWEVER / THEN / BECAUSE,
+  and fields such as `@epistemic-value` and `@done`). Interpreting it for the
+  chosen target is something done after selection that sharpens that
+  belief. The "contradiction" came from treating a pattern's effect as
+  either a supplied exact operator or a missing input, with nothing between.
+- **It was specified, and not built.** The spec's own words (§4): each
+  pattern's transition comes "from its attested (else documented)
+  interpretation". The documented meaning of a pattern is the default; an
+  attested, target-specific one replaces it when it exists. What was never
+  built is the step that reads a pattern's documented IF/THEN as its
+  operator. M-象-cascade's IDENTIFY section states exactly this gap:
+  "There's no step that turns IF/THEN prose into these rules. The only text
+  compiler, `interpret-pattern`, works on keywords, and nothing in selection
+  uses it." In its absence, agents hand-wrote operators for one target at a
+  time, and that hand-written list became the policy set.
+- **So handoff 4 is not a decision for Joe.** It is: G is computed from the
+  pattern's documented meaning (what M-象-cascade supplies per pattern, in
+  the background), and the interpretation for the chosen target, made after
+  selection, updates it.
+
 ### How large the policy set has ever been (from all run records)
 
 Joe: "whoever fed cascadePolicySet with the degenerate badly designed system
