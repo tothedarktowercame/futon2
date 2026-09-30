@@ -285,6 +285,15 @@
      :nodes (count nodes)
      :longest-dependency-chain (reduce max 0 (vals depth))}))
 
+(defn structural-identity
+  "The shared policy identity: target/mission scope, node sequence, and
+  normalized directed/overlap edges. Annotation text is deliberately absent."
+  [policy]
+  (let [c (:cascade policy)]
+    {:mission (or (:mission policy) (:target policy))
+     :node-sequence (mapv #(or (:pattern %) (:id %) %) (:nodes c))
+     :edges (mapv #(select-keys (normalize-edge %) [:from :to :kind]) (:edges c))}))
+
 (defn materialize-policies
   "Read S3c's fixed artifacts.  Returns both analysis arrangements and graph
   retractions; the result is data and performs no scoring or writes."
@@ -322,15 +331,9 @@
                            (str/ends-with? (.getName (io/file %))
                                            ".request.json.analysis.json"))
                      (file-seq (io/file dir))))))
-        structure (fn [p]
-                    (let [c (:cascade p)]
-                      {:mission (:mission p)
-                       :node-sequence (mapv #(or (:pattern %) (:id %) %) (:nodes c))
-                       :edges (mapv #(select-keys (normalize-edge %)
-                                                  [:from :to :kind]) (:edges c))}))
         distinct-policies
         (:rows (reduce (fn [{:keys [seen] :as acc} p]
-                         (let [shape (structure p)]
+                         (let [shape (structural-identity p)]
                            (if (contains? seen shape)
                              acc
                              (-> acc (update :seen conj shape) (update :rows conj p)))))
