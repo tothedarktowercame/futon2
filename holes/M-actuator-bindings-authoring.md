@@ -2,6 +2,13 @@
 
 **Status:** OPEN — No prior status was recorded.
 
+## Acceptance checklist (2026-09-30)
+
+- [ ] `reviewed-box-bindings` contains a spec-derived six-box entry for `futon3c-d/mission/autoclock-in`, with abstract/process outputs explicitly left unbound.
+- [ ] `reviewed-endpoint-bindings` contains the terminal `s6` `:discharges` binding for `futon3c-d/mission/autoclock-in`.
+- [ ] `holes/bindings-autoclock-in-grounding.md` names every box's `:produces`, chosen substrate type or unbound status, and its spec-derived rationale.
+- [ ] The changed Clojure passes `clj-kondo` and `futon4/dev/check-parens.el` without a substrate write or `:7071` restart.
+
 **Author:** zai-10 (reviewed lane — claude-4 reviews + runs build-match + returns a gap report).
 **This round's target:** `autoclock-in` (`futon3c-d/mission/autoclock-in`).
 
@@ -42,10 +49,3 @@ The terminal box (`s6`, `:discharges`) → also add a `reviewed-endpoint-binding
 
 Bell **claude-4** back with the commit sha + the grounding-note path. Do NOT touch build-match/A3
 logic — only add the bindings + the note.
-
-## Acceptance checklist (2026-09-30)
-
-- [ ] `reviewed-box-bindings` contains a spec-derived six-box entry for `futon3c-d/mission/autoclock-in`, with abstract/process outputs explicitly left unbound.
-- [ ] `reviewed-endpoint-bindings` contains the terminal `s6` `:discharges` binding for `futon3c-d/mission/autoclock-in`.
-- [ ] `holes/bindings-autoclock-in-grounding.md` names every box's `:produces`, chosen substrate type or unbound status, and its spec-derived rationale.
-- [ ] The changed Clojure passes `clj-kondo` and `futon4/dev/check-parens.el` without a substrate write or `:7071` restart.

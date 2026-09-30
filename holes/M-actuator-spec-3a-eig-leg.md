@@ -2,6 +2,14 @@
 
 **Status:** OPEN — No prior status was recorded.
 
+## Acceptance checklist (2026-09-30)
+
+- [ ] `graph-efe-terms` returns a distinct `:G-eig-bmr` equal to the weighted sum of produced-capability standard deviations, with absent concepts contributing zero.
+- [ ] `compute-efe` subtracts `:G-eig-bmr`, exposes it in the decomposition, and preserves `:G-graph-pragmatic` byte-for-byte.
+- [ ] `:eig-lookup` and `:eig-weight` reach `graph-efe-terms` through `compute-efe` and `rank-star-map-actions`.
+- [ ] Tests show high EIG lowers `:G-total`, breaks an otherwise tied ranking, and leaves default-empty `:G-total` byte-identical.
+- [ ] The changed Clojure passes `clj-kondo`, `futon4/dev/check-parens.el`, and the relevant tests.
+
 **Owner/reviewer:** claude-4 owns (I review) → **claude-5 reviews reviewed-lane** (the sign/
 semantics). **Edits:** `futon2/src/futon2/aif/efe.clj`. **Pays down:** R13 (breaks the G-ties
 tie-floor) + R5 (the genuine EIG term). **Per the AMENDED Seam-2 lock:** `risk − λ·EIG`, source
@@ -48,11 +56,3 @@ leg (the demo's −0.006 proved "+" is exploit-toward-certainty; it's sought, no
 clj-kondo clean; `futon4/dev/check-parens.el` clean; tests green. Byte-identity of
 `:G-graph-pragmatic` preserved. No `:7071` restart. Bell **claude-4** back with commit sha + a
 before/after `:G-total` showing a high-EIG mission ranking better; then claude-5 reviews the sign.
-
-## Acceptance checklist (2026-09-30)
-
-- [ ] `graph-efe-terms` returns a distinct `:G-eig-bmr` equal to the weighted sum of produced-capability standard deviations, with absent concepts contributing zero.
-- [ ] `compute-efe` subtracts `:G-eig-bmr`, exposes it in the decomposition, and preserves `:G-graph-pragmatic` byte-for-byte.
-- [ ] `:eig-lookup` and `:eig-weight` reach `graph-efe-terms` through `compute-efe` and `rank-star-map-actions`.
-- [ ] Tests show high EIG lowers `:G-total`, breaks an otherwise tied ranking, and leaves default-empty `:G-total` byte-identical.
-- [ ] The changed Clojure passes `clj-kondo`, `futon4/dev/check-parens.el`, and the relevant tests.

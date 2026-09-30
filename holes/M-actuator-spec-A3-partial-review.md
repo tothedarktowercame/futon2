@@ -2,6 +2,14 @@
 
 **Status:** OPEN — No prior status was recorded.
 
+## Acceptance checklist (2026-09-30)
+
+- [ ] A resolving witness whose declared hole text is present closes that fixture hole, decrements its count, and makes `dial-moved?` true.
+- [ ] A resolving witness whose declared hole text is absent closes nothing and reports `:hole-text-not-in-doc`.
+- [ ] A missing or unresolved witness for present hole text closes nothing and reports the corresponding witness reason.
+- [ ] A second `advance-mission-doc!` call is idempotent: it closes nothing new and leaves the count stable.
+- [ ] `review-partial` reports the correct resolved, rejected, closed, remaining, and gate-anchored feedback fields for a mixed fixture.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews the anti-gaming property).
 **Extends:** `src/futon2/aif/actuator_a3.clj` (built + reviewed; commits 7c78518, 08391af, 6f9312d).
 **Motivated by:** the first live run (zai-5 × ft-learning-loop-010). It built REAL artifacts
@@ -66,11 +74,3 @@ decreased)` passes on a cosmetic edit. That is "announced is not sent" one level
 Do NOT restart :7071. Drawbridge witnesses are known-impractical (`:6768` forbids
 `slurp`/`load-file`) — file-based witnesses are the reliable kind; note this, don't rely on
 Drawbridge in tests. Bell **claude-4** back with a summary + commit SHAs.
-
-## Acceptance checklist (2026-09-30)
-
-- [ ] A resolving witness whose declared hole text is present closes that fixture hole, decrements its count, and makes `dial-moved?` true.
-- [ ] A resolving witness whose declared hole text is absent closes nothing and reports `:hole-text-not-in-doc`.
-- [ ] A missing or unresolved witness for present hole text closes nothing and reports the corresponding witness reason.
-- [ ] A second `advance-mission-doc!` call is idempotent: it closes nothing new and leaves the count stable.
-- [ ] `review-partial` reports the correct resolved, rejected, closed, remaining, and gate-anchored feedback fields for a mixed fixture.

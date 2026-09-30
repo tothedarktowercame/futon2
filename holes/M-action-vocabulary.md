@@ -1,10 +1,6 @@
 # M-action-vocabulary — price all the move classes the operator actually values
 
-**Status:** ABANDONED — STOPPED BY KILL CRITERION (2026-07-05, same day as charter —
-flown end-to-end through pipeline-cards-II: P1 deposit ft-action-vocabulary-005,
-P2 dark implementation f5fde3a3 [flag stays dark permanently under this
-charter], P3 negative x2). Lineage: futonzero-alphazero.md §5;
-E-cascade-sampler-sampler (stays parked — E1 precondition undischarged).
+**Status:** ABANDONED — STOPPED BY KILL CRITERION (2026-07-05, same day as charter — flown end-to-end through pipeline-cards-II: P1 deposit ft-action-vocabulary-005, P2 dark implementation f5fde3a3 [flag stays dark permanently under this charter], P3 negative x2). Lineage: futonzero-alphazero.md §5; E-cascade-sampler-sampler (stays parked — E1 precondition undischarged).
 
 **The finding, per the kill clause ("the operator's value structure is
 not expressible at this grain"), fully mechanized:** negative #1 — the

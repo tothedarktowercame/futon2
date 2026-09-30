@@ -1,12 +1,15 @@
 # Mission: A4a — the R17 structure-learning node (capability concept-formation)
 
+**Status:** OPEN — (2026-07-08): Increments 1–2 **BUILT + reviewed-green** (BMR kernel `4064533`, concept pipeline `8200f08`) — basic pipeline runs end-to-end. R17 patterns + pattern-map section written. **3a** (ambiguity → A1 forward ranker, per Seam-2) = the clean first slice. **3b** (ambiguity → γ calibration leg) + **GFlowNets / candidate-slush** are **PARKED pending a loop-closure strategy to be agreed with claude-4** — Joe 2026-07-08: "too many liabilities to proceed with confidence." Strategy agenda sent to claude-4 (the enact.clj seam liabilities below).
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The pure BMR kernel and concept pipeline are built and reviewed green. (evidence: commits `4064533` and `8200f08`)
+- [ ] The 3a ambiguity/EIG leg feeds the A1 forward ranker with `risk − λ·EIG`, preserves `:realized-G`, and passes its stated scale and sign checks.
+- [ ] Production `:capability/*` writes provide a real corpus from which A4a forms capability concepts rather than demo-validated concepts.
+- [ ] The parked 3b γ-calibration and A1 candidate-slush work has an agreed loop-closure strategy with the enactment seam liabilities resolved.
+
 **Date:** 2026-07-08
-**Status:** OPEN — (2026-07-08): Increments 1–2 **BUILT + reviewed-green** (BMR kernel `4064533`, concept
-  pipeline `8200f08`) — basic pipeline runs end-to-end. R17 patterns + pattern-map section written.
-  **3a** (ambiguity → A1 forward ranker, per Seam-2) = the clean first slice. **3b** (ambiguity → γ
-  calibration leg) + **GFlowNets / candidate-slush** are **PARKED pending a loop-closure strategy to
-  be agreed with claude-4** — Joe 2026-07-08: "too many liabilities to proceed with confidence."
-  Strategy agenda sent to claude-4 (the enact.clj seam liabilities below).
 **Owner:** Joe + claude-5 (architecture / review). Build → Codex (handoff, per CLAUDE.md default).
   Interface counterpart: claude-4 (will review the build spec the reviewed-lane way).
 **Repos / files:**
@@ -184,10 +187,3 @@ concept-formation until the `:capability/*` prod write flows.
   design question inherited for the A1 edge, not slice 1.
 - **The stack-scale ambiguity** (substrate-2 `T`-field / Ollivier-Ricci, per M-G-over-cascades) — the
   candidate edge's richer reward; not needed for the A5 ambiguity leg.
-
-## Acceptance checklist (2026-09-30)
-
-- [x] The pure BMR kernel and concept pipeline are built and reviewed green. (evidence: commits `4064533` and `8200f08`)
-- [ ] The 3a ambiguity/EIG leg feeds the A1 forward ranker with `risk − λ·EIG`, preserves `:realized-G`, and passes its stated scale and sign checks.
-- [ ] Production `:capability/*` writes provide a real corpus from which A4a forms capability concepts rather than demo-validated concepts.
-- [ ] The parked 3b γ-calibration and A1 candidate-slush work has an agreed loop-closure strategy with the enactment seam liabilities resolved.

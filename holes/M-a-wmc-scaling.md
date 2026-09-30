@@ -1,8 +1,16 @@
 # M-a-wmc-scaling: Compiled Observation Queries and Rate Uncertainty for A
 
+**Status:** OPEN — IDENTIFY (successor mission — activation governed by the triggers below, not by a date)
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] The A query interface has a WMC backend using cached SDD compilations of the declared common-cause model.
+- [ ] WMC marginal and joint queries match exact enumeration, including the matched-marginal total-G invariance control under point beliefs and product preferences.
+- [ ] Compiled query means and variances match small-model calculations while preserving shared rate-parameter identity.
+- [ ] Compiled joint queries compute the state-observation mutual information needed for total G under spread beliefs.
+- [ ] Compilation cost, memory use, and repeated-query latency are measured on actual candidate families.
+
 **Date:** 2026-09-20
-**Status:** OPEN — IDENTIFY (successor mission — activation governed by the
-triggers below, not by a date)
 **Owner:** claude-12 (activation triage — the typed trigger events land in run records; build ownership assigned at activation per the standing WM delegation)
 **Cross-ref:**
 * `holes/labs/wm-contract/DESIGN-a-plain-2026-09-20.md` — the A this
@@ -142,11 +150,3 @@ Trigger (a)'s premise, hole retention feeding declarations, landed on
 2026-09-20 in futon2 3b5557aa.
 
 ### tl;dr
-
-## Acceptance checklist (2026-09-30)
-
-- [ ] The A query interface has a WMC backend using cached SDD compilations of the declared common-cause model.
-- [ ] WMC marginal and joint queries match exact enumeration, including the matched-marginal total-G invariance control under point beliefs and product preferences.
-- [ ] Compiled query means and variances match small-model calculations while preserving shared rate-parameter identity.
-- [ ] Compiled joint queries compute the state-observation mutual information needed for total G under spread beliefs.
-- [ ] Compilation cost, memory use, and repeated-query latency are measured on actual candidate families.
