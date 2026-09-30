@@ -123,6 +123,39 @@ Read: `SPEC-cascade-policy-semantics-2026-09-15.md` (eight commits, all
 So: written down in the spec, contradicted by a later-recorded resolution in
 the same spec, absent from the Lean, and overridden in the code.
 
+### How large the policy set has ever been (from all run records)
+
+Joe: "whoever fed cascadePolicySet with the degenerate badly designed system
+certainly did not get it from me or from M-G-over-cascades ... I have
+insisted that this machine should not be based on facades."
+
+Counted from every run record in `data/wm-runs` that carries a selection
+certificate (30 of 76):
+
+- Every run that selected a target and dispatched an author had **exactly 1
+  candidate and 1 policy** (M-autoclock-in; M-aif-policy-conditioned-eig
+  09-29; M-self-documenting-stack ×3 and M-descriptive-essay-of-the-stack ×2
+  on 09-30).
+- The largest policy set ever recorded is **24 policies over 21 targets**
+  (three runs on 2026-09-21); none of those selected.
+- From 2026-09-22 on it is 1, 2 or 3 in every record.
+- The patterns came from five hand-written files in
+  `resources/wm/cascade-sources/` plus, from 09-30, per-target
+  interpretation answers. At no point was a policy set derived from the
+  pattern library for the problem at hand.
+
+So the scoring is real and its input has been a hand-fed menu: every
+selection the machine has made that led to work was a choice among one.
+Git authorship does not say which agent introduced each step (commits carry
+Joe's git identity; agent trailers exist only from 2026-09-30); the commit
+messages name claude-20's resolutions (09-15) and the hand-admitted first
+target (09-17).
+
+To close this part, beyond the code repair: the Lean must state where the
+policy set comes from, so that a hand-fed menu cannot satisfy it. Owner:
+controller with selection. Negative control: a menu that is not the result
+of construction over the library for the problem fails conformance.
+
 ### The order of operations (Joe, 2026-09-30)
 
 "Go ahead and interpret a pattern, after you select it. Don't gate
