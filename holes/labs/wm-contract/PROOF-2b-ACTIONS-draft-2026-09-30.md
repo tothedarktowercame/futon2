@@ -84,3 +84,44 @@ Open points for codex-6:
   the stubs? (Four vacuous checks were found on 2026-09-19 this way.)
 - Which behaviours need a method not listed here?
 - What would you require to see before agreeing a click could be run?
+
+## Plan C: extend the Lean proof so that bad behaviour cannot occur (added at Joe's direction, 2026-09-30)
+
+Joe: "extend the Lean proof to prove that bad behaviour cannot occur. We
+spent days and days developing an AIF formalism. Now you're running into
+failures purely on interface things, because that hasn't been developed or
+verified properly. PROOF-2a clearly was not a proof of anything because it
+was supposed to have shown that the machine would run as specified, and it
+doesn't run at all."
+
+What exists: `mathlib4/DarkTower/WarMachine`, 252 Lean files, about 2,200
+theorems. By a keyword search (not a read), they cover the AIF mathematics:
+expected free energy, beliefs, Dirichlet learning, cascades, policies. No
+module was found that models one tick from start to terminal receipt, or
+consecutive ticks. Every failure in clicks 13–20 was in that unmodelled
+part: a refusal thrown where an abstention was expected; an ask record
+dropped on one exception path; an outcome kind missing from a closed set;
+a classifier reading a different focus from the decision; a record going
+stale between ticks; the same selection after a refusal.
+
+C takes priority over A: A's rows are reordered and reworded after C1–C2,
+because each row should implement a transition of the model, not a patch.
+
+| # | Action | Acceptance |
+|---|---|---|
+| C1 | Write the tick as a transition system in Lean: state (target field, interpretation store, refusal memory, repair obligations, phase), inputs (judge result: selected / abstained with refusals / typed refusal / untyped throw; ask outcomes; author reply: change / typed refusal / already satisfied / invalid; review verdict; store errors), and a total executable `step`. | The file compiles with no `sorry`; every input constructor is handled by `step` (exhaustive match, no catch-all). |
+| C2 | State the bad behaviours as theorems and prove them. Draft list: **T1** every tick ends in exactly one terminal receipt, for every input sequence. **T2** every refusal kind in the closed set ends in a typed abstention or a routed failure, never `:untyped-failure`. **T3** after a tick fails on (target, cascade) for reason r, the next tick does not select the same pair unless an input that r names has changed. **T4** a nonempty field with at least one scorable or readable target never yields a tick that neither acts nor asks. **T5** an ask is issued only for a target the decision can score, and its record is on the run record on every path. **T6** a stated measure strictly decreases on every tick that is not a grounded change, or the tick emits a routed repair (no infinite stall). | Each theorem compiles; each has a negative control (a deliberately wrong `step` variant for which the theorem fails to prove), as the existing `*Negative.lean` files do. |
+| C3 | State the environment assumptions as explicit hypotheses: what a seat may reply (anything inside the reply grammar, including nothing), what a store may do (atomic write, may be stale by a bounded lag, may refuse). | The theorems of C2 are proved under these hypotheses only; the list is in one file Joe can read. |
+| C4 | Bind the Clojure runner to the Lean model. This is what PROOF-2a lacked: its theorems were about a model and nothing made the runner be that model. Two candidate bindings, to be settled with codex-6: **(i) trace conformance**: every tick (hermetic or live) exports its event trace, and a compiled Lean checker replays it through `step` and rejects any divergence in phase, receipt or store effect; **(ii) table-driven runner**: the tick's control flow in `full_loop_runner.clj` (today one very large function with per-path `catch` branches) is replaced by an interpreter of the transition table exported from Lean, so the branches are the model's by construction. claude-1's draft position: (ii) for the tick lifecycle, with (i) kept as the running check. | For (i): the checker rejects a planted divergent trace and accepts the recorded traces of conforming ticks. For (ii): the old control flow is deleted, not kept beside the new one. |
+| C5 | Re-derive Plan A from the model: one row per transition the runner does not yet implement. | Every Plan A row cites the `step` case it implements and the theorem it serves. |
+
+What Lean cannot prove, stated so it is not claimed later: that a seat
+replies well, that the Clojure is the model (C4 checks or constructs that,
+it is not a theorem), or that the AIF terms select well. T1–T6 are about
+the tick never ending in an unrecorded, untyped or repeated state.
+
+Open points for codex-6:
+- Is T1–T6 the right list? What bad behaviour from clicks 13–20 (or from
+  09-24 to 09-29) does it miss?
+- C4: (i), (ii), or both, and in which order?
+- What is the smallest first C1 (one handoff) that still has a theorem?
