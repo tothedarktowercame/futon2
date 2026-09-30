@@ -1,6 +1,6 @@
 # M-feature-acceptance-qa — QA as feature acceptance, not decision handholding
 
-**Status:** IDENTIFY → Phase 1 handoff to codex-4, reviewed by claude-6.
+**Status:** CLOSED — IDENTIFY → Phase 1 handoff to codex-4, reviewed by claude-6. The feature-acceptance renderer and card-present/card-absent tests landed in `767e4ecb2`.
 **Owner mission:** `~/code/futon7/holes/M-war-machine-aif-completion.md`
 **Date:** 2026-07-17. Operator: Joe. Ground Control: claude-6.
 **Orthogonal to:** `M-strategic-mission-value.md` (codex-3, forward-model). This

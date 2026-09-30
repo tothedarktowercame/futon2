@@ -1,6 +1,13 @@
 # M-legacy-sorry-cleanup — validate & improve the 23 pre-existing substrate-2 sorries
 
-**Status:** IDENTIFY (2026-07-02, spawned from M-fold-ansatz / the A-next gold-corpus work).
+**Status:** OPEN — IDENTIFY (2026-07-02, spawned from M-fold-ansatz / the A-next gold-corpus work).
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] `holes/labs/M-legacy-sorry-cleanup/legacy-sorries-snapshot.edn` has an improve, keep-logged, or evict disposition and one-line rationale for each of its 23 entries.
+- [ ] Every improved entry is minted as an oriented interface-sorry and included in the A-next gold corpus.
+- [ ] Every retained logged issue is visibly discriminated by `:sorry/facet :logged` or a distinct logged-hole type, leaving `code/v05/sorry` unambiguous.
+- [ ] Every eviction uses the gated `futon1a/scripts/erase.bb` path with its reason recorded while the original snapshot remains as an audit trail.
 **Owner:** Joe + Claude. **Input snapshot:** `futon2/holes/labs/M-legacy-sorry-cleanup/legacy-sorries-snapshot.edn`
 (the 23 `code/v05/sorry` hyperedges pulled from `:7071` on 2026-07-02, sha256 `d242066d…`; XTDB originals untouched).
 

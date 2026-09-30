@@ -1,6 +1,16 @@
 # Mission: the embedding fold as an ansatz (M-fold-ansatz)
 
-**Date:** 2026-07-01 · **Status:** MAP COMPLETE (claude-4 — the scatter is mapped; see §MAP M1–M4; awaiting Joe's ARGUE steer). IDENTIFY complete below.
+**Status:** OPEN — MAP COMPLETE (claude-4 — the scatter is mapped; see §MAP M1–M4; awaiting Joe's ARGUE steer). IDENTIFY complete below.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The scattered JAX/GFlowNet landscape is consolidated into live components, dead ends, and reusable machinery. (evidence: §MAP M1–M4 in this file)
+- [x] The A-next phase-2 ground truth contains ten independently recovered `(cascade, sorry, wiring)` triples. (evidence: `holes/labs/A-next-gold-corpus.md`)
+- [ ] A trained substrate-2/code structural embedding is compared with the degree/popularity baseline on the A-next gold corpus and reports soundness and efficiency.
+- [ ] The resulting evidence gives an explicit build/retire/defer verdict for embedding-fold implementation #3 against the working LLM-fold implementation #2.
+- [ ] Any retained implementation plugs into `futon2.aif.fold` and preserves explicit `:policy-holes` for wiring it cannot discharge.
+
+**Date:** 2026-07-01
 **Authored by:** claude-4. **Card:** expands **FOLD-ANSATZ** (`futon2/holes/aif-wiring-explainer.html#FOLD-ANSATZ`).
 **Cross-refs (card-IDs, not transclusions):** FOLD-ANSATZ · FOLD-GAE · FOLD-GFLOWNET · FOLD-JAXREFINE ·
 FOLD-EXOTYPE · (contrast) FOLD-MINILM.

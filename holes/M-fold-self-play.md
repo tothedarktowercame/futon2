@@ -1,9 +1,13 @@
 # M-fold-self-play — close R2: the deposits become the curriculum
 
-**Status: IDENTIFY (2026-07-05, operator-directed). Owner: TBD (operator
-assigns). Ratification: Joe. Lineage: futonzero-alphazero.md §1/§5
-(R2 = the defining gap), E-live-loop-2 (the supervised deposits),
-M-differentiable-substrate (R2 = distill from visit-counts).**
+**Status:** OPEN — IDENTIFY (2026-07-05, operator-directed). Owner: TBD (operator assigns). Ratification: Joe. Lineage: futonzero-alphazero.md §1/§5 (R2 = the defining gap), E-live-loop-2 (the supervised deposits), M-differentiable-substrate (R2 = distill from visit-counts).
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A versioned curriculum record combines competing deposit pairs, their blind scores, and a bout verdict for at least three gold-corpus sorries.
+- [ ] At least one Calculemus bout over a fold-turn pair has a filed verdict that is consumed by the curriculum update.
+- [ ] A recipe, pattern-prior/phylogeny weight, or constructor parameter update derived from outcomes improves a held-out before/after measurement.
+- [ ] `futonzero-alphazero.md` §1 records the evidence-backed lineage verdict: self-play, curriculum learning, or a parked indeterminate protocol.
 
 ## HEAD (operator, 2026-07-05, verbatim in substance)
 

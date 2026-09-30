@@ -1,7 +1,15 @@
 # M-joe-reflection — what's-in-it-for-me: how the work acts on the operator
 
-**Status: IDENTIFY (DRAFT 2026-07-12, claude-2 from Joe's charter, this
-session). Arming = Joe. Candidate lane of [[C-futon1b-features]].**
+**Status:** OPEN — IDENTIFY (DRAFT 2026-07-12, claude-2 from Joe's charter, this session). Arming = Joe. Candidate lane of [[C-futon1b-features]].
+
+## Acceptance checklist (2026-09-30)
+
+- [x] `labs/M-joe-reflection/j0-self-evidence-census.edn` records the J0 source census without reading recording content. (evidence: “MAP — J0 self-evidence census” in this file)
+- [ ] Joe explicitly arms the reflection lane and separately consents to each operator-turn content-reading slice.
+- [ ] J1 publishes cited, confidence-marked self-directed themes and capability claims from the consented operator corpus.
+- [ ] J2 records a new JSDQ maturity snapshot and witness-linked deltas from the existing baseline.
+- [ ] The reflection contract states which operator claims each corpus supports, where witness inversion applies, and which inferences are forbidden.
+- [ ] A walkable Q5 `self/` surface shows witnessed capability deltas, cited themes, and investment/judgment density while marking narration as narration.
 
 **Composes:** [[N-peircean-codebook]] (signs; interpretants that co-evolve) ·
 [[M-points-de-fuite]] (recognition-first symbolic acts; the marks hydra) ·

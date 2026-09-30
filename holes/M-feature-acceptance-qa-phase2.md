@@ -1,6 +1,6 @@
 # M-feature-acceptance-qa — Phase 2: build-time feature-card emission
 
-**Status:** IDENTIFY → handoff, reviewed by claude-6.
+**Status:** CLOSED — IDENTIFY → handoff, reviewed by claude-6. Grounded feature-card emission and runner tests landed in `7f9e53f23`; subsequent commits hardened the declared card boundary and validation.
 **Owner mission:** `~/code/futon7/holes/M-war-machine-aif-completion.md`
 **Prereqs (both landed + reviewed PASS):** Phase 1 render (`767e4ec`,
 `feature` command reads an optional `:feature-card`) and M-strategic-mission-value

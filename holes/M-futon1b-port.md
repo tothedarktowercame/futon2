@@ -1,9 +1,6 @@
 # M-futon1b-port — the XTDB 2 port, driven by a zai agent
 
-**Status: COMPLETE (2026-07-04). All P1–P4, E1–E4 criteria MET. Mission
-closed by operator direction; follow-on excursion
-E-futon1a-to-futon1b-migration-pipeline opened.
-Owner-driver: zai-9. Reviewer of record: claude-16. Operator gate: Joe.**
+**Status:** CLOSED — COMPLETE (2026-07-04). All P1–P4, E1–E4 criteria MET. Mission closed by operator direction; follow-on excursion E-futon1a-to-futon1b-migration-pipeline opened. Owner-driver: zai-9. Reviewer of record: claude-16. Operator gate: Joe.
 
 ## The dual purpose, stated honestly
 

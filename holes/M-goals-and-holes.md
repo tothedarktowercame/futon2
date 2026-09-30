@@ -1,7 +1,7 @@
 # Mission: Goals and holes — the WM's setpoints, stated & unstated (M-goals-and-holes)
 
 **Date:** 2026-06-25
-**Status:** **IDENTIFY** (standard mission — run by the lifecycle; the **backward/goal dual** of [[M-operational-vocabulary]]).
+**Status:** OPEN — **IDENTIFY** (standard mission — run by the lifecycle; the **backward/goal dual** of [[M-operational-vocabulary]]).
 **Owner:** Joe + claude-1
 **Repos:** futon1a (`:7071` substrate-2 — the `:sorry` entities) · futon3c (Evidence Landscape, agent→human turns) · futon5a ([[M-a-sorry-enterprise]], stack-geometry) · futon0 ([[M-capability-star-map]] — the goal hierarchy) · futon7 ([[C-pudding-prover]] — the discharge standard) · futon2 (`aif/efe.clj` risk; `aif-wiring-explainer.html` — the belly; this doc)
 **Cross-ref:** [[M-operational-vocabulary]] (the **forward** dual — methods/policy) · [[M-a-sorry-enterprise]] (the sorry-driven-organisation this serves) · [[M-aif-wiring]] (R5 risk · R14 γ · R15 hierarchy · R16 — the backward criteria; the **belly** this fills) · [[M-populate-substrate-2]] (the `:sorry` corpus + the empty PROOF layer) · [[M-capability-star-map]] + [[C-pudding-prover]] (orientation) · `futonic-logic.flexiarg` (the 應 should-voice)
@@ -198,7 +198,7 @@ Tracked in **`goals-holes-readiness.html`** (the INSTANTIATE card-tracker, backw
 ## Phases ahead
 **INSTANTIATE (continuing)** — C-STORE next (substrate-2 overlay, sim-only) + the GPU 應-voice box run (hot-swap, while the forward run has headroom) → **DOCUMENT**. Three CPU channels (stated/incompleteness/mess) + the GPU producer are built; the C-vector assembles (265 open preferences). Checkpoints append as each wave completes.
 
-### tl;dr
+## Acceptance checklist (2026-09-30)
 
 - [ ] The WM has a stated-goal set linked to missions through the star-map.
 - [ ] An incompleteness detector records a goal missed by the stated-goal channel and distinguishes it from ordinary work in progress.
