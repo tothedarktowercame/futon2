@@ -62,11 +62,27 @@
       (let [analysis-map (:analysis reading)
             params (merge default-retraction retraction)
             seeds (reading-patterns analysis-map)
-            retract (retraction/retractions graph (assoc params :seeds seeds))
+            ;; A reading pattern with no graph edges (or outside the library)
+            ;; cannot seed a retraction.  It is counted, and the retraction
+            ;; runs over the remaining seeds, as the S3c lab artifacts did
+            ;; (their refused_no_edges).  The pattern stays in the reading
+            ;; cascades.
+            library (set (:pattern-ids graph))
+            edge-nodes (set (mapcat (juxt :a :b) (:edges graph)))
+            unknown (vec (sort (remove library seeds)))
+            isolated (vec (sort (filter #(and (library %) (not (edge-nodes %))) seeds)))
+            usable (vec (remove (set (concat unknown isolated)) seeds))
+            seed-failures (cond-> []
+                            (seq unknown) (conj {:kind :seed-not-in-graph :seeds unknown})
+                            (seq isolated) (conj {:kind :isolated-seed :seeds isolated}))
+            retract (if (seq usable)
+                      (retraction/retractions graph (assoc params :seeds usable))
+                      {:retractions [] :failures [{:kind :no-usable-retraction-seed
+                                                   :seeds (vec (sort seeds))}]})
             reported (vec (concat (reading-policies target analysis-map)
                                   (retraction-policies target analysis-map retract)))
             policies (deduplicate reported)
-            failures (vec (:failures retract))
+            failures (into seed-failures (:failures retract))
             failures (cond-> failures
                        (empty? policies) (conj {:kind :empty-policy-family
                                                 :target-id target}))]
@@ -77,5 +93,6 @@
          :provenance {:excerpt-digest (:excerpt-digest reading)
                       :analysis-digest (:analysis-digest reading)
                       :graph-digest (identity/sha256 (.getBytes (pr-str graph) "UTF-8"))
-                      :retraction params}}))))
+                      :retraction (assoc params :seeds usable
+                                         :all-reading-seeds (vec (sort seeds)))}}))))
 

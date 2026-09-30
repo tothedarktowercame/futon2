@@ -76,8 +76,23 @@
     (is (= :computed (:status result)))
     (is (= 1 (:distinct-count result)))
     (is (= #{:reading-alternatives} (set (map :kind (:policies result)))))
-    (is (= :isolated-seed (get-in result [:failures 0 :kind])))
-    (is (= 1 (:failure-count result)))))
+    (is (= {:kind :isolated-seed :seeds ["p/a" "p/b"]} (get-in result [:failures 0])))
+    (is (= :no-usable-retraction-seed (get-in result [:failures 1 :kind])))
+    (is (= 2 (:failure-count result)))))
+
+(deftest one-isolated-seed-does-not-remove-the-other-seeds-retractions
+  ;; Bad case found on the real graph: four of seven targets lost every
+  ;; retraction because a single reading pattern had no edges.
+  (let [g {:pattern-ids ["p/a" "p/b" "p/c"] :nodes ["p/b" "p/c"]
+           :edges [{:a "p/b" :b "p/c" :kind "why" :weight 1 :evidence []}]}
+        result (sut/policy-family {:reading (reading (analysis-map)) :graph g})
+        retractions (filter #(= :retraction (:kind %)) (:policies result))]
+    (is (= [{:kind :isolated-seed :seeds ["p/a"]}] (:failures result)))
+    (is (= ["p/b"] (get-in result [:provenance :retraction :seeds])))
+    (is (seq retractions))
+    (is (not-any? #(some #{"p/a"} (map (fn [n] (or (:pattern n) n))
+                                       (get-in % [:cascade :nodes])))
+                  retractions))))
 
 (def lab-root "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 (def graph-path "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
