@@ -78,15 +78,15 @@
                        :else nil))))]
     (walk [] root)))
 
-(def absence-statuses #{:absent :not-supplied :missing :refused
-                        "absent" "not-supplied" "missing" "refused"})
+(def absence-statuses #{:absent :not-supplied :missing :refused :failed
+                        "absent" "not-supplied" "missing" "refused" "failed"})
 
 (defn absence-paths
   "Count one typed absence/refusal map per path, only below the persisted
   selection-to-receipt roots named here."
   [record]
-  (let [roots [[:decision] [:selection-event] [:interpretation-ask]
-               [:terminal-receipt] [:failure]]]
+  (let [roots [[:world-at-selection :failures] [:decision] [:selection-event]
+               [:interpretation-ask] [:terminal-receipt] [:failure]]]
     (vec
      (mapcat
       (fn [root]
@@ -129,10 +129,9 @@
         candidates (:candidates cert)
         policies (:policies cert)
         gpolicies (get-in record [:decision :g-term-decomposition :policies])
-        enum-kinds (get-in record [:decision :enumeration-completeness :kinds])
-        enum-ids (when (and (seq enum-kinds)
-                            (every? #(contains? % :enumerated-ids) enum-kinds))
-                   (set (mapcat :enumerated-ids enum-kinds)))
+        world (:world-at-selection record)
+        world-ids (fn [kind] (get-in world [:open-tasks kind :ids]))
+        enum-ids (get-in world [:enumerated-tasks :ids])
         reaching (when (vector? candidates) (set (keep candidate-target candidates)))
         with-g (when (vector? candidates)
                  (set (keep #(when (numeric-g? %) (candidate-target %)) candidates)))
@@ -156,9 +155,12 @@
                                   (get-in record [:participants :reviewer])
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
-        facts {"openMissions" (sorted-ids (:open-missions snap))
-               "openExcursions" (sorted-ids (:open-excursions snap))
-               "openTickets" (sorted-ids (:open-tickets snap))
+        facts {"openMissions" (if (some? (world-ids :missions))
+                                (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
+               "openExcursions" (if (some? (world-ids :excursions))
+                                  (vec (world-ids :excursions)) (sorted-ids (:open-excursions snap)))
+               "openTickets" (if (some? (world-ids :tickets))
+                               (vec (world-ids :tickets)) (sorted-ids (:open-tickets snap)))
                "enumeratedTasks" (if enum-ids (sorted-ids enum-ids)
                                      (nr "record has enumerated counts/missing ids but no :enumerated-ids sets"))
                "targetsReachingScoring" (if (some? reaching) (sorted-ids reaching)
@@ -187,7 +189,13 @@
                              "ambiguity" (boolean (some #(number? (or (:ambiguity %) (get-in % [:terms :ambiguity]))) candidates))
                              "informationGain" (boolean (some #(number? (or (:information-gain %) (get-in % [:terms :information-gain]))) candidates))}
                             (nr "per-candidate G terms absent"))
-               "interpretationOrder" (nr "record has no timestamped selection and interpretation events sufficient to order them")
+               "interpretationOrder"
+               (if-let [selected-at (:selection-ended-at world)]
+                 (if-let [asked-at (:interpretation-issued-at world)]
+                   (if (neg? (compare (str selected-at) (str asked-at)))
+                     "selectionBeforeInterpretation" "interpretationBeforeSelection")
+                   "selectionBeforeInterpretation")
+                 (nr "selection completion instant absent"))
                "pathAbsenceCount" (count apaths)
                "previousChoice" (if previous-chosen
                                     {"target" (str (:target previous-chosen))
@@ -195,14 +203,18 @@
                                     (nr "previous run or previous chosen action absent"))
                "previousOutcome" (if previous (outcome previous)
                                       (nr "previous run absent"))
-               "previousInputDigest" (nr "record does not persist complete selection-input digest")
+               "previousInputDigest" (or (get-in previous [:world-at-selection :selection-input-digest])
+                                           (nr "previous selection-input digest absent"))
                "currentChoice" (if (and (map? chosen) (not (:status chosen)))
                                    {"target" (str (:target chosen))
                                     "cascade" (pr-str (:precedence chosen))}
                                    (nr "chosen target/cascade absent"))
-               "currentInputDigest" (nr "record does not persist complete selection-input digest")
-               "seatsAvailable" (if (:seats snap) (sorted-ids (:seats snap))
-                                      (nr "Agency roster snapshot unavailable"))
+               "currentInputDigest" (or (:selection-input-digest world)
+                                          (nr "selection-input digest absent"))
+               "seatsAvailable" (if (map? (:seat-roster world))
+                                  (sorted-ids (mapcat :ids (vals (:seat-roster world))))
+                                  (if (:seats snap) (sorted-ids (:seats snap))
+                                      (nr "Agency roster snapshot unavailable")))
                "seatsUsed" (if (seq used) (sorted-ids used)
                                (nr "participant seat ids absent"))}
         sources (into {}

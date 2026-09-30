@@ -1,0 +1,101 @@
+(ns futon2.aif.selection-world
+  "Record-only census of the world visible when selection finishes.
+
+  This value is attached after the decision has been computed and is never
+  returned to scoring. Every set is a sorted id vector with count and digest;
+  failed parts are named in :failures and contribute to :failure-count."
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [futon2.aif.enumeration-completeness :as enumeration]
+            [futon2.aif.mission-registry :as registry])
+  (:import [java.security MessageDigest]
+           [java.time Instant]))
+
+(defn sha256 [x]
+  (let [d (.digest (MessageDigest/getInstance "SHA-256")
+                   (.getBytes (str x) "UTF-8"))]
+    (apply str (map #(format "%02x" (bit-and % 0xff)) d))))
+
+(defn id-set [xs]
+  (let [ids (vec (sort (map str (distinct xs))))]
+    {:ids ids :count (count ids) :digest (sha256 (pr-str ids))}))
+
+(defn- pattern-manifest [root]
+  (let [files (->> (file-seq (io/file root))
+                   (filter #(.isFile ^java.io.File %))
+                   (filter #(str/ends-with? (.getName ^java.io.File %) ".flexiarg"))
+                   (map (fn [f] [(.getCanonicalPath ^java.io.File f)
+                                 (sha256 (slurp f))]))
+                   sort vec)]
+    {:file-count (count files) :digest (sha256 (pr-str files))}))
+
+(defn- default-task-sets [code-root]
+  (let [missions (registry/load-missions code-root)
+        excursions (registry/load-excursions code-root)
+        tickets (registry/load-tickets code-root)]
+    {:missions (map :id (registry/open-missions missions))
+     :excursions (map :id (filter registry/live-excursion? (:excursions excursions)))
+     :tickets (map :id (filter registry/live-ticket? (:tickets tickets)))}))
+
+(defn- roster-by-type [roster]
+  (reduce-kv (fn [m id seat]
+               (update m (keyword (name (or (:type seat) (:kind seat) :untyped)))
+                       (fnil conj []) (name id)))
+             {} (or roster {})))
+
+(defn capture
+  "Capture after DECISION is final. Dependencies are injectable for hermetic
+  tests. A failed part is explicit and does not throw into the runner."
+  [decision roster interpretation-ask opts]
+  (let [failures (atom [])
+        part (fn [name f]
+               (try (f) (catch Throwable e
+                          (swap! failures conj {:part name :status :failed
+                                                :error (ex-message e)})
+                          {:status :failed :part name})))
+        code-root (or (:code-root opts) "/home/joe/code")
+        task-sets (part :open-tasks #((or (:world-task-sets-fn opts)
+                                          default-task-sets) code-root))
+        ranking (:controller-ranking decision)
+        enumerated (part :enumerated-tasks
+                         #(mapcat (fn [kind]
+                                    (enumeration/enumerated-targets kind ranking))
+                                  [:mission :excursion :ticket]))
+        library (part :pattern-library
+                      #((or (:world-pattern-manifest-fn opts) pattern-manifest)
+                        (or (:pattern-library-root opts)
+                            (str code-root "/futon3/library"))))
+        seats (part :seat-roster #(if (map? roster)
+                                    (roster-by-type roster)
+                                    (throw (ex-info "Agency roster unavailable" {}))))
+        task-carrier (if (= :failed (:status task-sets)) task-sets
+                       (into {} (map (fn [[k ids]] [k (id-set ids)]) task-sets)))
+        enumerated-carrier (if (= :failed (:status enumerated)) enumerated
+                               (id-set enumerated))
+        seat-carrier (if (= :failed (:status seats)) seats
+                         (into {} (map (fn [[k ids]] [k (id-set ids)]) seats)))
+        enumerator-source "src/futon2/aif/mission_registry.clj"
+        now-fn (or (:world-now-fn opts) (fn [] (Instant/now)))
+        inputs {:open-tasks task-carrier :enumerated enumerated-carrier
+                :pattern-library library :seat-roster seat-carrier
+                :decision-input (select-keys decision
+                                             [:controller-ranking :proposal-supply
+                                              :mission-hole-coverage])}]
+    {:schema :wm/world-at-selection-v1
+     :open-tasks task-carrier
+     :enumerator {:source enumerator-source
+                  :code-sha256 (part :enumerator-code
+                                     #(sha256 (slurp enumerator-source)))}
+     :enumerated-tasks enumerated-carrier
+     :pattern-library library
+     :seat-roster seat-carrier
+     :selection-input-digest (sha256 (pr-str inputs))
+     :selection-ended-at (str (now-fn))
+     :interpretation-issued-at (when (and interpretation-ask
+                                           (not= :absent (:status interpretation-ask)))
+                                  (or (:issued-at interpretation-ask)
+                                      (:requested-at interpretation-ask)
+                                      (:at interpretation-ask)
+                                      (str (now-fn))))
+     :failure-count (count @failures)
+     :failures @failures}))

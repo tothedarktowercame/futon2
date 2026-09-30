@@ -58,6 +58,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
+            [futon2.aif.selection-world :as selection-world]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
             [futon2.aif.repair-discharge-receipt :as discharge-receipt]
@@ -842,6 +843,17 @@
                                                      :interpretation-ask])
                                             {:status :absent
                                              :reason :no-interpretation-ask})
+                    :world-at-selection (or (get-in result
+                                                    [:checkpoints :selection :judgment
+                                                     :world-at-selection])
+                                            (get-in result
+                                                    [:checkpoints :selection :sorry
+                                                     :world-at-selection])
+                                            {:schema :wm/world-at-selection-v1
+                                             :failure-count 1
+                                             :failures [{:part :world-at-selection
+                                                         :status :failed
+                                                         :error "selection did not attach census"}]})
                     :route route
                     :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
@@ -5309,6 +5321,9 @@
                                        interpretation-ask-record))))
                   (throw e)))
               judgement0-base)
+            world-at-selection (selection-world/capture
+                                (:decision judgement0) roster
+                                interpretation-ask-record opts)
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             entry ordinary-entry
@@ -5438,7 +5453,10 @@
                                ;; record whether or not it published.
                                interpretation-ask-record
                                (assoc-in [:judgment :interpretation-ask]
-                                         interpretation-ask-record))]
+                                         interpretation-ask-record)
+                               true
+                               (assoc-in [:judgment :world-at-selection]
+                                         world-at-selection))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry

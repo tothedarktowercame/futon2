@@ -32,3 +32,20 @@
 (deftest runfacts-field-set-is-exact
   (let [exported (:facts (facts/facts-for-record record "r" snap nil nil))]
     (is (= (set facts/run-fact-fields) (set (keys exported))))))
+
+(deftest new-world-carrier-removes-record-nr-fields
+  (let [world {:open-tasks {:missions {:ids ["M-x"]}
+                            :excursions {:ids []} :tickets {:ids []}}
+               :enumerated-tasks {:ids ["M-x"]}
+               :seat-roster {:codex {:ids ["author"]}}
+               :selection-input-digest "digest"
+               :selection-ended-at "2026-09-30T00:00:00Z"
+               :interpretation-issued-at nil
+               :failures []}
+        exported (:facts (facts/facts-for-record
+                          (assoc record :world-at-selection world)
+                          "r" snap nil nil))]
+    (is (= ["M-x"] (exported "enumeratedTasks")))
+    (is (= "digest" (exported "currentInputDigest")))
+    (is (= ["author"] (exported "seatsAvailable")))
+    (is (= "selectionBeforeInterpretation" (exported "interpretationOrder")))))

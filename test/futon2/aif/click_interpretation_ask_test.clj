@@ -203,7 +203,11 @@
         record (edn/read-string (slurp (:run-record result)))]
     (is (= 0 @asks) "the ask fn was never invoked")
     (is (= {:status :absent :reason :no-interpretation-ask}
-           (:interpretation-ask record)))))
+           (:interpretation-ask record)))
+    (is (= :wm/world-at-selection-v1
+           (get-in record [:world-at-selection :schema])))
+    (is (string? (get-in record [:world-at-selection
+                                 :selection-input-digest])))))
 
 (defn- publishing-ask-fn
   "An ask whose stubbed seat publishes (the real ask step, hermetic store)."
