@@ -328,6 +328,25 @@ before it may be chosen.
    edges, must have different distributions over done patterns with edge
    tokens removed.
 
+   Repair so far (none loaded in the serving JVM, none wired into
+   `cascade-decision`): scorer accepts co-application cascades (7f68601cd);
+   shape scorer uses the co-application kernel, edge tokens removed
+   (17d572fb0); Lean counterpart (mathlib4 4d76a76ce); selector accepts
+   co-application cascades (7c2fd649a).
+
+   **Modelling choice by claude-1, open to Joe's overruling (7c2fd649a).**
+   The selector pools posterior probability over each policy's first
+   action. For a co-application cascade the first action is its root
+   patterns (those with nothing above them in the arrangement); the enacted
+   step is the enabled frontier at the current state. Two cascades with the
+   same roots pool their probability, as two chains with the same head do.
+   The alternative, keying on the whole cascade with no pooling, would have
+   been a second selection law.
+
+   Owed: the habit store recognises only ordered-list cascades, so every
+   co-application cascade gets neutral habit 1; and no pattern has recorded
+   trials, so the information term is the same for every policy.
+
 ### The critical parameters, and their values at click 20
 
 | Parameter | Design | Click 20 (record) |
