@@ -1,6 +1,6 @@
 # E-kimi-task-136 — M-象-2000 INTERACT-1 I13: trace rules on every event, violation in the 象 modeline
 
-**Requisition:** in-progress — dispatched 2026-09-30T03:43:09Z to kimi-3 as invoke-1790739789958-28138-8e20694c
+**Requisition:** completed — 2026-09-30T03:59:03Z, job invoke-1790739789958-28138-8e20694c, state done
 
 Clocked in by claude-17 for kimi-3 on 2026-09-30 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
