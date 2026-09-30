@@ -156,9 +156,11 @@
 (defn attach
   "RECORD with its terminal receipt and that receipt's digest attached. The
   close's OUTCOME — already computed, never re-derived here — is threaded
-  in so the receipt's :outcome is the outcome the close recorded. For
-  cond-> threading convenience the map is the LAST argument."
-  [outcome record]
+  in so the receipt's :outcome is the outcome the close recorded. The
+  RECORD is the FIRST argument: persist-run-record! calls this inside
+  cond->, which threads first (with the order reversed, click
+  wm-click-cffd9df4 failed assoc'ing onto the outcome keyword)."
+  [record outcome]
   (let [receipt (try
                   (terminal-receipt (assoc record :outcome outcome))
                   (catch clojure.lang.ExceptionInfo e

@@ -95,7 +95,7 @@
 
 (deftest attach-never-throws-and-types-an-invalid-receipt
   ;; no :click/id on a selected record -> the action receipt is ill-formed
-  (let [record (tr/attach :grounded-change (dissoc selected-record :click/id))
+  (let [record (tr/attach (dissoc selected-record :click/id) :grounded-change)
         r (:terminal-receipt record)]
     (is (= :failure (:kind r)))
     (is (= :terminal-receipt-invalid (:failure-kind r)))
@@ -119,9 +119,15 @@
                         (tr/validate-receipt {:kind :failure :id "F"}))))
 
 (deftest attach-puts-receipt-and-digest-on-the-record
-  (let [record (tr/attach :grounded-change selected-record)
+  (let [record (tr/attach selected-record :grounded-change)
         r (:terminal-receipt record)]
     (is (= :action-receipt (:kind r)))
     (is (= 64 (count (:terminal-receipt-digest record))))
     (is (= (:terminal-receipt-digest record)
            (tr/terminal-receipt-digest r)))))
+
+(deftest attach-works-as-persist-run-record-threads-it
+  ;; the exact call shape in full_loop_runner.clj persist-run-record!
+  (let [record (cond-> abstained-record true (tr/attach :abstained))]
+    (is (map? record))
+    (is (= :failure (get-in record [:terminal-receipt :kind])))))
