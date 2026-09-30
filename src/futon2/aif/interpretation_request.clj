@@ -140,6 +140,34 @@
                                                    :retriever-rank (inc i) :raw row :judgment :unjudged}))))
             {:candidates [] :failures []} (map-indexed vector rows))))
 
+(defonce ^:private !library-pins-memo
+  ;; Pinned library listings, keyed on [evidence-dir library-revision]: the
+  ;; whole-library pin (sha256 + git rev-parse per file, ~1415 files) is
+  ;; computed once per library HEAD and reused across wants of a click. A
+  ;; library commit changes the revision, hence the key, hence re-pins; the
+  ;; key is never time. Bounded: old revisions are dropped past 32 entries.
+  (atom {}))
+
+(defn- pinned-library
+  "Pin each of PATHS into DIR, once per (DIR, library revision). REVISION-FN
+   pins the key: it is called on the first library path (all library files
+   share one repo HEAD). REGISTER! performs the per-request registration
+   (on-capture, sources/pins) for each pin, memo hit or miss. Cached pins
+   drop :bytes: library pins are read for :snapshot/:source-id/:byte-count
+   only, and retaining ~1415 files' bytes per revision serves nothing."
+  [dir paths revision-fn register!]
+  (if (empty? paths)
+    []
+    (let [rev (revision-fn (first paths))
+          key [(str (.getCanonicalFile (io/file dir))) rev]
+          cached (get @!library-pins-memo key)]
+      (if cached
+        (mapv register! cached)
+        (let [fresh (mapv (fn [path] (dissoc (pin! dir path revision-fn) :bytes)) paths)]
+          (swap! !library-pins-memo
+                 (fn [m] (assoc (if (< (count m) 32) m {}) key fresh)))
+          (mapv register! fresh))))))
+
 (defn- captured-request!
   "Pin target and retrieval inputs; return unjudged candidates only.
    Shared by authorized interpretation requests and preselection proposals."
@@ -171,13 +199,14 @@
          query (str/join "\n\n" (map :quote citations))
          sources (atom [(:source target-pin)])
          pins (atom [target-pin])
-         capture! (fn [path] (let [p (pin! dir path revision-fn)] (on-capture (:source p)) (swap! sources conj (:source p)) (swap! pins conj p) p))
+         register! (fn [p] (on-capture (:source p)) (swap! sources conj (:source p)) (swap! pins conj p) p)
+         capture! (fn [path] (register! (pin! dir path revision-fn)))
          library-pins (delay
-                        (mapv (fn [path]
-                                (let [p (capture! path) f (io/file path)]
+                        (mapv (fn [p]
+                                (let [f (io/file (:canonical-path p))]
                                   {:snapshot (:snapshot p) :source-id (get-in p [:source :id])
                                    :relative (str (.getName (.getParentFile f)) "/" (.getName f))}))
-                              (library-fn)))
+                              (pinned-library dir (library-fn) revision-fn register!)))
          runs (mapv
                (fn [{:keys [kind implementation index k]}]
                  (let [partial (atom {:retriever (name kind) :version "unavailable"

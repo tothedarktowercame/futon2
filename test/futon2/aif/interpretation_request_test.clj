@@ -1,6 +1,7 @@
 (ns futon2.aif.interpretation-request-test
   (:require [cheshire.core]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.close-retention :as retention]
@@ -163,3 +164,65 @@
     (is (some #(and (= (str link) (:requested-path %)) (= (str source) (:canonical-path %))) (:source-paths r)))
     (is (pos? (:captured-bytes r)))
     (is (citations-match? r))))
+
+(defn- git! [dir & args]
+  (let [r (apply shell/sh "git" "-C" (str dir) args)]
+    (when-not (zero? (:exit r)) (throw (ex-info "git failed" {:args args :err (:err r)})))
+    (str/trim (:out r))))
+
+(deftest library-pinned-once-per-revision
+  ;; Acceptance (a): two want requests against the same library revision pin
+  ;; the library once; (b): a library commit re-pins and the pins change.
+  (let [root (.toFile (Files/createTempDirectory "library-pin-memo" (make-array FileAttribute 0)))
+        _ (swap! roots conj root)
+        lib (io/file root "lib" "family")
+        _ (.mkdirs lib)
+        fa (io/file lib "alpha.flexiarg") fb (io/file lib "beta.flexiarg")
+        _ (spit fa "pattern alpha") _ (spit fb "pattern beta")
+        target (io/file root "M-fixture.md")
+        _ (spit target "# M\n\n## IDENTIFY\nHave a boundary; the criterion text.\n")
+        code (io/file root "code.py") index (io/file root "index.json")
+        _ (spit code "# retriever fixture") _ (spit index "[]")
+        _ (git! root "init")
+        _ (git! root "add" ".")
+        _ (git! root "-c" "user.email=t@t" "-c" "user.name=t" "commit" "-m" "rev1")
+        rev1 (git! root "rev-parse" "HEAD")
+        lib-paths (mapv #(.getCanonicalPath %) [fa fb])
+        pin-counts (atom {})
+        real-pin @#'request/pin!
+        entry {:id "M-fixture" :path (.getCanonicalPath target)}
+        opts {:resolve-fn (constantly entry)
+              :retrieve-fn (constantly [])
+              :revision-fn @#'request/revision
+              :library-fn (constantly lib-paths)
+              :retriever-specs (mapv #(assoc % :implementation (.getCanonicalPath code)
+                                              :index (.getCanonicalPath index))
+                                     request/retrievers)}
+        citations (atom 0)
+        ask (fn [] (request/prepare-want-proposal!
+                    "M-fixture" :mission (io/file root "evidence")
+                    (fn [src _text] (let [n (swap! citations inc)]
+                                      [{:source src :lines [3 3]
+                                        :quote (str "criterion " n)}]))
+                    opts))]
+    (with-redefs [request/pin! (fn [dir path revision-fn]
+                                 (swap! pin-counts update path (fnil inc 0))
+                                 (real-pin dir path revision-fn))]
+      (let [r1 (ask) r2 (ask)
+            lib-pins (fn [r] (get-in r [:retrieval :runs 1 :parameters :library-sources]))]
+        ;; (a) library pinned once across two wants; target/code/index pin per request
+        (is (= 1 (get @pin-counts (first lib-paths))))
+        (is (= 1 (get @pin-counts (second lib-paths))))
+        (is (= 2 (get @pin-counts (.getCanonicalPath target))))
+        (is (= (lib-pins r1) (lib-pins r2)))
+        (is (= 2 (count (lib-pins r1))))
+        ;; (b) a library commit re-pins, and the pins reflect the change
+        (spit fa "pattern alpha, revised")
+        (git! root "add" ".")
+        (git! root "-c" "user.email=t@t" "-c" "user.name=t" "commit" "-m" "rev2")
+        (let [rev2 (git! root "rev-parse" "HEAD")
+              r3 (ask)]
+          (is (not= rev1 rev2))
+          (is (= 2 (get @pin-counts (first lib-paths))))
+          (is (= 2 (get @pin-counts (second lib-paths))))
+          (is (not= (lib-pins r1) (lib-pins r3))))))))
