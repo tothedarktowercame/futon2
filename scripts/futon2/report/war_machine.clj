@@ -1283,16 +1283,20 @@
   (java.net.URLEncoder/encode (str s) "UTF-8"))
 
 (defn- fetch-hyperedges-by-type
-  [hx-type]
-  (try
-    (mapv normalize-hyperedge
-          (or (:hyperedges
-               (substrate-get-edn
-                (str futon1a-url "/api/alpha/hyperedges?type="
-                     (url-encode hx-type)
-                     "&limit=500&include-total=false")))
-              []))
-    (catch Exception _ [])))
+  "FIELDS, when given, is futon1b's `fields=` list: only those columns are
+   read and returned."
+  ([hx-type] (fetch-hyperedges-by-type hx-type nil))
+  ([hx-type fields]
+   (try
+     (mapv normalize-hyperedge
+           (or (:hyperedges
+                (substrate-get-edn
+                 (str futon1a-url "/api/alpha/hyperedges?type="
+                      (url-encode hx-type)
+                      "&limit=500&include-total=false"
+                      (when fields (str "&fields=" fields)))))
+               []))
+     (catch Exception _ []))))
 
 (defn- real-endpoints
   [hx]
@@ -1330,7 +1334,41 @@
   ;; retained for genuinely-unopened targets.
   #{:open-mission :advance-mission})
 
+(def ^:private mission-doc-fields
+  ;; The whole props map, not `hx/props.<key>`: 162 of 389 rows (2026-09-30)
+  ;; carry props as an EDN string, which normalize-hyperedge parses and a
+  ;; per-key projection cannot reach into.
+  "hx/endpoints,hx/props")
+
+(def ^:private mission-doc-cache-ms (* 2 60 1000))
+(def ^:private mission-doc-backoff-ms (* 2 60 1000))
+(defonce ^:private !mission-doc-index (atom {}))
+(defonce ^:private mission-doc-index-lock (Object.))
+
+(declare mission-doc-index*)
+
 (defn- mission-doc-index
+  "mission-id -> {:endpoint :operator-gates :phase}, shared for
+   `mission-doc-cache-ms`. The Agency JVM rebuilt it for every report: a
+   whole-document fetch of every mission-doc hyperedge (a whole-table scan in
+   futon1b, ~25 s on 2026-09-30) under a 20 s timeout, so it failed every
+   ~35 s and returned an empty index. Now it reads endpoints and props only
+   (~10 s), and an empty or failed fetch keeps the last good index and is not
+   retried for `mission-doc-backoff-ms`."
+  []
+  (locking mission-doc-index-lock
+    (let [now (System/currentTimeMillis)
+          {:keys [v at failed-at]} @!mission-doc-index]
+      (cond
+        (and at (< (- now at) mission-doc-cache-ms)) v
+        (and failed-at (< (- now failed-at) mission-doc-backoff-ms)) (or v {})
+        :else
+        (let [fresh (mission-doc-index*)]
+          (if (seq fresh)
+            (do (reset! !mission-doc-index {:v fresh :at now}) fresh)
+            (do (swap! !mission-doc-index assoc :failed-at now) (or v {}))))))))
+
+(defn- mission-doc-index*
   []
   (reduce (fn [idx hx]
             (let [endpoint (first (real-endpoints hx))
@@ -1359,7 +1397,7 @@
                                        :phase (hx-prop hx :mission/phase)})
                 idx)))
           {}
-          (fetch-hyperedges-by-type "code/v05/mission-doc")))
+          (fetch-hyperedges-by-type "code/v05/mission-doc" mission-doc-fields)))
 
 (defn- mission-index-endpoint [entry]
   (if (map? entry) (:endpoint entry) entry))

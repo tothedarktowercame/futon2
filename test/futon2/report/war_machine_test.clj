@@ -10,7 +10,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.efe :as efe]
             [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
@@ -26,6 +26,11 @@
   (:import (java.io PushbackReader StringReader)
            (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))
+
+;; mission-doc-index is cached for 2 minutes (war_machine.clj); tests stub
+;; the fetch and expect the index built from their own stub.
+(use-fixtures :each
+  (fn [t] (reset! @#'wm/!mission-doc-index {}) (t)))
 
 (defn- read-all-forms [source]
   (with-open [reader (PushbackReader. (StringReader. source))]
@@ -2742,3 +2747,32 @@
         (is (.contains md "Uncertain-ownership feed: missing"))
         (do (is (.contains md "collection incomplete (2 repo(s) failed)"))
             (is (.contains md "backlog write failed")))))))
+
+
+(deftest mission-doc-index-is-cached-keeps-last-good-and-backs-off
+  (let [calls (atom 0)
+        good [{:hx/endpoints ["repo/mission/a"] :hx/props {:mission/id "M-a"}}]
+        results (atom [good []])]
+    (with-redefs-fn {#'wm/fetch-hyperedges-by-type
+                     (fn [& _] (swap! calls inc)
+                       (let [r (first @results)] (swap! results rest) (or r [])))}
+      (fn []
+        (let [idx (#'wm/mission-doc-index)]
+          (is (= "repo/mission/a" (get-in idx ["a" :endpoint])))
+          (testing "served from cache inside the window"
+            (is (= idx (#'wm/mission-doc-index)))
+            (is (= 1 @calls)))
+          (testing "after expiry an empty fetch keeps the last good index"
+            (swap! @#'wm/!mission-doc-index assoc :at 0)
+            (is (= idx (#'wm/mission-doc-index)))
+            (is (= 2 @calls)))
+          (testing "and futon1b is not asked again within the backoff"
+            (is (= idx (#'wm/mission-doc-index)))
+            (is (= 2 @calls))))))))
+
+(deftest mission-doc-fetch-asks-for-endpoints-and-props-only
+  (let [urls (atom [])]
+    (with-redefs-fn {#'wm/substrate-get-edn (fn [url] (swap! urls conj url) {:hyperedges []})}
+      (fn []
+        (#'wm/mission-doc-index)
+        (is (str/includes? (first @urls) "&fields=hx/endpoints,hx/props"))))))
