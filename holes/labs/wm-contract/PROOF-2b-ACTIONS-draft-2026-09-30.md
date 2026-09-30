@@ -102,6 +102,51 @@ It needs two things the runner does not obviously have (to be confirmed
 against the code by codex-6): the run state persisted at each phase
 boundary, and an entry point that continues from a persisted state.
 
+## The small model (Joe's, 2026-09-30; this is the specification, not a search target)
+
+Joe: "I have told you the small model in the last few chat messages ... If
+there were any functions that provided it we would not be having this
+conversation." The question to codex-6 about which existing functions
+provide it is WITHDRAWN. Nothing provides it. It is built, from this:
+
+- **What it is a model of**: the open tasks, the completed work, and agent
+  behaviour. Nothing else.
+- **Tasks.** Every open mission, excursion and ticket is in it and is
+  wanted. Per task: its kind, the project it belongs to (from its path),
+  and a state: untouched / question outstanding / in progress / refused on
+  a stated basis / closed.
+- **Outcomes** of handing a task to an agent: closed / progressed / asked a
+  question / refused / no usable reply.
+- **Agent behaviour.** Counts of outcomes per (task kind, project, seat),
+  starting flat and updated after every run (Dirichlet counts). Completed
+  work is where these counts come from.
+- **Preferences (C).** Closed is preferred to progressed, progressed to a
+  question, a question to a refusal, a refusal to no usable reply. Tasks in
+  Joe's stated priorities weigh more: finishing the War Machine; work that
+  serves the consulting business. Cτ: until a run has completed end to
+  end, an outcome that completes a run outweighs everything else, so the
+  first choices favour tasks most likely to close.
+- **Curiosity.** A cell of the counts with little data has more to teach,
+  so trying it scores better (information gain). Not knowing how a task
+  will go counts for choosing it.
+- **Habit (the prior over choices).** Joe's written patterns, read
+  directly: for instance, continue what is in progress before starting
+  something untouched; stay with the current focus.
+- **Choice.** Score = expected shortfall from C, minus information gain,
+  with habit as the prior; one softmax over all open tasks. Close scores
+  are settled by habit or a draw. There is no case in which nothing is
+  chosen.
+- **Questions.** An agent that does not know what a task means in context
+  asks. The question is recorded on the task; answering it (from the
+  patterns, from Joe's mined chats via M-象-cascade, or by Joe) is itself a
+  task state the next choice can act on.
+- **Update.** After each run: the task's state, the counts, and the
+  refused-on-this-basis mark.
+
+Formal wants, classes, relations and interpretations are not part of this
+model. Where they exist they may later refine the predicted outcome for a
+task; the model does not wait for them.
+
 ## Critical path to a first end-to-end run (rulings 10 and 11; governs the order below)
 
 One complete run means: a task is chosen from the open field, an agent is
