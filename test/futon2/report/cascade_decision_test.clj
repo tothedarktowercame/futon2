@@ -175,6 +175,23 @@
            (mapv :kind (get-in r [:decision :refusals])))
         "each refusal is typed; the decision has passed emit! by construction")))
 
+(deftest missing-slice-is-counted-while-another-target-proceeds
+  (let [missing :M-no-slice
+        sources (assoc tick-1-sources
+                       :universes (assoc (:universes tick-1-sources)
+                                         missing {:open true}))
+        assembled (assemble* {:targets [missing tick-1-target] :sources sources})
+        result (wm-cd/cascade-decision assembled live-c-opts)]
+    (is (= :no-query-time-slice
+           (:kind (first (:refusals assembled))))
+        "the absent slice remains a typed assembly failure")
+    (is (= tick-1-target (get-in result [:decision :action :target]))
+        "the other target is still selected")
+    (is (= 1 (count (filter #(and (= missing (:target %))
+                                  (= :no-query-time-slice (:reason %)))
+                            (:dropped-candidates result))))
+        "the failure is counted once and reaches the decision result")))
+
 (deftest h5a-tick-1-decision
   (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
@@ -585,9 +602,9 @@
     (is (= :abstained (:status decision))
         "nothing thrown: the all-declined family abstains")
     (is (= [a-target u-target] (mapv :target (:refusals decision))))
-    (is (= [:no-admitted-interpretation :class-unknown-no-scalar-g]
+    (is (= [:no-query-time-slice :class-unknown-no-scalar-g]
            (mapv :kind (:refusals decision)))
-        "A's admission refusal in its existing place, then U's class-unknown refusal")
+        "A's missing-slice refusal in its existing place, then U's class-unknown refusal")
     (is (= :target-relation (:missing (second (:refusals decision))))
         "the class-unknown refusal names the missing input")
     (is (some #(and (= :class-unknown-no-scalar-g (:reason %))

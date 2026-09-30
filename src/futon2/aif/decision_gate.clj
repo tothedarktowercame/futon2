@@ -28,7 +28,7 @@
    2. A typed abstention {:status :abstained :refusals […] } with a NON-EMPTY
       list of per-target refusals, each {:target … :kind k …} with k one of
       :universe-not-admitted :no-admitted-interpretation :want-not-declared
-      :beta-not-declared :no-constructed-candidate.
+      :beta-not-declared :no-query-time-slice :no-constructed-candidate.
 
    Anything else throws {:error :inadmissible-decision :reason …}. That
    includes a flat {:action {:type …}} decision, a single-pattern cascade
@@ -50,6 +50,7 @@
     :no-admitted-interpretation
     :want-not-declared
     :beta-not-declared
+    :no-query-time-slice
     :no-constructed-candidate
     :class-unknown-no-scalar-g})
 
