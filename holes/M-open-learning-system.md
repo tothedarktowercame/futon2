@@ -7,7 +7,7 @@ I’ll write a futonic mission in that style, grounded in your three-phase progr
 # Mission: Evaluating Open Research Training as a Learning System
 
 **Date:** 2026-03-31
-**Status:** IDENTIFY (mission proposal)
+**Status:** OPEN — IDENTIFY (mission proposal)
 **Cross-ref:**
 
 * UKRN Working Paper draft (ORP T3 evaluation) 
@@ -252,3 +252,12 @@ If you want to refine this before handing it off, the next move would be to tigh
 * the phase boundaries (especially how far Phase 3 is allowed to go)
 
 before moving to MAP.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A named structured artifact represents the ORP entities and relations and exposes at least one executable coherence check over the qualitative logic.
+- [ ] A named comparison report says whether the original implicit logic model is coherent and shows how the enriched model improves or revises it.
+- [ ] At least two UKRN-S design scenarios produce pattern-level and implementation-mode projections with an uncertainty or sensitivity indication.
+- [ ] The model contains an explicit prior → measurement → update cycle whose measurement layer includes the T1 instrument.
+- [ ] At least one working-paper section is backed by a graph/hypergraph representation and an executable computation while preserving empirical, reconstructed, projected, and speculative status tags.
+- [ ] A documented local command produces narrative output, scenario summaries, and at least one diagnostic comparison.

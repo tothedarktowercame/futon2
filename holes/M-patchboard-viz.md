@@ -1,6 +1,6 @@
 # M-patchboard-viz — see the airship before deciding it can't fly
 
-**Status:** SPEC, 2026-07-16. Owner: claude-2 (review + architecture). Build: belled to codex-1.
+**Status:** OPEN — SPEC, 2026-07-16. Owner: claude-2 (review + architecture). Build: belled to codex-1.
 **Motive (Joe, 2026-07-16):** *"Currently we have been flying blind with regard to this
 crucial middle layer (i.e. the entire wiring) and deeming the results poor. Well, we don't
 know. It would be like saying 'this airship will never take off' — but never actually
@@ -281,6 +281,13 @@ hypothesis, made visible instead of assumed.
 - Setting the MetaCA board to `k ↦ max(k-1,0)` shows **FREE {7}, UNSAT {0}**, derived
   attractor `{42,170}`, and reproduces the Figure-8 picture in the right pane.
 - The shape readout is correct against `futon5/scripts/propagator_constraint_model.py`.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The MetaCA model accepts non-injective wiring and reports Figure 8 as `FREE {7}`, `CHAIN {1..6}`, `UNSAT {0}`, with attractors `{42,170}`. (evidence: `c81492078`, `src/futon2/patchboard.clj`, and `test/futon2/patchboard_test.clj`)
+- [x] The browser model runs the propagator during the simulation and converges to the Figure-8 genotype pair across its seeded test cases. (evidence: `2629ef260` and `test/patchboard_viz_model_test.js`)
+- [ ] A reviewer records that `resources/public/patchboard-viz.html` permits live patching with no restart and visibly updates the genotype, phenotype, and FREE/CHAIN/UNSAT readouts.
+- [ ] The mission's operative acceptance section is reconciled with the §2 v0 scope change so the superseded 14-jack ant-board requirements are not presented as current acceptance.
 
 ## 6. Out of scope for v0
 

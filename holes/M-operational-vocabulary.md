@@ -1,7 +1,7 @@
 # Mission: Mine the operational vocabulary — give the WM a memory of previous actions (M-operational-vocabulary)
 
 **Date:** 2026-06-25 (created + driven through one session; lifecycle reconstructed after the fact)
-**Status:** **INSTANTIATE** — the FORWARD mining pipeline is BUILT and CPU-validated end-to-end; the GPU **box run** (joint mine over ~6.4k turns) is the at-scale instantiation, **pending commissioning** (prereg, §5). The **backward/sorry half** and the **promotion paths** (overlay→library/move-set/substrate-2) are chartered as the next steps. *Name provisional — alternatives: M-spin-the-scattered · M-concentration.*
+**Status:** OPEN — **INSTANTIATE** — the FORWARD mining pipeline is BUILT and CPU-validated end-to-end; the GPU **box run** (joint mine over ~6.4k turns) is the at-scale instantiation, **pending commissioning** (prereg, §5). The **backward/sorry half** and the **promotion paths** (overlay→library/move-set/substrate-2) are chartered as the next steps. *Name provisional — alternatives: M-spin-the-scattered · M-concentration.*
 **Owner:** Joe + claude-1
 **Repos:** futon6 (`scripts/{mission_structure_embed, mission_mine_moves, meme_mine_runner, meme_mine_joint, meme_consume, mission_concept_tag, meme_target_sample}.py`, `scripts/linode-meme-mine.sh`, `holes/{meme-mine-runner-spec, meme-mine-preregistration}.md`, `data/meme-mine/`) · futon2 (`aif/rollout.clj`, `report/cascade_lane.clj`, `aif-wiring-explainer.html`, this doc, `mission-mining-readiness.html`, [[E-mine-mission-transitions]]) · futon3c (Evidence Landscape `src/futon3c/evidence/*`, the WM pilot, [[M-autoclock-in]]) · futon3a (`resources/notions/minilm_*_embeddings.json`, the meme/arrow store) · futon1a (`:7071` substrate-2)
 **Cross-ref:** [[M-aif-wiring]] (this closes its R16 **criterion (2)** — the rollout path — and feeds **R14** γ; the diagram now carries the *belly* this work motivated) · [[M-wm-policies]] (CLOSED — continues its **Track 2** forward-model coverage) · [[M-a-sorry-enterprise]] (the **backward/goal dual** — sorries; §3b) · [[M-autoclock-in]] (the `turn→mission` link this consumes; §6) · [[M-populate-substrate-2]] (our run *produces* its empty PROOF-layer content; §3d) · `the-woven-form.flexiarg` + `futonic-logic.flexiarg` (the root metaphor + vocabulary) · `futon6/holes/proofcheck-readiness.html` (the pipeline template ported here)
@@ -68,3 +68,11 @@ The GPU run mines ~6.4k human→agent asks **× retrieved missions × patterns**
 **Deferred / post-box:** `SELECT-PER-MISSION` (runtime selection) and `GAMMA-FEED` (R14 γ) need a running loop — not buildable as shells now. The **backward/goal half is the sequel [[M-goals-and-holes]]** (mine goals/holes — spoken sorries + *unspoken* absence-holes), serving [[M-a-sorry-enterprise]].
 
 **DRAFT:** `the-woven-form.flexiarg` (root metaphor; the §3 "commitments" are claude-1's synthesis for Joe's review).
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The forward mining pipeline is CPU-validated end to end and gives `M-war-machine` a real-ask move with non-nil ΔG. (evidence: §4 of this file and the named `futon6/scripts/mission_*` and `meme_*` programs)
+- [ ] The preregistered `scripts/linode-meme-mine.sh` box run over the approximately 6.4k turns has a committed result report covering predictions P1–P6.
+- [ ] Box-run `new_patterns`, cascades, and meme-moves have named, inspectable promotion records into the pattern library, move-set, and substrate-2 PROOF layer.
+- [ ] The backward/sorry half has a named artifact implementing the trust-filtered goal/preference side described in §3b.
+- [ ] A recorded runtime witness shows `SELECT-PER-MISSION` and the R14 γ feed consuming accumulated real provenance.

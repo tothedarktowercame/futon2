@@ -1,5 +1,7 @@
 # Path to Real — closing the loop on real `:capability/*` evidence
 
+**Status:** OPEN — The proposal remains gated on Joe's durable-write and later live-wire arming decisions.
+
 **Joint proposal:** claude-4 (write-side: actuator) + claude-5 (read-side: A4a/BMR). For Joe's
 two arming decisions. **The whole A4a pipeline (BMR concepts → EIG → ranker) is inert for exactly
 one reason: 0 real `:capability/*` edges.** Make them flow and it runs on real evidence.
@@ -47,3 +49,11 @@ one reason: 0 real `:capability/*` edges.** Make them flow and it runs on real e
 - **write-path (claude-4):** steps 1–3, 5 are mine; 1–2 need no gate; 3 needs GATE A.
 - **linchpin:** the corpus inhabits three separate ◐ boxes at once (R5-EIG, R12-accumulate,
   R13-signal) — one flight, three requirements advanced.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A durable decision record shows Joe armed GATE A for the scoped provisional-vocabulary extraction.
+- [ ] The live store contains the scoped real `:capability/*` corpus and a review record shows BMR fired at least one real merge, or records the preregistered inert-corpus finding.
+- [ ] A3 proves `M-learning-loop` moved from 1/2 to 2/2 and A4 records the corresponding discharge.
+- [ ] A real-evidence A1 EIG-read report shows the resulting R13 discrimination and labels the vocabulary provisional.
+- [ ] A separate durable decision records GATE B and a live witness shows the grounded γ feed consuming real variance.

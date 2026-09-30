@@ -1,8 +1,8 @@
 # M-marks-to-labels — operator marks, resolved to referents, minted as reward labels
 
-**Status: DRAFT 2026-07-12 (claude-5 laptop, from Joe's synthesis: "label mass
+**Status:** OPEN — DRAFT 2026-07-12 (claude-5 laptop, from Joe's synthesis: "label mass
 not features" × M-points-de-fuite × the 5637/D1 text-indexing line). Not
-armed.**
+armed.
 
 **Composes:** [[M-points-de-fuite]] §6.5 (✘/✓/💡 hydra, EDN long form,
 illocutionary-force sketch, clustering probe) · [[M-zaif-harness]] (PZ1 base
@@ -104,3 +104,10 @@ Vocabulary from the record, not a priori.
 - L2: adapter output round-trips through fold_ground_truth's loader with
   the flag ON in a sandbox; flag OFF = byte-identical current behavior.
 - L3: the two preregistered numbers, reported pass or fail.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A live ✘/✓ turn is stored with its typed tag and parsed reference while a use-as-mention control is stored without either tag, and D1 answers locally.
+- [ ] Mark-adjudication fixtures exercise explicit-reference, quoted-span, and bare-reply precedence, and every resulting record contains its replayable resolving query.
+- [ ] With its sandbox flag enabled, the operator-mark adapter round-trips through `fold_ground_truth`; with the flag disabled, current loader output is byte-identical.
+- [ ] Once at least 20 mark labels exist, the preregistered agreement and S3/LOMO with-versus-without results are recorded, whether positive or negative.

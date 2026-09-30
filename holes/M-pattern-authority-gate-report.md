@@ -1,5 +1,7 @@
 # M-pattern-authority-gate — run report
 
+**Status:** CLOSED — The authoritative run completed with AUTHORITY FAIL under preregistration `9fee3be`; this report records the controls and per-arm verdicts.
+
 **Run:** 2026-07-16, authoritative execution after preregistration commit `9fee3be`
 
 **Verdict:** **AUTHORITY FAIL.** Under the preregistered definition, none of the
