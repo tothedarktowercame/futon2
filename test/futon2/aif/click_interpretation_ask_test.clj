@@ -118,8 +118,9 @@
   "One ordinary click with a counting judge-fn (first call ABSTAINED-decision,
   every later call SECOND, default the SELECTED-decision) and the given
   ask-fn. SECOND is a zero-arg fn returning the decision or throwing."
-  ([ask-fn] (run-click ask-fn (fn [] (selected-decision))))
-  ([ask-fn second]
+  ([ask-fn] (run-click ask-fn (fn [] (selected-decision)) {}))
+  ([ask-fn second] (run-click ask-fn second {}))
+  ([ask-fn second {:keys [first-refusals classify-fn]}]
    (let [judge-calls (atom [])
          findings (atom [])
          result (runner/run-opportunity!
@@ -127,7 +128,13 @@
                         {:judge-fn (fn [days]
                                      (let [n (count (swap! judge-calls conj days))]
                                        {:judgement (judgement-for
-                                                    (if (= 1 n) abstained-decision (second)))}))
+                                                    (if (= 1 n)
+                                                      (assoc abstained-decision
+                                                             :refusals (or first-refusals
+                                                                           (:refusals abstained-decision)))
+                                                      (second)))}))
+                         :interpretation-ask-classify-fn (or classify-fn
+                                                             (constantly :focused))
                          :interpretation-ask-fn ask-fn
                          :repair-system-record-fn (fn [m] (swap! findings conj m)
                                                     {:repair/id (str "repair-test-" (count @findings))
@@ -245,3 +252,42 @@
                    (fn [] (throw (ex-info "not a refusal" {:something :else}))))]
     (is (= true (:published (:interpretation-ask record))))
     (is (= "job-1" (:job-id (:interpretation-ask record))))))
+
+(deftest the-ask-skips-targets-the-tick-can-never-score
+  ;; click 17 (tick-run-record-2026-09-30-1790746462): the ask bought six
+  ;; interpretations for M-apm-demonstration, then the re-decision declined
+  ;; it :class-unknown-no-scalar-g (focus-receipt classify-target :unknown:
+  ;; no :relations row, no Relations section). The ask now picks the first
+  ;; refusal whose target classifies other than :unknown.
+  (let [store (io/file (temp-dir "click-ask-store"))
+        {:keys [record judge-calls]}
+        (run-click (publishing-ask-fn store)
+                   (fn [] (selected-decision))
+                   {:first-refusals
+                    [{:target "M-unknown-one" :kind :no-admitted-interpretation
+                      :missing :interpretations}
+                     {:target target :kind :no-admitted-interpretation
+                      :missing :interpretations}]
+                    :classify-fn {"M-unknown-one" :unknown target :focused}})]
+    (is (= 2 (count judge-calls)) "the interpretable target was asked and the decision re-run")
+    (is (= target (:target (:interpretation-ask record))))
+    (is (= ["M-unknown-one"] (:skipped-unknown-class (:interpretation-ask record))))
+    (is (= true (:published (:interpretation-ask record))))
+    (is (= target (get-in record [:decision :chosen :target])))))
+
+(deftest no-ask-when-every-refused-target-is-unknown-class
+  (let [{:keys [record judge-calls]}
+        (run-click (fn [& _] (throw (ex-info "must not be asked" {})))
+                   (fn [] (selected-decision))
+                   {:first-refusals
+                    [{:target "M-unknown-one" :kind :no-admitted-interpretation
+                      :missing :interpretations}
+                     {:target "M-unknown-two" :kind :no-admitted-interpretation
+                      :missing :interpretations}]
+                    :classify-fn (constantly :unknown)})]
+    (is (= 1 (count judge-calls)) "no publication, no re-decision")
+    (is (= {:status :absent
+            :reason :all-refused-targets-unknown-class
+            :skipped-unknown-class ["M-unknown-one" "M-unknown-two"]}
+           (:interpretation-ask record))
+        "the record says, typed, that no refused target can be scored")))

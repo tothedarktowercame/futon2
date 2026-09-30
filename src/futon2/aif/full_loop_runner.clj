@@ -39,6 +39,7 @@
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
             [futon2.aif.fold :as fold]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.g-term-decomposition :as decomposition]
@@ -1299,7 +1300,12 @@
                :transient-exhausted))))))))
 
 (defn dispatch!
-  [{:keys [agency-base d-task-dispatch-state run-id]} agent caller mission prompt]
+  "Bell one ask to the Agency. OPTS may carry :invoke-mode — \"brief\" for
+   answer-only work (an interpretation/reading ask is a reply with no tool
+   use, and the Agency's work-mode no-execution gate
+   futon3c codex-task-no-execution? would fail it); absent means \"work\",
+   the enactment default that requires execution evidence."
+  [{:keys [agency-base d-task-dispatch-state run-id invoke-mode] :as opts} agent caller mission prompt]
   (let [captured (some-> d-task-dispatch-state deref)
         prompt (if (= :captured (:status captured))
                  (str (d-task/prompt-binding (:dispatch captured)) "\n" prompt) prompt)
@@ -1310,7 +1316,7 @@
                                 {:kind :war-machine :basis :producer-context :execution-id run-id}
                                 {:kind :unknown :basis :producer-context
                                  :reason "runner has no usable :run-id"})
-                     :type "request" :mode "work" :prompt prompt})]
+                     :type "request" :mode (or invoke-mode "work") :prompt prompt})]
     (when-let [job-id (:job-id response)]
       (println "[wm-cancel] Ctrl-C alone does NOT cancel the Agency job.")
       (println "[wm-cancel] To stop this runner and its Agency job:")
@@ -1470,16 +1476,49 @@
          (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"}
                     failure-code))))
 
-(defn- first-no-admitted-interpretation-refusal
-  "PROOF-2b: the FIRST refusal of an abstained decision whose kind is
-  :no-admitted-interpretation, in the decision's own refusal order (the
-  cascade's ranking of the targets it refused), else nil. A decision that
-  selected something, abstained for another reason, or named no refusals
-  yields nil: no ask."
+(defn interpretation-ask-classifier
+  "PROOF-2b (click 17): the target classifier the ask selection uses — the
+  SAME focus-receipt/classify-target the cascade decision scores with, same
+  relation context (registry code root; futon2 ticket and findings dirs),
+  over a fresh focus read. A target classifying :unknown can never be scored
+  (click 15/17: the ask bought interpretations, then the decision declined
+  the target :class-unknown-no-scalar-g). Injectable per click via
+  :interpretation-ask-classify-fn (tests stub it); target -> class keyword."
+  ([] (interpretation-ask-classifier {}))
+  ([{:keys [focus-inputs focus-as-of]}]
+   (let [inputs (or focus-inputs (focus-receipt/read-inputs))
+         as-of (or focus-as-of (str (Instant/now)))
+         discovery (focus-receipt/discover inputs as-of nil)
+         f2-root (str missions/default-code-root "/futon2")
+         ctx {:code-root missions/default-code-root
+              :ticket-dir (str f2-root "/holes/tickets")
+              :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}]
+     (fn [target]
+       (:class (focus-receipt/classify-target inputs discovery as-of target ctx))))))
+
+(defn- no-admitted-interpretation-refusals
+  "The :no-admitted-interpretation refusals of an abstained decision, in the
+  decision's own refusal order (the cascade's ranking of the targets it
+  refused)."
   [decision]
   (when (and (map? decision) (= :abstained (:status decision)))
-    (first (filter #(= :no-admitted-interpretation (:kind %))
-                   (:refusals decision)))))
+    (vec (filter #(= :no-admitted-interpretation (:kind %))
+                 (:refusals decision)))))
+
+(defn- interpretable-refusal
+  "The first :no-admitted-interpretation refusal whose target classifies to
+  something other than :unknown (CLASSIFY-FN: target -> class keyword).
+  {:refusal r :skipped-unknown-class [..]}, or — every candidate :unknown —
+  {:all-unknown-class [..]}: no ask, the tick cannot score any of them."
+  [decision classify-fn]
+  (let [refusals (no-admitted-interpretation-refusals decision)]
+    (when (seq refusals)
+      (loop [[r & more] refusals skipped []]
+        (cond
+          (nil? r) {:all-unknown-class skipped}
+          (not= :unknown (classify-fn (:target r)))
+          {:refusal r :skipped-unknown-class skipped}
+          :else (recur more (conj skipped (:target r))))))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
@@ -5066,18 +5105,33 @@
             ;; (full-loop-runtime installs wm.click-ask/click-ask-fn).
             interpretation-ask-fn (or (:interpretation-ask-fn opts)
                                       (get *runtime-defaults* :interpretation-ask-fn))
-            interpretation-ask-refusal
+            interpretation-ask-selection
             (when (and interpretation-ask-fn (nil? (:flight opts)))
-              (first-no-admitted-interpretation-refusal
-               (:decision judgement0-base)))
+              (interpretable-refusal
+               (:decision judgement0-base)
+               (or (:interpretation-ask-classify-fn opts)
+                   (interpretation-ask-classifier))))
             interpretation-ask-record
-            (when interpretation-ask-refusal
-              (try (interpretation-ask-fn opts interpretation-ask-refusal)
-                   (catch Throwable e
-                     {:target (:target interpretation-ask-refusal)
-                      :outcome :ask-threw
-                      :error (ex-message e)
-                      :published false})))
+            (cond
+              ;; every refused target classifies :unknown: no ask — the
+              ;; tick could never score what the ask would buy (click 17)
+              (:all-unknown-class interpretation-ask-selection)
+              {:status :absent
+               :reason :all-refused-targets-unknown-class
+               :skipped-unknown-class (:all-unknown-class interpretation-ask-selection)}
+              (:refusal interpretation-ask-selection)
+              (let [{:keys [refusal skipped-unknown-class]}
+                    interpretation-ask-selection]
+                (try (cond-> (interpretation-ask-fn opts refusal)
+                       (seq skipped-unknown-class)
+                       (assoc :skipped-unknown-class skipped-unknown-class))
+                     (catch Throwable e
+                       (cond-> {:target (:target refusal)
+                                :outcome :ask-threw
+                                :error (ex-message e)
+                                :published false}
+                         (seq skipped-unknown-class)
+                         (assoc :skipped-unknown-class skipped-unknown-class))))))
             judgement0
             (if (and interpretation-ask-record (:published interpretation-ask-record))
               ;; the ask published: re-run the decision ONCE in the same
