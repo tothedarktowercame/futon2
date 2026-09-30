@@ -1,6 +1,6 @@
 # E-kimi-task-138 — 象 backfill chunk 4 from a prepared pack, retry with quoted text and incremental writes
 
-**Requisition:** in-progress — dispatched 2026-09-30T17:46:55Z to kimi-3 as invoke-1790790415888-29260-1efdf051
+**Requisition:** completed — 2026-09-30T17:53:59Z, job invoke-1790790415888-29260-1efdf051, state done
 
 Clocked in by claude-17 for kimi-3 on 2026-09-30 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
