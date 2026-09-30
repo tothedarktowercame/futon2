@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="Working definitions of a pattern cascade and a policy set for the War Machine, with seven real policy sets drawn out.">
+<title>What a cascade is, with real examples · Zone</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .table-scroll { overflow-x:auto; margin:.6rem 0; }
+  table.terms, table.frags, table.defs { border-collapse:collapse; font-size:.85rem; margin:.4rem 0 1.2rem; }
+  table.terms td, table.terms th, table.frags td, table.frags th, table.defs td, table.defs th { border:1px solid #ccc; padding:.25rem .5rem; vertical-align:top; text-align:left; }
+  pre.src { white-space:pre-wrap; font-size:.8rem; background:#f7f7f4; padding:.6rem; border:1px solid #ddd; }
+  .evidence { font-size:.9rem; }
+  .draft { border-left:3px solid #8a3a2a; padding:.4rem 1rem; background:#fff8e5; }
+  summary { cursor:pointer; }
+  h4 { margin-bottom:.2rem; }
+</style>
+</head>
+<body>
+<header><a href="/">zone.hyperreal.enterprises</a><div class="sub">decisions, with the evidence attached</div></header>
+<main><article>
+<h1>What a cascade is, with real examples</h1>
+<p class="meta">30 September 2026 · Draft by Claude-1 for Joe, from work with Codex-4, Codex-6 and Claude-17 · Not linked from the index</p>
+
+<div class="draft">
+<p><strong>Status.</strong> This is a draft for Joe to look at. Nothing described here is running in the War Machine: the code is committed and tested on its own, not called by the real decision and not loaded in the serving process. The drawings are generated from the code as it stands, including its known defects, which are listed at the end.</p>
+{{STATUS}}
+</div>
+
+<h2>Why this post exists</h2>
+<p>On 29 and 30 September the War Machine ran twenty clicks in which the set of policies it chose among had one member. The Lean model did not object, because its definition of the policy set, <code>cascadePolicySet (menu : List …)</code>, takes the list as an argument that nothing has to produce. Every theorem about it holds for any list, including a list of one. Joe’s word for that argument was a backdoor.</p>
+<p>Since then a replacement has been built in pieces: read the target’s text, form cascades from the reading and from the pattern graph, score them. Along the way a question came up about pooling cascades that share a first step. Joe’s answer was that the question is premature until we can see what these cascades are, what they do and what their specification is. This post is the attempt to show that, using the seven missions for which a reading exists.</p>
+
+<h2>Working definitions</h2>
+<p>These are the definitions the code implements today, in plain words. A Lean version, in which the policy set can only be obtained from the construction, has been requested from Codex-6; its state is reported in the next section.</p>
+<table class="defs">
+<tr><th>Term</th><th>Definition</th><th>The countable thing</th></tr>
+<tr><td>Library</td><td>The finite set of pattern ids in <code>futon3/library</code>.</td><td>1,431 patterns.</td></tr>
+<tr><td>Target</td><td>Something the machine could work on: a mission, a ticket, a proposal.</td><td>288 in the field today; 199 have a file to read.</td></tr>
+<tr><td>Reading</td><td>象’s analysis of a target’s HEAD section (or its opening, when there is no HEAD): the text split into fragments, each with a role and with the library patterns it cites and the ones it considered and rejected.</td><td>7 targets have one. It is keyed to a digest of the exact text read, so an edit to that text makes it stale.</td></tr>
+<tr><td>Unit</td><td>One citation: a pattern at a fragment. The same pattern cited in two fragments is two units.</td><td>1 to 16 per reading cascade below.</td></tr>
+<tr><td>Cascade</td><td>A nonempty set of units, each labelled with a library pattern, with two kinds of relation between units: <em>precedes</em> (directed; must contain no cycle) and <em>overlap</em> (undirected; the two belong together and neither must come first). The units with nothing preceding them are the <em>roots</em>.</td><td>{{NPOL}} across the seven targets.</td></tr>
+<tr><td>Reading cascade</td><td>A cascade taken directly from a reading: units in fragment order, each preceding the next. Where a fragment cites several patterns, either one is picked per fragment (“alternatives”, giving several cascades) or all are kept with overlap between them (“overlap”).</td><td>1 to 3 structurally distinct per target.</td></tr>
+<tr><td>Pattern graph</td><td>A graph over the library. Two patterns are joined when they were cited together, cited in successive turns, rejected beside each other, or when one pattern’s own text names the other in its “why” or “how”.</td><td>{{PIN}}.</td></tr>
+<tr><td>Retraction</td><td>A small connected subgraph of the pattern graph that contains the reading’s patterns (the <em>seeds</em>), found as a cheapest tree joining them. It adds <em>connector</em> patterns the reading did not cite. The tool returns the k cheapest.</td><td>k = 3 by default. A seed with no edges cannot be joined and is counted as a failure.</td></tr>
+<tr><td>Policy</td><td>A structurally distinct cascade for a target. Two cascades that differ only in annotation are one policy.</td><td></td></tr>
+<tr><td>Policy set of a target</td><td><strong>The output of a construction</strong>: the reading cascades together with the retractions seeded by the reading, deduplicated. Its inputs are the library, the reading, the pinned graph, k and the edge weights. There is no other way to get a policy into it, and a target without a current reading has an empty policy set and a counted failure, not a substitute.</td><td>1 to 6 per target below.</td></tr>
+</table>
+
+<h3>What a cascade does</h3>
+<p>Selection scores each policy by imagining it carried out. The imagined execution goes in rounds. In each round, every unit whose predecessors are all done is attempted, and each attempt succeeds with that pattern’s success probability. So the arrangement decides what can happen when: a chain of three units needs at least three rounds, while three units with no ordering between them can all finish in the first. With success probability one half, three unordered units are all done after one round with probability 1/8; a chain of three, with probability 0. Codex-6 has proved these two figures in Lean for the three-unit case.</p>
+<p>In the drawings below, each row is the earliest round in which a unit can be attempted, and roots are shaded green.</p>
+<p>Two numbers are then computed for each policy:</p>
+<ul>
+<li><strong>F, fit to the present.</strong> How well the reading supports the cascade’s patterns for this text: a pattern 象 cited for the text is given probability 0.9 of fitting, one it rejected 0.1, one never read against the text 0.5, and F is the average surprisal of those, plus a term for how many fragments the cascade covers. The three probabilities are stated preliminary values, not measurements. Connector patterns added by a retraction were never read against the text, which is why retractions have a higher (worse) F.</li>
+<li><strong>G, expected free energy.</strong> Risk plus ambiguity minus expected information gain, over the imagined rounds. Risk measures how far the imagined progress falls from what is preferred; the preference used at the moment is simply “more units done is better, and the last units done is better still”.</li>
+</ul>
+<p>Lower is better for both. The selection law combines them with habit: probability proportional to exp(log E − F − γ·G).</p>
+
+<h2>The definitions in Lean</h2>
+{{LEAN}}
+
+<h2>Examples</h2>
+<p>All seven policy sets were produced by the same code from the same pinned graph. Three are shown in full and four are folded.</p>
+{{WEB}}
+{{ESS}}
+{{SDS}}
+<h3>The other four</h3>
+{{REST}}
+
+<h2>What the examples show that is wrong or unsettled</h2>
+<ol>
+<li><strong>Retraction arrows mostly come from the alphabet.</strong> The pattern graph is undirected except where a pattern’s own text names another. The scorer currently turns every graph edge into “precedes”, pointing from the alphabetically earlier pattern name to the later one. Those edges are the dashed brown arrows. Which units are roots, and therefore the risk figure, follows from that. A fix is with Codex-4: an edge with an authored direction keeps it; any other graph edge becomes an overlap.</li>
+<li><strong>Retractions of one seed set are near-copies.</strong> For M-self-documenting-stack the three retractions differ by one connector. Claude-17 measured that asking for 6 or 10 gives 6 or 10, all at nearly the same cost, with no sign of settling. So k decides how many near-copies a target gets, and k has no stated source.</li>
+<li><strong>A reading can be a reading of boilerplate.</strong> M-web-arxana-ui-improvements has an empty HEAD; the policy set was built from the template sentence.</li>
+<li><strong>Every success probability is one half,</strong> because no pattern has recorded trials. Expected information gain is therefore the same (0.31) for every policy, and habit is neutral for every policy. Differences in G come from risk and ambiguity only.</li>
+<li><strong>The preference is synthetic.</strong> “More units done is better” was written for this scorer. It is not the preference from Joe’s ruling of 22 September that the real decision scores with, nor the one derived from mission wants that the real decision records without scoring. Which of the three should score cascades is an open question for Joe.</li>
+<li><strong>Coverage.</strong> Seven readings exist. The field has 288 targets; 192 missions with a file have no reading, and 89 targets (tickets, proposals) have no file the machine knows of.</li>
+<li><strong>Not in the formal model yet.</strong> Until the Lean definitions above are complete and the real decision is changed to call the construction, the old free-list definition is still the one the running machine answers to.</li>
+</ol>
+
+<h2>Where things are</h2>
+<p class="evidence">Code (futon2, all unloaded): <code>analysis_cascade.clj</code>, <code>pattern_retraction.clj</code>, <code>target_policy_family.clj</code>, <code>cascade_shape_g.clj</code>, <code>wm/family_selection.clj</code>. Lean (mathlib4): <code>DarkTower/WarMachine/HeadCascadeG.lean</code>, <code>Proof2/CascadePolicySet.lean</code> (the old definition). Readings: <code>futon2/holes/labs/wm-contract/mission-head-cascades-2026-09-30/</code>. Incident: <code>futon2/holes/labs/wm-contract/incidents/INCIDENT-2026-09-30-one-policy-selection-repeated-refusal.md</code>. Claude-17’s wiring check and the k measurement: <code>futon3c/holes/excursions/E-象-spec-wiring.md</code>.</p>
+</article></main>
+</body>
+</html>
