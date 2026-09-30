@@ -1,0 +1,377 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "hygiene/observe-the-authority",
+          "problems/operator-turns-become-inference-observations"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 100000,
+      "how": 1,
+      "next-in-session": 100000,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 9,
+      "edges": [
+        {
+          "a": "agent/student-dispatch",
+          "b": "hygiene/observe-the-authority",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-4.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block009/emacs-6e209ae364420eb9dc201d7ddacc321b.json.analysis.json -> 2026-08-22_2026-09-21_block009/codex-18-turn-1.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/student-dispatch",
+          "b": "proof-search/typed-hole-as-frontier",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/codex-18-turn-1.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "cascades/on-the-fly-cascade",
+          "b": "problems/operator-turns-become-inference-observations",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-09-22_2026-09-26_block005/claude-12-turn-84.json.analysis.json#s1.0",
+              "reason": "Read its file: derive a cascade of patterns per query against the current problem state. It concerns which patterns apply to a problem, not the interpretation of an operator turn, and has no second seat."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "cascades/on-the-fly-cascade",
+          "b": "proof-search/typed-hole-as-frontier",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-TAZQYL.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/student-dispatch",
+        "cascades/on-the-fly-cascade",
+        "hygiene/observe-the-authority",
+        "problems/operator-turns-become-inference-observations",
+        "proof-search/typed-hole-as-frontier"
+      ],
+      "rank": 1,
+      "size": 5,
+      "weak_edges": 0
+    },
+    {
+      "cost": 9,
+      "edges": [
+        {
+          "a": "agent/student-dispatch",
+          "b": "cycle-machine/runtime-restoration",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block002/claude-13-turn-207.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "agent/student-dispatch",
+          "b": "hygiene/observe-the-authority",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-4.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block009/emacs-6e209ae364420eb9dc201d7ddacc321b.json.analysis.json -> 2026-08-22_2026-09-21_block009/codex-18-turn-1.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "cycle-machine/disruption-soak",
+          "b": "cycle-machine/step-machine",
+          "direction": {
+            "from": "cycle-machine/disruption-soak",
+            "to": "cycle-machine/step-machine"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/cycle-machine/disruption-soak.flexiarg"
+            },
+            {
+              "file": "/home/joe/code/futon3/library/cycle-machine/step-machine.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why",
+            "how"
+          ]
+        },
+        {
+          "a": "cycle-machine/disruption-soak",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "cycle-machine/disruption-soak",
+            "to": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/cycle-machine/disruption-soak.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "cycle-machine/runtime-restoration",
+          "b": "cycle-machine/step-machine",
+          "direction": {
+            "from": "cycle-machine/runtime-restoration",
+            "to": "cycle-machine/step-machine"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/cycle-machine/runtime-restoration.flexiarg"
+            },
+            {
+              "file": "/home/joe/code/futon3/library/cycle-machine/step-machine.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why",
+            "how"
+          ]
+        },
+        {
+          "a": "problems/operator-turns-become-inference-observations",
+          "b": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "direction": {
+            "from": "problems/operator-turns-become-inference-observations",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/problems/operator-turns-become-inference-observations.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-27-a-loop-is-born-instrumented-for-its-gain.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/student-dispatch",
+        "cycle-machine/disruption-soak",
+        "cycle-machine/runtime-restoration",
+        "cycle-machine/step-machine",
+        "hygiene/observe-the-authority",
+        "problems/operator-turns-become-inference-observations",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+      ],
+      "rank": 2,
+      "size": 8,
+      "weak_edges": 0
+    },
+    {
+      "cost": 9,
+      "edges": [
+        {
+          "a": "agent/student-dispatch",
+          "b": "hygiene/observe-the-authority",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/claude-13-turn-4.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block009/emacs-6e209ae364420eb9dc201d7ddacc321b.json.analysis.json -> 2026-08-22_2026-09-21_block009/codex-18-turn-1.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agent/student-dispatch",
+          "b": "proof-search/typed-hole-as-frontier",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block009/codex-18-turn-1.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "problems/operator-turns-become-inference-observations",
+          "b": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "direction": {
+            "from": "problems/operator-turns-become-inference-observations",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/problems/operator-turns-become-inference-observations.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "process/built-but-not-wired-invisibility",
+          "b": "proof-search/typed-hole-as-frontier",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-Tgmnta.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "process/built-but-not-wired-invisibility",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "process/built-but-not-wired-invisibility",
+            "to": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/process/built-but-not-wired-invisibility.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        },
+        {
+          "a": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "b": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "direction": {
+            "from": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+            "to": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+          },
+          "evidence": [
+            {
+              "file": "/home/joe/code/futon3/library/war-room/wr-27-a-loop-is-born-instrumented-for-its-gain.flexiarg"
+            }
+          ],
+          "kind_used": "why",
+          "kinds": [
+            "why"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/student-dispatch",
+        "hygiene/observe-the-authority",
+        "problems/operator-turns-become-inference-observations",
+        "process/built-but-not-wired-invisibility",
+        "proof-search/typed-hole-as-frontier",
+        "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+      ],
+      "rank": 3,
+      "size": 7,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "hygiene/observe-the-authority",
+    "problems/operator-turns-become-inference-observations"
+  ],
+  "refused_no_edges": [],
+  "all_reading_seeds": [
+    "hygiene/observe-the-authority",
+    "problems/operator-turns-become-inference-observations"
+  ]
+}

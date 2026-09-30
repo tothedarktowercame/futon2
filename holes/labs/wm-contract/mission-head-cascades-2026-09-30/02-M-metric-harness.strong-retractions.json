@@ -1,0 +1,73 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "data-mining/smoke-before-the-paid-run",
+          "futon-theory/honest-map-over-flattering-counter",
+          "measurement/error-needs-structure-to-teach",
+          "musn/declare-scope",
+          "plos-npt-with-small-n/absence-as-evidence",
+          "system-coherence/facet-before-aggregating",
+          "vsatelier/decision-provenance",
+          "writing-coherence/hedged-lift"
+        ],
+        "size": 620
+      },
+      {
+        "component": 5,
+        "seeds": [
+          "futon-theory/progress-signal"
+        ],
+        "size": 3
+      }
+    ],
+    "seeds_connected": false,
+    "size": 0
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 100000,
+      "how": 1,
+      "next-in-session": 100000,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [],
+  "seeds": [
+    "data-mining/smoke-before-the-paid-run",
+    "futon-theory/honest-map-over-flattering-counter",
+    "futon-theory/progress-signal",
+    "measurement/error-needs-structure-to-teach",
+    "musn/declare-scope",
+    "plos-npt-with-small-n/absence-as-evidence",
+    "system-coherence/facet-before-aggregating",
+    "vsatelier/decision-provenance",
+    "writing-coherence/hedged-lift"
+  ],
+  "refused_no_edges": [
+    "plos-npt-with-small-n/research-questions-stated-early"
+  ],
+  "all_reading_seeds": [
+    "data-mining/smoke-before-the-paid-run",
+    "futon-theory/honest-map-over-flattering-counter",
+    "futon-theory/progress-signal",
+    "measurement/error-needs-structure-to-teach",
+    "musn/declare-scope",
+    "plos-npt-with-small-n/absence-as-evidence",
+    "plos-npt-with-small-n/research-questions-stated-early",
+    "system-coherence/facet-before-aggregating",
+    "vsatelier/decision-provenance",
+    "writing-coherence/hedged-lift"
+  ]
+}

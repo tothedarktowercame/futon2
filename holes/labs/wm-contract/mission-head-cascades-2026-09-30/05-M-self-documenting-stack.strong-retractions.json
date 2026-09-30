@@ -1,0 +1,449 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "futon-theory/mission-lifecycle",
+          "futon-theory/mission-scoping",
+          "orchestration/consent-gate",
+          "war-machine/advanceability"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 100000,
+      "how": 1,
+      "next-in-session": 100000,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 14,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/mission-lifecycle",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-0eoQWs.json.analysis.json#s1.0",
+              "reason": "That pattern governs how much context must travel with a handoff; here the move is the gate judgement and phase routing itself, and no context-packaging decision is being made."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block028/claude-4-turn-266.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-scoping",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-5PJcyp.json.analysis.json"
+            },
+            {
+              "at": "live/turn-F8sjMa.json.analysis.json -> live/turn-IFnNGA.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "inbox-zero/escalate-by-who-can-act",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block030/claude-4-turn-405.json.analysis.json -> 2026-08-22_2026-09-21_block030/claude-4-turn-419.json.analysis.json"
+            },
+            {
+              "at": "live/turn-UtTh6n.json.analysis.json#s1.1",
+              "reason": "The 'yes' here is confirmation of the addressee's prior suggestion, not a consent locus being consulted before acting; no approval record is being sought."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "inbox-zero/escalate-by-who-can-act",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-9-turn-6.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "futon-theory/single-source-of-truth",
+        "inbox-zero/escalate-by-who-can-act",
+        "orchestration/consent-gate",
+        "war-machine/advanceability"
+      ],
+      "rank": 1,
+      "size": 7,
+      "weak_edges": 0
+    },
+    {
+      "cost": 14,
+      "edges": [
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/mission-lifecycle",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-0eoQWs.json.analysis.json#s1.0",
+              "reason": "That pattern governs how much context must travel with a handoff; here the move is the gate judgement and phase routing itself, and no context-packaging decision is being made."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block028/claude-4-turn-266.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-scoping",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-5PJcyp.json.analysis.json"
+            },
+            {
+              "at": "live/turn-F8sjMa.json.analysis.json -> live/turn-IFnNGA.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/consent-gate",
+          "b": "orchestration/recorded-handoff",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block001/codex-10-turn-277.json.analysis.json -> 2026-08-22_2026-09-21_block001/codex-10-turn-278.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block010/claude-13-turn-92.json.analysis.json#s1.0",
+              "reason": "The consent gate is a recorded approval locus inside an autonomous loop; Joe granting a next step in dialogue is the human side of that seam, not a gate event."
+            },
+            {
+              "at": "live/turn-PGfiv2.json.analysis.json -> live/turn-TJP9tQ.json.analysis.json"
+            },
+            {
+              "at": "live/turn-TJP9tQ.json.analysis.json -> live/turn-Kp3fSa.json.analysis.json"
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "orchestration/recorded-handoff",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-30.json.analysis.json -> 2026-08-22_2026-09-21_block026/claude-4-turn-38.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-38.json.analysis.json -> 2026-08-22_2026-09-21_block026/claude-4-turn-42.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-42.json.analysis.json -> 2026-08-22_2026-09-21_block026/claude-4-turn-44.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-42.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-46.json.analysis.json -> 2026-08-22_2026-09-21_block026/claude-4-turn-47.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/claude-4-turn-47.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-28-turn-29.json.analysis.json -> 2026-08-22_2026-09-21_block026/codex-28-turn-31.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-28-turn-31.json.analysis.json -> 2026-08-22_2026-09-21_block026/codex-28-turn-32.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-28-turn-32.json.analysis.json -> 2026-08-22_2026-09-21_block026/codex-28-turn-34.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-28-turn-32.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block026/codex-9-turn-1.json.analysis.json -> 2026-08-22_2026-09-21_block026/codex-9-turn-6.json.analysis.json"
+            },
+            {
+              "at": "2026-08-22_2026-09-21_block031/claude-12-turn-224.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "agent/handoff-preserves-context",
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "futon-theory/single-source-of-truth",
+        "orchestration/consent-gate",
+        "orchestration/recorded-handoff",
+        "war-machine/advanceability"
+      ],
+      "rank": 2,
+      "size": 7,
+      "weak_edges": 0
+    },
+    {
+      "cost": 15,
+      "edges": [
+        {
+          "a": "agency/loud-failure",
+          "b": "orchestration/consent-gate",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block029/claude-4-turn-305.json.analysis.json -> 2026-08-22_2026-09-21_block029/claude-4-turn-306.json.analysis.json"
+            },
+            {
+              "at": "live/turn-S0Jk0M.json.analysis.json -> live/turn-InkU3S.json.analysis.json"
+            },
+            {
+              "at": "live/turn-S0Jk0M.json.analysis.json"
+            },
+            {
+              "at": "live/turn-kNueLA.json.analysis.json -> live/turn-DHoxUh.json.analysis.json"
+            },
+            {
+              "at": "live/turn-y2mR2E.json.analysis.json -> live/turn-jA45qP.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        },
+        {
+          "a": "agency/loud-failure",
+          "b": "writing-coherence/hedged-lift",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block029/claude-13-turn-4.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/mission-lifecycle",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-0eoQWs.json.analysis.json#s1.0",
+              "reason": "That pattern governs how much context must travel with a handoff; here the move is the gate judgement and phase routing itself, and no context-packaging decision is being made."
+            }
+          ],
+          "kind_used": "rejected-beside",
+          "kinds": [
+            "rejected-beside"
+          ]
+        },
+        {
+          "a": "agent/handoff-preserves-context",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "2026-08-22_2026-09-21_block028/claude-4-turn-266.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "war-machine/advanceability",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-sguiyy.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-lifecycle",
+          "b": "writing-coherence/hedged-lift",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-0eoQWs.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited"
+          ]
+        },
+        {
+          "a": "futon-theory/mission-scoping",
+          "b": "futon-theory/single-source-of-truth",
+          "direction": null,
+          "evidence": [
+            {
+              "at": "live/turn-5PJcyp.json.analysis.json"
+            },
+            {
+              "at": "live/turn-F8sjMa.json.analysis.json -> live/turn-IFnNGA.json.analysis.json"
+            }
+          ],
+          "kind_used": "co-cited",
+          "kinds": [
+            "co-cited",
+            "next-in-session"
+          ]
+        }
+      ],
+      "nodes": [
+        "agency/loud-failure",
+        "agent/handoff-preserves-context",
+        "futon-theory/mission-lifecycle",
+        "futon-theory/mission-scoping",
+        "futon-theory/single-source-of-truth",
+        "orchestration/consent-gate",
+        "war-machine/advanceability",
+        "writing-coherence/hedged-lift"
+      ],
+      "rank": 3,
+      "size": 8,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "futon-theory/mission-lifecycle",
+    "futon-theory/mission-scoping",
+    "orchestration/consent-gate",
+    "war-machine/advanceability"
+  ],
+  "refused_no_edges": [
+    "coordination/intent-to-mission-binding"
+  ],
+  "all_reading_seeds": [
+    "coordination/intent-to-mission-binding",
+    "futon-theory/mission-lifecycle",
+    "futon-theory/mission-scoping",
+    "orchestration/consent-gate",
+    "war-machine/advanceability"
+  ]
+}

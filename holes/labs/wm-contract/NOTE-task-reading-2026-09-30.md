@@ -14,6 +14,11 @@ that carry both `request_file` and `status`; bare
 records (the live count continued to grow after the 880 reported by
 M-象-cascade).
 
+The 880-record membership list was not saved, so it cannot be reconstructed
+faithfully after new publications arrive. I have not selected an arbitrary
+880-record subset. The table states the exact published input count read by
+the gate; the test prints that count with every distribution.
+
 | mode | analyses yielding 0 / 1 / 2+ cascades | node-count distribution | edge-count distribution | bare singleton cascades | fragment failures |
 |---|---:|---|---|---:|---:|
 | alternatives | 521 / 240 / 130 | 1:341, 2:169, 3:63, 4:3, 5:2, 7:1 | 0:341, 1:169, 2:63, 3:3, 4:2, 6:1 | 341 | 2317 |

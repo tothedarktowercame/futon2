@@ -8,6 +8,14 @@ Selection rule: enumerate tracked `M-*.md` mission files in canonical repositori
 
 The pattern graph was generated once by `futon3c/scripts/mined_pattern_graph.py`, then passed by path to every `pattern_retraction.py --k 3` call. Committed graph file SHA-256: `30325e476fe25638415de375bab505f1afd0710fbad0684008ffd0cc7899084d`; 1,431 patterns, 4,654 analysis records. A seed absent from the graph’s edge endpoints is reported and omitted before retraction. If the remaining seeds occupy several components, the connected-retraction count is zero.
 
+Joe has not decided whether `co-rejected` and `next-in-session` may connect
+the graph. Every default result below records `weak_edges`; all 22 returned
+retractions have `weak_edges=0`. I also reran each seed set with both weak
+kinds weighted 100,000. Seven sets remained connected without using a weak
+edge; `M-metric-harness` remained disconnected. The high-cost outputs are
+committed as `*.strong-retractions.json`, so this conclusion remains
+checkable if the default changes.
+
 “Materialized policy set” below is the number of distinct arrangements produced across alternatives and overlap modes plus graph retractions. Rejected patterns are listed as possible adjustment probes but are not counted as policies because 象 explicitly rejected them; admitting one requires a later reading.
 
 ## Results
@@ -22,6 +30,28 @@ The pattern graph was generated once by `futon3c/scripts/mined_pattern_graph.py`
 | 6 | `M-war-machine-aif-completion` / opening | 38 / 10 | 16 / 8 | 3 | 27 | `war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern` | 209.1s |
 | 7 | `M-essays-diachronic-model` / opening | 4 / 2 | 4 / 4 | 1 | 5 | `sidecar/fact-lifecycle-event-types` | 75.3s |
 | 8 | `M-value-creation-loop` / opening | 7 / 3 | 2 / 2 | 3 | 5 | none | 152.1s |
+
+### Retraction sensitivity and timing
+
+Times include starting Python and loading the pinned graph. “Near” means two
+default k=3 results share every edge of the smaller tree except at most one.
+
+| mission | default / high-weak-cost time | connected without weak links | default/high weak-edge counts | near result pairs |
+|---|---:|---|---|---|
+| M-象-2000 | 1.519s / 2.949s | yes | 0,0,0 / 0,0,0 | ranks 2–3 share 13/14 smaller-tree edges |
+| M-metric-harness | 0.051s / 0.050s | **no** | none / none | none |
+| M-distributed-proofreaders | 0.194s / 0.247s | yes | 0,0,0 / 0,0,0 | ranks 2–3 share 3/4 smaller-tree edges |
+| M-web-arxana-ui-improvements | 0.114s / 0.220s | yes | 0,0,0 / 0,0,0 | none |
+| M-self-documenting-stack | 0.130s / 0.280s | yes | 0,0,0 / 0,0,0 | none |
+| M-war-machine-aif-completion | **4.729s** / **3.866s** | yes | 0,0,0 / 0,0,0 | ranks 1–3 share 15/16 smaller-tree edges |
+| M-essays-diachronic-model | 0.050s / 0.050s | yes | 0 / 0 | only one result |
+| M-value-creation-loop | 0.124s / 0.224s | yes | 0,0,0 / 0,0,0 | none |
+
+The 10-seed `M-war-machine-aif-completion` call is the slow case and its
+rank 1/rank 3 trees are near-identical. The 7 usable-seed M-象-2000 and
+3-seed M-distributed-proofreaders sets also have a near-identical pair. Their
+complete seed sets are recorded in their sections below for the retraction
+owner.
 
 ### 1. M-象-2000
 

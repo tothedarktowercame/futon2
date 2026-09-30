@@ -1,0 +1,54 @@
+{
+  "component": {
+    "seed_components": [
+      {
+        "component": 1,
+        "seeds": [
+          "futon-theory/mission-lifecycle"
+        ],
+        "size": 620
+      }
+    ],
+    "seeds_connected": true,
+    "size": 620
+  },
+  "graph": {
+    "digest": "45709c8759711044a5cf7bec8e0b51c361d01021a65300cc6795454c5660acad",
+    "edges": 3115,
+    "inputs": 4654,
+    "patterns": 1431
+  },
+  "params": {
+    "k": 3,
+    "weights": {
+      "co-cited": 2,
+      "co-rejected": 100000,
+      "how": 1,
+      "next-in-session": 100000,
+      "rejected-beside": 3,
+      "why": 1
+    }
+  },
+  "retractions": [
+    {
+      "cost": 0,
+      "edges": [],
+      "nodes": [
+        "futon-theory/mission-lifecycle"
+      ],
+      "rank": 1,
+      "size": 1,
+      "weak_edges": 0
+    }
+  ],
+  "seeds": [
+    "futon-theory/mission-lifecycle"
+  ],
+  "refused_no_edges": [
+    "sidecar/fact-lifecycle-event-types"
+  ],
+  "all_reading_seeds": [
+    "futon-theory/mission-lifecycle",
+    "sidecar/fact-lifecycle-event-types"
+  ]
+}
