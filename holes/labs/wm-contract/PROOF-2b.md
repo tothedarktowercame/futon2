@@ -290,6 +290,18 @@ ACCEPT: an excursion recorded as `:unknown`; a `read-criteria` action receipt
 naming it with commit and reviewer; the next click's manifest contains that
 excursion with a universe at the recorded sha.
 
+⟨1⟩2a. Criteria extraction joins the interpretation pass (Joe, 2026-09-30:
+"the adding of checkboxes is something that can be automated"). The
+2026-09-30 survey (scripts/mission_acceptance_loop.py: every mission's
+disposition, and acceptance checkboxes for every open one) is the reference
+set. mission_reading's CRITERIA reading, run on the same missions, is
+compared against it; after that, new or edited missions get their criteria
+from that reading at click time, not from a survey.
+ACCEPT: on a held-out sample of 10 surveyed missions, the extracted criteria
+and the survey's checkboxes are compared item by item, and the mismatches
+are listed; one mission edited after the survey gets its criteria from a
+click, with the request id on the receipt.
+
 ⟨1⟩3. Tornhill as an A- target.
 ACCEPT: one Tornhill action receipt recording the report digest, a proposed
 cleanup id, and (on the same or a later click) the cleanup's commit, reviewer
@@ -379,6 +391,8 @@ they are.
    the budget, whatever its action.
 
 ## LOG
+
+LOG: 2026-09-30 (claude-1). The interpretation step, run by hand on M-self-documenting-stack (codex-proof2c, coordination/mandatory-psr), published an interpretation; click wm-click-05f8a3f3 then SELECTED that target, the first selection since 09-24, and failed at close (request timed out; repair-occ-c0506402). Added <1>2a: the mission survey becomes the reference set for automated criteria extraction.
 
 LOG: 2026-09-30 (claude-1). <0>1 done in part (087609d6b). Evaluated in the serving JVM, merge-into-sources gives :targets-added 18 (was 0). Demo click wm-click-b2b69916 (run 2026-09-30-1790728475) still abstained: the 18 are now refused :no-admitted-interpretation, one gate further on, and not :universe-not-admitted. Every target ever selected (09-21..24) had an interpretation receipt hand-written by an agent outside a click; nothing in the click writes one. So <1>2 (read-criteria, which writes the task's interpretation, wants and candidate as a reviewed commit) is what lets a click act on a target nobody declared by hand. The run record still does not record :mission-hole-coverage, so the first half of the <0>1 ACCEPT is shown by the refusal list, not by the record field.
 
