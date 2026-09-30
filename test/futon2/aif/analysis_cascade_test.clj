@@ -1,6 +1,7 @@
 (ns futon2.aif.analysis-cascade-test
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.set :as set]
             [clojure.test :refer [deftest is]]
             [futon2.aif.analysis-cascade :as sut]))
@@ -65,30 +66,70 @@
     (is (every? #(empty? (set/intersection rejected (pattern-set %)))
                 cascades))))
 
-(deftest all-real-analyses-report-cascade-scale
-  (let [files (->> (.listFiles (io/file analysis-root))
-                   (filter #(and (.isFile %)
-                                 (.endsWith (.getName %) ".analysis.json")))
-                   (sort-by #(.getName %)))
-        rows (mapv (fn [file]
+(deftest overlap-keeps-coapplicable-patterns-in-one-arrangement
+  ;; Selection rule: lexicographically first real analysis having two
+  ;; validated pattern_refs on one fragment.
+  (let [analysis (fixture "turn-6TxxZn")
+        result (sut/analysis->cascades analysis {:mode :overlap})
+        cascade (first (:cascades result))
+        overlap (first (filter #(= :overlap (:kind %)) (:edges cascade)))]
+    (is overlap)
+    (is (= (:from-fragment overlap) (:to-fragment overlap)))
+    (is (= 2 (count (filter #(= (:from-fragment overlap) (:fragment-index %))
+                            (:nodes cascade)))))
+    (is (every? (validated-patterns analysis) (pattern-set cascade)))))
+
+(deftest task-request-preserves-section-and-exact-offsets
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "wm-task-reading" (make-array java.nio.file.attribute.FileAttribute 0)))
+        task (io/file dir "M-example.md")
+        out (io/file dir "request.json")
+        text "# Mission\n\n## Open work\nContext line.\n- [ ] First observable outcome.\n- [ ] Second outcome.\n\n## Later\nNot included.\n"]
+    (spit task text)
+    (let [{:keys [exit err]} (shell/sh "python3" "scripts/wm_task_reading.py"
+                                       (.getPath task) "--target" "M-example"
+                                       "--out" (.getPath out))
+          request (read-analysis out)
+          source (:source_text request)
+          item (get-in request [:task :item])]
+      (is (zero? exit) err)
+      (is (= "M-example" (get-in request [:task :target_id])))
+      (is (.startsWith source "## Open work"))
+      (is (not (.contains source "## Later")))
+      (is (= (:text item) (subs source (:start item) (:end item))))
+      (is (every? #(= (:text %) (subs source (:start %) (:end %)))
+                  (:sentences request))))))
+
+(defn corpus-report [files mode]
+  (let [rows (mapv (fn [file]
                      (let [analysis (read-analysis file)
-                           result (sut/analysis->cascades analysis)
+                           result (sut/analysis->cascades analysis {:mode mode})
                            allowed (validated-patterns analysis)]
                        (is (every? #(every? allowed (pattern-set %))
                                    (:cascades result)))
                        {:file (.getName file) :result result}))
                    files)
         cascade-counts (mapv #(count (get-in % [:result :cascades])) rows)
-        cascades (mapcat #(get-in % [:result :cascades]) rows)
-        report {:analyses (count rows)
-                :cascade-counts {:zero (count (filter zero? cascade-counts))
-                                 :one (count (filter #{1} cascade-counts))
-                                 :two-plus (count (filter #(< 1 %) cascade-counts))}
-                :node-counts (into (sorted-map) (frequencies (map #(count (:nodes %)) cascades)))
-                :edge-counts (into (sorted-map) (frequencies (map #(count (:edges %)) cascades)))
-                :bare-singletons (count (filter #(and (= 1 (count (:nodes %)))
-                                                      (empty? (:edges %))) cascades))
-                :failures (reduce + (map #(get-in % [:result :failure-count]) rows))}]
+        cascades (mapcat #(get-in % [:result :cascades]) rows)]
+    {:analyses (count rows)
+     :cascade-counts {:zero (count (filter zero? cascade-counts))
+                      :one (count (filter #{1} cascade-counts))
+                      :two-plus (count (filter #(< 1 %) cascade-counts))}
+     :node-counts (into (sorted-map) (frequencies (map #(count (:nodes %)) cascades)))
+     :edge-counts (into (sorted-map) (frequencies (map #(count (:edges %)) cascades)))
+     :bare-singletons (count (filter #(and (= 1 (count (:nodes %)))
+                                           (empty? (:edges %))) cascades))
+     :failures (reduce + (map #(get-in % [:result :failure-count]) rows))}))
+
+(deftest all-real-analyses-report-cascade-scale
+  (let [files (->> (.listFiles (io/file analysis-root))
+                   (filter #(and (.isFile %)
+                                 (.endsWith (.getName %) ".analysis.json")))
+                   (sort-by #(.getName %)))
+        report {:alternatives (corpus-report files :alternatives)
+                :overlap (corpus-report files :overlap)}]
     (println "ANALYSIS-CASCADE-CORPUS" (pr-str report))
-    (is (pos? (count rows)))
-    (is (= (count rows) (reduce + (vals (:cascade-counts report)))))))
+    (is (pos? (count files)))
+    (doseq [mode [:alternatives :overlap]]
+      (is (= (count files)
+             (reduce + (vals (get-in report [mode :cascade-counts]))))))))

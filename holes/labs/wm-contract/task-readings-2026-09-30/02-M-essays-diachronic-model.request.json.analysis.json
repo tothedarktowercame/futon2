@@ -1,0 +1,160 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-3",
+  "reusable_cues": [
+    {
+      "start": 293,
+      "end": 330,
+      "text": "mints a writable Hyperreal live round",
+      "intent": "derive",
+      "rationale": "The derive-a-live-round phrasing recurs wherever a mutable working copy is minted from a fixed basis."
+    },
+    {
+      "start": 339,
+      "end": 360,
+      "text": "immutable golden seed",
+      "intent": "constrain",
+      "rationale": "'Immutable golden seed' is a reusable cue for the constraint that the basis must not be mutated."
+    }
+  ],
+  "created_at": "2026-09-30T08:53:40.476564+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [x] This mission specifies golden/live dataset identity, lifecycle-event vocabulary, event-versus-projection boundaries, and the Hyperreal Side A replay scenario. (evidence: `holes/missions/M-essays-diachronic-model.md`)\n- [ ] A named command or script mints a writable Hyperreal live round from an immutable golden seed without modifying the source pair.\n- [ ] XTDB document shapes exist for `dataset-round` and the lifecycle events named in this mission.\n- [ ] Save-time transitions emit the applicable lifecycle events with stable essay, section, annotation, and dataset-round identities.\n- [ ] A replay distinguishes preserved-anchor, forced-reanchor, and substrate-removal transitions in its projections.\n- [ ] Temporal query and WebArxana views expose the lifecycle and identify the live round from which every result was derived.",
+  "source_sha256": "6cba4d9a2d6bee14f78370960a936832d515496f8633a29bc771d26d48c79f2b",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [],
+      "unresolved_reason": "Heading only; names the checklist and date, carries no interpretable move."
+    },
+    {
+      "id": "s2",
+      "fragments": [],
+      "unresolved_reason": "Already-checked item with an evidence pointer; background context, not the tasked checklist item (s3)."
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 267,
+          "end": 298,
+          "text": "A named command or script mints",
+          "intent": "commission",
+          "target": "a named command or script that performs the mint operation",
+          "rationale": "The acceptance item requires a deliverable with a stable, invocable name: one entry point that performs the mint, not ad hoc REPL steps. That is the shape of an encapsulated command.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 275,
+              "end": 298,
+              "text": "command or script mints"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "software-design/agent-command-pattern",
+              "rationale": "The item demands the mint be encapsulated as a named, invocable unit with a defined effect, matching the Command-value shape this pattern prescribes.",
+              "status": "candidate",
+              "source_sha256": "dc7098aaf3425b387f9a0c6592797e7b23fbc0579808b7108198a9b0800bec0a"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "musn/pattern-action-helper-command",
+              "reason": "That pattern is about helper commands inside the pattern-library toolchain; this item asks for a first-class deliverable script in the diachronic-model mission, not a library maintenance helper.",
+              "query": "name a command that performs one well-defined action"
+            }
+          ]
+        },
+        {
+          "start": 299,
+          "end": 360,
+          "text": "a writable Hyperreal live round from an immutable golden seed",
+          "intent": "derive",
+          "target": "the writable live round derived from the immutable golden seed",
+          "rationale": "The core move: produce a mutable working layer (the live round) whose basis is a fixed, immutable seed. The seed stays the auditable record while the derived round accepts writes.",
+          "relations": [
+            "action",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 301,
+              "end": 330,
+              "text": "writable Hyperreal live round"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "exotic/immutable-vision-mutable-plan",
+              "rationale": "Same structural split: an immutable declared basis (VISION / golden seed) with a mutable working layer (PLAN / live round) whose changes are traceable back to the locked basis.",
+              "status": "candidate",
+              "source_sha256": "1b0982554b2afbdaa91f8c693a8d53eacb016289fbbb3d5c47ee1cfb132d3c55"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "exotic/live-sync-source-truth",
+              "reason": "That pattern governs ongoing bidirectional sync with version logging against an evolving upstream; this item is a one-shot mint of a working copy from a fixed seed, with no sync-back channel.",
+              "query": "derive a mutable working copy from an immutable source without modifying the original"
+            }
+          ]
+        },
+        {
+          "start": 361,
+          "end": 394,
+          "text": "without modifying the source pair",
+          "intent": "constrain",
+          "target": "the golden source pair, which must remain untouched",
+          "rationale": "A guard condition on the mint: derivation must copy, never mutate. This is what keeps the golden seed immutable and makes later replay against it meaningful.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 361,
+              "end": 378,
+              "text": "without modifying"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (XTDB document shapes); outside the tasked item s3."
+    },
+    {
+      "id": "s5",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (save-time lifecycle events); outside the tasked item s3."
+    },
+    {
+      "id": "s6",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (replay transition distinctions); outside the tasked item s3."
+    },
+    {
+      "id": "s7",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (temporal query and WebArxana views); outside the tasked item s3."
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/02-M-essays-diachronic-model.request.json",
+  "request_sha256": "eec256a237c6278988981946a827cfc2ae9eaaf7964d7cf9cbc9b5165e086354"
+}

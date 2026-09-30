@@ -8,11 +8,13 @@
   The edge retains both fragments and their complete role vectors, so this
   qualification never discards 象's reading.
 
-  Pattern refs on one fragment are alternatives because they explain the same
-  span. A recorded rejection also forks an alternative reading: the rejected
-  pattern never becomes a node, but its id/reason/query remain on that variant.
-  Thus every node is a validator-stamped pattern_ref, never a retrieval hit
-  that 象 rejected."
+  MODE controls co-application on one fragment. In :alternatives mode (the
+  default), refs on one fragment fork readings. In :overlap mode, they are
+  nodes in one reading joined by :overlap edges because they explain shared
+  state in the same exact span. A recorded rejection forks either mode: the
+  rejected pattern never becomes a node, but its id/reason/query remain on
+  that variant. Thus every node is a validator-stamped pattern_ref, never a
+  retrieval hit that 象 rejected."
   (:require [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
@@ -33,23 +35,30 @@
        (sort-by (juxt :start :end :sentence-id))
        vec))
 
-(defn- alternatives [fragment-index fragment]
-  (let [refs (filter validated-ref? (:pattern_refs fragment))
+(defn- node [fragment-index fragment ref]
+  {:pattern (:id ref)
+   :source-sha256 (:source_sha256 ref)
+   :pattern-rationale (:rationale ref)
+   :fragment-index fragment-index
+   :sentence-id (:sentence-id fragment)
+   :fragment {:start (:start fragment) :end (:end fragment)
+              :text (:text fragment) :intent (:intent fragment)
+              :target (:target fragment)
+              :rationale (:rationale fragment)}
+   :roles (vec (:relations fragment))})
+
+(defn- fragment-choices [mode fragment-index fragment]
+  (let [refs (vec (filter validated-ref? (:pattern_refs fragment)))
         rejections (vec (:pattern_rejections fragment))
-        readings (cons nil rejections)]
+        readings (if (seq rejections) (cons nil rejections) [nil])
+        node-groups (case mode
+                      :overlap [(mapv #(node fragment-index fragment %) refs)]
+                      :alternatives (mapv #(vector (node fragment-index fragment %)) refs))]
     (vec
-     (for [ref refs
-           rejection (if (seq rejections) readings [nil])]
-       {:node {:pattern (:id ref)
-               :source-sha256 (:source_sha256 ref)
-               :pattern-rationale (:rationale ref)
-               :fragment-index fragment-index
-               :sentence-id (:sentence-id fragment)
-               :fragment {:start (:start fragment) :end (:end fragment)
-                          :text (:text fragment) :intent (:intent fragment)
-                          :target (:target fragment)
-                          :rationale (:rationale fragment)}
-               :roles (vec (:relations fragment))}
+     (for [nodes node-groups
+           :when (seq nodes)
+           rejection readings]
+       {:nodes nodes
         :rejected-alternative (when rejection
                                 (select-keys rejection [:id :reason :query]))}))))
 
@@ -70,40 +79,58 @@
       (l "goal") :goal-precedes
       :else :precedes)))
 
+(defn- role-edge [left right]
+  {:from (:pattern left)
+   :to (:pattern right)
+   :kind (edge-kind {:node left} {:node right})
+   :from-fragment (:fragment-index left)
+   :to-fragment (:fragment-index right)
+   :from-roles (:roles left)
+   :to-roles (:roles right)})
+
+(defn- overlap-edges [nodes]
+  (vec (for [i (range (count nodes))
+             j (range (inc i) (count nodes))
+             :let [left (nth nodes i) right (nth nodes j)]]
+         {:from (:pattern left) :to (:pattern right) :kind :overlap
+          :from-fragment (:fragment-index left)
+          :to-fragment (:fragment-index right)
+          :from-roles (:roles left) :to-roles (:roles right)})))
+
 (defn- arrange [reading]
-  (let [nodes (mapv :node reading)
-        edges (mapv (fn [left right]
-                      {:from (get-in left [:node :pattern])
-                       :to (get-in right [:node :pattern])
-                       :kind (edge-kind left right)
-                       :from-fragment (get-in left [:node :fragment-index])
-                       :to-fragment (get-in right [:node :fragment-index])
-                       :from-roles (get-in left [:node :roles])
-                       :to-roles (get-in right [:node :roles])})
-                    reading (rest reading))]
+  (let [nodes (vec (mapcat :nodes reading))
+        within (mapcat #(overlap-edges (:nodes %)) reading)
+        between (mapcat (fn [left right]
+                          (for [a (:nodes left) b (:nodes right)] (role-edge a b)))
+                        reading (rest reading))]
     {:nodes nodes
-     :edges edges
+     :edges (vec (concat within between))
      :precedence (mapv :pattern nodes)
      :alternatives (vec (keep :rejected-alternative reading))}))
 
 (defn analysis->cascades
   "Return every cascade supported by ANALYSIS and counted conversion failures.
-   Zero validated refs is a failure count, not a successful typed absence."
-  [analysis]
-  (let [fragments (fragment-records analysis)
-        groups (mapv (fn [i fragment] (alternatives i fragment))
-                     (range) fragments)
-        supported (vec (filter seq groups))
-        failures (vec (keep-indexed
-                       (fn [i choices]
-                         (when (empty? choices)
-                           {:kind :fragment-without-validated-pattern-ref
-                            :fragment-index i}))
-                       groups))
-        cascades (if (seq supported)
-                   (->> (cartesian supported) (map arrange) distinct vec)
-                   [])]
-    {:status (if (seq cascades) :constructed :failed)
-     :cascades cascades
-     :failures failures
-     :failure-count (count failures)}))
+   MODE is :alternatives (default) or :overlap. Zero validated refs is a
+   failure count, not a successful typed absence."
+  ([analysis] (analysis->cascades analysis {:mode :alternatives}))
+  ([analysis {:keys [mode] :or {mode :alternatives}}]
+   (when-not (#{:alternatives :overlap} mode)
+     (throw (ex-info "Unknown analysis-cascade mode" {:mode mode})))
+   (let [fragments (fragment-records analysis)
+         groups (mapv (fn [i fragment] (fragment-choices mode i fragment))
+                      (range) fragments)
+         supported (vec (filter seq groups))
+         failures (vec (keep-indexed
+                        (fn [i choices]
+                          (when (empty? choices)
+                            {:kind :fragment-without-validated-pattern-ref
+                             :fragment-index i}))
+                        groups))
+         cascades (if (seq supported)
+                    (->> (cartesian supported) (map arrange) distinct vec)
+                    [])]
+     {:status (if (seq cascades) :constructed :failed)
+      :mode mode
+      :cascades cascades
+      :failures failures
+      :failure-count (count failures)})))

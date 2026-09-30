@@ -1,0 +1,156 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-2",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T08:55:03.573561+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The DOCUMENT section gives a reviewer-readable account of the implemented as-of, derivation, agreement, obligation, withdrawal, blocker-escalation, and attestation paths with their evidence.\n- [ ] The DOCUMENT exit names the deferred items and their written re-arm conditions, including Joe's user-side demonstration condition for item 17.4.\n\n---",
+  "source_sha256": "a2ffc5de33be8facd4fa3ba69a023cd81d15dc2016856779ca52671effadb3e1",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [],
+      "unresolved_reason": "Section heading; it frames what follows as acceptance criteria but makes no move of its own."
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 44,
+          "end": 234,
+          "text": "The DOCUMENT section gives a reviewer-readable account of the implemented as-of, derivation, agreement, obligation, withdrawal, blocker-escalation, and attestation paths with their evidence.",
+          "intent": "verify",
+          "target": "the DOCUMENT section of mission M-象-2000",
+          "rationale": "An unchecked acceptance item: the mission is not done until the document gives a reviewer a readable account of each named path with its evidence. The move sets the standard of proof for done, not the work itself.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 73,
+              "end": 98,
+              "text": "reviewer-readable account"
+            },
+            {
+              "start": 214,
+              "end": 233,
+              "text": "with their evidence"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "apparatus/done-is-observed-running",
+              "rationale": "The item defines done as an account backed by evidence for each path, not as a declaration that the paths exist; it is the mission-level form of activation-as-part-of-done.",
+              "status": "candidate",
+              "source_sha256": "7f0c05735928fef7fdd95fcfcb369ae4bc39d2191d0a76104e2b4e26ec7621f9"
+            },
+            {
+              "id": "test-registry/judge-adequacy",
+              "rationale": "The deliverable is reviewer-readable: the standard is an adequacy judgement by a reader (which behaviours are pinned, with what evidence), not the author's assertion of completeness.",
+              "status": "candidate",
+              "source_sha256": "a4d6ea879bb250f5fe78f697645fab1b2d3cece806dcec7a94b05c5f44006b43"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+              "reason": "That pattern warns against proxies for a claimed property; here the checklist demands the direct evidence account itself, so the boundary case does not apply.",
+              "query": "acceptance checklist items with observable evidence"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 259,
+          "end": 319,
+          "text": "names the deferred items and their written re-arm conditions",
+          "intent": "constrain",
+          "target": "how the DOCUMENT exit treats deferred items",
+          "rationale": "Deferral is permitted only in a hardened form: each deferred item must be named and must carry its re-arm condition in writing at the exit. This constrains the shape of an acceptable close, ruling out silent or vague deferral.",
+          "relations": [
+            "condition",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 294,
+              "end": 319,
+              "text": "written re-arm conditions"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch",
+              "rationale": "The item is WR-26 applied to mission documentation: switched-off scope must carry a countable, written re-arm condition at the point of switching off, so deferral persists by decision rather than by default.",
+              "status": "candidate",
+              "source_sha256": "dfef03b26cf9141adc758146405bb15b5c6ea271a06163d7afe86b146d8d214c"
+            },
+            {
+              "id": "writing-coherence/hedged-lift",
+              "rationale": "Its defer-properly branch: a deferral is legitimate only with a forward pointer the reader can chase, which is exactly what naming the items with written re-arm conditions enforces.",
+              "status": "candidate",
+              "source_sha256": "a58ce7caf31dc207a3f7b81b246570f7f6e182c49dfb309685fbe1d91fc68ed9"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "hygiene/exempt-the-in-use",
+              "reason": "That pattern exempts in-use items from scoring before judgement; this sentence is about deferring undone work with re-arm conditions, a different deferral shape.",
+              "query": "defer items with written re-arm conditions"
+            }
+          ]
+        },
+        {
+          "start": 331,
+          "end": 385,
+          "text": "Joe's user-side demonstration condition for item 17.4.",
+          "intent": "specify",
+          "target": "the re-arm condition for deferred item 17.4",
+          "rationale": "One deferred item is pinned to a specific, owner-assigned re-arm condition: Joe demonstrating it from the user side. The acceptance item shows the rule applied concretely, with the condition holder named.",
+          "relations": [
+            "condition",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 337,
+              "end": 370,
+              "text": "user-side demonstration condition"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "apparatus/done-is-observed-running",
+              "rationale": "Re-arming on a user-side demonstration makes reactivation observed behaviour rather than a declaration: item 17.4 returns only when it is seen working in Joe's hands.",
+              "status": "candidate",
+              "source_sha256": "7f0c05735928fef7fdd95fcfcb369ae4bc39d2191d0a76104e2b4e26ec7621f9"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [],
+      "unresolved_reason": "Markdown horizontal rule closing the checklist section; no propositional content."
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/01-M-xiang-2000.request.json",
+  "request_sha256": "73021a910253e97a22852c694df2c89aec75dd55ad8f9d5f18d4571ca45b392c"
+}

@@ -1,0 +1,61 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] Mark 3 tags arXiv papers using an arXiv-aware prompt and hierarchical pattern set, with batch coverage and hand-tagging agreement measured and recorded.\n- [ ] Mark 3 uses eprint input by default for rich theorem-and-proof hypergraphs.\n- [ ] Mark 3 reverse-morphogenesis output records failures explicitly instead of null analyses and rejects collapsed situation, salience, and constraint slots.\n- [ ] Mark 3 emits geometry artifacts with tension, unpaired claims, and hypergraph Laplacian summaries for papers and batches.\n- [ ] Mark 3 passes the inherited Mark 2 regression checks and uses a separate manifest with a tested rollback to Mark 2.",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 196,
+   "text": "\n- [ ] Mark 3 tags arXiv papers using an arXiv-aware prompt and hierarchical pattern set, with batch coverage and hand-tagging agreement measured and recorded."
+  },
+  {
+   "id": "s3",
+   "start": 197,
+   "end": 278,
+   "text": "- [ ] Mark 3 uses eprint input by default for rich theorem-and-proof hypergraphs."
+  },
+  {
+   "id": "s4",
+   "start": 279,
+   "end": 438,
+   "text": "- [ ] Mark 3 reverse-morphogenesis output records failures explicitly instead of null analyses and rejects collapsed situation, salience, and constraint slots."
+  },
+  {
+   "id": "s5",
+   "start": 439,
+   "end": 566,
+   "text": "- [ ] Mark 3 emits geometry artifacts with tension, unpaired claims, and hypergraph Laplacian summaries for papers and batches."
+  },
+  {
+   "id": "s6",
+   "start": 567,
+   "end": 688,
+   "text": "- [ ] Mark 3 passes the inherited Mark 2 regression checks and uses a separate manifest with a tested rollback to Mark 2."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-superpod-mark3",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-superpod-mark3.md",
+  "content_sha256": "3dde2d834d7a87f3d6f5bd5bd1f6fc1865e697ca9104ef2a9c19e003ed0b3ae7",
+  "item": {
+   "start": 37,
+   "end": 196,
+   "line": 710,
+   "text": "\n- [ ] Mark 3 tags arXiv papers using an arXiv-aware prompt and hierarchical pattern set, with batch coverage and hand-tagging agreement measured and recorded."
+  },
+  "section": {
+   "source_start": 32701,
+   "source_end": 33390
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/05-M-superpod-mark3.request.json.analysis.json"
+}

@@ -1,0 +1,67 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] Wikipedia gold JSON contains at least 1,000 well-formed symbol/canon pairs across at least 500 articles, including a recorded 30-pair hand sample.\n- [ ] Combined PM and Wikipedia gold contains at least 1,500 pairs across at least 800 entries and reports the per-source precision delta.\n- [ ] Strategy gating plus canon-ancestry comparison achieves at least 25% loose precision on the combined gold.\n- [ ] The final evaluation reports at least 30% loose precision, no high-volume strategy below 15%, and no more than a five-point recall drop.\n- [ ] The full pipeline completes cleanly on 100 papers and emits loadable evaluation JSON plus a structurally valid learned-vocabulary side file.\n- [ ] Joe's explicit approval is recorded after review of the precision report, 100-paper output, and scale economics, before Rob's batch is sent.",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 190,
+   "text": "\n- [ ] Wikipedia gold JSON contains at least 1,000 well-formed symbol/canon pairs across at least 500 articles, including a recorded 30-pair hand sample."
+  },
+  {
+   "id": "s3",
+   "start": 191,
+   "end": 329,
+   "text": "- [ ] Combined PM and Wikipedia gold contains at least 1,500 pairs across at least 800 entries and reports the per-source precision delta."
+  },
+  {
+   "id": "s4",
+   "start": 330,
+   "end": 442,
+   "text": "- [ ] Strategy gating plus canon-ancestry comparison achieves at least 25% loose precision on the combined gold."
+  },
+  {
+   "id": "s5",
+   "start": 443,
+   "end": 585,
+   "text": "- [ ] The final evaluation reports at least 30% loose precision, no high-volume strategy below 15%, and no more than a five-point recall drop."
+  },
+  {
+   "id": "s6",
+   "start": 586,
+   "end": 732,
+   "text": "- [ ] The full pipeline completes cleanly on 100 papers and emits loadable evaluation JSON plus a structurally valid learned-vocabulary side file."
+  },
+  {
+   "id": "s7",
+   "start": 733,
+   "end": 879,
+   "text": "- [ ] Joe's explicit approval is recorded after review of the precision report, 100-paper output, and scale economics, before Rob's batch is sent."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-symbol-grounding-scaling-plan",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-symbol-grounding-scaling-plan.md",
+  "content_sha256": "06e3a807e7ec391a23e32208be7abdbc2a2d9cef6c7e066e8258fff769f32063",
+  "item": {
+   "start": 37,
+   "end": 190,
+   "line": 370,
+   "text": "\n- [ ] Wikipedia gold JSON contains at least 1,000 well-formed symbol/canon pairs across at least 500 articles, including a recorded 30-pair hand sample."
+  },
+  "section": {
+   "source_start": 14782,
+   "source_end": 15662
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/04-M-symbol-grounding-scaling-plan.request.json.analysis.json"
+}

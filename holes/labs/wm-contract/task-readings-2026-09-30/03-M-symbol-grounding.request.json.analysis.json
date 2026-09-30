@@ -1,0 +1,353 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-4",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T08:55:48.009917+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The Layer 1 v2 demo shows visible math-scope marks on at least 80% of math-heavy papers and its regex regression tests pass.\n- [ ] Layer 2 reaches Layer 1 coverage parity and its AST handles at least five named constructions missed by regex.\n- [ ] Layer 3 achieves at least 50% symbol-grounding precision on a 30-paper sample against the First Proof Batch One projection.\n- [ ] Real post-H4 held output meets the preregistered `symbol_grounded` coverage-at-confidence target while keeping `symbol_tagged` at 1.0, `W-NEST-SCOPE` at 0, and grounding non-decreasing.\n- [ ] The evaluation harness machine-checks the preregistered capability-star bar and surfaces the result in a regenerated star-map graph.\n- [ ] Held-out precision and `math_outer_count` are recorded across two cycles and satisfy the mission's stopping rule or name the next upstream bottleneck.",
+  "source_sha256": "a3d2cea07cec0b1890ade8b28260013aa8a791bfa3f7b54d2e9785ad694e970e",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 36,
+          "text": "## Acceptance checklist (2026-09-30)",
+          "intent": "frame",
+          "target": "the six acceptance items that follow",
+          "rationale": "A dated header that frames the whole block as an acceptance checklist; it carries no demand of its own but sets the interpretive frame (these are pass/fail gates fixed at a date) for every item below.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3,
+              "end": 23,
+              "text": "Acceptance checklist"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "Dating and sealing the checklist header is the preregistration move itself: the bar is fixed at a named time before the evidence arrives.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 37,
+          "end": 168,
+          "text": "\n- [ ] The Layer 1 v2 demo shows visible math-scope marks on at least 80% of math-heavy papers and its regex regression tests pass.",
+          "intent": "constrain",
+          "target": "Layer 1 v2 demo acceptance bar",
+          "rationale": "Sets a fixed quantitative gate for the regex layer: visible marks on a named fraction of real math-heavy papers plus passing regression tests. Both the threshold and the test-pass condition are stated before the result is known.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 70,
+              "end": 94,
+              "text": "visible math-scope marks"
+            },
+            {
+              "start": 98,
+              "end": 110,
+              "text": "at least 80%"
+            },
+            {
+              "start": 140,
+              "end": 167,
+              "text": "regex regression tests pass"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "The 80% coverage figure and the regression-test pass condition are fixed, named thresholds committed in advance — exactly the sealed graduation bar.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "cascade-construction/run-it-on-a-real-case",
+              "reason": "That pattern runs a constructed cascade on a recorded case *before* building; this item accepts an already-built v2 demo, so the temporal direction is reversed.",
+              "query": "demo must visibly show the feature working on real data"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 169,
+          "end": 285,
+          "text": "- [ ] Layer 2 reaches Layer 1 coverage parity and its AST handles at least five named constructions missed by regex.",
+          "intent": "constrain",
+          "target": "Layer 2 AST acceptance bar",
+          "rationale": "Requires the AST layer to reach parity with the regex layer and then exceed it on a fixed count of named missed constructions — a sealed pair of thresholds (parity, five constructions) that define when Layer 2 may graduate.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 199,
+              "end": 214,
+              "text": "coverage parity"
+            },
+            {
+              "start": 244,
+              "end": 284,
+              "text": "five named constructions missed by regex"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "Coverage parity plus 'at least five named constructions' are fixed thresholds committed before measurement, the sealed-bar shape.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "enrichment/extend-not-rewrite",
+              "reason": "That pattern is about adding to a tested script instead of rewriting code; this item is about one analysis layer matching another's coverage, a measurement relation, not a code-reuse decision.",
+              "query": "new layer must match coverage of previous layer before replacing it"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 286,
+          "end": 415,
+          "text": "- [ ] Layer 3 achieves at least 50% symbol-grounding precision on a 30-paper sample against the First Proof Batch One projection.",
+          "intent": "constrain",
+          "target": "Layer 3 symbol-grounding acceptance bar",
+          "rationale": "Fixes a precision floor (50%) on a named held-out sample (30 papers) scored against a named external reference (the First Proof Batch One projection) — sample, threshold, and answer key all committed in advance.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 309,
+              "end": 348,
+              "text": "at least 50% symbol-grounding precision"
+            },
+            {
+              "start": 354,
+              "end": 369,
+              "text": "30-paper sample"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "Threshold, sample size, and reference projection are all named before the measurement is taken; the seal binds the answer key, not the candidate pool.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "reason": "A smoke test is a cheap pre-run sanity check before the expensive full run; this item *is* the evaluation whose result decides acceptance, not a rehearsal for one.",
+              "query": "precision measured against held-out sample"
+            },
+            {
+              "id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+              "reason": "That pattern warns against accepting a proxy for the claimed property; here precision is scored directly against the First Proof projection, the claimed property itself, so the warning does not bite.",
+              "query": "preregistered acceptance criteria with measurable thresholds before doing the work"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 416,
+          "end": 607,
+          "text": "- [ ] Real post-H4 held output meets the preregistered `symbol_grounded` coverage-at-confidence target while keeping `symbol_tagged` at 1.0, `W-NEST-SCOPE` at 0, and grounding non-decreasing.",
+          "intent": "constrain",
+          "target": "end-to-end held-output gate with guard metrics",
+          "rationale": "The real-output gate pairs a preregistered primary target (symbol_grounded coverage-at-confidence) with named guard rails that must not move: symbol_tagged pinned at 1.0, W-NEST-SCOPE pinned at 0, grounding monotone. Improvement on one axis may not be bought by regression on another.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 457,
+              "end": 488,
+              "text": "preregistered `symbol_grounded`"
+            },
+            {
+              "start": 533,
+              "end": 555,
+              "text": "`symbol_tagged` at 1.0"
+            },
+            {
+              "start": 557,
+              "end": 576,
+              "text": "`W-NEST-SCOPE` at 0"
+            },
+            {
+              "start": 592,
+              "end": 606,
+              "text": "non-decreasing"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "The primary target is explicitly 'preregistered' — the sealed-bar move named in the checklist's own words.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            },
+            {
+              "id": "futon-theory/counter-ratchet",
+              "rationale": "The three guard clauses (symbol_tagged at 1.0, W-NEST-SCOPE at 0, grounding non-decreasing) are the counter-ratchet invariant applied as acceptance conditions: key counts must not drop without explanation.",
+              "status": "candidate",
+              "source_sha256": "da108802c46bfa861be7776a991212819f65778f0dd65a6a93080e57d082bf9e"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 608,
+          "end": 746,
+          "text": "- [ ] The evaluation harness machine-checks the preregistered capability-star bar and surfaces the result in a regenerated star-map graph.",
+          "intent": "constrain",
+          "target": "machine-checked acceptance surfacing",
+          "rationale": "The bar must be checked by the evaluation harness itself and the outcome surfaced in a regenerated star-map artifact — acceptance is a mechanical check with a visible certificate, not a human judgement call.",
+          "relations": [
+            "goal",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 637,
+              "end": 689,
+              "text": "machine-checks the preregistered capability-star bar"
+            },
+            {
+              "start": 719,
+              "end": 745,
+              "text": "regenerated star-map graph"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "nomad/self-certifying-artifact",
+              "rationale": "Machine-checking the capability-star bar and surfacing it in a regenerated graph makes the result carry its own validity: a mechanical certificate substitutes for argued judgement.",
+              "status": "candidate",
+              "source_sha256": "fff6d529fb5ad95350f0b36690e31757434f8801f95f2cd0403373bca7eca7aa"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 747,
+          "end": 903,
+          "text": "- [ ] Held-out precision and `math_outer_count` are recorded across two cycles and satisfy the mission's stopping rule or name the next upstream bottleneck.",
+          "intent": "constrain",
+          "target": "cross-cycle stopping condition",
+          "rationale": "Requires the two guard metrics to be recorded across two cycles and then a sealed disjunction: either the mission's stopping rule is satisfied or the next upstream bottleneck is named. 'We kept going' is not an admissible outcome; the exit condition is fixed in advance.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 799,
+              "end": 825,
+              "text": "recorded across two cycles"
+            },
+            {
+              "start": 852,
+              "end": 865,
+              "text": "stopping rule"
+            },
+            {
+              "start": 878,
+              "end": 902,
+              "text": "next upstream bottleneck"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "The stopping rule is fixed before the two cycles run, and the only alternative it permits is a named bottleneck — a sealed graduation criterion with an explicit failure exit.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            },
+            {
+              "id": "futon-theory/counter-ratchet",
+              "rationale": "Recording held-out precision and math_outer_count across cycles is the ratchet's baseline-and-compare discipline over time.",
+              "status": "candidate",
+              "source_sha256": "da108802c46bfa861be7776a991212819f65778f0dd65a6a93080e57d082bf9e"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "agent/pause-is-not-failure",
+              "reason": "That pattern legitimises pausing as an outcome; this item does not permit a bare pause — the only permitted non-pass is naming the next upstream bottleneck, a diagnostic deliverable.",
+              "query": "stopping rule or name the next bottleneck"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/03-M-symbol-grounding.request.json",
+  "request_sha256": "a3503ecab9fac63f25e3ff2d2525c31c30d869d0f8bb212ee6c3e5574f3260f9"
+}

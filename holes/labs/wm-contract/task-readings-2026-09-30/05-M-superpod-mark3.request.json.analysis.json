@@ -1,0 +1,165 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象-3",
+  "reusable_cues": [
+    {
+      "start": 151,
+      "end": 173,
+      "text": "hand-tagging agreement",
+      "intent": "evaluate",
+      "rationale": "Agreement-against-hand-tags is a reusable cue for evaluating a tagger against a human reference set."
+    }
+  ],
+  "created_at": "2026-09-30T08:55:48.828061+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] Mark 3 tags arXiv papers using an arXiv-aware prompt and hierarchical pattern set, with batch coverage and hand-tagging agreement measured and recorded.\n- [ ] Mark 3 uses eprint input by default for rich theorem-and-proof hypergraphs.\n- [ ] Mark 3 reverse-morphogenesis output records failures explicitly instead of null analyses and rejects collapsed situation, salience, and constraint slots.\n- [ ] Mark 3 emits geometry artifacts with tension, unpaired claims, and hypergraph Laplacian summaries for papers and batches.\n- [ ] Mark 3 passes the inherited Mark 2 regression checks and uses a separate manifest with a tested rollback to Mark 2.",
+  "source_sha256": "384270d072e931706bf194af28b8f865cc006ebe5f7753cffce3997dea2352d8",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [],
+      "unresolved_reason": "Heading only; names the checklist and date, carries no interpretable move."
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 44,
+          "end": 125,
+          "text": "Mark 3 tags arXiv papers using an arXiv-aware prompt and hierarchical pattern set",
+          "intent": "classify",
+          "target": "arXiv papers, tagged by Mark 3 with a domain-aware prompt and a fixed hierarchical pattern vocabulary",
+          "rationale": "The deliverable is an automated tagger whose labels are constrained to a curated hierarchical pattern set rather than free description; the arXiv-aware prompt supplies the domain framing.",
+          "relations": [
+            "action",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 78,
+              "end": 96,
+              "text": "arXiv-aware prompt"
+            },
+            {
+              "start": 101,
+              "end": 125,
+              "text": "hierarchical pattern set"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+              "rationale": "Tagging papers with a fixed hierarchical pattern set is exactly constraining an extracted field to the downstream vocabulary so the consumer gets operation names, not paraphrase.",
+              "status": "candidate",
+              "source_sha256": "776e9fff9a2328b6ce8017d15226f385267f3fd7f002fd3d697e0b1ccd1a1d52"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "hygiene/classify-by-remedy-judgement",
+              "reason": "That pattern classifies hygiene items by how much judgement their remedy needs; this item tags papers against a domain taxonomy, where the axis is subject-matter patterns, not remedy cost.",
+              "query": "classify items with a domain-aware prompt and a hierarchical tag set"
+            },
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "reason": "Smoke-testing a prompt on a held-out sample is a cost-control step before a paid run; the acceptance item specifies the tagger itself and its measured quality, not a pre-run cost gate.",
+              "query": "classify items with a domain-aware prompt and a hierarchical tag set"
+            }
+          ]
+        },
+        {
+          "start": 132,
+          "end": 173,
+          "text": "batch coverage and hand-tagging agreement",
+          "intent": "evaluate",
+          "target": "tagging quality, measured as batch coverage plus agreement against human hand-tagging",
+          "rationale": "Acceptance requires the tagger to be scored against a human reference: agreement with hand-tagging presupposes a hand-verified comparison set, and coverage quantifies how much of the batch gets tagged.",
+          "relations": [
+            "condition",
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 151,
+              "end": 173,
+              "text": "hand-tagging agreement"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/golden-is-curated-not-raw",
+              "rationale": "Hand-tagging agreement is only meaningful against a curated, hand-verified reference set rather than raw pipeline output, which is what this pattern mandates.",
+              "status": "candidate",
+              "source_sha256": "3b3bc114e46315443cece712fad8d270b16fbb043f49f62c4f2b18d820a5b6e2"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "ukrns/measure-where-least-sure",
+              "reason": "That pattern selects where to measure by uncertainty; this item fixes the metric in advance (coverage and hand-tag agreement) rather than choosing measurement sites adaptively.",
+              "query": "measure agreement between machine labels and human hand-tagging"
+            }
+          ]
+        },
+        {
+          "start": 174,
+          "end": 195,
+          "text": "measured and recorded",
+          "intent": "attest",
+          "target": "the coverage and agreement numbers, which must be recorded with their derivation",
+          "rationale": "The item does not accept informal claims of quality: the metrics must be recorded so the acceptance claim is checkable later, which is a provenance requirement on the numbers.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 174,
+              "end": 195,
+              "text": "measured and recorded"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "measurement/warrant-travels-with-the-number",
+              "rationale": "Requiring the metrics to be measured and recorded makes the acceptance claim checkable rather than asserted, exactly the warrant-travels-with-the-number discipline.",
+              "status": "candidate",
+              "source_sha256": "415a41bc2fc385ebc02e7cae2dc20d0b484790afa9b14a7958fc66853652e7e3"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (eprint input default); outside the tasked item s2."
+    },
+    {
+      "id": "s4",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (explicit failure recording in reverse-morphogenesis); outside the tasked item s2."
+    },
+    {
+      "id": "s5",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (geometry artifacts); outside the tasked item s2."
+    },
+    {
+      "id": "s6",
+      "fragments": [],
+      "unresolved_reason": "Sibling checklist item (Mark 2 regression and rollback manifest); outside the tasked item s2."
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/05-M-superpod-mark3.request.json",
+  "request_sha256": "724522d9e07e84b8dd9e34b7aeee72f92b38472204ab1790f1b3dd808b0ccf36"
+}

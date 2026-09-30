@@ -1,0 +1,67 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The Layer 1 v2 demo shows visible math-scope marks on at least 80% of math-heavy papers and its regex regression tests pass.\n- [ ] Layer 2 reaches Layer 1 coverage parity and its AST handles at least five named constructions missed by regex.\n- [ ] Layer 3 achieves at least 50% symbol-grounding precision on a 30-paper sample against the First Proof Batch One projection.\n- [ ] Real post-H4 held output meets the preregistered `symbol_grounded` coverage-at-confidence target while keeping `symbol_tagged` at 1.0, `W-NEST-SCOPE` at 0, and grounding non-decreasing.\n- [ ] The evaluation harness machine-checks the preregistered capability-star bar and surfaces the result in a regenerated star-map graph.\n- [ ] Held-out precision and `math_outer_count` are recorded across two cycles and satisfy the mission's stopping rule or name the next upstream bottleneck.",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 168,
+   "text": "\n- [ ] The Layer 1 v2 demo shows visible math-scope marks on at least 80% of math-heavy papers and its regex regression tests pass."
+  },
+  {
+   "id": "s3",
+   "start": 169,
+   "end": 285,
+   "text": "- [ ] Layer 2 reaches Layer 1 coverage parity and its AST handles at least five named constructions missed by regex."
+  },
+  {
+   "id": "s4",
+   "start": 286,
+   "end": 415,
+   "text": "- [ ] Layer 3 achieves at least 50% symbol-grounding precision on a 30-paper sample against the First Proof Batch One projection."
+  },
+  {
+   "id": "s5",
+   "start": 416,
+   "end": 607,
+   "text": "- [ ] Real post-H4 held output meets the preregistered `symbol_grounded` coverage-at-confidence target while keeping `symbol_tagged` at 1.0, `W-NEST-SCOPE` at 0, and grounding non-decreasing."
+  },
+  {
+   "id": "s6",
+   "start": 608,
+   "end": 746,
+   "text": "- [ ] The evaluation harness machine-checks the preregistered capability-star bar and surfaces the result in a regenerated star-map graph."
+  },
+  {
+   "id": "s7",
+   "start": 747,
+   "end": 903,
+   "text": "- [ ] Held-out precision and `math_outer_count` are recorded across two cycles and satisfy the mission's stopping rule or name the next upstream bottleneck."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-symbol-grounding",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-symbol-grounding.md",
+  "content_sha256": "1a45cd04cf5c6be3fda685c2b1c9c2549c39891a176764da24273ee187fad683",
+  "item": {
+   "start": 37,
+   "end": 168,
+   "line": 341,
+   "text": "\n- [ ] The Layer 1 v2 demo shows visible math-scope marks on at least 80% of math-heavy papers and its regex regression tests pass."
+  },
+  "section": {
+   "source_start": 16629,
+   "source_end": 17533
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/03-M-symbol-grounding.request.json.analysis.json"
+}

@@ -1,0 +1,67 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [x] This mission specifies golden/live dataset identity, lifecycle-event vocabulary, event-versus-projection boundaries, and the Hyperreal Side A replay scenario. (evidence: `holes/missions/M-essays-diachronic-model.md`)\n- [ ] A named command or script mints a writable Hyperreal live round from an immutable golden seed without modifying the source pair.\n- [ ] XTDB document shapes exist for `dataset-round` and the lifecycle events named in this mission.\n- [ ] Save-time transitions emit the applicable lifecycle events with stable essay, section, annotation, and dataset-round identities.\n- [ ] A replay distinguishes preserved-anchor, forced-reanchor, and substrate-removal transitions in its projections.\n- [ ] Temporal query and WebArxana views expose the lifecycle and identify the live round from which every result was derived.",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 260,
+   "text": "\n- [x] This mission specifies golden/live dataset identity, lifecycle-event vocabulary, event-versus-projection boundaries, and the Hyperreal Side A replay scenario. (evidence: `holes/missions/M-essays-diachronic-model.md`)"
+  },
+  {
+   "id": "s3",
+   "start": 261,
+   "end": 395,
+   "text": "- [ ] A named command or script mints a writable Hyperreal live round from an immutable golden seed without modifying the source pair."
+  },
+  {
+   "id": "s4",
+   "start": 396,
+   "end": 496,
+   "text": "- [ ] XTDB document shapes exist for `dataset-round` and the lifecycle events named in this mission."
+  },
+  {
+   "id": "s5",
+   "start": 497,
+   "end": 631,
+   "text": "- [ ] Save-time transitions emit the applicable lifecycle events with stable essay, section, annotation, and dataset-round identities."
+  },
+  {
+   "id": "s6",
+   "start": 632,
+   "end": 749,
+   "text": "- [ ] A replay distinguishes preserved-anchor, forced-reanchor, and substrate-removal transitions in its projections."
+  },
+  {
+   "id": "s7",
+   "start": 750,
+   "end": 876,
+   "text": "- [ ] Temporal query and WebArxana views expose the lifecycle and identify the live round from which every result was derived."
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-essays-diachronic-model",
+  "file_path": "/home/joe/code/futon4/holes/missions/M-essays-diachronic-model.md",
+  "content_sha256": "be274a0532af060091e7d4c3f3f09f8c795a25d25c7589d488a13f618fda2f0f",
+  "item": {
+   "start": 261,
+   "end": 395,
+   "line": 11,
+   "text": "- [ ] A named command or script mints a writable Hyperreal live round from an immutable golden seed without modifying the source pair."
+  },
+  "section": {
+   "source_start": 319,
+   "source_end": 1197
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/02-M-essays-diachronic-model.request.json.analysis.json"
+}

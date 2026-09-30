@@ -1,0 +1,544 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象 (sonnet), M-G-wm-wiring task reading",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T08:56:34.628967+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The improved pipeline completes on an all-arXiv-math corpus of at least 200,000 papers.\n- [ ] Stage 9b reports pairwise cosine-similarity standard deviation above 0.10 and validation accuracy below 90%.\n- [ ] A learn-to-swim or LeanDojo pilot record shows structural or hybrid retrieval finds technique-relevant papers missed by BGE-only retrieval.\n- [ ] `corpus_ws_bridge.py` serves a FAISS index whose measured retrieval precision exceeds the BGE-only Mark 1 baseline.\n\n| Mission | Relationship |\n|---------|-------------|\n| M-apm-solutions | Consumer: uses retrieval for theorem proving |\n| M-diagramprover | Shares superpod, separate workflow (proof search not mining) |\n| M-artificial-stack-exchange | Future consumer of improved retrieval |\n| M-distributed-frontiermath | Future consumer for FrontierMath campaigns |",
+  "source_sha256": "a8f011beb36392d969fb74c40828b74872a3269c38d7d3576163842515ecd717",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 36,
+          "text": "## Acceptance checklist (2026-09-30)",
+          "intent": "define-acceptance-criteria",
+          "target": "the M-superpod-mark2 mission's completion conditions",
+          "rationale": "The heading declares that what follows is a dated list of conditions for calling the mission done, written before any of them is met; nothing below is a status report.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3,
+              "end": 23,
+              "text": "Acceptance checklist"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "forward-model/seal-the-graduation-criteria",
+              "rationale": "The pattern asks for the bar to be fixed in advance so it cannot be moved to fit what was produced. A dated checklist of numeric and comparative conditions is that kind of advance statement, though this mission doc does not say the list is sealed or protected from later edits.",
+              "status": "candidate",
+              "source_sha256": "f21cd2590ab95e2366c4873469d626c8640378184bf47e1ed76708e77d477036"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/gates-as-code",
+              "reason": "Its move is to turn prose bands into a runnable checker run by someone other than the producer. The heading only frames the list; the items below are still prose checkboxes, so that pattern names a next step for them, not what this fragment does.",
+              "query": "numeric quality gate encoded as a checkable threshold"
+            },
+            {
+              "id": "process/fake-done-via-binary-closure",
+              "reason": "It warns about a done bit that closes over an unfinished artifact. The '[ ]' boxes are binary, but this heading only announces the list; the risk applies to how the boxes get ticked later.",
+              "query": "acceptance criteria stated as checkable conditions before the work counts as done"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 44,
+          "end": 75,
+          "text": "The improved pipeline completes",
+          "intent": "require-pipeline-completion",
+          "target": "the improved pipeline",
+          "rationale": "The first condition is that the whole improved pipeline runs to the end; no quality figure is attached to this item, the later items supply those.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 48,
+              "end": 75,
+              "text": "improved pipeline completes"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "process/fake-done-via-binary-closure",
+              "reason": "A bare 'completes' is the kind of binary status the pattern says can be true while the output is unusable. Items 2 to 4 add artifact-level figures, so this fragment is not itself a fake-done instance; it is the part that would be if it stood alone.",
+              "query": "acceptance criteria stated as checkable conditions before the work counts as done"
+            }
+          ]
+        },
+        {
+          "start": 76,
+          "end": 130,
+          "text": "on an all-arXiv-math corpus of at least 200,000 papers",
+          "intent": "set-scale-threshold",
+          "target": "the corpus the pipeline must complete on",
+          "rationale": "Fixes the scale at which completion counts: the whole arXiv math corpus, at least 200,000 papers, not a sample.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 107,
+              "end": 130,
+              "text": "at least 200,000 papers"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/the-first-checkpoint-is-a-quality-probe",
+              "rationale": "The pattern says that once a run is fast and checkpointed, point it at the whole corpus instead of a capped subset and gate the first checkpoint. This item asks for exactly the whole-corpus run; the source does not mention checkpointing or an early gate.",
+              "status": "candidate",
+              "source_sha256": "994b08bb36e5eba7b4fefc4fbf490374a7193daf22de3a335073547d7af1acdb"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "reason": "That pattern is about a small held-out real-backend pass before the paid run. This fragment states the end-state scale of the run, not a pre-run sample.",
+              "query": "run the full pipeline at corpus scale before declaring it works"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 138,
+          "end": 211,
+          "text": "Stage 9b reports pairwise cosine-similarity standard deviation above 0.10",
+          "intent": "set-quantitative-acceptance-threshold",
+          "target": "the spread of pairwise cosine similarities reported by stage 9b",
+          "rationale": "A lower bound on how spread out the vectors are, as a number the stage itself reports; a value under 0.10 fails the item.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 182,
+              "end": 211,
+              "text": "standard deviation above 0.10"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "A band with a stated number that the pipeline prints and a checker can compare is what the pattern asks for in place of a prose judgement. Here the stage reports the figure and the checklist fixes the threshold.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "devmap-coherence/prototype-alignment-embedding",
+              "reason": "About keeping a patterns-index and compression log so the sigil-based 'fake embedding' in FUTON3 stays reproducible. It does not concern a threshold on the spread of learned vectors; the hit was on the word 'embedding'.",
+              "query": "embedding similarity spread as a collapse check on learned vectors"
+            }
+          ]
+        },
+        {
+          "start": 212,
+          "end": 245,
+          "text": "and validation accuracy below 90%",
+          "intent": "set-quantitative-acceptance-threshold",
+          "target": "the validation accuracy reported by stage 9b",
+          "rationale": "A ceiling, not a floor: validation accuracy has to stay under 90%. The doc does not say why; read literally, the item fails a run whose validation task is too easy or saturated.",
+          "relations": [
+            "goal",
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 227,
+              "end": 245,
+              "text": "accuracy below 90%"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "Same gate shape as the previous fragment: a numeric band with a pass or fail. The direction is unusual (fail if too high), and the source gives no reason for it.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+              "reason": "It says to probe the promised property instead of a cheap proxy. Accuracy under 90% could be read as a guard against a proxy, but the source does not say so, and the fragment states a threshold rather than a probe design.",
+              "query": "validation accuracy too high means the test is too easy"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 253,
+          "end": 299,
+          "text": "A learn-to-swim or LeanDojo pilot record shows",
+          "intent": "require-pilot-evidence",
+          "target": "a recorded pilot on learn-to-swim or LeanDojo material",
+          "rationale": "The evidence has to be a pilot record on one of two named tasks; a claim of improvement without the record does not satisfy the item.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 281,
+              "end": 299,
+              "text": "pilot record shows"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "peripherals/pilot-plus-ground-control",
+              "reason": "'Pilot' there is a role in a two-agent split (one flies the peripheral, one repairs the instrument). Here it is a small trial run whose record serves as evidence; the hit was on the word.",
+              "query": "a pilot record is the evidence that a method works before scaling"
+            }
+          ]
+        },
+        {
+          "start": 300,
+          "end": 391,
+          "text": "structural or hybrid retrieval finds technique-relevant papers missed by BGE-only retrieval",
+          "intent": "require-comparative-improvement",
+          "target": "structural or hybrid retrieval versus BGE-only retrieval",
+          "rationale": "The claim to be shown is a difference in what is found: papers relevant to a technique that the embedding-only baseline misses, not a general score gain.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 337,
+              "end": 362,
+              "text": "technique-relevant papers"
+            },
+            {
+              "start": 363,
+              "end": 391,
+              "text": "missed by BGE-only retrieval"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "exotic/semi-robust-baselines",
+              "reason": "It sets up A/B comparison with rotated seeds and repeated batches so variance can be estimated. This item asks only that a pilot record show the difference; it does not require repeats or variance estimates.",
+              "query": "retrieval precision measured against a fixed earlier baseline"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 399,
+          "end": 441,
+          "text": "`corpus_ws_bridge.py` serves a FAISS index",
+          "intent": "require-deployed-artifact",
+          "target": "the corpus_ws_bridge.py service",
+          "rationale": "Names the concrete deliverable: the bridge script must actually serve a FAISS index, so a script that exists but serves nothing does not count.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 421,
+              "end": 441,
+              "text": "serves a FAISS index"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [],
+          "pattern_rejections": [
+            {
+              "id": "test-registry/bind-the-subject",
+              "reason": "About binding subjects to warrants and closing incidents only with fresher ones. The fragment names a service that must be running, not a warrant or incident.",
+              "query": "service must serve an index whose quality is measured, not asserted"
+            }
+          ]
+        },
+        {
+          "start": 442,
+          "end": 513,
+          "text": "whose measured retrieval precision exceeds the BGE-only Mark 1 baseline",
+          "intent": "require-baseline-beating-measurement",
+          "target": "retrieval precision of the served index against the Mark 1 baseline",
+          "rationale": "The item passes only if a measured precision figure for the served index is above the figure for the earlier BGE-only Mark 1 system, so two numbers have to exist and be comparable.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 448,
+              "end": 484,
+              "text": "measured retrieval precision exceeds"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "measurement/warrant-travels-with-the-number",
+              "rationale": "The item depends on two computed precision numbers being compared. The pattern says each such number should carry its rule and inputs so a dispute can be settled by checking; without that, 'exceeds the baseline' cannot be checked by someone other than whoever ran it. The source does not require this, so the pattern names a gap, not something the item already does.",
+              "status": "candidate",
+              "source_sha256": "415a41bc2fc385ebc02e7cae2dc20d0b484790afa9b14a7958fc66853652e7e3"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "cycle-machine/toolchain-port",
+              "reason": "It derives an accepted Lean baseline from the distribution over a whole corpus. 'Baseline' here is the earlier system's measured precision, not a distribution-derived acceptance rule.",
+              "query": "retrieval precision measured against a fixed earlier baseline"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 516,
+          "end": 542,
+          "text": "| Mission | Relationship |",
+          "intent": "declare-table-schema",
+          "target": "the table of related missions",
+          "rationale": "The header says each row below pairs a mission with how it relates to M-superpod-mark2.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 528,
+              "end": 540,
+              "text": "Relationship"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "The pattern asks for missions to be linked by typed relationships (blocks, enables, shares, parent-child) so dependencies are visible; this table is the doc's version, with free-text relationship cells.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [],
+      "unresolved_reason": "Markdown table separator row (dashes and pipes). It carries no words and no content of its own."
+    },
+    {
+      "id": "s8",
+      "fragments": [
+        {
+          "start": 569,
+          "end": 635,
+          "text": "| M-apm-solutions | Consumer: uses retrieval for theorem proving |",
+          "intent": "declare-mission-relationship",
+          "target": "M-apm-solutions and its relationship to M-superpod-mark2",
+          "rationale": "M-apm-solutions is downstream of this mission: it uses the retrieval for theorem proving, so it is affected by whether the retrieval improves.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 571,
+              "end": 586,
+              "text": "M-apm-solutions"
+            },
+            {
+              "start": 589,
+              "end": 613,
+              "text": "Consumer: uses retrieval"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "Downstream consumer relationship, close to the pattern's 'enables' type, recorded from the enabling mission's side.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "data-mining/classify-over-one-clean-source",
+              "reason": "About one provenance classifier serving several consumers instead of per-consumer filters. The word 'consumer' matches; the fragment declares a mission relationship, not a shared classifier.",
+              "query": "table of missions and how each relates: consumer, shares resource, future consumer"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s9",
+      "fragments": [
+        {
+          "start": 636,
+          "end": 718,
+          "text": "| M-diagramprover | Shares superpod, separate workflow (proof search not mining) |",
+          "intent": "declare-mission-relationship",
+          "target": "M-diagramprover and its relationship to M-superpod-mark2",
+          "rationale": "M-diagramprover uses the same superpod but does a different job (proof search, not mining), so it competes for the machine without depending on this mission's output.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 656,
+              "end": 671,
+              "text": "Shares superpod"
+            },
+            {
+              "start": 673,
+              "end": 690,
+              "text": "separate workflow"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "The pattern's 'shares' type: two missions share a resource, and the parenthesis states that the work itself is separate.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s10",
+      "fragments": [
+        {
+          "start": 719,
+          "end": 790,
+          "text": "| M-artificial-stack-exchange | Future consumer of improved retrieval |",
+          "intent": "declare-mission-relationship",
+          "target": "M-artificial-stack-exchange and its relationship to M-superpod-mark2",
+          "rationale": "M-artificial-stack-exchange is expected to use the improved retrieval later; nothing is blocked now, but its needs are a reason to finish.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 751,
+              "end": 766,
+              "text": "Future consumer"
+            },
+            {
+              "start": 770,
+              "end": 788,
+              "text": "improved retrieval"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "A soft, later downstream relationship, like 'enables' with the timing marked as future.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "stack-coherence/stack-blocker-detection",
+              "reason": "It scans devmaps for declared prerequisites and reports what blocks what. This row declares a future consumer and states no blocker or unmet prerequisite.",
+              "query": "state the relationship between missions so blocked and shared work is visible"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s11",
+      "fragments": [
+        {
+          "start": 791,
+          "end": 866,
+          "text": "| M-distributed-frontiermath | Future consumer for FrontierMath campaigns |",
+          "intent": "declare-mission-relationship",
+          "target": "M-distributed-frontiermath and its relationship to M-superpod-mark2",
+          "rationale": "M-distributed-frontiermath is expected to use the retrieval later, for FrontierMath campaigns.",
+          "relations": [
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 822,
+              "end": 837,
+              "text": "Future consumer"
+            },
+            {
+              "start": 842,
+              "end": 864,
+              "text": "FrontierMath campaigns"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "futon-theory/mission-dependency",
+              "rationale": "Same relationship as the row above, with the intended use named.",
+              "status": "candidate",
+              "source_sha256": "1805ee0861f02b1cb198be733bc09c1b9067b6339ca13b24cdadf5e547fd653a"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/06-M-superpod-mark2.request.json",
+  "request_sha256": "1e60ecb54480810421cdbac3021f38da717c745b98ed97e1c2a7ade8e49ccd73"
+}

@@ -1,0 +1,91 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The improved pipeline completes on an all-arXiv-math corpus of at least 200,000 papers.\n- [ ] Stage 9b reports pairwise cosine-similarity standard deviation above 0.10 and validation accuracy below 90%.\n- [ ] A learn-to-swim or LeanDojo pilot record shows structural or hybrid retrieval finds technique-relevant papers missed by BGE-only retrieval.\n- [ ] `corpus_ws_bridge.py` serves a FAISS index whose measured retrieval precision exceeds the BGE-only Mark 1 baseline.\n\n| Mission | Relationship |\n|---------|-------------|\n| M-apm-solutions | Consumer: uses retrieval for theorem proving |\n| M-diagramprover | Shares superpod, separate workflow (proof search not mining) |\n| M-artificial-stack-exchange | Future consumer of improved retrieval |\n| M-distributed-frontiermath | Future consumer for FrontierMath campaigns |",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 131,
+   "text": "\n- [ ] The improved pipeline completes on an all-arXiv-math corpus of at least 200,000 papers."
+  },
+  {
+   "id": "s3",
+   "start": 132,
+   "end": 246,
+   "text": "- [ ] Stage 9b reports pairwise cosine-similarity standard deviation above 0.10 and validation accuracy below 90%."
+  },
+  {
+   "id": "s4",
+   "start": 247,
+   "end": 392,
+   "text": "- [ ] A learn-to-swim or LeanDojo pilot record shows structural or hybrid retrieval finds technique-relevant papers missed by BGE-only retrieval."
+  },
+  {
+   "id": "s5",
+   "start": 393,
+   "end": 514,
+   "text": "- [ ] `corpus_ws_bridge.py` serves a FAISS index whose measured retrieval precision exceeds the BGE-only Mark 1 baseline."
+  },
+  {
+   "id": "s6",
+   "start": 515,
+   "end": 542,
+   "text": "\n| Mission | Relationship |"
+  },
+  {
+   "id": "s7",
+   "start": 543,
+   "end": 568,
+   "text": "|---------|-------------|"
+  },
+  {
+   "id": "s8",
+   "start": 569,
+   "end": 635,
+   "text": "| M-apm-solutions | Consumer: uses retrieval for theorem proving |"
+  },
+  {
+   "id": "s9",
+   "start": 636,
+   "end": 718,
+   "text": "| M-diagramprover | Shares superpod, separate workflow (proof search not mining) |"
+  },
+  {
+   "id": "s10",
+   "start": 719,
+   "end": 790,
+   "text": "| M-artificial-stack-exchange | Future consumer of improved retrieval |"
+  },
+  {
+   "id": "s11",
+   "start": 791,
+   "end": 866,
+   "text": "| M-distributed-frontiermath | Future consumer for FrontierMath campaigns |"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-superpod-mark2",
+  "file_path": "/home/joe/code/futon6/holes/missions/M-superpod-mark2.md",
+  "content_sha256": "e9ff6d05d8bc246b9eb9d9e511542a90041ee94b6b9104616bb9c8ae4568145f",
+  "item": {
+   "start": 37,
+   "end": 131,
+   "line": 206,
+   "text": "\n- [ ] The improved pipeline completes on an all-arXiv-math corpus of at least 200,000 papers."
+  },
+  "section": {
+   "source_start": 9663,
+   "source_end": 10531
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/06-M-superpod-mark2.request.json.analysis.json"
+}

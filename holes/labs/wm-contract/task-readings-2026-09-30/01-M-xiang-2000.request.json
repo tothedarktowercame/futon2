@@ -1,0 +1,49 @@
+{
+ "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] The DOCUMENT section gives a reviewer-readable account of the implemented as-of, derivation, agreement, obligation, withdrawal, blocker-escalation, and attestation paths with their evidence.\n- [ ] The DOCUMENT exit names the deferred items and their written re-arm conditions, including Joe's user-side demonstration condition for item 17.4.\n\n---",
+ "offset_unit": "unicode-codepoint",
+ "sentences": [
+  {
+   "id": "s1",
+   "start": 0,
+   "end": 36,
+   "text": "## Acceptance checklist (2026-09-30)"
+  },
+  {
+   "id": "s2",
+   "start": 37,
+   "end": 234,
+   "text": "\n- [ ] The DOCUMENT section gives a reviewer-readable account of the implemented as-of, derivation, agreement, obligation, withdrawal, blocker-escalation, and attestation paths with their evidence."
+  },
+  {
+   "id": "s3",
+   "start": 235,
+   "end": 385,
+   "text": "- [ ] The DOCUMENT exit names the deferred items and their written re-arm conditions, including Joe's user-side demonstration condition for item 17.4."
+  },
+  {
+   "id": "s4",
+   "start": 386,
+   "end": 390,
+   "text": "\n---"
+  }
+ ],
+ "analysis_status": "analyzed",
+ "interpretation_version": 1,
+ "vocabulary_version": 1,
+ "task": {
+  "target_id": "M-象-2000",
+  "file_path": "/home/joe/code/futon3c/holes/missions/M-象-2000.md",
+  "content_sha256": "e74b6e40418b5092cbd3e601724cbe6cac532a1be064f815152fd5486b772386",
+  "item": {
+   "start": 37,
+   "end": 234,
+   "line": 11,
+   "text": "\n- [ ] The DOCUMENT section gives a reviewer-readable account of the implemented as-of, derivation, agreement, obligation, withdrawal, blocker-escalation, and attestation paths with their evidence."
+  },
+  "section": {
+   "source_start": 502,
+   "source_end": 894
+  }
+ },
+ "analysis_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/01-M-xiang-2000.request.json.analysis.json"
+}

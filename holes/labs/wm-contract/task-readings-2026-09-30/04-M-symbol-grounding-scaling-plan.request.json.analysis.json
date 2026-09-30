@@ -1,0 +1,349 @@
+{
+  "version": 2,
+  "status": "analyzed",
+  "method": "agent-interpretation",
+  "interpretation_version": 1,
+  "vocabulary_version": 1,
+  "human_approved": false,
+  "labeller": "象 (kimi), M-G-wm-wiring task reading",
+  "reusable_cues": [],
+  "created_at": "2026-09-30T08:54:43.178045+00:00",
+  "source_text": "## Acceptance checklist (2026-09-30)\n\n- [ ] Wikipedia gold JSON contains at least 1,000 well-formed symbol/canon pairs across at least 500 articles, including a recorded 30-pair hand sample.\n- [ ] Combined PM and Wikipedia gold contains at least 1,500 pairs across at least 800 entries and reports the per-source precision delta.\n- [ ] Strategy gating plus canon-ancestry comparison achieves at least 25% loose precision on the combined gold.\n- [ ] The final evaluation reports at least 30% loose precision, no high-volume strategy below 15%, and no more than a five-point recall drop.\n- [ ] The full pipeline completes cleanly on 100 papers and emits loadable evaluation JSON plus a structurally valid learned-vocabulary side file.\n- [ ] Joe's explicit approval is recorded after review of the precision report, 100-paper output, and scale economics, before Rob's batch is sent.",
+  "source_sha256": "6979c8ee36adf10ceae73503abad5f63b08f09ef0c9ed589b4075f4e222de9a8",
+  "offset_unit": "unicode-codepoint",
+  "sentences": [
+    {
+      "id": "s1",
+      "fragments": [
+        {
+          "start": 0,
+          "end": 36,
+          "text": "## Acceptance checklist (2026-09-30)",
+          "intent": "define-acceptance-criteria",
+          "target": "the M-symbol-grounding scaling plan",
+          "rationale": "The heading frames everything below as a dated, enumerated go/no-go checklist: acceptance is declared up front as checkable conditions rather than left to post-hoc judgement.",
+          "relations": [
+            "context"
+          ],
+          "display_cues": [
+            {
+              "start": 3,
+              "end": 23,
+              "text": "Acceptance checklist"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "The checklist is exactly a prose form of encoded go/no-go quality bands; the pattern's next step is making these bands a runnable checker independent of the producer.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s2",
+      "fragments": [
+        {
+          "start": 44,
+          "end": 147,
+          "text": "Wikipedia gold JSON contains at least 1,000 well-formed symbol/canon pairs across at least 500 articles",
+          "intent": "set-quantitative-acceptance-threshold",
+          "target": "the Wikipedia gold dataset",
+          "rationale": "Fixes minimum corpus size and well-formedness as numeric gates the gold JSON must clear before it counts.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 73,
+              "end": 118,
+              "text": "at least 1,000 well-formed symbol/canon pairs"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "A numeric band (>=1000 pairs, >=500 articles) is a gate-as-code condition: checkable mechanically, not a prose aspiration.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 149,
+          "end": 189,
+          "text": "including a recorded 30-pair hand sample",
+          "intent": "require-hand-verified-sample",
+          "target": "the Wikipedia gold dataset's provenance",
+          "rationale": "The bulk extraction must be anchored by a small recorded hand-checked sample, so gold quality is evidenced by human verification, not asserted by volume.",
+          "relations": [
+            "condition",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 161,
+              "end": 189,
+              "text": "recorded 30-pair hand sample"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/golden-is-curated-not-raw",
+              "rationale": "A golden set earns its name from hand verification; the 30-pair recorded sample is the curated core that keeps bulk scraped pairs honest.",
+              "status": "candidate",
+              "source_sha256": "3b3bc114e46315443cece712fad8d270b16fbb043f49f62c4f2b18d820a5b6e2"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "plos-npt-with-small-n/small-n-is-a-design-feature",
+              "reason": "That pattern defends a small-n study design as the research method; here the 30-pair sample is a verification anchor subordinate to a 1000-pair bulk requirement, not the object of study.",
+              "query": "small verified sample before trusting the bulk extraction"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s3",
+      "fragments": [
+        {
+          "start": 197,
+          "end": 285,
+          "text": "Combined PM and Wikipedia gold contains at least 1,500 pairs across at least 800 entries",
+          "intent": "set-quantitative-acceptance-threshold",
+          "target": "the combined gold dataset",
+          "rationale": "Sets size floors for the merged corpus so combination must grow coverage, not merely concatenate.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 237,
+              "end": 257,
+              "text": "at least 1,500 pairs"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "Another numeric go/no-go band on the merged artefact, same checker-shaped acceptance logic as s2.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": []
+        },
+        {
+          "start": 286,
+          "end": 328,
+          "text": "and reports the per-source precision delta",
+          "intent": "report-per-channel-precision",
+          "target": "the PM vs Wikipedia sources",
+          "rationale": "Merging is only accepted if the evaluation makes each source's precision explicit and reports their delta, so a weak source cannot hide inside the combined number.",
+          "relations": [
+            "condition"
+          ],
+          "display_cues": [
+            {
+              "start": 302,
+              "end": 328,
+              "text": "per-source precision delta"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "aif/evidence-precision-registry",
+              "rationale": "The pattern makes evidence weighting explicit per observation channel; a reported per-source precision delta is exactly per-channel precision made visible.",
+              "status": "candidate",
+              "source_sha256": "ad0e5ebef39dff7eeade7fe5e0661a047629d3d84aa6715891a173b3f2e55b55"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s4",
+      "fragments": [
+        {
+          "start": 336,
+          "end": 441,
+          "text": "Strategy gating plus canon-ancestry comparison achieves at least 25% loose precision on the combined gold",
+          "intent": "set-strategy-precision-floor",
+          "target": "the gating plus canon-ancestry strategy",
+          "rationale": "The intermediate mechanism must clear a stated precision floor on the combined gold before the final evaluation is even meaningful.",
+          "relations": [
+            "goal",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 392,
+              "end": 420,
+              "text": "at least 25% loose precision"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "A precision floor the mechanism must clear is a quality band; encoding it as a checklist item is the prose form of a runnable checker.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            }
+          ],
+          "pattern_rejections": [
+            {
+              "id": "mmca/threshold-shaped-events",
+              "reason": "That pattern is about checking episode length against a detection threshold in realtime monitoring; this is a static precision floor on an extraction strategy, no temporal episodes involved.",
+              "query": "threshold that a strategy must clear to count"
+            }
+          ]
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s5",
+      "fragments": [
+        {
+          "start": 449,
+          "end": 584,
+          "text": "The final evaluation reports at least 30% loose precision, no high-volume strategy below 15%, and no more than a five-point recall drop",
+          "intent": "set-final-evaluation-bounds",
+          "target": "the final evaluation",
+          "rationale": "The ship gate is a triple of numeric bounds — floor on headline precision, floor per high-volume strategy, cap on recall cost — so the pipeline cannot pass by trading one metric off against another.",
+          "relations": [
+            "goal"
+          ],
+          "display_cues": [
+            {
+              "start": 478,
+              "end": 506,
+              "text": "at least 30% loose precision"
+            },
+            {
+              "start": 562,
+              "end": 584,
+              "text": "five-point recall drop"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/gates-as-code",
+              "rationale": "Three simultaneous numeric bands are precisely go/no-go quality bands; the checklist item exists so prose cannot be rubber-stamped.",
+              "status": "candidate",
+              "source_sha256": "c3548ad027b88f989772e96ba0489bdbfd801e9bafe5f160bb6b64925daebddf"
+            },
+            {
+              "id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+              "rationale": "The bounds target the claimed property itself (precision/recall on gold) rather than a proxy like run completion or pair volume, which is the distinction this pattern names.",
+              "status": "candidate",
+              "source_sha256": "eaa5f4b9e104fea25100f23a959b84682df8ee8e5b153b2c17436f97d3c35c99"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s6",
+      "fragments": [
+        {
+          "start": 592,
+          "end": 731,
+          "text": "The full pipeline completes cleanly on 100 papers and emits loadable evaluation JSON plus a structurally valid learned-vocabulary side file",
+          "intent": "require-clean-end-to-end-run",
+          "target": "the full extraction pipeline",
+          "rationale": "Before any paid/large batch, a bounded 100-paper run must complete cleanly and produce artefacts that downstream tools can actually load — plumbing-green plus output-valid.",
+          "relations": [
+            "goal",
+            "dependency"
+          ],
+          "display_cues": [
+            {
+              "start": 610,
+              "end": 641,
+              "text": "completes cleanly on 100 papers"
+            },
+            {
+              "start": 652,
+              "end": 676,
+              "text": "loadable evaluation JSON"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "data-mining/smoke-before-the-paid-run",
+              "rationale": "A bounded 100-paper pass through the real pipeline before Rob's full batch is exactly a smoke run: cheap discovery of failure at n=100 rather than at full corpus price.",
+              "status": "candidate",
+              "source_sha256": "45bf2e6d4fe6d78a00fc06010ad6ea2eaa8af2760399124f9e24ec418ef7e1f6"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    },
+    {
+      "id": "s7",
+      "fragments": [
+        {
+          "start": 739,
+          "end": 878,
+          "text": "Joe's explicit approval is recorded after review of the precision report, 100-paper output, and scale economics, before Rob's batch is sent",
+          "intent": "gate-irreversible-action-on-recorded-approval",
+          "target": "sending Rob's batch",
+          "rationale": "The outward, irreversible act (sending the batch) is blocked on a recorded operator approval at the exact locus where it would fire, conditioned on review of named evidence.",
+          "relations": [
+            "condition",
+            "action"
+          ],
+          "display_cues": [
+            {
+              "start": 739,
+              "end": 762,
+              "text": "Joe's explicit approval"
+            },
+            {
+              "start": 852,
+              "end": 878,
+              "text": "before Rob's batch is sent"
+            }
+          ],
+          "no_surface_cue": "",
+          "pattern_refs": [
+            {
+              "id": "orchestration/consent-gate",
+              "rationale": "Sending Rob's batch is an outward act; requiring Joe's recorded approval at that locus, with the review materials named as warrant, is the consent-gate pattern verbatim.",
+              "status": "candidate",
+              "source_sha256": "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"
+            }
+          ],
+          "pattern_rejections": []
+        }
+      ],
+      "unresolved_reason": ""
+    }
+  ],
+  "request_file": "/home/joe/code/futon2/holes/labs/wm-contract/task-readings-2026-09-30/04-M-symbol-grounding-scaling-plan.request.json",
+  "request_sha256": "d44708a765ca10a86eb36d301f34dbf584bc13029b4c326252635abb4df4285a"
+}
