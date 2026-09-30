@@ -77,7 +77,32 @@ has seen the agreed text. The negotiation is in git: this file's history
     thing worth preferring is progress toward a first complete run. Work
     that does not shorten that path is not on it, however correct.
 
-## Critical path to a first end-to-end run (ruling 10; governs the order below)
+11. Run the machine in the forward direction until it works, instead of
+    resetting it each time and failing each time.
+
+### What ruling 11 changes
+
+Every click so far began a new run from nothing: new opportunity id,
+readiness checks, selection from scratch. What the previous run had reached
+(a target chosen, interpretations published, an author's refusal) was not
+the starting state of the next. So each failure discarded the run, and the
+next click had to get past every earlier step again before it could reach
+the step that had failed.
+
+Forward means one continuing run with a durable state: the field, the
+chosen task, the phase reached, and the results so far. An invocation
+advances that state by one step. A failure leaves the state at the failed
+step; the incident is handled (ruling 6); the same run then continues from
+that step. Nothing already achieved is redone. This is also the shape of the
+Lean model (a state and a `step`), so the model, the verification and the
+running machine describe the same thing: item 8 below verifies `step`
+applied repeatedly to one persisted state, not N independent ticks.
+
+It needs two things the runner does not obviously have (to be confirmed
+against the code by codex-6): the run state persisted at each phase
+boundary, and an entry point that continues from a persisted state.
+
+## Critical path to a first end-to-end run (rulings 10 and 11; governs the order below)
 
 One complete run means: a task is chosen from the open field, an agent is
 handed it, the agent's result is reviewed, one receipt is written, and the
