@@ -2,7 +2,8 @@
   "PROOF-2b step ⟨0⟩0: every click's run record ends in EXACTLY ONE terminal
   receipt, either an :action-receipt (the click selected and enacted work)
   or a :failure (an abstention, a refusal to select, or an exception before
-  selection reached the record). Never both, never neither.
+  selection reached the record). Never both, never neither; persisting the
+  run record never fails because of its receipt.
 
   The receipt reuses fields the run record already holds (click id,
   selection-event target, the decision's selection-law action kind and
@@ -80,14 +81,19 @@
   for an abstention, carrying the abstention status), this builder as the
   source, and the record's own startedAt as :at — no new clock is read."
   [record]
-  (let [kind (if (abstained? record) :abstained (:kind (:failure record)))
+  (let [kind (cond (abstained? record) :abstained
+                   (:kind (:failure record)) (:kind (:failure record))
+                   :else :no-terminal-state)
         status (get-in record [:decision :abstention :status])]
-    {:kind :failure
-     :id (str (:run/id record) "-" (some-> kind name))
-     :failure-kind kind
-     :source "futon2.aif.wm.terminal-receipt/terminal-receipt"
-     :at (:startedAt record)
-     :abstention-status (when (abstained? record) status)}))
+    (cond-> {:kind :failure
+             :id (str (:run/id record) "-" (name kind))
+             :failure-kind kind
+             :source "futon2.aif.wm.terminal-receipt/terminal-receipt"
+             :at (:startedAt record)
+             :abstention-status (when (abstained? record) status)}
+      ;; A click that selected and then failed names what it failed on.
+      (selected-target record) (assoc :target (selected-target record)
+                                      :target-kind (target-kind (selected-target record))))))
 
 (defn validate-receipt
   "RECEIPT as passed through, or throw {:failure-kind
@@ -125,22 +131,18 @@
 (defn terminal-receipt
   "The one terminal receipt for RECORD, validated. A record whose
   :selection-event says :cascade-selected and which carries no failure and
-  no abstention gets an :action-receipt; a record with a failure or an
-  abstention gets a :failure. A record indicating BOTH (selected AND
-  failed) or NEITHER throws :terminal-receipt-invalid — never a silent
-  default, never a guess."
+  no abstention gets an :action-receipt. Every other record gets a :failure:
+  an abstention, a failure after selection (the receipt names the target),
+  or a record showing neither a selection nor a failure
+  (:no-terminal-state, itself a defect to repair). The RECEIPT is exactly
+  one kind; the record's state never makes this throw (review, claude-1
+  2026-09-30: 35 of 63 past records were both or neither, and a throw here
+  would have left their run records unwritten)."
   [record]
-  (let [selected? (boolean (selected-target record))
-        failed? (failed? record)]
-    (when (= selected? failed?)
-      (throw (ex-info "run record is not exactly one of selected / failed"
-                      {:failure-kind :terminal-receipt-invalid
-                       :selected? selected?
-                       :failed? failed?})))
-    (validate-receipt
-     (if selected?
-       (action-receipt record)
-       (failure-receipt record)))))
+  (validate-receipt
+   (if (and (selected-target record) (not (failed? record)))
+     (action-receipt record)
+     (failure-receipt record))))
 
 (defn terminal-receipt-digest
   "The sha256 of the receipt's pr-str, hex, for the click binding's
@@ -157,7 +159,17 @@
   in so the receipt's :outcome is the outcome the close recorded. For
   cond-> threading convenience the map is the LAST argument."
   [outcome record]
-  (let [receipt (terminal-receipt (assoc record :outcome outcome))]
+  (let [receipt (try
+                  (terminal-receipt (assoc record :outcome outcome))
+                  (catch clojure.lang.ExceptionInfo e
+                    ;; Never lose the run record over its receipt: an
+                    ;; ill-formed receipt becomes a typed failure receipt.
+                    {:kind :failure
+                     :id (str (:run/id record) "-terminal-receipt-invalid")
+                     :failure-kind :terminal-receipt-invalid
+                     :source "futon2.aif.wm.terminal-receipt/attach"
+                     :at (:startedAt record)
+                     :detail (ex-data e)}))]
     (assoc record
            :terminal-receipt receipt
            :terminal-receipt-digest (terminal-receipt-digest receipt))))

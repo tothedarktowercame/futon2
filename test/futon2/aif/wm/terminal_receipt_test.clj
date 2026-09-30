@@ -79,18 +79,27 @@
     (is (string? (:id r)))
     (is (= (:startedAt exception-record) (:at r)))))
 
-(deftest a-record-that-is-both-is-rejected
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not exactly one"
-                        (tr/terminal-receipt
-                         (assoc-in selected-record [:decision :abstention :status]
-                                   :abstained)))))
+(deftest a-record-that-selected-then-failed-yields-failure-naming-its-target
+  ;; the 2026-09-29-1790654511 shape: cascade-selected, then :close-exception
+  (let [r (tr/terminal-receipt (assoc selected-record :failure {:kind :close-exception}))]
+    (is (= :failure (:kind r)))
+    (is (= :close-exception (:failure-kind r)))
+    (is (= (get-in selected-record [:selection-event :target]) (:target r)))
+    (is (= :ticket (:target-kind r)))))
 
-(deftest a-record-that-is-neither-is-rejected
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not exactly one"
-                        (tr/terminal-receipt
-                         (-> exception-record
-                             (assoc :failure {:absent :no-failure})
-                             (assoc-in [:decision :abstention :status] :present))))))
+(deftest a-record-that-is-neither-yields-no-terminal-state-failure
+  (let [r (tr/terminal-receipt (assoc exception-record :failure {:absent :no-failure}))]
+    (is (= :failure (:kind r)))
+    (is (= :no-terminal-state (:failure-kind r)))
+    (is (= "2026-09-25-1bc6d9f0-no-terminal-state" (:id r)))))
+
+(deftest attach-never-throws-and-types-an-invalid-receipt
+  ;; no :click/id on a selected record -> the action receipt is ill-formed
+  (let [record (tr/attach :grounded-change (dissoc selected-record :click/id))
+        r (:terminal-receipt record)]
+    (is (= :failure (:kind r)))
+    (is (= :terminal-receipt-invalid (:failure-kind r)))
+    (is (= 64 (count (:terminal-receipt-digest record))))))
 
 (deftest a-receipt-of-both-kinds-is-rejected
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not exactly one kind"
