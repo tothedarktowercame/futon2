@@ -1,0 +1,193 @@
+{
+ "schema": "wm/head-recovery-batch-01-2026-09-30",
+ "missions": [
+  {
+   "id": "M-warrant-limit",
+   "created": "2026-09-28T17:58:47Z",
+   "commit": "934ac5df",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-28T20:28:55Z",
+   "passages": [
+    {
+     "at": "2026-09-28T20:28:55.086943632Z",
+     "source": "evidence",
+     "evidence_id": "emacs-05e0725c1dd89d84ae663d3ed196cd41",
+     "mission_id_join": "M-warrant-limit",
+     "text": "OK, I'd consider that we can now get back to the War Machine PROOF-2a, or just about, with all of the warrant stuff under our belts and ready to use on an ongoing basis as the kind of expeditious tool that it was meant to me."
+    },
+    {
+     "at": "2026-09-28T21:02:35.754715736Z",
+     "source": "evidence",
+     "evidence_id": "emacs-ab787b2100a07ecc1c2f81b5a752b522",
+     "mission_id_join": "M-warrant-limit",
+     "text": "OK; then I'd say it's not really scope creep, but either \"getting it right\" or \"building necessary tooling to make that efficient\".  E.g. the test-registry is because it is untenable to rerun tests endlessly and I'd rather spend a day making a well-functioning warrant system that we can reuse than spend endless days on tests."
+    }
+   ]
+  },
+  {
+   "id": "M-inbox-zero-claim-lifecycle",
+   "created": "2026-09-27T18:28:58Z",
+   "commit": "bbca7a7e",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-27T19:21:08Z",
+   "passages": [
+    {
+     "at": "2026-09-27T19:21:08.429498932Z",
+     "source": "evidence",
+     "evidence_id": "emacs-6aa2374e245e9d00909e0bce0e59074f",
+     "mission_id_join": "M-inbox-zero-claim-lifecycle",
+     "text": "Here's a live example of how inbox zero is working now.  The messages: to claude-1 detail seemingly irrelevant files to the work in progress.  viz as follows: followup: inbox-zero: futon3c-d is carrying 10 dirty file(s) (3 untracked); 5 of them were written during your turns. Commit or delete what is yours and leave what is not. Newest first: holes/labs/M-inbox-zero-claim-lifecycle/s0-git-transaction.py (also inside codex-4, kimi-9, 象's turn), scripts/test_xiang2000_p0_origins.py (also inside codex-4, kimi-9, 象's turn), holes/labs/M-象-2000/p0-expected.edn (also inside codex-4, kimi-9, 象's turn), scripts/xiang2000_p0.py (also inside codex-4, kimi-9, 象's turn), emacs/session-mode.el (also inside codex-4, kimi-9, 象's turn). Full list: git -C /home/joe/code/futon3c status --porcelain"
+    }
+   ]
+  },
+  {
+   "id": "M-wm-wiring",
+   "created": "2026-09-25T15:20:09Z",
+   "commit": "ad9fb4e8",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-25T16:57:49Z",
+   "passages": [
+    {
+     "at": "2026-09-25T16:57:49.692160004Z",
+     "source": "evidence",
+     "evidence_id": "emacs-62562e9735392b15eff02d03adb8355e",
+     "mission_id_join": "M-wm-wiring",
+     "text": "So, the mission lifecycle would say that DERIVE is next, though we may have already done that step."
+    }
+   ],
+   "note": "creating commit names the HEAD but is not shown to be operator-authored"
+  },
+  {
+   "id": "M-turns-first",
+   "created": "2026-09-17T19:50:47Z",
+   "commit": "11649128",
+   "committer": "Joseph Corneli",
+   "class": "C",
+   "earliest_operator_turn": null,
+   "note": "sweep commit 'Commit M-turns-first and two small edits left behind in the lab tree'; no operator turn names it; +-8h keyword window empty",
+   "passages": []
+  },
+  {
+   "id": "M-u88-contextual-preferences",
+   "created": "2026-09-10T17:21:34Z",
+   "commit": "cf2aee0c0",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-11T01:04:15Z",
+   "passages": [
+    {
+     "at": "2026-09-11T01:04:15.755652916Z",
+     "source": "evidence",
+     "evidence_id": "emacs-2db5ff8c76c6cb2a29d2484f5301cc20",
+     "mission_id_join": null,
+     "text": "Review activated U88 mission/pin freeze and actual production eligibility; effective live consumers now all true. Complete pre-go checks without dispatch/acceptance or another restart.\n\n--- resumed: parked dependencies complete (1) ---\n• invoke-1789088097074-19965-91cbcdeb: Implemented and committed the U88 activation and exact pin freeze.\n\n- **futon2:** `b5e0df41d9c8c835c1361bdffb9a2a58311ae26a`\n- **futon3c:** `a0e49926a537425124320a94bf05cc981eeb69e3`\n\nThe canonical mission is OPEN at `futon2/holes/missions/M-u88-contextual-preferences.md`. The reviewed draft and preparation basis remain unchanged as historical evidence. Production resolution finds the canonical mission, the guardrail accepts exactly:\n\n```clojure\n{:type :advance-mission\n :target \"M-u88-contextual-preferences\"}\n```\n\nAlias-shaped targets now refuse with `:action-mission-mismatch`. The boot test proves the exact action is admissible and the alias is rejected. Deployment preflight reports:\n\n```clojure\n{:sources :current\n :mission :open-activated\n :template-disabled true\n :eligible-to-launch? false}\n```\n\nExact hashes:\n\n- Mission: `8212ec999123468aa10a8bfc657028a0d06ec3c51be7b97a0bcb517f4040c146`\n- Task pin: `9cf34ffcf"
+    }
+   ],
+   "note": "operator wake/checklist message embedding park state; not commissioning"
+  },
+  {
+   "id": "M-zaif-harness-v1",
+   "created": "2026-09-02T12:06:11Z",
+   "commit": "6362cb425",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-09-02T11:52:19Z",
+   "passages": [
+    {
+     "at": "2026-09-02T11:52:19.214287246Z",
+     "source": "file",
+     "path": "/home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block016/claude-1-turn-104.json",
+     "agent": "claude-1",
+     "turn": "claude-1-turn-104",
+     "text": "So I was thinking for U6, maybe instead of ants, we could use the zai. AIF model idea, which may already exist as a mission. And that way we'd get a practical mission that we could run through the system. And break down into components so we could test each component. Of the war machine. And the kind of cool outcome is basically we're going to get the crew for the war machine. By building it ourselves, because ultimately we can use these Zaif agents as the crew. And I was thinking just for fun, we could pull the Chipwits fourth repository from GitHub and look at some of the assets in there and just see if we couldn't make a little fun analogy between Chipwits and these agentic models and their harnesses."
+    },
+    {
+     "at": "2026-09-02T12:00:07.135550672Z",
+     "source": "file",
+     "path": "/home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block016/claude-1-turn-105.json",
+     "agent": "claude-1",
+     "turn": "claude-1-turn-105",
+     "text": "Okay, so this is a good development, and I think that we should look at any historical Zaif missions, because they do exist with a basic specification on some level. But I think we need to take that historical document and mash it up with the new chipwits. Considerations. And see if we can make... A nice set of unit tests. For each of the R number nodes that will exercise them. And help us. Build a new… Addition of the Zaiv. Harness."
+    }
+   ]
+  },
+  {
+   "id": "M-sigils-reconsidered",
+   "created": "2026-08-17T13:18:35Z",
+   "commit": "59bfe27a",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-08-17T13:17:21Z",
+   "passages": [
+    {
+     "at": "2026-08-17T13:17:21.935364046Z",
+     "source": "evidence",
+     "evidence_id": "emacs-9ea75683b0f2caa686402521ee1855c0",
+     "mission_id_join": "M-apm-demonstration",
+     "text": "Well, I'm not ready to rule on it, we can create a M-sigils-reconsidered with the findings from your survey, but there would be a case \"for\" them to add later.  For now, the 8 index rows can be added w/o sigils"
+    }
+   ]
+  },
+  {
+   "id": "M-what-is-it-who-is-it-for",
+   "created": "2026-08-17T13:16:05Z",
+   "commit": "0902df5",
+   "committer": "Joseph Corneli",
+   "class": "C",
+   "earliest_operator_turn": null,
+   "note": "created in the 2026-08-17 HEAD-capture batch; no operator turn names it; day's turns are about other missions",
+   "passages": []
+  },
+  {
+   "id": "M-capability-levels",
+   "created": "2026-08-17T11:19:56Z",
+   "commit": "35598df",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-08-15T15:26:37Z",
+   "passages": [
+    {
+     "at": "2026-08-15T15:26:37.880276816Z",
+     "source": "evidence",
+     "evidence_id": "emacs-3f6b635c544bf62d155b761fdfca411a",
+     "mission_id_join": "M-apm-demonstration",
+     "text": "Maybe ladder is the wrong word, how about M-capability-levels.md — that's clearer, and also akin to the CodeSignal platform's lingo"
+    }
+   ]
+  },
+  {
+   "id": "M-evidence-landscape-index",
+   "created": "2026-08-17T07:47:03Z",
+   "commit": "4561ff9",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-08-15T17:01:32Z",
+   "passages": [
+    {
+     "at": "2026-08-15T17:01:32.955986384Z",
+     "source": "evidence",
+     "evidence_id": "emacs-f6f55353c9db9c054bf69e7127207c5d",
+     "mission_id_join": "M-apm-demonstration",
+     "text": "So, what about futon1b/holes/M-evidence-landscape-index.md capturing these ideas, to be developed as a formal futonic mission?"
+    }
+   ]
+  }
+ ],
+ "counts": {
+  "A": 4,
+  "B": 4,
+  "C": 2,
+  "D": 0
+ },
+ "earliest_operator_turn_seen_this_batch": "2026-08-15T15:26:37Z",
+ "earliest_operator_turn_seen_in_store": "2026-02-18T15:34:37Z (pilot/RM1 measurement)",
+ "operator_turn_fields": [
+  "evidence/body event=chat-turn",
+  "evidence/body role=user",
+  "evidence/author=joe"
+ ],
+ "store_queries": 10
+}
