@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.analysis-cascade :as analysis]
+            [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.target-policy-family :as sut]
@@ -35,6 +36,70 @@
   {:pattern-ids ["p/a" "p/b" "p/c"] :nodes ["p/a" "p/b" "p/c"]
    :edges [{:a "p/a" :b "p/b" :kind "why" :weight 1 :evidence []}
            {:a "p/b" :b "p/c" :kind "why" :weight 1 :evidence []}]})
+
+(defn- retraction-policy [analysis graph]
+  (first (filter #(= :retraction (:kind %))
+                 (:policies (sut/policy-family {:reading (reading analysis)
+                                                :graph graph})))))
+
+(defn- roots [policy]
+  (let [co (get-in (shape-g/arranged->candidate
+                    (:target policy) (:policy-id policy) (:cascade policy))
+                   [:precedence :co-apply])]
+    (vec (remove (set (map second (:descent co))) (:units co)))))
+
+(deftest authored-retraction-direction-defines-descent
+  (let [g {:pattern-ids ["p/a" "p/b"] :nodes ["p/a" "p/b"]
+           :edges [{:a "p/a" :b "p/b" :kind "why" :weight 1
+                    :evidence [{:file "/library/p/b.flexiarg"}]}]}
+        policy (retraction-policy (analysis-map) g)]
+    (is (= [{:from "p/b" :to "p/a" :kind :precedes
+             :kinds ["why"] :kind-used "why"
+             :evidence [{:file "/library/p/b.flexiarg"}]
+             :authored-direction {:from "p/b" :to "p/a"}}]
+           (get-in policy [:cascade :edges])))
+    (is (= ["p/b" "p/a"] (get-in policy [:cascade :precedence])))
+    (is (= ["p/b"] (roots policy)))
+    (is (= :reading-order-then-target-stable-hash
+           (get-in policy [:cascade :unit-order-rule])))))
+
+(deftest unauthored-retraction-relation-is-overlap
+  (let [g {:pattern-ids ["p/a" "p/b"] :nodes ["p/a" "p/b"]
+           :edges [{:a "p/a" :b "p/b" :kind "co-cited" :weight 2
+                    :evidence [{:at "turn"}]}]}
+        policy (retraction-policy (analysis-map) g)
+        candidate (shape-g/arranged->candidate
+                   (:target policy) (:policy-id policy) (:cascade policy))]
+    (is (= :overlap (get-in policy [:cascade :edges 0 :kind])))
+    (is (nil? (get-in policy [:cascade :edges 0 :authored-direction])))
+    (is (empty? (get-in candidate [:precedence :co-apply :descent])))
+    (is (= ["p/a" "p/b"] (roots policy)))))
+
+(deftest renaming-does-not-turn-alphabet-into-arrangement
+  (let [original-graph {:pattern-ids ["p/a" "p/b"] :nodes ["p/a" "p/b"]
+                        :edges [{:a "p/a" :b "p/b" :kind "why" :weight 1
+                                 :evidence [{:file "/library/p/b.flexiarg"}]}]}
+        renamed-analysis
+        {:status "analyzed"
+         :sentences [{:id "s1" :fragments [{:start 0 :end 1 :text "z"
+                                             :intent "act" :target "x" :rationale "a"
+                                             :relations ["context"]
+                                             :pattern_refs [(pattern-ref "p/z" "a")]}]}
+                     {:id "s2" :fragments [{:start 2 :end 3 :text "a"
+                                             :intent "act" :target "x" :rationale "b"
+                                             :relations ["goal"]
+                                             :pattern_refs [(pattern-ref "p/a" "b")]}]}]}
+        renamed-graph {:pattern-ids ["p/a" "p/z"] :nodes ["p/a" "p/z"]
+                       :edges [{:a "p/a" :b "p/z" :kind "why" :weight 1
+                                :evidence [{:file "/library/p/a.flexiarg"}]}]}
+        original (retraction-policy (analysis-map) original-graph)
+        renamed (retraction-policy renamed-analysis renamed-graph)
+        original-score (shape-g/score-policy original)
+        renamed-score (shape-g/score-policy renamed)]
+    (is (= ["p/b"] (roots original)))
+    (is (= ["p/a"] (roots renamed)))
+    (is (= (:g original-score) (:g renamed-score))
+        "renaming a structurally identical authored edge does not change G")))
 
 (deftest reading-and-retraction-form-one-family
   (let [result (sut/policy-family {:reading (reading (analysis-map)) :graph graph})]
