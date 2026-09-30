@@ -21,7 +21,9 @@
             [clojure.string :as str]
             [futon2.aif.analysis-cascade :as analysis]
             [futon2.aif.cascade-observation-scoring :as scorer]
+            [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.aif.matched-observation-evidence :as matched]
             [futon2.aif.parameter-novelty :as novelty]))
 
 (def ^:private class-universe
@@ -195,6 +197,77 @@
 (defn read-json [path]
   (json/parse-string (slurp path) true))
 
+(defn- binary-entropy [p]
+  (- (reduce + 0.0 (for [x [p (- 1.0 p)] :when (pos? x)]
+                          (* x (Math/log x))))))
+
+(defn fit-evidence
+  "Fit of one arranged policy to its mission-HEAD reading.
+
+  Accepted nodes use p=.9, rejected nodes p=.1, and nodes never read against
+  this circumstance p=.5 (maximum Bernoulli uncertainty).  Coverage is the
+  fraction of read fragments accounted for by at least one policy node, with
+  Jeffreys smoothing.  F is the negative log likelihood of these stated fit
+  observations.  FIT-ambiguity adds H(p)+(1-p), so unknown and poor fits both
+  raise G.  These probabilities are an explicit preliminary model, not facts
+  recovered from the retriever; the stored analyses contain ranks and
+  rationales but no numeric relevance score."
+  [cascade analysis-map]
+  (let [fragments (vec (mapcat :fragments (:sentences analysis-map)))
+        accepted (reduce (fn [m [i f]]
+                           (reduce (fn [m r] (update m (:id r) (fnil conj [])
+                                                    {:fragment-index i :rationale (:rationale r)}))
+                                   m (:pattern_refs f)))
+                         {} (map-indexed vector fragments))
+        rejected (set (map :id (mapcat :pattern_rejections fragments)))
+        patterns (mapv #(or (:pattern %) (:id %) %) (:nodes cascade))
+        nodes (mapv (fn [pattern]
+                      (let [evidence (get accepted pattern)
+                            status (cond (seq evidence) :accepted
+                                         (rejected pattern) :rejected
+                                         :else :not-read)
+                            p ({:accepted 9/10 :rejected 1/10 :not-read 1/2} status)]
+                        {:pattern pattern :status status :probability p
+                         :reading-evidence evidence
+                         :retriever-relevance {:status :absent
+                                               :reason :numeric-score-not-recorded}}))
+                    patterns)
+        covered (set (mapcat #(map :fragment-index (:reading-evidence %)) nodes))
+        total (count fragments)
+        coverage-p (/ (+ (count covered) 1/2) (+ total 1))
+        node-f (reduce + 0.0 (map #(matched/surprisal (:probability %)) nodes))
+        coverage-f (matched/surprisal coverage-p)
+        fit-ambiguity (reduce + 0.0
+                              (map (fn [{:keys [probability]}]
+                                     (+ (binary-entropy (double probability))
+                                        (- 1.0 (double probability))))
+                                   nodes))]
+    {:status :computed :nodes nodes
+     :coverage {:covered (count covered) :total total
+                :share (if (zero? total) 0 (/ (count covered) total))
+                :unexplained (vec (remove covered (range total)))}
+     :retriever-relevance {:status :absent :reason :numeric-scores-not-in-analysis-artifact}
+     :f (+ node-f coverage-f) :fit-ambiguity fit-ambiguity
+     :interpretation-owed (mapv :pattern (filter #(= :not-read (:status %)) nodes))}))
+
+(defn score-policy
+  "Score one materialized policy, attaching circumstance fit as F and adding
+  its stated uncertainty to the scorer's ambiguity term."
+  [policy]
+  (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy))
+        fit (fit-evidence (:cascade policy) (:analysis policy))
+        ambiguity (+ (double (:ambiguity base)) (:fit-ambiguity fit))
+        g (+ (double (:risk base)) ambiguity)
+        computed-f {:status :computed :value (:f fit) :source :xiang-reading-fit
+                    :evidence fit}
+        carrier {:id (:policy-id policy) :habit 1.0 :g g :f (:f fit)
+                 :f-status :computed :computed-f computed-f}]
+    (assoc base :g g :controller-score g :ambiguity ambiguity
+           :scorer-g (:g base) :scorer-ambiguity (:ambiguity base)
+           :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
+           :selection-candidate carrier
+           :selection-law (selection/law-receipt [carrier]))))
+
 (defn materialize-policies
   "Read S3c's fixed artifacts.  Returns both analysis arrangements and graph
   retractions; the result is data and performs no scoring or writes."
@@ -224,7 +297,8 @@
                              :adjustment (str "retraction-" (:rank r))
                              :cascade {:nodes (:nodes r) :edges (:edges r)
                                        :precedence (:nodes r)}}))]
-        (map-indexed (fn [i p] (assoc p :target target :reported-id (str stem "/" (inc i))))
+        (map-indexed (fn [i p] (assoc p :target target :analysis analysis-map
+                                      :reported-id (str stem "/" (inc i))))
                      (concat modes retractions))))
     (sort-by #(.getName (io/file %))
              (filter #(and (.isFile (io/file %))

@@ -21,17 +21,39 @@ Jeffreys Beta(1/2,1/2) prior. Those operators and that prior are claude-1's
 modelling choice, delegated by Joe; they are not read from an attested
 target-specific interpretation.
 
-The existing scorer fixes the rest. It rolls the generated precedence through
+The existing scorer fixes the base rollout. It rolls the generated precedence through
 the existing forward model, queries C at every tau, and sums the returned G
 (`cascade_observation_scoring.clj:91-150`). Its certificate records the whole
 step-indexed C schedule (`:126-145`). Risk and observation ambiguity are the
 sums of the scorer's step terms. Expected parameter information is computed
 with the existing Beta kernel (`parameter_novelty.clj:21-29`) and reported for
-every policy. The current scorer does **not** consume that parameter term; its
-G remains the scorer's risk + observation ambiguity. This preserves the
-existing EFE instead of silently creating a second score. A later decision is
+every policy. The current scorer does **not** consume that parameter term; the
+adapter retains it as a reported term and adds only the fit ambiguity described
+below to the scorer's risk + observation ambiguity. A later decision is
 needed if Joe intends parameter information, rather than the scorer's existing
 observation uncertainty, to enter the numeric G.
+
+The fit amendment uses the evidence the committed analysis actually contains.
+An accepted occurrence carries its exact fragment and rationale and receives
+preliminary likelihood 0.9; a recorded rejection gets 0.1; a connector never
+read against this HEAD gets 0.5, maximum Bernoulli uncertainty. Fragment
+coverage is Jeffreys-smoothed. Their joint negative log likelihood is attached
+as finite `:f`, `:f-status :computed`, and `:computed-f`.
+This uses the existing F convention `F = -ln p` from
+`cascade_free_energy.clj:90-106` and its shared surprisal function rather than
+treating “unknown” as neutral zero.
+`cascade_selection.clj:182-215` therefore reports the full
+`sigma(log E - F - gamma*G)` law with no omitted F, using the existing carrier
+defined at `policy.clj:228-254`.
+
+Fit uncertainty enters G as `sum(H(p) + (1-p))`, added to the scorer's
+ambiguity. Entropy makes an unread connector uncertain; `(1-p)` makes a poor
+fit costly rather than confidently cheap. The likelihoods, coverage
+smoothing, and this fit-ambiguity expression are claude-1's preliminary
+modelling choices. The stored 象 artifacts do not carry numeric retriever
+relevance for accepted refs, so every receipt records that term as
+`:absent :numeric-scores-not-in-analysis-artifact`; no score is reconstructed
+or invented.
 
 The preference is present at every bounded horizon step. Before the terminal
 step it prefers `:ending/not-yet-evaluated`; at the terminal step it prefers
@@ -74,16 +96,16 @@ stable artifact order. Lower G is preferred.
 policy for that mission by more than one node (for a one-policy set this is
 vacuously one).
 
-| mission | reported / distinct | initial G | minimum G | minimizing adjustment | ΔG | >1-node isolated |
-|---|---:|---:|---:|---|---:|---:|
-| M-象-2000 | 15 / 6 | 1.210676 | 1.037486 | retraction-3 | 0.173189 | 1 |
-| M-metric-harness | 4 / 1 | 1.032715 | 1.032715 | alternatives-1 | 0.000000 | 1 |
-| M-distributed-proofreaders | 9 / 4 | 0.387251 | 0.387251 | alternatives-1 | 0.000000 | 1 |
-| M-web-arxana-ui-improvements | 12 / 6 | 1.203973 | 0.544266 | overlap-1 | 0.659707 | 3 |
-| M-self-documenting-stack | 4 / 4 | 1.291536 | 1.291536 | alternatives-1 | 0.000000 | 4 |
-| M-war-machine-aif-completion | 27 / 6 | 1.037486 | 1.037486 | alternatives-1 | 0.000000 | 3 |
-| M-essays-diachronic-model | 5 / 2 | 0.544266 | 0.544266 | alternatives-1 | 0.000000 | 0 |
-| M-value-creation-loop | 5 / 4 | 3.547199 | 2.955834 | retraction-2 | 0.591365 | 4 |
+| mission | reported / distinct | initial G / F | minimum G / F | minimizing adjustment | ΔG | interpretation owed | >1-node isolated |
+|---|---:|---:|---:|---|---:|---|---:|
+| M-象-2000 | 15 / 6 | 5.461505 / 1.592602 | 5.461505 / 1.592602 | alternatives-5 | 0.000000 | none | 1 |
+| M-metric-harness | 4 / 1 | 6.558794 / 2.062834 | 6.558794 / 2.062834 | alternatives-1 | 0.000000 | none | 1 |
+| M-distributed-proofreaders | 9 / 4 | 1.662500 / 1.260543 | 1.662500 / 1.260543 | alternatives-1 | 0.000000 | none | 1 |
+| M-web-arxana-ui-improvements | 12 / 6 | 1.629056 / 0.798508 | 1.394432 / 0.903868 | overlap-1 | 0.234624 | none | 3 |
+| M-self-documenting-stack | 4 / 4 | 5.117283 / 1.530166 | 4.518894 / 1.807736 | retraction-3 | 0.598389 | `social/explicit-exit-over-abandonment` | 4 |
+| M-war-machine-aif-completion | 27 / 6 | 7.413731 / 2.503129 | 7.413731 / 2.503129 | alternatives-3 | 0.000000 | none | 3 |
+| M-essays-diachronic-model | 5 / 2 | 1.394432 / 0.903868 | 1.394432 / 0.903868 | alternatives-1 | 0.000000 | none | 0 |
+| M-value-creation-loop | 5 / 4 | 5.247531 / 0.996806 | 5.247531 / 0.996806 | alternatives-1 | 0.000000 | none | 4 |
 
 The 33 distinct policies contain **0** same-pattern-sequence,
 different-edge pairs, so the
@@ -100,6 +122,12 @@ materialised policies. It is therefore **unranked**, rather than assigned a
 made-up position. The HEAD reading did not select it and the three k=3
 retractions did not introduce it. This is evidence that the adjustment set
 did not contain the pattern the machine actually used.
+
+The fit falsifier holds structure fixed. When both nodes have accepted
+fragment evidence, that policy has lower F and G than the same two-node edge
+with its connector never read against the circumstance. The latter records
+that connector under `:interpretation-owed`; it is the concrete post-selection
+象 request, rather than a pre-selection admission condition.
 
 ## Reproduction
 
