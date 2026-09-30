@@ -176,6 +176,18 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     reliability is evaluated over subsequent campaigns and must not be
     reported as established by the three validation closures.
 
+19. **Reliability includes resource efficiency.** Evaluate operational
+    reliability over a rolling five-campaign window (100 clicks). Report not
+    only closures and progress, but elapsed wall-clock time and token usage.
+    At minimum the window records: closures by task kind; tasks progressed by
+    kind; closure-or-progress rate per click; elapsed time per closure and per
+    closure-or-progress outcome; tokens per closure and per
+    closure-or-progress outcome; unresolved questions; repeated refusals; and
+    backlog change. A machine that eventually closes work while consuming
+    excessive time or tokens does not pass merely because its closure count is
+    nonzero. Absolute or comparative efficiency thresholds remain to be set
+    from measured runs, not invented here.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,

@@ -155,7 +155,10 @@ motion", which named no observable.)
 wants flipped false → true; task knowledge or lifecycle steps; algorithm
 runs; reviewed commits caused by an action; repairs closed. Wiring commits
 count only if a later action receipt cites the wire. Counts are reported
-separately, with denominators, not combined into a score.
+separately, with denominators, not combined into a score. Operational
+reliability is also reported over a rolling five-campaign window (100 clicks):
+closure-or-progress rate, wall-clock time and token usage, including time and
+tokens per closure and per closure-or-progress outcome.
 *Threshold:* RQ-2 met, and at least one of {want closed, task advanced,
 reviewed action commit} > 0.
 *Today:* 0 on every count. Want and task transitions are not recorded.
@@ -167,7 +170,10 @@ to continue operating and complete work across missions, excursions and
 tickets. Capability validation requires at least one closed mission, one
 closed excursion and one closed ticket; the three closures may occur in
 separate campaigns. That finite validation does not establish reliable
-long-term behaviour, which is assessed over subsequent operation.
+long-term behaviour, which is assessed over subsequent operation. A nonzero
+closure count is insufficient if the machine is too slow or token-expensive;
+the rolling report also includes unresolved questions, repeated refusals and
+backlog change.
 
 **RQ-8. Every action leaves a complete receipt.**
 *Metric:* `paper_trail = complete action receipts / enacted actions`, with
