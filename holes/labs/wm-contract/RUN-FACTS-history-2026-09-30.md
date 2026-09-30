@@ -88,3 +88,88 @@ Of 76 run records, 17 recomputably carried exactly one compared policy; the larg
 ## Click 20 reconciliation with `Requirements.click20`
 
 The record supports one target reaching scoring, one target with numeric G, one constructed cascade, one compared policy, horizon 4 with only zero-based preference step 3, and risk without recorded ambiguity/information gain; these agree with the Lean witness. The current independently scanned world is 141 missions + 305 excursions + 183 tickets = 629, not Lean's historical 221 + 373 + 43 = 637: click 20 did not persist its canonical task snapshots, so neither historical triple can be recomputed from that record and the Lean constants must not be treated as record facts. The current library snapshot agrees at 1,431 files. The record does not carry query-time slice ids, so Lean's two-element slice/pool and `sliceFromWholeLibrary=false` are incident reconstructions, not recomputable RunFacts. This exporter counts 62 typed absent/missing/not-supplied/refused maps under exactly `:decision`, `:selection-event`, `:interpretation-ask`, `:terminal-receipt`, and `:failure`; Lean says 155 without specifying or persisting the counted paths, so the Lean constant is not reproducible and is the disagreement. Previous/current complete input digests, temporal interpretation order, and click-time roster are likewise absent and are reported NR rather than copied from Lean.
+
+## Lean requirement results (R2)
+
+`violated` is a recomputable false requirement; `unverifiable` means at least one required exported fact was NR and is alerting, never passing.
+
+| run | violated | unverifiable |
+|---|---|---|
+| `tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-18-r12fix-1789773891.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789779250.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789780157.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789827859.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789828199.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789828750.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789835454.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789848147.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789848234.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789848916.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789849189.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789854206.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-1789856495.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-19-postfix-1789776011.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-1789862860.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-1789940260.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-1789948650.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn` | none | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1789948972.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1789951020.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1789952178.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1789952479.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1789964661.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-21-1790033693.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-22-1790037762.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-22-1790053967.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-22-1790060806.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-22-1790110142.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790131591.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790136186.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790161992.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790184736.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790187227.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790189901.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790193054.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790196782.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-1790199409.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-23-eee9f1be-731f-46c2-941d-11b94d30187e.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-24-1790225596.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-24-a4b4fc78-6158-4106-904d-08b8b009cccc.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-25-1bc6d9f0-d050-4db2-add7-4d3dab9429fd.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-25-flight-ffcd772b-click-1.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-26-flight-278b6988-click-1.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-26-flight-7f89646a-click-1.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-26-flight-ada87008-click-1.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-26-flight-e70b4baf-click-1.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-10027eab-80b7-4122-84fd-112c01d40815.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-411d607c-e0a9-4ca8-bf89-c83213da7d62.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-7ed7bd46-574f-49ce-9bf4-a92df1baf854.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-8190a177-1c5b-45b2-b2bb-4615b803c269.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-928742a5-b893-407c-9166-1acb0ad1068b.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-28-bc0e07ad-c6ce-424a-af1e-78b50ec630cc.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790654511.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790655282.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790688574.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790688778.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790688961.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-29-1790701955.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790728475.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790729170.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790730988.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790737908.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790742487.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790742842.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790745596.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790746462.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790747225.edn` | Q7 | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790747529.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-2026-09-30-1790748841.edn` | Q4, Q7 | Q1, Q2, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-cohort-discharge-run.edn` | Q7 | Q1, Q2, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-probe-revert-check.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+| `tick-run-record-smoke.edn` | none | Q1, Q2, Q3, Q4, Q5, Q6, Q8, Q9, Q10 |
+
+No run conforms (0/76).
