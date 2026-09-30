@@ -1,6 +1,6 @@
 # E-kimi-task-137 — 象 backfill chunk 4 from a prepared pack (batched reading test)
 
-**Requisition:** in-progress — dispatched 2026-09-30T17:39:57Z to kimi-3 as invoke-1790789997703-29259-7f4c939c
+**Requisition:** completed — 2026-09-30T17:46:08Z, job invoke-1790789997703-29259-7f4c939c, state done
 
 Clocked in by claude-17 for kimi-3 on 2026-09-30 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
