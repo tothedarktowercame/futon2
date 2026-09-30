@@ -555,3 +555,43 @@
                   (catch clojure.lang.ExceptionInfo e
                     (:kind (ex-data e)))))
           "(b) the refusal keeps the scoring refusal's kind"))))
+
+(deftest all-declined-family-with-admission-refusals-abstains
+  ;; M-a-wmc-scaling (click 16): the only admitted family is class :unknown;
+  ;; every other target was refused at admission :no-admitted-interpretation.
+  ;; The decision must ABSTAIN with all refusals -- never throw -- so the
+  ;; runner's first-no-admitted-interpretation-refusal ask can fire. The
+  ;; scoring declines stay on :dropped-candidates.
+  (let [u-target :U
+        a-target :A
+        sources
+        (assoc tick-1-sources
+               :universes {u-target {:u-open true :u-clean false}
+                           ;; A has a fact universe but NO interpretations:
+                           ;; assembly refuses it :no-admitted-interpretation.
+                           a-target {:a-open true :a-clean false}}
+               :interpretations {u-target {:patterns
+                                           {:u-fix {:guard {:needs #{:u-open}
+                                                            :forbids #{:u-clean}}
+                                                    :produces #{:u-clean}}}
+                                           :receipts {:u-fix {:receipt "U-fix"
+                                                              :source "fixture"}}}}
+               :wants {u-target [:u-clean]}
+               :candidates {u-target [{:precedence [:u-fix]
+                                       :construction-receipt receipt}]})
+        assembled (assemble* {:targets [a-target u-target] :sources sources})
+        r (wm-cd/cascade-decision assembled live-c-opts)
+        decision (:decision r)]
+    (is (= :abstained (:status decision))
+        "nothing thrown: the all-declined family abstains")
+    (is (= [a-target u-target] (mapv :target (:refusals decision))))
+    (is (= [:no-admitted-interpretation :class-unknown-no-scalar-g]
+           (mapv :kind (:refusals decision)))
+        "A's admission refusal in its existing place, then U's class-unknown refusal")
+    (is (= :target-relation (:missing (second (:refusals decision))))
+        "the class-unknown refusal names the missing input")
+    (is (some #(and (= :class-unknown-no-scalar-g (:reason %))
+                    (= u-target (:target %))
+                    (= :scoring (:stage %)))
+              (:dropped-candidates r))
+        "the scoring decline is kept on :dropped-candidates")))

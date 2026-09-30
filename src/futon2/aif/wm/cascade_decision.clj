@@ -1035,34 +1035,66 @@
               ;; scalar. Only when NO candidate has a scalar does the
               ;; decision refuse as before. No G is invented for the unknown
               ;; target (no worst case, no average, no default class).
-              [ranked class-declines]
-              (loop [candidates joint-candidates declines []]
+              [ranked class-declines class-unknown-refusals]
+              (loop [candidates joint-candidates declines [] refused []]
                 (let [r (efe/rank-actions {:cascade-belief joint-q0}
                                           candidates rank-opts)]
                   (if (and (map? r) (contains? r :status)
                            (= :class-unknown-no-scalar-g (:kind r))
                            (some #(= (:target r) (:target %)) candidates))
                     (let [t (:target r)
-                          remaining (filterv #(not= t (:target %)) candidates)]
+                          remaining (filterv #(not= t (:target %)) candidates)
+                          target-declines (map (fn [c]
+                                                 {:target t
+                                                  :stage :scoring
+                                                  :candidate (:id c)
+                                                  :reason :class-unknown-no-scalar-g
+                                                  :possible-costs (:possible-costs r)})
+                                               (filter #(= t (:target %)) candidates))
+                          refusal {:target t
+                                   :kind :class-unknown-no-scalar-g
+                                   :missing :target-relation
+                                   :possible-costs (:possible-costs r)}]
                       (if (empty? remaining)
-                        (throw (ex-info "cascade decision refused"
-                                        (merge {:kind :class-unknown-no-scalar-g} r)))
+                        ;; Every scored candidate declined: nil ranked; the
+                        ;; body below abstains with all refusals when other
+                        ;; targets carry admission refusals, else throws.
+                        [nil (into declines target-declines)
+                         (conj refused refusal)]
                         (recur remaining
-                               (into declines
-                                     (map (fn [c]
-                                            {:target t
-                                             :stage :scoring
-                                             :candidate (:id c)
-                                             :reason :class-unknown-no-scalar-g
-                                             :possible-costs (:possible-costs r)}))
-                                     (filter #(= t (:target %)) candidates)))))
-                    [r declines])))
+                               (into declines target-declines)
+                               (conj refused refusal))))
+                    [r declines refused])))
               dropped (vec (concat dropped class-declines))]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
-          (let [precision-model (get-in (meta ranked) [:cascade-scoring :precision-model])
+          ;; M-a-wmc-scaling (click 16): when EVERY scored candidate was
+          ;; declined :class-unknown-no-scalar-g and other targets carry
+          ;; admission refusals, the decision ABSTAINS -- the same typed
+          ;; abstention as the no-admitted-problems path, :refusals in their
+          ;; existing order plus one :class-unknown-no-scalar-g refusal per
+          ;; declined target -- so the runner's
+          ;; first-no-admitted-interpretation-refusal ask can fire. When the
+          ;; declined family was the whole field the decision still refuses.
+          (or (when (nil? ranked)
+                (if (seq (:refusals assembled))
+                  {:decision (decision-gate/emit!
+                              {:status :abstained
+                               :refusals (into (vec (:refusals assembled))
+                                               class-unknown-refusals)})
+                   :lanes (mapv (fn [lane]
+                                  (cond-> lane
+                                    (seq dropped)
+                                    (assoc :dropped-candidates dropped)))
+                                lanes)
+                   :dropped-candidates dropped
+                   :cascade-problems assembled}
+                  (throw (ex-info "cascade decision refused"
+                                  (merge {:kind :class-unknown-no-scalar-g}
+                                         (last class-unknown-refusals))))))
+              (let [precision-model (get-in (meta ranked) [:cascade-scoring :precision-model])
                 schedules (into {} (map (fn [p] [(:target p) (get-in p [:cascade-problem :observation-schedule])]) problems))
                 model-id (precision-carry/model-identity precision-model
                            (mapv (fn [e] {:id (:action e)}) ranked) schedules)
@@ -1186,7 +1218,7 @@
                               (assoc :dropped-candidates dropped)))
                           lanes)
              :dropped-candidates dropped
-             :cascade-problems assembled})))))
+             :cascade-problems assembled}))))))
 
 (defn- candidate-want-progress
   "Use the scorer/constructor's rollout, on this target's fresh true facts.

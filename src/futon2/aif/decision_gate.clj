@@ -41,12 +41,17 @@
             [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def ^:private allowed-refusal-kinds
-  "The closed set of per-target refusal kinds (SPEC §Decision 4)."
+  "The closed set of per-target refusal kinds (SPEC §Decision 4).
+   :class-unknown-no-scalar-g (M-a-wmc-scaling, click 16) admits the
+   all-declined-family abstention: the target's relation is unresolvable
+   (codex-20 handoff B), so its candidates got no scalar G and the tick
+   abstains with the admission refusals plus this one."
   #{:universe-not-admitted
     :no-admitted-interpretation
     :want-not-declared
     :beta-not-declared
-    :no-constructed-candidate})
+    :no-constructed-candidate
+    :class-unknown-no-scalar-g})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
