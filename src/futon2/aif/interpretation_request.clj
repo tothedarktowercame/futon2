@@ -162,6 +162,46 @@
                                                    :retriever-rank (inc i) :raw row :judgment :unjudged}))))
             {:candidates [] :failures []} (map-indexed vector rows))))
 
+(defn query-time-slice
+  "Pure projection of one captured retrieval into the query-time library slice.
+   Candidates retain both their normalized rank and retriever rank. Retrieval
+   failures are typed and never become candidates. Pins and source revisions
+   make the result independently auditable by request preparation and, later,
+   selection."
+  [request]
+  (let [runs (get-in request [:retrieval :runs])
+        sources-by-id (into {} (map (juxt :id identity)) (:sources request))
+        library-source-ids (->> runs
+                                (mapcat #(get-in % [:parameters :library-sources] []))
+                                distinct
+                                vec)
+        candidates (->> runs
+                        (mapcat (fn [run]
+                                  (map #(assoc % :retriever (:retriever run))
+                                       (:candidates run))))
+                        (map-indexed (fn [i candidate]
+                                       (assoc candidate :slice-rank (inc i))))
+                        vec)
+        failures (->> runs
+                      (mapcat (fn [run]
+                                (concat
+                                 (map #(assoc % :retriever (:retriever run))
+                                      (:row-failures run))
+                                 (map #(assoc % :retriever (:retriever run))
+                                      (:failures run)))))
+                      vec)]
+    {:schema :wm/query-time-library-slice-v1
+     :target (get-in request [:target :id])
+     :query (get-in request [:retrieval :query])
+     :candidates candidates
+     :failures failures
+     :slice-size (count candidates)
+     :library-size (count library-source-ids)
+     :retriever-runs runs
+     :source-revisions (mapv #(select-keys % [:id :path :sha256 :revision])
+                             (:sources request))
+     :library-pins (mapv sources-by-id library-source-ids)}))
+
 (defonce ^:private !library-pins-memo
   ;; Pinned library listings, keyed on [evidence-dir library-revision]: the
   ;; whole-library pin (sha256 + git rev-parse per file, ~1415 files) is
@@ -292,7 +332,7 @@
      (need! (= #{:embedding :tier0} (set (map :kind retriever-specs)))
             :interpretation/retriever-set-invalid {:request request})
      (need! (some #(empty? (:failures %)) runs) :interpretation/retrieval-unavailable {:request request})
-     request))
+     (assoc-in request [:retrieval :slice] (query-time-slice request))))
 
 (defn prepare!
   "ACTION is the authorized input, not a selection proposal. Ports allow hermetic tests.

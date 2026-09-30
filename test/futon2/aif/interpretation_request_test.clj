@@ -262,3 +262,54 @@
              (get-in r2 [:retrieval :runs 0 :failures 0 :reason])))
       (is (= [] (get-in r2 [:retrieval :runs 1 :failures])))
       (is (= "family/ok" (get-in r2 [:retrieval :runs 1 :candidates 0 :pattern]))))))
+
+(deftest query-time-slice-is-shared-and-rejects-unresolved-identities
+  (let [{:keys [action identity entry opts]} (fixture
+                                               :advance-mission
+                                               "## IDENTIFY\nHave a query; want a ranked library slice.\n")
+        root (io/file (:data-root identity))
+        family (io/file root "library" "family")
+        other (io/file root "library" "other")
+        _ (.mkdirs family)
+        _ (.mkdirs other)
+        alpha (io/file family "alpha.flexiarg")
+        beta-a (io/file family "beta.flexiarg")
+        beta-b (io/file other "beta.flexiarg")
+        _ (spit alpha "alpha")
+        _ (spit beta-a "beta-a")
+        _ (spit beta-b "beta-b")
+        paths (mapv #(.getCanonicalPath %) [alpha beta-a beta-b])
+        retrieve (fn [{:keys [kind]}]
+                   (if (= "embedding" kind)
+                     [{:pattern_id "family/alpha" :score 0.9}
+                      {:pattern_id "unresolved" :score 0.8}]
+                     [{:pattern_id "beta" :score 7}]))
+        shared-opts (assoc opts
+                           :resolve-fn (constantly entry)
+                           :library-fn (constantly paths)
+                           :retrieve-fn retrieve)
+        prepared (request/prepare! action identity shared-opts)
+        proposal (request/prepare-want-proposal!
+                  (:target action) :mission (io/file root "want-slice")
+                  (fn [source text]
+                    (request/tension-citations :mission source text))
+                  shared-opts)
+        request-slice (get-in prepared [:retrieval :slice])
+        want-slice (get-in proposal [:retrieval :slice])]
+    ;; The authorized request and want producer expose the same pure result.
+    (is (= request-slice want-slice))
+    (is (= ["family/alpha"] (mapv :pattern (:candidates want-slice))))
+    (is (= [1] (mapv :slice-rank (:candidates want-slice))))
+    (is (= #{:interpretation/unresolved-pattern-id
+             :interpretation/ambiguous-pattern-id}
+           (set (map :kind (:failures want-slice)))))
+    (is (not-any? #{"unresolved" "beta"}
+                  (map :pattern (:candidates want-slice))))
+    (is (= 1 (:slice-size want-slice)))
+    (is (= 3 (:library-size want-slice)))
+    (is (= 3 (count (:library-pins want-slice))))
+    (is (every? #(and (:id %) (:sha256 %) (:revision %))
+                (:library-pins want-slice)))
+    (is (= #{"embedding" "tier0"}
+           (set (map :retriever (:retriever-runs want-slice)))))
+    (is (seq (:source-revisions want-slice)))))
