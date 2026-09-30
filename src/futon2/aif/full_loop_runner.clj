@@ -31,6 +31,7 @@
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
+            [futon2.aif.wm.terminal-receipt :as terminal-receipt]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
@@ -816,7 +817,15 @@
                      (assoc :run4/effective-environment-attestation
                             environment-attestation)
                      terminal-context
-                     (assoc :terminal terminal-context))]
+                     (assoc :terminal terminal-context)
+                     ;; PROOF-2b ⟨0⟩0: exactly one terminal receipt per
+                     ;; record — an :action-receipt for a selected click, a
+                     ;; :failure for an abstention, refusal, or exception.
+                     ;; The outcome is the close's own, threaded in here;
+                     ;; terminal-receipt reads only what the record holds
+                     ;; and throws on a record that is both or neither.
+                     true
+                     (terminal-receipt/attach (:outcome result)))]
         (io/make-parents target)
         (spit tmp (str (pr-str record) "\n"))
         (java.nio.file.Files/move
