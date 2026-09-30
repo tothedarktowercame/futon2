@@ -17,6 +17,7 @@
    Contract: contributes to R6 (softmax action selection) per
    `futon2/docs/futon-aif-completeness.md`."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
@@ -144,10 +145,18 @@
 ;; Cascade-candidate selection (R14 requirement, tick 1 of the virtual WM)
 ;; ---------------------------------------------------------------------------
 
+(defn- co-apply-roots
+  [{:keys [units descent patterns]}]
+  (let [has-unit-above (set (map second descent))]
+    (mapv patterns (remove has-unit-above units))))
+
 (defn- cascade-first-action
   "The action a ranked cascade entry contributes to the action marginal at
-  this step: its first acting pattern; a non-cascade entry (e.g. the explicit
-  no-op) contributes its :type. Purely additive helper of
+  this step: its first acting pattern for vector precedence, or the ordered
+  vector of root pattern maps for co-application precedence.  Two co-apply
+  cascades with the same roots therefore pool their posterior mass.  A
+  non-cascade entry (e.g. the explicit no-op) contributes its :type.
+  Purely additive helper of
   `select-action-cascades`.
 
   PROOF-wm-works ⟨1⟩6 reporting note: this is the CHAIN HEAD (the first
@@ -159,16 +168,23 @@
   chain head; the enacted step is recorded ALONGSIDE it (see
   enacted-step-of) and never redefines this key."
   [action]
-  (if (and (map? action) (seq (:precedence action)))
-    (first (:precedence action))
-    (if (map? action) (:type action) action)))
+  (if (map? action)
+    (let [precedence (:precedence action)]
+      (cond
+        (vector? precedence) (first precedence)
+        (map? (:co-apply precedence))
+        (let [roots (co-apply-roots (:co-apply precedence))]
+          (when (seq roots) roots))
+        :else (:type action)))
+    action))
 
 (defn enacted-step-of
   "PROOF-wm-works ⟨1⟩6: the step the machine would actually take now — the
   first pattern in the cascade's precedence whose guard holds at the
-  current state (Lean CascadeTransition.firstEnabled semantics), resolved
-  against the belief the decision scored from. Returns the enabled step's
-  id (the chain head's when it is itself enabled). Otherwise a typed
+  current state (Lean CascadeTransition.firstEnabled semantics), or every
+  id in the co-application enabled frontier, resolved against the belief the
+  decision scored from. Returns the enabled step id for a vector precedence
+  and an ordered vector of ids for co-application precedence. Otherwise a typed
   absence, never nil standing in for one (M-wm-wiring, claude-10,
   2026-09-25; fad94c89 found the nils): {:absent :no-scoring-belief} when
   STATE-TOKENS is nil (the entry carried no prediction belief),
@@ -178,7 +194,19 @@
   Additive: nothing downstream changes key."
   [action state-tokens]
   (when (and (map? action) (seq (:precedence action)))
-    (let [;; the live qualifier's pattern maps carry interpreted guards; the
+    (if-let [{:keys [units descent patterns]} (get-in action [:precedence :co-apply])]
+      (cond
+        (nil? state-tokens) {:absent :no-scoring-belief}
+        (empty? units) nil
+        :else
+        (let [frontier (try
+                         (manifest/enabled-frontier units descent patterns state-tokens)
+                         (catch Exception _ ::refused))]
+          (cond
+            (= ::refused frontier) {:absent :first-enabled-refused}
+            (seq frontier) frontier
+            :else {:absent :no-enabled-step})))
+      (let [;; the live qualifier's pattern maps carry interpreted guards; the
           ;; guard clauses are used directly with first-enabled by building
           ;; the interpreted shape here. (The earlier `precedence` binding
           ;; computed a token-interpretation normalization nothing consumed;
@@ -198,14 +226,13 @@
                                   :produces (:produces p)})))
           enabled (when (some? state-tokens)
                     (try
-                      ((requiring-resolve 'futon2.aif.cascade-model-manifest/first-enabled)
-                        interpreted state-tokens)
+                      (manifest/first-enabled interpreted state-tokens)
                       (catch Exception _ ::refused)))]
       (cond
         (nil? state-tokens) {:absent :no-scoring-belief}
         (= ::refused enabled) {:absent :first-enabled-refused}
         (some? (:id enabled)) (:id enabled)
-        :else {:absent :no-enabled-step}))))
+        :else {:absent :no-enabled-step})))))
 
 (defn- selection-input
   "Record the historical neutral-input rule, including present null/false.
@@ -488,9 +515,12 @@
                             (for [e original-ranked
                                   :let [a (:action e)
                                         first-entry (cascade-first-action a)
-                                        head (if (map? first-entry)
-                                               (:id first-entry)
-                                               first-entry)
+                                        head (cond
+                                               (and (vector? first-entry)
+                                                    (every? map? first-entry))
+                                               (mapv :id first-entry)
+                                               (map? first-entry) (:id first-entry)
+                                               :else first-entry)
                                         ;; the belief the decision scored from:
                                         ;; the entry's prediction initial belief
                                         ;; (a state-set); nil when the entry

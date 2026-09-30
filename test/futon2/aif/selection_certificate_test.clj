@@ -160,6 +160,67 @@
    :controller-score score
    :certificate {:f nil}})
 
+(defn- co-pattern
+  [id needs forbids produces]
+  {:id id :guard {:status :interpreted
+                  :clauses [{:present (set needs) :absent (set forbids)}]}
+   :produces (set produces) :theta 1/2})
+
+(defn- co-action
+  [id units descent patterns]
+  {:kind :cascade-candidate :id id :target :co-target
+   :precedence {:co-apply {:units units :descent descent :patterns patterns}}})
+
+(deftest co-application-first-action-is-the-declared-root-frontier
+  (let [patterns {:a (co-pattern :a [] [] [:a-done])
+                  :b (co-pattern :b [:a-done] [] [:b-done])
+                  :c (co-pattern :c [:b-done] [] [:c-done])}
+        first-action @#'policy/cascade-first-action]
+    (is (= [(patterns :a)]
+           (first-action (co-action :chain [:a :b :c] [[:a :b] [:b :c]] patterns))))
+    (is (= (mapv patterns [:a :b :c])
+           (first-action (co-action :independent [:a :b :c] [] patterns))))
+    (is (= (mapv patterns [:a :b])
+           (first-action (co-action :partial [:a :b :c] [[:a :c]] patterns))))
+    (is (nil? (first-action (co-action :empty [] [] {})))
+        "zero units are the same absence as an empty vector precedence")))
+
+(deftest co-application-marginal-pools-cascades-with-the-same-roots
+  (let [a (co-pattern :a [] [] [:a-done])
+        b (co-pattern :b [:a-done] [] [:b-done])
+        c (co-pattern :c [:a-done] [] [:c-done])
+        x (co-pattern :x [] [] [:x-done])
+        y (co-pattern :y [] [] [:y-done])
+        actions [(co-action :ab [:a :b] [[:a :b]] {:a a :b b})
+                 (co-action :ac [:a :c] [[:a :c]] {:a a :c c})
+                 (co-action :xy [:x :y] [] {:x x :y y})]
+        ranked (mapv (fn [action g]
+                       {:action action :cascade-id (:id action)
+                        :controller-score g :certificate {:f nil}})
+                     actions [1.0 2.0 3.0])
+        decision (policy/select-action-cascades ranked {:beta 1})
+        posterior (get-in decision [:selection-law :posterior])
+        marginal (get-in decision [:selection-law :action-marginal])
+        shared-root [a]
+        shared-mass (+ (posterior (actions 0)) (posterior (actions 1)))]
+    (is (= 2 (count marginal)))
+    (is (== shared-mass (marginal shared-root)))
+    (is (= #{[:a] [:x :y]}
+           (set (map #(mapv :id %) (keys marginal)))))
+    (is (not-any? #(and (vector? %) (= :co-apply (first %))) (keys marginal))
+        "the precedence container is never an action-marginal key")
+    (is (= #{[:a] [:x :y]}
+           (set (keys (get-in decision [:selection-law :enacted-steps])))))))
+
+(deftest co-application-enacted-step-is-the-enabled-frontier
+  (let [patterns {:a (co-pattern :a [] [:a-done] [:a-done])
+                  :b (co-pattern :b [:a-done] [:b-done] [:b-done])
+                  :c (co-pattern :c [:b-done] [:c-done] [:c-done])}
+        action (co-action :chain [:a :b :c] [[:a :b] [:b :c]] patterns)]
+    (is (= [:b] (policy/enacted-step-of action #{:a-done})))
+    (is (= {:absent :no-enabled-step}
+           (policy/enacted-step-of action #{:a-done :b-done :c-done})))))
+
 (deftest empty-cascades-cannot-outvote-an-acting-one-by-count
   ;; The bad case the guard is named for: many empty cascades, one acting.
   ;; Under the pooled-nil defect the empties' summed mass wins.
