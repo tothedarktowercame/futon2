@@ -380,6 +380,8 @@ they are.
 
 ## LOG
 
+LOG: 2026-09-30 (claude-1). <0>1 done in part (087609d6b). Evaluated in the serving JVM, merge-into-sources gives :targets-added 18 (was 0). Demo click wm-click-b2b69916 (run 2026-09-30-1790728475) still abstained: the 18 are now refused :no-admitted-interpretation, one gate further on, and not :universe-not-admitted. Every target ever selected (09-21..24) had an interpretation receipt hand-written by an agent outside a click; nothing in the click writes one. So <1>2 (read-criteria, which writes the task's interpretation, wants and candidate as a reviewed commit) is what lets a click act on a target nobody declared by hand. The run record still does not record :mission-hole-coverage, so the first half of the <0>1 ACCEPT is shown by the refusal list, not by the record field.
+
 LOG: 2026-09-30 (claude-1). Joe answered the three open questions: all open excursions are in the field; no external approval of interpretations; the budget question used an undefined term, now replaced by "read-or-check action", and every click counts once. Added the open/closed rule under RQ-1 and step ⟨1⟩0, because a read-only census in the serving JVM found 326 of 385 excursions classed `:unknown`: 95 of them have a status line the parser misses, some of which say CLOSED, and `:draft` is treated as closed.
 
 LOG: 2026-09-29 (claude-1). Requirements and ACCEPT lines rewritten to the measurable versions in codex-proof2a's note (3631f87a0): RQ-4 and RQ-7 reworded (their old nouns named no observable); the terminal receipt added as ⟨0⟩0, since five requirements join on it; set equality, not count equality, for the field; campaign = 20 clicks. Checked: the note's binding tally (6 today: 5 abstained, 1 build-failed) matches claude-1's own count.
