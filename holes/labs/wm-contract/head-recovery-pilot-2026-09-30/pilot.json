@@ -1,0 +1,202 @@
+{
+ "schema": "wm/head-recovery-pilot-2026-09-30",
+ "missions": [
+  {
+   "id": "M-formal-war-machine",
+   "created": "2026-08-25T11:17:54Z",
+   "commit": "e0295c8e3",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-08-25T11:15:23.845745835Z",
+   "passages": [
+    {
+     "at": "2026-08-25T11:15:23.845745835Z",
+     "source": "file",
+     "path": "/home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block007/claude-13-turn-415.json",
+     "agent": "claude-13",
+     "turn": "claude-13-turn-415",
+     "text": "Let's not worry about those other commits.  I think we should take the \"build a Lean model of the War Machine\" idea discussed above and write a new mission M-formal-war-machine.md that adapts the APM approach.  There may alse be a cross-reference to ./futon5/holes/M-formal-patterns.md but the latter one is a fairly speculative mission, whereas the M-apm-demonstration is running right now, and the Lean to Clojure spec work has definitely helped it run better"
+    }
+   ]
+  },
+  {
+   "id": "M-G-wm-wiring",
+   "created": "2026-09-17T19:49:56Z",
+   "commit": "d9b906f31",
+   "committer": "Joseph Corneli",
+   "class": "C",
+   "earliest_operator_turn": null,
+   "note": "created by the sweep commit 'Commit the work that was sitting uncommitted in the lab tree'; 123 operator turns in the +-8h window (earliest 2026-09-17T12:37:59Z, claude-4) but none about this mission",
+   "passages": []
+  },
+  {
+   "id": "M-a-wmc-scaling",
+   "created": "2026-09-20T18:03:16Z",
+   "commit": "5271311d4",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-20T14:59:07Z",
+   "passages": [
+    {
+     "at": "2026-09-20T14:59:07Z",
+     "source": "file",
+     "path": "/home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block031/claude-12-turn-208.json",
+     "agent": "claude-12",
+     "turn": "claude-12-turn-208",
+     "text": "OK, let's consider that C is now specified to a level where *something* compatible with my views on the matter can be implemented.  I think we should move on to A.  I had asked codex-3 to look at nttcslab/variance-wmc from Github, we could reread the notes in *codex-repl:codex-3* from line 45",
+     "note": "commissioning discussion ~3h before; mission not named"
+    },
+    {
+     "at": "2026-09-20T19:58:45.144316414Z",
+     "source": "evidence",
+     "evidence_id": "emacs-b76a80d7a6bf9dc7e462e13d9d731555",
+     "mission_id_join": "M-a-wmc-scaling",
+     "text": "Hi, I'd like a pre-post-plop-2026 read of M-a-wmc-scaling.md —",
+     "note": "after creation"
+    }
+   ]
+  },
+  {
+   "id": "M-run-produces-its-own-brief",
+   "created": "2026-09-01T07:34:05Z",
+   "commit": "e3e5f3684",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-01T07:26:55Z",
+   "passages": [
+    {
+     "at": "2026-09-01T07:26:55Z",
+     "source": "file",
+     "path": "/home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block015/claude-20-turn-87.json",
+     "agent": "claude-20",
+     "turn": "claude-20-turn-87",
+     "text": "So I agree we don't need to restart right away. We can restart once we've gotten... A few things in place when we've done the analysis that you were talking about and so forth. As for this morning brief, I suppose in a sense we're having a prototype of that right now because we're walking through the decisions that have been made or the decisions that need to be made after the end of an overnight run.",
+     "note": "8 min before commit; partly describes; the C449 sentence itself appears only in the commit message"
+    }
+   ]
+  },
+  {
+   "id": "M-f11-find-production-successor",
+   "created": "2026-09-12T16:16:09Z",
+   "commit": "ad6e034db",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-09-26T17:33:40.893055879Z",
+   "passages": [
+    {
+     "at": "2026-09-26T17:33:40.893055879Z",
+     "source": "evidence",
+     "evidence_id": "emacs-a1f2891de58d9b872c8be0e11fdaaa2f",
+     "mission_id_join": "M-f11-find-production-successor",
+     "text": "As predicted we hit the limit, let's restart with Codex helpers",
+     "note": "post-creation"
+    }
+   ]
+  },
+  {
+   "id": "M-custom-harness",
+   "created": "2026-07-04T18:57:33Z",
+   "commit": "f15682272",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-07-04T17:26:58.023920249Z",
+   "passages": [
+    {
+     "at": "2026-07-04T17:26:58.023920249Z",
+     "source": "evidence",
+     "evidence_id": "e-9712457b-0a5d-4229-9e30-aed4ca6f1ca4",
+     "mission_id_join": "M-custom-harness",
+     "text": "So, I think we should focus now on the zai-7 M-custom-harness work and get it finalised.  I have been directin zai-8 to look at some exploratory issues.  We could come back to the futon1b idea later."
+    },
+    {
+     "at": "2026-07-04T17:46:51.103243764Z",
+     "source": "evidence",
+     "evidence_id": "e-ed7d36ed-e4d8-4810-903f-474c767da31c",
+     "mission_id_join": "M-custom-harness",
+     "text": "Not urgent, just useful real-world testing for M-custom-harness"
+    }
+   ]
+  },
+  {
+   "id": "M-eoi-outbox-management",
+   "created": "2026-06-12T18:38:41Z",
+   "commit": "fd2be4c",
+   "committer": "Joseph Corneli",
+   "class": "A",
+   "earliest_operator_turn": "2026-06-09T20:06:58.624065624Z",
+   "passages": [
+    {
+     "at": "2026-06-09T20:06:58.624065624Z",
+     "source": "evidence",
+     "evidence_id": "e-efc5e109-0e9b-4133-b0a7-d2c3d1805e89",
+     "mission_id_join": "M-memes-arrows-patterns-diagrams",
+     "text": "So, Cluster A should go in a new mission such as M-eoi-outbox-management.md — the exact wording is that FUTON should author cold outreach letters, it's not asserted that it needs to send them.  The work could be parallel to the \"Arxana Ledger\" with a pipeline whereby FUTON writes EOIs (that's new) and I review and send them (working on my Rembrandt signature more than my John Hancock this time).",
+     "note": "join names the session's clocked mission; the text commissions this one"
+    }
+   ]
+  },
+  {
+   "id": "M-single-entry-point",
+   "created": "2026-05-03T17:36:43Z",
+   "commit": "5f18bc2f",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-07-08T06:44:28Z",
+   "passages": [
+    {
+     "at": "2026-07-08T06:44:28Z",
+     "source": "evidence",
+     "query": "single entry point",
+     "text": "Let's ask Zai-10 for the the single-entry-point binding now.",
+     "note": "two months post-creation"
+    },
+    {
+     "at": "2026-07-08T07:38:33Z",
+     "source": "evidence",
+     "query": "single entry point",
+     "text": "But I thought our three zai-sourced packets, latest being single-entry-point, had passed through A3, which would make them ready for A4?  I don't think we need M-learning-loop all in one go."
+    }
+   ]
+  },
+  {
+   "id": "M-codex-sorry-loop",
+   "created": "2026-08-01T16:16:18Z",
+   "commit": "e0adbc3a",
+   "committer": "Joseph Corneli",
+   "class": "C",
+   "earliest_operator_turn": "2026-07-31T18:19:39.232323133Z",
+   "note": "two operator turns carry the mission join but neither describes its purpose; file entered git in a sweep commit",
+   "passages": []
+  },
+  {
+   "id": "M-experiment-build-match",
+   "created": "2026-08-01T15:15:05Z",
+   "commit": "029351177",
+   "committer": "Joseph Corneli",
+   "class": "B",
+   "earliest_operator_turn": "2026-08-01T15:44:35Z",
+   "passages": [
+    {
+     "at": "2026-08-01T15:44:35Z",
+     "source": "evidence",
+     "query": "experiment build match",
+     "text": "Experiment-build-match, 3 layers. codex-8 = layer 1 (CLean->Lean render + navigability gate); codex-9 = layers 2+3 (malli config validation + core.logic checker relation). ON BELLS: (1) codex-8 NEGATI…",
+     "note": "29 min after the creating commit; pre-creation turn 15:03:50Z directs the same jobs without naming the mission"
+    }
+   ]
+  }
+ ],
+ "counts": {
+  "A": 3,
+  "B": 5,
+  "C": 2,
+  "D": 0
+ },
+ "earliest_operator_turn_seen_in_store": "2026-02-18T15:34:37Z",
+ "operator_turn_fields": [
+  "evidence/body event=chat-turn",
+  "evidence/body role=user",
+  "evidence/author=joe (== origin.actor joe == origin.kind operator)"
+ ],
+ "store_queries": 16
+}
