@@ -1,7 +1,7 @@
 # M-wm-capability-claim — what the War Machine should be able to do
 
 **Opened:** 2026-08-01. **Owner:** Claude (claude-4). **Operator:** Joe.
-**Status:** SPEC. Prerequisite for M-aif-stack S2.
+**Status:** OPEN — SPEC. Prerequisite for M-aif-stack S2.
 
 ## The gap, with evidence
 
@@ -139,3 +139,10 @@ just the mark the correction probe already specified.
 - **S2:** one window of L1 data, reported whichever way it lands.
 - **S3:** L2 only after two windows exist.
 - **S4:** the L3 adjudication design — the hard one, and the one worth a paper.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] An append-only L1 ledger records the operator's verdict at recommendation time and records an endorse-rate threshold fixed before the first window closes.
+- [ ] One complete L1 window reports the WM's endorse rate whether it meets the preregistered threshold or not.
+- [ ] Two comparable L1 windows exist and report whether endorse rate rose, stayed flat, or declined as run history accumulated.
+- [ ] A written L3 adjudication design names an outcome authority independent of the operator who disagreed with the recommendation.

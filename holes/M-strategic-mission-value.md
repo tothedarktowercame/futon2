@@ -1,6 +1,6 @@
 # M-strategic-mission-value — make the strategic forward model discriminate on mission value
 
-**Status:** IDENTIFY → handoff to codex-3, reviewed by claude-6.
+**Status:** CLOSED — IDENTIFY → handoff to codex-3, reviewed by claude-6. Acceptance implementation and tests landed in `836151255` and the three-factor wiring in `568c44d51`.
 **Owner mission:** `~/code/futon7/holes/M-war-machine-aif-completion.md`
 **Date:** 2026-07-17. Operator: Joe. Ground Control: claude-6.
 

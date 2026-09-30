@@ -1,6 +1,6 @@
 # M-peradam-mechanization — the ritual ran; mechanize it without corrupting it
 
-**Status: P1-P3 MACHINERY LANDED DARK (2026-07-05 late evening — flown
+**Status:** OPEN — P1-P3 MACHINERY LANDED DARK (2026-07-05 late evening — flown
 end-to-end through pipeline-cards-II in one sitting: plan of record =
 ft-peradam-mechanization-006, the second v2 fold; P1+P3 = futon6
 peradam_cert loader, empty store refusing correctly — ALL six real
@@ -16,7 +16,7 @@ protocol (gates 001's certificate issuance, which starts the
 kill-criterion clock). THEN: E1 typed reward seam. Owner: claude-16
 orchestrating; Ratification: Joe. Lineage: futonzero-alphazero.md §5 (Goodhart's door;
 the peradam as the reward), M-peradam-grounding (co-lead; the
-grounded-loop portfolio), E-live-loop-2 2f/2g (the ritual's first run).**
+grounded-loop portfolio), E-live-loop-2 2f/2g (the ritual's first run).
 
 ## HEAD
 
@@ -93,3 +93,10 @@ consent budget are exactly the pieces that let one agent run the whole
 loop while the certification remains external to its judgment. This
 mission's P1-P3 (certificate schema, mana gate, machine refusal) are
 therefore the unification path, not just hardening.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] `futon6/src/futon6/peradam_cert.py` defines the P1 certificate loader and `futon6/tests/test_peradam_cert.py` pins rejection of missing witnesses. (evidence: `futon6/src/futon6/peradam_cert.py`)
+- [x] `src/futon2/aif/mana_gate.clj` provides award, consume, balance, and write-ahead spend logging for P2. (evidence: `src/futon2/aif/mana_gate.clj`)
+- [x] The peradam certificate tests include a synthetic P3 refusal with a named cause. (evidence: `futon6/tests/test_peradam_cert.py`)
+- [ ] A certified peradam is accepted as the outcome signal by M-fold-self-play P2 and the 3-series γ, while an uncertified score is rejected by the same typed reward seam.

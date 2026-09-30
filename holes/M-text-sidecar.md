@@ -1,7 +1,7 @@
 # Mission: M-text-sidecar — free-text recall for futon1b + evidence for XTDB #5637
 
 **Date:** 2026-07-10
-**Status:** OPEN — IDENTIFY drafted, awaiting Joe's read
+**Status:** OPEN — OPEN — IDENTIFY drafted, awaiting Joe's read
 **Owner:** claude (Fable session, 2026-07-10). Driver: Joe.
 **Home:** futon2/holes/ (alongside the migration excursion this grows out of)
 
@@ -461,3 +461,8 @@ relevance-beyond-BM25).
   #5637 comment draft, gated on Joe) can now be assembled from
   `textprobe/divergence-full.edn` + `tokens-graph.edn` + `tokens-evidence.edn`
   + the two migration-dynamics findings.
+
+## Acceptance checklist (2026-09-30)
+
+- [x] The FTS5 sidecar agrees with exhaustive scan-and-recheck on all ten named oracle queries, rebuilds deterministically, and preserves the `memory-search` envelope. (evidence: D1 acceptance section; futon1b `ea696ce`…`706f16d`)
+- [ ] A reproducible #5637 evidence packet reports divergence, posting skew, and candidate false-positive measurements, and Joe has approved its draft for posting.

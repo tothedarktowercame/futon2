@@ -1,6 +1,6 @@
 # M-post-mining-ingest — govern the post-mining material so it is neither forgotten nor muddled
 
-**Status:** IDENTIFY ratified (Joe, 2026-06-26) → **MAP in progress.** (Lifecycle: `futon4/holes/mission-lifecycle.md`; MAP = survey/catalogue the artifacts + consumers, facts not design.)
+**Status:** OPEN — IDENTIFY ratified (Joe, 2026-06-26) → **MAP in progress.** (Lifecycle: `futon4/holes/mission-lifecycle.md`; MAP = survey/catalogue the artifacts + consumers, facts not design.)
 **Owner:** Joe + claude-1 · **Spawned:** 2026-06-26, from [[M-points-de-fuite]]'s VERIFY — when we moved to *reconstruct the past from the mine*, we hit the question of which mine, applied how.
 
 ## HEAD (the one line)
@@ -67,3 +67,10 @@ MAP's object: **survey what the mine actually contains and who actually reads it
 5. **Substrate-2 ingest is the candidate single-source** (DERIVE question): would consumers reading one substrate query beat a canonical-pinned file? — defer to DERIVE.
 
 **← MAP cataloguing the SHAPE of the problem is done (artifacts + consumers + the divergence set). Remaining MAP-if-wanted: confirm the `.openai.json` lineage is the gate-passed one, and whether the 4 muddle-consumers are live or dead code. Then → DERIVE (pin a canonical + the consumer contract + the consistency check).**
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A tracked registry names the canonical mined data artifacts with provenance, version, and checksum.
+- [x] A consumer manifest classifies each mined-data reader and distinguishes canonical consumers, fixtures, and the intentional salvage path. (evidence: §2.B of this file)
+- [ ] A consistency check fails when a normal consumer reads `pre-instr-fix`, `salvaged`, `stub`, or `verify-smoke` data as canonical input.
+- [ ] The four divergent consumers named in §2.B either read the canonical source or are recorded as dead code.

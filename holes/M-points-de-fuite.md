@@ -1,6 +1,6 @@
 # M-points-de-fuite — a tiny DSL for minting structure on the line of flight
 
-**Status:** IDENTIFY → MAP (§2) → DERIVE prototyped (§3) → ARGUE/VERIFY basic-pass (§4, claude-11) → INSTANTIATE built + verified (§5) → **DOCUMENT (§6, 2026-06-26).** (Lifecycle: `futon4/holes/mission-lifecycle.md`.)
+**Status:** CLOSED — IDENTIFY → MAP (§2) → DERIVE prototyped (§3) → ARGUE/VERIFY basic-pass (§4, claude-11) → INSTANTIATE built + verified (§5) → **DOCUMENT (§6, 2026-06-26).** (Lifecycle: `futon4/holes/mission-lifecycle.md`.)
 **Owner:** Joe + claude-1 · **Spawned:** 2026-06-25, from the meme/goals-holes mining work — the realization that we are paying a 70B to *recover, twice, after the fact* the very structure the agent *knew* it was minting as it worked.
 
 > *"[I]t is by headlong flight that things progress and signs proliferate."* — Deleuze & Guattari, *A Thousand Plateaus* (1980, p. 73).

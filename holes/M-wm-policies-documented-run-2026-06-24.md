@@ -1,5 +1,7 @@
 # M-wm-policies — DOCUMENT: a real run of the WM, new features at work (2026-06-24)
 
+**Status:** CLOSED — completed DOCUMENT evidence for `M-wm-policies.md`, which Joe closed on 2026-06-24
+
 *What this is (Joe's DOCUMENT ask): real output from the **live** WM/AIF apparatus showing each M-wm-policies
 feature firing, and **the difference it makes** vs the pre-mission behaviour. Captured against the running futon3c
 JVM (served judgement `/api/alpha/war-machine` + live `futon3c.portfolio.*` / `futon2.aif.rollout` /

@@ -1,7 +1,7 @@
 # Mission: WM selects over policies, not just next steps (M-wm-policies)
 
 **Date:** 2026-06-09
-**Status:** **CLOSED (Joe, 2026-06-24).** All 4 completion criteria MET + live-verified; Track 1 LIVE, Track 2 (rollout/R13) LANDED+witnessed, Track 3 (niche-construction/R17 + grounding/R18) LIVE+committed; DOCUMENT done (§5 + `M-wm-policies-documented-run-2026-06-24.md`). Drove the AIF contract **R12→R18** (created R13; surfaced R16/R17/R18). Gated next-phases continue under their own homes: Car-3 acting → operator arming (R16 loop-closure + consent gate); `E-prove-salingaros-cascade-scorer` (R18 proof); route-(a) island foothold → operator go.
+**Status:** CLOSED — **CLOSED (Joe, 2026-06-24).** All 4 completion criteria MET + live-verified; Track 1 LIVE, Track 2 (rollout/R13) LANDED+witnessed, Track 3 (niche-construction/R17 + grounding/R18) LIVE+committed; DOCUMENT done (§5 + `M-wm-policies-documented-run-2026-06-24.md`). Drove the AIF contract **R12→R18** (created R13; surfaced R16/R17/R18). Gated next-phases continue under their own homes: Car-3 acting → operator arming (R16 loop-closure + consent gate); `E-prove-salingaros-cascade-scorer` (R18 proof); route-(a) island foothold → operator go.
 **Owner:** Joe + claude-1
 **Repos:** futon2 (`aif/efe.clj` — the pure scorer), futon3c (`peripheral/war-machine-pilot`,
   `report/war_machine.clj` — the live judgement + opts), futon0 (`M-capability-star-map` — the graph)
