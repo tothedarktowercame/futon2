@@ -41,6 +41,45 @@ target had any pool at all. Policies = cascades constructible from admitted
 patterns of admitted targets = 1. (Not checked: how many cascades the
 constructor can enumerate from a given pool; the record shows one.)
 
+## PRIMARY FINDING: this violates the core design from the first step (Joe, 2026-09-30)
+
+Joe: "Then you are violating my core design from the first step."
+
+The design, in the library's own words
+(`futon3/library/cascades/on-the-fly-cascade.flexiarg`): "Derive cascade
+edges per query, against the current problem state — the cascade a seat
+needs is the cascade FOR THIS PROBLEM, and most such relations cannot be
+pre-declared. ... Compute the cascade slice at query time (lexical,
+structural, or model-judged relation candidates over declared skeleton plus
+context), hand the seat the slice with provenance, and receipt whatever the
+seat actually uses."
+
+What was built instead, and since when:
+- 2026-09-17 (`e2e1b477a`, `8e3fde409`): a target's patterns come from a
+  hand-written per-target file (`resources/wm/cascade-sources/*.edn`,
+  "hand-admitted interpretation/construction").
+- 2026-09-24 (`e08d08329`, `604959898`): an agent may add to that per-target
+  list by answering an interpretation request, one pattern per want,
+  validated before it counts.
+- The constructor has only ever read that per-target list. It has never
+  derived a slice from the library for the problem at hand.
+
+Why it went that way (the cause, not a defence): to compute G for a cascade
+the code wants each pattern as a rewrite over the target's tokens (a guard
+and a produced want). Library patterns are prose. The "interpretation" is
+the translation of one pattern for one target, and only translated patterns
+may be used. A step introduced to make the score computable replaced the
+library with a short list fed in by hand. This is the same root as the
+"formal wants" gate.
+
+Already in the code and misused: `interpretation_request.clj` runs two
+retrievers (embedding and tier0) over the whole library against a want and
+ranks candidate patterns. That is a query-time slice with provenance. It is
+used only to fill the prompt of an interpretation request; the slice itself
+never reaches the constructor or the seat.
+
+All other findings below are downstream of this one.
+
 ## In active inference terms
 
 | Part | What the theory has | What the record shows |
