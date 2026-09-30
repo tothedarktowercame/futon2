@@ -24,11 +24,13 @@
 (defn stoppable-failure?
   "True when THROWABLE is a failure that the runner would close as a failure.
 
-  A typed judge or gate refusal is deliberately thrown through run-phase! so
-  the surrounding runner code can turn it into the existing :abstained close.
-  Stopping there would turn an already-handled refusal into an operator break."
-  [throwable]
-  (not= :abstained (:outcome (ex-data throwable))))
+  Typed judge and gate refusals are failures too.  Detached runs retain the
+  existing close behaviour because run-phase! consults this predicate only
+  after checking attached?.  An attached run stops before its surrounding
+  close handler, so the operator can repair and retry the same phase or abort
+  to preserve the ordinary terminal refusal."
+  [_throwable]
+  true)
 
 (defn stopped
   "Public descriptions of run threads currently waiting for a restart."
@@ -56,6 +58,7 @@
 (defn- condition-kind [throwable]
   (let [data (ex-data throwable)]
     (or (:kind data) (:failure-kind data) (:reason data)
+        (get-in data [:judge-refusal :kind])
         :wm/phase-failure)))
 
 (defn await-restart!

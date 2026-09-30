@@ -155,17 +155,35 @@
     (is (= {:selected :operator-value} (deref running 2000 ::timeout)))
     (is (= :use-value (:debugger/restart (last @events))))))
 
-(deftest handled-refusal-does-not-enter-the-debugger
+(deftest typed-refusal-stops-when-debugger-is-attached
   (debugger/attach!)
+  (let [refusal (ex-info "War Machine abstained: cascade decision refused"
+                         {:outcome :abstained
+                          :judge-refusal {:kind :class-unknown-no-scalar-g}})
+        running (future
+                  (try
+                    (runner/run-phase!
+                     (phase-opts "typed-refusal" (atom []))
+                     {:opportunity-id "op" :attempt-id "attempt"}
+                     :selection #(throw refusal))
+                    (catch clojure.lang.ExceptionInfo e e)))]
+    (let [stop (wait-for-stop "typed-refusal")]
+      (is (= :selection (:phase stop)))
+      (is (= :class-unknown-no-scalar-g
+             (get-in stop [:condition :kind])))
+      (debugger/continue! "typed-refusal" :abort)
+      (is (identical? refusal (deref running 2000 ::timeout))
+          "abort preserves the ordinary outer refusal handling"))))
+
+(deftest typed-refusal-retains-ordinary-behaviour-when-detached
   (let [refusal (ex-info "War Machine abstained: cascade decision refused"
                          {:outcome :abstained
                           :judge-refusal {:kind :class-unknown-no-scalar-g}})
         caught (try
                  (runner/run-phase!
-                  (phase-opts "handled" (atom []))
+                  (phase-opts "detached-refusal" (atom []))
                   {:opportunity-id "op" :attempt-id "attempt"}
                   :selection #(throw refusal))
                  (catch clojure.lang.ExceptionInfo e e))]
-    (is (identical? refusal caught)
-        "the existing outer refusal handler receives the original exception")
+    (is (identical? refusal caught))
     (is (empty? (debugger/stopped)))))
