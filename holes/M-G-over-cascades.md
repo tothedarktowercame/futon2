@@ -1,7 +1,7 @@
 # Mission: G is over Cascades, not Patterns (M-G-over-cascades)
 
 **Date:** 2026-06-22
-**Status:** HEAD + IDENTIFY + MAP done; now in **exploratory DERIVE**. Per Joe (2026-06-23): slice-1 (reviewed PASS) and slice-2a are *exploratory probes*, **not** INSTANTIATE — only from their findings will we commit to a design, ARGUE it, VERIFY, then INSTANTIATE the real artifact. slice-2a probe in flight (claude-1). Continuation of [[M-wm-policies]].
+**Status:** OPEN — HEAD + IDENTIFY + MAP done; now in **exploratory DERIVE**. Per Joe (2026-06-23): slice-1 (reviewed PASS) and slice-2a are *exploratory probes*, **not** INSTANTIATE — only from their findings will we commit to a design, ARGUE it, VERIFY, then INSTANTIATE the real artifact. slice-2a probe in flight (claude-1). Continuation of [[M-wm-policies]].
 **Owner:** Joe + claude-2 (build/review); claude-1 (AIF theory, via whistle coordination).
 **Repos:** futon2 (`futon2.aif.rollout` — the rollout engine), futon3a (`meme.gates`; the lab experiments under
   `holes/labs/M-memes-arrows/`), futon3/library (the pattern language), futon6 (`holes/closure-folds.edn` — ground truth).
@@ -897,3 +897,10 @@ rule this row outranks non-F work until the seam lands). This entry
 corrects the formalisation *direction* only; the §7 stop-the-line on
 INSTANTIATE-ing the coupled tension-discharge G stands untouched — the
 module defines the domain and conformance, not the grounding.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] A temporal-curvature record supplies the per-commit `∂κ/∂t` evidence needed to evaluate tension discharge at the stack scale.
+- [ ] A named Axis-2 ground-truth dataset and held-out evaluation show whether coupled cascade `G` improves usefulness beyond the mission-anchor term.
+- [ ] The production policy seam presents `Cascade`-typed policies to `G`, cites `DarkTower/WarMachine/GOverCascades.lean`, and retires worklist item `:F13`.
+- [ ] Production cascade scoring no longer records the documented `:G-total 0.0` placeholder for out-of-v2-move-set missions.

@@ -1,5 +1,7 @@
 # Spec: A3 — the thin, content-free actuator ("build this")
 
+**Status:** OPEN — No prior status was recorded.
+
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews the *generality*).
 **Tracks:** `futon2/holes/aif-wiring-actuator.html`. Consumes the reviewed
 blueprint corpus (fold-turn deposits) and executes it into real substrate change.
@@ -92,3 +94,11 @@ Do NOT re-enable the hourly WM cron. Do NOT restart :7071 (futon1a#6). Verify
 substrate populations via Drawbridge :6768, never the :7071 HTTP read API.
 Bell **claude-4** back with a summary + commit SHAs. Small first pass fine — list
 limitations honestly.
+
+## Acceptance checklist (2026-09-30)
+
+- [ ] One content-free executor extracts build packages for all four named corpus blueprints without per-blueprint branches.
+- [ ] Witness-gate tests reject missing and unresolved evidence refs without moving the dial and accept a resolving witness with the documented dial movement.
+- [ ] Dry-run over all four blueprints is deterministic and performs no builder dispatch or substrate write.
+- [ ] Missing typespec or structure-spec produces a typed `spec-too-weak` or `instruction-inadequate` explanation rather than a silent skip.
+- [ ] The changed Clojure passes `clj-kondo`, `futon4/dev/check-parens.el`, and the named unit tests without live dispatch.
