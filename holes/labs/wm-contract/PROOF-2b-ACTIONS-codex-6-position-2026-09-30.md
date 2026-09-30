@@ -763,3 +763,119 @@ acceptance of PROOF-2b as a whole. Record 2 completes those claims. Whether Joe
 orders any click after either record is his decision; neither plan should use a
 click as its verification method, and an open critical incident still forbids
 proposing one.
+
+## Final position on the clean candidate: NO, with exact amendments
+
+The candidate is otherwise agreed. I require the following amendments before
+YES.
+
+### 1. I0 incident classification
+
+I agree with the critical-incident rule as written. A failure stops the line;
+the incident record is closed before further machine verification or any click;
+and the negative test represents the failure class rather than merely replaying
+the same instance.
+
+Add one classification rule so “hypothesis gap” does not become the bucket for
+every inconvenient environment result:
+
+> Choose the earliest violated boundary. A content gap means the supplied
+> field fails an already agreed D0 predicate. A hypothesis gap means an
+> external participant produced a result genuinely outside the already agreed
+> C3 closed sum or liveness hypothesis. A binding gap means the model covers or
+> forbids the event but the implementation/adapter diverges. A model gap means
+> a foreseeable event or required transition is absent or permitted wrongly in
+> the lifecycle model. Do not repair a model omission by assuming the event
+> away.
+
+The retrospective register is provisional until D0/C3 and the lifecycle model
+exist, but its classes can still name the intended boundary. Nine of the twelve
+rows are correctly classified. Amend three:
+
+| Incident | Draft level | Required level | Reason |
+|---|---|---|---|
+| Re-selected work already committed (14) | hypothesis | **model** | A stale basis is a foreseeable store result. The lifecycle must carry the selection basis and specify refresh, exclusion, or typed failure. Treating ordinary staleness as outside the environment hypothesis would make T3 conditional on the problem not occurring. |
+| Valid answers failed `no-execution-evidence` (15, 17, 19) | hypothesis | **binding** | The stated class is “effect adapter misreported a reply.” That is exactly a model/wire result incorrectly represented by the adapter. It is a hypothesis gap only if the seat actually violated the agreed action-specific contract. Interpretation/read answers must not inherit code-change execution requirements merely because one generic adapter does. Keep the adapter test, but classify this first-cut incident as binding. |
+| futon1b record not refreshed after a commit (13→14) | hypothesis | **model** | The class names effect ordering: a required cheap refresh was ordered after a slow effect that could time out. Ordering and the response to timeout are lifecycle transitions. Model the refresh-before-slow-effect order and typed unavailable/stale results. It becomes hypothesis only if a store result falls outside that closed result sum. |
+
+The other nine stand:
+
+- missing `alreadySatisfied` is a hypothesis gap because the seat result fell
+  outside the proposed C3 sum; C3 is amended to admit that legitimate result;
+- duplicated transition sites, duplicated closed sets, and divergent
+  classifiers are binding gaps;
+- lost request state, exhausted-field behavior, ineligible asking, refusal
+  memory, and terminal receipt completeness are model gaps.
+
+The process incident is correctly separate from the machine levels. Its
+negative control is the precommitted-expectation/readiness discipline, not a
+synthetic machine event.
+
+### 2. D1 and the two D0 columns
+
+Agree. D1 is necessary because the 19-row inventory describes what the current
+machine demands, not what task completion inherently requires. Formalising all
+nineteen current gates would preserve accidental complexity such as
+feature-card phrasing, status-parser disagreements, interpretation-before-read,
+and code-change execution evidence applied to a reading response.
+
+Retain both columns and add a disposition column with exactly one of:
+
+- `required-by-agent` — evidence from D1 shows the agent needs it;
+- `required-by-machine-invariant` — needed for identity, safety, authorization,
+  independent review, or auditable evidence even if the agent does not ask for
+  it;
+- `selection-quality-only` — may change ranking or result quality but cannot
+  gate task presence or terminalization;
+- `remove` — current code demands it, while neither the agent nor a machine
+  invariant needs it.
+
+This qualification matters: “the agent did not need it in the sample” is not
+enough to remove commit reachability, scope limits, reviewer distinction,
+correlation ids, or basis digests. Those protect the system rather than help the
+agent understand the work. Conversely, a current check is not an invariant
+merely because code contains it. D1 supplies empirical agent needs; Plan C/D0
+must state and justify the separate machine invariants.
+
+D1a is read-only and sound. D1b is also sound as a separately authorized
+experiment, provided its record distinguishes at least task-understanding,
+method-choice, tool/environment, authorization, execution, validation, and
+review failures. Record the exact prompt, task basis SHA, job/event ids,
+artifact and review result; otherwise “agent succeeded/failed” will conceal the
+same joins the plan is trying to establish. The candidate already correctly
+requires Joe's go-ahead before spending those seats.
+
+### 3. May an agent choose while AIF ranks proposals?
+
+My recommendation to Joe is **yes**, with a boundary: let an agent generate a
+typed proposal from an open task, and let the AIF machinery rank proposals; do
+not require a task to have formal wants, a focus class, and a validated cascade
+interpretation before it is eligible for proposal-generation work.
+
+The machine must still enumerate every open task and retain the common target
+field. Agent choice cannot be an opaque replacement that sees a subset and
+silently drops the rest. For each task lacking a constructive proposal, the
+field should contain an information action such as `read-and-propose`; its
+typed result names target id, proposed action kind, criterion, method/effect
+contract, expected evidence, input digest, and refusal dependencies. AIF ranks
+those proposals together with existing constructive and algorithm actions.
+Tasks without proposals remain visible and eligible for information actions.
+
+This separates two questions that today's code conflates:
+
+1. can an agent read the task and propose a next action? — measured by D1 and
+   governed by D0's task/agent contracts;
+2. which available proposal should run? — governed by AIF scoring and later
+   RQ-3/4/5 work.
+
+“AIF ranks and does not gate proposals” should mean it never removes a task
+from proposal generation for missing formal content. It does not mean every
+unsafe or malformed proposal is executable: authorization, scope, evidence,
+and action-schema validation remain fail-closed and yield typed receipts.
+
+The candidate is right to leave this as an explicit question for Joe and to
+defer Plan A selection rows (4)-(5) until he answers. My recommendation must
+not be silently treated as his ruling.
+
+With the three incident-level changes and the D0 disposition column added, my
+position becomes YES; no other amendment to the clean candidate is required.
