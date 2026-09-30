@@ -214,3 +214,169 @@ The first runtime blocker is not scoring. It is the absence of a durable,
 target-keyed, freshness-checked 象 reading for 248 of the 255 measured current
 substrate targets—and the absence of any production lookup even for the seven
 lab examples.
+
+## 7. Inside cascade-decision
+
+This section re-reads the replacement boundary at futon2 `490026fbe`.  The
+replacement must be in place: the interpreted-construction route and its
+`efe/rank-actions` call do not remain behind an option or fallback.
+
+### 7.1 Consumers between construction and the recorded decision
+
+The present values have these consumers:
+
+| Value / consumer | Current read | Disposition under reading policy families |
+|---|---|---|
+| `joint-candidates` construction | `cascade_decision.clj:729-754` replaces declared precedence IDs with target-specific `:interpretations`, locators, construction receipts and interpretation receipts. | **The old route itself; goes.** A reading policy is already an arranged co-application candidate from `cascade-shape-g`; requiring target-specific operators here would restore interpretation-before-selection. |
+| per-problem `:interpretations` | Read while constructing `joint-candidates` (`cascade_decision.clj:736-752`), by the theta pass (`:917-953`), and by admission/progress prediction (`:1230-1281`). | **No meaning before interpretation; goes from selection admission.** `score-policy` obtains theta by library pattern ID and constructs progress operators. Interpretation receipts become a post-selection debt, not candidate admission evidence. |
+| live-C freshness and scales | Sources, derivation and freshness guard are at `cascade_decision.clj:681-726`; reachability/spec is derived from `joint-q0`, wants and candidates at `:790-839`. | **Does not feed the new scorer unchanged.** Freshness may remain as separately recorded evidence, but `family-selection` supplies neither `joint-reachable`, live-C scales, nor a live-C receipt. Treating it as scored C would create a second C; see §7.3. |
+| token-belief stage and carry | `token-carry/stage`, predecessor inspection and `joint-q0` are at `cascade_decision.clj:756-772`; the stage and input are attached to the certificate at `:1108-1111`. | **Carrier can remain recorded, but `joint-q0` has no scoring role.** Shape G starts from its own progress-token belief. The old target-token universe cannot initialize occurrence-specific done tokens without a new, warranted projection. |
+| `joint-q0` | Supplies the old `efe/rank-actions` belief at `cascade_decision.clj:1008-1011`, reachable-domain calculation at `:814-815`, and precision model identity indirectly at `:1067-1076`. | **Old scoring input; goes.** `family-selection` does not expose one shared q0 because each policy has its own progress-token domain and scorer receipt. |
+| diagnostic lanes | Each old interpreted problem runs `cascade-lane` at `cascade_decision.clj:773-789`; their token-rate scoring is copied at `:1106-1107`, used for measured A at `:1156-1175`, and returned at `:1185-1189`. | **No meaning for a pre-interpretation policy.** These lanes score target-specific interpreted token operators. They must be removed from selection output or explicitly retained as unavailable diagnostics; they cannot certify reading policies. |
+| theta consumption | The old candidate patterns are read and rewritten at `cascade_decision.clj:904-953`, then summarized on the decision at `:1127-1136`. | **Old duplicate; goes.** `cascade-shape-g/arranged->candidate` already calls `learning-ledger/pattern-theta` per library pattern and leaves provenance on every occurrence (`cascade_shape_g.clj:108-142`). Family summaries must carry that provenance if the decision needs the aggregate receipt. |
+| `rank-opts` | Defines the class observation model, upstream conditioning, prediction clock and old C at `cascade_decision.clj:954-999`; only `efe/rank-actions` consumes it at `:1008-1011`. | **Old route; goes.** `score-policy` already ran the existing scorer with co-application precedence, progress observation model, horizon C, fit F and all G terms. Re-scoring would be a second scorer. |
+| class-unknown declines | The retry loop removes targets refused by the class scorer at `cascade_decision.clj:1000-1066`. | **No meaning for the progress model; goes.** A reading policy does not ask the focus classifier for a scalar class G. Its typed failures come from reading, graph, retraction and policy scoring and are already counted by `family-selection` (`family_selection.clj:70-112`). |
+| precision carry model identity and beta | Precision model metadata is taken from the old ranked vector; candidate identities and observation schedules form `model-id`, then `advance` chooses beta (`cascade_decision.clj:1067-1076`). | **Needs fields family selection lacks:** `:cascade-scoring :precision-model`, old schedules and one joint q0. Beta still must be declared, but its model identity must be restated over the reading-family scorer configuration, graph/analysis pins, progress model and policy identities. Reusing the old identity would claim the wrong model was continuous. |
+| prefix admission / `production-ranked` | Flight steps are joined to `joint-candidates` at `cascade_decision.clj:1077-1089`; `production-ranked` supplies historical prefix F immediately before selection at `:1090-1094`. | **Has no present join to reading policies.** `family-selection` already supplies circumstance-fit F. Old flight steps name interpreted candidate policies and token beliefs, whereas reading policy IDs name arranged cascades. Until a new same-policy occurrence join exists, applying prefix F would attach another policy's history. |
+| ticket queue | Queue validation happens at `cascade_decision.clj:1301-1305`; selector options carry queue and refusals at `:1095-1101`; abstention retains its plan at `:1306-1311`. | **Keeps working with a field adjustment.** Reading candidates carry `:target`, so the existing selector can stratify them. The refusal input must include family failures instead of old admission declines. |
+| novelty | `novelty/read-inputs` enters the existing selector at `cascade_decision.clj:1099-1101`. | **Keeps working unchanged.** `family-selection` calls that same selector once; it accepts `:novelty-inputs` in its opts (`family_selection.clj:100-106`). No second novelty calculation is needed. |
+| joint selection | Old ranked entries pass through `production-ranked` to `policy/select-action-cascades` at `cascade_decision.clj:1090-1101`. | **Replaced by the one call already inside `family-selection/select-over-families`** (`family_selection.clj:64-112`). Calling the selector again in `cascade-decision` would be two decisions. |
+| selection certificate fields | Precision family, token lanes/stage/input, candidate derivations, schema, preference audit, theta and focus receipts are attached at `cascade_decision.clj:1104-1153`. | The base selector certificate, novelty, law and ticket receipt **keep working**. `:target-policy-families` and counted failures must be attached. Precision, prefix, candidate derivations, theta, token-rate lanes and preference audit each need the replacement evidence named above; copying the old fields would be false. |
+| authority and gate | `controller-authority/authorize` and `decision-gate/emit!` consume the selected decision and ranked entries at `cascade_decision.clj:1154-1155`. | **Keeps working** if family-ranked entries retain finite `:controller-score`, action, applied selection law and authorization fields. S12 provides those entries; the gate remains the one gate. |
+| `select-and-record-cascade!` | The public wrapper calls `cascade-decision` at `cascade_decision.clj:1341-1346`; the caller stores its returned decision and lanes. | **Keeps the same public seam.** Its recorded decision must add family summaries/failures and must not claim old lanes or interpreted candidate derivations were used. |
+
+There is therefore no safe one-line substitution at old line 1010.  The
+replacement boundary begins before interpretation admission and ends at the
+single selector call.  Post-selection authority, gating and the public
+`select-and-record-cascade!` seam remain.
+
+### 7.2 Producing families inside the decision
+
+The outer report already reads mission records once.  Each record includes
+`:id` and `:path` (`mission_registry.clj:13-17,409-416`), and the target vector
+is built from those records plus declared/proposal/ticket targets at
+`war_machine.clj:6532-6568`.  However, only the assembled result is passed to
+`select-and-record-cascade!` (`war_machine.clj:6591-6603`).  Assembly retains
+targets only as `:problems[*].target` and `:refusals[*].target`
+(`cascade_problems.clj:343-369`); **no existing argument passed into
+`cascade-decision` carries the mission file path**.  The path is available in
+`loaded-missions` outside the call, not inside it.  Declared targets, tickets
+and proposals may have no mission path at all.
+
+The integration must therefore carry an explicit target-source declaration
+into the existing `assembled` value (preferred, because it belongs to the
+enumerated field), for example one row per target with `:target-id`,
+`:source-path`, and source kind.  It must not scan the registry again.
+For every row with a mission path, the decision then:
+
+1. computes `target-reading-registry/excerpt-digest` from exactly the HEAD or
+   opening (`target_reading_registry.clj:35-55`);
+2. calls `current-reading` with target and digest
+   (`target_reading_registry.clj:148-161`);
+3. builds `target-policy-family/policy-family` with that reading and the one
+   loaded graph (`target_policy_family.clj:55-97`).
+
+`pattern-graph-pin/load-pinned` must run **once per decision**, before the
+per-target map, and its typed refusal must become one counted provider failure
+affecting every target rather than N filesystem reads
+(`pattern_graph_pin.clj:120-150`).  The graph path and reading root can be
+composition-root configuration, but cannot enable the old route.  A target
+without a source path receives a counted `:target-source-path-absent`; it does
+not borrow a guessed file.
+
+### 7.3 There are currently two different C values
+
+The old decision derives live-C and its scales at
+`cascade_decision.clj:681-726`, but its current class-scoring branch explicitly
+records live-C without scoring it (`cascade_decision.clj:972-985`).  The shape
+scorer uses another C: at every horizon step it prefers a larger completed
+pattern count and then want-met (`cascade_shape_g.clj:157-169,196-217`).
+These are different outcome spaces and different preference distributions.
+
+There is one C only if the live preference producer emits a step-indexed
+distribution over the shape scorer's actual observation space
+`[completed-pattern-count want-met?]`, pinned to the same policy horizon and
+want definition, and `score-policy` consumes that distribution instead of its
+synthetic `progress-preference`.  Alternatively the project can designate the
+shape progress C as the decision's sole C and retire live-C from selection.
+Merely attaching both receipts does not make them one preference.
+
+### 7.4 Tests at the replacement boundary
+
+A source search at this HEAD finds **26 test namespaces** that directly call
+`wm-cd/cascade-decision` or `select-and-record-cascade!`.  Eighteen assert the
+old interpreted-candidate, q0/class scoring, lane, prefix, or admission route
+and must be rewritten around reading families (or deleted when they test a
+removed behavior):
+
+`futon2.aif.h4-production-stage-test`,
+`policy-precision-carry-test`, `policy-prefix-admission-test`,
+`policy-prefix-f-test`, `scoring-input-receipts-test`, `temporal-consume-test`,
+`token-belief-carry-test`, `token-belief-predecessor-test`,
+`token-observation-initialization-test`, `uniform-run-record-test`,
+`futon2.report.cascade-decision-test`, `coverage-account-test`,
+`eig-source-remaining-test`, `measured-a-decision-test`,
+`new-wanted-token-admission-test`, `observation-labels-consume-test`,
+`preference-schedule-decision-test`, and `wm01-bindings-test`.
+
+Eight exercise boundaries that should retain their behavioral claim after
+their fixtures acquire readings: `futon2.aif.cascade-proposals-test`,
+`gate-refusal-abstention-test`, `judge-refusal-abstention-test`,
+`repair-proposals-test`, `ticket-queue-test`,
+`futon2.report.cascade-habit-accumulation-test`,
+`cascade-habit-selection-test`, and `habit-fold-call-test`.  Their exact bytes
+may gain family receipts, but proposal failure accounting, gate refusal,
+ticket planning, no reinforcement during selection, recording identity and
+fold delivery remain valid.  This count is by namespace, not by test form;
+the source command was `rg -l 'wm-cd/(cascade-decision|select-and-record-cascade!)' test/futon2`.
+
+### 7.5 Implementation handoffs
+
+1. **Carry the enumerated source declaration.** Add the already-read mission
+   paths beside every assembled target, including typed absence for non-mission
+   targets. Bad case: the decision re-reads the registry or guesses a path for
+   a ticket.
+2. **Load one pinned graph and form every family.** Compute excerpt digests,
+   query the reading registry and call `policy-family` once per target, with
+   one graph load for the decision. Bad case: stale reading bytes are returned
+   current, or N targets cause N graph reads.
+3. **Replace admission and scoring in place.** Delete interpreted candidate
+   admission, joint-q0/class `efe/rank-actions`, retry declines and diagnostic
+   lanes from the selection route; call `select-over-families` once. Bad case:
+   any option still reaches the old scorer, or an interpretation receipt is
+   required before a reading policy can be scored.
+4. **Restate beta/model continuity.** Define precision identity from the
+   pinned reading-family scoring model and preserve beta only when that exact
+   identity matches. Bad case: an old class/q0 identity carries beta into the
+   progress/co-application model.
+5. **Reconcile C explicitly.** Supply one step-indexed C in the progress
+   observation space or retire live-C from selection, with one recorded
+   authority. Bad case: the certificate contains two different preferences
+   both labelled as the C that selected the policy.
+6. **Attach the replacement certificate.** Record every target family,
+   failures, F/G terms, kernel, pins, preference schedule and selected policy;
+   retain novelty, ticket, authority and gate receipts. Bad case: deleting one
+   target's no-reading failure leaves the aggregate count unchanged.
+7. **Reconnect post-selection interpretation and execution evidence.** The
+   chosen policy's owed nodes are interpreted before enactment; token carry,
+   prefix and measured-A receipts return only when they join that same policy
+   and observation model. Bad case: an old candidate's flight prefix or theta
+   receipt is attached to the chosen reading policy by position or pattern
+   label alone.
+8. **End-to-end recording.** Through `select-and-record-cascade!`, give one
+   target a current reading and one no reading. The first is selected, the
+   second is counted in the recorded decision, and nothing throws. Plant a
+   placeholder/fallback for the missing target and show the test fails.
+
+### 7.6 Reason not to perform a narrow in-place splice
+
+The replacement should be done in the existing decision, but not as a narrow
+splice around `efe/rank-actions`.  The code before that call constructs the
+wrong policy grain and the code after it attributes old-model precision,
+prefixes, lanes, theta and candidate derivations to the ranked entries.  A
+splice that preserves those receipts would produce a decision that selects a
+reading cascade while certifying that an interpreted token cascade was scored.
+That is worse than an explicit abstention because the record would name the
+wrong evidence.  The coherent in-place replacement is the whole
+interpretation-admission/scoring/certificate segment, retaining the one outer
+decision, selector, authority gate and recording seam.
