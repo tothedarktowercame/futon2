@@ -777,6 +777,14 @@
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
                                      :chosen (chosen-summary decision))
+                    ;; PROOF-2b: the click's interpretation ask (nil when
+                    ;; nothing was asked — a selected tick, a refusal of
+                    ;; another kind, or no ask-fn installed).
+                    :interpretation-ask (or (get-in result
+                                                    [:checkpoints :selection :judgment
+                                                     :interpretation-ask])
+                                            {:status :absent
+                                             :reason :no-interpretation-ask})
                     :route route
                     :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
@@ -1450,6 +1458,17 @@
          (nil? (:artifact-ref job))
          (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"}
                     failure-code))))
+
+(defn- first-no-admitted-interpretation-refusal
+  "PROOF-2b: the FIRST refusal of an abstained decision whose kind is
+  :no-admitted-interpretation, in the decision's own refusal order (the
+  cascade's ranking of the targets it refused), else nil. A decision that
+  selected something, abstained for another reason, or named no refusals
+  yields nil: no ask."
+  [decision]
+  (when (and (map? decision) (= :abstained (:status decision)))
+    (first (filter #(= :no-admitted-interpretation (:kind %))
+                   (:refusals decision)))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
@@ -5008,7 +5027,44 @@
                     ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
                     ;; the :failure-kind, not :untyped-failure
                     (throw (or (phase-kind-failure e) e))))))
-            judgement0 judgement0-base
+            ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
+            ;; step inside the tick). Only when the decision abstained
+            ;; refusing at least one target :no-admitted-interpretation, at
+            ;; most once per click, never for a flight (run-flight!'s own
+            ;; ask step already asked). The ask-fn comes from the runner
+            ;; opts (tests stub it) or the composition root
+            ;; (full-loop-runtime installs wm.click-ask/click-ask-fn).
+            interpretation-ask-fn (or (:interpretation-ask-fn opts)
+                                      (get *runtime-defaults* :interpretation-ask-fn))
+            interpretation-ask-refusal
+            (when (and interpretation-ask-fn (nil? (:flight opts)))
+              (first-no-admitted-interpretation-refusal
+               (:decision judgement0-base)))
+            interpretation-ask-record
+            (when interpretation-ask-refusal
+              (try (interpretation-ask-fn opts interpretation-ask-refusal)
+                   (catch Throwable e
+                     {:target (:target interpretation-ask-refusal)
+                      :outcome :ask-threw
+                      :error (ex-message e)
+                      :published false})))
+            judgement0
+            (if (and interpretation-ask-record (:published interpretation-ask-record))
+              ;; the ask published: re-run the decision ONCE in the same
+              ;; click. The judge merges the published interpretation itself
+              ;; (assemble-cascade-problems-with-published), so the refused
+              ;; target can now be selected. No second ask on this decision.
+              (let [generated (selection-judge window-days)
+                    j ((or (:judgement-transform-fn opts) identity)
+                       (:judgement generated))]
+                (reset! effective-configuration
+                        (or (:effective-run-configuration j)
+                            (assoc @effective-configuration :evaluation :not-retained)))
+                (when-let [state (:scan-report/state opts)]
+                  (reset! state (assoc (or (:render-data generated) (:data generated))
+                                       :judgement j)))
+                j)
+              judgement0-base)
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             entry ordinary-entry
@@ -5125,12 +5181,20 @@
                                      :dropped-candidates
                                      (get-in judgement
                                              [:cascade-problems :dropped-candidates])}))]
-        (let [selection-cell (-> selection-cell
-                                 (assoc-in [:judgment :effective-run-configuration]
-                                           @effective-configuration)
-                                 (assoc-in [:judgment :open-stop-lines]
-                                           {:count (count open-stop-lines)
-                                            :ids (mapv :repair/id open-stop-lines)}))]
+        (let [selection-cell (cond-> (-> selection-cell
+                                         (assoc-in [:judgment :effective-run-configuration]
+                                                   @effective-configuration)
+                                         (assoc-in [:judgment :open-stop-lines]
+                                                   {:count (count open-stop-lines)
+                                                    :ids (mapv :repair/id open-stop-lines)}))
+                               ;; PROOF-2b: the click's interpretation ask
+                               ;; rides on the selection cell's judgment —
+                               ;; selected and abstained (sorry) cells alike —
+                               ;; so persist-run-record! writes it on the run
+                               ;; record whether or not it published.
+                               interpretation-ask-record
+                               (assoc-in [:judgment :interpretation-ask]
+                                         interpretation-ask-record))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry

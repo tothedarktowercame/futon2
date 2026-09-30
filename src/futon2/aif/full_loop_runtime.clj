@@ -2,6 +2,7 @@
   "Production composition root for the full-loop runner."
   (:require [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.wm.click-ask :as click-ask]
             [futon2.report.war-machine :as wm]))
 
 (load-identity/register! *ns* *file*)
@@ -21,6 +22,7 @@
   "Build the report-backed functions for one production invocation."
   [opts]
   {:judge-fn (fn [days] (selection-judge opts days))
+   :interpretation-ask-fn (click-ask/click-ask-fn opts)
    :scan-render-fn wm/render-war-machine
    :effective-run-configuration-fn wm/effective-run-configuration
    :mode-flags-fn wm/arena-mode-flags})
