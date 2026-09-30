@@ -785,6 +785,15 @@
                     :interpretation-ask (or (get-in result
                                                     [:checkpoints :selection :judgment
                                                      :interpretation-ask])
+                                            ;; the judge-refusal sorry cell
+                                            ;; (a typed refusal of the
+                                            ;; decision or of the PROOF-2b
+                                            ;; re-decision) and the bare
+                                            ;; sorry cell of an untyped
+                                            ;; re-decision throw
+                                            (get-in result
+                                                    [:checkpoints :selection :sorry
+                                                     :interpretation-ask])
                                             {:status :absent
                                              :reason :no-interpretation-ask})
                     :route route
@@ -4994,6 +5003,28 @@
                            (map? (:repair/verification %)))
                      validation-lines)
             selection-judge (runtime-default opts :judge-fn)
+            ;; WM-CLICK-REFUSAL-I / WM-GATE-REFUSAL-I, shared by the first
+            ;; decision call and the PROOF-2b re-decision (click 15,
+            ;; tick-run-record-2026-09-30-1790742842: the re-decision's
+            ;; typed refusal bypassed this handling and closed the click
+            ;; :untyped-failure). ASK-RECORD, when the re-decision is the
+            ;; caller, rides the sorry cell so the run record keeps the
+            ;; ask whatever the re-decision did.
+            selection-refusal!
+            (fn [e ask-record]
+              (let [target (get-in opts [:flight :target])
+                    jr (judge-refusal e target)
+                    gr (when-not jr (gate-refusal e target))]
+                (if-let [r (or jr gr)]
+                  (let [cell (cond-> (judge-refusal-sorry r)
+                               ask-record (assoc-in [:sorry :interpretation-ask]
+                                                    ask-record))]
+                    (reset! pending-selection cell)
+                    (swap! checkpoints assoc :selection cell)
+                    (throw (judge-refusal-abstention r e)))
+                  ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
+                  ;; the :failure-kind, not :untyped-failure
+                  (throw (or (phase-kind-failure e) e)))))
             judgement0-base
             (try
             (run-phase!
@@ -5018,17 +5049,7 @@
                 ;; below), carried on the :no-selection sorry cell; so is the
                 ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
                 ;; else goes on, typed by its thrower's :kind when it has one
-                (let [target (get-in opts [:flight :target])
-                      jr (judge-refusal e target)
-                      gr (when-not jr (gate-refusal e target))]
-                  (if-let [r (or jr gr)]
-                    (let [cell (judge-refusal-sorry r)]
-                      (reset! pending-selection cell)
-                      (swap! checkpoints assoc :selection cell)
-                      (throw (judge-refusal-abstention r e)))
-                    ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
-                    ;; the :failure-kind, not :untyped-failure
-                    (throw (or (phase-kind-failure e) e))))))
+                (selection-refusal! e nil)))
             ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
             ;; step inside the tick). Only when the decision abstained
             ;; refusing at least one target :no-admitted-interpretation, at
@@ -5056,16 +5077,36 @@
               ;; click. The judge merges the published interpretation itself
               ;; (assemble-cascade-problems-with-published), so the refused
               ;; target can now be selected. No second ask on this decision.
-              (let [generated (selection-judge window-days)
-                    j ((or (:judgement-transform-fn opts) identity)
-                       (:judgement generated))]
-                (reset! effective-configuration
-                        (or (:effective-run-configuration j)
-                            (assoc @effective-configuration :evaluation :not-retained)))
-                (when-let [state (:scan-report/state opts)]
-                  (reset! state (assoc (or (:render-data generated) (:data generated))
-                                       :judgement j)))
-                j)
+              ;; The re-decision gets the SAME typed-refusal handling as the
+              ;; first call (click 15 closed :untyped-failure because it
+              ;; bypassed it), and the ask record reaches the run record on
+              ;; every re-decision path: typed refusal (on the sorry cell),
+              ;; untyped throw (on a bare sorry cell), selection (on the
+              ;; selection cell below).
+              (try
+                (let [generated (selection-judge window-days)
+                      j ((or (:judgement-transform-fn opts) identity)
+                         (:judgement generated))]
+                  (reset! effective-configuration
+                          (or (:effective-run-configuration j)
+                              (assoc @effective-configuration :evaluation :not-retained)))
+                  (when-let [state (:scan-report/state opts)]
+                    (reset! state (assoc (or (:render-data generated) (:data generated))
+                                         :judgement j)))
+                  j)
+                (catch clojure.lang.ExceptionInfo e
+                  (selection-refusal! e interpretation-ask-record))
+                (catch Throwable e
+                  ;; an untyped failure is recorded as today; the ask record
+                  ;; still rides the selection sorry cell so the run record
+                  ;; says the click asked and published
+                  (swap! checkpoints update :selection
+                         (fn [cell]
+                           (cond-> (or cell (sorry :no-selection {}))
+                             interpretation-ask-record
+                             (assoc-in [:sorry :interpretation-ask]
+                                       interpretation-ask-record))))
+                  (throw e)))
               judgement0-base)
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)

@@ -116,23 +116,25 @@
 
 (defn- run-click
   "One ordinary click with a counting judge-fn (first call ABSTAINED-decision,
-  every later call SELECTED-decision) and the given ask-fn."
-  [ask-fn]
-  (let [judge-calls (atom [])
-        findings (atom [])
-        result (runner/run-opportunity!
-                (merge (fixture/isolated-runner-opts)
-                       {:judge-fn (fn [days]
-                                    (let [n (count (swap! judge-calls conj days))]
-                                      {:judgement (judgement-for
-                                                   (if (= 1 n) abstained-decision (selected-decision)))}))
-                        :interpretation-ask-fn ask-fn
-                        :repair-system-record-fn (fn [m] (swap! findings conj m)
-                                                   {:repair/id (str "repair-test-" (count @findings))
-                                                    :repair/class (:repair-class m)})
-                        :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}))]
-    {:result result :judge-calls @judge-calls :findings @findings
-     :record (edn/read-string (slurp (:run-record result)))}))
+  every later call SECOND, default the SELECTED-decision) and the given
+  ask-fn. SECOND is a zero-arg fn returning the decision or throwing."
+  ([ask-fn] (run-click ask-fn (fn [] (selected-decision))))
+  ([ask-fn second]
+   (let [judge-calls (atom [])
+         findings (atom [])
+         result (runner/run-opportunity!
+                 (merge (fixture/isolated-runner-opts)
+                        {:judge-fn (fn [days]
+                                     (let [n (count (swap! judge-calls conj days))]
+                                       {:judgement (judgement-for
+                                                    (if (= 1 n) abstained-decision (second)))}))
+                         :interpretation-ask-fn ask-fn
+                         :repair-system-record-fn (fn [m] (swap! findings conj m)
+                                                    {:repair/id (str "repair-test-" (count @findings))
+                                                     :repair/class (:repair-class m)})
+                         :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}))]
+     {:result result :judge-calls @judge-calls :findings @findings
+      :record (edn/read-string (slurp (:run-record result)))})))
 
 (deftest an-abstained-tick-asks-then-selects-in-the-same-click
   ;; (a) the only candidate refused :no-admitted-interpretation: the click
@@ -194,3 +196,41 @@
     (is (= 0 @asks) "the ask fn was never invoked")
     (is (= {:status :absent :reason :no-interpretation-ask}
            (:interpretation-ask record)))))
+
+(defn- publishing-ask-fn
+  "An ask whose stubbed seat publishes (the real ask step, hermetic store)."
+  [store]
+  (test-ask-fn store (fn [_] {:seat "kimi-6" :job-id "job-1" :state "done"
+                              :text (reply-for :writing-coherence/meet-the-reader-where-they-are)})))
+
+(deftest a-typed-refusal-of-the-redecision-is-the-ticks-typed-abstention
+  ;; (d) click 15 (tick-run-record-2026-09-30-1790742842): the ask published,
+  ;; then the re-decision refused the cascade decision typed and the click
+  ;; closed :untyped-failure. The re-decision now goes through the same
+  ;; judge-refusal handling as the first call, and the ask record survives.
+  (let [store (io/file (temp-dir "click-ask-store"))
+        {:keys [result record judge-calls]}
+        (run-click (publishing-ask-fn store)
+                   (fn [] (throw (ex-info "cascade decision refused"
+                                          {:kind :class-unknown-no-scalar-g
+                                           :target target}))))]
+    (is (= 2 (count judge-calls)) "the ask published and the decision was re-run")
+    (is (= :abstained (get-in result [:data :failure-kind]))
+        "a typed refusal of the re-decision is the tick's typed abstention")
+    (is (not= :untyped-failure (get-in result [:data :failure-kind])))
+    (is (= :class-unknown-no-scalar-g
+           (get-in record [:decision :abstention :targets 0 :kind])))
+    (is (= true (:published (:interpretation-ask record))))
+    (is (= "job-1" (:job-id (:interpretation-ask record))))))
+
+(deftest an-untyped-redecision-failure-keeps-the-ask-record
+  ;; (e) the re-decision threw untyped: the failure is recorded as before,
+  ;; and the ask record is still on the run record
+  (let [store (io/file (temp-dir "click-ask-store"))
+        {:keys [result record]}
+        (run-click (publishing-ask-fn store)
+                   (fn [] (throw (RuntimeException. "boom"))))]
+    (is (= :untyped-failure (get-in result [:data :failure-kind]))
+        "an untyped re-decision failure is recorded as today")
+    (is (= true (:published (:interpretation-ask record))))
+    (is (= "job-1" (:job-id (:interpretation-ask record))))))
