@@ -879,3 +879,137 @@ not be silently treated as his ruling.
 
 With the three incident-level changes and the D0 disposition column added, my
 position becomes YES; no other amendment to the clean candidate is required.
+
+## Addendum: ruling 9, forward execution, and final YES/NO
+
+**NO as presently written, with the exact amendments below.** I agree with
+ruling 9 and with the no-admission-gate design. The remaining objections are
+internal inconsistencies in the candidate, not objections to that ruling.
+
+### Compatibility of the no-gate design
+
+The design does not conflict with RQ-1, RQ-2, RQ-3, A7, or a typed agent
+contract:
+
+- It directly satisfies RQ-1: all open missions, tickets and excursions enter
+  one field. Missing wants, class or interpretation may affect later evidence,
+  but cannot remove a task.
+- It gives RQ-2 a non-empty initial support: every open task has a
+  `make-progress-or-question` action. A question is a result of an action, not
+  an empty policy and not an unrecorded pause.
+- It implements the important direction of RQ-3: uncertainty supplies
+  epistemic value instead of becoming exclusion. It does not by itself finish
+  RQ-3's quantitative comparison tests; those remain in Record 2.
+- A7 refusal memory must be narrow. Record it against at least
+  `(target, action-kind, seat-or-method, input-digest)` and forbid that same
+  unchanged attempt, not the whole task. A question-resolution action, a
+  changed dependency digest, or an explicitly different seat/method remains
+  eligible. If none exists, emit typed exhaustion. Thus refusal memory prevents
+  repetition without reintroducing admission by another name.
+- Add `question` to the closed agent-result sum everywhere, not only to the
+  critical-path list. Its minimum payload is the target and attempt identity,
+  input/basis digest, the missing fact or ambiguity, the dependency or person
+  able to answer when known, and retained evidence/context. The next state is
+  `question-outstanding`. `changed` alone invokes independent review;
+  `already-satisfied`, `question`, `refused`, `invalid`, and `timed-out` each
+  have their own typed transition and receipt.
+
+Do not count every question or refusal as task progress for RQ-7. It is a
+valid observed outcome and can have information value, while the progress
+metric still distinguishes changed/closed work from repeated requests for
+information.
+
+### Smallest computable model
+
+The candidate's small model is sufficient after two small qualifications.
+For each task retain identity, kind, current basis digest, and one state from
+`untouched / in-progress / question-outstanding / refused-on-basis / closed`.
+Refusal and question records carry the action/seat/digest described above.
+No wants translation, cascade interpretation, repository priority, or class
+is required to create the first candidate action.
+
+The shared learned state is a Dirichlet table keyed by
+`(task-kind, action-kind, seat)` with counts for
+`closed / progressed / question / refused / invalid-or-timeout`. Keep cost or
+duration as a separate optional statistic; it is not needed to make the first
+choice. Flat counts are a valid cold start. The preference order in the draft,
+information gain for under-observed cells, and a habit prior for continuing
+in-progress work are enough to produce one score per open task and one softmax.
+Until a source for Joe's stated priorities is specified, the draft correctly
+keeps those priorities out of the numeric score. A deterministic recorded
+tie-break or a sampled draw makes flat initial scores executable.
+
+Existing code supplies parts, but not this model as a whole:
+
+- `target-field/considered` enumerates the three live open universes without
+  applying the later assessment gate. The model must use that boundary, not
+  `target-field/target-field`, whose assessment/exclusion path is the gate
+  ruling 9 removes (`target_field.clj:101-120,415-433`). Its sources are
+  `mission-registry/open-missions`, `mission-enumerator-proposer`,
+  `ticket-enumerator-proposer`, and `excursion-enumerator-proposer`.
+- `policy/selection-scores` and `policy/softmax-weights` are the existing
+  single score/normalisation seam (`policy.clj:57-141`). They can consume the
+  new model's G values and log priors.
+- `habit-prior/initial-state`, `observe-action`, and `log-priors` provide a
+  persisted categorical-count implementation (`habit_prior.clj:39-119`), but
+  cannot be reused unchanged: its key includes the exact target and it counts
+  selected actions, whereas ruling 9 needs shared task-kind/action/seat
+  **outcome** counts.
+- `scan-learn/prior-state`, `step`, and `fold` are a useful existing example
+  of a Dirichlet outcome learner, not the task selector itself. Its scan
+  statuses and channels are unrelated to this result vocabulary.
+- `efe/rank-actions` is not the ready-made answer: its ordinary branch calls
+  `partition-policy-support`, and its cascade branch requires cascade
+  candidates (`efe.clj:1438-1490`). Reusing it unchanged would preserve a
+  support gate. The first implementation should use the common policy score
+  seam above with the small model's explicit G, then bind any richer EFE path
+  only after it is shown not to exclude an open task.
+
+This agrees with Joe's correction that no existing function provides the
+small model. The named functions are reusable enumeration, arithmetic, and
+learning mechanisms, not evidence that the missing model already exists.
+
+### Forward execution and exact amendments
+
+The code confirms the draft's suspicion. `emit-phase!` appends durable phase
+events and `run-phase!` records start, success, and error
+(`full_loop_runner.clj:324-365`). These are telemetry, not a resumable state.
+`run-opportunity!` allocates a run id when absent, creates fresh state atoms,
+and the core creates a new attempt and checkpoint state
+(`full_loop_runner.clj:6291-6315,4260-4345`). I found no public entry point that
+loads a persisted phase state and resumes its next transition. Therefore the
+first discovery task in ruling 14 is correctly stated: inventory what each
+real phase already retains and identify the missing continuation state before
+changing control flow.
+
+Amend the candidate as follows:
+
+1. Distinguish a durable **workflow/run** id from an **attempt/invocation** id.
+   One workflow continues forward. Each invocation has exactly one terminal
+   receipt. A failed invocation's receipt closes that invocation and leaves
+   the workflow at the failed phase; after the incident is handled, a new
+   invocation resumes that same workflow state. Otherwise “one terminal
+   receipt” conflicts with subsequently continuing the same run and producing
+   another terminal outcome.
+2. Replace “a failure leaves the state at the failed step” with “the durable
+   state retains the last completed transition plus the failed effect request
+   and typed result.” Retrying an unchanged refused or failed effect is still
+   forbidden by A7; continuation requires a repaired dependency, changed
+   digest, different permitted method, or typed exhaustion.
+3. Delete the stale open question under `Critical path` asking whether items
+   1–6 should be a thin path beside `run-opportunity!`. Rulings 13 and 14 have
+   answered it: no. Likewise change item 8's `stub seats` wording. Stub seats
+   can test reducer control flow, but the pre-click record must also pass raw
+   recorded replies through the real parser and perform a real temporary-git
+   change/review transaction, as Plan B already says; otherwise it proves the
+   stubs.
+4. Change “Plan C is unchanged in form and smaller: fewer phases to model.”
+   No-gate removes selection gates, but questions and durable continuation add
+   explicit transitions. State instead that Plan C keeps the same proof/binding
+   method while its selection preconditions shrink; derive the actual phase
+   count from the real-run inventory.
+5. Reconcile the two result vocabularies by adding `question` to D0/C3 and the
+   Lean closed sum, with the payload and transition above.
+
+With those five edits, and with the earlier three incident classifications
+and D0 disposition column retained, my position is **YES**.
