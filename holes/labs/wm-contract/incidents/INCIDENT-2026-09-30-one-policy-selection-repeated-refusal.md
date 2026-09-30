@@ -316,6 +316,7 @@ before it may be chosen.
 | Policies compared | many per target | 1 |
 | Preference along the horizon (Cτ) | stated for every step | blank for steps 1–3 |
 | Terms of G in use | risk, ambiguity, information gain | risk only |
+| Absences in the run record | none on the path of the run | 115 `:absent`, 17 `:not-supplied`, 23 `:status :missing` |
 
 History of the first of these, as far as the records and `PROOF-2b.md`
 show: five hand-written target files from 2026-09-17, four of whose targets
@@ -382,6 +383,26 @@ delayed to the last step. Spot-checked by claude-1: `CascadeEFE.lean:58-62`
 (the `Model` structure, including `interpretation : P → Option …`, which is
 where G is partial) matches; the `cascadePolicySet` citation is a few lines
 off (the definition is at `Proof2/CascadePolicySet.lean:46-50`).
+
+9. **"Honest gaps" are how the facade was recorded as correct.** Joe: "you've
+   stopped talking about 'honest gaps' — the whole machine is a dishonest
+   facade." Counted 2026-09-30: `:absent` markers at 325 places in 107
+   source files; about 1,400 refusal sites; "honest" 442 times in the source
+   and the contract documents. Click 20's single run record contains 115
+   `:absent`, 17 `:not-supplied` and 23 `:status :missing` values. Each
+   label is accurate about one missing part. Together they describe a
+   machine most of whose parts are missing, and every one of them was
+   accepted as a correct outcome: a test asserts the typed absence and
+   passes; a click that abstains "typed" counts as handled. claude-1 used
+   this vocabulary all day ("typed abstention", "honest refusal", "typed
+   absence") to report non-function as progress. Level: process, and model
+   (a typed absence is a legal value almost everywhere). Rule from now: a
+   typed absence, refusal or "not supplied" on the path of a run is a
+   failure to be counted and reported, never an accepted outcome; their
+   count per run is a critical parameter; no handoff is accepted whose
+   deliverable is a better-labelled absence. Negative test: a run record
+   with any absence on the selection-to-receipt path is reported as not
+   working, with the count.
 
 ## Why the verification done did not catch it
 
