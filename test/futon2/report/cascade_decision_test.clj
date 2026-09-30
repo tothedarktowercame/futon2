@@ -496,3 +496,62 @@
         (is (empty? (:lanes r)))
         (is (= 1 (count (filter #(= :target-admission (:stage %)) declines))))
         (is (every? #(and (= tick-1-target (:target %)) (:reason %) (seq (:missing-evidence %))) declines))))))
+
+(deftest class-unknown-target-is-declined-not-a-decision-refusal
+  ;; codex-20 handoff B ruling (M-a-wmc-scaling repair): a candidate whose
+  ;; target-class is :unknown gets NO scalar G. The joint decision DECLINES
+  ;; it (a typed entry in :dropped-candidates carrying :possible-costs) and
+  ;; selection continues over the candidates that have a scalar. Only when
+  ;; NO candidate has a scalar does the decision refuse.
+  (let [u-target :U
+        sources
+        (merge tick-1-sources
+               {:universes (assoc (:universes tick-1-sources)
+                                  u-target {:u-open true :u-clean false})
+                :interpretations (assoc (:interpretations tick-1-sources)
+                                        u-target
+                                        {:patterns
+                                         {:u-fix {:guard {:needs #{:u-open}
+                                                          :forbids #{:u-clean}}
+                                                  :produces #{:u-clean}}}
+                                         :receipts {:u-fix {:receipt "U-fix"
+                                                            :source "fixture"}}})
+                :wants (assoc (:wants tick-1-sources) u-target [:u-clean])
+                :candidates (assoc (:candidates tick-1-sources)
+                                   u-target
+                                   [{:precedence [:u-fix]
+                                     :construction-receipt receipt}])})
+        ;; :U has no row in the injected :focus-inputs relations, so the
+        ;; shared relation producer (focus-receipt/classify-target)
+        ;; classifies it :unknown and its candidate's scoring refuses
+        ;; :class-unknown-no-scalar-g.
+        both (assemble* {:targets [tick-1-target u-target] :sources sources})
+        r (wm-cd/cascade-decision both live-c-opts)
+        decision (:decision r)
+        declines (vec (filter #(= :class-unknown-no-scalar-g (:reason %))
+                              (:dropped-candidates r)))]
+    (is (= tick-1-target (get-in decision [:action :target]))
+        "(a) selection proceeds over the scorable target's candidates")
+    (is (= 1 (count declines))
+        "(a) the unknown target's candidate is a typed decline, not a decision refusal")
+    (is (= {:target u-target :stage :scoring :candidate :C1
+            :reason :class-unknown-no-scalar-g}
+           (dissoc (first declines) :possible-costs))
+        "(a) the decline names the target, stage, candidate and reason")
+    (is (= #{:focused :related :unrelated}
+           (set (keys (:possible-costs (first declines)))))
+        "(a) the decline carries the possible terminal costs under Joe's C")
+    (is (= #{tick-1-target}
+           (set (map :target (keys (get-in decision [:selection-law :posterior])))))
+        "(a) the declined candidate never reached the posterior")
+    (let [only-unknown (assemble* {:targets [u-target] :sources sources})]
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo
+           #"cascade decision refused"
+           (wm-cd/cascade-decision only-unknown live-c-opts))
+          "(b) with only the unknown target the decision still refuses")
+      (is (= :class-unknown-no-scalar-g
+             (try (wm-cd/cascade-decision only-unknown live-c-opts)
+                  (catch clojure.lang.ExceptionInfo e
+                    (:kind (ex-data e)))))
+          "(b) the refusal keeps the scoring refusal's kind"))))

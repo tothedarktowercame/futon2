@@ -988,9 +988,7 @@
                                                 (for [[t c] target-classifications]
                                                   [t (get scorer-class (:class c) :unknown)]))
                             :horizon T})
-              ranked (efe/rank-actions {:cascade-belief joint-q0}
-                                       joint-candidates
-                                       {:f-prefix-production? true
+              rank-opts {:f-prefix-production? true
                                         :horizon-steps T
                                         :observation-model class-model
                                         :upstream-initialization-conditioning
@@ -1028,7 +1026,38 @@
                                                :reachable (:reachable live-refusal)
                                                :unreached-in-domain (:unreached-in-domain live-refusal)}}
                                           (merge-live-cascade-spec
-                                           joint-want live-spec)))})]
+                                           joint-want live-spec)))}
+              ;; codex-20 ruling, handoff B (live repair, M-a-wmc-scaling):
+              ;; a candidate whose scoring refuses :class-unknown-no-scalar-g
+              ;; gets NO scalar G. It is DECLINED -- a typed entry in the
+              ;; decision's dropped candidates carrying :possible-costs --
+              ;; and selection continues over the candidates that have a
+              ;; scalar. Only when NO candidate has a scalar does the
+              ;; decision refuse as before. No G is invented for the unknown
+              ;; target (no worst case, no average, no default class).
+              [ranked class-declines]
+              (loop [candidates joint-candidates declines []]
+                (let [r (efe/rank-actions {:cascade-belief joint-q0}
+                                          candidates rank-opts)]
+                  (if (and (map? r) (contains? r :status)
+                           (= :class-unknown-no-scalar-g (:kind r))
+                           (some #(= (:target r) (:target %)) candidates))
+                    (let [t (:target r)
+                          remaining (filterv #(not= t (:target %)) candidates)]
+                      (if (empty? remaining)
+                        (throw (ex-info "cascade decision refused"
+                                        (merge {:kind :class-unknown-no-scalar-g} r)))
+                        (recur remaining
+                               (into declines
+                                     (map (fn [c]
+                                            {:target t
+                                             :stage :scoring
+                                             :candidate (:id c)
+                                             :reason :class-unknown-no-scalar-g
+                                             :possible-costs (:possible-costs r)}))
+                                     (filter #(= t (:target %)) candidates)))))
+                    [r declines])))
+              dropped (vec (concat dropped class-declines))]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
@@ -1288,7 +1317,12 @@
                              :model-id (:model-id previous-beta)}))
                  result)]
     (cond-> (-> result
-                (assoc :dropped-candidates dropped)
+                ;; cascade-decision-admitted's own :dropped-candidates (when
+                ;; it ran a scored family) already carries this wrapper's
+                ;; assembly/admission declines PLUS any scoring-stage
+                ;; declines (e.g. :class-unknown-no-scalar-g); the
+                ;; early-return abstention path carries none.
+                (assoc :dropped-candidates (vec (or (:dropped-candidates result) dropped)))
                 (assoc-in [:decision :selection-certificate :observation-labels]
                           (observation-label-certificate view opts))
                 (assoc-in [:decision :mission-hole-coverage]
