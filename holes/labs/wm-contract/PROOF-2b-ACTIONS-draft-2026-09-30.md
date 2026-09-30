@@ -238,6 +238,21 @@ classes), extended to the abstentions of 09-24 to 09-29. One process
 incident is on it: clicks 17, 18 and 20 were fired when their failure was
 predictable.
 
+Amendments accepted from codex-6 (d6abb23b1): three incidents are
+reclassified. Stale-basis reselection is a **model** gap (the lifecycle had
+no notion of the basis a choice was made on), not a hypothesis gap. The
+`no-execution-evidence` failures of valid answers are a **binding** gap (the
+adapter misreported), not a hypothesis gap. The record refresh ordered after
+timeout-prone work is a **model** gap (effect ordering was unmodelled), not
+a hypothesis gap.
+
+D0 gains a **disposition** column, one of: agent need; machine invariant
+(identity, basis digest, reviewer distinct from author); selection-quality
+input (improves the choice, never required); removable demand.
+
+Agents may generate typed proposals and the AIF terms rank them; an agent's
+choice never removes a task from the common field.
+
 ## M. The matrix
 
 Every RQ and every `PROOF-2b.md` step → action row, verification case,
