@@ -1,0 +1,64 @@
+{:schema :wm/registered-run-series-v1
+ :series/id :wm-reflective-runtime-2026-v1
+ :registered-at "2026-10-01"
+ :registration-boundary
+ {:rule :first-click-whose-request-names-series
+  :source "holes/labs/wm-contract/runs/reflective-runtime-2026-v1/PREREG.edn"
+  :amendments :new-series-only}
+ :purpose
+ "Observe whether the War Machine produces useful work while its selection,
+  construction, learning and enactment remain traceable to the accepted PLoP
+  AIF patterns and to source-pinned Lean/runtime certificates."
+ :sampling
+ {:target-choice :ordinary-live-priority-order
+  :no-benchmark-targets true
+  :no-target-retries-for-balance true
+  :maximum-opportunities 9
+  :desired-qualifying-diversity
+  {:mission 1 :excursion 1 :ticket 1}
+  :stopping-rule
+  "Stop after nine admitted opportunities, or after three qualifying grounded
+   opportunities containing at least one mission, excursion and ticket,
+   whichever occurs first. Infrastructure refusals after click admission count."}
+ :measurements
+ {:qualitative
+  [:entity-kind :target :selected-wants :reached-wants :unreached-wants
+   :selected-patterns :verified-applied-patterns :cascade-revisions
+   :terminal-outcome :artifact-commit :independent-review-verdict
+   :blocker-or-failure :plain-language-achievement :plop-pattern-anchors]
+  :efficiency
+  [:wall-clock-ms :phase-timings-ms :model-input-tokens :model-output-tokens
+   :model-total-tokens :author-turns :review-turns]
+  :conformance
+  [:construction :admission :selection :g :target-local-aqc
+   :enactment-grounding]
+  :rates
+  [:grounded-closure-or-progress :usable-progress :question :refusal
+   :no-usable-reply]}
+ :measurement-rules
+ {:timing-source :monotonic-run-and-phase-boundaries
+  :token-source :provider-or-agency-usage-receipt
+  :missing-timing :typed-missing
+  :missing-token-usage :typed-missing
+  :no-cost-imputation true
+  :qualitative-adjudicator :independent-reviewer
+  :selected-is-not-used true
+  :progress-requires-before-after-want-evidence true
+  :certificate-source :exact-run-record-sha256}
+ :running-example-eligibility
+ {:terminal-outcomes #{:grounded-change :grounded-progress :already-satisfied}
+  :requires
+  [:selection-reached :verified-applied-pattern :before-after-want-evidence
+   :independent-review :complete-timing :complete-token-usage
+   :all-applicable-lean-certificates-compiled :certificate-mutation-caught
+   :plain-language-achievement :plop-pattern-anchors]
+  :forbids
+  [:artifact-only :self-certified-review :selected-as-used
+   :imputed-timing :imputed-token-usage :retroactive-target-choice]}
+ :reporting
+ {:all-opportunities true
+  :failures-first-class true
+  :separate-by-entity-kind true
+  :no-pooled-success-rate-before-stop true
+  :paper-layer :reflective-sidenote-and-running-example
+  :technical-layer :supplementary-certificate-bundle}}
