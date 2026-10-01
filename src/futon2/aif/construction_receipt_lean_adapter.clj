@@ -6,6 +6,8 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.aif.candidate-derivations :as candidate-derivations]
+            [futon2.aif.cascade-equivalence :as equivalence]
             [futon2.aif.g-term-decomposition :as decomposition])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
@@ -524,6 +526,84 @@
     (let [projection (selection-input-from-run-record (strict-edn bytes))]
       {:source-sha256 actual :projection projection
        :lean (render-selection projection actual)})))
+
+(defn admission-input-from-run-record
+  "Project the selected candidate's recorded P0 provenance admission. Missing
+  P0 evidence stays excluded; only the canonical forbidden-provenance check
+  and exact admitted/scored field correspondence are certified."
+  [run-record]
+  (let [selection (selection-input-from-run-record run-record)
+        selected-action (get-in run-record
+                                [:decision :selection-law :per-policy-argmax :action])
+        selected-id (:id selected-action)
+        candidates (get-in run-record [:decision :selection-certificate :candidates])
+        derivations (get-in run-record
+                            [:decision :selection-certificate :candidate-derivations])
+        derivation (get derivations selected-id)
+        payload-sha (equivalence/canonical-sha256 selected-action)
+        required-fields (conj (set candidate-derivations/p0-fields)
+                              :candidate-payload-sha256 :payload-canonicalisation :status)]
+    (when-not (and (map? derivations) (= #{selected-id} (set (keys derivations)))
+                   (= 1 (count candidates))
+                   (= selected-action (:id (first candidates))))
+      (refuse! :adapter/admission-field-identity-mismatch
+               {:selected selected-id :derivation-ids (set (keys derivations))}))
+    (when-not (set/subset? required-fields (set (keys derivation)))
+      (refuse! :adapter/admission-check-coverage-mismatch
+               {:missing (set/difference required-fields (set (keys derivation)))}))
+    (when-not (and (= :admitted (:status derivation))
+                   (= {:kind :declared-file-load :admitted-by :war-machine-judge}
+                      (:admission derivation))
+                   (= {:admissible true} (equivalence/admissible-provenance? derivation))
+                   (= payload-sha (:candidate-payload-sha256 derivation))
+                   (= {:form :cert-s-v1-canonical-edn
+                       :note "same candidate iff [:id :id] and :candidate-payload-sha256 agree"}
+                      (:payload-canonicalisation derivation)))
+      (refuse! :adapter/admission-check-failed
+               {:status (:status derivation)
+                :verdict (equivalence/admissible-provenance? derivation)}))
+    {:runtime-source (:runtime-source selection)
+     :candidate-payload-sha256 payload-sha
+     :admitted-count 1
+     :selected-count 1
+     :provenance-checks [:interpretation :construction :review-publication :admission]
+     :typed-exclusions (select-keys derivation
+                                    [:source-revision :source-content-sha256
+                                     :discovered-at :review-publication
+                                     :acceptance :scope])}))
+
+(defn render-admission [input source-sha]
+  (let [digest (:candidate-payload-sha256 input)]
+    (str "import DarkTower.WarMachine.Requirements\n\n"
+         "/-! GENERATED FILE — DO NOT EDIT.\nSource SHA-256: " source-sha
+         "\nRuntime source: " (pr-str (:runtime-source input))
+         "\nCandidate payload SHA-256: " digest
+         "\nScope: recorded P0 forbidden-provenance admission only; typed missing checks are excluded.\n-/\n\n"
+         "namespace DarkTower.WarMachine.RuntimeAdmission\n"
+         "open DarkTower.WarMachine.Requirements\n\n"
+         "def admittedTargets : Finset Id := {0}\n"
+         "def targetsReachingScoring : Finset Id := {0}\n"
+         "def selectedTarget : Id := 0\n"
+         "def selectedCandidateDigest : String := \"" digest "\"\n"
+         "def admittedCandidateDigest : String := \"" digest "\"\n\n"
+         "theorem selected_full_identity_is_admitted :\n"
+         "    selectedCandidateDigest = admittedCandidateDigest := rfl\n"
+         "theorem selected_target_reached_scoring :\n"
+         "    selectedTarget ∈ admittedTargets := by decide\n"
+         "theorem selection_field_is_exactly_admitted_field :\n"
+         "    targetsReachingScoring = admittedTargets := rfl\n\n"
+         "#print axioms selected_full_identity_is_admitted\n"
+         "#print axioms selected_target_reached_scoring\n"
+         "#print axioms selection_field_is_exactly_admitted_field\n"
+         "end DarkTower.WarMachine.RuntimeAdmission\n")))
+
+(defn adapt-run-record-admission-bytes [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (admission-input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual :projection projection
+       :lean (render-admission projection actual)})))
 
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))

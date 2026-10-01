@@ -251,3 +251,38 @@
                         (assoc-in record
                                   [:decision :selection-certificate :scoring]
                                   {}))))))))
+
+(deftest controlled-record-renders-p0-admission-certificate
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file selection-record)))
+        adapted (adapter/adapt-run-record-admission-bytes bytes selection-sha)]
+    (is (= selection-sha (:source-sha256 adapted)))
+    (is (= 1 (get-in adapted [:projection :admitted-count])))
+    (is (= [:interpretation :construction :review-publication :admission]
+           (get-in adapted [:projection :provenance-checks])))
+    (is (= :missing
+           (get-in adapted [:projection :typed-exclusions :acceptance :status])))
+    (is (.contains (:lean adapted) "selected_full_identity_is_admitted"))
+    (is (.contains (:lean adapted) "selection_field_is_exactly_admitted_field"))
+    (is (not (.contains (:lean adapted) ":precedence")))))
+
+(deftest admission-certificate-refuses-admission-and-identity-mutations
+  (let [record (read-string (slurp selection-record))]
+    (testing "a forbidden provenance kind reverses the recorded admission"
+      (is (= :adapter/admission-check-failed
+             (refusal #(adapter/admission-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-certificate
+                                   :candidate-derivations :C1 :admission :kind]
+                                  :hand-admitted))))))
+    (testing "the admitted-field key must be the exact selected candidate id"
+      (let [derivation (get-in record [:decision :selection-certificate
+                                       :candidate-derivations :C1])]
+        (is (= :adapter/admission-field-identity-mismatch
+               (refusal #(adapter/admission-input-from-run-record
+                          (-> record
+                              (update-in [:decision :selection-certificate
+                                          :candidate-derivations]
+                                         dissoc :C1)
+                              (assoc-in [:decision :selection-certificate
+                                         :candidate-derivations :C2]
+                                        derivation))))))))))
