@@ -86,6 +86,44 @@ Every constructed policy records:
 The policy set is the exact image of this construction. A caller-supplied menu
 without the receipt is not a policy set.
 
+## Interpretation and concrete-state sensitivity
+
+The cascade graph is the identity of the policy, but it is not by itself a
+generative model.  An interpretation for a pinned problem supplies a finite
+state carrier, observations and outcomes, and maps each pattern occurrence to
+guarded stochastic transitions on that carrier.  Expected free energy is
+therefore indexed by the interpretation:
+
+`G[I](problem, cascade)`
+
+and not merely by the component-pattern set.  A token-set state (`Finset V`)
+is one concrete interpretation; it is neither the definition of a cascade nor
+an eligibility test for admitting one.  Other concrete carriers may represent
+resource quantities, partially completed artefacts, event histories, or a
+product of these.  The construction receipt must pin the chosen interpretation
+and its provenance.
+
+The choice of carrier is application-significant.  An interpretation is
+adequate only to the extent that it preserves distinctions which can change a
+future observation, preferred outcome, enabled transition, cost, or duration.
+Conversely, distinctions with none of those consequences may be quotiented
+away.  Thus a coarse model can be rejected for aliasing two operationally
+different states, while an unnecessarily fine model can be rejected for cost
+without claiming that finer state is intrinsically worse.
+
+For two interpretations `I_fine` and `I_coarse`, a proposed abstraction map
+must state its conditions.  When it preserves guards, transition probabilities,
+observations, preferences, and costs (the usual lumpability/sufficient-statistic
+conditions), Lean should prove policy-value and ranking invariance.  When a
+condition fails, the application should provide a finite witness: two states or
+two cascades whose predicted outcomes or `G` ordering differ.  Such a
+difference is model sensitivity to be measured, not erased by the abstraction.
+
+Token vocabulary is consequently derived from and audited against the pinned
+problem and pattern texts.  Free caller-supplied tokens, orphan tokens with no
+application reading, and tokens used only to exclude policies are invalid
+interpretations rather than alternative cascades.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
@@ -102,10 +140,18 @@ without the receipt is not a policy set.
 7. Adding an unwarranted edge fails provenance even when it lowers entropy.
 8. The generated runtime sample and Lean term have equal units, three
    relations, extension count, and ambiguity value.
+9. `G` is explicitly indexed by a pinned interpretation; changing the concrete
+   carrier cannot be definitionally invisible.
+10. A coarse/fine pair satisfying the declared abstraction conditions proves
+    equal policy values (or at least identical rankings, if that is the stated
+    preservation level).
+11. A deliberately inadequate coarse interpretation has a finite counterexample
+    showing the lost distinction and its effect on prediction or policy rank.
+12. Every concrete token has an auditable application reading, and token
+    vocabulary cannot act as a caller-controlled cascade admission gate.
 
 The existing `CascadeSpec` proves useful carrier facts, provenance facts,
 acyclicity and structural deduplication, but it currently conflates the policy
 structure with `precedes + overlap` and does not carry support or meet as the
 separate relations above. Its three real retractions with empty `precedes`
 remain evidence inputs, not completed acceptance of this specification.
-
