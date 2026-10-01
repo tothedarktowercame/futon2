@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [futon2.aif.full-loop-runner :as runner]
+  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
@@ -16,6 +17,7 @@
    (merge (wm/accumulation-config)
           (select-keys opts [:accumulate-strategic-habit? :run-id
                              :loaded-code-identity :cascade-habit-path
+                             :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
@@ -37,5 +39,7 @@
 (defn run-opportunity!
   "Run one production opportunity with the report-backed defaults installed."
   [opts]
-  (binding [runner/*runtime-defaults* (production-defaults opts)]
-    (runner/run-opportunity! opts)))
+  (let [opts (update opts :cascade-feedback-path
+                     #(or % cascade-feedback/default-path))]
+    (binding [runner/*runtime-defaults* (production-defaults opts)]
+      (runner/run-opportunity! opts))))

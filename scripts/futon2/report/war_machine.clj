@@ -44,6 +44,7 @@
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.interpretation-construction :as interpretation-construction]
             [futon2.aif.want-interpretation :as want-interpretation]
@@ -6544,7 +6545,18 @@
                              mission-registry/default-code-root
                              (:missions loaded-missions)
                              :WM)))
-        cascade-sources (or (:cascade-sources judge-opts) declared-sources {})
+        cascade-source-base (or (:cascade-sources judge-opts) declared-sources {})
+        ;; Past cascades are not declarations.  Their selected/applied/outcome
+        ;; receipts enter the next construction only as target-local metadata;
+        ;; current mission bytes and current interpretations still construct
+        ;; the candidate family afresh.
+        pattern-feedback
+        (or (:cascade-feedback-metadata judge-opts)
+            (:pattern-feedback cascade-source-base)
+            (cascade-feedback/load-construction-metadata
+             (or (:cascade-feedback-path judge-opts)
+                 cascade-feedback/default-path)))
+        cascade-sources (assoc cascade-source-base :pattern-feedback pattern-feedback)
         cascade-proposal-supply
         (or (:cascade-proposal-supply judge-opts)
             (cascade-proposals/load-supply

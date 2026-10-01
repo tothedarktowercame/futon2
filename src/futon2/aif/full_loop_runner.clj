@@ -19,6 +19,7 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-structure :as cascade-structure]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-habit-reinforcement :as habit-reinforcement]
             [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
@@ -805,6 +806,9 @@
                     :selection-event (habit-reinforcement/selection-event decision)
                     :habit-reinforcement (or (:habit-reinforcement result)
                                              (habit-reinforcement/evaluate decision (:outcome result) nil))
+                    :cascade-feedback (or (:cascade-feedback result)
+                                          {:status :absent
+                                           :reason :no-selected-cascade-feedback})
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
                                   (runtime-default raw-opts :scan-render-fn))
@@ -4838,6 +4842,43 @@
                          :declared-tokens (vec (sort-by pr-str declared))})
                          :criterion-step enacted-step
                          :measured-tokens (vec (sort-by pr-str (map :token measured-rows)))))
+                       ;; Production-to-construction feedback is not a
+                       ;; declaration of a reusable cascade.  It records this
+                       ;; run's provisional selection and only calls a pattern
+                       ;; applied when the selected/enacted bridge and the
+                       ;; recorded criterion step agree.  Selection alone has
+                       ;; no positive learning effect.
+                       cascade-feedback-receipt
+                       (when selected-action
+                         (cascade-feedback/receipt
+                          {:run-id (:run-id opts)
+                           :target (:target selected-action)
+                           :selected-action selected-action
+                           :outcome outcome
+                           :failure {:kind (:failure-kind data)
+                                     :stage (:failure-stage data)}
+                           :accepted-increment accepted-increment-result
+                           :d-task-enactment d-task-result
+                           :artifact {:repo (or (get-in data [:artifact-binding :repo])
+                                                (:repo data))
+                                      :commit (:commit data)}}))
+                       cascade-feedback-publication
+                       (when cascade-feedback-receipt
+                         (if-let [feedback-path (:cascade-feedback-path opts)]
+                           (try
+                             (cascade-feedback/record! feedback-path
+                                                       cascade-feedback-receipt)
+                             (catch Exception e
+                               {:status :refused
+                                :reason (or (:cascade-feedback/refusal (ex-data e))
+                                            :feedback-store-write-failed)
+                                :message (.getMessage e)}))
+                           ;; The composition root always supplies the
+                           ;; production path. Direct runner callers (notably
+                           ;; hermetic tests) may inspect the receipt without
+                           ;; mutating the production feedback store.
+                           {:status :not-published
+                            :reason :feedback-path-not-supplied}))
                        ;; B-C (PROOF-2 strategy row 34): the concentration
                        ;; carrier recorded ON the close. record! ran inside
                        ;; retain-token-outcome! above, before the predicate
@@ -4873,6 +4914,10 @@
                                :token-outcome-comparison (:receipt token-comparison)
                                :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :accepted-increment accepted-increment-result
+                               :cascade-feedback
+                               (when cascade-feedback-receipt
+                                 (assoc cascade-feedback-receipt
+                                        :publication cascade-feedback-publication))
                                :b-update b-update-snapshot
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
@@ -4943,6 +4988,10 @@
                                :token-outcome-comparison (:receipt token-comparison)
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :accepted-increment accepted-increment-result
+                               :cascade-feedback
+                               (when cascade-feedback-receipt
+                                 (assoc cascade-feedback-receipt
+                                        :publication cascade-feedback-publication))
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)
@@ -6159,7 +6208,16 @@
                                          :commits (if revision
                                                     [initial-commit commit]
                                                     [commit])
-                                         :patterns-used (vec (:shown construction))
+                                         ;; At build time these are selected,
+                                         ;; not yet proven applied.  The close
+                                         ;; feedback receipt is the only
+                                         ;; authority for :applications and
+                                         ;; positive reinforcement.
+                                         :patterns-selected (vec (:shown construction))
+                                         :patterns-used []
+                                         :pattern-use-status
+                                         {:status :pending
+                                          :reason :close-verification-not-yet-run}
                                          :inline-improvements []
                                          :build-retries (vec build-retries)
                                          :validation

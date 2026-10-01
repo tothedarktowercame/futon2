@@ -127,19 +127,29 @@
   [sources horizon target universe patterns want base-problem]
   (when-let [{:keys [construct budget move-cost evaluate-g]} (:construction sources)]
     (let [receipts (or (get-in sources [:interpretations target :receipts]) {})
+          feedback (get-in sources [:pattern-feedback target])
           tokens (problem-tokens universe want patterns)
           unknown (sort-by pr-str (filter #(= :unknown (get universe %)) tokens))
           observation (into {} (for [t tokens :let [v (get universe t)]
                                      :when (or (boolean? v) (= :unknown v))]
                                  [t (true? v)]))
-          result (construct {:target target :want (vec want) :observation observation
-                                  :interpretations (into {} (for [[k p] patterns] [k (select-keys p [:guard :produces])]))
-                                  :interpretation-receipts receipts
-                                  :horizon horizon :move-cost (or move-cost 1)
-                                  :budget budget
-                                  :evaluate-g (fn [candidate] (evaluate-g base-problem candidate))})]
+          result (construct (cond-> {:target target :want (vec want) :observation observation
+                                     :interpretations (into {} (for [[k p] patterns] [k (select-keys p [:guard :produces])]))
+                                     :interpretation-receipts receipts
+                                     :horizon horizon :move-cost (or move-cost 1)
+                                     :budget budget
+                                     :evaluate-g (fn [candidate] (evaluate-g base-problem candidate))}
+                              ;; Provisional cascades are rebuilt from the
+                              ;; current problem.  Prior runs are evidence
+                              ;; about pattern use, never a canonical
+                              ;; declaration or a replacement candidate.
+                              feedback (assoc :pattern-feedback feedback)))]
       (if (= :constructed (:status result))
-        {:candidates (mapv #(assoc-in % [:construction-receipt :unknown-read-as-not-established] (vec unknown))
+        {:candidates (mapv #(cond-> (assoc-in %
+                                              [:construction-receipt :unknown-read-as-not-established]
+                                              (vec unknown))
+                              feedback (assoc-in [:construction-receipt :pattern-feedback]
+                                                 feedback))
                            (:candidates result))}
         {:construction-refusal (dissoc result :status :candidates)}))))
 
@@ -184,6 +194,8 @@
                       :locators locators
                       :token-initialization (get-in sources [:token-initialization target])}]
     (cond-> problem
+      (get-in sources [:pattern-feedback target])
+      (assoc :pattern-feedback (get-in sources [:pattern-feedback target]))
       (and (map? slice) (not (seq patterns))) (assoc :query-time-slice slice))))
 
 (defn base-problem
