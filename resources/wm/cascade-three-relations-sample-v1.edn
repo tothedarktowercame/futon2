@@ -1,0 +1,77 @@
+{:schema :wm/cascade-three-relations-sample-v1
+ :status :exemplar
+ :problem
+ {:id :war-machine/debugger-continuation
+  :statement
+  "Continue the one regular War Machine run through typed failures while preserving its state and canonical infrastructure."
+  :library "futon3/library/peripherals"
+  :library-kind :flat-directory}
+ :components
+ [{:id :seam
+   :pattern "peripherals/read-existing-seam-before-implementing"}
+  {:id :envelope
+   :pattern "peripherals/constrained-execution-envelope"}
+  {:id :event
+   :pattern "peripherals/canonical-typed-event-vs-side-channel"}
+  {:id :ground
+   :pattern "peripherals/pilot-plus-ground-control"}
+  {:id :heartbeat
+   :pattern "peripherals/progress-heartbeat-distinct-from-cycle-completion"}
+  {:id :reload
+   :pattern "peripherals/hot-reload-as-default-fix-path"}]
+ :support
+ [{:child :seam :parent :envelope
+   :because "The execution envelope must extend the existing runner seam rather than fork it."}
+  {:child :seam :parent :reload
+   :because "Live repair must use the existing serving seam and preserve its state."}
+  {:child :event :parent :ground
+   :because "Pilot observations and ground-control responses cross one typed boundary."}
+  {:child :event :parent :heartbeat
+   :because "Progress is represented as a first-class typed event rather than a side channel."}
+  {:child :ground :parent :envelope
+   :because "Role separation maintains the boundary of the execution envelope."}
+  {:child :heartbeat :parent :ground
+   :because "Ground control needs progress observations distinct from terminal completion."}
+  {:child :reload :parent :ground
+   :because "Ground control repairs the instrument live while the pilot remains inside it."}]
+ :overlap
+ [{:left :ground :right :heartbeat :meet :event
+   :because "Both roles and liveness supervision depend on the same canonical observation boundary."}
+  {:left :envelope :right :reload :meet :seam
+   :because "Both confinement and state-preserving repair depend on the one existing runner seam."}]
+ :precedence
+ [{:before :seam :after :envelope}
+  {:before :seam :after :event}
+  {:before :envelope :after :ground}
+  {:before :event :after :ground}
+  {:before :event :after :heartbeat}
+  {:before :ground :after :reload}
+  {:before :heartbeat :after :reload}]
+ :admissible-linear-extensions
+ [[:seam :envelope :event :ground :heartbeat :reload]
+  [:seam :envelope :event :heartbeat :ground :reload]
+  [:seam :event :envelope :ground :heartbeat :reload]
+  [:seam :event :envelope :heartbeat :ground :reload]
+  [:seam :event :heartbeat :envelope :ground :reload]]
+ :ambiguity
+ {:flat-extension-count 720
+  :cascade-extension-count 5
+  :flat-ordering-entropy-bits 9.491853096329674
+  :cascade-ordering-entropy-bits 2.321928094887362
+  :entropy-reduction-bits 7.169925001442312
+  :model :uniform-over-linear-extensions}
+ :argument
+ {:flat
+  "The directory supplies six individually useful patterns but no problem-specific policy, shared-unit account, or build order."
+  :cascade
+  "The cascade identifies two shared units that satisfy co-requirements and reduces 720 possible total orders to five warranted unfoldings without pretending the remaining incomparable steps are simultaneous."}
+ :negative-controls
+ [{:kind :support-is-not-precedence
+   :example [:reload :ground]
+   :reason "Reload supports ground control, but ground control must exist before the live repair step."}
+  {:kind :unwarranted-certainty
+   :example {:add-edge [:heartbeat :envelope]}
+   :reason "The edge would reduce extension count but has no problem evidence."}
+  {:kind :bag-is-not-parallel-success
+   :example :remove-all-precedence
+   :reason "Missing order restores predictive uncertainty; it does not prove all six steps can succeed together."}]}
