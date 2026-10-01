@@ -147,3 +147,37 @@
     ;; the good value and rejects this changed recorded G.
     (is (not= (re-find #"def recordedG.*" good)
               (re-find #"def recordedG.*" mutated)))))
+
+(def controlled-record
+  "data/wm-runs/tick-run-record-2026-10-01-9cc46d2e-184e-4a97-aa25-aedb383ec426.edn")
+(def controlled-sha "8fe42ee7b5633d18deeb4b58a9c4c08f2107dd4cbf033665d2460671909563fa")
+
+(deftest controlled-record-renders-target-local-aqc-certificate
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file controlled-record)))
+        adapted (adapter/adapt-run-record-aqc-bytes bytes controlled-sha)]
+    (is (= controlled-sha (:source-sha256 adapted)))
+    (is (= :related (get-in adapted [:projection :target-class])))
+    (is (= 4 (get-in adapted [:projection :horizon])))
+    (is (.contains (:lean adapted) "retained_A_is_target_local"))
+    (is (.contains (:lean adapted) "retained_Q_reaches_target"))
+    (is (.contains (:lean adapted) "retained_C_is_normalised"))))
+
+(deftest aqc-certificate-refuses-identity-and-correspondence-mutations
+  (let [record (read-string (slurp controlled-record))]
+    (testing "selecting the unrelated unknown target cannot borrow C1's A/Q/C"
+      (is (= :adapter/aqc-correspondence-mismatch
+             (refusal #(adapter/aqc-input-from-run-record
+                        (-> record
+                            (assoc-in [:decision :chosen :target] "M-formal-patterns")
+                            (assoc-in [:decision :selection-certificate :scoring 0 :id :target]
+                                      "M-formal-patterns")
+                            (assoc-in [:decision :selection-certificate :candidates 0 :id :target]
+                                      "M-formal-patterns")))))))
+    (testing "zero preference for the retained A class breaks correspondence"
+      (is (= :adapter/aqc-correspondence-mismatch
+             (refusal #(adapter/aqc-input-from-run-record
+                        (-> record
+                            (assoc-in [:decision :selection-certificate :scoring 0
+                                       :consumed-g :C :steps 3 :distribution :related] 0)
+                            (assoc-in [:decision :selection-certificate :scoring 0
+                                       :consumed-g :C :steps 3 :distribution :focused] 9/10)))))))))

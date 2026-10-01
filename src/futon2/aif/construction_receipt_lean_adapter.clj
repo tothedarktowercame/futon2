@@ -4,7 +4,8 @@
   the decoded value; source occurrence is not treated as correspondence."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.g-term-decomposition :as decomposition])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
@@ -309,6 +310,97 @@
       {:source-sha256 actual
        :projection projection
        :lean (render-g projection actual)})))
+
+(defn aqc-input-from-run-record
+  "Project the selected policy's repaired, target-local A/Q/C census. The
+  retained scoring fields are classified but never rescored."
+  [run-record]
+  (let [entry (selected-scoring-entry run-record)
+        selected (:id entry)
+        candidates (get-in run-record [:decision :selection-certificate :candidates])
+        candidate (one! :adapter/aqc-candidate-identity-mismatch
+                        (filter #(= selected (:id %)) candidates)
+                        {:selected selected})
+        census (decomposition/census
+                [{:action selected :controller-score (:g entry) :certificate entry}]
+                [candidate])
+        policy (first (:policies census))
+        terms (:terms policy)
+        a (:A terms) q (:Q terms) c (:C terms)
+        target (:target selected)
+        c-steps (get-in c [:value :steps])
+        final-c (:distribution (last c-steps))
+        initial (get-in q [:value :initial-belief])
+        q-steps (get-in q [:value :steps])
+        target-present? (fn [belief]
+                          (every? #(contains? (key %) (first (get-in a [:value :acceptance])))
+                                  (filter (comp pos? val) belief)))]
+    (when-not (= selected (:id policy))
+      (refuse! :adapter/aqc-candidate-identity-mismatch {}))
+    (when-not (and (= :present (:status a)) (= :present (:status q))
+                   (= :present (:status c)) (= {target :related}
+                                                (get-in a [:value :target-class]))
+                   (= (count q-steps) (count c-steps))
+                   (seq q-steps) (not (target-present? initial))
+                   (target-present? (:belief (last q-steps)))
+                   (= 1 (reduce + (vals final-c)))
+                   (pos? (get final-c :related 0)))
+      (refuse! :adapter/aqc-correspondence-mismatch
+               {:target target :A (select-keys a [:status :reason])
+                :Q (select-keys q [:status :reason])
+                :C (select-keys c [:status :reason])}))
+    {:runtime-source {:run-id (:run/id run-record) :click-id (:click/id run-record)
+                      :candidate selected}
+     :horizon (count q-steps)
+     :target-class :related
+     :q-initial-target false
+     :q-terminal-target true
+     :terminal-c final-c}))
+
+(defn- lean-ratio [x]
+  (cond
+    (ratio? x) (str "(" (numerator x) " / " (denominator x) " : ℝ)")
+    (integer? x) (str "(" x " : ℝ)")
+    :else (refuse! :adapter/aqc-non-exact-preference {:value x})))
+
+(defn render-aqc [input source-sha]
+  (let [c (:terminal-c input)]
+    (str "import DarkTower.WarMachine.CascadeEFE\n\n"
+         "/-! GENERATED FILE — DO NOT EDIT.\nSource SHA-256: " source-sha
+         "\nRuntime source: " (pr-str (:runtime-source input))
+         "\nScope: selected-policy target-local retained A/Q/C only; F and whole-census completeness excluded.\n-/\n\n"
+         "namespace DarkTower.WarMachine.RuntimeAQC\n"
+         "open Holes CascadeEFE\nopen scoped BigOperators\nnoncomputable section\n\n"
+         "inductive Outcome | focused | related | unrelated | stopTheLine | notYet\n"
+         "  deriving DecidableEq, Fintype\n\n"
+         "def cFocused : ℝ := " (lean-ratio (:focused c)) "\n"
+         "def cRelated : ℝ := " (lean-ratio (:related c)) "\n"
+         "def cUnrelated : ℝ := " (lean-ratio (:unrelated c)) "\n"
+         "def cStopTheLine : ℝ := " (lean-ratio (:stop-the-line c)) "\n"
+         "def cNotYet : ℝ := " (lean-ratio (:ending/not-yet-evaluated c 0)) "\n"
+         "def retainedAQ : ProbabilityKernel Unit Outcome := point .related\n\n"
+         "def retainedAClass : Outcome := .related\n"
+         "def qInitialHasTarget : Bool := false\n"
+         "def qTerminalHasTarget : Bool := true\n\n"
+         "theorem retained_A_is_target_local : retainedAClass = .related := rfl\n"
+         "theorem retained_Q_reaches_target : qInitialHasTarget = false ∧ qTerminalHasTarget = true := by decide\n"
+         "theorem retained_A_Q_kernel_normalised : (∑ o, retainedAQ.mass () o) = 1 := kernel_sum _ _\n"
+         "theorem retained_C_is_normalised : cFocused + cRelated + cUnrelated + cStopTheLine + cNotYet = 1 := by\n"
+         "  norm_num [cFocused, cRelated, cUnrelated, cStopTheLine, cNotYet]\n"
+         "theorem retained_target_has_positive_preference : 0 < cRelated := by\n"
+         "  norm_num [cRelated]\n\n"
+         "#print axioms retained_A_is_target_local\n#print axioms retained_Q_reaches_target\n"
+         "#print axioms retained_A_Q_kernel_normalised\n#print axioms retained_C_is_normalised\n"
+         "#print axioms retained_target_has_positive_preference\n"
+         "end\nend DarkTower.WarMachine.RuntimeAQC\n")))
+
+(defn adapt-run-record-aqc-bytes [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (aqc-input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual :projection projection
+       :lean (render-aqc projection actual)})))
 
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))
