@@ -258,6 +258,16 @@ G for every action in the field = risk + ambiguity − information gain −
 novelty. One softmax over the whole field. There is always at least one
 action per task and one per A- target, so the support is never empty (RQ-2).
 
+For cascade-informed actions, a retrieved collection of patterns may initially
+be disconnected, but interpretation supplies the precedence/overlap structure.
+Ordering is compression: a multi-unit candidate with no precedence edges is a
+degenerate baseline and must receive higher G than a warranted connected
+ordering, all else equal. It is not made attractive by interpreting every unit
+as immediately co-applicable. Co-application applies only to genuinely
+incomparable enabled units within the interpreted structure. The compression
+term and its Lean/runtime correspondence remain an acceptance obligation; the
+old hand-added edge-token reward is not an acceptable implementation.
+
 ### Structure learning
 
 Expansion: at each click, the enumerators' new tasks become new task-factor

@@ -219,6 +219,28 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     channel-level adoption rule was not an alternative definition of the War
     Machine's generative model. Treating it as one was a scope error.
 
+22. **A disconnected collection is a degenerate cascade, not free
+    parallelism.** Retrieval may begin with a collection of applicable
+    patterns and that collection meets the working input definition. Cascade
+    interpretation must then expose the relations that connect it: precedence
+    comes from the interpreted ordering, while genuine incomparability remains
+    visible. A multi-unit candidate with no precedence edges is permitted as a
+    degenerate baseline for comparison, but its G must be high relative to a
+    warranted connected ordering because the ordering is compression. It must
+    not acquire a low G merely by treating every unit as a root and proposing
+    to apply all of them together. Co-application describes the execution of a
+    genuinely enabled incomparable frontier inside an interpreted structure;
+    it is not the semantics of an uninterpreted bag. A one-unit cascade is
+    trivially exempt from the multi-unit degeneracy.
+
+    The current Lean real example does not yet establish this requirement: its
+    three graph retractions have five units and empty `precedes` sets, and the
+    proved count treats them as valid policy members. They may remain as
+    degenerate comparison members, but acceptance additionally needs a G-level
+    theorem/control showing that a warranted connected interpretation outranks
+    the disconnected version for the compression reason, rather than because
+    edge tokens were added by hand.
+
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
