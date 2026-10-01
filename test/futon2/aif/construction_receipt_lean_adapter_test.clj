@@ -210,3 +210,44 @@
                                        :consumed-g :C :steps 3 :distribution :related] 0)
                             (assoc-in [:decision :selection-certificate :scoring 0
                                        :consumed-g :C :steps 3 :distribution :focused] 9/10)))))))))
+
+(def selection-record
+  "data/wm-runs/tick-run-record-2026-10-01-949d08f1-3eb0-4bf7-8215-f811d7352ed6.edn")
+(def selection-sha "ec1d3e47b1a657adbe69f311137e8ba6c14635bad37c33e12a619f2563849b94")
+
+(deftest controlled-record-renders-complete-singleton-selection-certificate
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file selection-record)))
+        adapted (adapter/adapt-run-record-selection-bytes bytes selection-sha)]
+    (is (= selection-sha (:source-sha256 adapted)))
+    (is (= 1 (get-in adapted [:projection :candidate-count])))
+    (is (= :no-competing-policy
+           (get-in adapted [:projection :comparison-status])))
+    (is (= :not-supplied (get-in adapted [:projection :f-status])))
+    (is (= [:habit :free-energy :G]
+           (get-in adapted [:projection :contribution-order])))
+    (is (.contains (:lean adapted) "selected_is_recorded_no_competing_winner"))
+    (is (.contains (:lean adapted) "retained_F_and_pairwise_contributions_are_absent"))
+    (is (not (.contains (:lean adapted) ":precedence")))))
+
+(deftest selection-certificate-refuses-identity-order-and-coverage-mutations
+  (let [record (read-string (slurp selection-record))]
+    (testing "the recorded comparison winner cannot diverge from selection"
+      (is (= :adapter/selection-candidate-identity-mismatch
+             (refusal #(adapter/selection-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-law :policy-comparison
+                                   :winner :id :target]
+                                  "M-formal-patterns"))))))
+    (testing "the retained contribution order is part of the comparison law"
+      (is (= :adapter/selection-law-mismatch
+             (refusal #(adapter/selection-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-law :policy-comparison
+                                   :contribution-tie-order]
+                                  [:G :free-energy :habit]))))))
+    (testing "every candidate must have exactly one retained scoring row"
+      (is (= :adapter/selection-candidate-coverage-mismatch
+             (refusal #(adapter/selection-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-certificate :scoring]
+                                  {}))))))))

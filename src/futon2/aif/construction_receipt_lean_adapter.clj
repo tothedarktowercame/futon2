@@ -425,6 +425,106 @@
       {:source-sha256 actual :projection projection
        :lean (render-aqc projection actual)})))
 
+(defn selection-input-from-run-record
+  "Project the complete recorded policy field and its no-competing-policy
+  comparison branch. This validates retained comparison data; it does not
+  rescore candidates or treat absent F as zero."
+  [run-record]
+  (let [decision (:decision run-record)
+        chosen (:chosen decision)
+        action (get-in decision [:selection-law :per-policy-argmax :action])
+        comparison (get-in decision [:selection-law :policy-comparison])
+        candidates (get-in decision [:selection-certificate :candidates])
+        scoring (get-in decision [:selection-certificate :scoring])
+        candidate-ids (mapv :id candidates)
+        scoring-ids (mapv :id (vals scoring))
+        selected (:id (first (vals scoring)))
+        candidate (first candidates)
+        winner (:winner comparison)
+        chosen-matches? (and (= (:kind action) (:kind selected))
+                             (= (:id action) (:id chosen) (:candidate chosen)
+                                (:id selected))
+                             (= (:target action) (:target chosen) (:target selected))
+                             (= (mapv :id (:precedence action)) (:precedence chosen))
+                             (= (get-in action [:construction-receipt :kind])
+                                (:construction-kind chosen)))]
+    (when-not (and (vector? candidates) (map? scoring) (= 1 (count candidates))
+                   (= 1 (count scoring)) (= (count candidate-ids)
+                                            (count (distinct candidate-ids)))
+                   (= (set candidate-ids) (set scoring-ids)))
+      (refuse! :adapter/selection-candidate-coverage-mismatch
+               {:candidate-ids candidate-ids :scoring-ids scoring-ids}))
+    (when-not (and chosen-matches? (= action selected) (= selected (:id candidate))
+                   (= selected (:id winner)))
+      (refuse! :adapter/selection-candidate-identity-mismatch
+               {:selection-law action :chosen chosen :scoring selected
+                :candidate (:id candidate) :winner (:id winner)}))
+    (when-not (and (= :no-competing-policy (:status comparison))
+                   (= :acting-policy (:comparison-domain comparison))
+                   (= :unrestricted (:selection-domain comparison))
+                   (= :no-competing-policy (:runner-up comparison))
+                   (= :no-competing-policy (:decided-by comparison))
+                   (nil? (:contributions comparison))
+                   (= :policy-printed-identity-ascending (:tie-break-rule comparison))
+                   (= [:habit :free-energy :G] (:contribution-tie-order comparison))
+                   (= {:status :undeclared} (:near-tie-threshold comparison))
+                   (= :threshold-undeclared (:near-tie? comparison))
+                   (= 1.0 (:posterior winner))
+                   (= 1.0 (:habit winner) (:habit candidate))
+                   (nil? (:f winner)) (nil? (:f candidate))
+                   (= :not-supplied (:f-status winner) (:f-status candidate))
+                   (number? (:g candidate)) (= (:g candidate) (:g (first (vals scoring)))))
+      (refuse! :adapter/selection-law-mismatch
+               {:status (:status comparison)
+                :contribution-order (:contribution-tie-order comparison)}))
+    {:runtime-source {:run-id (:run/id run-record)
+                      :click-id (:click/id run-record)
+                      :candidate (select-keys selected [:kind :id :target])}
+     :candidate-count 1
+     :winner-index 0
+     :habit (:habit candidate)
+     :g (:g candidate)
+     :f-status :not-supplied
+     :comparison-status :no-competing-policy
+     :contributions :absent
+     :contribution-order [:habit :free-energy :G]}))
+
+(defn render-selection [input source-sha]
+  (let [{:keys [runtime-source habit g]} input]
+    (str "import Mathlib\n\n"
+         "/-! GENERATED FILE — DO NOT EDIT.\nSource SHA-256: " source-sha
+         "\nRuntime source: " (pr-str runtime-source)
+         "\nScope: complete recorded policy field; singleton no-competing-policy branch. F remains absent.\n-/\n\n"
+         "namespace DarkTower.WarMachine.RuntimeSelection\n\n"
+         "inductive Contribution | habit | freeEnergy | G deriving DecidableEq\n\n"
+         "structure Policy where\n  id : Nat\n  habit : Float\n  freeEnergy : Option Float\n  G : Float\n\n"
+         "def selected : Policy := ⟨0, Float.ofBits " (float-bits habit)
+         ", none, Float.ofBits " (float-bits g) "⟩\n"
+         "def recordedCandidates : List Policy := [selected]\n"
+         "def recordedContributionOrder : List Contribution := "
+         "[.habit, .freeEnergy, .G]\n"
+         "def recordedContributions : Option (Float × Float × Float) := none\n"
+         "def chooseNoCompeting : List Policy → Option Policy\n"
+         "  | [policy] => some policy\n  | _ => none\n\n"
+         "theorem selected_is_recorded_no_competing_winner :\n"
+         "    chooseNoCompeting recordedCandidates = some selected := rfl\n"
+         "theorem retained_contribution_order :\n"
+         "    recordedContributionOrder = [.habit, .freeEnergy, .G] := rfl\n"
+         "theorem retained_F_and_pairwise_contributions_are_absent :\n"
+         "    selected.freeEnergy = none ∧ recordedContributions = none := ⟨rfl, rfl⟩\n\n"
+         "#print axioms selected_is_recorded_no_competing_winner\n"
+         "#print axioms retained_contribution_order\n"
+         "#print axioms retained_F_and_pairwise_contributions_are_absent\n"
+         "end DarkTower.WarMachine.RuntimeSelection\n")))
+
+(defn adapt-run-record-selection-bytes [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (selection-input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual :projection projection
+       :lean (render-selection projection actual)})))
+
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))
     (binding [*out* *err*]
