@@ -34,6 +34,7 @@
             [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
+            [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -834,6 +835,7 @@
                     :registered-run/timing timing
                     :registered-run/model-usage usage
                     :registered-run/chronology chronology
+                    :run-output (run-output/receipt result grounded-commit)
                     :registered-run/critical-parameters
                     (selection-world/critical-task-counts world-at-selection raw-opts)
                     :selectorSeam "live:validated-selection"
