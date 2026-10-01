@@ -3,6 +3,19 @@
  :purpose
  "Show that a concrete interpretation can recognise operational peripherals and that a fact-token abstraction can lose the distinction."
 
+ :pinned-want
+ {:id :state-preserving-efficient-repair
+  :timing :fixed-before-policy-construction-and-scoring
+  :semantic-preferences
+  [{:outcome :repair-completes :weight 4 :mode :soft}
+   {:outcome :live-state-preserved :weight 3 :mode :soft}
+   {:outcome :observations-typed-and-auditable :weight 2 :mode :soft}
+   {:outcome :elapsed-time-low :weight 1 :mode :soft}
+   {:outcome :model-token-use-low :weight 1 :mode :soft}]
+  :hard-zero-outcomes []
+  :note
+  "Weights define the first sensitivity fixture, not universal WM preferences. Every outcome retains positive mass because this fixture declares no genuinely forbidden outcome."}
+
  :pattern-language
  {:snapshot "futon3/library/peripherals"
   :patterns
@@ -107,4 +120,8 @@
   {:name :adapter-composition
    :claim "A transport peripheral satisfying the composition contract plus a qualifying embodiment satisfies the execution-peripheral requirements."}
   {:name :g-is-instance-sensitive
-   :claim "A policy pair differing in lifecycle, duration, or token cost may tie under the coarse instance and rank differently under the operational instance."}]}
+   :claim "Under the one pinned want, a policy pair differing in lifecycle, duration, or token cost may tie under the coarse instance and rank differently under the operational instance."}
+  {:name :want-precedes-policy-scoring
+   :claim "The preference distribution is a function of outcomes and the pinned want, not of the candidate policy being scored."}
+  {:name :soft-unless-forbidden
+   :claim "Every outcome has positive preference mass in this fixture; only an explicitly declared genuinely forbidden outcome may receive zero."}]}

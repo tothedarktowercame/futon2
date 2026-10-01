@@ -141,6 +141,21 @@ Boolean classifier over the coarse carrier can correctly accept the REPL while
 rejecting the pipe.  Numerical `G` sensitivity remains the next layer rather
 than an assumption hidden in these recognition results.
 
+Before that numerical comparison, the exemplar pins one semantic want:
+repair completion, live-state preservation, typed/auditable observations,
+low elapsed time, and low model-token use.  It is fixed before policy
+construction and scoring.  These are soft preferences; the fixture declares
+no hard-zero outcomes.  Both concrete carriers must interpret this same want,
+so a ranking difference demonstrates representational sensitivity rather than
+an after-the-fact change of objective.
+
+This preference boundary is formalised in
+`mathlib4/DarkTower/WarMachine/PinnedRepairWant.lean` at commit `dffe7dd02f`.
+The preference distribution is normalized and strictly positive on every
+fixture outcome.  The operational carrier strictly prefers the
+state-preserving REPL result, whereas every score factoring only through the
+completion carrier must tie it with completed restart-and-replay.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
