@@ -87,7 +87,7 @@
                  [(assoc-in inputs [:prediction :action :target] "other") :prediction-occurrence-mismatch]]]
           (is (= kind (:kind (example/align bad)))))))))
 
-(deftest versioned-fourteen-to-twelve-join-keeps-administrative-mass
+(deftest versioned-close-to-disposition-join-keeps-administrative-mass
   (let [domain (example/declaration)
         counts (assoc (zipmap cohort/outcome-kinds (repeat 0))
                       :grounded-change 3 :historical-verification-refused 2
@@ -95,14 +95,16 @@
         joined (example/join-counts domain counts)]
     (is (= (:support ruled/seeded-c) (set (keys (:dispositions joined)))))
     (is (= [6 3 3] ((juxt :total :disposition-total :administrative-total) joined)))
-    (is (= 12 (count (:dispositions joined))))
-    (is (= 2 (count (:administrative joined))))
+    (is (= (count ruled/disposition-outcomes) (count (:dispositions joined))))
+    (is (= (count ruled/non-disposition-outcomes) (count (:administrative joined))))
     (doseq [label ruled/non-disposition-outcomes]
       (is (= :not-a-disposition (get-in joined [:mapping :mapping label :status]))))
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Kernel example refused"
                          (example/join-counts domain (dissoc counts :historical-verification-refused))))
-    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Kernel example refused"
-                         (example/validate-domain! (update domain :mapping dissoc :historical-verification-refused))))))
+    (doseq [label cohort/outcome-kinds]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Kernel example refused"
+                            (example/validate-domain! (update domain :mapping dissoc label)))
+          (str "omitting canonical outcome must refuse: " label)))))
 
 (deftest reference-1789964661-negative-updater-grounded-pair
   ;; Read-only retained-evidence replay: real Git/C4/identity checks, retained
@@ -133,10 +135,10 @@
     (is (= :grounded-change (get-in result [:disposition :value])))))
 
 
-(deftest existing-fourteen-wide-fit-has-an-explicit-lossless-join
+(deftest existing-canonical-fit-has-an-explicit-lossless-join
   (let [kernel (fit/read-kernel fit/default-ledger)
         joined (example/join-counts (example/declaration) (:outcome-counts kernel))]
-    (is (= 14 (count (:support kernel))))
+    (is (= (count cohort/outcome-kinds) (count (:support kernel))))
     (is (= (:sample-size kernel) (:total joined)))
     (is (= (:total joined) (+ (:disposition-total joined) (:administrative-total joined))))
     (is (= (:support ruled/seeded-c) (set (keys (:dispositions joined)))))))

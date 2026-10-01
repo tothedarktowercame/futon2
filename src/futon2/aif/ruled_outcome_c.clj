@@ -59,10 +59,12 @@
               :reason :no-attested-certification-update-vocabulary}})
 
 (def seeded-c
-  "The full twelve-wide support required by the corrected ruling at
+  "The full canonical disposition support required by the corrected ruling at
    `futon2:holes/labs/wm-contract/aif-equations.edn:214`; named zeros remain in
    support so the positivity premise at
-   `mathlib4:DarkTower/WarMachine/Holes.lean:6993-6997` can reach them."
+   `mathlib4:DarkTower/WarMachine/Holes.lean:6993-6997` can reach them. The
+   width is derived from `full-loop-cohort/outcome-kinds` after removing the
+   explicitly administrative outcomes, never maintained as a parallel count."
   {:support disposition-outcomes
    :mass (merge (zipmap named-zero-dispositions (repeat 0))
                 seeded-positive-masses)})

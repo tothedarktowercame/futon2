@@ -83,9 +83,11 @@
       (let [result (c/construct-machine-preference context loader-input)]
         (is (:ok result))
         (is (= :unit (:unconditional-on result)))
-        (is (= 12 (count (get-in result [:distribution :support]))))
+        (is (= (count c/disposition-outcomes)
+               (count (get-in result [:distribution :support]))))
         (is (= 1 (reduce + (vals (get-in result [:distribution :mass])))))
-        (is (= 7 (count (:named-zero-outcomes result))))
+        (is (= (count c/named-zero-dispositions)
+               (count (:named-zero-outcomes result))))
         (is (= [] (get-in result [:vertices :nouns :support])))
         (is (= [] (get-in result [:vertices :verbs :support])))
         (is (= :owed (get-in result [:vertices :evidence :support])))
@@ -139,7 +141,7 @@
             expected (into {} (map (fn [[k v]] [[:organization k] v])) c/seeded-positive-masses)
             positives (filter #(pos? (get masses %)) (get-in result [:distribution :support]))]
         (is (:ok result))
-        (is (= 12 (count masses)))
+        (is (= (count c/disposition-outcomes) (count masses)))
         (doseq [[outcome mass] masses]
           (is (= (get expected outcome 0) mass) (str "exact Lean reference mass " outcome)))
         (is (= [:organization :abstained] (first (get-in result [:distribution :support]))))

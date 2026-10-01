@@ -18,7 +18,7 @@
           expected-trajectory
           [:time-step :selection :construction :dispatch :build :adjudication :closed]]
       (is (= cohort/outcome-kinds (set (:support fitted))))
-      (is (= 12 (count (:support fitted))))
+      (is (= (count cohort/outcome-kinds) (count (:support fitted))))
       (is (= 3 (:sample-size fitted)))
       (is (= 1 (count (:states fitted))))
       (is (= {:checkpoint-trajectory expected-trajectory}
@@ -26,6 +26,7 @@
       (is (= 3 (:sample-size state)))
       (is (= 3 (get-in state [:counts :grounded-change])))
       (is (= 1 (get-in state [:probability :grounded-change])))
-      (is (= 11 (count (:unsupported-outcomes fitted))))
+      (is (= (dec (count cohort/outcome-kinds))
+             (count (:unsupported-outcomes fitted))))
       (is (every? zero? (map (:counts state) (:unsupported-outcomes fitted))))
       (is (every? zero? (map (:probability state) (:unsupported-outcomes fitted)))))))
