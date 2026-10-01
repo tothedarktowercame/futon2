@@ -139,4 +139,33 @@
    :operational :repl-repair-strictly-lower-g
    :coarse :tie}
   :control
-  "The coarse preference is the pushforward of the one pinned operational preference, not a separately selected want."}}
+  "The coarse preference is the pushforward of the one pinned operational preference, not a separately selected want."}
+
+ :cascade-policy-bridge
+ {:lean-source "DarkTower/WarMachine/PeripheralCascadePolicies.lean"
+  :lean-commit "7abcc2366b"
+  :relations [:support :meet :generative-precedence]
+  :policies
+  [{:id :direct-drawbridge-repl
+    :admissible true
+    :interpretation
+    {:completion :contains-hot-reload
+     :state-preservation :seam-precedes-reload
+     :typed-auditability :typed-event-precedes-reload
+     :resource-band :low}}
+   {:id :irc-mediated-ground-control
+    :admissible true
+    :interpretation
+    {:completion :contains-hot-reload
+     :state-preservation :seam-precedes-reload
+     :typed-auditability :typed-event-precedes-reload
+     :resource-band :high-because-split-transport-hop}}]
+  :results
+  {:deterministic {:operational :direct-strictly-lower-g :coarse :tie}
+   :stochastic {:operational :direct-strictly-lower-g :coarse :tie}}
+  :negative-control
+  {:id :restart-through-untyped-pipe
+   :structurally-well-formed true
+   :admissible false
+   :reason
+   "For the pinned reload-safe problem it lacks the seam and typed-event construction evidence; restart remains valid only across a separately documented reload-safety boundary."}}}

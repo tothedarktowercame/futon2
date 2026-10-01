@@ -165,6 +165,22 @@ success, `1/5` fallback, and an arbitrary shared ambiguity contribution.  Its
 coarse preference is the pushforward of the pinned operational preference, so
 the comparison does not introduce a second want.
 
+The graph-to-model bridge is formalised in
+`mathlib4/DarkTower/WarMachine/PeripheralCascadePolicies.lean` at commit
+`7abcc2366b`.  It instantiates occurrence graphs with separate support, meet,
+and generative-precedence relations for direct Drawbridge/REPL repair and
+IRC-mediated ground-control repair.  Both are admissible for the pinned
+reload-safe problem.  Completion, continuity, typed auditability, and resource
+bands are compiled from graph facts, and both the deterministic and stochastic
+theorems rank the direct cascade below the mediated cascade operationally while
+the completion-only carrier ties them.
+
+Restart-through-an-untyped-pipe is retained only as a negative control.  Its
+one-node graph is structurally well formed, but Lean proves that it is not an
+admissible peripheral repair cascade for this problem because it lacks the
+seam and typed-event construction evidence.  This does not prohibit restart
+when a separately evidenced reload-safety boundary requires one.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
