@@ -130,3 +130,15 @@ repairs between them, so the write-only scan learner, per-channel BMR and
 proxy shadow record at least 20 carrying ticks (the 6B-4 exposure floor)
 before design packet 6 is proposed. These clicks are outside any PROOF-2
 preregistered sequence L and cannot be selected into it later.
+
+## Joe's grant to codex-10, 2026-10-01 — ten clicks, allocated
+
+Joe, 2026-10-01, heard directly by codex-10 in its operator buffer, after the
+registered-run preflight and before its first click: "I'll grant a block of 10
+clicks that we can run on this basis, i.e., not strictly 'back to back' but
+with improvements as needed as we go." He subsequently confirmed that the
+pre-go-live list was complete and instructed codex-10 to perform the admin
+step and run click 1. Per this document's standing rule, `allocated` rises
+from 35 to **45**; issue-time accounting and the no-refund rule are unchanged.
+These ten clicks form the new registered-run series: each click selects its
+work through the ordinary outer loop, and repairs may land between clicks.
