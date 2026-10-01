@@ -2,14 +2,16 @@
   "PROOF-2b: the ordinary click's interpretation ask step (D11, moved into
   the tick). futon2.aif.flight-runner/ask-fn is the ask step; until now only
   run-flight! called it, so an ordinary tick whose every candidate target was
-  refused :no-admitted-interpretation abstained without asking anyone. This
+  refused for missing query-time input or admitted interpretation abstained
+  without asking anyone. This
   namespace builds the ask a click performs for ONE refused target, with the
   same wants shape the tick itself derives for checkbox missions
   (mission-hole-wants), exactly as the manual demonstration
   /tmp/claude-1/ask-demo.clj did.
 
   The full-loop runner calls the fn built by click-ask-fn only when its own
-  decision abstained refusing a target :no-admitted-interpretation, at most
+  decision abstained because a target lacks a query-time slice or admitted
+  interpretation, at most
   once per click, and re-runs the decision once when the ask published. The
   answer-fn is injectable (:interpretation-answer-fn on the runner opts) so
   tests can stub the seat; production answers through Agency with the seat
@@ -55,7 +57,7 @@
 (defn click-ask-fn
   "The ordinary click's ask step as a full-loop-runner
   :interpretation-ask-fn: (fn [runner-opts refusal] record). REFUSAL is the
-  abstained decision's {:target .. :kind :no-admitted-interpretation ..}.
+  abstained decision's interpretation-needed refusal.
   Returns the :interpretation-ask record {:target :want :outcome :job-id
   :published} for the run record — the outcome is ask-fn's own (published,
   declined, request-refused, ask-threw ...), whether or not anything was

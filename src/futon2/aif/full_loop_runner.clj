@@ -1566,13 +1566,16 @@
      (fn [target]
        (:class (focus-receipt/classify-target inputs discovery (:as-of discovery) target ctx))))))
 
-(defn- no-admitted-interpretation-refusals
-  "The :no-admitted-interpretation refusals of an abstained decision, in the
-  decision's own refusal order (the cascade's ranking of the targets it
-  refused)."
+(defn- interpretation-needed-refusals
+  "Refusals an interpretation ask can discharge, in the decision's own
+  refusal order.  `:no-query-time-slice` means no retrieval/interpretation
+  entered construction at all; asking for and publishing an interpretation
+  is the in-tick way to create that missing construction input."
   [decision]
   (when (and (map? decision) (= :abstained (:status decision)))
-    (vec (filter #(= :no-admitted-interpretation (:kind %))
+    (vec (filter #(contains? #{:no-query-time-slice
+                               :no-admitted-interpretation}
+                             (:kind %))
                  (:refusals decision)))))
 
 (defn- interpretable-refusal
@@ -1581,7 +1584,7 @@
   {:refusal r :skipped-unknown-class [..]}, or — every candidate :unknown —
   {:all-unknown-class [..]}: no ask, the tick cannot score any of them."
   [decision classify-fn]
-  (let [refusals (no-admitted-interpretation-refusals decision)]
+  (let [refusals (interpretation-needed-refusals decision)]
     (when (seq refusals)
       (loop [[r & more] refusals skipped []]
         (cond
@@ -5329,7 +5332,7 @@
             ;; the classifier does a fresh focus read: build it only when
             ;; there is a refusal to ask about, not on every click
             (when (and interpretation-ask-fn (nil? (:flight opts))
-                       (seq (no-admitted-interpretation-refusals
+                       (seq (interpretation-needed-refusals
                              (:decision judgement0-base))))
               (interpretable-refusal
                (:decision judgement0-base)

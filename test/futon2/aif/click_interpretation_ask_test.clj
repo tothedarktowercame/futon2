@@ -168,6 +168,24 @@
     (is (= target (get-in record [:decision :chosen :target]))
         "the same tick then selects the refused target")))
 
+(deftest a-missing-query-time-slice-asks-then-selects
+  (let [store (io/file (temp-dir "click-query-slice-ask-store"))
+        answers (atom 0)
+        answer-fn (fn [_]
+                    (swap! answers inc)
+                    {:seat "kimi-6" :job-id "query-slice-job" :state "done"
+                     :text (reply-for :writing-coherence/meet-the-reader-where-they-are)})
+        {:keys [record judge-calls]}
+        (run-click (test-ask-fn store answer-fn)
+                   (fn [] (selected-decision))
+                   {:first-refusals [{:target target :kind :no-query-time-slice
+                                      :missing :query-time-slices}]})]
+    (is (= 1 @answers))
+    (is (= 2 (count judge-calls))
+        "publishing the interpretation reruns selection in the same click")
+    (is (= true (:published (:interpretation-ask record))))
+    (is (= target (get-in record [:decision :chosen :target])))))
+
 (deftest a-declined-ask-leaves-the-tick-abstained
   ;; (b) a stubbed decline: no publication, no re-decide, the tick stays
   ;; abstained and :interpretation-ask records the decline
