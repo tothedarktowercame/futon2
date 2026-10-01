@@ -9,18 +9,34 @@
   :observed-model-usage :absent}
  :checks
  {:terminal-monotonic-timing-capture
-  {:status :failed :reason :terminal-duration-not-retained}
+  {:status :passed
+   :evidence {:commit "7c81ee697"
+              :record-path [:registered-run/timing :wall-clock-ms]
+              :clock :monotonic}}
   :phase-monotonic-timing-capture
-  {:status :failed :reason :phase-durations-not-retained}
+  {:status :passed
+   :evidence {:commit "7c81ee697"
+              :record-path [:registered-run/timing :phase-timings-ms]
+              :clock :monotonic}}
   :provider-or-agency-token-usage-capture
-  {:status :failed :reason :usage-receipt-not-retained}
+  {:status :passed
+   :evidence {:agency-commit "80f866f8"
+              :projection-commit "7c81ee697"
+              :record-path [:registered-run/model-usage]}
+   :missing-rule :typed-missing-never-imputed}
   :outer-loop-selection-receipt-capture
   {:status :present :evidence-path [:selection-event]}
   :source-and-substrate-digest-capture
-  {:status :partial
-   :reason :intervening-change-chronology-not-yet-projected-as-a-series-row}}
+  {:status :passed
+   :evidence {:commit "7c81ee697"
+              :record-path [:registered-run/chronology]}}}
  :decision
- {:first-click :deferred
+ {:first-click :ready
   :consumes-opportunity false
-  :next-repair
-  :retain-terminal-and-phase-monotonic-timings-plus-provider-usage}}
+  :next-action :launch-first-live-outer-loop-opportunity}
+ :serving-process-verification
+ {:status :passed
+  :method :drawbridge-hot-load-and-probe
+  :observed {:provider-usage-public-view :present
+             :monotonic-phase-projection {:probe 4}}
+  :click-launched false}}
