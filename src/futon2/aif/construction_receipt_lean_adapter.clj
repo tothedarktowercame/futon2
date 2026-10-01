@@ -371,8 +371,9 @@
                {:target target :A (select-keys a [:status :reason])
                 :Q (select-keys q [:status :reason])
                 :C (select-keys c [:status :reason])}))
-    {:runtime-source {:run-id (:run/id run-record) :click-id (:click/id run-record)
-                      :candidate selected}
+    {:runtime-source {:run-id (:run/id run-record)
+                      :click-id (:click/id run-record)
+                      :candidate (select-keys selected [:kind :id :target])}
      :horizon (count q-steps)
      :target-class :related
      :q-initial-target false

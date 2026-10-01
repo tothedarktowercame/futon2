@@ -158,6 +158,12 @@
     (is (= controlled-sha (:source-sha256 adapted)))
     (is (= :related (get-in adapted [:projection :target-class])))
     (is (= 4 (get-in adapted [:projection :horizon])))
+    (is (= {:kind :cascade-candidate
+            :id :C1
+            :target "M-daily-scan-multi-axis-queue"}
+           (get-in adapted [:projection :runtime-source :candidate])))
+    (is (not (.contains (:lean adapted) ":precedence")))
+    (is (not (.contains (:lean adapted) ":interpretation-receipts")))
     (is (.contains (:lean adapted) "retained_A_is_target_local"))
     (is (.contains (:lean adapted) "retained_Q_reaches_target"))
     (is (.contains (:lean adapted) "retained_C_is_normalised"))))
