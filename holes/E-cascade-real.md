@@ -369,11 +369,17 @@ nonempty invented token or a disconnected path fails with
 `:machine-construction-relations-invalid`. The corresponding executable Lean
 carrier is `DarkTower/WarMachine/ConstructionReceipt.lean`: its positive
 two-unit witness and negative forged-token/disconnected-path controls build
-with `lake env lean`. This establishes predicate correspondence. The remaining
-adapter obligation is to decode a pinned runtime receipt into that carrier and
-prove the decoded value, rather than maintaining a second hand-authored Lean
-example; meet *maximality* is also deliberately still a stronger, separate
-obligation.
+with `lake env lean`. Runtime commit `ff9e0ca8b` established predicate
+correspondence. The identity-preserving adapter is now
+`futon2.aif.construction-receipt-lean-adapter`: it accepts one strict EDN form
+under a mandatory SHA-256 pin, assigns deterministic unit/token identities,
+and emits the exact decoded receipt plus a `native_decide` validity theorem.
+The pinned fixture regenerates
+`DarkTower/WarMachine/ConstructionReceiptRuntimeWitness.lean` byte for byte;
+Lean elaborates it, while a semantic lie is preserved for Lean to refute rather
+than silently repaired. Meet *maximality* remains deliberately a stronger,
+separate obligation; this adapter proves correspondence with the current
+runtime admission predicate, not that stronger claim.
 
 **D14 gap 7 follow-up (claude-8, 2026-09-24).** Discovery `proof2/packets/D14-HORIZON-D.md` (6b662a25, kimi-7): the judge's horizon is the max-lift of per-file `:horizon-steps` (1de6aadc; only T-repair declares, 4), with a literal `{:value 2}` else-branch reached when nothing declares or when judge-opts bypass the lift; the constructor takes an untied caller horizon. Amendment H1 (delete the fallback, carry `:cascade-horizon` with authority on the certificate, constructor receives the judge's value) is with claude-10 for the D16 wiring.
 Correction to H1 (claude-10, 2026-09-24): deleting the fallback in favour of

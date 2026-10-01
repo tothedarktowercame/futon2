@@ -1,0 +1,25 @@
+{:schema :wm/construction-receipt-lean-input-v1
+ :precedence [:P :Q]
+ :interpretations
+ {:P {:guard {:needs #{} :forbids #{}} :produces #{:q}}
+  :Q {:guard {:needs #{:q} :forbids #{}} :produces #{:w}}}
+ :construction-receipt
+ {:kind :machine-constructed
+  :relations
+  {:status :computed
+   :support
+   {:basis :produced-token-consumed-by-guard
+    :relations [{:from :P :to :Q :tokens #{:q}}]}
+   :meet
+   {:basis :greatest-common-descendant
+    :missing []
+    :relations
+    [{:pair [:P :Q] :meet :Q
+      :evidence
+      {:left-path [{:from :P :to :Q :tokens #{:q}}]
+       :right-path []}}]}
+   :precedence
+   {:basis :generative-support
+    :relations [{:from :P :to :Q :tokens #{:q}}]
+    :linear-extension [:P :Q]
+    :violations []}}}}
