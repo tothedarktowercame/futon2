@@ -3,6 +3,7 @@
    no EIG integration."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.machine-model :as machine-model])
   (:import [java.security MessageDigest]))
 
@@ -31,6 +32,15 @@
           {:ok true :record record}
           (refusal :unregistered-hypothesis [:hypotheses (:id h)]))))))
 
+(defn- likelihood-support-valid? [hypothesis states outcomes]
+  (let [rows (get-in hypothesis [:likelihood :rows])]
+    (and (= (set states) (set (keys rows)))
+         (every? (fn [state]
+                   (let [row (get rows state)]
+                     (and (set/subset? (set (keys row)) (set outcomes))
+                          (every? number? (vals row)))))
+                 states))))
+
 (defn parameter-kernels
   "Construct Q(theta|pi), Q(theta|o,pi), evidence, and the shared marginal."
   [model parameter-state policies outcome-support]
@@ -55,14 +65,17 @@
       :else
       (if-let [bad (first (remove :ok (map registration hypotheses)))]
         bad
-        (let [likelihood
+        (if-let [bad (first (remove #(likelihood-support-valid? % states outcome-support)
+                                    hypotheses))]
+          (refusal :support-mismatch [:hypotheses (:id bad) :likelihood :rows])
+          (let [likelihood
               (into {}
                     (for [p policies h hypotheses]
                       [[(:id p) (:id h)]
                        (into {}
                              (for [o outcome-support]
                                [o (reduce + (for [[s mass] q-state]
-                                              (* mass (get-in h [:likelihood :rows s o]))))]))]))
+                                              (* mass (get-in h [:likelihood :rows s o] 0))))]))]))
               marginals
               (into {} (for [p policies]
                          [(:id p) (into {} (for [o outcome-support]
@@ -93,4 +106,4 @@
              :prior-kernel (into {} (for [p policies] [(:id p) prior]))
              :likelihood likelihood :posterior-kernel posteriors
              :evidence-normalizers marginals :posterior-predictive marginals
-             :likelihood-marginal recomputed}))))))
+             :likelihood-marginal recomputed})))))))
