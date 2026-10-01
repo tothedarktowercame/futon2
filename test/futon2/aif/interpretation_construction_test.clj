@@ -90,7 +90,13 @@
         (is (= :interpretation-receipts-missing (get-in bad [:declines 0 :reason])))))
     (testing "machine-constructed is a fail-closed relation claim"
       (doseq [damage [#(update % :construction-receipt dissoc :relations)
-                      #(assoc-in % [:construction-receipt :relations :support :relations 0 :tokens] #{})]]
+                      #(assoc-in % [:construction-receipt :relations :support :relations 0 :tokens] #{})
+                      #(let [forged #{:not-produced-or-needed}]
+                         (-> %
+                             (assoc-in [:construction-receipt :relations :support :relations 0 :tokens] forged)
+                             (assoc-in [:construction-receipt :relations :precedence :relations 0 :tokens] forged)))
+                      #(assoc-in % [:construction-receipt :relations :meet :relations 0
+                                    :evidence :left-path 0 :to] :P)]]
         (let [bad-problem (update (first (:problems assembled)) :constructed-candidates
                                   (fn [cs] (mapv damage cs)))
               bad (admit bad-problem)]

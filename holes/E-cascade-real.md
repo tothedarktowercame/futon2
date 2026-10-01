@@ -360,6 +360,21 @@ the hand-built Lean exemplar. Admission fails closed with
 `:machine-constructed` but omits or malforms this record; hand-admitted and
 fixture receipts do not acquire the claim retroactively.
 
+**Lean/runtime correspondence follow-up (codex-10, 2026-10-01).** The first
+correspondence boundary is now semantic rather than field-shaped. Runtime
+admission recomputes each edge's token witness as `source.produces ∩
+target.guard.needs`, requires the exact set, checks that the edge increases the
+declared linear extension, and checks meet-path endpoints and adjacency. Thus a
+nonempty invented token or a disconnected path fails with
+`:machine-construction-relations-invalid`. The corresponding executable Lean
+carrier is `DarkTower/WarMachine/ConstructionReceipt.lean`: its positive
+two-unit witness and negative forged-token/disconnected-path controls build
+with `lake env lean`. This establishes predicate correspondence. The remaining
+adapter obligation is to decode a pinned runtime receipt into that carrier and
+prove the decoded value, rather than maintaining a second hand-authored Lean
+example; meet *maximality* is also deliberately still a stronger, separate
+obligation.
+
 **D14 gap 7 follow-up (claude-8, 2026-09-24).** Discovery `proof2/packets/D14-HORIZON-D.md` (6b662a25, kimi-7): the judge's horizon is the max-lift of per-file `:horizon-steps` (1de6aadc; only T-repair declares, 4), with a literal `{:value 2}` else-branch reached when nothing declares or when judge-opts bypass the lift; the constructor takes an untied caller horizon. Amendment H1 (delete the fallback, carry `:cascade-horizon` with authority on the certificate, constructor receives the judge's value) is with claude-10 for the D16 wiring.
 Correction to H1 (claude-10, 2026-09-24): deleting the fallback in favour of
 `:horizon-not-declared` would refuse a computable input (PROOF-2a flight rule

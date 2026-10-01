@@ -1228,37 +1228,57 @@
                               :new-wanted-tokens new-wanted)}))))))
 
 (defn- witnessed-relation?
-  [units relation]
-  (and (map? relation)
-       (contains? units (:from relation))
-       (contains? units (:to relation))
-       (set? (:tokens relation))
-       (seq (:tokens relation))))
+  [units patterns positions relation]
+  (let [{:keys [from to tokens]} relation
+        semantic-tokens (set/intersection
+                         (set (get-in patterns [from :produces]))
+                         (set (get-in patterns [to :guard :needs])))]
+    (and (map? relation)
+         (contains? units from)
+         (contains? units to)
+         (set? tokens)
+         (seq tokens)
+         (= semantic-tokens tokens)
+         (< (positions from) (positions to)))))
+
+(defn- witnessed-path?
+  [units patterns positions from to path]
+  (and (vector? path)
+       (if (= from to)
+         (empty? path)
+         (and (seq path)
+              (= from (:from (first path)))
+              (= to (:to (last path)))
+              (every? true?
+                      (map (fn [left right] (= (:to left) (:from right)))
+                           path (rest path)))))
+       (every? #(witnessed-relation? units patterns positions %) path)))
 
 (defn- machine-construction-relations-valid?
   "Fail-closed PROOF-2b relation contract for a receipt which claims it was
   machine-constructed. Hand-admitted and fixture receipts do not acquire this
   claim retroactively."
-  [precedence receipt]
+  [precedence patterns receipt]
   (if (not= :machine-constructed (:kind receipt))
     true
     (let [relations (:relations receipt)
           units (set precedence)
+          positions (zipmap precedence (range))
           support (get-in relations [:support :relations])
           meet (get-in relations [:meet :relations])
           generative (get-in relations [:precedence :relations])
-          path-valid? (fn [path]
-                        (and (vector? path)
-                             (every? #(witnessed-relation? units %) path)))
           meet-valid? (fn [{:keys [pair meet evidence]}]
                         (and (vector? pair) (= 2 (count pair))
                              (every? units pair) (contains? units meet)
                              (map? evidence)
-                             (path-valid? (:left-path evidence))
-                             (path-valid? (:right-path evidence))))]
+                             (witnessed-path? units patterns positions
+                                              (first pair) meet (:left-path evidence))
+                             (witnessed-path? units patterns positions
+                                              (second pair) meet (:right-path evidence))))]
       (and (= :computed (:status relations))
            (= :produced-token-consumed-by-guard (get-in relations [:support :basis]))
-           (vector? support) (every? #(witnessed-relation? units %) support)
+           (vector? support)
+           (every? #(witnessed-relation? units patterns positions %) support)
            (= :greatest-common-descendant (get-in relations [:meet :basis]))
            (vector? meet) (every? meet-valid? meet)
            (vector? (get-in relations [:meet :missing]))
@@ -1284,7 +1304,7 @@
                                 (nil? construction-receipt) (conj :construction-receipt)
                                 (and (map? construction-receipt)
                                      (not (machine-construction-relations-valid?
-                                           precedence construction-receipt)))
+                                           precedence patterns construction-receipt)))
                                 (conj :construction-relations)
                                 (some #(not (map? (get patterns %))) precedence)
                                 (conj :pattern-interpretation)
