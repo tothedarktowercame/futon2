@@ -6555,11 +6555,22 @@
                                   (:ticket-queue judge-opts) (ticket-queue/read-declaration)))
         substrate-tickets (map :id (filter mission-registry/live-ticket?
                                            (:tickets loaded-tickets)))
+        known-mission-ids (set (map :id (:missions loaded-missions)))
+        live-mission-ids (set (map :id (filter mission-registry/live-mission?
+                                               (:missions loaded-missions))))
         cascade-targets
-        (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets loaded-excursions)
-                               (keys (:universes cascade-sources))
-                               (map :target (:proposals cascade-proposal-supply))
-                               (map :ticket (:entries ticket-queue-declaration)))))
+        (->> (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets loaded-excursions)
+                     (keys (:universes cascade-sources))
+                     (map :target (:proposals cascade-proposal-supply))
+                     (map :ticket (:entries ticket-queue-declaration)))
+             distinct
+             ;; A declaration or saved proposal may outlive the mission's
+             ;; eligibility.  It can enrich an eligible target, but it must
+             ;; never reintroduce a known closed, frozen, or operator-gated
+             ;; mission after the registry has excluded it.
+             (remove #(and (contains? known-mission-ids %)
+                           (not (contains? live-mission-ids %))))
+             vec)
         flight-cascade-assembly-input
         (flight-assembly-input
          (:flight judge-opts)
