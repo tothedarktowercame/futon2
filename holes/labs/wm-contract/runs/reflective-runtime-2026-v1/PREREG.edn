@@ -10,14 +10,21 @@
   construction, learning and enactment remain traceable to the accepted PLoP
   AIF patterns and to source-pinned Lean/runtime certificates."
  :sampling
- {:target-choice :ordinary-live-priority-order
+ {:target-choice :selected-by-live-outer-loop
+  :target-binding :record-after-selection
+  :caller-supplied-targets :forbidden
+  :outer-loop-exercised true
   :no-benchmark-targets true
   :no-target-retries-for-balance true
   :maximum-opportunities 9
   :desired-qualifying-diversity
   {:mission 1 :excursion 1 :ticket 1}
   :stopping-rule
-  "Stop after nine admitted opportunities, or after three qualifying grounded
+  "Each opportunity enters without a target; the live outer loop observes the
+   current substrate, ranks the available missions, excursions and tickets,
+   and selects one. Only then does the run bind and retain that entity and the
+   decision inputs that selected it. Stop after nine admitted opportunities,
+   or after three qualifying grounded
    opportunities containing at least one mission, excursion and ticket,
    whichever occurs first. Infrastructure refusals after click admission count."}
  :measurements
@@ -60,5 +67,6 @@
   :failures-first-class true
   :separate-by-entity-kind true
   :no-pooled-success-rate-before-stop true
+  :outer-loop-selection-receipt-required true
   :paper-layer :reflective-sidenote-and-running-example
   :technical-layer :supplementary-certificate-bundle}}

@@ -31,8 +31,17 @@
       (not (pos-int? (:maximum-opportunities sampling)))
       (refuse :maximum-opportunities-required {})
 
-      (not= :ordinary-live-priority-order (:target-choice sampling))
+      (not= :selected-by-live-outer-loop (:target-choice sampling))
       (refuse :target-choice-must-remain-live {})
+
+      (not= :record-after-selection (:target-binding sampling))
+      (refuse :target-must-bind-after-selection {})
+
+      (not= :forbidden (:caller-supplied-targets sampling))
+      (refuse :caller-supplied-targets-must-be-forbidden {})
+
+      (not (true? (:outer-loop-exercised sampling)))
+      (refuse :outer-loop-must-be-exercised {})
 
       (not (true? (:no-target-retries-for-balance sampling)))
       (refuse :balance-retries-must-be-forbidden {})
@@ -115,6 +124,12 @@
       (refuse :opportunity-schema-mismatch {:schema (:schema row)})
       (not (:admitted-opportunity? row))
       (refuse :opportunity-not-admitted {})
+      (:caller-supplied-target row)
+      (refuse :caller-supplied-target-forbidden
+              {:target (:caller-supplied-target row)})
+      (not= :live-outer-loop (get-in row [:selection :authority]))
+      (refuse :outer-loop-selection-receipt-required
+              {:selection (:selection row)})
       :else
       {:status :recorded
        :series/id (:series/id registration)

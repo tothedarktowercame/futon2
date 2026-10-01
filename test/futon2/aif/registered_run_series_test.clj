@@ -16,6 +16,8 @@
    :opportunity/id "reflective-001"
    :admitted-opportunity? true
    :entity-kind :mission
+   :selection {:authority :live-outer-loop
+               :target "M-selected-by-the-machine"}
    :terminal-outcome :grounded-progress
    :selection-reached? true
    :verified-applied-patterns [:aif/no-self-certification]
@@ -55,3 +57,15 @@
   (let [bad (assoc-in registration [:sampling :no-target-retries-for-balance] false)]
     (is (= :balance-retries-must-be-forbidden
            (:kind (series/validate-registration bad))))))
+
+(deftest caller-supplied-target-is-rejected-even-when-the-run-would-otherwise-qualify
+  (let [result (series/evaluate-opportunity
+                registration
+                (assoc complete-row :caller-supplied-target "M-hand-picked"))]
+    (is (= :refused (:status result)))
+    (is (= :caller-supplied-target-forbidden (:kind result)))))
+
+(deftest missing-live-outer-loop-receipt-is-rejected
+  (let [result (series/evaluate-opportunity registration
+                                            (dissoc complete-row :selection))]
+    (is (= :outer-loop-selection-receipt-required (:kind result)))))
