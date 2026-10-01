@@ -49,7 +49,7 @@
       (is (every? zero? (map #(get-in extended [:posterior-predictive % :new-outcome])
                              (map :id policies)))))))
 
-(deftest registrations-satisfy-machine-model-contract
+(deftest historical-registrations-require-zero-extension-at-the-parameter-boundary
   (model-test/with-example
     (fn [example]
       (let [base (transition-test/model example)
@@ -59,4 +59,7 @@
                                            :hypotheses [h1 h2]
                                            :prior {"identity-transition" 1/2
                                                    "controlled-transition" 1/2}})]
-        (is (:ok (machine-model/validate registered)))))))
+        (is (= {:ok false
+                :refusal {:kind :distribution-support-mismatch
+                          :path [:parameters :hypotheses :likelihood :rows :addressed]}}
+               (machine-model/validate registered)))))))

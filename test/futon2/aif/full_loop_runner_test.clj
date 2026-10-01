@@ -6284,7 +6284,7 @@
                                      :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
            result (runner/run-opportunity! opts)
            selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
-       (is (= :grounded-change (:outcome result)))
+       (is (= :grounded-progress (:outcome result)))
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
        (let [example (:kernel-example result)
              manifest (:close-evidence-manifest result)
@@ -6292,7 +6292,7 @@
          ;; This fixture's synthetic author lacks a verifiable D-task artifact;
          ;; preserve its close disposition with unavailable observations.
          (is (= :recorded (:status example)))
-         (is (= :grounded-change (get-in example [:disposition :value])))
+         (is (= :grounded-progress (get-in example [:disposition :value])))
          (is (= :unavailable (get-in example [:missingness :observations])))
          (is (= example (edn/read-string (slurp (:source-path entry)))))
          (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
