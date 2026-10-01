@@ -25,11 +25,16 @@
                    (:cost/output-tokens usage))
         total (or (:total-tokens usage) (:total_tokens usage)
                   (:cost/total-tokens usage)
-                  (when (and (integer? input) (integer? output)) (+ input output)))]
+                  (when (and (integer? input) (integer? output)) (+ input output)))
+        cached (or (:cached-input-tokens usage) (:cached_input_tokens usage)
+                   (:cost/cached-input-tokens usage))]
     (when (and (integer? input) (<= 0 input)
                (integer? output) (<= 0 output)
                (= total (+ input output)))
       (cond-> {:input-tokens input :output-tokens output :total-tokens total}
+        (and (integer? cached) (<= 0 cached) (<= cached input))
+        (assoc :cached-input-tokens cached
+               :uncached-input-tokens (- input cached))
         (or (:model usage) (:cost/model usage))
         (assoc :model (or (:model usage) (:cost/model usage)))
         (or (:source usage) (:cost/source usage))
@@ -55,8 +60,12 @@
                        (-> m
                            (update :input-tokens + (:input-tokens row))
                            (update :output-tokens + (:output-tokens row))
-                           (update :total-tokens + (:total-tokens row))))
-                     {:input-tokens 0 :output-tokens 0 :total-tokens 0} rows))
+                           (update :total-tokens + (:total-tokens row))
+                           (update :cached-input-tokens + (or (:cached-input-tokens row) 0))
+                           (update :uncached-input-tokens + (or (:uncached-input-tokens row)
+                                                               (:input-tokens row)))))
+                     {:input-tokens 0 :output-tokens 0 :total-tokens 0
+                      :cached-input-tokens 0 :uncached-input-tokens 0} rows))
       {:status (if (seq rows) :partial :typed-missing)
        :source :agency-provider-receipts
        :jobs (vec (sort-by :job-id rows))

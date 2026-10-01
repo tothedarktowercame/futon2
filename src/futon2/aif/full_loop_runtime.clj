@@ -7,7 +7,9 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.wm.click-ask :as click-ask]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm])
+  (:import [java.time Instant]
+           [java.util UUID]))
 
 (load-identity/register! *ns* *file*)
 
@@ -47,7 +49,15 @@
 (defn run-opportunity!
   "Run one production opportunity with the report-backed defaults installed."
   [opts]
-  (let [opts (update opts :cascade-feedback-path
+  ;; Mint before building the composition root.  The runner historically
+  ;; minted later, after `production-defaults` had closed over OPTS; the judge
+  ;; therefore saw no tick identity and accumulation refused even though the
+  ;; eventual run record had one.
+  (let [opts (cond-> opts
+               (not (:run-id opts))
+               (assoc :run-id (str (subs (str (Instant/now)) 0 10)
+                                   "-" (UUID/randomUUID))))
+        opts (update opts :cascade-feedback-path
                      #(or % cascade-feedback/default-path))
         opts (update opts :cascade-feedback-metadata
                      #(or % (cascade-feedback/load-construction-metadata
