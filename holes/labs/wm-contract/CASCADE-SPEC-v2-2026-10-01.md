@@ -133,6 +133,14 @@ instance deliberately aliases an inhabitable REPL with an untyped pipe; its
 operational instance separates them and retains elapsed-time and model-token
 costs for `G`.
 
+The recognition-first portion is formalised in
+`mathlib4/DarkTower/WarMachine/PeripheralRecognition.lean` at commit
+`955d26c4b5`.  It proves name invariance, the three positive classifications,
+the REPL/pipe coarse collision, their operational separation, and that no
+Boolean classifier over the coarse carrier can correctly accept the REPL while
+rejecting the pipe.  Numerical `G` sensitivity remains the next layer rather
+than an assumption hidden in these recognition results.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
