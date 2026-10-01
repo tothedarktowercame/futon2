@@ -1,7 +1,7 @@
 (ns futon2.aif.g-term-decomposition-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.cascade-observation-scoring :as scoring]
             [futon2.aif.efe :as efe]
@@ -176,6 +176,41 @@
     (is (= :present (:status census)))
     (is (= :deterministic-class-emission
            (get-in census [:policies 0 :terms :A :reason])))))
+
+(deftest census-projects-class-emission-to-the-policy-target
+  (let [target "M-daily-scan-multi-axis-queue"
+        unrelated "M-formal-patterns"
+        model (-> (class-model-from-decision)
+                  (assoc :acceptance #{[target :daily-token]
+                                       [unrelated :formal-token]})
+                  (assoc :target-class {target :related unrelated :unknown}))
+        q {#{} 1}
+        ranked [{:action {:kind :cascade-candidate :id :C1 :target target}
+                 :controller-score 1
+                 :certificate {:consumed-g
+                               {:A model
+                                :C {:form :step-indexed
+                                    :steps [{:distribution {:related 1}}]}
+                                :D q
+                                :Q {:initial-belief q
+                                    :steps [{:tau 1 :belief q}]
+                                    :observation-updates []}}}}]
+        candidate {:id (:action (first ranked)) :habit 1 :f 0}
+        census (d/census ranked [candidate])
+        retained-a (get-in census [:policies 0 :terms :A :value])]
+    (is (= :present (:status census)))
+    (is (= #{[target :daily-token]} (:acceptance retained-a)))
+    (is (= {target :related} (:target-class retained-a)))
+    (is (= :deterministic-class-emission
+           (get-in census [:policies 0 :terms :A :reason])))
+    (testing "an unknown row remains invalid when it belongs to the policy"
+      (let [unknown-census (d/census ranked [(assoc-in candidate [:id :target]
+                                                       unrelated)])]
+        (is (= :missing (:status unknown-census)))
+        (is (= :invalid-class-emission-row
+               (get-in unknown-census [:policies 0 :terms :A :reason])))
+        (is (= {unrelated {:unknown 1}}
+               (get-in unknown-census [:policies 0 :terms :A :invalid-rows])))))))
 
 (deftest each-term-can-distinguish-nondegenerate-input
   (doseq [[term value] {:A {:token {:false-neg 1/4 :false-pos 1/3}}

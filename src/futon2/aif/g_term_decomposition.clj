@@ -51,6 +51,10 @@
   (let [required [:universe :horizon :class-universe :acceptance :target-class]
         missing (filterv #(not (contains? value %)) required)]
     (cond
+      (and (:policy-target value)
+           (not-any? #(= (:policy-target value) (first %)) (:acceptance value)))
+      {:status :missing :value value :reason :policy-target-not-in-acceptance}
+
       (seq missing)
       {:status :missing :value value :reason :class-emission-fields-missing
        :missing-fields missing}
@@ -193,8 +197,24 @@
   (let [all-habits (mapv :habit candidates)
         policies
         (mapv (fn [entry candidate]
-                (let [values (assoc (get-in entry [:certificate :consumed-g])
-                                    :E (:habit candidate) :F (:f candidate))]
+                (let [consumed (get-in entry [:certificate :consumed-g])
+                      a (:A consumed)
+                      target (get-in candidate [:id :target])
+                      ;; Class-emission G consumes only this policy's target
+                      ;; (observation-model/class-emission-row). Retain that
+                      ;; exact slice for the census; unrelated global rows,
+                      ;; including honest :unknown rows declined by scoring,
+                      ;; are not observations of this policy.
+                      policy-a (if (and (= :class-emission (:kind a)) target)
+                                 (assoc a
+                                        :policy-target target
+                                        :acceptance (set (filter #(= target (first %))
+                                                                 (:acceptance a)))
+                                        :target-class (select-keys (:target-class a)
+                                                                   [target]))
+                                 a)
+                      values (assoc consumed :A policy-a
+                                             :E (:habit candidate) :F (:f candidate))]
                   {:id (:id candidate)
                    :terms (into {} (map (fn [term]
                                           [term (if (= term :E)
