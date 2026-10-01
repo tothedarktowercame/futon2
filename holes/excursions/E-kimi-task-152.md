@@ -1,6 +1,6 @@
 # E-kimi-task-152 — 象 backfill pack kimi-3-1790813935 (10 turns, 2026-07-01_2026-07-31_block013)
 
-**Requisition:** in-progress — dispatched 2026-10-01T00:18:56Z to kimi-3 as invoke-1790813936086-29458-99e6e1ba
+**Requisition:** completed — 2026-10-01T00:32:27Z, job invoke-1790813936086-29458-99e6e1ba, state done
 
 Clocked in by xiang-backfill-loop for kimi-3 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
