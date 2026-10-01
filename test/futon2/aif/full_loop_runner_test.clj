@@ -3334,6 +3334,7 @@
 (deftest invoking-agent-remains-busy-without-a-wake-attempt
   (let [phases (atom [])
         wake-calls (atom 0)
+        admissions (atom 0)
         result
         (runner/run-opportunity!
          (merge
@@ -3341,10 +3342,13 @@
            phases
            (fn [_] {:zai-5 {:status "invoking" :invoke-ready? true}
                     :codex-7 {:status "idle" :invoke-ready? true}}))
-          {:wake-agent-fn (fn [& _] (swap! wake-calls inc))}))]
+          {:wake-agent-fn (fn [& _] (swap! wake-calls inc))
+           :readiness-admitted-fn (fn [] (swap! admissions inc))}))]
     (is (= :agent-unavailable (:outcome result)))
     (is (= :busy (get-in result [:data :failure-detail])))
-    (is (zero? @wake-calls))))
+    (is (zero? @wake-calls))
+    (is (zero? @admissions)
+        "a seat that became busy is refused before click-ration admission")))
 
 (deftest healthy-readiness-paths-retain-original-values
   (let [roster {:zai-5 {:status "idle" :invoke-ready? true}}

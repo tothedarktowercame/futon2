@@ -5240,6 +5240,12 @@
                          :failure-stage :agent-readiness
                          :failure-detail (agent-failure-detail roster author)
                          :author author})))
+      ;; The ordinary-click ration is admitted by the component that owns the
+      ;; authoritative readiness observation.  Endpoint preflight is useful
+      ;; diagnostics, but cannot spend against a seat that became busy before
+      ;; this check (wm-click-32828638, 2026-10-01).
+      (when-let [admit! (:readiness-admitted-fn opts)]
+        (admit!))
       (run-phase! opts @phase-context :substrate-preflight
                   #(substrate-readiness! opts)
                   readiness-event)
