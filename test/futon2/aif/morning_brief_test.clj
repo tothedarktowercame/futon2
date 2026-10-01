@@ -34,6 +34,24 @@
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (brief/queue-item! root {:attempt-id "attempt-001"})))))
 
+(deftest queue-writes-a-compact-inbox-envelope
+  (let [root (temp-root)
+        full {:attempt-id "attempt-envelope"
+              :outcome :grounded-progress
+              :selected-target "M-example"
+              :commit "abc123"
+              :achievement {:build {:large (apply str (repeat 10000 "x"))}}
+              :feature-card {:built "Useful work" :matches-intent? true}}
+        path (brief/queue-item! root full)
+        envelope (first (brief/summaries root))]
+    (is (= "attempt-envelope" (:attempt-id envelope)))
+    (is (= path (:source-path envelope)))
+    (is (= {:build {:present true}} (:achievement envelope)))
+    (is (= {:built "Useful work" :matches-intent? true}
+           (:feature-card envelope)))
+    (is (< (count (pr-str envelope)) 600))
+    (is (= {:written 0} (brief/ensure-summaries! root)))))
+
 (deftest evidence-time-provenance-is-recorded-without-ageing
   (let [event {:morning-brief/event-schema-version 2
                :weight 1.0

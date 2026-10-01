@@ -106,17 +106,37 @@
 (defn read-records [dir]
   (mapv #(edn/read-string (slurp %)) (edn-files dir)))
 
+(defn item-summary
+  "Compact inbox envelope for ITEM.  Full audit evidence remains in SOURCE."
+  [source item]
+  (let [build (get-in item [:achievement :build])]
+    (cond-> (select-keys item [:attempt-id :queued-at :outcome :commit
+                               :selected-target :operator-action])
+      true (assoc :morning-brief/summary-version 1
+                  :source-path (.getPath (io/file source))
+                  :achievement {:build (when build {:present true})})
+      (:failure item) (assoc :failure (select-keys (:failure item) [:kind :stage]))
+      (:feature-card item) (assoc :feature-card
+                                  (select-keys (:feature-card item)
+                                               [:built :matches-intent?])))))
+
+(defn- write-summary! [root source item]
+  (write-new! (io/file root "summaries" (str (:attempt-id item) ".edn"))
+              (item-summary source item)))
+
 (defn queue-item!
   ([item] (queue-item! default-root item))
   ([root {:keys [attempt-id] :as item}]
    (when-not (and (string? attempt-id) (not (str/blank? attempt-id)))
      (throw (ex-info "Morning Brief item requires attempt-id" {:item item})))
-   (let [occurred-at (str (Instant/now))]
-     (write-new! (io/file root "items" (str attempt-id ".edn"))
-                 (assoc item :queued-at occurred-at
-                             :evidence/occurred-at
-                             {:status :present :value occurred-at}
-                             :morning-brief/schema-version 2)))))
+   (let [occurred-at (str (Instant/now))
+         item (assoc item :queued-at occurred-at
+                          :evidence/occurred-at
+                          {:status :present :value occurred-at}
+                          :morning-brief/schema-version 2)
+         path (write-new! (io/file root "items" (str attempt-id ".edn")) item)]
+     (write-summary! root path item)
+     path)))
 
 (declare reviews items)
 
@@ -263,6 +283,25 @@
 (defn items
   ([] (items default-root))
   ([root] (read-records (io/file root "items"))))
+
+(defn summaries
+  "Read compact inbox envelopes without parsing full audit records."
+  ([] (summaries default-root))
+  ([root] (read-records (io/file root "summaries"))))
+
+(defn ensure-summaries!
+  "Backfill missing compact envelopes. Existing envelopes are immutable."
+  ([] (ensure-summaries! default-root))
+  ([root]
+   (let [known (set (map :attempt-id (summaries root)))]
+     (reduce (fn [result file]
+               (let [item (edn/read-string (slurp file))]
+                 (if (contains? known (:attempt-id item))
+                   result
+                   (do (write-summary! root file item)
+                       (update result :written inc)))))
+             {:written 0}
+             (edn-files (io/file root "items"))))))
 
 (defn addenda
   ([] (addenda default-root))
