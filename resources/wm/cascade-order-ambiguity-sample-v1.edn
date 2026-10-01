@@ -1,0 +1,35 @@
+{:schema :wm/cascade-order-ambiguity-sample-v1
+ :purpose "Matched sample data for the information-theoretic cascade obligation."
+ :assumptions
+ {:same-units [:a :b :c]
+  :schedule-model :uniform-over-linear-extensions
+  :entropy-units :bits
+  :edge-authority :warranted-by-problem-interpretation
+  :simultaneous-success-assumed? false}
+ :cases
+ [{:id :antichain
+   :precedes #{}
+   :linear-extensions
+   [[:a :b :c] [:a :c :b]
+    [:b :a :c] [:b :c :a]
+    [:c :a :b] [:c :b :a]]
+   :extension-count 6
+   :ordering-entropy-bits 2.584962500721156}
+  {:id :fork
+   :precedes #{[:a :b] [:a :c]}
+   :linear-extensions [[:a :b :c] [:a :c :b]]
+   :extension-count 2
+   :ordering-entropy-bits 1.0}
+  {:id :chain
+   :precedes #{[:a :b] [:b :c]}
+   :linear-extensions [[:a :b :c]]
+   :extension-count 1
+   :ordering-entropy-bits 0.0}]
+ :expected-order [:chain :fork :antichain]
+ :claim
+ "For the same units under the declared schedule model, warranted precedence reduces the entropy of feasible execution order; ordinary predictive ambiguity can therefore distinguish these cascades without an edge reward."
+ :non-claims
+ ["An arbitrary edge is evidence of a true dependency."
+  "Every incomparable frontier can execute simultaneously."
+  "Ordering entropy is the whole expected-free-energy score."
+  "The uniform schedule assumption is the production schedule model."]}

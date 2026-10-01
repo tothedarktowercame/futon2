@@ -219,28 +219,6 @@ the component owners in `WM-TEAM.md`. The history is in git: this file
     channel-level adoption rule was not an alternative definition of the War
     Machine's generative model. Treating it as one was a scope error.
 
-22. **A disconnected collection is a degenerate cascade, not free
-    parallelism.** Retrieval may begin with a collection of applicable
-    patterns and that collection meets the working input definition. Cascade
-    interpretation must then expose the relations that connect it: precedence
-    comes from the interpreted ordering, while genuine incomparability remains
-    visible. A multi-unit candidate with no precedence edges is permitted as a
-    degenerate baseline for comparison, but its G must be high relative to a
-    warranted connected ordering because the ordering is compression. It must
-    not acquire a low G merely by treating every unit as a root and proposing
-    to apply all of them together. Co-application describes the execution of a
-    genuinely enabled incomparable frontier inside an interpreted structure;
-    it is not the semantics of an uninterpreted bag. A one-unit cascade is
-    trivially exempt from the multi-unit degeneracy.
-
-    The current Lean real example does not yet establish this requirement: its
-    three graph retractions have five units and empty `precedes` sets, and the
-    proved count treats them as valid policy members. They may remain as
-    degenerate comparison members, but acceptance additionally needs a G-level
-    theorem/control showing that a warranted connected interpretation outranks
-    the disconnected version for the compression reason, rather than because
-    edge tokens were added by hand.
-
 ### What ruling 11 changes
 
 Every click so far began a new run from nothing: new opportunity id,
@@ -310,6 +288,37 @@ provide it is WITHDRAWN. Nothing provides it. It is built, from this:
 Formal wants, classes, relations and interpretations are not part of this
 model. Where they exist they may later refine the predicted outcome for a
 task; the model does not wait for them.
+
+## Information-theoretic cascade obligation (derived, not an operator ruling)
+
+Retrieval may begin with a collection of applicable patterns. Cascade
+interpretation exposes the relations that connect it: precedence comes from
+the interpreted ordering, while genuine incomparability remains visible. A
+multi-unit candidate with no precedence edges is a degenerate comparison
+baseline, not free parallelism.
+
+The reason is to be demonstrated rather than stipulated. For a fixed set of
+units, let the predictive model range over execution orders consistent with the
+precedence relation. An antichain admits more linear extensions than a
+warranted partial order; under a uniform schedule model its ordering entropy is
+`log2(number-of-linear-extensions)`. With three units, an antichain admits 6
+orders (about 2.585 bits), a fork admits 2 (1 bit), and a chain admits 1 (0
+bits). The ordinary ambiguity term of G must reflect the corresponding
+predictive uncertainty. No separate edge reward or hand-added compression
+bonus is authorised.
+
+This statement is conditional on the ordering being warranted by the problem
+evidence and on the predictive model actually representing the feasible
+orders. Adding arbitrary edges can lower the count while making the model
+wrong; it is not compression evidence. Co-application describes genuinely
+incomparable enabled units inside an interpreted structure, not an
+uninterpreted bag assumed to succeed simultaneously.
+
+The current Lean real example does not establish this obligation: its three
+five-unit graph retractions have empty `precedes` sets, and the count theorem
+treats them as policy members. They may remain degenerate comparison members,
+but acceptance needs a theorem and negative control deriving the ambiguity
+ordering from admissible executions, without edge tokens.
 
 ## Critical path to a first end-to-end run (rulings 10 and 11; governs the order below)
 

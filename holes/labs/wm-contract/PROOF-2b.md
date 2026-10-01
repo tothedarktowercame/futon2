@@ -260,13 +260,15 @@ action per task and one per A- target, so the support is never empty (RQ-2).
 
 For cascade-informed actions, a retrieved collection of patterns may initially
 be disconnected, but interpretation supplies the precedence/overlap structure.
-Ordering is compression: a multi-unit candidate with no precedence edges is a
-degenerate baseline and must receive higher G than a warranted connected
-ordering, all else equal. It is not made attractive by interpreting every unit
-as immediately co-applicable. Co-application applies only to genuinely
-incomparable enabled units within the interpreted structure. The compression
-term and its Lean/runtime correspondence remain an acceptance obligation; the
-old hand-added edge-token reward is not an acceptable implementation.
+The information-theoretic obligation is derived, not stipulated: over the same
+units, a warranted partial order admits fewer feasible execution orders than
+an antichain, so the predictive distribution has lower ordering entropy. That
+ordinary ambiguity difference must reach G through the generative model. No
+edge reward or separate structural bonus is added. Co-application applies only
+to genuinely incomparable enabled units within an interpreted structure; an
+uninterpreted bag is not assumed to succeed simultaneously. Lean and runtime
+must demonstrate the ambiguity ordering on matched examples and refuse the
+false shortcut in which arbitrary edges count as compression evidence.
 
 ### Structure learning
 
