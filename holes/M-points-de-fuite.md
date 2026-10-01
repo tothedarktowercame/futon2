@@ -309,6 +309,36 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
 - **Floor-only is deliberate** for bare mentions (anti-fuzzy-switch, M-autoclock-in principle) — so the `→` override is the *correct* place to put explicit switch intent, not a loosening of the mention rule.
 - **Buffer vs durable divergence:** the Emacs buffer clock (set by mention/`→`) is separate from the durable server clock (fed by edits); they reconcile only where a surface pulls the durable clock on turn-end (`agent-chat--sync-clock-from-server!`). The `→` switch sets the buffer clock; making a `→` switch *also* durable is an open follow-on (the durable set-path is currently edit- and dispatch-fed; `set-dispatch-mission!` is mission-only, no excursion).
 
+### 6.6 The reply marks supersede the ✓ ✘ 💡 notation (Joe, 2026-10-01, claude-17)
+
+Joe: "we've basically delivered what M-points-de-fuite was asking for; it
+proposed a short series of other marks like ✓ which I haven't been using
+regularly. I think the new system is better." Recorded by agreement
+`act:31e3fc8d-2436-462f-a8a1-eb470d8eeb2c`, option 2 (note only; the old keys
+stay bound).
+
+The new arrangement, against §1's three tiers:
+
+- **lightest / middle (recognition):** 象 reads the intent of each operator
+  turn; 小象 (`futon3c/emacs/xiaoxiang-preview.el`) does it classically,
+  with no language model.
+- **agent side:** agents mark each reply paragraph with one of 象's intent
+  marks (㊥ gist, ㊭ propose, 🈸 ask-action, …; key in `~/code/CLAUDE.md`,
+  "Reply proforma", trial from 2026-09-30).
+- **heaviest (explicit override):** the operator types a mark only where it
+  does something: `🈸:yes 1` accepts option 1 of an open M-象-2000 offer and
+  records an agreement (P11; `🈸:` prefix accepted from futon3c `d9d30ead`).
+  `C-c ;` in the agent REPLs inserts any mark from a menu.
+
+The ✓ ✘ 💡 hydra (`C-c .`) and the second-string hydra (`C-c ,`) in
+`agent-chat.el` are left bound; nothing new is built on them.
+
+Against the tl;dr acceptance list: item 1 (deterministic turn-level
+recognizer) is partly met — 小象 emits intent labels, not the sorry /
+preference / method / proof-edge records the item names; item 2 (inline
+override notation) is met for agreements; items 3 (atomic claim-node and
+proof-edge minting) and 4 (the composition trial) are not met.
+
 ## Phases ahead — mission lifecycle COMPLETE (IDENTIFY→DOCUMENT); follow-ons spun out
 - **Done:** MAP (§2) · DERIVE (§3) · ARGUE/VERIFY basic-pass (§4) · INSTANTIATE built+verified (§5) · DOCUMENT (§6). The instrument is live and reproducible.
 - **Follow-ons (recorded, not built):**
