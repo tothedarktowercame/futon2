@@ -38,6 +38,18 @@
     (is (= [[:P :Q]] (mapv :precedence (:candidates r))))
     (is (= #{[:P :Q]} (:need-edges c)))
     (is (= :machine-constructed (:kind receipt)))
+    (is (= {:status :computed
+            :support {:relations [{:from :P :to :Q :tokens #{:q}}]
+                      :basis :produced-token-consumed-by-guard}
+            :meet {:relations [{:pair [:P :Q] :meet :Q
+                                :evidence {:left-path [{:from :P :to :Q :tokens #{:q}}]
+                                           :right-path []}}]
+                   :missing [] :basis :greatest-common-descendant}
+            :precedence {:relations [{:from :P :to :Q :tokens #{:q}}]
+                         :basis :generative-support
+                         :linear-extension [:P :Q]
+                         :violations []}}
+           (:relations receipt)))
     (is (= [:compose-by-need] (mapv :move-id (:moves receipt))))
     (is (= [:P :Q] (get-in receipt [:ordering 0 :after])))
     (is (= [:Q :P] (get-in receipt [:ordering 0 :before])))
@@ -201,6 +213,20 @@
                                 :war-room/wr-8-typed-files-are-sources-of-truth]}]
              (:missing-meets order))))
     (is (= 27 (count (:meets order))))
+    (testing "all three relation kinds are explicit and token-witnessed"
+      (let [relations (get-in c [:construction-receipt :relations])]
+        (is (= :computed (:status relations)))
+        (is (seq (get-in relations [:support :relations])))
+        (is (every? (comp seq :tokens) (get-in relations [:support :relations])))
+        (is (= (get-in relations [:support :relations])
+               (get-in relations [:precedence :relations])))
+        (is (= (:precedence c) (get-in relations [:precedence :linear-extension])))
+        (is (= (:missing-meets order) (get-in relations [:meet :missing])))
+        (is (= 27 (count (get-in relations [:meet :relations]))))
+        (is (every? (fn [{:keys [evidence]}]
+                      (every? (fn [path] (every? (comp seq :tokens) path))
+                              ((juxt :left-path :right-path) evidence)))
+                    (get-in relations [:meet :relations])))))
     (testing "a finding, not a failure: construction still hands the
              candidate over with its order attached"
       (is (= :machine-constructed (get-in c [:construction-receipt :kind]))))))
@@ -223,6 +249,11 @@
    :evaluate-g (fn [c] (get (merge {nil 5.0} g-by) (first (:precedence c))))})
 
 (defn- g-of-best [r] (get-in r [:candidates 0 :construction-receipt :g-of-best :value]))
+
+(defn- without-relation-contract [result]
+  (update result :candidates
+          #(mapv (fn [candidate]
+                   (update candidate :construction-receipt dissoc :relations)) %)))
 
 (deftest nf-1-one-nan-is-left-out-the-finite-two-are-compared
   (let [r (sut/construct (three-input {:P ##NaN :P2 1.5 :P3 2}))
@@ -260,7 +291,7 @@
   ;; key inserted (verified: the bytes beyond that key are unchanged)
   (let [r (sut/construct (three-input {:P 3.0 :P2 1.5 :P3 2}))]
     (is (= (slurp "test/fixtures/interpretation-construction/nf4-all-finite@futon2-3bbf5059.edn")
-           (pr-str r)))
+           (pr-str (without-relation-contract r))))
     (is (not (contains? r :left-out)))))
 
 (deftest nf-bad-case-a-zero-g-boxed-double-or-long-is-finite
@@ -325,7 +356,7 @@
   ;; :baseline-g key inserted (verified: the bytes beyond it are unchanged)
   (let [r (sut/construct (three-input {nil 4 :P 2.5 :P2 0.5 :P3 1}))]
     (is (= (slurp "test/fixtures/interpretation-construction/nb4-finite-baseline@futon2-082dfe5e.edn")
-           (pr-str r)))))
+           (pr-str (without-relation-contract r))))))
 
 (deftest nb-bad-case-inf-baseline-and-inf-candidate-is-no-dg-of-zero
   (let [r (sut/construct (three-input {nil ##Inf :P ##Inf :P2 1.5 :P3 2}))]

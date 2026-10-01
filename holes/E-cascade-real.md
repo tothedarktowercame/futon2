@@ -347,6 +347,16 @@ flight rule 3 and claude-10's constraints (unreached wants stay in the
 target's wants; scoring sees the full set) are met in the constructor; the
 flight loop must carry `:unreached-wants` into the next click's wants.
 
+**PROOF-2b construction relation contract (Joe, 2026-10-01).** A
+`:machine-constructed` candidate receipt must state three relations explicitly:
+`:support`, `:meet`, and `:precedence`. Support and generative-precedence edges
+name the source token produced by the first unit and consumed by the second;
+the executable precedence vector is recorded separately as a linear extension.
+Every meet names its common unit and the two token-witnessed paths into it.
+Missing meets remain typed findings and are never silently completed. This is
+an acceptance contract for autonomous construction, not a claim discharged by
+the hand-built Lean exemplar.
+
 **D14 gap 7 follow-up (claude-8, 2026-09-24).** Discovery `proof2/packets/D14-HORIZON-D.md` (6b662a25, kimi-7): the judge's horizon is the max-lift of per-file `:horizon-steps` (1de6aadc; only T-repair declares, 4), with a literal `{:value 2}` else-branch reached when nothing declares or when judge-opts bypass the lift; the constructor takes an untied caller horizon. Amendment H1 (delete the fallback, carry `:cascade-horizon` with authority on the certificate, constructor receives the judge's value) is with claude-10 for the D16 wiring.
 Correction to H1 (claude-10, 2026-09-24): deleting the fallback in favour of
 `:horizon-not-declared` would refuse a computable input (PROOF-2a flight rule

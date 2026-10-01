@@ -240,6 +240,52 @@
                      (vec (filter (fn [[a b]] (> (pos a) (pos b))) descent))
                      :units-not-mapped-to-precedence))))))))
 
+(defn relation-witnesses
+  "PROOF-2b's explicit three-relation construction record for CANDIDATE.
+  Nothing is inferred from pattern names: every direct support/precedence edge
+  names the produced token(s) consumed by its target.  A meet names the two
+  token-witnessed paths from its pair to the common unit.  The candidate's
+  executable :precedence remains a linear extension, not evidence by itself.
+
+  Missing meets and a refused containment order remain explicit; neither is
+  completed by fiat."
+  [candidate order]
+  (if (:status order)
+    {:status :refused :reason (:reason order) :order order}
+    (let [patterns (into {} (map (juxt :id identity)) (:patterns candidate))
+          edge-witness (fn [from to]
+                         {:from from :to to
+                          :tokens (set/intersection
+                                   (set (:produces (patterns from)))
+                                   (set (get-in patterns [to :guard :needs])))})
+          supports (mapv (fn [[from to]] (edge-witness from to)) (:descent order))
+          children (reduce (fn [m {:keys [from to]}]
+                             (update m from (fnil conj []) to))
+                           {} supports)
+          path (fn path [from to]
+                 (letfn [(walk [at seen]
+                           (cond
+                             (= at to) []
+                             (contains? seen at) nil
+                             :else
+                             (some (fn [next]
+                                     (when-let [tail (walk next (conj seen at))]
+                                       (into [(edge-witness at next)] tail)))
+                                   (sort-by pr-str (get children at)))))]
+                   (walk from #{})))
+          meets (mapv (fn [[[left right] meet]]
+                        {:pair [left right] :meet meet
+                         :evidence {:left-path (path left meet)
+                                    :right-path (path right meet)}})
+                      (sort-by (comp pr-str key) (:meets order)))]
+      {:status :computed
+       :support {:relations supports :basis :produced-token-consumed-by-guard}
+       :meet {:relations meets :missing (:missing-meets order)
+              :basis :greatest-common-descendant}
+       :precedence {:relations supports :basis :generative-support
+                    :linear-extension (vec (:precedence candidate))
+                    :violations (:precedence-violations order)}})))
+
 (defn- checks-for
   "Gating unknown facts as check candidates, through check-candidates.
   Returns check-candidates' {:checks […] :not-gating […]} or a typed

@@ -331,7 +331,8 @@
                                                 :kind :cascade-candidate :target target
                                                 :want (vec want)
                                                 :construction-receipt
-                                                (assoc receipt
+                                                (let [order (construction/containment-order c)]
+                                                  (assoc receipt
                                                        :unreached-wants (:unreached-wants c)
                                                        ;; clause 0: this
                                                        ;; candidate's
@@ -340,7 +341,8 @@
                                                        ;; typed
                                                        ;; :cyclic-containment
                                                        ;; refusal)
-                                                       :order (construction/containment-order c))
+                                                       :order order
+                                                       :relations (construction/relation-witnesses c order)))
                                                 :interpretation-receipts
                                                 (select-keys interpretation-receipts (:precedence c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))
