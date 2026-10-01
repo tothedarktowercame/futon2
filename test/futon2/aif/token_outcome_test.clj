@@ -6,6 +6,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.observation-checks :as checks]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.token-outcome :as outcome])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -30,12 +31,24 @@
                 :construction-receipt (get-in declaration [:candidates 0 :construction-receipt])
                 :interpretation-receipts (:interpretation-receipts declaration)
                 :observation-locators
-                (into {} (map (fn [[t l]] [(qualify t) l])) (:locators declaration))}]
-    {:action action
-     :selection-certificate
-     {:precision-family {:model-id "fixture-model" :selected-action action
-                         :model {:q0 {#{(qualify :admission/task-stated)} 1} :horizon 1}}
-      :token-belief-stage {:domain-inputs [{:target target :declaration declaration}]}}}))
+                (into {} (map (fn [[t l]] [(qualify t) l])) (:locators declaration))}
+        model {:q0 {#{(qualify :admission/task-stated)} 1}
+                 :horizon 1
+                 :rates (zipmap (keys (:observation-locators action)) (repeat 1/2))}
+          candidates [{:id action :g 0 :habit 0}]
+          schedules {}]
+      {:action action
+       :selection-certificate
+       {:precision-family (precision-carry/seal
+                           {:schema :wm/precision-family-v1
+                            :context :WM
+                            :z-semantics :per-step-redraw
+                            :model model
+                            :candidates candidates
+                            :observation-schedules schedules
+                            :model-id (precision-carry/model-identity model candidates schedules)
+                            :selected-action action})
+       :token-belief-stage {:domain-inputs [{:target target :declaration declaration}]}}}))
 
 (defn command [repo & args]
   (let [{:keys [exit out err]} (apply shell/sh "git" "-C" (str repo) args)]

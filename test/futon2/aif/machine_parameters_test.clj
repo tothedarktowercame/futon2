@@ -41,7 +41,13 @@
            (get-in (parameters/parameter-kernels
                     model (assoc-in parameter-state [:hypotheses 0 :registration :path]
                                     (str dir "/identity-transition-mutated.edn"))
-                    policies outcomes) [:refusal :kind])))))
+                    policies outcomes) [:refusal :kind])))
+    (let [extended (parameters/parameter-kernels
+                    (update-in model [:outcome :support] conj :new-outcome)
+                    parameter-state policies (conj outcomes :new-outcome))]
+      (is (:ok extended))
+      (is (every? zero? (map #(get-in extended [:posterior-predictive % :new-outcome])
+                             (map :id policies)))))))
 
 (deftest registrations-satisfy-machine-model-contract
   (model-test/with-example

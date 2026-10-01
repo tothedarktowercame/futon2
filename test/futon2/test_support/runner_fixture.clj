@@ -67,13 +67,19 @@
                               :admitted-by :test-suite}]})
 
 (def ^:private judgement
-  {:decision (policy/select-action-cascades
-              [{:action selected-action :controller-score -2.0 :rank 1}
-               {:action (assoc selected-action
-                               :cascade-id "M-rank-head" :id "M-rank-head"
-                               :precedence [:test/other-pattern])
-                :controller-score -1.0 :rank 2}]
-              {:beta 2.0})
+  {:decision (assoc-in
+              (policy/select-action-cascades
+               [{:action selected-action :controller-score -2.0 :rank 1}
+                {:action (assoc selected-action
+                                :cascade-id "M-rank-head" :id "M-rank-head"
+                                :precedence [:test/other-pattern])
+                 :controller-score -1.0 :rank 2}]
+               {:beta 2.0})
+              [:selection-certificate :token-belief-stage :prospective-carry]
+              {:schema :wm/prospective-token-carry-v1
+               :conditioning-status :not-wired
+               :occurrence-id "test-selection-carry"
+               :universe #{}})
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})

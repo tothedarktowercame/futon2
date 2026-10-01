@@ -519,14 +519,23 @@
    :interpretation-receipts [{:pattern :test/selected-pattern
                               :admitted-by :test-suite}]})
 
+(defn with-test-carry [decision]
+  (-> decision
+      (assoc-in [:selection-certificate :token-belief-stage :prospective-carry]
+                {:schema :wm/prospective-token-carry-v1
+                 :conditioning-status :not-wired
+                 :occurrence-id "test-selection-carry"
+                 :universe (set (keys (get-in decision [:action :observation-locators])))})))
+
 (def judgement
-  {:decision (policy/select-action-cascades
-              [{:action selected-action :controller-score -2.0 :rank 1}
-               {:action (assoc selected-action
-                               :cascade-id "M-rank-head" :id "M-rank-head"
-                               :precedence [:test/other-pattern])
-                :controller-score -1.0 :rank 2}]
-              {:beta 2.0})
+  {:decision (with-test-carry
+              (policy/select-action-cascades
+               [{:action selected-action :controller-score -2.0 :rank 1}
+                {:action (assoc selected-action
+                                :cascade-id "M-rank-head" :id "M-rank-head"
+                                :precedence [:test/other-pattern])
+                 :controller-score -1.0 :rank 2}]
+               {:beta 2.0}))
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})
@@ -549,7 +558,7 @@
                    {:beta 2.0})]
      (is (= action (:action decision))
          "the real selector must choose the explicit repair from distinct candidates")
-     (assoc judgement :decision decision))))
+     (assoc judgement :decision (with-test-carry decision)))))
 
 (defn synthetic-artifact-binding [_repo before author-job]
   {:fresh-author? true
@@ -6027,9 +6036,10 @@
          {:author-card feature-card-claim
           :judgement-transform-fn
           #(assoc % :decision
-                  (policy/select-action-cascades
-                   [{:action action :controller-score -2.0 :rank 1}]
-                   {:beta 2.0}))
+                  (with-test-carry
+                    (policy/select-action-cascades
+                     [{:action action :controller-score -2.0 :rank 1}]
+                     {:beta 2.0})))
           :runner-options
           {:mission-fn (fn [target]
                          (swap! mission-reads conj target)
@@ -6119,7 +6129,7 @@
   (token-fixture/with-artifact
    (fn [sha]
      (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
-           decision (merge (:decision judgement) (token-fixture/decision))
+           decision (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
            record (io/file root "d-task.edn")
            _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
            ;; A fresh-author artifact must bind in the repository the build
@@ -6153,7 +6163,7 @@
            receipt (get-in close-event [:payload :judgment :token-outcome-comparison])
            entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/token-outcome.edn")
                                 (get-in close-event [:payload :close-evidence-manifest :entries])))]
-       (is (= :grounded-change (:outcome result)))
+       (is (= :grounded-progress (:outcome result)))
        ;; Retained files must not disturb the closed attempt's exact file set.
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
        (is (= :wm/action-transition-occurrence-v2
@@ -6181,7 +6191,7 @@
   (token-fixture/with-artifact
    (fn [sha]
      (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
-           decision (merge (:decision judgement) (token-fixture/decision))
+           decision (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
            record (io/file root "d-task.edn")
            _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
            opts (assoc (retention-success-opts c)
@@ -6301,7 +6311,7 @@
         frozen (edn/read-string (slurp "test/fixtures/learning-trial/1789964661.edn"))
         ;; Replace only the posterior: the runner needs the law's :applied
         ;; marker to treat this as a cascade selection.
-        d (assoc-in (merge (:decision judgement) (token-fixture/decision))
+        d (assoc-in (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
                     [:selection-law :posterior] (:posterior frozen))
         {:keys [result]}
         (run-feature-card-attempt
@@ -6318,7 +6328,7 @@
         receipt (:learning-trial-receipt closed)
         surprise-path (io/file root "test-cohort-exhaustion" (:attempt-id result) "retained" "surprises.edn")
         surprises (cohort/read-edn surprise-path)]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result)))
     ;; This grounded fixture uses feature123, not a resolvable Git artifact.
     ;; Missing measurements remain non-surprises; the real artifact helper
     ;; below separately pins the one-surprise retention/manifest case.
@@ -6390,8 +6400,9 @@
   (let [{:keys [root] :as c} (retention-cohort "parameter-novelty")
         ranked (novelty-fixture/frozen-ranked "1789964661")
         select! (requiring-resolve 'futon2.aif.policy/select-action-cascades)
-        d (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
-                           :novelty-inputs novelty-fixture/inputs})
+        d (with-test-carry
+            (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
+                             :novelty-inputs novelty-fixture/inputs}))
         {:keys [result]}
         (with-redefs [brief/default-root (str (io/file root "morning-brief"))]
           (run-feature-card-attempt
@@ -6404,7 +6415,7 @@
         selection (get-in (cohort/read-edn (io/file attempt-dir "002-selection.edn"))
                           [:payload :judgment :controller-decision])
         closed (get-in (cohort/read-edn (io/file attempt-dir "007-closed.edn")) [:payload :judgment])]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result)))
     (is (map? closed))
     (is (= 3 (count (get-in selection [:selection-certificate :parameter-novelty]))))
     (is (= (get-in d [:selection-certificate :parameter-novelty])
@@ -6446,7 +6457,7 @@
   ;; Passing grounded fixture; keep the canonical runner source guard enabled.
   (let [{:keys [root] :as c} (retention-cohort "focus-receipt-feature-card")
         d (focus-receipt/attach
-           (merge (:decision judgement) (token-fixture/decision))
+           (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
            (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
         {:keys [result]}
         (run-feature-card-attempt
@@ -6456,7 +6467,7 @@
                            :learning-trial-ledger-root (str (io/file root "learning-ledger"))
                            :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
         selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result)))
     (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))
     (is (= (get-in d [:selection-certificate :focus-receipt])
            (get-in selected [:selection-certificate :focus-receipt])))
@@ -6486,7 +6497,7 @@
   ;; Canonical runner-source guard blocks this in a worktree; owner runs on main.
   (let [{:keys [root] :as c} (retention-cohort "run-ending-feature-card")
         d (focus-receipt/attach
-           (merge (:decision judgement) (token-fixture/decision))
+           (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
            (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
         {:keys [result]}
         (run-feature-card-attempt
@@ -6501,7 +6512,7 @@
         entry (first (filter #(str/ends-with? (:evidence/id %)
                                               "/retained/run-ending-classification.edn")
                              (get-in close [:payload :close-evidence-manifest :entries])))]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result)))
     (is (= :wm/run-ending-classification-receipt-v1 (:schema receipt)))
     (is (run-ending/verify-close close receipt))
     (is (= receipt (edn/read-string (slurp (:source-path entry)))))
