@@ -1,6 +1,6 @@
 # E-kimi-task-169 — pattern-stage reading kimi-3-1790890049 (10 patterns)
 
-**Requisition:** in-progress — dispatched 2026-10-01T21:27:29Z to kimi-3 as invoke-1790890049818-29867-973fd4df
+**Requisition:** completed — 2026-10-01T21:28:39Z, job invoke-1790890049818-29867-973fd4df, state done
 
 Clocked in by pattern-stage-read-loop for kimi-3 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
