@@ -57,8 +57,18 @@
   ;; The fixture bytes are untouched; the typed values are pinned below and
   ;; in enacted-step-test.
   (let [d (decide roster)
-        ;; :e-source (step 8, the enactment fold) joined after the capture too
-        proj (fn [m] (pr-str (update m :selection-law dissoc :candidate :enacted-steps :e-source)))]
+        ;; :e-source (step 8, the enactment fold) joined after the capture too.
+        ;; The retained runtime G certificate joined later still; it is outside
+        ;; the selection-law field under test, so project that named addition
+        ;; from both sides without weakening the comparison of any old field.
+        proj (fn [m]
+               (pr-str
+                (-> m
+                    (update :selection-law dissoc :candidate :enacted-steps :e-source)
+                    (update-in [:selection-certificate :scoring]
+                               (fn [scoring]
+                                 (into {} (map (fn [[i entry]] [i (dissoc entry :g)]))
+                                       scoring))))))]
     ;; step 8's named drop: the habit provenance names the enactment fold
     (is (= (proj (edn/read-string (clojure.string/replace
                                    (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))
