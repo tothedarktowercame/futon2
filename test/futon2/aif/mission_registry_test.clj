@@ -255,7 +255,7 @@
     (is (= :inactive (get by-id "M-archived-compound"))
         "ARCHIVED-LEGACY classifies :inactive (prefix match catches compounds)")))
 
-(deftest operator-gated-status-is-not-selectable
+(deftest only-explicit-operator-gates-are-not-selectable
   (write-primary-mission! "futon7/holes/M-awaiting-joe.md"
                           (str "**Status:** OPEN — awaiting Joe verbatims\n"
                                "# Awaiting Joe\n"
@@ -266,12 +266,15 @@
                                "**Gate:** HEAD awaits operator acceptance.\n"))
   (let [loaded (mr/load-missions *tmpdir*)
         by-id (into {} (map (juxt :id identity) (:missions loaded)))]
-    (is (= :operator-gated (:status-class (get by-id "M-awaiting-joe"))))
+    (is (= :open (:status-class (get by-id "M-awaiting-joe")))
+        "incidental status prose does not declare an operator gate")
+    (is (false? (:operator-gated? (get by-id "M-awaiting-joe"))))
+    (is (empty? (:operator-gate-lines (get by-id "M-awaiting-joe"))))
     (is (= :operator-gated (:status-class (get by-id "M-acceptance-gate"))))
     (is (= ["**Gate:** HEAD awaits operator acceptance."]
            (:operator-gate-lines (get by-id "M-acceptance-gate"))))
-    (is (empty? (mr/open-missions loaded))
-        "an explicit operator gate is observed but never proposed")))
+    (is (= ["M-awaiting-joe"] (mapv :id (mr/open-missions loaded)))
+        "only the explicitly gated mission is withheld")))
 
 (deftest finding-2-bayesian-structure-learning-filtered-from-live-missions
   "The real mission that triggered Finding-2: M-bayesian-structure-learning

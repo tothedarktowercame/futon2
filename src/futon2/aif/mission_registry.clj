@@ -35,9 +35,6 @@
 (def ^:private status-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
 
-(def ^:private operator-gate-pattern
-  #"(?i)(?:\b(?:await(?:ing)?|pending)\b[^.\n;|]{0,120}\bJoe\b|\bJoe\b[^.\n;|]{0,120}\b(?:acceptance|decision|input|ratification|verbatim|gate)\b|\bratification\s*=\s*Joe\b)")
-
 (def ^:private gate-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Gate:?(?:\*\*)?\s*:?\s*(.+)$")
 
@@ -122,12 +119,6 @@
         head  (or (re-find #"[A-Z][A-Z-]*" lead) "")
         prefix? (fn [coll] (some #(str/starts-with? head %) coll))]
     (cond
-      ;; An operator gate is not ordinary work-in-flight.  The machine may
-      ;; observe it, but must not select it until the named operator acts.
-      ;; This is deliberately read from the declared Status field rather than
-      ;; guessed from arbitrary prose elsewhere in the document.
-      (re-find operator-gate-pattern (or status-line ""))
-      :operator-gated
       (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")            :draft
       (= "DRAFT" head)                                                  :draft
       ;; Finding-2 (E-live-loop-3): prefix match catches compound forms
@@ -224,17 +215,13 @@
                             (when-let [[_ status] (re-matches status-line-pattern line)]
                               status))
                           (take 20 lines))
+        ;; Status prose records work state, not permission.  Only an explicit
+        ;; Gate line can remove a mission from selection.
         gate-lines (->> lines
                         (keep (fn [line]
-                                (cond
-                                  (and (re-matches status-line-pattern line)
-                                       (re-find operator-gate-pattern line))
-                                  (str/trim line)
-
-                                  :else
-                                  (when-let [[_ gate] (re-matches gate-line-pattern line)]
-                                    (when (re-find #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b" gate)
-                                      (str/trim line))))))
+                                (when-let [[_ gate] (re-matches gate-line-pattern line)]
+                                  (when (re-find #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b" gate)
+                                    (str/trim line)))))
                         distinct
                         vec)
         operator-gated? (boolean (seq gate-lines))
