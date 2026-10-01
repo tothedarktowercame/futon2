@@ -1,5 +1,5 @@
 {:schema :wm/peripheral-recognition-sensitivity-sample-v1
- :status :candidate-lean-witness
+ :status :lean-witness
  :purpose
  "Show that a concrete interpretation can recognise operational peripherals and that a fact-token abstraction can lose the distinction."
 
@@ -124,4 +124,19 @@
   {:name :want-precedes-policy-scoring
    :claim "The preference distribution is a function of outcomes and the pinned want, not of the candidate policy being scored."}
   {:name :soft-unless-forbidden
-   :claim "Every outcome has positive preference mass in this fixture; only an explicitly declared genuinely forbidden outcome may receive zero."}]}
+   :claim "Every outcome has positive preference mass in this fixture; only an explicitly declared genuinely forbidden outcome may receive zero."}]
+
+ :model-comparison
+ {:lean-source "DarkTower/WarMachine/PeripheralSensitivityG.lean"
+  :lean-commit "44cb16e712"
+  :deterministic
+  {:operational :repl-repair-strictly-lower-g
+   :coarse :tie}
+  :stochastic
+  {:success-probability [4 5]
+   :fallback-probability [1 5]
+   :ambiguity :shared-arbitrary
+   :operational :repl-repair-strictly-lower-g
+   :coarse :tie}
+  :control
+  "The coarse preference is the pushforward of the one pinned operational preference, not a separately selected want."}}

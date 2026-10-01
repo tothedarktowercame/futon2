@@ -156,6 +156,15 @@ fixture outcome.  The operational carrier strictly prefers the
 state-preserving REPL result, whereas every score factoring only through the
 completion carrier must tie it with completed restart-and-replay.
 
+The matched deterministic/stochastic comparison is formalised in
+`mathlib4/DarkTower/WarMachine/PeripheralSensitivityG.lean` at commit
+`44cb16e712`.  In the deterministic model the operational carrier strictly
+ranks REPL repair below restart-and-replay in `G`, while the coarse carrier
+ties them.  The stochastic model repeats the result with matched `4/5`
+success, `1/5` fallback, and an arbitrary shared ambiguity contribution.  Its
+coarse preference is the pushforward of the pinned operational preference, so
+the comparison does not introduce a second want.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
