@@ -37,6 +37,46 @@
      :excursions (map :id (filter registry/live-excursion? (:excursions excursions)))
      :tickets (map :id (filter registry/live-ticket? (:tickets tickets)))}))
 
+(defn critical-task-counts
+  "Counts of tasks available to the selector for a registered run. Reuse a
+  successful selection-world snapshot when present. Runs that terminate before
+  selection take a fresh, explicitly terminal-time census rather than claiming
+  it was observed at selection. Census failure is retained as data."
+  [selection-world opts]
+  (let [from-selection (when (and (= :wm/world-at-selection-v1
+                                      (:schema selection-world))
+                                  (map? (:open-tasks selection-world))
+                                  (every? number?
+                                          (map #(get-in selection-world
+                                                        [:open-tasks % :count])
+                                               [:missions :excursions :tickets])))
+                         {:basis :selection-world
+                          :observed-at (:selection-ended-at selection-world)
+                          :available-to-choose
+                          (into {}
+                                (map (fn [kind]
+                                       [kind (get-in selection-world
+                                                     [:open-tasks kind :count])]))
+                                [:missions :excursions :tickets])})]
+    (if from-selection
+      (assoc from-selection :schema :wm/critical-task-counts-v1)
+      (try
+        (let [sets ((or (:world-task-sets-fn opts) default-task-sets)
+                    (or (:code-root opts) "/home/joe/code"))
+              now-fn (or (:world-now-fn opts) (fn [] (Instant/now)))]
+          {:schema :wm/critical-task-counts-v1
+           :basis :terminal-fallback
+           :observed-at (str (now-fn))
+           :available-to-choose
+           (into {}
+                 (map (fn [kind] [kind (count (distinct (get sets kind [])))]))
+                 [:missions :excursions :tickets])})
+        (catch Throwable e
+          {:schema :wm/critical-task-counts-v1
+           :basis :terminal-fallback
+           :status :failed
+           :error (ex-message e)})))))
+
 (defn- roster-by-type [roster]
   (reduce-kv (fn [m id seat]
                (update m (keyword (name (or (:type seat) (:kind seat) :untyped)))

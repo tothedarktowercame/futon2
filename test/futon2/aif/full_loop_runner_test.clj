@@ -159,6 +159,14 @@
             "existing routed record shape stays unchanged")
         (is (= "run-assigned" (:run/id record)))
         (is (= "click-assigned" (:click/id record)))
+        (is (= :wm/critical-task-counts-v1
+               (get-in record [:registered-run/critical-parameters :schema])))
+        (is (= :terminal-fallback
+               (get-in record [:registered-run/critical-parameters :basis])))
+        (is (every? integer?
+                    (vals (get-in record
+                                  [:registered-run/critical-parameters
+                                   :available-to-choose]))))
         (is (= [{:fromNode "R20" :toNode "R12"
                  :via "observe" :at_ "2026-08-31T00:00:01Z"}]
                (:route record))))))))

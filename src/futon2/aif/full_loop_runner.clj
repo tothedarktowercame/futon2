@@ -809,6 +809,17 @@
                                            (:judge-refusal selection-sorry))
             declaration-reads (cascade-sources/provenance
                                (some-> (:declaration-reads/state raw-opts) deref))
+            world-at-selection (or (get-in result
+                                            [:checkpoints :selection :judgment
+                                             :world-at-selection])
+                                   (get-in result
+                                           [:checkpoints :selection :sorry
+                                            :world-at-selection])
+                                   {:schema :wm/world-at-selection-v1
+                                    :failure-count 1
+                                    :failures [{:part :world-at-selection
+                                                :status :failed
+                                                :error "selection did not attach census"}]})
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
@@ -823,6 +834,8 @@
                     :registered-run/timing timing
                     :registered-run/model-usage usage
                     :registered-run/chronology chronology
+                    :registered-run/critical-parameters
+                    (selection-world/critical-task-counts world-at-selection raw-opts)
                     :selectorSeam "live:validated-selection"
                     :selection-event (habit-reinforcement/selection-event decision)
                     :habit-reinforcement (or (:habit-reinforcement result)
@@ -868,17 +881,7 @@
                                                      :interpretation-ask])
                                             {:status :absent
                                              :reason :no-interpretation-ask})
-                    :world-at-selection (or (get-in result
-                                                    [:checkpoints :selection :judgment
-                                                     :world-at-selection])
-                                            (get-in result
-                                                    [:checkpoints :selection :sorry
-                                                     :world-at-selection])
-                                            {:schema :wm/world-at-selection-v1
-                                             :failure-count 1
-                                             :failures [{:part :world-at-selection
-                                                         :status :failed
-                                                         :error "selection did not attach census"}]})
+                    :world-at-selection world-at-selection
                     :route route
                     :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
