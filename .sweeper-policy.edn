@@ -2,4 +2,9 @@
 ;; The sweeper appends: -n <namespace>. Each namespace runs in a fresh JVM.
 {:clojure-test-command
  ["clojure" "-J-XX:ActiveProcessorCount=2" "-M:test"
-  "-m" "cognitect.test-runner"]}
+  "-m" "cognitect.test-runner"]
+
+ ;; These are immutable preregistration records. Words such as REQUIRED and
+ ;; TODO describe protocol obligations; they are not unfinished source code.
+ :intent-marker-exempt-path-regexes
+ ["holes/labs/M-aif-full-loop-[0-9]+/cohort\\.edn"]}
