@@ -499,6 +499,46 @@
   ([] (load-missions-from-substrate))
   ([code-root] (load-missions-from-files code-root)))
 
+(defn refresh-mission-substrate!
+  "Refresh the mission records from the canonical primary checkouts and prove
+   that the substrate now carries every scanned file revision.  This is the
+   outer-loop boundary used before a new WM decision: a healthy but stale
+   substrate is not fresh evidence."
+  ([] (refresh-mission-substrate! {}))
+  ([{:keys [code-root scan-fn index-fn upsert-fn]
+     :or {code-root default-code-root
+          scan-fn load-missions-from-files
+          index-fn mission-entity-index
+          upsert-fn upsert-mission-record!}}]
+   (let [entries (:missions (scan-fn code-root))
+         before (index-fn)
+         results (mapv (fn [entry]
+                         (upsert-fn {:code-root code-root
+                                     :path (:path entry)
+                                     :existing (get before (:id entry))}))
+                       entries)
+         errors (filterv #(= :error (:status %)) results)
+         after (index-fn)
+         stale (->> entries
+                    (keep (fn [entry]
+                            (let [actual (some-> (get after (:id entry))
+                                                 :entity/props parse-entity-props
+                                                 :provenance/sha256)
+                                  expected (sha256-file (:path entry))]
+                              (when-not (= expected actual)
+                                {:id (:id entry) :expected expected :actual actual}))))
+                    vec)]
+     (when (or (empty? entries) (seq errors) (seq stale))
+       (throw (ex-info "Mission substrate freshness could not be established"
+                       {:kind :mission-substrate-freshness-unestablished
+                        :scanned (count entries) :errors errors :stale stale})))
+     {:schema :wm/mission-substrate-freshness-v1
+      :status :established
+      :scanned (count entries)
+      :created (count (filter #(= :created (:status %)) results))
+      :updated (count (filter #(= :updated (:status %)) results))
+      :unchanged (count (filter #(= :unchanged (:status %)) results))})))
+
 (def ^:private missions-cache (atom nil))
 
 (def missions-cache-ttl-ms

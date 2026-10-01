@@ -4273,13 +4273,15 @@
   refresh is recorded rather than swallowed. {:outcome :refresh-failed
   :failure-kind k :error (flight/throwable-summary t)} on any Throwable, k
   the throw's typed kind (explicit typing, else the thrower's :kind, else
-  failure-kind-from); else {:outcome :ok :freshness {:absent
-  :not-reported-by-maybe-refresh}}: maybe-refresh! returns the C state,
-  not whether it was stale."
+  failure-kind-from). A refresh may return {:freshness ...}; that evidence is
+  retained verbatim. Legacy C-only refreshes retain the explicit
+  :not-reported-by-maybe-refresh absence."
   [refresh-fn]
   (try
-    (refresh-fn)
-    {:outcome :ok :freshness {:absent :not-reported-by-maybe-refresh}}
+    (let [result (refresh-fn)]
+      {:outcome :ok
+       :freshness (or (:freshness result)
+                      {:absent :not-reported-by-maybe-refresh})})
     (catch Throwable t
       {:outcome :refresh-failed
        :failure-kind (or (explicit-failure-kind t)
@@ -5252,11 +5254,22 @@
       ;; WM-PHASE-SWALLOW-I: non-fatal as before; the refresh's own
       ;; outcome is recorded beside the phase's :ok, on the phase event and
       ;; (through :preference-refresh/state) the run record
-      (run-phase! opts @phase-context :preference-refresh
-                  #(let [r (refresh-record (or (:refresh-fn opts) cv/maybe-refresh!))]
-                     (some-> (:preference-refresh/state opts) (reset! r))
-                     r)
-                  (fn [r] {:refresh r}))
+      (let [r (run-phase! opts @phase-context :preference-refresh
+                          #(let [r (refresh-record
+                                   (or (:refresh-fn opts)
+                                       (get *runtime-defaults* :refresh-fn)
+                                       cv/maybe-refresh!))]
+                             (some-> (:preference-refresh/state opts) (reset! r))
+                             r)
+                          (fn [r] {:refresh r}))]
+        (when (and (or (:refresh-required? opts)
+                       (get *runtime-defaults* :refresh-required?))
+                   (not= :ok (:outcome r)))
+          (throw (ex-info "Required decision-input refresh failed"
+                          {:outcome :incomplete
+                           :failure-kind :decision-input-freshness-unestablished
+                           :failure-stage :preference-refresh
+                           :refresh r}))))
       (let [open-stop-lines
             (run-phase! opts @phase-context :stop-line-memory
                         #((or (:repair-open-fn opts) repair/open-obligations)))

@@ -157,3 +157,56 @@
                             :existing nil}))))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest consecutive-refreshes-observe-the-new-residual-mission-state
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "mission-two-tick" (make-array java.nio.file.attribute.FileAttribute 0)))
+        repo (io/file root "primary")
+        file (io/file repo "holes" "M-two-tick.md")
+        store (atom {})
+        index-fn (fn [] @store)
+        upsert-fn (fn [{:keys [code-root path]}]
+                    (let [entry (#'mr/mission-doc->entry path)
+                          entity {:entity/external-id (:id entry)
+                                  :entity/props (mr/mission-record-props code-root entry)}]
+                      (swap! store assoc (:id entry) entity)
+                      {:id (:id entry) :status :updated}))]
+    (try
+      (.mkdirs (io/file repo ".git"))
+      (io/make-parents file)
+      (spit file "# Two tick\n\nStatus: ACTIVE\n\n- [ ] residual work\n")
+      (let [first-refresh (mr/refresh-mission-substrate!
+                           {:code-root (str root) :index-fn index-fn :upsert-fn upsert-fn})]
+        (is (= :established (:status first-refresh)))
+        (is (= ["- [ ] residual work"]
+               (mapv :text (get-in @store ["M-two-tick" :entity/props :mission/open-holes])))))
+      ;; Tick one's grounded commit satisfies the only want. Tick two must
+      ;; reconstruct from these bytes, not replay the old unchecked source.
+      (spit file "# Two tick\n\nStatus: COMPLETE\n\n- [x] residual work\n")
+      (mr/refresh-mission-substrate!
+       {:code-root (str root) :index-fn index-fn :upsert-fn upsert-fn})
+      (is (= "complete" (get-in @store ["M-two-tick" :entity/props :mission/status-class])))
+      (is (nil? (get-in @store ["M-two-tick" :entity/props :mission/open-holes]))
+          "the identical satisfied cascade has no residual want to replay")
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest refresh-refuses-when-readback-does-not-carry-the-scanned-revision
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "mission-stale" (make-array java.nio.file.attribute.FileAttribute 0)))
+        repo (io/file root "primary")
+        file (io/file repo "holes" "M-stale.md")]
+    (try
+      (.mkdirs (io/file repo ".git"))
+      (io/make-parents file)
+      (spit file "# Stale\n\nStatus: ACTIVE\n\n- [ ] work\n")
+      (try
+        (mr/refresh-mission-substrate!
+         {:code-root (str root)
+          :index-fn (constantly {"M-stale" {:entity/props {:provenance/sha256 "old"}}})
+          :upsert-fn (constantly {:id "M-stale" :status :updated})})
+        (is false "a stale substrate readback must refuse")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= :mission-substrate-freshness-unestablished (:kind (ex-data e))))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
