@@ -4,6 +4,7 @@
   the decoded value; source occurrence is not treated as correspondence."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.g-term-decomposition :as decomposition])
   (:import (java.io PushbackReader StringReader)
@@ -315,7 +316,10 @@
   "Project the selected policy's repaired, target-local A/Q/C census. The
   retained scoring fields are classified but never rescored."
   [run-record]
-  (let [entry (selected-scoring-entry run-record)
+  (let [chosen (get-in run-record [:decision :chosen])
+        selected-action (get-in run-record
+                                [:decision :selection-law :per-policy-argmax :action])
+        entry (selected-scoring-entry run-record)
         selected (:id entry)
         candidates (get-in run-record [:decision :selection-certificate :candidates])
         candidate (one! :adapter/aqc-candidate-identity-mismatch
@@ -332,17 +336,35 @@
         final-c (:distribution (last c-steps))
         initial (get-in q [:value :initial-belief])
         q-steps (get-in q [:value :steps])
-        target-present? (fn [belief]
-                          (every? #(contains? (key %) (first (get-in a [:value :acceptance])))
-                                  (filter (comp pos? val) belief)))]
-    (when-not (= selected (:id policy))
-      (refuse! :adapter/aqc-candidate-identity-mismatch {}))
+        acceptance (get-in a [:value :acceptance])
+        positive-states (fn [belief]
+                          (map key (filter (comp pos? val) belief)))
+        none-accepted? (fn [belief]
+                         (every? #(empty? (set/intersection acceptance %))
+                                 (positive-states belief)))
+        all-accepted? (fn [belief]
+                        (every? #(set/subset? acceptance %)
+                                (positive-states belief)))
+        chosen-matches? (and (= (:kind selected-action) (:kind selected))
+                             (= (:id selected-action) (:id chosen) (:candidate chosen)
+                                (:id selected))
+                             (= (:target selected-action) (:target chosen) (:target selected))
+                             (= (mapv :id (:precedence selected-action)) (:precedence chosen))
+                             (= (get-in selected-action [:construction-receipt :kind])
+                                (:construction-kind chosen)))]
+    (when-not (and chosen-matches? (= selected-action selected)
+                   (= selected (:id candidate)) (= selected (:id policy)))
+      (refuse! :adapter/aqc-candidate-identity-mismatch
+               {:selection-law selected-action :chosen chosen
+                :scoring selected :candidate (:id candidate) :policy (:id policy)}))
     (when-not (and (= :present (:status a)) (= :present (:status q))
                    (= :present (:status c)) (= {target :related}
                                                 (get-in a [:value :target-class]))
+                   (set? acceptance) (seq acceptance)
+                   (every? #(and (vector? %) (= target (first %))) acceptance)
                    (= (count q-steps) (count c-steps))
-                   (seq q-steps) (not (target-present? initial))
-                   (target-present? (:belief (last q-steps)))
+                   (seq q-steps) (none-accepted? initial)
+                   (all-accepted? (:belief (last q-steps)))
                    (= 1 (reduce + (vals final-c)))
                    (pos? (get final-c :related 0)))
       (refuse! :adapter/aqc-correspondence-mismatch

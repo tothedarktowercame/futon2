@@ -164,15 +164,38 @@
 
 (deftest aqc-certificate-refuses-identity-and-correspondence-mutations
   (let [record (read-string (slurp controlled-record))]
+    (testing "selection-law identity cannot diverge from the chosen candidate"
+      (is (= :adapter/aqc-candidate-identity-mismatch
+             (refusal #(adapter/aqc-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-law :per-policy-argmax
+                                   :action :target]
+                                  "M-formal-patterns"))))))
     (testing "selecting the unrelated unknown target cannot borrow C1's A/Q/C"
       (is (= :adapter/aqc-correspondence-mismatch
              (refusal #(adapter/aqc-input-from-run-record
                         (-> record
                             (assoc-in [:decision :chosen :target] "M-formal-patterns")
+                            (assoc-in [:decision :selection-law :per-policy-argmax
+                                       :action :target]
+                                      "M-formal-patterns")
                             (assoc-in [:decision :selection-certificate :scoring 0 :id :target]
                                       "M-formal-patterns")
                             (assoc-in [:decision :selection-certificate :candidates 0 :id :target]
                                       "M-formal-patterns")))))))
+    (testing "every accepted token must occur in every positive terminal state"
+      (let [accepted (get-in record [:decision :selection-certificate :scoring 0
+                                     :consumed-g :A :acceptance])
+            missing (second (sort-by pr-str accepted))]
+        (is (= :adapter/aqc-correspondence-mismatch
+               (refusal #(adapter/aqc-input-from-run-record
+                          (update-in record
+                                     [:decision :selection-certificate :scoring 0
+                                      :consumed-g :Q :steps 3 :belief]
+                                     (fn [belief]
+                                       (into {} (map (fn [[state probability]]
+                                                       [(disj state missing) probability]))
+                                             belief)))))))))
     (testing "zero preference for the retained A class breaks correspondence"
       (is (= :adapter/aqc-correspondence-mismatch
              (refusal #(adapter/aqc-input-from-run-record
