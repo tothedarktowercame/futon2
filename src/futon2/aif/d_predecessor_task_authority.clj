@@ -206,19 +206,41 @@
                      (= sha256 (sha (.getBytes ^String snapshot-edn "UTF-8")))
                      (= snapshot (read-one (.getBytes ^String snapshot-edn "UTF-8"))))
                 :declaration-snapshot-mismatch {}))
-    (when-let [family (:precision-family dispatch)]
-      (precision-carry/validate-binding! family occurrence)
-      (let [target (get-in family [:selected-action :target])
-            declarations (filter #(= target (get-in % [:snapshot :target])) (:declarations dispatch))]
-        (require! (= 1 (count declarations)) :precision-selected-declaration-unestablished {})
-        (require! (= (cascade-sources/observation-schedule (:snapshot (first declarations)))
-                     (get-in family [:observation-schedules target]))
-                  :precision-observation-schedule-mismatch {})))
-    (let [replayed (artifact-tokens dispatch repository final)
+    (let [precision-verification
+          (when-let [family (:precision-family dispatch)]
+            (precision-carry/validate-binding! family occurrence)
+            (let [target (get-in family [:selected-action :target])
+                  declarations (filter #(= target (get-in % [:snapshot :target]))
+                                       (:declarations dispatch))]
+              (cond
+                (empty? declarations)
+                {:status :refused :kind :precision-selected-declaration-unestablished}
+
+                (not= 1 (count declarations))
+                {:status :refused :kind :precision-selected-declaration-ambiguous}
+
+                (not= (cascade-sources/observation-schedule
+                       (:snapshot (first declarations)))
+                      (get-in family [:observation-schedules target]))
+                {:status :refused :kind :precision-observation-schedule-mismatch}
+
+                :else {:status :verified :target target})))
+          replayed (artifact-tokens dispatch repository final)
           affirmations (filter #(true? (get-in % [:result :observed])) replayed)
-          present (set (map :token affirmations))]
+          present (set (map :token affirmations))
+          observation-verification
+          (if (seq present)
+            {:status :verified}
+            {:status :refused :kind :after-token-evidence-unavailable})]
       (require! (= replayed (:after-token-evidence record)) :after-token-evidence-mismatch {})
-      (require! (seq present) :after-token-evidence-unavailable {})
+      ;; A retained selected-target declaration makes its failed artifact
+      ;; observation an execution failure. When no such declaration was
+      ;; retained, preserve that independent precision/observation refusal
+      ;; without erasing the verified action, artifact and review authority.
+      (when (and (not= :precision-selected-declaration-unestablished
+                       (:kind precision-verification))
+                 (empty? present))
+        (refuse! :after-token-evidence-unavailable {}))
       {:status :admitted :authority authority :scope verified-scope
        :occurrence occurrence :carry-occurrence-id (:carry-occurrence-id dispatch)
        :candidate-to-minted-join correspondence
@@ -227,6 +249,8 @@
        :declared-action (:action/value occurrence)
        :revision-pair revision-pair :before-evidence :not-measured
        :present present :absent #{} :unknown (set/difference (:universe dispatch) present)
+       :precision-verification precision-verification
+       :token-observation-verification observation-verification
        :causal-attribution :independent-check-required
        :precision-family (when-let [family (:precision-family dispatch)]
                            (precision-carry/validate-binding! family occurrence))

@@ -8,6 +8,7 @@
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as observation]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.task-execution-evidence :as execution]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.trace :as trace]
@@ -28,6 +29,13 @@
                          [:env (isolated-git-environment)]))]
     (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
     (str/trim (:out r))))
+
+(defn precision-family [action schedule]
+  (precision-carry/family
+   {:action action
+    :selection-certificate {:candidates [{:id action :g 1.0 :habit 1.0}]}}
+   {:q0 {#{} 1} :rates {} :horizon 1}
+   {(:target action) schedule}))
 
 (defn with-artifact
   ([f] (with-artifact {} f))
@@ -58,7 +66,7 @@
                          :selected-action action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
             occurrence ((or (:occurrence-fn opts) identity) occurrence)
             declaration (io/file dir "declaration.edn")
-            _ (spit declaration (pr-str (cond-> {:target target :locators
+            _ (spit declaration (pr-str (cond-> {:target (get opts :declaration-target target) :locators
                                         {:artifact {:class :C3 :repo "repo" :sha (:head before)
                                                     :path (or (:locator-path opts) "created.clj")}}}
                                           (:locators opts)
@@ -70,6 +78,8 @@
             dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"
                                     :universe (or (:universe opts) #{[target :artifact]})
                                     :selected-action action
+                                    :precision-family (when-let [f (:precision-family-fn opts)]
+                                                        (f action))
                                     :declaration-reads pins :before before})
             _ (spit (io/file repo "created.clj") "(ns created)\n")
             _ (git! repo "add" "created.clj")
@@ -170,6 +180,38 @@
        (is (= :selected-enacted-correspondence-invalid
               (:kind (task/verify (assoc record :dispatch forged-dispatch)
                                   expected jobs))))))))
+
+(deftest missing-selected-declaration-does-not-mask-enactment-authority
+  (let [schedule {:status :held :reason :observation-placement-not-declared}]
+    (with-artifact
+     {:declaration-target "different-target"
+      :precision-family-fn #(precision-family % schedule)}
+     (fn [{:keys [inputs expected jobs]}]
+       (let [verification (task/verify (task/claim inputs) expected jobs)]
+         (is (= :admitted (:status verification)))
+         (is (= :verified (get-in verification [:candidate-to-minted-join :status])))
+         (is (= {:status :refused
+                 :kind :precision-selected-declaration-unestablished}
+                (:precision-verification verification)))
+         (is (= :after-token-evidence-unavailable
+                (get-in verification [:token-observation-verification :kind])))
+         (is (= (:universe expected) (:unknown verification)))))))
+  (let [declared {:tau {:value 1 :status :declared}}
+        mutated {:tau {:value 2 :status :declared}}]
+    (with-artifact
+     {:observation-schedule declared
+      :precision-family-fn #(precision-family % mutated)}
+     (fn [{:keys [inputs expected jobs]}]
+       (let [verification (task/verify (task/claim inputs) expected jobs)]
+         (is (= :admitted (:status verification)))
+         (is (= {:status :refused :kind :precision-observation-schedule-mismatch}
+                (:precision-verification verification)))
+         (is (= :precision-observation-schedule-mismatch
+                (:reason (precision-carry/advance
+                          {:initialized-beta 1.0
+                           :model-id (get-in verification [:precision-family :model-id])
+                           :admission verification
+                           :family (:precision-family verification)})))))))))
 
 (deftest refusal-is-preserved-by-persistence
   (with-artifact

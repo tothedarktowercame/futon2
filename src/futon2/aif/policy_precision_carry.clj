@@ -112,6 +112,11 @@
       (not= :admitted (:status admission))
       (hold :precision-no-admitted-predecessor {:admission admission})
       (nil? family) (hold :precision-dispatch-binding-absent)
+      (and (map? (:precision-verification admission))
+           (not= :verified (get-in admission [:precision-verification :status])))
+      (hold (or (get-in admission [:precision-verification :kind])
+                :precision-verification-unavailable)
+            {:precision-verification (:precision-verification admission)})
       :else
       (try
         (validate-binding! family (:occurrence admission))

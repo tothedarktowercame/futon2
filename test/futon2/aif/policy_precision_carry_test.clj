@@ -123,7 +123,7 @@
        (is (= frozen (:precision-family admitted)))
        (is (= :updated (:status state)))
        (is (< (:beta state) 1))
-       (is (= :not-established (:candidate-to-minted-join admitted)))
+        (is (= :verified (get-in admitted [:candidate-to-minted-join :status])))
        (is (not= :admitted (:status (task/verify (task/claim (assoc inputs :dispatch dispatch)) expected jobs)))
            "Original job prompts cannot authenticate a retrospectively added family")))))
 
