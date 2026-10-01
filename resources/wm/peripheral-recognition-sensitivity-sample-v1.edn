@@ -1,0 +1,110 @@
+{:schema :wm/peripheral-recognition-sensitivity-sample-v1
+ :status :candidate-lean-witness
+ :purpose
+ "Show that a concrete interpretation can recognise operational peripherals and that a fact-token abstraction can lose the distinction."
+
+ :pattern-language
+ {:snapshot "futon3/library/peripherals"
+  :patterns
+  ["peripherals/constrained-execution-envelope"
+   "peripherals/split-transport-from-embodiment"
+   "peripherals/canonical-typed-event-vs-side-channel"
+   "peripherals/surface-earns-inhabitation"
+   "peripherals/inhabitation-feeds-evolution"
+   "peripherals/pattern-becomes-peripheral"]}
+
+ :recognition
+ {:principle
+  "Peripheral is a role inferred from an evidenced operational relation, not a product-name token or a nominal class."
+  :observations
+  [:bounded-action-vocabulary
+   :entry-condition
+   :exit-condition
+   :transport-contract
+   :typed-events
+   :embodiment
+   :auditable-trace
+   :inhabitation-feedback]
+  :roles
+  {:execution-peripheral
+   {:requires [:bounded-action-vocabulary :entry-condition :exit-condition
+               :transport-contract :embodiment]
+    :strengthened-by [:typed-events :auditable-trace :inhabitation-feedback]}
+   :transport-peripheral
+   {:requires [:bounded-action-vocabulary :transport-contract :typed-events]
+    :composition-note
+    "May be composed with a separate embodiment to form an inhabited execution peripheral."}}}
+
+ :instances
+ [{:id :codex-repl
+   :candidate-name "Codex REPL"
+   :observed
+   {:bounded-action-vocabulary true
+    :entry-condition true
+    :exit-condition true
+    :transport-contract true
+    :typed-events true
+    :embodiment true
+    :auditable-trace true
+    :inhabitation-feedback true}
+   :derived-role :execution-peripheral}
+  {:id :claude-repl
+   :candidate-name "Claude REPL"
+   :observed
+   {:bounded-action-vocabulary true
+    :entry-condition true
+    :exit-condition true
+    :transport-contract true
+    :typed-events true
+    :embodiment true
+    :auditable-trace true
+    :inhabitation-feedback true}
+   :derived-role :execution-peripheral}
+  {:id :irc-adapter
+   :candidate-name "IRC adapter"
+   :observed
+   {:bounded-action-vocabulary true
+    :entry-condition false
+    :exit-condition false
+    :transport-contract true
+    :typed-events true
+    :embodiment false
+    :auditable-trace true
+    :inhabitation-feedback false}
+   :derived-role :transport-peripheral
+   :composes-with :repl-or-chat-embodiment}]
+
+ :coarse-token-instance
+ {:state-type [:finset :fact-token]
+  :retained [:can-send :can-receive :connected]
+  :collision
+  {:left :codex-repl
+   :right :untyped-dumb-pipe
+   :same-state #{:can-send :can-receive :connected}
+   :lost
+   [:bounded-action-vocabulary :entry-condition :exit-condition
+    :typed-events :embodiment :auditable-trace :inhabitation-feedback]}
+  :consequence
+  "Cannot justify peripheral recognition or distinguish an inhabitable REPL from an untyped pipe."}
+
+ :operational-instance
+ {:state-type
+  {:envelope [:actions :entry :exit]
+   :transport [:schema :event-types :reliability]
+   :embodiment [:surface :affordances]
+   :history [:trace :feedback]
+   :resources [:elapsed-ms :model-tokens]}
+  :consequence
+  "Recognises the two REPLs as execution peripherals and the IRC adapter as a transport peripheral from witnesses, while retaining time and token costs for G."}
+
+ :lean-obligations
+ [{:name :recognition-is-name-invariant
+   :claim "Renaming an instance without changing its operational witness preserves its derived peripheral role."}
+  {:name :coarse-collision
+   :claim "The coarse encoding maps Codex REPL and an untyped dumb pipe to the same state."}
+  {:name :operational-separation
+   :claim "The operational encoding distinguishes them by at least typed events, embodiment, and lifecycle."}
+  {:name :adapter-composition
+   :claim "A transport peripheral satisfying the composition contract plus a qualifying embodiment satisfies the execution-peripheral requirements."}
+  {:name :g-is-instance-sensitive
+   :claim "A policy pair differing in lifecycle, duration, or token cost may tie under the coarse instance and rank differently under the operational instance."}]}

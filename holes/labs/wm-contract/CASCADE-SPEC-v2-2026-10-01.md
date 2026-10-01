@@ -124,6 +124,15 @@ problem and pattern texts.  Free caller-supplied tokens, orphan tokens with no
 application reading, and tokens used only to exclude policies are invalid
 interpretations rather than alternative cascades.
 
+The first sensitivity exemplar is
+`resources/wm/peripheral-recognition-sensitivity-sample-v1.edn`.  It treats
+"peripheral" as a role inferred from operational witnesses rather than a name:
+the Codex and Claude REPLs are execution peripherals, while the IRC adapter is
+a transport peripheral that composes with an embodiment.  Its coarse token
+instance deliberately aliases an inhabitable REPL with an untyped pipe; its
+operational instance separates them and retains elapsed-time and model-token
+costs for `G`.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.
