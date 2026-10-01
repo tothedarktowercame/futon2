@@ -10,6 +10,7 @@
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-equivalence :as equivalence]
             [futon2.aif.g-term-decomposition :as decomposition]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
@@ -624,6 +625,9 @@
         roles (get-in run-record [:participants :roles])
         reviewer (get roles :reviewer-of-record)
         configured-reviewer (get roles :configured-reviewer)
+        precision-state (get-in run-record
+                                [:decision :selection-certificate
+                                 :policy-precision-state])
         action-sha (action-identity/digest action)]
     (when-not (and (= (:id action) (:id chosen) (:candidate chosen))
                    (= (:target action) (:target chosen))
@@ -651,6 +655,17 @@
       (refuse! :adapter/refused-subreceipt-mismatch
                {:precision (:precision-verification verification)
                 :token-observation (:token-observation-verification verification)}))
+    (when-not (and (precision-carry/intact? precision-state)
+                   (= :wm/precision-carry-v1 (:schema precision-state))
+                   (= :held (:status precision-state))
+                   (= :precision-model-changed (:reason precision-state))
+                   (= :declared (:beta-status precision-state))
+                   (integer? (:beta precision-state))
+                   (= (:beta precision-state) (:initialized-beta precision-state)))
+      (refuse! :adapter/precision-state-mismatch
+               {:state (select-keys precision-state
+                                    [:schema :status :reason :beta :initialized-beta
+                                     :beta-status])}))
     (when-not (and (map? grounded)
                    (re-matches #"[0-9a-f]{40}" (:sha grounded ""))
                    (string? (:repo grounded)) (not (str/blank? (:repo grounded)))
@@ -685,15 +700,21 @@
      :reviewer (:identity reviewer)
      :outcome :grounded-progress
      :precision-status :refused :token-observation-status :refused
-     :precision-consumed false :token-observation-consumed false}))
+     :precision-subreceipt-admissible false
+     :token-observation-subreceipt-admissible false
+     :precision-state-status (:status precision-state)
+     :precision-state-reason (:reason precision-state)
+     :precision-beta (:beta precision-state)
+     :precision-initialized-beta (:initialized-beta precision-state)}))
 
 (defn render-enactment-grounding [input source-sha]
-  (let [{:keys [selected-action-sha256 enacted-action-sha256 commit repository reviewer]}
+  (let [{:keys [selected-action-sha256 enacted-action-sha256 commit repository reviewer
+                precision-beta precision-initialized-beta precision-state-reason]}
         input]
     (str "import DarkTower.WarMachine.CertificateStates\n\n"
          "/-! GENERATED FILE — DO NOT EDIT.\nSource SHA-256: " source-sha
          "\nRuntime source: " (pr-str (:runtime-source input))
-         "\nScope: admitted execution/grounding correspondence only; refused precision and token observations are not consumed.\n-/\n\n"
+         "\nScope: admitted execution/grounding correspondence; refused subreceipts are non-admissible inputs. No global token-consumption claim.\n-/\n\n"
          "namespace DarkTower.WarMachine.RuntimeEnactmentGrounding\n"
          "open DarkTower.WarMachine.CertificateStates\n\n"
          "def selectedDigest : String := \"" selected-action-sha256 "\"\n"
@@ -712,18 +733,24 @@
          "def groundedProgress : Bool := true\n"
          "def precisionRefused : Bool := true\n"
          "def tokenObservationRefused : Bool := true\n"
-         "def precisionConsumed : Bool := false\n"
-         "def tokenObservationConsumed : Bool := false\n\n"
+         "def precisionSubreceiptAdmissible : Bool := false\n"
+         "def tokenObservationSubreceiptAdmissible : Bool := false\n"
+         "def precisionStateHeld : Bool := true\n"
+         "def precisionStateReason : String := \"" (name precision-state-reason) "\"\n"
+         "def precisionBeta : Int := " precision-beta "\n"
+         "def precisionInitializedBeta : Int := " precision-initialized-beta "\n\n"
          "theorem selected_enacted_exact : selectionEnaction = .match selectedDigest selectedDigest := rfl\n"
          "theorem grounded_artifact_consistent : groundedCommit = terminalCommit ∧ groundedRepository = terminalRepository := ⟨rfl, rfl⟩\n"
          "theorem reviewer_consistent : reviewerOfRecord = terminalReviewer := rfl\n"
          "theorem admitted_grounded_unique_terminal_no_failure : executionAdmitted = true ∧ executedWithArtifacts = true ∧ groundedProgress = true ∧ terminalReceiptCount = 1 ∧ failurePresent = false := ⟨rfl, rfl, rfl, rfl, rfl⟩\n"
-         "theorem refused_subreceipts_not_consumed : precisionRefused = true ∧ tokenObservationRefused = true ∧ precisionConsumed = false ∧ tokenObservationConsumed = false := ⟨rfl, rfl, rfl, rfl⟩\n\n"
+         "theorem refused_subreceipts_are_not_admissible : precisionRefused = true ∧ tokenObservationRefused = true ∧ precisionSubreceiptAdmissible = false ∧ tokenObservationSubreceiptAdmissible = false := ⟨rfl, rfl, rfl, rfl⟩\n"
+         "theorem retained_precision_is_held_with_unchanged_beta : precisionStateHeld = true ∧ precisionStateReason = \"precision-model-changed\" ∧ precisionBeta = precisionInitializedBeta := ⟨rfl, rfl, rfl⟩\n\n"
          "#print axioms selected_enacted_exact\n"
          "#print axioms grounded_artifact_consistent\n"
          "#print axioms reviewer_consistent\n"
          "#print axioms admitted_grounded_unique_terminal_no_failure\n"
-         "#print axioms refused_subreceipts_not_consumed\n"
+         "#print axioms refused_subreceipts_are_not_admissible\n"
+         "#print axioms retained_precision_is_held_with_unchanged_beta\n"
          "end DarkTower.WarMachine.RuntimeEnactmentGrounding\n")))
 
 (defn adapt-run-record-enactment-grounding-bytes [bytes expected-sha]

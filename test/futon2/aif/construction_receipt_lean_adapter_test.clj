@@ -302,11 +302,18 @@
     (is (= "0d91cc768f2a5b807c8c30edda7a131fbd2c6d52"
            (get-in adapted [:projection :commit])))
     (is (= "zai-1" (get-in adapted [:projection :reviewer])))
-    (is (false? (get-in adapted [:projection :precision-consumed])))
-    (is (false? (get-in adapted [:projection :token-observation-consumed])))
+    (is (= :held (get-in adapted [:projection :precision-state-status])))
+    (is (= :precision-model-changed
+           (get-in adapted [:projection :precision-state-reason])))
+    (is (= (get-in adapted [:projection :precision-beta])
+           (get-in adapted [:projection :precision-initialized-beta])))
+    (is (false? (get-in adapted [:projection :precision-subreceipt-admissible])))
+    (is (false? (get-in adapted [:projection :token-observation-subreceipt-admissible])))
     (is (.contains (:lean adapted) "selected_enacted_exact"))
     (is (.contains (:lean adapted) "admitted_grounded_unique_terminal_no_failure"))
-    (is (.contains (:lean adapted) "refused_subreceipts_not_consumed"))
+    (is (.contains (:lean adapted) "refused_subreceipts_are_not_admissible"))
+    (is (.contains (:lean adapted) "retained_precision_is_held_with_unchanged_beta"))
+    (is (not (.contains (:lean adapted) "tokenObservationConsumed")))
     (is (not (.contains (:lean adapted) ":precedence")))))
 
 (deftest enactment-grounding-certificate-refuses-runtime-mutations
@@ -333,4 +340,25 @@
                         (assoc-in record
                                   [:d-task-enactment :verification
                                    :precision-verification]
-                                  {:status :verified}))))))))
+                                  {:status :verified}))))))
+    (testing "a refused token-observation subreceipt cannot become success"
+      (is (= :adapter/refused-subreceipt-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record
+                                  [:d-task-enactment :verification
+                                   :token-observation-verification]
+                                  {:status :verified}))))))
+    (testing "changed retained beta refuses"
+      (is (= :adapter/precision-state-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-certificate
+                                   :policy-precision-state :beta]
+                                  2))))))
+    (testing "an updated retained precision state refuses"
+      (is (= :adapter/precision-state-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record
+                                  [:decision :selection-certificate
+                                   :policy-precision-state :status]
+                                  :updated))))))))
