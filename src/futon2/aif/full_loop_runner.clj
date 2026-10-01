@@ -60,6 +60,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
+            [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
@@ -351,7 +352,8 @@
    (run-phase! opts context phase thunk nil))
   ([opts context phase thunk result->event]
    (loop []
-     (let [started (System/currentTimeMillis)
+     (let [nano-time (or (:nano-time-fn opts) #(System/nanoTime))
+           started (nano-time)
            _ (emit-phase! opts context {:phase phase :transition :start})
            attempt
            (try
@@ -359,13 +361,13 @@
                    detail (if result->event (or (result->event result) {}) {})]
                (emit-phase! opts context
                             (merge {:phase phase :transition :end :outcome :ok
-                                    :duration-ms (- (System/currentTimeMillis) started)}
+                                    :duration-ms (quot (- (nano-time) started) 1000000)}
                                    detail))
                {:outcome :ok :value result})
              (catch Throwable e
                (emit-phase! opts context
                             {:phase phase :transition :end :outcome :error
-                             :duration-ms (- (System/currentTimeMillis) started)
+                             :duration-ms (quot (- (nano-time) started) 1000000)
                              :error-class (.getName (class e))
                              :error (.getMessage e)})
                {:outcome :error :throwable e}))]
@@ -385,7 +387,7 @@
                  (let [detail (if result->event (or (result->event value) {}) {})]
                    (emit-phase! opts context
                                 (merge {:phase phase :transition :end :outcome :ok
-                                        :duration-ms (- (System/currentTimeMillis) started)
+                                        :duration-ms (quot (- (nano-time) started) 1000000)
                                         :debugger/restart :use-value}
                                        detail))
                    value)
@@ -767,7 +769,22 @@
         route (if (seq observed)
                 observed
                 (observed-route (terminal-fallback-route result)))
-        grounded-commit (grounded-commit-for result)]
+        grounded-commit (grounded-commit-for result)
+        nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
+        elapsed-nanos (when-let [start (:run-timing/start-nanos raw-opts)]
+                        (max 0 (- (nano-time) start)))
+        phase-timing (registered-telemetry/phase-timings
+                      (some-> (:phase-events/state raw-opts) deref))
+        timing (merge phase-timing
+                      {:wall-clock-ms (when elapsed-nanos
+                                        (quot elapsed-nanos 1000000))
+                       :started-at started-at
+                       :finished-at (str (Instant/now))})
+        usage (registered-telemetry/model-usage result)
+        refresh (or (some-> (:preference-refresh/state raw-opts) deref)
+                    {:absent :refresh-not-reached})
+        chronology (registered-telemetry/chronology-finish
+                    (:registered-run/chronology-start raw-opts) raw-opts refresh)]
     (if (seq route)
       (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
@@ -803,6 +820,9 @@
                                          (:observation-labels-path raw-opts) declaration-reads)
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
+                    :registered-run/timing timing
+                    :registered-run/model-usage usage
+                    :registered-run/chronology chronology
                     :selectorSeam "live:validated-selection"
                     :selection-event (habit-reinforcement/selection-event decision)
                     :habit-reinforcement (or (:habit-reinforcement result)
@@ -4362,7 +4382,7 @@
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
-  (let [phase-events (atom [])
+  (let [phase-events (or (:phase-events/state raw-opts) (atom []))
         d-task-dispatch (atom nil)
         author-dispatch-route (atom nil)
         {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
@@ -6560,12 +6580,18 @@
   (let [run-id (or (:run-id raw-opts)
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
+        nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
+        phase-events (atom [])
+        chronology-start (registered-telemetry/chronology-start raw-opts)
         raw-opts (assoc raw-opts :participants/state (atom nil)
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
                                 :scan-report/state (atom nil)
-                                :preference-refresh/state (atom nil))
+                                :preference-refresh/state (atom nil)
+                                :phase-events/state phase-events
+                                :run-timing/start-nanos (nano-time)
+                                :registered-run/chronology-start chronology-start)
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
