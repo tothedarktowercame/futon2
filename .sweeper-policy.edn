@@ -1,0 +1,5 @@
+;; Commands preceding each relevant test namespace selected by Street Sweeper.
+;; The sweeper appends: -n <namespace>. Each namespace runs in a fresh JVM.
+{:clojure-test-command
+ ["clojure" "-J-XX:ActiveProcessorCount=2" "-M:test"
+  "-m" "cognitect.test-runner"]}
