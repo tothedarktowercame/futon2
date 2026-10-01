@@ -181,6 +181,23 @@ admissible peripheral repair cascade for this problem because it lacks the
 seam and typed-event construction evidence.  This does not prohibit restart
 when a separately evidenced reload-safety boundary requires one.
 
+### Exemplar boundary
+
+Everything above is one hand-constructed, interactively specified exemplar.
+It proves that the proposed representations can express, interpret, and rank
+these cascades.  It is **not** evidence that the War Machine can construct a
+cascade for an arbitrary problem.
+
+The undischarged capability is a per-problem pipeline which searches a pinned
+snapshot of the whole `futon3/library`, selects and excludes candidates with
+reasons, constructs evidenced support/meet/precedence relations, derives an
+application interpretation and policy family, emits the construction receipt
+and Lean term, and proves equality with the runtime policy.  This must operate
+without interactive authorship of the answer; operator input may resolve a
+genuine ambiguity but cannot supply the construction that the capability is
+supposed to demonstrate.  The generated-receipt follow-up is recorded as a
+comment in `PeripheralCascadePolicies.lean`; it is not claimed as completed.
+
 ## Lean acceptance obligations
 
 1. Component occurrences refer to the pinned library.

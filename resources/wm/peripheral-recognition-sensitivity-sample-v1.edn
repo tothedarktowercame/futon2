@@ -1,5 +1,9 @@
 {:schema :wm/peripheral-recognition-sensitivity-sample-v1
- :status :lean-witness
+ :status :hand-constructed-lean-exemplar
+ :scope-warning
+ "This proves properties of one interactively constructed example. It is not evidence that the War Machine can perform retrieval, cascade construction, interpretation, or policy-family generation for a new problem."
+ :follow-up
+ "Per problem, search a pinned snapshot of the whole futon3/library; construct alternative occurrence cascades with evidenced support, meet, and precedence relations; derive their outcome semantics; record exclusions and provenance; generate the Lean term; and prove equality with the runtime policy."
  :purpose
  "Show that a concrete interpretation can recognise operational peripherals and that a fact-token abstraction can lose the distinction."
 
