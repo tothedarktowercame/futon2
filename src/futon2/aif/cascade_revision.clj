@@ -132,22 +132,42 @@
 (defn revise-from-blocker
   "Runner adapter. PROPOSALS-FN receives the pinned whole mission including
    :content and returns candidate maps. Absent ports refuse honestly."
-  [{:keys [mission construction blocker proposals-fn pattern-feedback]}]
+  [{:keys [mission construction blocker proposals-fn pattern-feedback
+           producer-context]}]
   (let [original (:selected-action construction)
         whole (whole-mission-context mission)]
     (try
-      (let [proposals (when (and (= context-schema (:schema whole))
-                                 (fn? proposals-fn))
-                        (proposals-fn {:target (:target original)
-                                       :original original
-                                       :blocker blocker
-                                       :whole-mission whole}))]
-        (revise {:original original
-                 :head-context (head-seed original)
-                 :whole-context whole
-                 :blocker blocker
-                 :proposals (or proposals [])
-                 :pattern-feedback pattern-feedback}))
+      (let [produced (cond
+                       (not= :cascade-candidate (:kind original))
+                       {:status :refused :kind :selected-action-not-provisional-cascade}
+
+                       (and (= context-schema (:schema whole)) (fn? proposals-fn))
+                       (proposals-fn
+                        (merge producer-context
+                               {:target (:target original)
+                                :original original
+                                :blocker blocker
+                                :whole-mission whole})))
+            production-refusal (when (and (map? produced)
+                                          (= :refused (:status produced)))
+                                 produced)
+            proposals (if (map? produced) (:candidates produced) produced)
+            result (revise {:original original
+                            :head-context (head-seed original)
+                            :whole-context whole
+                            :blocker blocker
+                            :proposals (or proposals [])
+                            :pattern-feedback pattern-feedback})]
+        (cond-> result
+          (map? produced)
+          (assoc :proposal-production
+                 (or (:receipt produced)
+                     (select-keys produced [:status :kind :detail :validation])))
+          production-refusal
+          (assoc :kind (:kind production-refusal)
+                 :repair-evidence
+                 {:status :present :reason (:kind production-refusal)
+                  :producer (dissoc production-refusal :candidates)})))
       (catch Exception e
         {:schema revision-schema :status :refused
          :kind :whole-mission-skim-failed

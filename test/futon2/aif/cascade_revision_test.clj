@@ -87,3 +87,27 @@
       (finally
         (doseq [file (reverse (file-seq dir))]
           (io/delete-file file true))))))
+
+(deftest producer-refusal-remains-a-typed-no-extension-repair
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "cascade-revision-refusal-test"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        mission-file (io/file dir "M-current.md")]
+    (try
+      (spit mission-file "# Mission\n")
+      (let [result
+            (revision/revise-from-blocker
+             {:mission {:id "M-current" :path (.getPath mission-file)}
+              :construction {:selected-action original}
+              :blocker blocker
+              :proposals-fn
+              (fn [_] {:status :refused
+                       :kind :raw-or-uninterpreted-revision-response})})]
+        (is (= :refused (:status result)))
+        (is (= :raw-or-uninterpreted-revision-response (:kind result)))
+        (is (= :present (get-in result [:repair-evidence :status])))
+        (is (= :raw-or-uninterpreted-revision-response
+               (get-in result [:proposal-production :kind]))))
+      (finally
+        (doseq [file (reverse (file-seq dir))]
+          (io/delete-file file true))))))

@@ -2870,7 +2870,23 @@
              {:mission (:mission-entry construction)
               :construction construction
               :blocker cascade-blocker
-              :proposals-fn (:cascade-revision-proposals-fn opts)
+              :proposals-fn (or (:cascade-revision-proposals-fn opts)
+                                (:cascade-revision-proposals-fn *runtime-defaults*))
+              :producer-context
+              {:evidence-root (some-> (:attempt-evidence-dir opts)
+                                      (io/file "cascade-revision"))
+               :ask!
+               (fn [prompt]
+                 (swap! dispatched-turns inc)
+                 (let [response ((or (:dispatch-fn opts) dispatch!)
+                                 opts author "wm-cascade-revision" target prompt)
+                       job ((or (:poll-fn opts) poll-job!) opts (:job-id response))]
+                   (when-not (= "done" (:state job))
+                     (throw (ex-info "Cascade revision interpretation did not complete"
+                                     {:outcome :incomplete
+                                      :failure-stage :cascade-revision-interpretation
+                                      :job job})))
+                   (job-text job)))}
               :pattern-feedback
               (or (get (:cascade-feedback-metadata opts) target)
                   (get (:cascade-feedback-metadata opts) :wm/global))})

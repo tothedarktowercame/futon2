@@ -25,7 +25,9 @@
                   (fn [days judge-opts]
                     (reset! seen [days judge-opts])
                     expected)]
-      (is (= expected ((:judge-fn (runtime/production-defaults opts)) 17)))
+      (let [defaults (runtime/production-defaults opts)]
+        (is (fn? (:cascade-revision-proposals-fn defaults)))
+        (is (= expected ((:judge-fn defaults) 17))))
       (is (= 17 (first @seen)))
       (is (= {:accumulation :configured
               :run-id "runtime-test"

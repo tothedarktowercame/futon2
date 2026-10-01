@@ -61,6 +61,7 @@
    'futon2.aif.cascade-sources "/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj"
    'futon2.aif.cascade-feedback "/home/joe/code/futon2/src/futon2/aif/cascade_feedback.clj"
    'futon2.aif.cascade-revision "/home/joe/code/futon2/src/futon2/aif/cascade_revision.clj"
+   'futon2.aif.cascade-revision-producer "/home/joe/code/futon2/src/futon2/aif/cascade_revision_producer.clj"
    'futon2.aif.cascade-problems "/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj"
    'futon2.aif.cascade-structure "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj"
    ;; --- click-path additions (runner-service -> full-loop-runner requires) ---
