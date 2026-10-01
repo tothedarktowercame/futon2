@@ -7,8 +7,10 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.candidate-derivations :as candidate-derivations]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-equivalence :as equivalence]
-            [futon2.aif.g-term-decomposition :as decomposition])
+            [futon2.aif.g-term-decomposition :as decomposition]
+            [futon2.aif.wm.terminal-receipt :as terminal-receipt])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
@@ -604,6 +606,133 @@
     (let [projection (admission-input-from-run-record (strict-edn bytes))]
       {:source-sha256 actual :projection projection
        :lean (render-admission projection actual)})))
+
+(defn enactment-grounding-input-from-run-record
+  "Project only the admitted selected/enacted identity and grounded runtime
+  receipt. Refused precision and token-observation subreceipts remain explicit
+  non-consumed exclusions."
+  [run-record]
+  (let [action (get-in run-record [:decision :selection-law :per-policy-argmax :action])
+        chosen (get-in run-record [:decision :chosen])
+        identity (select-keys action [:kind :id :target])
+        d-task (:d-task-enactment run-record)
+        verification (:verification d-task)
+        bridge (:candidate-to-minted-join verification)
+        scope (:scope verification)
+        grounded (:grounded-commit run-record)
+        terminal (:terminal-receipt run-record)
+        roles (get-in run-record [:participants :roles])
+        reviewer (get roles :reviewer-of-record)
+        configured-reviewer (get roles :configured-reviewer)
+        action-sha (action-identity/digest action)]
+    (when-not (and (= (:id action) (:id chosen) (:candidate chosen))
+                   (= (:target action) (:target chosen))
+                   (= identity (:identity bridge))
+                   (= :wm/selected-enacted-action-correspondence-v1 (:schema bridge))
+                   (= :verified (:status bridge))
+                   (= action-sha (:selected-action-sha256 bridge)
+                                 (:enacted-action-sha256 bridge)))
+      (refuse! :adapter/enactment-identity-mismatch
+               {:selected identity :chosen chosen :bridge bridge}))
+    (when-not (and (= :admitted (:status verification))
+                   (= :d-predecessor-task-authority-v1 (:authority verification)
+                      (:authority d-task))
+                   (= scope (:scope d-task))
+                   (= :executed-with-artifacts (:certifies scope))
+                   (= #{:e1-portfolio-membership :r6-r11-domain}
+                      (:does-not-establish scope)))
+      (refuse! :adapter/enactment-admission-mismatch
+               {:status (:status verification) :scope scope}))
+    (when-not (and (= {:status :refused
+                       :kind :precision-selected-declaration-unestablished}
+                      (:precision-verification verification))
+                   (= {:status :refused :kind :after-token-evidence-unavailable}
+                      (:token-observation-verification verification)))
+      (refuse! :adapter/refused-subreceipt-mismatch
+               {:precision (:precision-verification verification)
+                :token-observation (:token-observation-verification verification)}))
+    (when-not (and (map? grounded)
+                   (re-matches #"[0-9a-f]{40}" (:sha grounded ""))
+                   (string? (:repo grounded)) (not (str/blank? (:repo grounded)))
+                   (= grounded (:commit terminal))
+                   (= (:sha grounded) (get-in verification [:revision-pair :after])))
+      (refuse! :adapter/grounded-commit-mismatch
+               {:grounded grounded :terminal (:commit terminal)
+                :revision (get-in verification [:revision-pair :after])}))
+    (when-not (and (= :present (:status reviewer) (:status configured-reviewer))
+                   (= (:identity reviewer) (:identity configured-reviewer)
+                      (:reviewer terminal)))
+      (refuse! :adapter/reviewer-mismatch
+               {:reviewer reviewer :configured configured-reviewer
+                :terminal (:reviewer terminal)}))
+    (when-not (and (= {:absent :no-failure} (:failure run-record))
+                   (= terminal (terminal-receipt/validate-receipt terminal))
+                   (= (:terminal-receipt-digest run-record)
+                      (terminal-receipt/terminal-receipt-digest terminal))
+                   (= :action-receipt (:kind terminal))
+                   (= :grounded-progress (:outcome terminal))
+                   (= (:kind action) (:action-kind terminal))
+                   (= (:target action) (:target terminal))
+                   (= action (get-in terminal [:G :candidate])))
+      (refuse! :adapter/terminal-receipt-mismatch
+               {:failure (:failure run-record) :terminal terminal}))
+    {:runtime-source {:run-id (:run/id run-record)
+                      :click-id (:click/id run-record)
+                      :candidate identity}
+     :selected-action-sha256 action-sha
+     :enacted-action-sha256 (:enacted-action-sha256 bridge)
+     :commit (:sha grounded) :repository (:repo grounded)
+     :reviewer (:identity reviewer)
+     :outcome :grounded-progress
+     :precision-status :refused :token-observation-status :refused
+     :precision-consumed false :token-observation-consumed false}))
+
+(defn render-enactment-grounding [input source-sha]
+  (let [{:keys [selected-action-sha256 enacted-action-sha256 commit repository reviewer]}
+        input]
+    (str "import DarkTower.WarMachine.CertificateStates\n\n"
+         "/-! GENERATED FILE — DO NOT EDIT.\nSource SHA-256: " source-sha
+         "\nRuntime source: " (pr-str (:runtime-source input))
+         "\nScope: admitted execution/grounding correspondence only; refused precision and token observations are not consumed.\n-/\n\n"
+         "namespace DarkTower.WarMachine.RuntimeEnactmentGrounding\n"
+         "open DarkTower.WarMachine.CertificateStates\n\n"
+         "def selectedDigest : String := \"" selected-action-sha256 "\"\n"
+         "def enactedDigest : String := \"" enacted-action-sha256 "\"\n"
+         "def selectionEnaction : SelectionEnaction := .match selectedDigest enactedDigest\n"
+         "def groundedCommit : String := \"" commit "\"\n"
+         "def terminalCommit : String := \"" commit "\"\n"
+         "def groundedRepository : String := \"" repository "\"\n"
+         "def terminalRepository : String := \"" repository "\"\n"
+         "def reviewerOfRecord : String := \"" reviewer "\"\n"
+         "def terminalReviewer : String := \"" reviewer "\"\n"
+         "def executionAdmitted : Bool := true\n"
+         "def executedWithArtifacts : Bool := true\n"
+         "def terminalReceiptCount : Nat := 1\n"
+         "def failurePresent : Bool := false\n"
+         "def groundedProgress : Bool := true\n"
+         "def precisionRefused : Bool := true\n"
+         "def tokenObservationRefused : Bool := true\n"
+         "def precisionConsumed : Bool := false\n"
+         "def tokenObservationConsumed : Bool := false\n\n"
+         "theorem selected_enacted_exact : selectionEnaction = .match selectedDigest selectedDigest := rfl\n"
+         "theorem grounded_artifact_consistent : groundedCommit = terminalCommit ∧ groundedRepository = terminalRepository := ⟨rfl, rfl⟩\n"
+         "theorem reviewer_consistent : reviewerOfRecord = terminalReviewer := rfl\n"
+         "theorem admitted_grounded_unique_terminal_no_failure : executionAdmitted = true ∧ executedWithArtifacts = true ∧ groundedProgress = true ∧ terminalReceiptCount = 1 ∧ failurePresent = false := ⟨rfl, rfl, rfl, rfl, rfl⟩\n"
+         "theorem refused_subreceipts_not_consumed : precisionRefused = true ∧ tokenObservationRefused = true ∧ precisionConsumed = false ∧ tokenObservationConsumed = false := ⟨rfl, rfl, rfl, rfl⟩\n\n"
+         "#print axioms selected_enacted_exact\n"
+         "#print axioms grounded_artifact_consistent\n"
+         "#print axioms reviewer_consistent\n"
+         "#print axioms admitted_grounded_unique_terminal_no_failure\n"
+         "#print axioms refused_subreceipts_not_consumed\n"
+         "end DarkTower.WarMachine.RuntimeEnactmentGrounding\n")))
+
+(defn adapt-run-record-enactment-grounding-bytes [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (enactment-grounding-input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual :projection projection
+       :lean (render-enactment-grounding projection actual)})))
 
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))

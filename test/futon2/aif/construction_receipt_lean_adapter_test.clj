@@ -286,3 +286,51 @@
                               (assoc-in [:decision :selection-certificate
                                          :candidate-derivations :C2]
                                         derivation))))))))))
+
+(def enactment-grounding-record
+  "data/wm-runs/tick-run-record-2026-10-01-5a07d49b-4074-4372-958a-828c160513d3.edn")
+(def enactment-grounding-sha
+  "ef65928e8bd237cf1a26599bb9cb6ef78e2ae1186668f7c2104b88f08ad51a98")
+
+(deftest controlled-record-renders-enactment-grounding-certificate
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file enactment-grounding-record)))
+        adapted (adapter/adapt-run-record-enactment-grounding-bytes
+                 bytes enactment-grounding-sha)]
+    (is (= enactment-grounding-sha (:source-sha256 adapted)))
+    (is (= (get-in adapted [:projection :selected-action-sha256])
+           (get-in adapted [:projection :enacted-action-sha256])))
+    (is (= "0d91cc768f2a5b807c8c30edda7a131fbd2c6d52"
+           (get-in adapted [:projection :commit])))
+    (is (= "zai-1" (get-in adapted [:projection :reviewer])))
+    (is (false? (get-in adapted [:projection :precision-consumed])))
+    (is (false? (get-in adapted [:projection :token-observation-consumed])))
+    (is (.contains (:lean adapted) "selected_enacted_exact"))
+    (is (.contains (:lean adapted) "admitted_grounded_unique_terminal_no_failure"))
+    (is (.contains (:lean adapted) "refused_subreceipts_not_consumed"))
+    (is (not (.contains (:lean adapted) ":precedence")))))
+
+(deftest enactment-grounding-certificate-refuses-runtime-mutations
+  (let [record (read-string (slurp enactment-grounding-record))]
+    (testing "selected and enacted canonical digests must remain equal"
+      (is (= :adapter/enactment-identity-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record
+                                  [:d-task-enactment :verification
+                                   :candidate-to-minted-join :enacted-action-sha256]
+                                  (apply str (repeat 64 "0"))))))))
+    (testing "grounded, terminal and revision commits must agree"
+      (is (= :adapter/grounded-commit-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record [:terminal-receipt :commit :sha]
+                                  (apply str (repeat 40 "0"))))))))
+    (testing "the reviewer-of-record must be the terminal reviewer"
+      (is (= :adapter/reviewer-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record [:terminal-receipt :reviewer] "codex-11"))))))
+    (testing "a refused precision subreceipt cannot become unverified success"
+      (is (= :adapter/refused-subreceipt-mismatch
+             (refusal #(adapter/enactment-grounding-input-from-run-record
+                        (assoc-in record
+                                  [:d-task-enactment :verification
+                                   :precision-verification]
+                                  {:status :verified}))))))))
