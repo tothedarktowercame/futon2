@@ -6535,6 +6535,7 @@
         ;; registry, one substrate read apart, in this let)
         loaded-missions (mission-registry/load-missions)
         loaded-tickets (mission-registry/load-tickets)
+        loaded-excursions (mission-registry/load-excursions)
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
                             (mission-hole-wants/merge-into-sources
@@ -6555,7 +6556,7 @@
         substrate-tickets (map :id (filter mission-registry/live-ticket?
                                            (:tickets loaded-tickets)))
         cascade-targets
-        (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets)
+        (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets loaded-excursions)
                                (keys (:universes cascade-sources))
                                (map :target (:proposals cascade-proposal-supply))
                                (map :ticket (:entries ticket-queue-declaration)))))
@@ -6568,12 +6569,15 @@
            cascade-targets
            {:loaded-missions loaded-missions
             :loaded-tickets loaded-tickets
+            :loaded-excursions loaded-excursions
             :declared-files (:files cascade-sources)
             :proposals (:proposals cascade-proposal-supply)
             :declared-targets (keys (:universes cascade-sources))
             :proposal-targets (map :target (:proposals cascade-proposal-supply))
             :ticket-targets (concat substrate-tickets
-                                    (map :ticket (:entries ticket-queue-declaration)))})
+                                    (map :ticket (:entries ticket-queue-declaration)))
+            :excursion-targets (map :id (filter mission-registry/live-excursion?
+                                                (:excursions loaded-excursions)))})
           ;; the horizon is resolved after the flight's input and the
           ;; published interpretations are merged (resolve-cascade-horizon)
           :sources (cond-> cascade-sources

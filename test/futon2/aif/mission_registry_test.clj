@@ -255,6 +255,24 @@
     (is (= :inactive (get by-id "M-archived-compound"))
         "ARCHIVED-LEGACY classifies :inactive (prefix match catches compounds)")))
 
+(deftest operator-gated-status-is-not-selectable
+  (write-primary-mission! "futon7/holes/M-awaiting-joe.md"
+                          (str "**Status:** OPEN — awaiting Joe verbatims\n"
+                               "# Awaiting Joe\n"
+                               "- [ ] Draft the result\n"))
+  (write-primary-mission! "futon3/holes/M-acceptance-gate.md"
+                          (str "**Status:** HEAD complete; IDENTIFY active\n"
+                               "# Acceptance gate\n"
+                               "**Gate:** HEAD awaits operator acceptance.\n"))
+  (let [loaded (mr/load-missions *tmpdir*)
+        by-id (into {} (map (juxt :id identity) (:missions loaded)))]
+    (is (= :operator-gated (:status-class (get by-id "M-awaiting-joe"))))
+    (is (= :operator-gated (:status-class (get by-id "M-acceptance-gate"))))
+    (is (= ["**Gate:** HEAD awaits operator acceptance."]
+           (:operator-gate-lines (get by-id "M-acceptance-gate"))))
+    (is (empty? (mr/open-missions loaded))
+        "an explicit operator gate is observed but never proposed")))
+
 (deftest finding-2-bayesian-structure-learning-filtered-from-live-missions
   "The real mission that triggered Finding-2: M-bayesian-structure-learning
    has SUPERSEDED-AS-MISSION status and must be filtered from the live set."

@@ -141,7 +141,7 @@
    Keep each producer's complete after-locator, including its bound revision.
    Missing measurements remain missing; evaluation errors are evidence, never
    exceptions that prevent writing the close."
-  [{:keys [binding token-rows acceptance after-revision]}]
+  [{:keys [binding token-rows declared-tokens acceptance after-revision]}]
   (try
     (accepted-increment
      {:binding binding
@@ -153,6 +153,7 @@
                       [(:token row) (get-in row [:measurement :after-locator])]))
             token-rows)
       :acceptance acceptance
+      :declared-tokens declared-tokens
       :after-revision after-revision})
     (catch Exception e
       {:accepted? :refused

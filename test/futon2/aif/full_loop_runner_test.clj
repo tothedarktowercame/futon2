@@ -24,6 +24,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -43,6 +44,22 @@
 (def with-hermetic-traces runner-fixture/with-hermetic-traces)
 
 (use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)
+
+(deftest grounded-change-requires-the-enacted-closure-claim-test
+  (let [action {:target "M-example"
+                :precedence [{:id :p :produces #{["M-example" :hole/x]}}]}
+        data {:commit "abcdef0" :artifact-binding {:commit "abcdef0"}}
+        sources {:locators {"M-example" {:hole/x {:class :C4}}}}]
+    (with-redefs [cascade-sources/load-declared (constantly sources)
+                  cascade-sources/acceptance-of (fn [_] {:token :hole/x :locator {:class :C4}})
+                  accepted-increment/accepted-increment (constantly {:accepted? false :failed :b})]
+      (is (= :grounded-progress
+             (runner/classify-grounded-outcome :grounded-change action data))))
+    (with-redefs [cascade-sources/load-declared (constantly sources)
+                  cascade-sources/acceptance-of (fn [_] {:token :hole/x :locator {:class :C4}})
+                  accepted-increment/accepted-increment (constantly {:accepted? true})]
+      (is (= :grounded-change
+             (runner/classify-grounded-outcome :grounded-change action data))))))
 
 (defn- without-live-wm-status
   [f]
@@ -765,6 +782,17 @@
     (is (= :delivery-qa-gate-failed
            (get-in result [:data :sorry :kind])))
     (is (= :close (get-in result [:data :failure-stage])))))
+
+(deftest provider-capacity-is-a-bounded-infrastructure-retry
+  (is (true? (runner/author-infrastructure-failure?
+              {:state "failed" :artifact-ref nil :terminal-code "error"
+               :terminal-message "The selected model is at capacity"
+               :events []})))
+  (is (false? (runner/author-infrastructure-failure?
+               {:state "failed" :artifact-ref "abc1234" :terminal-code "error"
+                :terminal-message "The selected model is at capacity"
+                :events []}))
+      "an invocation that already bound an artifact is never silently retried"))
 
 (deftest invoke-exception-author-job-is-retried-once
   ;; Replays attempt-043: Agency rejected transcript persistence after tool
@@ -6016,7 +6044,8 @@
         discharge (first (filter #(= :discharge (:entity/type %)) (vals @docs)))
         root (.toFile (Files/createTempDirectory "mission-brief-" (make-array FileAttribute 0)))]
     (is (= mission-id (#'runner/selected-target entry)))
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result))
+        "a grounded commit without mechanically accepted declared products is progress, not closure")
     (is (= [mission-id] @mission-reads))
     (is (str/includes? (first @prompts) (str "SELECTED TARGET: " (pr-str mission-id))))
     (is (str/includes? (first @prompts) "Shared posterior updater"))

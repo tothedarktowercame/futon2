@@ -96,10 +96,11 @@
    :excursion
    {:dir "excursions"
     :file-pattern #".*/holes/excursions/(E-[^/]+)\.md$"
-    :contract-source :declared-by-this-check
-    :contract-pointer nil
-    :candidate-types #{}
-    :enumerator nil}
+    :contract-source :code
+    :contract-pointer "src/futon2/aif/mission_registry.clj:load-excursions"
+    :candidate-types #{:advance-excursion}
+    :enumerator {:proposer :excursion-enumerator
+                 :pointer "src/futon2/aif/mission_registry.clj:excursion-enumerator-proposer"}}
    :ticket
    {:dir "tickets"
     :file-pattern #".*/holes/tickets/(T-[^/]+)\.md$"

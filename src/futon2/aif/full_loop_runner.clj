@@ -1529,11 +1529,19 @@
                             (filter #(= "failed" (:type %)))
                             last
                             :code)
-        failure-code (or (:terminal-code job) event-code)]
+        failure-code (or (:terminal-code job) event-code)
+        failure-text (str/lower-case
+                      (str (:terminal-message job) " "
+                           (str/join " " (keep #(or (:text %) (:message %))
+                                                (:events job)))))]
     (and (= "failed" (:state job))
          (nil? (:artifact-ref job))
-         (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"}
-                    failure-code))))
+         (or (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"
+                          "model-capacity" "provider-overloaded"}
+                        failure-code)
+             (boolean
+              (re-find #"selected model is at capacity|model.*capacity|provider.*overload|temporarily unavailable"
+                       failure-text))))))
 
 (defn interpretation-ask-classifier
   "PROOF-2b (click 17): the target classifier the ask selection uses — the
@@ -2514,6 +2522,39 @@
     (catch Exception e
       {:status :absent :reason :criterion-rendering-failed :message (.getMessage e)})))
 
+(defn classify-grounded-outcome
+  "Distinguish a reviewed, grounded increment from closure of the enacted
+   step's declared products.  `:grounded-change` is retained for a change
+   whose declared products and target acceptance are mechanically true;
+   `:grounded-progress` names an honest reviewed commit that did not close
+   them.  Cascades declaring no products retain the legacy outcome because
+   there is no closure claim to test."
+  [requested-outcome selected-action data]
+  (if-not (= :grounded-change requested-outcome)
+    requested-outcome
+    (let [{:keys [pattern]} (enacted-step-pattern selected-action)
+          target (:target (or (:selected-action selected-action) selected-action))
+          declared (vec (:produces pattern))]
+      (if (empty? declared)
+        requested-outcome
+        (let [sources (cascade-sources/load-declared)
+              bare (mapv #(if (vector? %) (second %) %) declared)
+              locators (into {}
+                             (for [token bare
+                                   :let [locator (get-in sources [:locators target token])]
+                                   :when locator]
+                               [token locator]))
+              verdict (accepted-increment/accepted-increment
+                       {:binding (or (:artifact-binding data)
+                                     (get-in data [:validation :artifact-binding]))
+                        :produced-tokens locators
+                        :declared-tokens bare
+                        :acceptance (cascade-sources/acceptance-of target)
+                        :after-revision (:commit data)})]
+          (if (true? (:accepted? verdict))
+            :grounded-change
+            :grounded-progress))))))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
@@ -2544,9 +2585,13 @@
           nil)]
     (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
-       "Implement one bounded, substantive advancement of the selected War Machine action. "
+       "Implement the enacted step of the selected War Machine action. "
        "This is NOT a request for a fold-turn deposit, wiring diagram, report-only artifact, "
-       "or prose claiming that work could be done. Change the actual mission/code world.\n\n"
+       "or prose claiming that work could be done. Change the actual mission/code world. "
+       "A declared produced token is a closure claim, not an aspiration: mark it true only "
+       "when its stated locator is mechanically satisfied. If a bounded parcel can make "
+       "real progress but cannot close the enacted step, leave the token false and state "
+       "that limitation; the run will record grounded progress rather than closure.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
        "TARGET REPOSITORY: " (pr-str target-repository) "\n"
        "TARGET REPOSITORY BASE HEAD: " (pr-str target-repository-head) "\n"
@@ -2559,7 +2604,10 @@
        "actions nested in the mission record are context, not permission to commit in "
        "another repository; a commit elsewhere is an artifact-binding mismatch. If the "
        "target repository is unresolved or the parcel cannot be completed there, make no "
-       "commit and REFUSE with a typed reason.\n"
+       "commit and REFUSE with a typed reason. Generated artifacts must be a fixed point: "
+       "run each generator twice before committing and require the second run to leave no "
+       "diff. Time-dependent output is a build failure, not something for build-cure to "
+       "discover after the first commit.\n"
        "MISSION RECORD: "
        (pr-str (if (:repair/id mission)
                  (first (prompt-findings [mission]))
@@ -2896,6 +2944,11 @@
                 (assoc :repo-observed-artifact-ref revision-commit
                        :artifact-binding (:artifact-binding revision-build)
                        :revision-of (:job-id author-job)))
+            re-review-prompt-text
+            (revision-reviewer-prompt
+             (assoc opts :reviewer reviewer)
+             target construction repo commit revision-commit
+             effective-author-job review-job stop-lines)
             re-review-response
             (run-phase!
              opts phase-context :re-review-dispatch
@@ -2903,14 +2956,25 @@
                 (swap! dispatched-turns inc)
                 ((or (:dispatch-fn opts) dispatch!) opts reviewer
                  "wm-full-loop" target
-                 (revision-reviewer-prompt
-                  (assoc opts :reviewer reviewer)
-                  target construction repo commit revision-commit
-                  effective-author-job review-job stop-lines))))
-            re-review-job
+                 re-review-prompt-text)))
+            initial-re-review-job
             (run-phase!
              opts phase-context :re-review-wait
              #((or (:poll-fn opts) poll-job!) opts (:job-id re-review-response)))
+            retry-re-review? (author-infrastructure-failure? initial-re-review-job)
+            retry-re-review-response
+            (when retry-re-review?
+              (run-phase!
+               opts phase-context :re-review-retry-dispatch
+               #(do (swap! dispatched-turns inc)
+                    ((or (:dispatch-fn opts) dispatch!) opts reviewer
+                     "wm-full-loop" target re-review-prompt-text))))
+            re-review-job
+            (if retry-re-review?
+              (run-phase! opts phase-context :re-review-retry-wait
+                          #((or (:poll-fn opts) poll-job!) opts
+                            (:job-id retry-re-review-response)))
+              initial-re-review-job)
             _ (throw-if-cancelled! re-review-job :re-review-wait)
             re-review-gate
             (review-execution-gate (:files revision-build) re-review-job)
@@ -4447,6 +4511,10 @@
                        (= :historical-verification-awaiting-validation outcome)
                        selection-judgment (get-in @checkpoints [:selection :judgment])
                        selected-action (:selected-action selection-judgment)
+                       ;; The caller knows that a reviewed commit was grounded;
+                       ;; the located declarations decide whether that commit
+                       ;; closed the enacted step or only progressed it.
+                       outcome (classify-grounded-outcome outcome selected-action data)
                        selected-entry (when selected-action
                                         {:action selected-action
                                          :controller-score
@@ -4458,7 +4526,7 @@
                                         (repair-class-for
                                          (or (:failure-kind data) outcome)))
                        finding
-                       (when-not (or (= :grounded-change outcome)
+                       (when-not (or (#{:grounded-change :grounded-progress} outcome)
                                      admitted-verification?
                                      ;; PROOF-2b click 14: the author
                                      ;; reported the want already satisfied
@@ -4530,11 +4598,15 @@
                                    {:tier (cond
                                             (= :grounded-change outcome)
                                             :fully-grounded
+                                            (= :grounded-progress outcome)
+                                            :grounded-progress
                                             (:commit data) :partial-authored
                                             :else :none)
                                     :summary (cond
                                                (= :grounded-change outcome)
                                                "Independently reviewed and grounded change"
+                                               (= :grounded-progress outcome)
+                                               "Independently reviewed and grounded progress; declared closure remains false"
                                                (:commit data)
                                                "Authored commit exists but the loop is incomplete"
                                                admitted-verification?
@@ -4544,7 +4616,7 @@
                                     :adjudication
                                     (get-in @checkpoints [:adjudication :judgment])}
                                    :failure
-                                   (when-not (or (= :grounded-change outcome)
+                                   (when-not (or (#{:grounded-change :grounded-progress} outcome)
                                                  admitted-verification?)
                                      (cond-> {:kind (or (:failure-kind data) outcome)
                                               :stage (or (:failure-stage data)
@@ -4579,7 +4651,7 @@
                          (seq (:reviews data))
                          (assoc :reviews (:reviews data))
 
-                         (and (= :grounded-change outcome)
+                         (and (#{:grounded-change :grounded-progress} outcome)
                               (:feature-card data))
                          (assoc :feature-card (:feature-card data)))
                        brief-ref ((or (:queue-fn opts) brief/queue-item!) brief-item)
@@ -4787,7 +4859,7 @@
                            (get-in token-comparison [:receipt :learning-trial-receipt])}))
                        close-judgment-base
                        (merge {:outcome outcome
-                               :grounded? (= :grounded-change outcome)
+                               :grounded? (boolean (#{:grounded-change :grounded-progress} outcome))
                                :artifact-only? (= :artifact-only outcome)
                                :occurrence @action-occurrence
                                :outcome-entity outcome-entity
@@ -4972,7 +5044,7 @@
                                                  (when closed-event
                                                    (str (name (:cohort/id closed-event)) "--" attempt-id)))
                                  :run/id (:run-id opts) :closed-at (:recorded-at closed-event)
-                                 :grounded? (= :grounded-change outcome)}
+                                 :grounded? (boolean (#{:grounded-change :grounded-progress} outcome))}
                          :artifact {:repo (get-in data [:artifact-binding :repo]) :commit (:commit data)}
                          :artifact-binding (:artifact-binding data)
                          :files (get-in @checkpoints [:build :judgment :artifacts])
@@ -5948,6 +6020,10 @@
                          :artifact-binding/failed-commits
                          (vec (keep :failed-commit stop-lines))})
                       _ (reset! measurement-artifact {:repository repo :commit commit :paths files})
+                      reviewer-prompt-text
+                      (reviewer-prompt (assoc prompt-opts :reviewer reviewer)
+                                       target construction repo commit
+                                       author-job stop-lines)
                       review-response
                       (run-phase!
                        opts (cond-> @phase-context
@@ -5962,10 +6038,8 @@
                             (swap! dispatched-turns inc)
                             ((or (:dispatch-fn opts) dispatch!) opts reviewer
                              "wm-full-loop" target
-                             (reviewer-prompt (assoc prompt-opts :reviewer reviewer)
-                                              target construction repo commit
-                                              author-job stop-lines)))))
-                      review-job
+                             reviewer-prompt-text))))
+                      initial-review-job
                       (if deferred-review-job
                         deferred-review-job
                         (try
@@ -5984,6 +6058,22 @@
                                               :repository repo
                                               :files files})
                                       e)))))
+                      retry-review? (and (not deferred-review-job)
+                                         (author-infrastructure-failure?
+                                          initial-review-job))
+                      retry-review-response
+                      (when retry-review?
+                        (run-phase!
+                         opts @phase-context :reviewer-retry-dispatch
+                         #(do (swap! dispatched-turns inc)
+                              ((or (:dispatch-fn opts) dispatch!) opts reviewer
+                               "wm-full-loop" target reviewer-prompt-text))))
+                      review-job
+                      (if retry-review?
+                        (run-phase! opts @phase-context :reviewer-retry-wait
+                                    #((or (:poll-fn opts) poll-job!) opts
+                                      (:job-id retry-review-response)))
+                        initial-review-job)
                       _ (throw-if-cancelled! review-job :reviewer-wait)
                       review-gate (review-execution-gate files review-job)
                       initial-commit commit

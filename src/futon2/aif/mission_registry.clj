@@ -35,6 +35,12 @@
 (def ^:private status-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
 
+(def ^:private operator-gate-pattern
+  #"(?i)(?:\b(?:await(?:ing)?|pending)\b[^.\n;|]{0,120}\bJoe\b|\bJoe\b[^.\n;|]{0,120}\b(?:acceptance|decision|input|ratification|verbatim|gate)\b|\bratification\s*=\s*Joe\b)")
+
+(def ^:private gate-line-pattern
+  #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Gate:?(?:\*\*)?\s*:?\s*(.+)$")
+
 (def ^:private unchecked-task-pattern
   #"^\s*[-*]\s+\[\s\]\s+\S.*$")
 
@@ -116,6 +122,12 @@
         head  (or (re-find #"[A-Z][A-Z-]*" lead) "")
         prefix? (fn [coll] (some #(str/starts-with? head %) coll))]
     (cond
+      ;; An operator gate is not ordinary work-in-flight.  The machine may
+      ;; observe it, but must not select it until the named operator acts.
+      ;; This is deliberately read from the declared Status field rather than
+      ;; guessed from arbitrary prose elsewhere in the document.
+      (re-find operator-gate-pattern (or status-line ""))
+      :operator-gated
       (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")            :draft
       (= "DRAFT" head)                                                  :draft
       ;; Finding-2 (E-live-loop-3): prefix match catches compound forms
@@ -212,12 +224,30 @@
                             (when-let [[_ status] (re-matches status-line-pattern line)]
                               status))
                           (take 20 lines))
-        status-class (classify-status status-line)]
+        gate-lines (->> lines
+                        (keep (fn [line]
+                                (cond
+                                  (and (re-matches status-line-pattern line)
+                                       (re-find operator-gate-pattern line))
+                                  (str/trim line)
+
+                                  :else
+                                  (when-let [[_ gate] (re-matches gate-line-pattern line)]
+                                    (when (re-find #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b" gate)
+                                      (str/trim line))))))
+                        distinct
+                        vec)
+        operator-gated? (boolean (seq gate-lines))
+        status-class (if operator-gated?
+                       :operator-gated
+                       (classify-status status-line))]
     {:id mission-id
      :path path
      :title (mission-title-from-lines mission-id lines)
      :status-line status-line
      :status-class status-class
+     :operator-gated? operator-gated?
+     :operator-gate-lines gate-lines
      :open-holes (open-holes mission-id status-class lines)
      :open-hole-count (open-hole-count mission-id status-class lines)}))
 
@@ -273,6 +303,9 @@
          :mission/title (:title entry)
          :mission/status-line (:status-line entry)
          :mission/status-class (some-> (:status-class entry) name)
+         :mission/operator-gated? (when (:operator-gated? entry) true)
+         :mission/operator-gate-lines (when (seq (:operator-gate-lines entry))
+                                        (vec (:operator-gate-lines entry)))
          :mission/open-hole-count (some-> (:open-hole-count entry) long)
          ;; The items the count summarises. Until 2026-09-20 only the total was
          ;; stored, so every mission's stated remaining work was recomputed and
@@ -419,6 +452,8 @@
      :status-class (if-some [sc (:mission/status-class props)]
                      (keyword sc)
                      :unknown)
+     :operator-gated? (true? (:mission/operator-gated? props))
+     :operator-gate-lines (vec (or (:mission/operator-gate-lines props) []))
      :open-hole-count (long (or (:mission/open-hole-count props) 0))
      :open-holes (vec (or (:mission/open-holes props) []))
      ;; A stored count with no stored items means this entity predates hole
@@ -497,8 +532,9 @@
   "True when a loaded mission entry is eligible for WM `:open-mission`
    enumeration/ranking."
   [mission]
-  (not (contains? #{:complete :inactive :draft}
-                  (:status-class mission))))
+  (and (not (:operator-gated? mission))
+       (not (contains? #{:complete :inactive :draft :operator-gated}
+                       (:status-class mission)))))
 
 (defn open-missions
   "Filter loaded missions to those that are live. Zero-arg variant

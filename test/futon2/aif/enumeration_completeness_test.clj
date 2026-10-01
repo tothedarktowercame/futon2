@@ -129,24 +129,21 @@
     (is (= :live (:status-class (ec/classify-doc-status "# M\n\nno status line\n")))
         "an unreadable or absent status keeps the item in the queue")))
 
-(deftest kind-without-a-proposer-is-a-typed-absence-test
-  (testing "excursions have no proposer, so their whole population
-            is outside the selector's view -- typed, with the pointer to the
-            proposer list that omits them, and never counted as agreement"
+(deftest excursion-proposer-participates-in-completeness-test
+  (testing "excursions are an ordinary enumerated target kind"
     (spit (doto (io/file *root* "repo" "holes" "excursions" "E-one.md")
             io/make-parents)
           "# E-one\n")
-    (let [c (ec/compare-kind (ec/scan-population :excursion *root*) [])]
-      (is (= :kind-not-enumerated (:verdict c)))
-      (is (= :no-proposer-for-kind (:reason c)))
+    (let [c (ec/compare-kind (ec/scan-population :excursion *root*)
+                             [{:action {:type :advance-excursion :target "E-one"}}])]
+      (is (= :complete (:verdict c)))
+      (is (nil? (:reason c)))
       (is (= 1 (:available-count c)))
-      (is (= 0 (:enumerated-count c)))
-      (is (= ec/proposer-list-pointer (:pointer (:enumerator c)))
-          "the absence points at the code that would have to change"))))
+      (is (= 1 (:enumerated-count c)))
+      (is (= :excursion-enumerator (get-in c [:enumerator :proposer]))))))
 
-(deftest record-verdict-ignores-unenumerated-kinds-test
-  (testing "a kind with no proposer can neither green nor red the record: it is
-            carried in :typed-kind-absences where a reader counts it"
+(deftest record-verdict-covers-all-three-target-kinds-test
+  (testing "mission, excursion and ticket kinds all participate"
     (mission! "repo" "M-live" "ACTIVE")
     (spit (doto (io/file *root* "repo" "holes" "tickets" "T-one.md")
             io/make-parents)
@@ -154,7 +151,7 @@
     (let [r (ec/completeness-record [(candidate "M-live") {:action {:type :advance-ticket :target "T-one"}}] {:code-root *root*})]
       (is (= :complete (:verdict r))
           "the one kind that HAS a proposer agrees with its scan")
-      (is (= #{:excursion} (set (map :kind (:typed-kind-absences r)))))
+      (is (empty? (:typed-kind-absences r)))
       (is (= :complete (some #(when (= :ticket (:kind %)) (:verdict %))
                              (:kinds r)))
           "tickets now participate in completeness"))))

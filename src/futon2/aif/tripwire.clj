@@ -115,17 +115,39 @@
     (catch Throwable e
       {:tripwire/unreadable? true :tripwire/error (.getMessage e)})))
 
+(def ^:private repair-snapshot-cache
+  "Parsed repair snapshots keyed by root.  Phase telemetry asks for this at
+   every boundary; reparsing every immutable EDN object made emitting a phase
+   materially slower than the phase itself.  A cheap inventory of relative
+   path, size and mtime invalidates the cache whenever the store changes."
+  (atom {}))
+
+(defn- repair-inventory [root]
+  (vec
+   (sort
+    (for [child repair-children
+          file (or (.listFiles (io/file root child)) [])
+          :when (and (.isFile file) (str/ends-with? (.getName file) ".edn"))]
+      [(str child "/" (.getName file)) (.length file) (.lastModified file)]))))
+
 (defn repair-snapshot
   "Immutable audit snapshot of the repair-record directories, including dispositions."
   ([] (repair-snapshot repair/default-root))
   ([root]
-   (into {}
-         (for [child repair-children
-               file (or (.listFiles (io/file root child)) [])
-               :when (and (.isFile file) (str/ends-with? (.getName file) ".edn"))]
-           (let [relative (str child "/" (.getName file))]
-             [relative {:sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
-                        :record (read-record file)}])))))
+   (let [root (.getAbsolutePath (io/file root))
+         inventory (repair-inventory root)
+         cached (get @repair-snapshot-cache root)]
+     (if (= inventory (:inventory cached))
+       (:snapshot cached)
+       (let [snapshot
+             (into {}
+                   (for [[relative _ _] inventory
+                         :let [file (io/file root relative)]]
+                     [relative {:sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
+                                :record (read-record file)}]))]
+         (swap! repair-snapshot-cache assoc root
+                {:inventory inventory :snapshot snapshot})
+         snapshot)))))
 
 (defn- effective-statuses [snapshot]
   (reduce (fn [statuses [_ {:keys [record]}]]

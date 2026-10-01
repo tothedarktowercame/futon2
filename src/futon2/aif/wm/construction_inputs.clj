@@ -49,19 +49,25 @@
   them. Sources are copied from records already read by the report; no path or
   item line is guessed from a target id. Conflicting byte authorities produce
   one typed conflict row retaining every claim."
-  [targets {:keys [loaded-missions loaded-tickets declared-files proposals
-                   declared-targets proposal-targets ticket-targets]}]
+  [targets {:keys [loaded-missions loaded-tickets loaded-excursions
+                   declared-files proposals declared-targets proposal-targets
+                   ticket-targets excursion-targets]}]
   (let [missions (into {} (map (juxt :id identity)
                                (mission-registry/open-missions loaded-missions)))
         tickets-by-id (group-by :id (filter mission-registry/live-ticket?
                                             (:tickets loaded-tickets)))
+        excursions-by-id (into {} (map (juxt :id identity)
+                                       (filter mission-registry/live-excursion?
+                                               (:excursions loaded-excursions))))
         declared-by-id (group-by :target declared-files)
         proposals-by-id (group-by :target proposals)
         declared (set declared-targets)
         proposals (set proposal-targets)
-        tickets (set ticket-targets)]
+        tickets (set ticket-targets)
+        excursions (set excursion-targets)]
     (mapv (fn [target]
             (let [mission (get missions target)
+                  excursion (get excursions-by-id target)
                   ticket-claims (mapv (fn [ticket]
                                         (let [item? (or (some? (:item-line ticket))
                                                         (= :item-section (:source-kind ticket)))]
@@ -84,6 +90,7 @@
                   ;; the same target without becoming a competing source claim.
                   claims (cond
                            mission [{:source-kind :head :source-path (:path mission)}]
+                           excursion [{:source-kind :head :source-path (:path excursion)}]
                            (and (tickets target) (seq ticket-claims)) ticket-claims
                            (and (declared target) (seq declared-claims)) declared-claims
                            (and (proposals target) (seq proposal-claims)) proposal-claims
@@ -105,6 +112,7 @@
 
                 :else
                 (let [kind (cond (tickets target) :item-section
+                                 (excursions target) :head
                                  (declared target) :inline-bytes
                                  (proposals target) :inline-bytes
                                  mission :head
