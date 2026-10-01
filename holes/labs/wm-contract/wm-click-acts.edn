@@ -1,0 +1,140 @@
+;; War Machine click acts, observed 2026-10-01.
+;; Code source: futon2 c228a362928ccd064b3a4c12460ebf88516f9eca.
+;; Receipt controls: data/wm-runs/tick-run-record-2026-10-01-9cc46d2e-184e-4a97-aa25-aedb383ec426.edn
+;; (sha256 8fe42ee7b5633d18deeb4b58a9c4c08f2107dd4cbf033665d2460671909563fa)
+;; and tick-run-record-2026-10-01-af6aa80e-24a7-468c-b4d1-7418982a1afd.edn
+;; (sha256 3471ceb23739b48bbe611e5b48bed64beb0ab36e4e093228ed35632adf831ac2).
+;; Stage/R-node names come from p4ng/empirics-futon/control-stages.edn;
+;; :nearest-intent is from futon3.turnfeed.core/intent-mark at futon3 ea8af8e.
+{:schema :wm/click-act-vocabulary-v1
+ :observed-at "2026-10-01"
+ :row-contract
+ {:required [:act/id :description :emitted-at :receipt-paths :loop/stage
+             :control/r-node :nearest-intent :operator-addressed?]
+  :operator-addressed?-meaning
+  "True only when the act presents the operator with a proposal or report that can receive a response. Agent dispatches are false."}
+ :acts
+ [{:act/id :wm.act/observe-world
+   :description "Capture the selectable task sets, enumerated candidates, pattern-library digest, and available seats."
+   :emitted-at {:ns "futon2.aif.selection-world" :fn "capture"
+                :file "src/futon2/aif/selection_world.clj" :line 86}
+   :receipt-paths [[:world-at-selection] [:registered-run/critical-parameters]]
+   :loop/stage :PERCEIVE :control/r-node :R2
+   :nearest-intent :none :operator-addressed? false}
+
+  {:act/id :wm.act/select-policy
+   :description "Score the admitted cascade policies and commit to the recorded winner or a typed no-selection result."
+   :emitted-at {:ns "futon2.aif.policy" :fn "select-action-cascades"
+                :file "src/futon2/aif/policy.clj" :line 338}
+   :receipt-paths [[:decision :selection-law] [:decision :selection-certificate]
+                   [:selection-event]]
+   :loop/stage :SELECT :control/r-node :R6
+   :nearest-intent :prioritize :operator-addressed? false}
+
+  {:act/id :wm.act/request-interpretation
+   :description "Ask once for an interpretation when selection cannot admit a target and the refusal has a known class."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "run-opportunity-core!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 5449}
+   :receipt-paths [[:interpretation-ask]]
+   :loop/stage :PERCEIVE :control/r-node :R7
+   :nearest-intent :clarify :operator-addressed? true}
+
+  {:act/id :wm.act/abstain
+   :description "Stop without selecting when the selector or its gate returns a typed refusal or no acting candidate."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "run-opportunity-core!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 5402}
+   :receipt-paths [[:decision :abstention] [:terminal-receipt] [:failure]]
+   :loop/stage :SELECT :control/r-node :R6
+   :nearest-intent :none :operator-addressed? false}
+
+  {:act/id :wm.act/construct-cascade
+   :description "Materialize the selected cascade's precedence, interpretation receipts, and enactable action."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "construct-for-decision"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 1928}
+   :receipt-paths [[:decision :chosen] [:terminal :selected-action]
+                   [:d-task-enactment :scope :selected-action]]
+   :loop/stage :SELECT :control/r-node :R13
+   :nearest-intent :propose :operator-addressed? false}
+
+  {:act/id :wm.act/dispatch-author
+   :description "Send the selected, bound task to the author seat for execution."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "dispatch!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 1389
+                :call-site-line 6015}
+   :receipt-paths [[:terminal :author-job] [:d-task-enactment :dispatch]]
+   :loop/stage :ACT :control/r-node :R16
+   :nearest-intent :delegate :operator-addressed? false}
+
+  {:act/id :wm.act/dispatch-reviewer
+   :description "Send the authored revision and its evidence to the independent reviewer seat."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "dispatch!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 1389
+                :call-site-line 6164}
+   :receipt-paths [[:terminal :review-job] [:terminal :reviews]]
+   :loop/stage :ACT :control/r-node :R9
+   :nearest-intent :verify :operator-addressed? false}
+
+  {:act/id :wm.act/verify-review
+   :description "Check that the reviewer supplied independent execution evidence and an admissible verdict."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "independent-review-evidence"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 2342}
+   :receipt-paths [[:terminal :review-gate] [:terminal :reviews]]
+   :loop/stage :ACT :control/r-node :R9
+   :nearest-intent :verify :operator-addressed? false}
+
+  {:act/id :wm.act/ground-change
+   :description "Ground the reviewed commit against the target and close with whether the intended dial actually moved."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "run-opportunity-core!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 6391}
+   :receipt-paths [[:terminal :witness] [:grounded-commit]
+                   [:terminal-receipt] [:d-task-enactment]]
+   :loop/stage :ACT :control/r-node :R16
+   :nearest-intent :continue :operator-addressed? false}
+
+  {:act/id :wm.act/repair-machine-failure
+   :description "Represent a retained machine failure as an explicit selectable repair action with its discharge contract."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "repair-entry"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 1747}
+   :receipt-paths [[:decision :chosen] [:repair/discharge]
+                   [:repair/publication]]
+   :loop/stage :SELECT :control/r-node :R17
+   :nearest-intent :redirect :operator-addressed? false}
+
+  {:act/id :wm.act/refresh-preferences
+   :description "Refresh the post-run preference and mission-freshness inputs used by the next decision."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "refresh-record"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 4332}
+   :receipt-paths [[:refresh] [:registered-run/chronology]]
+   :loop/stage :BELIEVE :control/r-node :R3
+   :nearest-intent :none :operator-addressed? false}
+
+  {:act/id :wm.act/publish-selection-trace
+   :description "Publish the retained selection judgment and its accumulation receipts to the WM trace store."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "publish-selection-trace!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 4363}
+   :receipt-paths [[:traceWritten] [:route]]
+   :loop/stage :ACT :control/r-node :TRACE
+   :nearest-intent :report :operator-addressed? false}
+
+  {:act/id :wm.act/queue-failure-brief
+   :description "Queue an operator-visible brief item when initialization stops the run before ordinary work begins."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "run-opportunity-core!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 6693}
+   :receipt-paths [[:morning-brief-ref] [:failure]]
+   :loop/stage :ACT :control/r-node :R16
+   :nearest-intent :report-problem :operator-addressed? true}
+
+  {:act/id :wm.act/record-run-receipt
+   :description "Atomically write the terminal click record, including timing, usage, decision, route, failure, and terminal receipt."
+   :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "persist-run-record!"
+                :file "src/futon2/aif/full_loop_runner.clj" :line 766}
+   :receipt-paths [[:run/id] [:registered-run/timing] [:terminal-receipt]]
+   :loop/stage :ACT :control/r-node :TRACE
+   :nearest-intent :none :operator-addressed? false}]
+ :known-non-click-acts
+ [{:act/id :wm.act/emit-futility-nag
+   :reason "lane_futility/dry-run-bulletins emits only :dry-run? true records today; it is not claimed as a live click act."
+   :source {:file "src/futon2/aif/lane_futility.clj" :line 317}}
+  {:act/id :wm.act/emit-brief-or-silent
+   :reason "nag/brief/silent presentation exists in reporting and bulletin paths, but no current full-loop click emission site records those three as a click act."}]}
+
