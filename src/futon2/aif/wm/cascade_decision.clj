@@ -1227,6 +1227,47 @@
              :evidence (assoc evidence :terminal-wanted-belief projected
                               :new-wanted-tokens new-wanted)}))))))
 
+(defn- witnessed-relation?
+  [units relation]
+  (and (map? relation)
+       (contains? units (:from relation))
+       (contains? units (:to relation))
+       (set? (:tokens relation))
+       (seq (:tokens relation))))
+
+(defn- machine-construction-relations-valid?
+  "Fail-closed PROOF-2b relation contract for a receipt which claims it was
+  machine-constructed. Hand-admitted and fixture receipts do not acquire this
+  claim retroactively."
+  [precedence receipt]
+  (if (not= :machine-constructed (:kind receipt))
+    true
+    (let [relations (:relations receipt)
+          units (set precedence)
+          support (get-in relations [:support :relations])
+          meet (get-in relations [:meet :relations])
+          generative (get-in relations [:precedence :relations])
+          path-valid? (fn [path]
+                        (and (vector? path)
+                             (every? #(witnessed-relation? units %) path)))
+          meet-valid? (fn [{:keys [pair meet evidence]}]
+                        (and (vector? pair) (= 2 (count pair))
+                             (every? units pair) (contains? units meet)
+                             (map? evidence)
+                             (path-valid? (:left-path evidence))
+                             (path-valid? (:right-path evidence))))]
+      (and (= :computed (:status relations))
+           (= :produced-token-consumed-by-guard (get-in relations [:support :basis]))
+           (vector? support) (every? #(witnessed-relation? units %) support)
+           (= :greatest-common-descendant (get-in relations [:meet :basis]))
+           (vector? meet) (every? meet-valid? meet)
+           (vector? (get-in relations [:meet :missing]))
+           (= :generative-support (get-in relations [:precedence :basis]))
+           (vector? generative) (= support generative)
+           (= precedence (get-in relations [:precedence :linear-extension]))
+           (vector? (get-in relations [:precedence :violations]))
+           (empty? (get-in relations [:precedence :violations]))))))
+
 (defn- admit-cascade-problem
   "Check every executable order before lane construction or scoring. Keep each
   rejection with its target and missing evidence; never replace it with []."
@@ -1241,6 +1282,10 @@
                                 (not (and (vector? precedence) (seq precedence)))
                                 (conj :nonempty-precedence)
                                 (nil? construction-receipt) (conj :construction-receipt)
+                                (and (map? construction-receipt)
+                                     (not (machine-construction-relations-valid?
+                                           precedence construction-receipt)))
+                                (conj :construction-relations)
                                 (some #(not (map? (get patterns %))) precedence)
                                 (conj :pattern-interpretation)
                                 (or (not (seq receipts))
@@ -1252,6 +1297,7 @@
                                :reason (cond
                                          (some #{:nonempty-precedence} missing) :empty-cascade
                                          (some #{:construction-receipt} missing) :construction-receipt-unmatched
+                                         (some #{:construction-relations} missing) :machine-construction-relations-invalid
                                          :else :interpretation-receipts-missing)
                                :missing-evidence missing}}
                     (if-let [no-progress (candidate-want-progress (:cascade-problem problem) precedence)]

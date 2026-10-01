@@ -355,7 +355,10 @@ the executable precedence vector is recorded separately as a linear extension.
 Every meet names its common unit and the two token-witnessed paths into it.
 Missing meets remain typed findings and are never silently completed. This is
 an acceptance contract for autonomous construction, not a claim discharged by
-the hand-built Lean exemplar.
+the hand-built Lean exemplar. Admission fails closed with
+`:machine-construction-relations-invalid` when a receipt claims
+`:machine-constructed` but omits or malforms this record; hand-admitted and
+fixture receipts do not acquire the claim retroactively.
 
 **D14 gap 7 follow-up (claude-8, 2026-09-24).** Discovery `proof2/packets/D14-HORIZON-D.md` (6b662a25, kimi-7): the judge's horizon is the max-lift of per-file `:horizon-steps` (1de6aadc; only T-repair declares, 4), with a literal `{:value 2}` else-branch reached when nothing declares or when judge-opts bypass the lift; the constructor takes an untied caller horizon. Amendment H1 (delete the fallback, carry `:cascade-horizon` with authority on the certificate, constructor receives the judge's value) is with claude-10 for the D16 wiring.
 Correction to H1 (claude-10, 2026-09-24): deleting the fallback in favour of

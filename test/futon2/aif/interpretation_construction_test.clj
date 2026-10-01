@@ -87,7 +87,18 @@
     (testing "the real admission check catches the named bad case"
       (let [bad (admit (update (first (:problems assembled)) :interpretation-receipts dissoc :P))]
         (is (nil? (:problem bad)))
-        (is (= :interpretation-receipts-missing (get-in bad [:declines 0 :reason])))))))
+        (is (= :interpretation-receipts-missing (get-in bad [:declines 0 :reason])))))
+    (testing "machine-constructed is a fail-closed relation claim"
+      (doseq [damage [#(update % :construction-receipt dissoc :relations)
+                      #(assoc-in % [:construction-receipt :relations :support :relations 0 :tokens] #{})]]
+        (let [bad-problem (update (first (:problems assembled)) :constructed-candidates
+                                  (fn [cs] (mapv damage cs)))
+              bad (admit bad-problem)]
+          (is (nil? (:problem bad)))
+          (is (= :machine-construction-relations-invalid
+                 (get-in bad [:declines 0 :reason])))
+          (is (= [:construction-relations]
+                 (get-in bad [:declines 0 :missing-evidence]))))))))
 
 (deftest limits-and-economics-are-not-overridden
   (doseq [[edit kind] [[#(dissoc % :budget) :budget-required]
