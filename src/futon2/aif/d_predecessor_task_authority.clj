@@ -27,6 +27,8 @@
 (def scope {:certifies :executed-with-artifacts
             :does-not-establish #{:e1-portfolio-membership :r6-r11-domain
                                   :machine-enactment-correspondence}})
+(def verified-scope
+  (update scope :does-not-establish disj :machine-enactment-correspondence))
 (defn- refuse! [kind data]
   (throw (ex-info "D task predecessor refused" (assoc data :d-predecessor/refusal kind))))
 (defn- require! [p kind data] (when-not p (refuse! kind data)))
@@ -47,21 +49,30 @@
 (defn capture
   "Retain the minted occurrence and declaration bytes before dispatch.
    No pre-side token mapping is inferred from interpretation facts."
-  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id precision-family]}]
+  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id
+           precision-family selected-action]}]
   (retention/validate-occurrence occurrence)
   (require! (and (string? carry-occurrence-id) (set? universe)) :carry-identity-unavailable {})
-  {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
-   :carry-occurrence-id carry-occurrence-id :universe universe
-   :r6-candidate-occurrence candidate-id :candidate-to-minted-join :not-established
-   :before before :before-evidence :not-measured
-   :precision-family (when precision-family
-                       (precision-carry/validate-binding! precision-family occurrence))
-   :declarations
-   (mapv (fn [{:keys [path sha256]}]
-           (let [bytes (file-bytes path)]
-             (require! (= sha256 (sha bytes)) :declaration-changed-before-dispatch {:path path})
-             {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
-         (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))})
+  (require! (= selected-action (:action/value occurrence))
+            :selected-enacted-action-mismatch {})
+  (let [action-sha256 (identity/digest selected-action)
+        action-identity (select-keys selected-action [:kind :id :target])]
+    {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
+     :carry-occurrence-id carry-occurrence-id :universe universe
+     :r6-candidate-occurrence candidate-id
+     :candidate-to-minted-join
+     {:schema :wm/selected-enacted-action-correspondence-v1
+      :status :verified :identity action-identity
+      :selected-action-sha256 action-sha256 :enacted-action-sha256 action-sha256}
+     :before before :before-evidence :not-measured
+     :precision-family (when precision-family
+                         (precision-carry/validate-binding! precision-family occurrence))
+     :declarations
+     (mapv (fn [{:keys [path sha256]}]
+             (let [bytes (file-bytes path)]
+               (require! (= sha256 (sha bytes)) :declaration-changed-before-dispatch {:path path})
+               {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
+           (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
 
 (defn- artifact-tokens
   "Revision-pair C3/C4 affirmations. Other check classes remain explicit
@@ -125,14 +136,26 @@
     (refuse! :task-execution-incomplete {}))
   (let [{:keys [dispatch repository artifact-binding files revision-pair]} record
         occurrence (retention/validate-occurrence (:occurrence dispatch))
+        enacted-action (:action/value occurrence)
+        correspondence (:candidate-to-minted-join dispatch)
         author (read-job (get-in record [:author-job :job-id]))
         reviewer (read-job (get-in record [:review-job :job-id]))
         before (:before dispatch)
         final (:commit artifact-binding)]
     (require! (= occurrence (:occurrence expected)) :occurrence-mismatch {})
+    (require! (= (:selected-action expected) enacted-action)
+              :selected-enacted-action-mismatch {})
     (require! (= (:carry-occurrence-id expected) (:carry-occurrence-id dispatch)) :carry-occurrence-mismatch {})
     (require! (= (:universe expected) (:universe dispatch)) :carry-domain-changed {})
-    (require! (= :not-established (:candidate-to-minted-join dispatch)) :unestablished-identity-join {})
+    (let [action-sha256 (identity/digest enacted-action)]
+      (require! (and (= :wm/selected-enacted-action-correspondence-v1
+                        (:schema correspondence))
+                     (= :verified (:status correspondence))
+                     (= (select-keys enacted-action [:kind :id :target])
+                        (:identity correspondence))
+                     (= action-sha256 (:selected-action-sha256 correspondence)
+                                      (:enacted-action-sha256 correspondence)))
+                :selected-enacted-correspondence-invalid {}))
     (require! (and (= :task (:enactment-grain record))
                    (= :declared-kernel-of-verified-macro-action (:b-authority record)))
               :kernel-authority-mismatch {})
@@ -196,9 +219,9 @@
           present (set (map :token affirmations))]
       (require! (= replayed (:after-token-evidence record)) :after-token-evidence-mismatch {})
       (require! (seq present) :after-token-evidence-unavailable {})
-      {:status :admitted :authority authority :scope scope
+      {:status :admitted :authority authority :scope verified-scope
        :occurrence occurrence :carry-occurrence-id (:carry-occurrence-id dispatch)
-       :candidate-to-minted-join :not-established
+       :candidate-to-minted-join correspondence
        :r6-candidate-occurrence (:r6-candidate-occurrence dispatch)
        :enactment-grain :task :b-authority :declared-kernel-of-verified-macro-action
        :declared-action (:action/value occurrence)
@@ -273,7 +296,8 @@
 
 (defn context [decision occurrence declaration-reads]
   (let [carry (get-in decision [:selection-certificate :token-belief-stage :prospective-carry])]
-    {:occurrence occurrence :carry-occurrence-id (:occurrence-id carry)
+    {:occurrence occurrence :selected-action (:action decision)
+     :carry-occurrence-id (:occurrence-id carry)
      :universe (:universe carry)
      :precision-family (get-in decision [:selection-certificate :precision-family])
      :candidate-id (or (:r6-candidate-occurrence decision) (:selected/occurrence-id decision))
@@ -284,7 +308,8 @@
   (let [record (claim inputs)
         verification (verify record expected read-job)
         source (write-claim! root record)]
-    {:authority authority :scope scope :verification verification :source source}))
+    {:authority authority :scope (:scope verification)
+     :verification verification :source source}))
 
 (defn capture-result [inputs]
   (try {:status :captured :dispatch (capture inputs)}

@@ -5882,6 +5882,12 @@
                            (assoc @d-task-context
                                   :declaration-reads (some-> (:declaration-reads/state opts) deref)
                                   :before pre-author-head)))
+                _ (when-not (= :captured (:status @d-task-dispatch))
+                    (throw (ex-info "Selected action could not be bound to the D task dispatch"
+                                    {:outcome :incomplete
+                                     :failure-kind (:kind @d-task-dispatch)
+                                     :failure-stage :author-dispatch
+                                     :d-task-dispatch @d-task-dispatch})))
                 author-prompt-text
                 (prompt-for-head pre-author-head)
                 author-response

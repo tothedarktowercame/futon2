@@ -47,7 +47,8 @@
            _ (spit file (pr-str declaration))
            pins [{:path file :sha256 (evidence/sha256 (java.nio.file.Files/readAllBytes (.toPath (io/file file))))}]
            dispatch (task/capture {:occurrence (:occurrence expected) :carry-occurrence-id "carry"
-                                     :universe effects :declaration-reads pins
+                                     :universe effects :selected-action action
+                                     :declaration-reads pins
                                      :before (get-in inputs [:dispatch :before])})
              author (assoc-in (jobs "author-job") [:events 0 :text] (task/prompt-binding dispatch))
              reviewer (assoc-in (jobs "review-job") [:events 0 :text]

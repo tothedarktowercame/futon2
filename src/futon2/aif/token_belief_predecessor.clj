@@ -55,11 +55,14 @@
    (task/read-predecessor task/default-root expected task/agency-job)))
 
 (defn- valid-authority? [a inspection]
-  (and (= task/authority (:authority a)) (= task/scope (:scope a))
+  (and (= task/authority (:authority a))
+       (= (if (= :admitted (:status a)) task/verified-scope task/scope) (:scope a))
        (case (:status a)
          :admitted (and (= (get-in inspection [:task-context :occurrence]) (:occurrence a))
                         (= (get-in inspection [:task-context :carry-occurrence-id]) (:carry-occurrence-id a))
-                        (= :not-established (:candidate-to-minted-join a))
+                        (= :verified (get-in a [:candidate-to-minted-join :status]))
+                        (= (get-in inspection [:task-context :selected-action])
+                           (:declared-action a))
                         (= :task (:enactment-grain a))
                         (= :declared-kernel-of-verified-macro-action (:b-authority a))
                         (string? (:record-sha256 a)) (string? (get-in a [:source :sha256])))

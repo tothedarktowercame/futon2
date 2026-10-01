@@ -3,6 +3,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.close-retention :as retention]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -67,7 +68,9 @@
             pins [{:path (str declaration)
                    :sha256 (evidence/sha256 (Files/readAllBytes (.toPath declaration)))}]
             dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"
-                                    :universe (or (:universe opts) #{[target :artifact]}) :declaration-reads pins :before before})
+                                    :universe (or (:universe opts) #{[target :artifact]})
+                                    :selected-action action
+                                    :declaration-reads pins :before before})
             _ (spit (io/file repo "created.clj") "(ns created)\n")
             _ (git! repo "add" "created.clj")
             _ (git! repo "-c" "user.name=D fixture"
@@ -86,6 +89,7 @@
             inputs {:dispatch dispatch :artifact-binding binding :author-job author
                     :review-job reviewer :files ["created.clj"] :repository (str repo) :route :fresh-author}
             expected {:occurrence occurrence :carry-occurrence-id "carry"
+                      :selected-action action
                       :universe (or (:universe opts) #{[target :artifact]}) :declaration-pins pins}]
         ;; Only repository location and external Agency read ports are local;
         ;; producer, verifier, Git, occurrence and observation checks are real.
@@ -103,7 +107,11 @@
        (is (= :admitted (get-in produced [:verification :status])))
        (is (= :admitted (:status reread)))
        (is (= :executed-with-artifacts (get-in reread [:scope :certifies])))
-       (is (= :not-established (:candidate-to-minted-join reread)))
+       (is (not (contains? (get-in reread [:scope :does-not-establish])
+                           :machine-enactment-correspondence)))
+       (is (= :verified (get-in reread [:candidate-to-minted-join :status])))
+       (is (= (get-in reread [:candidate-to-minted-join :selected-action-sha256])
+              (get-in reread [:candidate-to-minted-join :enacted-action-sha256])))
        (is (= :not-measured (:before-evidence reread)))
        (is (= #{["target" :artifact]} (:present reread)))
        (is (= :declared-kernel-of-verified-macro-action (:b-authority reread)))
@@ -137,6 +145,31 @@
               (:kind (task/verify record expected (assoc-in jobs ["review-job" :agent-id] "author")))))
        (is (not= :admitted (:status (check (assoc-in record [:artifact-binding :commit]
                                                     (get-in inputs [:dispatch :before :head]))))))))))
+
+(deftest selected-and-enacted-payload-mutations-refuse
+  (with-artifact
+   (fn [{:keys [inputs expected jobs]}]
+     (let [action (:selected-action expected)
+           mismatch (task/capture-result
+                     (assoc (:dispatch inputs)
+                            :occurrence (:occurrence expected)
+                            :selected-action (assoc action :target "other-target")
+                            :declaration-reads []))]
+       (is (= :selected-enacted-action-mismatch (:kind mismatch))))
+     (let [record (task/claim inputs)
+           forged-dispatch (assoc-in (:dispatch inputs)
+                                     [:candidate-to-minted-join :enacted-action-sha256]
+                                     (action-identity/digest
+                                      (assoc (:selected-action expected) :target "other-target")))
+           binding (task/prompt-binding forged-dispatch)
+           jobs (-> jobs
+                    (assoc-in ["author-job" :events 0 :text] binding)
+                    (assoc-in ["review-job" :events 0 :text]
+                              (str binding "\nReview " (get-in inputs [:artifact-binding :commit])
+                                   "\nRepository: " (:repository inputs))))]
+       (is (= :selected-enacted-correspondence-invalid
+              (:kind (task/verify (assoc record :dispatch forged-dispatch)
+                                  expected jobs))))))))
 
 (deftest refusal-is-preserved-by-persistence
   (with-artifact
@@ -223,6 +256,7 @@
   (let [fixture (edn/read-string (slurp "test/fixtures/tick-b-enactment.edn"))
         dispatch (:dispatch fixture)
         expected {:occurrence (:occurrence dispatch)
+                  :selected-action (get-in dispatch [:occurrence :action/value])
                   :carry-occurrence-id (:carry-occurrence-id dispatch)
                   :universe (:universe dispatch)}
         jobs (into {} (map (juxt :job-id identity)
@@ -243,7 +277,7 @@
           (is (true? (get-in claim [:artifact-binding :fresh-author?])))
           (is (= :request-changes (execution/review-verdict (:review-job claim))))
           ;; Preserve the real next refusal; never turn a rejected run green.
-          (is (= :job-occurrence-binding-unestablished
+          (is (= :selected-enacted-correspondence-invalid
                  (get-in result [:verification :kind])))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
