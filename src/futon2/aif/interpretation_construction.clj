@@ -4,6 +4,7 @@
   first-enabled model. Model reachability is not an observed discharge."
   (:require [futon2.aif.load-identity :as load-identity]
             [clojure.set :as set]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.construction :as construction]
@@ -194,7 +195,7 @@
   or interpreter is called. Receipts report :token-set-not-supplied to the existing
   construction policy: supplying observation locators/check policies is later work."
   [{:keys [target want observation interpretations interpretation-receipts
-           budget horizon move-cost evaluate-g] :as input}]
+           budget horizon move-cost evaluate-g pattern-feedback] :as input}]
   (cond
     (not (and (map? budget) (integer? (:max-moves budget)) (<= 0 (:max-moves budget))
               (pos-int? (:max-expansions budget)))) (refuse :budget-required)
@@ -234,6 +235,18 @@
                                      :interpretation-receipts
                                      (select-keys interpretation-receipts (:precedence c)))))
               family (vec (filter #(finite? (:g (g-raw %))) (:family supported)))
+              feedback-prior
+              (memoize #(cascade-feedback/pattern-evidence-prior
+                         pattern-feedback %))
+              ;; Feedback ranks proposals at construction time, while the
+              ;; selector independently consumes the same evidence as E.
+              ;; G itself remains the certified EFE arithmetic.
+              family (if pattern-feedback
+                       (vec (sort-by (fn [c]
+                                       [(- (:log-factor (feedback-prior c)))
+                                        (pr-str (:precedence c))])
+                                     family))
+                       family)
               move (fn [current]
                              (if (= family current)
                                {:status :no-move :move-id :compose-by-need :reason :family-already-constructed}
@@ -332,7 +345,7 @@
                                                 :want (vec want)
                                                 :construction-receipt
                                                 (let [order (construction/containment-order c)]
-                                                  (assoc receipt
+                                                  (cond-> (assoc receipt
                                                        :unreached-wants (:unreached-wants c)
                                                        ;; clause 0: this
                                                        ;; candidate's
@@ -342,7 +355,10 @@
                                                        ;; :cyclic-containment
                                                        ;; refusal)
                                                        :order order
-                                                       :relations (construction/relation-witnesses c order)))
+                                                       :relations (construction/relation-witnesses c order))
+                                                    pattern-feedback
+                                                    (assoc :pattern-feedback-prior
+                                                           (feedback-prior c))))
                                                 :interpretation-receipts
                                                 (select-keys interpretation-receipts (:precedence c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))

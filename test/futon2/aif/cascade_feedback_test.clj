@@ -4,7 +4,8 @@
             [futon2.aif.cascade-feedback :as feedback]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.interpretation-construction :as construction]
-            [futon2.aif.locator-fixtures :as locfix]))
+            [futon2.aif.locator-fixtures :as locfix]
+            [futon2.aif.policy :as policy]))
 
 (def action
   {:kind :cascade-candidate
@@ -66,8 +67,13 @@
     (is (empty? (get-in receipt [:patterns :positive-reinforcement])))))
 
 (deftest blocked-application-is-repair-evidence-not-reinforcement
-  (let [receipt (feedback/receipt
+  (let [revision {:schema :wm/provisional-cascade-revision-v1
+                  :status :refused
+                  :kind :no-distinct-whole-mission-proposal
+                  :repair-evidence {:status :present}}
+        receipt (feedback/receipt
                  (input :outcome :grounded-progress
+                        :cascade-revision revision
                         :accepted-increment
                         {:accepted? false
                          :reason :declared-product-not-observed-true
@@ -81,7 +87,8 @@
     (is (= :declared-product-not-observed-true
            (get-in receipt [:blocker :kind])))
     (is (= :patterns/applied
-           (get-in receipt [:blocker :repair-evidence 0 :pattern])))))
+           (get-in receipt [:blocker :repair-evidence 0 :pattern])))
+    (is (= revision (:cascade-revision receipt)))))
 
 (deftest next-construction-receives-retained-pattern-feedback
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
@@ -138,3 +145,65 @@
       (finally
         (doseq [file (reverse (file-seq dir))]
           (io/delete-file file true))))))
+
+(deftest verified-feedback-changes-the-unchanged-policy-choice-through-e
+  (let [entry (fn [id]
+                {:action {:kind :cascade-candidate :id id :target "M-current"
+                          :precedence [{:id id :target "M-current"}]}
+                 :controller-score 1.0 :certificate {:f nil}})
+        entries [(entry :patterns/a) (entry :patterns/b)]
+        metadata {:wm/global
+                  {:schema feedback/metadata-schema
+                   :scope :global
+                   :global-patterns
+                   {:patterns/a {:successful-applications 0
+                                 :incomplete-applications 3
+                                 :selected-only 9}
+                    :patterns/b {:successful-applications 2
+                                 :incomplete-applications 0
+                                 :selected-only 0}}}}
+        before (policy/select-action-cascades entries {:beta 1})
+        after (policy/select-action-cascades entries
+                                             {:beta 1 :pattern-feedback metadata})
+        habits (get-in after [:selection-certificate :policies])]
+    (is (= :patterns/a (get-in before [:action :id]))
+        "the unchanged tied menu uses the declared action-name tie-break")
+    (is (= :patterns/b (get-in after [:action :id]))
+        "verified global feedback changes the posterior, not mission state")
+    (is (= 1.0 (reduce + (map :habit habits))))
+    (is (= :verified-application-beta11-likelihood-ratio
+           (get-in after [:selection-certificate :candidates 0
+                          :habit-provenance :pattern-feedback :basis])))
+    (is (= :none
+           (get-in after [:selection-certificate :candidates 0
+                          :habit-provenance :pattern-feedback
+                          :selected-only-effect])))))
+
+(deftest construction-ranks-proposals-with-the-same-receipted-evidence
+  (let [metadata {:schema feedback/metadata-schema :target "M-current"
+                  :global-patterns
+                  {:patterns/a {:successful-applications 0
+                                :incomplete-applications 2}
+                   :patterns/b {:successful-applications 2
+                                :incomplete-applications 0}}}
+        result (construction/construct
+                {:target "M-current" :want [:done]
+                 :observation {:done false}
+                 :interpretations
+                 {:patterns/a {:guard {:needs #{} :forbids #{}} :produces #{:done}}
+                  :patterns/b {:guard {:needs #{} :forbids #{}} :produces #{:done}}}
+                 :interpretation-receipts
+                 {:patterns/a {:source :test} :patterns/b {:source :test}}
+                 :horizon 1 :move-cost 0
+                 :budget {:max-moves 2 :max-expansions 20}
+                 :pattern-feedback metadata
+                 :evaluate-g (fn [candidate]
+                               {:value (if (seq (:precedence candidate)) 1.0 2.0)
+                                :universe [:done]})})]
+    (is (= :constructed (:status result)))
+    (is (= [[:patterns/b] [:patterns/a]]
+           (mapv :precedence (:candidates result))))
+    (is (> (get-in result [:candidates 0 :construction-receipt
+                           :pattern-feedback-prior :factor])
+           (get-in result [:candidates 1 :construction-receipt
+                           :pattern-feedback-prior :factor])))))

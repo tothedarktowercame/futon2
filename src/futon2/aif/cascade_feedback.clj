@@ -37,7 +37,7 @@
    positive evidence only when that step's increment was accepted on a
    grounded close.  Other selected patterns remain :selected-only."
   [{:keys [run-id target selected-action outcome failure accepted-increment
-           d-task-enactment artifact]}]
+           d-task-enactment cascade-revision artifact]}]
   (let [target (or target (:target selected-action))
         selected (selected-patterns selected-action)
         step (get-in accepted-increment [:criterion-step :id])
@@ -82,6 +82,9 @@
                          :applications (cond-> [] application (conj application))
                          :selected-only selected-only
                          :positive-reinforcement (if success? [step] [])}
+              :cascade-revision
+              (or cascade-revision
+                  {:status :absent :reason :no-mid-run-cascade-revision})
               :blocker (if blocker-kind
                          {:status :present
                           :kind blocker-kind
@@ -146,19 +149,15 @@
 
 (defn construction-metadata
   "Project retained close receipts into target-local construction metadata.
-   Counts separate successful, incomplete, and selected-only evidence."
+   Counts separate successful, incomplete, and selected-only evidence. Every
+   target also receives the global pattern counts: pattern experience may
+   transfer across missions, while the target-local counts remain visible."
   [snapshot]
-  (into {}
-        (for [[target events] (group-by :target (:events snapshot))]
-          (let [selected (mapcat #(get-in % [:patterns :selected]) events)
-                applications (mapcat #(get-in % [:patterns :applications]) events)
-                by-pattern (group-by :pattern applications)
-                ids (set/union (set selected) (set (keys by-pattern)))]
-            [target
-             {:schema metadata-schema
-              :target target
-              :receipt-count (count events)
-              :patterns
+  (letfn [(counts [events]
+            (let [selected (mapcat #(get-in % [:patterns :selected]) events)
+                  applications (mapcat #(get-in % [:patterns :applications]) events)
+                  by-pattern (group-by :pattern applications)
+                  ids (set/union (set selected) (set (keys by-pattern)))]
               (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
                     (for [id ids
                           :let [apps (get by-pattern id [])]]
@@ -169,9 +168,87 @@
                            :selected-only
                            (count (filter #(some #{id}
                                                   (get-in % [:patterns :selected-only]))
-                                          events))}]))
-              :latest (select-keys (last events)
-                                   [:receipt/id :run/id :mission-state :blocker :artifact])}]))))
+                                          events))}]))))]
+    (let [all-events (:events snapshot)
+          global (counts all-events)]
+      (cond->
+       (into {}
+             (for [[target events] (group-by :target all-events)]
+               [target
+                {:schema metadata-schema
+                 :target target
+                 :receipt-count (count events)
+                 :patterns (counts events)
+                 :global-patterns global
+                 :latest (select-keys (last events)
+                                      [:receipt/id :run/id :mission-state :blocker
+                                       :cascade-revision :artifact])}]))
+        (seq global)
+        (assoc :wm/global
+               {:schema metadata-schema :scope :global
+                :receipt-count (count all-events)
+                :patterns global :global-patterns global})))))
+
+(defn pattern-evidence-prior
+  "A generic empirical prior for one provisional cascade. Successful verified
+   applications and incomplete verified applications are the only counts.
+   Merely selected patterns have no effect. Each evidenced pattern receives
+   the posterior-mean likelihood ratio against the neutral Beta(1,1) mean;
+   the cascade factor is their geometric mean, avoiding a length bonus."
+  [metadata candidate]
+  (let [counts (or (:global-patterns metadata) (:patterns metadata) {})
+        ids (->> (:precedence candidate)
+                 (map #(if (map? %) (:id %) %))
+                 (remove nil?) distinct vec)
+        rows (vec
+              (keep (fn [id]
+                      (let [{:keys [successful-applications incomplete-applications]}
+                            (get counts id)
+                            s (long (or successful-applications 0))
+                            f (long (or incomplete-applications 0))]
+                        (when (pos? (+ s f))
+                          (let [factor (/ (* 2.0 (inc s)) (+ s f 2.0))]
+                            {:pattern id :successful s :incomplete f
+                             :factor factor :log-factor (Math/log factor)}))))
+                    ids))
+        log-factor (if (seq rows)
+                     (/ (reduce + (map :log-factor rows)) (double (count rows)))
+                     0.0)]
+    {:schema :wm/pattern-evidence-prior-v1
+     :basis :verified-application-beta11-likelihood-ratio
+     :selected-only-effect :none
+     :patterns rows
+     :log-factor log-factor
+     :factor (Math/exp log-factor)}))
+
+(defn attach-pattern-evidence
+  "Multiply ENTRY's already-attached habit mass by the pattern evidence prior.
+   G is deliberately untouched: this is AIF's empirical E term, not a hidden
+   addition to the certified expected-free-energy decomposition."
+  [metadata entry]
+  (let [prior (pattern-evidence-prior metadata (:action entry))]
+    (-> entry
+        (update :habit (fnil * 1.0) (:factor prior))
+        (assoc-in [:habit-provenance :pattern-feedback] prior))))
+
+(defn attach-pattern-evidence-menu
+  "Apply pattern evidence to a whole candidate menu and renormalize E."
+  [metadata-by-target entries]
+  (let [adjusted
+        (mapv #(attach-pattern-evidence
+                (or (get metadata-by-target (get-in % [:action :target]))
+                    (get metadata-by-target :wm/global)
+                    metadata-by-target)
+                %)
+              entries)
+        total (reduce + 0.0 (map #(double (:habit %)) adjusted))]
+    (if (pos? total)
+      (mapv #(-> %
+                 (update :habit / total)
+                 (assoc-in [:habit-provenance :pattern-feedback :normalization]
+                           {:menu-total total :status :normalized}))
+            adjusted)
+      entries)))
 
 (defn load-construction-metadata
   ([] (load-construction-metadata default-path))

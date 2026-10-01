@@ -40,6 +40,9 @@
   "Run one production opportunity with the report-backed defaults installed."
   [opts]
   (let [opts (update opts :cascade-feedback-path
-                     #(or % cascade-feedback/default-path))]
+                     #(or % cascade-feedback/default-path))
+        opts (update opts :cascade-feedback-metadata
+                     #(or % (cascade-feedback/load-construction-metadata
+                             (:cascade-feedback-path opts))))]
     (binding [runner/*runtime-defaults* (production-defaults opts)]
       (runner/run-opportunity! opts))))

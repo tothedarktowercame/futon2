@@ -56,4 +56,5 @@
                     :ran)]
       (is (= :ran (runtime/run-opportunity! {:run-id "feedback-default"})))
       (is (= cascade-feedback/default-path
-             (:cascade-feedback-path @seen))))))
+             (:cascade-feedback-path @seen)))
+      (is (map? (:cascade-feedback-metadata @seen))))))

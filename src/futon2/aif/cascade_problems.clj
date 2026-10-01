@@ -127,7 +127,8 @@
   [sources horizon target universe patterns want base-problem]
   (when-let [{:keys [construct budget move-cost evaluate-g]} (:construction sources)]
     (let [receipts (or (get-in sources [:interpretations target :receipts]) {})
-          feedback (get-in sources [:pattern-feedback target])
+          feedback (or (get-in sources [:pattern-feedback target])
+                       (get-in sources [:pattern-feedback :wm/global]))
           tokens (problem-tokens universe want patterns)
           unknown (sort-by pr-str (filter #(= :unknown (get universe %)) tokens))
           observation (into {} (for [t tokens :let [v (get universe t)]
@@ -194,8 +195,11 @@
                       :locators locators
                       :token-initialization (get-in sources [:token-initialization target])}]
     (cond-> problem
-      (get-in sources [:pattern-feedback target])
-      (assoc :pattern-feedback (get-in sources [:pattern-feedback target]))
+      (or (get-in sources [:pattern-feedback target])
+          (get-in sources [:pattern-feedback :wm/global]))
+      (assoc :pattern-feedback
+             (or (get-in sources [:pattern-feedback target])
+                 (get-in sources [:pattern-feedback :wm/global])))
       (and (map? slice) (not (seq patterns))) (assoc :query-time-slice slice))))
 
 (defn base-problem

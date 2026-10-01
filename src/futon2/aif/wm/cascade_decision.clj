@@ -1094,6 +1094,7 @@
                                       (:policy-prefixes token-belief-input))
                                     {:beta (:beta beta-state) :beta-state beta-state
                                      :cascade-habit-path (:cascade-habit-path opts)
+                                     :pattern-feedback (:pattern-feedback opts)
                                      ;; WM-HABIT-FOLD-CALL-I: judge's fold
                                      :enactment-fold (:enactment-fold opts)
                                      :ticket-queue (:ticket-queue opts)

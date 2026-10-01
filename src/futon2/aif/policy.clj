@@ -17,6 +17,7 @@
    Contract: contributes to R6 (softmax action selection) per
    `futon2/docs/futon-aif-completeness.md`."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.parameter-novelty :as novelty]
@@ -400,6 +401,7 @@
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
   [ranked-actions {:keys [beta beta-state enactment-fold habit-state near-tie-threshold novelty-inputs
+                                 pattern-feedback
                                  ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
@@ -420,15 +422,28 @@
         e-input (if replay? (:state habit-state) enactment-fold)
         e-label (if replay? :recorded-run :enactment-fold)
         fold-state ((requiring-resolve 'futon2.aif.cascade-prior/coerce-state) e-input)
-        e-source {:source e-label
-                  :records (count (:enactment-records fold-state))
-                  :samples (:samples fold-state)
-                  :uniform (zero? (:samples fold-state))}
+        e-source (cond-> {:source e-label
+                          :records (count (:enactment-records fold-state))
+                          :samples (:samples fold-state)
+                          :uniform (zero? (:samples fold-state))}
+                   pattern-feedback
+                   (assoc :pattern-feedback
+                          {:status :consumed
+                           :schema :wm/pattern-feedback-metadata-v1
+                           :term :E
+                           :rule :verified-application-beta11-likelihood-ratio}))
         ;; ⟨1⟩6: the ORIGINAL entries carry the prediction context the
         ;; enacted-step record reads; attach may rebuild entries without it
         original-ranked ranked-actions
         ranked-actions ((requiring-resolve 'futon2.aif.cascade-habit-store/attach-state)
                         e-input ranked-actions e-label)
+        ;; Learned pattern evidence belongs to E, not G. This preserves the
+        ;; runtime-G certificate while allowing verified cross-run experience
+        ;; to change the posterior over otherwise unchanged cascade policies.
+        ranked-actions (if pattern-feedback
+                         (cascade-feedback/attach-pattern-evidence-menu
+                          pattern-feedback ranked-actions)
+                         ranked-actions)
         candidates (mapv selection-candidate ranked-actions)
         _ (when (and beta-state
                      (not (and ((requiring-resolve 'futon2.aif.policy-precision-carry/intact?) beta-state)

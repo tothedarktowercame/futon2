@@ -20,6 +20,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-structure :as cascade-structure]
             [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.cascade-revision :as cascade-revision]
             [futon2.aif.cascade-habit-reinforcement :as habit-reinforcement]
             [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
@@ -2859,7 +2860,24 @@
       {:commit commit :repo repo :files files :author-job author-job
        :artifact-binding artifact-binding :review-job review-job
        :review-gate review-gate}
-      (let [;; The reviewer must be pointed at what the AUTHOR actually
+      (let [cascade-blocker
+            (cascade-revision/blocker
+             target :reviewer-verdict :review-request-changes
+             {:review-job (:job-id review-job)
+              :findings-sha256 (sha256 findings)})
+            cascade-revision-result
+            (cascade-revision/revise-from-blocker
+             {:mission (:mission-entry construction)
+              :construction construction
+              :blocker cascade-blocker
+              :proposals-fn (:cascade-revision-proposals-fn opts)
+              :pattern-feedback
+              (or (get (:cascade-feedback-metadata opts) target)
+                  (get (:cascade-feedback-metadata opts) :wm/global))})
+            effective-construction
+            (cascade-revision/apply-to-construction
+             construction cascade-revision-result)
+            ;; The reviewer must be pointed at what the AUTHOR actually
             ;; committed. `commit` can still be the pre-dispatch head when the
             ;; attempt was bound before authoring, and sending that makes the
             ;; reviewer read an unrelated commit and reject the revision on
@@ -2888,7 +2906,7 @@
                  (revision-author-prompt author reviewer
                                          (:attempt-evidence-dir opts)
                                          (:measured-acquisition? opts)
-                                         target construction
+                                         target effective-construction
                                          prior-commits findings))))
             revision-author-job
             (run-phase!
@@ -2954,7 +2972,7 @@
             re-review-prompt-text
             (revision-reviewer-prompt
              (assoc opts :reviewer reviewer)
-             target construction repo commit revision-commit
+             target effective-construction repo commit revision-commit
              effective-author-job review-job stop-lines)
             re-review-response
             (run-phase!
@@ -2999,6 +3017,7 @@
          :revision {:round 2
                     :commits [commit revision-commit]
                     :author-job (:job-id revision-author-job)
+                    :cascade-revision cascade-revision-result
                     :review (second reviews)}}))))
 
 (defn- find-commit-repo [commit]
@@ -4859,6 +4878,7 @@
                                      :stage (:failure-stage data)}
                            :accepted-increment accepted-increment-result
                            :d-task-enactment d-task-result
+                           :cascade-revision (get-in data [:revision :cascade-revision])
                            :artifact {:repo (or (get-in data [:artifact-binding :repo])
                                                 (:repo data))
                                       :commit (:commit data)}}))
@@ -6157,7 +6177,8 @@
                       revision-state
                       (run-revision-round
                        prompt-opts @phase-context author reviewer dispatched-turns
-                       target construction repo commit files author-job
+                       target (assoc construction :mission-entry mission)
+                       repo commit files author-job
                        artifact-binding review-job review-gate stop-lines)
                       commit (:commit revision-state)
                       repo (:repo revision-state)

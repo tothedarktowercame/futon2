@@ -6664,6 +6664,8 @@
                                ;; populate from :files / acceptance-of instead
                                ;; of typed absences.
                                :cascade-sources cascade-sources
+                               :pattern-feedback (when (seq pattern-feedback)
+                                                   pattern-feedback)
                                ;; WM-HABIT-FOLD-CALL-I: E, folded from the
                                ;; flights' increment receipts in the same
                                ;; store the interpretations come from; a
