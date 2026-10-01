@@ -36,10 +36,18 @@
 
 (deftest scoring-provenance-keeps-every-candidates-value
   (let [entries [{:action :a :controller-score 1 :f 0
-                  :certificate {:c {:status :derived :signature "a"}
+                  :certificate {:schema :score-v1
+                                :g-terms {:risk 1/2 :ambiguity 1/3
+                                          :expected-information-gain 1/6}
+                                :steps [{:tau 1 :risk 1/2 :ambiguity 1/3}]
+                                :c {:status :derived :signature "a"}
                                 :rates-provenance {:status :identity-default}}}
                  {:action :b :controller-score 2 :f 0
-                  :certificate {:c {:status :derived-no-overlap :signature "b"}
+                  :certificate {:schema :score-v1
+                                :g-terms {:risk 2/3 :ambiguity 1/2
+                                          :expected-information-gain 1/7}
+                                :steps [{:tau 1 :risk 2/3 :ambiguity 1/2}]
+                                :c {:status :derived-no-overlap :signature "b"}
                                 :rates-provenance {:status :declared-in-opts}}}]
         decision (policy/select-action-cascades entries {:beta 1})
         scoring (get-in decision [:selection-certificate :scoring])]
@@ -132,10 +140,11 @@
                     (vals (get-in carried [:selection-certificate :scoring]))))
         (is (zero? (:exit check)) (pr-str check))
         (is (str/includes? (:out check) "SELFTEST PASS"))
-        ;; Anchor the verdict: the old "VALID" substring also matched INVALID.
-        (is (re-find #"(?m)^\s+INVALID \(4/5 ok\)\s*$" (:out check)) (:out check))
+        ;; The scorer's G terms now survive the selection projection, so this
+        ;; production-style replay clears all five validity fields.
+        (is (re-find #"(?m)^\s+VALID \(5/5 ok\)\s*$" (:out check)) (:out check))
         (is (= {"c-source" "ok" "rates-provenance" "ok"
-                "posterior" "ok" "u37" "ok" "g-terms" "missing"}
+                "posterior" "ok" "u37" "ok" "g-terms" "ok"}
                (into {} (map (fn [line]
                                (let [[_ field verdict] (re-find #"^\s+(\S+)\s+(\S+)" line)]
                                  [field verdict]))) lines)))

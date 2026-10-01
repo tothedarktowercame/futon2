@@ -306,7 +306,16 @@
    :scoring (into (sorted-map)
                   (map-indexed
                    (fn [i entry]
-                     [i (assoc (select-keys (:certificate entry) [:c :c-source :rates-provenance])
+                     ;; Retain the values the scorer actually consumed and
+                     ;; the arithmetic it actually returned. Without these a
+                     ;; terminal run can show scalar G but cannot be replayed
+                     ;; or compared with Lean (live M-daily-scan audit,
+                     ;; 2026-10-01).
+                     [i (assoc (select-keys (:certificate entry)
+                                            [:schema :evaluation :scope
+                                             :observation-model :steps
+                                             :consumed-g :g-terms
+                                             :c :c-source :rates-provenance])
                                :id (:action entry))])
                    ranked))
    :candidates (mapv #(assoc % :f-consumed (cascade-selection/f-consumed-record %))
