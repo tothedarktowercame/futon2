@@ -21,6 +21,83 @@
 (defn sha256 [bytes]
   (hex (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes)))))
 
+(defn- one!
+  [kind values data]
+  (if (= 1 (count values))
+    (first values)
+    (refuse! kind (assoc data :matches (count values)))))
+
+(defn- runtime-token
+  "Undo only the target qualification added to tokens in the recorded
+   selection candidate. Relation witnesses are recorded in the constructor's
+   bare token domain, so a differently qualified token is a refusal."
+  [target token]
+  (if (vector? token)
+    (if (and (= 2 (count token)) (= target (first token)))
+      (second token)
+      (refuse! :adapter/mixed-target-token {:target target :token token}))
+    token))
+
+(defn- recorded-needs
+  [target guard]
+  (when-not (and (map? guard) (vector? (:clauses guard)))
+    (refuse! :adapter/recorded-guard-shape-mismatch {:guard guard}))
+  (into #{}
+        (mapcat (fn [clause]
+                  (when-not (set? (:present clause))
+                    (refuse! :adapter/recorded-guard-shape-mismatch {:clause clause}))
+                  (map #(runtime-token target %) (:present clause))))
+        (:clauses guard)))
+
+(defn input-from-run-record
+  "Project the uniquely selected production candidate into the strict Lean
+   adapter input. Selection identity comes from :decision/:chosen; it is not
+   guessed from candidate order. The projection reverses the recorder's
+   [target token] wrapper and otherwise preserves runtime values exactly."
+  [run-record]
+  (let [decision (:decision run-record)
+        chosen (:chosen decision)
+        target (:target chosen)
+        candidate-id (:candidate chosen)]
+    (when-not (and (map? decision) (map? chosen) (string? target) candidate-id)
+      (refuse! :adapter/selected-candidate-identity-missing {}))
+    (let [candidates (get-in decision [:selection-certificate :candidates])
+          _ (when-not (vector? candidates)
+              (refuse! :adapter/candidate-set-missing {}))
+          candidate (one! :adapter/selected-candidate-ambiguous
+                          (filter (fn [entry]
+                                    (let [id (:id entry)]
+                                      (and (= target (:target id))
+                                           (= candidate-id (:id id)))))
+                                  candidates)
+                          {:target target :candidate candidate-id})
+          recorded (:id candidate)
+          units (:precedence recorded)
+          order (mapv :id units)]
+      (when-not (and (= :cascade-candidate (:kind recorded))
+                     (seq units) (= (count units) (count (distinct order)))
+                     (= :machine-constructed (get-in recorded [:construction-receipt :kind])))
+        (refuse! :adapter/recorded-candidate-shape-mismatch
+                 {:target target :candidate candidate-id}))
+      {:schema schema
+       :precedence order
+       :interpretations
+       (into {}
+             (map (fn [unit]
+                    (when-not (= target (:target unit))
+                      (refuse! :adapter/mixed-candidate-target
+                               {:target target :unit (:id unit)
+                                :unit-target (:target unit)}))
+                    [(:id unit)
+                     {:produces (into #{} (map #(runtime-token target %)) (:produces unit))
+                      :guard {:needs (recorded-needs target (:guard unit))}}]))
+             units)
+       :construction-receipt (:construction-receipt recorded)
+       :runtime-source {:run-id (:run/id run-record)
+                        :click-id (:click/id run-record)
+                        :target target
+                        :candidate candidate-id}})))
+
 (defn- strict-edn [bytes]
   (try
     (let [decoder (doto (.newDecoder StandardCharsets/UTF_8)
@@ -111,6 +188,8 @@
         (str "import DarkTower.WarMachine.ConstructionReceipt\n\n"
              "/-! GENERATED FILE — DO NOT EDIT.\n"
              "Source SHA-256: " source-sha "\n"
+             (when-let [runtime-source (:runtime-source input)]
+               (str "Runtime source: " (pr-str runtime-source) "\n"))
              "Generator: futon2.aif.construction-receipt-lean-adapter\n"
              "Unit identity map: " (pr-str unit-ids) "\n"
              "Token identity map: " (pr-str token-ids) "\n-/\n\n"
@@ -142,6 +221,23 @@
 
 (defn adapt-file [path expected-sha]
   (adapt-bytes (java.nio.file.Files/readAllBytes (.toPath (io/file path))) expected-sha))
+
+(defn adapt-run-record-bytes
+  "Pin a complete production run record, select its enacted candidate, and
+   render the projected construction receipt. Returns the projection so the
+   normalization boundary remains inspectable."
+  [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual
+       :projection projection
+       :lean (render projection actual)})))
+
+(defn adapt-run-record-file [path expected-sha]
+  (adapt-run-record-bytes
+   (java.nio.file.Files/readAllBytes (.toPath (io/file path))) expected-sha))
 
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))

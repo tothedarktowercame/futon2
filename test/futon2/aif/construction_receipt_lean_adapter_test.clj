@@ -58,3 +58,56 @@
     ;; value reaches Lean, where decoded_runtime_receipt_valid cannot prove.
     (is (.contains lean "support := [⟨0, 1, {0}⟩]"))
     (is (.contains lean "| 1 => ⟨∅, {1}⟩"))))
+
+(defn recorded-run
+  ([] (recorded-run "M-live"))
+  ([unit-target]
+   {:run/id "run-live-1" :click/id "click-live-1"
+    :decision
+    {:chosen {:target "M-live" :candidate :C1}
+     :selection-certificate
+     {:candidates
+      [{:id {:kind :cascade-candidate :id :C1 :target "M-live"
+             :precedence
+             [{:id :P :target unit-target
+               :produces #{[unit-target :q]}
+               :guard {:clauses [{:present #{}}]}}
+              {:id :Q :target "M-live" :produces #{}
+               :guard {:clauses [{:present #{["M-live" :q]}}]}}]
+             :construction-receipt
+             {:kind :machine-constructed
+              :relations
+              {:status :computed
+               :support {:relations [{:from :P :to :Q :tokens #{:q}}]}
+               :meet {:relations []}
+               :precedence {:relations [{:from :P :to :Q :tokens #{:q}}]
+                            :linear-extension [:P :Q]
+                            :violations []}}}}}]}}}))
+
+(deftest production-run-record-projects-the-selected-candidate
+  (let [run (recorded-run)
+        raw (.getBytes (pr-str run) java.nio.charset.StandardCharsets/UTF_8)
+        sha (adapter/sha256 raw)
+        adapted (adapter/adapt-run-record-bytes raw sha)
+        projection (:projection adapted)]
+    (is (= sha (:source-sha256 adapted)))
+    (is (= {:run-id "run-live-1" :click-id "click-live-1"
+            :target "M-live" :candidate :C1}
+           (:runtime-source projection)))
+    (is (= [:P :Q] (:precedence projection)))
+    (is (= #{:q} (get-in projection [:interpretations :P :produces])))
+    (is (= #{:q} (get-in projection [:interpretations :Q :guard :needs])))
+    (is (.contains (:lean adapted) "theorem decoded_runtime_receipt_valid"))
+    (is (.contains (:lean adapted)
+                   "Runtime source: {:run-id \"run-live-1\""))))
+
+(deftest production-projection-refuses-mixed-targets-and-ambiguous-selection
+  (testing "the target wrapper is evidence, not decoration"
+    (is (= :adapter/mixed-candidate-target
+           (refusal #(adapter/input-from-run-record (recorded-run "M-other"))))))
+  (testing "candidate identity must select exactly one recorded value"
+    (let [run (recorded-run)
+          duplicate (update-in run [:decision :selection-certificate :candidates]
+                               #(conj % (first %)))]
+      (is (= :adapter/selected-candidate-ambiguous
+             (refusal #(adapter/input-from-run-record duplicate)))))))
