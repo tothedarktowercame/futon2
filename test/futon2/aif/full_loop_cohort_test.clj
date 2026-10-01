@@ -57,6 +57,34 @@
   (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
            attempt "007-closed.edn"))
 
+(deftest close-accepts-grounded-progress-and-refuses-ungrounded-mutation
+  ;; Exact terminal shape emitted after the controlled run's approved commit
+  ;; remained :still-live: real progress, without a claim of target closure.
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        valid-attempt (:attempt/id (open! root "grounded-progress/valid"))
+        invalid-attempt (:attempt/id (open! root "grounded-progress/ungrounded"))
+        close-judgment {:outcome :grounded-progress
+                        :grounded? true
+                        :artifact-only? false
+                        :duration-ms 1
+                        :resource-use {:agent-turns 2}}]
+    (doseq [attempt [valid-attempt invalid-attempt]]
+      (append-required! root attempt))
+    (is (= :grounded-progress
+           (get-in (cohort/close-attempt! prereg-path root valid-attempt
+                                          (term close-judgment))
+                   [:payload :judgment :outcome])))
+    (let [failure (try
+                    (cohort/close-attempt! prereg-path root invalid-attempt
+                                           (term (assoc close-judgment :grounded? false)))
+                    nil
+                    (catch clojure.lang.ExceptionInfo e e))]
+      (is (= :invalid-close-outcome (:failure-kind (ex-data failure))))
+      (is (= [:grounded-progress-must-be-grounded]
+             (:errors (ex-data failure))))
+      (is (not (.exists (close-path root invalid-attempt)))))))
+
 (deftest close-writer-optionally-completes-retention
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)

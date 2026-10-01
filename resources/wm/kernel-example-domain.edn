@@ -3,6 +3,7 @@
  :authority "ruled_outcome_c/non-disposition-outcomes; improve-2c record-only join"
  :mapping
  {:grounded-change {:status :disposition :value :grounded-change}
+  :grounded-progress {:status :disposition :value :grounded-progress}
   :grounded-no-change {:status :disposition :value :grounded-no-change}
   :artifact-only {:status :disposition :value :artifact-only}
   :abstained {:status :disposition :value :abstained}
