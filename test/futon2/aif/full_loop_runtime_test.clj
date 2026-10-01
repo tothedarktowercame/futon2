@@ -60,3 +60,20 @@
       (is (= cascade-feedback/default-path
              (:cascade-feedback-path @seen)))
       (is (map? (:cascade-feedback-metadata @seen))))))
+
+(deftest production-mints-run-identity-before-closing-over-the-judge
+  (let [runner-opts (atom nil)
+        judge-opts (atom nil)]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! runner-opts opts)
+                    ((:judge-fn runner/*runtime-defaults*) 1)
+                    :ran)
+                  wm/generate-war-machine
+                  (fn [_ opts]
+                    (reset! judge-opts opts)
+                    {:judgement {}})]
+      (is (= :ran (runtime/run-opportunity! {})))
+      (is (string? (:run-id @runner-opts)))
+      (is (= (:run-id @runner-opts) (:run-id @judge-opts))
+          "accumulation and the durable run record must receive one identity"))))

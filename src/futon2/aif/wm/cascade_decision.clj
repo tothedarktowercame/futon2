@@ -744,6 +744,7 @@
                               (:interpretations cp))]
                     (mapv (fn [{:keys [candidate-id precedence construction-receipt]}]
                             {:kind :cascade-candidate :id candidate-id :target t
+                             :want (vec (:want cp))
                              :precedence (mapv patterns precedence)
                              :observation-locators
                              (into {} (map (fn [[token locator]] [(qual token) locator]))

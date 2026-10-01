@@ -5,6 +5,7 @@
 
 (def ^:private mission
   {:id "M-probe" :path "/root/futonX/holes/missions/M-probe.md" :status-class :active
+   :text "# M-probe\n\n- [ ] a stated want\n"
    :open-holes [{:id "M-probe#aaa111" :kind :unchecked-task :line 3
                  :text "- [ ] a stated want"}
                 {:id "M-probe#bbb222" :kind :work-marker :line 5
@@ -24,25 +25,28 @@
 (deftest the-closed-form-is-the-same-item-with-its-box-ticked
   (is (= "- [x] a stated want" (mhw/closed-form (first (:open-holes mission)))))
   (testing "the witness is presence of a checked item, never absence of an unchecked one"
-    (is (re-find #"\[x\]" (get-in (mhw/mission-source "/root" mission)
-                                  [:locators (mhw/want-token (first (:open-holes mission))) :decl])))))
+    (is (re-find #"\[x\]" (:decl (first (vals (:locators (mhw/mission-source "/root" mission)))))))))
 
 (deftest the-locator-is-repo-relative-and-checkable
-  (let [loc (get (:locators (mhw/mission-source "/root" mission))
-                 (mhw/want-token (first (:open-holes mission))))]
+  (let [loc (first (vals (:locators (mhw/mission-source "/root" mission))))]
     (is (= :C4 (:class loc)))
     (is (= "futonX" (:repo loc)))
     (is (= "holes/missions/M-probe.md" (:path loc)) "repo prefix is stripped, not doubled")))
 
-(deftest a-declared-target-wins-over-a-generated-one
+(deftest current-mission-state-wins-over-a-declared-snapshot
   (let [declared {:universes {"M-probe" {:declared-token false}}
                   :wants {"M-probe" [:declared-token]}
-                  :locators {} :interpretations {} :candidates {} :context-by-target {}}
+                  :locators {} :interpretations {"M-probe" {:patterns {:p {}}}}
+                  :candidates {"M-probe" [{:old-order true}]} :context-by-target {}
+                  :preference-schedules {"M-probe" {:placement {:value :terminal}}}
+                  :preference-scales {"M-probe" {:lam {:value 1} :mu {:value 0}}}}
         merged (mhw/merge-into-sources declared "/root" [mission] :WM)]
-    (is (= [:declared-token] (get-in merged [:wants "M-probe"]))
-        "a hand-written declaration is an operator statement; a generated one only reads a document")
-    (is (= 0 (get-in merged [:mission-hole-coverage :targets-added])))
-    (is (= ["M-probe"] (get-in merged [:mission-hole-coverage :targets-deferred-to-declaration])))))
+    (is (not= [:declared-token] (get-in merged [:wants "M-probe"]))
+        "a prior declaration cannot freeze an older mission state")
+    (is (= {:patterns {:p {}}} (get-in merged [:interpretations "M-probe"])))
+    (is (= [] (get-in merged [:candidates "M-probe"])))
+    (is (= 1 (get-in merged [:mission-hole-coverage :targets-added])))
+    (is (= ["M-probe"] (get-in merged [:mission-hole-coverage :declared-targets-refreshed])))))
 
 (deftest coverage-accounts-for-what-was-not-projected
   (let [{:keys [coverage]} (mhw/mission-sources "/root" [mission])]
@@ -53,8 +57,24 @@
         "the gap between stated and projected must be visible, not silent")))
 
 (deftest terminal-missions-state-no-wants
-  (doseq [sc [:complete :inactive :draft]]
+  (doseq [sc [:complete :inactive]]
     (is (nil? (mhw/mission-source "/root" (assoc mission :status-class sc))) (str sc))))
+
+(deftest current-head-not-retained-open-holes-is-decision-authority
+  (let [closed (assoc mission :text "# M-probe\n\n- [x] a stated want\n")]
+    (is (nil? (mhw/mission-source "/root" closed))
+        "a stale substrate open-hole cannot recreate a want already checked at HEAD")))
+
+(deftest current-completion-criteria-join-checkbox-wants
+  (let [m (assoc mission :text (str "# M-probe\n\n- [ ] a stated want\n\n"
+                                   "## Completion criteria\n\n"
+                                   "- the generated report is reproducible\n"
+                                   "  **Not started.**\n"))
+        src (mhw/mission-source "/root" m)]
+    (is (= 2 (count (:want src))))
+    (is (= :current-mission-head (get-in src [:source :kind])))
+    (is (= 2 (count (:locators src))))
+    (is (every? false? (vals (:universe src))))))
 
 (def ^:private terminal-schedule
   {:placement {:value :terminal :status :declared}

@@ -30,6 +30,17 @@
     (is (= :partial (:status r)))
     (is (= ["r"] (:missing-job-ids r)))))
 
+(deftest separates-cached-from-uncached-provider-input
+  (let [r (sut/model-usage
+           {:author-job {:job-id "a"
+                         :usage {:input_tokens 100 :cached_input_tokens 80
+                                 :output_tokens 5 :source :codex}}})]
+    (is (= [100 80 20]
+           ((juxt :input-tokens :cached-input-tokens :uncached-input-tokens) r)))
+    (is (= {:input-tokens 100 :cached-input-tokens 80 :uncached-input-tokens 20
+            :output-tokens 5 :total-tokens 105 :provider :codex :job-id "a"}
+           (first (:jobs r))))))
+
 (deftest aggregates-zai-cost-schema-and-retains-model
   (let [r (sut/model-usage
            {:review-job {:job-id "z"

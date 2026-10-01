@@ -8,24 +8,22 @@
   a hand-written declaration, so the decision reached 3 of 465 entries, about
   0.47% of the corpus weight, and 464 sat in `:unreached-in-domain`.
 
-  Missions already state what they want done. `mission-registry/open-holes`
-  retains those statements. This namespace turns the MECHANICALLY OBSERVABLE
-  ones into the source shape `cascade-problems/assemble` consumes, so a
-  mission's own stated work can carry its weight into the decision without
-  anyone hand-authoring a declaration per mission.
+  Missions already state what they want done. This namespace reads each
+  mission's current HEAD bytes and turns unchecked tasks plus stated completion
+  criteria into the source shape `cascade-problems/assemble` consumes. Registry
+  `:open-holes` remains discovery metadata and has no decision authority.
 
-  WHAT IS DELIBERATELY NOT PROJECTED. Of 441 retained holes, only the 99
-  `:unchecked-task` items have an observable closed-form: `- [ ] X` becoming
-  `- [x] X`, which `observation-checks/decl-present?` can anchor. Work markers,
-  pending-lifecycle lines and open-section items state real work and have no
-  checkbox to flip, so no check can witness their closure -- they are retained
-  and reported, never projected. Projecting them would raise the coverage number
-  while giving the decision nothing it could act on, which is the failure this
-  namespace exists to avoid, pointing the other way.
+  Free-form work markers still have no checkable closure form and are reported
+  through coverage rather than invented as false facts. Completion criteria
+  use `mission-criteria`'s verdict-aware locators; an unlocated criterion stays
+  explicit and makes assembly refuse rather than silently disappearing.
 
   The witness is affirmation-shaped: the observation is that a CHECKED item is
   present, never that an unchecked one is absent."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.mission-criteria :as criteria]
+            [futon2.aif.observation-checks :as checks]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]))
 
 (load-identity/register! *ns* *file*)
@@ -70,35 +68,76 @@
      :path (str/replace-first rel (str repo "/") "")
      :decl (closed-form hole)}))
 
+(defn read-current-mission
+  "Read MISSION from its repository HEAD.  The registry's `:open-holes` is
+  discovery metadata, not decision state; selection must derive wants and
+  observations from one current byte string."
+  [code-root mission]
+  (let [abs (str (:path mission))
+        rel (str/replace-first abs (str code-root "/") "")
+        [repo & parts] (str/split rel #"/")
+        path (str/join "/" parts)]
+    (if (contains? mission :text)
+      {:repo repo :path path :text (:text mission)}
+      (let [{:keys [exit out]} (sh/sh "git" "-C" (str code-root "/" repo)
+                                      "show" (str "HEAD:" path))]
+        (when (zero? exit) {:repo repo :path path :text out})))))
+
+(defn- current-checkboxes [target text]
+  (vec (keep-indexed
+        (fn [i line]
+          (when (re-find #"^[-*]\s+\[\s\]\s+\S" line)
+            {:id (str target "#" (subs (load-identity/sha256
+                                         (.getBytes (str/trim line) "UTF-8")) 0 12))
+             :kind :unchecked-task :line (inc i) :text line}))
+        (str/split-lines text))))
+
 (defn mission-source
   "One target's worth of sources, or nil when the mission states no observable
    want. Shape matches `cascade-problems/assemble`'s `:sources`."
   [code-root mission]
-  (let [terminal? (contains? #{:complete :inactive :draft} (:status-class mission))
-        holes (when-not terminal? (filter observable-hole? (:open-holes mission)))]
-    (when (seq holes)
-      (let [target (str (:id mission))
-            tokens (mapv want-token holes)]
+  (let [terminal? (contains? #{:complete :inactive} (:status-class mission))
+        target (str (:id mission))
+        {:keys [repo path text]} (when-not terminal? (read-current-mission code-root mission))
+        holes (when text (current-checkboxes target text))
+        checkbox-tokens (mapv want-token holes)
+        checkbox-locators (into {} (map (fn [h] [(want-token h) (hole-locator code-root mission h)])) holes)
+        criterion-result (when text
+                           (criteria/wants (criteria/criteria target text)
+                                           {:repo repo :path path
+                                            :observe #(true? (:observed (checks/check-decl-in-file %)))}))
+        tokens (vec (distinct (concat checkbox-tokens (:wants criterion-result))))]
+    (when (seq tokens)
+      (let [criterion-locators (:locators criterion-result)
+            criterion-universe (:universe criterion-result)]
         {:target target
          :want tokens
-         ;; Stated and not yet witnessed closed. Never :unknown: the check runs.
-         :universe (zipmap tokens (repeat false))
-         :locators (into {} (map (fn [h] [(want-token h) (hole-locator code-root mission h)])) holes)
+         ;; Checkbox and criterion observations are read from the same HEAD
+         ;; whose text produced the wants.  No retained substrate fact is
+         ;; allowed to assert false against a current checked locator.
+         :universe (merge (zipmap checkbox-tokens (repeat false)) criterion-universe)
+         :locators (merge checkbox-locators criterion-locators)
          ;; A stated want does not establish any pattern's applicability.
          ;; Agent-authored declarations supply interpretations through the loader.
          :interpretation {:patterns {} :receipts {}}
          :candidates []
-         :holes (mapv (fn [h] (select-keys h [:id :kind :line :text])) holes)}))))
+         :holes (mapv (fn [h] (select-keys h [:id :kind :line :text])) holes)
+         :criteria (:criteria criterion-result)
+         :unlocated (:unlocated criterion-result)
+         :source {:kind :current-mission-head
+                  :repo repo :path path
+                  :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))}}))))
 
 (defn mission-sources
   "Sources for every live mission with an observable stated want, plus a typed
    account of what was retained and not projected -- so the gap between 441
    stated holes and the projected subset is visible rather than silent."
   [code-root missions]
-  (let [live (remove #(contains? #{:complete :inactive :draft} (:status-class %)) missions)
+  (let [live (remove #(contains? #{:complete :inactive} (:status-class %)) missions)
         sources (keep #(mission-source code-root %) live)
         retained (reduce + (map #(count (:open-holes %)) live))
-        projected (reduce + (map #(count (:want %)) sources))]
+        projected (reduce + (map #(count (:holes %)) sources))
+        current-wants (reduce + (map #(count (:want %)) sources))]
     {:sources (vec sources)
      :targets (mapv :target sources)
      :coverage {:live-missions (count live)
@@ -106,6 +145,7 @@
                 :holes-retained retained
                 :holes-projected projected
                 :holes-not-projected (- retained projected)
+                :current-head-wants current-wants
                 :retained-by-kind (frequencies (map :kind (mapcat :open-holes live)))
                 :projected-by-kind (frequencies (map :kind (filter observable-hole?
                                                                   (mapcat :open-holes live))))
@@ -119,11 +159,10 @@
   "Merge mission-stated wants into the declared source map, so a mission's own
    document can carry its live-C weight into the decision.
 
-   A HAND-WRITTEN DECLARATION WINS on any target it names. An operator wrote it;
-   this namespace only reads a document. Generated targets are added, never
-   substituted, and the coverage account rides on the returned map so the record
-   says how many stated holes were retained, how many were projected, and why
-   the rest were not."
+   Current mission HEAD wins for wants, observations and locators. A declaration
+   may supply pattern interpretations and family parameters, but it is not a
+   canonical snapshot of a mission and cannot freeze an older want set. Candidate
+   orders are reconstructed for the current problem."
   [declared code-root missions context]
   (let [{:keys [sources coverage]} (mission-sources code-root missions)
         declared-targets (set (keys (:universes declared)))
@@ -145,9 +184,7 @@
                          (when (= 1 (count vs)) (first vs))))
         schedule (one-of (:preference-schedules declared))
         scales (one-of (:preference-scales declared))
-        fresh (if (and schedule scales)
-                (remove #(contains? declared-targets (:target %)) sources)
-                [])
+        fresh (if (and schedule scales) sources [])
         by (fn [k] (into {} (map (juxt :target k)) fresh))]
     (-> declared
         (update :preference-schedules merge
@@ -157,7 +194,9 @@
         (update :universes merge (by :universe))
         (update :wants merge (by :want))
         (update :locators merge (by :locators))
-        (update :interpretations merge (by :interpretation))
+        ;; Declarations may remain useful interpretation evidence, but never
+        ;; override the mission's current state or supply a canonical order.
+        (update :interpretations #(or % {}))
         (update :candidates merge (by :candidates))
         (update :context-by-target merge
                 (into {} (map (fn [f] [(:target f) context])) fresh))
@@ -169,5 +208,5 @@
                       (when-not (and schedule scales)
                         :declared-sources-lack-one-agreed-schedule-or-scales)
                       :targets-added (count fresh)
-                      :targets-deferred-to-declaration
+                      :declared-targets-refreshed
                       (mapv :target (filter #(contains? declared-targets (:target %)) sources)))))))

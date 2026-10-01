@@ -486,6 +486,8 @@
         candidates (keys (get-in r [:decision :selection-law :posterior]))]
     (is (= (count pairs) (count candidates)))
     (is (every? #(seq (:precedence %)) candidates))
+    (is (every? #(= tick-1-want (:want %)) candidates)
+        "the selected action must retain the exact wants later feedback describes")
     (is (empty? (:dropped-candidates r)))
     (is (every? #(seq (:precedence %)) (mapcat :candidates (:lanes r))))
     (is (every? #(false? (get-in % [:null-comparison :used-for-joint-selection?])) (:lanes r)))

@@ -25,8 +25,10 @@
 (def scales {:lam {:value 1 :status :declared} :mu {:value 0 :status :declared}})
 (def missions
   [{:id "M-a" :path "/fixture/futon2/M-a.md" :status-class :active
+    :text "# M-a\n\n- [ ] do A\n"
     :open-holes [{:id "M-a#1" :kind :unchecked-task :text "- [ ] do A"}]}
    {:id "M-b" :path "/fixture/futon2/M-b.md" :status-class :active
+    :text "# M-b\n\n- [ ] do B\n\nTODO: explain\n"
     :open-holes [{:id "M-b#2" :kind :unchecked-task :text "- [ ] do B"}
                  {:id "M-b#3" :kind :work-marker :text "TODO: explain"}]}])
 (def declared
@@ -79,17 +81,11 @@
     (is (= {:unchecked-task 2} (:projected-by-kind coverage)))
     (is (= 2 (:holes-projected coverage)))
     (is (= {:work-marker 1} (:not-projected-by-kind coverage)))
-    (is (= 1 (:targets-added coverage)))
-    (is (= ["M-a"] (:targets-deferred-to-declaration coverage)))
-    (is (= {:unit :source-entry :count 4} (:source-entries live)))
-    (is (= {:unit :source-token :total 4 :projected 2 :reached 2 :unreached 2}
-           (:source-tokens live)))
-    (is (= :target-qualified-outcome-token (get-in live [:projected-outcome-tokens :unit])))
-    (is (= 3 (get-in live [:projected-outcome-tokens :count])))
-    (is (= 3 (get-in live [:in-domain-outcome-tokens :count])))
-    (is (= #{:closed/M-b :star/capability} (:unreached-source-tokens live)))
-    (is (= #{["M-a" :x] ["M-a" :y] ["M-a" :z]} (get-in live [:in-domain-outcome-tokens :tokens])))
-    (is (some #(and (= "M-b" (:target %)) (= :no-admitted-interpretation (:kind %)))
+    (is (= 2 (:targets-added coverage)))
+    (is (= ["M-a"] (:declared-targets-refreshed coverage)))
+    (is (= {:status :absent :reason :no-admitted-cascade-problems} live)
+        "a stale declaration cannot score against the current mission wants")
+    (is (some #(and (= "M-a" (:target %)) (= :universe-not-admitted (:kind %)))
               (get-in record [:cascade-problems :refusals])))
     ;; Exercise the serializer and durable trace path only under the temp dir.
     (let [path (trace/write-trace! {:decision (:decision result)
@@ -157,10 +153,8 @@
         new (get-in after [:decision :live-c-coverage])]
     (is (= (get-in before [:decision :mission-hole-coverage])
            (get-in after [:decision :mission-hole-coverage])))
-    (is (= [3 2] [(get-in old [:source-tokens :reached])
-                   (get-in new [:source-tokens :reached])]))
-    (is (= [4 3] [(get-in old [:in-domain-outcome-tokens :count])
-                   (get-in new [:in-domain-outcome-tokens :count])]))
-    (is (contains? (:unreached-source-tokens new) :closed/M-b))
+    (is (= 1 (get-in old [:source-tokens :reached])))
+    (is (= 1 (get-in old [:in-domain-outcome-tokens :count])))
+    (is (= {:status :absent :reason :no-admitted-cascade-problems} new))
     (is (some #(and (= "M-b" (:target %)) (= :no-constructed-candidate (:kind %)))
               (get-in after [:cascade-problems :refusals])))))
