@@ -58,6 +58,22 @@
     (is (= :balance-retries-must-be-forbidden
            (:kind (series/validate-registration bad))))))
 
+(deftest ten-click-budget-and-change-chronology-are-fixed
+  (is (= 10 (get-in registration [:sampling :maximum-opportunities])))
+  (is (= :exactly-ten-admitted-clicks
+         (get-in registration [:sampling :opportunity-budget])))
+  (is (true? (get-in registration
+                     [:between-opportunity-change-policy :chronology-required])))
+  (is (= :ten-click-budget-required
+         (:kind (series/validate-registration
+                 (assoc-in registration [:sampling :maximum-opportunities] 9)))))
+  (is (= :intervening-change-chronology-required
+         (:kind (series/validate-registration
+                 (assoc-in registration
+                           [:between-opportunity-change-policy
+                            :chronology-required]
+                           false))))))
+
 (deftest caller-supplied-target-is-rejected-even-when-the-run-would-otherwise-qualify
   (let [result (series/evaluate-opportunity
                 registration

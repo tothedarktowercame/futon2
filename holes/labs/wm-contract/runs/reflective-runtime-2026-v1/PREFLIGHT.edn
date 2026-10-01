@@ -1,0 +1,26 @@
+{:schema :wm/registered-run-preflight-v1
+ :series/id :wm-reflective-runtime-2026-v1
+ :audited-at "2026-10-01"
+ :latest-record
+ {:path "data/wm-runs/tick-run-record-2026-10-01-af6aa80e-24a7-468c-b4d1-7418982a1afd.edn"
+  :observed-top-level-timing {:startedAt :present
+                              :terminal-timing :absent
+                              :phase-timings :absent}
+  :observed-model-usage :absent}
+ :checks
+ {:terminal-monotonic-timing-capture
+  {:status :failed :reason :terminal-duration-not-retained}
+  :phase-monotonic-timing-capture
+  {:status :failed :reason :phase-durations-not-retained}
+  :provider-or-agency-token-usage-capture
+  {:status :failed :reason :usage-receipt-not-retained}
+  :outer-loop-selection-receipt-capture
+  {:status :present :evidence-path [:selection-event]}
+  :source-and-substrate-digest-capture
+  {:status :partial
+   :reason :intervening-change-chronology-not-yet-projected-as-a-series-row}}
+ :decision
+ {:first-click :deferred
+  :consumes-opportunity false
+  :next-repair
+  :retain-terminal-and-phase-monotonic-timings-plus-provider-usage}}

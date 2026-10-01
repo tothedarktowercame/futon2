@@ -16,17 +16,37 @@
   :outer-loop-exercised true
   :no-benchmark-targets true
   :no-target-retries-for-balance true
-  :maximum-opportunities 9
+  :maximum-opportunities 10
+  :opportunity-budget :exactly-ten-admitted-clicks
   :desired-qualifying-diversity
   {:mission 1 :excursion 1 :ticket 1}
   :stopping-rule
   "Each opportunity enters without a target; the live outer loop observes the
    current substrate, ranks the available missions, excursions and tickets,
    and selects one. Only then does the run bind and retain that entity and the
-   decision inputs that selected it. Stop after nine admitted opportunities,
-   or after three qualifying grounded
-   opportunities containing at least one mission, excursion and ticket,
-   whichever occurs first. Infrastructure refusals after click admission count."}
+   decision inputs that selected it. Stop after ten admitted clicks.
+   Infrastructure refusals after click admission count. Entity-kind diversity
+   is reported but never used to steer, retry, or stop selection."}
+ :between-opportunity-change-policy
+ {:repairs-and-improvements :allowed
+  :machine-self-improvement :allowed-when-live-outer-loop-selected
+  :back-to-back-required false
+  :chronology-required true
+  :each-opportunity-records
+  [:code-revisions :configuration-digest :substrate-snapshot-digest
+   :pattern-library-digest :prior-opportunity-id :intervening-change-receipts]
+  :interpretation
+  "The series samples an evolving machine. Intervening changes are retained as
+   explanatory observations; they do not reset the ten-click denominator."}
+ :preflight
+ {:must-pass-before-first-click
+  [:terminal-monotonic-timing-capture
+   :phase-monotonic-timing-capture
+   :provider-or-agency-token-usage-capture
+   :outer-loop-selection-receipt-capture
+   :source-and-substrate-digest-capture]
+  :failed-preflight-does-not-consume-click true
+  :evidence "PREFLIGHT.edn"}
  :measurements
  {:qualitative
   [:entity-kind :target :selected-wants :reached-wants :unreached-wants

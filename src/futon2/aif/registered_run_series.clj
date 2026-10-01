@@ -31,6 +31,13 @@
       (not (pos-int? (:maximum-opportunities sampling)))
       (refuse :maximum-opportunities-required {})
 
+      (not= 10 (:maximum-opportunities sampling))
+      (refuse :ten-click-budget-required
+              {:actual (:maximum-opportunities sampling)})
+
+      (not= :exactly-ten-admitted-clicks (:opportunity-budget sampling))
+      (refuse :fixed-opportunity-budget-required {})
+
       (not= :selected-by-live-outer-loop (:target-choice sampling))
       (refuse :target-choice-must-remain-live {})
 
@@ -45,6 +52,15 @@
 
       (not (true? (:no-target-retries-for-balance sampling)))
       (refuse :balance-retries-must-be-forbidden {})
+
+      (not (true? (get-in registration
+                           [:between-opportunity-change-policy
+                            :chronology-required])))
+      (refuse :intervening-change-chronology-required {})
+
+      (not (true? (get-in registration
+                           [:preflight :failed-preflight-does-not-consume-click])))
+      (refuse :preflight-must-not-consume-click {})
 
       (not= certificate-kinds measurement-certs)
       (refuse :certificate-family-mismatch
