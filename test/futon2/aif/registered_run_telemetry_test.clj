@@ -30,6 +30,20 @@
     (is (= :partial (:status r)))
     (is (= ["r"] (:missing-job-ids r)))))
 
+(deftest aggregates-zai-cost-schema-and-retains-model
+  (let [r (sut/model-usage
+           {:review-job {:job-id "z"
+                         :usage {:cost/input-tokens 9
+                                 :cost/output-tokens 4
+                                 :cost/total-tokens 13
+                                 :cost/source :zai
+                                 :cost/model "glm-4.6"}}})]
+    (is (= :complete (:status r)))
+    (is (= 13 (:total-tokens r)))
+    (is (= {:input-tokens 9 :output-tokens 4 :total-tokens 13
+            :model "glm-4.6" :provider :zai :job-id "z"}
+           (first (:jobs r))))))
+
 (deftest chronology-cites-revisions-and-change
   (with-redefs [sut/source-revisions
                 (fn [_] {"futon2" "after" "futon3-pattern-library" "patterns"})]

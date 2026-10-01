@@ -46,14 +46,20 @@
     (is (= [{:pattern :patterns/applied
              :status :successful
              :evidence {:selected-enacted-action :verified
+                        :grounded-work :attested
+                        :terminal-outcome :grounded-change
                         :accepted-increment true
-                        :accepted-reason nil
+                        :accepted-reason nil}
+             :reinforcement :positive}
+            {:pattern :patterns/selected-only
+             :status :successful
+             :evidence {:selected-enacted-action :verified
+                        :grounded-work :attested
                         :terminal-outcome :grounded-change}
              :reinforcement :positive}]
            (get-in receipt [:patterns :applications])))
-    (is (= [:patterns/selected-only]
-           (get-in receipt [:patterns :selected-only])))
-    (is (= [:patterns/applied]
+    (is (empty? (get-in receipt [:patterns :selected-only])))
+    (is (= [:patterns/applied :patterns/selected-only]
            (get-in receipt [:patterns :positive-reinforcement])))
     (is (= {:repo "/repo" :commit "abc1234" :grounded? true}
            (:artifact receipt)))))
@@ -66,7 +72,7 @@
            (get-in receipt [:patterns :selected-only])))
     (is (empty? (get-in receipt [:patterns :positive-reinforcement])))))
 
-(deftest blocked-application-is-repair-evidence-not-reinforcement
+(deftest grounded-work-attests-cascade-without-operator-acceptance
   (let [revision {:schema :wm/provisional-cascade-revision-v1
                   :status :refused
                   :kind :no-distinct-whole-mission-proposal
@@ -79,15 +85,14 @@
                          :reason :declared-product-not-observed-true
                          :criterion-step {:id :patterns/applied
                                           :source :recorded-decision}}))]
-    (is (= :incomplete
+    (is (= :successful
            (get-in receipt [:patterns :applications 0 :status])))
-    (is (= :none
+    (is (= :positive
            (get-in receipt [:patterns :applications 0 :reinforcement])))
-    (is (empty? (get-in receipt [:patterns :positive-reinforcement])))
-    (is (= :declared-product-not-observed-true
-           (get-in receipt [:blocker :kind])))
-    (is (= :patterns/applied
-           (get-in receipt [:blocker :repair-evidence 0 :pattern])))
+    (is (= [:patterns/applied :patterns/selected-only]
+           (get-in receipt [:patterns :positive-reinforcement])))
+    (is (= {:status :absent :reason :verified-grounded-work}
+           (:blocker receipt)))
     (is (= revision (:cascade-revision receipt)))))
 
 (deftest next-construction-receives-retained-pattern-feedback
@@ -136,11 +141,13 @@
                                        :construction-receipt :pattern-feedback])]
           (is (empty? (:refusals assembled)))
           (is (= feedback/metadata-schema (:schema carried)))
-          (is (= 1 (get-in carried [:patterns :patterns/applied
+          (is (= 2 (get-in carried [:patterns :patterns/applied
                                     :successful-applications])))
-          (is (= 1 (get-in carried [:patterns :patterns/applied
+          (is (= 0 (get-in carried [:patterns :patterns/applied
                                     :incomplete-applications])))
           (is (= 2 (get-in carried [:patterns :patterns/selected-only
+                                    :successful-applications])))
+          (is (= 0 (get-in carried [:patterns :patterns/selected-only
                                     :selected-only])))))
       (finally
         (doseq [file (reverse (file-seq dir))]

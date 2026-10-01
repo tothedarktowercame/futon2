@@ -1,7 +1,8 @@
 (ns futon2.aif.cascade-feedback
   "Production feedback from one provisional cascade execution to later
-   construction.  Selection, verified application, and successful use are
-   deliberately different events: selection alone never reinforces a pattern."
+   construction. Selection alone never reinforces a pattern. Verified enactment
+   that produces grounded work attests the selected cascade; operator acceptance
+   is a separate, potentially stronger observation rather than a prerequisite."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -31,33 +32,51 @@
             (:enacted-action-sha256 join)))))
 
 (defn receipt
-  "Create the close feedback receipt.  A pattern appears in :applications
-   only when the retained D-task bridge proves the selected action was enacted
-   and the accepted-increment receipt names a recorded criterion step.  It is
-   positive evidence only when that step's increment was accepted on a
-   grounded close.  Other selected patterns remain :selected-only."
+  "Create the close feedback receipt. A grounded close whose retained D-task
+   bridge proves selected/enacted identity attests every pattern in the enacted
+   cascade. An accepted-increment remains explicit evidence about its criterion
+   step, but absence of an operator acceptance declaration does not erase the
+   grounded-work attestation. Other selected patterns remain :selected-only."
   [{:keys [run-id target selected-action outcome failure accepted-increment
            d-task-enactment cascade-revision artifact]}]
   (let [target (or target (:target selected-action))
         selected (selected-patterns selected-action)
         step (get-in accepted-increment [:criterion-step :id])
-        exact-step? (and (verified-application? d-task-enactment)
+        enacted? (verified-application? d-task-enactment)
+        exact-step? (and enacted?
                          (= :recorded-decision
                             (get-in accepted-increment [:criterion-step :source]))
                          (contains? (set selected) step))
         grounded? (contains? #{:grounded-change :grounded-progress} outcome)
-        success? (and exact-step? grounded? (true? (:accepted? accepted-increment)))
-        application (when exact-step?
-                      {:pattern step
-                       :status (if success? :successful :incomplete)
-                       :evidence {:selected-enacted-action :verified
-                                  :accepted-increment (:accepted? accepted-increment)
-                                  :accepted-reason (:reason accepted-increment)
-                                  :terminal-outcome outcome}
-                       :reinforcement (if success? :positive :none)})
-        applied (cond-> #{} application (conj step))
+        grounded-attestation? (and enacted? grounded?)
+        applications
+        (cond
+          grounded-attestation?
+          (mapv (fn [pattern]
+                  {:pattern pattern
+                   :status :successful
+                   :evidence (cond-> {:selected-enacted-action :verified
+                                      :grounded-work :attested
+                                      :terminal-outcome outcome}
+                               (= pattern step)
+                               (assoc :accepted-increment (:accepted? accepted-increment)
+                                      :accepted-reason (:reason accepted-increment)))
+                   :reinforcement :positive})
+                selected)
+
+          exact-step?
+          [{:pattern step
+            :status :incomplete
+            :evidence {:selected-enacted-action :verified
+                       :accepted-increment (:accepted? accepted-increment)
+                       :accepted-reason (:reason accepted-increment)
+                       :terminal-outcome outcome}
+            :reinforcement :none}]
+
+          :else [])
+        applied (set (map :pattern applications))
         selected-only (vec (remove applied selected))
-        blocker-kind (when-not success?
+        blocker-kind (when-not grounded-attestation?
                        (or (:kind failure)
                            (:reason accepted-increment)
                            (when selected-action outcome)
@@ -79,9 +98,10 @@
                                        []))
                               :terminal-outcome outcome}
               :patterns {:selected selected
-                         :applications (cond-> [] application (conj application))
+                         :applications applications
                          :selected-only selected-only
-                         :positive-reinforcement (if success? [step] [])}
+                         :positive-reinforcement
+                         (if grounded-attestation? selected [])}
               :cascade-revision
               (or cascade-revision
                   {:status :absent :reason :no-mid-run-cascade-revision})
@@ -89,8 +109,8 @@
                          {:status :present
                           :kind blocker-kind
                           :stage (or (:stage failure) {:absent :not-recorded})
-                          :repair-evidence (cond-> [] application (conj application))}
-                         {:status :absent :reason :accepted-grounded-application})
+                          :repair-evidence applications}
+                         {:status :absent :reason :verified-grounded-work})
               :artifact (if (and (map? artifact) (string? (:commit artifact)))
                           (assoc (select-keys artifact [:repo :commit])
                                  :grounded? grounded?)

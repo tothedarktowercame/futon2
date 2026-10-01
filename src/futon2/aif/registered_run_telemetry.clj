@@ -1,6 +1,7 @@
 (ns futon2.aif.registered-run-telemetry
   "Evidence projection used by registered War Machine opportunities."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [futon2.aif.load-identity :as load-identity]))
 
@@ -17,15 +18,22 @@
 
 (defn- normalized-usage [usage]
   (let [input (or (:input-tokens usage) (:input_tokens usage)
-                  (:prompt-tokens usage) (:prompt_tokens usage))
+                  (:prompt-tokens usage) (:prompt_tokens usage)
+                  (:cost/input-tokens usage))
         output (or (:output-tokens usage) (:output_tokens usage)
-                   (:completion-tokens usage) (:completion_tokens usage))
+                   (:completion-tokens usage) (:completion_tokens usage)
+                   (:cost/output-tokens usage))
         total (or (:total-tokens usage) (:total_tokens usage)
+                  (:cost/total-tokens usage)
                   (when (and (integer? input) (integer? output)) (+ input output)))]
     (when (and (integer? input) (<= 0 input)
                (integer? output) (<= 0 output)
                (= total (+ input output)))
-      {:input-tokens input :output-tokens output :total-tokens total})))
+      (cond-> {:input-tokens input :output-tokens output :total-tokens total}
+        (or (:model usage) (:cost/model usage))
+        (assoc :model (or (:model usage) (:cost/model usage)))
+        (or (:source usage) (:cost/source usage))
+        (assoc :provider (or (:source usage) (:cost/source usage)))))))
 
 (defn model-usage
   "Aggregate authoritative receipts from distinct Agency jobs in RESULT.
@@ -73,7 +81,7 @@
                     (sort-by #(.lastModified ^java.io.File %) >)
                     first)]
     (try
-      (let [r (clojure.edn/read-string (slurp f))]
+      (let [r (edn/read-string (slurp f))]
         {:run/id (:run/id r)
          :source-revisions-after (get-in r [:registered-run/chronology
                                             :source-revisions-after])})
