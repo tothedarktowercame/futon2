@@ -111,3 +111,39 @@
                                #(conj % (first %)))]
       (is (= :adapter/selected-candidate-ambiguous
              (refusal #(adapter/input-from-run-record duplicate)))))))
+
+(defn recorded-g-run [recorded-g]
+  {:run/id "run-g-1" :click/id "click-g-1"
+   :decision
+   {:chosen {:target "M-live" :candidate :C1}
+    :selection-certificate
+    {:scoring
+     {0 {:id {:kind :cascade-candidate :id :C1 :target "M-live"}
+         :schema :wm/bounded-observation-score-v1
+         :g recorded-g
+         :g-terms {:risk 0.5 :ambiguity 0.25
+                   :expected-information-gain 0.125
+                   :combination :risk-plus-ambiguity-minus-information-gain
+                   :units :nats}}}}}})
+
+(deftest retained-g-renders-an-exact-float-combination-check
+  (let [run (recorded-g-run 0.625)
+        raw (.getBytes (pr-str run) java.nio.charset.StandardCharsets/UTF_8)
+        adapted (adapter/adapt-run-record-g-bytes raw (adapter/sha256 raw))]
+    (is (= 0.625 (get-in adapted [:projection :recorded-g])))
+    (is (.contains (:lean adapted)
+                   "recorded_g_matches_risk_plus_ambiguity_minus_information"))
+    (is (.contains (:lean adapted) "def recordedG : Float := Float.ofBits"))))
+
+(deftest retained-g-mutation-changes-the-exact-named-check
+  (let [good (adapter/render-g
+              (adapter/g-input-from-run-record (recorded-g-run 0.625)) "good")
+        mutated (adapter/render-g
+                 (adapter/g-input-from-run-record (recorded-g-run 0.626)) "mutated")]
+    (is (not= good mutated))
+    (is (.contains mutated
+                   "recorded_g_matches_risk_plus_ambiguity_minus_information"))
+    ;; Both inputs reach Lean as exact bits; native_decide succeeds only for
+    ;; the good value and rejects this changed recorded G.
+    (is (not= (re-find #"def recordedG.*" good)
+              (re-find #"def recordedG.*" mutated)))))

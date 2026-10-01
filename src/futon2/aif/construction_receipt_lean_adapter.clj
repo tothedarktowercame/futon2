@@ -239,6 +239,77 @@
   (adapt-run-record-bytes
    (java.nio.file.Files/readAllBytes (.toPath (io/file path))) expected-sha))
 
+(defn- selected-scoring-entry [run-record]
+  (let [chosen (get-in run-record [:decision :chosen])
+        target (:target chosen)
+        candidate-id (:candidate chosen)
+        scoring (get-in run-record [:decision :selection-certificate :scoring])]
+    (when-not (map? scoring)
+      (refuse! :adapter/g-scoring-missing {}))
+    (one! :adapter/g-selected-candidate-ambiguous
+          (filter (fn [entry]
+                    (let [id (:id entry)]
+                      (and (= :cascade-candidate (:kind id))
+                           (= target (:target id))
+                           (= candidate-id (:id id)))))
+                  (vals scoring))
+          {:target target :candidate candidate-id})))
+
+(defn g-input-from-run-record
+  "Select the enacted candidate's retained JVM-double G decomposition. This
+   checks the runtime combination law without claiming A/Q/C correspondence."
+  [run-record]
+  (let [chosen (get-in run-record [:decision :chosen])
+        entry (selected-scoring-entry run-record)
+        terms (:g-terms entry)
+        values [(:risk terms) (:ambiguity terms)
+                (:expected-information-gain terms) (:g entry)]]
+    (when-not (and (= :wm/bounded-observation-score-v1 (:schema entry))
+                   (= :risk-plus-ambiguity-minus-information-gain (:combination terms))
+                   (= :nats (:units terms))
+                   (every? #(and (number? %) (Double/isFinite (double %))) values))
+      (refuse! :adapter/g-certificate-shape-mismatch {}))
+    {:runtime-source {:run-id (:run/id run-record)
+                      :click-id (:click/id run-record)
+                      :target (:target chosen)
+                      :candidate (:candidate chosen)}
+     :risk (double (:risk terms))
+     :ambiguity (double (:ambiguity terms))
+     :information (double (:expected-information-gain terms))
+     :recorded-g (double (:g entry))}))
+
+(defn- float-bits [value]
+  (Long/toUnsignedString (Double/doubleToRawLongBits value)))
+
+(defn render-g
+  "Render exact IEEE-754 inputs and the named runtime G combination check."
+  [input source-sha]
+  (let [{:keys [risk ambiguity information recorded-g runtime-source]} input]
+    (str "import Mathlib\n\n"
+         "/-! GENERATED FILE — DO NOT EDIT.\n"
+         "Source SHA-256: " source-sha "\n"
+         "Runtime source: " (pr-str runtime-source) "\n"
+         "Scope: retained JVM-double combination law only; not A/Q/C correspondence.\n-/\n\n"
+         "namespace DarkTower.WarMachine.RuntimeG\n\n"
+         "def risk : Float := Float.ofBits " (float-bits risk) "\n"
+         "def ambiguity : Float := Float.ofBits " (float-bits ambiguity) "\n"
+         "def information : Float := Float.ofBits " (float-bits information) "\n"
+         "def recordedG : Float := Float.ofBits " (float-bits recorded-g) "\n\n"
+         "theorem recorded_g_matches_risk_plus_ambiguity_minus_information :\n"
+         "    ((risk + ambiguity - information) == recordedG) = true := by\n"
+         "  native_decide\n\n"
+         "#print axioms recorded_g_matches_risk_plus_ambiguity_minus_information\n"
+         "end DarkTower.WarMachine.RuntimeG\n")))
+
+(defn adapt-run-record-g-bytes [bytes expected-sha]
+  (let [actual (sha256 bytes)]
+    (when-not (= expected-sha actual)
+      (refuse! :adapter/source-pin-mismatch {:expected expected-sha :actual actual}))
+    (let [projection (g-input-from-run-record (strict-edn bytes))]
+      {:source-sha256 actual
+       :projection projection
+       :lean (render-g projection actual)})))
+
 (defn -main [& [input expected-sha output :as args]]
   (when-not (= 3 (count args))
     (binding [*out* *err*]

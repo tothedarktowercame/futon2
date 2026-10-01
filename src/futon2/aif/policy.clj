@@ -316,7 +316,8 @@
                                              :observation-model :steps
                                              :consumed-g :g-terms
                                              :c :c-source :rates-provenance])
-                               :id (:action entry))])
+                               :id (:action entry)
+                               :g (:controller-score entry))])
                    ranked))
    :candidates (mapv #(assoc % :f-consumed (cascade-selection/f-consumed-record %))
                      candidates)

@@ -53,7 +53,8 @@
         scoring (get-in decision [:selection-certificate :scoring])]
     (doseq [[i entry] (map-indexed vector entries)]
       (is (= (:action entry) (get-in scoring [i :id])))
-      (is (= (:certificate entry) (dissoc (get scoring i) :id))))))
+      (is (= (:controller-score entry) (get-in scoring [i :g])))
+      (is (= (:certificate entry) (dissoc (get scoring i) :id :g))))))
 
 (deftest offline-tick-record-preserves-validity-and-missing-prefix
   ;; tick-001's target is synthetic and has no row in the production focus
