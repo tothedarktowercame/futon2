@@ -34,9 +34,10 @@
 (defn receipt
   "Create the close feedback receipt. A grounded close whose retained D-task
    bridge proves selected/enacted identity attests every pattern in the enacted
-   cascade. An accepted-increment remains explicit evidence about its criterion
-   step, but absence of an operator acceptance declaration does not erase the
-   grounded-work attestation. Other selected patterns remain :selected-only."
+   cascade, but gives full application credit only to the recorded enacted
+   criterion step. Other cascade members receive a weaker supporting
+   attestation. Absence of an operator acceptance declaration does not erase
+   either grounded-work observation."
   [{:keys [run-id target selected-action outcome failure accepted-increment
            d-task-enactment cascade-revision artifact]}]
   (let [target (or target (:target selected-action))
@@ -54,9 +55,14 @@
           grounded-attestation?
           (mapv (fn [pattern]
                   {:pattern pattern
-                   :status :successful
+                   :status (if (= pattern step)
+                             :successful
+                             :supporting-attestation)
                    :evidence (cond-> {:selected-enacted-action :verified
                                       :grounded-work :attested
+                                      :application-role (if (= pattern step)
+                                                          :enacted-step
+                                                          :cascade-support)
                                       :terminal-outcome outcome}
                                (= pattern step)
                                (assoc :accepted-increment (:accepted? accepted-increment)
@@ -183,6 +189,8 @@
                           :let [apps (get by-pattern id [])]]
                       [id {:successful-applications
                            (count (filter #(= :successful (:status %)) apps))
+                           :supporting-attestations
+                           (count (filter #(= :supporting-attestation (:status %)) apps))
                            :incomplete-applications
                            (count (filter #(= :incomplete (:status %)) apps))
                            :selected-only
@@ -222,13 +230,21 @@
                  (remove nil?) distinct vec)
         rows (vec
               (keep (fn [id]
-                      (let [{:keys [successful-applications incomplete-applications]}
+                      (let [{:keys [successful-applications supporting-attestations
+                                    incomplete-applications]}
                             (get counts id)
                             s (long (or successful-applications 0))
+                            a (long (or supporting-attestations 0))
                             f (long (or incomplete-applications 0))]
-                        (when (pos? (+ s f))
-                          (let [factor (/ (* 2.0 (inc s)) (+ s f 2.0))]
-                            {:pattern id :successful s :incomplete f
+                        (when (pos? (+ s a f))
+                          ;; Supporting membership is useful evidence, but it
+                          ;; must not masquerade as enactment. Four grounded
+                          ;; support observations carry the weight of one
+                          ;; directly enacted application.
+                          (let [positive (+ (double s) (* 0.25 (double a)))
+                                factor (/ (* 2.0 (+ 1.0 positive))
+                                          (+ positive (double f) 2.0))]
+                            {:pattern id :successful s :supporting a :incomplete f
                              :factor factor :log-factor (Math/log factor)}))))
                     ids))
         log-factor (if (seq rows)

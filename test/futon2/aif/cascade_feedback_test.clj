@@ -47,14 +47,16 @@
              :status :successful
              :evidence {:selected-enacted-action :verified
                         :grounded-work :attested
+                        :application-role :enacted-step
                         :terminal-outcome :grounded-change
                         :accepted-increment true
                         :accepted-reason nil}
              :reinforcement :positive}
             {:pattern :patterns/selected-only
-             :status :successful
+             :status :supporting-attestation
              :evidence {:selected-enacted-action :verified
                         :grounded-work :attested
+                        :application-role :cascade-support
                         :terminal-outcome :grounded-change}
              :reinforcement :positive}]
            (get-in receipt [:patterns :applications])))
@@ -87,6 +89,8 @@
                                           :source :recorded-decision}}))]
     (is (= :successful
            (get-in receipt [:patterns :applications 0 :status])))
+    (is (= :supporting-attestation
+           (get-in receipt [:patterns :applications 1 :status])))
     (is (= :positive
            (get-in receipt [:patterns :applications 0 :reinforcement])))
     (is (= [:patterns/applied :patterns/selected-only]
@@ -94,6 +98,28 @@
     (is (= {:status :absent :reason :verified-grounded-work}
            (:blocker receipt)))
     (is (= revision (:cascade-revision receipt)))))
+
+(deftest partial-grounded-run-gives-enacted-step-more-credit-than-support
+  (let [receipt (feedback/receipt
+                 (input :outcome :grounded-progress
+                        :accepted-increment
+                        {:accepted? :no-acceptance-declared
+                         :reason :target-has-no-mechanical-acceptance-declaration
+                         :criterion-step {:id :patterns/applied
+                                          :source :recorded-decision}}))
+        metadata (feedback/construction-metadata {:events [receipt]})
+        applied (feedback/pattern-evidence-prior
+                 (get metadata "M-current")
+                 {:precedence [:patterns/applied]})
+        supporting (feedback/pattern-evidence-prior
+                    (get metadata "M-current")
+                    {:precedence [:patterns/selected-only]})]
+    (is (= 1 (get-in metadata ["M-current" :patterns :patterns/applied
+                               :successful-applications])))
+    (is (= 1 (get-in metadata ["M-current" :patterns :patterns/selected-only
+                               :supporting-attestations])))
+    (is (> (:factor applied) (:factor supporting))
+        "the next construction can distinguish enacted work from support")))
 
 (deftest next-construction-receives-retained-pattern-feedback
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
@@ -145,8 +171,10 @@
                                     :successful-applications])))
           (is (= 0 (get-in carried [:patterns :patterns/applied
                                     :incomplete-applications])))
-          (is (= 2 (get-in carried [:patterns :patterns/selected-only
+          (is (= 0 (get-in carried [:patterns :patterns/selected-only
                                     :successful-applications])))
+          (is (= 2 (get-in carried [:patterns :patterns/selected-only
+                                    :supporting-attestations])))
           (is (= 0 (get-in carried [:patterns :patterns/selected-only
                                     :selected-only])))))
       (finally
