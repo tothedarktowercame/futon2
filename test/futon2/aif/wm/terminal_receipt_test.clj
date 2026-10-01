@@ -18,7 +18,19 @@
    :selection-event {:event :cascade-selected
                      :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"}
    :decision {:selection-law {:per-policy-argmax
-                              {:action {:kind :cascade-candidate :id :C2}}}
+                              {:action {:kind :cascade-candidate :id :C2
+                                        :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"}}}
+              :selection-certificate
+              {:scoring
+               {0 {:id {:kind :cascade-candidate :id :C2
+                        :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"}
+                   :g 1.0498221244986776
+                   :g-terms {:risk 1.0498221244986776
+                             :ambiguity 0.0
+                             :expected-information-gain 0.0
+                             :combination :risk-plus-ambiguity-minus-information-gain
+                             :normalization :none
+                             :units :nats}}}}
               :g-term-decomposition {:status :present :terms [:R1 :R2]}}
    :outcome :grounded-change
    :d-task-enactment {:verification {:revision-pair
@@ -58,10 +70,44 @@
            (:target r)))
     (is (= :ticket (:target-kind r)))
     (is (= :cascade-candidate (:action-kind r)))
-    (is (= (get-in selected-record [:decision :g-term-decomposition]) (:G r)))
+    (is (= {:schema :wm/g-term-decomposition-v1
+            :status :present
+            :candidate (get-in selected-record
+                               [:decision :selection-law :per-policy-argmax :action])
+            :g 1.0498221244986776
+            :terms {:risk 1.0498221244986776
+                    :ambiguity 0.0
+                    :expected-information-gain 0.0
+                    :combination :risk-plus-ambiguity-minus-information-gain
+                    :normalization :none
+                    :units :nats}}
+           (:G r)))
     (is (= :grounded-change (:outcome r)))
     (is (= {:sha "0798f96ad2082a8f80c8a"} (:commit r)))
     (is (= "codex-13" (:reviewer r)))))
+
+(deftest selected-candidate-g-absence-is-typed-without-recomputation
+  (let [record (assoc-in selected-record [:decision :selection-certificate :scoring] {})
+        r (tr/terminal-receipt record)]
+    (is (= {:schema :wm/g-term-decomposition-v1
+            :status :missing
+            :reason :selected-candidate-g-not-recorded}
+           (:G r)))))
+
+(deftest selected-candidate-identity-mismatch-fails-closed
+  (let [record (assoc-in selected-record
+                         [:decision :selection-certificate :scoring 0 :id :id]
+                         :C-other)
+        failure (try
+                  (tr/terminal-receipt record)
+                  nil
+                  (catch clojure.lang.ExceptionInfo e e))
+        attached (tr/attach record :grounded-change)]
+    (is (= :candidate-identity-mismatch (:reason (ex-data failure))))
+    (is (= :terminal-receipt-invalid (:failure-kind (ex-data failure))))
+    (is (= :failure (get-in attached [:terminal-receipt :kind])))
+    (is (= :terminal-receipt-invalid
+           (get-in attached [:terminal-receipt :failure-kind])))))
 
 (deftest abstained-yields-failure
   (let [r (tr/terminal-receipt abstained-record)]

@@ -55,6 +55,42 @@
   [record]
   (boolean (or (:kind (:failure record)) (abstained? record))))
 
+(defn selected-g-decomposition
+  "Project the selected candidate's retained scalar G and term decomposition.
+  The selection certificate is the sole authority: no term is recomputed.
+  A certificate with scoring rows for another candidate is contradictory and
+  refuses; a certificate with no scoring rows is an honest typed absence."
+  [record]
+  (let [selected (get-in record [:decision :selection-law
+                                 :per-policy-argmax :action])
+        scoring (vals (or (get-in record [:decision :selection-certificate
+                                         :scoring]) {}))
+        matches (filterv #(= selected (:id %)) scoring)]
+    (cond
+      (empty? scoring)
+      {:schema :wm/g-term-decomposition-v1
+       :status :missing
+       :reason :selected-candidate-g-not-recorded}
+
+      (not= 1 (count matches))
+      (throw (ex-info "selected candidate does not identify one retained G decomposition"
+                      {:failure-kind :terminal-receipt-invalid
+                       :reason :candidate-identity-mismatch
+                       :selected selected
+                       :retained-identities (mapv :id scoring)}))
+
+      :else
+      (let [{:keys [g g-terms]} (first matches)]
+        (if (and (number? g) (map? g-terms) (seq g-terms))
+          {:schema :wm/g-term-decomposition-v1
+           :status :present
+           :candidate selected
+           :g g
+           :terms g-terms}
+          {:schema :wm/g-term-decomposition-v1
+           :status :missing
+           :reason :selected-candidate-g-not-recorded})))))
+
 (defn action-receipt
   "The :action-receipt for a selected-and-enacted RECORD: click id, target
   and its kind, the action kind and G terms the decision already records
@@ -73,7 +109,7 @@
    :action-kind (or (get-in record [:decision :selection-law
                                     :per-policy-argmax :action :kind])
                     {:absent :no-recorded-action-kind})
-   :G (get-in record [:decision :g-term-decomposition])
+   :G (selected-g-decomposition record)
    :outcome (:outcome record)
    :commit (or (:grounded-commit record)
                (when-let [sha (get-in record
