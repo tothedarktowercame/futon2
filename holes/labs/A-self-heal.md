@@ -53,6 +53,11 @@ it to look like a successful no-op.
   :repair-evidence [:explicit-commit :focused-gates :independent-review]}
 
  :stopping-rule :debugger-stop
+ :exit-maneuver
+ {:restart :abort
+  :cardinality :exactly-once-per-unresolved-stop
+  :postconditions [:terminal-run-record-present
+                   :run-absent-from-debugger-stop-registry]}
  :rearm-observation
  {:kind :counted-controlled-click
   :count 1
@@ -97,14 +102,21 @@ available as a filler but no concrete policy instance is admissible to G.
    Hot-load canonical namespaces only after the repair is sound.
 7. Choose a debugger restart explicitly:
    - `:retry` repeats only the repaired phase in the same attempt;
-   - `:abort` preserves the ordinary terminal failure;
+   - `:abort` preserves the ordinary terminal failure and discharges the
+     current debugger frame;
    - no restart is taken when semantics are genuinely undecided.
 8. Repeat from step 2.  Each new stop is a new observation and may select a
    different repair pattern; it is not evidence that the previous repair was
    useless.
-9. Re-arm ordinary M/E/T support only when one controlled click satisfies
+9. Before returning, handing off, or permitting another click, deliver
+   `:abort` exactly once to every unresolved stop owned by this algorithm.
+   Wait for its terminal run record, then verify its run ID is absent from
+   `futon2.aif.wm.debugger/stopped`.  An undecided semantic issue may prevent
+   `:retry`, but it must not leave a suspended debugger frame behind.  Failure
+   to discharge a frame is `:self-heal-debugger-frame-undischarged`.
+10. Re-arm ordinary M/E/T support only when one controlled click satisfies
    every required receipt in `:rearm-observation`.  Otherwise leave the
-   machine injured and the click paused or terminally failed.
+   machine injured with a terminally recorded failure.
 
 ## Receipts from the observed procedure
 
@@ -122,8 +134,11 @@ available as a filler but no concrete policy instance is admissible to G.
 - The first stop then exposed a lifecycle defect in `E-close-S6`; its source
   was marked completed in futon5a `e4cb486110d5eacabad96973f607a89cc164dda3`
   and the same attempt was retried.  The second stop selected
-  `E-apm-halftime-pre-go-live-D` and remains paused because its acceptance
-  prose has no authoritative completion observation.
+  `E-apm-halftime-pre-go-live-D`; because its acceptance prose had no
+  authoritative completion observation, the stop was aborted rather than
+  retried.  The resulting terminal record has SHA-256
+  `dfac8e2be03d0ed865bc1dabf4858aa4e9eed9587f166f33a29bdb278cb6a87e`,
+  and the debugger stop registry was verified empty.
 
 These receipts establish the algorithm's provenance.  They do **not** satisfy
 its re-arm condition: no post-repair click has yet completed with the complete
@@ -139,3 +154,6 @@ receipt set.
   algorithm as `:typed-blocker`.
 - Re-arm probe fails: keep `:wm-click-completes-with-reviewable-receipts`
   injured and use the new receipt as the next self-heal observation.
+- Abort delivery or terminal recording fails: refuse algorithm completion as
+  `:self-heal-debugger-frame-undischarged`; do not start another click on top
+  of the suspended frame.
