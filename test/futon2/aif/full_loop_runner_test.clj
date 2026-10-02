@@ -6583,12 +6583,16 @@
 
 (deftest dispatch-carries-current-run-harness
   (doseq [id ["run-one" nil " "]]
-    (let [sent (atom nil)]
+    (let [sent (atom nil)
+          ledger (atom {:order [] :jobs {}})]
       (with-redefs-fn {#'runner/post-json! (fn [_ payload] (reset! sent payload) {})}
-        #(runner/dispatch! {:agency-base "http://agency" :run-id id}
+        #(runner/dispatch! {:agency-base "http://agency" :run-id id
+                            :click-id "click-one"
+                            :registered-run/job-ledger ledger}
                            "seat" "wm-full-loop" "mission" "no-op"))
       (if (= id "run-one")
-        (is (= {:kind :war-machine :basis :producer-context :execution-id id} (:harness @sent)))
+        (is (= {:kind :war-machine :basis :producer-context
+                :execution-id id :source-ref "click-one"} (:harness @sent)))
         (do (is (= :unknown (get-in @sent [:harness :kind])))
             (is (string? (get-in @sent [:harness :reason])))
             (is (not (contains? (:harness @sent) :execution-id))))))))

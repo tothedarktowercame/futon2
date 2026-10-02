@@ -848,7 +848,9 @@
                                         (quot elapsed-nanos 1000000))
                        :started-at started-at
                        :finished-at (str (Instant/now))})
-        usage (registered-telemetry/model-usage result)
+        usage (registered-telemetry/model-usage
+               (:registered-run/job-ledger raw-opts)
+               {:run-id run-id :click-id (:click-id raw-opts)})
         refresh (or (some-> (:preference-refresh/state raw-opts) deref)
                     {:absent :refresh-not-reached})
         chronology (registered-telemetry/chronology-finish
@@ -1473,19 +1475,34 @@
    use, and the Agency's work-mode no-execution gate
    futon3c codex-task-no-execution? would fail it); absent means \"work\",
    the enactment default that requires execution evidence."
-  [{:keys [agency-base d-task-dispatch-state run-id invoke-mode]} agent caller mission prompt]
+  [{:keys [agency-base d-task-dispatch-state run-id invoke-mode] :as opts}
+   agent caller mission prompt]
   (let [captured (some-> d-task-dispatch-state deref)
         prompt (if (= :captured (:status captured))
                  (str (d-task/prompt-binding (:dispatch captured)) "\n" prompt) prompt)
+        wm-run? (and (string? run-id) (not (str/blank? run-id)))
+        _ (when (and wm-run?
+                     (or (str/blank? (str (:click-id opts)))
+                         (nil? (:registered-run/job-ledger opts))))
+            (throw (ex-info "WM dispatch lacks its run-local job ledger context"
+                            {:failure-kind :wm-job-ledger-unavailable
+                             :run-id run-id :click-id (:click-id opts)})))
         response
         (post-json! (str agency-base "/api/alpha/bell")
                     {:agent-id agent :caller caller :mission-id (str mission)
-                     :harness (if (and (string? run-id) (not (str/blank? run-id)))
-                                {:kind :war-machine :basis :producer-context :execution-id run-id}
+                     :harness (if wm-run?
+                                {:kind :war-machine :basis :producer-context
+                                 :execution-id run-id :source-ref (:click-id opts)}
                                 {:kind :unknown :basis :producer-context
                                  :reason "runner has no usable :run-id"})
                      :type "request" :mode (or invoke-mode "work") :prompt prompt})]
     (when-let [job-id (:job-id response)]
+      (when-let [ledger (:registered-run/job-ledger opts)]
+        (let [phase-state (some-> (:wm-phase-state opts) deref)]
+          (registered-telemetry/register-job!
+           ledger {:run-id run-id :click-id (:click-id opts) :job-id job-id
+                   :role {:agent agent :caller caller :mission mission}
+                   :phase (:phase phase-state)})))
       (println "[wm-cancel] Ctrl-C alone does NOT cancel the Agency job.")
       (println "[wm-cancel] To stop this runner and its Agency job:")
       (println (str "clojure -M:wm-full-loop cancel " job-id
@@ -1594,7 +1611,10 @@
                 silent-for (max 0 (- now activity))]
             (report-wm-wait! opts job first-poll-ms)
             (if (contains? terminal-states (:state job))
-              job
+              (do
+                (when-let [ledger (:registered-run/job-ledger opts)]
+                  (registered-telemetry/retain-terminal-job! ledger job))
+                job)
               (let [stalled? (and (>= silent-for threshold)
                                   (not= activity reported-activity))]
                 (when stalled?
@@ -6775,6 +6795,7 @@
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
+                                :registered-run/job-ledger (atom {:order [] :jobs {}})
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :phase-events/state phase-events

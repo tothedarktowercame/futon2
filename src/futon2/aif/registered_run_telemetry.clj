@@ -40,23 +40,90 @@
         (or (:source usage) (:cost/source usage))
         (assoc :provider (or (:source usage) (:cost/source usage)))))))
 
+(defn register-job!
+  "Register one WM dispatch at the point Agency returns its job identity."
+  [ledger {:keys [run-id click-id job-id] :as entry}]
+  (when-not (and (instance? clojure.lang.IAtom ledger)
+                 (every? #(and (string? %) (not-empty %))
+                         [run-id click-id job-id]))
+    (throw (ex-info "WM job registration lacks run/click/job identity"
+                    {:failure-kind :wm-job-ledger-registration-invalid
+                     :entry entry})))
+  (swap! ledger
+         (fn [state]
+           (when (get-in state [:jobs job-id])
+             (throw (ex-info "WM job registered more than once"
+                             {:failure-kind :wm-job-ledger-duplicate-job
+                              :job-id job-id})))
+           (-> state
+               (update :order (fnil conj []) job-id)
+               (assoc-in [:jobs job-id] (assoc entry :status :dispatched)))))
+  entry)
+
+(defn retain-terminal-job!
+  "Attach the exact terminal Agency job map to its dispatch-ledger entry."
+  [ledger job]
+  (let [job-id (:job-id job)]
+    (swap! ledger
+           (fn [state]
+             (cond
+               (nil? (get-in state [:jobs job-id]))
+               (update state :errors (fnil conj [])
+                       {:reason :terminal-job-unregistered :job-id job-id})
+
+               (get-in state [:jobs job-id :terminal])
+               (update state :errors (fnil conj [])
+                       {:reason :terminal-job-duplicated :job-id job-id})
+
+               :else
+               (-> state
+                   (assoc-in [:jobs job-id :status] :terminal)
+                   (assoc-in [:jobs job-id :terminal] job))))))
+  job)
+
 (defn model-usage
-  "Aggregate authoritative receipts from distinct Agency jobs in RESULT.
-   If any dispatched job lacks provider usage, retain typed partial evidence."
-  [result]
-  (let [job-id-of (fn [m] (try (get m :job-id) (catch ClassCastException _ nil)))
-        jobs (->> (tree-seq coll? seq result)
-                  (filter map?)
-                  (filter job-id-of)
-                  (reduce (fn [m job] (assoc m (job-id-of job) job)) {})
-                  vals)
-        rows (keep #(some-> (:usage %) normalized-usage
-                            (assoc :job-id (:job-id %))) jobs)
-        missing (vec (sort (remove (set (map :job-id rows)) (map :job-id jobs))))]
-    (if (and (seq jobs) (empty? missing))
-      (merge {:status :complete :source :agency-provider-receipts
-              :jobs (vec (sort-by :job-id rows))}
-             (reduce (fn [m row]
+  "Project provider usage solely from the run-local dispatch ledger."
+  [ledger {:keys [run-id click-id]}]
+  (let [{:keys [order jobs errors]} (or (some-> ledger deref) {})
+        rows (mapv
+              (fn [job-id]
+                (let [{:keys [terminal role phase] :as entry} (get jobs job-id)
+                      harness (:harness terminal)
+                      joined? (and (= run-id (:run-id entry))
+                                   (= click-id (:click-id entry))
+                                   (= job-id (:job-id terminal))
+                                   (= :war-machine (:kind harness))
+                                   (= :producer-context (:basis harness))
+                                   (= run-id (:execution-id harness))
+                                   (= click-id (:source-ref harness)))
+                      usage (when joined? (normalized-usage (:usage terminal)))
+                      reason (cond
+                               (nil? terminal) :terminal-receipt-missing
+                               (not (contains? #{"done" "failed" "cancelled" "timed-out"}
+                                               (:state terminal))) :job-nonterminal
+                               (not joined?) :run-click-job-join-mismatch
+                               (nil? usage) :provider-usage-missing-or-invalid)]
+                  (cond-> {:job-id job-id :run-id (:run-id entry)
+                           :click-id (:click-id entry) :role role :phase phase
+                           :status (if reason :typed-missing :complete)
+                           :unit :tokens}
+                    reason (assoc :reason reason)
+                    usage (merge usage))))
+              (or order []))
+        valid (filterv #(= :complete (:status %)) rows)
+        missing (filterv #(not= :complete (:status %)) rows)
+        all-valid? (and (seq rows) (empty? missing) (empty? errors))]
+    (cond-> {:status (cond all-valid? :complete
+                           (seq valid) :partial
+                           :else :typed-missing)
+             :source :wm-run-local-agency-ledger
+             :unit :tokens
+             :jobs rows}
+      (seq missing) (assoc :missing (mapv #(select-keys % [:job-id :reason]) missing))
+      (seq errors) (assoc :ledger-errors errors)
+      (empty? rows) (assoc :reason :no-wm-jobs-dispatched)
+      (seq valid)
+      (merge (reduce (fn [m row]
                        (-> m
                            (update :input-tokens + (:input-tokens row))
                            (update :output-tokens + (:output-tokens row))
@@ -65,11 +132,8 @@
                            (update :uncached-input-tokens + (or (:uncached-input-tokens row)
                                                                (:input-tokens row)))))
                      {:input-tokens 0 :output-tokens 0 :total-tokens 0
-                      :cached-input-tokens 0 :uncached-input-tokens 0} rows))
-      {:status (if (seq rows) :partial :typed-missing)
-       :source :agency-provider-receipts
-       :jobs (vec (sort-by :job-id rows))
-       :missing-job-ids missing})))
+                      :cached-input-tokens 0 :uncached-input-tokens 0}
+                     valid)))))
 
 (defn- git-head [path]
   (let [{:keys [exit out]} (shell/sh "git" "-C" path "rev-parse" "HEAD")]
