@@ -785,6 +785,52 @@
       (cond-> {:sha sha}
         (not (str/blank? (str repo))) (assoc :repo repo)))))
 
+(defn outer-task-selection-record
+  "Validate and return the exact outer selection receipt retained at selection.
+  Missing or identity-inconsistent receipts become typed absences; this
+  projection never recomputes the population, seed, draw, or choice."
+  [receipt decision]
+  (let [chosen-target (get-in receipt [:chosen :id])
+        action-target (get-in receipt [:action :target])
+        decision-targets
+        (set (keep identity
+                   (concat [(get-in decision [:action :target])]
+                           (map :target (:refusals decision)))))
+        valid-no-choice? (and (contains? (:chosen receipt) :absent)
+                              (nil? (:action receipt))
+                              (empty? decision-targets))]
+    (cond
+      (nil? receipt)
+      {:schema :wm/outer-task-selection-v1
+       :status :absent :reason :receipt-not-retained}
+
+      (not= :wm/outer-task-selection-v1 (:schema receipt))
+      {:schema :wm/outer-task-selection-v1
+       :status :absent :reason :receipt-schema-invalid
+       :observed-schema (:schema receipt)
+       :observed-receipt receipt}
+
+      (and (not valid-no-choice?)
+           (or (not (string? chosen-target))
+               (not= chosen-target action-target)
+               (and (seq decision-targets)
+                    (not (contains? decision-targets chosen-target)))))
+      {:schema :wm/outer-task-selection-v1
+       :status :absent :reason :receipt-identity-inconsistent
+       :receipt-target chosen-target
+       :action-target action-target
+       :decision-targets (vec (sort decision-targets))
+       :observed-receipt receipt}
+
+      :else receipt)))
+
+(defn retain-outer-task-selection
+  "Carry the judge's receipt on the native selected or abstained checkpoint arm."
+  [selection-cell selected? receipt]
+  (assoc-in selection-cell
+            [(if selected? :judgment :sorry) :outer-task-selection]
+            receipt))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -829,6 +875,13 @@
             abstention (abstention-carrier (or decision (:decision selection-sorry))
                                            (:dropped-candidates selection-sorry)
                                            (:judge-refusal selection-sorry))
+            outer-task-selection
+            (outer-task-selection-record
+             (or (get-in result [:checkpoints :selection :judgment
+                                 :outer-task-selection])
+                 (get-in result [:checkpoints :selection :sorry
+                                 :outer-task-selection]))
+             (or decision (:decision selection-sorry)))
             declaration-reads (cascade-sources/provenance
                                (some-> (:declaration-reads/state raw-opts) deref))
             world-at-selection (or (get-in result
@@ -908,6 +961,7 @@
                                                      :interpretation-ask])
                                             {:status :absent
                                              :reason :no-interpretation-ask})
+                    :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :route route
                     :failure (run-record-failure result)
@@ -5785,7 +5839,11 @@
                                          interpretation-ask-record)
                                true
                                (assoc-in [:judgment :world-at-selection]
-                                         world-at-selection))]
+                                         world-at-selection)
+                               true
+                               (retain-outer-task-selection
+                                (boolean entry)
+                                (:outer-task-selection judgement)))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
