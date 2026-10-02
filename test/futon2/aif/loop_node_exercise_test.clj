@@ -48,3 +48,13 @@
 
 (deftest complete-exercise-crosses-the-launch-gate
   (is (identical? exercised (exercise/require-complete! exercised))))
+
+(deftest debugger-context-retains-abstention-rationale
+  (let [decision {:status :abstained
+                  :refusals [{:kind :no-problems :target "E-x"}]}]
+    (try
+      (exercise/require-complete! decision)
+      (is false "abstention without node decisions must stop")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= (:refusals decision)
+               (get-in (ex-data e) [:decision-context :refusals])))))))

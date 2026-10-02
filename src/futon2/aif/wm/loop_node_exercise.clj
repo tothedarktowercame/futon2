@@ -72,6 +72,7 @@
     {:decision-status (:status decision)
      :chosen (select-keys (:chosen decision) [:status :kind :id :target])
      :action (select-keys (:action decision) [:kind :id :target])
+     :refusals (:refusals decision)
      :abstention (:abstention decision)
      :selection-law (:selection-law decision)
      :candidate-count (count candidates)
