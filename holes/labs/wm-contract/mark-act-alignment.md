@@ -91,3 +91,42 @@ acts file): record-run-receipt → ㊢ report, by analogy with
 publish-selection-trace, which also writes TRACE; abstain → 🈝 defer, same
 stage. observe-world and refresh-preferences read rather than say, and `:none`
 looks right for them.
+
+## 🈸 outside the click: the morning brief
+
+Joe (2026-10-02): the War Machine's equivalent of 🈸 is the morning brief,
+"here is what I implemented, do you approve it?". That is the same question an
+agent's 🈸 asks. It explains why no click act names ask-action: the acts file
+lists the brief under `:known-non-click-acts` (`emit-brief-or-silent`, "no
+current full-loop click emission site records" it). The machine's one
+outward-addressed ask is made after the click, not during it.
+
+## Self-talk: the missing marks as steps the machine says to itself
+
+Joe (2026-10-02): the marks with no click act can still be carried out in
+self-talk; one can clarify something by investigating its properties. Read
+that way, a step the machine addresses to itself can carry a mark and an
+R-node without emitting anything outward. In self-talk the speaker is also
+the listener, so one mark is both said (the acts file's ACT) and taken in
+(the menu's PERCEIVE), and both sources are right about it.
+
+Each candidate below was checked against the code site this turn (futon2 at
+450387929). "Supported" means a live function does the step the mark names;
+it does not mean the step is recorded with the mark.
+
+| mark | node | step said to itself | code site | verdict |
+|---|---|---|---|---|
+| 🈲 constrain | GRAIN-GATE | refuse a candidate whose grain does not match the planned attempt | `src/futon2/aif/grain_gate.clj:65` `grain-gate`, called at `src/futon2/aif/flight_runner.clj:944`; a refusal is kept on the attempt as `:not-committed :grain-gate-refused` | supported |
+| ㊩ report-problem | R8 | compute the mismatch between predicted and observed | `src/futon2/aif/free_energy.clj:203` `compute-prediction-error`, route-tagged `:R8` at `scripts/futon2/report/war_machine.clj:6508` | supported; the step finds a mismatch, which is a problem only when it is large |
+| ㊟ qualify | R3 | move a belief by the evidence of this tick | `scripts/futon2/report/war_machine.clj:830` `apply-arena-belief-events`, route-tagged `:R3` at `:6502` | supported |
+| 🈹 retract | R3 | reverse a belief | same site | not established: nothing found that tells a reversal apart from any other update |
+| ㊫ explore | R4 | roll a policy forward to see what it would lead to | `src/futon2/aif/forward_model.clj:308` `predict-multi-horizon`, called at `src/futon2/aif/efe.clj:644` when the horizon is 2 or more | supported in code; whether live clicks take the horizon-2 branch was not checked |
+| 🈕 extend | R17 | add structure to the model | `aif-equations.edn` `:a-conc` is `:realised false` ("no tick has accumulated live on any route"); the running R17 step is Bayesian model reduction, which removes structure | not supported |
+| 🈝 defer | R6 | stop without selecting | the click act `abstain` (above) | supported, and it is already a click act with no intent |
+| 🈯 clarify | — | investigate a thing's properties instead of asking | the outward version is the click act `request-interpretation`; no inward site found | not established |
+
+Still with no counterpart, outward or inward: 🈖 explain, ㊣ approve,
+🈚 disagree, ㊮ collect, 🈡 withdraw, and the two annotator marks ㊥ and 🈳.
+approve and disagree are what the reviewer seat says about the author's work,
+so in the machine they are said by one seat to another, which the acts file
+files under verify.
