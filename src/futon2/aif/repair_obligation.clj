@@ -560,7 +560,33 @@
                   (not (str/blank? (str error))))
      (throw (ex-info "System stop-the-line finding lacks required provenance"
                      {:finding finding})))
-   (let [occurrence (validate-occurrence! occurrence
+   (let [selection (get-in finding [:backtrace :checkpoints :selection])
+         judgment (:judgment selection)
+         selection-sorry (:sorry selection)
+         ask (or (get-in finding [:failure-data :interpretation-ask])
+                 (:interpretation-ask judgment)
+                 (:interpretation-ask selection-sorry))
+         selected-entry (or (:selected-entry finding)
+                            (when-let [action (:selected-action judgment)]
+                              {:action action
+                               :controller-score
+                               (get-in judgment [:selection-reasons
+                                                 :controller-score])}))
+         target (or (:target finding)
+                    (get-in finding [:failure-data :target])
+                    (:selected-mission judgment)
+                    (get-in selected-entry [:action :target])
+                    (:target selected-entry)
+                    (:selected-mission selection-sorry)
+                    (:target ask))
+         failure-context
+         (cond-> {:phase failure-stage}
+           (get-in finding [:failure-data :decision-context])
+           (assoc :decision-context
+                  (get-in finding [:failure-data :decision-context]))
+           selected-entry (assoc :selected-entry selected-entry)
+           ask (assoc :interpretation-ask ask))
+         occurrence (validate-occurrence! occurrence
                                           (:failure-kind finding) repair-id)
          id (or (when occurrence (occurrence-finding-id occurrence))
                 repair-id
@@ -571,9 +597,8 @@
                  :repair/class repair-class
                  :machine-repo (:machine-repo finding)
                  :attempt-id attempt-id
-                 :target (:target finding)
-                 :selected-entry (:selected-entry finding)
                  :failure-stage failure-stage
+                 :failure-context failure-context
                  :failure-outcome outcome
                  :failure-kind (:failure-kind finding)
                  :failure-error error
@@ -583,6 +608,8 @@
                  :opened-at (or (:opened-at finding)
                                 (:observed-at observation)
                                 (str (Instant/now)))}
+                  target (assoc :target target)
+                  selected-entry (assoc :selected-entry selected-entry)
                   occurrence (assoc :repair/occurrence occurrence)
                   ;; WM-CAUSE-ON-RECORD-I: the cause chain beneath the
                   ;; failure, kept when the writer supplied one

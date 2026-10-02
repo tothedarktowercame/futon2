@@ -38,6 +38,8 @@
            (str "Parent: " (:target finding) "\n\n"))
          "## Observed failure\n\n"
          "Target: " (or (:target finding) "not retained") "; stage: " (:failure-stage finding) ".\n\n"
+         (when-let [context (:failure-context finding)]
+           (str "Context: " (description context) ".\n\n"))
          (description (or (:failure-error finding) (:review-text finding) (:failure-kind finding))) "\n\n"
          "## Scoped task\n\n"
          (if environmental?

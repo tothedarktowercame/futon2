@@ -25,6 +25,74 @@
     (spit file (pr-str record))
     record))
 
+(defn- publication-destinations [root]
+  {:ticket-dir (str (io/file root "ticket-publication" "holes" "tickets"))
+   :queue-path (str (io/file root "ticket-publication" "resources" "wm"
+                            "ticket-queue.edn"))})
+
+(deftest automatic-finding-retains-known-selection-context
+  (let [root (temp-root)
+        ask {:target "M-self-documenting-stack" :outcome :published
+             :published true :job-id "invoke-test"}
+        decision-context {:decision-status :abstained
+                          :refusals [{:target "M-self-documenting-stack"
+                                      :kind :no-query-time-slice}]}
+        finding (repair/record-system-failure!
+                 root
+                 {:attempt-id "controlled-attempt"
+                  :repair-class :machine-failure
+                  :failure-stage :selection-redecision
+                  :outcome :incomplete
+                  :failure-kind :required-loop-node-unexercised
+                  :error "Required loop nodes were not exercised by selection"
+                  :failure-data {:decision-context decision-context}
+                  :backtrace
+                  {:checkpoints
+                   {:selection
+                    {:sorry {:kind :selection-redecision-failed
+                             :selected-mission "M-self-documenting-stack"
+                             :interpretation-ask ask}}}}
+                  :discharge-contract {:requires [:distinct-repair-commit]
+                                       :artifact-shape :code-commit}}
+                 (publication-destinations root))
+        durable (edn/read-string
+                 (slurp (io/file root "findings"
+                                 (str (:repair/id finding) ".edn"))))
+        ticket (slurp (io/file root "ticket-publication" "holes" "tickets"
+                               (str "T-" (:repair/id finding) ".md")))]
+    (is (= "M-self-documenting-stack" (:target durable)))
+    (is (= {:phase :selection-redecision
+            :decision-context decision-context
+            :interpretation-ask ask}
+           (:failure-context durable)))
+    (is (str/includes? ticket
+                       "Target: M-self-documenting-stack; stage: :selection-redecision."))
+    (is (str/includes? ticket ":interpretation-ask"))))
+
+(deftest automatic-finding-does-not-invent-preselection-target
+  (let [root (temp-root)
+        finding (repair/record-system-failure!
+                 root
+                 {:attempt-id "initialization-attempt"
+                  :repair-class :machine-failure
+                  :failure-stage :initialization
+                  :outcome :incomplete
+                  :failure-kind :initialization-failed
+                  :error "Initialization failed before selection"
+                  :failure-data {:trigger :duree-click-on-demand}
+                  :backtrace {:error-class "clojure.lang.ExceptionInfo"}
+                  :discharge-contract {:requires [:distinct-repair-commit]
+                                       :artifact-shape :code-commit}}
+                 (publication-destinations root))
+        durable (edn/read-string
+                 (slurp (io/file root "findings"
+                                 (str (:repair/id finding) ".edn"))))
+        ticket (slurp (io/file root "ticket-publication" "holes" "tickets"
+                               (str "T-" (:repair/id finding) ".md")))]
+    (is (not (contains? durable :target)))
+    (is (= {:phase :initialization} (:failure-context durable)))
+    (is (str/includes? ticket "Target: not retained; stage: :initialization."))))
+
 (deftest dismiss-grounding-readback-degraded-proof-controls
   (let [commit "a2d8aba0ae57126b22b9afa9c7ff0888a54afdaa"
         impl-id (str "full-loop/implementation/" commit)
