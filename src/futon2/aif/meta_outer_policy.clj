@@ -85,6 +85,25 @@
   {:schema :wm/meta-outer-policy-receipt-v1
    :status :refused :reason reason :details details})
 
+(defn- graph-errors [patterns edges]
+  (let [nodes (set patterns)
+        adjacency (reduce (fn [m [a b]] (update m a (fnil conj #{}) b)) {} edges)
+        sinks (set (remove #(seq (get adjacency %)) nodes))
+        reaches? (fn reaches? [start target seen]
+                   (or (= start target)
+                       (some #(or (= % target)
+                                  (when-not (seen %)
+                                    (reaches? % target (conj seen %))))
+                             (get adjacency start))))
+        cyclic? (some (fn [node]
+                        (some #(reaches? % node #{node}) (get adjacency node))) nodes)]
+    (cond-> []
+      cyclic? (conj :precedence-cyclic)
+      (not= 1 (count sinks)) (conj :selection-sink-not-unique)
+      (and (= 1 (count sinks))
+           (not-every? #(reaches? % (first sinks) #{%}) nodes))
+      (conj :selection-sink-unreachable))))
+
 (defn- contract-errors [contract]
   (let [patterns (:patterns contract)
         slots (:slots contract)
@@ -111,10 +130,49 @@
                 (every? #(and (vector? %) (= 2 (count %))
                               (every? (set patterns) %)) precedence)))
       (conj :precedence-invalid)
+      (and (vector? patterns) (seq patterns) (vector? precedence)
+           (every? #(and (vector? %) (= 2 (count %))
+                         (every? (set patterns) %)) precedence))
+      (into (graph-errors patterns precedence))
       (not= :argmin-G (get-in contract [:selection :law]))
       (conj :selection-law-invalid)
       (not= :refuse-not-zero (get-in contract [:generative-model :missing-term-policy]))
       (conj :missing-term-policy-invalid))))
+
+(defn- field-errors [field candidates]
+  (let [rows (:rows field)
+        row-ids (map :id rows)
+        candidate-targets (map #(get-in % [:slots :target]) candidates)
+        by-target (into {} (map (juxt :id identity)) rows)
+        joins (for [candidate candidates
+                    :let [target (get-in candidate [:slots :target])
+                          row (get by-target target)]]
+                [candidate row])
+        algorithm-rows (filter #(= :algorithm (:kind %)) rows)]
+    (cond-> []
+      (not= :wm/meta-field-observation-v1 (:schema field))
+      (conj :field-schema-invalid)
+      (not (source-pin? (:source-pin field))) (conj :field-source-unpinned)
+      (not (and (vector? rows) (seq rows))) (conj :field-rows-invalid)
+      (not= (count row-ids) (count (set row-ids))) (conj :field-row-ids-not-unique)
+      (not (every? #(and (string? (:id %)) (contains? task-kinds (:kind %))
+                         (source-pin? (:source %))) rows))
+      (conj :field-row-invalid)
+      (not (and (= (count rows) (count candidates))
+                (= (count candidate-targets) (count (set candidate-targets)))
+                (= (set row-ids) (set candidate-targets))))
+      (conj :field-coverage-incomplete)
+      (not-every? (fn [[candidate row]]
+                    (and row
+                         (= (:kind row) (get-in candidate [:slots :task-kind]))
+                         (= (:source row) (get-in candidate [:slots :evidence-channel :source]))))
+                  joins)
+      (conj :field-candidate-identity-mismatch)
+      (and (seq algorithm-rows)
+           (not (source-pin? (:algorithm-catalog-source field))))
+      (conj :algorithm-catalog-unpinned)
+      (some #(not= true (:approved %)) algorithm-rows)
+      (conj :algorithm-not-approved))))
 
 (defn evaluate
   "Validate and evaluate an explicit, replayable META field.
@@ -122,7 +180,7 @@
   Healthy support admits ordinary M/E/T/A work. Injury restricts support to an
   exact capability-matching repair algorithm. G uses the canonical Gaussian
   EFE core plus the canonical Bayes-coherent EIG kernel."
-  [{:keys [contract contract-source observation candidates] :as input}]
+  [{:keys [contract contract-source field-observation observation candidates] :as input}]
   (cond
     (not= :meta/outer-policy-cascade-v1 (:schema contract))
     (typed-refusal :contract-schema-invalid {:schema (:schema contract)})
@@ -159,6 +217,10 @@
         (seq malformed)
         (typed-refusal :candidate-invalid {:candidate-errors malformed})
 
+        (seq (field-errors field-observation candidates))
+        (typed-refusal :field-observation-invalid
+                       {:errors (field-errors field-observation candidates)})
+
         (and injured? (not (source-pin? (:source-pin observation))))
         (typed-refusal :injury-source-unpinned {:source-pin (:source-pin observation)})
 
@@ -169,10 +231,30 @@
                         :field-census (frequencies (map #(get-in % [:slots :task-kind]) candidates))})
 
         :else
-        (let [g-errors (into {} (keep (fn [c] (when-let [es (seq (g-input-errors c))]
+        (let [declared-vocabulary (vec (get-in contract [:generative-model :outcomes]))
+              vocabularies (set (map #(get-in % [:g-input :outcome-vocabulary]) support))
+              vocabulary-errors
+              (cond-> []
+                (or (empty? declared-vocabulary)
+                    (not= (count declared-vocabulary)
+                          (count (set declared-vocabulary))))
+                (conj :contract-outcome-vocabulary-empty-or-duplicated)
+                (not= #{declared-vocabulary} vocabularies)
+                (conj :candidate-outcome-vocabulary-mismatch)
+                (some (fn [c]
+                        (not= (count declared-vocabulary)
+                              (count (get-in c [:g-input :means])))) support)
+                (conj :outcome-dimension-mismatch))
+              g-errors (into {} (keep (fn [c] (when-let [es (seq (g-input-errors c))]
                                                 [(:id c) (vec es)]))) support)]
-          (if (seq g-errors)
+          (cond
+            (seq vocabulary-errors)
+            (typed-refusal :outcome-vocabulary-invalid {:errors vocabulary-errors})
+
+            (seq g-errors)
             (typed-refusal :g-inputs-incomplete {:candidate-errors g-errors})
+
+            :else
             (try
               (let [scored
                     (mapv (fn [candidate]
@@ -193,7 +275,8 @@
                  :status :selected
                  :arm (if injured? :self-heal :healthy)
                  :contract-source contract-source
-                 :field-census (frequencies (map #(get-in % [:slots :task-kind]) candidates))
+                 :field-observation-source (:source-pin field-observation)
+                 :field-census (frequencies (map :kind (:rows field-observation)))
                  :typed-exclusions
                  (into {} (for [c candidates :when (not (some #{c} support))]
                             [(:id c) :machine-injury-active-or-capability-mismatch]))

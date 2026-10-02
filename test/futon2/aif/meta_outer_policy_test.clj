@@ -22,7 +22,8 @@
     {:required true :type :closure-or-progress-observer
      :fields {:source :source-pin :locator :checkable-locator}}
     :stopping-rule {:required true :type :enum}}
-   :generative-model {:missing-term-policy :refuse-not-zero}
+   :generative-model {:outcomes [:closure]
+                      :missing-term-policy :refuse-not-zero}
    :selection {:law :argmin-G}})
 
 (def zero-information
@@ -42,18 +43,35 @@
            :stopping-rule :grounded-progress}
    :g-input {:means [mean] :variances [1.0]
              :preference-means [0.0] :preference-variances [1.0]
+             :outcome-vocabulary [:closure]
              :information-model zero-information
              :source-pin {:path (str "predictions/" (name id) ".edn")
                           :sha256 (apply str (repeat 64 "c"))}}})
+
+(defn field [candidates]
+  {:schema :wm/meta-field-observation-v1
+   :source-pin {:path "observations/meta-field.edn"
+                :sha256 (apply str (repeat 64 "d"))}
+   :algorithm-catalog-source {:path "algorithms/approved.edn"
+                              :sha256 (apply str (repeat 64 "e"))}
+   :rows (mapv (fn [candidate]
+                 {:id (get-in candidate [:slots :target])
+                  :kind (get-in candidate [:slots :task-kind])
+                  :source (get-in candidate [:slots :evidence-channel :source])
+                  :approved (= :algorithm (get-in candidate [:slots :task-kind]))})
+               candidates)})
+
+(defn evaluate [input]
+  (meta/evaluate (assoc input :field-observation (field (:candidates input)))))
 
 (deftest healthy-field-admits-m-e-t-and-useful-algorithms
   (let [field [(candidate :m :mission "M-one" 0.1)
                (candidate :e :excursion "E-one" 0.2)
                (candidate :t :ticket "T-one" 0.3)
                (candidate :a :algorithm "A-approved" 0.0)]
-        receipt (meta/evaluate {:contract contract :contract-source pin
-                                :observation {:injury-observation {:absent :none}}
-                                :candidates field})]
+        receipt (evaluate {:contract contract :contract-source pin
+                           :observation {:injury-observation {:absent :none}}
+                           :candidates field})]
     (is (= :selected (:status receipt)))
     (is (= {:mission 1 :excursion 1 :ticket 1 :algorithm 1}
            (:field-census receipt)))
@@ -61,9 +79,9 @@
     (is (= :minimum-canonical-G (:selection-reason receipt)))
     (is (every? number? (vals (:g receipt))))
     (is (= receipt
-           (meta/evaluate {:contract contract :contract-source pin
-                           :observation {:injury-observation {:absent :none}}
-                           :candidates field}))
+           (evaluate {:contract contract :contract-source pin
+                      :observation {:injury-observation {:absent :none}}
+                      :candidates field}))
         "explicit pinned inputs replay byte-for-value")))
 
 (deftest injured-field-is-exact-match-only-and-no-match-abstains
@@ -76,10 +94,10 @@
                      :rearm-observation {:kind :probe :requires [:network-ok]})
         observation {:injury-observation :active :injured-capability :write
                      :source-pin source}
-        selected (meta/evaluate {:contract contract :contract-source pin
-                                 :observation observation :candidates [heal other]})
-        no-match (meta/evaluate {:contract contract :contract-source pin
-                                 :observation observation :candidates [other]})]
+        selected (evaluate {:contract contract :contract-source pin
+                            :observation observation :candidates [heal other]})
+        no-match (evaluate {:contract contract :contract-source pin
+                            :observation observation :candidates [other]})]
     (is (= :heal (:selected-policy selected)))
     (is (= :singleton-admitted-support (:selection-reason selected)))
     (is (= :no-matching-self-heal-algorithm (:reason no-match)))
@@ -89,25 +107,66 @@
   (let [good (candidate :m :mission "M-one" 0.1)]
     (testing "slot declaration mutation"
       (is (= :contract-invalid
-             (:reason (meta/evaluate {:contract (assoc-in contract [:slots :target :type] :string)
-                                      :contract-source pin :observation {}
-                                      :candidates [good]})))))
+             (:reason (evaluate {:contract (assoc-in contract [:slots :target :type] :string)
+                                 :contract-source pin :observation {}
+                                 :candidates [good]})))))
     (testing "missing and invalid candidate slot data"
       (let [bad (-> good
                     (update :slots dissoc :target)
                     (assoc-in [:slots :resource-envelope :token-budget] 0))
-            receipt (meta/evaluate {:contract contract :contract-source pin
-                                    :observation {} :candidates [bad]})]
+            receipt (evaluate {:contract contract :contract-source pin
+                               :observation {} :candidates [bad]})]
         (is (= :candidate-invalid (:reason receipt)))
         (is (= #{:required-slot-missing :target-invalid :resource-envelope-invalid}
                (set (get-in receipt [:details :candidate-errors :m]))))))
     (testing "complete G inputs are mandatory"
       (is (= :g-inputs-incomplete
-             (:reason (meta/evaluate {:contract contract :contract-source pin
-                                      :observation {}
-                                      :candidates [(update good :g-input dissoc :information-model)]})))))
+             (:reason (evaluate {:contract contract :contract-source pin
+                                 :observation {}
+                                 :candidates [(update good :g-input dissoc :information-model)]})))))
     (testing "tactical material cannot cross the outer boundary"
       (is (= :outer-boundary-violated
-             (:reason (meta/evaluate {:contract contract :contract-source pin
-                                      :observation {} :candidates [good]
-                                      :tactical-precedence [:p]})))))))
+             (:reason (evaluate {:contract contract :contract-source pin
+                                 :observation {} :candidates [good]
+                                 :tactical-precedence [:p]})))))))
+
+(deftest adversarial-vocabulary-graph-and-field-mutations-fail-closed
+  (let [a (candidate :a :mission "M-a" 0.1)
+        b (candidate :b :excursion "E-b" 0.2)
+        input {:contract contract :contract-source pin :observation {}
+               :candidates [a b]}]
+    (testing "different Gaussian dimensions cannot be compared"
+      (let [two-channel (-> b
+                            (assoc-in [:g-input :outcome-vocabulary] [:closure :progress])
+                            (assoc-in [:g-input :means] [0.2 0.3])
+                            (assoc-in [:g-input :variances] [1.0 1.0])
+                            (assoc-in [:g-input :preference-means] [0.0 0.0])
+                            (assoc-in [:g-input :preference-variances] [1.0 1.0]))
+            receipt (evaluate (assoc input :candidates [a two-channel]))]
+        (is (= :outcome-vocabulary-invalid (:reason receipt)))
+        (is (= #{:candidate-outcome-vocabulary-mismatch :outcome-dimension-mismatch}
+               (set (get-in receipt [:details :errors]))))))
+    (testing "a cycle cannot masquerade as an outer cascade"
+      (let [cyclic (assoc contract :precedence [[:meta/observe :meta/fill]
+                                                [:meta/fill :meta/observe]
+                                                [:meta/fill :meta/select]])
+            receipt (evaluate (assoc input :contract cyclic))]
+        (is (= :contract-invalid (:reason receipt)))
+        (is (some #{:precedence-cyclic} (get-in receipt [:details :errors])))))
+    (testing "candidate subset cannot call itself the field"
+      (let [manifest (field [a b])
+            receipt (meta/evaluate (assoc input :candidates [a]
+                                          :field-observation manifest))]
+        (is (= :field-observation-invalid (:reason receipt)))
+        (is (= [:field-coverage-incomplete]
+               (get-in receipt [:details :errors])))))
+    (testing "algorithm rows require a pinned approval catalog and approval"
+      (let [algorithm (candidate :alg :algorithm "A-one" 0.1)
+            manifest (-> (field [algorithm])
+                         (dissoc :algorithm-catalog-source)
+                         (assoc-in [:rows 0 :approved] false))
+            receipt (meta/evaluate {:contract contract :contract-source pin
+                                    :field-observation manifest :observation {}
+                                    :candidates [algorithm]})]
+        (is (= #{:algorithm-catalog-unpinned :algorithm-not-approved}
+               (set (get-in receipt [:details :errors]))))))))
