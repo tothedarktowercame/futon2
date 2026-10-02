@@ -34,9 +34,24 @@
    :allocated 5 :consumed 3 :available 2 :unit :ordinary-click
    :ledger-source (pin "/data/consumption.jsonl" "8")})
 
+(def injury-run-record
+  {:run/id "run-1" :click/id "click-1"
+   :failure {:kind :abstained :stage :selection
+             :detail {:kind :wm/selection-terminal-abstention}}
+   :terminal-receipt {:kind :failure :failure-kind :abstained}
+   :outer-task-selection {:schema :wm/outer-task-selection-v1
+                          :status :absent :reason :receipt-not-retained}
+   :loop-node-exercise {:schema :wm/loop-node-exercise-v1 :status :incomplete
+                        :counts {:present 0 :bypassed 0 :refused 4}}
+   :run-output {:schema :wm/run-output-v1 :status :absent
+                :reason :run-not-grounded :outcome :abstained}
+   :traceWritten false})
+(def injury-run-bytes (.getBytes (pr-str injury-run-record) "UTF-8"))
+(def injury-run-pin {:path "/data/wm-runs/source.edn"
+                     :sha256 (field/sha256 injury-run-bytes)})
 (def injury-record
   {:schema :wm/injury-evidence-v1
-   :source-record (pin "/data/wm-runs/source.edn" "5")
+   :source-record injury-run-pin
    :run-id "run-1" :click-id "click-1"
    :failure {:kind :abstained :stage :selection
              :detail-kind :wm/selection-terminal-abstention}
@@ -51,7 +66,9 @@
 (def injury-bytes (.getBytes (pr-str injury-record) "UTF-8"))
 (def injury-pin {:path "/data/wm-runs/injured.edn"
                  :sha256 (field/sha256 injury-bytes)})
-(def injury-authority {:source-bytes injury-bytes :expected-source-pin injury-pin})
+(def injury-authority {:source-bytes injury-bytes :expected-source-pin injury-pin
+                       :run-record-bytes injury-run-bytes
+                       :expected-run-record-pin injury-run-pin})
 
 (deftest current-registry-is-accounted-without-a-second-lifecycle-policy
   (let [reads (atom [])
@@ -337,4 +354,31 @@
       (is (= :injury-observation-does-not-match-source
              (:reason (injury/verify
                        (resign (update observation :evidence dissoc :run-output))
-                       injury-authority)))))))
+                       injury-authority)))))
+    (testing "correct projection pin with wrong run bytes"
+      (is (= :injury-run-record-drift
+             (:reason (injury/produce
+                       (assoc injury-authority :run-record-bytes
+                              (.getBytes "{}" "UTF-8")))))))
+    (testing "altered and re-pinned projection with the correct run"
+      (let [altered (.getBytes (pr-str (assoc-in injury-record
+                                                 [:failure :detail-kind]
+                                                 :wm/network-unavailable)) "UTF-8")]
+        (is (= :injury-projection-mismatch
+               (:reason (injury/produce
+                         (assoc injury-authority
+                                :source-bytes altered
+                                :expected-source-pin
+                                {:path (:path injury-pin)
+                                 :sha256 (field/sha256 altered)})))))))
+    (testing "mismatched run identity"
+      (doseq [altered-record [(assoc injury-record :run-id "other-run")
+                              (assoc injury-record :click-id "other-click")]]
+        (let [altered (.getBytes (pr-str altered-record) "UTF-8")]
+          (is (= :injury-projection-mismatch
+                 (:reason (injury/produce
+                           (assoc injury-authority
+                                  :source-bytes altered
+                                  :expected-source-pin
+                                  {:path (:path injury-pin)
+                                   :sha256 (field/sha256 altered)}))))))))))

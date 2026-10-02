@@ -180,6 +180,10 @@
         injury-bytes (java.nio.file.Files/readAllBytes
                       (.toPath (java.io.File. injury-path)))
         injury-pin {:path injury-path :sha256 (field/sha256 injury-bytes)}
+        run-path (str "/home/joe/code/futon2/data/wm-runs/"
+                      "tick-run-record-2026-10-02-afd0e890-46e7-4152-a0e6-68b78759e248.edn")
+        run-bytes (java.nio.file.Files/readAllBytes (.toPath (java.io.File. run-path)))
+        run-pin {:path run-path :sha256 (field/sha256 run-bytes)}
         clicks {:schema :wm/ordinary-click-availability-v1
                 :authorization {:path "authority.md" :sha "review-fixture"}
                 :allocated 2 :consumed 1 :available 1 :unit :ordinary-click
@@ -192,7 +196,9 @@
                       :catalog-path field/default-algorithm-catalog
                       :click-availability clicks
                       :injury-authority {:source-bytes injury-bytes
-                                         :expected-source-pin injury-pin}})
+                                         :expected-source-pin injury-pin
+                                         :run-record-bytes run-bytes
+                                         :expected-run-record-pin run-pin}})
         authority {:field-observation observation
                    :expected-field-pin (:source-pin observation)
                    :code-root "/home/joe/code"

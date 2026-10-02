@@ -27,10 +27,29 @@
 (defn- refusal [reason details]
   {:schema schema :status :refused :reason reason :details details})
 
+(defn- project-run-record [record source-record]
+  {:schema :wm/injury-evidence-v1
+   :source-record source-record
+   :run-id (:run/id record)
+   :click-id (:click/id record)
+   :failure {:kind (get-in record [:failure :kind])
+             :stage (get-in record [:failure :stage])
+             :detail-kind (get-in record [:failure :detail :kind])}
+   :terminal-receipt (select-keys (:terminal-receipt record)
+                                  [:kind :failure-kind])
+   :outer-task-selection (select-keys (:outer-task-selection record)
+                                      [:schema :status :reason])
+   :loop-node-exercise (select-keys (:loop-node-exercise record)
+                                    [:schema :status :counts])
+   :run-output (select-keys (:run-output record)
+                            [:schema :status :reason :outcome])
+   :trace-written (:traceWritten record)})
+
 (defn produce
   "Derive the one currently declared META injury from exact run-record bytes.
    EXPECTED-SOURCE-PIN is retained independently by the caller."
-  [{:keys [source-bytes expected-source-pin]}]
+  [{:keys [source-bytes expected-source-pin
+           run-record-bytes expected-run-record-pin]}]
   (cond
     (not (bytes? source-bytes))
     (refusal :injury-source-bytes-missing {})
@@ -39,14 +58,28 @@
     (refusal :external-injury-source-authority-invalid
              {:expected-source-pin expected-source-pin})
 
+    (not (bytes? run-record-bytes))
+    (refusal :injury-run-record-bytes-missing {})
+
+    (not (pin? expected-run-record-pin))
+    (refusal :external-injury-run-record-authority-invalid
+             {:expected-run-record-pin expected-run-record-pin})
+
     (not= (:sha256 expected-source-pin) (sha256 source-bytes))
     (refusal :injury-source-drift
              {:expected (:sha256 expected-source-pin)
               :actual (sha256 source-bytes)})
 
+    (not= (:sha256 expected-run-record-pin) (sha256 run-record-bytes))
+    (refusal :injury-run-record-drift
+             {:expected (:sha256 expected-run-record-pin)
+              :actual (sha256 run-record-bytes)})
+
     :else
     (try
       (let [record (edn/read-string (String. ^bytes source-bytes "UTF-8"))
+            run-record (edn/read-string (String. ^bytes run-record-bytes "UTF-8"))
+            expected-projection (project-run-record run-record expected-run-record-pin)
             evidence
             {:source-record (:source-record record)
              :run-id (:run-id record)
@@ -62,8 +95,7 @@
                                       [:schema :status :reason :outcome])
              :trace-written (:trace-written record)}
             active?
-            (and (= :wm/injury-evidence-v1 (:schema record))
-                 (pin? (:source-record evidence))
+            (and (= expected-projection record)
                  (string? (:run-id evidence)) (string? (:click-id evidence))
                  (= :abstained (get-in evidence [:failure :kind]))
                  (= :selection (get-in evidence [:failure :stage]))
@@ -76,15 +108,23 @@
                  (= :absent (get-in evidence [:run-output :status]))
                  (= :abstained (get-in evidence [:run-output :outcome]))
                  (false? (:trace-written evidence)))
-            body (if active?
+            body (cond
+                   (not= expected-projection record)
+                   (refusal :injury-projection-mismatch
+                            {:expected expected-projection :actual record})
+
+                   active?
                    {:schema schema :status :active :capability capability
                     :source-pin expected-source-pin :evidence evidence}
+                   :else
                    {:schema schema :status :absent
                     :reason :required-injury-evidence-not-present
                     :source-pin expected-source-pin :evidence evidence})]
-        (assoc body :observation-pin
-               {:path "wm://meta-injury-observation-v1"
-                :sha256 (digest body)}))
+        (if (= :refused (:status body))
+          body
+          (assoc body :observation-pin
+                 {:path "wm://meta-injury-observation-v1"
+                  :sha256 (digest body)})))
       (catch Throwable t
         (refusal :injury-source-unreadable {:message (ex-message t)})))))
 
