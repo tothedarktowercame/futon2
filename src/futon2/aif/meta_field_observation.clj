@@ -7,13 +7,13 @@
   separately pinned, explicit approval catalog."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [futon2.aif.meta-injury-observation :as injury]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.outer-task-selection :as outer])
   (:import [java.security MessageDigest]))
 
 (def schema :wm/meta-field-observation-v1)
 (def algorithm-catalog-schema :wm/approved-algorithm-catalog-v1)
-(def injury-schema :wm/injury-observation-v1)
 (def default-algorithm-catalog
   "/home/joe/code/futon2/resources/wm/approved-algorithms.edn")
 
@@ -102,16 +102,15 @@
        (>= (:available receipt) required)))
 
 (defn- matching-injury-authority?
-  [observation expected-pin capability]
-  (and (= injury-schema (:schema observation))
+  [observation capability]
+  (and (= injury/schema (:schema observation))
        (= :active (:status observation))
        (= capability (:capability observation))
-       (pin? expected-pin)
-       (= expected-pin (:source-pin observation))))
+       (pin? (:source-pin observation))
+       (pin? (:observation-pin observation))))
 
 (defn- algorithm-rows
-  [{:keys [path read-bytes click-availability injury-observation
-           expected-injury-pin]}]
+  [{:keys [path read-bytes click-availability injury-observation]}]
   (if-not path
     {:rows []
      :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-unavailable
@@ -162,8 +161,7 @@
                                  :availability click-availability}}))
 
                   (not (matching-injury-authority?
-                        injury-observation expected-injury-pin
-                        (:repairs-capability entry)))
+                        injury-observation (:repairs-capability entry)))
                   (recur (next remaining) rows
                          (conj exclusions
                                {:id (:id entry) :kind :algorithm
@@ -173,7 +171,8 @@
                                  :source source
                                  :repairs-capability (:repairs-capability entry)
                                  :injury-observation injury-observation
-                                 :expected-injury-pin expected-injury-pin}}))
+                                 :injury-verification (:injury-verification
+                                                      injury-observation)}}))
 
                   :else
                   (let [actual (sha256 (read-bytes (:path source)))]
@@ -216,7 +215,7 @@
   result of the authoritative loaders; no task source is reread here. Algorithm
   catalog and algorithm files are each read exactly once via `:read-bytes`."
   [{:keys [registry-snapshot catalog-path read-bytes click-availability
-           injury-observation expected-injury-pin]
+           injury-authority]
     :or {read-bytes #(java.nio.file.Files/readAllBytes (.toPath (io/file %)))}}]
   (let [registry-snapshot
         (or registry-snapshot
@@ -227,10 +226,14 @@
         task-ids (map :id (concat support exclusions))
         duplicates (->> task-ids frequencies
                         (keep (fn [[id n]] (when (> n 1) id))) vec)
+        derived-injury (when injury-authority (injury/produce injury-authority))
+        verified-injury (when derived-injury
+                          (injury/verify derived-injury injury-authority))
+        injury-observation (when (= :verified (:status verified-injury))
+                             (assoc derived-injury :injury-verification verified-injury))
         algorithms (algorithm-rows {:path catalog-path :read-bytes read-bytes
                                     :click-availability click-availability
-                                    :injury-observation injury-observation
-                                    :expected-injury-pin expected-injury-pin})]
+                                    :injury-observation injury-observation})]
     (cond
       (seq duplicates)
       (refusal :duplicate-identities {:kind :task :ids duplicates})

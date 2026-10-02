@@ -1,0 +1,25 @@
+{:schema :wm/injury-evidence-v1
+ :source-record
+ {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-02-afd0e890-46e7-4152-a0e6-68b78759e248.edn"
+  :sha256 "dfac8e2be03d0ed865bc1dabf4858aa4e9eed9587f166f33a29bdb278cb6a87e"}
+ :run-id "2026-10-02-afd0e890-46e7-4152-a0e6-68b78759e248"
+ :click-id "wm-click-72d1881d-4c21-4ca3-8774-49d757e9e8a4"
+ :failure
+ {:kind :abstained
+  :stage :selection
+  :detail-kind :wm/selection-terminal-abstention}
+ :terminal-receipt {:kind :failure :failure-kind :abstained}
+ :outer-task-selection
+ {:schema :wm/outer-task-selection-v1
+  :status :absent
+  :reason :receipt-not-retained}
+ :loop-node-exercise
+ {:schema :wm/loop-node-exercise-v1
+  :status :incomplete
+  :counts {:present 0 :bypassed 0 :refused 4}}
+ :run-output
+ {:schema :wm/run-output-v1
+  :status :absent
+  :reason :run-not-grounded
+  :outcome :abstained}
+ :trace-written false}

@@ -175,12 +175,11 @@
     (is (= #{:head-source-mismatch} (set (map :reason (:exclusions receipt)))))))
 
 (deftest actual-self-heal-injury-joins-field-discovery-and-construction
-  (let [injury-pin
-        {:path "/home/joe/code/futon3/library/meta/meta-outer-policy-cascade.edn"
-         :sha256 "b1eaaa09a7f16fff9e4ac1c8e43e584b7d187ce348a25458237549983ddb6b86"}
-        injury {:schema :wm/injury-observation-v1 :status :active
-                :capability :wm-click-completes-with-reviewable-receipts
-                :source-pin injury-pin}
+  (let [injury-path (str "/home/joe/code/futon2/resources/wm/injuries/"
+                         "wm-click-reviewable-receipts-2026-10-02.edn")
+        injury-bytes (java.nio.file.Files/readAllBytes
+                      (.toPath (java.io.File. injury-path)))
+        injury-pin {:path injury-path :sha256 (field/sha256 injury-bytes)}
         clicks {:schema :wm/ordinary-click-availability-v1
                 :authorization {:path "authority.md" :sha "review-fixture"}
                 :allocated 2 :consumed 1 :available 1 :unit :ordinary-click
@@ -192,8 +191,8 @@
                      {:registry-snapshot empty-registry
                       :catalog-path field/default-algorithm-catalog
                       :click-availability clicks
-                      :injury-observation injury
-                      :expected-injury-pin injury-pin})
+                      :injury-authority {:source-bytes injury-bytes
+                                         :expected-source-pin injury-pin}})
         authority {:field-observation observation
                    :expected-field-pin (:source-pin observation)
                    :code-root "/home/joe/code"
@@ -209,6 +208,11 @@
                       :adapters (:adapters discovered)})]
     (is (= {:algorithm 1 :excursion 0 :mission 0 :ticket 0}
            (:counts observation)))
+    (is (= "f338af6e24e88eb7bbef9db4f5e1906cc35f182daa1c30ab0b40f8b46134cef7"
+           (:sha256 injury-pin)))
+    (is (= "dfac8e2be03d0ed865bc1dabf4858aa4e9eed9587f166f33a29bdb278cb6a87e"
+           (get-in observation [:rows 0 :algorithm-admission :injury-observation
+                                :evidence :source-record :sha256])))
     (is (= :verified (:status (discovery/verify discovered authority))))
     (is (= :approved-injury-repair-algorithm
            (get-in discovered [:adapters 0 :adapter])))

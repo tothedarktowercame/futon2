@@ -1,7 +1,8 @@
 (ns futon2.aif.meta-field-observation-test
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.meta-field-observation :as field]))
+            [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.meta-injury-observation :as injury]))
 
 (defn- pin [path ch]
   {:path path :sha256 (apply str (repeat 64 ch))})
@@ -33,11 +34,24 @@
    :allocated 5 :consumed 3 :available 2 :unit :ordinary-click
    :ledger-source (pin "/data/consumption.jsonl" "8")})
 
-(def injury-pin (pin "/data/wm-injuries/current.edn" "7"))
-(def matching-injury
-  {:schema :wm/injury-observation-v1 :status :active
-   :capability :wm-click-completes-with-reviewable-receipts
-   :source-pin injury-pin})
+(def injury-record
+  {:schema :wm/injury-evidence-v1
+   :source-record (pin "/data/wm-runs/source.edn" "5")
+   :run-id "run-1" :click-id "click-1"
+   :failure {:kind :abstained :stage :selection
+             :detail-kind :wm/selection-terminal-abstention}
+   :terminal-receipt {:kind :failure :failure-kind :abstained}
+   :outer-task-selection {:schema :wm/outer-task-selection-v1
+                          :status :absent :reason :receipt-not-retained}
+   :loop-node-exercise {:schema :wm/loop-node-exercise-v1 :status :incomplete
+                        :counts {:present 0 :bypassed 0 :refused 4}}
+   :run-output {:schema :wm/run-output-v1 :status :absent
+                :reason :run-not-grounded :outcome :abstained}
+   :trace-written false})
+(def injury-bytes (.getBytes (pr-str injury-record) "UTF-8"))
+(def injury-pin {:path "/data/wm-runs/injured.edn"
+                 :sha256 (field/sha256 injury-bytes)})
+(def injury-authority {:source-bytes injury-bytes :expected-source-pin injury-pin})
 
 (deftest current-registry-is-accounted-without-a-second-lifecycle-policy
   (let [reads (atom [])
@@ -84,8 +98,7 @@
         observation (field/observe {:registry-snapshot current-registry
                                     :catalog-path "/catalog.edn"
                                     :click-availability positive-clicks
-                                    :injury-observation matching-injury
-                                    :expected-injury-pin injury-pin
+                                    :injury-authority injury-authority
                                     :read-bytes read-bytes})]
     (is (= ["/catalog.edn" "/algorithms/A-approved.md"] @reads)
         "catalog and approved algorithm source are each read once")
@@ -139,7 +152,7 @@
               (field/observe
                {:registry-snapshot current-registry :catalog-path "/catalog.edn"
                 :click-availability positive-clicks
-                :injury-observation matching-injury :expected-injury-pin injury-pin
+                :injury-authority injury-authority
                 :read-bytes #(case % "/catalog.edn" catalog-bytes
                                     "/A-one.md" algorithm-bytes)}))]
     (testing "algorithm file drift"
@@ -236,7 +249,7 @@
               (field/observe
                {:registry-snapshot current-registry :catalog-path "/catalog.edn"
                 :click-availability availability
-                :injury-observation matching-injury :expected-injury-pin injury-pin
+                :injury-authority injury-authority
                 :read-bytes #(case % "/catalog.edn" catalog "/A.md" body)}))]
     (doseq [bad [nil
                  (assoc positive-clicks :available 0 :consumed 5)
@@ -254,7 +267,7 @@
              (get-in (first (filter #(= "A" (:id %)) (:rows observation)))
                      [:resource-admission :availability]))))))
 
-(deftest approved-algorithm-requires-exact-independently-pinned-injury
+(deftest approved-algorithm-requires-exact-reconstructed-injury
   (let [body (.getBytes "algorithm" "UTF-8")
         source {:path "/A.md" :sha256 (field/sha256 body)}
         catalog (.getBytes
@@ -267,28 +280,61 @@
                                       :id :wm-click-completes-with-reviewable-receipts}
                                      :resource-requirements {:ordinary-clicks 1}}]})
                  "UTF-8")
-        run (fn [injury expected]
+        run (fn [authority]
               (field/observe
                {:registry-snapshot current-registry :catalog-path "/catalog.edn"
                 :click-availability positive-clicks
-                :injury-observation injury :expected-injury-pin expected
+                :injury-authority authority
                 :read-bytes #(case % "/catalog.edn" catalog "/A.md" body)}))]
-    (doseq [[injury expected]
-            [[{:schema :wm/injury-observation-v1 :status :healthy
-               :source-pin injury-pin} injury-pin]
-             [(assoc matching-injury :capability :network) injury-pin]
-             [matching-injury nil]
-             [matching-injury (pin "/other.edn" "6")]]]
-      (let [observation (run injury expected)
+    (doseq [authority
+            [nil
+             (assoc injury-authority :source-bytes
+                    (.getBytes (pr-str (assoc injury-record :trace-written true)) "UTF-8"))
+             (assoc injury-authority :source-bytes
+                    (.getBytes (pr-str (assoc-in injury-record
+                                                [:failure :detail-kind]
+                                                :wm/network-unavailable)) "UTF-8"))
+             (assoc injury-authority :expected-source-pin (pin "/other.edn" "6"))]]
+      (let [observation (run authority)
             excluded (some #(when (= "A" (:id %)) %) (:exclusions observation))]
         (is (zero? (get-in observation [:counts :algorithm])))
         (is (= :algorithm/injury-capability-unavailable
                (:ineligible-reason excluded)))
         (is (= :verified (:status (verify-produced observation))))))
-    (let [observation (run matching-injury injury-pin)
+    (let [observation (run injury-authority)
           row (some #(when (= "A" (:id %)) %) (:rows observation))]
       (is (= 1 (get-in observation [:counts :algorithm])))
       (is (= :wm-click-completes-with-reviewable-receipts
              (:repairs-capability row)))
-      (is (= matching-injury
-             (get-in row [:algorithm-admission :injury-observation]))))))
+      (is (= :active
+             (get-in row [:algorithm-admission :injury-observation :status])))
+      (is (= injury-pin
+             (get-in row [:algorithm-admission :injury-observation :source-pin]))))))
+
+(deftest injury-observation-reconstruction-rejects-self-signed-claims
+  (let [observation (injury/produce injury-authority)
+        resign (fn [x]
+                 (assoc x :observation-pin
+                        {:path "wm://meta-injury-observation-v1"
+                         :sha256 (field/digest (dissoc x :observation-pin))}))]
+    (is (= :verified (:status (injury/verify observation injury-authority))))
+    (testing "changing capability and re-signing"
+      (is (= :injury-observation-does-not-match-source
+             (:reason (injury/verify (resign (assoc observation :capability :network))
+                                     injury-authority)))))
+    (testing "substituting the META cascade pin"
+      (let [cascade-pin {:path "/home/joe/code/futon3/library/meta/meta-outer-policy-cascade.edn"
+                         :sha256 "b1eaaa09a7f16fff9e4ac1c8e43e584b7d187ce348a25458237549983ddb6b86"}]
+        (is (= :injury-observation-does-not-match-source
+               (:reason (injury/verify observation
+                                       (assoc injury-authority
+                                              :expected-source-pin cascade-pin)))))))
+    (testing "active status without retained failure evidence"
+      (is (= :injury-observation-does-not-match-source
+             (:reason (injury/verify
+                       (resign (assoc observation :evidence {})) injury-authority)))))
+    (testing "dropping one required injury evidence field"
+      (is (= :injury-observation-does-not-match-source
+             (:reason (injury/verify
+                       (resign (update observation :evidence dissoc :run-output))
+                       injury-authority)))))))
