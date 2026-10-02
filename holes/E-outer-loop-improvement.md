@@ -1,6 +1,7 @@
 # E-outer-loop-improvement — recover useful task-selection knowledge after the loop works
 
-**Status:** IDENTIFY (opened 2026-10-02). Live; the unchecked items below are
+**Status:** DERIVE (opened 2026-10-02; advanced after the 2026-10-02
+debugger run exposed completed and unreasoned selections). Live; the unchecked items below are
 the work, not admission gates.
 
 **Driver:** War Machine. **Operator:** Joe. **Repository:** `futon2`.
@@ -39,6 +40,51 @@ make any historical score or cascade canonical.
   or causing long unchanged-target runs.
 - [ ] The accepted outer-policy receipt and its learned state remain distinct
   from the selected task's tactical cascade/G certificate.
+
+## Minimal reason-bearing META policy
+
+The current seeded-uniform selector is a reproducible inhabitant of the outer
+policy's type. It is not an adequate live policy: a seed and an index explain
+how an item was drawn, but not why that M/E/T/A item should be worked now.
+
+Before an outer decision may launch tactical cascade construction, its receipt
+must answer **why this item?** from task-level evidence. At minimum it records:
+
+1. the complete current M/E/T/A support and typed exclusions;
+2. the selected item's admissibility and actionable next surface;
+3. each policy term actually consulted, with source, units, value and
+   missing-value semantics;
+4. the selected item's contribution or rank under each term;
+5. at least the nearest rejected alternative and the reason it lost; and
+6. the resulting choice probability or deterministic ordering rule.
+
+The minimal first live policy need not recover the historical information-
+geometric controller. It may use only explicit priority, actionable status,
+blockers, recent progress/failure, repetition, and estimated time/token cost.
+But it must use enough of those observations to make the selected item better
+supported than an alternative. If no available item is distinguishable on the
+declared evidence, uniform choice is retained as a typed fallback
+`:no-task-level-preference-evidence`, not presented as a positive rationale.
+
+This receipt must not observe a task's tactical patterns, constructed
+cascades, universes, precedence, or G. Those belong to the inner loop after
+the M/E/T/A identity is selected. Conversely, an inner construction failure
+becomes a next-run task-level observation (failure kind, blocker, time and
+cost); it is not silently converted into permanent outer ineligibility.
+
+### Launch gate
+
+An outer selection is launchable only when its receipt has a selected task,
+the complete support/exclusion census, and either:
+
+- an evidence-backed comparison showing why it outranks or outweighs an
+  alternative; or
+- the explicit uniform-fallback absence above, during a registered baseline
+  or shadow-policy comparison.
+
+A bare `:seeded-uniform-task-support` receipt outside such a registered
+baseline is a typed `:outer-policy-rationale-missing` stop, not permission to
+spend an author/reviewer dispatch.
 
 ## Scope
 
@@ -149,4 +195,3 @@ selection, starvation, or excessive cost. Choose the smallest historical
 mechanism that addresses the observed failure and run it first as a recorded
 shadow/counterfactual. A theory that does not affect a decision or improve the
 measured outcome remains archived evidence, not live machinery.
-
