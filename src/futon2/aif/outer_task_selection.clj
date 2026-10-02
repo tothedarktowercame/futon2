@@ -23,13 +23,33 @@
   In particular, cascade candidates, interpretations, precedence and G terms
   cannot cross this boundary."
   [task]
-  (select-keys task [:id :kind :status-class :open-hole-count :priority]))
+  (select-keys task [:id :kind :status-class :open-hole-count :priority
+                     :requisition :source]))
 
 (defn- supported? [{:keys [id kind]}]
   (and (string? id) (not (empty? id)) (contains? kind-order kind)))
 
+(defn- requisition-ineligible? [task]
+  (contains? #{:in-progress :completed} (get-in task [:requisition :state])))
+
+(defn- support-order [task]
+  [(if (number? (:priority task)) (:priority task) 0)
+   (get kind-order (:kind task) Long/MAX_VALUE)
+   (:id task)])
+
+(defn- excluded-task [task]
+  (if-not (supported? task)
+    (assoc task :eligible false :ineligible-reason :unsupported-task-shape)
+    (let [state (get-in task [:requisition :state])]
+      (assoc task
+             :eligible false
+             :ineligible-reason (keyword "requisition" (name state))
+             :ineligibility-evidence
+             {:requisition (:requisition task)
+              :source (:source task)}))))
+
 (defn select-task
-  "Select one current task using an explicit E-only baseline policy.
+  "Select one current M/E/T/A task using the requisition-aware baseline policy.
 
   The support is sorted by declared numeric priority (lower first), task kind,
   then id.  Selection is a reproducible seeded uniform draw over that support;
@@ -39,11 +59,16 @@
   [{:keys [tasks seed]}]
   (let [projected (mapv task-view (or tasks []))
         support (->> projected
-                     (filter supported?)
-                     (sort-by (juxt #(if (number? (:priority %)) (:priority %) 0)
-                                    #(get kind-order (:kind %)) :id))
+                     (filter #(and (supported? %)
+                                   (not (requisition-ineligible? %))))
+                     (sort-by support-order)
                      vec)
-        excluded (->> projected (remove supported?) vec)
+        excluded (->> projected
+                      (remove #(and (supported? %)
+                                    (not (requisition-ineligible? %))))
+                      (map excluded-task)
+                      (sort-by support-order)
+                      vec)
         n (count support)
         seeded? (integer? seed)
         index (when (and (pos? n) seeded?)
@@ -52,7 +77,8 @@
     (cond->
      {:schema schema
       :policy {:kind :seeded-uniform-task-support
-               :uses [:id :kind :status-class :open-hole-count :priority]
+               :uses [:id :kind :status-class :open-hole-count :priority
+                      :requisition :source]
                :forbids [:cascade :candidates :constructed-candidates
                          :interpretations :precedence :g :g-terms]}
       :support support

@@ -20,7 +20,8 @@
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm]
-            [futon2.aif.substrate :as substrate])
+            [futon2.aif.substrate :as substrate]
+            [futon2.aif.task-requisition :as task-requisition])
   (:import (java.io File)))
 
 (def default-code-root
@@ -103,6 +104,11 @@
                 title))
             lines)
       mission-id))
+
+(defn- sha256-text [text]
+  (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                        (.getBytes (str text) "UTF-8"))]
+    (apply str (map #(format "%02x" %) digest))))
 
 (defn- classify-status
   "Classify a mission from its Status line. Terminal / draft / inactive states are
@@ -220,7 +226,8 @@
 
 (defn- mission-doc->entry
   [path]
-  (let [lines (str/split-lines (slurp path))
+  (let [text (slurp path)
+        lines (str/split-lines text)
         mission-id (mission-id-from-path path)
         status-line (some (fn [line]
                             (when-let [[_ status] (re-matches status-line-pattern line)]
@@ -246,6 +253,8 @@
      :status-class status-class
      :operator-gated? operator-gated?
      :operator-gate-lines gate-lines
+     :requisition (task-requisition/read-state text)
+     :source {:path path :sha256 (sha256-text text)}
      :open-holes (open-holes mission-id status-class lines)
      :open-hole-count (open-hole-count mission-id status-class lines)}))
 
@@ -304,6 +313,7 @@
          :mission/operator-gated? (when (:operator-gated? entry) true)
          :mission/operator-gate-lines (when (seq (:operator-gate-lines entry))
                                         (vec (:operator-gate-lines entry)))
+         :mission/requisition (:requisition entry)
          :mission/open-hole-count (some-> (:open-hole-count entry) long)
          ;; The items the count summarises. Until 2026-09-20 only the total was
          ;; stored, so every mission's stated remaining work was recomputed and
@@ -312,7 +322,7 @@
          :mission/open-holes (when (seq (:open-holes entry)) (vec (:open-holes entry)))
          :provenance/repo (repo-of code-root (:path entry))
          :provenance/path (:path entry)
-         :provenance/sha256 (sha256-file (:path entry))}))
+         :provenance/sha256 (get-in entry [:source :sha256])}))
 
 (defn- record-parse-props [props]
   (cond
@@ -452,6 +462,8 @@
                      :unknown)
      :operator-gated? (true? (:mission/operator-gated? props))
      :operator-gate-lines (vec (or (:mission/operator-gate-lines props) []))
+     :requisition (or (:mission/requisition props) {:absent :not-ingested})
+     :source {:path (:provenance/path props) :sha256 (:provenance/sha256 props)}
      :open-hole-count (long (or (:mission/open-hole-count props) 0))
      :open-holes (vec (or (:mission/open-holes props) []))
      ;; A stored count with no stored items means this entity predates hole
@@ -701,12 +713,15 @@
          (sort-by (juxt count identity))
          (map (fn [path]
                 (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
-                      lines (str/split-lines (slurp path))
+                      text (slurp path)
+                      lines (str/split-lines text)
                       status (ticket-status-text lines)]
                   {:id id :kind :ticket :path path
                    :item-line (first-open-checkbox-line lines)
                    :title (mission-title-from-lines id lines)
                    :status-line status :status-class (classify-ticket-status status)
+                   :requisition (task-requisition/read-state text)
+                   :source {:path path :sha256 (sha256-text text)}
                    :parent (some #(when (re-find #"(?i)parent" %)
                                     (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
          dedupe-by-id vec)}))
@@ -751,14 +766,17 @@
   #".*/holes/(?:excursions/)?(E-[^/]+)\.md$")
 
 (defn- excursion-doc->entry [path]
-  (let [lines (str/split-lines (slurp path))
+  (let [text (slurp path)
+        lines (str/split-lines text)
         id (second (re-matches excursion-path-pattern path))
         status-line (some (fn [line] (when-let [[_ status] (re-matches status-line-pattern line)] status))
                           (take 20 lines))]
     {:id id :kind :excursion :path path
      :title (mission-title-from-lines id lines)
      :status-line status-line
-     :status-class (classify-status status-line)}))
+     :status-class (classify-status status-line)
+     :requisition (task-requisition/read-state text)
+     :source {:path path :sha256 (sha256-text text)}}))
 
 (defn load-excursions
   "Primary-checkout `<repo>/holes/E-*.md` and `<repo>/holes/excursions/E-*.md`

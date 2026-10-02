@@ -43,6 +43,7 @@
             [clojure.java.shell :as sh]
             [clojure.pprint :as pp]
             [clojure.string :as str]
+            [futon2.aif.task-requisition :as task-requisition]
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.construction :as construction]
             [futon2.aif.flight :as flight]
@@ -202,7 +203,7 @@
 (def requisition-states
   "The state words kimi-task.sh writes. A requisition is made at dispatch
   time, so it flags the work in-progress and then completed."
-  {"in-progress" :in-progress "completed" :completed})
+  task-requisition/states)
 
 (defn requisition
   "The requisition state declared by TEXT, as a typed fact:
@@ -225,17 +226,7 @@
   This function reads the state only. What it makes of it is
   `with-eligibility`."
   [text]
-  (let [lines (str/split-lines (str text))
-        after-h1 (next (drop-while #(not (re-matches #"^#\s+\S.*$" %)) lines))
-        line (first (drop-while str/blank? after-h1))]
-    (if-not (and line (re-find #"^\*\*Requisition:\*\*" line))
-      {:absent :no-requisition}
-      (let [[_ word rest] (re-matches #"^\*\*Requisition:\*\*\s+(\S+)\s*(.*)$" (str line))
-            state (requisition-states word)
-            text (str/trim (str/replace (str rest) #"^[—-]\s*" ""))]
-        (if-not state
-          {:malformed line}
-          (cond-> {:state state} (seq text) (assoc :text text)))))))
+  (task-requisition/read-state text))
 
 (defn- with-eligibility
   "Record REQ on feasible entry E, and what the ruling (see `requisition`)

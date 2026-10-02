@@ -53,6 +53,29 @@
     (is (not (contains? ids "hinge-log")))
     (is (not (contains? ids "README")))))
 
+(deftest registry-rows-retain-requisition-and-source-pin-for-all-task-kinds
+  (let [body (fn [id state]
+               (str "# " id "\n\n**Requisition:** " state " — retained evidence\n\n"
+                    "**Status:** OPEN\n"))]
+    (write-primary-mission! "futon0/holes/missions/M-req.md"
+                            (body "M-req" "completed"))
+    (write-primary-mission! "futon0/holes/excursions/E-req.md"
+                            (body "E-req" "in-progress"))
+    (write-primary-mission! "futon0/holes/tickets/T-req.md"
+                            (body "T-req" "completed"))
+    (let [rows [(first (:missions (mr/load-missions *tmpdir*)))
+                (first (:excursions (mr/load-excursions *tmpdir*)))
+                (first (:tickets (mr/load-tickets *tmpdir*)))]
+          mission-props (mr/mission-record-props *tmpdir* (first rows))]
+      (is (= ["M-req" "E-req" "T-req"] (mapv :id rows)))
+      (is (= [:completed :in-progress :completed]
+             (mapv #(get-in % [:requisition :state]) rows)))
+      (is (every? #(re-matches #"[0-9a-f]{64}" (get-in % [:source :sha256])) rows))
+      (is (every? #(= (:path %) (get-in % [:source :path])) rows))
+      (is (= (:requisition (first rows)) (:mission/requisition mission-props)))
+      (is (= (get-in (first rows) [:source :sha256])
+             (:provenance/sha256 mission-props))))))
+
 (deftest load-missions-excludes-sandbox-and-derived-docs-test
   (write-primary-mission! "futon0/holes/missions/M-alpha.md"
                   (str "Status: OPEN\n"
