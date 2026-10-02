@@ -205,10 +205,18 @@
                               :sha256 snapshot-sha}))))))
 
 (defn verify
-  "Verify immutable snapshot identity and that its registry accounting has no
-  silent row loss. Intended for replay before policy construction."
-  [observation]
-  (let [expected (get-in observation [:source-pin :sha256])
+  "Verify a snapshot against an independently retained source pin.
+
+  The one-arity form refuses: a digest carried by the value it authenticates
+  cannot establish completeness.  Callers must supply
+  `{:expected-snapshot-pin {:path ... :sha256 ...}}` from their independent
+  binding/receipt."
+  ([observation]
+   (refusal :external-snapshot-authority-required
+            {:presented-source-pin (:source-pin observation)}))
+  ([observation {:keys [expected-snapshot-pin]}]
+   (let [presented (:source-pin observation)
+        expected (:sha256 expected-snapshot-pin)
         body (dissoc observation :status :source-pin)
         actual (digest body)
         proof (:registry-proof observation)
@@ -244,7 +252,13 @@
         duplicate-identities (->> (concat rows (filter :id exclusions))
                                   (map :id) frequencies
                                   (keep (fn [[id n]] (when (> n 1) id))) vec)]
-    (cond
+     (cond
+      (not (pin? expected-snapshot-pin))
+      (refusal :external-snapshot-authority-invalid
+               {:expected-snapshot-pin expected-snapshot-pin})
+      (not= expected-snapshot-pin presented)
+      (refusal :external-snapshot-pin-mismatch
+               {:expected expected-snapshot-pin :presented presented})
       (not= schema (:schema observation))
       (refusal :field-schema-invalid {:actual (:schema observation)})
       (not= expected actual)
@@ -266,4 +280,4 @@
       (refusal :algorithm-catalog-accounting-mismatch
                {:proof catalog-proof :represented represented
                 :representation-errors representation-errors})
-      :else {:schema schema :status :verified :source-pin (:source-pin observation)})))
+      :else {:schema schema :status :verified :source-pin presented}))))

@@ -23,6 +23,9 @@
   (assoc-in observation [:source-pin :sha256]
             (field/digest (dissoc observation :status :source-pin))))
 
+(defn- verify-produced [observation]
+  (field/verify observation {:expected-snapshot-pin (:source-pin observation)}))
+
 (deftest current-registry-is-accounted-without-a-second-lifecycle-policy
   (let [reads (atom [])
         observation (field/observe
@@ -37,7 +40,9 @@
     (is (= 5 (get-in observation [:registry-proof :observed-total])))
     (is (= 5 (get-in observation [:registry-proof :accounted-total])))
     (is (= [] @reads) "registry pins are retained; task files are not reread")
-    (is (= :verified (:status (field/verify observation))))
+    (is (= :external-snapshot-authority-required
+           (:reason (field/verify observation))))
+    (is (= :verified (:status (verify-produced observation))))
     (is (= observation
            (field/observe {:registry-snapshot current-registry
                            :read-bytes #(throw (ex-info "unexpected read" {}))})))))
@@ -70,21 +75,33 @@
            (:ineligible-reason
             (some #(when (= "A-candidate" (:id %)) %) (:exclusions observation)))))
     (is (= 2 (get-in observation [:algorithm-catalog-proof :entry-total])))
-    (is (= :verified (:status (field/verify observation))))
+    (is (= :verified (:status (verify-produced observation))))
     (testing "re-signed dropped approved algorithm is caught by catalog accounting"
-      (let [mutated (-> observation
+      (let [authority (:source-pin observation)
+            mutated (-> observation
                         (update :rows #(filterv (fn [row] (not= "A-approved" (:id row))) %))
                         (assoc-in [:counts :algorithm] 0)
                         resign)]
-        (is (= :algorithm-catalog-accounting-mismatch
-               (:reason (field/verify mutated))))))
+        (is (= :external-snapshot-pin-mismatch
+               (:reason (field/verify mutated {:expected-snapshot-pin authority}))))))
     (testing "re-signed dropped unapproved algorithm is caught by catalog accounting"
-      (let [mutated (-> observation
+      (let [authority (:source-pin observation)
+            mutated (-> observation
                         (update :exclusions
                                 #(filterv (fn [row] (not= "A-candidate" (:id row))) %))
                         resign)]
-        (is (= :algorithm-catalog-accounting-mismatch
-               (:reason (field/verify mutated))))))))
+        (is (= :external-snapshot-pin-mismatch
+               (:reason (field/verify mutated {:expected-snapshot-pin authority}))))))
+    (testing "rewriting the complete catalog proof and re-signing is not authority"
+      (let [authority (:source-pin observation)
+            forged (-> observation
+                       (update :rows #(filterv (fn [row] (not= "A-approved" (:id row))) %))
+                       (update :exclusions #(filterv (fn [row] (not= "A-candidate" (:id row))) %))
+                       (assoc :algorithm-catalog-proof {:entry-total 0 :entries []})
+                       (assoc-in [:counts :algorithm] 0)
+                       resign)]
+        (is (= :external-snapshot-pin-mismatch
+               (:reason (field/verify forged {:expected-snapshot-pin authority}))))))))
 
 (deftest catalog-and-source-adversarial-mutations-refuse
   (let [bytes (.getBytes "body" "UTF-8")
@@ -117,15 +134,33 @@
     (doseq [mutated [(update observation :rows pop)
                      (assoc-in observation [:rows 0 :id] "M-forged")
                      (assoc observation :counts {:mission 999})]]
-      (is (= :source-drift (:reason (field/verify mutated)))))
+      (is (= :source-drift
+             (:reason (field/verify mutated
+                                    {:expected-snapshot-pin (:source-pin observation)})))))
     (let [dropped (-> observation
                       (update :rows pop)
                       (update-in [:counts :ticket] dec))
           resigned (resign dropped)]
-      (is (= :registry-row-dropped (:reason (field/verify resigned)))
+      (is (= :external-snapshot-pin-mismatch
+             (:reason (field/verify resigned
+                                    {:expected-snapshot-pin (:source-pin observation)})))
           "even a recomputed snapshot digest cannot erase registry accounting"))
     (let [bad-counts (resign (assoc observation :counts {:mission 999}))]
-      (is (= :field-counts-mismatch (:reason (field/verify bad-counts)))))))
+      (is (= :external-snapshot-pin-mismatch
+             (:reason (field/verify bad-counts
+                                    {:expected-snapshot-pin (:source-pin observation)})))))
+    (testing "rewriting the entire registry proof and re-signing is not authority"
+      (let [authority (:source-pin observation)
+            forged (-> observation
+                       (update :rows #(filterv (fn [row] (not= "T-open" (:id row))) %))
+                       (assoc-in [:counts :ticket] 0)
+                       (assoc :registry-proof
+                              {:observed-total 4 :accounted-total 4
+                               :all-task-identities
+                               ["E-open" "E-running" "M-done" "M-open"]})
+                       resign)]
+        (is (= :external-snapshot-pin-mismatch
+               (:reason (field/verify forged {:expected-snapshot-pin authority}))))))))
 
 (deftest selectable-pathless-substrate-identity-is-retained-as-an-exclusion
   (let [broken (assoc-in current-registry [:missions :missions 0 :source]
@@ -139,7 +174,7 @@
     (is (not (some #(= "M-open" (:id %)) (:rows observation))))
     (is (= 5 (get-in observation [:registry-proof :observed-total])
            (get-in observation [:registry-proof :accounted-total])))
-    (is (= :verified (:status (field/verify observation))))))
+    (is (= :verified (:status (verify-produced observation))))))
 
 (deftest duplicate-identities-include-registry-exclusions
   (let [duplicate (task "M-open" :complete {:absent :no-requisition} "f")
