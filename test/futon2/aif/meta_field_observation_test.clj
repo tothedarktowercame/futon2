@@ -19,6 +19,10 @@
    :tickets
    {:tickets [(task "T-open" :live {:absent :no-requisition} "e")]}})
 
+(defn- resign [observation]
+  (assoc-in observation [:source-pin :sha256]
+            (field/digest (dissoc observation :status :source-pin))))
+
 (deftest current-registry-is-accounted-without-a-second-lifecycle-policy
   (let [reads (atom [])
         observation (field/observe
@@ -65,7 +69,22 @@
     (is (= :algorithm/not-approved
            (:ineligible-reason
             (some #(when (= "A-candidate" (:id %)) %) (:exclusions observation)))))
-    (is (= :verified (:status (field/verify observation))))))
+    (is (= 2 (get-in observation [:algorithm-catalog-proof :entry-total])))
+    (is (= :verified (:status (field/verify observation))))
+    (testing "re-signed dropped approved algorithm is caught by catalog accounting"
+      (let [mutated (-> observation
+                        (update :rows #(filterv (fn [row] (not= "A-approved" (:id row))) %))
+                        (assoc-in [:counts :algorithm] 0)
+                        resign)]
+        (is (= :algorithm-catalog-accounting-mismatch
+               (:reason (field/verify mutated))))))
+    (testing "re-signed dropped unapproved algorithm is caught by catalog accounting"
+      (let [mutated (-> observation
+                        (update :exclusions
+                                #(filterv (fn [row] (not= "A-candidate" (:id row))) %))
+                        resign)]
+        (is (= :algorithm-catalog-accounting-mismatch
+               (:reason (field/verify mutated))))))))
 
 (deftest catalog-and-source-adversarial-mutations-refuse
   (let [bytes (.getBytes "body" "UTF-8")
@@ -99,19 +118,34 @@
                      (assoc-in observation [:rows 0 :id] "M-forged")
                      (assoc observation :counts {:mission 999})]]
       (is (= :source-drift (:reason (field/verify mutated)))))
-    (let [dropped (update observation :rows pop)
-          resigned (assoc-in dropped [:source-pin :sha256]
-                             (field/digest (dissoc dropped :status :source-pin)))]
+    (let [dropped (-> observation
+                      (update :rows pop)
+                      (update-in [:counts :ticket] dec))
+          resigned (resign dropped)]
       (is (= :registry-row-dropped (:reason (field/verify resigned)))
-          "even a recomputed snapshot digest cannot erase registry accounting"))))
+          "even a recomputed snapshot digest cannot erase registry accounting"))
+    (let [bad-counts (resign (assoc observation :counts {:mission 999}))]
+      (is (= :field-counts-mismatch (:reason (field/verify bad-counts)))))))
 
-(deftest selectable-registry-row-without-source-identity-fails-closed
+(deftest selectable-pathless-substrate-identity-is-retained-as-an-exclusion
   (let [broken (assoc-in current-registry [:missions :missions 0 :source]
                          {:path nil :sha256 nil})
-        receipt (field/observe {:registry-snapshot broken})]
-    (is (= :registry-source-unpinned (:reason receipt)))
-    (is (= [{:id "M-open" :kind :mission :source {:path nil :sha256 nil}}]
-           (get-in receipt [:details :rows])))))
+        observation (field/observe {:registry-snapshot broken})
+        excluded (some #(when (= "M-open" (:id %)) %) (:exclusions observation))]
+    (is (= :observed (:status observation)))
+    (is (= :registry/source-unavailable (:ineligible-reason excluded)))
+    (is (= {:path nil :sha256 nil}
+           (get-in excluded [:ineligibility-evidence :retained-source])))
+    (is (not (some #(= "M-open" (:id %)) (:rows observation))))
+    (is (= 5 (get-in observation [:registry-proof :observed-total])
+           (get-in observation [:registry-proof :accounted-total])))
+    (is (= :verified (:status (field/verify observation))))))
+
+(deftest duplicate-identities-include-registry-exclusions
+  (let [duplicate (task "M-open" :complete {:absent :no-requisition} "f")
+        broken (update-in current-registry [:missions :missions] conj duplicate)]
+    (is (= :duplicate-identities
+           (:reason (field/observe {:registry-snapshot broken}))))))
 
 (deftest current-self-heal-document-is-not-approval-authority
   (let [text (slurp "holes/labs/A-self-heal.md")
