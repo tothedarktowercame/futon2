@@ -61,6 +61,29 @@
      :by-node by-node
      :counts (merge {:present 0 :refused 0} counts)}))
 
+(defn- decision-context
+  "Retain enough of the upstream decision in a debugger stop to decide
+  whether an unexercised node is a justified bypass or missing machinery.
+  This deliberately avoids copying the full (and potentially large)
+  construction certificate into exception data."
+  [decision]
+  (let [certificate (:selection-certificate decision)
+        candidates (:candidates certificate)]
+    {:decision-status (:status decision)
+     :chosen (select-keys (:chosen decision) [:status :kind :id :target])
+     :action (select-keys (:action decision) [:kind :id :target])
+     :abstention (:abstention decision)
+     :selection-law (:selection-law decision)
+     :candidate-count (count candidates)
+     :policy-count (count (:policies certificate))
+     :candidates
+     (mapv (fn [candidate]
+             {:identity (select-keys candidate [:kind :id :target])
+              :policy (select-keys (:policy candidate)
+                                   [:kind :id :target :precedence :enacted-steps])
+              :model (get-in candidate [:computed-f :model])})
+           candidates)}))
+
 (defn require-complete!
   "Return DECISION only when every required selection node was exercised.
   Otherwise throw inside the caller's restartable selection phase. This is a
@@ -76,5 +99,6 @@
                        :failure-kind :required-loop-node-unexercised
                        :failure-stage :selection
                        :receipt r
+                       :decision-context (decision-context decision)
                        :refused refused})))
     decision))

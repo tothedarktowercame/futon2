@@ -40,7 +40,11 @@
         (is (= :required-loop-node-unexercised
                (:failure-kind (ex-data e))))
         (is (= #{:R6 :R13 :R14 :CTAU-CLASS}
-               (set (map :node (:refused (ex-data e))))))))))
+               (set (map :node (:refused (ex-data e))))))
+        (is (= 1 (get-in (ex-data e) [:decision-context :candidate-count])))
+        (is (= "M-x"
+               (get-in (ex-data e)
+                       [:decision-context :candidates 0 :policy :target])))))))
 
 (deftest complete-exercise-crosses-the-launch-gate
   (is (identical? exercised (exercise/require-complete! exercised))))
