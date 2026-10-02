@@ -13,6 +13,13 @@
 (defn- refused [node reason]
   {:node node :status :refused :reason reason})
 
+(defn- bypassed [node refusals]
+  {:node node
+   :status :bypassed
+   :decision :selection-abstained
+   :because :typed-selection-refusal
+   :evidence (mapv #(select-keys % [:target :kind :missing]) refusals)})
+
 (defn receipt [decision]
   (let [certificate (:selection-certificate decision)
         candidates (:candidates certificate)
@@ -30,8 +37,13 @@
         temperature (or (get-in certificate [:policy-precision-state :temperature])
                         (get-in certificate [:precision-family :temperature]))
         abstention (get-in decision [:abstention :status])
+        typed-abstention? (and (= :abstained (:status decision))
+                               (seq (:refusals decision)))
         by-node
-        {:R6 (if (> (count candidates) 1)
+        (if typed-abstention?
+          (into {} (map (fn [node] [node (bypassed node (:refusals decision))])
+                        [:R6 :R13 :R14 :CTAU-CLASS]))
+          {:R6 (if (> (count candidates) 1)
                (present :R6 {:candidate-count (count candidates)
                              :policy-count (count policies)})
                (refused :R6 :no-competing-action-candidates))
@@ -54,12 +66,12 @@
                     {:scored-candidate-count (count class-scoring)
                      :comparison-status (:status comparison)
                      :preference-kind :class-emission})
-           (refused :CTAU-CLASS :class-preference-not-consumed-by-scoring))}
+           (refused :CTAU-CLASS :class-preference-not-consumed-by-scoring))})
         counts (frequencies (map :status (vals by-node)))]
     {:schema schema
      :status (if (zero? (get counts :refused 0)) :complete :incomplete)
      :by-node by-node
-     :counts (merge {:present 0 :refused 0} counts)}))
+     :counts (merge {:present 0 :bypassed 0 :refused 0} counts)}))
 
 (defn- decision-context
   "Retain enough of the upstream decision in a debugger stop to decide

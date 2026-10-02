@@ -19,7 +19,7 @@
 (deftest distinguishes-exercised-nodes-from-declared-machinery
   (let [r (exercise/receipt exercised)]
     (is (= :complete (:status r)))
-    (is (= {:present 4 :refused 0} (:counts r)))
+    (is (= {:present 4 :bypassed 0 :refused 0} (:counts r)))
     (is (every? #(= :present (:status %)) (vals (:by-node r))))))
 
 (deftest singleton-click-does-not-claim-temperature-or-temporal-depth
@@ -52,9 +52,17 @@
 (deftest debugger-context-retains-abstention-rationale
   (let [decision {:status :abstained
                   :refusals [{:kind :no-problems :target "E-x"}]}]
-    (try
-      (exercise/require-complete! decision)
-      (is false "abstention without node decisions must stop")
-      (catch clojure.lang.ExceptionInfo e
-        (is (= (:refusals decision)
-               (get-in (ex-data e) [:decision-context :refusals])))))))
+    (is (identical? decision (exercise/require-complete! decision)))
+    (let [r (exercise/receipt decision)]
+      (is (= :complete (:status r)))
+      (is (= 4 (get-in r [:counts :bypassed])))
+      (is (every? #(= :typed-selection-refusal (:because %))
+                  (vals (:by-node r)))))))
+
+(deftest rationale-free-abstention-still-stops
+  (try
+    (exercise/require-complete! {:status :abstained :refusals []})
+    (is false "an unexplained abstention must stop")
+    (catch clojure.lang.ExceptionInfo e
+      (is (= :required-loop-node-unexercised
+             (:failure-kind (ex-data e)))))))
