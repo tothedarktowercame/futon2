@@ -178,3 +178,26 @@
                                     :candidates [algorithm]})]
         (is (= #{:algorithm-catalog-unpinned :algorithm-not-approved}
                (set (get-in receipt [:details :errors]))))))))
+
+(deftest evaluator-scores-constructed-support-and-retains-construction-exclusions
+  (let [a (candidate :a :mission "M-a" 0.1)
+        b (candidate :b :excursion "E-b" 0.2)
+        manifest (field [a b])
+        exclusion {:id "E-b" :kind :excursion
+                   :source (get-in b [:slots :evidence-channel :source])
+                   :reason :evidence-channel-unavailable
+                   :evidence {:adapter {:next-step :read-criteria}}}
+        input {:contract contract :contract-source pin :observation {}
+               :field-observation manifest :candidates [a]
+               :construction-exclusions [exclusion]}
+        receipt (meta/evaluate input)]
+    (is (= :selected (:status receipt)))
+    (is (= :a (:selected-policy receipt)))
+    (is (= [exclusion] (:construction-exclusions receipt)))
+    (is (= {:mission 1 :excursion 1} (:field-census receipt)))
+    (is (= :field-observation-invalid
+           (:reason (meta/evaluate (dissoc input :construction-exclusions)))))
+    (is (= :field-observation-invalid
+           (:reason (meta/evaluate
+                     (assoc-in input [:construction-exclusions 0 :source]
+                               {:path "forged" :sha256 (apply str (repeat 64 "f"))})))))))

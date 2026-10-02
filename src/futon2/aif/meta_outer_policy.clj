@@ -150,10 +150,12 @@
       (not= :refuse-not-zero (get-in contract [:generative-model :missing-term-policy]))
       (conj :missing-term-policy-invalid))))
 
-(defn- field-errors [field candidates]
+(defn- field-errors [field candidates construction-exclusions]
   (let [rows (:rows field)
         row-ids (map :id rows)
         candidate-targets (map #(get-in % [:slots :target]) candidates)
+        excluded-targets (map :id construction-exclusions)
+        represented-targets (concat candidate-targets excluded-targets)
         by-target (into {} (map (juxt :id identity)) rows)
         joins (for [candidate candidates
                     :let [target (get-in candidate [:slots :target])
@@ -169,10 +171,17 @@
       (not (every? #(and (string? (:id %)) (contains? task-kinds (:kind %))
                          (source-pin? (:source %))) rows))
       (conj :field-row-invalid)
-      (not (and (= (count rows) (count candidates))
-                (= (count candidate-targets) (count (set candidate-targets)))
-                (= (set row-ids) (set candidate-targets))))
+      (not (and (= (count rows) (count represented-targets))
+                (= (count represented-targets) (count (set represented-targets)))
+                (= (set row-ids) (set represented-targets))))
       (conj :field-coverage-incomplete)
+      (not-every? (fn [exclusion]
+                    (let [row (get by-target (:id exclusion))]
+                      (and row (keyword? (:reason exclusion))
+                           (= (:kind row) (:kind exclusion))
+                           (= (:source row) (:source exclusion)))))
+                  construction-exclusions)
+      (conj :field-construction-exclusion-invalid)
       (not-every? (fn [[candidate row]]
                     (and row
                          (= (:kind row) (get-in candidate [:slots :task-kind]))
@@ -191,7 +200,8 @@
   Healthy support admits ordinary M/E/T/A work. Injury restricts support to an
   exact capability-matching repair algorithm. G uses the canonical Gaussian
   EFE core plus the canonical Bayes-coherent EIG kernel."
-  [{:keys [contract contract-source field-observation observation candidates] :as input}]
+  [{:keys [contract contract-source field-observation observation candidates
+           construction-exclusions] :as input}]
   (cond
     (not= :meta/outer-policy-cascade-v1 (:schema contract))
     (typed-refusal :contract-schema-invalid {:schema (:schema contract)})
@@ -228,9 +238,10 @@
         (seq malformed)
         (typed-refusal :candidate-invalid {:candidate-errors malformed})
 
-        (seq (field-errors field-observation candidates))
+        (seq (field-errors field-observation candidates construction-exclusions))
         (typed-refusal :field-observation-invalid
-                       {:errors (field-errors field-observation candidates)})
+                       {:errors (field-errors field-observation candidates
+                                              construction-exclusions)})
 
         (and injured? (not (source-pin? (:source-pin observation))))
         (typed-refusal :injury-source-unpinned {:source-pin (:source-pin observation)})
@@ -288,6 +299,7 @@
                  :contract-source contract-source
                  :field-observation-source (:source-pin field-observation)
                  :field-census (frequencies (map :kind (:rows field-observation)))
+                 :construction-exclusions (vec construction-exclusions)
                  :typed-exclusions
                  (into {} (for [c candidates :when (not (some #{c} support))]
                             [(:id c) :machine-injury-active-or-capability-mismatch]))
