@@ -27,6 +27,17 @@
     (world/capture decision {} nil opts)
     (is (= before (pr-str decision)))))
 
+(deftest production-cascade-candidates-are-the-live-enumeration-carrier
+  (let [cascade-decision
+        {:selection-certificate
+         {:candidates [{:f-prefix
+                        {:policy {:kind :cascade-candidate :id :C1
+                                  :target "M-live"}}}]}}
+        x (world/capture cascade-decision {} nil opts)]
+    (is (= ["M-live"] (get-in x [:enumerated-tasks :ids])))
+    (is (= 1 (get-in x [:enumerated-tasks :count]))
+        "a selected live policy can no longer be reported beside zero enumerated tasks")))
+
 (deftest failed-roster-is-counted
   (let [x (world/capture decision nil nil opts)]
     (is (= 1 (:failure-count x)))

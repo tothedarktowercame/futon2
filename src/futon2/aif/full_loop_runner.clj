@@ -36,6 +36,7 @@
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
             [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.apparatus-certificates :as apparatus-certificates]
+            [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -840,6 +841,7 @@
                     :apparatus-certificates
                     (apparatus-certificates/receipt
                      result (or (:trigger raw-opts) :duree-click-on-demand))
+                    :loop-node-exercise (loop-node-exercise/receipt decision)
                     :registered-run/critical-parameters
                     (selection-world/critical-task-counts world-at-selection raw-opts)
                     :selectorSeam "live:validated-selection"

@@ -83,6 +83,26 @@
                        (fnil conj []) (name id)))
              {} (or roster {})))
 
+(defn- live-enumerated-targets
+  "Targets which actually entered the live decision field.  The current
+  cascade selector retains these under :selection-certificate/:candidates;
+  :controller-ranking is the legacy action-ranking carrier and is absent on
+  production cascade clicks.  Reading only it produced the impossible receipt
+  `0 enumerated` beside a selected policy."
+  [decision]
+  (let [legacy (mapcat (fn [kind]
+                         (enumeration/enumerated-targets kind
+                                                         (:controller-ranking decision)))
+                       [:mission :excursion :ticket])
+        policies (get-in decision [:selection-certificate :candidates])
+        live (keep (fn [candidate]
+                     (or (:target candidate)
+                         (get-in candidate [:policy :target])
+                         (get-in candidate [:f-prefix :policy :target])
+                         (get-in candidate [:action :target])))
+                   policies)]
+    (distinct (concat legacy live))))
+
 (defn capture
   "Capture after DECISION is final. Dependencies are injectable for hermetic
   tests. A failed part is explicit and does not throw into the runner."
@@ -96,11 +116,8 @@
         code-root (or (:code-root opts) "/home/joe/code")
         task-sets (part :open-tasks #((or (:world-task-sets-fn opts)
                                           default-task-sets) code-root))
-        ranking (:controller-ranking decision)
         enumerated (part :enumerated-tasks
-                         #(mapcat (fn [kind]
-                                    (enumeration/enumerated-targets kind ranking))
-                                  [:mission :excursion :ticket]))
+                         #(live-enumerated-targets decision))
         library (part :pattern-library
                       #((or (:world-pattern-manifest-fn opts) pattern-manifest)
                         (or (:pattern-library-root opts)
