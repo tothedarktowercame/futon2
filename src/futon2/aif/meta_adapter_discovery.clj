@@ -1,10 +1,12 @@
 (ns futon2.aif.meta-adapter-discovery
   "Source-pinned discovery of checkable META task adapters."
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.mission-criteria :as criteria]
-            [futon2.aif.mission-hole-wants :as holes]))
+            [futon2.aif.mission-hole-wants :as holes]
+            [futon2.aif.observation-checks :as checks]))
 
 (def schema :wm/meta-adapter-discovery-v1)
 (def ordering [:unchecked-checkbox-document-order
@@ -25,11 +27,13 @@
   (when-let [{:keys [repo path]} (source-location code-root (get-in row [:source :path]))]
     (let [checkboxes
           (mapv (fn [hole]
-                  {:token (holes/want-token hole) :origin :unchecked-checkbox
-                   :line (:line hole) :observed false
-                   :locator (holes/hole-locator code-root
-                                                {:path (get-in row [:source :path])}
-                                                hole)})
+                  (let [locator (holes/hole-locator code-root
+                                                    {:path (get-in row [:source :path])}
+                                                    hole)]
+                    {:token (holes/want-token hole) :origin :unchecked-checkbox
+                     :line (:line hole)
+                     :observed (checks/decl-present? text (:decl locator))
+                     :locator locator}))
                 (holes/current-checkboxes (:id row) text))
           all-criteria (criteria/criteria (:id row) text)
           criterion-view (criteria/wants all-criteria
@@ -41,22 +45,28 @@
                (keep (fn [token]
                        (when-let [locator (get-in criterion-view [:locators token])]
                          (let [criterion (get by-token token)
-                               observed (true? (get-in criterion-view [:universe token]))]
-                           (when-not observed
-                             {:token token :origin :verdict-aware-criterion
-                              :line (:line criterion) :observed false
-                              :verdict-class (get-in criterion [:verdict-class :class])
-                              :locator locator})))))
+                               observed (checks/decl-present? text (:decl locator))]
+                           {:token token :origin :verdict-aware-criterion
+                            :line (:line criterion) :observed observed
+                            :verdict-class (get-in criterion [:verdict-class :class])
+                            :locator locator}))))
                vec)]
       (vec (concat checkboxes criterion-observations)))))
+
+(defn- default-read-head-bytes [code-root repo path]
+  (let [{:keys [exit out]} (sh/sh "git" "-C" (str code-root "/" repo)
+                                  "show" (str "HEAD:" path))]
+    (when (zero? exit) (.getBytes out "UTF-8"))))
 
 (defn discover
   "Read every admitted field row exactly once and derive canonical C4 adapter
   evidence. Dependencies are injectable; no lifecycle or model data is read."
-  [{:keys [field-observation expected-field-pin code-root read-bytes]
+  [{:keys [field-observation expected-field-pin code-root read-bytes read-head-bytes]
     :or {code-root "/home/joe/code"
          read-bytes #(java.nio.file.Files/readAllBytes (.toPath (io/file %)))}}]
-  (let [fv (field/verify field-observation {:expected-snapshot-pin expected-field-pin})]
+  (let [read-head-bytes (or read-head-bytes
+                            #(default-read-head-bytes code-root %1 %2))
+        fv (field/verify field-observation {:expected-snapshot-pin expected-field-pin})]
     (if-not (= :verified (:status fv))
       (refusal :field-not-verified {:verification fv})
       (loop [rows (:rows field-observation) adapters [] exclusions [] read-count 0]
@@ -79,9 +89,32 @@
 
               :else
               (let [text (String. ^bytes bytes "UTF-8")
-                    found (observations code-root row text)]
-                (if (seq found)
-                  (let [chosen (first found)]
+                    location (source-location code-root path)
+                    head-bytes (when location
+                                 (try (read-head-bytes (:repo location) (:path location))
+                                      (catch Throwable _ nil)))
+                    head-sha (when head-bytes (field/sha256 head-bytes))
+                    found (when (= actual head-sha) (observations code-root row text))
+                    false-observations (filterv #(false? (:observed %)) found)]
+                (cond
+                  (nil? location)
+                  (recur (next rows) adapters
+                         (conj exclusions {:id (:id row) :kind (:kind row) :source (:source row)
+                                           :reason :source-outside-code-root
+                                           :evidence {:ordering ordering :observations []}})
+                         (inc read-count))
+
+                  (not= actual head-sha)
+                  (recur (next rows) adapters
+                         (conj exclusions {:id (:id row) :kind (:kind row) :source (:source row)
+                                           :reason :head-source-mismatch
+                                           :evidence {:expected-source-sha actual
+                                                      :head-source-sha head-sha
+                                                      :repo (:repo location) :path (:path location)}})
+                         (inc read-count))
+
+                  (seq false-observations)
+                  (let [chosen (first false-observations)]
                     (recur (next rows)
                            (conj adapters
                                  {:id (:id row) :kind (:kind row) :source (:source row)
@@ -92,13 +125,12 @@
                                   :evidence {:ordering ordering :chosen-token (:token chosen)
                                              :observations found}})
                            exclusions (inc read-count)))
+
+                  :else
                   (recur (next rows) adapters
-                         (conj exclusions
-                               {:id (:id row) :kind (:kind row) :source (:source row)
-                                :reason (if (source-location code-root path)
-                                          :no-current-false-checkable-want
-                                          :source-outside-code-root)
-                                :evidence {:ordering ordering :observations (or found [])}})
+                         (conj exclusions {:id (:id row) :kind (:kind row) :source (:source row)
+                                           :reason :no-current-false-checkable-want
+                                           :evidence {:ordering ordering :observations found}})
                          (inc read-count))))))
           (let [body {:schema schema :status :discovered
                       :field-source-pin expected-field-pin
@@ -119,7 +151,8 @@
   ([receipt]
    (refusal :external-adapter-source-authority-required
             {:presented-source-pin (:source-pin receipt)}))
-  ([receipt {:keys [field-observation expected-field-pin code-root read-bytes] :as authority}]
+  ([receipt {:keys [field-observation expected-field-pin code-root read-bytes
+                    read-head-bytes] :as authority}]
    (if-not (and (contains? authority :field-observation)
                 (contains? authority :expected-field-pin)
                 (contains? authority :read-bytes))
@@ -127,7 +160,8 @@
      (let [expected (discover {:field-observation field-observation
                                :expected-field-pin expected-field-pin
                                :code-root (or code-root "/home/joe/code")
-                               :read-bytes read-bytes})]
+                               :read-bytes read-bytes
+                               :read-head-bytes read-head-bytes})]
        (if (= expected receipt)
          {:schema schema :status :verified :source-pin (:source-pin receipt)}
          (refusal :adapter-discovery-does-not-match-authority

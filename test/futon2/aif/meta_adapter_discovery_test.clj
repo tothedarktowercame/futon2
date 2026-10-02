@@ -26,7 +26,10 @@
   (let [observation (field/observe {:registry-snapshot registry})]
     {:field-observation observation :expected-field-pin (:source-pin observation)
      :code-root "/code"
-     :read-bytes #(utf8 (or (texts %) (throw (java.io.FileNotFoundException. %))))}))
+     :read-bytes #(utf8 (or (texts %) (throw (java.io.FileNotFoundException. %))))
+     :read-head-bytes (fn [repo path]
+                        (utf8 (or (texts (str "/code/" repo "/" path))
+                                  (throw (java.io.FileNotFoundException. path)))))}))
 
 (deftest discovers-canonical-checkbox-and-verdict-locators-once
   (let [in (fixture-input)
@@ -113,3 +116,38 @@
     (is (= :C4 (get-in receipt [:adapters 0 :locator :class])))
     (is (= :unchecked-checkbox
            (get-in receipt [:adapters 0 :evidence :observations 0 :origin])))))
+
+(defn- one-row-discovery [text]
+  (let [path "/code/repo/holes/M-edge.md"
+        bs (utf8 text)
+        registry {:missions {:missions [{:id "M-edge" :status-class :live
+                                         :status-line "OPEN"
+                                         :requisition {:absent :no-requisition}
+                                         :source {:path path :sha256 (field/sha256 bs)}}]}
+                  :excursions {:excursions []} :tickets {:tickets []}}
+        observation (field/observe {:registry-snapshot registry})]
+    (discovery/discover {:field-observation observation
+                         :expected-field-pin (:source-pin observation)
+                         :code-root "/code" :read-bytes (constantly bs)
+                         :read-head-bytes (fn [_ _] bs)})))
+
+(deftest canonical-c4-anchoring-controls-current-observation
+  (testing "an inline future declaration does not satisfy the criterion locator"
+    (let [receipt (one-row-discovery
+                   "# M-edge\n\n**Status:** OPEN\n\n## Acceptance\n- Done. **Not started.**\n\nThe future line will be `- Done. **Met.**`.\n")]
+      (is (= 1 (get-in receipt [:counts :adapters])))
+      (is (false? (get-in receipt [:adapters 0 :evidence :observations 0 :observed])))))
+  (testing "a checked form starting its own line makes the duplicate unchecked want true"
+    (let [receipt (one-row-discovery
+                   "# M-edge\n\n**Status:** OPEN\n\n- [ ] Same task\n- [x] Same task\n")]
+      (is (= 0 (get-in receipt [:counts :adapters])))
+      (is (= :no-current-false-checkable-want (get-in receipt [:exclusions 0 :reason])))
+      (is (true? (get-in receipt [:exclusions 0 :evidence :observations 0 :observed]))))))
+
+(deftest head-source-mismatch-excludes-without-emitting-head-locator
+  (let [authority (assoc (fixture-input) :read-head-bytes
+                         (fn [_ _] (utf8 "different HEAD bytes")))
+        receipt (discovery/discover authority)]
+    (is (= 0 (get-in receipt [:counts :adapters])))
+    (is (= 3 (get-in receipt [:counts :excluded])))
+    (is (= #{:head-source-mismatch} (set (map :reason (:exclusions receipt)))))))
