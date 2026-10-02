@@ -34,6 +34,14 @@ it to look like a successful no-op.
  :next-move :run-algorithm
  :repairs-capability :wm-click-completes-with-reviewable-receipts
 
+ :entry-maneuver
+ {:inspect :debugger-stop-registry
+  :zero-stops :permit-one-click-launch
+  :one-stop :adopt-existing-run-as-current-patient
+  :multiple-stops {:result :refuse
+                   :reason :self-heal-debugger-frames-stacked}
+  :launch-precondition :debugger-stop-registry-empty}
+
  ;; The observed campaign did not declare numeric time or token budgets.  Do
  ;; not invent them retrospectively: the runtime must bind both before this
  ;; template becomes a fully filled policy.
@@ -85,8 +93,19 @@ available as a filler but no concrete policy instance is admissible to G.
 
 ## Algorithm distilled from the run
 
-1. Attach `futon2.aif.wm.debugger` before launching the one authorised click.
-   Record the run/click identity and verify the attached state.
+0. Before attachment or launch, read `futon2.aif.wm.debugger/stopped`.
+   - With zero stops, the algorithm may proceed to its one-click launch.
+   - With exactly one stop, launch nothing: adopt that run as the current
+     patient and continue at step 3 using its retained condition.
+   - With multiple stops, refuse as `:self-heal-debugger-frames-stacked` and
+     require explicit operator disposition; do not guess which frame owns the
+     machine.
+   A previously stopped run may be repaired and retried, or explicitly
+   aborted.  In either case a new click is forbidden until the registry has
+   been observed empty.
+1. If step 0 found no stop, attach `futon2.aif.wm.debugger` before launching
+   the one authorised click.  Record the run/click identity, verify the
+   attached state, and immediately re-check that the stop registry is empty.
 2. Run until either the click reaches the re-arm observation or a typed
    debugger condition stops it.  A bypass without an exercised branch must
    carry a specific rationale; `:unknown` is itself a stop.
@@ -157,3 +176,6 @@ receipt set.
 - Abort delivery or terminal recording fails: refuse algorithm completion as
   `:self-heal-debugger-frame-undischarged`; do not start another click on top
   of the suspended frame.
+- The entry check finds multiple existing stops: refuse as
+  `:self-heal-debugger-frames-stacked`.  Preserve every stop and require an
+  explicit operator choice; starting a new self-heal click is forbidden.
