@@ -200,13 +200,25 @@ The outer loop remains in DERIVE until all four conditions below are met.  A
 green condition is evidence that the corresponding dependency exists; it is
 not permission to weaken or bypass the other three.
 
-- [ ] **Numeric G authority exists.** A pinned declaration supplies the units
+- [x] **Numeric G authority exists.** A pinned declaration supplies the units
   and normalization for every outcome channel, numeric preference means with
   positive variances and weights, and the authority under which those numbers
-  may be used.  The current audit
-  `futon3/library/meta/meta-outer-g-authority-audit.edn` remains
-  `:blocked-missing-numeric-authority`; illustrative numbers are not an exit
-  witness.
+  may be used. The audit
+  `futon3/library/meta/meta-outer-g-authority-audit.edn` preserves the original
+  `:blocked-missing-numeric-authority` finding and records its resolution as
+  `:provisional-prior-declared-predictions-missing`; illustrative numbers are
+  not an exit witness.
+
+  Exit evidence 2026-10-02: Joe authorized a transparent provisional prior,
+  explicitly not an empirical calibration. Futon3 `7ba5d2208` records the
+  five-channel declaration at SHA-256 `e18b3d24…`: closure, grounded progress,
+  abstention/failure, elapsed-budget fraction, and token-budget fraction. It
+  declares means `[1 1 0 0 0]`, wide positive variances `4.0`, equal weights,
+  candidate-envelope-relative clamped resource normalization, typed exclusions
+  for unresolved channels, and registered-evidence-only revision. Futon2
+  `b18d8a41e` verifies the source and emits preferences/normalization only.
+  Independent review passed 4 tests / 21 assertions plus EDN parsing, exact
+  digest, and lint; absent prediction and information inputs still refuse.
 - [ ] **Every scored policy has complete grounded G inputs.** Each candidate
   carries source-bound predictive distributions and a candidate-specific,
   Bayes-coherent information model over the common outcome vocabulary.  The
