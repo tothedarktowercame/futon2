@@ -261,6 +261,14 @@
              #'repair/dismiss-repaired-elsewhere!]]
     (is (= #{2 3} (into #{} (map count) (:arglists (meta v)))))))
 
+(deftest repaired-elsewhere-anchor-includes-the-findings-failure-kind
+  (is (= ["required-checkpoints-missing"]
+         (#'repair/finding-diagnosis-anchors
+          {:failure-kind :required-checkpoints-missing
+           :failure-stage :close
+           :failure-error "required checkpoints missing"
+           :failure-data {:missing [:selection]}}))))
+
 (deftest dismiss-superseded-attempt-retained-proof-controls
   (doseq [[label finding-extra record expected]
           [[:later {} {:implementation-attempt "other-attempt"
@@ -1435,11 +1443,11 @@
       (testing "a filename the finding mentions is no anchor at all"
         ;; A path says the commit touched a file the finding names, not that
         ;; it addressed the condition. It is not an anchor, so a finding
-        ;; whose only link to code is a filename has none and refuses here
-        ;; rather than at the match.
+        ;; whose only link to code is a filename can match only its own typed
+        ;; failure kind, which this unrelated commit does not contain.
         (let [root (temp-root)]
           (.mkdirs (io/file root "findings"))
-          (is (= :diagnosis-anchor-absent
+          (is (= :repair-not-evidenced
                  (fire root (assoc base
                                    :repair/id "finding-path-anchor"
                                    :failure-kind :untyped-failure
@@ -1454,7 +1462,7 @@
         ;; repair store -- including the commit that added this route.
         (let [root (temp-root)]
           (.mkdirs (io/file root "findings"))
-          (is (= :diagnosis-anchor-absent
+          (is (= :repair-not-evidenced
                  (fire root (assoc base
                                    :repair/id "finding-schema-anchor"
                                    :failure-kind :fold-output-invalid

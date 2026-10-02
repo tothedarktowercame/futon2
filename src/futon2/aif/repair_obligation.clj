@@ -1532,8 +1532,11 @@
         kw-tokens (->> (re-seq #"(:[\w.$!?*+-]+/[\w.$!?*+-]{6,})" text)
                        (map first)
                        (remove #(str/starts-with? % ":repair/")))
-        kind (some-> (get-in finding [:failure-data :kind]) name)]
-    (vec (distinct (concat kw-tokens (when kind [kind]))))))
+        data-kind (some-> (get-in finding [:failure-data :kind]) name)
+        failure-kind (some-> (:failure-kind finding) name)]
+    (vec (distinct (concat kw-tokens
+                           (when data-kind [data-kind])
+                           (when failure-kind [failure-kind]))))))
 
 (defn- git-out [repo & args]
   (let [{:keys [exit out]} (apply git-command repo args)]

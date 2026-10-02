@@ -1,6 +1,14 @@
 # Verify or restore trigger ineligible
 
-**Status:** OPEN
+**Status:** DONE
+
+## Canonical disposition
+
+Dismissed `:condition-cleared` by the immutable repair-store dismissal record
+`data/wm-repair-obligations/dismissals/repair-occ-fb997ae164a1aebcbc6facfb9fd27003b7a226d3444ad7ce579a136ca859702f.edn`.
+The dated recheck cites futon3c commit
+`39ad0348ab7cbdeb12907fa678bf0839dfc50721`, whose reviewed boundary tests
+establish rejection before click ID, run record, or ration consumption.
 
 ## Observed failure
 
