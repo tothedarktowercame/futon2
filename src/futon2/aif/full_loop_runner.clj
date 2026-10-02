@@ -3941,8 +3941,16 @@
               ordered-events)
         evidence-dir (io/file data-root cohort-name attempt-id "evidence")
         evidence-files (if (.isDirectory evidence-dir)
-                         (sort-by #(.getName ^java.io.File %)
-                                  (seq (.listFiles evidence-dir)))
+                         ;; Evidence producers may retain a directory tree (for
+                         ;; example cascade-revision/request-*/evidence).  The
+                         ;; old one-level listing passed those directories to
+                         ;; Files/readAllBytes, so an otherwise successful run
+                         ;; failed at close with :source-unavailable.  Freeze
+                         ;; every leaf file; directories are containers, never
+                         ;; evidence bytes.
+                         (sort-by #(.getAbsolutePath ^java.io.File %)
+                                  (filter #(.isFile ^java.io.File %)
+                                          (rest (file-seq evidence-dir))))
                          [])
         captured (atom {})
         captured-evidence
@@ -5007,21 +5015,29 @@
                                                   [:controller-decision :selection-certificate
                                                    :focus-receipt])}))
                        manifest (when (and cohort? @action-occurrence)
-                                  (checkpoint-evidence-manifest
-                                   @checkpoint-events
-                                   (or (:data-root execution-cohort)
-                                       cohort/default-data-root)
-                                   (:cohort/id start-event)
-                                   attempt-id
-                                   (or (:target data)
-                                       (:selected-mission selection-judgment))
-                                   {:occurrence @action-occurrence
-                                    :semantic-epoch semantic-epoch
-                                    :token-outcome-entry (:entry token-comparison)
-                                    :surprise-entry (:surprise-entry token-comparison)
-                                    :route-attestation-entry (:entry route-account)
-                                    :kernel-example-entry (:entry kernel-example-result)
-                                    :run-ending-entry (:entry run-ending-result)}))
+                                  ;; Closing used to sit outside the restart
+                                  ;; debugger.  A manifest fault therefore
+                                  ;; destroyed the run after successful
+                                  ;; author/review/grounding work.  Give this
+                                  ;; boundary the same repair-and-retry seam as
+                                  ;; every earlier phase.
+                                  (run-phase!
+                                   opts @phase-context :close-evidence-manifest
+                                   #(checkpoint-evidence-manifest
+                                     @checkpoint-events
+                                     (or (:data-root execution-cohort)
+                                         cohort/default-data-root)
+                                     (:cohort/id start-event)
+                                     attempt-id
+                                     (or (:target data)
+                                         (:selected-mission selection-judgment))
+                                     {:occurrence @action-occurrence
+                                      :semantic-epoch semantic-epoch
+                                      :token-outcome-entry (:entry token-comparison)
+                                      :surprise-entry (:surprise-entry token-comparison)
+                                      :route-attestation-entry (:entry route-account)
+                                      :kernel-example-entry (:entry kernel-example-result)
+                                      :run-ending-entry (:entry run-ending-result)})))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (assoc close-judgment-base

@@ -6262,6 +6262,20 @@
                         (catch clojure.lang.ExceptionInfo e (ex-data e)))))))
          (finally (doseq [file (reverse (file-seq root))] (.delete file))))))))
 
+(deftest evidence-manifest-treats-nested-directories-as-containers
+  (let [root (.toFile (Files/createTempDirectory "nested-evidence-"
+                                                  (make-array FileAttribute 0)))
+        nested (io/file root "cohort" "attempt" "evidence"
+                        "cascade-revision" "request-1" "evidence")]
+    (try
+      (.mkdirs nested)
+      (let [manifest (#'runner/checkpoint-evidence-manifest
+                      {} root :cohort "attempt" "M-target")]
+        (is (= :wm/close-evidence-manifest-v1 (:schema manifest)))
+        (is (empty? (:entries manifest))))
+      (finally
+        (doseq [file (reverse (file-seq root))] (.delete file))))))
+
 
 (deftest admitted-token-initialization-survives-runner-close
   ;; Same grounded retention fixture as close-retains-token-mismatch-before-manifest-freeze.
