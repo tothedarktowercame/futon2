@@ -32,6 +32,7 @@
 
 (defn- pin? [x]
   (and (map? x) (string? (:path x))
+       (string? (:sha256 x))
        (boolean (re-matches #"[0-9a-f]{64}" (:sha256 x)))))
 
 (defn- task-row [kind row]
@@ -86,8 +87,21 @@
 (defn- refusal [reason details]
   {:schema schema :status :refused :reason reason :details details})
 
+(defn- positive-click-authority?
+  [receipt required]
+  (and (= :wm/ordinary-click-availability-v1 (:schema receipt))
+       (= :ordinary-click (:unit receipt))
+       (pin? (:ledger-source receipt))
+       (integer? (:allocated receipt))
+       (integer? (:consumed receipt))
+       (integer? (:available receipt))
+       (<= 0 (:consumed receipt) (:allocated receipt))
+       (= (:available receipt) (- (:allocated receipt) (:consumed receipt)))
+       (pos-int? required)
+       (>= (:available receipt) required)))
+
 (defn- algorithm-rows
-  [{:keys [path read-bytes]}]
+  [{:keys [path read-bytes click-availability]}]
   (if-not path
     {:rows []
      :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-unavailable
@@ -124,6 +138,19 @@
                   (refusal :algorithm-catalog-file-mismatch
                            {:id (:id entry) :error :source-pin-invalid :catalog-source pin})
 
+                  (not (positive-click-authority?
+                        click-availability
+                        (get-in entry [:resource-requirements :ordinary-clicks])))
+                  (recur (next remaining) rows
+                         (conj exclusions
+                               {:id (:id entry) :kind :algorithm
+                                :ineligible-reason :algorithm/click-resource-unavailable
+                                :ineligibility-evidence
+                                {:catalog-source pin
+                                 :source source
+                                 :required (:resource-requirements entry)
+                                 :availability click-availability}}))
+
                   :else
                   (let [actual (sha256 (read-bytes (:path source)))]
                     (if (not= actual (:sha256 source))
@@ -133,13 +160,16 @@
                       (recur (next remaining)
                              (conj rows {:id (:id entry) :kind :algorithm
                                          :source source :approved true
-                                         :catalog-source pin})
+                                         :catalog-source pin
+                                         :resource-admission
+                                         {:required (:resource-requirements entry)
+                                          :availability click-availability}})
                              exclusions)))))
               {:rows rows :exclusions exclusions :catalog-source pin
                :catalog-proof
                {:entry-total (count entries)
                 :entries (->> entries
-                              (map #(select-keys % [:id :status :source]))
+                              (map #(select-keys % [:id :status :source :resource-requirements]))
                               (sort-by :id) vec)}}))))
       (catch java.io.FileNotFoundException _
         {:rows []
@@ -155,7 +185,7 @@
   Dependencies are explicit for replay. `:registry-snapshot` must be the one
   result of the authoritative loaders; no task source is reread here. Algorithm
   catalog and algorithm files are each read exactly once via `:read-bytes`."
-  [{:keys [registry-snapshot catalog-path read-bytes]
+  [{:keys [registry-snapshot catalog-path read-bytes click-availability]
     :or {read-bytes #(java.nio.file.Files/readAllBytes (.toPath (io/file %)))}}]
   (let [registry-snapshot
         (or registry-snapshot
@@ -166,7 +196,8 @@
         task-ids (map :id (concat support exclusions))
         duplicates (->> task-ids frequencies
                         (keep (fn [[id n]] (when (> n 1) id))) vec)
-        algorithms (algorithm-rows {:path catalog-path :read-bytes read-bytes})]
+        algorithms (algorithm-rows {:path catalog-path :read-bytes read-bytes
+                                    :click-availability click-availability})]
     (cond
       (seq duplicates)
       (refusal :duplicate-identities {:kind :task :ids duplicates})
@@ -241,7 +272,11 @@
              (keep (fn [{:keys [id representation ineligible-reason]}]
                      (let [status (get catalog-status id)]
                        (when (or (nil? status)
-                                 (and (= :approved status) (not= :admitted representation))
+                                 (and (= :approved status)
+                                      (not (or (= :admitted representation)
+                                               (and (= :excluded representation)
+                                                    (= :algorithm/click-resource-unavailable
+                                                       ineligible-reason)))))
                                  (and (not= :approved status)
                                       (not (and (= :excluded representation)
                                                 (= :algorithm/not-approved ineligible-reason)))))

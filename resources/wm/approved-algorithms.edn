@@ -8,6 +8,7 @@
    :revision "approved-2026-10-02"
    :owner :war-machine
    :status :approved
+   :resource-requirements {:ordinary-clicks 1}
    :approval-evidence
    {:actor "joe"
     :date "2026-10-02"

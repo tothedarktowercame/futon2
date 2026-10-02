@@ -27,6 +27,12 @@
 (defn- verify-produced [observation]
   (field/verify observation {:expected-snapshot-pin (:source-pin observation)}))
 
+(def positive-clicks
+  {:schema :wm/ordinary-click-availability-v1
+   :authorization {:path "authority.md" :sha "deadbeef"}
+   :allocated 5 :consumed 3 :available 2 :unit :ordinary-click
+   :ledger-source (pin "/data/consumption.jsonl" "8")})
+
 (deftest current-registry-is-accounted-without-a-second-lifecycle-policy
   (let [reads (atom [])
         observation (field/observe
@@ -53,7 +59,8 @@
         source {:path "/algorithms/A-approved.md"
                 :sha256 (field/sha256 algorithm-bytes)}
         catalog-value {:schema :wm/approved-algorithm-catalog-v1
-                       :entries [{:id "A-approved" :status :approved :source source}
+                       :entries [{:id "A-approved" :status :approved :source source
+                                  :resource-requirements {:ordinary-clicks 1}}
                                  {:id "A-candidate" :status :candidate
                                   :source (pin "/algorithms/A-candidate.md" "9")}]}
         catalog-bytes (.getBytes (pr-str catalog-value) "UTF-8")
@@ -66,12 +73,13 @@
                        (throw (java.io.FileNotFoundException. path))))
         observation (field/observe {:registry-snapshot current-registry
                                     :catalog-path "/catalog.edn"
+                                    :click-availability positive-clicks
                                     :read-bytes read-bytes})]
     (is (= ["/catalog.edn" "/algorithms/A-approved.md"] @reads)
         "catalog and approved algorithm source are each read once")
-    (is (= {:id "A-approved" :kind :algorithm :source source :approved true
-            :catalog-source {:path "/catalog.edn" :sha256 (field/sha256 catalog-bytes)}}
-           (some #(when (= "A-approved" (:id %)) %) (:rows observation))))
+    (is (= positive-clicks
+           (get-in (some #(when (= "A-approved" (:id %)) %) (:rows observation))
+                   [:resource-admission :availability])))
     (is (= :algorithm/not-approved
            (:ineligible-reason
             (some #(when (= "A-candidate" (:id %)) %) (:exclusions observation)))))
@@ -110,10 +118,12 @@
                                (pr-str {:schema :wm/approved-algorithm-catalog-v1
                                         :entries entries}) "UTF-8"))
         entry {:id "A-one" :status :approved
+               :resource-requirements {:ordinary-clicks 1}
                :source {:path "/A-one.md" :sha256 (field/sha256 bytes)}}
         run (fn [catalog-bytes algorithm-bytes]
               (field/observe
                {:registry-snapshot current-registry :catalog-path "/catalog.edn"
+                :click-availability positive-clicks
                 :read-bytes #(case % "/catalog.edn" catalog-bytes
                                     "/A-one.md" algorithm-bytes)}))]
     (testing "algorithm file drift"
@@ -192,3 +202,32 @@
     (is (= :wm/approved-algorithm-catalog-v1 (:schema catalog)))
     (is (= [{:id "A-self-heal" :status :approved}]
            (mapv #(select-keys % [:id :status]) (:entries catalog))))))
+
+(deftest approved-algorithm-requires-positive-source-pinned-click-ration
+  (let [body (.getBytes "algorithm" "UTF-8")
+        source {:path "/A.md" :sha256 (field/sha256 body)}
+        catalog (.getBytes
+                 (pr-str {:schema :wm/approved-algorithm-catalog-v1
+                          :entries [{:id "A" :status :approved :source source
+                                     :resource-requirements {:ordinary-clicks 1}}]})
+                 "UTF-8")
+        run (fn [availability]
+              (field/observe
+               {:registry-snapshot current-registry :catalog-path "/catalog.edn"
+                :click-availability availability
+                :read-bytes #(case % "/catalog.edn" catalog "/A.md" body)}))]
+    (doseq [bad [nil
+                 (assoc positive-clicks :available 0 :consumed 5)
+                 (assoc positive-clicks :available 1 :consumed 3)
+                 (assoc positive-clicks :ledger-source {:path "/ledger"})]]
+      (let [observation (run bad)
+            excluded (some #(when (= "A" (:id %)) %) (:exclusions observation))]
+        (is (zero? (get-in observation [:counts :algorithm])))
+        (is (= :algorithm/click-resource-unavailable
+               (:ineligible-reason excluded)))
+        (is (= :verified (:status (verify-produced observation))))))
+    (let [observation (run positive-clicks)]
+      (is (= 1 (get-in observation [:counts :algorithm])))
+      (is (= positive-clicks
+             (get-in (first (filter #(= "A" (:id %)) (:rows observation)))
+                     [:resource-admission :availability]))))))
