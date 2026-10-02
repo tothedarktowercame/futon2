@@ -8,6 +8,10 @@
    :revision "approved-2026-10-02"
    :owner :war-machine
    :status :approved
+   :repairs-capability :wm-click-completes-with-reviewable-receipts
+   :evidence-locator
+   {:kind :debugger-stop-and-terminal-run-record
+    :id :wm-click-completes-with-reviewable-receipts}
    :resource-requirements {:ordinary-clicks 1}
    :approval-evidence
    {:actor "joe"

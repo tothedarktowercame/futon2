@@ -173,3 +173,50 @@
     (is (= 0 (get-in receipt [:counts :adapters])))
     (is (= 3 (get-in receipt [:counts :excluded])))
     (is (= #{:head-source-mismatch} (set (map :reason (:exclusions receipt)))))))
+
+(deftest actual-self-heal-injury-joins-field-discovery-and-construction
+  (let [injury-pin
+        {:path "/home/joe/code/futon3/library/meta/meta-outer-policy-cascade.edn"
+         :sha256 "b1eaaa09a7f16fff9e4ac1c8e43e584b7d187ce348a25458237549983ddb6b86"}
+        injury {:schema :wm/injury-observation-v1 :status :active
+                :capability :wm-click-completes-with-reviewable-receipts
+                :source-pin injury-pin}
+        clicks {:schema :wm/ordinary-click-availability-v1
+                :authorization {:path "authority.md" :sha "review-fixture"}
+                :allocated 2 :consumed 1 :available 1 :unit :ordinary-click
+                :ledger-source {:path "/data/consumption.jsonl"
+                                :sha256 (apply str (repeat 64 "8"))}}
+        empty-registry {:missions {:missions []} :excursions {:excursions []}
+                        :tickets {:tickets []}}
+        observation (field/observe
+                     {:registry-snapshot empty-registry
+                      :catalog-path field/default-algorithm-catalog
+                      :click-availability clicks
+                      :injury-observation injury
+                      :expected-injury-pin injury-pin})
+        authority {:field-observation observation
+                   :expected-field-pin (:source-pin observation)
+                   :code-root "/home/joe/code"
+                   :read-bytes #(java.nio.file.Files/readAllBytes
+                                 (.toPath (java.io.File. %)))}
+        discovered (discovery/discover authority)
+        resources {:time-budget-ms 1000 :token-budget 100
+                   :author-seat "author" :reviewer-seat "reviewer"}
+        constructed (constructor/construct
+                     {:field-observation observation
+                      :expected-field-pin (:source-pin observation)
+                      :resource-envelope resources
+                      :adapters (:adapters discovered)})]
+    (is (= {:algorithm 1 :excursion 0 :mission 0 :ticket 0}
+           (:counts observation)))
+    (is (= :verified (:status (discovery/verify discovered authority))))
+    (is (= :approved-injury-repair-algorithm
+           (get-in discovered [:adapters 0 :adapter])))
+    (is (= :wm-click-completes-with-reviewable-receipts
+           (get-in discovered [:adapters 0 :repairs-capability])))
+    (is (= :run-algorithm
+           (get-in constructed [:templates 0 :slots :next-move])))
+    (is (= :debugger-stop
+           (get-in constructed [:templates 0 :slots :stopping-rule])))
+    (is (nil? (get-in constructed [:templates 0 :g-input]))
+        "the join supplies no prediction, preference, EIG, or G input")))

@@ -94,7 +94,9 @@
                                  (try (read-head-bytes (:repo location) (:path location))
                                       (catch Throwable _ nil)))
                     head-sha (when head-bytes (field/sha256 head-bytes))
-                    found (when (= actual head-sha) (observations code-root row text))
+                    algorithm? (= :algorithm (:kind row))
+                    found (when (and (= actual head-sha) (not algorithm?))
+                            (observations code-root row text))
                     false-observations (filterv #(false? (:observed %)) found)]
                 (cond
                   (nil? location)
@@ -112,6 +114,29 @@
                                                       :head-source-sha head-sha
                                                       :repo (:repo location) :path (:path location)}})
                          (inc read-count))
+
+                  algorithm?
+                  (let [locator (get-in row [:algorithm-admission :evidence-locator])]
+                    (if (and (map? locator) (keyword? (:kind locator)) (:id locator))
+                      (recur (next rows)
+                             (conj adapters
+                                   {:id (:id row) :kind :algorithm :source (:source row)
+                                    :adapter :approved-injury-repair-algorithm
+                                    :next-move :run-algorithm
+                                    :stopping-rule :debugger-stop
+                                    :locator locator
+                                    :repairs-capability (:repairs-capability row)
+                                    :evidence
+                                    {:field-admission (:algorithm-admission row)
+                                     :resource-admission (:resource-admission row)}})
+                             exclusions (inc read-count))
+                      (recur (next rows) adapters
+                             (conj exclusions
+                                   {:id (:id row) :kind :algorithm :source (:source row)
+                                    :reason :algorithm-admission-evidence-unavailable
+                                    :evidence {:field-admission
+                                               (:algorithm-admission row)}})
+                             (inc read-count))))
 
                   (seq false-observations)
                   (let [chosen (first false-observations)]
