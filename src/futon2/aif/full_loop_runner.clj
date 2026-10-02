@@ -3970,14 +3970,22 @@
                                            e))))]
              (swap! captured assoc path bytes)
              {:filename (.getName file) :path path :bytes bytes
+              ;; Direct children are the limb protocol's typed EDN records.
+              ;; Recursive descendants belong to producer-owned evidence
+              ;; bundles (for example cascade-revision's `.source` corpus):
+              ;; freeze their bytes, but do not reinterpret arbitrary source
+              ;; text as a limb record.
+              :record-candidate? (= (.getCanonicalFile evidence-dir)
+                                    (.getCanonicalFile (.getParentFile file)))
               :admitted-at admitted-at
               :parsed (try
                         {:value (parse-attempt-evidence bytes path)}
                         (catch clojure.lang.ExceptionInfo e {:error e}))}))
          evidence-files)
         record-captures
-        (filterv #(contains? limb-record-schemas
-                             (get-in % [:parsed :value :schema]))
+        (filterv #(and (:record-candidate? %)
+                       (contains? limb-record-schemas
+                                  (get-in % [:parsed :value :schema])))
                  captured-evidence)
         records (mapv #(let [record (get-in % [:parsed :value])]
                         (if (interpretation-evidence/schemas (:schema record))
@@ -4000,8 +4008,9 @@
                                         [:before :after])))))
               records)
         captures-by-name (into {} (map (juxt :filename :bytes)) captured-evidence)
-        _ (doseq [{:keys [filename parsed]} captured-evidence
-                  :when (and (not (contains? companion-names filename))
+        _ (doseq [{:keys [filename parsed record-candidate?]} captured-evidence
+                  :when (and record-candidate?
+                             (not (contains? companion-names filename))
                              (not (contains? limb-record-schemas
                                              (get-in parsed [:value :schema]))))]
             (if-let [error (:error parsed)]
@@ -4031,10 +4040,13 @@
             (limb-evidence/validate-revision-pair-files
              pair #(get captures-by-name %)))
         evidence-entries
-        (mapv (fn [{:keys [filename path admitted-at]}]
-                {:evidence/id (str cohort-name "/" attempt-id "/evidence/" filename)
+        (mapv (fn [{:keys [path admitted-at]}]
+                (let [relative (str (.relativize (.toPath evidence-dir)
+                                                 (.toPath (io/file path))))]
+                {:evidence/id (str cohort-name "/" attempt-id "/evidence/"
+                                   (str/replace relative java.io.File/separator "/"))
                  :source-path path
-                 :admitted-at admitted-at})
+                 :admitted-at admitted-at}))
               captured-evidence)
         entries (cond-> (into checkpoint-entries evidence-entries)
                   (:token-outcome-entry interpretation-context)

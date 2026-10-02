@@ -6276,6 +6276,25 @@
       (finally
         (doseq [file (reverse (file-seq root))] (.delete file))))))
 
+(deftest evidence-manifest-freezes-nested-opaque-source-without-edn-parsing
+  (let [root (.toFile (Files/createTempDirectory "nested-source-evidence-"
+                                                  (make-array FileAttribute 0)))
+        nested (io/file root "cohort" "attempt" "evidence"
+                        "cascade-revision" "request-1" "evidence")
+        source (io/file nested "pattern.source")]
+    (try
+      (.mkdirs nested)
+      (spit source "@flexiarg example\n! conclusion: not EDN\n")
+      (let [manifest (#'runner/checkpoint-evidence-manifest
+                      {} root :cohort "attempt" "M-target")
+            entry (first (:entries manifest))]
+        (is (= 1 (count (:entries manifest))))
+        (is (= "cohort/attempt/evidence/cascade-revision/request-1/evidence/pattern.source"
+               (:evidence/id entry)))
+        (is (= (.getAbsolutePath source) (:source-path entry))))
+      (finally
+        (doseq [file (reverse (file-seq root))] (.delete file))))))
+
 
 (deftest admitted-token-initialization-survives-runner-close
   ;; Same grounded retention fixture as close-retains-token-mismatch-before-manifest-freeze.
