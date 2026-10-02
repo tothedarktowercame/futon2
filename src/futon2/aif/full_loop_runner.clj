@@ -738,13 +738,24 @@
   {:kind :stage :error :cause :detail}; {:absent :no-failure} when the close carries
   no failure kind. A close no exception reached has no cause to give."
   [result]
-  (let [d (:data result)]
+  (let [d (:data result)
+        ask (or (get-in result [:checkpoints :selection :judgment
+                                :interpretation-ask])
+                (get-in result [:checkpoints :selection :sorry
+                                :interpretation-ask]))]
     (if-let [kind (:failure-kind d)]
-      {:kind kind
-       :stage (or (:failure-stage d) {:absent :no-failure-stage})
-       :error (if (str/blank? (str (:error d))) {:absent :no-error-message} (:error d))
-       :cause (if (contains? d :cause) (:cause d) {:absent :close-without-exception})
-       :detail (failure-detail (:error-data d))}
+      (cond-> {:kind kind
+               :stage (or (:failure-stage d) {:absent :no-failure-stage})
+               :error (if (str/blank? (str (:error d)))
+                        {:absent :no-error-message}
+                        (:error d))
+               :cause (if (contains? d :cause)
+                        (:cause d)
+                        {:absent :close-without-exception})
+               :detail (failure-detail (:error-data d))}
+        (:target d) (assoc :target (:target d))
+        ask (assoc :context {:phase (:failure-stage d)
+                             :interpretation-ask ask}))
       {:absent :no-failure})))
 
 (defn grounded-commit-for
@@ -5457,6 +5468,37 @@
                     ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
                     ;; the :failure-kind, not :untyped-failure
                     (throw (or (phase-kind-failure e) e))))))
+            retain-redecision-failure!
+            (fn [e ask-record]
+              (let [data (if (instance? clojure.lang.ExceptionInfo e)
+                           (ex-data e)
+                           {})
+                    target (or (:target data) (:target ask-record))
+                    failure-kind (failure-kind-from e)
+                    cell (sorry :selection-redecision-failed
+                                {:outcome :incomplete
+                                 :failure-kind failure-kind
+                                 :failure-stage :selection-redecision
+                                 :selected-mission target
+                                 :interpretation-ask ask-record
+                                 :error (ex-message e)
+                                 :error-data data})]
+                ;; The selection did not succeed, but this is still the
+                ;; authoritative selection checkpoint for the terminal path.
+                ;; Put it on the same pending carrier persist-selection! uses;
+                ;; an in-memory checkpoint alone leaves the cohort close to
+                ;; replace the actual error with :required-checkpoints-missing.
+                (reset! pending-selection cell)
+                (swap! checkpoints assoc :selection cell)
+                (throw (ex-info (or (ex-message e)
+                                    "Selection redecision failed")
+                                (merge data
+                                       {:outcome :incomplete
+                                        :failure-kind failure-kind
+                                        :failure-stage :selection-redecision
+                                        :target target
+                                        :interpretation-ask ask-record})
+                                e))))
             judgement0-base
             (try
             (run-phase!
@@ -5554,18 +5596,13 @@
                                            :judgement j)))
                     j))
                 (catch clojure.lang.ExceptionInfo e
-                  (selection-refusal! e interpretation-ask-record))
+                  (let [target (get-in opts [:flight :target])]
+                    (if (or (judge-refusal e target)
+                            (gate-refusal e target))
+                      (selection-refusal! e interpretation-ask-record)
+                      (retain-redecision-failure! e interpretation-ask-record))))
                 (catch Throwable e
-                  ;; an untyped failure is recorded as today; the ask record
-                  ;; still rides the selection sorry cell so the run record
-                  ;; says the click asked and published
-                  (swap! checkpoints update :selection
-                         (fn [cell]
-                           (cond-> (or cell (sorry :no-selection {}))
-                             interpretation-ask-record
-                             (assoc-in [:sorry :interpretation-ask]
-                                       interpretation-ask-record))))
-                  (throw e)))
+                  (retain-redecision-failure! e interpretation-ask-record)))
               judgement0-base)
             world-at-selection (selection-world/capture
                                 (:decision judgement0) roster

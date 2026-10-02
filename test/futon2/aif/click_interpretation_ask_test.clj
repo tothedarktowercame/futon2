@@ -12,6 +12,7 @@
             [clojure.pprint :as pp]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.flight-runner :as fr]
+            [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.interpretation-request :as ireq]
             [futon2.aif.policy :as policy]
@@ -121,11 +122,12 @@
   ask-fn. SECOND is a zero-arg fn returning the decision or throwing."
   ([ask-fn] (run-click ask-fn (fn [] (selected-decision)) {}))
   ([ask-fn second] (run-click ask-fn second {}))
-  ([ask-fn second {:keys [first-refusals classify-fn]}]
+  ([ask-fn second {:keys [first-refusals classify-fn runner-opts]}]
    (let [judge-calls (atom [])
          findings (atom [])
          result (runner/run-opportunity!
                  (merge (fixture/isolated-runner-opts)
+                        runner-opts
                         {:judge-fn (fn [days]
                                      (let [n (count (swap! judge-calls conj days))]
                                        {:judgement (judgement-for
@@ -275,6 +277,50 @@
                    (fn [] (throw (ex-info "not a refusal" {:something :else}))))]
     (is (= true (:published (:interpretation-ask record))))
     (is (= "job-1" (:job-id (:interpretation-ask record))))))
+
+(deftest no-slice-ask-published-redecision-failure-is-the-terminal-record
+  ;; Controlled run 2026-10-02-1084e87d… reached this exact shape.  Commit
+  ;; 95d89d4af made the redecision a debugger-restartable phase; this test
+  ;; pins the separate retention requirement after the final retry fails.
+  (let [store (io/file (temp-dir "click-query-slice-redecision-failure"))
+        cohort-root (temp-dir "click-query-slice-redecision-cohort")
+        preregistration (str cohort-root "/cohort.edn")
+        raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                        (assoc :cohort/id :click-query-slice-redecision-test)
+                        (assoc-in [:stopping-rule :target] 1)))
+        sha (apply str (map #(format "%02x" (bit-and 255 %))
+                            (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                     (.getBytes raw "UTF-8"))))
+        execution-cohort {:preregistration preregistration
+                          :data-root cohort-root
+                          :cohort-id :click-query-slice-redecision-test
+                          :sha256 sha}
+        _ (spit preregistration raw)
+        _ (cohort/activate! preregistration cohort-root)
+        {:keys [result record judge-calls]}
+        (run-click
+         (publishing-ask-fn store)
+         (fn []
+           (throw (ex-info "Required loop nodes were not exercised by selection"
+                           {:failure-kind :loop-node-unexercised})))
+         {:first-refusals [{:target target
+                            :kind :no-query-time-slice
+                            :missing :query-time-slices}]
+          :runner-opts {:cohort? true
+                        :execution-cohort execution-cohort}})]
+    (is (= 2 (count judge-calls)) "the published ask caused one redecision")
+    (is (= :loop-node-unexercised (get-in result [:data :failure-kind])))
+    (is (= :loop-node-unexercised (get-in record [:failure :kind]))
+        "the actual redecision failure is not replaced at close")
+    (is (not= :required-checkpoints-missing (get-in record [:failure :kind])))
+    (is (= :selection-redecision (get-in record [:failure :stage])))
+    (is (= target (get-in record [:failure :target])))
+    (is (= {:phase :selection-redecision
+            :interpretation-ask (:interpretation-ask record)}
+           (get-in record [:failure :context])))
+    (is (= {:target target :outcome :published :published true}
+           (select-keys (:interpretation-ask record)
+                        [:target :outcome :published])))))
 
 (deftest the-ask-skips-targets-the-tick-can-never-score
   ;; click 17 (tick-run-record-2026-09-30-1790746462): the ask bought six
