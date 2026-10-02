@@ -7,6 +7,13 @@
 (def records
   {"/runs/one.edn"
    {:run/id "run-1" :click/id "click-1"
+    :startedAt "2026-09-19T00:54:11.109006657Z"
+    :outer-task-selection
+    {:schema :wm/outer-task-selection-v1
+     :policy {:kind :seeded-uniform-task-support}
+     :support [] :excluded [] :draw {:seed 1}
+     :chosen {:id "M-one" :kind :mission}
+     :action {:target "M-one" :type :advance-mission}}
     :decision {:selection-law {:per-policy-argmax {:action {:target "M-one"}}}}
     :terminal-receipt {:outcome :grounded-change}
     :registered-run/timing {:status :complete :wall-clock-ms 120
@@ -18,6 +25,9 @@
     :d-task-enactment {:target "M-one"}}
    "/runs/two.edn"
    {:run/id "run-2" :click/id "click-2"
+    :startedAt "2026-09-19T00:00:11.302351062Z"
+    :outer-task-selection {:schema :wm/outer-task-selection-v1
+                           :status :refused :reason :identity-inconsistent}
     :decision {:selection-law {:per-policy-argmax {:action {:target "M-one"}}}}
     :terminal-receipt {:outcome :grounded-progress}
     :registered-run/timing {:status :typed-missing}
@@ -39,7 +49,8 @@
 
 (deftest extracts-only-explicit-measurements-and-repetition
   (let [a (authority) result (dataset/produce a)
-        [one two] (:rows result)]
+        by-run (into {} (map (juxt :run/id identity) (:rows result)))
+        one (by-run "run-1") two (by-run "run-2")]
     (is (= :produced (:status result)))
     (is (= {:inputs 3 :usable 2 :excluded 1
             :task-kinds {:mission 2}
@@ -55,7 +66,14 @@
            (:token-use one)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:elapsed two)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:token-use two)))
-    (is (= {:prior-occurrences 1 :position 2} (:repetition two)))
+    (is (= ["run-2" "run-1"] (mapv :run/id (:rows result))))
+    (is (= {:prior-occurrences 0 :position 1} (:repetition two)))
+    (is (= {:prior-occurrences 1 :position 2} (:repetition one)))
+    (is (true? (get-in one [:quality :outer-selection-retained])))
+    (is (= :canonical-outer (get-in one [:quality :selected-identity-class])))
+    (is (false? (get-in two [:quality :outer-selection-retained])))
+    (is (= :legacy-inner-fallback
+           (get-in two [:quality :selected-identity-class])))
     (is (= :outer-task-identity-missing (get-in result [:exclusions 0 :reason])))
     (is (= :verified (:status (dataset/verify result a))))
     (is (= :external-run-record-authority-required
@@ -77,6 +95,44 @@
       (testing (name label)
         (is (= :dataset-does-not-match-run-record-authority
                (:reason (dataset/verify (mutate result) a))))))))
+
+(deftest chronology-and-outer-receipt-quality-fail-closed
+  (let [base (select-keys records ["/runs/one.edn" "/runs/two.edn"])
+        altered
+        (-> base
+            (assoc-in ["/runs/one.edn" :outer-task-selection]
+                      {:schema :wm/outer-task-selection-v1
+                       :status :absent :reason :receipt-not-retained}))
+        reader #(utf8 (altered %))
+        m (dataset/manifest (keys altered) reader)
+        result (dataset/produce {:manifest m :expected-manifest-pin (:source-pin m)
+                                 :read-bytes reader})]
+    (is (= [:legacy-inner-fallback :legacy-inner-fallback]
+           (mapv #(get-in % [:quality :selected-identity-class]) (:rows result))))
+    (is (every? false? (map #(get-in % [:quality :outer-selection-retained])
+                            (:rows result))))
+    (doseq [[label started reason]
+            [[:missing nil :start-instant-missing]
+             [:malformed "yesterday" :start-instant-malformed]]]
+      (testing (name label)
+        (let [record (cond-> (records "/runs/one.edn")
+                       true (dissoc :startedAt)
+                       started (assoc :startedAt started))
+              source {"/runs/time.edn" record}
+              reader #(utf8 (source %))
+              m (dataset/manifest (keys source) reader)
+              result (dataset/produce
+                      {:manifest m :expected-manifest-pin (:source-pin m)
+                       :read-bytes reader})]
+          (is (= reason (get-in result [:exclusions 0 :reason]))))))
+    (let [same-time (assoc-in base ["/runs/two.edn" :startedAt]
+                              (get-in base ["/runs/one.edn" :startedAt]))
+          reader #(utf8 (same-time %))
+          m (dataset/manifest (keys same-time) reader)]
+      (is (= :record-start-instants-duplicated
+             (:reason (dataset/produce
+                       {:manifest m :expected-manifest-pin (:source-pin m)
+                        :read-bytes reader})))))))
 
 (deftest manifest-and-record-source-mutations-refuse
   (let [a (authority)]
@@ -103,6 +159,6 @@
   (is (= :closure (dataset/outcome-class :grounded-change)))
   (is (= :closure (dataset/outcome-class :already-satisfied)))
   (is (= :grounded-progress (dataset/outcome-class :grounded-progress)))
-  (is (= :useful-typed-blocker (dataset/outcome-class :guardrail-refusal)))
+  (is (= :typed-blocker (dataset/outcome-class :guardrail-refusal)))
   (is (= :abstention-or-failure (dataset/outcome-class :abstained)))
   (is (= :typed-unknown (dataset/outcome-class :future-outcome))))

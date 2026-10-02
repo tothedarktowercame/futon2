@@ -3,7 +3,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.meta-field-observation :as field]))
+            [futon2.aif.meta-field-observation :as field])
+  (:import [java.time Instant]))
 
 (def schema :wm/meta-outcome-dataset-v1)
 (def manifest-schema :wm/run-record-manifest-v1)
@@ -37,9 +38,22 @@
     (str/starts-with? (str target) "T-") :ticket
     :else nil))
 
+(defn- canonical-outer-receipt? [receipt]
+  (and (= :wm/outer-task-selection-v1 (:schema receipt))
+       (map? (:policy receipt))
+       (vector? (:support receipt))
+       (vector? (:excluded receipt))
+       (map? (:draw receipt))
+       (string? (get-in receipt [:chosen :id]))
+       (= (get-in receipt [:chosen :id]) (get-in receipt [:action :target]))))
+
 (defn- selected-target [record]
-  (or (get-in record [:outer-task-selection :chosen :id])
-      (get-in record [:decision :selection-law :per-policy-argmax :action :target])))
+  (let [receipt (:outer-task-selection record)]
+    (if (canonical-outer-receipt? receipt)
+      {:id (get-in receipt [:chosen :id]) :source :canonical-outer}
+      (when-let [target (get-in record [:decision :selection-law
+                                        :per-policy-argmax :action :target])]
+        {:id target :source :legacy-inner-fallback}))))
 
 (defn- raw-outcome [record]
   (or (get-in record [:terminal-receipt :outcome])
@@ -52,7 +66,7 @@
     (= :grounded-progress outcome) :grounded-progress
     (contains? #{:guardrail-refusal :substrate-unavailable :agent-unavailable
                  :dispatch-failed :historical-verification-awaiting-validation
-                 :historical-verification-refused} outcome) :useful-typed-blocker
+                 :historical-verification-refused} outcome) :typed-blocker
     (contains? #{:abstained :no-selection :build-failed :incomplete :cancelled
                  :grounded-no-change :artifact-only} outcome) :abstention-or-failure
     :else :typed-unknown))
@@ -80,9 +94,10 @@
                    [:registered-run/model-usage :jobs :total-tokens])
       (typed-value nil nil nil))))
 
-(defn- quality [record target]
-  {:outer-selection-retained (map? (:outer-task-selection record))
-   :selected-identity-retained (boolean target)
+(defn- quality [record selection]
+  {:outer-selection-retained (= :canonical-outer (:source selection))
+   :selected-identity-retained (boolean selection)
+   :selected-identity-class (or (:source selection) :absent)
    :enacted-identity-retained
    (boolean (or (get-in record [:d-task-enactment :target])
                 (get-in record [:decision :selected-enacted-identity])))
@@ -91,19 +106,19 @@
 
 (defn produce
   "Read each manifest entry once and partition it into a usable row or typed
-  exclusion. Manifest order is the repetition chronology."
+  exclusion. Repetition chronology is derived from canonical start instants."
   [{:keys [manifest expected-manifest-pin read-bytes]
     :or {read-bytes #(java.nio.file.Files/readAllBytes (.toPath (io/file %)))}}]
   (if-let [bad (manifest-check manifest expected-manifest-pin)]
     (refusal bad {})
-    (loop [entries (:entries manifest) rows [] exclusions [] occurrences {}]
+    (loop [entries (:entries manifest) rows [] exclusions []]
       (if-let [{:keys [path sha256] :as source} (first entries)]
         (let [bytes (try (read-bytes path) (catch Throwable _ nil))
               actual (when bytes (field/sha256 bytes))]
           (cond
             (nil? bytes)
             (recur (next entries) rows
-                   (conj exclusions {:source source :reason :record-unreadable}) occurrences)
+                   (conj exclusions {:source source :reason :record-unreadable}))
             (not= sha256 actual)
             (refusal :record-source-drift {:path path :expected sha256 :actual actual})
             :else
@@ -111,9 +126,13 @@
                               (catch Throwable _ ::invalid))]
               (if (= ::invalid record)
                 (recur (next entries) rows
-                       (conj exclusions {:source source :reason :record-invalid-edn}) occurrences)
+                       (conj exclusions {:source source :reason :record-invalid-edn}))
                 (let [run-id (:run/id record) click-id (:click/id record)
-                      target (selected-target record) kind (target-kind target)]
+                      selection (selected-target record)
+                      target (:id selection) kind (target-kind target)
+                      started-at (when (string? (:startedAt record))
+                                   (try (Instant/parse (:startedAt record))
+                                        (catch Throwable _ nil)))]
                   (if-not (and (string? run-id) (string? click-id) kind)
                     (recur (next entries) rows
                            (conj exclusions
@@ -124,12 +143,23 @@
                                             (nil? target) :outer-task-identity-missing
                                             :else :outer-task-kind-invalid)
                                   :evidence {:run/id run-id :click/id click-id
-                                             :selected-target target}})
-                           occurrences)
-                    (let [prior (get occurrences target 0)
-                          outcome (raw-outcome record)
-                          row {:source source :run/id run-id :click/id click-id
+                                             :selected-target target}}))
+                    (if-not started-at
+                      (recur (next entries) rows
+                             (conj exclusions
+                                   {:source source
+                                    :reason (if (nil? (:startedAt record))
+                                              :start-instant-missing
+                                              :start-instant-malformed)
+                                    :evidence {:run/id run-id :click/id click-id
+                                               :startedAt (:startedAt record)}}))
+                      (let [outcome (raw-outcome record)
+                            row {:source source :run/id run-id :click/id click-id
                                :task {:id target :kind kind}
+                               :started-at {:status :present
+                                            :value (.toString started-at)
+                                            :unit :utc-instant
+                                            :source [:startedAt]}
                                :terminal-outcome {:raw (or outcome {:absent :not-recorded})
                                                   :class (outcome-class outcome)
                                                   :source (cond
@@ -138,19 +168,33 @@
                                                             (get-in record [:terminal :outcome]) [:terminal :outcome]
                                                             :else {:absent :not-recorded})}
                                :elapsed (timing record) :token-use (token-use record)
-                               :quality (quality record target)
-                               :repetition {:prior-occurrences prior :position (inc prior)}
+                               :quality (quality record selection)
                                :projection-evidence
-                               {:target-source (if (get-in record [:outer-task-selection :chosen :id])
+                               {:target-source (if (= :canonical-outer (:source selection))
                                                  [:outer-task-selection :chosen :id]
-                                                 [:decision :selection-law :per-policy-argmax :action :target])}}
-                          occurrences (update occurrences target (fnil inc 0))]
-                      (recur (next entries) (conj rows row) exclusions occurrences))))))))
+                                                 [:decision :selection-law :per-policy-argmax :action :target])}}]
+                        (recur (next entries) (conj rows row) exclusions)))))))))
         (let [duplicate-identities (->> rows
                                         (group-by (juxt :run/id :click/id))
                                         (keep (fn [[identity matches]]
                                                 (when (> (count matches) 1) identity)))
                                         vec)
+              duplicate-starts (->> rows
+                                    (group-by #(get-in % [:started-at :value]))
+                                    (keep (fn [[instant matches]]
+                                            (when (> (count matches) 1) instant)))
+                                    vec)
+              rows (->> rows
+                        (sort-by #(get-in % [:started-at :value]))
+                        (reduce (fn [{:keys [rows occurrences]} row]
+                                  (let [target (get-in row [:task :id])
+                                        prior (get occurrences target 0)]
+                                    {:rows (conj rows (assoc row :repetition
+                                                            {:prior-occurrences prior
+                                                             :position (inc prior)}))
+                                     :occurrences (update occurrences target (fnil inc 0))}))
+                                {:rows [] :occurrences {}})
+                        :rows)
               body {:schema schema :status :produced
                     :manifest-source-pin expected-manifest-pin
                     :rows rows :exclusions exclusions
@@ -164,9 +208,14 @@
                               :closure-or-progress (count (filter #(contains? #{:closure :grounded-progress}
                                                                             (get-in % [:terminal-outcome :class])) rows))
                               :repetition (count (filter #(pos? (get-in % [:repetition :prior-occurrences])) rows))}}}]
-          (if (seq duplicate-identities)
+          (cond
+            (seq duplicate-identities)
             (refusal :record-identities-duplicated
                      {:identities duplicate-identities})
+            (seq duplicate-starts)
+            (refusal :record-start-instants-duplicated
+                     {:instants duplicate-starts})
+            :else
             (assoc body :source-pin {:path "wm://meta-outcome-dataset-v1"
                                      :sha256 (field/digest body)})))))))
 
