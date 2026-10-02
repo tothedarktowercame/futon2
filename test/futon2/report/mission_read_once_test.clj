@@ -13,6 +13,7 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.mission-registry :as mr]
+            [futon2.aif.outer-task-selection :as outer-task-selection]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.report.war-machine :as wm]))
 
@@ -26,12 +27,14 @@
 (defn- one-selection
   "judge in NS (the war-machine namespace, or its pre-fix copy) with
   JUDGE-OPTS, stopped once the targets exist: {:reads n :targets [...]}."
-  [ns judge-opts]
+  ([ns judge-opts] (one-selection ns judge-opts missions))
+  ([ns judge-opts mission-doc]
   (let [reads (atom 0)
         targets (atom nil)
         tmp (tmp-dir)]
-    (with-redefs-fn {#'mr/load-missions (fn [& _] (swap! reads inc) missions)
+    (with-redefs-fn {#'mr/load-missions (fn [& _] (swap! reads inc) mission-doc)
                      #'mr/load-tickets (fn [& _] {:tickets []})
+                     #'mr/load-excursions (fn [& _] {:excursions []})
                      (ns-resolve ns 'assemble-cascade-problems-with-published)
                      (fn [_ input & _]
                        (reset! targets (:targets input))
@@ -44,7 +47,7 @@
                                                judge-opts))
             (catch clojure.lang.ExceptionInfo e
               (when-not (::stop (ex-data e)) (throw e)))))
-    {:reads @reads :targets @targets}))
+    {:reads @reads :targets @targets})))
 
 (def pre-fix-ns
   (delay
@@ -70,6 +73,35 @@
     (is (= ["M-live"] targets))
     (is (= 1 reads))))
 
+(deftest outer-task-is-selected-before-and-independently-of-cascade-material
+  (let [mission-doc {:missions [{:id "M-a" :status-class :active}
+                                {:id "M-b" :status-class :active}]}
+        seed 17
+        expected (get-in (outer-task-selection/select-task
+                          {:tasks [{:id "M-a" :kind :mission :status-class :active}
+                                   {:id "M-b" :kind :mission :status-class :active}]
+                           :seed seed})
+                         [:chosen :id])
+        rich-a {:universes {"M-a" {:x false}}
+                :interpretations {"M-a" {:patterns {:p/a {:produces #{:x}}}}}
+                :candidates {"M-a" [{:precedence [:p/a]
+                                      :construction-receipt {:kind :fixture}}]}}
+        rich-b {:universes {"M-b" {:y false}}
+                :interpretations {"M-b" {:patterns {:p/b {:produces #{:y}}}}}
+                :candidates {"M-b" [{:precedence [:p/b]
+                                      :construction-receipt {:kind :fixture}}]}}
+        first-run (one-selection (:ns (meta #'wm/judge))
+                                 {:outer-task-seed seed :cascade-sources rich-a}
+                                 mission-doc)
+        second-run (one-selection (:ns (meta #'wm/judge))
+                                  {:outer-task-seed seed :cascade-sources rich-b}
+                                  mission-doc)]
+    (is (= [expected] (:targets first-run)))
+    (is (= [expected] (:targets second-run))
+        "moving all prepared cascade material to the other task cannot move outer selection")
+    (is (= 1 (count (:targets first-run)))
+        "inner assembly receives exactly the already-selected task")))
+
 (deftest the-pre-fix-selection-read-twice
   ;; the bad case: judge at e3bdcfdb, no pass-through
   (let [{:keys [reads targets]} (one-selection @pre-fix-ns {})]
@@ -80,6 +112,7 @@
   ;; work_target_predictor_input.clj's caller is unchanged
   (let [reads (atom 0)]
     (with-redefs [mr/load-missions (fn [& _] (swap! reads inc) missions)
-                  mr/load-tickets (fn [& _] {:tickets []})]
+                  mr/load-tickets (fn [& _] {:tickets []})
+                  mr/load-excursions (fn [& _] {:excursions []})]
       (is (= ["M-live"] (cp/substrate-targets)))
       (is (= 1 @reads)))))

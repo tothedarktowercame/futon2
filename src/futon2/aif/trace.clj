@@ -469,6 +469,8 @@
     :live-c-coverage (or (get-in judge-output [:decision :live-c-coverage])
                         {:status :absent :reason :coverage-not-recorded})
     :mode (:mode judge-output)}
+    (contains? judge-output :outer-task-selection)
+    (assoc :outer-task-selection (:outer-task-selection judge-output))
     (contains? judge-output :scan-exposures)
     (assoc :scan-exposures (:scan-exposures judge-output))
     (contains? judge-output :horizon-steps)

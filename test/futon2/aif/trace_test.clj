@@ -114,6 +114,15 @@
       (is (contains? r :cascade-problems))
       (is (contains? r :mode)))))
 
+(deftest outer-task-selection-receipt-is-persisted-present-only
+  (let [receipt {:schema :wm/outer-task-selection-v1
+                 :chosen {:id "M-a" :kind :mission}}
+        present (trace/trace-record
+                 (assoc sample-judge-output :outer-task-selection receipt))
+        absent (trace/trace-record sample-judge-output)]
+    (is (= receipt (:outer-task-selection present)))
+    (is (not (contains? absent :outer-task-selection)))))
+
 (deftest scan-shadow-is-persisted-present-only
   (let [shadow {:schema :wm/scan-shadow-v1 :applied false}
         present (trace/trace-record (assoc sample-judge-output :scan-shadow shadow))

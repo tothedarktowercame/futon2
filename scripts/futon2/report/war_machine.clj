@@ -45,7 +45,6 @@
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
             [futon2.aif.cascade-feedback :as cascade-feedback]
-            [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.interpretation-construction :as interpretation-construction]
             [futon2.aif.want-interpretation :as want-interpretation]
             [futon2.aif.enactment-fold-source :as enactment-fold-source]
@@ -63,6 +62,7 @@
             [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-hole-wants :as mission-hole-wants]
             [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.outer-task-selection :as outer-task-selection]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
             [futon2.aif.scan-bins :as scan-bins]
@@ -6546,6 +6546,34 @@
         loaded-missions (mission-registry/load-missions)
         loaded-tickets (mission-registry/load-tickets)
         loaded-excursions (mission-registry/load-excursions)
+        ;; The outer loop selects a task identity from current M/E/T state.
+        ;; It is deliberately completed before any cascade source is loaded or
+        ;; any interpretation is constructed.  The inner loop below receives
+        ;; exactly the chosen target.
+        outer-task-population
+        (vec (concat
+              (map #(assoc % :kind :mission)
+                   (mission-registry/open-missions loaded-missions))
+              (map #(assoc % :kind :excursion)
+                   (filter mission-registry/live-excursion?
+                           (:excursions loaded-excursions)))
+              (map #(assoc % :kind :ticket)
+                   (filter mission-registry/live-ticket?
+                           (:tickets loaded-tickets)))))
+        outer-task-population
+        (if-let [flight-target (get-in judge-opts [:flight :target])]
+          (filterv #(= flight-target (:id %)) outer-task-population)
+          outer-task-population)
+        outer-task-seed
+        (long (or (:outer-task-seed judge-opts)
+                  ;; Production supplies :run-id. Standalone report calls use
+                  ;; this report's already-recorded timestamp; either way the
+                  ;; actual seed is retained in the selection receipt.
+                  (hash (str (or (:run-id judge-opts) wm-as-of)))))
+        outer-task-selection
+        (outer-task-selection/select-task
+         {:tasks outer-task-population :seed outer-task-seed})
+        selected-task-id (get-in outer-task-selection [:chosen :id])
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
                             (mission-hole-wants/merge-into-sources
@@ -6576,22 +6604,11 @@
                                   (:ticket-queue judge-opts) (ticket-queue/read-declaration)))
         substrate-tickets (map :id (filter mission-registry/live-ticket?
                                            (:tickets loaded-tickets)))
-        known-mission-ids (set (map :id (:missions loaded-missions)))
-        live-mission-ids (set (map :id (filter mission-registry/live-mission?
-                                               (:missions loaded-missions))))
         cascade-targets
-        (->> (concat (cascade-problems/substrate-targets loaded-missions loaded-tickets loaded-excursions)
-                     (keys (:universes cascade-sources))
-                     (map :target (:proposals cascade-proposal-supply))
-                     (map :ticket (:entries ticket-queue-declaration)))
-             distinct
-             ;; A declaration or saved proposal may outlive the mission's
-             ;; eligibility.  It can enrich an eligible target, but it must
-             ;; never reintroduce a known closed, frozen, or operator-gated
-             ;; mission after the registry has excluded it.
-             (remove #(and (contains? known-mission-ids %)
-                           (not (contains? live-mission-ids %))))
-             vec)
+        ;; Inner cascade construction is target-local. Declarations and saved
+        ;; proposals can enrich the selected task, but can neither introduce
+        ;; nor select a different task.
+        (if (string? selected-task-id) [selected-task-id] [])
         flight-cascade-assembly-input
         (flight-assembly-input
          (:flight judge-opts)
@@ -6839,6 +6856,7 @@
                   ;; (or the gated abstention); the flat ranked/advisory
                   ;; fields are gone with the flat path.
                   :decision wm-decision
+                  :outer-task-selection outer-task-selection
                   :cascade-problems (:cascade-problems cascade-result)
                   :cascade-lanes (:lanes cascade-result)
                   :cascade-horizon cascade-horizon
