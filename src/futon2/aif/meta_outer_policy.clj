@@ -23,6 +23,15 @@
   #{:closed :grounded-progress :typed-blocker :budget-exhausted :debugger-stop})
 (def checkable-locator-classes #{:C3 :C4 :C5 :C6 :C8})
 
+(defn- finite-number? [x]
+  (and (number? x) (Double/isFinite (double x))))
+
+(defn- positive-finite-number? [x]
+  (and (finite-number? x) (pos? (double x))))
+
+(defn- nonnegative-finite-number? [x]
+  (and (finite-number? x) (not (neg? (double x)))))
+
 (defn- sha256? [x]
   (and (string? x) (boolean (re-matches #"[0-9a-f]{64}" x))))
 
@@ -70,13 +79,15 @@
                 weights information-model source-pin]} (:g-input candidate)
         n (count means)]
     (cond-> []
-      (not (and (pos? n) (every? number? means)
+      (not (and (pos? n) (every? finite-number? means)
                 (= n (count variances) (count preference-means)
                    (count preference-variances))
-                (every? #(and (number? %) (pos? (double %)))
+                (every? positive-finite-number?
                         (concat variances preference-variances))
+                (every? finite-number? preference-means)
                 (or (nil? weights)
-                    (and (= n (count weights)) (every? number? weights)))))
+                    (and (= n (count weights))
+                         (every? nonnegative-finite-number? weights)))))
       (conj :gaussian-model-incomplete)
       (not (map? information-model)) (conj :information-model-missing)
       (not (source-pin? source-pin)) (conj :g-source-pin-invalid))))

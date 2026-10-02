@@ -124,6 +124,14 @@
              (:reason (evaluate {:contract contract :contract-source pin
                                  :observation {}
                                  :candidates [(update good :g-input dissoc :information-model)]})))))
+    (testing "non-finite model values and negative weights are not G inputs"
+      (doseq [bad [(assoc-in good [:g-input :means 0] Double/NaN)
+                   (assoc-in good [:g-input :preference-means 0]
+                             Double/POSITIVE_INFINITY)
+                   (assoc-in good [:g-input :weights] [-1.0])]]
+        (is (= :g-inputs-incomplete
+               (:reason (evaluate {:contract contract :contract-source pin
+                                   :observation {} :candidates [bad]}))))))
     (testing "tactical material cannot cross the outer boundary"
       (is (= :outer-boundary-violated
              (:reason (evaluate {:contract contract :contract-source pin
