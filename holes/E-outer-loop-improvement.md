@@ -225,6 +225,18 @@ not permission to weaken or bypass the other three.
   evaluator refuses missing prediction, normalization, preference, or
   information-model inputs, and a mutation of each input class fails a named
   gate.
+
+  Blocker evidence 2026-10-02: Futon3 `7890a839a` records the source-pinned
+  decision at SHA-256 `33ac1617…`. The verified historical dataset has 39
+  usable rows (M30/E0/T9/A0), all selected by legacy inner fallback, with only
+  five elapsed measurements and no token measurements. Current candidate
+  fields establish applicability and observation surfaces, not outcome
+  probabilities. Therefore no candidate-specific Q, prior, or posterior is
+  presently authorized; uniform halves, budget-as-forecast, per-kind fitting,
+  and first/singleton selection are prohibited. Independent review confirmed
+  the three producer hashes and reran 9 tests / 56 assertions. The criterion
+  remains open pending an explicitly authorized acquisition or predictive-
+  prior route.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
