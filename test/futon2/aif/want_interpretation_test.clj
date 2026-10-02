@@ -347,6 +347,21 @@
                store ["M-futon-seams"])]
         (is (nil? (get-in m [:machine-interpretations-overridden "M-futon-seams"])))))))
 
+(deftest published-interpretation-for-a-closed-want-is-not-reattached
+  (let [store (temp-store)
+        resp (response :writing-coherence/meet-the-reader-where-they-are)
+        v (validate document resp (seams-sources))
+        _ (wi/publish! store (wi/issue! store (req document)) resp v)
+        current (-> (seams-sources)
+                    (assoc-in [:wants "M-futon-seams"] [argue])
+                    (update-in [:universes "M-futon-seams"] dissoc document)
+                    (update-in [:locators "M-futon-seams"] dissoc document))
+        merged (wi/merge-published current store ["M-futon-seams"])]
+    (is (empty? (get-in merged [:interpretations "M-futon-seams" :patterns])))
+    (is (= [:writing-coherence/meet-the-reader-where-they-are]
+           (get-in merged [:machine-interpretations-stale "M-futon-seams"])))
+    (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))))
+
 (deftest a-string-spelled-id-canonicalises
   ;; D17 sibling of the un-namespaced refusal: the same proposal with its
   ;; id as a namespaced string validates under the canonical keyword

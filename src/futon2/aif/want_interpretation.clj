@@ -516,7 +516,13 @@
             (if-let [{:keys [patterns receipts]} (read-published store target)]
               (let [declared-map (get-in srcs [:interpretations target :patterns])
                     declared (set (keys declared-map))
-                    fresh (remove (comp declared key) patterns)
+                    current-wants (set (get-in srcs [:wants target]))
+                    current? (fn [[id _pattern]]
+                               (contains? current-wants (get-in receipts [id :want])))
+                    stale (vec (sort-by str (map key (remove current? patterns))))
+                    fresh (remove (some-fn (comp declared key)
+                                           (complement current?))
+                                  patterns)
                     reading-sha #(evidence/sha256 (.getBytes (pr-str (select-keys % [:guard :produces])) "UTF-8"))
                     ;; hand wins, but a published reading it overrode stays
                     ;; visible on the merged sources (AR-39)
@@ -526,6 +532,8 @@
                                       {:id id :published-sha (reading-sha p) :declared-sha (reading-sha d)
                                        :request-id (get-in receipts [id :request-id])}))]
                 (-> srcs
+                    (cond-> (seq stale)
+                      (assoc-in [:machine-interpretations-stale target] stale))
                     (cond-> (seq overridden)
                       (assoc-in [:machine-interpretations-overridden target] overridden))
                     (update-in [:interpretations target :patterns] merge (into {} fresh))
