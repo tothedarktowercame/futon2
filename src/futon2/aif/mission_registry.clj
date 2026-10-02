@@ -117,13 +117,24 @@
   (let [upper (str/upper-case (or status-line ""))
         lead  (-> upper (str/replace #"^[\s>*#`_~-]+" "") str/trim)
         head  (or (re-find #"[A-Z][A-Z-]*" lead) "")
+        ;; A lifecycle qualifier immediately attached to an otherwise-live lead
+        ;; is part of the overall state, not incidental phase prose.  In
+        ;; particular, `OPEN — parked` must not become runnable merely because
+        ;; OPEN is the first token.  Keep this deliberately narrower than a
+        ;; search of the whole line: `PARTIAL (Phases 2-4 deferred)` remains live.
+        held-qualifier (some-> (re-find
+                                #"^(?:OPEN|ACTIVE|PARTIAL|IDENTIFY|HEAD|INSTANTIATE|MAP|DERIVE|ARGUE|VERIFY)\s*(?:[-—–:/]|\()\s*(PARKED|FROZEN|DEFERRED)\b"
+                                lead)
+                               second)
         prefix? (fn [coll] (some #(str/starts-with? head %) coll))]
     (cond
       (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")            :draft
       (= "DRAFT" head)                                                  :draft
       ;; Finding-2 (E-live-loop-3): prefix match catches compound forms
       ;; like SUPERSEDED-AS-MISSION that the old exact-match missed.
-      (prefix? #{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"}) :inactive
+      held-qualifier                                                   :inactive
+      (prefix? #{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"
+                 "FROZEN"})                                           :inactive
       (prefix? #{"COMPLETE" "COMPLETED" "CLOSED" "DONE" "DISCHARGED"
                  "ANSWERED" "DISSOLVED"})                                :complete
       (= "ACTIVE" head)                                                 :active

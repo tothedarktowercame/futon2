@@ -233,6 +233,26 @@
     (is (contains? open-ids "M-map-lead-draft"))
     (is (not (contains? open-ids "M-really-complete")))))
 
+(deftest explicit-held-qualifier-overrides-live-lead-test
+  ;; An attached lifecycle qualifier describes the mission as a whole.  This is
+  ;; distinct from later prose about a deferred sub-phase and from an ordinary
+  ;; descriptive OPEN suffix such as "awaiting Joe verbatims".
+  (write-primary-mission! "futon0/holes/missions/M-open-parked.md"
+                          "**Status:** OPEN — parked\n# Parked\n")
+  (write-primary-mission! "futon0/holes/missions/M-active-frozen.md"
+                          "**Status:** ACTIVE / frozen\n# Frozen\n")
+  (write-primary-mission! "futon0/holes/missions/M-open-description.md"
+                          "**Status:** OPEN — work continues\n# Live\n")
+  (let [loaded (mr/load-missions *tmpdir*)
+        by-id (into {} (map (juxt :id :status-class) (:missions loaded)))
+        open-ids (set (map :id (mr/open-missions loaded)))]
+    (is (= :inactive (get by-id "M-open-parked")))
+    (is (= :inactive (get by-id "M-active-frozen")))
+    (is (= :open (get by-id "M-open-description")))
+    (is (not (contains? open-ids "M-open-parked")))
+    (is (not (contains? open-ids "M-active-frozen")))
+    (is (contains? open-ids "M-open-description"))))
+
 (deftest finding-2-compound-superseded-status-classifies-inactive
   "Finding-2 (E-live-loop-3): SUPERSEDED-AS-MISSION must classify as :inactive.
    The old exact-match missed compound forms; prefix matching catches them."
