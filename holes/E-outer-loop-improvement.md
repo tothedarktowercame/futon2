@@ -233,6 +233,14 @@ not permission to weaken or bypass the other three.
   159 assertions. This condition remains unchecked until exact injury-to-
   capability matching is demonstrated through the same constructed field.
 
+  Review finding 2026-10-02: `8ef8c37fb` added exact keyword matching, but its
+  claimed real-injury fixture pins a test-constructed injury map to the bytes
+  of `futon3/library/meta/meta-outer-policy-cascade.edn`. Those bytes specify
+  the policy; they do not observe an injured machine. Repeating that pin as
+  expected authority proves equality only. The condition therefore remains
+  open pending a reconstructively verified injury observation derived from
+  retained debugger/run-record evidence.
+
 **DERIVE exit: Not met.** Joe approved `A-self-heal` on 2026-10-02, allowing
 the fourth condition's catalog work to proceed.  The other three conditions,
 and the click-availability portion of the fourth, remain to be demonstrated.
