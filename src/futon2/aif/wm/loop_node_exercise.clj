@@ -60,3 +60,21 @@
      :status (if (zero? (get counts :refused 0)) :complete :incomplete)
      :by-node by-node
      :counts (merge {:present 0 :refused 0} counts)}))
+
+(defn require-complete!
+  "Return DECISION only when every required selection node was exercised.
+  Otherwise throw inside the caller's restartable selection phase. This is a
+  launch gate, not a post-run annotation: author/reviewer work must not begin
+  for a decision already known to be incapable of demonstrating its declared
+  machinery."
+  [decision]
+  (let [r (receipt decision)
+        refused (->> (:by-node r) vals (filter #(= :refused (:status %))) vec)]
+    (when (seq refused)
+      (throw (ex-info "Required loop nodes were not exercised by selection"
+                      {:outcome :selection-validation-failed
+                       :failure-kind :required-loop-node-unexercised
+                       :failure-stage :selection
+                       :receipt r
+                       :refused refused})))
+    decision))

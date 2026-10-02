@@ -5469,7 +5469,10 @@
                                   (assoc @effective-configuration :evaluation :not-retained)))
                     ;; RULING-selection-precedence-2026-09-19.md: ordinary clicks
                     ;; always select; repair memory is evidence, never a divert.
-                    judgement ((or (:judgement-transform-fn opts) identity) judgement)]
+                    judgement ((or (:judgement-transform-fn opts) identity) judgement)
+                    _ (when (or (:require-loop-node-exercise? opts)
+                                (get *runtime-defaults* :require-loop-node-exercise?))
+                        (loop-node-exercise/require-complete! (:decision judgement)))]
                 (when-let [state (:scan-report/state opts)]
                   ;; Capture exactly the judgement used below, never rescan.
                   (reset! state (assoc (or (:render-data generated) (:data generated))
@@ -5537,7 +5540,10 @@
               (try
                 (let [generated (selection-judge window-days)
                       j ((or (:judgement-transform-fn opts) identity)
-                         (:judgement generated))]
+                         (:judgement generated))
+                      _ (when (or (:require-loop-node-exercise? opts)
+                                  (get *runtime-defaults* :require-loop-node-exercise?))
+                          (loop-node-exercise/require-complete! (:decision j)))]
                   (reset! effective-configuration
                           (or (:effective-run-configuration j)
                               (assoc @effective-configuration :evaluation :not-retained)))

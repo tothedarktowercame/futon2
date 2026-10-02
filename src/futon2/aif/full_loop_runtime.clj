@@ -37,6 +37,10 @@
      (cascade-revision-producer/make-proposals-fn
       {:judgment-fn #(deref selected-judgment)})
      :refresh-required? true
+     ;; Stop before dispatch when a selection merely names machinery that this
+     ;; click did not exercise. The stop is inside the restartable selection
+     ;; phase, so a hot repair followed by :retry reruns the decision.
+     :require-loop-node-exercise? true
      :refresh-fn (fn []
                    (let [mission-freshness (mission-registry/refresh-mission-substrate!)]
                      (cv/maybe-refresh!)

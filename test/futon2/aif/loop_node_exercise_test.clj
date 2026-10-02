@@ -23,13 +23,24 @@
     (is (every? #(= :present (:status %)) (vals (:by-node r))))))
 
 (deftest singleton-click-does-not-claim-temperature-or-temporal-depth
-  (let [r (exercise/receipt
-           {:abstention {:status :not-abstained}
-            :selection-certificate
-            {:candidates [{:policy {:target "M-x" :precedence [:p]}
-                           :computed-f {:model {:kind :class-emission :horizon 4}}}]
-             :policies [{:id :C1}]}})]
+  (let [decision {:abstention {:status :not-abstained}
+                  :selection-certificate
+                  {:candidates [{:policy {:target "M-x" :precedence [:p]}
+                                 :computed-f {:model {:kind :class-emission :horizon 4}}}]
+                   :policies [{:id :C1}]}}
+        r (exercise/receipt decision)]
     (is (= :refused (get-in r [:by-node :R6 :status])))
     (is (= :refused (get-in r [:by-node :CTAU-CLASS :status])))
     (is (= :refused (get-in r [:by-node :R13 :status])))
-    (is (= :refused (get-in r [:by-node :R14 :status])))))
+    (is (= :refused (get-in r [:by-node :R14 :status])))
+    (try
+      (exercise/require-complete! decision)
+      (is false "singleton selection must stop before dispatch")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :required-loop-node-unexercised
+               (:failure-kind (ex-data e))))
+        (is (= #{:R6 :R13 :R14 :CTAU-CLASS}
+               (set (map :node (:refused (ex-data e))))))))))
+
+(deftest complete-exercise-crosses-the-launch-gate
+  (is (identical? exercised (exercise/require-complete! exercised))))
