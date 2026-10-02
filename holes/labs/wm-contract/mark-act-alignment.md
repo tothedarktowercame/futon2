@@ -4,7 +4,7 @@
 `mark_act_alignment.bb` (this directory), which reads three sources and edits
 none of them:
 
-- `wm-click-acts.edn` (futon2 bcabec982): each click act's stage, R-node and
+- `wm-click-acts.edn` (futon2 40d741321): each click act's stage, R-node and
   `:nearest-intent`. This is the alignment followed: a mark sits where the acts
   naming it as their nearest intent sit.
 - futon3c `emacs/xiaoxiang-preview.el` `xiaoxiang-mark-keys` (futon3c 0c0cbfa1):
@@ -118,7 +118,7 @@ it does not mean the step is recorded with the mark.
 | 🈹 retract | R3 | reverse a belief | same site | not established: nothing found that tells a reversal apart from any other update |
 | ㊫ explore | R4 | roll a policy forward to see what it would lead to | `src/futon2/aif/forward_model.clj:308` `predict-multi-horizon`, called at `src/futon2/aif/efe.clj:644` when the horizon is 2 or more | supported in code; whether live clicks take the horizon-2 branch was not checked |
 | 🈕 extend | R17 | add structure to the model | `aif-equations.edn` `:a-conc` is `:realised false` ("no tick has accumulated live on any route"); the running R17 step is Bayesian model reduction, which removes structure | not supported |
-| 🈝 defer | R6 | stop without selecting | the click act `abstain` (above) | supported, and it is already a click act with no intent |
+| 🈝 defer | R6 | stop without selecting | the click act `abstain` (above) | supported; now tagged :defer as a click act (40d741321) |
 | 🈯 clarify | — | investigate a thing's properties instead of asking | the outward version is the click act `request-interpretation`; no inward site found | not established |
 
 Still with no counterpart, outward or inward: 🈖 explain, ㊣ approve,
