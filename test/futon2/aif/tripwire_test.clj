@@ -7,6 +7,7 @@
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.registered-run-telemetry :as telemetry]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
            [java.time Instant]))
@@ -442,12 +443,17 @@
   (let [finding (atom nil)
         park (atom nil)
         bell (atom nil)
+        ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :run-id "run-trip" :click-id "click-trip"
+              :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-summon.edn")
               :tripwire/repair-record-fn #(reset! finding %)
               :tripwire/roster-fn (fn [_] #{"claude-6" "codex-7"})
               :tripwire/park-fn (fn [_ payload] (reset! park payload))
-              :tripwire/bell-fn (fn [_ payload] (reset! bell payload))}]
+              :tripwire/bell-fn (fn [_ payload]
+                                  (reset! bell payload)
+                                  {:accepted true :job-id "trip-job"})}]
     (halted! opts (synthetic-trip-record))
     (is (= :invariant-tripped (:failure-kind @finding)))
     (is (= {:agent "claude-6" :surface "emacs-repl" :mode :background}
@@ -455,16 +461,31 @@
     (is (= 1 (count (:awaiting @park))))
     (is (str/ends-with? (first (:awaiting @park)) "-investigation"))
     (is (= "claude-6" (:agent-id @bell)))
+    (is (= {:kind :war-machine :basis :producer-context
+            :execution-id "run-trip" :source-ref "click-trip"}
+           (:harness @bell)))
+    (is (= :typed-missing
+           (:status (telemetry/model-usage ledger {:run-id "run-trip"
+                                                   :click-id "click-trip"}))))
+    (is (= :terminal-receipt-missing
+           (get-in (telemetry/model-usage ledger {:run-id "run-trip"
+                                                  :click-id "click-trip"})
+                   [:jobs 0 :reason])))
     (is (re-find #"investigate then discharge or revise the wire"
                  (:prompt @bell)))))
 
 (deftest summon-roster-accepts-real-agents-map-shape
   (let [effects (atom [])
+        ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :run-id "run-roster" :click-id "click-roster"
+              :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-real-roster.edn")
               :tripwire/repair-record-fn (fn [_] (swap! effects conj :repair))
               :tripwire/park-fn (fn [& _] (swap! effects conj :park))
-              :tripwire/bell-fn (fn [& _] (swap! effects conj :bell))}]
+              :tripwire/bell-fn (fn [& _]
+                                  (swap! effects conj :bell)
+                                  {:accepted true :job-id "roster-job"})}]
     (with-redefs [http/get
                   (fn [& _]
                     {:status 200
@@ -478,7 +499,10 @@
   (let [record (synthetic-trip-record)
         effects (atom [])
         err (java.io.StringWriter.)
+        ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :run-id "run-bell-fail" :click-id "click-bell-fail"
+              :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-degraded.edn")
               :tripwire/repair-record-fn
               (fn [_] (throw (ex-info "repair store unavailable" {})))
@@ -515,7 +539,10 @@
   (let [record (synthetic-trip-record)
         effects (atom [])
         err (java.io.StringWriter.)
+        ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :run-id "run-bell-fail" :click-id "click-bell-fail"
+              :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-bell-fail.edn")
               :tripwire/repair-record-fn
               (fn [_] (swap! effects conj :repair))
@@ -528,6 +555,45 @@
       (halted! opts record))
     (is (= [:repair :park :bell] @effects))
     (is (str/includes? (str err) "degraded to :stop-line"))))
+
+(deftest tripwire-bell-ledger-refuses-missing-duplicate-and-wrong-join
+  (let [payload {:agent-id "claude-6" :caller "wm-full-loop"
+                 :mission-id "M-wm-tripwires-investigation"}
+        missing (try (#'tripwire/post-bell! {} payload)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :wm-tripwire-telemetry-context-missing (:failure-kind missing))))
+  (let [ledger (atom {:order [] :jobs {}})
+        opts {:run-id "run-trip" :click-id "click-trip"
+              :registered-run/job-ledger ledger
+              :tripwire/bell-fn (fn [& _] {:accepted true :job-id "trip-job"})}
+        payload {:agent-id "claude-6" :caller "wm-full-loop"
+                 :mission-id "M-wm-tripwires-investigation"}]
+    (#'tripwire/post-bell! opts payload)
+    (is (= :wm-job-ledger-duplicate-job
+           (try (#'tripwire/post-bell! opts payload)
+                nil
+                (catch clojure.lang.ExceptionInfo e (:failure-kind (ex-data e))))))
+    (telemetry/retain-terminal-job!
+     ledger {:job-id "trip-job" :state "done"
+             :harness {:kind :war-machine :basis :producer-context
+                       :execution-id "wrong-run" :source-ref "click-trip"}
+             :usage {:input_tokens 1 :output_tokens 2 :total_tokens 3}})
+    (is (= :run-click-job-join-mismatch
+           (get-in (telemetry/model-usage ledger {:run-id "run-trip"
+                                                  :click-id "click-trip"})
+                   [:jobs 0 :reason])))))
+
+(deftest wm-agency-bell-call-sites-are-a-closed-enumerated-set
+  (let [root (io/file "src/futon2/aif")
+        paths (->> (file-seq root)
+                   (filter #(.isFile %))
+                   (filter #(str/includes? (slurp %) "/api/alpha/bell"))
+                   (map #(.getPath %))
+                   set)]
+    (is (= #{"src/futon2/aif/full_loop_runner.clj"
+             "src/futon2/aif/tripwire.clj"}
+           paths))))
 
 (deftest t12-is-chartered-disabled-and-inert
   (is (= {:title "four-opportunity zero-grounding target wedge"

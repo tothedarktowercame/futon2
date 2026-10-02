@@ -16,6 +16,7 @@
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.trace :as trace])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
@@ -757,16 +758,35 @@
                  :timeout 10000 :throw false}))))
 
 (defn- post-bell! [opts payload]
-  (if-let [bell-fn (:tripwire/bell-fn opts)]
-    (bell-fn opts payload)
-    (let [body (successful-response!
-                :tripwire-bell
-                (http/post (str (agency-base opts) "/api/alpha/bell")
-                           {:headers {"Content-Type" "application/json"}
-                            :body (json/generate-string payload)
-                            :timeout 10000 :throw false}))]
-      (when-not (:accepted body)
-        (throw (ex-info "Tripwire bell was not accepted" {:response body})))
+  (let [run-id (:run-id opts)
+        click-id (:click-id opts)
+        ledger (:registered-run/job-ledger opts)]
+    (when-not (and (string? run-id) (not (str/blank? run-id))
+                   (string? click-id) (not (str/blank? click-id)) ledger)
+      (throw (ex-info "WM tripwire summon lacks run-local telemetry context"
+                      {:failure-kind :wm-tripwire-telemetry-context-missing
+                       :run-id run-id :click-id click-id})))
+    (let [payload (assoc payload :harness {:kind :war-machine
+                                           :basis :producer-context
+                                           :execution-id run-id
+                                           :source-ref click-id})
+          body (if-let [bell-fn (:tripwire/bell-fn opts)]
+                 (bell-fn opts payload)
+                 (successful-response!
+                  :tripwire-bell
+                  (http/post (str (agency-base opts) "/api/alpha/bell")
+                             {:headers {"Content-Type" "application/json"}
+                              :body (json/generate-string payload)
+                              :timeout 10000 :throw false})))]
+      (when-not (and (:accepted body) (string? (:job-id body)))
+        (throw (ex-info "Tripwire bell returned no accountable job"
+                        {:failure-kind :wm-tripwire-job-identity-missing
+                         :response body})))
+      (registered-telemetry/register-job!
+       ledger {:run-id run-id :click-id click-id :job-id (:job-id body)
+               :role {:agent (:agent-id payload) :caller (:caller payload)
+                      :mission (:mission-id payload)}
+               :phase :tripwire-summon})
       body)))
 
 (defn- record-finding! [opts report report-path]
