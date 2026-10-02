@@ -20,6 +20,21 @@
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace [] :mode :maintain})
 
+(def recorded-terminal-abstention
+  {:decision
+   {:status :abstained
+    :refusals [{:target "E-kimi-task-10"
+                :kind :universe-not-admitted
+                :missing :universes}]}})
+
+(def selected-judgement
+  {:decision {:status :selected
+              :selection-law {:applied :cascade-selection-posterior}
+              :action {:id :C1 :target "M-self-documenting-stack"}}})
+
+(defn- terminal-selection-condition [judgement]
+  (runner/selection-terminal-condition :selection judgement))
+
 (defn- wait-for-stop [run-id]
   (loop [remaining 4000]
     (if-let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
@@ -27,6 +42,16 @@
       (if (pos? remaining)
         (do (Thread/sleep 5) (recur (dec remaining)))
         (throw (ex-info "Debugger stop did not appear" {:run-id run-id}))))))
+
+(defn- wait-for-condition [run-id kind]
+  (loop [remaining 4000]
+    (let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
+      (if (= kind (get-in stop [:condition :kind]))
+        stop
+        (if (pos? remaining)
+          (do (Thread/sleep 5) (recur (dec remaining)))
+          (throw (ex-info "Debugger condition did not appear"
+                          {:run-id run-id :kind kind :last-stop stop})))))))
 
 (defn- phase-opts [run-id events]
   {:run-id run-id :phase-log-fn #(swap! events conj %) :phase-events events})
@@ -115,7 +140,11 @@
         (alter-var-root #'repairable-judge
                         (constantly (fn [_] {:judgement repaired-judgement})))
         (debugger/continue! run-id :retry)
-        (let [result (deref running 5000 ::timeout)
+        (let [abstention-stop
+              (wait-for-condition run-id :wm/selection-terminal-abstention)
+              _ (is (= :abstained (get-in abstention-stop [:ex-data :outcome])))
+              _ (debugger/continue! run-id :abort)
+              result (deref running 5000 ::timeout)
               record (when-not (= ::timeout result)
                        (edn/read-string (slurp (:run-record result))))]
           (is (not= ::timeout result))
@@ -166,14 +195,14 @@
                      (phase-opts "typed-refusal" (atom []))
                      {:opportunity-id "op" :attempt-id "attempt"}
                      :selection #(throw refusal))
-                    (catch clojure.lang.ExceptionInfo e e)))]
-    (let [stop (wait-for-stop "typed-refusal")]
-      (is (= :selection (:phase stop)))
-      (is (= :class-unknown-no-scalar-g
-             (get-in stop [:condition :kind])))
-      (debugger/continue! "typed-refusal" :abort)
-      (is (identical? refusal (deref running 2000 ::timeout))
-          "abort preserves the ordinary outer refusal handling"))))
+                    (catch clojure.lang.ExceptionInfo e e)))
+        stop (wait-for-stop "typed-refusal")]
+    (is (= :selection (:phase stop)))
+    (is (= :class-unknown-no-scalar-g
+           (get-in stop [:condition :kind])))
+    (debugger/continue! "typed-refusal" :abort)
+    (is (identical? refusal (deref running 2000 ::timeout))
+        "abort preserves the ordinary outer refusal handling")))
 
 (deftest typed-refusal-retains-ordinary-behaviour-when-detached
   (let [refusal (ex-info "War Machine abstained: cascade decision refused"
@@ -187,3 +216,69 @@
                  (catch clojure.lang.ExceptionInfo e e))]
     (is (identical? refusal caught))
     (is (empty? (debugger/stopped)))))
+
+(deftest recorded-terminal-abstention-stops-with-decision-context
+  (debugger/attach!)
+  (let [running
+        (future
+          (try
+            (runner/run-phase!
+             (phase-opts "recorded-abstention" (atom []))
+             {:opportunity-id "op" :attempt-id "attempt"}
+             :selection (constantly recorded-terminal-abstention)
+             nil terminal-selection-condition)
+            (catch clojure.lang.ExceptionInfo e e)))
+        stop (wait-for-stop "recorded-abstention")]
+    (is (= :wm/selection-terminal-abstention
+           (get-in stop [:condition :kind])))
+    (is (= {:failure-kind :abstained
+            :failure-stage :selection
+            :outcome :abstained
+            :target "E-kimi-task-10"
+            :targets ["E-kimi-task-10"]
+            :refusals [{:target "E-kimi-task-10"
+                        :kind :universe-not-admitted
+                        :missing :universes}]
+            :decision (:decision recorded-terminal-abstention)}
+           (select-keys (:ex-data stop)
+                        [:failure-kind :failure-stage :outcome :target
+                         :targets :refusals :decision])))
+    (debugger/continue! "recorded-abstention" :abort)
+    (let [aborted (deref running 2000 ::timeout)]
+      (is (instance? clojure.lang.ExceptionInfo aborted))
+      (is (= :abstained (:outcome (ex-data aborted)))))))
+
+(deftest recorded-terminal-abstention-is-unchanged-when-detached
+  (let [events (atom [])
+        result (runner/run-phase!
+                (phase-opts "detached-recorded-abstention" events)
+                {:opportunity-id "op" :attempt-id "attempt"}
+                :selection (constantly recorded-terminal-abstention)
+                nil terminal-selection-condition)]
+    (is (identical? recorded-terminal-abstention result))
+    (is (= :ok (:outcome (last @events))))
+    (is (empty? (debugger/stopped)))))
+
+(deftest terminal-abstention-retry-reruns-only-the-same-selection-phase
+  (debugger/attach!)
+  (let [calls (atom 0)
+        events (atom [])
+        running
+        (future
+          (runner/run-phase!
+           (phase-opts "abstention-retry" events)
+           {:opportunity-id "op" :attempt-id "same-attempt"}
+           :selection
+           #(if (= 1 (swap! calls inc))
+              recorded-terminal-abstention
+              selected-judgement)
+           nil terminal-selection-condition))
+        stop (wait-for-stop "abstention-retry")]
+    (is (= {:attempt-id "same-attempt" :phase :selection}
+           (select-keys stop [:attempt-id :phase])))
+    (debugger/continue! "abstention-retry" :retry)
+    (is (= selected-judgement (deref running 2000 ::timeout)))
+    (is (= 2 @calls))
+    (is (= [[:selection :start] [:selection :end]
+            [:selection :start] [:selection :end]]
+           (mapv (juxt :phase :transition) (take-nth 2 @events))))))

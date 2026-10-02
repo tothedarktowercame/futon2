@@ -349,11 +349,15 @@
       (swap! events conj record))
     record))
 
+(declare selection-terminal-condition)
+
 (defn run-phase!
   "Run thunk with start/end telemetry; errors are logged and rethrown."
   ([opts context phase thunk]
    (run-phase! opts context phase thunk nil))
   ([opts context phase thunk result->event]
+   (run-phase! opts context phase thunk result->event nil))
+  ([opts context phase thunk result->event result->debugger-condition]
    (loop []
      (let [nano-time (or (:nano-time-fn opts) #(System/nanoTime))
            started (nano-time)
@@ -361,6 +365,10 @@
            attempt
            (try
              (let [result (thunk)
+                   condition (when (and result->debugger-condition
+                                        (debugger/attached?))
+                               (result->debugger-condition result))
+                   _ (when condition (throw condition))
                    detail (if result->event (or (result->event result) {}) {})]
                (emit-phase! opts context
                             (merge {:phase phase :transition :end :outcome :ok
@@ -1663,6 +1671,30 @@
          ;; the trial configuration and the dedup key).
          :enacted-steps (get-in decision [:selection-law :enacted-steps])})
       :else nil)))
+
+(defn selection-terminal-condition
+  "Return the debugger condition for a completed selection result that chose
+  no addressable action.  This is only called by run-phase! while the restart
+  debugger is attached; detached selection never evaluates this projection."
+  ([phase judgement]
+   (selection-terminal-condition phase judgement nil))
+  ([phase judgement context]
+   (when-not (selected-entry judgement)
+     (let [decision (:decision judgement)
+           refusals (vec (or (:refusals decision) []))
+           targets (vec (keep :target refusals))
+           outcome (if (= :abstained (:status decision))
+                     :abstained :no-selection)]
+       (ex-info "War Machine selection produced no addressable action"
+                (cond-> {:kind :wm/selection-terminal-abstention
+                         :failure-kind outcome
+                         :failure-stage phase
+                         :outcome outcome
+                         :decision decision
+                         :refusals refusals
+                         :targets targets}
+                  (= 1 (count targets)) (assoc :target (first targets))
+                  (seq context) (assoc :selection-context context)))))))
 
 ;; resolve-pinned-selection and pinned-refusal! (RUN4) RETIRED with the flat
 ;; decision (SPEC flat-removal H4, 2026-09-17): they validated a pinned flat
@@ -5499,6 +5531,8 @@
                                         :target target
                                         :interpretation-ask ask-record})
                                 e))))
+            interpretation-ask-fn (or (:interpretation-ask-fn opts)
+                                      (get *runtime-defaults* :interpretation-ask-fn))
             judgement0-base
             (try
             (run-phase!
@@ -5519,7 +5553,17 @@
                   ;; Capture exactly the judgement used below, never rescan.
                   (reset! state (assoc (or (:render-data generated) (:data generated))
                                        :judgement judgement)))
-                judgement))
+                judgement)
+             nil
+             (fn [judgement]
+               ;; An interpretation ask can still turn these two refusal
+               ;; kinds into a selection in this click, so they are not yet
+               ;; terminal. Every other no-entry result is the selection
+               ;; phase's final answer and must be restartable when attached.
+               (when-not (and interpretation-ask-fn (nil? (:flight opts))
+                              (seq (interpretation-needed-refusals
+                                    (:decision judgement))))
+                 (selection-terminal-condition :selection judgement))))
               (catch clojure.lang.ExceptionInfo e
                 ;; WM-CLICK-REFUSAL-I: a typed refusal of the cascade decision
                 ;; is the tick's abstention (as an abstained judgement is,
@@ -5534,8 +5578,6 @@
             ;; ask step already asked). The ask-fn comes from the runner
             ;; opts (tests stub it) or the composition root
             ;; (full-loop-runtime installs wm.click-ask/click-ask-fn).
-            interpretation-ask-fn (or (:interpretation-ask-fn opts)
-                                      (get *runtime-defaults* :interpretation-ask-fn))
             interpretation-ask-selection
             ;; the classifier does a fresh focus read: build it only when
             ;; there is a refusal to ask about, not on every click
@@ -5594,7 +5636,11 @@
                     (when-let [state (:scan-report/state opts)]
                       (reset! state (assoc (or (:render-data generated) (:data generated))
                                            :judgement j)))
-                    j))
+                    j)
+                 nil
+                 #(selection-terminal-condition
+                   :selection-redecision %
+                   {:interpretation-ask interpretation-ask-record}))
                 (catch clojure.lang.ExceptionInfo e
                   (let [target (get-in opts [:flight :target])]
                     (if (or (judge-refusal e target)
