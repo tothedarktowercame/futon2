@@ -21,8 +21,8 @@ at those shas.
 |---|---|---|---|---|
 | ㊩ | report-problem | PERCEIVE | queue-failure-brief R16 ACT | acts at ACT |
 | 🈖 | explain | PERCEIVE | - | no click act |
-| ㊢ | report | PERCEIVE | publish-selection-trace TRACE ACT | acts at ACT |
-| 🈯 | clarify | BELIEVE | request-interpretation R7 PERCEIVE (registry: BELIEVE) | acts at PERCEIVE |
+| ㊢ | report | PERCEIVE | publish-selection-trace TRACE ACT; record-run-receipt TRACE ACT | acts at ACT |
+| 🈯 | clarify | BELIEVE | request-interpretation R7 BELIEVE | same stage |
 | ㊟ | qualify | BELIEVE | - | no click act |
 | ㊣ | approve | BELIEVE | - | no click act |
 | 🈚 | disagree | BELIEVE | - | no click act |
@@ -34,7 +34,7 @@ at those shas.
 | ㊭ | propose | SELECT | construct-cascade R13 SELECT | same stage |
 | ㊝ | prioritize | SELECT | select-policy R6 SELECT | same stage |
 | 🈘 | redirect | SELECT | repair-machine-failure R17 SELECT | same stage |
-| 🈝 | defer | SELECT | - | no click act |
+| 🈝 | defer | SELECT | abstain R6 SELECT | same stage |
 | ㊯ | delegate | SELECT | dispatch-author R16 ACT | acts at ACT |
 | 🈡 | withdraw | SELECT | - | no click act |
 | 🈸 | ask-action | ACT | - | no click act |
@@ -43,8 +43,8 @@ at those shas.
 | ㊥ | gist | ANNOTATOR | - | no click act |
 | 🈳 | unresolved | ANNOTATOR | - | no click act |
 
-Click acts with no nearest intent: observe-world (R2 PERCEIVE), abstain
-(R6 SELECT), refresh-preferences (R3 BELIEVE), record-run-receipt (TRACE ACT).
+Click acts with no nearest intent: observe-world (R2 PERCEIVE) and
+refresh-preferences (R3 BELIEVE).
 
 Nodes no click act is tagged with:
 - PERCEIVE: R8 present-fit mismatch, R10 scheduled entrypoint, R19 mission preference
@@ -54,7 +54,7 @@ Nodes no click act is tagged with:
 
 ## Reading
 
-**Nine of the 23 marks have a click act; five of those sit at the same stage
+**Eleven of the 23 marks have a click act; seven of those sit at the same stage
 in both sources.** propose, prioritize and redirect are SELECT on both sides;
 continue and verify are ACT on both sides.
 
@@ -65,12 +65,11 @@ trace or queueing a brief is something the machine does. Delegate is the same:
 the menu files it under SELECT (choosing who), the machine's dispatch-author
 is ACT. Following the acts file, an agent tool for ㊢, ㊩ or ㊯ is an ACT.
 
-**Clarify is the one disagreement that is a defect, not a point of view.**
-request-interpretation is tagged `:loop/stage :PERCEIVE :control/r-node :R7`,
-but the registry puts R7 in BELIEVE, and the menu also puts clarify in
-BELIEVE. Either the stage or the node in `wm-click-acts.edn` is wrong.
+**Clarify is BELIEVE on both sides.** request-interpretation publishes an
+interpretation that feeds the same click's selection re-decision, so the act
+is now tagged R7/BELIEVE rather than PERCEIVE.
 
-**Fourteen marks have no click act (the audit).**
+**Twelve marks have no click act (the audit).**
 - EVALUATE is empty on both sides: no click act sits at EVALUATE, and none of
   constrain, extend, explore names one. The machine's evaluation (R4, R5, the
   two C_tau nodes) is computed inside a step and never emitted as an act.
@@ -82,15 +81,12 @@ BELIEVE. Either the stage or the node in `wm-click-acts.edn` is wrong.
 - ask-action has no act. The machine's one operator-addressed question,
   request-interpretation, is filed as clarify, which fits: it asks for an
   interpretation, not for an action to be taken.
-- defer and withdraw have no act. abstain (no intent) is a candidate for defer
-  at the same stage; nothing in the click withdraws an earlier act.
+- withdraw has no act. abstain is tagged defer at the same SELECT stage;
+  nothing in the click withdraws an earlier act.
 - explain, gist and unresolved have no act.
 
-**Candidates for the four acts with no intent** (proposals, not edits to the
-acts file): record-run-receipt → ㊢ report, by analogy with
-publish-selection-trace, which also writes TRACE; abstain → 🈝 defer, same
-stage. observe-world and refresh-preferences read rather than say, and `:none`
-looks right for them.
+**The two acts with no intent** are observe-world and refresh-preferences.
+Both read rather than say, so `:none` remains appropriate.
 
 ## 🈸 outside the click: the morning brief
 

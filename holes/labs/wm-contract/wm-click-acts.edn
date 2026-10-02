@@ -36,7 +36,7 @@
    :emitted-at {:ns "futon2.aif.full-loop-runner" :fn "run-opportunity-core!"
                 :file "src/futon2/aif/full_loop_runner.clj" :line 5449}
    :receipt-paths [[:interpretation-ask]]
-   :loop/stage :PERCEIVE :control/r-node :R7
+   :loop/stage :BELIEVE :control/r-node :R7
    :nearest-intent :clarify :operator-addressed? true}
 
   {:act/id :wm.act/abstain
@@ -45,7 +45,7 @@
                 :file "src/futon2/aif/full_loop_runner.clj" :line 5402}
    :receipt-paths [[:decision :abstention] [:terminal-receipt] [:failure]]
    :loop/stage :SELECT :control/r-node :R6
-   :nearest-intent :none :operator-addressed? false}
+   :nearest-intent :defer :operator-addressed? false}
 
   {:act/id :wm.act/construct-cascade
    :description "Materialize the selected cascade's precedence, interpretation receipts, and enactable action."
@@ -130,11 +130,10 @@
                 :file "src/futon2/aif/full_loop_runner.clj" :line 766}
    :receipt-paths [[:run/id] [:registered-run/timing] [:terminal-receipt]]
    :loop/stage :ACT :control/r-node :TRACE
-   :nearest-intent :none :operator-addressed? false}]
+   :nearest-intent :report :operator-addressed? false}]
  :known-non-click-acts
  [{:act/id :wm.act/emit-futility-nag
    :reason "lane_futility/dry-run-bulletins emits only :dry-run? true records today; it is not claimed as a live click act."
    :source {:file "src/futon2/aif/lane_futility.clj" :line 317}}
   {:act/id :wm.act/emit-brief-or-silent
    :reason "nag/brief/silent presentation exists in reporting and bulletin paths, but no current full-loop click emission site records those three as a click act."}]}
-
