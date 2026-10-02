@@ -1,7 +1,8 @@
 (ns futon2.aif.meta-adapter-discovery-test
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-adapter-discovery :as discovery]
-            [futon2.aif.meta-field-observation :as field]))
+            [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.meta-policy-constructor :as constructor]))
 
 (def texts
   {"/code/repo/holes/M-one.md"
@@ -59,6 +60,27 @@
     (is (= :no-current-false-checkable-want
            (:reason (first (:exclusions receipt)))))
     (is (= :verified (:status (discovery/verify receipt authority))))))
+
+(deftest discovered-current-wants-join-to-advance-not-unblock
+  (let [source-authority (fixture-input)
+        discovered (discovery/discover source-authority)
+        resources {:time-budget-ms 1000 :token-budget 100
+                   :author-seat "author" :reviewer-seat "reviewer"}
+        construction (constructor/construct
+                      {:field-observation (:field-observation source-authority)
+                       :expected-field-pin (:expected-field-pin source-authority)
+                       :resource-envelope resources
+                       :adapters (:adapters discovered)})
+        moves (into {} (map (fn [template]
+                              [(get-in template [:slots :target])
+                               (get-in template [:slots :next-move])]))
+                    (:templates construction))]
+    (is (= {"E-one" :advance "M-one" :advance} moves)
+        "unchecked checkbox and unmet verdict criterion are actionable")
+    (is (= ["T-one"] (mapv :id (:exclusions construction)))
+        "prose with no checkable locator remains excluded")
+    (is (= :evidence-channel-unavailable
+           (get-in construction [:exclusions 0 :reason])))))
 
 (deftest drift-and-authority-mutations-refuse
   (let [authority (fixture-input)

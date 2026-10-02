@@ -117,9 +117,11 @@
                   (let [chosen (first false-observations)]
                     (recur (next rows)
                            (conj adapters
-                                 {:id (:id row) :kind (:kind row) :source (:source row)
+                                  {:id (:id row) :kind (:kind row) :source (:source row)
                                   :adapter :canonical-document-wants
-                                  :next-step :observe
+                                  ;; A current false C4 is actionable remaining
+                                  ;; work. It is not blocker evidence.
+                                  :next-move :advance
                                   :stopping-rule :grounded-progress
                                   :locator (:locator chosen)
                                   :evidence {:ordering ordering :chosen-token (:token chosen)

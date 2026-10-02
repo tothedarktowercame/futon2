@@ -27,7 +27,7 @@
 (defn- next-move [kind adapter]
   (or (:next-move adapter)
       (when (ordinary-kinds kind)
-        (if (= :ready (:next-step adapter)) :advance :unblock))
+        (when (= :ready (:next-step adapter)) :advance))
       (when (= :algorithm kind) :run-algorithm)))
 
 (defn- permitted-next-move? [kind move]

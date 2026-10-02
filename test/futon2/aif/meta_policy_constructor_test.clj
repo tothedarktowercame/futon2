@@ -32,8 +32,9 @@
      :adapters [(adapter (rows "M-one") :ready
                          {:class :C4 :repo "repo" :path "M-one.md" :decl "criterion-1"})
                 (adapter (rows "E-one") :read-criteria nil)
-                (adapter (rows "T-one") :observe
-                         {:kind :registered-run :id "ticket-observation"})]}))
+                (assoc (adapter (rows "T-one") :observe
+                                {:kind :registered-run :id "ticket-observation"})
+                       :next-move :advance)]}))
 
 (deftest constructs-or-excludes-every-verified-field-row
   (let [base (input)
@@ -47,7 +48,7 @@
             :excluded-by-kind {:excursion 1}}
            (:counts receipt)))
     (is (= :advance (get-in templates ["M-one" :slots :next-move])))
-    (is (= :unblock (get-in templates ["T-one" :slots :next-move])))
+    (is (= :advance (get-in templates ["T-one" :slots :next-move])))
     (is (= resources (get-in templates ["M-one" :slots :resource-envelope])))
     (is (nil? (:g-input (templates "M-one")))
         "construction does not invent model terms")
@@ -138,3 +139,10 @@
            (:reason (constructor/construct
                      (update base :adapters conj
                              {:id "T-phantom" :source (pin "T-phantom" "4")})))))))
+
+(deftest nonready-next-step-does-not-imply-a-blocker
+  (let [base (input)
+        receipt (constructor/construct (update-in base [:adapters 2] dissoc :next-move))]
+    (is (not (some #(= "T-one" (get-in % [:slots :target])) (:templates receipt))))
+    (is (= :evidence-channel-unavailable
+           (:reason (some #(when (= "T-one" (:id %)) %) (:exclusions receipt)))))))
