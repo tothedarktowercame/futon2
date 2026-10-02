@@ -1910,8 +1910,17 @@
     enum-complete/*enumeration-assert?*
     (assoc-in [:decision :enumeration-completeness]
               (try
-                (enum-complete/completeness-record
-                 (get-in result [:decision :controller-ranking]))
+                (let [decision (:decision result)
+                      ;; `:controller-ranking` is the retired carrier.  Live
+                      ;; cascade policies are retained in the selection
+                      ;; certificate; an empty legacy vector must not mask
+                      ;; them and turn one constructed policy into zero.
+                      candidates (or (seq (:controller-ranking decision))
+                                     (get-in decision
+                                             [:selection-certificate
+                                              :candidates])
+                                     [])]
+                  (enum-complete/completeness-record candidates))
                 (catch Throwable e
                   {:version :enumeration-completeness/v1
                    :verdict :refused

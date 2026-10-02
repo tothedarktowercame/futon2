@@ -277,21 +277,43 @@
 ;; The comparison
 ;; ---------------------------------------------------------------------------
 
+(defn- target-kind [target]
+  (let [target (if (keyword? target) (name target) (str target))]
+    (cond
+      (str/starts-with? target "M-") :mission
+      (str/starts-with? target "E-") :excursion
+      (str/starts-with? target "T-") :ticket)))
+
+(defn- candidate-target
+  "Return CANDIDATE's target when it belongs to KIND.
+
+   Supports both the retired controller-ranking action shape and the live
+   scored-cascade shape.  The latter carries its action below
+   `:f-prefix/:policy`; requiring the target prefix prevents one live policy
+   from being counted in all three populations."
+  [kind candidate]
+  (let [action (or (:action candidate) candidate)
+        legacy-target (:target action)
+        live-target (or (get-in candidate [:f-prefix :policy :target])
+                        (get-in candidate [:policy :target]))
+        types (:candidate-types (get kinds kind))]
+    (cond
+      (and legacy-target (contains? types (:type action))) legacy-target
+      (= kind (target-kind live-target)) live-target)))
+
 (defn enumerated-targets
   "The targets a tick enumerated for KIND, read off recorded candidates.
 
-   CANDIDATES is any sequence carrying `{:action {:type _ :target _}}` (a
-   record's `:controller-ranking` or `:ranked-actions`) or the bare
-   `{:type _ :target _}` action maps the proposers emit."
+   CANDIDATES may carry the retired `{:action {:type _ :target _}}` ranking
+   shape, bare proposer actions, or live scored cascade candidates whose
+   policy is under `:f-prefix`."
   [kind candidates]
-  (let [types (:candidate-types (get kinds kind))]
-    (->> candidates
-         (map #(or (:action %) %))
-         (filter #(contains? types (:type %)))
-         (map #(let [t (:target %)] (if (keyword? t) (name t) (str t))))
-         distinct
-         sort
-         vec)))
+  (->> candidates
+       (keep #(candidate-target kind %))
+       (map #(if (keyword? %) (name %) (str %)))
+       distinct
+       sort
+       vec))
 
 (defn compare-kind
   "Compare one kind's scanned population with what a tick enumerated.

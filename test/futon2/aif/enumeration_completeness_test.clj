@@ -73,6 +73,20 @@
       (is (= :incomplete (:verdict c)))
       (is (= [(last ids)] (:missing c))))))
 
+(deftest live-cascade-candidate-is-counted-test
+  (testing "the production selection-certificate shape is an enumeration
+            carrier, without counting its target under the wrong kind"
+    (mission! "repo-a" "M-live" "ACTIVE")
+    (let [candidate {:f-prefix
+                     {:policy {:kind :cascade-candidate :id :C1
+                               :target "M-live"}}}
+          mission (mission-compare [candidate])]
+      (is (= ["M-live"] (ec/enumerated-targets :mission [candidate])))
+      (is (= [] (ec/enumerated-targets :excursion [candidate])))
+      (is (= [] (ec/enumerated-targets :ticket [candidate])))
+      (is (= :complete (:verdict mission)))
+      (is (= 1 (:enumerated-count mission))))))
+
 (deftest phantom-candidate-is-refused-test
   (testing "a candidate for a mission with no doc is a phantom, not coverage"
     (let [ids [(mission! "repo-a" "M-real" "ACTIVE")]
