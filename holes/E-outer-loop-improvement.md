@@ -225,6 +225,14 @@ not permission to weaken or bypass the other three.
   becomes selectable.  With no click available it is excluded with a typed
   resource reason; approval alone must not fabricate an executable policy.
 
+  Checkpoint 2026-10-02: resource admission is implemented by futon3c
+  `db19d4cf5` and futon2 `ca375699a`. A locked, non-consuming, source-pinned
+  availability receipt admits `A-self-heal` only with at least one ordinary
+  click and otherwise records `:algorithm/click-resource-unavailable`.
+  Independent review reran 8 Futon2 tests / 53 assertions and 5 Futon3c tests /
+  159 assertions. This condition remains unchecked until exact injury-to-
+  capability matching is demonstrated through the same constructed field.
+
 **DERIVE exit: Not met.** Joe approved `A-self-heal` on 2026-10-02, allowing
 the fourth condition's catalog work to proceed.  The other three conditions,
 and the click-availability portion of the fourth, remain to be demonstrated.
