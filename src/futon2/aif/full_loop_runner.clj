@@ -5538,19 +5538,21 @@
               ;; untyped throw (on a bare sorry cell), selection (on the
               ;; selection cell below).
               (try
-                (let [generated (selection-judge window-days)
-                      j ((or (:judgement-transform-fn opts) identity)
-                         (:judgement generated))
-                      _ (when (or (:require-loop-node-exercise? opts)
-                                  (get *runtime-defaults* :require-loop-node-exercise?))
-                          (loop-node-exercise/require-complete! (:decision j)))]
-                  (reset! effective-configuration
-                          (or (:effective-run-configuration j)
-                              (assoc @effective-configuration :evaluation :not-retained)))
-                  (when-let [state (:scan-report/state opts)]
-                    (reset! state (assoc (or (:render-data generated) (:data generated))
-                                         :judgement j)))
-                  j)
+                (run-phase!
+                 opts @phase-context :selection-redecision
+                 #(let [generated (selection-judge window-days)
+                        j ((or (:judgement-transform-fn opts) identity)
+                           (:judgement generated))
+                        _ (when (or (:require-loop-node-exercise? opts)
+                                    (get *runtime-defaults* :require-loop-node-exercise?))
+                            (loop-node-exercise/require-complete! (:decision j)))]
+                    (reset! effective-configuration
+                            (or (:effective-run-configuration j)
+                                (assoc @effective-configuration :evaluation :not-retained)))
+                    (when-let [state (:scan-report/state opts)]
+                      (reset! state (assoc (or (:render-data generated) (:data generated))
+                                           :judgement j)))
+                    j))
                 (catch clojure.lang.ExceptionInfo e
                   (selection-refusal! e interpretation-ask-record))
                 (catch Throwable e
