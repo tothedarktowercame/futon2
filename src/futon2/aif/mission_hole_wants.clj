@@ -83,7 +83,11 @@
                                       "show" (str "HEAD:" path))]
         (when (zero? exit) {:repo repo :path path :text out})))))
 
-(defn- current-checkboxes [target text]
+(defn current-checkboxes
+  "Unchecked checkbox observations in TEXT, in document order. Public so
+  source-pinned adapters can reuse the same token/line semantics without
+  rereading a mission or copying the parser."
+  [target text]
   (vec (keep-indexed
         (fn [i line]
           (when (re-find #"^[-*]\s+\[\s\]\s+\S" line)

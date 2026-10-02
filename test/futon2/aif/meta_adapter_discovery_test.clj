@@ -1,0 +1,115 @@
+(ns futon2.aif.meta-adapter-discovery-test
+  (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.meta-adapter-discovery :as discovery]
+            [futon2.aif.meta-field-observation :as field]))
+
+(def texts
+  {"/code/repo/holes/M-one.md"
+   "# M-one\n\n**Status:** OPEN\n\n- [ ] First explicit task\n\n## Acceptance\n- Criterion two. **Not started.**\n"
+   "/code/repo/holes/excursions/E-one.md"
+   "# E-one\n\n**Status:** OPEN\n\n## Acceptance\n- Excursion result exists. **Not met.**\n"
+   "/code/repo/holes/tickets/T-one.md"
+   "# T-one\n\n**Status:** OPEN\n\nUnstructured prose is not a checkable want.\n"})
+
+(defn- utf8 [s] (.getBytes s "UTF-8"))
+(defn- row [id path]
+  {:id id :status-class :live :status-line "OPEN"
+   :requisition {:absent :no-requisition}
+   :source {:path path :sha256 (field/sha256 (utf8 (texts path)))}})
+
+(def registry
+  {:missions {:missions [(row "M-one" "/code/repo/holes/M-one.md")]}
+   :excursions {:excursions [(row "E-one" "/code/repo/holes/excursions/E-one.md")]}
+   :tickets {:tickets [(row "T-one" "/code/repo/holes/tickets/T-one.md")]}})
+
+(defn- fixture-input []
+  (let [observation (field/observe {:registry-snapshot registry})]
+    {:field-observation observation :expected-field-pin (:source-pin observation)
+     :code-root "/code"
+     :read-bytes #(utf8 (or (texts %) (throw (java.io.FileNotFoundException. %))))}))
+
+(deftest discovers-canonical-checkbox-and-verdict-locators-once
+  (let [in (fixture-input)
+        reads (atom [])
+        read-bytes (:read-bytes in)
+        authority (assoc in :read-bytes #(do (swap! reads conj %) (read-bytes %)))
+        receipt (discovery/discover authority)
+        by-id (into {} (map (juxt :id identity)) (:adapters receipt))]
+    (is (= :discovered (:status receipt)))
+    (is (= 3 (:read-count receipt)))
+    (is (= 3 (count @reads)))
+    (is (= 3 (count (distinct @reads))) "each admitted source is read once")
+    (is (= {:field 3 :adapters 2 :excluded 1
+            :adapters-by-kind {:excursion 1 :mission 1}
+            :excluded-by-kind {:ticket 1}}
+           (:counts receipt)))
+    (is (= :unchecked-checkbox
+           (get-in by-id ["M-one" :evidence :observations 0 :origin])))
+    (is (= :verdict-aware-criterion
+           (get-in by-id ["M-one" :evidence :observations 1 :origin])))
+    (is (= (get-in by-id ["M-one" :evidence :observations 0 :locator])
+           (get-in by-id ["M-one" :locator]))
+        "unchecked checkbox precedes verdict criterion")
+    (is (= #{:C4} (set (map :class (mapcat #(map :locator
+                                                  (get-in % [:evidence :observations]))
+                                            (:adapters receipt))))))
+    (is (= :no-current-false-checkable-want
+           (:reason (first (:exclusions receipt)))))
+    (is (= :verified (:status (discovery/verify receipt authority))))))
+
+(deftest drift-and-authority-mutations-refuse
+  (let [authority (fixture-input)
+        receipt (discovery/discover authority)]
+    (testing "bytes are checked before parsing"
+      (is (= :source-drift
+             (:reason (discovery/discover
+                       (assoc authority :read-bytes
+                              #(if (= % "/code/repo/holes/M-one.md")
+                                 (utf8 "changed") ((:read-bytes authority) %))))))))
+    (is (= :external-adapter-source-authority-required
+           (:reason (discovery/verify receipt))))
+    (testing "omission"
+      (is (= :adapter-discovery-does-not-match-authority
+             (:reason (discovery/verify (update receipt :adapters pop) authority)))))
+    (testing "forged locator"
+      (is (= :adapter-discovery-does-not-match-authority
+             (:reason (discovery/verify
+                       (assoc-in receipt [:adapters 0 :locator :decl] "lie") authority)))))
+    (testing "reordered choice"
+      (let [index (first (keep-indexed #(when (= "M-one" (:id %2)) %1)
+                                       (:adapters receipt)))
+            observations (get-in receipt [:adapters index :evidence :observations])
+            forged (-> receipt
+                       (assoc-in [:adapters index :evidence :observations]
+                                 (vec (reverse observations)))
+                       (assoc-in [:adapters index :locator] (:locator (last observations))))]
+        (is (= :adapter-discovery-does-not-match-authority
+               (:reason (discovery/verify forged authority))))))
+    (testing "forged exclusion evidence"
+      (is (= :adapter-discovery-does-not-match-authority
+             (:reason (discovery/verify
+                       (assoc-in receipt [:exclusions 0 :evidence]
+                                 {:ordering [:forged] :observations []})
+                       authority)))))))
+
+(deftest actual-current-excursion-row-uses-its-pinned-bytes
+  (let [path "/home/joe/code/futon2/holes/E-wm-algorithms.md"
+        bs (java.nio.file.Files/readAllBytes (.toPath (java.io.File. path)))
+        row {:id "E-wm-algorithms" :status-class :live :status-line "OPEN"
+             :requisition {:absent :no-requisition}
+             :source {:path path :sha256 (field/sha256 bs)}}
+        registry {:missions {:missions []} :tickets {:tickets []}
+                  :excursions {:excursions [row]}}
+        observation (field/observe {:registry-snapshot registry})
+        reads (atom 0)
+        receipt (discovery/discover
+                 {:field-observation observation
+                  :expected-field-pin (:source-pin observation)
+                  :code-root "/home/joe/code"
+                  :read-bytes (fn [p] (swap! reads inc)
+                                (java.nio.file.Files/readAllBytes (.toPath (java.io.File. p))))})]
+    (is (= 1 @reads))
+    (is (= 1 (get-in receipt [:counts :adapters])))
+    (is (= :C4 (get-in receipt [:adapters 0 :locator :class])))
+    (is (= :unchecked-checkbox
+           (get-in receipt [:adapters 0 :evidence :observations 0 :origin])))))
