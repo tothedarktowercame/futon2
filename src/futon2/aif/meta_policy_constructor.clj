@@ -113,10 +113,23 @@
                       (into (sorted-map) (frequencies (map :kind exclusions)))}}))))))
 
 (defn verify
-  "Verify construction coverage against the independently pinned field. The
-  field, rather than a digest inside the construction receipt, is authority."
-  [receipt {:keys [field-observation expected-field-pin expected-resource-envelope]}]
-  (let [fv (field/verify field-observation {:expected-snapshot-pin expected-field-pin})
+  "Verify construction against independently supplied field, resources, and
+  adapter observations. The canonical expected receipt is reconstructed by
+  `construct`; receipt-local locator/evidence claims are never authority."
+  ([receipt]
+   (refusal :external-construction-authority-required
+            {:receipt-schema (:schema receipt)}))
+  ([receipt {:keys [field-observation expected-field-pin expected-resource-envelope adapters]
+             :as authority}]
+  (let [adapter-authority? (contains? authority :adapters)
+        fv (field/verify field-observation {:expected-snapshot-pin expected-field-pin})
+        expected (when adapter-authority?
+                   (construct {:field-observation field-observation
+                               :expected-field-pin expected-field-pin
+                               :resource-envelope expected-resource-envelope
+                               :adapters adapters}))
+        receipt-fields [:schema :status :field-source-pin :resource-envelope
+                        :templates :exclusions :counts]
         rows (:rows field-observation)
         field-by-id (into {} (map (juxt :id identity)) rows)
         represented (concat
@@ -162,8 +175,17 @@
          :excluded-by-kind
          (into (sorted-map) (frequencies (map :kind (:exclusions receipt))))}]
     (cond
+      (not adapter-authority?)
+      (refusal :external-adapter-authority-required {})
       (not= :verified (:status fv))
       (refusal :field-not-verified {:verification fv})
+      (not= :constructed (:status expected))
+      (refusal :expected-construction-refused {:construction expected})
+      (not= (select-keys expected receipt-fields)
+            (select-keys receipt receipt-fields))
+      (refusal :construction-does-not-match-authority
+               {:expected (select-keys expected receipt-fields)
+                :actual (select-keys receipt receipt-fields)})
       (not= schema (:schema receipt))
       (refusal :construction-schema-invalid {:actual (:schema receipt)})
       (not (resource-envelope? expected-resource-envelope))
@@ -188,4 +210,4 @@
       (refusal :constructed-template-invalid {:templates template-errors})
       (seq exclusion-errors)
       (refusal :construction-exclusion-invalid {:exclusions exclusion-errors})
-      :else {:schema schema :status :verified :field-source-pin expected-field-pin})))
+      :else {:schema schema :status :verified :field-source-pin expected-field-pin}))))

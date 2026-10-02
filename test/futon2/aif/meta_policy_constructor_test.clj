@@ -36,7 +36,8 @@
                          {:kind :registered-run :id "ticket-observation"})]}))
 
 (deftest constructs-or-excludes-every-verified-field-row
-  (let [receipt (constructor/construct (input))
+  (let [base (input)
+        receipt (constructor/construct base)
         templates (into {} (map (juxt #(get-in % [:slots :target]) identity))
                         (:templates receipt))
         exclusion (first (:exclusions receipt))]
@@ -57,9 +58,10 @@
            exclusion))
     (is (= :verified
            (:status (constructor/verify receipt
-                                        (assoc (select-keys (input)
+                                        (assoc (select-keys base
                                                             [:field-observation
-                                                             :expected-field-pin])
+                                                             :expected-field-pin
+                                                             :adapters])
                                                :expected-resource-envelope resources)))))))
 
 (deftest construction-refuses-unverified-field-bad-resources-and-source-swap
@@ -79,10 +81,15 @@
 (deftest construction-verification-detects-omission-source-swap-and-duplicates
   (let [base (input)
         receipt (constructor/construct base)
-        authority (assoc (select-keys base [:field-observation :expected-field-pin])
+        authority (assoc (select-keys base [:field-observation :expected-field-pin
+                                            :adapters])
                          :expected-resource-envelope resources)]
+    (is (= :external-construction-authority-required
+           (:reason (constructor/verify receipt))))
+    (is (= :external-adapter-authority-required
+           (:reason (constructor/verify receipt (dissoc authority :adapters)))))
     (testing "omitted typed exclusion"
-      (is (= :construction-coverage-incomplete
+      (is (= :construction-does-not-match-authority
              (:reason (constructor/verify
                        (assoc receipt :exclusions []
                               :counts {:field 3 :constructed 2 :excluded 0
@@ -90,13 +97,13 @@
                                        :excluded-by-kind {}})
                        authority)))))
     (testing "constructed source changed"
-      (is (= :construction-source-or-kind-mismatch
+      (is (= :construction-does-not-match-authority
              (:reason (constructor/verify
                        (assoc-in receipt [:templates 0 :slots :evidence-channel :source]
                                  (pin "forged" "9"))
                        authority)))))
     (testing "one field identity appears on both sides"
-      (is (= :construction-identities-duplicated
+      (is (= :construction-does-not-match-authority
              (:reason (constructor/verify
                        (-> receipt
                            (update :exclusions conj
@@ -107,6 +114,19 @@
                                   {:field 3 :constructed 2 :excluded 2
                                    :constructed-by-kind {:mission 1 :ticket 1}
                                    :excluded-by-kind {:excursion 1 :mission 1}}))
+                       authority)))))
+    (testing "plausible forged locator is rejected against adapter authority"
+      (is (= :construction-does-not-match-authority
+             (:reason (constructor/verify
+                       (assoc-in receipt [:templates 0 :slots :evidence-channel :locator]
+                                 {:class :C4 :repo "forged" :path "fake.md" :decl "lie"})
+                       authority)))))
+    (testing "forged exclusion evidence is rejected against adapter authority"
+      (is (= :construction-does-not-match-authority
+             (:reason (constructor/verify
+                       (assoc-in receipt [:exclusions 0 :evidence :adapter]
+                                 {:adapter :forged :next-step :ready
+                                  :locator {:class :C4 :path "fake"}})
                        authority)))))))
 
 (deftest adapter-identity-mutations-refuse-before-construction
