@@ -76,6 +76,16 @@
     (is (= 2 (count (:locators src))))
     (is (every? false? (vals (:universe src))))))
 
+(deftest operational-checkbox-does-not-become-blocked-by-unlocated-prose
+  (let [m (assoc mission :text (str "# M-probe\n\n- [ ] current work\n\n"
+                                   "## Completion criteria\n\n"
+                                   "- old prose criterion with no verdict\n"))
+        src (mhw/mission-source "/root" m)]
+    (is (= 1 (count (:want src))))
+    (is (= 1 (count (:locators src))))
+    (is (= :verdict-not-stated (get-in src [:unlocated 0 :reason]))
+        "the prose gap remains visible even though it cannot veto the checklist")))
+
 (def ^:private terminal-schedule
   {:placement {:value :terminal :status :declared}
    :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}})

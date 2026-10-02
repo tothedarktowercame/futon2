@@ -106,7 +106,17 @@
                            (criteria/wants (criteria/criteria target text)
                                            {:repo repo :path path
                                             :observe #(true? (:observed (checks/check-decl-in-file %)))}))
-        tokens (vec (distinct (concat checkbox-tokens (:wants criterion-result))))]
+        ;; A current checkbox is an operational closure surface.  When one
+        ;; exists, do not let older prose criteria with no stated verdict
+        ;; make the whole mission unselectable: retain them under :unlocated,
+        ;; but admit only criteria that themselves have a checkable locator.
+        ;; With no checkbox surface, the existing fail-closed behaviour stays:
+        ;; unlocated criteria remain wants and assembly names the defect.
+        criterion-tokens (if (seq checkbox-tokens)
+                           (filterv #(contains? (:locators criterion-result) %)
+                                    (:wants criterion-result))
+                           (:wants criterion-result))
+        tokens (vec (distinct (concat checkbox-tokens criterion-tokens)))]
     (when (seq tokens)
       (let [criterion-locators (:locators criterion-result)
             criterion-universe (:universe criterion-result)]
