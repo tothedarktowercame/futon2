@@ -1,0 +1,18 @@
+{:schema :wm/approved-algorithm-catalog-v1
+ :entries
+ [{:id "A-self-heal"
+   :description "Repair one injured War Machine click under its debugger."
+   :implementation-locator
+   {:kind :documented-procedure
+    :path "/home/joe/code/futon2/holes/labs/A-self-heal.md"}
+   :revision "approved-2026-10-02"
+   :owner :war-machine
+   :status :approved
+   :approval-evidence
+   {:actor "joe"
+    :date "2026-10-02"
+    :statement "A-self-heal is approved"
+    :surface :emacs-repl}
+   :source
+   {:path "/home/joe/code/futon2/holes/labs/A-self-heal.md"
+    :sha256 "774004898bd8ee887cdb2daeb26c23728ddbae90b04a9bb0015e2d0e7a7c0b4b"}}]}

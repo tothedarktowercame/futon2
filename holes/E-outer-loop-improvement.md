@@ -41,6 +41,10 @@ make any historical score or cascade canonical.
 - [ ] The accepted outer-policy receipt and its learned state remain distinct
   from the selected task's tactical cascade/G certificate.
 
+**IDENTIFY exit: Met.** The controlled runs established the gap: seeded-uniform
+selection is reproducible but cannot say why its chosen current task is useful,
+and completed or unactionable selections consumed clicks before later repairs.
+
 ## Minimal reason-bearing META policy
 
 The current seeded-uniform selector is a reproducible inhabitant of the outer
@@ -175,6 +179,10 @@ belief change or novelty instrumentation, but it is session/retrieval geometry,
 not evidence that a particular mission should be selected. Keep it separate
 unless a future DERIVE step establishes that correspondence.
 
+**MAP exit: Met.** The survey above identifies the earlier implementation,
+empirical traces, geometric and feasibility models, practical scheduling
+signals, and their limits without promoting any of them to current authority.
+
 ## Ready versus missing
 
 | Ready—reuse or replay | Missing—do not pretend it exists |
@@ -185,6 +193,51 @@ unless a future DERIVE step establishes that correspondence.
 | U22 epistemic and U44 doability comparison packets | Current per-task uncertainty and live likelihoods at selection time |
 | Explicit feasibility/support distinction in prior code and notes | A current production support predicate covering M/E/T(/A) |
 | Strategic-policy mission and dark typed-control-graph kernel | Reviewed relation corpus and a validated live strategic policy |
+
+## DERIVE exit criteria — launch contract
+
+The outer loop remains in DERIVE until all four conditions below are met.  A
+green condition is evidence that the corresponding dependency exists; it is
+not permission to weaken or bypass the other three.
+
+- [ ] **Numeric G authority exists.** A pinned declaration supplies the units
+  and normalization for every outcome channel, numeric preference means with
+  positive variances and weights, and the authority under which those numbers
+  may be used.  The current audit
+  `futon3/library/meta/meta-outer-g-authority-audit.edn` remains
+  `:blocked-missing-numeric-authority`; illustrative numbers are not an exit
+  witness.
+- [ ] **Every scored policy has complete grounded G inputs.** Each candidate
+  carries source-bound predictive distributions and a candidate-specific,
+  Bayes-coherent information model over the common outcome vocabulary.  The
+  evaluator refuses missing prediction, normalization, preference, or
+  information-model inputs, and a mutation of each input class fails a named
+  gate.
+- [ ] **The verified META policy is the live outer selector.** The complete
+  field observation, construction exclusions, comparison receipt, selected
+  identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
+  before tactical cascade construction.  The legacy seeded-uniform selector
+  cannot launch an ordinary click except as the explicitly typed registered
+  baseline fallback described above.
+- [ ] **Approved Algorithms are real, bounded field members.** The pinned
+  approval catalog admits `A-self-heal`, exact capability matching controls
+  its injured arm, and a positive numeric click budget is available before it
+  becomes selectable.  With no click available it is excluded with a typed
+  resource reason; approval alone must not fabricate an executable policy.
+
+**DERIVE exit: Not met.** Joe approved `A-self-heal` on 2026-10-02, allowing
+the fourth condition's catalog work to proceed.  The other three conditions,
+and the click-availability portion of the fourth, remain to be demonstrated.
+
+### PSR-1: `futon-theory/stop-the-line` for outer-policy launch
+
+- Pattern chosen: futon-theory/stop-the-line
+- Candidates: stop-the-line, typed fallback, deploy behind a flag
+- Rationale: A random baseline is a useful type inhabitant but cannot justify
+  spending an author/reviewer click.  The four conditions above turn missing
+  authority, inputs, wiring, or resources into observable refusals.
+- Confidence: high — the preceding controlled runs exposed each missing seam
+  independently.
 
 ## Re-entry rule
 

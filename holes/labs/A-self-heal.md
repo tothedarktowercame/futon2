@@ -1,8 +1,8 @@
 # A-self-heal — repair one War Machine click under its debugger
 
-**Kind:** approved-algorithm candidate.  **Status:** observed procedure, written
-down 2026-10-02.  **Scope:** War Machine control-path injury; not ordinary
-mission implementation.
+**Kind:** approved algorithm.  **Status:** approved by Joe 2026-10-02; observed
+procedure, not yet live-enabled.  **Scope:** War Machine control-path injury;
+not ordinary mission implementation.
 
 ## What this records
 
@@ -48,7 +48,9 @@ it to look like a successful no-op.
  :resource-envelope
  {:time-budget-ms :bind-at-launch
   :token-budget :bind-at-launch
-  :click-budget 1
+  :click-budget {:required 1
+                 :source :ordinary-click-ration
+                 :on-unavailable :exclude-from-meta-support}
   :repair-width :one-bounded-commit-per-stop
   :author-seat "codex-16"
   :reviewer-seat "codex-10"}
@@ -90,6 +92,9 @@ procedure was bounded by one paused click and one repair commit at a time, but
 did not meter elapsed time or tokens.  META construction must supply positive
 numeric values from the current resource state; until then this algorithm is
 available as a filler but no concrete policy instance is admissible to G.
+Approval likewise does not reserve a click: the field producer must observe
+one available ordinary click before admitting this Algorithm, and must retain
+a typed resource exclusion when the ration is empty.
 
 ## Algorithm distilled from the run
 

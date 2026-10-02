@@ -1,7 +1,8 @@
 # E-wm-algorithms — make META's Algorithm class safe and selectable
 
-**Status:** OPEN (2026-10-01, operator-directed). Algorithms are not yet an
-enabled War Machine action class; the unchecked items below are the excursion.
+**Status:** DERIVE (2026-10-02). One Algorithm is approved; Algorithms are not
+yet an enabled War Machine action class and the unchecked items below remain
+the excursion.
 
 ## Origin
 
@@ -30,10 +31,13 @@ agent authority, or turning every failure into an Algorithm invocation.
 
 ## Work items
 
-- [ ] **Approved registry.** Define a versioned, machine-readable registry
+- [x] **Approved registry.** Define a versioned, machine-readable registry
   separate from the sample corpus. Every entry has a stable id, description,
   implementation locator and revision, owner, status, and explicit approval
   evidence. Unregistered or unapproved entries never become candidates.
+  `resources/wm/approved-algorithms.edn` is the v1 registry; Joe approved
+  `A-self-heal` on 2026-10-02. Approval does not waive applicability,
+  resource, or launch checks.
 
 - [ ] **Applicability contract.** Every approved Algorithm declares the
   observations under which it is eligible, including the typed stuck condition
@@ -87,3 +91,7 @@ the serving War Machine records all four selectable counts per run, and a
 disabled/empty Algorithm registry cannot fabricate an A candidate. Live
 enablement for general clicks is a separate operational decision based on those
 receipts, not a condition for completing the implementation work.
+
+**DERIVE exit: Not met.** The approval catalog now has its first entry, while
+applicability, resource admission (including available clicks), execution,
+receipts, and the controlled recovery-loop acceptance remain open.

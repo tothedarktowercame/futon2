@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-field-observation-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-field-observation :as field]))
 
 (defn- pin [path ch]
@@ -182,9 +183,12 @@
     (is (= :duplicate-identities
            (:reason (field/observe {:registry-snapshot broken}))))))
 
-(deftest current-self-heal-document-is-not-approval-authority
+(deftest current-self-heal-approval-is-catalogued
   (let [text (slurp "holes/labs/A-self-heal.md")
-        excursion (slurp "holes/E-wm-algorithms.md")]
-    (is (re-find #"approved-algorithm candidate" text))
-    (is (re-find #"\[ \] \*\*Approved registry" excursion))
-    (is (not (.exists (java.io.File. field/default-algorithm-catalog))))))
+        excursion (slurp "holes/E-wm-algorithms.md")
+        catalog (edn/read-string (slurp field/default-algorithm-catalog))]
+    (is (re-find #"approved algorithm" text))
+    (is (re-find #"\[x\] \*\*Approved registry" excursion))
+    (is (= :wm/approved-algorithm-catalog-v1 (:schema catalog)))
+    (is (= [{:id "A-self-heal" :status :approved}]
+           (mapv #(select-keys % [:id :status]) (:entries catalog))))))

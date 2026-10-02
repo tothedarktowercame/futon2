@@ -14,7 +14,7 @@
 (def schema :wm/meta-field-observation-v1)
 (def algorithm-catalog-schema :wm/approved-algorithm-catalog-v1)
 (def default-algorithm-catalog
-  "/home/joe/code/futon2/data/wm-approved-algorithms.edn")
+  "/home/joe/code/futon2/resources/wm/approved-algorithms.edn")
 
 (defn sha256 [^bytes bytes]
   (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
@@ -93,7 +93,7 @@
      :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-unavailable
                    :ineligibility-evidence
                    {:expected-path default-algorithm-catalog
-                    :authority "holes/E-wm-algorithms.md: Approved registry remains unchecked"}}]}
+                    :authority "holes/E-wm-algorithms.md: approved registry"}}]}
     (try
       (let [bytes (read-bytes path)
             pin {:path path :sha256 (sha256 bytes)}
