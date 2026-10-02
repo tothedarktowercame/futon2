@@ -219,7 +219,7 @@ not permission to weaken or bypass the other three.
   before tactical cascade construction.  The legacy seeded-uniform selector
   cannot launch an ordinary click except as the explicitly typed registered
   baseline fallback described above.
-- [ ] **Approved Algorithms are real, bounded field members.** The pinned
+- [x] **Approved Algorithms are real, bounded field members.** The pinned
   approval catalog admits `A-self-heal`, exact capability matching controls
   its injured arm, and a positive numeric click budget is available before it
   becomes selectable.  With no click available it is excluded with a typed
@@ -240,6 +240,16 @@ not permission to weaken or bypass the other three.
   expected authority proves equality only. The condition therefore remains
   open pending a reconstructively verified injury observation derived from
   retained debugger/run-record evidence.
+
+  Exit evidence 2026-10-02: `ed3fb32d0` closes that finding. It independently
+  pins the committed projection (`f338af6e…`) and terminal run record
+  (`dfac8e2b…`), reconstructs every required projection field from the latter,
+  and requires exact equality before capability admission. Independent review
+  passed 17 focused tests / 119 assertions, including wrong-run bytes,
+  re-pinned altered projection, and changed run/click identity. Together with
+  `db19d4cf5`, `ca375699a`, and `46e8922d6`, this demonstrates approval,
+  click-resource gating, exact injury matching, and construction of only the
+  matching `:run-algorithm` template without G inputs.
 
 **DERIVE exit: Not met.** Joe approved `A-self-heal` on 2026-10-02, allowing
 the fourth condition's catalog work to proceed.  The other three conditions,
