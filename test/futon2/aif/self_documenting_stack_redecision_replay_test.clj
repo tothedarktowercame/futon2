@@ -14,7 +14,8 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.want-interpretation :as want-interpretation]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
-            [futon2.aif.wm.construction-inputs :as construction-inputs]))
+            [futon2.aif.wm.construction-inputs :as construction-inputs]
+            [futon2.aif.wm.loop-node-exercise :as loop-exercise]))
 
 (def ^:private target "M-self-documenting-stack")
 
@@ -86,3 +87,21 @@
     (is (nil? (:refusal admission)))
     (is (= [candidate]
            (get-in admission [:problem :constructed-candidates])))))
+
+(deftest admitted-real-candidate-retains-specific-loop-node-evidence
+  (let [assembled (:assembled (production-replay))
+        decision (:decision (cascade-decision/cascade-decision assembled {}))
+        receipt (loop-exercise/receipt decision)]
+    (is (= :complete (:status receipt)))
+    (is (= :singleton-admissible-candidate
+           (get-in receipt [:by-node :R6 :because])))
+    (is (= :present (get-in receipt [:by-node :R13 :status])))
+    (is (= [[:apparatus/evidence-to-disposition-once
+             :pattern-interpretation/reproduce-the-recorded-run]]
+           (get-in receipt [:by-node :R13 :evidence :precedences])))
+    (is (= :singleton-policy-posterior
+           (get-in receipt [:by-node :R14 :because])))
+    (is (= :present (get-in receipt [:by-node :CTAU-CLASS :status])))
+    (is (= :class-emission
+           (get-in receipt [:by-node :CTAU-CLASS :evidence :preference-kind])))
+    (is (identical? decision (loop-exercise/require-complete! decision)))))

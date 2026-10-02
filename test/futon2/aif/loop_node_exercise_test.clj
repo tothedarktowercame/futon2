@@ -8,10 +8,12 @@
    :selection-certificate
    {:candidates [{:policy {:target "M-x" :precedence [:p1 :p2]
                            :enacted-steps {:p1 :p1 :p2 :p2}}
-                  :computed-f {:model {:kind :class-emission :horizon 4}}}
+                  :computed-f {:model {:kind :class-emission :horizon 4
+                                       :class-preference {4 {:focused 1}}}}}
                  {:policy {:target "M-y" :precedence [:p3 :p4]
                            :enacted-steps {:p3 :p3 :p4 :p4}}
-                  :computed-f {:model {:kind :class-emission :horizon 4}}}]
+                  :computed-f {:model {:kind :class-emission :horizon 4
+                                       :class-preference {4 {:focused 1}}}}}]
     :policies [{:id :C1} {:id :C2}]
     :policy-precision-state {:temperature 0.75
                              :probabilities {:C1 0.6 :C2 0.4}}}})
@@ -22,16 +24,19 @@
     (is (= {:present 4 :bypassed 0 :refused 0} (:counts r)))
     (is (every? #(= :present (:status %)) (vals (:by-node r))))))
 
-(deftest singleton-click-does-not-claim-temperature-or-temporal-depth
+(deftest singleton-click-retains-specific-bypasses-and-refuses-missing-evidence
   (let [decision {:abstention {:status :not-abstained}
                   :selection-certificate
                   {:candidates [{:policy {:target "M-x" :precedence [:p]}
                                  :computed-f {:model {:kind :class-emission :horizon 4}}}]
                    :policies [{:id :C1}]}}
         r (exercise/receipt decision)]
-    (is (= :refused (get-in r [:by-node :R6 :status])))
+    (is (= :bypassed (get-in r [:by-node :R6 :status])))
+    (is (= :singleton-admissible-candidate
+           (get-in r [:by-node :R6 :because])))
     (is (= :refused (get-in r [:by-node :CTAU-CLASS :status])))
-    (is (= :refused (get-in r [:by-node :R13 :status])))
+    (is (= :bypassed (get-in r [:by-node :R13 :status])))
+    (is (= :single-step-policy (get-in r [:by-node :R13 :because])))
     (is (= :refused (get-in r [:by-node :R14 :status])))
     (try
       (exercise/require-complete! decision)
@@ -39,7 +44,7 @@
       (catch clojure.lang.ExceptionInfo e
         (is (= :required-loop-node-unexercised
                (:failure-kind (ex-data e))))
-        (is (= #{:R6 :R13 :R14 :CTAU-CLASS}
+        (is (= #{:R14 :CTAU-CLASS}
                (set (map :node (:refused (ex-data e))))))
         (is (= 1 (get-in (ex-data e) [:decision-context :candidate-count])))
         (is (= "M-x"
