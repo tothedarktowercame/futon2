@@ -267,6 +267,18 @@ not permission to weaken or bypass the other three.
   Terminal/resource predictions remain refused. Implementation awaits the
   operator's task-state preference and missing-kind ruling plus regenerated
   source snapshots.
+
+  Operator ruling 2026-10-03: use the conservative task-state policy, amended
+  by freshness. Prefer higher current centrality and a present automated-
+  progress surface. A mission on EFE-carpet level set 0 is presumptively
+  outdated and de-prioritized into a retirement-review surface rather than
+  treated as ordinary attractive work. Tornhill hotspot/trend and Salingaros
+  mess are current-work signals only when freshness evidence shows recent
+  contact; a high historical value untouched for months is `:museum-work`, not
+  a live hotspot or urgent mess. Museum classification does not itself retire
+  or delete a mission: a separate, reviewable retirement pass must establish
+  lifecycle disposition. Pairwise comparisons still require at least one
+  shared, current, authoritative channel; missing channels remain absence.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
