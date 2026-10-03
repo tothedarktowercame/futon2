@@ -33,6 +33,7 @@
               :run-id "runtime-test"
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
+              :outer-task-policy :meta
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}

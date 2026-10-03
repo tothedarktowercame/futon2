@@ -1536,6 +1536,36 @@
   (cond-> result
     *clock-focus?* (assoc :active-mission active-mission)))
 
+(defn select-outer-task
+  "Invoke the configured outer policy at the task-before-cascade boundary.
+
+  Production META supplies `:outer-task-selection-fn`; the seeded selector is
+  available only when the caller explicitly requests `:seeded-baseline`.
+  Both implementations must return the canonical outer-selection receipt so
+  the runner and historical dataset retain one stable boundary contract."
+  [judge-opts tasks seed]
+  (let [policy (or (:outer-task-policy judge-opts) :seeded-baseline)
+        selector (:outer-task-selection-fn judge-opts)
+        receipt (cond
+                  selector (selector {:tasks tasks :seed seed})
+                  (= :seeded-baseline policy)
+                  (outer-task-selection/select-task {:tasks tasks :seed seed})
+                  :else
+                  (throw (ex-info "META outer selector is not configured"
+                                  {:kind :meta-outer-selector-unavailable
+                                   :policy policy})))
+        chosen (get-in receipt [:chosen :id])]
+    (when-not (= outer-task-selection/schema (:schema receipt))
+      (throw (ex-info "Outer selector returned the wrong receipt schema"
+                      {:kind :meta-outer-receipt-invalid
+                       :observed-schema (:schema receipt)})))
+    (when (and chosen
+               (not= chosen (get-in receipt [:action :target])))
+      (throw (ex-info "Outer selector choice/action identity mismatch"
+                      {:kind :meta-outer-receipt-invalid
+                       :chosen chosen :action-target (get-in receipt [:action :target])})))
+    receipt))
+
 ;; ---------------------------------------------------------------------------
 ;; U21 -- selection -> clocking, the same-tick half. `mission-action-types` and
 ;; the durable clock write live further down (`record-selection-clock!`); this
@@ -6571,8 +6601,7 @@
                   ;; actual seed is retained in the selection receipt.
                   (hash (str (or (:run-id judge-opts) wm-as-of)))))
         outer-task-selection
-        (outer-task-selection/select-task
-         {:tasks outer-task-population :seed outer-task-seed})
+        (select-outer-task judge-opts outer-task-population outer-task-seed)
         selected-task-id (get-in outer-task-selection [:chosen :id])
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn

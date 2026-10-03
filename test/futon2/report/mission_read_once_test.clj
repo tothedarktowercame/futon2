@@ -102,6 +102,43 @@
     (is (= 1 (count (:targets first-run)))
         "inner assembly receives exactly the already-selected task")))
 
+(deftest configured-meta-outer-selector-controls-the-only-inner-target
+  (let [mission-doc {:missions [{:id "M-a" :status-class :active}
+                                {:id "M-b" :status-class :active}]}
+        calls (atom [])
+        meta-selector
+        (fn [{:keys [tasks seed]}]
+          (swap! calls conj {:ids (mapv :id tasks) :seed seed})
+          {:schema :wm/outer-task-selection-v1
+           :policy {:kind :meta-pipeline-task-state}
+           :support (mapv outer-task-selection/task-view tasks)
+           :excluded []
+           :draw {:absent :meta-policy-does-not-draw}
+           :chosen (outer-task-selection/task-view
+                    (first (filter #(= "M-b" (:id %)) tasks)))
+           :action {:type :advance-mission :target "M-b"}})
+        rich-a {:universes {"M-a" {:x false}}
+                :interpretations {"M-a" {:patterns {:p/a {:produces #{:x}}}}}}
+        run (one-selection (:ns (meta #'wm/judge))
+                           {:outer-task-selection-fn meta-selector
+                            :cascade-sources rich-a}
+                           mission-doc)]
+    (is (= ["M-b"] (:targets run))
+        "the META-selected identity, not the prepared inner material, is targeted")
+    (is (= 1 (count @calls)))
+    (is (= #{"M-a" "M-b"} (set (:ids (first @calls)))))))
+
+(deftest meta-is-fail-closed-and-seeded-baseline-is-explicit
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo #"META outer selector is not configured"
+       (wm/select-outer-task {:outer-task-policy :meta}
+                             [{:id "M-a" :kind :mission}] 1)))
+  (is (= "M-a"
+         (get-in (wm/select-outer-task
+                  {:outer-task-policy :seeded-baseline}
+                  [{:id "M-a" :kind :mission}] 1)
+                 [:chosen :id]))))
+
 (deftest the-pre-fix-selection-read-twice
   ;; the bad case: judge at e3bdcfdb, no pass-through
   (let [{:keys [reads targets]} (one-selection @pre-fix-ns {})]

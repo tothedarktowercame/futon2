@@ -21,14 +21,16 @@
           (select-keys opts [:accumulate-strategic-habit? :run-id
                              :loaded-code-identity :cascade-habit-path
                              :cascade-feedback-path :cascade-feedback-metadata
-                             :observation-labels-path :flight :trace-dir])
+                             :observation-labels-path :flight :trace-dir
+                             :outer-task-policy :outer-task-selection-fn])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
-  (let [selected-judgment (atom nil)]
+  (let [opts (update opts :outer-task-policy #(or % :meta))
+        selected-judgment (atom nil)]
     {:judge-fn (fn [days]
                  (let [generated (selection-judge opts days)]
                    (reset! selected-judgment (:judgement generated))
