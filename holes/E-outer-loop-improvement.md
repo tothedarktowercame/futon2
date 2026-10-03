@@ -133,13 +133,30 @@ selector, then translates selection or refusal into the canonical outer
 receipt.  Production installs this adapter at the seam above; it has no
 seeded fallback.
 
-The first non-click live replay is an important refusal, not a launch result:
+The first non-click live replay was an important refusal, not a launch result:
 667 live registry tasks partitioned into 35 current map nodes and 632 typed
 `:pipeline/not-on-current-map` exclusions.  None of the 35 map nodes had a
 source-pinned numeric declared priority, so all comparisons lacked a shared
 current channel and META returned `:shared-current-channel-unavailable` with
 no action.  The adapter is live, but the remaining task-state channel work is
 still a launch blocker; no click should turn this honest absence into a draw.
+
+Freshness-channel follow-up 2026-10-03: the live graph's ticket/file section
+supplies `mtime-ms` with the graph bytes as its source authority.  The adapter
+now normalizes those observations over the current mapped field as
+`:pipeline-freshness-cost` (newest = lowest cost), retaining the raw Unix-epoch
+milliseconds and units on every candidate.  Absence remains absence, and an
+equal timestamp remains a tie.  This is the already-authorized recency signal,
+not a claim that recency measures terminal success or morphogenetic value.
+
+The resulting non-click replay over the same 667-row registry field accounted
+for 35 mapped policies and 632 typed exclusions, compared all 595 mapped
+pairs on the common freshness channel, and selected
+`E-mfuton-receiver-matching-20261003` by
+`:minimum-pairwise-task-state-G`.  The receipt pins the live summary and graph;
+there is no seeded draw.  Broader pipeline position, feasibility, centrality,
+Tornhill and Salingaros remain additive future channels rather than fabricated
+inputs to this first executable policy.
 
 ## MAP — prior outer-loop material to keep at hand
 

@@ -57,10 +57,32 @@
                          :freshness :current :source source}]))
           tasks))))
 
+(defn- normalized-pipeline-freshness [tasks snapshot]
+  (let [observed (into {}
+                       (keep (fn [{:keys [stem mtime-ms]}]
+                               (when (and (string? stem) (number? mtime-ms))
+                                 [stem (double mtime-ms)])))
+                       (get-in snapshot [:graph :tickets :items]))
+        values (keep #(get observed (:id %)) tasks)
+        lo (when (seq values) (apply min values))
+        hi (when (seq values) (apply max values))
+        source (:graph-source snapshot)]
+    (into {}
+          (keep (fn [{:keys [id]}]
+                  (when-let [mtime (get observed id)]
+                    [id {:value (if (= lo hi) 0.5
+                                  (/ (- hi mtime) (- hi lo)))
+                         :freshness :current :source source
+                         :observation {:field :mtime-ms
+                                       :unit :unix-epoch-milliseconds
+                                       :value (long mtime)}}])))
+          tasks)))
+
 (defn task-state-candidates
-  "Project current task evidence. Missing priority remains absent, never zero."
-  [tasks]
-  (let [priority-by-id (normalized-priorities tasks)]
+  "Project current task evidence. Missing channels remain absent, never zero."
+  [tasks snapshot]
+  (let [priority-by-id (normalized-priorities tasks)
+        freshness-by-id (normalized-pipeline-freshness tasks snapshot)]
     (mapv (fn [{:keys [id kind automated-feasibility]}]
             {:id id :kind kind
              :support {:automated-feasibility
@@ -69,7 +91,9 @@
                          automated-feasibility :unknown)}
              :channels (cond-> {}
                          (get priority-by-id id)
-                         (assoc :declared-priority-cost (get priority-by-id id)))})
+                         (assoc :declared-priority-cost (get priority-by-id id))
+                         (get freshness-by-id id)
+                         (assoc :pipeline-freshness-cost (get freshness-by-id id)))})
           tasks)))
 
 (defn- canonical-receipt [tasks excluded selection]
@@ -78,7 +102,8 @@
         chosen (first (filter #(= selected-id (:id %)) support))]
     (cond-> {:schema outer/schema
              :policy {:kind policy-kind
-                      :uses [:pipeline-cascade :declared-priority
+                      :uses [:pipeline-cascade :pipeline-freshness
+                             :declared-priority
                              :automated-feasibility]
                       :forbids [:cascade :candidates :constructed-candidates
                                 :interpretations :precedence :tactical-g]
@@ -107,7 +132,7 @@
                                    {:summary-source (:summary-source snapshot)
                                     :graph-source (:graph-source snapshot)})))
         selection (meta/select {:snapshot snapshot
-                                :candidates (candidate-fn on-map)})]
+                                :candidates (candidate-fn on-map snapshot)})]
     (canonical-receipt on-map off-map selection)))
 
 (defn selector [{:keys [tasks]}]
