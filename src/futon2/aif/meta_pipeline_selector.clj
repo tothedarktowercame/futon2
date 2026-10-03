@@ -5,7 +5,10 @@
   nodes.  Missing channels are absent, feasibility is support, and the
   deterministic information term is exactly zero.  Terminal outcomes are not
   predicted here."
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (def schema :wm/meta-pipeline-selection-v1)
 (def snapshot-schema :wm/pipeline-cascade-snapshot-v1)

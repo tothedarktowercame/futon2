@@ -5462,6 +5462,33 @@
           (is (= :stale-runner-source (:failure-kind failure)))
           (is (= :drift (get-in failure [:runner/source :runner/source-check]))))))))
 
+(deftest stale-meta-composition-refuses-before-consuming-the-attempt
+  (let [core-ran (atom false)
+        current (fn [n]
+                  {:sha256 (if (= n 'futon2.aif.meta-live-outer-selector)
+                             "stale"
+                             (load-identity/sha256
+                              (load-identity/read-bytes
+                               (get load-identity/required-sources n))))})
+        registrations (into {} (map (fn [n] [n (current n)]))
+                            ['futon2.aif.full-loop-runner
+                             'futon2.aif.full-loop-runtime
+                             'futon2.aif.meta-live-outer-selector
+                             'futon2.aif.meta-pipeline-selector])]
+    (with-redefs-fn
+      {#'load-identity/registry (atom registrations)
+       #'runner/run-opportunity-core!
+       (fn [_] (reset! core-ran true) {:attempt-id "x" :outcome :no-op-change})}
+      (fn []
+        (let [failure (try (runner/run-opportunity! {:run-record-dir "/tmp/wm-meta-drift-refuse"})
+                           nil
+                           (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+          (is (false? @core-ran))
+          (is (= :stale-outer-selection-composition (:failure-kind failure)))
+          (is (= :stale (get-in failure [:critical-namespaces
+                                         'futon2.aif.meta-live-outer-selector
+                                         :status]))))))))
+
 (deftest run-record-carries-the-runner-source-identity
   ;; Round-2 review: the durable tick record never contained :runner/source.
   ;; The same identity that gated the run must be readable back from the

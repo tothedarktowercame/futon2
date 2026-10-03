@@ -4,9 +4,12 @@
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-pipeline-selector :as meta]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.outer-task-selection :as outer]
             [futon2.aif.pattern-registry :as pattern-registry]))
+
+(load-identity/register! *ns* *file*)
 
 (def policy-kind :meta-live-pipeline-task-state)
 

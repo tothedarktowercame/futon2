@@ -583,6 +583,21 @@
                        :failure-kind :stale-runner-source
                        :failure-stage :runner-source
                        :runner/source check})))
+    (let [critical ['futon2.aif.full-loop-runtime
+                    'futon2.aif.meta-live-outer-selector
+                    'futon2.aif.meta-pipeline-selector]
+          bad (into {}
+                    (keep (fn [n]
+                            (let [r (get-in check [:namespaces n])]
+                              (when (not= :current (:status r)) [n r]))))
+                    critical)]
+      (when (seq bad)
+        (throw (ex-info "Serving outer-selection composition is not current"
+                        {:outcome :build-failed
+                         :failure-kind :stale-outer-selection-composition
+                         :failure-stage :runner-source
+                         :critical-namespaces bad
+                         :runner/source check}))))
     check))
 
 (defn judge-refusal
