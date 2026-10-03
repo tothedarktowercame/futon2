@@ -179,7 +179,13 @@
       (let [target (str (:id ticket))
             token (keyword "ticket-closure"
                            (str "h" (subs (load-identity/sha256
-                                           (.getBytes target "UTF-8")) 0 12)))]
+                                           (.getBytes target "UTF-8")) 0 12)))
+            status (or (some->> (str/split-lines text)
+                                (map-indexed vector)
+                                (some (fn [[i line]]
+                                        (when (re-find #"^\*\*Status:\*\*\s+\S" line)
+                                          {:line (inc i) :text line}))))
+                       {:line 1 :text (first (str/split-lines text))})]
         {:target target
          :want [token]
          :universe {token false}
@@ -187,6 +193,12 @@
                            :decl "**Status:** DONE"}}
          :interpretation {:patterns {} :receipts {}}
          :candidates []
+         ;; The current status line is the source-stated criterion used to
+         ;; retrieve an interpretation.  The closure locator above remains
+         ;; the distinct future observation.  Without this row click-ask
+         ;; retained the want but returned :no-criterion before retrieval.
+         :holes [{:id (name token) :kind :ticket-closure
+                  :line (:line status) :text (:text status)}]
          :source {:kind :current-ticket-head :repo repo :path path
                   :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))}}))))
 

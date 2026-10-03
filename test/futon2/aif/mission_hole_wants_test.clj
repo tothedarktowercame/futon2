@@ -145,4 +145,8 @@
             :path "holes/tickets/T-repair-one.md" :decl "**Status:** DONE"}
            (get-in source [:locators token])))
     (is (= :current-ticket-head (get-in source [:source :kind])))
+    (is (= [{:id (name token) :kind :ticket-closure
+             :line 3 :text "**Status:** OPEN"}]
+           (:holes source))
+        "the current status is the source-stated interpretation criterion")
     (is (nil? (mhw/ticket-source "/root" (assoc ticket :status-class :terminal))))))

@@ -76,6 +76,18 @@
 
 (def tick-sources {:beta-by-context {:WM {:beta 1}}})
 
+(deftest ticket-source-supplies-click-ask-criterion
+  (let [token :ticket-closure/hfixture
+        ticket-pick {:target "T-repair-fixture"
+                     :want [token]
+                     :universe {token false}
+                     :locators {token {:class :C4}}
+                     :holes [{:id "hfixture" :kind :ticket-closure
+                              :line 3 :text "**Status:** OPEN"}]}
+        wants (click-ask/wants-for ticket-pick)]
+    (is (= {:kind :ticket-closure :line 3 :stated "**Status:** OPEN"}
+           (get-in wants [:source :criteria-by-token token])))))
+
 (defn- test-ask-fn
   "The REAL click ask step (wm.click-ask/click-ask-fn driving
   flight-runner/ask-fn) with hermetic store/sources and a stubbed seat."
