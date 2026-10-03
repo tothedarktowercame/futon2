@@ -356,6 +356,19 @@ not permission to weaken or bypass the other three.
   `:status :failed`. This demonstrates both the intended core input and the
   required fail-closed rule: the snapshot is useful partial evidence, but is
   not yet a complete externally pinned selector input.
+
+  Prototype checkpoint 2026-10-03: `futon2.aif.meta-pipeline-selector` now
+  implements this boundary as a pure, replayable selector. It requires pinned
+  summary and graph bytes, a consistent cascade, all five cascade standards,
+  and successful reads for every declared graph section. Candidates must be
+  nodes on that map. Explicit infeasibility excludes support; unknown support
+  remains unknown. Pairwise task-state G is computed only over shared current,
+  pinned normalized preference-cost channels, with deterministic EIG `0.0`.
+  No shared channel, stale evidence, a partial feed, a tie, or a non-map
+  candidate refuses with a typed reason rather than selecting the first row.
+  This establishes the selector semantics, not criterion completion: a fully
+  pinned current pipeline snapshot and discriminating current annotations are
+  still required before live wiring.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
