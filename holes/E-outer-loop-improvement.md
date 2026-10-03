@@ -357,6 +357,18 @@ not permission to weaken or bypass the other three.
   required fail-closed rule: the snapshot is useful partial evidence, but is
   not yet a complete externally pinned selector input.
 
+  Live-feed repair 2026-10-03: Futon3c `d58fd008` replaces the obsolete
+  100-row/5-second cascade tuning with a cascade-local, server-supported
+  1,000-row page and 30-second per-page bound, while retaining bounded timeout
+  retry and explicit partial-pagination refusal from `6f12e767`. After hot
+  loading both canonical namespaces, the serving endpoint completed in 48.7 s
+  with every section `:ok`: patterns 1,652, arrows 177 raw/176 projected,
+  held 124, clusters 117, lineage 113, and checked-zero hole/meme relations.
+  The pattern projection spans 568 patterns and 247 missions; 30 citations
+  point to absent pattern nodes and remain honest holes. This clears the live
+  read defect, but an outer-selection run must still pin the exact returned
+  bytes rather than treating a later mutable response as the same snapshot.
+
   Prototype checkpoint 2026-10-03: `futon2.aif.meta-pipeline-selector` now
   implements this boundary as a pure, replayable selector. It requires pinned
   summary and graph bytes, a consistent cascade, all five cascade standards,
