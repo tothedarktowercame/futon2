@@ -255,16 +255,26 @@
   ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn] :as ctx}]
    (let [row-of (fn [t] (first (filter #(and (= t (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs))))
          direct (row-of target)
+         finding-record (when (and findings-dir (string? target)
+                                   (str/starts-with? target "T-repair-occ-"))
+                          (try
+                            (edn/read-string
+                             (slurp (io/file findings-dir (str (subs target 2) ".edn"))))
+                            (catch Exception _ nil)))
+         active-repair? (and (= :open (:repair/status finding-record))
+                             (= (subs target 2) (:repair/id finding-record))
+                             (string? (:machine-repo finding-record)))
+         repair-relation (when active-repair?
+                           {:target target :relation "focus" :facet "WM"
+                            :source {:kind :open-repair-obligation
+                                     :repair-id (:repair/id finding-record)
+                                     :machine-repo (:machine-repo finding-record)}})
          parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
                          (or (when ticket-dir
                              (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
                                {:kind :ticket-parent :parent p :source (str "ticket " target)}))
-                           (when findings-dir
-                             (try
-                               (when-let [p (-> (edn/read-string (slurp (io/file findings-dir (str (subs target 2) ".edn"))))
-                                                (:target))]
-                                 {:kind :finding-target :parent p :source (str "finding " (subs target 2))})
-                               (catch Exception _ nil)))))
+                           (when-let [p (:target finding-record)]
+                             {:kind :finding-target :parent p :source (str "finding " (subs target 2))})))
          parent (:parent parent-source)
          ;; WM-RELATION-I: an M- target with no row, when a relation context
          ;; is given (the scoring path's), derives through (a) then (b)
@@ -280,16 +290,18 @@
                               (if (:row b)
                                 (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
                                 {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
-         relation-row (or direct
+         relation-row (or direct repair-relation
                           (when parent
                             (row-of parent))
                           (:row m-derivation))
-         derived (cond (and parent-source relation-row (nil? direct)) parent-source
+         derived (cond active-repair? (:source repair-relation)
+                       (and parent-source relation-row (nil? direct)) parent-source
                        (:row m-derivation) (:derived-via m-derivation))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
-         eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
+         eligible (or active-repair?
+                      (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
-                       (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row))))]
+                       (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row)))))]
      {:target target
       :class (if eligible (keyword (:relation relation-row)) :unknown)
       :relation (if eligible
@@ -333,8 +345,7 @@
      :rule (:rule inputs) :heads (:heads inputs) :discovery discovery
      :candidates (mapv (fn [c]
                          (let [t (:target (:id c))
-                               {:keys [class relation derived-via]} (classify t)
-                               node (when (string? t) (subs t (if (.startsWith ^String t "M-") 2 0)))]
+                               {:keys [class relation derived-via]} (classify t)]
                            (-> (classification inputs discovery as-of c)
                                (assoc :class class
                                       :relation (if (= :unknown class) relation relation)

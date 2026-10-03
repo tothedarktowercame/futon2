@@ -150,3 +150,23 @@
         "a target with a relation row classifies under the decision's focus")
     (is (= :unknown (:class (focus/classify-target inputs bare as-of target)))
         "the bad case: a bare discover past the last window classifies it :unknown")))
+
+(deftest open-machine-repair-ticket-is-operational-focus
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "focus-repair" (make-array java.nio.file.attribute.FileAttribute 0)))
+        id "repair-occ-fixture"
+        target (str "T-" id)
+        file (io/file dir (str id ".edn"))
+        discovery (focus/decision-focus-info inputs "2026-09-30T00:00:00Z")]
+    (spit file (pr-str {:repair/id id :repair/status :open
+                        :machine-repo "/machine"}))
+    (let [r (focus/classify-target inputs discovery (:as-of discovery) target
+                                   {:findings-dir (.getPath dir)})]
+      (is (= :focus (:class r)))
+      (is (= :open-repair-obligation (get-in r [:relation :source :kind])))
+      (is (= id (get-in r [:derived-via :repair-id]))))
+    (spit file (pr-str {:repair/id id :repair/status :closed
+                        :machine-repo "/machine"}))
+    (is (= :unknown
+           (:class (focus/classify-target inputs discovery (:as-of discovery) target
+                                          {:findings-dir (.getPath dir)}))))))
