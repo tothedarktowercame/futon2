@@ -98,6 +98,32 @@ behaviour. Out of scope until the baseline loop is viable: selecting one
 historical theory as canonical, tuning against benchmark missions, or folding
 tactical cascade readiness into task eligibility.
 
+### Modifier family
+
+`META` is the outer task-policy modifier being made executable in this
+excursion.  `HYPER`, `SUPER`, and `CONTROL` name plausible future modifiers:
+they may alter different aspects of the machine, or compose with META, but
+they have no production semantics yet.  Their names are reserved here only to
+prevent later work from overloading META with every kind of behavioural
+control.  A future modifier must declare its observation boundary, output
+type, composition order, and conflict rule before it can affect a click.
+
+META is not deferred in the same way.  Its production boundary is the
+task-before-cascade call in `futon2.report.war-machine/select-outer-task`.
+Commit `7c67afecb` replaces the direct seeded draw with that injectable policy
+boundary, makes production request `:meta`, and leaves the seeded selector
+available only as an explicit `:seeded-baseline`.  The boundary rejects a
+missing META implementation and a malformed or identity-inconsistent outer
+receipt before tactical construction.  The focused regression proves that a
+META choice of `M-b` sends only `M-b` into inner cascade construction even
+when prepared cascade material exists only for `M-a`.
+
+This is the substitution seam, not the completed live adapter.  A click
+remains stopped until the adapter supplies that seam with the externally
+pinned pipeline snapshot, complete M/E/T/A accounting, current task-state
+channels, and the canonical reason-bearing outer-selection receipt.  In
+particular, no seeded draw may fill the gap merely because META refuses.
+
 ## MAP — prior outer-loop material to keep at hand
 
 ### 1. The pre-H5b outer loop and what it actually did
