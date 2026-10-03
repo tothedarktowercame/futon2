@@ -279,6 +279,19 @@ not permission to weaken or bypass the other three.
   or delete a mission: a separate, reviewable retirement pass must establish
   lifecycle disposition. Pairwise comparisons still require at least one
   shared, current, authoritative channel; missing channels remain absence.
+
+  Freshness audit checkpoint 2026-10-03: Futon3 `f85eca94b` records
+  `meta-task-state-freshness-audit-v1.edn` at SHA-256 `9f978b2c…`. Independent
+  review verified the EFE producer's exact 0–6 normalized scope-density band
+  calculation and its own warning that the band is not a value judgement.
+  It also verified the existing 90-day activity boundary (`<90` recent,
+  `>=90` stale). No classifier was admitted: the EFE band has no independent
+  pinned snapshot, the wholeness artifact lacks generation/input pins and is
+  currently modified by another seat, and the Tornhill/activity snapshots are
+  stale (with E/T/A absent). Thus no stale value enters comparison, missing is
+  not zero, and neither `:museum-work` nor level-set 0 mutates lifecycle state.
+  The next mechanical work is to produce independent current snapshots before
+  deriving the review-only task-state classifications.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
