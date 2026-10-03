@@ -237,6 +237,15 @@ not permission to weaken or bypass the other three.
   the three producer hashes and reran 9 tests / 56 assertions. The criterion
   remains open pending an explicitly authorized acquisition or predictive-
   prior route.
+
+  Operator direction 2026-10-03: take the source-grounded predictive-prior
+  route. Candidate features should begin with structural centrality in the
+  mission network and explicit feasibility for automated progress. Earlier
+  tension/curvature proposals are historical inputs, not default features:
+  prefer morphogenetic signals when a source-pinned correspondence to task
+  development is available. A separate stratified-acquisition Algorithm may
+  update the prior from registered outcomes; it must not bootstrap the initial
+  model or silently turn acquisition into ordinary task selection.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
