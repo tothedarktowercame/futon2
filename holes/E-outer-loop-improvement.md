@@ -179,6 +179,26 @@ belief change or novelty instrumentation, but it is session/retrieval geometry,
 not evidence that a particular mission should be selected. Keep it separate
 unless a future DERIVE step establishes that correspondence.
 
+### 7. The pipeline cascade is the work map
+
+The primary outer-loop input is the live data behind
+`pipeline-pattern-cascade.html`, not a newly synthesized flat M/E/T list. Its
+canonical serving surfaces are Futon3c `GET /api/alpha/cascade-real` (summary,
+composition, holes and standards) and `GET /api/alpha/cascade-real/graph`
+(lineage, clusters, holes, have-to-want arrows, held work, tickets and
+mission-to-pattern links), produced by
+`futon3c.logic.cascade-real-live/cascade-real-summary` and
+`cascade-real-graph`. This is the accumulating map on which continuous durée
+work promotes items upward and makes active work visible in Voxterm.
+
+Centrality, automated feasibility, freshness, EFE level set, Tornhill and
+Salingaros are annotations for interpreting priorities *within that map*.
+They neither replace its population nor manufacture an unrelated candidate
+universe. Outer selection must retain the selected node's canonical cascade
+identity, its incoming/outgoing relations and the exact feed snapshot. A
+partial section is typed missing for the channels it supplies; it is not an
+empty or complete section.
+
 **MAP exit: Met.** The survey above identifies the earlier implementation,
 empirical traces, geometric and feasibility models, practical scheduling
 signals, and their limits without promoting any of them to current authority.
@@ -230,6 +250,12 @@ not permission to weaken or bypass the other three.
   refuses stale sources, unsupported comparisons, missing preference
   direction, or a nonzero information claim without a separately authorized
   latent model, and mutations of those inputs fail named gates.
+
+  Candidate support begins with a verified, externally pinned snapshot of the
+  live pipeline cascade. Task-state channels annotate its nodes and relations.
+  A registry row absent from that map is retained as a typed map-coverage gap,
+  not silently promoted into ordinary comparison. Conversely, a failed
+  cascade section read is missing evidence, never a measured empty section.
 
   Closure, grounded progress, abstention/failure, elapsed-budget fraction and
   token-budget fraction remain registered post-click outcome data. They are
@@ -321,6 +347,15 @@ not permission to weaken or bypass the other three.
   may tie until independently refreshed centrality/Tornhill channels provide
   discrimination. `A-self-heal` is not smuggled into that ordinary comparison:
   it remains the exact-capability, click-budget-gated injured-arm choice.
+
+  Live-feed observation 2026-10-03: `/api/alpha/cascade-real` reported a
+  consistent, composed spine of 236 canonical mission nodes, with O1-by-O4
+  overlap 73 and all five standards true. The graph feed returned lineage,
+  clusters, arrows, held work and filesystem task rows, but its
+  `mission-scope/pattern` section timed out and explicitly reported
+  `:status :failed`. This demonstrates both the intended core input and the
+  required fail-closed rule: the snapshot is useful partial evidence, but is
+  not yet a complete externally pinned selector input.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
