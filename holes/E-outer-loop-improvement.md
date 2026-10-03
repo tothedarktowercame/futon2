@@ -420,9 +420,12 @@ not permission to weaken or bypass the other three.
   Operational boundary 2026-10-03: unfinished scheduler/clock visibility and
   the Nonstarter prototype do not prevent explicitly registered prototype-WM
   clicks. Until this criterion closes, such a click must identify itself as a
-  seeded baseline/acquisition run, retain the complete pipeline/META shadow
-  receipt, and must not claim that META selected its target. This permits
-  evidence acquisition today without weakening the live-selector exit gate.
+  seeded baseline/acquisition run and must not claim that META selected its
+  target. The run packet may pin the contemporaneous pipeline snapshot as a
+  sidecar for offline META replay; it must not fabricate an in-process shadow
+  receipt, because `full_loop_runner` does not yet invoke the prototype META
+  selector. This permits evidence acquisition today without weakening the
+  live-selector exit gate.
 - [x] **Approved Algorithms are real, bounded field members.** The pinned
   approval catalog admits `A-self-heal`, exact capability matching controls
   its injured arm, and a positive numeric click budget is available before it
