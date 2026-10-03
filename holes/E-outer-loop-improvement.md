@@ -219,12 +219,23 @@ not permission to weaken or bypass the other three.
   `b18d8a41e` verifies the source and emits preferences/normalization only.
   Independent review passed 4 tests / 21 assertions plus EDN parsing, exact
   digest, and lint; absent prediction and information inputs still refuse.
-- [ ] **Every scored policy has complete grounded G inputs.** Each candidate
-  carries source-bound predictive distributions and a candidate-specific,
-  Bayes-coherent information model over the common outcome vocabulary.  The
-  evaluator refuses missing prediction, normalization, preference, or
-  information-model inputs, and a mutation of each input class fails a named
-  gate.
+- [ ] **Every scored policy has complete grounded proof-of-concept inputs.**
+  The first META policy scores source-bound, current task-state preference
+  channels rather than fabricating forecasts for terminal outcomes. Explicit
+  automated infeasibility is a support exclusion; it is not a preference or a
+  predicted failure. Each admitted deterministic task-state observation uses
+  the pinned single-known-state categorical model, whose Bayes-coherent EIG is
+  exactly zero. Pairwise comparison requires at least one shared current
+  channel; a missing channel is omitted, never filled with zero. The evaluator
+  refuses stale sources, unsupported comparisons, missing preference
+  direction, or a nonzero information claim without a separately authorized
+  latent model, and mutations of those inputs fail named gates.
+
+  Closure, grounded progress, abstention/failure, elapsed-budget fraction and
+  token-budget fraction remain registered post-click outcome data. They are
+  not proof-of-concept predictive inputs. Learning candidate-specific terminal
+  predictions, nonzero latent information models, and revised preference
+  variances belongs to `A-update-meta-predictive-prior`.
 
   Blocker evidence 2026-10-02: Futon3 `7890a839a` records the source-pinned
   decision at SHA-256 `33ac1617…`. The verified historical dataset has 39
@@ -292,6 +303,24 @@ not permission to weaken or bypass the other three.
   not zero, and neither `:museum-work` nor level-set 0 mutates lifecycle state.
   The next mechanical work is to produce independent current snapshots before
   deriving the review-only task-state classifications.
+
+  Operator clarification 2026-10-03: the preceding task-state construction is
+  the authoritative answer to the earlier numeric-map question. There is no
+  map from centrality and feasibility into the five terminal channels:
+  centrality is a task-state preference and feasibility is support. Use the
+  zero-EIG single-known-state model pinned by Futon3 `988976137`; defer a
+  nonzero latent model and preference-variance recalibration to
+  `A-update-meta-predictive-prior`. Do not exclude a whole M/E/T/A kind merely
+  for missing data; instead report lack of a shared current comparison channel.
+
+  Present coverage report: the only fresh ordinary task-state channel is the
+  automated-progress surface. It is present for M162/E7 and missing for M1,
+  E234, and T69. Thus tickets are currently unrankable as a kind; 234
+  excursions and one mission are individually unrankable on current evidence.
+  The 162 missions and seven excursions with that surface can be compared but
+  may tie until independently refreshed centrality/Tornhill channels provide
+  discrimination. `A-self-heal` is not smuggled into that ordinary comparison:
+  it remains the exact-capability, click-budget-gated injured-arm choice.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
