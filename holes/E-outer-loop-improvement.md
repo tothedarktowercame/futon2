@@ -330,6 +330,18 @@ not permission to weaken or bypass the other three.
   The next mechanical work is to produce independent current snapshots before
   deriving the review-only task-state classifications.
 
+  Cadence clarification 2026-10-03: snapshot freshness and task recency use
+  different clocks. Tornhill/Salingaros/activity artifacts are current for
+  seven days and cross into `:refresh-due` at age seven days; this makes the
+  2026-09-26 artifacts boundary-due on 2026-10-03, not historically obsolete.
+  The 90-day boundary continues to classify the task itself as recent versus
+  `:museum-work`. A weekly refresh is the proposed operating cadence. Scheduler
+  audit found Joe's current crontab empty despite older mission prose saying
+  related EFE jobs were armed, so no refresh job is presently installed or
+  outstanding. Any installed job must regenerate, pin inputs/outputs, validate,
+  and publish atomically; failure retains the last good snapshot as stale and
+  must not overwrite it.
+
   Operator clarification 2026-10-03: the preceding task-state construction is
   the authoritative answer to the earlier numeric-map question. There is no
   map from centrality and feasibility into the five terminal channels:
