@@ -255,6 +255,18 @@ not permission to weaken or bypass the other three.
   through a pinned task-to-file mapping. Missing joins are typed absences, not
   zero development pressure. Centrality and automated feasibility remain
   separate features; Tornhill hotspot is not itself an outcome probability.
+
+  Task-state design checkpoint 2026-10-03: Futon3 `988976137` records the
+  decision artifact at SHA-256 `5c322278…`. A selected policy may expose
+  already-computed centrality, automated-progress surface, and Tornhill proxy
+  as deterministic current-task observations; canonical categorical EIG is
+  exactly zero because no latent uncertainty is resolved. The Gaussian port
+  cannot represent exact determinism without invented observation noise.
+  Current progress-surface coverage is M162/E7/T0/A0; centrality is stale and
+  mission-only; Tornhill is stale with zero currently admissible joins.
+  Terminal/resource predictions remain refused. Implementation awaits the
+  operator's task-state preference and missing-kind ruling plus regenerated
+  source snapshots.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
