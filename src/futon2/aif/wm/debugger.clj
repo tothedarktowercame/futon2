@@ -10,6 +10,7 @@
 
 (defonce ^:private !attached? (atom false))
 (defonce ^:private !stops (atom {}))
+(defonce ^:private !breakpoints (atom #{}))
 
 (defn attach! []
   (reset! !attached? true)
@@ -20,6 +21,17 @@
   {:attached false})
 
 (defn attached? [] @!attached?)
+
+(defn arm-breakpoint! [breakpoint]
+  (swap! !breakpoints conj breakpoint)
+  {:armed (vec (sort @!breakpoints))})
+
+(defn clear-breakpoint! [breakpoint]
+  (swap! !breakpoints disj breakpoint)
+  {:armed (vec (sort @!breakpoints))})
+
+(defn breakpoint-armed? [breakpoint]
+  (contains? @!breakpoints breakpoint))
 
 (defn stoppable-failure?
   "True when THROWABLE is a failure that the runner would close as a failure.

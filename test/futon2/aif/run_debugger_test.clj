@@ -259,6 +259,28 @@
     (is (= :ok (:outcome (last @events))))
     (is (empty? (debugger/stopped)))))
 
+(deftest armed-outer-selection-breakpoint-stops-and-continues-the-same-value
+  (debugger/attach!)
+  (debugger/arm-breakpoint! :outer-selection-complete)
+  (let [judgement (assoc selected-judgement
+                         :outer-task-selection
+                         {:schema :wm/outer-task-selection-v1
+                          :chosen {:id "M-self-documenting-stack"}})
+        running (future
+                  (runner/run-phase!
+                   (phase-opts "outer-selection-stop" (atom []))
+                   {:opportunity-id "op" :attempt-id "attempt"}
+                   :selection (constantly judgement)
+                   nil terminal-selection-condition))
+        stop (wait-for-condition "outer-selection-stop"
+                                 :wm/outer-selection-complete)]
+    (is (= "M-self-documenting-stack" (get-in stop [:ex-data :selected])))
+    (is (= judgement (get-in stop [:ex-data :judgement])))
+    (debugger/clear-breakpoint! :outer-selection-complete)
+    (debugger/continue! "outer-selection-stop"
+                        [:use-value (get-in stop [:ex-data :judgement])])
+    (is (= judgement (deref running 2000 ::timeout)))))
+
 (deftest terminal-abstention-retry-reruns-only-the-same-selection-phase
   (debugger/attach!)
   (let [calls (atom 0)

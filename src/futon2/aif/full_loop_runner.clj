@@ -1753,7 +1753,18 @@
   ([phase judgement]
    (selection-terminal-condition phase judgement nil))
   ([phase judgement context]
-   (when-not (selected-entry judgement)
+   (if (and (selected-entry judgement)
+            (debugger/breakpoint-armed? :outer-selection-complete))
+     (let [outer (:outer-task-selection judgement)]
+       (ex-info "War Machine outer selection completed"
+                {:kind :wm/outer-selection-complete
+                 :failure-stage phase
+                 :outcome :breakpoint
+                 :selected (get-in outer [:chosen :id])
+                 :outer-task-selection outer
+                 :judgement judgement
+                 :selection-context context}))
+     (when-not (selected-entry judgement)
      (let [decision (:decision judgement)
            refusals (vec (or (:refusals decision) []))
            targets (vec (keep :target refusals))
@@ -1768,7 +1779,7 @@
                          :refusals refusals
                          :targets targets}
                   (= 1 (count targets)) (assoc :target (first targets))
-                  (seq context) (assoc :selection-context context)))))))
+                  (seq context) (assoc :selection-context context))))))))
 
 ;; resolve-pinned-selection and pinned-refusal! (RUN4) RETIRED with the flat
 ;; decision (SPEC flat-removal H4, 2026-09-17): they validated a pinned flat
