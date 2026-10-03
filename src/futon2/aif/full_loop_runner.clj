@@ -584,6 +584,7 @@
                        :failure-stage :runner-source
                        :runner/source check})))
     (let [critical ['futon2.aif.full-loop-runtime
+                    'futon2.report.war-machine
                     'futon2.aif.meta-live-outer-selector
                     'futon2.aif.meta-pipeline-selector]
           bad (into {}
