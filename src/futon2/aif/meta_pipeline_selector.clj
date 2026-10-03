@@ -142,5 +142,13 @@
               {:schema schema :status :selected :selected (:id (first winners))
                :reason :minimum-pairwise-task-state-G
                :epistemic-value-nats 0.0 :pairwise pairs
+               :ranking (->> admitted
+                             (sort-by (juxt #(get losses (:id %) 0) :id))
+                             (map-indexed (fn [i candidate]
+                                            {:rank (inc i) :id (:id candidate)
+                                             :kind (:kind candidate)
+                                             :pairwise-losses (get losses (:id candidate) 0)
+                                             :channels (:channels candidate)}))
+                             vec)
                :snapshot-sources (select-keys snapshot [:summary-source :graph-source])
                :typed-exclusions (mapv :id infeasible)})))))))

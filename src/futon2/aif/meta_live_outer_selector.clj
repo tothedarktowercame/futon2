@@ -4,6 +4,7 @@
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-pipeline-selector :as meta]
+            [futon2.aif.mission-registry :as registry]
             [futon2.aif.outer-task-selection :as outer]
             [futon2.aif.pattern-registry :as pattern-registry]))
 
@@ -137,3 +138,19 @@
 
 (defn selector [{:keys [tasks]}]
   (select-live {:tasks tasks}))
+
+(defn preview-live
+  "Read the authoritative registries once and produce the same receipt used by
+  the production selector. This is the read-only Arxana/API projection."
+  []
+  (let [missions (registry/load-missions)
+        excursions (registry/load-excursions)
+        tickets (registry/load-tickets)
+        tasks (vec (concat
+                    (map #(assoc % :kind :mission)
+                         (registry/open-missions missions))
+                    (map #(assoc % :kind :excursion)
+                         (filter registry/live-excursion? (:excursions excursions)))
+                    (map #(assoc % :kind :ticket)
+                         (filter registry/live-ticket? (:tickets tickets)))))]
+    (select-live {:tasks tasks})))

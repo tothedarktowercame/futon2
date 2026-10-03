@@ -31,7 +31,9 @@
            (get-in receipt [:policy :meta-selection :reason])))
     (is (contains? (set (get-in receipt [:policy :meta-selection
                                          :pairwise 0 :shared-channels]))
-                   :pipeline-freshness-cost))))
+                   :pipeline-freshness-cost))
+    (is (= ["M-a" "M-b"]
+           (mapv :id (get-in receipt [:policy :meta-selection :ranking]))))))
 
 (deftest missing-or-equal-evidence-refuses-with-complete-support
   (testing "missing is absence"
