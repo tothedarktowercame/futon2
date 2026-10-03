@@ -246,6 +246,15 @@ not permission to weaken or bypass the other three.
   development is available. A separate stratified-acquisition Algorithm may
   update the prior from registered outcomes; it must not bootstrap the initial
   model or silently turn acquisition into ordinary task selection.
+
+  Operator addition 2026-10-03: for the first proof-of-concept, the existing
+  Tornhill signals from `M-the-perfect-crime` are an authorized stand-in for
+  richer morphogenesis geometry. The proxy must remain named as such. Its
+  source surface is the audited per-file report (`revs`, `churn`, complexity,
+  `hotspot = revs × complexity.total`, age and trend), joined to a task only
+  through a pinned task-to-file mapping. Missing joins are typed absences, not
+  zero development pressure. Centrality and automated feasibility remain
+  separate features; Tornhill hotspot is not itself an outcome probability.
 - [ ] **The verified META policy is the live outer selector.** The complete
   field observation, construction exclusions, comparison receipt, selected
   identity, and rationale reach `full_loop_runtime` / `full_loop_runner`
