@@ -5,6 +5,7 @@
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.report.war-machine :as wm]))
 
 (deftest flight-runner-does-not-load-the-report
@@ -34,6 +35,7 @@
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
               :outer-task-policy :meta
+              :outer-task-selection-fn meta-live/selector
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}

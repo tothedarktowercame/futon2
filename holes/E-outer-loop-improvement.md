@@ -124,6 +124,23 @@ pinned pipeline snapshot, complete M/E/T/A accounting, current task-state
 channels, and the canonical reason-bearing outer-selection receipt.  In
 particular, no seeded draw may fill the gap merely because META refuses.
 
+Live-adapter evidence 2026-10-03: `futon2.aif.meta-live-outer-selector`
+fetches and byte-pins each canonical Futon3c cascade surface once, normalizes
+only the closed section-status vocabulary, intersects the registry field with
+the map, and accounts non-map tasks as typed exclusions.  It projects only
+source-pinned declared priority and explicit feasibility into the pure META
+selector, then translates selection or refusal into the canonical outer
+receipt.  Production installs this adapter at the seam above; it has no
+seeded fallback.
+
+The first non-click live replay is an important refusal, not a launch result:
+667 live registry tasks partitioned into 35 current map nodes and 632 typed
+`:pipeline/not-on-current-map` exclusions.  None of the 35 map nodes had a
+source-pinned numeric declared priority, so all comparisons lacked a shared
+current channel and META returned `:shared-current-channel-unavailable` with
+no action.  The adapter is live, but the remaining task-state channel work is
+still a launch blocker; no click should turn this honest absence into a draw.
+
 ## MAP — prior outer-loop material to keep at hand
 
 ### 1. The pre-H5b outer loop and what it actually did

@@ -35,7 +35,9 @@
           (some #(not= :ok (:status %)) (vals section-status)))
       (conj :cascade-section-incomplete))))
 
-(defn- node-ids [graph]
+(defn pipeline-node-ids
+  "Return the exact task/pattern identities exposed by a verified graph value."
+  [graph]
   (set (concat
         (mapcat (juxt :mission :predecessor :successor) (:lineage graph))
         (map :mission (:clusters graph))
@@ -91,7 +93,7 @@
       (refusal :candidate-field-invalid {:expected :vector})
 
       :else
-      (let [nodes (node-ids (:graph snapshot))
+      (let [nodes (pipeline-node-ids (:graph snapshot))
             malformed (into {}
                             (keep (fn [c]
                                     (when-let [errors (seq (candidate-errors nodes c))]

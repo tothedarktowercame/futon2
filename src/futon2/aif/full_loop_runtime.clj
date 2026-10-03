@@ -4,6 +4,7 @@
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.wm.click-ask :as click-ask]
@@ -29,7 +30,9 @@
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
-  (let [opts (update opts :outer-task-policy #(or % :meta))
+  (let [opts (-> opts
+                 (update :outer-task-policy #(or % :meta))
+                 (update :outer-task-selection-fn #(or % meta-live/selector)))
         selected-judgment (atom nil)]
     {:judge-fn (fn [days]
                  (let [generated (selection-judge opts days)]
