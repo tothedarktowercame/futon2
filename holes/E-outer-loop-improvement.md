@@ -199,6 +199,23 @@ identity, its incoming/outgoing relations and the exact feed snapshot. A
 partial section is typed missing for the channels it supplies; it is not an
 empty or complete section.
 
+### 8. Joe-facing clock and Nonstarter are sibling control surfaces
+
+Futon5a's Nonstarter prototype is the operator-facing analogue of this outer
+loop: finite weekly attention is bid, actual use is cleared, and the discrepancy
+drives review. Its clock is human cadence (epochs, weeks, days and sparse
+markers), whereas the WM's clock is machine cadence (registered clicks, ticks,
+task promotions and terminal receipts). Both operate over an accumulating
+cascade and both need a legible "what is due / active / cleared" surface.
+
+Relevant retained artifacts are `futon5a/nonstarter-tech-note.md` (bid/clear as
+prediction/observation), `futon5a/docs/joe-loop-r-contract-audit.md` (the Joe
+loop against R1-R19), `futon5a/futon5a.devmap` (weekly discrepancy review), and
+`futon5a/docs/joe-terminal-vocabulary.md`. A future Arxana Browse clock can
+compose scheduled refreshes, WM work bubbles and Joe-facing weekly review, but
+Nonstarter remains a prototype and is not a dependency of the WM selector.
+Returning to it is a separate mission/excursion, not a new launch gate here.
+
 **MAP exit: Met.** The survey above identifies the earlier implementation,
 empirical traces, geometric and feasibility models, practical scheduling
 signals, and their limits without promoting any of them to current authority.
@@ -399,6 +416,13 @@ not permission to weaken or bypass the other three.
   before tactical cascade construction.  The legacy seeded-uniform selector
   cannot launch an ordinary click except as the explicitly typed registered
   baseline fallback described above.
+
+  Operational boundary 2026-10-03: unfinished scheduler/clock visibility and
+  the Nonstarter prototype do not prevent explicitly registered prototype-WM
+  clicks. Until this criterion closes, such a click must identify itself as a
+  seeded baseline/acquisition run, retain the complete pipeline/META shadow
+  receipt, and must not claim that META selected its target. This permits
+  evidence acquisition today without weakening the live-selector exit gate.
 - [x] **Approved Algorithms are real, bounded field members.** The pinned
   approval catalog admits `A-self-heal`, exact capability matching controls
   its injured arm, and a positive numeric click budget is available before it
