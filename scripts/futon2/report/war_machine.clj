@@ -6605,12 +6605,16 @@
         selected-task-id (get-in outer-task-selection [:chosen :id])
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
+                           (mission-hole-wants/merge-ticket-sources
                             (mission-hole-wants/merge-into-sources
                              (cascade-sources/load-declared
                               (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))
                              mission-registry/default-code-root
                              (:missions loaded-missions)
-                             :WM)))
+                             :WM)
+                            mission-registry/default-code-root
+                            (:tickets loaded-tickets)
+                            :WM)))
         cascade-source-base (or (:cascade-sources judge-opts) declared-sources {})
         ;; Past cascades are not declarations.  Their selected/applied/outcome
         ;; receipts enter the next construction only as target-local metadata;

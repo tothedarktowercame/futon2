@@ -169,6 +169,64 @@
                 :reason-not-projected
                 "no check can witness closure: the item carries no checkbox to flip"}}))
 
+(defn ticket-source
+  "Project one live ticket's declared DONE status as a mechanically observable
+   inner-loop want. The ticket remains the authority: no work steps or outcome
+   facts are inferred from its prose."
+  [code-root ticket]
+  (when (= :live (:status-class ticket))
+    (when-let [{:keys [repo path text]} (read-current-mission code-root ticket)]
+      (let [target (str (:id ticket))
+            token (keyword "ticket-closure"
+                           (str "h" (subs (load-identity/sha256
+                                           (.getBytes target "UTF-8")) 0 12)))]
+        {:target target
+         :want [token]
+         :universe {token false}
+         :locators {token {:class :C4 :repo repo :sha "HEAD" :path path
+                           :decl "**Status:** DONE"}}
+         :interpretation {:patterns {} :receipts {}}
+         :candidates []
+         :source {:kind :current-ticket-head :repo repo :path path
+                  :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))}}))))
+
+(defn ticket-sources [code-root tickets]
+  (let [live (filter #(= :live (:status-class %)) tickets)
+        sources (keep #(ticket-source code-root %) live)]
+    {:sources (vec sources)
+     :coverage {:live-tickets (count live)
+                :tickets-projected (count sources)
+                :closure-form "**Status:** DONE"}}))
+
+(defn merge-ticket-sources
+  "Add live ticket closure wants to an already scheduled/scaled source family."
+  [declared code-root tickets context]
+  (let [{:keys [sources coverage]} (ticket-sources code-root tickets)
+        declared-targets (set (keys (:universes declared)))
+        one-of (fn [m] (let [vs (distinct (keep #(get m %) declared-targets))]
+                         (when (= 1 (count vs)) (first vs))))
+        schedule (one-of (:preference-schedules declared))
+        scales (one-of (:preference-scales declared))
+        fresh (if (and schedule scales) sources [])
+        by (fn [k] (into {} (map (juxt :target k)) fresh))]
+    (-> declared
+        (update :preference-schedules merge
+                (into {} (map (fn [f] [(:target f) schedule])) fresh))
+        (update :preference-scales merge
+                (into {} (map (fn [f] [(:target f) scales])) fresh))
+        (update :universes merge (by :universe))
+        (update :wants merge (by :want))
+        (update :locators merge (by :locators))
+        (update :candidates merge (by :candidates))
+        (update :context-by-target merge
+                (into {} (map (fn [f] [(:target f) context])) fresh))
+        (assoc :ticket-closure-coverage
+               (assoc coverage :targets-added (count fresh)
+                      :adopted-schedule schedule :adopted-scales scales
+                      :not-generated-reason
+                      (when-not (and schedule scales)
+                        :declared-sources-lack-one-agreed-schedule-or-scales))))))
+
 (defn merge-into-sources
   "Merge mission-stated wants into the declared source map, so a mission's own
    document can carry its live-C weight into the decision.

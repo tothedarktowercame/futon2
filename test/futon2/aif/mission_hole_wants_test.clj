@@ -133,3 +133,16 @@
             (str "unreadable token from id " id
                  " -- it would print into a run record and throw on the next read"))
         (is (= [tok] (edn/read-string (pr-str [tok]))) "also inside a collection")))))
+
+(deftest live-ticket-status-is-a-checkable-closure-want
+  (let [ticket {:id "T-repair-one" :status-class :live
+                :path "/root/futon2/holes/tickets/T-repair-one.md"
+                :text "# Repair\n\n**Status:** OPEN\n"}
+        source (mhw/ticket-source "/root" ticket)
+        token (first (:want source))]
+    (is (= false (get-in source [:universe token])))
+    (is (= {:class :C4 :repo "futon2" :sha "HEAD"
+            :path "holes/tickets/T-repair-one.md" :decl "**Status:** DONE"}
+           (get-in source [:locators token])))
+    (is (= :current-ticket-head (get-in source [:source :kind])))
+    (is (nil? (mhw/ticket-source "/root" (assoc ticket :status-class :terminal))))))

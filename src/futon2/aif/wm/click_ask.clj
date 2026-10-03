@@ -84,14 +84,18 @@
                     wi/default-store)
           ;; read only when a test seam does not replace it
           missions (delay (:missions (reg/load-missions)))
+          tickets (delay (:tickets (reg/load-tickets)))
           code-root (or mission-code-root reg/default-code-root)
           sources (or cascade-sources
                       (cs/with-context-fn
-                       (mhw/merge-into-sources
-                        (cs/load-declared (or cascade-sources-dir cs/default-dir))
-                        code-root @missions :WM)))
+                       (mhw/merge-ticket-sources
+                        (mhw/merge-into-sources
+                         (cs/load-declared (or cascade-sources-dir cs/default-dir))
+                         code-root @missions :WM)
+                        code-root @tickets :WM)))
           pick (mission-hole-pick (or mission-hole-sources
-                                      (:sources (mhw/mission-sources code-root @missions)))
+                                      (concat (:sources (mhw/mission-sources code-root @missions))
+                                              (:sources (mhw/ticket-sources code-root @tickets))))
                                   target)]
       (if-not pick
         {:target target :outcome :no-mission-hole-want :published false}
