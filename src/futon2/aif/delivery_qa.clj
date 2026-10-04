@@ -4,9 +4,8 @@
    Operator decision evidence 6e6f56a1-b9d7-4f83-928f-3a211ef890a0 moves
    the human gate from enactment to delivered-work review. Writes are accepted
    only through the Arxana Field Desk API on port 7070."
-  (:require [babashka.http-client :as http]
-            [cheshire.core :as json]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [futon2.aif.morning-brief :as morning-brief]))
 
 (def endpoint-path "/api/alpha/morning-brief/addendum")
 (def decision-evidence-id "6e6f56a1-b9d7-4f83-928f-3a211ef890a0")
@@ -70,26 +69,21 @@
      :author "war-machine"}))
 
 (defn emit!
-  "POST one mandatory QA note and fail the delivery gate on any rejection."
+  "Write one mandatory QA note through the canonical Field Desk store.
+
+  The production runner and Field Desk HTTP handler share this JVM and the
+  same `morning-brief/addendum!` authority. Calling that authority directly
+  avoids a synchronous request from the sole WM runner back into its serving
+  HTTP pool. The public endpoint remains the operator-facing boundary."
   [opts item]
   (let [url (endpoint opts)
         payload (qa-note item)
-        response
-        (http/post url
-                   {:headers {"Content-Type" "application/json"}
-                    :body (json/generate-string payload)
-                    :timeout 10000
-                    :throw false})
-        response-body
-        (try
-          (json/parse-string (str (:body response)) true)
-          (catch Exception _ {}))]
-    (when-not (and (<= 200 (long (or (:status response) 0)) 299)
-                   (true? (:ok response-body)))
-      (throw
-       (ex-info "Field Desk delivery QA gate failed"
-                {:status (:status response)
-                 :response response-body
-                 :endpoint url
-                 :attempt-id (:attempt-id item)})))
-    (:addendum response-body)))
+        kind (keyword (:kind payload))]
+    (try
+      (morning-brief/addendum! (:attempt-id payload) kind (:title payload)
+                               (:body payload) (:author payload))
+      (catch Throwable throwable
+        (throw
+         (ex-info "Field Desk delivery QA gate failed"
+                  {:endpoint url :attempt-id (:attempt-id item)}
+                  throwable))))))

@@ -1,8 +1,7 @@
 (ns futon2.aif.delivery-qa-test
-  (:require [babashka.http-client :as http]
-            [cheshire.core :as json]
-            [clojure.test :refer [deftest is testing]]
-            [futon2.aif.delivery-qa :as qa]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.delivery-qa :as qa]
+            [futon2.aif.morning-brief :as morning-brief]))
 
 (def delivered-item
   {:attempt-id "attempt-qa-1"
@@ -26,23 +25,23 @@
     (is (= "Wired automatic bounded autonomy."
            (:delivery/built-or-changed body)))))
 
-(deftest emitter-writes-only-through-field-desk-on-7070
+(deftest emitter-writes-through-canonical-field-desk-authority
   (let [seen (atom nil)]
     (with-redefs
-      [http/post
-       (fn [url opts]
-         (reset! seen {:url url
-                       :payload (json/parse-string (:body opts) true)})
-         {:status 200
-          :body (json/generate-string
-                 {:ok true
-                  :addendum {:morning-brief/addendum-id "mba-1"}})})]
+      [morning-brief/addendum!
+       (fn [attempt-id kind title body author]
+         (reset! seen {:attempt-id attempt-id :kind kind :title title
+                       :body body :author author})
+         {:morning-brief/addendum-id "mba-1"})]
       (is (= "mba-1"
              (:morning-brief/addendum-id
               (qa/emit! {:agency-base "http://127.0.0.1:7070"}
                         delivered-item))))
-      (is (= "http://127.0.0.1:7070/api/alpha/morning-brief/addendum"
-             (:url @seen)))))
+      (is (= {:attempt-id "attempt-qa-1" :kind :note
+              :title "War Machine delivery QA — attempt-qa-1"
+              :body (:body (qa/qa-note delivered-item))
+              :author "war-machine"}
+             @seen))))
   (testing "a substrate or alternate API port cannot receive delivery QA"
     (is (thrown-with-msg?
          clojure.lang.ExceptionInfo
@@ -52,10 +51,8 @@
 
 (deftest rejected-field-desk-write-is-a-gate-failure
   (with-redefs
-    [http/post
-     (fn [& _]
-       {:status 400
-        :body (json/generate-string {:ok false :err "invalid"})})]
+    [morning-brief/addendum!
+     (fn [& _] (throw (ex-info "invalid" {:kind :invalid-addendum})))]
     (is (thrown-with-msg?
          clojure.lang.ExceptionInfo
          #"delivery QA gate failed"
