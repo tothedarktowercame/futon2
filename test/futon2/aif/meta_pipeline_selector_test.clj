@@ -72,6 +72,45 @@
     (is (= [:not-in-pipeline-cascade]
            (get-in receipt [:details :candidate-errors "M-not-on-map"])))))
 
+(deftest qualified-work-identities-join-canonical-registry-identities
+  (let [qualified (-> snapshot
+                      (assoc-in [:graph :clusters]
+                                [{:cluster "c" :mission "futon3c-d/mission/war-machine-pilot"}])
+                      (assoc-in [:graph :lineage]
+                                [{:mission "futon2-d/excursion/outer-loop-improvement"}])
+                      (assoc-in [:graph :tickets :items]
+                                [{:stem "futon3c-d/ticket/repair-observation"}]))
+        ids (selector/pipeline-node-ids (:graph qualified))]
+    (is (every? ids ["M-war-machine-pilot"
+                     "E-outer-loop-improvement"
+                     "T-repair-observation"]))
+    (is (= :selected
+           (:status (selector/select
+                     {:snapshot qualified
+                      :candidates [(candidate "M-war-machine-pilot" 0.2)]}))))))
+
+(deftest ambiguous-and-malformed-qualified-identities-fail-closed
+  (testing "the same canonical id from two authorities is ambiguous"
+    (let [colliding (assoc-in snapshot [:graph :lineage]
+                              [{:mission "futon2-d/mission/same"}
+                               {:mission "futon3c-d/mission/same"}])
+          receipt (selector/select {:snapshot colliding
+                                    :candidates [(candidate "M-same" 0.2)]})]
+      (is (not (contains? (selector/pipeline-node-ids (:graph colliding))
+                          "M-same")))
+      (is (= :candidate-invalid (:reason receipt)))
+      (is (= [:pipeline-identity-collision]
+             (get-in receipt [:details :candidate-errors "M-same"])))))
+  (testing "a work-looking identity with an extra path component is not guessed"
+    (let [malformed (assoc-in snapshot [:graph :lineage]
+                              [{:mission "futon3c-d/mission/nested/name"}])
+          receipt (selector/select {:snapshot malformed
+                                    :candidates [(candidate "M-name" 0.2)]})]
+      (is (not (contains? (selector/pipeline-node-ids (:graph malformed))
+                          "M-name")))
+      (is (= [:not-in-pipeline-cascade]
+             (get-in receipt [:details :candidate-errors "M-name"]))))))
+
 (deftest ties-refuse-rather-than-selecting-first
   (let [receipt (selector/select {:snapshot snapshot
                                   :candidates [(candidate "M-a" 0.5)

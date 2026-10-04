@@ -23,6 +23,44 @@
 (defn- refusal [reason details]
   {:schema schema :status :refused :reason reason :details details})
 
+(def ^:private qualified-work-id
+  #"^([^/]+)-d/(mission|excursion|ticket)/([^/]+)$")
+
+(def ^:private kind-prefix
+  {"mission" "M-" "excursion" "E-" "ticket" "T-"})
+
+(defn- raw-pipeline-node-ids [graph]
+  (concat
+   (mapcat (juxt :mission :predecessor :successor) (:lineage graph))
+   (map :mission (:clusters graph))
+   (mapcat (juxt :have :want) (:arrows graph))
+   (map :mission (:held graph))
+   (map :stem (get-in graph [:tickets :items]))
+   (mapcat (juxt :mission :pattern) (get-in graph [:patterns :edges]))))
+
+(defn- pipeline-identity-analysis [graph]
+  (let [raw-ids (set (filter string? (raw-pipeline-node-ids graph)))
+        malformed (->> raw-ids
+                       (filter #(and (re-find #"-d/(mission|excursion|ticket)/" %)
+                                     (not (re-matches qualified-work-id %))))
+                       sort vec)
+        qualified (keep (fn [raw]
+                          (when-let [[_ authority kind stem]
+                                     (re-matches qualified-work-id raw)]
+                            {:raw raw :authority authority
+                             :canonical (str (kind-prefix kind) stem)}))
+                        raw-ids)
+        by-canonical (group-by :canonical qualified)
+        collisions (into (sorted-map)
+                         (keep (fn [[canonical rows]]
+                                 (when (< 1 (count (set (map :authority rows))))
+                                   [canonical (vec (sort (map :raw rows)))])))
+                         by-canonical)
+        canonicalized (reduce (fn [ids {:keys [raw canonical]}]
+                                (conj (disj ids raw) canonical))
+                              raw-ids qualified)]
+    {:ids canonicalized :malformed malformed :collisions collisions}))
+
 (defn- snapshot-errors [{:keys [schema summary-source graph-source summary graph]}]
   (let [section-status (:section-status graph)]
     (cond-> []
@@ -39,26 +77,27 @@
       (conj :cascade-section-incomplete))))
 
 (defn pipeline-node-ids
-  "Return the exact task/pattern identities exposed by a verified graph value."
+  "Return registry-canonical M/E/T ids and exact non-work identities in graph.
+
+  Qualified work ids are accepted only in the exact `AUTHORITY-d/kind/stem`
+  form. Ambiguous canonical ids and malformed work ids are omitted rather than
+  guessed; unrelated exact identities remain available."
   [graph]
-  (set (concat
-        (mapcat (juxt :mission :predecessor :successor) (:lineage graph))
-        (map :mission (:clusters graph))
-        (mapcat (juxt :have :want) (:arrows graph))
-        (map :mission (:held graph))
-        (map :stem (get-in graph [:tickets :items]))
-        (mapcat (juxt :mission :pattern) (get-in graph [:patterns :edges])))))
+  (let [{:keys [ids malformed collisions]} (pipeline-identity-analysis graph)]
+    (apply disj ids (concat malformed (keys collisions)))))
 
 (defn- channel-valid? [[_ {:keys [value source freshness]}]]
   (and (number? value) (Double/isFinite (double value))
        (<= 0.0 (double value) 1.0)
        (pin? source) (= :current freshness)))
 
-(defn- candidate-errors [nodes candidate]
+(defn- candidate-errors [nodes collisions candidate]
   (cond-> []
     (not (string? (:id candidate))) (conj :identity-invalid)
     (not (contains? task-kinds (:kind candidate))) (conj :kind-invalid)
-    (not (contains? nodes (:id candidate))) (conj :not-in-pipeline-cascade)
+    (contains? collisions (:id candidate)) (conj :pipeline-identity-collision)
+    (and (not (contains? collisions (:id candidate)))
+         (not (contains? nodes (:id candidate)))) (conj :not-in-pipeline-cascade)
     (not (contains? #{:supported :infeasible :unknown}
                     (get-in candidate [:support :automated-feasibility])))
     (conj :feasibility-invalid)
@@ -96,10 +135,12 @@
       (refusal :candidate-field-invalid {:expected :vector})
 
       :else
-      (let [nodes (pipeline-node-ids (:graph snapshot))
+      (let [analysis (pipeline-identity-analysis (:graph snapshot))
+            nodes (pipeline-node-ids (:graph snapshot))
             malformed (into {}
                             (keep (fn [c]
-                                    (when-let [errors (seq (candidate-errors nodes c))]
+                                    (when-let [errors (seq (candidate-errors
+                                                           nodes (:collisions analysis) c))]
                                       [(:id c) (vec errors)])))
                             candidates)
             infeasible (filterv #(= :infeasible
