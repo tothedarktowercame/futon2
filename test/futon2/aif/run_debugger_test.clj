@@ -1,6 +1,7 @@
 (ns futon2.aif.run-debugger-test
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.full-loop-runtime]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.registered-run-telemetry :as telemetry]
