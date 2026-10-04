@@ -121,7 +121,6 @@
              (map :mission (:clusters graph))
              (mapcat (juxt :have :want) (:arrows graph))
              (map :mission (:held graph))
-             (map :stem (get-in graph [:tickets :items]))
              (map :mission (get-in graph [:patterns :edges])))]
     (frequencies (keep meta/canonical-work-id raw))))
 
@@ -278,67 +277,128 @@
       (throw (ex-info "git provenance command failed"
                       {:dir dir :args args :exit exit :stderr err})))))
 
-(defn- git-command-raw [dir & args]
-  (let [{:keys [exit out err]} (apply shell/sh "git" "-C" dir args)]
-    (if (zero? exit)
-      out
-      (throw (ex-info "git provenance command failed"
-                      {:dir dir :args args :exit exit :stderr err})))))
+(defn- repository-root [path]
+  (loop [f (.getParentFile (java.io.File. path))]
+    (when f
+      (if (.exists (java.io.File. f ".git"))
+        (.getCanonicalPath f)
+        (recur (.getParentFile f))))))
 
-(defn- trailer-values [text label]
-  (mapv second (re-seq (re-pattern (str "(?m)^" label ": (.+)$")) text)))
+(defn- git-blob-id [^bytes content]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-1")
+        header (.getBytes (str "blob " (alength content) "\u0000") "UTF-8")]
+    (.update digest header)
+    (.update digest content)
+    (format "%040x" (java.math.BigInteger. 1 (.digest digest)))))
 
-(defn- last-touch-observation [task]
+(def ^:private git-log-format
+  (str "%x1e%H%x1f%(trailers:key=Agent-Id,valueonly,separator=%x1d)"
+       "%x1f%(trailers:key=Agency-Job,valueonly,separator=%x1d)"
+       "%x1f%(trailers:key=Dispatched-By,valueonly,separator=%x1d)"))
+
+(defn- split-values [s]
+  (if (str/blank? s) [] (str/split s #"\u001d")))
+
+(defn- repo-last-touch [repo rel]
+  (let [out (apply git-command repo "-c" "core.quotePath=false" "log"
+                   "-1" (str "--format=" git-log-format) "--raw" "--no-renames"
+                   "--abbrev=40" "--" [rel])]
+    (reduce
+     (fn [found record]
+       (let [[header body] (str/split record #"\n" 2)
+             [commit agents jobs dispatchers] (str/split header #"\u001f" -1)
+             provenance {:commit commit
+                         :agent-ids (split-values agents)
+                         :agency-jobs (split-values jobs)
+                         :dispatched-by (split-values dispatchers)}]
+         (reduce (fn [m line]
+                   (if-let [[_ blob rel]
+                            (re-matches #":[0-7]+ [0-7]+ [0-9a-f]+ ([0-9a-f]+) [A-Z]\t(.+)"
+                                        line)]
+                     (if (contains? m rel) m (assoc m rel (assoc provenance :blob blob)))
+                     m))
+                 found (str/split-lines (or body "")))))
+     {} (rest (str/split out #"\u001e")))))
+
+(defn- classify-last-touch [task touch]
   (try
     (let [path (get-in task [:source :path])
           declared-sha (get-in task [:source :sha256])
-          parent (.getParent (java.io.File. path))
-          repo (git-command parent "rev-parse" "--show-toplevel")
-          rel (.toString (.relativize (.toPath (java.io.File. repo))
-                                     (.toPath (java.io.File. path))))
-          commit (git-command repo "log" "-1" "--format=%H" "--" rel)]
-      (if (str/blank? commit)
+          content (java.nio.file.Files/readAllBytes (.toPath (java.io.File. path)))
+          current-sha (field/sha256 content)
+          current-blob (git-blob-id content)
+          {:keys [commit blob agent-ids agency-jobs dispatched-by]} touch]
+      (cond
+        (nil? touch)
         {:state :unknown :reason :source-uncommitted :source (:source task)}
-        (let [blob (git-command-raw repo "show" (str commit ":" rel))
-              blob-sha (field/sha256 (.getBytes ^String blob "UTF-8"))
-              current-sha (field/sha256 (.getBytes ^String (slurp path) "UTF-8"))
-              commit-data (git-command
-                           repo "show" "-s"
-                           "--format=%H%n%(trailers:key=Agent-Id)%n%(trailers:key=Agency-Job)%n%(trailers:key=Dispatched-By)"
-                           commit)
-              agent-ids (trailer-values commit-data "Agent-Id")
-              agency-jobs (trailer-values commit-data "Agency-Job")
-              dispatched-by (trailer-values commit-data "Dispatched-By")]
-          (cond
-            (or (not= declared-sha blob-sha) (not= declared-sha current-sha))
-            {:state :unknown :reason :source-commit-mismatch
-             :source (:source task) :commit commit :commit-source-sha256 blob-sha}
 
-            (not-every? #(= 1 (count %)) [agent-ids agency-jobs dispatched-by])
-            {:state :unknown :reason :commit-trailers-missing-or-ambiguous
-             :source (:source task) :commit commit
-             :trailers {:agent-id agent-ids :agency-job agency-jobs
-                        :dispatched-by dispatched-by}}
+        (or (not= declared-sha current-sha) (not= blob current-blob))
+        {:state :unknown :reason :source-commit-mismatch
+         :source (:source task) :commit commit :commit-source-git-blob blob
+         :current-source-sha256 current-sha :current-git-blob current-blob}
 
-            :else
-            (let [agent-id (first agent-ids)]
-              {:state (if (str/starts-with? agent-id "wm-")
-                        :war-machine-authored :agent-authored)
-               :source (:source task) :commit commit
-               :trailers {:agent-id agent-id
-                          :agency-job (first agency-jobs)
-                          :dispatched-by (first dispatched-by)}})))))
+        (not-every? #(= 1 (count %)) [agent-ids agency-jobs dispatched-by])
+        {:state :unknown :reason :commit-trailers-missing-or-ambiguous
+         :source (:source task) :commit commit
+         :trailers {:agent-id agent-ids :agency-job agency-jobs
+                    :dispatched-by dispatched-by}}
+
+        :else
+        (let [agent-id (first agent-ids)]
+          {:state (if (str/starts-with? agent-id "wm-")
+                    :war-machine-authored :agent-authored)
+           :source (:source task) :commit commit
+           :trailers {:agent-id agent-id :agency-job (first agency-jobs)
+                      :dispatched-by (first dispatched-by)}})))
     (catch Throwable t
       {:state :unknown :reason :git-provenance-unavailable
        :source (:source task) :error-class (.getName (class t))
        :error-message (.getMessage t)})))
 
+(defn- last-touch-observations [tasks]
+  (let [located (mapv (fn [task]
+                        (let [path (get-in task [:source :path])
+                              repo (when (string? path) (repository-root path))]
+                          {:task task :repo repo
+                           :rel (when repo
+                                  (.toString (.relativize
+                                              (.toPath (java.io.File. repo))
+                                              (.toPath (java.io.File. path)))))}))
+                      tasks)
+        pool (java.util.concurrent.Executors/newFixedThreadPool 8)]
+    ;; One log process supplies commit, trailers and blob identity.  Run the
+    ;; structurally bounded field with a fixed eight-process ceiling; latency
+    ;; follows the cascade field without exhausting the serving JVM's threads.
+    (try
+      (let [jobs (mapv (fn [{:keys [task repo rel]}]
+                         (reify java.util.concurrent.Callable
+                           (call [_]
+                             [(:id task)
+                              (if repo
+                                (try
+                                  (classify-last-touch
+                                   task (get (repo-last-touch repo rel) rel))
+                                  (catch Throwable t
+                                    {:state :unknown
+                                     :reason :git-provenance-unavailable
+                                     :source (:source task)
+                                     :error-class (.getName (class t))
+                                     :error-message (.getMessage t)}))
+                                {:state :unknown
+                                 :reason :git-provenance-unavailable
+                                 :source (:source task)})])))
+                       located)]
+        (into {} (map #(.get ^java.util.concurrent.Future %)
+                      (.invokeAll pool jobs))))
+      (finally (.shutdown pool)))))
+
 (defn- attach-work-attribution [tasks snapshot]
-  (mapv (fn [task]
-          (assoc task
-                 :ownership (ownership-observation task snapshot)
-                 :last-touch (last-touch-observation task)))
-        tasks))
+  (let [last-touches (last-touch-observations tasks)]
+    (mapv (fn [task]
+            (assoc task
+                   :ownership (ownership-observation task snapshot)
+                   :last-touch (get last-touches (:id task))))
+          tasks)))
 
 (defn- canonical-receipt [tasks excluded selection]
   (let [support (mapv outer/task-view tasks)
@@ -368,8 +428,12 @@
   (let [{ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations tasks)
         snapshot (fetch-snapshot)
-        attributed-tasks (attach-work-attribution ordinary-tasks snapshot)
         nodes (meta/pipeline-node-ids (:graph snapshot))
+        ;; Git provenance is useful only for structural map members.  Resolve
+        ;; membership before spawning provenance reads so the complete ticket
+        ;; inventory cannot make browser latency grow with every file in it.
+        raw-on-map (filterv #(contains? nodes (:id %)) ordinary-tasks)
+        attributed-tasks (attach-work-attribution raw-on-map snapshot)
         actively-owned (filterv #(contains? #{:active :ambiguous}
                                              (get-in % [:ownership :state]))
                                 attributed-tasks)
@@ -385,8 +449,8 @@
                         :ownership/ambiguous-active-owner)
                       :ineligibility-evidence (:ownership %))
               actively-owned)
-        on-map (filterv #(contains? nodes (:id %)) selectable-tasks)
-        off-map (->> selectable-tasks
+        on-map selectable-tasks
+        off-map (->> ordinary-tasks
                      (remove #(contains? nodes (:id %)))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
@@ -421,21 +485,24 @@
    :chosen (:chosen receipt)
    :action (:action receipt)})
 
+(defn live-registry-tasks
+  "Read the authoritative registries once into the outer-task input shape."
+  []
+  (let [missions (registry/load-missions)
+        excursions (registry/load-excursions)
+        tickets (registry/load-tickets)]
+    (vec (concat
+          (map #(assoc % :kind :mission) (registry/open-missions missions))
+          (map #(assoc % :kind :excursion)
+               (filter registry/live-excursion? (:excursions excursions)))
+          (map #(assoc % :kind :ticket)
+               (filter registry/live-ticket? (:tickets tickets)))))))
+
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by
   the production selector. This is the read-only Arxana/API projection."
   []
-  (let [missions (registry/load-missions)
-        excursions (registry/load-excursions)
-        tickets (registry/load-tickets)
-        tasks (vec (concat
-                    (map #(assoc % :kind :mission)
-                         (registry/open-missions missions))
-                    (map #(assoc % :kind :excursion)
-                         (filter registry/live-excursion? (:excursions excursions)))
-                    (map #(assoc % :kind :ticket)
-                         (filter registry/live-ticket? (:tickets tickets)))))]
-    (select-live {:tasks tasks})))
+  (select-live {:tasks (live-registry-tasks)}))
 
 (defn preview-live-browser
   "Compute the canonical live selection and return its bounded UI projection."

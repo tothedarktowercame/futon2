@@ -39,13 +39,15 @@
                   (str (kind-prefix kind) stem))))
 
 (defn- raw-pipeline-node-ids [graph]
+  ;; Only structural work positions define membership.  The tickets section is
+  ;; an inventory/mtime surface, and :pattern names evidence associated with a
+  ;; mission; neither may promote a registry file onto the cascade map.
   (concat
    (mapcat (juxt :mission :target :predecessor :successor) (:lineage graph))
    (map :mission (:clusters graph))
    (mapcat (juxt :have :want) (:arrows graph))
    (map :mission (:held graph))
-   (map :stem (get-in graph [:tickets :items]))
-   (mapcat (juxt :mission :pattern) (get-in graph [:patterns :edges]))))
+   (map :mission (get-in graph [:patterns :edges]))))
 
 (defn- pipeline-identity-analysis [graph]
   (let [raw-ids (set (filter string? (raw-pipeline-node-ids graph)))

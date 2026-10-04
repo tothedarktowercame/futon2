@@ -75,10 +75,27 @@
         a-channel (get-in candidates [0 :channels
                                       :pipeline-structural-centrality-cost])]
     (is (= "M-a" (:selected receipt)))
-    (is (= 0.25 (:value a-channel)))
-    (is (= 3 (get-in a-channel [:observation :value])))
+    (is (= (/ 1.0 3.0) (:value a-channel)))
+    (is (= 2 (get-in a-channel [:observation :value])))
     (is (= (:graph-source central) (:source a-channel)))
     (is (= 0.0 (:epistemic-value-nats receipt)))))
+
+(deftest complete-ticket-inventory-cannot-enlarge-live-field
+  (let [with-inventory-only
+        (update-in snapshot [:graph :tickets :items]
+                   conj {:stem "M-inventory-only" :mtime-ms 300})
+        receipt (live/select-live
+                 {:tasks (conj tasks
+                               {:id "M-inventory-only" :kind :mission
+                                :priority 0
+                                :source (pin "M-inventory-only.md" "e")})
+                  :fetch-snapshot (constantly with-inventory-only)})]
+    (is (= ["M-a" "M-b"] (mapv :id (:support receipt))))
+    (is (= :pipeline/not-on-current-map
+           (->> (:excluded receipt)
+                (filter #(= "M-inventory-only" (:id %)))
+                first :ineligible-reason)))
+    (is (= "M-a" (get-in receipt [:chosen :id])))))
 
 (deftest task-state-channels-refuse-stale-pins-and-preserve-absence
   (let [candidate (first (live/task-state-candidates [(dissoc (first tasks) :priority)]
@@ -270,3 +287,26 @@
            (get-in preview [:policy :meta-selection :ranking])))
     (is (nil? (get-in preview [:policy :meta-selection :pairwise])))
     (is (nil? (get-in preview [:excluded 0 :ineligibility-evidence])))))
+
+(deftest ^:slow current-data-composition-is-structurally-bounded
+  (let [snapshot (live/fetch-pipeline-snapshot)
+        tasks (live/live-registry-tasks)
+        nodes (selector/pipeline-node-ids (:graph snapshot))
+        inventory-ids (set (keep (comp selector/canonical-work-id :stem)
+                                 (get-in snapshot [:graph :tickets :items])))
+        inventory-only (some #(when (and (contains? inventory-ids (:id %))
+                                         (not (contains? nodes (:id %)))) %)
+                             tasks)
+        started (System/nanoTime)
+        receipt (live/select-live {:tasks tasks
+                                   :fetch-snapshot (constantly snapshot)})
+        elapsed-ms (quot (- (System/nanoTime) started) 1000000)
+        support-ids (set (map :id (:support receipt)))
+        excluded-by-id (into {} (map (juxt :id identity)) (:excluded receipt))]
+    (is inventory-only "current inventory contains a registry file off the cascade")
+    (is (every? nodes support-ids))
+    (is (= :pipeline/not-on-current-map
+           (get-in excluded-by-id [(:id inventory-only) :ineligible-reason])))
+    (is (< (count (:support receipt)) (count inventory-ids)))
+    (is (< elapsed-ms 30000)
+        (str "bounded browser composition took " elapsed-ms "ms"))))

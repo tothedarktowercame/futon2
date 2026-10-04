@@ -77,9 +77,8 @@
                       (assoc-in [:graph :clusters]
                                 [{:cluster "c" :mission "futon3c-d/mission/war-machine-pilot"}])
                       (assoc-in [:graph :lineage]
-                                [{:mission "futon2-d/excursion/outer-loop-improvement"}])
-                      (assoc-in [:graph :tickets :items]
-                                [{:stem "futon3c-d/ticket/repair-observation"}]))
+                                [{:mission "futon2-d/excursion/outer-loop-improvement"}
+                                 {:target "futon3c-d/ticket/repair-observation"}]))
         ids (selector/pipeline-node-ids (:graph qualified))]
     (is (every? ids ["M-war-machine-pilot"
                      "E-outer-loop-improvement"
@@ -88,6 +87,20 @@
            (:status (selector/select
                      {:snapshot qualified
                       :candidates [(candidate "M-war-machine-pilot" 0.2)]}))))))
+
+(deftest ticket-inventory-is-evidence-not-pipeline-membership
+  (let [inventory-only (assoc-in snapshot [:graph :tickets :items]
+                                 [{:stem "M-off-cascade" :mtime-ms 1}
+                                  {:stem "repo-d/excursion/off-cascade"
+                                   :mtime-ms 2}])
+        ids (selector/pipeline-node-ids (:graph inventory-only))]
+    (is (not (contains? ids "M-off-cascade")))
+    (is (not (contains? ids "E-off-cascade")))
+    (is (= [:not-in-pipeline-cascade]
+           (get-in (selector/select
+                    {:snapshot inventory-only
+                     :candidates [(candidate "M-off-cascade" 0.1)]})
+                   [:details :candidate-errors "M-off-cascade"])))))
 
 (deftest ambiguous-and-malformed-qualified-identities-fail-closed
   (testing "the same canonical id from two authorities is ambiguous"
