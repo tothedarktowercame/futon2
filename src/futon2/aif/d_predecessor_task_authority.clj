@@ -74,7 +74,7 @@
                {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
            (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
 
-(defn- artifact-tokens
+(defn artifact-tokens
   "Revision-pair C3/C4 affirmations. Other check classes remain explicit
    unavailable measurements; their declared locators are never modified."
   [dispatch repo commit]

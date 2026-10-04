@@ -30,6 +30,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.token-outcome-pair :as token-outcome-pair]
             [futon2.aif.selected-want-outcome :as selected-want-outcome]
+            [futon2.aif.reviewer-falsifier :as reviewer-falsifier]
             [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.increment-attestation :as increment-attestation]
@@ -6504,9 +6505,39 @@
                       review-gate (:review-gate revision-state)
                       reviews (:reviews revision-state)
                       revision (:revision revision-state)
-                      approved? (and (= "done" (:state review-job))
-                                     (= :approve (review-verdict review-job))
-                                     (:passed? review-gate))]
+                      reviewer-falsifier-input
+                      (let [measurements
+                            (d-task/artifact-tokens
+                             (get-in @d-task-dispatch [:dispatch]) repo commit)
+                            comparison
+                            (token-outcome/compare-outcomes
+                             (get-in @checkpoints
+                                     [:selection :judgment :token-outcome-prediction])
+                             measurements commit)
+                            outcomes
+                            (selected-want-outcome/receipt
+                             {:selected-action (get-in construction [:selected-action])
+                              :token-comparison comparison})]
+                        {:target target :commit commit
+                         :mission-standing
+                         (missions/mission-standing-observation
+                          (cond-> mission
+                            (str/starts-with? target "M-") (assoc :kind :mission)))
+                         :selected-want-outcomes outcomes
+                         :disposition nil
+                         :artifact-binding artifact-binding
+                         :review-gate review-gate})
+                      reviewer-falsifier-receipt
+                      (reviewer-falsifier/receipt reviewer-falsifier-input)
+                      reviewer-falsifier-verification
+                      (reviewer-falsifier/verify reviewer-falsifier-receipt
+                                                 reviewer-falsifier-input)
+                      approved?
+                      (reviewer-falsifier/approved?
+                       {:review-state (:state review-job)
+                        :review-verdict (review-verdict review-job)
+                        :review-gate review-gate
+                        :falsifier-verification reviewer-falsifier-verification})]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
                   ;; wiring of an already-registered test-registry warrant
@@ -6563,6 +6594,10 @@
                                           :review-text (job-text review-job)
                                           :approved? approved?
                                           :review-gate review-gate
+                                          :reviewer-falsifier
+                                          reviewer-falsifier-receipt
+                                          :reviewer-falsifier-verification
+                                          reviewer-falsifier-verification
                                           :artifact-binding artifact-binding}}
                                          revision
                                          (assoc :revision revision
@@ -6610,6 +6645,9 @@
                            :artifact-binding artifact-binding
                            :review-job review-job :commit commit
                            :target target
+                           :reviewer-falsifier reviewer-falsifier-receipt
+                           :reviewer-falsifier-verification
+                           reviewer-falsifier-verification
                            :selected-entry
                            (select-keys entry
                                         [:action :controller-score :G-efe])}
@@ -6620,7 +6658,12 @@
                             (assoc :failure-kind
                                    :review-execution-evidence-missing
                                    :failure-stage :reviewer-wait
-                                   :review-gate review-gate))
+                                   :review-gate review-gate)
+                            (and (:passed? review-gate)
+                                 (not= :verified
+                                       (:status reviewer-falsifier-verification)))
+                            (assoc :failure-kind :reviewer-falsifier-failed
+                                   :failure-stage :reviewer-wait))
                           deferred-completion-rejection
                           (when (and deferred-review-job
                                      (= :incomplete-recoverable
@@ -6656,9 +6699,13 @@
                                    repair/supersede!)
                                stop-line finding :deferred-review-rejected)
                               finding))]
-                      (throw (ex-info (if (:passed? review-gate)
-                                        "Independent review did not approve"
-                                        "Independent review lacks execution evidence")
+                      (throw (ex-info (cond
+                                        (not (:passed? review-gate))
+                                        "Independent review lacks execution evidence"
+                                        (not= :verified
+                                              (:status reviewer-falsifier-verification))
+                                        "Reviewer falsifier checks did not pass"
+                                        :else "Independent review did not approve")
                                       (cond-> failure-data
                                         deferred-completion-rejection
                                         (assoc :repair-obligation
