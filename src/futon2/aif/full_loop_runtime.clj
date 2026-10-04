@@ -7,6 +7,7 @@
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
@@ -23,7 +24,8 @@
                              :loaded-code-identity :cascade-habit-path
                              :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir
-                             :outer-task-policy :outer-task-selection-fn])
+                             :outer-task-policy :outer-task-selection-fn
+                             :selection-timing/state :nano-time-fn])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
@@ -35,9 +37,15 @@
                  (update :outer-task-selection-fn #(or % meta-live/selector)))
         selected-judgment (atom nil)]
     {:judge-fn (fn [days]
-                 (let [generated (selection-judge opts days)]
-                   (reset! selected-judgment (:judgement generated))
-                   generated))
+                 (try
+                   (let [generated (selection-judge opts days)]
+                     (reset! selected-judgment (:judgement generated))
+                     generated)
+                   (catch Throwable e
+                     (selection-timing/abort! (:selection-timing/state opts)
+                                              (:nano-time-fn opts)
+                                              :selection-judge-threw)
+                     (throw e))))
      :cascade-revision-proposals-fn
      (cascade-revision-producer/make-proposals-fn
       {:judgment-fn #(deref selected-judgment)})
@@ -70,6 +78,11 @@
                      #(or % cascade-feedback/default-path))
         opts (update opts :cascade-feedback-metadata
                      #(or % (cascade-feedback/load-construction-metadata
-                             (:cascade-feedback-path opts))))]
+                             (:cascade-feedback-path opts))))
+        ;; The production judge closes over OPTS before the runner adds its
+        ;; other ledgers. Mint this collector here and pass the same identity
+        ;; through, rather than timing into a disconnected atom.
+        opts (update opts :selection-timing/state
+                     #(or % (selection-timing/new-state)))]
     (binding [runner/*runtime-defaults* (production-defaults opts)]
       (runner/run-opportunity! opts))))

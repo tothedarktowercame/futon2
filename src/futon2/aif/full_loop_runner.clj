@@ -65,6 +65,7 @@
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
+            [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
             [futon2.aif.repair-discharge-receipt :as discharge-receipt]
@@ -888,7 +889,11 @@
                       {:wall-clock-ms (when elapsed-nanos
                                         (quot elapsed-nanos 1000000))
                        :started-at started-at
-                       :finished-at (str (Instant/now))})
+                       :finished-at (str (Instant/now))
+                       :selection-subphases
+                       (selection-timing/receipt
+                        (:selection-timing/state raw-opts)
+                        (get-in phase-timing [:phase-timings-ms :selection]))})
         usage (registered-telemetry/model-usage
                (:registered-run/job-ledger raw-opts)
                {:run-id run-id :click-id (:click-id raw-opts)})
@@ -6851,6 +6856,9 @@
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :phase-events/state phase-events
+                                :selection-timing/state
+                                (or (:selection-timing/state raw-opts)
+                                    (selection-timing/new-state))
                                 :debugger-dwell/state (debugger/new-dwell-ledger run-id)
                                 :run-timing/start-nanos (nano-time)
                                 :registered-run/chronology-start chronology-start)

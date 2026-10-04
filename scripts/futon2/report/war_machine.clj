@@ -75,6 +75,7 @@
             [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.realized-outcome :as ro]
             [futon2.aif.selection-rationale :as selection-rationale]
+            [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
@@ -6364,6 +6365,10 @@
                     step-portfolio? true eval-invariant-fallback? true}}]
   (let [judge-opts (assoc judge-opts :observation-labels-view
                            (observation-label-view judge-opts))
+        _selection-judgement
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :strategic-judgement)
         loaded-configuration (effective-run-configuration judge-opts)
         depth-config (policy-depth/configured judge-opts)
         accumulate-strategic-habit?
@@ -6573,9 +6578,17 @@
         ;; here, unconditionally, and both the declared sources and the
         ;; cascade's targets take this doc (they were two reads of the same
         ;; registry, one substrate read apart, in this let)
+        _strategic-prefix-complete
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :registry-loading)
         loaded-missions (mission-registry/load-missions)
         loaded-tickets (mission-registry/load-tickets)
         loaded-excursions (mission-registry/load-excursions)
+        _registry-loaded
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :meta-field-ranking)
         ;; The outer loop selects a task identity from current M/E/T state.
         ;; It is deliberately completed before any cascade source is loaded or
         ;; any interpretation is constructed.  The inner loop below receives
@@ -6603,6 +6616,10 @@
         outer-task-selection
         (select-outer-task judge-opts outer-task-population outer-task-seed)
         selected-task-id (get-in outer-task-selection [:chosen :id])
+        _outer-task-selected
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :declaration-interpretation-loading)
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
                            (mission-hole-wants/merge-ticket-sources
@@ -6686,6 +6703,10 @@
                 (fn [rows]
                   (let [targets (set (:targets flight-cascade-assembly-input))]
                     (filterv #(targets (:target-id %)) rows))))
+        _declarations-loaded
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :inner-cascade-assembly)
         raw-cascade-assembled
         (assemble-cascade-problems-with-published
          (or (:machine-interpretations-dir judge-opts) want-interpretation/default-store)
@@ -6703,6 +6724,10 @@
         (cascade-proposals/record-supply
          raw-cascade-assembled cascade-sources
          cascade-proposal-supply)
+        _cascade-assembled
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :g-admission)
         cascade-result (cd/select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts
@@ -6742,6 +6767,10 @@
                                 (str (io/file (or (:machine-interpretations-dir judge-opts)
                                                   want-interpretation/default-store)
                                               "flights")))))
+        _cascade-selected
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :completeness-audit-projection)
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention
@@ -6931,6 +6960,10 @@
                             (with-accumulation-receipt
                               (carry-mission-focus result0-unfocused mission-focus) accumulation)
                             scan-learning scan-shadow-result)
+        _terminal-projections-built
+        (selection-timing/checkpoint! (:selection-timing/state judge-opts)
+                                      (:nano-time-fn judge-opts)
+                                      :receipt-serialization)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
         result0 (cond-> (assoc (carry-enumeration-completeness result0-unasserted)
@@ -6971,7 +7004,10 @@
                                (trace/reconcile-accumulation result record) result)]
                   (binding [*out* *err*] (println (str (name k) ":") (ex-message e)))
                   (assoc result k {k (ex-message e)})))))
-          result0)]
+          result0)
+        _selection-timing-finished
+        (selection-timing/finish! (:selection-timing/state judge-opts)
+                                  (:nano-time-fn judge-opts))]
     result)))
 
 ;; ---------------------------------------------------------------------------
@@ -7201,6 +7237,10 @@
   ([days judge-opts]
   (binding [*input-status* (atom {:read-paths #{} :issues []})]
     (let [now-zdt (ZonedDateTime/now tz)
+          _selection-timing-started
+          (selection-timing/begin! (:selection-timing/state judge-opts)
+                                   (:nano-time-fn judge-opts)
+                                   :strategic-scans)
           now (.toString (.toLocalDate now-zdt))
           scan-route0 []
           ;; One bounded recent window feeds all evidence-derived scans. The hard cap is

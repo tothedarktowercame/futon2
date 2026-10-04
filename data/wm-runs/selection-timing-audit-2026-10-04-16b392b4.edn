@@ -1,0 +1,41 @@
+{:schema :wm/selection-timing-audit-v1
+ :run-id "2026-10-04-16b392b4-b4c8-487f-90ff-781a461106d8"
+ :click-id "wm-click-abb61cd8-2e13-4f76-91e1-1f8ae70522af"
+ :observed-revision "bdabc8c7ea604b1776c2320215f58c8834dc7613"
+ :sources
+ {:run-record "data/wm-runs/tick-run-record-2026-10-04-16b392b4-b4c8-487f-90ff-781a461106d8.edn"
+  :phase-log "data/wm-full-loop-phases.edn.log"}
+ :phase-arithmetic-ms
+ {:opportunity-wall 533887
+  :selection-wall 165974
+  :selection-debugger-dwell 44200
+  :selection-active 121774
+  :child-phase-wall-sum 513404
+  :opportunity-minus-child-wall-sum 20483
+  :child-phase-active-sum 469204
+  :opportunity-minus-child-active-sum 64683
+  :active-gap-includes-separated-debugger-dwell true}
+ :timestamp-boundaries
+ [{:at "2026-10-04T04:46:31.132813113Z" :boundary :selection-start}
+  {:at "2026-10-04T04:47:03.105814625Z"
+   :boundary :wm-as-of/live-selection-occurrence
+   :elapsed-from-previous-ns 31973001512
+   :interpretation :strategic-scan-and-judgement-prefix}
+  {:at "2026-10-04T04:48:30.594312896Z"
+   :boundary :repair-obligation-read
+   :elapsed-from-previous-ns 87488498271
+   :interpretation :outer-selection-through-target-local-cascade-and-admission}
+  {:at "2026-10-04T04:48:32.905034592Z"
+   :boundary :focus-completeness-breakpoint
+   :elapsed-from-previous-ns 2310721696
+   :interpretation :terminal-focus-completeness-and-audit-projection}]
+ :qualification
+ {:status :timestamp-derived
+  :reason :subphase-boundaries-were-retained-domain-timestamps-not-monotonic-timers
+  :meta-preview-ms-approx 2200
+  :conclusion :meta-ranking-alone-does-not-explain-middle-interval}
+ :instrumented-subphases
+ [:strategic-scans :strategic-judgement :registry-loading :meta-field-ranking
+  :declaration-interpretation-loading :inner-cascade-assembly :g-admission
+  :completeness-audit-projection :receipt-serialization]
+ :click-consumed false}

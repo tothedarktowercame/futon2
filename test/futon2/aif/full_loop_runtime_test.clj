@@ -64,6 +64,24 @@
              (:cascade-feedback-path @seen)))
       (is (map? (:cascade-feedback-metadata @seen))))))
 
+(deftest production-composition-shares-one-selection-timing-collector
+  (let [runner-opts (atom nil)
+        judge-opts (atom nil)]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! runner-opts opts)
+                    ((:judge-fn runner/*runtime-defaults*) 1)
+                    :ran)
+                  wm/generate-war-machine
+                  (fn [_ opts]
+                    (reset! judge-opts opts)
+                    {:judgement {}})]
+      (is (= :ran (runtime/run-opportunity! {:run-id "timing-state"})))
+      (is (instance? clojure.lang.IAtom
+                     (:selection-timing/state @runner-opts)))
+      (is (identical? (:selection-timing/state @runner-opts)
+                      (:selection-timing/state @judge-opts))))))
+
 (deftest production-mints-run-identity-before-closing-over-the-judge
   (let [runner-opts (atom nil)
         judge-opts (atom nil)]
