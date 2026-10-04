@@ -78,6 +78,27 @@
                       (= :universe-not-admitted (:kind %)))
                 (:refusals recorded))))))
 
+(deftest published-interpretation-with-checkable-closure-is-not-withheld
+  (let [sources (cs/with-context-fn (cs/load-declared))
+        supply (cprop/load-supply {})
+        id (first (get-in supply [:repair-scan :open-finding-ids]))
+        target (str "T-" id)
+        token :ticket-closure/hfixture
+        problem {:target target
+                 :cascade-problem {:facts {token false} :want [token]
+                                   :locators {token {:class :C4}}
+                                   :interpretations {:p {:produces #{token}}}}
+                 :constructed-candidates [{:id :C1 :precedence [:p]}]}
+        recorded (cprop/record-supply
+                  {:problems [problem] :refusals [] :dropped-candidates []}
+                  sources supply)]
+    (is (some #(= target (:target %)) (:problems recorded)))
+    (is (not-any? #(= :repair-closure-observation-unavailable (:reason %))
+                  (:dropped-candidates recorded)))
+    (is (= :checkable-closure-and-constructed-candidate
+           (get-in recorded [:repair-withhold-distinction
+                             :supplied-by-observable-construction 0 :rule])))))
+
 (deftest generated-repair-proposal-is-still-withheld
   ;; A :repair-finding-proposed proposal whose target has NO declared source
   ;; keeps the withhold; the generated proposal itself stays out of

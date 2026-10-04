@@ -146,6 +146,23 @@
         declared-source-targets (set (for [[t _] (:interpretations sources)
                                            :when (seq (get-in sources [:candidates t]))]
                                       t))
+        ;; A query-time/published interpretation is deliberately not promoted
+        ;; into a hand declaration.  It nevertheless supplies the condition
+        ;; this withhold exists to demand when construction produced a
+        ;; candidate and every current want has a checkable closure locator.
+        ;; Treating only hand-declared candidates as supplied made every new
+        ;; live repair ticket impossible to enact after a successful ask.
+        observable-constructed-targets
+        (set (for [{:keys [target cascade-problem constructed-candidates]} (:problems assembled)
+                   :let [wants (vec (:want cascade-problem))
+                         locators (:locators cascade-problem)]
+                   :when (and (seq constructed-candidates)
+                              (seq wants)
+                              (every? #(contains? #{:C1 :C2 :C3 :C4}
+                                                   (:class (get locators %)))
+                                      wants))]
+               target))
+        supplied-repair-targets (into declared-source-targets observable-constructed-targets)
         generated-repair-targets (set (map :target
                                           (filter #(= :repair-finding-proposed (:origin %))
                                                   (:proposals supply))))
@@ -153,11 +170,16 @@
                                       (get-in supply [:repair-scan :open-finding-ids])))
         repair-targets (set (concat scan-repair-targets generated-repair-targets))
         withheld (filter #(and (contains? repair-targets (:target %))
-                               (not (contains? declared-source-targets (:target %))))
+                               (not (contains? supplied-repair-targets (:target %))))
                          (:problems assembled))
         supplied-by-declaration (filter #(and (contains? repair-targets (:target %))
                                               (contains? declared-source-targets (:target %)))
                                         (:problems assembled))
+        supplied-by-observable-construction
+        (filter #(and (contains? repair-targets (:target %))
+                      (contains? observable-constructed-targets (:target %))
+                      (not (contains? declared-source-targets (:target %))))
+                (:problems assembled))
         repair-declines (mapv #(decline (:target %) :repair-closure-observation-unavailable
                                        [:produced-resolution-evidence]) withheld)
         admissions
@@ -188,7 +210,7 @@
     (-> assembled
         (cond-> (seq withheld)
           (assoc :problems (vec (remove #(and (contains? repair-targets (:target %))
-                                              (not (contains? declared-source-targets (:target %))))
+                                              (not (contains? supplied-repair-targets (:target %))))
                                         (:problems assembled)))))
         (update :refusals #(into (vec %)
                                 (map (fn [p] {:target (:target p)
@@ -206,6 +228,13 @@
                         :source-paths (vec (for [[_ rec] (get-in sources
                                                                  [:interpretations (:target p) :receipts])]
                                              (get-in rec [:source :path])))}))
+                :supplied-by-observable-construction
+                (vec (for [p supplied-by-observable-construction]
+                       {:target (:target p)
+                        :rule :checkable-closure-and-constructed-candidate
+                        :locator-classes
+                        (vec (sort (map #(get-in p [:cascade-problem :locators % :class])
+                                        (get-in p [:cascade-problem :want]))))}))
                 :withheld-generated-or-sourceless
                 (vec (for [p withheld] {:target (:target p)
                                         :rule :repair-closure-observation-unavailable}))})
