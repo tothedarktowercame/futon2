@@ -36,15 +36,20 @@
 (defn- terminal-selection-condition [judgement]
   (runner/selection-terminal-condition :selection judgement))
 
-(defn- wait-for-stop [run-id]
+(defn- wait-for-stop
+  ([run-id] (wait-for-stop run-id nil))
+  ([run-id running]
   ;; The real selection path reads the complete cascade field before reaching
   ;; its debugger boundary; its pinned graph walk can exceed twenty seconds.
-  (loop [remaining 12000]
-    (if-let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
-      stop
-      (if (pos? remaining)
-        (do (Thread/sleep 5) (recur (dec remaining)))
-        (throw (ex-info "Debugger stop did not appear" {:run-id run-id}))))))
+   (loop [remaining 12000]
+     (if-let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
+       stop
+       (if (pos? remaining)
+         (do (Thread/sleep 5) (recur (dec remaining)))
+         (throw (ex-info "Debugger stop did not appear"
+                         (cond-> {:run-id run-id}
+                           (and running (realized? running))
+                           (assoc :run-result @running)))))))))
 
 (defn- wait-for-condition [run-id kind]
   (loop [remaining 4000]
@@ -137,7 +142,7 @@
         _ (debugger/attach!)
         running (future (runner/run-opportunity! opts))]
     (try
-      (let [stop (wait-for-stop run-id)]
+      (let [stop (wait-for-stop run-id running)]
         (is (= :selection (:phase stop)))
         (is (string? (:attempt-id stop)))
         (alter-var-root #'repairable-judge
