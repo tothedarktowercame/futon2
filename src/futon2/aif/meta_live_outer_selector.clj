@@ -439,7 +439,11 @@
         (fn [task]
           (let [observation (get standing (:id task))]
             (or (= :conflict (:status observation))
-                (= :mission-standing-source-mismatch (:reason observation)))))
+                (= :mission-standing-source-mismatch (:reason observation))
+                (and (= :mission (:kind task))
+                     (nil? (get-in task [:source :path]))
+                     (= :mission-standing-source-unavailable
+                        (:reason observation))))))
         standing-refused (filterv standing-refused? ordinary-tasks)
         standing-admitted (filterv (complement standing-refused?) ordinary-tasks)
         standing-excluded
@@ -449,7 +453,10 @@
                       (let [observation (get standing (:id %))]
                         (if (= :conflict (:status observation))
                           :mission-standing-conflict
-                          (:reason observation)))
+                          (if (= :mission-standing-source-unavailable
+                                 (:reason observation))
+                            :task-document-source-unavailable
+                            (:reason observation))))
                       :ineligibility-evidence (get standing (:id %)))
               standing-refused)
         nodes (meta/pipeline-node-ids (:graph snapshot))
@@ -492,6 +499,7 @@
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot
+                                 :registry-snapshot (:registry-snapshot (meta tasks))
                                  :candidate-inputs on-map
                                  :candidates candidates})
       receipt)))
@@ -522,13 +530,20 @@
   []
   (let [missions (registry/load-missions)
         excursions (registry/load-excursions)
-        tickets (registry/load-tickets)]
-    (vec (concat
-          (map #(assoc % :kind :mission) (registry/open-missions missions))
-          (map #(assoc % :kind :excursion)
-               (filter registry/live-excursion? (:excursions excursions)))
-          (map #(assoc % :kind :ticket)
-               (filter registry/live-ticket? (:tickets tickets)))))))
+        tickets (registry/load-tickets)
+        tasks (vec (concat
+                    (map #(assoc % :kind :mission)
+                         (registry/open-missions missions))
+                    (map #(assoc % :kind :excursion)
+                         (filter registry/live-excursion?
+                                 (:excursions excursions)))
+                    (map #(assoc % :kind :ticket)
+                         (filter registry/live-ticket? (:tickets tickets)))))
+        content (decision-manifest/registry-snapshot-content tasks)]
+    (with-meta tasks
+      {:registry-snapshot
+       {:source (pin "registry://live-outer-task-field" content)
+        :content content}})))
 
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by

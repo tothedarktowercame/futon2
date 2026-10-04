@@ -35,7 +35,9 @@
         _ (git! repo "config" "user.email" "test@example.invalid")
         _ (git! repo "config" "user.name" "Test")
         tasks [(committed-task repo "M-a") (committed-task repo "M-b")
-               (committed-task repo "M-off-map")]
+               (committed-task repo "M-off-map")
+               {:id "M-snapshot-only" :kind :mission
+                :status-class :unknown :source {:path nil :sha256 nil}}]
         summary {:consistent? true
                  :standards {:s1-regenerates true :s2-evidence true
                              :s3-reconstitution true :s4-honest-holes true
@@ -61,15 +63,24 @@
                                    :fetch-snapshot (constantly snapshot)})
         candidate-inputs (subvec tasks 0 2)
         candidates (live/task-state-candidates candidate-inputs snapshot)
+        registry-content (manifest/registry-snapshot-content tasks)
+        registry-snapshot {:source (pin "registry" registry-content)
+                           :content registry-content}
         m (manifest/build receipt {:tasks tasks :snapshot snapshot
+                                   :registry-snapshot registry-snapshot
                                    :candidate-inputs candidate-inputs
                                    :candidates candidates})]
     {:tasks tasks :snapshot snapshot :manifest m}))
 
 (deftest immutable-manifest-verifies-and-adversarial-changes-refuse
   (let [{:keys [tasks snapshot manifest]} (fixture)
-        verify #(manifest/verify %1 {:tasks %2 :snapshot %3})]
+        verify #(manifest/verify %1 {:tasks %2 :snapshot %3})
+        snapshot-row (some #(when (= "M-snapshot-only" (:id %)) %)
+                           (:field manifest))]
     (is (= :verified (:status (verify manifest tasks snapshot))))
+    (is (= :registry-snapshot-only (:authority-kind snapshot-row)))
+    (is (= :task-document-source-unavailable
+           (get-in manifest [:decision :excluded-reasons "M-snapshot-only"])))
     (is (= :decision-field-identity-mismatch
            (:reason (verify manifest (pop tasks) snapshot))))
     (is (= :decision-field-identity-mismatch
@@ -95,4 +106,41 @@
                             tasks snapshot))))
     (is (= :decision-input-authority-unavailable
            (:reason (verify (assoc-in manifest [:field 0 :source :path] "wrong.md")
-                            tasks snapshot))))))
+                            tasks snapshot))))
+    (is (= :decision-snapshot-only-exclusion-mismatch
+           (:reason (verify (assoc-in manifest
+                                      [:decision :excluded-reasons "M-snapshot-only"]
+                                      :pipeline/not-on-current-map)
+                            tasks snapshot))))
+    (let [promoted (-> manifest
+                       (update :candidate-inputs conj
+                               {:id "M-snapshot-only" :kind :mission
+                                :source {:path nil :sha256 nil}})
+                       (update-in [:decision :support-ids] conj "M-snapshot-only")
+                       (update-in [:decision :excluded-ids]
+                                  #(vec (remove #{"M-snapshot-only"} %))))]
+      (is (= :decision-snapshot-only-task-promoted
+             (:reason (verify promoted tasks snapshot)))))))
+
+(deftest ^:slow current-pathless-mission-is-snapshot-authoritative-not-promoted
+  (let [tasks (live/live-registry-tasks)
+        snapshot (live/fetch-pipeline-snapshot)
+        receipt (live/select-live {:tasks tasks
+                                   :fetch-snapshot (constantly snapshot)
+                                   :retain-manifest? true})
+        m (:decision-input-manifest receipt)
+        rows (filterv #(= "M-ukrns-wp" (:id %)) (:field m))
+        excluded (filterv #(= "M-ukrns-wp" (:id %)) (:excluded receipt))
+        candidates (filterv #(= "M-ukrns-wp" (:id %)) (:candidate-inputs m))
+        verdict (manifest/verify m {:tasks tasks :snapshot snapshot
+                                    :manifest-sha256
+                                    (:decision-input-manifest-sha256 receipt)})]
+    (is (= :captured (:status m)))
+    (is (= :verified (:status verdict)))
+    (is (= 1 (count rows)))
+    (is (= :registry-snapshot-only (:authority-kind (first rows))))
+    (is (= 1 (count excluded)))
+    (is (= :task-document-source-unavailable
+           (:ineligible-reason (first excluded))))
+    (is (empty? candidates))
+    (is (string? (get-in receipt [:chosen :id])))))

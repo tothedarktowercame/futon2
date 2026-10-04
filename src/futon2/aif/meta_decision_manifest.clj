@@ -62,14 +62,28 @@
          :path rel :content-sha256 sha256})
       {:kind :bytes :path path :content-sha256 sha256 :content bytes})))
 
-(defn- task-entry [task]
-  (try
+(defn registry-snapshot-content [tasks]
+  (pr-str (mapv #(select-keys % [:id :kind :status-class :operator-gated?
+                                 :automated-feasibility :priority :source])
+                tasks)))
+
+(defn- task-entry [task exclusion-reason registry-snapshot]
+  (if (and (= :task-document-source-unavailable exclusion-reason)
+           (nil? (get-in task [:source :path]))
+           (= (:sha256 (:source registry-snapshot))
+              (field/sha256 (.getBytes (:content registry-snapshot) "UTF-8"))))
     {:id (:id task) :kind (:kind task)
-     :automated-feasibility (:automated-feasibility task)
-     :priority (:priority task)
-     :source (source-authority (:source task))}
-    (catch clojure.lang.ExceptionInfo e
-      (throw (ex-info (ex-message e) (assoc (ex-data e) :task-id (:id task)) e)))))
+     :authority-kind :registry-snapshot-only
+     :exclusion-reason exclusion-reason
+     :registry-source (:source registry-snapshot)}
+    (try
+      {:id (:id task) :kind (:kind task)
+       :authority-kind :task-document
+       :automated-feasibility (:automated-feasibility task)
+       :priority (:priority task)
+       :source (source-authority (:source task))}
+      (catch clojure.lang.ExceptionInfo e
+        (throw (ex-info (ex-message e) (assoc (ex-data e) :task-id (:id task)) e))))))
 
 (defn- snapshot-entry [snapshot]
   (let [sources [[:summary :summary-source] [:graph :graph-source]
@@ -95,7 +109,8 @@
    :selection-status (get-in receipt [:policy :meta-selection :status])
    :selection-reason (get-in receipt [:policy :meta-selection :reason])})
 
-(defn build [receipt {:keys [tasks snapshot candidate-inputs candidates]}]
+(defn build [receipt {:keys [tasks snapshot registry-snapshot
+                             candidate-inputs candidates]}]
   (try
     (when (some #(contains? (:channels %) :declared-priority-cost) candidates)
       (throw (ex-info "Declared priority lacks an independently replayable producer"
@@ -104,7 +119,11 @@
     {:schema schema :status :captured
      :verification-status :pending-independent-replay
      :snapshot (snapshot-entry snapshot)
-     :field (mapv task-entry tasks)
+     :registry-snapshot registry-snapshot
+     :field (mapv #(task-entry % (get-in (decision-view receipt)
+                                         [:excluded-reasons (:id %)])
+                               registry-snapshot)
+                  tasks)
      :candidate-inputs (mapv #(select-keys % [:id :kind :automated-feasibility
                                               :priority :source])
                              candidate-inputs)
@@ -220,26 +239,55 @@
           support-ids (mapv :id (:candidate-inputs manifest))
           expected-excluded (vec (remove (set support-ids) field-ids))
           decision (:decision manifest)]
+      (when-not (= (count field-ids) (count (distinct field-ids)))
+        (throw (ex-info "Field identity appears more than once"
+                        {:kind :decision-field-identity-mismatch})))
       (when-not (= support-ids (:support-ids decision))
         (throw (ex-info "Admitted identity census changed"
                         {:kind :decision-field-identity-mismatch
                          :expected support-ids :actual (:support-ids decision)})))
-      (when-not (= expected-excluded (:excluded-ids decision))
+      (when-not (= (set expected-excluded) (set (:excluded-ids decision)))
         (throw (ex-info "Excluded identity census changed"
                         {:kind :decision-field-identity-mismatch
                          :expected expected-excluded
                          :actual (:excluded-ids decision)}))))
     (doseq [[record task] (map vector (:field manifest) tasks)]
-      (let [bytes (authority-bytes (:source record))
-            supplied-source (:source task)]
-        (when-not (= (:content-sha256 (:source record)) (:sha256 supplied-source))
-          (throw (ex-info "Task path/content authority substituted"
-                          {:kind :decision-input-source-substitution
-                           :id (:id record)})))
-        (when-not (= (:content-sha256 (:source record))
-                     (field/sha256 (.getBytes bytes "UTF-8")))
-          (throw (ex-info "Task content drift" {:kind :decision-input-source-drift
-                                                 :id (:id record)})))))
+      (if (= :registry-snapshot-only (:authority-kind record))
+        (do
+          (when-not (= :task-document-source-unavailable
+                       (:exclusion-reason record))
+            (throw (ex-info "Snapshot-only task exclusion changed"
+                            {:kind :decision-snapshot-only-exclusion-mismatch
+                             :id (:id record)})))
+          (when-not (= (:exclusion-reason record)
+                       (get-in manifest [:decision :excluded-reasons (:id record)]))
+            (throw (ex-info "Snapshot-only receipt exclusion changed"
+                            {:kind :decision-snapshot-only-exclusion-mismatch
+                             :id (:id record)})))
+          (when (some #(= (:id record) (:id %)) (:candidate-inputs manifest))
+            (throw (ex-info "Snapshot-only task was promoted into comparison"
+                            {:kind :decision-snapshot-only-task-promoted
+                             :id (:id record)}))))
+        (let [bytes (authority-bytes (:source record))
+              supplied-source (:source task)]
+          (when-not (= (:content-sha256 (:source record)) (:sha256 supplied-source))
+            (throw (ex-info "Task path/content authority substituted"
+                            {:kind :decision-input-source-substitution
+                             :id (:id record)})))
+          (when-not (= (:content-sha256 (:source record))
+                       (field/sha256 (.getBytes bytes "UTF-8")))
+            (throw (ex-info "Task content drift"
+                            {:kind :decision-input-source-drift
+                             :id (:id record)}))))))
+    (let [registry-snapshot (:registry-snapshot manifest)
+          supplied-content (registry-snapshot-content tasks)
+          supplied-sha (field/sha256 (.getBytes supplied-content "UTF-8"))]
+      (when-not (= supplied-sha (get-in registry-snapshot [:source :sha256]))
+        (throw (ex-info "Registry snapshot membership changed"
+                        {:kind :decision-registry-snapshot-mismatch})))
+      (when-not (= (:content registry-snapshot) supplied-content)
+        (throw (ex-info "Registry snapshot content changed"
+                        {:kind :decision-registry-snapshot-mismatch}))))
     (doseq [label [:summary :graph :agency]]
       (let [{:keys [source content]} (get-in manifest [:snapshot label])
             supplied-source (get snapshot (keyword (str (name label) "-source")))]
