@@ -29,9 +29,18 @@
 (def ^:private kind-prefix
   {"mission" "M-" "excursion" "E-" "ticket" "T-"})
 
+(defn canonical-work-id
+  "Map one exact qualified cascade work identity to its registry M/E/T id.
+  Canonical registry ids pass through; every other form returns nil."
+  [x]
+  (cond
+    (and (string? x) (re-matches #"^[MET]-[^/]+$" x)) x
+    (string? x) (when-let [[_ _ kind stem] (re-matches qualified-work-id x)]
+                  (str (kind-prefix kind) stem))))
+
 (defn- raw-pipeline-node-ids [graph]
   (concat
-   (mapcat (juxt :mission :predecessor :successor) (:lineage graph))
+   (mapcat (juxt :mission :target :predecessor :successor) (:lineage graph))
    (map :mission (:clusters graph))
    (mapcat (juxt :have :want) (:arrows graph))
    (map :mission (:held graph))
@@ -91,7 +100,7 @@
        (<= 0.0 (double value) 1.0)
        (pin? source) (= :current freshness)))
 
-(defn- candidate-errors [nodes collisions candidate]
+(defn- candidate-errors [nodes collisions snapshot candidate]
   (cond-> []
     (not (string? (:id candidate))) (conj :identity-invalid)
     (not (contains? task-kinds (:kind candidate))) (conj :kind-invalid)
@@ -102,7 +111,28 @@
                     (get-in candidate [:support :automated-feasibility])))
     (conj :feasibility-invalid)
     (not-every? channel-valid? (:channels candidate))
-    (conj :task-state-channel-invalid)))
+    (conj :task-state-channel-invalid)
+    (some (fn [[channel {:keys [source]}]]
+            (and (contains? #{:pipeline-structural-centrality-cost
+                              :pipeline-freshness-cost} channel)
+                 (not= source (:graph-source snapshot))))
+          (:channels candidate))
+    (conj :task-state-source-mismatch)))
+
+(defn- channel-coverage [candidates]
+  (let [channels (->> candidates (mapcat (comp keys :channels)) set sort vec)]
+    {:candidate-count (count candidates)
+     :by-channel (into (sorted-map)
+                       (map (fn [channel]
+                              [channel (count (filter #(contains? (:channels %) channel)
+                                                     candidates))]))
+                       channels)
+     :unsupported-by-kind
+     (->> candidates
+          (mapcat (fn [{:keys [kind unsupported-channels]}]
+                    (map (fn [channel] [kind channel]) unsupported-channels)))
+          frequencies
+          (into (sorted-map)))}))
 
 (defn- pairwise [a b]
   (let [shared (set/intersection (set (keys (:channels a)))
@@ -140,7 +170,8 @@
             malformed (into {}
                             (keep (fn [c]
                                     (when-let [errors (seq (candidate-errors
-                                                           nodes (:collisions analysis) c))]
+                                                           nodes (:collisions analysis)
+                                                           snapshot c))]
                                       [(:id c) (vec errors)])))
                             candidates)
             infeasible (filterv #(= :infeasible
@@ -148,7 +179,8 @@
                                 candidates)
             admitted (filterv #(not= :infeasible
                                      (get-in % [:support :automated-feasibility]))
-                              candidates)]
+                              candidates)
+            coverage (channel-coverage admitted)]
         (cond
           (seq malformed)
           (refusal :candidate-invalid {:candidate-errors malformed})
@@ -162,6 +194,7 @@
            :reason :singleton-supported-pipeline-item
            :epistemic-value-nats 0.0
            :snapshot-sources (select-keys snapshot [:summary-source :graph-source])
+           :channel-coverage coverage
            :typed-exclusions (mapv :id infeasible)}
 
           :else
@@ -176,23 +209,28 @@
             (cond
               (seq unrankable)
               (refusal :shared-current-channel-unavailable
-                       {:unrankable-pairs unrankable :pairwise pairs})
+                       {:unrankable-pairs unrankable :pairwise pairs
+                        :channel-coverage coverage})
 
               (not= 1 (count winners))
               (refusal :no-unique-task-state-minimum
-                       {:undefeated (mapv :id winners) :pairwise pairs})
+                       {:undefeated (mapv :id winners) :pairwise pairs
+                        :channel-coverage coverage})
 
               :else
               {:schema schema :status :selected :selected (:id (first winners))
                :reason :minimum-pairwise-task-state-G
                :epistemic-value-nats 0.0 :pairwise pairs
+               :channel-coverage coverage
                :ranking (->> admitted
                              (sort-by (juxt #(get losses (:id %) 0) :id))
                              (map-indexed (fn [i candidate]
                                             {:rank (inc i) :id (:id candidate)
                                              :kind (:kind candidate)
                                              :pairwise-losses (get losses (:id candidate) 0)
-                                             :channels (:channels candidate)}))
+                                             :channels (:channels candidate)
+                                             :unsupported-channels
+                                             (:unsupported-channels candidate)}))
                              vec)
                :snapshot-sources (select-keys snapshot [:summary-source :graph-source])
                :typed-exclusions (mapv :id infeasible)})))))))

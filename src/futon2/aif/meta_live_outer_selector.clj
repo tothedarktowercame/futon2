@@ -114,22 +114,59 @@
                                        :value (long mtime)}}])))
           tasks)))
 
+(defn- graph-work-occurrences [graph]
+  (let [raw (concat
+             (mapcat (juxt :mission :target :predecessor :successor)
+                     (:lineage graph))
+             (map :mission (:clusters graph))
+             (mapcat (juxt :have :want) (:arrows graph))
+             (map :mission (:held graph))
+             (map :stem (get-in graph [:tickets :items]))
+             (map :mission (get-in graph [:patterns :edges])))]
+    (frequencies (keep meta/canonical-work-id raw))))
+
+(defn- normalized-pipeline-centrality [tasks snapshot]
+  (let [occurrences (graph-work-occurrences (:graph snapshot))
+        source (:graph-source snapshot)]
+    (into {}
+          (keep (fn [{:keys [id]}]
+                  (when-let [n (get occurrences id)]
+                    [id {:value (/ 1.0 (inc (double n)))
+                         :freshness :current :source source
+                         :observation {:field :pipeline-structural-occurrences
+                                       :value n
+                                       :cost-rule "1 / (1 + occurrence count)"}}])))
+          tasks)))
+
 (defn task-state-candidates
   "Project current task evidence. Missing channels remain absent, never zero."
   [tasks snapshot]
   (let [priority-by-id (normalized-priorities tasks)
-        freshness-by-id (normalized-pipeline-freshness tasks snapshot)]
+        freshness-by-id (normalized-pipeline-freshness tasks snapshot)
+        centrality-by-id (normalized-pipeline-centrality tasks snapshot)]
     (mapv (fn [{:keys [id kind automated-feasibility]}]
-            {:id id :kind kind
+            (let [channels (cond-> {}
+                             (get priority-by-id id)
+                             (assoc :declared-priority-cost (get priority-by-id id))
+                             (get centrality-by-id id)
+                             (assoc :pipeline-structural-centrality-cost
+                                    (get centrality-by-id id))
+                             (get freshness-by-id id)
+                             (assoc :pipeline-freshness-cost (get freshness-by-id id)))]
+              {:id id :kind kind
              :support {:automated-feasibility
                        (if (contains? #{:supported :infeasible :unknown}
                                       automated-feasibility)
                          automated-feasibility :unknown)}
-             :channels (cond-> {}
-                         (get priority-by-id id)
-                         (assoc :declared-priority-cost (get priority-by-id id))
-                         (get freshness-by-id id)
-                         (assoc :pipeline-freshness-cost (get freshness-by-id id)))})
+               :channels channels
+               :unsupported-channels
+               (cond-> []
+                 (not (contains? channels :declared-priority-cost))
+                 (conj :declared-priority-cost)
+                 (not (contains? channels :pipeline-structural-centrality-cost))
+                 (conj :pipeline-structural-centrality-cost)
+                 (not (contains? channels :pipeline-freshness-cost))
+                 (conj :pipeline-freshness-cost))}))
           tasks)))
 
 (defn- exactly-one [xs]

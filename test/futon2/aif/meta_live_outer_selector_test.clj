@@ -3,7 +3,8 @@
             [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-field-observation :as field]
-            [futon2.aif.meta-live-outer-selector :as live]))
+            [futon2.aif.meta-live-outer-selector :as live]
+            [futon2.aif.meta-pipeline-selector :as selector]))
 
 (defn pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
 (def snapshot
@@ -60,6 +61,46 @@
       (is (= :no-unique-task-state-minimum
              (get-in receipt [:policy :meta-selection :reason])))
       (is (nil? (:action receipt))))))
+
+(deftest current-pipeline-centrality-discriminates-with-pinned-reasons
+  (let [central (-> snapshot
+                    (assoc-in [:graph :tickets :items]
+                              [{:stem "M-a" :mtime-ms 100}
+                               {:stem "M-b" :mtime-ms 100}])
+                    (assoc-in [:graph :patterns :edges]
+                              [{:mission "repo-d/mission/a" :pattern "p/x"}]))
+        candidates (live/task-state-candidates
+                    (mapv #(dissoc % :priority) tasks) central)
+        receipt (selector/select {:snapshot central :candidates candidates})
+        a-channel (get-in candidates [0 :channels
+                                      :pipeline-structural-centrality-cost])]
+    (is (= "M-a" (:selected receipt)))
+    (is (= 0.25 (:value a-channel)))
+    (is (= 3 (get-in a-channel [:observation :value])))
+    (is (= (:graph-source central) (:source a-channel)))
+    (is (= 0.0 (:epistemic-value-nats receipt)))))
+
+(deftest task-state-channels-refuse-stale-pins-and-preserve-absence
+  (let [candidate (first (live/task-state-candidates [(dissoc (first tasks) :priority)]
+                                                      snapshot))
+        repinned (assoc snapshot :graph-source (pin "graph-new" "f"))
+        receipt (selector/select {:snapshot repinned :candidates [candidate]})]
+    (is (= :candidate-invalid (:reason receipt)))
+    (is (some #{:task-state-source-mismatch}
+              (get-in receipt [:details :candidate-errors "M-a"])))
+    (is (not (contains? (:channels candidate) :declared-priority-cost)))
+    (is (some #{:declared-priority-cost} (:unsupported-channels candidate)))))
+
+(deftest unsupported-kind-channels-are-reported-not-zeroed
+  (let [rows [{:id "E-no-surface" :kind :excursion :source (pin "e" "1")}
+              {:id "T-no-surface" :kind :ticket :source (pin "t" "2")}
+              {:id "A-no-surface" :kind :algorithm :source (pin "a" "3")}]
+        candidates (live/task-state-candidates rows snapshot)]
+    (doseq [candidate candidates]
+      (is (= {} (:channels candidate)))
+      (is (= #{:declared-priority-cost :pipeline-structural-centrality-cost
+               :pipeline-freshness-cost}
+             (set (:unsupported-channels candidate)))))))
 
 (deftest partial-live-snapshot-remains-a-typed-outer-refusal
   (let [receipt (live/select-live
