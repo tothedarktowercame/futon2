@@ -2,6 +2,8 @@
   "Live adapter from the pipeline cascade to canonical outer-task selection."
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-pipeline-selector :as meta]
@@ -52,6 +54,7 @@
   ([base-url]
    (let [summary-url (str base-url "/api/alpha/cascade-real")
          graph-url (str base-url "/api/alpha/cascade-real/graph")
+         agency-url (str base-url "/api/alpha/agents")
          ;; Futon2 and Futon3c share the canonical serving JVM. Prefer direct
          ;; producer calls there: synchronous self-HTTP can wait behind the
          ;; request currently serving META. Standalone consumers retain HTTP.
@@ -63,6 +66,9 @@
                     graph-url
                     'futon3c.logic.cascade-real-live/cascade-real-graph)
                    (fetch-json graph-url))
+         agency (or (local-cascade-source
+                     agency-url 'futon3c.agency.registry/registry-status)
+                    (fetch-json agency-url))
          graph-value (update (:value graph) :section-status
                              (fn [sections]
                                (into {} (map (fn [[k v]]
@@ -70,7 +76,8 @@
                                      sections)))]
      {:schema meta/snapshot-schema
       :summary-source (:source summary) :graph-source (:source graph)
-      :summary (:value summary) :graph graph-value})))
+      :agency-source (:source agency)
+      :summary (:value summary) :graph graph-value :agency (:value agency)})))
 
 (defn- normalized-priorities [tasks]
   (let [values (filter number? (map :priority tasks))
@@ -206,6 +213,96 @@
                        findings)]
     {:tasks enriched :excluded excluded}))
 
+(defn- agency-target [agent]
+  (some #(when (and (string? %) (re-matches root-task-id %)) %)
+        [(:mission-id agent) (:excursion-id agent) (:ticket-id agent)]))
+
+(defn- ownership-observation [task snapshot]
+  (let [source (:agency-source snapshot)
+        agents (get-in snapshot [:agency :agents])
+        owners (when (and (map? agents) (map? source))
+                 (->> agents
+                      (keep (fn [[agent-id agent]]
+                              (when (= (:id task) (agency-target agent))
+                                {:agent-id (name agent-id)
+                                 :session-id (:session-id agent)
+                                 :status (:status agent)})))
+                      (sort-by :agent-id) vec))]
+    (cond
+      (nil? owners) {:state :unknown :reason :agency-evidence-unavailable}
+      (empty? owners) {:state :unowned :source source}
+      (= 1 (count owners)) {:state :active :owner (first owners) :source source}
+      :else {:state :ambiguous :owners owners :source source})))
+
+(defn- git-command [dir & args]
+  (let [{:keys [exit out err]} (apply shell/sh "git" "-C" dir args)]
+    (if (zero? exit)
+      (str/trim-newline out)
+      (throw (ex-info "git provenance command failed"
+                      {:dir dir :args args :exit exit :stderr err})))))
+
+(defn- git-command-raw [dir & args]
+  (let [{:keys [exit out err]} (apply shell/sh "git" "-C" dir args)]
+    (if (zero? exit)
+      out
+      (throw (ex-info "git provenance command failed"
+                      {:dir dir :args args :exit exit :stderr err})))))
+
+(defn- trailer-values [text label]
+  (mapv second (re-seq (re-pattern (str "(?m)^" label ": (.+)$")) text)))
+
+(defn- last-touch-observation [task]
+  (try
+    (let [path (get-in task [:source :path])
+          declared-sha (get-in task [:source :sha256])
+          parent (.getParent (java.io.File. path))
+          repo (git-command parent "rev-parse" "--show-toplevel")
+          rel (.toString (.relativize (.toPath (java.io.File. repo))
+                                     (.toPath (java.io.File. path))))
+          commit (git-command repo "log" "-1" "--format=%H" "--" rel)]
+      (if (str/blank? commit)
+        {:state :unknown :reason :source-uncommitted :source (:source task)}
+        (let [blob (git-command-raw repo "show" (str commit ":" rel))
+              blob-sha (field/sha256 (.getBytes ^String blob "UTF-8"))
+              current-sha (field/sha256 (.getBytes ^String (slurp path) "UTF-8"))
+              commit-data (git-command
+                           repo "show" "-s"
+                           "--format=%H%n%(trailers:key=Agent-Id)%n%(trailers:key=Agency-Job)%n%(trailers:key=Dispatched-By)"
+                           commit)
+              agent-ids (trailer-values commit-data "Agent-Id")
+              agency-jobs (trailer-values commit-data "Agency-Job")
+              dispatched-by (trailer-values commit-data "Dispatched-By")]
+          (cond
+            (or (not= declared-sha blob-sha) (not= declared-sha current-sha))
+            {:state :unknown :reason :source-commit-mismatch
+             :source (:source task) :commit commit :commit-source-sha256 blob-sha}
+
+            (not-every? #(= 1 (count %)) [agent-ids agency-jobs dispatched-by])
+            {:state :unknown :reason :commit-trailers-missing-or-ambiguous
+             :source (:source task) :commit commit
+             :trailers {:agent-id agent-ids :agency-job agency-jobs
+                        :dispatched-by dispatched-by}}
+
+            :else
+            (let [agent-id (first agent-ids)]
+              {:state (if (str/starts-with? agent-id "wm-")
+                        :war-machine-authored :agent-authored)
+               :source (:source task) :commit commit
+               :trailers {:agent-id agent-id
+                          :agency-job (first agency-jobs)
+                          :dispatched-by (first dispatched-by)}})))))
+    (catch Throwable t
+      {:state :unknown :reason :git-provenance-unavailable
+       :source (:source task) :error-class (.getName (class t))
+       :error-message (.getMessage t)})))
+
+(defn- attach-work-attribution [tasks snapshot]
+  (mapv (fn [task]
+          (assoc task
+                 :ownership (ownership-observation task snapshot)
+                 :last-touch (last-touch-observation task)))
+        tasks))
+
 (defn- canonical-receipt [tasks excluded selection]
   (let [support (mapv outer/task-view tasks)
         selected-id (when (= :selected (:status selection)) (:selected selection))
@@ -215,7 +312,7 @@
                       :uses [:pipeline-cascade :pipeline-freshness
                              :declared-priority
                              :automated-feasibility]
-                      :observes [:repair-observations]
+                      :observes [:repair-observations :ownership :last-touch]
                       :forbids [:cascade :candidates :constructed-candidates
                                 :interpretations :precedence :tactical-g]
                       :meta-selection selection}
@@ -234,9 +331,25 @@
   (let [{ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations tasks)
         snapshot (fetch-snapshot)
+        attributed-tasks (attach-work-attribution ordinary-tasks snapshot)
         nodes (meta/pipeline-node-ids (:graph snapshot))
-        on-map (filterv #(contains? nodes (:id %)) ordinary-tasks)
-        off-map (->> ordinary-tasks
+        actively-owned (filterv #(contains? #{:active :ambiguous}
+                                             (get-in % [:ownership :state]))
+                                attributed-tasks)
+        selectable-tasks (filterv #(not (contains? #{:active :ambiguous}
+                                                    (get-in % [:ownership :state])))
+                                  attributed-tasks)
+        ownership-excluded
+        (mapv #(assoc (outer/task-view %)
+                      :eligible false
+                      :ineligible-reason
+                      (if (= :active (get-in % [:ownership :state]))
+                        :ownership/actively-held
+                        :ownership/ambiguous-active-owner)
+                      :ineligibility-evidence (:ownership %))
+              actively-owned)
+        on-map (filterv #(contains? nodes (:id %)) selectable-tasks)
+        off-map (->> selectable-tasks
                      (remove #(contains? nodes (:id %)))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
@@ -246,7 +359,9 @@
                                     :graph-source (:graph-source snapshot)})))
         selection (meta/select {:snapshot snapshot
                                 :candidates (candidate-fn on-map snapshot)})]
-    (canonical-receipt on-map (into repair-excluded off-map) selection)))
+    (canonical-receipt on-map
+                       (into repair-excluded (concat ownership-excluded off-map))
+                       selection)))
 
 (defn selector [{:keys [tasks]}]
   (select-live {:tasks tasks}))

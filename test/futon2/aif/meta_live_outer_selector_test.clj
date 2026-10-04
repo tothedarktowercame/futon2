@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-live-outer-selector-test
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-live-outer-selector :as live]))
@@ -142,6 +143,78 @@
     (is (every? #(get-in % [:ineligibility-evidence :ticket-source :sha256])
                 (:excluded receipt)))
     (is (= ["M-a" "M-b"] (mapv :id (:support receipt))))))
+
+(defn- git! [dir & args]
+  (let [{:keys [exit out err]} (apply shell/sh "git" "-C" (.getAbsolutePath dir) args)]
+    (when-not (zero? exit) (throw (ex-info err {:args args})))
+    out))
+
+(defn- committed-task [repo id agent-id]
+  (let [path (.getAbsolutePath (io/file repo (str id ".md")))
+        text (str "# " id "\n")
+        message (if agent-id
+                  (str "write " id "\n\nAgent-Id: " agent-id
+                       "\nAgency-Job: invoke-test\nDispatched-By: test-owner\n")
+                  (str "write " id))]
+    (spit path text)
+    (git! repo "add" (str id ".md"))
+    (git! repo "commit" "-m" message)
+    {:id id :kind :mission :priority 2 :path path
+     :source {:path path :sha256 (field/sha256 (.getBytes text "UTF-8"))}}))
+
+(deftest active-ownership-and-exact-last-touch-are-distinct
+  (let [repo (.toFile (java.nio.file.Files/createTempDirectory
+                       "meta-attribution"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (git! repo "init")
+    (git! repo "config" "user.email" "test@example.invalid")
+    (git! repo "config" "user.name" "Test")
+    (let [wm (committed-task repo "M-a" "wm-author")
+          other (committed-task repo "M-b" "codex-18")
+          agency-snapshot (assoc snapshot
+                                 :agency-source (pin "agency" "e")
+                                 :agency {:agents
+                                          {:codex-9 {:mission-id "M-a"
+                                                     :session-id "live-session"
+                                                     :status :idle}}})
+          held (live/select-live {:tasks [wm other]
+                                  :fetch-snapshot (constantly agency-snapshot)})
+          held-row (first (:excluded held))]
+      (is (= ["M-b"] (mapv :id (:support held))))
+      (is (= :ownership/actively-held (:ineligible-reason held-row)))
+      (is (= "codex-9" (get-in held-row [:ownership :owner :agent-id])))
+      (is (= :war-machine-authored (get-in held-row [:last-touch :state])))
+      (is (= :agent-authored (get-in held [:support 0 :last-touch :state])))
+      (testing "a historical agent trailer does not assert current ownership"
+        (let [stale (live/select-live
+                     {:tasks [other]
+                      :fetch-snapshot #(assoc snapshot
+                                              :agency-source (pin "agency" "e")
+                                              :agency {:agents {}})})]
+          (is (= :unowned (get-in stale [:support 0 :ownership :state])))
+          (is (= :agent-authored (get-in stale [:support 0 :last-touch :state]))))))))
+
+(deftest missing-or-mismatched-commit-provenance-is-unknown
+  (let [repo (.toFile (java.nio.file.Files/createTempDirectory
+                       "meta-attribution-unknown"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (git! repo "init")
+    (git! repo "config" "user.email" "test@example.invalid")
+    (git! repo "config" "user.name" "Test")
+    (let [missing (committed-task repo "M-a" nil)
+          mismatch (committed-task repo "M-b" "codex-18")
+          agency-snapshot (assoc snapshot :agency-source (pin "agency" "e")
+                                 :agency {:agents {}})]
+      (spit (:path mismatch) "# changed after commit\n")
+      (let [receipt (live/select-live {:tasks [missing mismatch]
+                                       :fetch-snapshot (constantly agency-snapshot)})
+            by-id (into {} (map (juxt :id identity)) (:support receipt))]
+        (is (= :commit-trailers-missing-or-ambiguous
+               (get-in by-id ["M-a" :last-touch :reason])))
+        (is (= :source-commit-mismatch
+               (get-in by-id ["M-b" :last-touch :reason])))
+        (is (every? #(= :unknown (get-in % [:last-touch :state]))
+                    (:support receipt)))))))
 
 (deftest browser-projection-preserves-order-and-census-without-proof-bulk
   (let [receipt (live/select-live {:tasks (conj tasks
