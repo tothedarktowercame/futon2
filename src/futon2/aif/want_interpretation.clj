@@ -94,7 +94,9 @@
   criterion's text at its recorded lines (interpretation-request's pinned
   path; hermetic in tests through OPTIONS). ROOT holds the evidence."
   [{:keys [target criterion] :as m} root options]
-  (let [r (ireq/prepare-want-proposal! target :mission root
+  (let [kind (if (and (string? target) (str/starts-with? target "T-"))
+               :ticket :mission)
+        r (ireq/prepare-want-proposal! target kind root
                                        (fn [src text] [(citation-for src text criterion)])
                                        options)]
     (request (assoc m :retrieval (select-keys r [:target :sources :retrieval])))))

@@ -74,6 +74,19 @@
     (is (= [9 10] (get-in r [:retrieval :target :citations 0 :lines])))
     (is (= :want-criterion (get-in r [:retrieval :target :tension-rule])))))
 
+(deftest request!-resolves-ticket-wants-as-tickets
+  (let [seen (atom nil)
+        criterion {:kind :ticket-closure :line 3 :stated "**Status:** OPEN"}]
+    (with-redefs [ireq/prepare-want-proposal!
+                  (fn [target kind _root _citations _options]
+                    (reset! seen [target kind])
+                    {:target {:id target} :sources [] :retrieval {}})]
+      (wi/request! {:target "T-repair-fixture"
+                    :want :ticket-closure/hfixture
+                    :criterion criterion :facts {} :patterns {}}
+                   "/tmp/unused" {})
+      (is (= ["T-repair-fixture" :ticket] @seen)))))
+
 (defn- refusal-of [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e)))))
 
