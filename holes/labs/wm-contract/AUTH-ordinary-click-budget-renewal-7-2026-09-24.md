@@ -142,3 +142,13 @@ step and run click 1. Per this document's standing rule, `allocated` rises
 from 35 to **45**; issue-time accounting and the no-refund rule are unchanged.
 These ten clicks form the new registered-run series: each click selects its
 work through the ordinary outer loop, and repairs may land between clicks.
+
+## Joe's grant to codex-10, 2026-10-04 — one click, allocated
+
+Joe, 2026-10-04, heard directly by codex-10 in its operator buffer after the
+registered-run allocation reached 45 consumed of 45 and the read-only META
+preview selected a different mission: "1 is authorised". This authorizes
+exactly one further ordinary click for the repaired, debugger-attached run and
+its post-hoc qualitative/timing analysis. Per this document's standing rule,
+`allocated` rises from 45 to **46**. Issue-time accounting and the existing
+refund rules are unchanged.
