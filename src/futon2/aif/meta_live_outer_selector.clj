@@ -6,6 +6,7 @@
             [clojure.string :as str]
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.meta-decision-manifest :as decision-manifest]
             [futon2.aif.meta-pipeline-selector :as meta]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
@@ -34,7 +35,7 @@
       (throw (ex-info "Live META source unavailable"
                       {:kind :meta-live-source-unavailable
                        :url url :status (:status response)})))
-    {:source (pin url body) :value (json/parse-string body true)}))
+    {:source (pin url body) :bytes body :value (json/parse-string body true)}))
 
 (defn- local-cascade-source
   "Call a cascade producer in the shared serving JVM and pin its canonical JSON.
@@ -45,7 +46,7 @@
     (when-let [producer (requiring-resolve producer-symbol)]
       (let [value (producer)
             body (json/generate-string value)]
-        {:source (pin source-id body) :value value}))
+        {:source (pin source-id body) :bytes body :value value}))
     (catch java.io.FileNotFoundException _ nil)))
 
 (defn fetch-pipeline-snapshot
@@ -77,6 +78,8 @@
      {:schema meta/snapshot-schema
       :summary-source (:source summary) :graph-source (:source graph)
       :agency-source (:source agency)
+      :source-bytes {:summary (:bytes summary) :graph (:bytes graph)
+                     :agency (:bytes agency)}
       :summary (:value summary) :graph graph-value :agency (:value agency)})))
 
 (defn- normalized-priorities [tasks]
@@ -422,7 +425,7 @@
 
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
-  [{:keys [tasks fetch-snapshot candidate-fn]
+  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest?]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates}}]
   (let [{ordinary-tasks :tasks repair-excluded :excluded}
@@ -479,15 +482,22 @@
                                    :ineligibility-evidence
                                    {:summary-source (:summary-source snapshot)
                                     :graph-source (:graph-source snapshot)})))
-        selection (meta/select {:snapshot snapshot
-                                :candidates (candidate-fn on-map snapshot)})]
-    (canonical-receipt on-map
-                       (into repair-excluded
-                             (concat standing-excluded ownership-excluded off-map))
-                       selection)))
+        candidates (candidate-fn on-map snapshot)
+        selection (meta/select {:snapshot snapshot :candidates candidates})
+        receipt (canonical-receipt
+                 on-map
+                 (into repair-excluded
+                       (concat standing-excluded ownership-excluded off-map))
+                 selection)]
+    (if retain-manifest?
+      (decision-manifest/attach receipt
+                                {:tasks tasks :snapshot snapshot
+                                 :candidate-inputs on-map
+                                 :candidates candidates})
+      receipt)))
 
 (defn selector [{:keys [tasks]}]
-  (select-live {:tasks tasks}))
+  (select-live {:tasks tasks :retain-manifest? true}))
 
 (defn browser-receipt
   "Return the bounded UI projection of a canonical outer-selection receipt.
@@ -524,7 +534,7 @@
   "Read the authoritative registries once and produce the same receipt used by
   the production selector. This is the read-only Arxana/API projection."
   []
-  (select-live {:tasks (live-registry-tasks)}))
+  (select-live {:tasks (live-registry-tasks) :retain-manifest? true}))
 
 (defn preview-live-browser
   "Compute the canonical live selection and return its bounded UI projection."
