@@ -1,0 +1,31 @@
+{:schema :wm/ticket-closure-review-v1
+ :ticket/id "T-repair-occ-5643bd66e188fed501ef1b93c4296fcd9957168ad24131656d2c822b197e5ed7"
+ :checked-at "2026-10-04T00:35:22.624146797Z"
+ :repair/finding
+ {:path "data/wm-repair-obligations/findings/repair-occ-5643bd66e188fed501ef1b93c4296fcd9957168ad24131656d2c822b197e5ed7.edn"
+  :sha256 "bf1d51db8ca9fdfd7083e736b8b6cf696b9a0d913e9bd2e854331826048657f6"}
+ :recheck
+ {:condition :repair-ticket-target-resolvable
+  :source
+  {:path "data/wm-full-loop-machinery-102/wm-contract-machinery-102-v1/attempt-002/003-construction.edn"
+   :sha256 "e78c16c3c60047dc0778f350f308f7aa4a2d1de68d5a390a22881020a34af5b2"}
+  :observed :cleared
+  :evidence "The current cascade resolved this repair ticket as an addressable target and constructed a reviewed closure action; the earlier :interpretation/target-unresolved precondition no longer holds for this ticket class."}
+ :tensions
+ [{:kind :solvable-in-scope
+   :subject :interpretation-target-resolution
+   :disposition :cleared}
+  {:kind :out-of-scope
+   :subject "T-repair-occ-c4f34d0d2b676562a3c76bf7f7292bb73424d271aa0457c5a9fb21977c5d0201"
+   :recipient "T-repair-occ-c4f34d0d2b676562a3c76bf7f7292bb73424d271aa0457c5a9fb21977c5d0201"
+   :source
+   {:path "holes/tickets/T-repair-occ-c4f34d0d2b676562a3c76bf7f7292bb73424d271aa0457c5a9fb21977c5d0201.md"
+    :sha256 "d45995acb84fc5fdd6d5b440ab9a6fc04a82637b0b495c708c2cd62b90de7ccf"}
+   :disposition :retained-open
+   :reason "The referenced ticket owns its own selection failure and acceptance review; closing this occurrence does not close or weaken that ticket."}
+  {:kind :structural-void
+   :subject :closure-token-locator
+   :disposition :preserved
+   :reason "The construction reports no declared locator for the produced closure token; the ticket Status line remains the recorded C4 observation boundary."}]
+ :actionable-in-scope []
+ :decision :close}
