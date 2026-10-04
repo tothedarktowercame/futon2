@@ -30,14 +30,35 @@
                        :url url :status (:status response)})))
     {:source (pin url body) :value (json/parse-string body true)}))
 
+(defn- local-cascade-source
+  "Call a cascade producer in the shared serving JVM and pin its canonical JSON.
+  This avoids making a blocking HTTP request back into the same bounded server
+  worker pool. Returns nil when the producer is not present in this process."
+  [source-id producer-symbol]
+  (try
+    (when-let [producer (requiring-resolve producer-symbol)]
+      (let [value (producer)
+            body (json/generate-string value)]
+        {:source (pin source-id body) :value value}))
+    (catch java.io.FileNotFoundException _ nil)))
+
 (defn fetch-pipeline-snapshot
   "Fetch and byte-pin the current summary and graph exactly once each."
   ([] (fetch-pipeline-snapshot (pattern-registry/configured-evidence-base)))
   ([base-url]
    (let [summary-url (str base-url "/api/alpha/cascade-real")
          graph-url (str base-url "/api/alpha/cascade-real/graph")
-         summary (fetch-json summary-url)
-         graph (fetch-json graph-url)
+         ;; Futon2 and Futon3c share the canonical serving JVM. Prefer direct
+         ;; producer calls there: synchronous self-HTTP can wait behind the
+         ;; request currently serving META. Standalone consumers retain HTTP.
+         summary (or (local-cascade-source
+                      summary-url
+                      'futon3c.logic.cascade-real-live/cascade-real-summary)
+                     (fetch-json summary-url))
+         graph (or (local-cascade-source
+                    graph-url
+                    'futon3c.logic.cascade-real-live/cascade-real-graph)
+                   (fetch-json graph-url))
          graph-value (update (:value graph) :section-status
                              (fn [sections]
                                (into {} (map (fn [[k v]]
@@ -142,6 +163,24 @@
 (defn selector [{:keys [tasks]}]
   (select-live {:tasks tasks}))
 
+(defn browser-receipt
+  "Return the bounded UI projection of a canonical outer-selection receipt.
+  The full receipt remains the proof/audit artifact; Arxana needs identities,
+  ordering, display channels and typed exclusions, not the quadratic pairwise
+  comparison witnesses or repeated exclusion evidence."
+  [receipt]
+  {:schema (:schema receipt)
+   :policy {:kind (get-in receipt [:policy :kind])
+            :meta-selection
+            (select-keys (get-in receipt [:policy :meta-selection])
+                         [:schema :status :selected :reason
+                          :epistemic-value-nats :ranking])}
+   :support (mapv #(select-keys % [:id :kind :source]) (:support receipt))
+   :excluded (mapv #(select-keys % [:id :kind :source :ineligible-reason])
+                   (:excluded receipt))
+   :chosen (:chosen receipt)
+   :action (:action receipt)})
+
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by
   the production selector. This is the read-only Arxana/API projection."
@@ -157,3 +196,8 @@
                     (map #(assoc % :kind :ticket)
                          (filter registry/live-ticket? (:tickets tickets)))))]
     (select-live {:tasks tasks})))
+
+(defn preview-live-browser
+  "Compute the canonical live selection and return its bounded UI projection."
+  []
+  (browser-receipt (preview-live)))

@@ -79,3 +79,17 @@
     (is (= :pipeline/not-on-current-map
            (get-in receipt [:excluded 0 :ineligible-reason])))
     (is (= 3 (+ (count (:support receipt)) (count (:excluded receipt)))))))
+
+(deftest browser-projection-preserves-order-and-census-without-proof-bulk
+  (let [receipt (live/select-live {:tasks (conj tasks
+                                                {:id "M-z" :kind :mission
+                                                 :priority 0
+                                                 :source (pin "M-z.md" "e")})
+                                   :fetch-snapshot (constantly snapshot)})
+        preview (live/browser-receipt receipt)]
+    (is (= (mapv :id (:support receipt)) (mapv :id (:support preview))))
+    (is (= (mapv :id (:excluded receipt)) (mapv :id (:excluded preview))))
+    (is (= (get-in receipt [:policy :meta-selection :ranking])
+           (get-in preview [:policy :meta-selection :ranking])))
+    (is (nil? (get-in preview [:policy :meta-selection :pairwise])))
+    (is (nil? (get-in preview [:excluded 0 :ineligibility-evidence])))))
