@@ -63,10 +63,13 @@
       {:kind :bytes :path path :content-sha256 sha256 :content bytes})))
 
 (defn- task-entry [task]
-  {:id (:id task) :kind (:kind task)
-   :automated-feasibility (:automated-feasibility task)
-   :priority (:priority task)
-   :source (source-authority (:source task))})
+  (try
+    {:id (:id task) :kind (:kind task)
+     :automated-feasibility (:automated-feasibility task)
+     :priority (:priority task)
+     :source (source-authority (:source task))}
+    (catch clojure.lang.ExceptionInfo e
+      (throw (ex-info (ex-message e) (assoc (ex-data e) :task-id (:id task)) e)))))
 
 (defn- snapshot-entry [snapshot]
   (let [sources [[:summary :summary-source] [:graph :graph-source]
