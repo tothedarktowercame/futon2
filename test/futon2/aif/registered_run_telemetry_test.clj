@@ -36,6 +36,29 @@
     (is (= :complete (:status r)))
     (is (= [17 7 24] ((juxt :input-tokens :output-tokens :total-tokens) r)))))
 
+(deftest joins-real-agency-json-enums
+  ;; Shape pinned from GET /api/alpha/invoke/jobs/
+  ;; invoke-1791074118947-31367-c368e0c8 on 2026-10-04. JSON parsing keeps
+  ;; harness enum values as strings even though its map keys are keywordized.
+  (let [run-id "2026-10-04-d197fe96-53e4-498b-b870-15b8c541e3b1"
+        click-id "wm-click-998f4b67-58c7-48d4-88c7-fc063c8db4c8"
+        job-id "invoke-1791074118947-31367-c368e0c8"
+        ledger (atom {:order [] :jobs {}})
+        job {:job-id job-id :state "done"
+             :harness {:kind "war-machine" :basis "producer-context"
+                       :execution-id run-id :source-ref click-id}
+             :usage {:input_tokens 2493187 :cached_input_tokens 2303232
+                     :output_tokens 5303 :source "codex"
+                     :model "gpt-5.6-sol"}}]
+    (sut/register-job! ledger {:run-id run-id :click-id click-id :job-id job-id
+                               :role :author :phase :author-dispatch})
+    (sut/retain-terminal-job! ledger job)
+    (let [usage (sut/model-usage ledger {:run-id run-id :click-id click-id})]
+      (is (= :complete (:status usage)))
+      (is (= [2493187 5303 2498490]
+             ((juxt :input-tokens :output-tokens :total-tokens) usage)))
+      (is (= 2303232 (:cached-input-tokens usage))))))
+
 (deftest missing-provider-receipt-stays-typed
   (let [ledger (usage-ledger "run" "click" [["a" {:input_tokens 1
                                                        :output_tokens 2}]])

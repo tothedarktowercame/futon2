@@ -40,6 +40,15 @@
         (or (:source usage) (:cost/source usage))
         (assoc :provider (or (:source usage) (:cost/source usage)))))))
 
+(defn- enum=
+  "Compare an enum across the EDN producer and JSON transport boundary."
+  [expected observed]
+  (= (name expected)
+     (cond
+       (keyword? observed) (name observed)
+       (string? observed) observed
+       :else nil)))
+
 (defn register-job!
   "Register one WM dispatch at the point Agency returns its job identity."
   [ledger {:keys [run-id click-id job-id] :as entry}]
@@ -92,8 +101,8 @@
                       joined? (and (= run-id (:run-id entry))
                                    (= click-id (:click-id entry))
                                    (= job-id (:job-id terminal))
-                                   (= :war-machine (:kind harness))
-                                   (= :producer-context (:basis harness))
+                                   (enum= :war-machine (:kind harness))
+                                   (enum= :producer-context (:basis harness))
                                    (= run-id (:execution-id harness))
                                    (= click-id (:source-ref harness)))
                       usage (when joined? (normalized-usage (:usage terminal)))
