@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-live-outer-selector
   "Live adapter from the pipeline cascade to canonical outer-task selection."
   (:require [babashka.http-client :as http]
+            [clojure.edn :as edn]
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-pipeline-selector :as meta]
@@ -16,6 +17,9 @@
 (def ^:private action-type
   {:mission :advance-mission :excursion :advance-excursion
    :ticket :advance-ticket :algorithm :run-algorithm})
+
+(def ^:private repair-ticket-id #"^T-(repair-occ-[0-9a-f]{64})$")
+(def ^:private root-task-id #"^[MET]-[^/]+$")
 
 (defn- pin [path body]
   {:path path :sha256 (field/sha256 (.getBytes ^String body "UTF-8"))})
@@ -121,6 +125,87 @@
                          (assoc :pipeline-freshness-cost (get freshness-by-id id)))})
           tasks)))
 
+(defn- exactly-one [xs]
+  (when (= 1 (count xs)) (first xs)))
+
+(defn- repair-observation
+  "Read the canonical finding pinned by a repair ticket. Returns either an
+  exact root observation or a typed unresolved record; neither is rankable."
+  [ticket root-ids]
+  (try
+    (let [[_ expected-finding-id] (re-matches repair-ticket-id (:id ticket))
+          ticket-text (slurp (:path ticket))
+          finding-path (exactly-one
+                        (map second (re-seq #"Finding:.*\(([^)]+\.edn)\)"
+                                            ticket-text)))
+          declared-sha (exactly-one
+                        (map second (re-seq #"Finding SHA-256: `([0-9a-f]{64})`"
+                                            ticket-text)))
+          finding-text (when finding-path (slurp finding-path))
+          actual-sha (when finding-text
+                       (field/sha256 (.getBytes ^String finding-text "UTF-8")))
+          finding (when (= declared-sha actual-sha) (edn/read-string finding-text))
+          finding-id (:repair/id finding)
+          target (:target finding)
+          parent (:parent ticket)
+          reason (cond
+                   (not (and finding-path declared-sha)) :repair-finding/evidence-missing
+                   (not= declared-sha actual-sha) :repair-finding/source-sha-mismatch
+                   (not= expected-finding-id finding-id) :repair-finding/identity-mismatch
+                   (not (and (string? target) (re-matches root-task-id target)))
+                   :repair-finding/root-missing
+                   (and parent (not= parent target)) :repair-finding/root-ambiguous
+                   (not (contains? root-ids target)) :repair-finding/root-not-current)
+          evidence {:ticket-id (:id ticket)
+                    :ticket-source (:source ticket)
+                    :finding-id finding-id
+                    :finding-source {:path finding-path :sha256 actual-sha}
+                    :declared-finding-sha256 declared-sha
+                    :ticket-parent parent
+                    :finding-target target}]
+      (if reason
+        {:status :unresolved :reason reason :evidence evidence}
+        {:status :attached :root-id target
+         :observation {:kind :repair-finding
+                       :id (:id ticket)
+                       :repair-class (:repair/class finding)
+                       :repair-status (:repair/status finding)
+                       :failure-kind (:failure-kind finding)
+                       :failure-stage (:failure-stage finding)
+                       :opened-at (:opened-at finding)
+                       :evidence evidence}}))
+    (catch Throwable t
+      {:status :unresolved :reason :repair-finding/evidence-unreadable
+       :evidence {:ticket-id (:id ticket) :ticket-source (:source ticket)
+                  :error-class (.getName (class t))
+                  :error-message (.getMessage t)}})))
+
+(defn- attach-repair-observations [tasks]
+  (let [repair? #(boolean (and (= :ticket (:kind %))
+                               (re-matches repair-ticket-id (:id %))))
+        ordinary (filterv (complement repair?) tasks)
+        root-ids (set (map :id ordinary))
+        findings (mapv #(assoc (repair-observation % root-ids) :ticket %)
+                       (filter repair? tasks))
+        by-root (group-by :root-id (filter #(= :attached (:status %)) findings))
+        enriched (mapv (fn [task]
+                         (if-let [rows (seq (get by-root (:id task)))]
+                           (assoc task :repair-observations
+                                  (mapv :observation rows))
+                           task))
+                       ordinary)
+        excluded (mapv (fn [{:keys [status reason evidence ticket root-id]}]
+                         (assoc (outer/task-view ticket)
+                                :eligible false
+                                :ineligible-reason
+                                (if (= :attached status)
+                                  :repair-finding/attached-to-root
+                                  reason)
+                                :ineligibility-evidence
+                                (cond-> evidence root-id (assoc :root-id root-id))))
+                       findings)]
+    {:tasks enriched :excluded excluded}))
+
 (defn- canonical-receipt [tasks excluded selection]
   (let [support (mapv outer/task-view tasks)
         selected-id (when (= :selected (:status selection)) (:selected selection))
@@ -130,6 +215,7 @@
                       :uses [:pipeline-cascade :pipeline-freshness
                              :declared-priority
                              :automated-feasibility]
+                      :observes [:repair-observations]
                       :forbids [:cascade :candidates :constructed-candidates
                                 :interpretations :precedence :tactical-g]
                       :meta-selection selection}
@@ -145,10 +231,12 @@
   [{:keys [tasks fetch-snapshot candidate-fn]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates}}]
-  (let [snapshot (fetch-snapshot)
+  (let [{ordinary-tasks :tasks repair-excluded :excluded}
+        (attach-repair-observations tasks)
+        snapshot (fetch-snapshot)
         nodes (meta/pipeline-node-ids (:graph snapshot))
-        on-map (filterv #(contains? nodes (:id %)) tasks)
-        off-map (->> tasks
+        on-map (filterv #(contains? nodes (:id %)) ordinary-tasks)
+        off-map (->> ordinary-tasks
                      (remove #(contains? nodes (:id %)))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
@@ -158,7 +246,7 @@
                                     :graph-source (:graph-source snapshot)})))
         selection (meta/select {:snapshot snapshot
                                 :candidates (candidate-fn on-map snapshot)})]
-    (canonical-receipt on-map off-map selection)))
+    (canonical-receipt on-map (into repair-excluded off-map) selection)))
 
 (defn selector [{:keys [tasks]}]
   (select-live {:tasks tasks}))

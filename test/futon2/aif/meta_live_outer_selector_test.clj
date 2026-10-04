@@ -1,5 +1,7 @@
 (ns futon2.aif.meta-live-outer-selector-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-live-outer-selector :as live]))
 
 (defn pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
@@ -79,6 +81,67 @@
     (is (= :pipeline/not-on-current-map
            (get-in receipt [:excluded 0 :ineligible-reason])))
     (is (= 3 (+ (count (:support receipt)) (count (:excluded receipt)))))))
+
+(defn- repair-ticket [dir suffix target parent]
+  (let [finding-id (str "repair-occ-" suffix)
+        finding-path (.getAbsolutePath (io/file dir (str finding-id ".edn")))
+        finding-text (pr-str {:repair/id finding-id :repair/status :open
+                              :repair/class :environmental-hold
+                              :failure-kind :agent-unavailable
+                              :failure-stage :agent-readiness :target target})
+        finding-sha (field/sha256 (.getBytes finding-text "UTF-8"))
+        ticket-id (str "T-" finding-id)
+        ticket-path (.getAbsolutePath (io/file dir (str ticket-id ".md")))
+        ticket-text (str "# Repair\n\n**Status:** OPEN\n\n"
+                         (when parent (str "Parent: " parent "\n\n"))
+                         "## Provenance\n\nFinding: [" finding-id "](" finding-path ")\n\n"
+                         "Finding SHA-256: `" finding-sha "`\n")]
+    (spit finding-path finding-text)
+    (spit ticket-path ticket-text)
+    {:task {:id ticket-id :kind :ticket :path ticket-path :parent parent
+            :source {:path ticket-path
+                     :sha256 (field/sha256 (.getBytes ticket-text "UTF-8"))}}
+     :finding-path finding-path}))
+
+(deftest repair-findings-are-root-observations-not-competing-tasks
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "meta-repair-observation"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        suffix-a (apply str (repeat 64 "1"))
+        suffix-b (apply str (repeat 64 "2"))
+        a (repair-ticket dir suffix-a "M-a" "M-a")
+        b (repair-ticket dir suffix-b "M-a" "M-a")
+        run #(live/select-live {:tasks (into tasks [(:task a) (:task b)])
+                                :fetch-snapshot (constantly snapshot)})
+        first-receipt (run)
+        root (first (:support first-receipt))]
+    (is (= ["M-a" "M-b"] (mapv :id (:support first-receipt))))
+    (is (= [(str "T-repair-occ-" suffix-a) (str "T-repair-occ-" suffix-b)]
+           (mapv :id (:repair-observations root))))
+    (is (every? #(= :repair-finding/attached-to-root (:ineligible-reason %))
+                (:excluded first-receipt)))
+    (testing "a finding rewrite changes evidence but cannot promote a ticket"
+      (spit (:finding-path a) "{:repair/id \"changed\"}")
+      (let [replayed (run)]
+        (is (= ["M-a" "M-b"] (mapv :id (:support replayed))))
+        (is (not-any? #(re-matches #"T-repair-occ-.*" (:id %))
+                      (:support replayed)))))))
+
+(deftest unresolved-repair-roots-fail-closed-with-evidence
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "meta-repair-unresolved"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        missing (repair-ticket dir (apply str (repeat 64 "3")) nil nil)
+        ambiguous (repair-ticket dir (apply str (repeat 64 "4")) "M-a" "M-b")
+        receipt (live/select-live
+                 {:tasks (into tasks [(:task missing) (:task ambiguous)])
+                  :fetch-snapshot (constantly snapshot)})
+        reasons (set (map :ineligible-reason (:excluded receipt)))]
+    (is (= #{:repair-finding/root-missing :repair-finding/root-ambiguous}
+           reasons))
+    (is (every? #(get-in % [:ineligibility-evidence :ticket-source :sha256])
+                (:excluded receipt)))
+    (is (= ["M-a" "M-b"] (mapv :id (:support receipt))))))
 
 (deftest browser-projection-preserves-order-and-census-without-proof-bulk
   (let [receipt (live/select-live {:tasks (conj tasks

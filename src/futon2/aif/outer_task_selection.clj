@@ -24,7 +24,7 @@
   cannot cross this boundary."
   [task]
   (select-keys task [:id :kind :status-class :open-hole-count :priority
-                     :requisition :source]))
+                     :requisition :source :repair-observations]))
 
 (defn- supported? [{:keys [id kind]}]
   (and (string? id) (not (empty? id)) (contains? kind-order kind)))
@@ -79,6 +79,7 @@
       :policy {:kind :seeded-uniform-task-support
                :uses [:id :kind :status-class :open-hole-count :priority
                       :requisition :source]
+               :observes [:repair-observations]
                :forbids [:cascade :candidates :constructed-candidates
                          :interpretations :precedence :g :g-terms]}
       :support support
