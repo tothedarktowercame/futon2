@@ -27,6 +27,19 @@
 (defn- pin [path body]
   {:path path :sha256 (field/sha256 (.getBytes ^String body "UTF-8"))})
 
+(defn- registry-snapshot
+  "Bind the exact task population received at the selector boundary.
+
+  Collection metadata is not a durable transport: production constructs the
+  outer population through ordinary vector transformations.  Reconstruct the
+  same canonical snapshot used by `live-registry-tasks` from those rows rather
+  than assuming metadata survived that transport."
+  [tasks]
+  (or (:registry-snapshot (meta tasks))
+      (let [content (decision-manifest/registry-snapshot-content tasks)]
+        {:source (pin "registry://live-outer-task-field" content)
+         :content content})))
+
 (defn- fetch-json [url]
   (let [response (http/get url {:headers {"Accept" "application/json"}
                                 :timeout 90000 :throw false})
@@ -499,7 +512,7 @@
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot
-                                 :registry-snapshot (:registry-snapshot (meta tasks))
+                                 :registry-snapshot (registry-snapshot tasks)
                                  :candidate-inputs on-map
                                  :candidates candidates})
       receipt)))
@@ -539,11 +552,9 @@
                                  (:excursions excursions)))
                     (map #(assoc % :kind :ticket)
                          (filter registry/live-ticket? (:tickets tickets)))))
-        content (decision-manifest/registry-snapshot-content tasks)]
+        snapshot (registry-snapshot tasks)]
     (with-meta tasks
-      {:registry-snapshot
-       {:source (pin "registry://live-outer-task-field" content)
-        :content content}})))
+      {:registry-snapshot snapshot})))
 
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by

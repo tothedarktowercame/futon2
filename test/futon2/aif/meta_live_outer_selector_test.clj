@@ -379,3 +379,12 @@
     (is (< (count (:support receipt)) (count inventory-ids)))
     (is (< elapsed-ms 30000)
         (str "bounded browser composition took " elapsed-ms "ms"))))
+
+(deftest ^:slow production-vector-retains-decision-authority-without-metadata
+  (let [tasks (vec (live/live-registry-tasks))
+        receipt (live/select-live {:tasks tasks :retain-manifest? true})]
+    (is (= :captured (get-in receipt [:decision-input-manifest :status])))
+    (is (= :pending-independent-replay
+           (:decision-input-verification receipt)))
+    (is (string? (:decision-input-manifest-sha256 receipt)))
+    (is (some? (:action receipt)))))
