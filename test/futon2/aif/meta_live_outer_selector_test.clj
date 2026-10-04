@@ -1,10 +1,12 @@
 (ns futon2.aif.meta-live-outer-selector-test
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-live-outer-selector :as live]
-            [futon2.aif.meta-pipeline-selector :as selector]))
+            [futon2.aif.meta-pipeline-selector :as selector]
+            [futon2.aif.mission-registry :as registry]))
 
 (defn pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
 (def snapshot
@@ -96,6 +98,72 @@
                 (filter #(= "M-inventory-only" (:id %)))
                 first :ineligible-reason)))
     (is (= "M-a" (get-in receipt [:chosen :id])))))
+
+(deftest conflicting-mission-standing-fails-closed-with-exact-authority
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "mission-standing-conflict"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        path (.getAbsolutePath (io/file dir "M-conflict.md"))
+        text (str "# Mission: M-conflict\n\n"
+                  "## Acceptance checklist\n\n"
+                  "- [ ] Record the manual walk-through.\n\n"
+                  "**Final lifecycle stamp**: **POC COMPLETE — shipped.**\n")
+        _ (spit path text)
+        task {:id "M-conflict" :kind :mission :priority 1
+              :source {:path path
+                       :sha256 (field/sha256 (.getBytes text "UTF-8"))}}
+        conflict-snapshot (assoc-in snapshot [:graph :clusters]
+                                    [{:mission "M-conflict"}])
+        receipt (live/select-live {:tasks [task]
+                                   :fetch-snapshot (constantly conflict-snapshot)})
+        excluded (first (:excluded receipt))
+        evidence (:ineligibility-evidence excluded)]
+    (is (empty? (:support receipt)))
+    (is (= :mission-standing-conflict (:ineligible-reason excluded)))
+    (is (= (:source task) (:source evidence)))
+    (is (= [{:kind :terminal-lifecycle-declaration :line 7
+             :text "**Final lifecycle stamp**: **POC COMPLETE — shipped.**"}
+            {:kind :unchecked-acceptance :line 5
+             :text "- [ ] Record the manual walk-through."
+             :heading {:line 3 :text "## Acceptance checklist"}}]
+           (:declarations evidence)))))
+
+(deftest current-self-documenting-mission-exposes-standing-conflict
+  (let [path "/home/joe/code/futon7/holes/M-self-documenting-stack.md"
+        text (slurp path)
+        source {:path path :sha256 (field/sha256 (.getBytes text "UTF-8"))}
+        observation (registry/mission-standing-observation
+                     {:id "M-self-documenting-stack" :kind :mission
+                      :source source})]
+    (is (= :conflict (:status observation)))
+    (is (= source (:source observation)))
+    (is (some #(= "- [ ] A recorded manual browser walk-through shows the LC1 mission-search surface returning and opening ranked mission results."
+                  (:text %))
+              (:open-acceptance-declarations observation)))
+    (is (some #(str/includes? (:text %) "M-self-documenting-stack POC COMPLETE")
+              (:terminal-declarations observation)))))
+
+(deftest mutated-mission-standing-source-is-refused-not-reinterpreted
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "mission-standing-mutation"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        path (.getAbsolutePath (io/file dir "M-mutated.md"))
+        original "# Mission\n\n## Acceptance\n- [ ] walk through it\n"
+        _ (spit path original)
+        task {:id "M-mutated" :kind :mission
+              :source {:path path
+                       :sha256 (field/sha256 (.getBytes original "UTF-8"))}}
+        _ (spit path (str original "\n**Final lifecycle stamp**: COMPLETE\n"))
+        receipt (live/select-live
+                 {:tasks [task]
+                  :fetch-snapshot
+                  #(assoc-in snapshot [:graph :clusters]
+                             [{:mission "M-mutated"}])})]
+    (is (empty? (:support receipt)))
+    (is (= :mission-standing-source-mismatch
+           (get-in receipt [:excluded 0 :ineligible-reason])))
+    (is (= (:source task)
+           (get-in receipt [:excluded 0 :ineligibility-evidence :source])))))
 
 (deftest task-state-channels-refuse-stale-pins-and-preserve-absence
   (let [candidate (first (live/task-state-candidates [(dissoc (first tasks) :priority)]
@@ -252,7 +320,7 @@
           (is (= :unowned (get-in stale [:support 0 :ownership :state])))
           (is (= :agent-authored (get-in stale [:support 0 :last-touch :state]))))))))
 
-(deftest missing-or-mismatched-commit-provenance-is-unknown
+(deftest missing-commit-provenance-is-unknown-and-source-mutation-is-refused
   (let [repo (.toFile (java.nio.file.Files/createTempDirectory
                        "meta-attribution-unknown"
                        (make-array java.nio.file.attribute.FileAttribute 0)))]
@@ -266,11 +334,12 @@
       (spit (:path mismatch) "# changed after commit\n")
       (let [receipt (live/select-live {:tasks [missing mismatch]
                                        :fetch-snapshot (constantly agency-snapshot)})
-            by-id (into {} (map (juxt :id identity)) (:support receipt))]
+            by-id (into {} (map (juxt :id identity)) (:support receipt))
+            excluded-by-id (into {} (map (juxt :id identity)) (:excluded receipt))]
         (is (= :commit-trailers-missing-or-ambiguous
                (get-in by-id ["M-a" :last-touch :reason])))
-        (is (= :source-commit-mismatch
-               (get-in by-id ["M-b" :last-touch :reason])))
+        (is (= :mission-standing-source-mismatch
+               (get-in excluded-by-id ["M-b" :ineligible-reason])))
         (is (every? #(= :unknown (get-in % [:last-touch :state]))
                     (:support receipt)))))))
 

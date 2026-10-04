@@ -428,11 +428,32 @@
   (let [{ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations tasks)
         snapshot (fetch-snapshot)
+        standing (into {} (map (fn [task]
+                                 [(:id task)
+                                  (registry/mission-standing-observation task)]))
+                       ordinary-tasks)
+        standing-refused?
+        (fn [task]
+          (let [observation (get standing (:id task))]
+            (or (= :conflict (:status observation))
+                (= :mission-standing-source-mismatch (:reason observation)))))
+        standing-refused (filterv standing-refused? ordinary-tasks)
+        standing-admitted (filterv (complement standing-refused?) ordinary-tasks)
+        standing-excluded
+        (mapv #(assoc (outer/task-view %)
+                      :eligible false
+                      :ineligible-reason
+                      (let [observation (get standing (:id %))]
+                        (if (= :conflict (:status observation))
+                          :mission-standing-conflict
+                          (:reason observation)))
+                      :ineligibility-evidence (get standing (:id %)))
+              standing-refused)
         nodes (meta/pipeline-node-ids (:graph snapshot))
         ;; Git provenance is useful only for structural map members.  Resolve
         ;; membership before spawning provenance reads so the complete ticket
         ;; inventory cannot make browser latency grow with every file in it.
-        raw-on-map (filterv #(contains? nodes (:id %)) ordinary-tasks)
+        raw-on-map (filterv #(contains? nodes (:id %)) standing-admitted)
         attributed-tasks (attach-work-attribution raw-on-map snapshot)
         actively-owned (filterv #(contains? #{:active :ambiguous}
                                              (get-in % [:ownership :state]))
@@ -450,7 +471,7 @@
                       :ineligibility-evidence (:ownership %))
               actively-owned)
         on-map selectable-tasks
-        off-map (->> ordinary-tasks
+        off-map (->> standing-admitted
                      (remove #(contains? nodes (:id %)))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
@@ -461,7 +482,8 @@
         selection (meta/select {:snapshot snapshot
                                 :candidates (candidate-fn on-map snapshot)})]
     (canonical-receipt on-map
-                       (into repair-excluded (concat ownership-excluded off-map))
+                       (into repair-excluded
+                             (concat standing-excluded ownership-excluded off-map))
                        selection)))
 
 (defn selector [{:keys [tasks]}]

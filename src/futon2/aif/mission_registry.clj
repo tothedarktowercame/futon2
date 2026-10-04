@@ -51,6 +51,15 @@
 (def ^:private open-section-heading-pattern
   #"(?i)^\s*#{2,6}\s+(?:open questions?|open tasks?|remaining work|remaining tasks?|pending work|next steps)\b.*$")
 
+(def ^:private acceptance-heading-pattern
+  #"(?i)^\s*#{1,6}\s+.*(?:acceptance|walk[- ]?through).*$")
+
+(def ^:private terminal-standing-label-pattern
+  #"(?i)\b(?:final\s+)?(?:lifecycle\s+(?:status|stamp)|final\s+status)\b")
+
+(def ^:private terminal-standing-state-pattern
+  #"(?i)\b(?:complete|completed|closed|done|discharged)\b")
+
 (def ^:private list-item-pattern
   #"^\s*(?:[-*+]\s+|\d+[.)]\s+)\S.*$")
 
@@ -257,6 +266,61 @@
      :source {:path path :sha256 (sha256-text text)}
      :open-holes (open-holes mission-id status-class lines)
      :open-hole-count (open-hole-count mission-id status-class lines)}))
+
+(defn mission-standing-observation
+  "Read one mission task's pinned source and report contradictory current
+   standing without deciding which declaration supersedes the other.
+
+   A conflict requires both an explicit terminal lifecycle declaration and an
+   unchecked item under an acceptance/walk-through heading.  Incidental uses
+   of words such as 'complete' and historical unchecked lists elsewhere do not
+   establish either side.  Exact lines and the caller's source authority are
+   retained for admission and replay evidence."
+  [{:keys [kind source]}]
+  (if (not= :mission kind)
+    {:status :not-applicable}
+    (try
+      (let [{:keys [path sha256]} source
+            text (slurp path)
+            actual-sha (sha256-text text)
+            lines (vec (str/split-lines text))]
+        (if (not= sha256 actual-sha)
+          {:status :unknown :reason :mission-standing-source-mismatch
+           :source source :actual-sha256 actual-sha}
+          (let [terminal (->> lines
+                              (keep-indexed
+                               (fn [i line]
+                                 (when (and (re-find terminal-standing-label-pattern line)
+                                            (re-find terminal-standing-state-pattern line))
+                                   {:kind :terminal-lifecycle-declaration
+                                    :line (inc i) :text line})))
+                              vec)
+                unchecked
+                (loop [i 0 active-heading nil acc []]
+                  (if-let [line (get lines i)]
+                    (let [level (heading-level line)
+                          heading? (boolean (re-find acceptance-heading-pattern line))
+                          active (cond
+                                   heading? {:line (inc i) :text line :level level}
+                                   (and active-heading level
+                                        (<= level (:level active-heading))) nil
+                                   :else active-heading)]
+                      (recur (inc i) active
+                             (cond-> acc
+                               (and active (re-find unchecked-task-pattern line))
+                               (conj {:kind :unchecked-acceptance
+                                      :line (inc i) :text line
+                                      :heading (dissoc active :level)}))))
+                    acc))
+                declarations (vec (concat terminal unchecked))]
+            {:status (if (and (seq terminal) (seq unchecked)) :conflict :consistent)
+             :source source :declarations declarations
+             :terminal-declarations terminal
+             :open-acceptance-declarations unchecked})))
+      (catch Throwable t
+        {:status :unknown :reason :mission-standing-source-unavailable
+         :source source :error-class (.getName (class t))
+         :error-message (.getMessage t)}))))
 
 (defn- dedupe-by-id
   "Keep the first entry per mission id after path-length/alphabetic sorting.
