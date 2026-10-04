@@ -4852,11 +4852,17 @@
                          (park-r16-stop-line! opts external-attempt-id finding))
                        brief-item
                        (cond->
-                        {:attempt-id external-attempt-id :opportunity-id opportunity-id
+                        {:attempt-id external-attempt-id
+                                   :run-id (:run-id opts)
+                                   :click-id external-attempt-id
+                                   :opportunity-id opportunity-id
                                    :batch-id (:batch-id opts)
                                    :trigger trigger :selected-target (:target data)
                                    :outcome outcome :author author
                                    :reviewer @reviewer-of-record
+                                   :review-job (or (get-in data [:review-job :job-id])
+                                                   (:review-job data))
+                                   :selected-wants (vec (:want selected-action))
                                    :commit (:commit data) :witness (:witness data)
                                    :lifecycle/discharge
                                    {:node :R16

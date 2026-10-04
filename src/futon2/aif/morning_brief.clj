@@ -9,10 +9,23 @@
             [clojure.pprint :as pp]
             [clojure.string :as str])
   (:import [java.nio.file Files StandardOpenOption]
+           [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
 
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
+(def lifecycle-schema :wm/morning-brief-lifecycle-v1)
+
+(defn- sha256 [^bytes bytes]
+  (format "%064x" (BigInteger. 1 (.digest (doto (MessageDigest/getInstance "SHA-256")
+                                            (.update bytes))))))
+
+(defn item-identity [item]
+  (let [identity (select-keys item [:attempt-id :run-id :click-id :opportunity-id
+                                    :selected-target :commit :review-job
+                                    :selected-wants])]
+    {:identity identity
+     :identity-sha256 (sha256 (.getBytes (pr-str (into (sorted-map) identity)) "UTF-8"))}))
 
 (def objective-order
   [:operator-gate :feature-verdict :selection-quality :substantive-achievement
@@ -133,9 +146,13 @@
          item (assoc item :queued-at occurred-at
                           :evidence/occurred-at
                           {:status :present :value occurred-at}
-                          :morning-brief/schema-version 2)
+                          :morning-brief/schema-version 3)
          path (write-new! (io/file root "items" (str attempt-id ".edn")) item)]
      (write-summary! root path item)
+     (write-new! (io/file root "lifecycle" attempt-id "queued.edn")
+                 (merge {:schema lifecycle-schema :transition :queued
+                         :at occurred-at :source :queue-item!}
+                        (item-identity item)))
      path)))
 
 (declare reviews items)
@@ -191,6 +208,78 @@
   (some #(when (= attempt-id (:attempt-id %)) %)
         (read-records (io/file root "items"))))
 
+(defn lifecycle-events
+  ([] (lifecycle-events default-root))
+  ([root]
+   (->> (or (.listFiles (io/file root "lifecycle")) [])
+        (filter #(.isDirectory %))
+        (mapcat read-records)
+        (sort-by :at)
+        vec)))
+
+(defn verify-lifecycle [item events]
+  (let [expected (:identity-sha256 (item-identity item))
+        transitions (mapv :transition events)
+        counts (frequencies transitions)
+        valid-orders #{[:queued] [:queued :opened] [:queued :opened :responded]}]
+    (cond
+      (some #(not= lifecycle-schema (:schema %)) events)
+      {:status :refused :reason :lifecycle-schema-mismatch}
+      (some #(not= expected (:identity-sha256 %)) events)
+      {:status :refused :reason :lifecycle-identity-mismatch}
+      (some #(> % 1) (vals counts))
+      {:status :refused :reason :duplicate-transition}
+      (not (contains? valid-orders transitions))
+      {:status :refused :reason :impossible-transition :transitions transitions}
+      :else {:status :verified :identity-sha256 expected :transitions transitions})))
+
+(defn lifecycle-state
+  ([attempt-id] (lifecycle-state default-root attempt-id))
+  ([root attempt-id]
+   (let [item (item-by-attempt root attempt-id)
+         events (filterv #(= attempt-id (get-in % [:identity :attempt-id]))
+                         (lifecycle-events root))
+         verification (when (seq events) (verify-lifecycle item events))
+         transitions (set (map :transition events))]
+     {:attempt-id attempt-id :events events
+      :verification verification
+      :status (cond
+                (= :refused (:status verification)) :invalid
+                (contains? transitions :responded) :responded
+                (contains? transitions :opened) :seen-no-response
+                :else :unseen-or-uninstrumented)})))
+
+(defn open-item!
+  "The Field Desk's single-item read boundary. Listing never calls this."
+  ([attempt-id consumer] (open-item! default-root attempt-id consumer))
+  ([root attempt-id consumer]
+   (let [item (item-by-attempt root attempt-id)]
+     (when-not item
+       (throw (ex-info "Unknown Morning Brief attempt" {:attempt-id attempt-id})))
+     (when-not (nonblank-string? consumer)
+       (throw (ex-info "Morning Brief open requires consumer identity" {})))
+     (let [state (lifecycle-state root attempt-id)]
+       (when (some #(= :opened (:transition %)) (:events state))
+         (throw (ex-info "Morning Brief item was already opened"
+                         {:attempt-id attempt-id :reason :duplicate-transition})))
+       (when (some #(= :responded (:transition %)) (:events state))
+         (throw (ex-info "Morning Brief response precedes open"
+                         {:attempt-id attempt-id :reason :impossible-transition})))
+       (let [record (merge {:schema lifecycle-schema :transition :opened
+                            :at (str (Instant/now)) :source :field-desk-item-read
+                            :consumer consumer}
+                           (item-identity item))]
+         (write-new! (io/file root "lifecycle" attempt-id "opened.edn") record)
+         {:item item :event record})))))
+
+(defn- response-class [answer]
+  (cond
+    (contains? #{:accept-feature :yes :sufficient :correct :acknowledged :resolved} answer)
+    :explicit-confirmation
+    (contains? #{:reject :no :insufficient :incorrect} answer) :complaint
+    (contains? #{:revert :withdraw :withdrawal} answer) :revert-or-withdrawal
+    :else :other-response))
+
 (defn- belief-event-for [review-id item objective answer reviewed-at]
   (when (= :substantive-achievement objective)
     (when-let [entity-id (get-in item [:qa-targets :achievement :entity-id])]
@@ -233,6 +322,10 @@
        (throw (ex-info "Morning Brief objective was already reviewed"
                        {:attempt-id attempt-id :objective objective
                         :review-id (:morning-brief/review-id prior-review)})))
+     (when (and (>= (long (or (:morning-brief/schema-version item) 0)) 3)
+                (not= :seen-no-response (:status (lifecycle-state root attempt-id))))
+       (throw (ex-info "Morning Brief response requires an observed item open"
+                       {:attempt-id attempt-id :reason :response-before-open})))
      (let [reviewed-at (str (Instant/now))
            review-id
            (str "mbqa-"
@@ -249,6 +342,15 @@
                    :belief-event (belief-event-for review-id item objective answer
                                                    reviewed-at)}]
        (write-new! (io/file root "reviews" (str review-id ".edn")) record)
+       (when-not (some #(= :responded (:transition %))
+                       (:events (lifecycle-state root attempt-id)))
+         (write-new! (io/file root "lifecycle" attempt-id "responded.edn")
+                     (merge {:schema lifecycle-schema :transition :responded
+                             :at reviewed-at :source :morning-brief-review
+                             :review-id review-id :reviewer reviewer
+                             :response-class (response-class answer)
+                             :objective objective :answer answer}
+                            (item-identity item))))
        record))))
 
 (defn addendum!

@@ -320,11 +320,12 @@
         read-back (first (brief/items root))]
     (is (= "bulletin-2026-03-02" attempt-id))
     (is (= attempt-id (:attempt-id read-back)))
-    (is (= 2 (:morning-brief/schema-version read-back))
-        "queued through morning-brief/queue-item!, so it carries the v2 carrier")
+    (is (= 3 (:morning-brief/schema-version read-back))
+        "queued through morning-brief/queue-item!, so it carries lifecycle identity")
     (is (= [:selection-quality :substantive-achievement]
            (:pending-objectives (first (brief/pending-items root)))))
     (testing "reviewing it records a verdict and mints no A-matrix event"
+      (brief/open-item! root attempt-id "joe")
       (let [review (brief/review! root attempt-id :substantive-achievement
                                   :partial "half the day landed" "joe")]
         (is (= :partial (:answer review)))

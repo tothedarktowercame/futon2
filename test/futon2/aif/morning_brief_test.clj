@@ -12,6 +12,7 @@
         _ (brief/queue-item! root {:attempt-id "attempt-001"
                                    :outcome :grounded-change
                                    :qa-targets {:achievement {:entity-id "entity/a"}}})
+        _ (brief/open-item! root "attempt-001" "joe")
         pending-before (brief/pending-items root)
         review (brief/review! root "attempt-001" :substantive-achievement
                               :yes "looks right" "joe")
@@ -96,6 +97,7 @@
         _ (brief/queue-item! root {:attempt-id "attempt-failed"
                                    :outcome :build-failed
                                    :qa-targets {:achievement {:entity-id nil}}})
+        _ (brief/open-item! root "attempt-failed" "joe")
         review (brief/review! root "attempt-failed"
                               :substantive-achievement :yes
                               "useful idea, no grounded result" "joe")]
@@ -109,6 +111,7 @@
               :commit "abc123"
               :feature-card {:built "A usable Field Desk"}}
         _ (brief/queue-item! root item)
+        _ (brief/open-item! root "attempt-feature" "joe")
         objectives (brief/item-objectives item)
         review (brief/review! root "attempt-feature" :feature-verdict
                               :accept-with-follow-ups
@@ -120,6 +123,43 @@
     (is (= "Accept; improve empty-state copy" (:note review)))
     (is (nil? (:belief-event review)))
     (is (= review (first (brief/reviews root))))))
+
+(deftest lifecycle-distinguishes-silence-seeing-and-response
+  (let [root (temp-root)
+        item {:attempt-id "click-1" :run-id "run-1" :click-id "click-1"
+              :selected-target "M-x" :commit "abc" :review-job "review-1"
+              :selected-wants [["M-x" "DOCUMENT"]]}]
+    (brief/queue-item! root item)
+    (is (= :unseen-or-uninstrumented (:status (brief/lifecycle-state root "click-1"))))
+    (brief/open-item! root "click-1" "joe")
+    (is (= :seen-no-response (:status (brief/lifecycle-state root "click-1"))))
+    (brief/review! root "click-1" :feature-verdict :reject "Broken" "joe")
+    (let [state (brief/lifecycle-state root "click-1")]
+      (is (= :responded (:status state)))
+      (is (= :complaint (:response-class (last (:events state)))))
+      (is (apply = (map :identity-sha256 (:events state)))))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"already opened"
+                          (brief/open-item! root "click-1" "joe")))))
+
+(deftest response-before-open-is-refused
+  (let [root (temp-root)]
+    (brief/queue-item! root {:attempt-id "closed" :commit "abc"})
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"requires an observed item open"
+                          (brief/review! root "closed" :feature-verdict
+                                         :accept-feature "Fine" "joe")))))
+
+(deftest lifecycle-verifier-rejects-wrong-item-click-or-commit
+  (let [item {:attempt-id "a" :click-id "click-1" :commit "abc"}
+        identity (brief/item-identity item)
+        queued (merge {:schema brief/lifecycle-schema :transition :queued} identity)]
+    (doseq [changed [(assoc item :attempt-id "b")
+                     (assoc item :click-id "click-2")
+                     (assoc item :commit "def")]]
+      (is (= :lifecycle-identity-mismatch
+             (:reason (brief/verify-lifecycle changed [queued])))))
+    (is (= :impossible-transition
+           (:reason (brief/verify-lifecycle
+                     item [(assoc queued :transition :responded)]))))))
 
 (deftest partial-authored-build-also-requires-a-feature-verdict
   (is (some #{:feature-verdict}
