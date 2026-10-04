@@ -376,33 +376,56 @@
                                    detail))
                {:outcome :ok :value result})
              (catch Throwable e
-               (emit-phase! opts context
-                            {:phase phase :transition :end :outcome :error
-                             :duration-ms (quot (- (nano-time) started) 1000000)
-                             :error-class (.getName (class e))
-                             :error (.getMessage e)})
                {:outcome :error :throwable e}))]
        (if (= :ok (:outcome attempt))
          (:value attempt)
          (let [throwable (:throwable attempt)]
            (if-not (and (debugger/attached?)
                         (debugger/stoppable-failure? throwable))
-             (throw throwable)
-             (let [{:keys [action value]}
+             (do
+               (emit-phase! opts context
+                            {:phase phase :transition :end :outcome :error
+                             :duration-ms (quot (- (nano-time) started) 1000000)
+                             :error-class (.getName (class throwable))
+                             :error (.getMessage throwable)})
+               (throw throwable))
+             (let [{:keys [action value debugger-dwell]}
                    (debugger/await-restart!
-                    (assoc context :run-id (:run-id opts) :phase phase)
+                    (assoc context
+                           :run-id (:run-id opts) :phase phase
+                           :nano-time-fn nano-time
+                           :debugger-dwell-ledger (:debugger-dwell/state opts))
                     throwable)]
                (case action
-                 :retry (recur)
+                 :retry
+                 (do
+                   (emit-phase! opts context
+                                {:phase phase :transition :end :outcome :error
+                                 :duration-ms (quot (- (nano-time) started) 1000000)
+                                 :error-class (.getName (class throwable))
+                                 :error (.getMessage throwable)
+                                 :debugger/restart :retry
+                                 :debugger/dwell debugger-dwell})
+                   (recur))
                  :use-value
                  (let [detail (if result->event (or (result->event value) {}) {})]
                    (emit-phase! opts context
                                 (merge {:phase phase :transition :end :outcome :ok
                                         :duration-ms (quot (- (nano-time) started) 1000000)
-                                        :debugger/restart :use-value}
+                                        :debugger/restart :use-value
+                                        :debugger/dwell debugger-dwell}
                                        detail))
                    value)
-                 :abort (throw throwable))))))))))
+                 :abort
+                 (do
+                   (emit-phase! opts context
+                                {:phase phase :transition :end :outcome :error
+                                 :duration-ms (quot (- (nano-time) started) 1000000)
+                                 :error-class (.getName (class throwable))
+                                 :error (.getMessage throwable)
+                                 :debugger/restart :abort
+                                 :debugger/dwell debugger-dwell})
+                   (throw throwable)))))))))))
 
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
@@ -858,7 +881,9 @@
         elapsed-nanos (when-let [start (:run-timing/start-nanos raw-opts)]
                         (max 0 (- (nano-time) start)))
         phase-timing (registered-telemetry/phase-timings
-                      (some-> (:phase-events/state raw-opts) deref))
+                      (some-> (:phase-events/state raw-opts) deref)
+                      (:debugger-dwell/state raw-opts)
+                      run-id)
         timing (merge phase-timing
                       {:wall-clock-ms (when elapsed-nanos
                                         (quot elapsed-nanos 1000000))
@@ -6826,6 +6851,7 @@
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :phase-events/state phase-events
+                                :debugger-dwell/state (debugger/new-dwell-ledger run-id)
                                 :run-timing/start-nanos (nano-time)
                                 :registered-run/chronology-start chronology-start)
         _ (ensure-dispatch-seat! (config raw-opts))

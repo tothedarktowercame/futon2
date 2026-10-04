@@ -3,6 +3,7 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.registered-run-telemetry :as telemetry]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.test-support.runner-fixture :as fixture]))
@@ -183,6 +184,60 @@
     (debugger/continue! "use-value" [:use-value {:selected :operator-value}])
     (is (= {:selected :operator-value} (deref running 2000 ::timeout)))
     (is (= :use-value (:debugger/restart (last @events))))))
+
+(deftest use-value-retains-monotonic-dwell-without-retaining-the-value
+  (debugger/attach!)
+  (let [run-id "use-value-dwell"
+        clock (atom 0)
+        events (atom [])
+        ledger (debugger/new-dwell-ledger run-id)
+        opts (assoc (dissoc (phase-opts run-id events) :phase-log-fn)
+                    :nano-time-fn #(long @clock)
+                    :debugger-dwell/state ledger)
+        secret {:large-value (apply str (repeat 10000 "do-not-retain"))}
+        running (future
+                  (runner/run-phase! opts
+                                     {:opportunity-id "op" :attempt-id "attempt"}
+                                     :selection repairable-callee))]
+    (wait-for-stop run-id)
+    (reset! clock (* 24 60 1000000000))
+    (debugger/continue! run-id [:use-value secret])
+    (is (= secret (deref running 2000 ::timeout)))
+    (let [receipt (first (:receipts @ledger))
+          timing (telemetry/phase-timings @events ledger run-id)]
+      (is (= {:schema :wm/debugger-dwell-v1
+              :run-id run-id :phase :selection
+              :condition-kind :test/selection-broke
+              :stopped-at-monotonic-ns 0
+              :resumed-at-monotonic-ns (* 24 60 1000000000)
+              :restart-choice :use-value
+              :duration-ms (* 24 60 1000)}
+             receipt))
+      (is (= 0 (get-in timing [:phase-timings-ms :selection])))
+      (is (not (.contains (pr-str receipt) "do-not-retain"))))))
+
+(deftest abort-retains-dwell-before-the-phase-closes
+  (debugger/attach!)
+  (let [run-id "abort-dwell"
+        clock (atom 10)
+        events (atom [])
+        ledger (debugger/new-dwell-ledger run-id)
+        running (future
+                  (try
+                    (runner/run-phase!
+                     (assoc (dissoc (phase-opts run-id events) :phase-log-fn)
+                            :nano-time-fn #(long @clock)
+                            :debugger-dwell/state ledger)
+                     {:opportunity-id "op" :attempt-id "attempt"}
+                     :delivery-qa repairable-callee)
+                    (catch Throwable e e)))]
+    (wait-for-stop run-id)
+    (reset! clock 100000010)
+    (debugger/continue! run-id :abort)
+    (is (instance? Throwable (deref running 2000 ::timeout)))
+    (is (= :abort (get-in @ledger [:receipts 0 :restart-choice])))
+    (is (= :end (:transition (last @events))))
+    (is (= :abort (:debugger/restart (last @events))))))
 
 (deftest typed-refusal-stops-when-debugger-is-attached
   (debugger/attach!)

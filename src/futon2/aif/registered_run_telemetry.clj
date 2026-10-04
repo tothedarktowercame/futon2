@@ -7,14 +7,61 @@
 
 (load-identity/register! *ns* *file*)
 
-(defn phase-timings [events]
-  (let [ends (filter #(and (= :end (:transition %))
-                           (number? (:duration-ms %))) events)]
-    {:status (if (seq ends) :complete :typed-missing)
-     :clock :monotonic
-     :phase-timings-ms
-     (reduce (fn [m {:keys [phase duration-ms]}]
-               (update m phase (fnil + 0) duration-ms)) {} ends)}))
+(defn phase-timings
+  ([events] (phase-timings events nil nil))
+  ([events dwell-ledger run-id]
+   (let [ends (filter #(and (= :end (:transition %))
+                            (number? (:duration-ms %))) events)
+         raw (reduce (fn [m {:keys [phase duration-ms]}]
+                       (update m phase (fnil + 0) duration-ms)) {} ends)
+         ledger (some-> dwell-ledger deref)
+         receipts (:receipts ledger)
+         errors (:errors ledger)
+         valid? (and (or (nil? dwell-ledger) (= run-id (:run-id ledger)))
+                     (empty? errors)
+                     (every? (fn [{:keys [schema run-id phase condition-kind
+                                          stopped-at-monotonic-ns
+                                          resumed-at-monotonic-ns restart-choice
+                                          duration-ms]}]
+                               (and (= :wm/debugger-dwell-v1 schema)
+                                    (= run-id (:run-id ledger))
+                                    (keyword? phase) (keyword? condition-kind)
+                                    (integer? stopped-at-monotonic-ns)
+                                    (integer? resumed-at-monotonic-ns)
+                                    (<= stopped-at-monotonic-ns
+                                        resumed-at-monotonic-ns)
+                                    (contains? #{:retry :abort :use-value}
+                                               restart-choice)
+                                    (= duration-ms
+                                       (quot (- resumed-at-monotonic-ns
+                                                stopped-at-monotonic-ns)
+                                             1000000))))
+                             receipts))
+         accepted (if valid? receipts [])
+         dwell-by-phase (reduce (fn [m {:keys [phase duration-ms]}]
+                                  (update m phase (fnil + 0) duration-ms))
+                                {} accepted)
+         adjusted (reduce-kv (fn [m phase duration-ms]
+                               (assoc m phase
+                                      (max 0 (- duration-ms
+                                                (get dwell-by-phase phase 0)))))
+                             {} raw)
+         base {:status (if (seq ends) :complete :typed-missing)
+               :clock :monotonic :phase-timings-ms adjusted}]
+     (if (nil? dwell-ledger)
+       base
+       (assoc base
+              :phase-wall-timings-ms raw
+              :debugger-stopped-ms (reduce + 0 (map :duration-ms accepted))
+              :debugger-stopped-by-phase-ms dwell-by-phase
+              :debugger-dwell-receipts (vec accepted)
+              :debugger-dwell-status (if valid? :complete :typed-missing)
+              :debugger-dwell-errors
+              (cond-> (vec errors)
+                (and dwell-ledger (not= run-id (:run-id ledger)))
+                (conj {:reason :debugger-dwell-run-mismatch
+                       :expected-run-id run-id
+                       :ledger-run-id (:run-id ledger)})))))))
 
 (defn- normalized-usage [usage]
   (let [input (or (:input-tokens usage) (:input_tokens usage)

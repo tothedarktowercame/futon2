@@ -27,6 +27,52 @@
                               {:phase :select :transition :end :duration-ms 7}
                               {:phase :wait :transition :end :duration-ms 11}])))))
 
+(defn- dwell [run-id phase start-ns end-ns restart]
+  {:schema :wm/debugger-dwell-v1 :run-id run-id :phase phase
+   :condition-kind :test/breakpoint
+   :stopped-at-monotonic-ns start-ns :resumed-at-monotonic-ns end-ns
+   :restart-choice restart :duration-ms (quot (- end-ns start-ns) 1000000)})
+
+(deftest debugger-dwell-is-separated-from-machine-active-phase-time
+  (let [minute-ns (* 60 1000000000)
+        ledger (atom {:run-id "run" :errors []
+                      :receipts [(dwell "run" :selection 0 (* 24 minute-ns)
+                                        :use-value)]})
+        timing (sut/phase-timings
+                [{:phase :selection :transition :end
+                  :duration-ms (+ (* 24 60 1000) 125)}]
+                ledger "run")]
+    (is (= (* 24 60 1000) (:debugger-stopped-ms timing)))
+    (is (= 125 (get-in timing [:phase-timings-ms :selection])))
+    (is (= (+ (* 24 60 1000) 125)
+           (get-in timing [:phase-wall-timings-ms :selection])))
+    (is (= :complete (:debugger-dwell-status timing)))))
+
+(deftest repeated-stops-sum-and-subtraction-has-a-zero-floor
+  (let [ledger (atom {:run-id "run" :errors []
+                      :receipts [(dwell "run" :selection 0 100000000 :retry)
+                                 (dwell "run" :selection 200000000 500000000
+                                        :abort)]})
+        timing (sut/phase-timings
+                [{:phase :selection :transition :end :duration-ms 150}
+                 {:phase :selection :transition :end :duration-ms 200}]
+                ledger "run")]
+    (is (= 400 (:debugger-stopped-ms timing)))
+    (is (= 0 (get-in timing [:phase-timings-ms :selection])))
+    (is (= 400 (get-in timing [:debugger-stopped-by-phase-ms :selection])))))
+
+(deftest foreign-dwell-ledger-is-typed-missing-and-never-subtracted
+  (let [ledger (atom {:run-id "other" :errors []
+                      :receipts [(dwell "other" :selection 0 90000000 :retry)]})
+        timing (sut/phase-timings
+                [{:phase :selection :transition :end :duration-ms 100}]
+                ledger "run")]
+    (is (= :typed-missing (:debugger-dwell-status timing)))
+    (is (= 100 (get-in timing [:phase-timings-ms :selection])))
+    (is (= 0 (:debugger-stopped-ms timing)))
+    (is (= :debugger-dwell-run-mismatch
+           (get-in timing [:debugger-dwell-errors 0 :reason])))))
+
 (deftest aggregates-provider-usage-without-imputation
   (let [r (sut/model-usage
            (usage-ledger "run" "click"

@@ -12,6 +12,11 @@
 (defonce ^:private !stops (atom {}))
 (defonce ^:private !breakpoints (atom #{}))
 
+(def dwell-schema :wm/debugger-dwell-v1)
+
+(defn new-dwell-ledger [run-id]
+  (atom {:run-id run-id :receipts [] :errors []}))
+
 (defn attach! []
   (reset! !attached? true)
   {:attached true})
@@ -63,7 +68,9 @@
       (throw (ex-info "Run is not stopped"
                       {:kind :debugger/run-not-stopped :run-id run-id})))
     (if (deliver (:decision stop) choice)
-      {:run-id run-id :choice choice :delivered true}
+      {:run-id run-id
+       :choice (if (vector? choice) (first choice) choice)
+       :delivered true}
       (throw (ex-info "A restart choice was already delivered"
                       {:kind :debugger/already-continued :run-id run-id})))))
 
@@ -73,11 +80,26 @@
         (get-in data [:judge-refusal :kind])
         :wm/phase-failure)))
 
+(defn- retain-dwell! [ledger receipt]
+  (when ledger
+    (swap! ledger
+           (fn [state]
+             (if (= (:run-id state) (:run-id receipt))
+               (update state :receipts (fnil conj []) receipt)
+               (update state :errors (fnil conj [])
+                       {:reason :debugger-dwell-run-mismatch
+                        :ledger-run-id (:run-id state)
+                        :receipt-run-id (:run-id receipt)})))))
+  receipt)
+
 (defn await-restart!
   "Signal THROWABLE as a phase condition and wait for an operator restart.
   Returns {:action ...}; it never invokes a restart from the operator thread."
-  [{:keys [run-id attempt-id opportunity-id phase]} throwable]
+  [{:keys [run-id attempt-id opportunity-id phase nano-time-fn
+           debugger-dwell-ledger]} throwable]
   (let [decision (promise)
+        nano-time (or nano-time-fn #(System/nanoTime))
+        stopped-ns (nano-time)
         condition {:kind (condition-kind throwable)
                    :class (.getName (class throwable))
                    :message (.getMessage throwable)}
@@ -85,6 +107,7 @@
                :opportunity-id opportunity-id :phase phase
                :condition condition :ex-data (ex-data throwable)
                :stopped-at (str (Instant/now))
+               :stopped-at-monotonic-ns stopped-ns
                :decision decision :throwable throwable}]
     #_{:clj-kondo/ignore [:unresolved-symbol]}
     (restart-case
@@ -93,15 +116,29 @@
         (fn [_ _condition]
           (swap! !stops assoc run-id entry)
           (try
-            (let [choice @decision]
+            (let [choice @decision
+                  resumed-ns (nano-time)
+                  restart-choice (if (vector? choice) (first choice) choice)
+                  receipt (retain-dwell!
+                           debugger-dwell-ledger
+                           {:schema dwell-schema
+                            :run-id run-id
+                            :phase phase
+                            :condition-kind (:kind condition)
+                            :stopped-at-monotonic-ns stopped-ns
+                            :resumed-at-monotonic-ns resumed-ns
+                            :restart-choice restart-choice
+                            :duration-ms (quot (max 0 (- resumed-ns stopped-ns))
+                                               1000000)})]
               (cond
-                (= :retry choice) (far/invoke-restart ::retry)
-                (= :abort choice) (far/invoke-restart ::abort)
+                (= :retry choice) (far/invoke-restart ::retry receipt)
+                (= :abort choice) (far/invoke-restart ::abort receipt)
                 (= :use-value (first choice))
-                (far/invoke-restart ::use-value (second choice))))
+                (far/invoke-restart ::use-value (second choice) receipt)))
             (finally
               (swap! !stops dissoc run-id))))]
        (far/error ::phase-failure entry))
-      (::retry [] {:action :retry})
-      (::use-value [value] {:action :use-value :value value})
-      (::abort [] {:action :abort}))))
+      (::retry [receipt] {:action :retry :debugger-dwell receipt})
+      (::use-value [value receipt]
+        {:action :use-value :value value :debugger-dwell receipt})
+      (::abort [receipt] {:action :abort :debugger-dwell receipt}))))
