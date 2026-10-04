@@ -37,7 +37,9 @@
   (runner/selection-terminal-condition :selection judgement))
 
 (defn- wait-for-stop [run-id]
-  (loop [remaining 4000]
+  ;; The real selection path reads the complete cascade field before reaching
+  ;; its debugger boundary; its pinned graph walk can exceed twenty seconds.
+  (loop [remaining 12000]
     (if-let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
       stop
       (if (pos? remaining)
