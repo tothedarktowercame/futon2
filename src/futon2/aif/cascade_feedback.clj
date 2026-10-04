@@ -39,7 +39,7 @@
    attestation. Absence of an operator acceptance declaration does not erase
    either grounded-work observation."
   [{:keys [run-id target selected-action outcome failure accepted-increment
-           d-task-enactment cascade-revision artifact]}]
+           d-task-enactment cascade-revision artifact want-outcome-accounting]}]
   (let [target (or target (:target selected-action))
         selected (selected-patterns selected-action)
         step (get-in accepted-increment [:criterion-step :id])
@@ -49,7 +49,8 @@
                             (get-in accepted-increment [:criterion-step :source]))
                          (contains? (set selected) step))
         grounded? (contains? #{:grounded-change :grounded-progress} outcome)
-        grounded-attestation? (and enacted? grounded?)
+        wants-verified? (= :verified (:status want-outcome-accounting))
+        grounded-attestation? (and enacted? grounded? wants-verified?)
         applications
         (cond
           grounded-attestation?
@@ -70,7 +71,7 @@
                    :reinforcement :positive})
                 selected)
 
-          exact-step?
+          (and exact-step? wants-verified?)
           [{:pattern step
             :status :incomplete
             :evidence {:selected-enacted-action :verified
@@ -83,25 +84,36 @@
         applied (set (map :pattern applications))
         selected-only (vec (remove applied selected))
         blocker-kind (when-not grounded-attestation?
-                       (or (:kind failure)
+                       (or (when-not wants-verified? (:reason want-outcome-accounting))
+                           (:kind failure)
                            (:reason accepted-increment)
                            (when selected-action outcome)
                            :execution-evidence-unavailable))
         base {:schema receipt-schema
+              :status (if wants-verified? :verified :refused)
+              :reason (when-not wants-verified? (:reason want-outcome-accounting))
               :run/id run-id
               :target target
               :cascade-status :provisional-per-run
               :mission-state {:selected-wants (vec (:want selected-action))
-                              :reached-wants
-                              (vec (or (:reached-wants selected-action)
-                                       (get-in selected-action
-                                               [:construction-receipt :reached-wants])
-                                       []))
+                              :construction-reachability
+                              {:reached-wants
+                               (vec (or (:reached-wants selected-action)
+                                        (get-in selected-action
+                                                [:construction-receipt :reached-wants]) []))
+                               :unreached-wants
+                               (vec (or (:unreached-wants selected-action)
+                                        (get-in selected-action
+                                                [:construction-receipt :unreached-wants]) []))}
+                              :execution-outcomes want-outcome-accounting
+                              :reached-wants (vec (get-in want-outcome-accounting [:by-class :reached]))
+                              :progressed-wants (vec (get-in want-outcome-accounting [:by-class :progressed]))
+                              :blocked-wants (vec (get-in want-outcome-accounting [:by-class :blocked]))
+                              :untouched-wants (vec (get-in want-outcome-accounting [:by-class :untouched]))
                               :unreached-wants
-                              (vec (or (:unreached-wants selected-action)
-                                       (get-in selected-action
-                                               [:construction-receipt :unreached-wants])
-                                       []))
+                              (vec (concat (get-in want-outcome-accounting [:by-class :progressed])
+                                           (get-in want-outcome-accounting [:by-class :blocked])
+                                           (get-in want-outcome-accounting [:by-class :untouched])))
                               :terminal-outcome outcome}
               :patterns {:selected selected
                          :applications applications

@@ -29,6 +29,7 @@
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.token-outcome-pair :as token-outcome-pair]
+            [futon2.aif.selected-want-outcome :as selected-want-outcome]
             [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.increment-attestation :as increment-attestation]
@@ -4978,6 +4979,13 @@
                            :selection-recorded-at (get-in @checkpoint-events [:selection :recorded-at])
                            :expected @d-task-context :read-job #(read-job! opts %)
                            :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
+                       want-outcome-accounting
+                       (when selected-action
+                         (selected-want-outcome/receipt
+                          {:selected-action selected-action
+                           :token-comparison (:receipt token-comparison)
+                           :progress-evidence (:want-progress-evidence data)
+                           :blockers (:want-blockers data)}))
                        route-account
                        (route-attestation/retain!
                         (if attempt-evidence-dir
@@ -5115,6 +5123,7 @@
                            :target (:target selected-action)
                            :selected-action selected-action
                            :outcome outcome
+                           :want-outcome-accounting want-outcome-accounting
                            :failure {:kind (:failure-kind data)
                                      :stage (:failure-stage data)}
                            :accepted-increment accepted-increment-result
@@ -5125,7 +5134,10 @@
                                       :commit (:commit data)}}))
                        cascade-feedback-publication
                        (when cascade-feedback-receipt
-                         (if-let [feedback-path (:cascade-feedback-path opts)]
+                         (if (= :refused (:status cascade-feedback-receipt))
+                           {:status :refused
+                            :reason (:reason cascade-feedback-receipt)}
+                           (if-let [feedback-path (:cascade-feedback-path opts)]
                            (try
                              (cascade-feedback/record! feedback-path
                                                        cascade-feedback-receipt)
@@ -5139,7 +5151,7 @@
                            ;; hermetic tests) may inspect the receipt without
                            ;; mutating the production feedback store.
                            {:status :not-published
-                            :reason :feedback-path-not-supplied}))
+                            :reason :feedback-path-not-supplied})))
                        ;; B-C (PROOF-2 strategy row 34): the concentration
                        ;; carrier recorded ON the close. record! ran inside
                        ;; retain-token-outcome! above, before the predicate
@@ -5173,6 +5185,7 @@
                                :entity-state-at-close close-state
                                :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
+                               :selected-want-outcomes want-outcome-accounting
                                :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :accepted-increment accepted-increment-result
                                :cascade-feedback
@@ -5255,6 +5268,7 @@
                                :d-task-enactment d-task-result
                                :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
+                               :selected-want-outcomes want-outcome-accounting
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :accepted-increment accepted-increment-result
                                :cascade-feedback

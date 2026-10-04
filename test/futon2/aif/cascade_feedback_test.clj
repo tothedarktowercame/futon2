@@ -29,11 +29,18 @@
   {:accepted? true
    :criterion-step {:id :patterns/applied :source :recorded-decision}})
 
+(def want-outcomes
+  {:schema :wm/selected-want-outcome-v1 :status :verified
+   :target "M-current" :selected-wants [["M-current" :done]]
+   :by-class {:reached [["M-current" :done]]
+              :progressed [] :blocked [] :untouched []}})
+
 (defn- input [& {:as overrides}]
   (merge {:run-id "run-1"
           :selected-action action
           :outcome :grounded-change
           :accepted-increment accepted
+          :want-outcome-accounting want-outcomes
           :d-task-enactment admitted-enactment
           :artifact {:repo "/repo" :commit "abc1234"}}
          overrides))
@@ -73,6 +80,22 @@
     (is (= [:patterns/applied :patterns/selected-only]
            (get-in receipt [:patterns :selected-only])))
     (is (empty? (get-in receipt [:patterns :positive-reinforcement])))))
+
+(deftest selected-wants-require-verified-terminal-outcome-accounting
+  (let [receipt (feedback/receipt
+                 (input :want-outcome-accounting
+                        {:schema :wm/selected-want-outcome-v1
+                         :status :refused
+                         :reason :selected-want-after-observation-missing}))]
+    (is (empty? (get-in receipt [:patterns :applications])))
+    (is (= :refused (:status receipt)))
+    (is (empty? (get-in receipt [:patterns :positive-reinforcement])))
+    (is (= :selected-want-after-observation-missing
+           (get-in receipt [:blocker :kind])))
+    (is (= :refused
+           (get-in receipt [:mission-state :execution-outcomes :status])))
+    (is (empty? (get-in receipt [:mission-state :reached-wants])))
+    (is (map? (get-in receipt [:mission-state :construction-reachability])))))
 
 (deftest grounded-work-attests-cascade-without-operator-acceptance
   (let [revision {:schema :wm/provisional-cascade-revision-v1
