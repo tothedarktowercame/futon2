@@ -291,6 +291,44 @@ G difference that *is* meaningful is therefore the one between the diamond
 and a four-unit chain whose edges are all token-carrying — which these four
 units do not have, and which would need a different example.
 
+## 5b. Charging the other off-diagonal (proposal, E-aif-cascade C3)
+
+The bag measurement is the test case. What let the bag score 0.393 is that
+the per-step C credits every completed pattern at every step, and nothing
+asks whether the token a pattern emitted was *wanted* by anything. In the
+flexiarg reading that is `¬IF ∧ THEN`: the alcove built where no tension
+called for it. The proposal is one rule, already implicit in v2, made a
+scored quantity:
+
+*A token counts toward progress only from the step at which some unit, or
+the want itself, consumes it.* Formally, with `needs` and `produces` from
+the units (not from an edge list): the progress state at τ is not the set
+of tokens held but the set of tokens held **and** in `⋃ needs(u)` for some
+not-yet-fired `u`, or in the want. A token no unit needs is held but
+inert; it earns nothing and, under the no-simultaneity rule, the pattern
+that produced it does not count as completed until its output is taken
+up.
+
+Consequences, checkable on the four arrangements of §5: the bag at τ = 1
+fires `fill`, `injury`, `minimise` without the observation — but under
+`ConstructionReceipt` semantics `fill` *needs* token 0, so it cannot fire;
+the bag is not scored low, it is not scored. The chains fire `injury`
+after `fill` on an edge that carries nothing; under the rule `injury`'s
+enablement comes from `observe`'s token (which it does hold), so the
+chains score exactly as the diamond does on progress and differ only in
+the ordering term — which is the right answer: the chain is the diamond
+plus one unwarranted bit. And the house of alcoves: a second ALCOVE token
+with no consumer is inert, so repeating a pattern does not raise
+progress, which is the Salingaros point in C's terms.
+
+What this does not settle: whether an inert token should carry a positive
+*cost* (complexity, as Salingaros would have it) or merely no credit. The
+proposal is no credit; a cost would need its own measurement. Where it
+would live: the progress-count observation that `cascade_shape_g` and the
+construction lane share (`[completed-pattern-count want-met?]`) would
+count consumed tokens rather than fired patterns. Not implemented; C3 of
+`E-aif-cascade` records it for Joe's decision alongside the v3 items.
+
 ## 5a. Refinement: the object is alive (Joe, 2026-10-05)
 
 Joe's second addition, the informal-proof story: the War Machine itself
