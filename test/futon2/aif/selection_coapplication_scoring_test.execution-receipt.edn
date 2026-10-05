@@ -1,0 +1,35 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-05"
+ :scope ["src/futon2/aif/cascade_order.clj"
+         "src/futon2/aif/efe.clj"
+         "src/futon2/aif/cascade_observation_scoring.clj"
+         "src/futon2/aif/cascade_evaluation_trace.clj"
+         "test/futon2/aif/selection_coapplication_scoring_test.clj"]
+ :measurements
+ {:recorded-click
+  {:list-g 1.0498221244986776
+   :co-application-g 1.0498221244986776
+   :list-risk [0.0 0.0 0.0 1.0498221244986776]
+   :co-application-risk [0.0 0.0 0.0 1.0498221244986776]}
+  :theta-half-horizon-one
+  {:list-g 1.3296300184663892
+   :co-application-g 0.9162907318741551}}
+ :runs
+ [{:namespace futon2.aif.selection-coapplication-scoring-test
+   :status :passed :tests 5 :assertions 19 :failures 0 :errors 0}
+  {:namespace futon2.aif.apparatus-certificates-test
+   :status :passed :tests 7 :assertions 39 :failures 0 :errors 0}
+  {:namespace futon2.aif.class-observation-scoring-test
+   :status :pre-existing-failure :tests 22 :assertions 95 :failures 7 :errors 0
+   :head-control {:commit "0dd9507a1" :tests 22 :assertions 95 :failures 7 :errors 0}
+   :reason "Current repair-obligation evidence classifies the fixture target as :open-repair-obligation, while the stale assertions require :ticket-parent; reproduced byte-for-byte from an isolated HEAD worktree."}
+  {:namespace futon2.aif.cascade-evaluation-trace-test
+   :status :passed :tests 5 :assertions 132 :failures 0 :errors 0}
+  {:namespace futon2.aif.order-kernel-test
+   :status :passed :tests 4 :assertions 9 :failures 0 :errors 0}
+  {:namespace futon2.aif.coapply-kernel-test
+   :status :passed :tests 5 :assertions 23 :failures 0 :errors 0}
+  {:command "clj-kondo --lint <changed Clojure files>"
+   :status :passed :errors 0 :warnings 0}
+  {:command "futon4/dev/check-parens.el <changed Clojure files>"
+   :status :passed :result "OK"}]}

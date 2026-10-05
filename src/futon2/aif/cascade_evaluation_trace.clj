@@ -2,7 +2,8 @@
   "Read-only consistency checking of retained evaluation records. No runtime
    access, model replay, gate changes, or authority claims. The checker uses
    the captured candidate/model values and the declared transition semantics."
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [futon2.aif.cascade-order :as cascade-order]))
 
 (defn- enabled? [pattern state]
   (and (= :interpreted (get-in pattern [:guard :status]))
@@ -27,6 +28,27 @@
 (defn- sum-contributions [rows]
   (reduce (fn [acc row] (merge-with + acc (:mass-contribution row))) {} rows))
 
+(defn- expected-model [candidate]
+  (let [ou (cascade-order/order-use candidate)
+        transition (or (:kernel-step ou) (:precedence ou))]
+    (if (map? transition)
+      (let [{:keys [units descent patterns]} (:co-apply transition)]
+        {:schema :wm/cascade-evaluation-model-v1
+         :semantics :co-application-frontier-theta-v1
+         :units (vec units) :descent (vec descent)
+         :patterns (into {} (for [u units] [u (effective-pattern (patterns u))]))})
+      {:schema :wm/cascade-evaluation-model-v1
+       :semantics :first-enabled-union-theta-v1
+       :precedence (mapv effective-pattern transition)})))
+
+(defn- retained-state-errors [{:keys [mass kernel mass-contribution] :as row}]
+  (cond-> []
+    (not= :evaluated (:status row)) (conj :state-not-evaluated)
+    (not= (update-vals kernel #(* mass %)) mass-contribution)
+    (conj :state-contribution-mismatch)
+    (not (contains? #{:co-application :identity} (:kernel-kind row)))
+    (conj :wrong-kernel-kind)))
+
 (defn- state-errors [precedence row]
   (let [{:keys [state mass selected-index pattern-id kernel guard-search mass-contribution]} row
         first-index (first (keep-indexed #(when (enabled? %2 state) %1) precedence))
@@ -50,17 +72,19 @@
       (conj :state-contribution-mismatch))))
 
 (defn- step-errors [candidate step]
-  (let [precedence (mapv effective-pattern (:precedence candidate))
+  (let [expected (expected-model candidate)
+        precedence (:precedence expected)
         model (:model step)
         incoming (:incoming-belief step)
         rows (:states step)
+        coapply? (= :co-application-frontier-theta-v1 (:semantics expected))
         per-state (mapcat (fn [row] (map #(hash-map :kind % :state (:state row))
-                                        (state-errors precedence row))) rows)]
+                                        ((if coapply? retained-state-errors
+                                             #(state-errors precedence %)) row))) rows)]
     (into
      (cond-> []
        (not= :evaluated (:status step)) (conj {:kind :step-not-evaluated})
-       (not= {:schema :wm/cascade-evaluation-model-v1
-              :semantics :first-enabled-union-theta-v1 :precedence precedence} model)
+       (not= expected model)
        (conj {:kind :model-candidate-mismatch})
        (or (not= (count incoming) (count rows))
            (not= incoming (into {} (map (juxt :state :mass)) rows)))
