@@ -6,7 +6,6 @@
    next prediction, not substituted into the prediction being evaluated."
   (:require [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.observation-model :as om]
             [futon2.aif.parameter-novelty :as novelty]))
 
@@ -134,12 +133,10 @@
 (defn- score-candidate [q0 candidate opts preference]
   (let [{:keys [observation-model horizon-steps observation prediction-context
                 upstream-initialization-conditioning]} opts
-        order-use (cascade-order/order-use candidate)
-        transition (or (:kernel-step order-use) (:precedence order-use))
         steps (loop [tau 1 q q0 result []]
                 (if (> tau horizon-steps)
                   result
-                  (let [evaluated (m/rollout-evaluation (constantly transition) q 1)
+                  (let [evaluated (m/rollout-evaluation (constantly (:precedence candidate)) q 1)
                         next-q (checked (:belief evaluated))
                         score (checked (om/query observation-model
                                                  ;; PROOF-wm-works 1.3 handoff A:
@@ -170,7 +167,6 @@
         information-gain (if normalize? (/ raw-information pattern-count) raw-information)
         g (- (+ risk ambiguity) information-gain)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
-               :order-use (:meta order-use)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
                :observation-model observation-model
                :prediction {:context prediction-context :initial-belief q0 :belief predicted}

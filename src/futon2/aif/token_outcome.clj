@@ -1,7 +1,6 @@
 (ns futon2.aif.token-outcome
   "Selection-time token prediction and post-build comparison. No belief update."
   (:require [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.interpretation-evidence :as evidence]))
 
@@ -29,14 +28,12 @@
                  (integer? horizon) (<= 0 horizon)
                  (vector? (:precedence action)))
       (assoc base :status :refused :reason :prediction-input-unavailable)
-      (let [order-use (cascade-order/order-use action)
-            transition (or (:kernel-step order-use) (:precedence order-use))
-            result (model/rollout-evaluation (constantly transition) q0 horizon)
+      (let [result (model/rollout-evaluation (constantly (:precedence action)) q0 horizon)
             belief (:belief result)]
         (if (contains? belief :status)
           (assoc base :status :refused :reason :model-rollout-refused :finding belief)
           (assoc base :status :frozen :initial-belief q0 :horizon horizon
-                 :model (:model family) :order-use (:meta order-use) :rollout result
+                 :model (:model family) :rollout result
                  :observation-locators (:observation-locators action)
                  :intended-outputs (into #{} (mapcat :produces) (:precedence action))
                  :wanted (mapv (fn [token]

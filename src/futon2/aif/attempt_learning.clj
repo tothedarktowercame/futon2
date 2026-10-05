@@ -3,7 +3,6 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.learning-trial :as trial]
@@ -13,11 +12,10 @@
 (def contract-resource "wm/attempt-learning-contract.edn")
 (def contract-v2-resource "wm/attempt-learning-contract-v2.edn")
 (defn declared-contract [] (edn/read-string (slurp (io/resource contract-resource))))
-(defn declared-contract-v2
+(defn declared-contract-v2 []
   "PROOF-wm-works ⟨1⟩4: the v2 contract authorising production consumption.
    Joe's signature on the proof plan is the authorisation (cited in the
    resource). The v1 resource stays untouched and still reads old events."
-  []
   (edn/read-string (slurp (io/resource contract-v2-resource))))
 
 (defn- supported-contract? [contract]
@@ -53,16 +51,12 @@
         base (trial/receipt input)
         prediction (:prediction comparison)
         action (:action prediction)
-        order-use (cascade-order/order-use action)
-        transition (or (:kernel-step order-use) (:precedence order-use))
         q0 (:initial-belief prediction)
         horizon (:horizon prediction)
         model-valid? (and (= :frozen (:status prediction)) (seq q0)
                           (model/normalized-exact? q0) (every? set? (keys q0))
                           (integer? horizon) (pos? horizon) (vector? (:precedence action)))
-        rollout (when model-valid?
-                  (model/rollout-evaluation (constantly transition) q0 horizon))
-        q (:belief rollout)
+        q (when model-valid? (model/rollout (constantly (:precedence action)) q0 horizon))
         prediction-valid? (and model-valid? (model/normalized-exact? q))
         signed (if (and source-record expected read-job)
                  (task/verify-observations-v2 source-record expected read-job)
@@ -131,5 +125,4 @@
                           (map (juxt :effect identity)) (:trials base))))]
     (assoc base :schema :wm/learning-trial-receipt-v2 :contract contract
            :contract-sha256 (identity/digest contract)
-           :status :record-only :reason nil :order-use (:meta order-use)
-           :rollout rollout :trials rows)))
+           :status :record-only :reason nil :trials rows)))

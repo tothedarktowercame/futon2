@@ -270,13 +270,7 @@
 (defn- without-relation-contract [result]
   (update result :candidates
           #(mapv (fn [candidate]
-                   ;; These snapshot tests isolate the older finite-G result.
-                   ;; The additive executable-order carrier is pinned by
-                   ;; construction-order-emission-test.
-                   (-> candidate
-                       (dissoc :patterns)
-                       (update :construction-receipt dissoc
-                               :relations :order-use :frontier-conflicts))) %)))
+                   (update candidate :construction-receipt dissoc :relations)) %)))
 
 (deftest nf-1-one-nan-is-left-out-the-finite-two-are-compared
   (let [r (sut/construct (three-input {:P ##NaN :P2 1.5 :P3 2}))

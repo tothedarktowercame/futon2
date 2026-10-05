@@ -1,12 +1,11 @@
 (ns futon2.aif.interpretation-construction
   "Pure, bounded construction from GIVEN interpretations, not retrieval/admission.
-  Searches backward from all wants, then checks each plan with the transition
-  its containment order calls for. Model reachability is not an observed discharge."
+  Searches backward from all wants, then checks each order with the existing
+  first-enabled model. Model reachability is not an observed discharge."
   (:require [futon2.aif.load-identity :as load-identity]
             [clojure.set :as set]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.construction :as construction]
             [futon2.aif.construction-moves :as moves]))
@@ -79,21 +78,7 @@
         ordered (if (= :no-move (:status ordering)) candidate (first (:proposed-family ordering)))
         precedence (:precedence ordered)
         maps (mapv #(policy/token-interpretation % (patterns %)) precedence)
-        containment-order (construction/containment-order ordered)
-        rollout-action {:precedence maps :construction-receipt {:order containment-order}}
-        order-use (cascade-order/order-use rollout-action)
-        transition (or (:kernel-step order-use) (:precedence order-use))
-        evaluated (model/rollout-evaluation (constantly transition)
-                                            (model/observed-belief established) horizon)
-        row (:belief evaluated)
-        ;; Lean Proof2.CoApplicationKernel.frontierConflict: two frontier
-        ;; patterns, one producing a token the other forbids. The kernel
-        ;; still co-applies them; the candidate carries the flag.
-        frontier-conflicts (vec (for [step (:evaluations evaluated)
-                                      state (:states step)
-                                      :when (:frontier-conflict state)]
-                                  {:tau (:tau step) :state (:state state)
-                                   :frontier (:frontier state)}))
+        row (model/rollout (constantly maps) (model/observed-belief established) horizon)
         edges (set (for [p order q order :when (not= p q)
                          :when (seq (set/intersection (:produces (patterns p))
                                                       (get-in patterns [q :guard :needs])))] [p q]))]
@@ -122,9 +107,7 @@
                       ;; established (the empty plan never constructs).
                       {:kind :no-new-want-produced :order precedence}
                       {:kind :want-unreachable-within-horizon :order precedence :horizon horizon :belief row})}
-          {:candidate (assoc ordered :need-edges edges :order containment-order
-                             :order-use (:meta order-use)
-                             :frontier-conflicts frontier-conflicts
+          {:candidate (assoc ordered :need-edges edges
                              :reached-wants (vec (sort-by pr-str reached-new))
                              :unreached-wants unreached)
            :ordering {:move-id :order-by-need :before order :after precedence
@@ -244,8 +227,7 @@
               left-out (vec (for [c (:family supported)
                                   :let [{:keys [r g]} (g-raw c)]
                                   :when (not (finite? g))]
-                              (assoc (select-keys c [:precedence :patterns :need-edges :order
-                                                    :order-use :frontier-conflicts])
+                              (assoc (select-keys c [:precedence :need-edges])
                                      :kind :cascade-candidate :target target :want (vec want)
                                      :g {:absent :nonfinite-g
                                          :value (if (or (number? g) (keyword? g)) g r)}
@@ -283,12 +265,10 @@
                                     (when-not (finite? g)
                                       (throw (ex-info "Constructor needs a finite G comparison"
                                                       {:constructor/refusal :nonfinite-g :value g})))
-                                    (cond-> {:value g
-                                             :universe (if (and (map? r) (some? (:universe r)))
-                                                         (:universe r)
-                                                         universe)}
-                                      (and (map? r) (:order-use r))
-                                      (assoc :order-use (:order-use r)))))
+                                    {:value g
+                                     :universe (if (and (map? r) (some? (:universe r)))
+                                                 (:universe r)
+                                                 universe)}))
                       ;; NONFINITE-BASELINE-I (owner's decision, claude-10,
                       ;; 2026-09-25): the empty baseline cascade is not a
                       ;; candidate. Target-grain dG is the difference against
@@ -360,11 +340,11 @@
                      ;; want set is the judge's job; each candidate carries
                      ;; the target's full :want so it can.
                      :candidates (mapv (fn [c]
-                                         (assoc (select-keys c [:precedence :patterns :need-edges])
+                                         (assoc (select-keys c [:precedence :need-edges])
                                                 :kind :cascade-candidate :target target
                                                 :want (vec want)
                                                 :construction-receipt
-                                                (let [order (:order c)]
+                                                (let [order (construction/containment-order c)]
                                                   (cond-> (assoc receipt
                                                        :unreached-wants (:unreached-wants c)
                                                        ;; clause 0: this
@@ -375,8 +355,6 @@
                                                        ;; :cyclic-containment
                                                        ;; refusal)
                                                        :order order
-                                                       :order-use (:order-use c)
-                                                       :frontier-conflicts (:frontier-conflicts c)
                                                        :relations (construction/relation-witnesses c order))
                                                     pattern-feedback
                                                     (assoc :pattern-feedback-prior

@@ -2,7 +2,6 @@
   "Prospective, record-only trials. No production parameter or learning ledger writes."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.cascade-sources :as sources]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -15,14 +14,10 @@
 
 (defn- shadow [prediction pattern theta]
   (let [precedence (mapv #(if (= (:id pattern) (:id %)) (assoc % :theta theta) %)
-                         (get-in prediction [:action :precedence]))
-        action (assoc (:action prediction) :precedence precedence)
-        order-use (cascade-order/order-use action)
-        transition (or (:kernel-step order-use) (:precedence order-use))]
+                         (get-in prediction [:action :precedence]))]
     (if (and (= :frozen (:status prediction)) (seq (:initial-belief prediction)))
-      {:theta theta :order-use (:meta order-use)
-       :rollout (model/rollout-evaluation (constantly transition)
-                                          (:initial-belief prediction) (:horizon prediction))}
+      {:theta theta :rollout (model/rollout-evaluation (constantly precedence)
+                                                      (:initial-belief prediction) (:horizon prediction))}
       {:status :held :reason :prediction-input-unavailable})))
 
 (defn receipt

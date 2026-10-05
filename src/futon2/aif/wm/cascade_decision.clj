@@ -85,8 +85,6 @@
                                    :produces #{}}}   R6's on-the-fly readings
      :repository {:patterns #{} :stands-on #{[u v]}}
      :precedences [[pattern-id …] …]         authored candidate orders
-     :candidate-actions [{:precedence …      optional rich carriers for those
-                          :construction-receipt {:order …}} …]
      :horizon-steps T                        R13's declared common horizon
      :cascade-spec {:want #{} …}             R5's preference spec
      :beta β}                                R14's DECLARED temperature
@@ -120,7 +118,7 @@
   way, with the same G selection uses (see `constructed-candidate-g`)."
   ([problem] (cascade-lane problem {}))
   ([problem {:keys [through universe observation-labels] :as lane-opts}]
-  (let [{:keys [facts want interpretations repository precedences candidate-actions horizon-steps
+  (let [{:keys [facts want interpretations repository precedences horizon-steps
                 cascade-spec beta]} problem
         route (atom [])
         state (atom {})
@@ -175,18 +173,13 @@
                         (map (fn [[id x]]
                                [id (cascade-policy/token-interpretation id x)]))
                         interpretations)
-                  rich-by-precedence (into {} (map (juxt (comp vec :precedence) identity))
-                                           candidate-actions)
                   candidates
                   (mapv (fn [c]
-                          (let [rich (get rich-by-precedence (vec (:precedence c)))]
-                            (cond-> {:kind :cascade-candidate
-                                     :id (:id c)
-                                     :precedence (mapv pattern-maps (:precedence c))}
-                              (:construction-receipt rich)
-                              (assoc :construction-receipt (:construction-receipt rich))
+                          (cond-> {:kind :cascade-candidate
+                                   :id (:id c)
+                                   :precedence (mapv pattern-maps (:precedence c))}
                             (empty? (:precedence c))
-                              (assoc :type :no-op))))
+                            (assoc :type :no-op)))
                         (:candidates (get @state :R6)))
                   predictions
                   (mapv (fn [a]
@@ -448,20 +441,8 @@
         enabled? (fn [[_ {:keys [guard]}]]
                    (and (every? true-facts (:needs guard))
                         (not-any? true-facts (:forbids guard))))
-        single-ids (mapv key
-                         (sort-by (comp pr-str key) (filter enabled? (:interpretations problem))))
-        singles (mapv vector single-ids)
-        single-actions (mapv (fn [id]
-                               {:precedence [id]
-                                :construction-receipt
-                                {:order {:units [{:unit id :pattern id}]
-                                         :descent [] :meets {} :missing-meets []
-                                         :precedence-violations []}}})
-                             single-ids)
-        candidate-action (cond-> {:precedence prec}
-                           (:order candidate)
-                           (assoc :construction-receipt {:order (:order candidate)}))
-        rich-family (vec (distinct (cond-> single-actions (seq prec) (conj candidate-action))))
+        singles (mapv (comp vector key)
+                      (sort-by (comp pr-str key) (filter enabled? (:interpretations problem))))
         family (vec (distinct (cond-> singles (seq prec) (conj prec))))
         ;; H-VALUE-G-D: score over the problem's declared token universe so
         ;; every evaluate-g call of one problem — and the empty baseline it
@@ -469,7 +450,7 @@
         ;; SAME universe (the cross-universe subtraction differed by T·k·ln2).
         universe (cascade-problems/problem-tokens
                   (:facts problem) (:want problem) (:interpretations problem))
-        lane (cascade-lane (assoc problem :precedences family :candidate-actions rich-family)
+        lane (cascade-lane (assoc problem :precedences family)
                            {:through :R5 :universe universe
                             :observation-labels (observation-label-inputs
                                                  (:observation-labels-view opts))})]
@@ -484,9 +465,7 @@
                         {:constructor/refusal :candidate-not-ranked :precedence prec})))
       ;; the universe G was taken over, so the construction receipt records
       ;; the scorer's universe rather than one the caller declares for it
-      {:value (double (:G-efe entry))
-       :universe (vec (sort-by pr-str universe))
-       :order-use (:order-use entry)}))))
+      {:value (double (:G-efe entry)) :universe (vec (sort-by pr-str universe))}))))
 
 (defn merge-live-cascade-spec
   "Merge the decision's declared wants with a derived live C spec.

@@ -20,7 +20,6 @@
    ship with R7 (adaptive precision) work."
   (:require [futon2.aif.belief :as belief]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
-            [futon2.aif.cascade-order :as cascade-order]
             [futon2.aif.machine-q :as machine-q]))
 
 (declare predict)  ; v0.15: predict-multi-horizon (below can-execute?) calls predict (further below).
@@ -357,9 +356,7 @@
    pattern interpretation) is returned unchanged, not coerced."
   [state action]
   (let [q (:cascade-belief state)
-        order-use (cascade-order/order-use action)
-        transition (or (:kernel-step order-use) (:precedence order-use))
-        q' (when (map? q) (cascade-manifest/rollout (constantly transition) q 1))]
+        q' (when (map? q) (cascade-manifest/rollout (constantly (:precedence action)) q 1))]
     (cond
       (not (map? q))
       {:status :missing :kind :missing-cascade-belief :action (:id action)}
@@ -369,7 +366,6 @@
       {:next-belief q'
        :next-token-state q'
        :action action
-       :order-use (:meta order-use)
        :predicted-events []
        :cascade true})))
 
