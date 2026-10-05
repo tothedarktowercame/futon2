@@ -39,6 +39,7 @@
             [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.apparatus-certificates :as apparatus-certificates]
             [futon2.aif.wm.pattern-graph-diff :as pattern-graph-diff]
+            [futon2.aif.wm.pattern-graph-view :as pattern-graph-view]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
@@ -990,6 +991,12 @@
                     :pattern-graph-diff (or (:pattern-graph-diff result)
                                             {:status :absent
                                              :reason :no-selected-action})
+                    :pattern-graph-view
+                    (if-let [graph-path (:pattern-graph-path raw-opts)]
+                      (pattern-graph-view/for-action
+                       graph-path
+                       (get-in decision [:selection-law :per-policy-argmax :action]))
+                      {:status :absent :reason :pattern-graph-path-not-supplied})
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
                                   (runtime-default raw-opts :scan-render-fn))

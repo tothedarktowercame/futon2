@@ -1,0 +1,21 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-05"
+ :scope ["src/futon2/aif/pattern_graph_pin.clj"
+         "src/futon2/aif/wm/pattern_graph_view.clj"
+         "src/futon2/aif/full_loop_runner.clj"
+         "test/futon2/aif/wm/pattern_graph_view_test.clj"]
+ :runs
+ [{:command "clojure -X:test :nses '[futon2.aif.wm.pattern-graph-view-test futon2.aif.pattern-graph-pin-test futon2.aif.pattern-retraction-test]'"
+   :status :passed :by "codex-10"
+   :tests 16 :assertions 79 :failures 0 :errors 0}
+  {:command "clj-kondo --lint <changed clojure files>"
+   :status :passed :errors 0 :warnings 0}
+  {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <changed clojure files>"
+   :status :passed :result "OK"}]
+ :real-graph-check
+ {:patterns [{:pattern "ukrns/reader-run-path" :linked-patterns 0}
+             {:pattern "war-machine/state-capture" :linked-patterns 7}
+             {:pattern "orchestration/recorded-handoff" :linked-patterns 119}
+             {:pattern "measurement/warrant-travels-with-the-number" :linked-patterns 23}]
+  :without-links ["ukrns/reader-run-path"]
+  :cascade-costs [8 9 9]}}

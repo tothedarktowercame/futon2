@@ -152,3 +152,19 @@
         (catch Exception e
           {:status :refused :kind :graph-unreadable :path (str graph-path)
            :message (ex-message e)})))))
+
+(defn load-unpinned
+  "Load and normalize GRAPH-PATH's current bytes without requiring a pin.
+  Intended for observational views, never for an authoritative decision."
+  [graph-path]
+  (try
+    (let [graph-file (io/file graph-path)
+          raw (json/parse-string (slurp graph-file) true)
+          graph (normalized-graph raw)]
+      (if-let [refusal (graph-refusal raw graph)]
+        (assoc refusal :path (str graph-path))
+        {:status :loaded :graph graph
+         :graph-ref {:path (str graph-path) :sha256 (file-sha256 graph-file)}}))
+    (catch Exception e
+      {:status :refused :kind :graph-unreadable :path (str graph-path)
+       :message (ex-message e)})))
