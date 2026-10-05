@@ -1,88 +1,147 @@
 (ns futon2.aif.wm.apparatus-certificates
-  "Fail-closed runtime-certificate census for catalogue nodes which are not
-  represented by a Lean equation.  A namespace or green unit test is never a
-  runtime certificate: only evidence retained by this run can yield :present."
-  (:require [futon2.aif.hierarchical-budget-adapter :as r11]))
+  "Fail-closed projection of retained run inputs into the R20 certificate.")
 
-(def schema :wm/apparatus-certificates-v1)
+(def schema :wm/r20-certificate-v1)
+(def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "bd04d997aa"})
+(def node-order [:precision :evidence :habit :class-preference :strategic-focus
+                 :liveness :independence :joint-action])
+(def risk-tolerance 1.0e-9)
 
-(defn- present [node kind evidence]
-  {:node node :status :present :kind kind :evidence evidence})
+(defn- absent [node missing & [reason checked]]
+  (cond-> {:node node :verdict :not-recorded :missing (vec missing)}
+    reason (assoc :reason reason) checked (assoc :checked checked)))
+(defn- verdict [node agrees? case checked & [reason]]
+  (cond-> {:node node :verdict (if agrees? :agrees :disagrees)
+           :case case :checked checked}
+    reason (assoc :reason reason)))
+(defn- finite-number? [x] (and (number? x) (Double/isFinite (double x))))
+(defn- close? [a b] (and (finite-number? a) (finite-number? b)
+                          (<= (Math/abs (- (double a) (double b))) risk-tolerance)))
 
-(defn- refused [node reason & [detail]]
-  (cond-> {:node node :status :refused :reason reason}
-    detail (assoc :detail detail)))
+(defn- precision-row [decision]
+  (let [path [:selection-certificate :policy-precision-state]
+        state (get-in decision path) update (:update state)
+        before (:beta-prior update) after (:beta update) solve (:solve update)
+        case (when (and (finite-number? before) (finite-number? after))
+               (cond (= (double after) (double before)) :unchanged
+                     (< (double after) (double before)) :more-decisive
+                     :else :less-decisive))]
+    (if-not (map? update)
+      (absent :precision [:update] (or (:reason state) :precision-update-not-retained)
+              {:source path :carry (select-keys state [:status :reason :beta :beta-status])})
+      (absent :precision [:prior :posterior] :policy-distributions-not-retained
+              {:source path :beta-prior before :beta after
+               :solve-converged? (:converged? solve)
+               :solve-residual (or (:residual solve) (:error solve) (:precision-error solve))
+               :case-if-recorded case}))))
 
-(defn- not-applicable [node reason]
-  {:node node :status :not-applicable :reason reason})
+(defn- constant-row [node missing]
+  (absent node missing :required-r20-record-fields-not-retained))
 
-(defn- r9-certificate [e]
-  (let [roles (:roles e)]
-    (if (and (= :wm/r9-independence-admission-v1 (:schema e))
-             (string? (:author roles)) (string? (:reviewer roles))
-             (not= (:author roles) (:reviewer roles))
-             (seq (:joins e))
-             (every? #{:passed} (vals (:joins e))))
-      (present :R9 :independent-pre-enact-authorization e)
-      (refused :R9 :canonical-pre-enact-authorization-not-retained))))
+(defn- identity-at [participants role]
+  (let [v (get-in participants [:roles role])]
+    {:path [:participants :roles role] :receipt v
+     :identity (when (= :present (:status v)) (:identity v))}))
+(defn- independence-row [participants]
+  (let [author (identity-at participants :author)
+        reviewer (identity-at participants :reviewer-of-record)
+        missing (cond-> [] (nil? (:identity author)) (conj :author)
+                         (nil? (:identity reviewer)) (conj :reviewer-of-record))
+        checked {:author author :reviewer reviewer}]
+    (if (seq missing)
+      (absent :independence missing :participant-identity-not-observed checked)
+      (let [different? (not= (:identity author) (:identity reviewer))]
+        (verdict :independence different?
+                 (if different? :author-is-not-reviewer :same-agent) checked)))))
 
-(defn- r10-certificate [trigger e]
-  (if (not= :scheduled trigger)
-    (not-applicable :R10 :run-was-not-scheduler-initiated)
-    (if (and (= :verified-causal-route (:status e))
-             (true? (:production-edge-fired? e)))
-      (present :R10 :scheduled-causal-route e)
-      (refused :R10 :production-scheduled-route-not-verified))))
+(def terminal-preference {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
+(def waiting-preference {:ending/not-yet-evaluated 1})
+(defn- canonical-preference [horizon tau]
+  (if (= tau horizon) terminal-preference waiting-preference))
+(defn- unsupported? [prediction preference]
+  (boolean (some (fn [[class mass]]
+                   (and (number? mass) (pos? mass) (zero? (get preference class 0)))) prediction)))
+(defn- class-risk [prediction preference]
+  (if (unsupported? prediction preference) :infinite
+      (reduce-kv (fn [sum class mass]
+                   (if (zero? mass) sum
+                       (+ sum (* (double mass)
+                                 (Math/log (/ (double mass) (double (get preference class))))))))
+                 0.0 prediction)))
+(defn- class-step-check [horizon preferences step]
+  (let [tau (:tau step) prediction (:prediction step) reported (:risk step)
+        preferred (get preferences tau) canonical (canonical-preference horizon tau)
+        expected (when (and (map? prediction) (map? preferred)) (class-risk prediction preferred))
+        risk-ok? (if (= :infinite expected) (= :infinite reported) (close? expected reported))]
+    {:tau tau :prediction prediction :reported-risk reported :preference preferred
+     :canonical-preference canonical :preference-ok? (= canonical preferred)
+     :computed-risk expected :risk-ok? risk-ok?
+     :ok? (and (integer? tau) (map? prediction) (= canonical preferred) risk-ok?)}))
+(defn- class-preference-row [decision]
+  (let [path [:selection-certificate :scoring]
+        scored (vals (or (get-in decision path) {}))
+        entries (filter #(= :class-emission (get-in % [:observation-model :kind])) scored)]
+    (cond
+      (empty? entries) (absent :class-preference [:class-emission-scoring]
+                               :no-scored-class-emission-candidate {:source path})
+      (some #(not= :none (get-in % [:g-terms :normalization])) entries)
+      (absent :class-preference [:unnormalized-risk] :recorded-risk-is-normalized
+              {:source path :normalizations (mapv #(get-in % [:g-terms :normalization]) entries)})
+      :else
+      (let [checks (mapv (fn [entry]
+                           (let [model (:observation-model entry) horizon (:horizon model)]
+                             {:id (:id entry) :horizon horizon
+                              :steps (mapv #(class-step-check horizon (:class-preference model) %)
+                                           (:steps entry))})) entries)
+            all-steps (mapcat :steps checks)
+            selected-id (:action decision)
+            selected (first (filter #(= selected-id (:id %)) checks))
+            terminal (first (filter #(= (:tau %) (:horizon selected)) (:steps selected)))
+            case (cond (nil? terminal) :before-horizon
+                       (= :infinite (:computed-risk terminal)) :at-horizon-unsupported
+                       :else :at-horizon-supported)
+            agrees? (and (seq all-steps) (every? :ok? all-steps))]
+        (verdict :class-preference agrees? case
+                 {:source path :risk-tolerance risk-tolerance :candidates checks
+                  :selected-id selected-id}
+                 (when-not agrees? :class-preference-or-risk-mismatch))))))
 
-(defn- r11-certificate [e]
-  (if (nil? e)
-    (not-applicable :R11 :no-shared-budget-arbitration-requested)
-    (try
-      (let [replay (r11/replay e)]
-        (if (:replay/identical? replay)
-          (present :R11 :exact-shared-budget-replay
-                   {:receipt e :replay/identical? true})
-          (refused :R11 :shared-budget-replay-disagrees)))
-      (catch Throwable t
-        (refused :R11 :shared-budget-receipt-invalid
-                 {:message (.getMessage t)})))))
+;; CTauClassPreference.lean:124-138 and R15StrategicTarget.lean:64-67:
+;; focus -> focused, associated -> related, usefulElsewhere -> unrelated;
+;; other relations are unscored/unknown. The focus receipt keeps the relation
+;; vocabulary in :class; :scored-class below records its Lean projection.
+(def scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated})
+(defn- relation-key [relation]
+  (let [relation (if (map? relation) (:relation relation) relation)]
+    (cond (keyword? relation) relation (string? relation) (keyword relation) :else :other)))
+(defn- strategic-focus-row [decision]
+  (let [path [:selection-certificate :focus-receipt] receipt (get-in decision path)
+        previous (get-in receipt [:context :previous-focus :focus])
+        current (get-in receipt [:discovery :focus])
+        missing (cond-> [] (nil? previous) (conj :previous-focus) (nil? current) (conj :focus))]
+    (if (seq missing)
+      (absent :strategic-focus missing :focus-pair-not-retained {:source path})
+      (let [checks (mapv (fn [candidate]
+                           (let [relation (relation-key (:relation candidate))
+                                 scored (get scorer-class relation)
+                                 expected-recorded (if scored relation :unknown)]
+                             {:target (:target candidate) :relation (:relation candidate)
+                              :recorded-class (:class candidate) :scored-class scored
+                              :ok? (= expected-recorded (:class candidate))}))
+                         (:candidates receipt))
+            agrees? (and (seq checks) (every? :ok? checks))]
+        (verdict :strategic-focus agrees? (if (= previous current) :focus-kept :focus-changed)
+                 {:source path :previous-focus previous :focus current :candidates checks}
+                 (when-not agrees? :relation-class-mismatch))))))
 
-(defn- independent-layer-2? [e]
-  (let [layer-2 (get-in e [:returned :artifact :layer-2/independent-evidence])]
-    (and (= :admitted (:status e))
-         (= :R12 (:node e))
-         (= :R12/layer-2 (:layer layer-2))
-         (= :admitted (:status layer-2))
-         (true? (:independent? layer-2)))))
-
-(defn- r12-certificate [e]
-  (if (independent-layer-2? e)
-    (present :R12 :independent-layer-2-calibration e)
-    (refused :R12 :independent-layer-2-calibration-not-retained)))
-
-(defn- r15-certificate [e]
-  (if (and (= :wm/r15-two-tick-certificate-v1 (:schema e))
-           (true? (:fast-outcome-independently-witnessed? e))
-           (some? (:slow-state-before e))
-           (some? (:slow-state-after e))
-           (not= (:slow-state-before e) (:slow-state-after e))
-           (= (:slow-state-after e) (:next-tick-consumed-slow-state e)))
-    (present :R15 :two-tick-strategic-tactical-feedback e)
-    (refused :R15 :two-tick-feedback-correspondence-not-retained)))
-
-(defn receipt
-  "Project the five apparatus certificates from this run's retained DATA.
-  Canonical producers may attach evidence below :apparatus-evidence keyed by
-  R-node.  TRIGGER is the runner trigger, not reconstructed from prose."
-  [result trigger]
-  (let [evidence (get-in result [:data :apparatus-evidence])
-        by-node {:R9 (r9-certificate (:R9 evidence))
-                 :R10 (r10-certificate trigger (:R10 evidence))
-                 :R11 (r11-certificate (:R11 evidence))
-                 :R12 (r12-certificate (:R12 evidence))
-                 :R15 (r15-certificate (:R15 evidence))}
-        counts (frequencies (map :status (vals by-node)))]
-    {:schema schema
-     :status (if (zero? (get counts :refused 0)) :complete :incomplete)
-     :by-node by-node
-     :counts (merge {:present 0 :refused 0 :not-applicable 0} counts)}))
+(defn receipt [{:keys [decision participants]}]
+  (let [rows [(precision-row decision)
+              (constant-row :evidence [:likelihood])
+              (constant-row :habit [:counts-after :next-consumed])
+              (class-preference-row decision)
+              (strategic-focus-row decision)
+              (constant-row :liveness [:before-state :after-state :reported-live])
+              (independence-row participants)
+              (constant-row :joint-action [:ownership])]]
+    {:schema schema :lean lean-authority :rows rows
+     :certified? (every? #(= :agrees (:verdict %)) rows)}))

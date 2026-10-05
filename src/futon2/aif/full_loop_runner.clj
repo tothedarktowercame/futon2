@@ -934,6 +934,7 @@
              (or decision (:decision selection-sorry)))
             declaration-reads (cascade-sources/provenance
                                (some-> (:declaration-reads/state raw-opts) deref))
+            participants-record (participants/record-value raw-opts)
             world-at-selection (or (get-in result
                                             [:checkpoints :selection :judgment
                                              :world-at-selection])
@@ -947,7 +948,7 @@
                                                 :error "selection did not attach census"}]})
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
-                    :participants (participants/record-value raw-opts)
+                    :participants participants-record
                     :habit-reads (input-receipts/habit-log
                                   (some-> (:habit-reads/state raw-opts) deref))
                     :declaration-reads declaration-reads
@@ -962,7 +963,7 @@
                     :run-output (run-output/receipt result grounded-commit)
                     :apparatus-certificates
                     (apparatus-certificates/receipt
-                     result (or (:trigger raw-opts) :duree-click-on-demand))
+                     {:decision decision :participants participants-record})
                     :loop-node-exercise (loop-node-exercise/receipt decision)
                     :registered-run/critical-parameters
                     (selection-world/critical-task-counts world-at-selection raw-opts)

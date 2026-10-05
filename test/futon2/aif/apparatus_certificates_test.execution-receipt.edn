@@ -1,0 +1,23 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-05"
+ :scope ["src/futon2/aif/wm/apparatus_certificates.clj"
+         "src/futon2/aif/full_loop_runner.clj"
+         "test/futon2/aif/apparatus_certificates_test.clj"]
+ :runs
+ [{:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
+   :status :passed
+   :tests 4
+   :assertions 14
+   :failures 0
+   :errors 0}
+  {:command "clojure -M:test -e <test-var run-record-carries-the-runner-source-identity>"
+   :status :refused-before-test-body
+   :reason :stale-outer-selection-composition
+   :detail "The isolated JVM reported the required serving composition namespaces unregistered; the runner fail-closed source check stopped before record construction. No hot-load or server mutation was authorized."}
+  {:command "clj-kondo --lint <three changed Clojure files>"
+   :status :passed :errors 0 :warnings 0}
+  {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <three changed Clojure files>"
+   :status :passed :result "OK"}]
+ :active-run-check
+ {:status :none-observed
+  :evidence "No full-loop/War-Machine runner process was active; the registered war-machine seat was unreachable/idle. Only the current Codex invocation and the ordinary futon3c development JVM matched the broad process search."}}
