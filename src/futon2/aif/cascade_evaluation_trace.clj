@@ -41,13 +41,50 @@
        :semantics :first-enabled-union-theta-v1
        :precedence (mapv effective-pattern transition)})))
 
-(defn- retained-state-errors [{:keys [mass kernel mass-contribution] :as row}]
-  (cond-> []
-    (not= :evaluated (:status row)) (conj :state-not-evaluated)
-    (not= (update-vals kernel #(* mass %)) mass-contribution)
-    (conj :state-contribution-mismatch)
-    (not (contains? #{:co-application :identity} (:kernel-kind row)))
-    (conj :wrong-kernel-kind)))
+(defn- expected-frontier
+  "The units enabled at STATE with no enabled unit above them, in the model's
+   unit order. DESCENT rows are [above below]."
+  [{:keys [units descent patterns]} state]
+  (let [parents (reduce (fn [m [a b]] (update m b (fnil conj #{}) a)) {} descent)
+        above (fn [u] (loop [todo (vec (parents u)) seen #{}]
+                        (if-let [v (peek todo)]
+                          (if (seen v)
+                            (recur (pop todo) seen)
+                            (recur (into (pop todo) (parents v)) (conj seen v)))
+                          seen)))
+        enabled (set (filter #(enabled? (patterns %) state) units))]
+    (vec (filter #(and (enabled %) (not-any? enabled (above %))) units))))
+
+(defn- expected-co-kernel
+  "Every frontier unit succeeds independently with its theta; the next state
+   adds the products of those that succeed."
+  [{:keys [patterns]} state frontier]
+  (into {} (remove (comp zero? val))
+        (reduce (fn [row unit]
+                  (let [{:keys [theta] :as pattern} (patterns unit)
+                        produces (or (:produces pattern)
+                                     (get-in pattern [:transition :produces]) #{})]
+                    (reduce-kv (fn [acc s w]
+                                 (-> acc
+                                     (update (set/union s produces) (fnil + 0) (* w theta))
+                                     (update s (fnil + 0) (* w (- 1 theta)))))
+                               {} row)))
+                {state 1} frontier)))
+
+(defn- co-state-errors
+  "The co-application counterpart of state-errors: the row's frontier and
+   kernel are recomputed from the expected model, not taken from the row."
+  [model {:keys [state mass kernel mass-contribution] :as row}]
+  (let [frontier (expected-frontier model state)]
+    (cond-> []
+      (not= :evaluated (:status row)) (conj :state-not-evaluated)
+      (not= frontier (vec (:frontier row))) (conj :frontier-mismatch)
+      (not= (if (seq frontier) :co-application :identity) (:kernel-kind row))
+      (conj :wrong-kernel-kind)
+      (not= (expected-co-kernel model state frontier) kernel)
+      (conj :applied-kernel-mismatch)
+      (not= (update-vals kernel #(* mass %)) mass-contribution)
+      (conj :state-contribution-mismatch))))
 
 (defn- state-errors [precedence row]
   (let [{:keys [state mass selected-index pattern-id kernel guard-search mass-contribution]} row
@@ -79,7 +116,7 @@
         rows (:states step)
         coapply? (= :co-application-frontier-theta-v1 (:semantics expected))
         per-state (mapcat (fn [row] (map #(hash-map :kind % :state (:state row))
-                                        ((if coapply? retained-state-errors
+                                        ((if coapply? #(co-state-errors expected %)
                                              #(state-errors precedence %)) row))) rows)]
     (into
      (cond-> []

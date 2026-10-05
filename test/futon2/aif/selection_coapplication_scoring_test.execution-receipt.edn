@@ -29,6 +29,10 @@
    :status :passed :tests 4 :assertions 9 :failures 0 :errors 0}
   {:namespace futon2.aif.coapply-kernel-test
    :status :passed :tests 5 :assertions 23 :failures 0 :errors 0}
+  {:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.selection-coapplication-scoring-test -n futon2.aif.cascade-evaluation-trace-test"
+   :status :passed :by "claude-2"
+   :tests 13 :assertions 158 :failures 0 :errors 0
+   :note "Review follow-up to 805db997e. The trace check accepted a co-application row on its own word: it compared the row's contribution with the row's kernel and did not recompute either, where the list path recomputes the first enabled pattern and its kernel. A row saying nothing happened, with a matching contribution, passed. The check now recomputes the frontier and the kernel from the candidate's order. Added: that case and a shortened frontier are caught; a trace with uncertain success (theta 1/2, branching beliefs) validates; an order naming a unit outside the precedence falls back to the list and records why. clj-kondo and check-parens clean on the two files."}
   {:command "clj-kondo --lint <changed Clojure files>"
    :status :passed :errors 0 :warnings 0}
   {:command "futon4/dev/check-parens.el <changed Clojure files>"

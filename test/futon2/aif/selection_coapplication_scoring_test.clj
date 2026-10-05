@@ -102,3 +102,37 @@
     (is (= :valid (:status (trace/validate-record honest))))
     (is (contains? (mismatch-kinds altered) :model-candidate-mismatch))
     (is (contains? (mismatch-kinds list-for-non-chain) :model-candidate-mismatch))))
+
+(def ^:private first-row
+  [:decision :selection-certificate :node-evaluation-traces 0 :evaluations 0 :states 0])
+
+(deftest co-application-rows-are-recomputed-not-trusted
+  (let [honest (trace-record action (score action))
+        row (get-in honest first-row)
+        ;; a row that says nothing happened, with its contribution kept
+        ;; consistent with that claim
+        idle (assoc-in honest first-row
+                       (assoc row :kernel {(:state row) 1}
+                              :mass-contribution {(:state row) (:mass row)}))
+        short-frontier (update-in honest (conj first-row :frontier) pop)]
+    (is (contains? (mismatch-kinds idle) :applied-kernel-mismatch))
+    (is (contains? (mismatch-kinds short-frontier) :frontier-mismatch))))
+
+(deftest uncertain-co-application-trace-validates
+  (let [half (update action :precedence
+                     #(mapv (fn [pattern] (assoc pattern :theta 1/2)) %))
+        scored (score half)
+        states-per-step (mapv #(count (get-in % [:node-evaluation :states]))
+                              (get-in scored [:certificate :steps]))]
+    (is (< 1 (apply max states-per-step)) "the belief branches when success is uncertain")
+    (is (= :valid (:status (trace/validate-record (trace-record half scored)))))))
+
+(deftest order-naming-a-unit-outside-the-precedence-falls-back-to-the-list
+  (let [broken (assoc-in action [:construction-receipt :order :units 0 :pattern]
+                         :missing/pattern)
+        scored (score broken)]
+    (is (= {:order-not-used :units-not-mapped-to-precedence} (:order-use scored)))
+    (is (= :first-enabled-union-theta-v1
+           (get-in scored [:certificate :steps 0 :node-evaluation :model :semantics])))
+    (is (= (:controller-score (score (list-action action)))
+           (:controller-score scored)))))
