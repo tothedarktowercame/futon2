@@ -2,7 +2,9 @@
 
 Date: 2026-10-05. Author: claude-2. Status: DRAFT for comment (claude-17,
 codex-10), then for Joe. Revised the same day after claude-17's comments
-(job invoke-1791237356680-33164-1ef923ba); the changes are marked "(c17)". Amends `CASCADE-SPEC-v2-2026-10-01.md` (codex-10),
+(job invoke-1791237356680-33164-1ef923ba) and codex-10's (job
+invoke-1791237359862-33165-a3585ac9); the changes are marked "(c17)" and
+"(c10)". Where the two disagree, both positions are recorded for Joe. Amends `CASCADE-SPEC-v2-2026-10-01.md` (codex-10),
 which Joe called "a good working draft but not final" (2026-10-05). Where this
 file says nothing, v2 stands. No code or Lean change is authorised by this
 file.
@@ -74,10 +76,10 @@ Cognitive Space and Time" (c. 2006), `refs/goguen2006.pdf`.
   "We suggest that emergent structure arises by integrating new triads that
   match important non-integrated concepts in the input spaces" (the
   Buddhist-monk example recruits a "meeting space" whose one new axiom,
-  d(t*) = 0, is the emergent part); p. 19 restates it as arising "through the
-  integration of additional triads that match important non-integrated
-  concepts in the input spaces" and calls it "a major new hypothesis of this
-  paper".
+  d(t*) = 0, is the emergent part); p. 20 (the conclusion; c10) restates it as
+  arising "through the integration of additional triads that match important
+  non-integrated concepts in the input spaces" and calls it "a major new
+  hypothesis of this paper".
 
 ## 2. The unit: an occurrence is a blend square
 
@@ -116,11 +118,17 @@ supplies; B = the conference version served at that address with the living
 version still findable (the pattern's conclusion). No record holds the four
 maps.
 
-A reading that cannot name G, I_1, I_2 and B for the problem gives an
-occurrence whose square is **typed absent** (c17): it is still a unit of the
-policy, but it supports nothing, meets nothing and is glued to nothing. A
-policy made only of such units is a bag by §3.1, and the reason is on the
-record rather than hidden in an empty policy.
+A reading that cannot name G, I_1, I_2 and B for the problem: two positions,
+for Joe. (c17) It is a unit of the policy whose square is **typed absent**: it
+supports nothing, meets nothing and is glued to nothing; a policy made only
+of such units is a bag by §3.1, and the reason is on the record rather than
+hidden in an empty policy. (c10) It is not an admitted occurrence at all,
+since without the square there is no span, cone or 3/2-pushout to check;
+it stays a retrieval seed or an unresolved construction candidate, and a
+genuine one-input case is admitted only as an explicitly typed degenerate
+square (named ground, identity maps). The two agree that the absence is
+typed on the record and that nothing is defaulted; they differ on whether the
+item counts as a unit of the policy.
 
 Two occurrences of one library pattern in one policy are distinct units
 (v2 already says so); two occurrences with the same G, I_1, I_2 and different
@@ -141,9 +149,14 @@ Consequences, each a requirement:
 1. **Connected or bag.** A diagram with no shared object between two
    components is a disjoint sum. Its "colimit" is the two parts side by side
    and nothing is blended. A construction whose occurrences share nothing is
-   reported as a **bag**, not a cascade (claude-17's amendment 4; v2's
-   "disconnected cascades as degenerate"). Run 2026-10-05-c9d25d6a (four
-   patterns picked one per want, one dependency) is a bag by this rule.
+   reported as a **bag**, not a cascade (claude-17's amendment 4). This
+   **amends** v2's "disconnected cascades as degenerate" rather than refining
+   it (c10). Connection means connection through declared, non-auxiliary
+   gluing maps, not two readings reusing a generic name or background
+   vocabulary (c10). Run 2026-10-05-c9d25d6a (four patterns picked one per
+   want, one token dependency) recorded no readings of G, I_1, I_2, B, so it
+   is a bag under its token graph and **would be** a bag under this rule if
+   the readings introduce no further shared object (c10).
 2. **Consistency is checked, not assumed.** Pasting two acceptable squares
    can fail to be consistent (§1). The condition on a figure is D-consistency
    over the whole diagram (Definition 10), not a witness per diamond (c17); a
@@ -152,12 +165,13 @@ Consequences, each a requirement:
 3. **The three relations of v2 are derived.**
    - *support(child, parent)*: a leg I → B of some square: the child is an
      input to the blend it helps form. Several parents because one object can
-     be an input to several squares. This is **narrower than v2** (c17): v2's
-     support relates two units ("applying or maintaining the child helps
-     complete the parent"); here support between two occurrences exists only
-     when one occurrence's B (or an object of it) is an input of the other.
-     Whether v2's wider sense is kept as a separate, evidenced relation is for
-     Joe.
+     be an input to several squares. This is **narrower than v2** (c17) and,
+     on codex-10's reading, a different relation rather than a derivation
+     (c10): v2's support is operational ("applying or maintaining the child
+     helps complete the larger parent pattern"), and an input inclusion does
+     not by itself show that. Proposed resolution (c10, accepted here): two
+     named relations, `blendLeg` (the leg I → B) and `supports` (v2's), with
+     a bridge obligation stating when a leg counts as support. For Joe.
    - *meet(left, right) = shared*: the object under both, i.e. the G of the
      square in which left and right are the inputs (or, for two squares
      glued at a shared input, that input: the W of Theorem 13), named as text
@@ -165,7 +179,9 @@ Consequences, each a requirement:
      unit already present in the policy"; this draft **keeps that condition**
      (c17): the shared object must be an object (ground, input or blend) of
      some occurrence in the policy, and when it is no occurrence's blend the
-     receipt says so. A meet is required only for pairs that are glued (the
+     receipt says so. Until the meet laws of v2 obligation 3 are proved for
+     it under the declared support/order interpretation, it is called a
+     **gluing object**, not a meet (c10). A meet is required only for pairs that are glued (the
      restricted condition of
      `mathlib4/DarkTower/WarMachine/Proof2/CoApplicationKernel.lean`,
      hasRestrictedMeets), not for every pair.
@@ -194,7 +210,13 @@ Consequences, each a requirement:
   term, is the number of maximal blends of a V that the order cannot rank
   against each other (the houseboat/boathouse choices left after fit). The
   "Irreducible" line is the kind of evidence that says when there are
-  several. v2's ordering-ambiguity term is unchanged by this draft.
+  several. codex-10's position (c10), also for Joe: the quality order is
+  neither F nor ambiguity; it is the order over which construction searches
+  (which extensions are maximal or preferred), and it reaches G only
+  indirectly, through the policy family it admits or an explicit prior over
+  interpretations; evidence from later observations about whether a mapping
+  fits can enter F, the categorical order itself cannot. v2's
+  ordering-ambiguity term is unchanged by this draft.
 - Emergent structure, on Goguen's 2006 hypothesis, is what an added space
   contributes when it matches concepts the inputs mention but the ground did
   not integrate. Read against construction: an extension candidate is an
@@ -215,6 +237,15 @@ Consequences, each a requirement:
 
 ## 6. Lean obligations (adds to v2's twelve)
 
+Carrier (c10, read against the files): neither `CascadeSpec.lean`
+(occurrences, one `precedes` relation, untyped overlap pairs) nor
+`ConstructionReceipt.lean` (token-derived support edges, path-shaped meet
+witnesses, and `valid` requiring `precedence == support`, which is contrary
+to §3.3's separation) can state 13-17. They need a new module, conceptually
+`ThreeHalvesBlend.lean`, reusing `CascadeSpec.PatternId`, occurrence
+identities and provenance; `ConstructionReceipt` is extended only after that
+carrier fixes what the runtime must serialise.
+
 13. An ordered-category carrier (Definition 6) and 3/2-pushout (Definition 7)
     stated; Proposition 8 proved or imported.
 14. A finite witness of non-uniqueness: two non-isomorphic 3/2-pushouts of one
@@ -230,10 +261,12 @@ Consequences, each a requirement:
 
 - Which parts of a library pattern are its inputs and ground, outside the
   axis form (§2 sample).
-- The relation between a 3/2-pushout and the existing kernel
-  (`CoApplicationKernel.lean`): the kernel is a transition on token states;
-  the blend is the structure of the policy. They are not the same object and
-  this draft does not identify them.
+- Settled (c10): a blend diagram specifies policy structure; the kernel of
+  `CoApplicationKernel.lean` specifies transition semantics on token states;
+  they are different typed layers. Open: the adequacy (compiler) theorem
+  that connects a blend diagram to its transition kernel.
+- Open (c10): what observable criterion distinguishes emergent structure
+  from an arbitrary extra axiom introduced during construction.
 - How the quality order enters G (§4).
 - Settled (c17): `@why` is not a leg. A leg maps objects inside one square;
   `@why` relates pattern to pattern ("this pattern follows from those",
