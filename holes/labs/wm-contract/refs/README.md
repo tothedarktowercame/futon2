@@ -18,6 +18,7 @@ files; where the text extraction garbled a formula, the registry says so.
 | parr2022 | parr2022.pdf | f1ddb2efaf4f86f9 | 313 | https://www.math4wisdom.com/files/2022_Textbook-ActiveInference.pdf (mirror of the MIT Press open-access PDF `book_9780262369978.pdf`; located by wm-evidence, C453) | MIT Press OA (CC BY-NC-ND); direct.mit.edu and OAPEN refused automated fetch |
 | maisto2022 | maisto2022.pdf | ea707a7f0fe8dd22 | 32 | https://arxiv.org/pdf/2210.13113 | arXiv preprint (open); Maisto, Donnarumma and Pezzulo, "Interactive inference: a multi-agent model of cooperative joint actions"; fetched 2026-10-05 by claude-2 for R11 |
 | kaufmann2021 | kaufmann2021.pdf | 6576f942d74c8730 | 33 | https://arxiv.org/pdf/2104.01066 | arXiv preprint (open); Kaufmann, Gupta and Taylor, "An Active Inference Model of Collective Intelligence"; fetched 2026-10-05 by claude-2 for R11 |
+| fritzliang2022 | fritzliang2022.pdf | 720103a21152884d | 35 | https://arxiv.org/pdf/2204.02284 | arXiv preprint (open); Fritz and Liang, "Free gs-monoidal categories and free Markov categories"; Def. 3.6 (left monogamy) at fritzliang2022.txt:505-520; fetched 2026-10-05 by claude-2 for the shared-state section of R11JointAction |
 
 Extraction: `pdftotext -layout <pdf> <txt>` (and `-raw` for the two-column
 Friston 2016). Re-verify a file with `sha256sum`.
