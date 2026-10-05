@@ -98,13 +98,30 @@ parameter; the squares do not move.
 When would the diagram have to move? Exactly when the fixed diagram has no
 consistent cone, or only a degenerate one:
 
-- a required slot cannot be filled from HEAD for a candidate (the record
-  shows the shape of this: `:declared-priority-cost` filled for 0 of 107,
-  freshness for 79, and 506 items off the map entirely). Then a *reading*
-  square must be pasted in before `fill` — Joe's 2026-09-25 step kinds
-  (read-criteria / ask-interpretation / defer), with epistemic value when
-  the fact is absent. That is a structural change, and it is the "live,
-  can get unstuck" property, not an exception to the cascade;
+- a required slot cannot be filled from HEAD for a candidate. Then a
+  *reading* square must be pasted in before `fill` — Joe's 2026-09-25
+  step kinds (read-criteria / ask-interpretation / defer), with epistemic
+  value when the fact is absent. That is a structural change, and it is
+  the "live, can get unstuck" property, not an exception to the cascade.
+  *Measured (codex-33, `REPORT-meta-slot-census-2026-10-05.md`, futon2
+  `597a03288`): of the 107 items c9d25d6a ranked, 105 are in the HEAD
+  field observation (484 rows), 103 fill all six slots, 2 fill four
+  (`E-cascade-real`, `M-joe-told-me-about-futon`:
+  `:no-current-false-checkable-want` — the latter has no checkbox and no
+  criterion in 1,938 lines), 2 fill none (`E-kimi-task-28`, `-70`: not in
+  the field). So the reading square is forced for 4 of 107, not for most.
+  Read the "six" with care: `task-kind` and `target` are the row's
+  identity, `resource-envelope` is the caller's constant, and discovery
+  sets `next-move :advance` and `stopping-rule :grounded-progress` for
+  every ordinary row it admits; the one slot that carries information
+  from the item is `evidence-channel`, the locator of the first current
+  false checkable want. "Fills all six" therefore means "is in the field
+  and has an unchecked want at HEAD".* The consequence for §2: on today's
+  field the diamond has a non-degenerate cone family of 103 near-identical
+  policies differing in `target` and one locator, and the quality order
+  over them is what is missing (the predictive authority decision of
+  2026-10-02 refuses candidate-conditioned prediction). Structure is not
+  the bottleneck on this field; the order is;
 - the admitted family is a singleton (`:singleton-policy :typed-bypass`) —
   minimise's square degenerates to an identity;
 - injury with no matching A item (`:no-matching-algorithm → :abstain`) —
@@ -274,8 +291,14 @@ check belongs after §6's items.
    observation and tabulate fillable slots per item. Output: which absence
    would force a reading square, and for how many items. Settles whether
    the diamond ever has a non-degenerate cone on today's field.
-   *Dispatched to codex-33 2026-10-05 22:39Z, job
-   `invoke-1791239989889-33224-b190b433`.*
+   *Done: codex-33, futon2 `597a03288`, report
+   `REPORT-meta-slot-census-2026-10-05.md`, script
+   `scripts/meta_slot_census.clj`; numbers and their reading in §2.
+   Reviewed by claude-2: ids taken from the record's `:ranking`; per-slot
+   rows sum to 107; refusals typed; spot-checked
+   `M-interim-director-proxy-metric-inventory` (four unchecked
+   checkboxes at HEAD, lines 2427–2430) and `M-joe-told-me-about-futon`
+   (none).*
 2. **Lean receipt** (small): the diamond and its two forged chains in
    `ConstructionReceipt.lean`; `valid` true / false / false by
    `native_decide`. *Done: mathlib4 `e5fa4352a5` — `diamondReceipt_valid`,
