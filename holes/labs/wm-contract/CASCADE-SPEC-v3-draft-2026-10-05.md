@@ -1,7 +1,8 @@
 # Cascade specification v3 (draft): a pattern is a blend
 
 Date: 2026-10-05. Author: claude-2. Status: DRAFT for comment (claude-17,
-codex-10), then for Joe. Amends `CASCADE-SPEC-v2-2026-10-01.md` (codex-10),
+codex-10), then for Joe. Revised the same day after claude-17's comments
+(job invoke-1791237356680-33164-1ef923ba); the changes are marked "(c17)". Amends `CASCADE-SPEC-v2-2026-10-01.md` (codex-10),
 which Joe called "a good working draft but not final" (2026-10-05). Where this
 file says nothing, v2 stands. No code or Lean change is authorised by this
 file.
@@ -51,11 +52,15 @@ Cognitive Space and Time" (c. 2006), `refs/goguen2006.pdf`.
   are not any kind of pushout" (pp. 34-35).
 - **Pasting (Propositions 8 and 9, pp. 32-33; Theorem 13, p. 34).** The
   composition of two 3/2-pushouts is a 3/2-pushout; a 2×2 grid of them is one;
-  and the 3/2-colimit of a W (two V's sharing their middle top) is the
-  3/2-pushout of the two V's 3/2-pushouts: (a_1 ⋈ a_2) ⋈ (a_3 ⋈ a_4) =
-  Colim(W). "3/2-pushouts can be used to compute the 3/2-colimit of any
-  connected diagram." But "unlike the situation for ordinary pushouts, the
-  composition of consistent diamonds need not be consistent" (p. 33).
+  and a 3/2-colimit of a W (two V's sharing their middle top) is obtained as
+  the 3/2-pushout of the two V's 3/2-pushouts: (a_1 ⋈ a_2) ⋈ (a_3 ⋈ a_4) =
+  Colim(W). That "3/2-pushouts can be used to compute the 3/2-colimit of any
+  connected diagram" is stated as following from "a generalization of the
+  above result", not proved (c17). But "unlike the situation for ordinary
+  pushouts, the composition of consistent diamonds need not be consistent"
+  (p. 33). For a figure with more than one diamond the condition is
+  D-consistency (Definition 10, p. 33), which coincides with the one-diamond
+  witness only for a single diamond (Fact 11) (c17).
 - **Names matter (p. 31).** "Isomorphic cones do *not* represent the same
   blend" because "the names attached to the elements in a blend are
   important"; the injections should be inclusions as far as possible.
@@ -63,13 +68,16 @@ Cognitive Space and Time" (c. 2006), `refs/goguen2006.pdf`.
   commuting: of house and boat, only houseboat does. Morphisms whose triangles
   are not required to commute are *auxiliary*; a blend is a commutative cone
   over the diagram with the auxiliary morphisms removed.
-- **Emergent structure.** 1999, p. 32: the ordering "captures what Fauconnier
-  and Turner have called 'emergent' structure, without needing any other
-  machinery". 2006, pp. 14-15 and 19: emergent structure "arises by
-  integrating new triads that match important non-integrated concepts in the
-  input spaces" (the Buddhist-monk example recruits a "meeting space" whose
-  one new axiom, d(t*) = 0, is the emergent part); "this is a major new
-  hypothesis of this paper".
+- **Emergent structure.** 1999, p. 32, as a belief, not a result (c17): "I
+  believe this approach captures what Fauconnier and Turner have called
+  'emergent' structure, without needing any other machinery". 2006, p. 14:
+  "We suggest that emergent structure arises by integrating new triads that
+  match important non-integrated concepts in the input spaces" (the
+  Buddhist-monk example recruits a "meeting space" whose one new axiom,
+  d(t*) = 0, is the emergent part); p. 19 restates it as arising "through the
+  integration of additional triads that match important non-integrated
+  concepts in the input spaces" and calls it "a major new hypothesis of this
+  paper".
 
 ## 2. The unit: an occurrence is a blend square
 
@@ -88,13 +96,31 @@ identified) and, for each triangle, whether it commutes or is auxiliary.
 The square is supplied by a **reading of the pattern for the problem**, not
 by slot position. Evidence (claude-2 and claude-17, 2026-10-05): 109 of 1,436
 library patterns state their two poles in IF ("The pattern operates on the
-axis: A ↔ B") and 103 follow with "Irreducible: …", which reads as the shared
-part; every pattern has `! conclusion`, which names the blend. In a 20-pattern
-sample outside that form, the poles sat in IF/HOWEVER (7), both in HOWEVER
-(3), in the conclusion (2), both in IF (1), or were not recoverable (2); five
-were generated registry entries; none stated the shared part. So no slot
-mapping is specified. A reading that cannot name G, I_1, I_2 and B for the
-problem is a typed absence on the occurrence, not a default.
+axis: A ↔ B"); every pattern has `! conclusion`, which names the blend. The
+"Irreducible: …" line that follows the axis in 103 of them is NOT the shared
+part (c17): in `ukrns/publication-cadence.flexiarg` it reads "a single
+publication cannot be simultaneously maximally current AND maximally citable
+as a fixed object", i.e. it says that no blend keeps both inputs whole. In a
+20-pattern sample outside the axis form, the poles sat in IF/HOWEVER (7), both
+in HOWEVER (3), in the conclusion (2), both in IF (1), or were not recoverable
+(2); five were generated registry entries; none stated the shared part. So no
+slot mapping is specified.
+
+One real reading (c17): turn `turn-w3xIu6`, 2026-10-01, Joe asking that the
+plop-2026.html viewer "bring up the conference version there"; 象 cited
+`ukrns/publication-cadence` with the rationale "The pattern names exactly this
+axis (living document vs citable snapshot at one address)". I_1 = the living
+rendering, I_2 = the frozen conference snapshot (the pattern's axis, restated
+by the reading); G = the one address, plop-2026.html, which only the reading
+supplies; B = the conference version served at that address with the living
+version still findable (the pattern's conclusion). No record holds the four
+maps.
+
+A reading that cannot name G, I_1, I_2 and B for the problem gives an
+occurrence whose square is **typed absent** (c17): it is still a unit of the
+policy, but it supports nothing, meets nothing and is glued to nothing. A
+policy made only of such units is a bag by §3.1, and the reason is on the
+record rather than hidden in an empty policy.
 
 Two occurrences of one library pattern in one policy are distinct units
 (v2 already says so); two occurrences with the same G, I_1, I_2 and different
@@ -104,8 +130,11 @@ maps or different B are distinct occurrences (houseboat / boathouse).
 
 Occurrences combine by sharing an object: one occurrence's blend, input or
 ground is another's input or ground. The diagram of all occurrences and
-shared objects is the cascade's identity; the cascade's blend is its
-3/2-colimit, computable from the 3/2-pushouts of its parts (§1, Theorem 13).
+shared objects is the cascade's identity; the cascade's blend is **a**
+3/2-colimit of that diagram (c17): there may be several, and there may be
+none. A construction records which one it took and the others it saw, or
+the typed finding that none exists; it is computed from the 3/2-pushouts of
+the parts where §1's pasting results apply.
 
 Consequences, each a requirement:
 
@@ -116,18 +145,28 @@ Consequences, each a requirement:
    "disconnected cascades as degenerate"). Run 2026-10-05-c9d25d6a (four
    patterns picked one per want, one dependency) is a bag by this rule.
 2. **Consistency is checked, not assumed.** Pasting two acceptable squares
-   can fail to be consistent (§1). A pasted figure without a witness d is a
-   typed construction defect (v2's "arbitrary overlap is not credited"), with
-   the pair named.
+   can fail to be consistent (§1). The condition on a figure is D-consistency
+   over the whole diagram (Definition 10), not a witness per diamond (c17); a
+   figure that is not D-consistent is a typed construction defect (v2's
+   "arbitrary overlap is not credited"), with the offending morphisms named.
 3. **The three relations of v2 are derived.**
    - *support(child, parent)*: a leg I → B of some square: the child is an
      input to the blend it helps form. Several parents because one object can
-     be an input to several squares.
+     be an input to several squares. This is **narrower than v2** (c17): v2's
+     support relates two units ("applying or maintaining the child helps
+     complete the parent"); here support between two occurrences exists only
+     when one occurrence's B (or an object of it) is an input of the other.
+     Whether v2's wider sense is kept as a separate, evidenced relation is for
+     Joe.
    - *meet(left, right) = shared*: the object under both, i.e. the G of the
      square in which left and right are the inputs (or, for two squares
-     glued at a shared input, that input: the W of Theorem 13). It is named
-     as text (claude-17's amendment 3). A meet is required only for pairs
-     that are glued (the restricted condition of
+     glued at a shared input, that input: the W of Theorem 13), named as text
+     (claude-17's amendment 3). v2 requires the meet to be "a recognisable
+     unit already present in the policy"; this draft **keeps that condition**
+     (c17): the shared object must be an object (ground, input or blend) of
+     some occurrence in the policy, and when it is no occurrence's blend the
+     receipt says so. A meet is required only for pairs that are glued (the
+     restricted condition of
      `mathlib4/DarkTower/WarMachine/Proof2/CoApplicationKernel.lean`,
      hasRestrictedMeets), not for every pair.
    - *precedence*: two different orders, kept apart in one sentence
@@ -147,10 +186,15 @@ Consequences, each a requirement:
   the natural place for "how well the interpretation fits the circumstance"
   (Joe, 2026-09-30, `NOTE-g-as-fold-2026-09-30.md`), and the 2006 paper
   proposes "the extent to which a mapping preserves source space features"
-  as the formal optimality criterion. Whether and how it enters G (as F, as a
-  term of ambiguity, or as the order over which construction extends) is NOT
-  specified here. v2's ordering-ambiguity term (log of the number of linear
-  extensions) is unchanged by this draft.
+  as the formal optimality criterion. Whether and how it enters G is NOT
+  specified here. claude-17's proposal (c17), recorded for Joe's decision:
+  the order enters F as fit, scored per occurrence, because it ranks the
+  blends of one fixed V and does not count possibilities; what does count
+  possibilities, and so belongs in ambiguity beside v2's linear-extension
+  term, is the number of maximal blends of a V that the order cannot rank
+  against each other (the houseboat/boathouse choices left after fit). The
+  "Irreducible" line is the kind of evidence that says when there are
+  several. v2's ordering-ambiguity term is unchanged by this draft.
 - Emergent structure, on Goguen's 2006 hypothesis, is what an added space
   contributes when it matches concepts the inputs mention but the ground did
   not integrate. Read against construction: an extension candidate is an
@@ -191,6 +235,8 @@ Consequences, each a requirement:
   the blend is the structure of the policy. They are not the same object and
   this draft does not identify them.
 - How the quality order enters G (§4).
-- Whether `@why` in the library is a leg (input → blend) or something else;
-  claude-17 reads it as nearest to support. The mined graph is undirected and
-  cannot supply legs.
+- Settled (c17): `@why` is not a leg. A leg maps objects inside one square;
+  `@why` relates pattern to pattern ("this pattern follows from those",
+  `futon3c/scripts/mined_pattern_graph.py` docstring). At most it is a
+  candidate for support between occurrences in §3.3's narrow sense. The
+  mined graph is undirected and cannot supply legs.
