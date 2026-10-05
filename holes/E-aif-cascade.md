@@ -84,6 +84,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 
 | B1b inter-item `@why` | (i) 961 cross-references among the 107 documents, 72 cued, 45 directed edges after review fixes (hyphen boundary; `successor` ambiguous in both directions — "X's successor is Y" vs "X is the successor of Y" — cue heuristic cannot settle it); most items have no directed edge; ρ with occurrence count 0.052. (ii) `mission-lifecycle.md` asks for "Relationship to other missions" in prose and defines no field; 16 of 107 fill a prose header (`Parent`, `Predecessor`, `Consumer mission`, …). (iii) 545 library `why` edges lift through applied patterns to 422 method-level item pairs — derived, about methods. Conclusion: the semantics were not written down (Joe's reading); declaration proposal in the report; B1c is the first cut | `REPORT-unblocks-relation-2026-10-05.md` |
 
+| B1c revealed attention | Lineage: 126 dispatch records over 29 targets; 15 of the 107 ranked items have any (top `M-the-perfect-crime` 14; the selected `M-interim-director-proxy-metric-inventory` 0). Operator turns under a mission exist in futon1b evidence (`:clocked-target`, 3,339 of 4,087 turns in the 14-day window carry one): 11 of 107 have any (`M-the-perfect-crime` 305, `M-a-wmc-scaling` 136, `E-cascade-real` 133, `M-autoclock-in` 94; the selected mission 0). Co-work graph over 29 targets, 54 edges; `M-diagramprover`'s set: 11 items by same-session / same-day / operator co-mention. ρ of dispatches vs occurrence count −0.044, vs B1 coupling −0.207: the live selector's centrality is uncorrelated with where attention goes. Proposal: attention as the `unblocks` token's first-cut *enabler weight*, superseded by declaration | `REPORT-revealed-attention-2026-10-05.md` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -208,7 +210,7 @@ project; a first cut is not. Minimising G is "subject to constraints": a
 deep dive to plan all the work across all time is not a good use of time
 — the outer cascade is improved over time (§5a of the note).
 
-- [ ] **B1c. Discovery: revealed attention and co-work.** The first cut
+- [x] **B1c. Discovery: revealed attention and co-work.** *Done (futon2 `0a6f806c8`; MAP table).* The first cut
   Joe describes, from records that exist: (i) Cascade Live `:lineage` —
   126 dispatch records `{agent target session at dispatched-by}` (B1
   found them; top targets `diagramprover` 25, `apm-demonstration` 22,
