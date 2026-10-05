@@ -20,7 +20,11 @@
 
 (defn receipt [{:keys [selected-action token-comparison progress-evidence blockers]}]
   (let [target (:target selected-action)
-        wants (vec (:want selected-action))
+        ;; The selection writes a want as a bare token of the action's own
+        ;; target; predictions, locators and evidence use [target token]. A
+        ;; want already written as a vector is checked below as it stands.
+        wants (mapv (fn [want] (if (vector? want) want [target want]))
+                    (:want selected-action))
         duplicates (->> wants frequencies (keep (fn [[w n]] (when (> n 1) w))) vec)
         rows (:tokens token-comparison)
         row-tokens (mapv :token rows)

@@ -1,7 +1,9 @@
 (ns futon2.aif.selected-want-outcome-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-field-observation :as field]
-            [futon2.aif.selected-want-outcome :as outcome]))
+            [futon2.aif.selected-want-outcome :as outcome]
+            [futon2.aif.token-outcome :as token-outcome]))
 
 (def target "M-example")
 (def document [target :document])
@@ -90,3 +92,41 @@
                        (assoc-in base [:token-comparison :tokens 0
                                        :measurement :after-locator :sha]
                                  "different"))))))))
+
+(deftest recorded-bare-wants-join-real-qualified-prediction-census
+  ;; The fixture holds the selected action of run 2026-10-05-c9d25d6a and the
+  ;; parts of its selection certificate the prediction reads, copied from the
+  ;; run record (see the fixture's :note; the run record is not tracked in git,
+  ;; so the test does not read it).
+  (let [{:keys [action selection-certificate] :as fixture}
+        (edn/read-string
+         (slurp "test/fixtures/selected-want-outcome/2026-10-05-c9d25d6a-action.edn"))
+        decision {:action action :selection-certificate selection-certificate}
+        prediction (token-outcome/freeze-prediction decision)
+        artifact-sha "recorded-action-test-artifact"
+        measurements
+        (mapv (fn [{:keys [token]}]
+                (let [locator (get (:observation-locators action) token)]
+                  {:token token :declared-locator locator
+                   :after-locator (assoc locator :sha artifact-sha)
+                   :result {:observed false
+                            :evidence {:resolved-sha artifact-sha}}}))
+              (:wanted prediction))
+        comparison (token-outcome/compare-outcomes prediction measurements artifact-sha)
+        accounting (outcome/receipt {:selected-action action
+                                     :token-comparison comparison})
+        qualified-wants (mapv (fn [want] [(:target action) want]) (:want action))]
+    (is (= "2026-10-05-c9d25d6a" (:run-id fixture)))
+    (is (every? keyword? (:want action)) "the recorded action carries bare wants")
+    (is (= :frozen (:status prediction)))
+    (is (= :compared (:status comparison)))
+    (is (not= :selected-want-target-mismatch (:reason accounting)))
+    (is (= qualified-wants (:selected-wants accounting)))
+    (is (= (set qualified-wants) (set (mapv :token (:tokens comparison)))))
+    (is (= (count qualified-wants) (count (:tokens comparison))))
+    (is (= qualified-wants (mapv :want (:outcomes accounting))))
+    (is (= :selected-want-target-mismatch
+           (:reason
+            (outcome/receipt
+             {:selected-action (assoc-in action [:want 0] ["M-other" (first (:want action))])
+              :token-comparison comparison}))))))
