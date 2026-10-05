@@ -1,7 +1,10 @@
 {:schema :wm/focused-test-execution-v1
  :date "2026-10-05"
  :scope ["src/futon2/aif/wm/pattern_graph_diff.clj"
-         "test/futon2/aif/wm/pattern_graph_diff_test.clj"]
+         "src/futon2/aif/full_loop_runner.clj"
+         "src/futon2/aif/full_loop_runtime.clj"
+         "test/futon2/aif/wm/pattern_graph_diff_test.clj"
+         "test/futon2/aif/full_loop_runtime_test.clj"]
  :runs
  [{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.wm.pattern-graph-diff-test"
    :status :passed
@@ -12,6 +15,11 @@
    :by "claude-2"
    :tests 5 :assertions 12 :failures 0 :errors 0
    :note "Review follow-up to 900e21cb4. A pattern whose :produces holds bare tokens threw (nth on a keyword); wants are now read against the action's target. Added: a pattern with two wants and a pattern with none (authored input), the bare-token case, and an assertion that the reached outcome sits on the pattern that produces the want. clj-kondo and check-parens clean on both files."}
+  {:command "clojure -X:test :nses '[futon2.aif.wm.pattern-graph-diff-test futon2.aif.full-loop-runtime-test]'"
+   :status :passed
+   :by "codex-10"
+   :tests 14 :assertions 41 :failures 0 :errors 0
+   :note "Publisher success and typed failure paths plus production composition defaults. No runner-level close fixture is green at HEAD: the broader runner fixtures refuse earlier at :required-loop-node-unexercised."}
   {:command "clj-kondo --lint src/futon2/aif/wm/pattern_graph_diff.clj test/futon2/aif/wm/pattern_graph_diff_test.clj"
    :status :passed :errors 0 :warnings 0}
   {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <the two files>"

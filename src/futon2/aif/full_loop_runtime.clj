@@ -15,6 +15,11 @@
 
 (load-identity/register! *ns* *file*)
 
+(def default-pattern-graph-path
+  "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
+(def default-pattern-graph-diff-dir
+  "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
+
 (defn- selection-judge
   [opts days]
   (wm/generate-war-machine
@@ -79,6 +84,8 @@
         opts (update opts :cascade-feedback-metadata
                      #(or % (cascade-feedback/load-construction-metadata
                              (:cascade-feedback-path opts))))
+        opts (update opts :pattern-graph-path #(or % default-pattern-graph-path))
+        opts (update opts :pattern-graph-diff-dir #(or % default-pattern-graph-diff-dir))
         ;; The production judge closes over OPTS before the runner adds its
         ;; other ledgers. Mint this collector here and pass the same identity
         ;; through, rather than timing into a disconnected atom.

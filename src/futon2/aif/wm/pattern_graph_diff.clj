@@ -1,7 +1,8 @@
 (ns futon2.aif.wm.pattern-graph-diff
   "Produce an inspectable, unapplied pattern-graph diff from one WM run."
   (:require [cheshire.core :as json]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [futon2.aif.load-identity :as load-identity]))
 
 (def schema "pattern-graph-diff-v1")
 
@@ -95,3 +96,27 @@
     (io/make-parents path)
     (spit path (str (json/generate-string proposal {:pretty true}) "\n"))
     proposal))
+
+(defn- file-bytes [path]
+  (java.nio.file.Files/readAllBytes (.toPath (io/file path))))
+
+(defn publish!
+  "Write one run's unapplied diff, returning typed absence instead of throwing."
+  [input graph-path output-dir]
+  (let [graph-bytes (try (file-bytes graph-path) (catch Exception _ nil))]
+    (if-not graph-bytes
+      {:status :not-written :reason :pattern-graph-unreadable :path graph-path}
+      (try
+        (let [path (str (io/file output-dir
+                                 (str (:run-id input) ".pattern-graph-diff.json")))
+              graph {:path graph-path :sha256 (load-identity/sha256 graph-bytes)}
+              proposal (pattern-graph-diff (assoc input :graph graph))]
+          (write-diff! path (assoc input :graph graph))
+          {:status :written :path path
+           :sha256 (load-identity/sha256 (file-bytes path))
+           :uses (count (:add_uses proposal))
+           :links (count (:add_edges proposal))
+           :nothing-to-add (:nothing_to_add proposal)})
+        (catch Exception e
+          {:status :not-written :reason :pattern-graph-diff-write-failed
+           :message (.getMessage e)})))))

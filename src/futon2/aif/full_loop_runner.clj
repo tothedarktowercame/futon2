@@ -38,6 +38,7 @@
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
             [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.apparatus-certificates :as apparatus-certificates]
+            [futon2.aif.wm.pattern-graph-diff :as pattern-graph-diff]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
@@ -986,6 +987,9 @@
                     :cascade-feedback (or (:cascade-feedback result)
                                           {:status :absent
                                            :reason :no-selected-cascade-feedback})
+                    :pattern-graph-diff (or (:pattern-graph-diff result)
+                                            {:status :absent
+                                             :reason :no-selected-action})
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
                                   (runtime-default raw-opts :scan-render-fn))
@@ -5172,6 +5176,24 @@
                            ;; mutating the production feedback store.
                            {:status :not-published
                             :reason :feedback-path-not-supplied})))
+                       pattern-graph-diff-publication
+                       (when selected-action
+                         (if-let [diff-dir (:pattern-graph-diff-dir opts)]
+                           (pattern-graph-diff/publish!
+                            {:run-id (:run-id opts)
+                             :target (:target selected-action)
+                             :selected-action selected-action
+                             :outcome outcome
+                             :terminal (:failure-kind data)
+                             :want-outcome-accounting want-outcome-accounting
+                             :d-task-enactment d-task-result
+                             :artifact {:repo (or (get-in data [:artifact-binding :repo])
+                                                  (:repo data))
+                                        :commit (:commit data)}}
+                            (:pattern-graph-path opts)
+                            diff-dir)
+                           {:status :not-published
+                            :reason :pattern-graph-diff-dir-not-supplied}))
                        ;; B-C (PROOF-2 strategy row 34): the concentration
                        ;; carrier recorded ON the close. record! ran inside
                        ;; retain-token-outcome! above, before the predicate
@@ -5212,6 +5234,7 @@
                                (when cascade-feedback-receipt
                                  (assoc cascade-feedback-receipt
                                         :publication cascade-feedback-publication))
+                               :pattern-graph-diff pattern-graph-diff-publication
                                :b-update b-update-snapshot
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
@@ -5295,6 +5318,7 @@
                                (when cascade-feedback-receipt
                                  (assoc cascade-feedback-receipt
                                         :publication cascade-feedback-publication))
+                               :pattern-graph-diff pattern-graph-diff-publication
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)

@@ -62,6 +62,8 @@
       (is (= :ran (runtime/run-opportunity! {:run-id "feedback-default"})))
       (is (= cascade-feedback/default-path
              (:cascade-feedback-path @seen)))
+      (is (= runtime/default-pattern-graph-path (:pattern-graph-path @seen)))
+      (is (= runtime/default-pattern-graph-diff-dir (:pattern-graph-diff-dir @seen)))
       (is (map? (:cascade-feedback-metadata @seen))))))
 
 (deftest production-composition-shares-one-selection-timing-collector

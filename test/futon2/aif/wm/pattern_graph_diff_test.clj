@@ -1,7 +1,9 @@
 (ns futon2.aif.wm.pattern-graph-diff-test
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.selected-want-outcome :as want-outcome]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.wm.pattern-graph-diff :as graph-diff]))
@@ -21,6 +23,10 @@
     (assoc parts :selected-action action :graph (get (expected) "base"))))
 (defn- json-round-trip [value]
   (json/parse-string (json/generate-string value)))
+
+(defn- temp-dir []
+  (.toFile (java.nio.file.Files/createTempDirectory
+            "pattern-graph-diff" (make-array java.nio.file.attribute.FileAttribute 0))))
 
 (defn- accounting [reached]
   (let [{:keys [action selection-certificate]} (read-edn action-path)
@@ -114,3 +120,41 @@
     (is (= [] (:add_uses proposal)))
     (is (= [] (:add_edges proposal)))
     (is (= "enactment-not-verified" (:nothing_to_add proposal)))))
+
+(deftest publish-writes-a-pinned-diff-and-counts-its-additions
+  (let [dir (temp-dir) graph-file (io/file dir "graph.json")
+        output-dir (io/file dir "out")
+        graph-bytes (.getBytes "{\"pattern_ids\":[]}" "UTF-8")
+        _ (spit graph-file (String. graph-bytes "UTF-8"))
+        input (dissoc (recorded-input) :graph)
+        result (graph-diff/publish! input (.getPath graph-file) (.getPath output-dir))
+        written (json/parse-string (slurp (:path result)))
+        graph {:path (.getPath graph-file) :sha256 (load-identity/sha256 graph-bytes)}]
+    (is (= :written (:status result)))
+    (is (= 4 (:uses result)))
+    (is (= 6 (:links result)))
+    (is (= (json-round-trip (graph-diff/pattern-graph-diff (assoc input :graph graph)))
+           written))
+    (is (= (:sha256 result)
+           (load-identity/sha256
+            (java.nio.file.Files/readAllBytes (.toPath (io/file (:path result)))))))))
+
+(deftest publish-reports-an-unreadable-graph-without-writing
+  (let [dir (temp-dir) output-dir (io/file dir "out")
+        missing (io/file dir "missing.json")
+        result (graph-diff/publish! (dissoc (recorded-input) :graph)
+                                    (.getPath missing) (.getPath output-dir))]
+    (is (= {:status :not-written :reason :pattern-graph-unreadable
+            :path (.getPath missing)} result))
+    (is (not (.exists output-dir)))))
+
+(deftest publish-turns-an-output-path-failure-into-a-typed-result
+  (let [dir (temp-dir) graph-file (io/file dir "graph.json")
+        not-directory (io/file dir "regular-file")
+        _ (spit graph-file "{}")
+        _ (spit not-directory "occupied")
+        result (graph-diff/publish! (dissoc (recorded-input) :graph)
+                                    (.getPath graph-file) (.getPath not-directory))]
+    (is (= :not-written (:status result)))
+    (is (= :pattern-graph-diff-write-failed (:reason result)))
+    (is (= "occupied" (slurp not-directory)))))
