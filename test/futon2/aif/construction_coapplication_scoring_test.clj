@@ -25,6 +25,16 @@
                   :weights (zipmap wants (repeat (/ 1 (count wants))))
                   :lam 1 :mu 0}})
 
+;; Hand reference for this scorer at zero adjudication rates and certain
+;; beliefs (cascade-model-manifest/horizon-g-sparse*): the step risk is
+;; sum over wants of KL(Bern(q_v) || Bern(sigmoid(w_v))), which for a want
+;; that is held is softplus(-w_v) and for one that is not is softplus(w_v).
+(defn softplus [x] (Math/log (+ 1.0 (Math/exp x))))
+(defn step-risk [weight wants-held wants-total]
+  (+ (* wants-held (softplus (- weight)))
+     (* (- wants-total wants-held) (softplus weight))))
+(defn close? [a b] (< (Math/abs (- (double a) (double b))) 1e-12))
+
 (defn score [p c]
   (cascade-decision/constructed-candidate-g p c))
 
@@ -63,19 +73,43 @@
            (:order-use (score (problem chain [:w1 :w2 :w3] 3)
                               (candidate chain ids)))))))
 
-(deftest half-theta-frontier-and-list-have-different-construction-g
-  (let [interpretations {:p (pattern [] [:w1] 1/2)
-                         :q (pattern [] [:w2] 1/2)
-                         :r (pattern [] [:w3] 1/2)}
+(deftest one-step-frontier-and-list-have-different-construction-g
+  ;; Three independent producers, one step, weight 1/3 per want. The frontier
+  ;; holds all three wants after the step; the list holds one.
+  (let [interpretations {:p (pattern [] [:w1] 1)
+                         :q (pattern [] [:w2] 1)
+                         :r (pattern [] [:w3] 1)}
         p (problem interpretations [:w1 :w2 :w3] 1)
         ordered (candidate interpretations [:p :q :r])
         co (score p ordered)
         list-score (score p (dissoc ordered :order))]
     (is (= {:order :co-application} (:order-use co)))
     (is (= {:order {:absent :no-order-on-receipt}} (:order-use list-score)))
-    (is (< (Math/abs (- 1.6209167240682252 (:value co))) 1e-12))
-    (is (< (Math/abs (- 2.2875833907348917 (:value list-score))) 1e-12))
+    (is (close? (step-risk 1/3 3 3) (:value co)))
+    (is (close? (step-risk 1/3 1 3) (:value list-score)))
     (is (not= (:value co) (:value list-score)))))
+
+(deftest the-construction-lane-does-not-carry-a-patterns-theta
+  ;; Not a wanted behaviour, a recorded one (claude-2, 2026-10-05): the lane
+  ;; rebuilds each pattern from its interpretation and the :theta is not among
+  ;; the keys it keeps, so every pattern is scored as certain to succeed. A
+  ;; learned success rate will not reach construction G until that changes;
+  ;; this test will then fail and should be replaced by the theta-1/2 values.
+  (let [with-theta (fn [theta] {:p (pattern [] [:w1] theta)
+                                :q (pattern [] [:w2] theta)
+                                :r (pattern [] [:w3] theta)})
+        g (fn [theta] (let [ix (with-theta theta)]
+                        (:value (score (problem ix [:w1 :w2 :w3] 1)
+                                       (candidate ix [:p :q :r])))))]
+    (is (= (g 1) (g 1/2)))))
+
+(deftest a-conflicting-frontier-is-scored-without-refusal
+  (let [interpretations {:p {:guard {:needs #{} :forbids #{:b}} :produces #{:a} :theta 1}
+                         :q {:guard {:needs #{} :forbids #{:a}} :produces #{:b} :theta 1}}
+        scored (score (problem interpretations [:a :b] 1)
+                      (candidate interpretations [:p :q]))]
+    (is (= {:order :co-application} (:order-use scored)))
+    (is (close? (step-risk 1/2 2 2) (:value scored)))))
 
 (deftest chain-g-is-the-list-g
   (let [interpretations {:p (pattern [] [:w1] 1/2)
@@ -101,6 +135,8 @@
         ordered (candidate interpretations ids)
         co (:value (score p ordered))
         list-score (:value (score p (dissoc ordered :order)))]
-    (is (= 9.465030718061497 co))
-    (is (= 10.715030718061497 list-score))
+    ;; wants held after steps 1..4: frontier 3,4,4,4; list 1,2,3,4
+    (is (close? (reduce + (map #(step-risk 1/4 % 4) [3 4 4 4])) co))
+    (is (close? (reduce + (map #(step-risk 1/4 % 4) [1 2 3 4])) list-score))
+    (is (close? 1.25 (- list-score co)) "five want-steps earlier, at weight 1/4 each")
     (is (< co list-score))))
