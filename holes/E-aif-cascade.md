@@ -1,0 +1,212 @@
+# E-aif-cascade — the cascade as formation: blends, tokens, causal theories, on the outer loop and the R-nodes
+
+**Status:** IDENTIFY → MAP (opened 2026-10-05). Live. The unchecked items
+are the work, in order; each is one packet for a worker seat (codex-33)
+with its own acceptance bar and a review by the owner between packets.
+
+**Driver:** War Machine. **Operator:** Joe. **Owner:** claude-2.
+**Worker:** codex-33. **Repositories:** `futon2` (notes, reports, data),
+`mathlib4/DarkTower/WarMachine` (receipts), `futon7/scripts` (figure-side
+scripts), `futon3/library/meta` (the outer contract; edits there are Joe's).
+
+## IDENTIFY
+
+Joe, 2026-10-05: the formal pieces for a convincing cascade exist and are
+scattered — the 3/2-category story (a pattern is a conceptual blend with
+emergent structure; a cascade is pasted blends: Goguen 1999, 2006), the
+wants-token story (`ConstructionReceipt.lean`: an edge carries
+`produces ∩ needs`, non-empty), and claude-17's small-causal-world story
+(`futon3c/notebooks/daxiang_live.clj` §5–8: a pattern compiles to an open
+causal theory, glued by shared names). The excursion brings them together
+on real cascades, not invented ones.
+
+Two readings Joe gave that govern the work:
+
+- *A proof is not a tree.* The tree is a parse of the proof, not its
+  formation. A cascade can be flattened to a do-this-then-this recipe, but
+  the recipe is work beyond the formation and carries no evidence of its
+  own: a linear extension, one of possibly many, chosen at a cost of
+  log₂(#extensions) bits and no token (CASCADE-SPEC-v2's ordering
+  ambiguity). *The cascade is constructed, not chosen.*
+- *One pattern is already a diamond.* IF/context = the generic space and
+  the tokens accepted; HOWEVER = the two forces, the input spaces; THEN =
+  the blend, whose emergent structure is the held tension, and the token
+  emitted; BECAUSE = why the square commutes. A cascade composes that inner
+  structure with the outer one; a cascade that reduces to a diamond can be
+  restated as a pattern. Too many alcoves (Alexander/Salingaros) is the
+  off-diagonal `¬IF ∧ THEN`, a solution without its problem, which no
+  score charges today.
+- *Refinement.* The War Machine's own iterations add either requirements
+  (a new square pasted in) or better structure (a higher blend over the
+  same inputs; Crumb's crossroads). The outer-loop cascade is to be
+  elaborated this way until, in Joe's words, "it's not even possible to
+  conceive of it as other than a cascade".
+
+Two real cascades carry the work:
+
+1. **The outer-loop META policy.** `futon3/library/meta/meta-outer-policy-cascade.edn`
+   is a diamond: observe → {fill, injury} → minimise; four token-carrying
+   edges, two linear extensions. Minimising G there is parametric in the
+   META item (the diagram is fixed; G orders the cones over `minimise`'s
+   square), where the tactical loop constructs the diagram per problem.
+   What the click runs today is not the diamond but
+   `meta_pipeline_selector/select`, a pairwise ranking on
+   `1/(1+occurrence count)` over the Cascade Live map
+   (run c9d25d6a: 107 ranked of 676, selected by centrality cost alone).
+2. **The R-nodes.** The harness figure (`futon7a/about.html` →
+   `harness.html`, drawn by `futon7/scripts/harness-figure.bb` from
+   `p4ng/empirics-futon/aif-lean-dag.edn`) is an elaborated prototype of
+   an R-cascade: 17 nodes, 43 term-carrying edges with Lean classes. It is
+   a wiring diagram, cyclic (11 nodes in one strongly connected
+   component); the cascade is its simplification — one click's formation,
+   obtained by a cut at the tick boundary, with its meets.
+
+Authority and record: `holes/labs/wm-contract/NOTE-outer-cascade-as-pasted-blends-2026-10-05.md`
+(the three readings on the outer diamond, with measurements folded in);
+`CASCADE-SPEC-v3-draft-2026-10-05.md` (the blend square under each unit;
+two decisions open for Joe); `CASCADE-SPEC-v2-2026-10-01.md` (three
+relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
+(every added outer-loop signal needs a replayable ablation);
+`mathlib4/DarkTower/WarMachine/{CascadeOrder,ConstructionReceipt,Proof2/CoApplicationKernel}.lean`.
+
+## MAP — done so far (2026-10-05)
+
+| step | result | where |
+|---|---|---|
+| slot census of the 107 ranked items | 103 fill all six slots (= in the field and one unchecked want at HEAD); 2 fill four; 2 absent from the field; reading square forced for 4 of 107; the missing thing is the quality order over 103 near-identical cones | futon2 `597a03288`, `REPORT-meta-slot-census-2026-10-05.md` |
+| the diamond as a `ConstructionReceipt` | both linear extensions valid over one support; the chain's fill–injury edge rejected, with or without a forged token | mathlib4 `e5fa4352a5` |
+| four numbers: diamond / two chains / bag | G 1.280 / 1.517 / 1.517 / 0.393; with ordering term 2.280 / 1.517 / 1.517 / 4.978; three of the four are not constructible from the units' tokens | futon2 `ce0d84041`, `REPORT-diamond-four-numbers-2026-10-05.md` |
+| R-cascade discovery (cut, meets, extensions, receipt projection) | in flight, codex-33, job `invoke-1791240755541-33256-fedacd03` | → `REPORT-r-cascade-2026-10-05.md`, `r-cascade/r-cascade.edn`, `futon7/scripts/r-cascade.bb` |
+
+## The work
+
+Each item is one packet. A packet's acceptance bar is written here so that
+the worker can take the next item without a new brief; the owner reviews
+each result (record check, test adequacy, selective re-execution) before
+the next starts, and folds the numbers into the note named. No edits to
+`futon3/library/meta/*.edn` or `*.flexiarg` by the worker: proposed
+contract changes go in the report as a diff for Joe.
+
+### A. The R-nodes as a cascade
+
+- [ ] **A1. Discovery** (in flight). `r-cascade.bb`: SCCs before the cut;
+  the cut as data with a reason per edge (`:cross-tick-state`
+  `:learned-parameter` `:fit-feedback` `:split-unit`); refuse a surviving
+  cycle rather than split R6/R4 silently, then a second pass with the
+  split as data; meets per `CascadeOrder.IsMeet`; linear extensions
+  against the five stage columns; `:absent`-class edges flagged token-less
+  in the receipt projection. Report written for Joe to rule on the cut.
+  *Accept:* counts match `aif-lean-dag.edn` (17/43; 23/10/6/1); both
+  passes on record; every cut edge justified from its term.
+- [ ] **A2. Ruling on the cut** (Joe). Which edges are cross-tick, whether
+  R6 and R4 are split, where the click begins and ends.
+- [ ] **A3. Lean receipt.** The ruled R-cascade in `ConstructionReceipt.lean`
+  as the outer diamond was done: `valid = true` for the ruled receipt;
+  `valid = false` for the receipt that includes an `:absent`-class edge
+  with its token set empty. *Accept:* `lake build` of the module; one
+  theorem per claim; the bad case constructed and rejected.
+- [ ] **A4. Drawing.** The R-cascade as a Hasse diagram (and as an
+  S-expression), not stage columns; the five-stage order shown as one
+  parse of it. Generated by script from `r-cascade.edn`; not wired into
+  `about.html` (claude-17's page is not to be disturbed). *Accept:* the
+  drawing is regenerated from the edn by one command and the edn's
+  source-pins match the inputs.
+- [ ] **A5. Each R-unit read as a blend square.** For the units that have
+  apparatus flexiargs (`futon3/library/apparatus/`), a table: IF /
+  HOWEVER / THEN / BECAUSE against in-tokens / out-tokens from the
+  receipt; units whose flexiarg and tokens disagree listed. *Accept:*
+  every row cites the flexiarg and the edge; disagreements are typed, not
+  smoothed.
+
+### B. Elaborating the outer-loop cascade
+
+Joe, 2026-10-05: centrality (as in claude-4's Lean4-rows work — the term
+that unblocks the most rows first) and feasibility (an item needing many
+operator turns is not a candidate for overnight automation) belong in the
+outer loop. Where they stand now: centrality is the live selector's only
+scored channel (`1/(1+occurrences)` on the Cascade Live map) and appears
+in the diamond's outcome vocabulary as `downstream-unblocking`;
+feasibility exists in the live selector as the `:automated-feasibility`
+support filter (`:supported :infeasible :unknown`) and in the diamond as
+the machine-side `injury` arm; **operator-turn load is in neither.**
+
+- [ ] **B1. Discovery: centrality.** What "unblocks the most" means per
+  task kind on today's field: for missions/excursions, the count of other
+  items whose wants name this item's produced tokens (from the Cascade
+  Live graph's `:arrows` have/want and the pattern graph); for Lean rows,
+  claude-4's measure, read from their record (cite it; do not recompute).
+  Output: the centrality token a square would emit, its source, and the
+  value for each of the 107 ranked items. *Accept:* one value per item with
+  a source pin or a typed absence; the live selector's occurrence count
+  reported beside it.
+- [ ] **B2. Discovery: operator-turn load.** From the run records and the
+  mission documents: per item, the share of its last N touches that were
+  operator turns vs machine-authored (`:last-touch :state`, commit
+  trailers), and any mission text that names an operator step
+  (`HIT`, "Joe decides", `🈸`). Output: a feasibility token with its
+  source. *Accept:* one value or typed absence per item; the rule stated
+  as data, not prose.
+- [ ] **B3. The extended diamond, as a proposal.** Two new squares pasted
+  in as the blend reading requires — each with its I₁, I₂, G, B and the
+  token it emits, and the edge it adds (centrality: observe → centrality →
+  minimise, consumed by the generative model's `downstream-unblocking`
+  term; feasibility: observe → operator-load → {fill, minimise}, as a
+  support change like `injury` or as a preference term — both written up,
+  Joe chooses). The result as an edn diff against
+  `meta-outer-policy-cascade.edn` and as a `ConstructionReceipt` example;
+  its meets and linear extensions. *Accept:* the edn validates under
+  `meta_outer_policy/contract-errors` (run in a fresh process on the
+  proposed edn); the receipt is `valid`.
+- [ ] **B4. Does the extension change the picture?** Re-run the
+  four-number script on the extended diamond and its bag; and, with the
+  provisional prior (`meta-outer-provisional-prior-v1.edn`) and the B1/B2
+  tokens as the only candidate-conditioned inputs, rank the 103 cones and
+  compare with the live selector's ranking of the same run. *Accept:*
+  both rankings on record with the Kendall distance between them; the
+  ablation rule of `E-outer-loop-improvement` honoured (each new signal
+  removable by a flag, and the ranking with it removed recorded).
+- [ ] **B5. The restated pattern.** `meta/select-the-meta-item` as a
+  flexiarg draft (IF = observe; HOWEVER = ordinary work against
+  self-repair, and now against operator load; THEN = argmin G over the
+  admitted family; BECAUSE = G over policies with predicted consequences),
+  in the report, for Joe to promote or not.
+
+### C. The causal reading and the chain comparison
+
+- [ ] **C1. Per-click unmet table.** Compile the outer diamond's four (or
+  six) patterns with claude-17's `ot/theory` / `ot/glue`, link theories
+  running down the diamond, and evaluate against a run record; output the
+  table the note §4 gave by hand. *Held* until claude-17's page has
+  settled; uses his compiler unchanged.
+- [ ] **C2. A meaningful chain-versus-cascade comparison.** The four-number
+  measurement compared one cascade with three non-cascades. Find or
+  construct a real four-unit example in which a token-carrying chain and a
+  token-carrying non-chain both exist over the same units (candidates: the
+  tactical cascades of `NOTE-g-over-head-cascades-2026-09-30.md`), and
+  score both with the ordering term in its own column. *Accept:* both
+  receipts `valid`; the two G values and the two ordering terms on record.
+- [ ] **C3. Charge the other off-diagonal.** A proposal, not code: how
+  `¬IF ∧ THEN` (the token emitted with no consuming want; the house of
+  alcoves) enters the score — via v2's rule that an unconsumed token earns
+  nothing — with the bag measurement as the test case it must fail.
+
+## DERIVE — exit criteria
+
+- The R-cascade exists as data, receipt and drawing, with the cut ruled.
+- The outer-loop diamond is extended with centrality and operator-load
+  squares as a proposal Joe has seen, with the measured effect on the
+  ranking of a real run.
+- The three readings are shown on one cascade end to end: blend squares
+  per unit, token-carrying edges with a `valid` receipt, and a per-click
+  unmet table from the causal compile.
+- A chain-versus-cascade G comparison exists in which both arrangements
+  are constructible.
+
+## Re-entry rule
+
+A worker takes the next unchecked item in order within its section;
+sections A and B may proceed in parallel on two seats; C1 waits for the
+owner's word. Every result is a commit plus a bell to the owner with the
+sha; the owner reviews before the next item in that section starts. Joe's
+rulings (A2; the B3 choice; B5 promotion; the CASCADE-SPEC-v3 decisions)
+are recorded here when given.
