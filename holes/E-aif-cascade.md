@@ -82,6 +82,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 
 | B2 operator-turn load | Commit-trailer attribution exists only since the signing hook (futon3c `3981fb38`, 2026-09-30 02:32Z); the first run counted pre-hook commits as operator touches (share 0.984, an artefact). Restricted to the hook era: 4 of 107 items have any attributable history (`M-interim-director-proxy-metric-inventory`, `M-daily-scan`, `M-daily-scan-multi-axis-queue`, `E-cascade-real`), all four machine-only (share 0.0; `wm-author`, codex-11/12/13); 103 are `:no-attributable-history`; ρ undefined. Text markers (`needs Joe`, `HIT`, `🈸`, …): 14 documents, 61 lines — the only HEAD-level operator-load signal. Token proposed `:meta/operator-load-share` (ratio + raw counts); support-change vs preference-term consumption left to B3 | `REPORT-operator-load-2026-10-05.md` |
 
+| B1b inter-item `@why` | (i) 961 cross-references among the 107 documents, 72 cued, 45 directed edges after review fixes (hyphen boundary; `successor` ambiguous in both directions — "X's successor is Y" vs "X is the successor of Y" — cue heuristic cannot settle it); most items have no directed edge; ρ with occurrence count 0.052. (ii) `mission-lifecycle.md` asks for "Relationship to other missions" in prose and defines no field; 16 of 107 fill a prose header (`Parent`, `Predecessor`, `Consumer mission`, …). (iii) 545 library `why` edges lift through applied patterns to 422 method-level item pairs — derived, about methods. Conclusion: the semantics were not written down (Joe's reading); declaration proposal in the report; B1c is the first cut | `REPORT-unblocks-relation-2026-10-05.md` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -179,7 +181,7 @@ measure is the first; the centrality Joe means is the second; they are two
 tokens, not one. Also ruled: a simplified cascade based on Cascade Live is
 the outer-loop driver (restating 2026-09-25).
 
-- [ ] **B1b. Discovery: an inter-item `@why` relation.** No source holds
+- [x] **B1b. Discovery: an inter-item `@why` relation.** *Done, with review fixes (futon2 `911fbefb0`, `8cd60cd9a`; MAP table).* No source holds
   one at HEAD (B1). Find what could: (i) cross-references in the 107
   items' documents to other M-/E-/T- ids, classified by the cue around
   them (`depends on`, `after`, `blocked by`, `unblocks`, `feeds`,
