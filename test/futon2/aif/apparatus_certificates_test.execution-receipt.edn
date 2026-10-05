@@ -6,6 +6,14 @@
  :runs
  [{:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
    :status :passed
+   :tests 7
+   :assertions 39
+   :failures 0
+   :errors 0
+   :by "claude-2"
+   :note "Cost row (ninth R20 row, mathlib4 8fda677deb). Live pins in test/fixtures/r20-cost/two-runs.edn: run 2026-10-04-073cb1b3 agrees :mostly-acting; run 2026-10-05-c9d25d6a is not recorded, naming the job with no usage. clj-kondo and check-parens clean on the changed files. codex-10's job for this row (invoke-1791181830531-32663-138f72d7) failed on model capacity before writing anything."}
+  {:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
+   :status :passed
    :tests 5
    :assertions 21
    :failures 0

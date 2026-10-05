@@ -1,5 +1,6 @@
 (ns futon2.aif.apparatus-certificates-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-observation-scoring :as scoring]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.focus-receipt :as focus]
@@ -143,7 +144,8 @@
 (deftest certificate-is-total-and-fail-closed
   (let [r (apparatus/receipt {:decision {} :participants {}})]
     (is (= apparatus/node-order (mapv :node (:rows r))))
-    (is (= (repeat 8 :not-recorded) (map :verdict (:rows r))))
+    (is (= (repeat 9 :not-recorded) (map :verdict (:rows r))))
+    (is (= :cost (:node (last (:rows r)))))
     (is (false? (:certified? r))))
   (testing "one missing row prevents certification even when implemented rows agree"
     (let [r (apparatus/receipt {:decision (merge (class-scoring-decision)
@@ -151,3 +153,63 @@
                                 :participants (participant-record "author" "reviewer")})]
       (is (some #(= :agrees (:verdict %)) (:rows r)))
       (is (false? (:certified? r))))))
+
+;; Two live pins: the :registered-run/model-usage and :registered-run/timing
+;; values of two retained runs, copied whole into the fixture (see its :note).
+(def cost-pins
+  (:runs (edn/read-string (slurp "test/fixtures/r20-cost/two-runs.edn"))))
+
+(defn cost-of [{:keys [model-usage timing]}]
+  (row (apparatus/receipt {:decision {} :participants {}
+                           :model-usage model-usage :timing timing})
+       :cost))
+
+(deftest cost-row-reads-the-recorded-usage-and-timing
+  (let [complete (get cost-pins "2026-10-04-073cb1b3")
+        partial-run (get cost-pins "2026-10-05-c9d25d6a")
+        good (cost-of complete)
+        checked (:checked good)]
+    (testing "a fully accounted click agrees and says where the cost fell"
+      (is (= [:agrees :mostly-acting] ((juxt :verdict :case) good)))
+      (is (= {:through-selection 0 :after-selection 4467357 :total 4467357}
+             (select-keys (:tokens checked) [:through-selection :after-selection :total])))
+      ;; preflight 8339 + refresh 3739 + stop-lines 4472 + readiness 7 +
+      ;; code-state 82 + selection 58014 + redecision 105593
+      (is (= 180246 (get-in checked [:active-ms :through-selection])))
+      ;; every other phase but :opportunity, the wall total
+      (is (= 401508 (get-in checked [:active-ms :after-selection])))
+      (is (= {:through-selection 0 :after-selection 2} (:jobs checked))))
+    (testing "a job with no usage record leaves the row not recorded, naming the job"
+      (let [r (cost-of partial-run)]
+        (is (= :not-recorded (:verdict r)))
+        (is (= [:complete-model-usage] (:missing r)))
+        (is (= [{:job-id "invoke-1791177908824-32604-81a9c058"
+                 :reason :provider-usage-missing-or-invalid}]
+               (get-in r [:checked :missing-jobs])))))
+    (testing "a recorded total that is not the sum of its jobs disagrees"
+      (let [r (cost-of (update-in complete [:model-usage :total-tokens] inc))]
+        (is (= :disagrees (:verdict r)))
+        (is (= {:recorded 4467358 :sum-over-jobs 4467357}
+               (get-in r [:checked :total-mismatches :total-tokens])))))
+    (testing "a job whose total is not input plus output disagrees"
+      (is (= :disagrees
+             (:verdict (cost-of (update-in complete [:model-usage :jobs 0 :total-tokens] inc))))))
+    (testing "no usage or no timing is not recorded"
+      (is (= :not-recorded (:verdict (cost-of (dissoc complete :model-usage)))))
+      (is (= :not-recorded (:verdict (cost-of (dissoc complete :timing))))))))
+
+(deftest cost-case-follows-the-lean-rule
+  (let [usage (fn [phase]
+                {:status :complete :input-tokens 10 :output-tokens 2 :total-tokens 12
+                 :jobs [{:job-id "j" :phase phase
+                         :input-tokens 10 :output-tokens 2 :total-tokens 12}]})
+        timing (fn [through after]
+                 {:phase-timings-ms {:selection through :author-wait after :opportunity 999999}})]
+    (is (= :mostly-choosing
+           (:case (cost-of {:model-usage (usage :selection) :timing (timing 1 5)}))))
+    (is (= :mostly-acting
+           (:case (cost-of {:model-usage (usage :author-dispatch) :timing (timing 5 1)}))))
+    (testing "equal tokens fall back to time, and :opportunity counts on neither side"
+      (let [none {:status :complete :input-tokens 0 :output-tokens 0 :total-tokens 0 :jobs []}]
+        (is (= :mostly-choosing (:case (cost-of {:model-usage none :timing (timing 5 1)}))))
+        (is (= :even (:case (cost-of {:model-usage none :timing (timing 3 3)}))))))))

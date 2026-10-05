@@ -974,7 +974,8 @@
                     :run-output (run-output/receipt result grounded-commit)
                     :apparatus-certificates
                     (apparatus-certificates/receipt
-                     {:decision decision :participants participants-record})
+                     {:decision decision :participants participants-record
+                      :model-usage usage :timing timing})
                     :loop-node-exercise (loop-node-exercise/receipt decision)
                     :registered-run/critical-parameters
                     (selection-world/critical-task-counts world-at-selection raw-opts)

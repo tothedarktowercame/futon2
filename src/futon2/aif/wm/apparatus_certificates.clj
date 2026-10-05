@@ -2,9 +2,9 @@
   "Fail-closed projection of retained run inputs into the R20 certificate.")
 
 (def schema :wm/r20-certificate-v1)
-(def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "bd04d997aa"})
+(def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "8fda677deb"})
 (def node-order [:precision :evidence :habit :class-preference :strategic-focus
-                 :liveness :independence :joint-action])
+                 :liveness :independence :joint-action :cost])
 (def risk-tolerance 1.0e-9)
 
 (defn- absent [node missing & [reason checked]]
@@ -160,7 +160,83 @@
                   :previous-focus previous :focus current :candidates checks}
                  (when-not agrees? :relation-class-mismatch))))))
 
-(defn receipt [{:keys [decision participants]}]
+;; R20Certificate.lean CostRow: a job is "through selection" when it was
+;; dispatched in a phase up to and including the click's choice. The phases are
+;; the runner's run-phase! names; :opportunity is the wall total of the whole
+;; click and belongs to neither side.
+(def through-selection-phases
+  #{:agent-readiness :code-state :substrate-preflight :preference-refresh
+    :stop-line-memory :selection :selection-redecision})
+(def whole-click-phases #{:opportunity})
+
+(defn- cost-case
+  "R20Certificate.costCase: by tokens, then by time when the tokens are equal."
+  [tokens-through tokens-after ms-through ms-after]
+  (cond (< tokens-after tokens-through) :mostly-choosing
+        (< tokens-through tokens-after) :mostly-acting
+        (< ms-after ms-through) :mostly-choosing
+        (< ms-through ms-after) :mostly-acting
+        :else :even))
+
+(defn- cost-row [usage timing]
+  (let [usage-path [:registered-run/model-usage]
+        timing-path [:registered-run/timing :phase-timings-ms]
+        phase-ms (:phase-timings-ms timing)
+        jobs (:jobs usage)
+        token-keys [:input-tokens :output-tokens :total-tokens]
+        missing (cond-> []
+                  (not (map? usage)) (conj :model-usage)
+                  (and (map? usage) (not= :complete (:status usage))) (conj :complete-model-usage)
+                  (not (and (map? phase-ms) (every? integer? (vals phase-ms))))
+                  (conj :phase-timings-ms))]
+    (if (or (seq missing)
+            (not (every? (fn [job] (every? #(integer? (get job %)) token-keys)) jobs)))
+      (absent :cost (if (seq missing) missing [:job-token-counts])
+              (or (:reason usage) :click-cost-not-fully-recorded)
+              {:source usage-path :timing-source timing-path
+               :usage-status (:status usage)
+               :missing-jobs (:missing usage)})
+      (let [through? #(contains? through-selection-phases (:phase %))
+            sum (fn [k rows] (reduce + 0 (map k rows)))
+            through (filter through? jobs)
+            after (remove through? jobs)
+            tokens-through (sum :total-tokens through)
+            tokens-after (sum :total-tokens after)
+            ms-of (fn [pred] (reduce + 0 (for [[phase ms] phase-ms
+                                              :when (and (not (whole-click-phases phase))
+                                                         (pred phase))]
+                                          ms)))
+            ms-through (ms-of through-selection-phases)
+            ms-after (ms-of (complement through-selection-phases))
+            job-mismatches (vec (for [job jobs
+                                      :when (not= (:total-tokens job)
+                                                  (+ (:input-tokens job) (:output-tokens job)))]
+                                  (select-keys job (into [:job-id :phase] token-keys))))
+            total-mismatches (into {}
+                                   (for [k token-keys
+                                         :let [recorded (get usage k) summed (sum k jobs)]
+                                         :when (not= recorded summed)]
+                                     [k {:recorded recorded :sum-over-jobs summed}]))
+            agrees? (and (empty? job-mismatches) (empty? total-mismatches))]
+        (verdict :cost agrees?
+                 (cost-case tokens-through tokens-after ms-through ms-after)
+                 (cond-> {:source usage-path :timing-source timing-path
+                          :tokens {:through-selection tokens-through
+                                   :after-selection tokens-after
+                                   :total (:total-tokens usage)
+                                   :input (:input-tokens usage)
+                                   :output (:output-tokens usage)
+                                   :cached-input (:cached-input-tokens usage)
+                                   :uncached-input (:uncached-input-tokens usage)}
+                          :active-ms {:through-selection ms-through
+                                      :after-selection ms-after}
+                          :jobs {:through-selection (count through)
+                                 :after-selection (count after)}}
+                   (seq job-mismatches) (assoc :job-total-mismatches job-mismatches)
+                   (seq total-mismatches) (assoc :total-mismatches total-mismatches))
+                 (when-not agrees? :cost-total-is-not-the-sum-of-its-jobs))))))
+
+(defn receipt [{:keys [decision participants model-usage timing]}]
   (let [rows [(precision-row decision)
               (constant-row :evidence [:likelihood])
               (constant-row :habit [:counts-after :next-consumed])
@@ -168,6 +244,7 @@
               (strategic-focus-row decision)
               (constant-row :liveness [:before-state :after-state :reported-live])
               (independence-row participants)
-              (constant-row :joint-action [:ownership])]]
+              (constant-row :joint-action [:ownership])
+              (cost-row model-usage timing)]]
     {:schema schema :lean lean-authority :rows rows
      :certified? (every? #(= :agrees (:verdict %)) rows)}))
