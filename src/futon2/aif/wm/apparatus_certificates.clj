@@ -109,29 +109,55 @@
 ;; CTauClassPreference.lean:124-138 and R15StrategicTarget.lean:64-67:
 ;; focus -> focused, associated -> related, usefulElsewhere -> unrelated;
 ;; other relations are unscored/unknown. The focus receipt keeps the relation
-;; vocabulary in :class; :scored-class below records its Lean projection.
+;; vocabulary in :class; :scored-class below records its Lean projection, and
+;; :consumed-class is what the scorer's class model held for that target.
 (def scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated})
 (defn- relation-key [relation]
   (let [relation (if (map? relation) (:relation relation) relation)]
     (cond (keyword? relation) relation (string? relation) (keyword relation) :else :other)))
+(defn- consumed-target-classes
+  "The class the scorer consumed for each target: the :target-class map of
+   the class-emission model retained with each scored candidate. nil when no
+   class-emission score is on the decision."
+  [decision]
+  (let [maps (keep #(when (= :class-emission (get-in % [:observation-model :kind]))
+                      (get-in % [:observation-model :target-class]))
+                   (vals (or (get-in decision [:selection-certificate :scoring]) {})))]
+    (when (seq maps) (apply merge maps))))
+
 (defn- strategic-focus-row [decision]
   (let [path [:selection-certificate :focus-receipt] receipt (get-in decision path)
+        consumed-path [:selection-certificate :scoring :* :observation-model :target-class]
+        consumed (consumed-target-classes decision)
         previous (get-in receipt [:context :previous-focus :focus])
         current (get-in receipt [:discovery :focus])
-        missing (cond-> [] (nil? previous) (conj :previous-focus) (nil? current) (conj :focus))]
+        unscored (when consumed
+                   (vec (remove #(contains? consumed (:target %)) (:candidates receipt))))
+        missing (cond-> []
+                  (nil? previous) (conj :previous-focus)
+                  (nil? current) (conj :focus)
+                  (or (nil? consumed) (seq unscored)) (conj :scored-class))]
     (if (seq missing)
-      (absent :strategic-focus missing :focus-pair-not-retained {:source path})
+      (absent :strategic-focus missing :focus-record-not-retained
+              (cond-> {:source path :consumed-source consumed-path}
+                (seq unscored) (assoc :targets-without-scored-class (mapv :target unscored))))
       (let [checks (mapv (fn [candidate]
                            (let [relation (relation-key (:relation candidate))
                                  scored (get scorer-class relation)
-                                 expected-recorded (if scored relation :unknown)]
+                                 expected-recorded (if scored relation :unknown)
+                                 consumed-class (get consumed (:target candidate))
+                                 recorded-ok? (= expected-recorded (:class candidate))
+                                 consumed-ok? (= (or scored :unknown) consumed-class)]
                              {:target (:target candidate) :relation (:relation candidate)
                               :recorded-class (:class candidate) :scored-class scored
-                              :ok? (= expected-recorded (:class candidate))}))
+                              :consumed-class consumed-class
+                              :recorded-ok? recorded-ok? :consumed-ok? consumed-ok?
+                              :ok? (and recorded-ok? consumed-ok?)}))
                          (:candidates receipt))
             agrees? (and (seq checks) (every? :ok? checks))]
         (verdict :strategic-focus agrees? (if (= previous current) :focus-kept :focus-changed)
-                 {:source path :previous-focus previous :focus current :candidates checks}
+                 {:source path :consumed-source consumed-path
+                  :previous-focus previous :focus current :candidates checks}
                  (when-not agrees? :relation-class-mismatch))))))
 
 (defn receipt [{:keys [decision participants]}]

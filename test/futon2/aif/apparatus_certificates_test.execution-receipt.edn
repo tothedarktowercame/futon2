@@ -6,10 +6,11 @@
  :runs
  [{:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
    :status :passed
-   :tests 4
-   :assertions 14
+   :tests 5
+   :assertions 21
    :failures 0
-   :errors 0}
+   :errors 0
+   :note "rerun by claude-2 after the review follow-up (consumed-class check; changed-preference and unsupported-prediction bad cases); the author's run of 8ecced332 was 4 tests, 14 assertions"}
   {:command "clojure -M:test -e <test-var run-record-carries-the-runner-source-identity>"
    :status :refused-before-test-body
    :reason :stale-outer-selection-composition

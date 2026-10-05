@@ -76,17 +76,68 @@
     (is (= :disagrees (:verdict (row bad :class-preference))))
     (is (= :not-recorded (:verdict (row missing :class-preference))))))
 
+(deftest class-preference-refuses-a-changed-preference-and-an-unsupported-prediction
+  (let [decision (class-scoring-decision)
+        other-preference (assoc-in decision
+                                   [:selection-certificate :scoring 0 :observation-model
+                                    :class-preference 2]
+                                   {:focused 1})
+        ;; before the horizon all preference mass is on not-yet-evaluated, so a
+        ;; prediction of :focused there has infinite risk; the record still
+        ;; reports the scorer's finite number
+        unsupported (assoc-in decision
+                              [:selection-certificate :scoring 0 :steps 0 :prediction]
+                              {:focused 1})]
+    (is (number? (get-in decision [:selection-certificate :scoring 0 :steps 0 :risk])))
+    (is (= :disagrees
+           (:verdict (row (apparatus/receipt {:decision other-preference :participants {}})
+                          :class-preference))))
+    (is (= :disagrees
+           (:verdict (row (apparatus/receipt {:decision unsupported :participants {}})
+                          :class-preference))))))
+
+(def focus-target "M-wm-08-external-f2")
+
+;; CTauClassPreference.scorerClass, written out here so the fixture does not
+;; borrow the table under test
+(def lean-scorer-class
+  {:focus :focused :associated :related :useful-elsewhere :unrelated})
+
+(defn focus-decision-with-scoring
+  "The real focus receipt, plus a real class score whose model holds
+   CONSUMED-CLASS for the focus candidate's target."
+  [consumed-class]
+  (let [focus (focus-decision)
+        scoring (assoc-in (class-scoring-decision)
+                          [:selection-certificate :scoring 0 :observation-model :target-class]
+                          {focus-target consumed-class})]
+    (update focus :selection-certificate merge (:selection-certificate scoring))))
+
 (deftest strategic-focus-checks-real-focus-receipt
-  (let [decision (focus-decision)
+  (let [recorded (get-in (focus-decision)
+                         [:selection-certificate :focus-receipt :candidates 0 :class])
+        expected (get lean-scorer-class recorded :unknown)
+        decision (focus-decision-with-scoring expected)
         good (apparatus/receipt {:decision decision :participants {}})
         bad-decision (assoc-in decision
                                [:selection-certificate :focus-receipt :candidates 0 :class]
                                :associated)
         bad (apparatus/receipt {:decision bad-decision :participants {}})
+        other (first (remove #{expected} [:focused :related :unrelated]))
+        scorer-consumed-other (apparatus/receipt
+                               {:decision (focus-decision-with-scoring other)
+                                :participants {}})
+        unscored (apparatus/receipt {:decision (focus-decision) :participants {}})
         missing (apparatus/receipt {:decision {} :participants {}})]
+    (is (not= :associated recorded))
     (is (= [:agrees :focus-kept]
            ((juxt :verdict :case) (row good :strategic-focus))))
     (is (= :disagrees (:verdict (row bad :strategic-focus))))
+    (testing "the scorer consumed a different class from the one the relation gives"
+      (is (= :disagrees (:verdict (row scorer-consumed-other :strategic-focus)))))
+    (testing "a focus receipt with no class score has no scored class to check"
+      (is (= :not-recorded (:verdict (row unscored :strategic-focus))))
+      (is (some #{:scored-class} (:missing (row unscored :strategic-focus)))))
     (is (= :not-recorded (:verdict (row missing :strategic-focus))))))
 
 (deftest certificate-is-total-and-fail-closed
@@ -95,7 +146,8 @@
     (is (= (repeat 8 :not-recorded) (map :verdict (:rows r))))
     (is (false? (:certified? r))))
   (testing "one missing row prevents certification even when implemented rows agree"
-    (let [r (apparatus/receipt {:decision (merge (class-scoring-decision) (focus-decision))
+    (let [r (apparatus/receipt {:decision (merge (class-scoring-decision)
+                                                 (focus-decision-with-scoring :focused))
                                 :participants (participant-record "author" "reviewer")})]
       (is (some #(= :agrees (:verdict %)) (:rows r)))
       (is (false? (:certified? r))))))
