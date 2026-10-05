@@ -139,6 +139,19 @@
            (load-identity/sha256
             (java.nio.file.Files/readAllBytes (.toPath (io/file (:path result)))))))))
 
+(deftest publish-needs-a-run-id-that-can-name-a-file
+  (let [dir (temp-dir) graph-file (io/file dir "graph.json")
+        output-dir (io/file dir "out")
+        _ (spit graph-file "{}")
+        input (dissoc (recorded-input) :graph)]
+    (doseq [run-id [nil "" "../outside" "a/b"]]
+      (let [result (graph-diff/publish! (assoc input :run-id run-id)
+                                        (.getPath graph-file) (.getPath output-dir))]
+        (is (= :not-written (:status result)) (pr-str run-id))
+        (is (= :run-id-unusable-as-file-name (:reason result)) (pr-str run-id))))
+    (is (not (.exists output-dir)))
+    (is (= ["graph.json"] (vec (.list dir))))))
+
 (deftest publish-reports-an-unreadable-graph-without-writing
   (let [dir (temp-dir) output-dir (io/file dir "out")
         missing (io/file dir "missing.json")

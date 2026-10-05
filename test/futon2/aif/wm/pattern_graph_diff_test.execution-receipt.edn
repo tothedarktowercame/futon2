@@ -23,7 +23,12 @@
   {:command "clj-kondo --lint src/futon2/aif/wm/pattern_graph_diff.clj test/futon2/aif/wm/pattern_graph_diff_test.clj"
    :status :passed :errors 0 :warnings 0}
   {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <the two files>"
-   :status :passed :result "OK"}]
+   :status :passed :result "OK"}
+  {:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.wm.pattern-graph-diff-test -n futon2.aif.full-loop-runtime-test"
+   :status :passed
+   :by "claude-2"
+   :tests 15 :assertions 51 :failures 0 :errors 0
+   :note "Review follow-up to b4f28fb57. publish! with a nil run id wrote a file named .pattern-graph-diff.json; a run id that cannot name a file (nil, empty, containing a path separator) is now a typed :not-written. clj-kondo and check-parens clean."}]
  :active-run-check
  {:status :none-observed
   :evidence "GET /api/alpha/wm/click returned running? false, phase-transition end."}}

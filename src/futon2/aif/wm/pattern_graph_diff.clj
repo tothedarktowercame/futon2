@@ -103,9 +103,18 @@
 (defn publish!
   "Write one run's unapplied diff, returning typed absence instead of throwing."
   [input graph-path output-dir]
-  (let [graph-bytes (try (file-bytes graph-path) (catch Exception _ nil))]
-    (if-not graph-bytes
+  (let [graph-bytes (try (file-bytes graph-path) (catch Exception _ nil))
+        run-id (:run-id input)]
+    (cond
+      ;; The run id names the file, and futon3c's apply names its copy by it.
+      (not (and (string? run-id) (seq run-id)
+                (= run-id (.getName (io/file run-id)))))
+      {:status :not-written :reason :run-id-unusable-as-file-name :run-id run-id}
+
+      (not graph-bytes)
       {:status :not-written :reason :pattern-graph-unreadable :path graph-path}
+
+      :else
       (try
         (let [path (str (io/file output-dir
                                  (str (:run-id input) ".pattern-graph-diff.json")))
