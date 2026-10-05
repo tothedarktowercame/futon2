@@ -228,6 +228,37 @@ deep dive to plan all the work across all time is not a good use of time
   dependency), to be superseded by declarations (B1b) where they exist.
   *Accept:* every count cites its record; the three sources never merged;
   no claim that attention is dependency.
+**Joe, 2026-10-05, after B1b:** reading from HEAD is "like jazz or free
+jazz" — it will not say whether a mission has spun off into abstraction
+(`M-weird-modernism`) or come back from abstraction to something concrete
+(`M-the-perfect-crime`). Beside HEAD we want a chord "cheat sheet": a very
+quick distillation of the scopes and keywords from across the mission.
+
+- [ ] **B1d. The cheat sheet per item.** One line per item, computed by
+  script from the whole document and its history, not from HEAD alone:
+  (a) *scopes* — the repos and directories its paths touch, by count;
+  (b) *keywords* — top terms by tf-idf over the 107 documents, plus the
+  document's own `@keywords`/header keywords where present; (c) *the
+  changes* — the applied patterns (Cascade Live `:patterns :edges`) in
+  order of first mention in the document, the harmonic progression under
+  the tune; (d) *register* — a concreteness score per section: share of
+  lines carrying a path, a sha, a number, a checkbox or a date, against
+  prose lines — and its *trajectory*, early sections vs late and first
+  commits vs last (`git log` by window), so that spinning off into
+  abstraction and coming back read as a direction, not a level; (e)
+  status line and lifecycle phase. Worked examples: `M-weird-modernism`
+  (1,037 lines, 101 paths, 5 checkboxes, "perpetual-projection mode") and
+  `M-the-perfect-crime` (557 lines, 100 paths, 6 checkboxes, 13 commit
+  shas). Format: a table row and a one-line sheet, e.g.
+  `| scope futon3c/agency ×41 · futon2/aif ×12 | keys clock, lineage, dispatch | changes p1 → p2 → p3 | register 0.62 ↑ |`.
+  Output: `REPORT-cheat-sheets-2026-10-05.md` with the 107 lines, the
+  register distribution by kind, ρ of register against B2's marker count
+  and B1's coupling, and one paragraph on which parts of the sheet the
+  `observe` square should emit as tokens (register and trajectory are the
+  feasibility signal B2 could not get from commit history). *Accept:* the
+  two worked examples read right to Joe; every number traceable to a
+  script line; no LLM summarisation — classical counts only, so that the
+  sheet is the same on every run.
 - [x] **B2. Discovery: operator-turn load.** *Done, with amendment (futon2 `b0405aa8c`, `0c56efe08`, `45af3c447`; MAP table).* From the run records and the
   mission documents: per item, the share of its last N touches that were
   operator turns vs machine-authored (`:last-touch :state`, commit
