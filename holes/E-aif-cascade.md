@@ -212,7 +212,7 @@ the machine-side `injury` arm; **operator-turn load is in neither.**
   tactical cascades of `NOTE-g-over-head-cascades-2026-09-30.md`), and
   score both with the ordering term in its own column. *Accept:* both
   receipts `valid`; the two G values and the two ordering terms on record.
-- [ ] **C3. Charge the other off-diagonal.** A proposal, not code: how
+- [ ] **C3. Charge the other off-diagonal.** *Proposal written: note §5b (futon2 `0ec367ad6`); awaits Joe.* A proposal, not code: how
   `¬IF ∧ THEN` (the token emitted with no consuming want; the house of
   alcoves) enters the score — via v2's rule that an unconsumed token earns
   nothing — with the bag measurement as the test case it must fail.
