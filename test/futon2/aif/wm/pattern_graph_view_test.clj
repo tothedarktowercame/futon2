@@ -26,7 +26,7 @@
            (dissoc result :graph)))
     (is (= (:graph-ref loaded) (:graph result)))))
 
-(deftest unknown-and-isolated-chosen-patterns-are-not-seeds
+(deftest unknown-and-isolated-cascade-patterns-are-not-seeds
   (let [graph (:graph (graph-pin/load-unpinned graph-path))
         result (graph-view/view graph ["missing/pattern" "ukrns/reader-run-path"])]
     (is (= ["missing/pattern"] (:unknown result)))

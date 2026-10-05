@@ -1,5 +1,7 @@
 (ns futon2.aif.wm.pattern-graph-view
-  "Observational view of a selected cascade against the mined pattern graph."
+  "Observational view of a constructed cascade against the mined pattern graph.
+  The cascade is the one construction built for the selected action; this
+  namespace reads its patterns and takes no part in building it."
   (:require [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.pattern-retraction :as retraction]))
 
@@ -12,7 +14,8 @@
     :else (str x)))
 
 (defn view
-  "Describe ordered chosen PATTERNS without changing any decision."
+  "Describe PATTERNS, a constructed cascade's patterns in order, against GRAPH.
+  Changes no construction and no decision."
   [graph patterns]
   (let [ids (set (:pattern-ids graph))
         edges (:edges graph)
@@ -33,11 +36,11 @@
                          :let [[i a] left [j b] right [x y] (sort [a b])]]
                      {:a x :b y :positions [i j]
                       :kinds (vec (sort (get pair-kinds [x y] #{})))}))
-        chosen (distinct patterns)
-        unknown (vec (filter #(not (contains? ids %)) chosen))
+        members (distinct patterns)
+        unknown (vec (filter #(not (contains? ids %)) members))
         without-links (vec (filter #(and (contains? ids %)
-                                         (empty? (get neighbours % #{}))) chosen))
-        seeds (vec (sort (remove (set (concat unknown without-links)) chosen)))
+                                         (empty? (get neighbours % #{}))) members))
+        seeds (vec (sort (remove (set (concat unknown without-links)) members)))
         result (when (>= (count seeds) 2)
                  (retraction/retractions graph {:seeds seeds :k 3}))
         cascades (mapv (fn [{:keys [rank cost nodes edges]}]
