@@ -21,8 +21,8 @@
    "unblocks" :document-to-target, "feeds" :document-to-target
    "prerequisite" :target-to-document, "requires" :target-to-document
    "enables" :document-to-target, "see" :undirected, "cf." :undirected
-   "follows" :target-to-document, "successor" :target-to-document
-   "predecessor" :target-to-document, "supersedes" :target-to-document
+   "follows" :target-to-document, "successor" :document-to-target
+   "predecessor" :target-to-document, "supersedes" :undirected
    "part of" :undirected})
 (def cues (sort-by (comp - count) (keys cue-directions)))
 (def id-pattern
@@ -37,9 +37,9 @@
     (if (re-find #"/" clean) (pipeline/canonical-work-id clean) clean)))
 (defn positions [text needle]
   (let [matcher (re-matcher
-                 (re-pattern (str "(?i)(?<![\\p{L}\\p{N}_])"
+                 (re-pattern (str "(?i)(?<![\\p{L}\\p{N}_-])"
                                   (java.util.regex.Pattern/quote needle)
-                                  "(?![\\p{L}\\p{N}_])")) text)]
+                                  "(?![\\p{L}\\p{N}_-])")) text)]
     (loop [out []]
       (if (.find matcher) (recur (conj out (.start matcher))) out))))
 (defn nearest-cue [sentence mention-start]

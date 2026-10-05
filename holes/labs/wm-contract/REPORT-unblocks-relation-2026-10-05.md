@@ -6,7 +6,7 @@ Reproduce from `/home/joe/code/futon2` in a fresh process:
 clojure -M scripts/unblocks_relation.clj
 ```
 
-futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranked population: `data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn` / `9de9e4bbb286680ebc74daa642a1fd8987009238928bddef60b387954d4d10c2`. HEAD field observation: 485 rows, pin `57388ec443dc2c1c2231553ba20fc06dfb3f5d4335363c224b404bf446fde335`. Cascade Live: `dc85ef4cda8d21f91c40e10b4876575d3b76ac3010e0497cf785f67247554313`. Mined graph: `/home/joe/code/storage/operator-turns/mined-pattern-graph.json` / `9992e2c62e41453d9ae33ba6c660b20195c91006759c84a3154af858436612e5`.
+futon2 HEAD before generation: `911fbefb0def04c886b8bf8fa09d8b749afd99b6`. Ranked population: `data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn` / `9de9e4bbb286680ebc74daa642a1fd8987009238928bddef60b387954d4d10c2`. HEAD field observation: 485 rows, pin `57388ec443dc2c1c2231553ba20fc06dfb3f5d4335363c224b404bf446fde335`. Cascade Live: `74ad67f613b8b41df6e6d88f582a62ed0af1053f0e1c3273ab624d9d177ee0f7`. Mined graph: `/home/joe/code/storage/operator-turns/mined-pattern-graph.json` / `9992e2c62e41453d9ae33ba6c660b20195c91006759c84a3154af858436612e5`.
 
 ## Cue directions
 
@@ -25,15 +25,15 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `prerequisite` | `:target-to-document` |
 | `requires` | `:target-to-document` |
 | `see` | `:undirected` |
-| `successor` | `:target-to-document` |
-| `supersedes` | `:target-to-document` |
+| `successor` | `:document-to-target` |
+| `supersedes` | `:undirected` |
 | `unblocks` | `:document-to-target` |
 
 `document-to-target` means completing the document item is read as unblocking the mentioned target. `target-to-document` means the mentioned item is read as unblocking the document item. `undirected` is a cued cross-reference but contributes no directed edge. The nearest cue in the same sentence is used; otherwise the mention is `:no-cue`.
 
 ## Sources
 
-**(i) Document cross-references.** 961 mentions of another item in the HEAD universe were found: 883 uncued and 78 cued. The directional conventions yield 51 distinct directed edges. Every occurrence is listed below with file and line.
+**(i) Document cross-references.** 961 mentions of another item in the HEAD universe were found: 889 uncued and 72 cued. The directional conventions yield 45 distinct directed edges. Every occurrence is listed below with file and line.
 
 **(ii) Lifecycle fields.** `/home/joe/code/futon4/holes/mission-lifecycle.md` / `73f0d3dc99404e1c03e1625146274ad09e00738441a19583907fd9e2df06fa6b` requires IDENTIFY to state “Relationship to other missions” and “Owner and dependencies,” but defines no machine-readable predecessor, successor, parent, consumer, or rests-on field. A header scan found 16 of 107 documents filling a prose header whose label contains one of those words. Labels and document counts: `{"Parent mission" 4, "Parent" 5, "Parent endpoints (the two sides of the bridge)" 1, "Parent audit" 1, "Predecessor" 4, "Parent theory" 1, "Downstream consumer references" 1, "Consumer mission" 1}`. Items without one carry `:typed-absence` (`:no-lifecycle-relation-field`).
 
@@ -55,9 +55,9 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `M-futon-enrichment` | `:mission` | 0 | 1 | 13 | `:typed-absence` (`:no-lifecycle-relation-field`) | 4 | 5 |
 | `M-stack-stereolithography` | `:mission` | 0 | 1 | 14 | `:typed-absence` (`:no-lifecycle-relation-field`) | 1 | 0 |
 | `M-essays-edit-cycle` | `:mission` | 1 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-trip-journal` | `:mission` | 1 | 0 | 27 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-pattern-application-diagnostic` | `:mission` | 1 | 0 | 12 | [{:field "Parent", :value "** `holes/missions/M-pattern-mining.md` (the IFR was articulated"}] | 4 | 5 |
-| `M-patterns-done-right` | `:mission` | 0 | 1 | 17 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 4 |
+| `M-trip-journal` | `:mission` | 0 | 0 | 28 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-pattern-application-diagnostic` | `:mission` | 0 | 0 | 12 | [{:field "Parent", :value "** `holes/missions/M-pattern-mining.md` (the IFR was articulated"}] | 4 | 5 |
+| `M-patterns-done-right` | `:mission` | 0 | 0 | 18 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 4 |
 | `M-joe-told-me-about-futon` | `:mission` | 0 | 0 | 4 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 4 |
 | `M-a-sorry-enterprise` | `:mission` | 1 | 3 | 21 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-expressions-of-interest` | `:mission` | 1 | 1 | 14 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 4 |
@@ -89,11 +89,11 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `M-war-machine-pilot` | `:mission` | 0 | 0 | 7 | `:typed-absence` (`:no-lifecycle-relation-field`) | 3 | 0 |
 | `M-warrant-limit` | `:mission` | 0 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-zai-learning-loop` | `:mission` | 1 | 0 | 8 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-differentiable-code` | `:mission` | 1 | 1 | 18 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-differentiable-code` | `:mission` | 0 | 1 | 19 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-inbox-zero-claim-lifecycle` | `:mission` | 0 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-aif-faithfulness` | `:mission` | 0 | 0 | 19 | [{:field "Parent audit", :value "** `holes/E-r18-faithfulness-audit.md` + `data/r18-badges.edn` — the"}] | 0 | 0 |
 | `M-operational-vocabulary` | `:mission` | 5 | 1 | 12 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-autoclock-in` | `:mission` | 1 | 5 | 11 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-autoclock-in` | `:mission` | 1 | 3 | 13 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-autonomous-doc-maintenance` | `:mission` | 0 | 1 | 24 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-essays-diachronic-model` | `:mission` | 0 | 0 | 0 | [{:field "Parent mission", :value "** `M-essays-edit-cycle.md`"}] | 0 | 0 |
 | `M-pudding-peradams` | `:mission` | 1 | 1 | 11 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
@@ -112,7 +112,7 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `M-arxana-roundtrip` | `:mission` | 0 | 0 | 2 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-editorial-assistant` | `:mission` | 1 | 1 | 3 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-reachable-from-boot` | `:mission` | 2 | 3 | 5 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `E-cascade-real` | `:excursion` | 0 | 1 | 3 | [{:field "Parent", :value "the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md`,"}] | 0 | 0 |
+| `E-cascade-real` | `:excursion` | 0 | 0 | 4 | [{:field "Parent", :value "the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md`,"}] | 0 | 0 |
 | `E-kimi-task-70` | `:excursion` | 0 | 0 | 3 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-a-wmc-scaling` | `:mission` | 0 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-aif-ants-port` | `:mission` | 0 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
@@ -122,8 +122,8 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `M-daily-scan-multi-axis-queue` | `:mission` | 0 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-interim-director-long-tail` | `:mission` | 0 | 0 | 1 | [{:field "Parent", :value "** `M-interim-director-proxy-metric-inventory.md`"}] | 0 | 0 |
 | `M-signal-roll-up` | `:mission` | 0 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-turns-first` | `:mission` | 1 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
-| `M-war-machine-aif-last-mile` | `:mission` | 1 | 1 | 8 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-turns-first` | `:mission` | 0 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-war-machine-aif-last-mile` | `:mission` | 2 | 0 | 8 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-state-snapshot-witness` | `:mission` | 0 | 1 | 2 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-xenotype-its` | `:mission` | 0 | 0 | 1 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-single-entry-point` | `:mission` | 0 | 0 | 7 | [{:field "Parent", :value "** M-the-futon-stack (Q4 — is the stack set up so the invariants can work?)"}] | 0 | 0 |
@@ -141,12 +141,12 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 | `M-artificial-stack-exchange` | `:mission` | 0 | 0 | 7 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-metric-harness` | `:mission` | 0 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-intent-curvature` | `:mission` | 0 | 0 | 6 | [{:field "Parent", :value "** `C-substrate-completion` §9.1 (the named follow-up beyond the dissolution bar)."}] | 0 | 0 |
-| `M-federated-agency-hardening` | `:mission` | 0 | 1 | 6 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-federated-agency-hardening` | `:mission` | 1 | 0 | 6 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-differentiable-substrate` | `:mission` | 0 | 0 | 16 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-canon-fingerprint-store` | `:mission` | 0 | 0 | 1 | [{:field "Predecessor", :value "** [M-bayesian-structure-learning.md](M-bayesian-structure-learning.md)"}] | 0 | 0 |
 | `M-differentiable-math` | `:mission` | 0 | 0 | 5 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-prior-mathematics` | `:mission` | 1 | 0 | 6 | [{:field "Predecessor", :value "** [M-bayesian-structure-learning.md](M-bayesian-structure-learning.md)"}] | 0 | 0 |
-| `M-superpod-mark2` | `:mission` | 1 | 1 | 6 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
+| `M-superpod-mark2` | `:mission` | 1 | 0 | 6 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
 | `M-hyperreal-dictionary-planning` | `:mission` | 0 | 0 | 4 | [{:field "Downstream consumer references", :value "**"}] | 0 | 0 |
 | `M-paper-reverse-morphogenesis` | `:mission` | 0 | 0 | 7 | [{:field "Parent mission", :value "** M-superpod-mark2 (Checkpoint — Learn As We Go, 2026-04-15)"} {:field "Consumer mission", :value "** M-apm-solutions (forward solver for theorem proving)"}] | 0 | 0 |
 | `M-distributed-frontiermath` | `:mission` | 0 | 0 | 0 | `:typed-absence` (`:no-lifecycle-relation-field`) | 0 | 0 |
@@ -167,6 +167,12 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 - `/home/joe/code/futon5a/holes/missions/M-war-machine-wiring.md:1722` → `M-war-machine-wiring` (`after`): \| 18b5336 \| M-reachable-from-boot **STOP-THE-LINE hot-fix** \| open family `layered-error-hierarchy` (I0) outside normal queue cadence after HUD widget showed STUCK \|
 - `/home/joe/code/futon5a/holes/missions/M-war-machine-wiring.md:1810` → `M-war-machine-wiring` (`after`): **After 18b5336** (STOP-THE-LINE M-reachable-from-boot):
 
+### `M-war-machine-aif-last-mile` — 2
+
+- `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:343` → `M-stack-morphogenetic-rewrite` (`unblocks`): - **Predecessor for:** unblocks `M-stack-morphogenetic-rewrite` (cluster precondition complete once this mission closes + alignment-bridge fully populated).
+- `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:8` → `M-war-machine-aif-completion` (`successor`): **Sequencing role:** Successor to `M-war-machine-aif-completion`. Does NOT introduce new R-criteria scope; closes residual gaps and propagates external-side landings (VSATARCS v0.5.1+v0.5.2) into the WM-side artefacts.
+- `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:342` → `M-war-machine-aif-completion` (`successor`): - **Successor to:** `M-war-machine-aif-completion`. That mission closed Checkpoints 0-9.5; this one captures the last-mile residuals.
+
 ### `M-a-sorry-enterprise` — 1
 
 - `/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md:388` → `M-action-cost-modelling` (`predecessor`): > M-INC step (b) (typed-event-vocabulary commit, currently HEAD-as-escrow under codex-7) is now identified as the hard predecessor for: (i) the geometry-track sorry-typing in substrate-2, (ii) `M-a-sorry-enterprise` mining-track resuming in earnest, (iii) `:sorry/r3d-per-entity-attribution` becoming addressable (re-typed from `:campaign`-scale to `:mission`-scale). Suggestion: codex-7's piece #2 → step (b) sequence is now load-bearing for the WM's prioritisation problem; visible elevation of priority warranted.
@@ -182,10 +188,6 @@ futon2 HEAD before generation: `55c39bb0ce24b55d551a572fd54cabc83fe63b05`. Ranke
 ### `M-bounded-disposition` — 1
 
 - `/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md:13` → `M-reachable-from-boot` (`depends on`): **Sibling missions:** [M-archaeology-control], [M-bounded-disposition], [M-single-locus] — each ships invariants whose live signal silently depends on `!store` being durable and `family-check-fns` being repopulated. This mission's job is to make those dependencies structural-not-trust.
-
-### `M-differentiable-code` — 1
-
-- `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:723` → `M-aif2` (`feeds`): **real delivered O4(c) cache + sparse feeds-A graph** (parallel to M-aif2 slice-1; additive,
 
 ### `M-editorial-assistant` — 1
 
@@ -205,14 +207,14 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 
 | comparison with (i) cued out-degree | rho |
 |---|---:|
-| persisted occurrence count | 0.098598 |
-| B1 (b), shared-pattern missions | 0.053708 |
+| persisted occurrence count | 0.052445 |
+| B1 (b), shared-pattern missions | 0.001681 |
 
 ## All document mentions
 
 | document | target | cue | source | text |
 |---|---|---|---|---|
-| `E-cascade-real` | `M-f11-find-production-successor` | `successor` | `/home/joe/code/futon2/holes/E-cascade-real.md:104` | M-f11-find-production-successor: the false want `:hole/h2045faa0e7cc` is |
+| `E-cascade-real` | `M-f11-find-production-successor` | `:no-cue` | `/home/joe/code/futon2/holes/E-cascade-real.md:104` | M-f11-find-production-successor: the false want `:hole/h2045faa0e7cc` is |
 | `E-cascade-real` | `M-aif-policy-conditioned-eig` | `:no-cue` | `/home/joe/code/futon2/holes/E-cascade-real.md:105` | produced by no declared pattern. M-aif-policy-conditioned-eig: the false want |
 | `E-cascade-real` | `M-daily-scan` | `:no-cue` | `/home/joe/code/futon2/holes/E-cascade-real.md:188` | \| seat A \| 9 (skipped M-daily-scan) \| 9 \| 5 \| 5 \| 4 `:no-supported-order`, each an `:unproduced-need` on one task the seat declined \| |
 | `E-cascade-real` | `M-daily-scan` | `:no-cue` | `/home/joe/code/futon2/holes/E-cascade-real.md:391` | the seven-unit `M-daily-scan` receipt elaborates under Lean; replacing its |
@@ -350,8 +352,8 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-autoclock-in` | `M-typed-holes` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:275` | **M-typed-holes invisible** — even though claude-2 demonstrably worked it (signed the doc, commits |
 | `M-autoclock-in` | `M-a-wmc-scaling` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:340` | \| INSTANTIATE-1: resolved mention \| `emacs/agent-chat.el:1083` token extraction, `:1107` resolution, `:1231` application; operator-only call at `:2381`; witness fields at `:3025`. \| **Observed working historically and yesterday**, not universal. 85 retained explicit-resolved-target witnesses since June 1; latest 2026-09-20T19:58:45.144316414Z, evidence `emacs-b76a80d7a6bf9dc7e462e13d9d731555`, M-a-wmc-scaling. A bell does not pass through this operator-turn trigger. \| |
 | `M-autoclock-in` | `M-smart-emacs-cursor` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:343` | \| INSTANTIATE-3: Emacs saves \| `agent-chat.el:1288` document resolution, `:1332` dominance, `:1352` reclock, `:1391` save recording, `:1422` after-save hook. Threshold 3 / 600 seconds, margin 2. \| **Observed June 8–13, currently unverified.** Four edit-activity receipts, latest 2026-06-13T15:30:39.366339184Z, `e-d76158b3-23f3-410d-9d6f-5f08b50b36c7`, M-smart-emacs-cursor. Only matching mission/campaign/excursion documents count. Save recording visits chat buffers (`:1408`); this is not evidence identifying which agent wrote a file. \| |
-| `M-autoclock-in` | `M-f11-find-production-successor` | `successor` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` | \| INSTANTIATE-4: agent tools + explicit dispatch \| `src/futon3c/agency/clock_store.clj:17`, `:59`, `:126`, `:180`, `:193`; `clock_lineage.clj:159`, `:177`; `dev/futon3c/dev.clj:1085`, `:1094`, `:1120`, Claude feeds `:3729` and `:3966`, Codex explicit dispatch `:4533`; HTTP preclock `src/futon3c/transport/http.clj:4728`, job path `:4876`, durable post-result dispatch `:4933`. \| **Implemented beyond the stale “candidate” text; JVM functions loaded; partial surface coverage.** GET reflection exposes clock-store, clock-lineage, record-agent-tool-use!, record-agent-tool-details!. Durable agent-edit receipt latest 2026-09-14T23:05:37.797Z (claude-19, M-turns-first); durable dispatch receipt latest September 12, 17:34:18.250Z (codex-18, M-f11-find-production-successor). Claude Edit/Write/MultiEdit bodies feed edits; Codex exec/apply_patch has no equivalent feed. No current clock state was found in any of the 90 roster sessions. \| |
-| `M-autoclock-in` | `M-turns-first` | `successor` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` | \| INSTANTIATE-4: agent tools + explicit dispatch \| `src/futon3c/agency/clock_store.clj:17`, `:59`, `:126`, `:180`, `:193`; `clock_lineage.clj:159`, `:177`; `dev/futon3c/dev.clj:1085`, `:1094`, `:1120`, Claude feeds `:3729` and `:3966`, Codex explicit dispatch `:4533`; HTTP preclock `src/futon3c/transport/http.clj:4728`, job path `:4876`, durable post-result dispatch `:4933`. \| **Implemented beyond the stale “candidate” text; JVM functions loaded; partial surface coverage.** GET reflection exposes clock-store, clock-lineage, record-agent-tool-use!, record-agent-tool-details!. Durable agent-edit receipt latest 2026-09-14T23:05:37.797Z (claude-19, M-turns-first); durable dispatch receipt latest September 12, 17:34:18.250Z (codex-18, M-f11-find-production-successor). Claude Edit/Write/MultiEdit bodies feed edits; Codex exec/apply_patch has no equivalent feed. No current clock state was found in any of the 90 roster sessions. \| |
+| `M-autoclock-in` | `M-f11-find-production-successor` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` | \| INSTANTIATE-4: agent tools + explicit dispatch \| `src/futon3c/agency/clock_store.clj:17`, `:59`, `:126`, `:180`, `:193`; `clock_lineage.clj:159`, `:177`; `dev/futon3c/dev.clj:1085`, `:1094`, `:1120`, Claude feeds `:3729` and `:3966`, Codex explicit dispatch `:4533`; HTTP preclock `src/futon3c/transport/http.clj:4728`, job path `:4876`, durable post-result dispatch `:4933`. \| **Implemented beyond the stale “candidate” text; JVM functions loaded; partial surface coverage.** GET reflection exposes clock-store, clock-lineage, record-agent-tool-use!, record-agent-tool-details!. Durable agent-edit receipt latest 2026-09-14T23:05:37.797Z (claude-19, M-turns-first); durable dispatch receipt latest September 12, 17:34:18.250Z (codex-18, M-f11-find-production-successor). Claude Edit/Write/MultiEdit bodies feed edits; Codex exec/apply_patch has no equivalent feed. No current clock state was found in any of the 90 roster sessions. \| |
+| `M-autoclock-in` | `M-turns-first` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` | \| INSTANTIATE-4: agent tools + explicit dispatch \| `src/futon3c/agency/clock_store.clj:17`, `:59`, `:126`, `:180`, `:193`; `clock_lineage.clj:159`, `:177`; `dev/futon3c/dev.clj:1085`, `:1094`, `:1120`, Claude feeds `:3729` and `:3966`, Codex explicit dispatch `:4533`; HTTP preclock `src/futon3c/transport/http.clj:4728`, job path `:4876`, durable post-result dispatch `:4933`. \| **Implemented beyond the stale “candidate” text; JVM functions loaded; partial surface coverage.** GET reflection exposes clock-store, clock-lineage, record-agent-tool-use!, record-agent-tool-details!. Durable agent-edit receipt latest 2026-09-14T23:05:37.797Z (claude-19, M-turns-first); durable dispatch receipt latest September 12, 17:34:18.250Z (codex-18, M-f11-find-production-successor). Claude Edit/Write/MultiEdit bodies feed edits; Codex exec/apply_patch has no equivalent feed. No current clock state was found in any of the 90 roster sessions. \| |
 | `M-autoclock-in` | `M-futon-seams` | `:no-cue` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:856` | Requisition: M-futon-seams — prototype PROOF-2a examples |
 | `M-autonomous-doc-maintenance` | `M-self-documenting-stack` | `predecessor` | `/home/joe/code/futon7/holes/M-autonomous-doc-maintenance.md:3` | > **Predecessor**: `M-self-documenting-stack` (~/code/futon7/holes/M-self-documenting-stack.md). That mission named the `stack-self-documentation` shape with two sub-shapes (autonomous-maintenance-loop + discoverability-surface) and shipped LC1 (the discoverability surface for missions) as POC. **This mission is the natural follow-on**: ship the *autonomous-maintenance-loop* sub-shape, applied to the (code/source → docs) chain-link. |
 | `M-autonomous-doc-maintenance` | `M-self-documenting-stack` | `:no-cue` | `/home/joe/code/futon7/holes/M-autonomous-doc-maintenance.md:5` | **Status:** OPEN — IDENTIFY (2026-05-20). Authored as Joe-directed follow-on to capture the scope that got deferred when M-self-documenting-stack scoped down to LC1 — *"I don't want to lose that mission just because of my bug-bear about mission-recovery"* (Joe 2026-05-20). |
@@ -448,7 +450,7 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-differentiable-code` | `M-differentiable-math` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:472` | **outside the Campaign**, in the futon6 `M-differentiable-math` timeline (claude-2 owns), |
 | `M-differentiable-code` | `M-aif2` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:678` | semantics call to confirm + fold into M-aif2.) |
 | `M-differentiable-code` | `M-aif2` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:718` | (M-aif2 slice-1 reading live curvature) — claude-3's gate, separate from the metric's own RUN/DELIVER. |
-| `M-differentiable-code` | `M-aif2` | `feeds` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:723` | **real delivered O4(c) cache + sparse feeds-A graph** (parallel to M-aif2 slice-1; additive, |
+| `M-differentiable-code` | `M-aif2` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:723` | **real delivered O4(c) cache + sparse feeds-A graph** (parallel to M-aif2 slice-1; additive, |
 | `M-differentiable-code` | `M-aif2` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:1111` | - a Pilot C benchmark list derived from `M-aif2` with path/line evidence, |
 | `M-differentiable-code` | `E-interest-mining` | `after` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:1179` | *Next WebArxana target after E-interest-mining closes. Joe: "the way Rob uses missions, they go right into |
 | `M-differentiable-code` | `E-interest-mining` | `:no-cue` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:1204` | **Proposed first slice + reflexive trick:** prove it on **E-interest-mining itself** — this session bound |
@@ -794,7 +796,7 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-patterns-done-right` | `M-pattern-retrieval-calibration` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:31` | - Not a replacement for M-pattern-retrieval-calibration. That mission ships the canonical parser + reshape rulebook (the engine); this mission specifies how the engine threads through authoring → library → code. |
 | `M-patterns-done-right` | `M-pattern-mining` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:77` | A pattern is honestly applied when there's a verifiable receipt linking the code that was built using it back to the pattern's claim. Today the link is via PSR/PUR notes (`futon3/CLAUDE.md`) plus per-turn evidence-mining (M-pattern-mining, M-pattern-retrieval-calibration); these are *advisory*. Level 4 makes the link *structural*. |
 | `M-patterns-done-right` | `M-pattern-retrieval-calibration` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:77` | A pattern is honestly applied when there's a verifiable receipt linking the code that was built using it back to the pattern's claim. Today the link is via PSR/PUR notes (`futon3/CLAUDE.md`) plus per-turn evidence-mining (M-pattern-mining, M-pattern-retrieval-calibration); these are *advisory*. Level 4 makes the link *structural*. |
-| `M-patterns-done-right` | `M-pattern-application-diagnostic` | `after` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:81` | - The footer joins the canonical parser + the M-pattern-application-diagnostic geometric substrate: the receipt names the pattern's `:witness-shape`, the commit's region of effect, and the implicit T-before / T-after pair. |
+| `M-patterns-done-right` | `M-pattern-application-diagnostic` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:81` | - The footer joins the canonical parser + the M-pattern-application-diagnostic geometric substrate: the receipt names the pattern's `:witness-shape`, the commit's region of effect, and the implicit T-before / T-after pair. |
 | `M-patterns-done-right` | `M-pattern-application-diagnostic` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:84` | **Why this is the long-arc payoff**: patterns become *measurable* — the IFR's "demonstrable value" property (M-pattern-application-diagnostic) graduates from claim to data. Mining + Haiku give per-turn evidence; receipts give per-commit evidence; together they triangulate which patterns the codebase *actually* embodies vs which are well-intentioned text. |
 | `M-patterns-done-right` | `M-bounded-in-flight-state` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:87` | - Footer parser (the pattern Joe already has in `M-bounded-in-flight-state` for `Block:` is the prior art — same shape: `^Pattern: <ns>/<name>$`, last occurrence wins). |
 | `M-patterns-done-right` | `M-pattern-application-diagnostic` | `:no-cue` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:126` | - Cross-repo refactoring of the existing pattern infrastructure. M-pattern-retrieval-calibration owns retrieval; M-pattern-application-diagnostic owns the typed-slot lift; M-pattern-mining owns mining. This mission is the *integrative* arc, not a re-implementation. |
@@ -988,7 +990,7 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-trip-journal` | `M-daily-scan` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:145` | M-daily-scan is the first immediate-consumer case: scans produce |
 | `M-trip-journal` | `M-daily-scan` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:155` | mission — adopting it in M-daily-scan for several daily runs will |
 | `M-trip-journal` | `M-peripheral-phenomenology` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:178` | \| Hinge-based cadence \| PAR/RAP paren-gates (session-scale) in M-peripheral-phenomenology \| **adapt** \| Same paren-gate move at mission-scale instead of session-scale \| |
-| `M-trip-journal` | `M-superpod-mark2` | `feeds` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:181` | \| Four-channel learning loop \| `realtime/learn-as-you-go`, M-superpod-mark2 § Learn As We Go, `peripherals/inhabitation-feeds-evolution` \| **adapt** \| Port from pipeline/peripheral-scale to operator-scale; four channels renamed for operator context \| |
+| `M-trip-journal` | `M-superpod-mark2` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:181` | \| Four-channel learning loop \| `realtime/learn-as-you-go`, M-superpod-mark2 § Learn As We Go, `peripherals/inhabitation-feeds-evolution` \| **adapt** \| Port from pipeline/peripheral-scale to operator-scale; four channels renamed for operator context \| |
 | `M-trip-journal` | `M-hypergraph-operator` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:183` | \| Hypergraph-overlay as future replacement \| M-hypergraph-operator Click/Tick, futon1a XTDB evidence \| **defer** \| Out of scope until M-hypergraph-operator stabilises; DR-1 records re-entry condition \| |
 | `M-trip-journal` | `M-hypergraph-operator` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:183` | \| Hypergraph-overlay as future replacement \| M-hypergraph-operator Click/Tick, futon1a XTDB evidence \| **defer** \| Out of scope until M-hypergraph-operator stabilises; DR-1 records re-entry condition \| |
 | `M-trip-journal` | `M-hypergraph-operator` | `:no-cue` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:201` | file-based; the stated target is an M-hypergraph-operator overlay. |
@@ -1184,15 +1186,13 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-archaeology-control` | `M-reachable-from-boot` | `depends on` | `/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md:13` |
 | `M-autoclock-in` | `M-pudding-peradams` | `depends on` | `/home/joe/code/futon7/holes/M-pudding-peradams.md:467` |
 | `M-bounded-disposition` | `M-reachable-from-boot` | `depends on` | `/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md:13` |
-| `M-differentiable-code` | `M-aif2` | `feeds` | `/home/joe/code/futon5/holes/missions/M-differentiable-code.md:723` |
 | `M-editorial-assistant` | `M-essay-corpus-substrate` | `depends on` | `/home/joe/code/futon4/holes/missions/M-essay-corpus-substrate.md:7` |
 | `M-essay-corpus-substrate` | `M-editorial-assistant` | `blocks` | `/home/joe/code/futon4/holes/missions/M-essay-corpus-substrate.md:7` |
 | `M-essays-edit-cycle` | `M-expressions-of-interest` | `after` | `/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md:1143` |
 | `M-expressions-of-interest` | `M-learning-loop` | `feeds` | `/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md:198` |
-| `M-f11-find-production-successor` | `E-cascade-real` | `successor` | `/home/joe/code/futon2/holes/E-cascade-real.md:104` |
-| `M-f11-find-production-successor` | `M-autoclock-in` | `successor` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` |
 | `M-f7-lead-report` | `M-daily-scan` | `predecessor` | `/home/joe/code/futon7/holes/missions/M-daily-scan.md:6` |
 | `M-f7-lead-report` | `M-daily-scan` | `predecessor` | `/home/joe/code/futon7/holes/missions/M-daily-scan.md:127` |
+| `M-federated-agency-hardening` | `M-kangaroo` | `successor` | `/home/joe/code/futon3c/holes/missions/M-federated-agency-hardening.md:7` |
 | `M-futon-seams` | `M-autoclock-in` | `after` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:87` |
 | `M-goals-and-holes` | `M-operational-vocabulary` | `feeds` | `/home/joe/code/futon2/holes/M-goals-and-holes.md:118` |
 | `M-hypergraph-operator` | `M-self-improvement-loop` | `enables` | `/home/joe/code/futon5a/holes/missions/M-hypergraph-operator.md:87` |
@@ -1200,7 +1200,6 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-interim-director-proxy-metric-inventory` | `M-stack-essay-code-alignment` | `feeds` | `/home/joe/code/futon7/holes/M-interim-director-proxy-metric-inventory.md:2365` |
 | `M-interim-director-proxy-metric-inventory` | `M-stack-essay-code-alignment` | `feeds` | `/home/joe/code/futon7/holes/M-interim-director-proxy-metric-inventory.md:2387` |
 | `M-invariant-queue-unstuck` | `M-the-futon-stack` | `predecessor` | `/home/joe/code/futon0/holes/missions/M-the-futon-stack.md:31` |
-| `M-kangaroo` | `M-federated-agency-hardening` | `successor` | `/home/joe/code/futon3c/holes/missions/M-federated-agency-hardening.md:7` |
 | `M-live-geometric-stack` | `M-action-cost-modelling` | `after` | `/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md:333` |
 | `M-live-geometric-stack` | `M-action-cost-modelling` | `after` | `/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md:343` |
 | `M-live-geometric-stack` | `M-action-cost-modelling` | `requires` | `/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md:384` |
@@ -1210,7 +1209,6 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-operational-vocabulary` | `M-autoclock-in` | `feeds` | `/home/joe/code/futon2/holes/M-operational-vocabulary.md:7` |
 | `M-operational-vocabulary` | `M-populate-substrate-2` | `feeds` | `/home/joe/code/futon2/holes/M-operational-vocabulary.md:7` |
 | `M-operational-vocabulary` | `M-wm-policies` | `feeds` | `/home/joe/code/futon2/holes/M-operational-vocabulary.md:7` |
-| `M-pattern-application-diagnostic` | `M-patterns-done-right` | `after` | `/home/joe/code/futon0/holes/missions/M-patterns-done-right.md:81` |
 | `M-pattern-mining` | `M-pattern-retrieval-calibration` | `after` | `/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md:569` |
 | `M-pattern-mining` | `M-pattern-retrieval-calibration` | `depends on` | `/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md:592` |
 | `M-pattern-retrieval-calibration` | `M-pattern-mining` | `feeds` | `/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md:666` |
@@ -1230,11 +1228,9 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 | `M-superpod-mark2` | `M-superpod-mark3` | `predecessor` | `/home/joe/code/futon6/holes/missions/M-superpod-mark3.md:186` |
 | `M-three-column-stack` | `M-futon-enrichment` | `blocked by` | `/home/joe/code/futon4/holes/missions/M-futon-enrichment.md:5` |
 | `M-tpg-coupling-evolution` | `M-coupling-as-constraint` | `blocked by` | `/home/joe/code/futon5/holes/missions/M-coupling-as-constraint.md:5` |
-| `M-trip-journal` | `M-superpod-mark2` | `feeds` | `/home/joe/code/futon5a/holes/missions/M-trip-journal.md:181` |
-| `M-turns-first` | `M-autoclock-in` | `successor` | `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:344` |
-| `M-war-machine-aif-completion` | `M-war-machine-aif-last-mile` | `successor` | `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:8` |
-| `M-war-machine-aif-completion` | `M-war-machine-aif-last-mile` | `successor` | `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:342` |
 | `M-war-machine-aif-last-mile` | `M-stack-morphogenetic-rewrite` | `unblocks` | `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:343` |
+| `M-war-machine-aif-last-mile` | `M-war-machine-aif-completion` | `successor` | `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:8` |
+| `M-war-machine-aif-last-mile` | `M-war-machine-aif-completion` | `successor` | `/home/joe/code/futon7/holes/M-war-machine-aif-last-mile.md:342` |
 | `M-war-machine-wiring` | `M-interim-director-proxy-metric-inventory` | `after` | `/home/joe/code/futon7/holes/M-interim-director-proxy-metric-inventory.md:2272` |
 | `M-web-arxana-missions` | `M-mission-scopes-into-substrate-2` | `predecessor` | `/home/joe/code/futon3c/holes/missions/M-mission-scopes-into-substrate-2.md:15` |
 | `M-xor-coupling-probe` | `M-coupling-as-constraint` | `blocked by` | `/home/joe/code/futon5/holes/missions/M-coupling-as-constraint.md:5` |
@@ -1243,3 +1239,22 @@ Spearman rho uses average ranks for ties over all 107 items; a scanned document 
 ## Declaration proposal
 
 Following `/home/joe/code/futon3/library/cascades/declared-skeleton.flexiarg` / `9ff0c6495764148c49a648b932bcd938d493baab3aad10ce80d3e0778a384e99`, an item could carry a plural line such as `**Unblocks:** M-x — because <one reviewable sentence>; E-y — because <one reviewable sentence>`. Each edge would point from this item to what rests on it, and would be declared only when its author would defend that completion of the source really changes the target from unanswered to answerable in review. Derived `why` lifts and uncued mentions may prompt that declaration, but must not mint it.
+
+## Review amendment (claude-2, 2026-10-05 ~23:50Z)
+
+Regenerated after three changes to `scripts/unblocks_relation.clj`, made
+at review: (1) cue matching treated `-` as a word boundary, so the
+mission id `M-f11-find-production-successor` supplied a `successor` cue to
+every sentence naming it — hyphen added to the boundary class; (2)
+`successor` was read target-to-document, inverted ("… `M-kangaroo`
+warm-pouch as a deferred successor" names what follows the document, so
+the document unblocks the target) — flipped to document-to-target; (3)
+`supersedes` made undirected (a replacement, not an unblocking). Cued
+mentions 78 → 72, directed edges 51 → 45, ρ with occurrence count 0.099 →
+0.052. The nearest-cue-in-sentence rule remains crude: the five `feeds`
+edges from `M-operational-vocabulary.md:7` come from one long cross-ref
+sentence in which only two of the five bracketed relations are "feeds".
+The conclusion stands either way: among 107 items the written record
+yields a few dozen directed edges, most items none, and Joe's reading
+(2026-10-05) that the semantics were never written down is what the
+numbers show. B1c (revealed attention) is the first cut.
