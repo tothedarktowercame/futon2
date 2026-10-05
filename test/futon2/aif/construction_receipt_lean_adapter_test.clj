@@ -348,6 +348,35 @@
                                   [:d-task-enactment :verification
                                    :token-observation-verification]
                                   {:status :verified}))))))
+    (testing "measured false is accepted without changing the Lean projection"
+      (let [old-projection (adapter/enactment-grounding-input-from-run-record record)
+            measured-record
+            (assoc-in record
+                      [:d-task-enactment :verification :token-observation-verification]
+                      {:status :refused :kind :after-token-not-observed
+                       :measured-token-count 4})
+            measured-projection
+            (adapter/enactment-grounding-input-from-run-record measured-record)]
+        (is (= old-projection measured-projection))
+        (is (java.util.Arrays/equals
+             (.getBytes (adapter/render-enactment-grounding old-projection "same")
+                        java.nio.charset.StandardCharsets/UTF_8)
+             (.getBytes (adapter/render-enactment-grounding measured-projection "same")
+                        java.nio.charset.StandardCharsets/UTF_8)))))
+    (testing "missing Boolean evidence keeps the existing accepted diagnostic"
+      (is (map? (adapter/enactment-grounding-input-from-run-record record))))
+    (testing "unrelated and malformed diagnostics still refuse"
+      (doseq [diagnostic [{:status :refused :kind :something-else}
+                          {:status :refused :kind :after-token-not-observed
+                           :measured-token-count 0}
+                          {:status :refused :kind :after-token-not-observed
+                           :measured-token-count 4 :forged true}]]
+        (is (= :adapter/refused-subreceipt-mismatch
+               (refusal #(adapter/enactment-grounding-input-from-run-record
+                          (assoc-in record
+                                    [:d-task-enactment :verification
+                                     :token-observation-verification]
+                                    diagnostic)))))))
     (testing "changed retained beta refuses"
       (is (= :adapter/precision-state-mismatch
              (refusal #(adapter/enactment-grounding-input-from-run-record

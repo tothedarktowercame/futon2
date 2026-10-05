@@ -650,8 +650,14 @@
     (when-not (and (= {:status :refused
                        :kind :precision-selected-declaration-unestablished}
                       (:precision-verification verification))
-                   (= {:status :refused :kind :after-token-evidence-unavailable}
-                      (:token-observation-verification verification)))
+                   (let [observation (:token-observation-verification verification)]
+                     (or (= {:status :refused :kind :after-token-evidence-unavailable}
+                            observation)
+                         (and (= :refused (:status observation))
+                              (= :after-token-not-observed (:kind observation))
+                              (pos-int? (:measured-token-count observation))
+                              (= #{:status :kind :measured-token-count}
+                                 (set (keys observation)))))))
       (refuse! :adapter/refused-subreceipt-mismatch
                {:precision (:precision-verification verification)
                 :token-observation (:token-observation-verification verification)}))

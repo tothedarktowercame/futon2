@@ -124,6 +124,7 @@
               (get-in reread [:candidate-to-minted-join :enacted-action-sha256])))
        (is (= :not-measured (:before-evidence reread)))
        (is (= #{["target" :artifact]} (:present reread)))
+       (is (= {:status :verified} (:token-observation-verification reread)))
        (is (= :declared-kernel-of-verified-macro-action (:b-authority reread)))
        (is (= :independent-check-required (:causal-attribution reread)))
        (is (= :carry-no-predecessor (:kind (task/read-predecessor root (dissoc expected :occurrence) jobs))))))))
@@ -271,8 +272,34 @@
     (is (every? #(= (get-in action [:observation-locators (:token %)])
                     (:declared-locator %)) rows))
     (is (every? #(false? (get-in % [:result :observed])) rows))
+    (is (= {:status :refused :kind :after-token-not-observed
+            :measured-token-count 4}
+           (task/token-observation-verification rows)))
+    (is (= {:status :refused :kind :after-token-evidence-unavailable}
+           (task/token-observation-verification [])))
+    (is (= {:status :verified}
+           (task/token-observation-verification positive-rows)))
     (is (true? (get-in (first (filter #(= first-token (:token %)) positive-rows))
                        [:result :observed])))))
+
+(deftest measured-false-carrier-remains-admitted-with-a-truthful-diagnostic
+  (let [schedule {:status :held :reason :observation-placement-not-declared}
+        action {:kind :cascade-candidate :id :C0 :target "target"
+                :observation-locators
+                {["target" :artifact]
+                 {:class :C3 :repo "repo" :sha "HEAD" :path "absent.clj"}}
+                :precedence [{:id :make-file :produces #{["target" :artifact]}}]}]
+    (with-artifact
+     {:action action :declaration-target "different-target"
+      :precision-family-fn #(precision-family % schedule)}
+     (fn [{:keys [inputs expected jobs]}]
+       (let [verification (task/verify (task/claim inputs) expected jobs)]
+         (is (= :admitted (:status verification)))
+         (is (= #{} (:present verification)))
+         (is (= (:universe expected) (:unknown verification)))
+         (is (= {:status :refused :kind :after-token-not-observed
+                 :measured-token-count 1}
+                (:token-observation-verification verification))))))))
 
 (deftest refusal-is-preserved-by-persistence
   (with-artifact

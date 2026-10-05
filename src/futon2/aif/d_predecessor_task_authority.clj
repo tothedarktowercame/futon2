@@ -46,6 +46,18 @@
     (str/trim (:out r))))
 (defn- canonical [path] (.getCanonicalPath (io/file path)))
 
+(defn token-observation-verification
+  "Classify retained after-work measurements without conflating measured false
+   with missing evidence. This diagnostic does not decide execution admission."
+  [measurements]
+  (let [measured (filter #(boolean? (get-in % [:result :observed])) measurements)
+        present (filter #(true? (get-in % [:result :observed])) measured)]
+    (cond
+      (seq present) {:status :verified}
+      (seq measured) {:status :refused :kind :after-token-not-observed
+                      :measured-token-count (count measured)}
+      :else {:status :refused :kind :after-token-evidence-unavailable})))
+
 (defn capture
   "Retain the minted occurrence and declaration bytes before dispatch.
    No pre-side token mapping is inferred from interpretation facts."
@@ -270,10 +282,7 @@
           replayed (artifact-tokens dispatch repository final)
           affirmations (filter #(true? (get-in % [:result :observed])) replayed)
           present (set (map :token affirmations))
-          observation-verification
-          (if (seq present)
-            {:status :verified}
-            {:status :refused :kind :after-token-evidence-unavailable})]
+          observation-verification (token-observation-verification replayed)]
       (require! (= replayed (:after-token-evidence record)) :after-token-evidence-mismatch {})
       ;; A retained selected-target declaration makes its failed artifact
       ;; observation an execution failure. When no such declaration was
