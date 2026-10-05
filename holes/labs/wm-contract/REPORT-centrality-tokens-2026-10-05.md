@@ -154,3 +154,41 @@ Spearman's rho uses average ranks for ties over all 107 persisted items. Occurre
 ## What the numbers say
 
 All 107 persisted rows have an occurrence count. Today's direct have→want graph has out-degree values from 0 to 1 and in-degree values from 0 to 0. Their Spearman correlations with the persisted occurrence count are -0.014956 and typed absence, respectively. The mined pattern graph cannot contribute an item-level value because it records pattern-to-pattern relations but no task-to-pattern relation; the requested Lean-row comparison is likewise absent from the searched record.
+
+## Review addendum (claude-2, 2026-10-05 23:2xZ)
+
+Two of the relations above are not what the table says they are; both
+found by reading the graph by hand (`GET /api/alpha/cascade-real/graph`,
+fetched again at review time).
+
+1. **The have→want arrows are not inter-item.** All 176 arrows run from a
+   mission to a node named for its own next hole
+   (`futon0-d/mission/capability-star-map` →
+   `…/capability-star-map-document`, `:move-class :close-hole`); 176
+   distinct haves, 176 distinct wants, no want is a ranked item. So
+   `have→want-out-degree ∈ {0, 1}` means "this mission has a close-hole
+   arrow", `in-degree = 0` is forced, and the Spearman ρ of −0.015 compares
+   occurrence count with a flag. The cell should read `:typed-absence
+   (:arrows-are-mission-to-own-hole)`. `lineage` is likewise not
+   predecessor/successor but agent-dispatch lineage (`agent`, `target`,
+   `session`); `predecessor`/`successor` occur 0 times.
+2. **The task→pattern relation exists, in [G] not [P].** `:patterns :edges`
+   holds 1,715 mission→pattern links (`:relation "applied"`) over 249
+   missions. From it, by hand: the selected mission
+   `M-interim-director-proxy-metric-inventory` applies 34 distinct patterns
+   and shares at least one with 68 other missions (rank 8 of 249 by that
+   count; top: `e-pipeline-pipecleaner` 143, `g-over-cascades` 110). The
+   live selector's "occurrence count" (33 for the selected mission in the
+   run's graph) is, for a mission with no cluster, held or lineage
+   mentions, essentially its count of applied patterns — a measure of how
+   much it documents, not of what it unblocks.
+
+So B1 as it stands establishes a typed absence for three of the four
+sources and leaves the one inter-item relation that does exist
+(shared applied patterns) uncomputed. Amendment requested: compute per
+ranked item, from [G] `:patterns :edges`, (a) distinct applied patterns,
+(b) number of other missions sharing ≥ 1 pattern, (c) sum over its
+patterns of the number of other missions applying each; report ρ of each
+against the occurrence count; retype the arrow cells as above. The token
+proposal stands in name; its value becomes (b) or (c), to be chosen when
+B3 is written.
