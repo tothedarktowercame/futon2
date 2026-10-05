@@ -83,7 +83,17 @@
         rollout-action {:precedence maps :construction-receipt {:order containment-order}}
         order-use (cascade-order/order-use rollout-action)
         transition (or (:kernel-step order-use) (:precedence order-use))
-        row (model/rollout (constantly transition) (model/observed-belief established) horizon)
+        evaluated (model/rollout-evaluation (constantly transition)
+                                            (model/observed-belief established) horizon)
+        row (:belief evaluated)
+        ;; Lean Proof2.CoApplicationKernel.frontierConflict: two frontier
+        ;; patterns, one producing a token the other forbids. The kernel
+        ;; still co-applies them; the candidate carries the flag.
+        frontier-conflicts (vec (for [step (:evaluations evaluated)
+                                      state (:states step)
+                                      :when (:frontier-conflict state)]
+                                  {:tau (:tau step) :state (:state state)
+                                   :frontier (:frontier state)}))
         edges (set (for [p order q order :when (not= p q)
                          :when (seq (set/intersection (:produces (patterns p))
                                                       (get-in patterns [q :guard :needs])))] [p q]))]
@@ -114,6 +124,7 @@
                       {:kind :want-unreachable-within-horizon :order precedence :horizon horizon :belief row})}
           {:candidate (assoc ordered :need-edges edges :order containment-order
                              :order-use (:meta order-use)
+                             :frontier-conflicts frontier-conflicts
                              :reached-wants (vec (sort-by pr-str reached-new))
                              :unreached-wants unreached)
            :ordering {:move-id :order-by-need :before order :after precedence

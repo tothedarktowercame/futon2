@@ -62,3 +62,43 @@
     (is (= [:wanted] (get-in result [:candidate :reached-wants])))
     (is (= {:order :co-application}
            (get-in result [:candidate :order-use])))))
+
+(defn guarded [needs forbids produces]
+  {:guard {:needs (set needs) :forbids (set forbids)} :produces (set produces)})
+
+(deftest conflicting-frontier-is-flagged-on-the-candidate
+  ;; The shape of Lean Proof2.CoApplicationKernel.ConflictFixture: p produces
+  ;; :a and forbids :b; q produces :b and forbids :a. Co-application fires
+  ;; both and reaches a state each of them forbids; the candidate says so.
+  (let [patterns {:p (guarded [] [:b] [:a])
+                  :q (guarded [] [:a] [:b])}
+        candidate (:candidate (compile-plan patterns [:a :b] 1 [:p :q]))]
+    (is (= [:a :b] (:reached-wants candidate)))
+    (is (= [{:tau 1 :state #{} :frontier [:p :q]}]
+           (:frontier-conflicts candidate)))))
+
+(deftest a-frontier-without-conflict-carries-no-flag
+  (let [patterns {:p (pattern [] [:w1])
+                  :q (pattern [] [:w2])}
+        candidate (:candidate (compile-plan patterns [:w1 :w2] 1 [:p :q]))]
+    (is (= [] (:frontier-conflicts candidate)))))
+
+(deftest a-need-cycle-is-a-typed-finding
+  (let [patterns {:p (pattern [:b] [:a])
+                  :q (pattern [:a] [:b])}
+        result (compile-plan patterns [:a :b] 2 [:p :q])]
+    (is (= :need-cycle (get-in result [:finding :kind])))
+    (is (nil? (:candidate result)))))
+
+(deftest an-overlapping-pair-without-a-meet-is-recorded-on-the-order
+  ;; p and q both stand above A and B, which are incomparable: the pair has
+  ;; two maximal common units and no meet (Lean hasRestrictedMeets fails).
+  ;; The plan is still compiled; its order names the pair.
+  (let [patterns {:p (pattern [] [:x])
+                  :q (pattern [] [:y])
+                  :A (pattern [:x :y] [:wa])
+                  :B (pattern [:x :y] [:wb])}
+        candidate (:candidate (compile-plan patterns [:wa :wb] 2 [:p :q :A :B]))]
+    (is (= [{:pair [:p :q] :common-maximal [:A :B]}]
+           (get-in candidate [:order :missing-meets])))
+    (is (= [:wa :wb] (:reached-wants candidate)))))

@@ -22,7 +22,11 @@
   {:command "clj-kondo --lint src/futon2/aif/interpretation_construction.clj test/futon2/aif/interpretation_construction_order_test.clj"
    :status :passed :errors 0 :warnings 0}
   {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <two changed files>"
-   :status :passed :result "OK"}]
+   :status :passed :result "OK"}
+  {:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.interpretation-construction-order-test -n futon2.aif.interpretation-construction-test -n futon2.aif.cascade-feedback-test"
+   :status :passed :by "claude-2"
+   :tests 38 :assertions 242 :failures 0 :errors 0
+   :note "Review follow-up to 1697e19ae. Two patterns that each forbid the other's product (the shape of Lean ConflictFixture) were co-applied and the plan admitted with no mark; the specification says the certificate carries the flag. The compiled candidate now carries :frontier-conflicts with the step, state and frontier. Added tests: that case, a frontier without conflict, a need cycle as a typed finding, and an overlapping pair without a meet recorded on the order. clj-kondo and check-parens clean."}]
  :expectation-changes []
  :active-run-check
  {:status :none-observed
