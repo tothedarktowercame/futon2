@@ -82,3 +82,23 @@
            (get-in shadow [:rollout :evaluations 0 :model :semantics])))
     (is (= (:belief (:rollout prediction))
            (get-in shadow [:rollout :belief])))))
+
+(deftest learning-shadow-carries-the-changed-theta-into-the-frontier
+  ;; The shadow asks what the prediction would be with one pattern's theta
+  ;; changed. Under co-application the changed pattern fires beside the other
+  ;; frontier patterns, so only its own want moves.
+  (let [d (with-half-theta-and-one-step (decision))
+        prediction (token-outcome/freeze-prediction d)
+        capture-pattern (first (filter #(= :war-machine/state-capture (:id %))
+                                       (get-in d [:action :precedence])))
+        shadow (#'learning-trial/shadow prediction capture-pattern 1/4)
+        belief (get-in shadow [:rollout :belief])
+        marginal (fn [token]
+                   (reduce-kv (fn [p state mass] (+ p (if (contains? state token) mass 0)))
+                              0 belief))]
+    (is (= 1/4 (:theta shadow)))
+    (is (= 1/4 (marginal (produced-token d :war-machine/state-capture))))
+    (is (= 1/2 (marginal (produced-token d :ukrns/reader-run-path))))
+    (is (= 1/2 (marginal (produced-token d :orchestration/recorded-handoff))))
+    (is (= 0 (marginal (produced-token d :measurement/warrant-travels-with-the-number))))
+    (is (not= (:belief (:rollout prediction)) belief))))
