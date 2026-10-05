@@ -214,36 +214,49 @@
                           :family (:precision-family verification)})))))))))
 
 (deftest retained-mission-action-measures-through-its-own-observation-carrier
-  ;; Real producer fixture: run 2026-10-05-c9d25d6a, selected action at
-  ;; [:decision :selection-law :per-policy-argmax :action].
-  (let [run (edn/read-string
-             (slurp "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn"))
-        retained (edn/read-string
-                  (slurp "/home/joe/code/futon3c/data/wm-d-task-enactment/action-d76d9f92-93c3-4891-860d-d1c0e822849e.edn"))
-        action (get-in run [:decision :selection-law :per-policy-argmax :action])
-        retained-dispatch (:dispatch retained)
-        pins (mapv #(select-keys % [:path :sha256]) (:declarations retained-dispatch))
+  ;; The selected action of run 2026-10-05-c9d25d6a, from the tracked fixture
+  ;; (copied from the run record at [:decision :selection-law
+  ;; :per-policy-argmax :action]; the run record and the retained dispatch are
+  ;; not tracked in git, so the test reads neither). The declaration reads are
+  ;; two hand-declared sources for other targets, pinned by their bytes now,
+  ;; which is what `capture` checks. The measurement runs against the author's
+  ;; commit of that run in futon7.
+  (let [action (:action
+                (edn/read-string
+                 (slurp "test/fixtures/selected-want-outcome/2026-10-05-c9d25d6a-action.edn")))
+        universe (set (map (fn [want] [(:target action) want]) (:want action)))
+        pins (mapv (fn [path]
+                     {:path path
+                      :sha256 (evidence/sha256 (Files/readAllBytes (.toPath (io/file path))))})
+                   ["resources/wm/cascade-sources/M-expressions-of-interest.edn"
+                    "resources/wm/cascade-sources/M-wm-08-external-f2.edn"])
+        mint (fn [selected]
+               (retention/mint-occurrence
+                {:run-id "carrier-test" :cohort-id "cohort" :attempt-id "attempt"
+                 :selected-action selected :now #(Instant/now) :uuid-fn #(UUID/randomUUID)}))
         capture-action
-        (fn [selected occurrence]
-          (task/capture {:occurrence occurrence
-                         :carry-occurrence-id (:carry-occurrence-id retained-dispatch)
-                         :universe (:universe retained-dispatch)
+        (fn [selected]
+          (task/capture {:occurrence (mint selected)
+                         :carry-occurrence-id "carrier-test-carry"
+                         :universe universe
                          :selected-action selected
                          :declaration-reads pins
-                         :before (:before retained-dispatch)}))
-        dispatch (capture-action action (:occurrence retained-dispatch))
+                         :before "ae45d5472d7764c99ab4cbb182b247f7adebd56e"}))
+        dispatch (capture-action action)
         commit "7a9113dfd245ab9918da304f32fc62845ef65741"
         rows (task/artifact-tokens dispatch "/home/joe/code/futon7" commit)
-        first-token (first (sort-by pr-str (:universe retained-dispatch)))
+        first-token (first (sort-by pr-str universe))
         positive-action
         (assoc-in action [:observation-locators first-token :decl]
                   "- [ ] The inventory records a follow-up mission’s first concrete artifact and its business-validation measurement.")
-        positive-occurrence
-        (retention/mint-occurrence
-         {:run-id "carrier-positive" :cohort-id "cohort" :attempt-id "attempt"
-          :selected-action positive-action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
-        positive-dispatch (capture-action positive-action positive-occurrence)
-        positive-rows (task/artifact-tokens positive-dispatch "/home/joe/code/futon7" commit)]
+        positive-dispatch (capture-action positive-action)
+        positive-rows (task/artifact-tokens positive-dispatch "/home/joe/code/futon7" commit)
+        ;; the same dispatch as captured before the carrier existed
+        without-carrier (dissoc dispatch :selected-action-observation-carrier)]
+    (is (= 4 (count universe)))
+    (is (= 2 (count (:declarations dispatch))))
+    (is (empty? (task/artifact-tokens without-carrier "/home/joe/code/futon7" commit))
+        "declaration files alone give no measurement for a mission-derived target")
     (is (every? #(not= (:target action) (get-in % [:snapshot :target]))
                 (:declarations dispatch)))
     (is (= {:schema :wm/selected-action-observation-carrier-v1
@@ -251,7 +264,7 @@
             :selected-action-sha256 (action-identity/digest action)
             :observation-locators (:observation-locators action)}
            (:selected-action-observation-carrier dispatch)))
-    (is (= (:universe retained-dispatch) (set (map :token rows))))
+    (is (= universe (set (map :token rows))))
     (is (= 4 (count rows)))
     (is (every? #(= commit (get-in % [:after-locator :sha])) rows))
     (is (every? #(= commit (get-in % [:result :evidence :resolved-sha])) rows))
