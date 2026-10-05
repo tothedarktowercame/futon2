@@ -13,7 +13,7 @@
 
 (identity/register! *ns* *file*)
 
-(def kind-order ["why" "how" "co-cited" "rejected-beside"
+(def kind-order ["why" "how" "used-together" "co-cited" "rejected-beside"
                  "next-in-session" "co-rejected"])
 (def kind-rank (zipmap kind-order (range)))
 

@@ -74,6 +74,29 @@
               (is (= (mapv shape (get-in py [:value :retractions]))
                      (mapv shape (:retractions clj))))))))))
 
+(deftest used-together-links-are-priced-like-the-python-tool
+  ;; a -- c is reachable through b by a used-together link (weight 2) and a
+  ;; why link (1), or through d by two next-in-session links (3 each).
+  (let [file (io/file (temp-dir) "used-together.json")
+        _ (spit file (json/generate-string
+                      {:pattern_ids ["a" "b" "c" "d"] :patterns 4 :records 1
+                       :edges [{:a "a" :b "b" :kind "used-together"
+                                :evidence [{:run "r" :order ["a" "b"] :positions [1 2]}]}
+                               (edge "b" "c")
+                               {:a "a" :b "d" :kind "next-in-session" :evidence []}
+                               {:a "c" :b "d" :kind "next-in-session" :evidence []}]}))
+        graph (loaded-graph file)
+        clj (sut/retractions graph {:seeds ["a" "c"] :k 3})
+        py (python-result file ["a" "c"])]
+    (is (every? number? (map :weight (:edges graph))))
+    (is (zero? (:exit py)) (:err py))
+    (is (= 3 (:cost (first (:retractions clj)))))
+    (is (= #{"a" "b" "c"} (set (:nodes (first (:retractions clj))))))
+    (is (= (mapv shape (get-in py [:value :retractions]))
+           (mapv shape (:retractions clj))))
+    (is (= (mapv :cost (get-in py [:value :retractions]))
+           (mapv :cost (:retractions clj))))))
+
 (deftest isolated-seed-is-a-counted-failure-not-a-singleton
   (let [file (fixture-file :isolated)
         result (sut/retractions (loaded-graph file) {:seeds ["z"] :k 3})]

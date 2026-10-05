@@ -18,7 +18,11 @@
 (identity/register! *ns* *file*)
 
 (def default-weights
-  {"why" 1 "how" 1 "co-cited" 2 "rejected-beside" 3
+  ;; "used-together" comes from applied War Machine run diffs (futon3c
+  ;; scripts/pattern_graph_diff.py). Its weight equals co-cited's and matches
+  ;; futon3c scripts/pattern_retraction.py: an interim choice by claude-2,
+  ;; 2026-10-05, not a ruling, and the same whatever the run's outcome.
+  {"why" 1 "how" 1 "used-together" 2 "co-cited" 2 "rejected-beside" 3
    "next-in-session" 3 "co-rejected" 8})
 
 (defn- pin-file [graph-path] (io/file (str graph-path ".pin.edn")))
