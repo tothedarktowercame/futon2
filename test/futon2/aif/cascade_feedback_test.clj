@@ -1,11 +1,14 @@
 (ns futon2.aif.cascade-feedback-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as feedback]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.interpretation-construction :as construction]
             [futon2.aif.locator-fixtures :as locfix]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.policy :as policy]
+            [futon2.aif.selected-want-outcome :as want-outcome]
+            [futon2.aif.token-outcome :as token-outcome]))
 
 (def action
   {:kind :cascade-candidate
@@ -143,6 +146,82 @@
                                :supporting-attestations])))
     (is (> (:factor applied) (:factor supporting))
         "the next construction can distinguish enacted work from support")))
+
+;; The selected action of run 2026-10-05-c9d25d6a (four wants, four patterns),
+;; copied from the run record into a tracked fixture. The want accounting is
+;; produced by the real prediction, comparison and accounting functions from
+;; measurements in which the wants named in REACHED were observed true and the
+;; rest false. With REACHED empty this is what the run's own measurement gave:
+;; all four mission lines were still unticked after the work.
+(defn- recorded-run-input [reached]
+  (let [{:keys [action selection-certificate]}
+        (edn/read-string
+         (slurp "test/fixtures/selected-want-outcome/2026-10-05-c9d25d6a-action.edn"))
+        prediction (token-outcome/freeze-prediction
+                    {:action action :selection-certificate selection-certificate})
+        artifact-sha "recorded-action-test-artifact"
+        measurements
+        (mapv (fn [{:keys [token]}]
+                (let [locator (get (:observation-locators action) token)]
+                  {:token token :declared-locator locator
+                   :after-locator (assoc locator :sha artifact-sha)
+                   :result {:observed (contains? reached token)
+                            :evidence {:resolved-sha artifact-sha}}}))
+              (:wanted prediction))
+        comparison (token-outcome/compare-outcomes prediction measurements artifact-sha)
+        step (:id (first (:precedence action)))]
+    {:run-id "2026-10-05-c9d25d6a"
+     :selected-action action
+     :outcome :grounded-change
+     :accepted-increment {:accepted? :no-acceptance-declared
+                          :criterion-step {:id step :source :recorded-decision}}
+     :want-outcome-accounting (want-outcome/receipt {:selected-action action
+                                                     :token-comparison comparison})
+     :d-task-enactment admitted-enactment
+     :artifact {:repo "/repo" :commit "abc1234"}}))
+
+(deftest grounded-close-with-no-want-reached-does-not-reinforce
+  (let [in (recorded-run-input #{})
+        action (:selected-action in)
+        patterns (mapv :id (:precedence action))
+        receipt (feedback/receipt in)
+        metadata (feedback/construction-metadata {:events [receipt]})
+        target-metadata (get metadata (:target action))]
+    (is (= :verified (get-in in [:want-outcome-accounting :status])))
+    (is (= 4 (count (get-in in [:want-outcome-accounting :by-class :untouched]))))
+    (is (= :verified (:status receipt)))
+    (is (= patterns (mapv :pattern (get-in receipt [:patterns :applications]))))
+    (is (= #{:no-want-effect}
+           (set (map :status (get-in receipt [:patterns :applications])))))
+    (is (= #{:none}
+           (set (map :reinforcement (get-in receipt [:patterns :applications])))))
+    (is (empty? (get-in receipt [:patterns :positive-reinforcement])))
+    (is (empty? (get-in receipt [:patterns :selected-only])))
+    (is (= {:status :absent :reason :verified-grounded-work} (:blocker receipt)))
+    (doseq [pattern patterns]
+      (is (= {:successful-applications 0 :supporting-attestations 0
+              :incomplete-applications 0 :no-want-effect-applications 1
+              :selected-only 0}
+             (get-in target-metadata [:patterns pattern]))))
+    (is (= 1.0 (:factor (feedback/pattern-evidence-prior target-metadata action)))
+        "the habit factor of the same cascade is unchanged by this close")))
+
+(deftest grounded-close-with-one-want-reached-reinforces
+  (let [none (recorded-run-input #{})
+        action (:selected-action none)
+        reached-want [(:target action) (first (:want action))]
+        in (recorded-run-input #{reached-want})
+        receipt (feedback/receipt in)
+        metadata (feedback/construction-metadata {:events [receipt]})]
+    (is (= [reached-want] (get-in in [:want-outcome-accounting :by-class :reached])))
+    (is (= 3 (count (get-in in [:want-outcome-accounting :by-class :untouched]))))
+    (is (= [:successful :supporting-attestation :supporting-attestation
+            :supporting-attestation]
+           (mapv :status (get-in receipt [:patterns :applications]))))
+    (is (= (mapv :id (:precedence action))
+           (get-in receipt [:patterns :positive-reinforcement])))
+    (is (< 1.0 (:factor (feedback/pattern-evidence-prior
+                         (get metadata (:target action)) action))))))
 
 (deftest next-construction-receives-retained-pattern-feedback
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory

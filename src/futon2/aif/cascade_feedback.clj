@@ -1,8 +1,9 @@
 (ns futon2.aif.cascade-feedback
   "Production feedback from one provisional cascade execution to later
    construction. Selection alone never reinforces a pattern. Verified enactment
-   that produces grounded work attests the selected cascade; operator acceptance
-   is a separate, potentially stronger observation rather than a prerequisite."
+   that produces grounded work attests the selected cascade when at least one
+   selected want was reached or progressed; operator acceptance is a separate,
+   potentially stronger observation rather than a prerequisite."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -37,7 +38,9 @@
    cascade, but gives full application credit only to the recorded enacted
    criterion step. Other cascade members receive a weaker supporting
    attestation. Absence of an operator acceptance declaration does not erase
-   either grounded-work observation."
+   either grounded-work observation. A grounded close in which no selected
+   want was reached or progressed records each pattern as :no-want-effect
+   with no reinforcement: the pattern counts are unchanged by it."
   [{:keys [run-id target selected-action outcome failure accepted-increment
            d-task-enactment cascade-revision artifact want-outcome-accounting]}]
   (let [target (or target (:target selected-action))
@@ -51,9 +54,13 @@
         grounded? (contains? #{:grounded-change :grounded-progress} outcome)
         wants-verified? (= :verified (:status want-outcome-accounting))
         grounded-attestation? (and enacted? grounded? wants-verified?)
+        want-effect? (boolean
+                      (or (seq (get-in want-outcome-accounting [:by-class :reached]))
+                          (seq (get-in want-outcome-accounting [:by-class :progressed]))))
+        reinforced? (and grounded-attestation? want-effect?)
         applications
         (cond
-          grounded-attestation?
+          reinforced?
           (mapv (fn [pattern]
                   {:pattern pattern
                    :status (if (= pattern step)
@@ -69,6 +76,20 @@
                                (assoc :accepted-increment (:accepted? accepted-increment)
                                       :accepted-reason (:reason accepted-increment)))
                    :reinforcement :positive})
+                selected)
+
+          grounded-attestation?
+          (mapv (fn [pattern]
+                  {:pattern pattern
+                   :status :no-want-effect
+                   :evidence {:selected-enacted-action :verified
+                              :grounded-work :attested
+                              :application-role (if (= pattern step)
+                                                  :enacted-step
+                                                  :cascade-support)
+                              :selected-want-effect :none
+                              :terminal-outcome outcome}
+                   :reinforcement :none})
                 selected)
 
           (and exact-step? wants-verified?)
@@ -119,7 +140,7 @@
                          :applications applications
                          :selected-only selected-only
                          :positive-reinforcement
-                         (if grounded-attestation? selected [])}
+                         (if reinforced? selected [])}
               :cascade-revision
               (or cascade-revision
                   {:status :absent :reason :no-mid-run-cascade-revision})
@@ -187,7 +208,8 @@
 
 (defn construction-metadata
   "Project retained close receipts into target-local construction metadata.
-   Counts separate successful, incomplete, and selected-only evidence. Every
+   Counts separate successful, incomplete, no-want-effect, and selected-only
+   evidence. Every
    target also receives the global pattern counts: pattern experience may
    transfer across missions, while the target-local counts remain visible."
   [snapshot]
@@ -205,6 +227,10 @@
                            (count (filter #(= :supporting-attestation (:status %)) apps))
                            :incomplete-applications
                            (count (filter #(= :incomplete (:status %)) apps))
+                           ;; Counted for the record only; the evidence
+                           ;; prior does not read it.
+                           :no-want-effect-applications
+                           (count (filter #(= :no-want-effect (:status %)) apps))
                            :selected-only
                            (count (filter #(some #{id}
                                                   (get-in % [:patterns :selected-only]))

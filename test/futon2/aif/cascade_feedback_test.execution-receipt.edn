@@ -1,0 +1,23 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-05"
+ :scope ["src/futon2/aif/cascade_feedback.clj"
+         "test/futon2/aif/cascade_feedback_test.clj"]
+ :runs
+ [{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.cascade-feedback-test -n futon2.aif.selected-want-outcome-test"
+   :status :passed
+   :by "claude-2"
+   :tests 14 :assertions 87 :failures 0 :errors 0
+   :note "A grounded close in which no selected want was reached or progressed records :no-want-effect with no reinforcement. The two new tests build the want accounting with the real prediction, comparison and accounting functions from the tracked selected action of run 2026-10-05-c9d25d6a."}
+  {:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.cascade-feedback-test"
+   :status :failed
+   :by "claude-2"
+   :tests 10 :assertions 62 :failures 8 :errors 0
+   :control true
+   :note "Control: with the working tree's rule put back to the earlier one (reinforce on any grounded attested close), all 8 failures are in grounded-close-with-no-want-reached-does-not-reinforce. The fixed file was restored before the commit."}
+  {:command "clj-kondo --lint src/futon2/aif/cascade_feedback.clj test/futon2/aif/cascade_feedback_test.clj"
+   :status :passed :errors 0 :warnings 0}
+  {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <the two files>"
+   :status :passed :result "OK"}]
+ :active-run-check
+ {:status :none-observed
+  :evidence "GET /api/alpha/wm/click returned running? false, phase-transition end."}}
