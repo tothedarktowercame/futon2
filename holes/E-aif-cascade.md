@@ -193,6 +193,39 @@ the outer-loop driver (restating 2026-09-25).
   declare only what you would defend in review), since a derived relation
   is at best a prompt for a declaration. *Accept:* every edge cites the
   line it was read from; (i) and (iii) never merged.
+**Joe, 2026-10-05, after B2:** unblocks "might be written down somewhere
+… but I haven't put a great deal of effort into clarifying those
+semantics", so failing to recover it may mean it is not there. Infer it
+instead from behaviour: that Joe is working on `E-aif-cascade` now says he
+holds it high priority and thinks it unblocks something. And distinguish
+*enabler* from *blocker*: `M-diagramprover` is connected to many things
+and need not be finished to be useful; Joe often works two things at once
+(diagramprover upgraded for Lean work and cascade work together). A
+rigorous study of which missions depend on which, and how, is a big
+project; a first cut is not. Minimising G is "subject to constraints": a
+deep dive to plan all the work across all time is not a good use of time
+— the outer cascade is improved over time (§5a of the note).
+
+- [ ] **B1c. Discovery: revealed attention and co-work.** The first cut
+  Joe describes, from records that exist: (i) Cascade Live `:lineage` —
+  126 dispatch records `{agent target session at dispatched-by}` (B1
+  found them; top targets `diagramprover` 25, `apm-demonstration` 22,
+  `the-perfect-crime` 14) — per item: dispatches, distinct sessions,
+  distinct dispatchers, last dispatch; (ii) operator turns: the turn
+  store's record of the mission the operator was working under (the
+  `turn-traced` view on `futon7a/about.html`; `futon3c.xiang.turn-record`)
+  — per item: operator turns under it in the last 14 days; (iii)
+  *co-work*: items targeted by the same session, or by the same agent
+  within one day, or named together in one operator turn — an undirected
+  *enabler* relation, kept apart from any directed unblocks; report
+  `M-diagramprover`'s co-work set as the worked example. Output: per
+  item, revealed-attention counts with source pins or typed absences; the
+  co-work graph's degree per item; ρ of attention against the persisted
+  occurrence count and against B1 (b). Proposal, one paragraph: attention
+  as the `unblocks` token's first-cut value (an *enabler weight*, not a
+  dependency), to be superseded by declarations (B1b) where they exist.
+  *Accept:* every count cites its record; the three sources never merged;
+  no claim that attention is dependency.
 - [x] **B2. Discovery: operator-turn load.** *Done, with amendment (futon2 `b0405aa8c`, `0c56efe08`, `45af3c447`; MAP table).* From the run records and the
   mission documents: per item, the share of its last N touches that were
   operator turns vs machine-authored (`:last-touch :state`, commit
