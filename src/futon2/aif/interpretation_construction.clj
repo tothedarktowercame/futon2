@@ -244,7 +244,8 @@
               left-out (vec (for [c (:family supported)
                                   :let [{:keys [r g]} (g-raw c)]
                                   :when (not (finite? g))]
-                              (assoc (select-keys c [:precedence :need-edges])
+                              (assoc (select-keys c [:precedence :patterns :need-edges :order
+                                                    :order-use :frontier-conflicts])
                                      :kind :cascade-candidate :target target :want (vec want)
                                      :g {:absent :nonfinite-g
                                          :value (if (or (number? g) (keyword? g)) g r)}
@@ -359,11 +360,11 @@
                      ;; want set is the judge's job; each candidate carries
                      ;; the target's full :want so it can.
                      :candidates (mapv (fn [c]
-                                         (assoc (select-keys c [:precedence :need-edges])
+                                         (assoc (select-keys c [:precedence :patterns :need-edges])
                                                 :kind :cascade-candidate :target target
                                                 :want (vec want)
                                                 :construction-receipt
-                                                (let [order (construction/containment-order c)]
+                                                (let [order (:order c)]
                                                   (cond-> (assoc receipt
                                                        :unreached-wants (:unreached-wants c)
                                                        ;; clause 0: this
@@ -374,6 +375,8 @@
                                                        ;; :cyclic-containment
                                                        ;; refusal)
                                                        :order order
+                                                       :order-use (:order-use c)
+                                                       :frontier-conflicts (:frontier-conflicts c)
                                                        :relations (construction/relation-witnesses c order))
                                                     pattern-feedback
                                                     (assoc :pattern-feedback-prior

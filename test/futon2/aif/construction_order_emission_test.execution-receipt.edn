@@ -1,0 +1,28 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-05"
+ :scope ["src/futon2/aif/interpretation_construction.clj"
+         "src/futon2/aif/cascade_order.clj"
+         "test/futon2/aif/construction_order_emission_test.clj"
+         "test/futon2/aif/interpretation_construction_test.clj"]
+ :runs
+ [{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.construction-order-emission-test -n futon2.aif.interpretation-construction-test -n futon2.aif.interpretation-construction-partial-test -n futon2.aif.interpretation-construction-order-test -n futon2.aif.construction-coapplication-scoring-test -n futon2.aif.cascade-feedback-test -n futon2.report.war-machine-construction-test -n futon2.aif.construction-receipt-lean-adapter-test -n futon2.aif.order-kernel-test -n futon2.aif.coapply-kernel-test"
+   :status :failed :by "codex-10"
+   :tests 82 :assertions 459 :failures 2 :errors 0
+   :reason :legacy-finite-g-snapshots-observed-new-additive-order-fields
+   :disposition :snapshot-projection-excludes-only-the-separately-pinned-additive-fields}
+  {:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.construction-order-emission-test -n futon2.aif.interpretation-construction-test -n futon2.aif.interpretation-construction-partial-test -n futon2.aif.interpretation-construction-order-test -n futon2.aif.construction-coapplication-scoring-test -n futon2.aif.cascade-feedback-test -n futon2.report.war-machine-construction-test -n futon2.aif.construction-receipt-lean-adapter-test -n futon2.aif.order-kernel-test -n futon2.aif.coapply-kernel-test"
+   :status :passed :by "codex-10"
+   :tests 82 :assertions 459 :failures 0 :errors 0}
+  {:command "clj-kondo --lint <two changed source files and two changed tests>"
+   :status :passed :errors 0 :warnings 0}
+  {:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults <four changed files>"
+   :status :passed :result "OK"}]
+ :expectation-changes
+ [{:tests [:nf-4-all-finite-is-byte-identical-to-before
+           :nb-4-finite-baseline-is-byte-identical-to-082dfe5e]
+   :old "snapshot included every emitted candidate field except :relations"
+   :new "snapshot excludes additive :patterns, :order-use and :frontier-conflicts; their exact behavior is pinned by construction-order-emission-test"
+   :reason :new-order-certificate-fields-are-the-intended-change}]
+ :active-run-check
+ {:status :none-observed
+  :evidence "GET /api/alpha/wm/click returned running? false, phase-transition end."}}
