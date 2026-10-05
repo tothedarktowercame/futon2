@@ -20,6 +20,13 @@
          (= (:selected-action-sha256 join)
             (:enacted-action-sha256 join)))))
 
+(defn- qualified-want
+  "A pattern's :produces holds [target token] pairs on a selected action and
+   bare tokens on an interpretation that has not been located. The want
+   accounting is keyed by the pair."
+  [target want]
+  (if (vector? want) want [target want]))
+
 (defn- want-token [[_target token]] (graph-id token))
 
 (defn- outcome-index [accounting]
@@ -29,10 +36,11 @@
                {} (:by-class accounting))
     {}))
 
-(defn- use-entry [position pattern outcomes accounting-verified?]
+(defn- use-entry [target position pattern outcomes accounting-verified?]
   {:pattern (graph-id (:id pattern))
    :position position
    :wants (->> (:produces pattern)
+               (map #(qualified-want target %))
                (sort-by want-token)
                (mapv (fn [want]
                        {:want (want-token want)
@@ -51,6 +59,7 @@
   [{:keys [run-id target selected-action outcome terminal d-task-enactment
            artifact want-outcome-accounting graph]}]
   (let [enacted? (verified-enactment? d-task-enactment)
+        target (or target (:target selected-action))
         patterns (vec (:precedence selected-action))
         positioned (mapv vector (range 1 (inc (count patterns))) patterns)
         accounting-verified? (= :verified (:status want-outcome-accounting))
@@ -68,7 +77,7 @@
                        :artifact (select-keys artifact [:repo :commit])}
               :add_uses (if enacted?
                           (mapv (fn [[position pattern]]
-                                  (use-entry position pattern outcomes accounting-verified?))
+                                  (use-entry target position pattern outcomes accounting-verified?))
                                 positioned)
                           [])
               :add_edges (if enacted?
