@@ -168,6 +168,29 @@ the machine-side `injury` arm; **operator-turn load is in neither.**
   value for each of the 107 ranked items. *Accept:* one value per item with
   a source pin or a typed absence; the live selector's occurrence count
   reported beside it.
+**Ruling (Joe, 2026-10-05, after B1):** "shares patterns" and "unblocks"
+have different semantics. *Shares patterns* generalises `@how` (toward the
+specific: the methods two items have in common — coupling through the
+library); *unblocks* generalises `@why` (toward the general: what rests on
+this item, what goes from unanswered to answered when it completes). B1's
+measure is the first; the centrality Joe means is the second; they are two
+tokens, not one. Also ruled: a simplified cascade based on Cascade Live is
+the outer-loop driver (restating 2026-09-25).
+
+- [ ] **B1b. Discovery: an inter-item `@why` relation.** No source holds
+  one at HEAD (B1). Find what could: (i) cross-references in the 107
+  items' documents to other M-/E-/T- ids, classified by the cue around
+  them (`depends on`, `after`, `blocked by`, `unblocks`, `feeds`,
+  `prerequisite`, `see`), with the resulting directed graph's in/out
+  degrees; (ii) the mission lifecycle's own fields, if any name a
+  predecessor or a consumer; (iii) the library's `why` edges (mined graph:
+  545) lifted to items through applied patterns, reported as a *derived*
+  relation and kept apart from (i). Output: per item, `unblocks-count`
+  from (i) with the cue, or a typed absence; and a one-paragraph proposal
+  for how items would *declare* what rests on them (`cascades/declared-skeleton`:
+  declare only what you would defend in review), since a derived relation
+  is at best a prompt for a declaration. *Accept:* every edge cites the
+  line it was read from; (i) and (iii) never merged.
 - [ ] **B2. Discovery: operator-turn load.** From the run records and the
   mission documents: per item, the share of its last N touches that were
   operator turns vs machine-authored (`:last-touch :state`, commit
@@ -175,11 +198,14 @@ the machine-side `injury` arm; **operator-turn load is in neither.**
   (`HIT`, "Joe decides", `🈸`). Output: a feasibility token with its
   source. *Accept:* one value or typed absence per item; the rule stated
   as data, not prose.
-- [ ] **B3. The extended diamond, as a proposal.** Two new squares pasted
-  in as the blend reading requires — each with its I₁, I₂, G, B and the
-  token it emits, and the edge it adds (centrality: observe → centrality →
-  minimise, consumed by the generative model's `downstream-unblocking`
-  term; feasibility: observe → operator-load → {fill, minimise}, as a
+- [ ] **B3. The extended diamond, as a proposal.** New squares pasted in
+  as the blend reading requires — each with its I₁, I₂, G, B and the
+  token it emits, and the edge it adds (unblocks (`@why`): observe →
+  unblocks-reading → minimise, consumed by the generative model's
+  `downstream-unblocking` term, emitting a typed absence until B1b's
+  relation exists or is declared; shares-patterns (`@how`): a separate
+  square and token, consumed only if Joe wants coupling scored at all;
+  feasibility: observe → operator-load → {fill, minimise}, as a
   support change like `injury` or as a preference term — both written up,
   Joe chooses). The result as an edn diff against
   `meta-outer-policy-cascade.edn` and as a `ConstructionReceipt` example;
