@@ -118,6 +118,45 @@ from the record. The circumstances are enumerable at HEAD: for each of the
 can fill. That census is the first thing to compute, and it needs no new
 machinery.
 
+## 2a. One pattern is already a diamond (Joe, 2026-10-05, after §1–6)
+
+Joe's addition: the three stories are readable inside a single pattern,
+and a pattern is itself a tiny diamond; a cascade composes that inner
+structure with the outer one. Read off the flexiarg form:
+
+| flexiarg part | blend | tokens | causal (claude-17) |
+|---|---|---|---|
+| IF / context | the generic space G: the situation in which both forces act | the tokens the pattern *accepts* | `k-if` |
+| HOWEVER | the two input spaces I₁, I₂ — the forces in conflict | — | the two inputs of the mechanism |
+| THEN | the blend B; the emergent structure is **the held tension** — a configuration that keeps both forces and belongs to neither input (an alcove is neither the family room nor a private room) | the token the pattern *emits* (something is, or is not, an ALCOVE) | `k-then` |
+| BECAUSE | why the square commutes: the mechanism by which B satisfies both maps from G | — | the pattern's own structural equation, which the generic `k-unmet = k-if ∧ ¬k-then` abstracts |
+
+Diamond: IF at the top, the two forces incomparable, THEN their meet.
+So a pattern is a blend square *and* a four-node semilattice, and a
+cascade is diamonds pasted along tokens — the inner structure of each
+unit and the outer structure of §2 are the same shape at two grains.
+
+**Too many alcoves** (Alexander/Salingaros): a house of alcoves emits the
+ALCOVE token where no tension calls for it. In claude-17's terms that is
+the *other* off-diagonal: `unmet = IF ∧ ¬THEN` is a problem unaddressed;
+`¬IF ∧ THEN` is a solution without its problem. A per-step C that rewards
+tokens held credits the second (it is the bag problem of §5 at the grain
+of one pattern); the token story handles it the way v2 handles missing
+edges — an emitted token with no consuming want earns nothing. Both
+off-diagonals should cost, and only one does today.
+
+**A cascade that reduces to a diamond can be restated as a pattern.** The
+outer-loop diamond of §1(a) is the example: IF = `observe` (the field and
+the machine's own condition); HOWEVER = ordinary work against self-repair,
+which is literally `injury`'s HOWEVER ("merely adding a large penalty to
+M/E/T leaves unsafe acts in support … treating every failure as injury
+creates a self-repair dark room"); THEN = `minimise` (argmin G over the
+admitted filled family, with the nearest alternative as the reason);
+BECAUSE = G is defined over policies with predicted consequences. That is
+a complete flexiarg, `meta/select-the-meta-item`, and the four units are
+its parts. Not written into the library here; whether it belongs there is
+Joe's.
+
 ## 3. The token reading (wants, `ConstructionReceipt.lean`)
 
 Each square's blend B is a token; a precedence edge carries
@@ -202,6 +241,32 @@ small and runs on this real cascade: score the diamond, its two linear
 extensions and its bag under construction's per-step C with the ordering
 term included, and report the four numbers.
 
+## 5a. Refinement: the object is alive (Joe, 2026-10-05)
+
+Joe's second addition, the informal-proof story: the War Machine itself
+went through many iterations, each adding structure and more explicit
+requirements; some steps are *additional requirements*, some are *better
+structure* — Alexander's street corner still has its newsstand,
+greengrocer and crosswalk, and now also a hydrant and a manhole; and R.
+Crumb's *A Short History of America* (1979), the one crossroads drawn
+panel by panel over a century: the object is refined as detail is added
+and is also a living object that changes.
+
+My reading in the terms above. The two kinds of step are two moves on the
+diagram. An additional requirement pastes in a new square (a new want
+token, a new input space); better structure replaces a blend by one higher
+in Goguen's quality order over the *same* inputs — the 3/2-pushout is the
+maximum among consistent cones, and refinement is movement toward it. A
+living object is one whose inputs also change, so the maximum moves. This
+is the same distinction as "a proof is not a tree": the sequence of
+panels is the formation; any one panel is a parse. For the WM's own
+record, a first classification: 09-15 → v2 (three relations, ordering
+ambiguity) is better structure over the same wants; v2 → v3 (the blend
+square under each unit) is better structure again; Requirements Q1–Q10
+and the pattern-graph diff were additional requirements. Whether that
+classification is right is checkable against the spec history, and the
+check belongs after §6's items.
+
 ## 6. Next checks, in order, each one dispatchable alone
 
 1. **Slot census at HEAD** (discovery, no code): for the 107 on-map items
@@ -209,9 +274,14 @@ term included, and report the four numbers.
    observation and tabulate fillable slots per item. Output: which absence
    would force a reading square, and for how many items. Settles whether
    the diamond ever has a non-degenerate cone on today's field.
+   *Dispatched to codex-33 2026-10-05 22:39Z, job
+   `invoke-1791239989889-33224-b190b433`.*
 2. **Lean receipt** (small): the diamond and its two forged chains in
    `ConstructionReceipt.lean`; `valid` true / false / false by
-   `native_decide`.
+   `native_decide`. *Done: mathlib4 `e5fa4352a5` — `diamondReceipt_valid`,
+   `diamondReceiptInjuryFirst_valid` (the other linear extension over the
+   same support), `chainReceipt_invalid`, `chainReceiptForgedToken_invalid`;
+   `lake build` 584 jobs, success.*
 3. **Per-click unmet table** (small, claude-17's compiler as is): compile
    the four meta patterns with downward link theories and evaluate against
    a run record; output §4's table from the record rather than by hand.
