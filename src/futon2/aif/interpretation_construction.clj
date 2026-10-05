@@ -282,10 +282,12 @@
                                     (when-not (finite? g)
                                       (throw (ex-info "Constructor needs a finite G comparison"
                                                       {:constructor/refusal :nonfinite-g :value g})))
-                                    {:value g
-                                     :universe (if (and (map? r) (some? (:universe r)))
-                                                 (:universe r)
-                                                 universe)}))
+                                    (cond-> {:value g
+                                             :universe (if (and (map? r) (some? (:universe r)))
+                                                         (:universe r)
+                                                         universe)}
+                                      (and (map? r) (:order-use r))
+                                      (assoc :order-use (:order-use r)))))
                       ;; NONFINITE-BASELINE-I (owner's decision, claude-10,
                       ;; 2026-09-25): the empty baseline cascade is not a
                       ;; candidate. Target-grain dG is the difference against
