@@ -211,7 +211,55 @@
                           {:initialized-beta 1.0
                            :model-id (get-in verification [:precision-family :model-id])
                            :admission verification
-                           :family (:precision-family verification)})))))))))
+                          :family (:precision-family verification)})))))))))
+
+(deftest retained-mission-action-measures-through-its-own-observation-carrier
+  ;; Real producer fixture: run 2026-10-05-c9d25d6a, selected action at
+  ;; [:decision :selection-law :per-policy-argmax :action].
+  (let [run (edn/read-string
+             (slurp "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn"))
+        retained (edn/read-string
+                  (slurp "/home/joe/code/futon3c/data/wm-d-task-enactment/action-d76d9f92-93c3-4891-860d-d1c0e822849e.edn"))
+        action (get-in run [:decision :selection-law :per-policy-argmax :action])
+        retained-dispatch (:dispatch retained)
+        pins (mapv #(select-keys % [:path :sha256]) (:declarations retained-dispatch))
+        capture-action
+        (fn [selected occurrence]
+          (task/capture {:occurrence occurrence
+                         :carry-occurrence-id (:carry-occurrence-id retained-dispatch)
+                         :universe (:universe retained-dispatch)
+                         :selected-action selected
+                         :declaration-reads pins
+                         :before (:before retained-dispatch)}))
+        dispatch (capture-action action (:occurrence retained-dispatch))
+        commit "7a9113dfd245ab9918da304f32fc62845ef65741"
+        rows (task/artifact-tokens dispatch "/home/joe/code/futon7" commit)
+        first-token (first (sort-by pr-str (:universe retained-dispatch)))
+        positive-action
+        (assoc-in action [:observation-locators first-token :decl]
+                  "- [ ] The inventory records a follow-up mission’s first concrete artifact and its business-validation measurement.")
+        positive-occurrence
+        (retention/mint-occurrence
+         {:run-id "carrier-positive" :cohort-id "cohort" :attempt-id "attempt"
+          :selected-action positive-action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
+        positive-dispatch (capture-action positive-action positive-occurrence)
+        positive-rows (task/artifact-tokens positive-dispatch "/home/joe/code/futon7" commit)]
+    (is (every? #(not= (:target action) (get-in % [:snapshot :target]))
+                (:declarations dispatch)))
+    (is (= {:schema :wm/selected-action-observation-carrier-v1
+            :target (:target action)
+            :selected-action-sha256 (action-identity/digest action)
+            :observation-locators (:observation-locators action)}
+           (:selected-action-observation-carrier dispatch)))
+    (is (= (:universe retained-dispatch) (set (map :token rows))))
+    (is (= 4 (count rows)))
+    (is (every? #(= commit (get-in % [:after-locator :sha])) rows))
+    (is (every? #(= commit (get-in % [:result :evidence :resolved-sha])) rows))
+    (is (every? #(= (get-in action [:observation-locators (:token %)])
+                    (:declared-locator %)) rows))
+    (is (every? #(false? (get-in % [:result :observed])) rows))
+    (is (true? (get-in (first (filter #(= first-token (:token %)) positive-rows))
+                       [:result :observed])))))
 
 (deftest refusal-is-preserved-by-persistence
   (with-artifact

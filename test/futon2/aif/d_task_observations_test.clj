@@ -45,6 +45,25 @@
         (is (= :independent-check-required (:causal-attribution new)))
         (is (= :not-authorized (:consumption new)))))))
 
+(deftest signed-observations-use-the-selected-action-carrier
+  (let [action {:kind :cascade-candidate :id :C0 :target "target"
+                :observation-locators
+                {["target" :artifact]
+                 {:class :C3 :repo "repo" :sha "HEAD" :path "created.clj"}}
+                :precedence [{:id :make-file :produces #{["target" :artifact]}}]}]
+    (fixture/with-artifact
+      {:action action :declaration-target "unrelated-target"}
+      (fn [{:keys [inputs expected jobs]}]
+        (let [record (task/claim inputs)
+              result (task/verify-observations-v2 record expected jobs)
+              row (get-in result [:observations ["target" :artifact]])]
+          (is (= :admitted (:status result)))
+          (is (true? (get-in row [:artifact-observation :observed])))
+          (is (= (identity/digest action)
+                 (get-in row [:meaning :selected-action-sha256])))
+          (is (= {:status :held :reason :observation-placement-not-declared}
+                 (:schedule row))))))))
+
 (deftest unchanged-execution-gates-and-bound-domain
   (fixture/with-artifact fixture-options
     (fn [{:keys [inputs expected jobs]}]

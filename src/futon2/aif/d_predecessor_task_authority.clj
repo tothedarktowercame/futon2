@@ -56,7 +56,12 @@
   (require! (= selected-action (:action/value occurrence))
             :selected-enacted-action-mismatch {})
   (let [action-sha256 (identity/digest selected-action)
-        action-identity (select-keys selected-action [:kind :id :target])]
+        action-identity (select-keys selected-action [:kind :id :target])
+        observation-carrier
+        {:schema :wm/selected-action-observation-carrier-v1
+         :target (:target selected-action)
+         :selected-action-sha256 action-sha256
+         :observation-locators (or (:observation-locators selected-action) {})}]
     {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
      :carry-occurrence-id carry-occurrence-id :universe universe
      :r6-candidate-occurrence candidate-id
@@ -64,6 +69,7 @@
      {:schema :wm/selected-enacted-action-correspondence-v1
       :status :verified :identity action-identity
       :selected-action-sha256 action-sha256 :enacted-action-sha256 action-sha256}
+     :selected-action-observation-carrier observation-carrier
      :before before :before-evidence :not-measured
      :precision-family (when precision-family
                          (precision-carry/validate-binding! precision-family occurrence))
@@ -74,15 +80,39 @@
                {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
            (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
 
+(defn- token-authorities
+  "Return declaration authorities first, using the selected-action carrier only
+   where no declaration binds the same qualified token."
+  [dispatch]
+  (let [declared
+        (vec
+         (for [{:keys [snapshot sha256]} (:declarations dispatch)
+               [token locator] (:locators snapshot)]
+           {:token [(:target snapshot) token]
+            :target (:target snapshot)
+            :locator locator
+            :declaration-sha256 sha256
+            :schedule (cascade-sources/observation-schedule snapshot)}))
+        declared-tokens (set (map :token declared))
+        {:keys [target observation-locators selected-action-sha256]}
+        (:selected-action-observation-carrier dispatch)
+        carried
+        (for [[qualified locator] observation-locators
+              :when (and (= target (first qualified))
+                         (not (contains? declared-tokens qualified)))]
+          {:token qualified :target target :locator locator
+           :selected-action-sha256 selected-action-sha256
+           :schedule {:status :held :reason :observation-placement-not-declared}})]
+    (concat declared carried)))
+
 (defn artifact-tokens
   "Revision-pair C3/C4 affirmations. Other check classes remain explicit
    unavailable measurements; their declared locators are never modified."
   [dispatch repo commit]
   (vec
-   (for [{:keys [snapshot sha256]} (:declarations dispatch)
-         [token locator] (:locators snapshot)
-         :let [qualified [(:target snapshot) token]]
-         :when (contains? (:universe dispatch) qualified)]
+   (for [{:keys [token locator declaration-sha256 selected-action-sha256]}
+         (token-authorities dispatch)
+         :when (contains? (:universe dispatch) token)]
      (let [same-repo? (= (canonical repo) (canonical (io/file observation/repo-root (:repo locator))))
            class (:class locator)
            after-locator (assoc locator :sha commit)
@@ -91,9 +121,12 @@
                      after-locator)
                     {:status :missing :kind (if same-repo? :revision-pair-reader-unavailable
                                                 :different-artifact-repository)})]
-       {:token qualified :declaration-sha256 sha256
-        :declared-locator locator :after-locator (when (and same-repo? (#{:C3 :C4} class)) after-locator)
-        :result result}))))
+       (cond-> {:token token
+                :declared-locator locator
+                :after-locator (when (and same-repo? (#{:C3 :C4} class)) after-locator)
+                :result result}
+         declaration-sha256 (assoc :declaration-sha256 declaration-sha256)
+         selected-action-sha256 (assoc :selected-action-sha256 selected-action-sha256))))))
 
 (defn prompt-binding [dispatch]
   (str "D_TASK_DISPATCH_SHA256: " (evidence/value-digest dispatch)))
@@ -155,7 +188,16 @@
                         (:identity correspondence))
                      (= action-sha256 (:selected-action-sha256 correspondence)
                                       (:enacted-action-sha256 correspondence)))
-                :selected-enacted-correspondence-invalid {}))
+                :selected-enacted-correspondence-invalid {})
+      ;; Pre-carrier retained records remain replayable. Every newly captured
+      ;; dispatch contains the carrier and must reproduce it exactly.
+      (when (contains? dispatch :selected-action-observation-carrier)
+        (require! (= {:schema :wm/selected-action-observation-carrier-v1
+                      :target (:target enacted-action)
+                      :selected-action-sha256 action-sha256
+                      :observation-locators (or (:observation-locators enacted-action) {})}
+                     (:selected-action-observation-carrier dispatch))
+                  :selected-action-observation-carrier-invalid {})))
     (require! (and (= :task (:enactment-grain record))
                    (= :declared-kernel-of-verified-macro-action (:b-authority record)))
               :kernel-authority-mismatch {})
@@ -383,30 +425,40 @@
 (defn- signed-observations [record]
   (let [dispatch (:dispatch record)
         rows (group-by :token (:after-token-evidence record))
+        authorities (group-by :token (token-authorities dispatch))
         final (get-in record [:revision-pair :after])]
     (into
      (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
-     (for [[target token :as qualified] (sort-by pr-str (:universe dispatch))]
-       (let [declarations (filter #(= target (get-in % [:snapshot :target])) (:declarations dispatch))
-             _ (require! (= 1 (count declarations)) :observation-declaration-ambiguous {:token qualified})
-             {:keys [snapshot sha256]} (first declarations)
-             declared (set (concat (:facts snapshot) (:want snapshot) (keys (:locators snapshot))))
-             _ (require! (contains? declared token) :observation-token-unbound {:token qualified})
-             locator (get-in snapshot [:locators token])
+     (for [[_ _ :as qualified] (sort-by pr-str (:universe dispatch))]
+       (let [matches-authority (get authorities qualified)
+             _ (require! (seq matches-authority)
+                         :observation-token-unbound {:token qualified})
+             _ (require! (= 1 (count matches-authority))
+                         :observation-declaration-ambiguous {:token qualified})
+             {:keys [locator declaration-sha256 selected-action-sha256 schedule]}
+             (first matches-authority)
              matches (get rows qualified)
              _ (require! (<= (count matches) 1) :observation-token-ambiguous {:token qualified})
              measurement (first matches)
              result (or (:result measurement) {:status :missing :kind :no-locator})
              _ (when (boolean? (:observed result))
                  (require! (and (= final (get-in result [:evidence :resolved-sha]))
-                                (= sha256 (:declaration-sha256 measurement))
+                                (if declaration-sha256
+                                  (= declaration-sha256 (:declaration-sha256 measurement))
+                                  (= selected-action-sha256
+                                     (:selected-action-sha256 measurement)
+                                     (get-in dispatch
+                                             [:candidate-to-minted-join
+                                              :selected-action-sha256])))
                                 (= locator (:declared-locator measurement)))
                            :observation-artifact-binding-mismatch {:token qualified}))
              ;; A revision-pair measurement is NOT the pinned historical proposition.
              ;; Preserve both questions, including missing historical revisions.
              historical? (and (string? (:sha locator)) (not= "HEAD" (:sha locator)))
-             meaning {:token qualified :declaration-sha256 sha256 :locator locator}
-             schedule (cascade-sources/observation-schedule snapshot)]
+             meaning (cond-> {:token qualified :locator locator}
+                       declaration-sha256 (assoc :declaration-sha256 declaration-sha256)
+                       selected-action-sha256
+                       (assoc :selected-action-sha256 selected-action-sha256))]
          [qualified
           (cond-> {:meaning meaning :meaning-sha256 (evidence/value-digest meaning)
                    :schedule schedule :schedule-sha256 (evidence/value-digest schedule)
