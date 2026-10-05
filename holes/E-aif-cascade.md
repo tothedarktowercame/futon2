@@ -76,7 +76,25 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 | slot census of the 107 ranked items | 103 fill all six slots (= in the field and one unchecked want at HEAD); 2 fill four; 2 absent from the field; reading square forced for 4 of 107; the missing thing is the quality order over 103 near-identical cones | futon2 `597a03288`, `REPORT-meta-slot-census-2026-10-05.md` |
 | the diamond as a `ConstructionReceipt` | both linear extensions valid over one support; the chain's fill–injury edge rejected, with or without a forged token | mathlib4 `e5fa4352a5` |
 | four numbers: diamond / two chains / bag | G 1.280 / 1.517 / 1.517 / 0.393; with ordering term 2.280 / 1.517 / 1.517 / 4.978; three of the four are not constructible from the units' tokens | futon2 `ce0d84041`, `REPORT-diamond-four-numbers-2026-10-05.md` |
-| R-cascade discovery (cut, meets, extensions, receipt projection) | in flight, codex-33, job `invoke-1791240755541-33256-fedacd03` | → `REPORT-r-cascade-2026-10-05.md`, `r-cascade/r-cascade.edn`, `futon7/scripts/r-cascade.bb` |
+| R-cascade discovery (cut, meets, extensions, receipt projection) | drawn graph: one SCC of 11; after an 11-edge cut two 2-cycles remain (R4⇄R7, R6⇄R17) and the script refuses; with R4 → model/rollout and R6 → candidates/select as data, a 19-unit DAG: 5 sources (R13 R14 R19 R2 R4-model), 4 sinks (CTAU-CLASS R16 R3 SCAN), 23 meets under `CascadeOrder.IsMeet`, 63 incomparable pairs with no common lower bound, 951,616,092 linear extensions (log₂ 29.83), of which **0** respect the five stage columns (7 edges run against them); 7 edges `:absent`-class, token-less in the receipt | futon7 `f8d24291c`, futon2 `b237e82a0`, `REPORT-r-cascade-2026-10-05.md`, `r-cascade/r-cascade.edn` |
+
+**Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
+modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
+has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
+one), so `hasMeets` says every pair shares an origin — consistent with Q1,
+one cascade per problem, one root. `ConstructionReceipt.MeetWitness` has
+paths from the operands *to* the meet (a common descendant), and the
+diamond example of mathlib4 `e5fa4352a5` and the note's "minimise is the
+meet of fill and injury" follow that direction. In Alexander's order
+(larger patterns above) the first is the join and the second the meet.
+codex-33 refused to forge reversed paths and left the receipt's `:meets`
+empty. Under `CascadeOrder`'s reading the R-cascade's five sources are a
+measurable defect — 63 pairs with no common origin — mended by one root
+unit, the click's input state (T, τ, C, o, A/B), which is also what the
+cut produced. Recommendation: `CascadeOrder` is the semilattice Joe means;
+amend `MeetWitness` to meet → operands and re-prove the diamond with
+observe as the meet of fill and injury (minimise their join). Joe to
+confirm; until then both readings are reported, neither asserted.
 
 ## The work
 
@@ -89,7 +107,7 @@ contract changes go in the report as a diff for Joe.
 
 ### A. The R-nodes as a cascade
 
-- [ ] **A1. Discovery** (in flight). `r-cascade.bb`: SCCs before the cut;
+- [x] **A1. Discovery** (done; see MAP table). `r-cascade.bb`: SCCs before the cut;
   the cut as data with a reason per edge (`:cross-tick-state`
   `:learned-parameter` `:fit-feedback` `:split-unit`); refuse a surviving
   cycle rather than split R6/R4 silently, then a second pass with the
@@ -98,8 +116,17 @@ contract changes go in the report as a diff for Joe.
   in the receipt projection. Report written for Joe to rule on the cut.
   *Accept:* counts match `aif-lean-dag.edn` (17/43; 23/10/6/1); both
   passes on record; every cut edge justified from its term.
-- [ ] **A2. Ruling on the cut** (Joe). Which edges are cross-tick, whether
-  R6 and R4 are split, where the click begins and ends.
+- [ ] **A2. Rulings** (Joe). (i) The cut: the 11 edges of the report's
+  table (3 cross-tick state: `u`, `u`/`world`, `s-next`; 4 learned
+  parameters `A`,`B` from R4; 2 fit feedbacks `Pi`, `F-pi` into R3; 2
+  split-unit). (ii) The splits: R6 → candidates (`interp` in; `pi`,`r`
+  out) / select (`G`,`E`,`F-pi`,`tau`,`pi` in; `Q-pi`,`pi` out); R4 →
+  model (`A`,`B`; a source, i.e. a have) / rollout (`mu`,`interp`,`T`,
+  `pi`,`r`,`rates` in; `Q-o-pi`,`A` out). Owner's judgement: both splits
+  follow the term names; the one question is whether R4-model is a unit
+  at all or the click's initial have. (iii) Meet direction, above.
+  (iv) Whether to add the root unit (click input state) so that the
+  R-cascade has meets for every pair.
 - [ ] **A3. Lean receipt.** The ruled R-cascade in `ConstructionReceipt.lean`
   as the outer diamond was done: `valid = true` for the ruled receipt;
   `valid = false` for the receipt that includes an `:absent`-class edge
