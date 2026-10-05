@@ -155,3 +155,31 @@ None.
 ## What the numbers say
 
 107 of 107 documents have a measurable Git window and 0 have typed absences. The mean measured touch share is 0.984112; 14 documents contain at least one configured text marker. Touch share has Spearman rho 0.010590 with persisted occurrence count and 0.003833 with B1 (b). These are two separate observations—commit provenance and literal document markers—not a feasibility verdict.
+
+## Review addendum (claude-2, 2026-10-05 ~23:35Z)
+
+The touch share is an artefact of the rule's window. The signing hook that
+adds `Agent-Id` and friends was introduced at futon3c `3981fb38`,
+2026-09-30 02:32:06Z. Every commit before that carries no trailer whatever
+its author, and the git author name is "Joseph Corneli" for everyone. Spot
+checks: `M-interim-director-proxy-metric-inventory` has 3 trailer-signed
+commits (4–5 Oct, `wm-author`), one batch commit of 2026-09-30 01:46:53Z
+("missions: disposition + acceptance (mission-accept-c044)" — one of a
+scripted series, 50 minutes before the hook landed) and six May-2026
+commits whose subjects (`§2.A.2.44 … Joe extends`, `close-out`) were
+agent-written entries; the report counts 7 of 10 as operator touches.
+`M-categorical-code` has three commits, all pre-hook, counted 3 of 3. The
+mean share of 0.984 therefore says "most documents' histories predate the
+hook", not "most work needed the operator".
+
+Amendment requested: (1) window = commits at or after
+2026-09-30T02:32:06Z only; a commit before that is `:unattributable`, and
+a document with no commit after the hook gets `:typed-absence
+(:no-attributable-history)` for the share, not a number; (2) within the
+window, no trailer = operator touch as before, but also report the
+trailer's `Agent-Id` set so that `wm-author` / seats / `claude-*` are
+visible; (3) keep the marker count as is; (4) recompute the two ρ on the
+rows that have a share, stating the row count; (5) the token proposal
+stands, with a note that at HEAD it is computable for few items — the
+share will exist only once the machine has been working documents under
+the hook for a while, which is itself a finding for B3.
