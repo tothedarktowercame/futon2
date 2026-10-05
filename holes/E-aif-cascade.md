@@ -80,6 +80,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 
 | B1 centrality: what the sources hold | Cascade Live `:arrows` are mission → its own next hole (176/176/176; no want is a task) and `:lineage` is dispatch lineage — no inter-item want relation at HEAD; the mined pattern graph has no task→pattern link; no claude-4 rows measure found in a bounded search. The one inter-item relation is shared applied patterns (`:patterns :edges`, 1,715 links, 249 missions): per item (a) distinct patterns, (b) other missions sharing ≥1, (c) incidences; 46 of 107 ranked items have none. Spearman ρ against the live occurrence count: (a) 0.896, (b) 0.824, (c) 0.840 — the live selector's "centrality" is largely the applied-pattern count. Token proposed: `:meta/downstream-unblocking-count`, value (b) or (c), chosen at B3 | `REPORT-centrality-tokens-2026-10-05.md` |
 
+| B2 operator-turn load | Commit-trailer attribution exists only since the signing hook (futon3c `3981fb38`, 2026-09-30 02:32Z); the first run counted pre-hook commits as operator touches (share 0.984, an artefact). Restricted to the hook era: 4 of 107 items have any attributable history (`M-interim-director-proxy-metric-inventory`, `M-daily-scan`, `M-daily-scan-multi-axis-queue`, `E-cascade-real`), all four machine-only (share 0.0; `wm-author`, codex-11/12/13); 103 are `:no-attributable-history`; ρ undefined. Text markers (`needs Joe`, `HIT`, `🈸`, …): 14 documents, 61 lines — the only HEAD-level operator-load signal. Token proposed `:meta/operator-load-share` (ratio + raw counts); support-change vs preference-term consumption left to B3 | `REPORT-operator-load-2026-10-05.md` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -191,7 +193,7 @@ the outer-loop driver (restating 2026-09-25).
   declare only what you would defend in review), since a derived relation
   is at best a prompt for a declaration. *Accept:* every edge cites the
   line it was read from; (i) and (iii) never merged.
-- [ ] **B2. Discovery: operator-turn load.** From the run records and the
+- [x] **B2. Discovery: operator-turn load.** *Done, with amendment (futon2 `b0405aa8c`, `0c56efe08`, `45af3c447`; MAP table).* From the run records and the
   mission documents: per item, the share of its last N touches that were
   operator turns vs machine-authored (`:last-touch :state`, commit
   trailers), and any mission text that names an operator step
