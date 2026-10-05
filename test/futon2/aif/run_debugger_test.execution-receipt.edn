@@ -1,0 +1,15 @@
+{:schema :test/execution-receipt-v1
+ :recorded-at "2026-10-05T06:26:17Z"
+ :command "clojure -X:test :nses '[futon2.aif.run-debugger-test]'"
+ :namespaces [futon2.aif.run-debugger-test]
+ :tests 17
+ :assertions 67
+ :failures 0
+ :errors 0
+ :result :passed
+ :additional-gates
+ {:clj-kondo {:errors 0 :warnings 0}
+  :check-parens :ok
+  :full-loop-runner-test
+  {:result :pre-existing-fixture-failures
+   :note "Attempted once; fixtures refuse earlier at :required-loop-node-unexercised and the long namespace was interrupted after establishing the unrelated failure class."}}}

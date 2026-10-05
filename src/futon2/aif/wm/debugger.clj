@@ -27,13 +27,16 @@
 
 (defn attached? [] @!attached?)
 
+(defn armed-breakpoints []
+  (vec (sort-by pr-str @!breakpoints)))
+
 (defn arm-breakpoint! [breakpoint]
   (swap! !breakpoints conj breakpoint)
-  {:armed (vec (sort @!breakpoints))})
+  {:armed (armed-breakpoints)})
 
 (defn clear-breakpoint! [breakpoint]
   (swap! !breakpoints disj breakpoint)
-  {:armed (vec (sort @!breakpoints))})
+  {:armed (armed-breakpoints)})
 
 (defn breakpoint-armed? [breakpoint]
   (contains? @!breakpoints breakpoint))
@@ -52,14 +55,31 @@
 (defn stopped
   "Public descriptions of run threads currently waiting for a restart."
   []
-  (->> @!stops vals (mapv #(dissoc % :decision :throwable))
+  (->> @!stops vals
+       (mapv (fn [stop]
+               (-> stop
+                   (dissoc :decision :throwable :stop-value :has-stop-value?)
+                   (update :ex-data dissoc :debugger/result))))
        (sort-by (juxt :stopped-at :run-id)) vec))
 
+(defn stop-value
+  "Return the retained computed value for stopped RUN-ID.
+  Failure stops do not have such a value."
+  [run-id]
+  (let [stop (get @!stops run-id)]
+    (when-not stop
+      (throw (ex-info "Run is not stopped"
+                      {:kind :debugger/run-not-stopped :run-id run-id})))
+    (when-not (:has-stop-value? stop)
+      (throw (ex-info "Stopped condition has no computed value"
+                      {:kind :debugger/stop-value-unavailable :run-id run-id})))
+    (:stop-value stop)))
+
 (defn continue!
-  "Deliver CHOICE to stopped RUN-ID. Choice is :retry, :abort, or
+  "Deliver CHOICE to stopped RUN-ID. Choice is :continue, :retry, :abort, or
   [:use-value value]. The restart itself is invoked by the waiting run thread."
   [run-id choice]
-  (when-not (or (#{:retry :abort} choice)
+  (when-not (or (#{:continue :retry :abort} choice)
                 (and (vector? choice) (= :use-value (first choice)) (= 2 (count choice))))
     (throw (ex-info "Unknown debugger restart choice"
                     {:kind :debugger/invalid-choice :run-id run-id :choice choice})))
@@ -67,6 +87,11 @@
     (when-not stop
       (throw (ex-info "Run is not stopped"
                       {:kind :debugger/run-not-stopped :run-id run-id})))
+    (when (and (= :continue choice) (not (:has-stop-value? stop)))
+      (throw (ex-info "Continue requires a retained phase result"
+                      {:kind :debugger/invalid-choice-for-stop
+                       :run-id run-id :choice choice
+                       :condition-kind (get-in stop [:condition :kind])})))
     (if (deliver (:decision stop) choice)
       {:run-id run-id
        :choice (if (vector? choice) (first choice) choice)
@@ -92,23 +117,33 @@
                         :receipt-run-id (:run-id receipt)})))))
   receipt)
 
+(defn- value-summary [value]
+  (if (map? value)
+    {:top-level-keys (vec (sort-by pr-str (keys value)))}
+    {:type (if (nil? value) "nil" (.getName (class value))) }))
+
 (defn await-restart!
   "Signal THROWABLE as a phase condition and wait for an operator restart.
   Returns {:action ...}; it never invokes a restart from the operator thread."
   [{:keys [run-id attempt-id opportunity-id phase nano-time-fn
-           debugger-dwell-ledger]} throwable]
+           debugger-dwell-ledger debugger-stop-value debugger-has-stop-value?]}
+   throwable]
   (let [decision (promise)
         nano-time (or nano-time-fn #(System/nanoTime))
         stopped-ns (nano-time)
         condition {:kind (condition-kind throwable)
                    :class (.getName (class throwable))
                    :message (.getMessage throwable)}
-        entry {:run-id run-id :attempt-id attempt-id
+        entry (cond-> {:run-id run-id :attempt-id attempt-id
                :opportunity-id opportunity-id :phase phase
                :condition condition :ex-data (ex-data throwable)
                :stopped-at (str (Instant/now))
                :stopped-at-monotonic-ns stopped-ns
-               :decision decision :throwable throwable}]
+               :decision decision :throwable throwable}
+                debugger-has-stop-value?
+                (assoc :has-stop-value? true
+                       :stop-value debugger-stop-value
+                       :result-summary (value-summary debugger-stop-value)))]
     #_{:clj-kondo/ignore [:unresolved-symbol]}
     (restart-case
       (handler-bind
@@ -131,6 +166,8 @@
                             :duration-ms (quot (max 0 (- resumed-ns stopped-ns))
                                                1000000)})]
               (cond
+                (= :continue choice)
+                (far/invoke-restart ::continue debugger-stop-value receipt)
                 (= :retry choice) (far/invoke-restart ::retry receipt)
                 (= :abort choice) (far/invoke-restart ::abort receipt)
                 (= :use-value (first choice))
@@ -139,6 +176,8 @@
               (swap! !stops dissoc run-id))))]
        (far/error ::phase-failure entry))
       (::retry [receipt] {:action :retry :debugger-dwell receipt})
+      (::continue [value receipt]
+        {:action :continue :value value :debugger-dwell receipt})
       (::use-value [value receipt]
         {:action :use-value :value value :debugger-dwell receipt})
       (::abort [receipt] {:action :abort :debugger-dwell receipt}))))

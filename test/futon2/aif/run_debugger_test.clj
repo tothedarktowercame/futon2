@@ -98,6 +98,110 @@
           (f)))
       (finally (debugger/detach!)))))
 
+(deftest armed-after-phase-continues-with-the-computed-value
+  (debugger/attach!)
+  (debugger/arm-breakpoint! [:after :phase-x])
+  (let [calls (atom 0)
+        result {:answer 42 :detail (apply str (repeat 1000 "large"))}
+        running (future
+                  (runner/run-phase!
+                   (phase-opts "after-continue" (atom []))
+                   {:opportunity-id "op" :attempt-id "attempt"}
+                   :phase-x #(do (swap! calls inc) result)))]
+    (try
+      (let [stop (wait-for-condition "after-continue" :wm/phase-breakpoint)]
+        (is (= :phase-x (:phase stop)))
+        (is (= {:top-level-keys [:answer :detail]} (:result-summary stop)))
+        (is (nil? (get-in stop [:ex-data :debugger/result])))
+        (is (= result (debugger/stop-value "after-continue")))
+        (debugger/continue! "after-continue" :continue)
+        (is (= result (deref running 2000 ::timeout)))
+        (is (= 1 @calls)))
+      (finally
+        (debugger/clear-breakpoint! [:after :phase-x])))))
+
+(deftest after-phase-retry-reruns-and-use-value-overrides
+  (debugger/attach!)
+  (debugger/arm-breakpoint! [:after :phase-x])
+  (let [calls (atom 0)
+        running (future
+                  (runner/run-phase!
+                   (phase-opts "after-retry" (atom []))
+                   {:opportunity-id "op" :attempt-id "attempt"}
+                   :phase-x #(swap! calls inc)))]
+    (try
+      (wait-for-stop "after-retry")
+      (debugger/clear-breakpoint! [:after :phase-x])
+      (debugger/continue! "after-retry" :retry)
+      (is (= 2 (deref running 2000 ::timeout)))
+      (is (= 2 @calls))
+      (debugger/arm-breakpoint! [:after :phase-x])
+      (let [override (future
+                       (runner/run-phase!
+                        (phase-opts "after-use-value" (atom []))
+                        {:opportunity-id "op" :attempt-id "attempt"}
+                        :phase-x (constantly :computed)))]
+        (wait-for-stop "after-use-value")
+        (debugger/continue! "after-use-value" [:use-value :operator])
+        (is (= :operator (deref override 2000 ::timeout))))
+      (finally
+        (debugger/clear-breakpoint! [:after :phase-x])))))
+
+(deftest after-phase-guard-requires-attachment-and-exact-name
+  (debugger/arm-breakpoint! [:after :phase-x])
+  (try
+    (is (= :detached
+           (runner/run-phase!
+            (phase-opts "after-detached" (atom [])) {} :phase-x
+            (constantly :detached))))
+    (debugger/attach!)
+    (debugger/clear-breakpoint! [:after :phase-x])
+    (debugger/arm-breakpoint! [:after :other-phase])
+    (is (= :unarmed
+           (runner/run-phase!
+            (phase-opts "after-unarmed" (atom [])) {} :phase-x
+            (constantly :unarmed))))
+    (finally
+      (debugger/clear-breakpoint! [:after :phase-x])
+      (debugger/clear-breakpoint! [:after :other-phase]))))
+
+(deftest continue-is-refused-for-a-failure-without-a-computed-value
+  (debugger/attach!)
+  (let [running (future
+                  (try
+                    (runner/run-phase!
+                     (phase-opts "failure-continue" (atom [])) {}
+                     :phase-x repairable-callee)
+                    (catch Throwable e e)))]
+    (wait-for-stop "failure-continue")
+    (is (= :debugger/invalid-choice-for-stop
+           (:kind (ex-data
+                   (try
+                     (debugger/continue! "failure-continue" :continue)
+                     (catch clojure.lang.ExceptionInfo e e))))))
+    (debugger/continue! "failure-continue" :abort)
+    (is (instance? Throwable (deref running 2000 ::timeout)))))
+
+(deftest after-phase-dwell-is-recorded-and-excluded-from-active-time
+  (debugger/attach!)
+  (debugger/arm-breakpoint! [:after :phase-x])
+  (let [run-id "after-dwell" clock (atom 0) events (atom [])
+        ledger (debugger/new-dwell-ledger run-id)
+        opts (assoc (dissoc (phase-opts run-id events) :phase-log-fn)
+                    :nano-time-fn #(long @clock)
+                    :debugger-dwell/state ledger)
+        running (future (runner/run-phase! opts {} :phase-x (constantly :ok)))]
+    (try
+      (wait-for-stop run-id)
+      (reset! clock 5000000000)
+      (debugger/continue! run-id :continue)
+      (is (= :ok (deref running 2000 ::timeout)))
+      (is (= 5000 (get-in @ledger [:receipts 0 :duration-ms])))
+      (is (= 0 (get-in (telemetry/phase-timings @events ledger run-id)
+                       [:phase-timings-ms :phase-x])))
+      (finally
+        (debugger/clear-breakpoint! [:after :phase-x])))))
+
 (deftest retry-repairs-only-the-failed-phase-on-the-same-run-thread
   ;; Plant: restarting miniature-run here would increment :agent-readiness to
   ;; two. The assertion fixes the restart boundary at run-phase!.

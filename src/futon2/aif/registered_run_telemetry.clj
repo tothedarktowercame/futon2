@@ -30,7 +30,7 @@
                                     (integer? resumed-at-monotonic-ns)
                                     (<= stopped-at-monotonic-ns
                                         resumed-at-monotonic-ns)
-                                    (contains? #{:retry :abort :use-value}
+                                    (contains? #{:continue :retry :abort :use-value}
                                                restart-choice)
                                     (= duration-ms
                                        (quot (- resumed-at-monotonic-ns

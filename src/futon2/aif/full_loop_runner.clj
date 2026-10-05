@@ -372,6 +372,13 @@
                                         (debugger/attached?))
                                (result->debugger-condition result))
                    _ (when condition (throw condition))
+                   _ (when (and (debugger/attached?)
+                                (debugger/breakpoint-armed? [:after phase]))
+                       (throw (ex-info "War Machine phase breakpoint"
+                                       {:kind :wm/phase-breakpoint
+                                        :phase phase
+                                        :debugger/has-result? true
+                                        :debugger/result result})))
                    detail (if result->event (or (result->event result) {}) {})]
                (emit-phase! opts context
                             (merge {:phase phase :transition :end :outcome :ok
@@ -397,7 +404,11 @@
                     (assoc context
                            :run-id (:run-id opts) :phase phase
                            :nano-time-fn nano-time
-                           :debugger-dwell-ledger (:debugger-dwell/state opts))
+                           :debugger-dwell-ledger (:debugger-dwell/state opts)
+                           :debugger-has-stop-value?
+                           (true? (:debugger/has-result? (ex-data throwable)))
+                           :debugger-stop-value
+                           (:debugger/result (ex-data throwable)))
                     throwable)]
                (case action
                  :retry
@@ -410,12 +421,12 @@
                                  :debugger/restart :retry
                                  :debugger/dwell debugger-dwell})
                    (recur))
-                 :use-value
+                 (:continue :use-value)
                  (let [detail (if result->event (or (result->event value) {}) {})]
                    (emit-phase! opts context
                                 (merge {:phase phase :transition :end :outcome :ok
                                         :duration-ms (quot (- (nano-time) started) 1000000)
-                                        :debugger/restart :use-value
+                                        :debugger/restart action
                                         :debugger/dwell debugger-dwell}
                                        detail))
                    value)
