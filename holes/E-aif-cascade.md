@@ -78,6 +78,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 | four numbers: diamond / two chains / bag | G 1.280 / 1.517 / 1.517 / 0.393; with ordering term 2.280 / 1.517 / 1.517 / 4.978; three of the four are not constructible from the units' tokens | futon2 `ce0d84041`, `REPORT-diamond-four-numbers-2026-10-05.md` |
 | R-cascade discovery (cut, meets, extensions, receipt projection) | drawn graph: one SCC of 11; after an 11-edge cut two 2-cycles remain (R4⇄R7, R6⇄R17) and the script refuses; with R4 → model/rollout and R6 → candidates/select as data, a 19-unit DAG: 5 sources (R13 R14 R19 R2 R4-model), 4 sinks (CTAU-CLASS R16 R3 SCAN), 23 meets under `CascadeOrder.IsMeet`, 63 incomparable pairs with no common lower bound, 951,616,092 linear extensions (log₂ 29.83), of which **0** respect the five stage columns (7 edges run against them); 7 edges `:absent`-class, token-less in the receipt | futon7 `f8d24291c`, futon2 `b237e82a0`, `REPORT-r-cascade-2026-10-05.md`, `r-cascade/r-cascade.edn` |
 
+| B1 centrality: what the sources hold | Cascade Live `:arrows` are mission → its own next hole (176/176/176; no want is a task) and `:lineage` is dispatch lineage — no inter-item want relation at HEAD; the mined pattern graph has no task→pattern link; no claude-4 rows measure found in a bounded search. The one inter-item relation is shared applied patterns (`:patterns :edges`, 1,715 links, 249 missions): per item (a) distinct patterns, (b) other missions sharing ≥1, (c) incidences; 46 of 107 ranked items have none. Spearman ρ against the live occurrence count: (a) 0.896, (b) 0.824, (c) 0.840 — the live selector's "centrality" is largely the applied-pattern count. Token proposed: `:meta/downstream-unblocking-count`, value (b) or (c), chosen at B3 | `REPORT-centrality-tokens-2026-10-05.md` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -157,7 +159,7 @@ feasibility exists in the live selector as the `:automated-feasibility`
 support filter (`:supported :infeasible :unknown`) and in the diamond as
 the machine-side `injury` arm; **operator-turn load is in neither.**
 
-- [ ] **B1. Discovery: centrality.** What "unblocks the most" means per
+- [x] **B1. Discovery: centrality.** *Done, with amendment (futon2 `e578e4259`, `5237a7598`, `5804aea37`; MAP table).* What "unblocks the most" means per
   task kind on today's field: for missions/excursions, the count of other
   items whose wants name this item's produced tokens (from the Cascade
   Live graph's `:arrows` have/want and the pattern graph); for Lean rows,
