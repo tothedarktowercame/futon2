@@ -152,3 +152,14 @@ exactly one further ordinary click for the repaired, debugger-attached run and
 its post-hoc qualitative/timing analysis. Per this document's standing rule,
 `allocated` rises from 45 to **46**. Issue-time accounting and the existing
 refund rules are unchanged.
+
+## Joe's R20 evaluation grant to codex-10, 2026-10-05 — one click, allocated
+
+Joe, 2026-10-05, dictated to claude-2 for codex-10: "Codex 10 had developed a
+repeatable way to evaluate the behavior of the machine, but that was kind of a
+generic evaluation, not necessarily an evaluation that included this R20
+certificate so I think we should ten that it can run another click and that we
+would like to evaluate the results." This authorizes exactly one further
+ordinary click and its post-hoc evaluation, including the R20 certificate.
+Per this document's standing rule, `allocated` rises from 46 to **47**.
+Issue-time accounting and the existing refund rules are unchanged.
