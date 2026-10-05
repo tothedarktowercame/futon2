@@ -26,14 +26,18 @@
         pair-kinds (reduce (fn [m {:keys [a b kind]}]
                              (update m (vec (sort [a b])) (fnil conj #{}) kind)) {} edges)
         pairs (vec (for [left positioned right positioned
-                         :when (< (first left) (first right))
+                         :when (and (< (first left) (first right))
+                                    ;; a pattern repeated in the cascade is
+                                    ;; not a pair with itself
+                                    (not= (second left) (second right)))
                          :let [[i a] left [j b] right [x y] (sort [a b])]]
                      {:a x :b y :positions [i j]
                       :kinds (vec (sort (get pair-kinds [x y] #{})))}))
-        unknown (vec (filter #(not (contains? ids %)) patterns))
+        chosen (distinct patterns)
+        unknown (vec (filter #(not (contains? ids %)) chosen))
         without-links (vec (filter #(and (contains? ids %)
-                                         (empty? (get neighbours % #{}))) patterns))
-        seeds (vec (sort (remove (set (concat unknown without-links)) patterns)))
+                                         (empty? (get neighbours % #{}))) chosen))
+        seeds (vec (sort (remove (set (concat unknown without-links)) chosen)))
         result (when (>= (count seeds) 2)
                  (retraction/retractions graph {:seeds seeds :k 3}))
         cascades (mapv (fn [{:keys [rank cost nodes edges]}]

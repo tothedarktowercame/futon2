@@ -44,6 +44,20 @@
              :seeds ["war-machine/state-capture"]}]
            (:failures result)))))
 
+(deftest a-repeated-pattern-is-one-seed-and-no-pair-with-itself
+  (let [graph (:graph (graph-pin/load-unpinned graph-path))
+        result (graph-view/view graph ["war-machine/state-capture"
+                                       "war-machine/state-capture"
+                                       "ukrns/reader-run-path"])]
+    (is (= 3 (count (:patterns result))) "every position is still listed")
+    (is (= [[1 3] [2 3]] (mapv :positions (:pairs result))))
+    (is (= ["war-machine/state-capture"] (:seeds result)))
+    (is (= ["ukrns/reader-run-path"] (:without-links result)))
+    (is (= [] (:connecting-cascades result)))
+    (is (= [{:kind :fewer-than-two-linked-patterns
+             :seeds ["war-machine/state-capture"]}]
+           (:failures result)))))
+
 (deftest missing-graph-is-a-typed-absence
   (is (= {:status :absent :reason :graph-unreadable
           :graph {:path "test/fixtures/pattern-graph-view/missing.json"}}

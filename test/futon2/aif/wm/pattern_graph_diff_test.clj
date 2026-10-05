@@ -98,6 +98,23 @@
            (:add_uses proposal)))
     (is (= 1 (count (:add_edges proposal))))))
 
+(deftest a-repeated-pattern-is-not-linked-to-itself
+  (let [proposal (graph-diff/pattern-graph-diff
+                  {:run-id "r" :target "M-x"
+                   :selected-action
+                   {:target "M-x"
+                    :precedence [{:id :p/one :produces #{["M-x" :a]}}
+                                 {:id :p/one :produces #{["M-x" :b]}}
+                                 {:id :p/two :produces #{}}]}
+                   :d-task-enactment verified-join
+                   :want-outcome-accounting {:status :refused}
+                   :graph {:path "g" :sha256 "0"}})]
+    (is (= 3 (count (:add_uses proposal))))
+    (is (= [["p/one" "p/two"] ["p/one" "p/two"]]
+           (mapv (juxt :a :b) (:add_edges proposal))))
+    (is (= [[1 3] [2 3]]
+           (mapv #(get-in % [:evidence 0 :positions]) (:add_edges proposal))))))
+
 (deftest bare-want-tokens-are-read-against-the-action-target
   (let [proposal (graph-diff/pattern-graph-diff
                   {:run-id "r"

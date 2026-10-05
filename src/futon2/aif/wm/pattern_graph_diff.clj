@@ -83,7 +83,11 @@
                           [])
               :add_edges (if enacted?
                            (vec (for [left positioned right positioned
-                                      :when (< (first left) (first right))]
+                                      :when (and (< (first left) (first right))
+                                                 ;; a pattern repeated in the
+                                                 ;; cascade is not linked to itself
+                                                 (not= (:id (second left))
+                                                       (:id (second right))))]
                                   (pair-edge run-id left right)))
                            [])}]
     (cond-> base (not enacted?)
