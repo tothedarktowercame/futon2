@@ -258,6 +258,39 @@ small and runs on this real cascade: score the diamond, its two linear
 extensions and its bag under construction's per-step C with the ordering
 term included, and report the four numbers.
 
+**Measured** (codex-33, `REPORT-diamond-four-numbers-2026-10-05.md`,
+futon2 `ce0d84041`; `cascade_shape_g/score-arranged`,
+`:co-application-frontier-theta-v1`, θ = 1/2 for all four patterns, no
+recorded trials; same per-step progress preference for all four; horizon
+4; ambiguity 0; information 0.3069 for all four):
+
+| arrangement | G | risk | P(all done at τ=4) | log₂ #ext | G + ordering |
+|---|---:|---:|---:|---:|---:|
+| diamond | 1.2797 | 1.5866 | 13/64 = 0.203 | 1 | 2.2797 |
+| chain O F I M | 1.5166 | 1.8234 | 1/16 = 0.0625 | 0 | 1.5166 |
+| chain O I F M | 1.5166 | 1.8234 | 1/16 | 0 | 1.5166 |
+| bag | 0.3929 | 0.6998 | 0.772 | log₂ 24 = 4.585 | 4.9779 |
+
+The §5 prediction held: on G alone the bag wins, because a per-step C
+rewards completed-pattern mass at every step and the bag co-applies all
+four at τ = 1. With the ordering term added the chains win instead. Neither
+column is the right accounting, and the reason is the one Joe gave on
+2026-10-05: *the cascade is constructed, not chosen.* These are not four
+policies over the same units to pick among. `fill` needs the field
+observation, so the bag, which fires `fill` at τ = 1 without it, is not an
+arrangement the tokens admit; the chains add a `fill`–`injury` edge that no
+token carries (`chainReceipt_invalid`). The scorer took the edges as given
+and derived needs from them (`arranged->candidate`), which is why it could
+score all four. Under `ConstructionReceipt.valid`, where produces/needs come
+from the units, exactly one of the four is constructible, and the four
+numbers are a comparison between one cascade and three things that are not
+cascades of these units. That is the measured form of v2's two rules: a
+missing edge is not simultaneous success (the bag), and an edge is
+precedence only if a token carries it (the chains). The chain-versus-cascade
+G difference that *is* meaningful is therefore the one between the diamond
+and a four-unit chain whose edges are all token-carrying — which these four
+units do not have, and which would need a different example.
+
 ## 5a. Refinement: the object is alive (Joe, 2026-10-05)
 
 Joe's second addition, the informal-proof story: the War Machine itself
@@ -308,7 +341,10 @@ check belongs after §6's items.
 3. **Per-click unmet table** (small, claude-17's compiler as is): compile
    the four meta patterns with downward link theories and evaluate against
    a run record; output §4's table from the record rather than by hand.
-4. **Four-number experiment** of §5 on the diamond.
+4. **Four-number experiment** of §5 on the diamond. *Done: codex-33,
+   futon2 `ce0d84041`; numbers and reading in §5. Reviewed by claude-2:
+   node sets identical, edges as specified, all four `:computed`, ordering
+   term separate from G.*
 5. Only after 1–4: whether the live selector is replaced by the diamond
    with a reading square, which is an operating change and Joe's call.
 
