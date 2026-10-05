@@ -1,0 +1,38 @@
+{:note "Expected view of run 2026-10-05-c9d25d6a's four patterns against c9d25d6a-graph-extract.json. :patterns and :pairs were computed from the extract by a separate script; :connecting-cascades is the output of futon2.aif.pattern-retraction (k=3, default weights) on the extract with the three linked patterns as seeds, which equals its output on the full graph."
+ :expected
+ {:schema :wm/pattern-graph-view-v1
+  :patterns
+  [{:pattern "ukrns/reader-run-path" :position 1 :in-graph? true :linked-patterns 0}
+   {:pattern "war-machine/state-capture" :position 2 :in-graph? true :linked-patterns 3}
+   {:pattern "orchestration/recorded-handoff" :position 3 :in-graph? true :linked-patterns 3}
+   {:pattern "measurement/warrant-travels-with-the-number" :position 4 :in-graph? true :linked-patterns 2}]
+  :pairs
+  [{:a "ukrns/reader-run-path" :b "war-machine/state-capture" :positions [1 2] :kinds []}
+   {:a "orchestration/recorded-handoff" :b "ukrns/reader-run-path" :positions [1 3] :kinds []}
+   {:a "measurement/warrant-travels-with-the-number" :b "ukrns/reader-run-path" :positions [1 4] :kinds []}
+   {:a "orchestration/recorded-handoff" :b "war-machine/state-capture" :positions [2 3] :kinds []}
+   {:a "measurement/warrant-travels-with-the-number" :b "war-machine/state-capture" :positions [2 4] :kinds []}
+   {:a "measurement/warrant-travels-with-the-number" :b "orchestration/recorded-handoff" :positions [3 4] :kinds ["next-in-session"]}]
+  :unknown []
+  :without-links ["ukrns/reader-run-path"]
+  :seeds ["measurement/warrant-travels-with-the-number" "orchestration/recorded-handoff" "war-machine/state-capture"]
+  :connecting-cascades
+  [{:rank 1 :cost 8
+    :nodes ["measurement/warrant-travels-with-the-number" "orchestration/recorded-handoff" "test-registry/register-the-run" "war-machine/state-capture"]
+    :added ["test-registry/register-the-run"]
+    :edges [{:a "measurement/warrant-travels-with-the-number" :b "orchestration/recorded-handoff" :kind "next-in-session"}
+            {:a "orchestration/recorded-handoff" :b "test-registry/register-the-run" :kind "co-cited"}
+            {:a "test-registry/register-the-run" :b "war-machine/state-capture" :kind "next-in-session"}]}
+   {:rank 2 :cost 9
+    :nodes ["measurement/warrant-travels-with-the-number" "orchestration/recorded-handoff" "process-coherence/stuck-means-signal" "war-machine/state-capture"]
+    :added ["process-coherence/stuck-means-signal"]
+    :edges [{:a "measurement/warrant-travels-with-the-number" :b "orchestration/recorded-handoff" :kind "next-in-session"}
+            {:a "orchestration/recorded-handoff" :b "process-coherence/stuck-means-signal" :kind "next-in-session"}
+            {:a "process-coherence/stuck-means-signal" :b "war-machine/state-capture" :kind "next-in-session"}]}
+   {:rank 3 :cost 9
+    :nodes ["measurement/warrant-travels-with-the-number" "orchestration/recorded-handoff" "war-machine/state-capture" "war-room/wr-4-inhabit-before-building"]
+    :added ["war-room/wr-4-inhabit-before-building"]
+    :edges [{:a "measurement/warrant-travels-with-the-number" :b "orchestration/recorded-handoff" :kind "next-in-session"}
+            {:a "measurement/warrant-travels-with-the-number" :b "war-room/wr-4-inhabit-before-building" :kind "next-in-session"}
+            {:a "war-machine/state-capture" :b "war-room/wr-4-inhabit-before-building" :kind "rejected-beside"}]}]
+  :failures []}}

@@ -1,0 +1,109 @@
+{
+ "note": "Extract of /home/joe/code/storage/operator-turns/mined-pattern-graph.json (sha256 9992e2c62e41453d9ae33ba6c660b20195c91006759c84a3154af858436612e5, not tracked in this repo): the four patterns of run 2026-10-05-c9d25d6a's cascade, the three patterns that the k=3 retraction over the full graph uses to connect the three linked ones, and every edge of the full graph between these seven, copied unchanged. ukrns/reader-run-path has no edges in the full graph.",
+ "records": 5816,
+ "patterns": 7,
+ "pattern_ids": [
+  "measurement/warrant-travels-with-the-number",
+  "orchestration/recorded-handoff",
+  "process-coherence/stuck-means-signal",
+  "test-registry/register-the-run",
+  "ukrns/reader-run-path",
+  "war-machine/state-capture",
+  "war-room/wr-4-inhabit-before-building"
+ ],
+ "edges": [
+  {
+   "a": "orchestration/recorded-handoff",
+   "b": "test-registry/register-the-run",
+   "kind": "co-cited",
+   "evidence": [
+    {
+     "at": "2026-08-01_2026-08-21_block000/claude-4-turn-28.json.analysis.json"
+    },
+    {
+     "at": "2026-08-01_2026-08-21_block000/claude-4-turn-31.json.analysis.json"
+    },
+    {
+     "at": "live/turn-qQHMM9.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "measurement/warrant-travels-with-the-number",
+   "b": "orchestration/recorded-handoff",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-08-22_2026-09-21_block009/claude-13-turn-29.json.analysis.json -> 2026-08-22_2026-09-21_block009/claude-13-turn-35.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "measurement/warrant-travels-with-the-number",
+   "b": "war-room/wr-4-inhabit-before-building",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-08-22_2026-09-21_block007/claude-13-turn-415.json.analysis.json -> 2026-08-22_2026-09-21_block007/claude-13-turn-416.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "orchestration/recorded-handoff",
+   "b": "process-coherence/stuck-means-signal",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-08-22_2026-09-21_block003/codex-10-turn-396.json.analysis.json -> 2026-08-22_2026-09-21_block004/codex-10-turn-402.json.analysis.json"
+    },
+    {
+     "at": "2026-08-22_2026-09-21_block006/codex-17-turn-50.json.analysis.json -> 2026-08-22_2026-09-21_block006/codex-17-turn-60.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "orchestration/recorded-handoff",
+   "b": "test-registry/register-the-run",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-08-01_2026-08-21_block000/claude-4-turn-28.json.analysis.json -> 2026-08-01_2026-08-21_block000/claude-4-turn-31.json.analysis.json"
+    },
+    {
+     "at": "2026-08-01_2026-08-21_block000/claude-4-turn-28.json.analysis.json -> 2026-08-01_2026-08-21_block000/claude-4-turn-31.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "process-coherence/stuck-means-signal",
+   "b": "war-machine/state-capture",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-07-01_2026-07-31_block004/claude-16-turn-97.json.analysis.json -> 2026-07-01_2026-07-31_block004/claude-16-turn-101.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "test-registry/register-the-run",
+   "b": "war-machine/state-capture",
+   "kind": "next-in-session",
+   "evidence": [
+    {
+     "at": "2026-08-22_2026-09-21_block033/claude-3-turn-55.json.analysis.json -> 2026-08-22_2026-09-21_block033/claude-3-turn-70.json.analysis.json"
+    }
+   ]
+  },
+  {
+   "a": "war-machine/state-capture",
+   "b": "war-room/wr-4-inhabit-before-building",
+   "kind": "rejected-beside",
+   "evidence": [
+    {
+     "at": "2026-08-22_2026-09-21_block024/codex-26-turn-57.json.analysis.json#s4.0",
+     "reason": "Read: inhabit existing surfaces before building infrastructure, and stack work that does not serve mathematics or consulting is building alone. Close, but it tells one to inhabit what exists; Joe does not say the layer duplicates a surface, he says the open items come first."
+    }
+   ]
+  }
+ ]
+}
