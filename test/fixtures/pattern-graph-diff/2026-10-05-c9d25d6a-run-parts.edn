@@ -1,0 +1,24 @@
+{:terminal :reviewer-falsifier-failed,
+ :outcome :build-failed,
+ :d-task-enactment
+ {:verification
+  {:status :admitted,
+   :candidate-to-minted-join
+   {:status :verified,
+    :selected-action-sha256
+    "29d4b62b0f9972fac85396a948c6ce1014811799e2eef575b768638445c82777",
+    :enacted-action-sha256
+    "29d4b62b0f9972fac85396a948c6ce1014811799e2eef575b768638445c82777"}}},
+ :note
+ "Copied by value from the run record named in :source-path (not tracked in git). The selected action of the same run is in test/fixtures/selected-want-outcome/2026-10-05-c9d25d6a-action.edn.",
+ :source-path
+ "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn",
+ :artifact
+ {:repo "/home/joe/code/futon7",
+  :commit "7a9113dfd245ab9918da304f32fc62845ef65741"},
+ :target "M-interim-director-proxy-metric-inventory",
+ :want-outcome-accounting
+ {:schema :wm/selected-want-outcome-v1,
+  :status :refused,
+  :reason :selected-want-target-mismatch},
+ :run-id "2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f"}
