@@ -182,7 +182,10 @@ by name as carrier items K1–K3):
   Under K1′: houseboat, boathouse (House leg auxiliary), RV (House leg
   auxiliary), the one-point blend and the water-dropping houseboat are all
   pushouts; the two degenerate ones are separated by K2′. `pushout_iff_coverage`
-  (packet 2b) is stated for coverage over both legs. It is named for what it
+  (packet 2b, mathlib4 `7c9cb26040`) is proved for coverage over both legs; its
+  proof uses neither consistency nor the hom-set hypotheses, so on this carrier
+  Definition 7's universal property *is* coverage and consistency is the
+  separate conjunct. It is named for what it
   is and the docstring says it is not Goguen's optimality distinction.
 - **K2 (revised K2′, 2026-10-06, after packet 2a's stop).** The optimality
   distinction lives in a declared **quality order over cones of one span**,
@@ -225,7 +228,7 @@ of the same question and is deferred with it.
    `native_decide`. (One packet; predict the enumeration size.)
 2. Packet 2a (done, mathlib4 `a82d6342e1`): `isPushout` (K1′), the cone quality
    order (K2′), non-isomorphism of houseboat and the RV (K3), the land-houseboat
-   incomparable pair. Packet 2b: `pushout_iff_coverage` as a theorem (both legs).
+   incomparable pair. Packet 2b (done, `7c9cb26040`): `pushout_iff_coverage`.
 3. (done, mathlib4 `e561bf9205`) Policies, gluing, components, `verdict`; the
    click-bag and diamond-cascade witnesses (obligation 16); application order as
    a separate carrier with `applicationOrder_independent` (obligation 17).
