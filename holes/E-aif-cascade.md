@@ -317,6 +317,176 @@ quick distillation of the scopes and keywords from across the mission.
   alcoves) enters the score — via v2's rule that an unconsumed token earns
   nothing — with the bag measurement as the test case it must fail.
 
+## Rulings — Joe's items (written 2026-10-06 00:20Z at Joe's request)
+
+Everything below waits on a word from Joe; nothing else in the excursion
+is dispatchable until one of these is given. Each item says what is being
+decided, what the record shows, the options, and the owner's
+recommendation. Joe records the ruling on the `→ Ruling:` line (a word is
+enough); the owner then dispatches what follows. Items are independent
+and can be ruled in any order or batch.
+
+### R1. The R-cascade cut (A2 i)
+
+*Decided:* which of the harness figure's 43 term edges carry state across
+the tick boundary and so are not part of one click's formation.
+*Record:* `REPORT-r-cascade-2026-10-05.md` §"Applied cut": 11 edges, each
+with its term and a reason — cross-tick state `R16→R1` (u), `R16→R2`
+(u, world), `R3→R1` (s-next); learned parameters `R4→{R1,R2,R3,R3a}`
+(A, B); fit feedback `R7→R3` (Pi), `R8→R3` (F-pi); split-unit `R6→R4`
+(pi, r), `R8→R6` (F-pi). Without the cut the 11 loop nodes are one
+strongly connected component. *Options:* accept the 11 as tabled; strike
+or add edges (name them). *Recommendation:* accept; the three reasons
+follow from the term names and no edge was argued over.
+→ Ruling:
+
+### R2. The R6 and R4 splits (A2 ii)
+
+*Decided:* whether two drawn boxes are each two units.
+*Record:* after the cut two 2-cycles remain, `R4⇄R7` (A out, rates back)
+and `R6⇄R17` (pi out, E back); the script refuses the unsplit graph and,
+with the splits as data, yields a 19-unit DAG. Proposed: R6 →
+*candidates* (interp in; pi, r out) and *select* (G, E, F-pi, tau, pi in;
+Q-pi, pi out); R4 → *model* (A, B; a source) and *rollout* (mu, interp, T,
+pi, r, rates in; Q-o-pi, A out). *Options:* accept both; accept R6 only;
+treat R4-model not as a unit but as the click's initial have (then R4 is
+not split, its parameters are inputs). *Recommendation:* accept the R6
+split; take the third option for R4 — `A`, `B` are read, not produced,
+within a click, and the figure's own "Forward model" box is the rollout.
+→ Ruling:
+
+### R3. Meet direction (A2 iii) — owner's Lean modules disagree
+
+*Decided:* which way `⊓` points in the Lean, and hence what "the
+semilattice" means in every note.
+*Record:* `CascadeOrder.IsMeet r a b m` has `m` reaching `a` and `b` —
+the nearest common *origin* in descent, so `hasMeets` = every pair shares
+a root (Q1, one cascade per problem). `ConstructionReceipt.MeetWitness`
+has paths from the operands *to* the meet — a common *descendant*. The
+outer diamond example (mathlib4 `e5fa4352a5`) and the note's "minimise is
+the meet of fill and injury" follow the receipt's direction; in
+Alexander's order (larger above) that is the join. codex-33 refused to
+forge reversed paths and left the R-cascade receipt's `:meets` empty.
+*Options:* (a) `CascadeOrder`'s direction is right; amend `MeetWitness`,
+re-prove the diamond with `observe` as the meet of `fill` and `injury`;
+(b) the receipt's direction is right; amend `CascadeOrder` (and the
+reading of Q1); (c) keep both as join and meet of one lattice, named so.
+*Recommendation:* (a). Under it the R-cascade's five sources (R13 R14 R19
+R2 R4-model) are a defect in a measurable sense — 63 pairs with no common
+origin — and R4 is the mend.
+→ Ruling:
+
+### R4. A root unit for the R-cascade (A2 iv)
+
+*Decided:* whether the click's input state is a unit.
+*Record:* the cut severs exactly the edges that would make one: T (R13),
+τ (R14), C (R19), o (R2), A/B (R4-model) are what the previous click left.
+Adding one unit *click-input* that produces those five tokens gives every
+pair a common origin under R3(a) and makes the stage columns' "PERCEIVE
+first" true of one unit. *Options:* add it; leave five sources and read
+them as the click's haves (as `ConstructionReceipt` already does for
+haves). *Recommendation:* add it, so that the R-cascade and the outer
+diamond have the same shape — one root, a frontier, one sink — and the
+Lean receipt for A3 has one `MeetWitness` per incomparable pair.
+→ Ruling:
+
+### R5. Operator load: preference term or support change (B3 i)
+
+*Decided:* how the feasibility reading enters selection.
+*Record:* B2 — attributable commit history exists for 4 of 107 items (all
+machine-only); the text markers (`needs Joe`, `HIT`, `🈸`, …) exist for 14
+documents, 61 lines; B1d — register and its two trajectories exist for
+every in-field item. *Options:* (a) a dispreferred outcome
+`:operator-demand` conditioned on the sheet (the proposal as written);
+(b) an arm like `injury` that excludes operator-bound items from overnight
+support; (c) both, with (b) guarded on a marker threshold.
+*Recommendation:* (a). Excluding on an absence would empty the field
+today; a preference can disprefer mildly and sharpen as history
+accumulates under the hook.
+→ Ruling:
+
+### R6. Library coupling: recorded or scored (B3 ii)
+
+*Decided:* whether "shares patterns" (`@how` generalised) affects G.
+*Record:* B1 — the live selector's occurrence count is ρ 0.896 with an
+item's applied-pattern count, so the current click scores coupling by
+accident; B1c — coupling is uncorrelated with where attention goes
+(ρ −0.207 with dispatches). *Options:* (a) `:item-coupling` on the
+receipt only, not in `minimise`'s needs (the proposal); (b) scored, as a
+term Joe names; (c) dropped from the cascade. *Recommendation:* (a) —
+visible, so that the pattern-graph diff and library work can read it,
+and not steering selection, so that the last click's choice is not
+reproduced on purpose.
+→ Ruling:
+
+### R7. The restated pattern (B5)
+
+*Decided:* whether `meta/select-the-meta-item` goes into
+`futon3/library/meta/` beside the four it is made of.
+*Record:* draft flexiarg at the end of
+`PROPOSAL-outer-diamond-extended-2026-10-06.md`; its HOWEVER is ordinary
+work against self-repair and documenting against doing.
+*Options:* promote as drafted; promote after B4 part 2 shows the
+extension changes a real ranking; do not promote (the diamond is enough).
+*Recommendation:* the middle — a pattern claiming a THEN should carry one
+run where the THEN held.
+→ Ruling:
+
+### R8. Inert tokens: no credit or a cost (C3)
+
+*Decided:* how the other off-diagonal (`¬IF ∧ THEN`, the house of alcoves,
+the token emitted with no consumer) enters the score.
+*Record:* note §5b; the bag of §5 (G 0.393 under per-step C) is the test
+case the rule must fail. *Options:* (a) no credit — a token counts toward
+progress only once a unit or the want consumes it; (b) a positive cost per
+inert token (Salingaros's complexity reading), which needs its own
+measurement; (c) leave the per-step C as is and rely on construction
+never offering the bag. *Recommendation:* (a) now; (b) only if a run
+shows repeated patterns being rewarded under (a).
+→ Ruling:
+
+### R9. Where the quality order enters G (CASCADE-SPEC-v3 §4, first decision)
+
+*Decided:* the route by which Goguen's order on blends reaches the score.
+*Record:* two positions on record in the v3 draft. c17: the order enters
+F as fit, per occurrence, and the number of maximal blends the order
+cannot rank enters ambiguity beside v2's linear-extension term. c10: the
+order is what construction searches over and reaches G only through the
+policy family it admits or an explicit prior; later evidence about fit
+enters F, the categorical order itself does not. *Recommendation:* c10
+for the order, c17 for the count — construction searches the order
+(c10), and when it returns several maximal blends it cannot separate,
+that number is a possibility count and belongs with the ordering term
+(c17's second half). The "fit in F per occurrence" part is already how
+`fit-evidence` works in `cascade_shape_g` and need not be re-decided.
+→ Ruling:
+
+### R10. Is the house/boat order the order for library patterns (v3 §4, second decision)
+
+*Decided:* whether content / axioms / inclusiveness, Goguen's three
+criteria for ranking blends of houseboat and boathouse, is the order to
+apply to blends of library patterns, or whether the library needs its own.
+*Record:* v3 §4 last bullet, open; §7 lists "which parts of a library
+pattern are its inputs and ground" as unsettled, and the order cannot be
+applied before that is. *Options:* adopt Goguen's three as a working
+order; state a library order (e.g. tokens kept, BECAUSE preserved,
+HOWEVER still held); defer until §7's first item is settled.
+*Recommendation:* defer, with the §2a reading (IF = ground, HOWEVER =
+inputs, THEN = blend) as the working answer to §7's first item, and
+revisit when A5 has read a dozen R-units that way.
+→ Ruling:
+
+### What each ruling releases
+
+| ruling | releases |
+|---|---|
+| R1–R4 | A3 (Lean receipt for the R-cascade), A4 (drawing), A5 (R-units as blend squares) |
+| R3 | re-proof of the outer diamond's `MeetWitness`; the seven-unit receipt |
+| R5, R6 | B4 part 2 (rank the 103 cones with the readings; compare with the live selector; ablation flags) |
+| R7 | nothing until B4 part 2; then the library edit (Joe's) |
+| R8 | a measurement packet: the per-step C with consumption, run on the §5 and B4 arrangements |
+| R9, R10 | CASCADE-SPEC-v3 moves from draft to v3; its Lean obligations join the list |
+
 ## DERIVE — exit criteria
 
 - The R-cascade exists as data, receipt and drawing, with the cut ruled.
@@ -335,5 +505,6 @@ A worker takes the next unchecked item in order within its section;
 sections A and B may proceed in parallel on two seats; C1 waits for the
 owner's word. Every result is a commit plus a bell to the owner with the
 sha; the owner reviews before the next item in that section starts. Joe's
-rulings (A2; the B3 choice; B5 promotion; the CASCADE-SPEC-v3 decisions)
-are recorded here when given.
+rulings are the ten items of the Rulings section above; each is recorded
+on its `→ Ruling:` line when given, and the owner dispatches what the
+table under them says it releases.
