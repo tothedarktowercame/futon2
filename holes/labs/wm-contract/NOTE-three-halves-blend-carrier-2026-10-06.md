@@ -229,7 +229,10 @@ of the same question and is deferred with it.
 3. (done, mathlib4 `e561bf9205`) Policies, gluing, components, `verdict`; the
    click-bag and diamond-cascade witnesses (obligation 16); application order as
    a separate carrier with `applicationOrder_independent` (obligation 17).
-4. The pasting-failure witness (obligation 15), after 1.
+4. (done, mathlib4 `8ba60c15c1`) The pasting-failure witness (obligation 15):
+   Proposition 8's vertical shape with a partial leg; `comp_wellFormed` and the
+   witness/consistency iff over the hom-set added. The W (Theorem 13) preserves
+   consistency when its middle pushout cone is consistent.
 5. Two-carrier witness for application order (obligation 17), after 3.
 6. Proposition 8 over the structure (obligation 13), last; it is the only
    piece that is a proof rather than a witness, and its statement must be
