@@ -88,6 +88,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 
 | B1d cheat sheets | 107 one-line sheets, classical counts only. `M-weird-modernism`: register 0.209 (bottom quartile; body sections 0.04–0.25, "Methodology note: the mission as a wyrd-engineered artifact" 0.056), history trajectory flat over 2 commits — the abstract spin-off reads. `M-the-perfect-crime`: register 0.463, IDENTIFY 377 lines at 0.472, history +0.262 over 16 commits — the return to concrete reads, in the history direction. Mission register median 0.474 (q1 0.330, q3 0.529); ρ of register vs B2 marker count 0.224, vs B1 coupling 0.040; the two trajectories disagree on 8 sheets, flagged. Fields proposed for the `observe` square: scope counts, keywords, applied-pattern order, register and both trajectories, status, phase | `REPORT-cheat-sheets-2026-10-05.md` |
 
+| A3 R-cascade receipt (ruled defaults) | 19 units (root `click-input` producing A B C T U-t o τ), 40 edges, 34 token-carried in support, 104 `MeetWitness` over 108 incomparable pairs, `rCascadeReceipt_valid` and the absent-edge bad case both by `native_decide`, lake 585 jobs. **Four pairs have no meet, all with R4:** (R4,R16) (R4,R17) (R4,R6-select) (R4,SCAN). Cause, read in the edn: R4's only outgoing term edges, `R4→R5` (A, Q-o-pi) and `R4→R8` (A), are `:absent` class — the Lean model does not carry the forward model's outputs — so in the receipt R4 is a sink, incomparable with everything downstream of R5, and its incomparable ancestors R13 and R2 leave those pairs without a greatest common origin. The missing meets are the Lean model's missing edges, seen as order structure; the mend is in `aif-lean-dag.edn`'s `:absent` rows, not in the cut | `REPORT-r-cascade-2026-10-05.md` (ruled pass), `r-cascade/r-cascade-ruled.edn`, `mathlib4/DarkTower/WarMachine/RCascadeReceipt.lean` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -137,7 +139,7 @@ contract changes go in the report as a diff for Joe.
   at all or the click's initial have. (iii) Meet direction, above.
   (iv) Whether to add the root unit (click input state) so that the
   R-cascade has meets for every pair.
-- [ ] **A3. Lean receipt.** The ruled R-cascade in `ConstructionReceipt.lean`
+- [x] **A3. Lean receipt.** *Done under the defaults (futon7 `51212a893`, futon2 `1d530b653`, mathlib4 `5319205cd`; MAP table). Reviewed by claude-2: defaults applied as data; `click-input → R4` carries {A, B, T} because `edgeValid` wants the exact intersection and R4 also needs T — right, not a weakening; token Nats spot-checked (R1→R4 mu=14, R13→CTAU-CLASS T=9, click-input→R4 {0 1 9}); no `sorry`; the absent-edge bad case rejected.* The ruled R-cascade in `ConstructionReceipt.lean`
   as the outer diamond was done: `valid = true` for the ruled receipt;
   `valid = false` for the receipt that includes an `:absent`-class edge
   with its token set empty. *Accept:* `lake build` of the module; one
