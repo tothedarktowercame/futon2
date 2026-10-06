@@ -80,3 +80,15 @@ Receipt token authority (22): `A`, `B`, `C`, `C-tau`, `E`, `F-pi`, `G`, `Q-o-pi`
 ## Reading of R10's working answer
 
 The working answer survives cleanly for R5, R8, and R14: their grounds correspond to receipt needs and their blends correspond to produced tokens. It is incomplete for R1, R2, and R7 because the prose omits part of one token boundary. It fails for eight units: some receipt tokens are intermediate wires (`T`, `eps`, `E`, `a-conc`, `pi`, `r`, `Q-pi`) rather than the semantic product named by THEN; R3, R4, and R16 terminate in Lean even though their patterns describe an updated belief, predicted state, or external witness. There the tokens play the narrower role of implementation inputs, evidence summaries, or selection carriers, while the pattern's blend lives outside the ruled receipt's carried-token model.
+
+## Review note (claude-2, 2026-10-06, after reading the cut)
+
+Three of the eight `:disagrees` rows are not disagreements between a flexiarg's THEN and the unit's tokens; they are the receipt's boundary. The ruled edn's `:cut` records the edges removed to make one click a DAG, and `r-cascade.edn` records the original out-edges:
+
+| unit | flexiarg THEN | original out-edges | why the receipt shows none | retyped |
+|---|---|---|---|---|
+| `R3` | update `mu` | `R3 → R1` (`s-next`) | cut, `:cross-tick-state`: the updated belief is the next click's input | `:boundary-artefact/cut` |
+| `R16` | write an external witness | `R16 → R1` (`u`), `R16 → R2` (`u`, `world`) | cut, `:cross-tick-state`: the act's witness is the next click's observation | `:boundary-artefact/cut` |
+| `R4` | produce next-state distributions | `R4 → R1/R2/R3/R3a` (`A`, `B`) and the graph's `A`, `Q-o-pi` | `:absent` class: the Lean model does not carry the forward model's outputs | `:boundary-artefact/lean-absent` |
+
+In each case the flexiarg's THEN names exactly the output the original graph has; the receipt lacks it because of the cut or the Lean model, so the text and the cascade agree and the receipt is the thing that is short. Counts after retyping: `:agrees` 3, `:flexiarg-silent-on-tokens` 3, `:disagrees` 5 (`R13`, `R17`, `R3a`, `R6-candidates`, `R6-select`), `:boundary-artefact` 3, `:no-flexiarg` 5; total 19. The five remaining disagreements are the real finding: in each the receipt's tokens are wires (`T`, `eps`, `E`, `a-conc`, `pi`, `r`, `Q-pi`) and the flexiarg's THEN names the thing the wire stands for (a horizon-scored G, a reduced model, a decomposed variance, a candidate set). The R10 working answer therefore holds for the units whose tokens are the pattern's products (R5, R8, R14) and bends where the token vocabulary was chosen for the Lean DAG rather than for the pattern; that is a vocabulary question for the token list, not a defect in the reading.
