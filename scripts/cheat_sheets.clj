@@ -49,12 +49,12 @@
 
 (def path-re #"(?i)(?:/home/joe/code/|~/code/)?(?:futon\d[a-z]?|mathlib4|p4ng|storage)(?:/[A-Za-z0-9._@+-]+)+|(?:[A-Za-z0-9._-]+/){1,}[A-Za-z0-9._@+-]+|\bfuton\d[a-z]?\b")
 (defn repo-of-path [path] (second (re-find #"/home/joe/code/([^/]+)" path)))
-(defn scope-key [token local-repo]
+(defn scope-key [token _local-repo]
   (let [s (str/replace token #"^[`'(\[]|[`'),.;:\]]$" "")
-        [_ explicit tail] (re-find #"(?i)(?:/home/joe/code/|~/code/)?(futon\d[a-z]?|mathlib4|p4ng|storage)(?:/([^/\s]+))?" s)
-        repo (or explicit local-repo)
-        top (or tail (when (and repo (not explicit)) (first (str/split s #"/"))))]
-    (if (and repo top (not= repo top)) (str repo "/" top) repo)))
+        [_ explicit tail] (re-find #"(?i)(?:/home/joe/code/|~/code/)?(futon\d[a-z]?|mathlib4|p4ng|storage)(?:/([^/\s]+))?" s)]
+    (if explicit
+      (if tail (str explicit "/" tail) explicit)
+      (str "relative/" (first (str/split s #"/"))))))
 (defn scopes [text path]
   (let [repo (repo-of-path path) ks (keep #(scope-key % repo) (re-seq path-re text))]
     {:counts (frequencies ks)
@@ -139,6 +139,15 @@
   (str (if (seq mentioned) (str/join " → " mentioned) "—")
        (when (seq unmentioned) (str " · " (str/join ", " unmentioned)))))
 (defn scopes-text [top] (if (seq top) (str/join " · " (map (fn [[k n]] (str k " ×" n)) top)) "—"))
+(defn check-scope! []
+  (let [path "/home/joe/code/futon3c/holes/missions/M-the-perfect-crime.md"
+        actual (scopes-text (get-in (scopes (slurp path) path) [:top]))
+        expected "relative/code ×23 · futon1b ×15 · futon0/analysis ×9"]
+    (when-not (= expected actual)
+      (throw (ex-info "real-document scope check failed" {:expected expected :actual actual})))
+    (when (str/includes? actual "futon3c/code")
+      (throw (ex-info "bare scope was attributed to the document repository" {:actual actual})))
+    (println "GREEN scope:" actual)))
 (defn sheet-line [r]
   (str "| `" (:id r) "` | scope " (scopes-text (get-in r [:scopes :top]))
        " | keys " (str/join ", " (concat (:keywords r) (map #(str "declared:" %) (:declared r))))
@@ -206,4 +215,6 @@
     (spit report-path (render result))
     (println report-path)))
 
-(apply -main *command-line-args*)
+(if (= ["--check-scope"] *command-line-args*)
+  (check-scope!)
+  (apply -main *command-line-args*))
