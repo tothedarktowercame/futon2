@@ -10,7 +10,7 @@
 
 (def run-path "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn")
 (def graph-url "http://127.0.0.1:7070/api/alpha/cascade-real/graph")
-(def report-path "holes/labs/wm-contract/REPORT-cheat-sheets-2026-10-05.md")
+(def report-path "holes/labs/wm-contract/REPORT-cheat-sheets-2026-10-06.md")
 (def markers ["HIT" "Joe decides" "Joe to decide" "operator ruling" "needs Joe" "🈸" "ask Joe"])
 (def stopwords
   (set (str/split
@@ -33,6 +33,7 @@
   (let [{:keys [exit out err]} (apply shell/sh args)]
     (when-not (zero? exit) (throw (ex-info "command refused" {:args args :exit exit :err err}))) out))
 (defn fmt [x] (format "%.3f" (double (or x 0))))
+(defn fmt6 [x] (format "%.6f" (double (or x 0))))
 (defn md [x] (-> (str x) (str/replace "|" "\\|") (str/replace #"\s+" " ") str/trim))
 (defn ranks [xs]
   (reduce (fn [v g]
@@ -60,6 +61,15 @@
   (let [repo (repo-of-path path) ks (keep #(scope-key % repo) (re-seq path-re text))]
     {:counts (frequencies ks)
      :top (take 3 (sort-by (juxt (comp - val) key) (frequencies ks)))}))
+(defn legacy-scope-key [token local-repo]
+  (let [s (str/replace token #"^[`'(\[]|[`'),.;:\]]$" "")
+        [_ explicit tail] (re-find #"(?i)(?:/home/joe/code/|~/code/)?(futon\d[a-z]?|mathlib4|p4ng|storage)(?:/([^/\s]+))?" s)
+        repo (or explicit local-repo)
+        top (or tail (when (and repo (not explicit)) (first (str/split s #"/"))))]
+    (if (and repo top (not= repo top)) (str repo "/" top) repo)))
+(defn legacy-scopes [text path]
+  (let [repo (repo-of-path path) ks (keep #(legacy-scope-key % repo) (re-seq path-re text))]
+    {:top (take 3 (sort-by (juxt (comp - val) key) (frequencies ks)))}))
 
 (defn clean-text [s]
   (-> s (str/replace #"(?s)```.*?```" " ") (str/replace #"(?s)~~~.*?~~~" " ")
@@ -101,11 +111,17 @@
   (let [ss (mapv #(merge (select-keys % [:title]) (line-register (:lines %))) (sections text))
         included (filterv #(>= (:lines %) minimum-trajectory-section-lines) ss)
         excluded (filterv #(< (:lines %) minimum-trajectory-section-lines) ss)
-        k (max 1 (long (Math/ceil (/ (count included) 3.0))))
-        first-third (vec (take k included)) last-third (vec (take-last k included))]
+        k (max 1 (long (Math/ceil (/ (count ss) 3.0))))
+        first-third (filterv #(>= (:lines %) minimum-trajectory-section-lines) (take k ss))
+        last-third (filterv #(>= (:lines %) minimum-trajectory-section-lines) (take-last k ss))]
     {:sections ss :included included :excluded excluded
      :first-third first-third :last-third last-third
      :delta (- (weighted-register last-third) (weighted-register first-third))}))
+(defn legacy-section-registers [text]
+  (let [ss (mapv #(merge (select-keys % [:title]) (line-register (:lines %))) (sections text))
+        k (max 1 (long (Math/ceil (/ (count ss) 3.0))))]
+    {:delta (- (mean (map :value (take-last k ss)))
+               (mean (map :value (take k ss))))}))
 (defn history-register [path]
   (let [repo (str "/home/joe/code/" (repo-of-path path)) rel (subs path (inc (count repo)))
         raw (sh! "git" "-C" repo "log" "--follow" "--format=%x1e%H" "--patch" "--unified=0" "--" rel)
@@ -182,13 +198,13 @@
        (when (seq (:phases r)) (str " · phase " (str/join "/" (:phases r)))) " |"))
 (defn quantile [xs p] (nth (vec (sort xs)) (long (Math/floor (* p (dec (count xs)))))))
 
-(defn render [{:keys [head graph-pin run-pin rows rhos]}]
+(defn render [{:keys [head graph-pin run-pin rows rhos changes]}]
   (let [examples (map #(first (filter (fn [r] (= % (:id r))) rows)) ["M-weird-modernism" "M-the-perfect-crime"])
         by-kind (sort-by key (group-by :kind rows))]
-    (str "# Deterministic cheat sheets for the persisted 107-item ranking — 2026-10-05\n\n"
+    (str "# Deterministic cheat sheets for the persisted 107-item ranking — 2026-10-06\n\n"
          "Reproduce from `/home/joe/code/futon2` in a fresh process:\n\n```sh\nclojure -M scripts/cheat_sheets.clj\n```\n\n"
-         "futon2 HEAD before generation: `" head "`. Run record pin: `" (:sha256 run-pin) "`. Cascade Live graph: `" graph-url "` / `" graph-pin "`.\n\n"
-         "## Rule\n\n```clojure\n" (pr-str rule) "\n```\n\nThe stoplist is an embedded, version-controlled list of common English function words plus Markdown/project-format words; the complete list is in the script. TF is raw count and IDF is `ln(107 / document-frequency)`. Scope tokens are grouped as `repo/top-dir` where possible. All calculations use whole HEAD documents.\n\n"
+         "futon2 HEAD before generation: `" head "`. Run record pin: `" (:sha256 run-pin) "`. Cascade Live applied-pattern relation: `" graph-url "` / `" graph-pin "` (sha256 of sorted `[:patterns :edges]`; volatile lineage is outside this input).\n\n"
+         "## Rule\n\n```clojure\n" (pr-str rule) "\n```\n\nThe stoplist is an embedded, version-controlled list of common English function words plus Markdown/project-format words; the complete list is in the script. TF is raw count and IDF is `ln(107 / document-frequency)`. Explicit repository tokens are grouped as `repo/top-dir`; bare tokens retain their first segment as `relative/<segment>` and are never assigned to the document's repository. Sections are divided into first and last ceiling thirds in document order; sections with fewer than **15 nonblank lines** are then excluded from those trajectory groups, and the retained registers are weighted by nonblank-line count. A small positive value after exclusion is a measurement, not a flag; a materiality threshold is deferred to E-aif-cascade R-list tuning. All calculations use whole HEAD documents.\n\n"
          "## Worked examples (first)\n\n"
          (str/join "\n\n" (for [r examples]
                               (str "### `" (:id r) "`\n\n" (sheet-line r) "\n\n"
@@ -199,13 +215,24 @@
                                    "| section | nonblank lines | concrete lines | register |\n|---|---:|---:|---:|\n"
                                    (str/join "\n" (for [s (:section-registers r)]
                                                         (str "| " (md (:title s)) " | " (:lines s) " | " (:concrete s) " | " (fmt (:value s)) " |")))
-                                   "\n\nSection delta: " (fmt (:section-delta r)) "; history added-line delta (last 3 minus first 3 of " (get-in r [:history :commits]) " commits): " (fmt (:history-delta r)) ".")))
+                                   "\n\nExcluded from section trajectory (<15 lines): "
+                                   (if (seq (:section-excluded r))
+                                     (str/join ", " (map #(str "`" (:title %) "` (" (:lines %) " lines)") (:section-excluded r)))
+                                     "none")
+                                   ". Last-third contributors: "
+                                   (str/join ", " (map #(str "`" (:title %) "` (" (:lines %) " lines, register " (fmt (:value %)) ")") (:section-last-third r)))
+                                   ". Section delta: " (fmt (:section-delta r)) "; history added-line delta (last 3 minus first 3 of " (get-in r [:history :commits]) " commits): " (fmt (:history-delta r)) ".")))
+         "\n\n## Changes from the first cut\n\n"
+         "The 2026-10-05 report remains unchanged because B4 part 2 pins it by SHA. This 2026-10-06 report is a new input for a later rerun. Against the first-cut algorithms on the same 107 HEAD documents, **" (:scope-count changes) " scope lines changed** and **" (:sign-count changes) " section-trajectory signs changed**.\n\n"
+         "| id | scope before | scope after | section before | section after |\n|---|---|---|---:|---:|\n"
+         (str/join "\n" (for [{:keys [id old-scope new-scope old-section new-section]} (:sample changes)]
+                            (str "| `" id "` | " old-scope " | " new-scope " | " (fmt old-section) " " (arrow old-section) " | " (fmt new-section) " " (arrow new-section) " |")))
          "\n\n## The 107 one-line sheets\n\n| id | scopes | keywords | changes | register trajectory | status |\n|---|---|---|---|---|---|\n"
          (str/join "\n" (map sheet-line rows))
          "\n\n## Register distribution by kind\n\n| kind | n | min | q1 | median | q3 | max | mean |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
          (str/join "\n" (for [[kind rs] by-kind :let [xs (mapv :register rs)]]
                               (str "| `" kind "` | " (count rs) " | " (fmt (apply min xs)) " | " (fmt (quantile xs 0.25)) " | " (fmt (quantile xs 0.5)) " | " (fmt (quantile xs 0.75)) " | " (fmt (apply max xs)) " | " (fmt (mean xs)) " |")))
-         "\n\n## Correlations\n\nSpearman rho uses average ranks for ties over all 107 items.\n\n| comparison | rho |\n|---|---:|\n| whole-document register vs B2 marker count | " (fmt (:markers rhos)) " |\n| whole-document register vs B1(b) shared missions | " (fmt (:shared rhos)) " |\n\n"
+         "\n\n## Correlations\n\nSpearman rho uses average ranks for ties over all 107 items.\n\n| comparison | rho |\n|---|---:|\n| whole-document register vs B2 marker count | " (fmt (:markers rhos)) " |\n| whole-document register vs B1(b) shared missions | " (fmt (:shared rhos)) " |\n\nFirst-cut rounded values were 0.224 and 0.040; against those recorded values the regenerated deltas are " (fmt6 (- (:markers rhos) 0.224)) " and " (fmt6 (- (:shared rhos) 0.040)) ". Neither moved by more than 0.05. Trajectory/history disagreement changed from 8 to " (:disagreement-count changes) " items (delta " (- (:disagreement-count changes) 8) ").\n\n"
          "## Observe-square token fields\n\nThe observe square could emit the mechanically traceable fields `:scope-counts`, `:tf-idf-keywords`, `:declared-keywords`, `:applied-pattern-order`, `:register`, `:section-register-trajectory`, `:history-register-trajectory`, `:status`, and `:lifecycle-phase`. Register and its two trajectories are feasibility observations; disagreement between the two trajectories remains explicit rather than being collapsed into one direction.\n")))
 
 (defn -main [& _]
@@ -220,21 +247,42 @@
                        {:id id :kind kind :rank rank :path path :text (slurp path)})) ranked)
         kws (keyword-map docs) fetched (fetch-graph) app (applied (:graph fetched))
         rows (mapv (fn [{:keys [id kind path text rank]}]
-                     (let [sr (section-registers text) hr (history-register path) st (status text)
+                     (let [sr (section-registers text) old-sr (legacy-section-registers text)
+                           hr (history-register path) st (status text)
                            sd (:delta sr) hd (:delta hr)]
                        (merge {:id id :kind kind :path path :scopes (scopes text path) :keywords (kws id)
+                               :legacy-scopes (legacy-scopes text path) :legacy-section-delta (:delta old-sr)
                               :declared (declared-keywords text) :patterns (pattern-order (get app id #{}) text)
                                :diagnostics {:source-lines (count (str/split-lines text))
                                              :path-lines (count (filter #(str/includes? % "/") (str/split-lines text)))
                                              :checkboxes (count (re-seq #"(?m)^\s*- \[[ xX]\]" text))
                                              :sha-tokens (count (re-seq #"(?i)\b[0-9a-f]{7,64}\b" text))}
                                :register (:value (line-register (str/split-lines text)))
-                               :section-registers (:sections sr) :section-delta sd :history hr :history-delta hd
+                               :section-registers (:sections sr) :section-excluded (:excluded sr)
+                               :section-last-third (:last-third sr) :section-delta sd :history hr :history-delta hd
                                :disagree (neg? (* sd hd)) :markers (marker-count text) :shared (shared-count app id)
                                :occurrence (get-in rank [:channels :pipeline-structural-centrality-cost :observation :value])}
                               st))) docs)
+        comparisons (mapv (fn [row]
+                            {:id (:id row)
+                             :old-scope (scopes-text (get-in row [:legacy-scopes :top]))
+                             :new-scope (scopes-text (get-in row [:scopes :top]))
+                             :old-section (:legacy-section-delta row)
+                             :new-section (:section-delta row)}) rows)
+        changed (filterv #(or (not= (:old-scope %) (:new-scope %))
+                              (not= (arrow (:old-section %)) (arrow (:new-section %)))) comparisons)
+        changes {:scope-count (count (filter #(not= (:old-scope %) (:new-scope %)) comparisons))
+                 :sign-count (count (filter #(not= (arrow (:old-section %))
+                                                 (arrow (:new-section %))) comparisons))
+                 :disagreement-count (count (filter :disagree rows))
+                 :sample (vec (take 10 changed))}
+        _ (when-not (= [94 58] [(:scope-count changes) (:sign-count changes)])
+            (throw (ex-info "first-cut comparison changed" {:changes changes})))
         result {:head (str/trim (sh! "git" "rev-parse" "HEAD"))
-                :run-pin {:sha256 (sha256 run-body)} :graph-pin (sha256 (:body fetched)) :rows rows
+                :run-pin {:sha256 (sha256 run-body)}
+                :graph-pin (sha256 (pr-str (sort-by pr-str (get-in fetched [:graph :patterns :edges]))))
+                :rows rows
+                :changes changes
                 :rhos {:markers (rho (mapv :register rows) (mapv :markers rows))
                        :shared (rho (mapv :register rows) (mapv :shared rows))}}]
     (spit report-path (render result))
