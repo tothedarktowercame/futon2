@@ -24,7 +24,8 @@
               :signals [:path :sha-7-plus :number :checkbox :iso-date]
               :denominator :nonblank-lines
               :sections :level-2-headings
-              :section-trajectory :mean-last-ceiling-third-minus-mean-first-ceiling-third
+              :section-trajectory {:form :line-weighted-last-ceiling-third-minus-first-ceiling-third
+                                   :minimum-section-lines 15}
               :history-trajectory :added-line-register-last-3-commits-minus-first-3-commits}})
 
 (defn sha256 [s] (field/sha256 (.getBytes ^String s "UTF-8")))
@@ -92,10 +93,19 @@
               (update-in out [(dec (count out)) :lines] conj line)))
           [{:title "Preamble" :lines []}] (str/split-lines text)))
 (defn mean [xs] (if (seq xs) (/ (reduce + xs) (double (count xs))) 0.0))
+(def minimum-trajectory-section-lines 15)
+(defn weighted-register [ss]
+  (let [lines (reduce + (map :lines ss)) concrete (reduce + (map :concrete ss))]
+    (if (pos? lines) (/ concrete (double lines)) 0.0)))
 (defn section-registers [text]
   (let [ss (mapv #(merge (select-keys % [:title]) (line-register (:lines %))) (sections text))
-        k (max 1 (long (Math/ceil (/ (count ss) 3.0))))]
-    {:sections ss :delta (- (mean (map :value (take-last k ss))) (mean (map :value (take k ss))))}))
+        included (filterv #(>= (:lines %) minimum-trajectory-section-lines) ss)
+        excluded (filterv #(< (:lines %) minimum-trajectory-section-lines) ss)
+        k (max 1 (long (Math/ceil (/ (count included) 3.0))))
+        first-third (vec (take k included)) last-third (vec (take-last k included))]
+    {:sections ss :included included :excluded excluded
+     :first-third first-third :last-third last-third
+     :delta (- (weighted-register last-third) (weighted-register first-third))}))
 (defn history-register [path]
   (let [repo (str "/home/joe/code/" (repo-of-path path)) rel (subs path (inc (count repo)))
         raw (sh! "git" "-C" repo "log" "--follow" "--format=%x1e%H" "--patch" "--unified=0" "--" rel)
@@ -148,6 +158,21 @@
     (when (str/includes? actual "futon3c/code")
       (throw (ex-info "bare scope was attributed to the document repository" {:actual actual})))
     (println "GREEN scope:" actual)))
+(defn check-trajectory! []
+  (let [path "/home/joe/code/futon3/holes/missions/M-weird-modernism.md"
+        result (section-registers (slurp path))
+        checklist (first (filter #(= "Acceptance checklist (2026-09-30)" (:title %))
+                                 (:excluded result)))
+        log (first (filter #(= "Mission log" (:title %)) (:last-third result)))]
+    (when-not (= "0.034961" (format "%.6f" (:delta result)))
+      (throw (ex-info "real-document trajectory delta check failed"
+                      {:expected 0.034961 :actual (:delta result)})))
+    (when-not (= 5 (:lines checklist))
+      (throw (ex-info "short acceptance checklist was not excluded"
+                      {:excluded (:excluded result)})))
+    (when-not (and (= 120 (:lines log)) (= "0.367" (format "%.3f" (:value log))))
+      (throw (ex-info "remaining last-third contributor changed" {:mission-log log})))
+    (println "GREEN trajectory: delta=0.034961; excluded=Acceptance checklist (2026-09-30) [5 lines]; remaining=Mission log [120 lines, register 0.367]")))
 (defn sheet-line [r]
   (str "| `" (:id r) "` | scope " (scopes-text (get-in r [:scopes :top]))
        " | keys " (str/join ", " (concat (:keywords r) (map #(str "declared:" %) (:declared r))))
@@ -215,6 +240,7 @@
     (spit report-path (render result))
     (println report-path)))
 
-(if (= ["--check-scope"] *command-line-args*)
-  (check-scope!)
+(case (first *command-line-args*)
+  "--check-scope" (check-scope!)
+  "--check" (do (check-scope!) (check-trajectory!))
   (apply -main *command-line-args*))
