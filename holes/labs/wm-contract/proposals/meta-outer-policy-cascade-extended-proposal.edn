@@ -1,0 +1,112 @@
+;; PROPOSAL (E-aif-cascade B3, claude-2, 2026-10-06). Not the contract.
+;; The contract is futon3/library/meta/meta-outer-policy-cascade.edn; this
+;; file is the same contract with three reading squares pasted in after
+;; observe-the-meta-field, and the generative model told what they emit.
+;; Joe decides whether any of it moves to futon3. Differences from the
+;; contract are marked ;; + (added) and ;; ~ (changed).
+{:schema :meta/outer-policy-cascade-v1
+ :id :meta/reason-bearing-meta-selection-extended
+ :patterns
+ [:meta/observe-the-meta-field
+  :meta/read-the-item-sheet          ;; + B1d: scope, keywords, pattern order, register, trajectories
+  :meta/read-revealed-attention      ;; + B1c: dispatches, operator turns, co-work; a declared rests-on line when present
+  :meta/read-library-coupling        ;; + B1: shared applied patterns (@how); recorded, consumed only if ruled
+  :meta/fill-meta-policy-slots
+  :meta/injury-routes-to-self-heal
+  :meta/minimise-g-over-filled-meta-policies]
+
+ :precedence
+ [[:meta/observe-the-meta-field :meta/read-the-item-sheet]           ;; + token :field-observation
+  [:meta/observe-the-meta-field :meta/read-revealed-attention]       ;; + token :field-observation
+  [:meta/observe-the-meta-field :meta/read-library-coupling]         ;; + token :field-observation
+  [:meta/observe-the-meta-field :meta/fill-meta-policy-slots]
+  [:meta/observe-the-meta-field :meta/injury-routes-to-self-heal]
+  [:meta/read-the-item-sheet :meta/minimise-g-over-filled-meta-policies]        ;; + token :item-sheet
+  [:meta/read-revealed-attention :meta/minimise-g-over-filled-meta-policies]    ;; + token :item-attention
+  [:meta/read-library-coupling :meta/minimise-g-over-filled-meta-policies]      ;; + token :item-coupling
+  [:meta/fill-meta-policy-slots :meta/minimise-g-over-filled-meta-policies]
+  [:meta/injury-routes-to-self-heal :meta/minimise-g-over-filled-meta-policies]]
+
+ ;; + the tokens each unit needs and produces, so that the receipt
+ ;;   (ConstructionReceipt.edgeValid) can be checked rather than declared
+ :tokens
+ {:meta/observe-the-meta-field        {:needs #{} :produces #{:field-observation :injury-observation}}
+  :meta/read-the-item-sheet           {:needs #{:field-observation} :produces #{:item-sheet}}
+  :meta/read-revealed-attention       {:needs #{:field-observation} :produces #{:item-attention :item-unblocks}}
+  :meta/read-library-coupling         {:needs #{:field-observation} :produces #{:item-coupling}}
+  :meta/fill-meta-policy-slots        {:needs #{:field-observation} :produces #{:filled-candidates :typed-exclusions}}
+  :meta/injury-routes-to-self-heal    {:needs #{:field-observation :injury-observation} :produces #{:admitted-support :rearm-slot}}
+  :meta/minimise-g-over-filled-meta-policies
+  {:needs #{:filled-candidates :typed-exclusions :admitted-support :rearm-slot :item-sheet :item-attention}
+   :produces #{:selected-meta-policy}}}
+ ;; :item-coupling and :item-unblocks are produced and carried on the
+ ;; receipt but not in minimise's needs until Joe rules (B3 choice (ii)
+ ;; and B1b's declaration proposal). Under edgeValid the coupling edge
+ ;; therefore carries no needed token and would be rejected: it is drawn
+ ;; here as the alternative, not asserted.
+
+ :slots
+ {:task-kind {:required true :type :enum :values [:mission :excursion :ticket :algorithm]}
+  :target {:required true :type :current-meta-item-id :source :meta-field/current-items}
+  :next-move {:required true :type :enum :values [:advance :unblock :close :repair :run-algorithm]}
+  :resource-envelope {:required true :type :resource-envelope
+                      :fields {:time-budget-ms :positive-integer :token-budget :positive-integer
+                               :author-seat :agent-id :reviewer-seat :agent-id}}
+  :evidence-channel {:required true :type :closure-or-progress-observer
+                     :fields {:source :source-pin :locator :checkable-locator}}
+  :stopping-rule {:required true :type :enum
+                  :values [:closed :grounded-progress :typed-blocker :budget-exhausted :debugger-stop]}}
+
+ :arms
+ {:ordinary-work {:guard {:injury-observation {:absent :no-active-injury}}
+                  :admit-task-kinds [:mission :excursion :ticket] :exclude-task-kinds [:algorithm]
+                  :next-moves [:advance :unblock :close]}
+  :self-heal {:guard {:injury-observation :active :requires [:injured-capability :source-pin]
+                      :algorithm-match :repairs-injured-capability}
+              :admit-task-kinds [:algorithm] :exclude-task-kinds [:mission :excursion :ticket]
+              :exclusion-reason :machine-injury-active :next-moves [:repair :run-algorithm]
+              :rearm-slot {:required true :type :checkable-capability-observation}
+              :no-matching-algorithm {:result :abstain :reason :no-matching-self-heal-algorithm
+                                      :ordinary-support :remains-excluded}}}
+
+ :generative-model
+ {:outcomes
+  [:closure :grounded-progress :useful-blocker-discovery
+   :downstream-unblocking :information-gain
+   :elapsed-ms :token-use :repeated-target
+   :abstention :unreviewable-output :injury-persistence
+   :operator-demand]                                     ;; + predicted operator turns needed
+  :terms
+  {:risk {:preferred [:closure :grounded-progress :downstream-unblocking]
+          :dispreferred [:elapsed-ms :token-use :repeated-target
+                         :abstention :unreviewable-output :injury-persistence
+                         :operator-demand]}             ;; ~ added
+   :ambiguity {:over :predicted-outcome-observations}
+   :epistemic-value {:preferred [:useful-blocker-discovery :information-gain]}}
+  ;; + which reading token conditions which predicted outcome
+  :conditioning
+  {:downstream-unblocking [:item-attention :item-unblocks]   ;; enabler weight first; declaration when present
+   :operator-demand [:item-sheet]                            ;; register, trajectories, marker count
+   :grounded-progress [:item-sheet]                          ;; register and phase
+   :repeated-target [:item-attention]}                       ;; recency of dispatch
+  :law :G=risk+ambiguity-epistemic-value
+  :missing-term-policy :refuse-not-zero}
+
+ :selection
+ {:law :argmin-G
+  :requires [:fully-filled-slots :common-outcome-vocabulary :preference-source :predicted-outcomes]
+  :singleton-policy :typed-bypass
+  :receipt [:field-census :typed-exclusions :candidate-slot-fillings :source-pins
+            :item-sheets :item-attention :item-coupling      ;; + the readings travel with the receipt
+            :predicted-outcomes :g-terms :g :selected-policy :nearest-alternative :selection-reason]}
+
+ :boundary
+ {:produces :selected-meta-policy
+  :then :construct-fresh-task-local-tactical-cascade
+  :forbids-as-outer-input [:tactical-patterns :tactical-candidates :tactical-precedence :tactical-G]}
+
+ :executable-examples-authority
+ {:status :illustrative-not-admissible-g-authority
+  :reason :numeric-preferences-normalization-and-candidate-predictions-are-undeclared
+  :must-not-feed [:production-selection :calibration :model-fitting]}
+ :executable-examples []}

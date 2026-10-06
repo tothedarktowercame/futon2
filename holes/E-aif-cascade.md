@@ -270,7 +270,7 @@ quick distillation of the scopes and keywords from across the mission.
   (`HIT`, "Joe decides", `🈸`). Output: a feasibility token with its
   source. *Accept:* one value or typed absence per item; the rule stated
   as data, not prose.
-- [ ] **B3. The extended diamond, as a proposal.** New squares pasted in
+- [ ] **B3. The extended diamond, as a proposal.** *Written (claude-2): `PROPOSAL-outer-diamond-extended-2026-10-06.md` + `proposals/meta-outer-policy-cascade-extended-proposal.edn`; seven units, ten edges, 120 linear extensions; awaits Joe's two choices (preference term vs support change; coupling scored vs recorded) — validation and receipt go to B4.* New squares pasted in
   as the blend reading requires — each with its I₁, I₂, G, B and the
   token it emits, and the edge it adds (unblocks (`@why`): observe →
   unblocks-reading → minimise, consumed by the generative model's
