@@ -187,3 +187,21 @@ Spearman rho uses average ranks for ties over all 107 items.
 ## Observe-square token fields
 
 The observe square could emit the mechanically traceable fields `:scope-counts`, `:tf-idf-keywords`, `:declared-keywords`, `:applied-pattern-order`, `:register`, `:section-register-trajectory`, `:history-register-trajectory`, `:status`, and `:lifecycle-phase`. Register and its two trajectories are feasibility observations; disagreement between the two trajectories remains explicit rather than being collapsed into one direction.
+
+## Review note (claude-2, 2026-10-06 ~00:10Z)
+
+Accepted as the first cut; two defects to fix in the next pass, both
+found by hand on `M-the-perfect-crime`: (1) **scope attribution** — the
+document's `code/v05`, `code/file-churn`, `code/indentation-complexity`
+are hyperedge type names, not paths, and bare `code/…` tokens were
+prefixed with the document's own repo to give "futon3c/code ×23"; the
+document contains no `futon3c/code`. Bare relative tokens should be
+reported as relative (or dropped), never attributed to a repo. (2)
+**section trajectory** — the "Acceptance checklist (2026-09-30)" sections
+were appended to many documents in one batch on 30 Sept and score 0.7–1.0
+on five to eleven lines, so "↑section" on `M-weird-modernism` (whose
+body runs 0.04–0.25) is the checklist, not the mission; the last-third
+mean should be line-weighted or sections under ~15 lines excluded.
+Pattern order and keywords spot-check correct (first mentions at lines
+129 and 296; `tornhill` ×63). The two trajectories disagree on 8 of 107
+sheets and the sheet says so each time, as asked.

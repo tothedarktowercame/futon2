@@ -86,6 +86,8 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 
 | B1c revealed attention | Lineage: 126 dispatch records over 29 targets; 15 of the 107 ranked items have any (top `M-the-perfect-crime` 14; the selected `M-interim-director-proxy-metric-inventory` 0). Operator turns under a mission exist in futon1b evidence (`:clocked-target`, 3,339 of 4,087 turns in the 14-day window carry one): 11 of 107 have any (`M-the-perfect-crime` 305, `M-a-wmc-scaling` 136, `E-cascade-real` 133, `M-autoclock-in` 94; the selected mission 0). Co-work graph over 29 targets, 54 edges; `M-diagramprover`'s set: 11 items by same-session / same-day / operator co-mention. ρ of dispatches vs occurrence count −0.044, vs B1 coupling −0.207: the live selector's centrality is uncorrelated with where attention goes. Proposal: attention as the `unblocks` token's first-cut *enabler weight*, superseded by declaration | `REPORT-revealed-attention-2026-10-05.md` |
 
+| B1d cheat sheets | 107 one-line sheets, classical counts only. `M-weird-modernism`: register 0.209 (bottom quartile; body sections 0.04–0.25, "Methodology note: the mission as a wyrd-engineered artifact" 0.056), history trajectory flat over 2 commits — the abstract spin-off reads. `M-the-perfect-crime`: register 0.463, IDENTIFY 377 lines at 0.472, history +0.262 over 16 commits — the return to concrete reads, in the history direction. Mission register median 0.474 (q1 0.330, q3 0.529); ρ of register vs B2 marker count 0.224, vs B1 coupling 0.040; the two trajectories disagree on 8 sheets, flagged. Fields proposed for the `observe` square: scope counts, keywords, applied-pattern order, register and both trajectories, status, phase | `REPORT-cheat-sheets-2026-10-05.md` |
+
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
 has `m` *reaching* `a` and `b` (a common ancestor in descent, the nearest
@@ -236,7 +238,7 @@ jazz" — it will not say whether a mission has spun off into abstraction
 (`M-the-perfect-crime`). Beside HEAD we want a chord "cheat sheet": a very
 quick distillation of the scopes and keywords from across the mission.
 
-- [ ] **B1d. The cheat sheet per item.** One line per item, computed by
+- [x] **B1d. The cheat sheet per item.** *Done as first cut (futon2 `24fd97fac`); two defects noted in the report for the next pass (bare relative tokens attributed to the document's repo; appended 30-Sept checklists inflate the section trajectory).* One line per item, computed by
   script from the whole document and its history, not from HEAD alone:
   (a) *scopes* — the repos and directories its paths touch, by count;
   (b) *keywords* — top terms by tf-idf over the 107 documents, plus the
