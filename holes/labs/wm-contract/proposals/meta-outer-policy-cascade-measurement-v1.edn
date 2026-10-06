@@ -1,0 +1,116 @@
+;; MEASUREMENT CONTRACT (E-aif-cascade B4 part 2, claude-2, 2026-10-06). Not
+;; the contract. futon3/library/meta/meta-outer-policy-cascade.edn with ONE
+;; change: the generative model's outcome vocabulary is restricted to the
+;; outcomes that have a declared preference (prior-v1's five + the two
+;; proposal rows), so that meta-outer-policy/evaluate's common-vocabulary
+;; invariant can be met honestly. Finding recorded in E-aif-cascade: the
+;; contract (11 raw outcomes) and prior-v1 (5 normalised outcomes), both of
+;; 2026-10-02, do not share a vocabulary, so evaluate could never have run
+;; on them as written. Default setting under Joe's 2026-10-06 policy.
+;; A typed outer-loop cascade. This is a policy skeleton, not a declaration of
+;; which task wins. Fillers come from the current M/E/T/A field; G is evaluated
+;; only after every required slot is bound. Tactical pattern construction is
+;; downstream of :selected-meta-policy and is deliberately absent here.
+{:schema :meta/outer-policy-cascade-v1
+ :id :meta/reason-bearing-meta-selection-measurement-v1
+ :patterns
+ [:meta/observe-the-meta-field
+  :meta/fill-meta-policy-slots
+  :meta/injury-routes-to-self-heal
+  :meta/minimise-g-over-filled-meta-policies]
+
+ :precedence
+ [[:meta/observe-the-meta-field :meta/fill-meta-policy-slots]
+  [:meta/observe-the-meta-field :meta/injury-routes-to-self-heal]
+  [:meta/fill-meta-policy-slots :meta/minimise-g-over-filled-meta-policies]
+  [:meta/injury-routes-to-self-heal :meta/minimise-g-over-filled-meta-policies]]
+
+ :slots
+ {:task-kind
+  {:required true :type :enum :values [:mission :excursion :ticket :algorithm]}
+  :target
+  {:required true :type :current-meta-item-id
+   :source :meta-field/current-items}
+  :next-move
+  {:required true :type :enum
+   :values [:advance :unblock :close :repair :run-algorithm]}
+  :resource-envelope
+  {:required true :type :resource-envelope
+   :fields {:time-budget-ms :positive-integer
+            :token-budget :positive-integer
+            :author-seat :agent-id
+            :reviewer-seat :agent-id}}
+  :evidence-channel
+  {:required true :type :closure-or-progress-observer
+   :fields {:source :source-pin :locator :checkable-locator}}
+  :stopping-rule
+  {:required true :type :enum
+   :values [:closed :grounded-progress :typed-blocker :budget-exhausted
+            :debugger-stop]}}
+
+ :arms
+ {:ordinary-work
+  {:guard {:injury-observation {:absent :no-active-injury}}
+   :admit-task-kinds [:mission :excursion :ticket]
+   :exclude-task-kinds [:algorithm]
+   :next-moves [:advance :unblock :close]}
+
+  :self-heal
+  {:guard {:injury-observation :active
+           :requires [:injured-capability :source-pin]
+           :algorithm-match :repairs-injured-capability}
+   :admit-task-kinds [:algorithm]
+   :exclude-task-kinds [:mission :excursion :ticket]
+   :exclusion-reason :machine-injury-active
+   :next-moves [:repair :run-algorithm]
+   :rearm-slot {:required true :type :checkable-capability-observation}
+   :no-matching-algorithm
+   {:result :abstain
+    :reason :no-matching-self-heal-algorithm
+    :ordinary-support :remains-excluded}}}
+
+ :generative-model
+ {;; Measurement vocabulary = the outcomes for which a declared preference
+  ;; exists: the five of meta-outer-provisional-prior-v1 (its names, which
+  ;; normalise the contract's :elapsed-ms/:token-use to budget fractions and
+  ;; fold :abstention into :abstention-or-failure) plus the two the
+  ;; E-aif-cascade proposal adds with proposal-prior-v2 rows. The contract's
+  ;; other outcomes (:useful-blocker-discovery :information-gain
+  ;; :repeated-target :unreviewable-output :injury-persistence) are excluded
+  ;; here for the reasons prior-v1 :excluded-outcomes gives; under
+  ;; :refuse-not-zero they cannot be scored without a preference.
+  :outcomes
+  [:closure :grounded-progress :downstream-unblocking
+   :abstention-or-failure :elapsed-budget-fraction :token-budget-fraction
+   :operator-demand]
+  :terms
+  {:risk {:preferred [:closure :grounded-progress :downstream-unblocking]
+          :dispreferred [:abstention-or-failure :elapsed-budget-fraction
+                         :token-budget-fraction :operator-demand]}
+   :ambiguity {:over :predicted-outcome-observations}
+   :epistemic-value {:preferred []}}
+  :law :G=risk+ambiguity-epistemic-value
+  :missing-term-policy :refuse-not-zero}
+
+ :selection
+ {:law :argmin-G
+  :requires [:fully-filled-slots :common-outcome-vocabulary
+             :preference-source :predicted-outcomes]
+  :singleton-policy :typed-bypass
+  :receipt
+  [:field-census :typed-exclusions :candidate-slot-fillings
+   :source-pins :predicted-outcomes :g-terms :g
+   :selected-policy :nearest-alternative :selection-reason]}
+
+ :boundary
+ {:produces :selected-meta-policy
+  :then :construct-fresh-task-local-tactical-cascade
+  :forbids-as-outer-input
+  [:tactical-patterns :tactical-candidates :tactical-precedence :tactical-G]}
+
+ :executable-examples-authority
+ {:status :illustrative-not-admissible-g-authority
+  :reason :numeric-preferences-normalization-and-candidate-predictions-are-undeclared
+  :must-not-feed [:production-selection :calibration :model-fitting]}
+
+ :executable-examples []}
