@@ -223,9 +223,9 @@ of the same question and is deferred with it.
 1. `ThreeHalvesBlend.lean`: §1 carrier + order + composition + identities
    maximal; house/boat theories and the two cones; consistency of both by
    `native_decide`. (One packet; predict the enumeration size.)
-2. Packet 2a: `isPushout` (K1) by decision on the four test cases and the RV; the
-   cone quality order (K2) with its comparisons; non-isomorphism of houseboat and
-   the RV (K3). Packet 2b: `pushout_iff_coverage` as a theorem.
+2. Packet 2a (done, mathlib4 `a82d6342e1`): `isPushout` (K1′), the cone quality
+   order (K2′), non-isomorphism of houseboat and the RV (K3), the land-houseboat
+   incomparable pair. Packet 2b: `pushout_iff_coverage` as a theorem (both legs).
 3. Policies, gluing, components, `verdict`; the two bag/cascade witnesses
    (obligation 16). Independent of 2; can run in parallel on a second seat
    if one is free.
