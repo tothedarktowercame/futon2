@@ -319,8 +319,12 @@ quick distillation of the scopes and keywords from across the mission.
 
 ## Rulings — Joe's items (written 2026-10-06 00:20Z at Joe's request)
 
-Everything below waits on a word from Joe; nothing else in the excursion
-is dispatchable until one of these is given. Each item says what is being
+**Joe, 2026-10-06 ~04:50Z: "What if instead of 'rulings' we follow your
+suggestions as a 'default setting' and sort out the tuning and
+improvements later?"** Taken as the ruling on all ten: each
+recommendation below is the default setting, in force from this commit;
+each `→ Ruling:` line says so; tuning is a later pass and any default can
+be revisited by name (R1…R10). Items were written as: Each item says what is being
 decided, what the record shows, the options, and the owner's
 recommendation. Joe records the ruling on the `→ Ruling:` line (a word is
 enough); the owner then dispatches what follows. Items are independent
@@ -338,7 +342,7 @@ with its term and a reason — cross-tick state `R16→R1` (u), `R16→R2`
 strongly connected component. *Options:* accept the 11 as tabled; strike
 or add edges (name them). *Recommendation:* accept; the three reasons
 follow from the term names and no edge was argued over.
-→ Ruling:
+→ Ruling: default — accept the 11 edges as tabled.
 
 ### R2. The R6 and R4 splits (A2 ii)
 
@@ -353,7 +357,7 @@ treat R4-model not as a unit but as the click's initial have (then R4 is
 not split, its parameters are inputs). *Recommendation:* accept the R6
 split; take the third option for R4 — `A`, `B` are read, not produced,
 within a click, and the figure's own "Forward model" box is the rollout.
-→ Ruling:
+→ Ruling: default — split R6 into candidates/select; R4 is not split: `A`, `B` are the click's initial have (R4-model is not a unit), the unit is the rollout.
 
 ### R3. Meet direction (A2 iii) — owner's Lean modules disagree
 
@@ -374,7 +378,7 @@ reading of Q1); (c) keep both as join and meet of one lattice, named so.
 *Recommendation:* (a). Under it the R-cascade's five sources (R13 R14 R19
 R2 R4-model) are a defect in a measurable sense — 63 pairs with no common
 origin — and R4 is the mend.
-→ Ruling:
+→ Ruling: default — (a): `CascadeOrder`'s direction; `MeetWitness` amended mathlib4 `7f497d3bd1`, diamond re-proved with `observe` as the meet of `fill` and `injury`.
 
 ### R4. A root unit for the R-cascade (A2 iv)
 
@@ -388,7 +392,7 @@ them as the click's haves (as `ConstructionReceipt` already does for
 haves). *Recommendation:* add it, so that the R-cascade and the outer
 diamond have the same shape — one root, a frontier, one sink — and the
 Lean receipt for A3 has one `MeetWitness` per incomparable pair.
-→ Ruling:
+→ Ruling: default — add the root unit `click-input` producing T, τ, C, o, A, B.
 
 ### R5. Operator load: preference term or support change (B3 i)
 
@@ -403,7 +407,7 @@ support; (c) both, with (b) guarded on a marker threshold.
 *Recommendation:* (a). Excluding on an absence would empty the field
 today; a preference can disprefer mildly and sharpen as history
 accumulates under the hook.
-→ Ruling:
+→ Ruling: default — (a) preference term: dispreferred outcome `:operator-demand` conditioned on the item sheet.
 
 ### R6. Library coupling: recorded or scored (B3 ii)
 
@@ -417,7 +421,7 @@ term Joe names; (c) dropped from the cascade. *Recommendation:* (a) —
 visible, so that the pattern-graph diff and library work can read it,
 and not steering selection, so that the last click's choice is not
 reproduced on purpose.
-→ Ruling:
+→ Ruling: default — (a) `:item-coupling` recorded on the receipt, not in `minimise`'s needs.
 
 ### R7. The restated pattern (B5)
 
@@ -430,7 +434,7 @@ work against self-repair and documenting against doing.
 extension changes a real ranking; do not promote (the diamond is enough).
 *Recommendation:* the middle — a pattern claiming a THEN should carry one
 run where the THEN held.
-→ Ruling:
+→ Ruling: default — promote only after B4 part 2 shows one run where the THEN held.
 
 ### R8. Inert tokens: no credit or a cost (C3)
 
@@ -443,7 +447,7 @@ inert token (Salingaros's complexity reading), which needs its own
 measurement; (c) leave the per-step C as is and rely on construction
 never offering the bag. *Recommendation:* (a) now; (b) only if a run
 shows repeated patterns being rewarded under (a).
-→ Ruling:
+→ Ruling: default — (a) no credit: a token counts toward progress only once consumed.
 
 ### R9. Where the quality order enters G (CASCADE-SPEC-v3 §4, first decision)
 
@@ -459,7 +463,7 @@ for the order, c17 for the count — construction searches the order
 that number is a possibility count and belongs with the ordering term
 (c17's second half). The "fit in F per occurrence" part is already how
 `fit-evidence` works in `cascade_shape_g` and need not be re-decided.
-→ Ruling:
+→ Ruling: default — c10 for the order (construction searches it), c17's count of unrankable maximal blends in ambiguity beside the ordering term; fit-in-F stays as `fit-evidence` already has it.
 
 ### R10. Is the house/boat order the order for library patterns (v3 §4, second decision)
 
@@ -474,7 +478,7 @@ HOWEVER still held); defer until §7's first item is settled.
 *Recommendation:* defer, with the §2a reading (IF = ground, HOWEVER =
 inputs, THEN = blend) as the working answer to §7's first item, and
 revisit when A5 has read a dozen R-units that way.
-→ Ruling:
+→ Ruling: default — deferred; §2a's reading (IF = ground, HOWEVER = inputs, THEN = blend) is the working answer to v3 §7's first item; revisit after A5.
 
 ### What each ruling releases
 
