@@ -316,11 +316,15 @@ cascade more efficient than a chain" is therefore a question about
 *formation* (§5's accounting: the chain is the cascade plus log₂ #ext bits
 and no token) or about *different unit sets*, never about two shapes over
 one set — which is Joe's "constructed, not chosen" once more, as a
-theorem-shaped statement. Lean obligation for `ConstructionReceipt`
-(claude-2): define `tokenRelation semantics units` and prove that for any
-valid receipt over those units `support ⊆ tokenRelation`, and that the
-diamond's support *is* its token relation. C2 is closed by this paragraph
-and that obligation; no example is to be hunted for.
+theorem-shaped statement. Proved in `ConstructionReceipt.lean` (mathlib4 `80cb146f0e`,
+2026-10-06): `tokenRelated semantics order u v` (produces ∩ needs non-empty
+and u before v); `valid_support_tokenRelated` — for any valid receipt,
+every support edge is token-related and its token set equals
+produces ∩ needs; `diamondSupport_is_tokenRelation` — the diamond's
+support, as pairs, equals `tokenRelation diamondSemantics [0,1,2,3]`;
+`chain_step_not_tokenRelated` — the fill–injury step is outside the
+relation in either order. C2 is closed by this paragraph and those
+theorems; no example is to be hunted for.
 
 ## 5b. Charging the other off-diagonal (proposal, E-aif-cascade C3)
 
