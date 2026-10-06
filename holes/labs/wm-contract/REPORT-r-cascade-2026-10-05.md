@@ -147,3 +147,22 @@ In the receipt semantics these edges contribute no produced or needed token IDs;
 ```
 
 This S-expression states only the split DAG's directed token-carrying edges, sources, and sinks; it does not claim that the input graph itself is a one-click cascade.
+
+
+## Ruled-defaults pass (R1–R4, 2026-10-06)
+
+This third pass keeps the earlier unsplit refusal and two-unit split pass above on record. It applies the ruled defaults as data: the same 11-edge R1 cut; only R6 split into `R6-candidates` and `R6-select`; R4 retained as the rollout unit; and one `click-input` root. The former R4-model → R7 edge is re-routed as `click-input` → R7 carrying `A`; the former model → rollout edge becomes `click-input` → R4 carrying `A, B`.
+
+The root's produced set, derived from the explicit synthetic input edges, is `:A`, `:B`, `:C`, `:T`, `:U-t`, `:o`, `:tau`; its needs are empty. R13, R14, R19, and R2 remain units and receive `T`, `tau`, `C/U-t`, and `o` respectively from the root. They are retained as pass-through/source-processing boxes because each still produces terms downstream; no former source was folded away.
+
+The ruled graph has 19 units, 40 edges (34 token-carried in Lean, 6 `:absent` excluded), and 129196596 linear extensions. Its receipt has 104 common-origin `MeetWitness` values for 108 incomparable pairs. Pairs without a meet: [["R16" "R4"] ["R17" "R4"] ["R4" "R6-select"] ["R4" "SCAN"]]. Paths run from each meet to each operand, matching mathlib4 `7f497d3bd1`.
+
+`click-input → R4` carries `A, B, T`: although the ruling introduces that edge for `A/B`, `ConstructionReceipt.edgeValid` requires the complete unit-level `produces ∩ needs`, and R4 also needs `T` through R13. The first generated proof run with only `A/B` failed `support.all edgeValid`; the exact-intersection edge is the data used below.
+
+The generated ruled EDN SHA-256 is `f3b3111473fa1295615e8b4e576a598e4f636d7c2562a9141bb64f920c70f39d`; the generated Lean header carries the same pin. The deliberate bad receipt adds excluded edge `CTAU-TOKEN → R5` with `∅` tokens to both support and precedence.
+
+### Lean build
+
+```text
+Build completed successfully (585 jobs).
+```
