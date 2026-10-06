@@ -284,7 +284,7 @@ quick distillation of the scopes and keywords from across the mission.
   its meets and linear extensions. *Accept:* the edn validates under
   `meta_outer_policy/contract-errors` (run in a fresh process on the
   proposed edn); the receipt is `valid`.
-- [ ] **B4. Does the extension change the picture?** Re-run the
+- [ ] **B4. Does the extension change the picture?** *Part 1 done (codex-33, futon2 `8b6a1afef`): the real `contract-errors` returns `[]` for the proposal and for the contract (the validator does not object to the added `:tokens`/`:conditioning` keys or the new outcome); 120 linear extensions, ten meets in each direction; scores with the same scorer — original diamond 1.2797 (control reproduced), extended shape 0.7321 (P(all done) 0.52 at horizon 7), extended bag 0.2381, an extended chain 1.3105: bag < cascade < chain again, with the same caveat that only the cascade is constructible from the tokens. Part 2 — the ranking of the 103 cones against the live selector — waits on Joe's choices (i) and (ii).* Re-run the
   four-number script on the extended diamond and its bag; and, with the
   provisional prior (`meta-outer-provisional-prior-v1.edn`) and the B1/B2
   tokens as the only candidate-conditioned inputs, rank the 103 cones and
@@ -292,7 +292,7 @@ quick distillation of the scopes and keywords from across the mission.
   both rankings on record with the Kendall distance between them; the
   ablation rule of `E-outer-loop-improvement` honoured (each new signal
   removable by a flag, and the ranking with it removed recorded).
-- [ ] **B5. The restated pattern.** `meta/select-the-meta-item` as a
+- [ ] **B5. The restated pattern.** *Draft flexiarg written at the end of `PROPOSAL-outer-diamond-extended-2026-10-06.md`; promotion is Joe's.* `meta/select-the-meta-item` as a
   flexiarg draft (IF = observe; HOWEVER = ordinary work against
   self-repair, and now against operator load; THEN = argmin G over the
   admitted family; BECAUSE = G over policies with predicted consequences),
