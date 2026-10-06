@@ -144,12 +144,61 @@ the connected components of squares under gluing.
   Proposition 9 (the 2×2 grid) and Theorem 13 (the W) follow or are left as
   named open obligations with the reason.
 
+## 4a. What the 3/2-pushout is on this carrier (discovery, 2026-10-06; defaults)
+
+`NOTE-three-halves-pushout-discovery-2026-10-06.md` (codex-33, futon2
+`18ece513b`) settles the literal Definition 7 on this carrier: the set of
+mediators into a comparison cone is not union-closed as maps, but a maximum
+exists iff the union of all pairwise-admissible pairs is a function, and that
+holds iff **every element of B lies in the image of a non-auxiliary leg**
+(coverage). The quantifier over C disappears; the empty map is always a
+mediator. Under coverage houseboat is a pushout, boathouse with its auxiliary
+House leg is not, and so are the one-point blend and a houseboat that drops
+the water axiom — the last two against Goguen 2006 p. 8. The discrimination
+Goguen draws therefore does not come from the universal property on named
+sets with partial maps; it needs either his richer morphisms (sorts,
+constructors) or an order over cones.
+
+Default settings (claude-2, under the 2026-10-06 defaults policy; revisable
+by name as carrier items K1–K3):
+
+- **K1.** `Cone.isPushout` is the coverage predicate with auxiliary legs
+  removed from both the consistency and the mediator constraints (the
+  reading of "a blend is a commutative cone over the diagram with the
+  auxiliary morphisms removed"). It is proved as a carrier theorem named for
+  what it is (`pushout_iff_coverage`), and the module's docstring says it is
+  not Goguen's optimality distinction.
+- **K2.** The optimality distinction lives in a declared **quality order over
+  cones of one span**: compare the pair of legs by (i) carried axioms (each
+  leg's `carries`, as sets), (ii) definedness (domains), and (iii)
+  identifications — the number of pairs of distinct input elements a leg
+  sends to one element, fewer is better ("the injections should be inclusions
+  as far as possible"; names matter). Conjunctive, so it is a partial order
+  and leaves incomparable blends incomparable; that incomparability is the
+  "several maximal blends the order cannot rank" that R9's default counts in
+  ambiguity. The one-point blend loses on (iii) to every other cone; the
+  water-dropping houseboat loses on (i) to houseboat.
+- **K3.** Obligation 14's witness is houseboat against the **amphibious RV**
+  (Goguen 2006 p. 7, "very good preservation properties": keeps `land` and
+  `water`, `on(house/boat, land)` and `on(house/boat, water)`): both consistent,
+  both pushouts under K1, incomparable under K2, non-isomorphic as cones.
+  Houseboat against the one-point blend would also witness non-uniqueness but
+  says nothing.
+
+Open, for v3 §7 (not blocking): whether Goguen's "not any kind of pushout"
+for structure-dropping blends depends on the richer 1999 morphisms, which
+the text extraction does not let us read; the typed-vocabulary admissibility
+codex-33 notes (the carrier cannot forbid mapping `land` to `water`) is part
+of the same question and is deferred with it.
+
 ## 5. Order of packets
 
 1. `ThreeHalvesBlend.lean`: §1 carrier + order + composition + identities
    maximal; house/boat theories and the two cones; consistency of both by
    `native_decide`. (One packet; predict the enumeration size.)
-2. Both cones are 3/2-pushouts; not isomorphic (obligation 14).
+2. Packet 2a: `isPushout` (K1) by decision on the four test cases and the RV; the
+   cone quality order (K2) with its comparisons; non-isomorphism of houseboat and
+   the RV (K3). Packet 2b: `pushout_iff_coverage` as a theorem.
 3. Policies, gluing, components, `verdict`; the two bag/cascade witnesses
    (obligation 16). Independent of 2; can run in parallel on a second seat
    if one is free.
