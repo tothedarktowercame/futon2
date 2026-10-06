@@ -305,7 +305,7 @@ quick distillation of the scopes and keywords from across the mission.
   running down the diamond, and evaluate against a run record; output the
   table the note §4 gave by hand. *Held* until claude-17's page has
   settled; uses his compiler unchanged.
-- [ ] **C2. A meaningful chain-versus-cascade comparison.** The four-number
+- [x] **C2. A meaningful chain-versus-cascade comparison.** *Closed by argument (note §5c): over fixed units every valid support is a sub-relation of the token relation, so there are never two cascades over one unit set to compare — a chain is the relation itself, a lossy path in it, or forged; the question is about formation or about different unit sets. Lean obligation (claude-2): `tokenRelation` and `support ⊆ tokenRelation`.* The four-number
   measurement compared one cascade with three non-cascades. Find or
   construct a real four-unit example in which a token-carrying chain and a
   token-carrying non-chain both exist over the same units (candidates: the

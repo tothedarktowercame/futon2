@@ -291,6 +291,37 @@ G difference that *is* meaningful is therefore the one between the diamond
 and a four-unit chain whose edges are all token-carrying — which these four
 units do not have, and which would need a different example.
 
+## 5c. Why a constructible chain-versus-cascade comparison over the same units does not exist (E-aif-cascade C2)
+
+§5 ended by asking for a four-unit example in which a token-carrying chain
+and a token-carrying non-chain both exist over the same units. Writing the
+condition down shows there is none. Under `ConstructionReceipt`, an edge
+`u → v` is valid iff `produces(u) ∩ needs(v) ≠ ∅` and `u` precedes `v`.
+Fix the units and their tokens. The set of all valid edges — the token
+relation — is then fixed too, and (when acyclic) it is the same set under
+every linear extension of itself. Every valid support is a *sub-relation*
+of it. So two valid arrangements over the same units are not two cascades:
+one is the token relation and the other has dropped edges. A chain that is
+valid is either the token relation itself (the tokens force a total order,
+and then there is no non-chain to compare it with) or a path inside the
+relation that forgets the other edges — a lossy parse, not a competitor.
+The only way to make a chain out of a non-chain relation is to add an
+edge no token carries, which `valid` rejects (`chainReceipt_invalid`).
+
+So the measurements of §5 and B4 compare the token relation with (a) its
+bag — the empty sub-relation — and (b) a path through it with one forged
+edge; the 30 Sept comparison (chain 3.07 vs first→last edge 1.41) was
+between two given sub-relations, with the full relation unstated. "Is a
+cascade more efficient than a chain" is therefore a question about
+*formation* (§5's accounting: the chain is the cascade plus log₂ #ext bits
+and no token) or about *different unit sets*, never about two shapes over
+one set — which is Joe's "constructed, not chosen" once more, as a
+theorem-shaped statement. Lean obligation for `ConstructionReceipt`
+(claude-2): define `tokenRelation semantics units` and prove that for any
+valid receipt over those units `support ⊆ tokenRelation`, and that the
+diamond's support *is* its token relation. C2 is closed by this paragraph
+and that obligation; no example is to be hunted for.
+
 ## 5b. Charging the other off-diagonal (proposal, E-aif-cascade C3)
 
 The bag measurement is the test case. What let the bag score 0.393 is that
