@@ -162,12 +162,28 @@ constructors) or an order over cones.
 Default settings (claude-2, under the 2026-10-06 defaults policy; revisable
 by name as carrier items K1–K3):
 
-- **K1.** `Cone.isPushout` is the coverage predicate with auxiliary legs
-  removed from both the consistency and the mediator constraints (the
-  reading of "a blend is a commutative cone over the diagram with the
-  auxiliary morphisms removed"). It is proved as a carrier theorem named for
-  what it is (`pushout_iff_coverage`), and the module's docstring says it is
-  not Goguen's optimality distinction.
+- **K1 (revised K1′, 2026-10-06, after packet 2a r2's stop).** `Cone.isPushout`
+  is consistency plus coverage: every element of B lies in the image of b₁
+  or b₂ — **both legs, whatever the auxiliary flags**. The flags remove a
+  triangle's commutation from *consistency* only. Reason: Goguen's sentence
+  is "a blend is a commutative cone over the diagram with the auxiliary
+  morphisms removed" (1999 p. 31; v3 §1); the diagram is the span, so the
+  removed morphism is a span arrow `aᵢ : G → Iᵢ`, which leaves `Iᵢ` in the
+  diagram as an object and the cone leg `bᵢ : Iᵢ → B` in place; the
+  mediator constraints `bᵢ ≫ h ≤ cᵢ` and hence coverage still range over
+  both legs. The first K1 (and the discovery note §2) dropped the auxiliary
+  leg from coverage too; under that reading neither boathouse nor the
+  amphibious RV could ever be a pushout, since each has an element reached
+  only through its auxiliary side, against Goguen 2006 p. 7–8 which counts
+  both among the good 3/2-pushouts. The RV's own square does not commute:
+  the generic `medium` reaches `land` through House and `water` through
+  Boat, and the RV keeps both, so one triangle is auxiliary (either side;
+  the House side by convention, as for boathouse) — codex-33's finding.
+  Under K1′: houseboat, boathouse (House leg auxiliary), RV (House leg
+  auxiliary), the one-point blend and the water-dropping houseboat are all
+  pushouts; the two degenerate ones are separated by K2′. `pushout_iff_coverage`
+  (packet 2b) is stated for coverage over both legs. It is named for what it
+  is and the docstring says it is not Goguen's optimality distinction.
 - **K2 (revised K2′, 2026-10-06, after packet 2a's stop).** The optimality
   distinction lives in a declared **quality order over cones of one span**,
   **lexicographic**: first fewer identifications on each leg (the number of
@@ -189,7 +205,8 @@ by name as carrier items K1–K3):
   witness.
 - **K3.** Obligation 14's witness is houseboat against the **amphibious RV**
   (Goguen 2006 p. 7, "very good preservation properties": keeps `land` and
-  `water`, `on(house/boat, land)` and `on(house/boat, water)`): both consistent,
+  `water`, `on(house/boat, land)` and `on(house/boat, water)`; its House
+  triangle auxiliary, since `medium` reaches both): both consistent,
   both pushouts under K1, RV above houseboat under K2′, non-isomorphic as
   cones (non-uniqueness does not need incomparability).
   Houseboat against the one-point blend would also witness non-uniqueness but
