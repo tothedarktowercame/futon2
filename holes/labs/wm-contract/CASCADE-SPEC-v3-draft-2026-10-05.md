@@ -217,13 +217,26 @@ Consequences, each a requirement:
   interpretations; evidence from later observations about whether a mapping
   fits can enter F, the categorical order itself cannot. v2's
   ordering-ambiguity term is unchanged by this draft.
+  **Default setting (Joe, 2026-10-06, E-aif-cascade R9: recommendations
+  adopted as defaults, tuning later):** c10 for the order — construction
+  searches it, and it reaches G only through the family admitted; c17's
+  count — when the order returns several maximal blends it cannot rank,
+  their number is a possibility count and sits in ambiguity beside v2's
+  linear-extension term; fit per occurrence stays in F as `fit-evidence`
+  in `cascade_shape_g` already has it. Revisable by name (R9).
 - Emergent structure, on Goguen's 2006 hypothesis, is what an added space
   contributes when it matches concepts the inputs mention but the ground did
   not integrate. Read against construction: an extension candidate is an
   occurrence whose inputs match such concepts. This is a reading, not a rule;
   it bears on where the pattern graph's neighbours enter construction.
 - Whether the house/boat quality order (content, axioms, inclusiveness) is
-  the right order for library patterns is open.
+  the right order for library patterns is open. **Default setting (Joe, 2026-10-06,
+  E-aif-cascade R10):** deferred; the working answer to §7's first item is
+  the flexiarg reading of E-aif-cascade / NOTE-outer-cascade §2a — IF and
+  context are the ground, the HOWEVER's two forces are the inputs, THEN is
+  the blend and its held tension the emergent structure, BECAUSE is why
+  the square commutes — and the order question is revisited once A5 has
+  read a dozen R-units that way.
 
 ## 5. Construction receipt (adds to v2's list)
 
