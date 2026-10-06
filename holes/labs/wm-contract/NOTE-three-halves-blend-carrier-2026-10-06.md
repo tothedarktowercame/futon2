@@ -226,9 +226,9 @@ of the same question and is deferred with it.
 2. Packet 2a (done, mathlib4 `a82d6342e1`): `isPushout` (K1′), the cone quality
    order (K2′), non-isomorphism of houseboat and the RV (K3), the land-houseboat
    incomparable pair. Packet 2b: `pushout_iff_coverage` as a theorem (both legs).
-3. Policies, gluing, components, `verdict`; the two bag/cascade witnesses
-   (obligation 16). Independent of 2; can run in parallel on a second seat
-   if one is free.
+3. (done, mathlib4 `e561bf9205`) Policies, gluing, components, `verdict`; the
+   click-bag and diamond-cascade witnesses (obligation 16); application order as
+   a separate carrier with `applicationOrder_independent` (obligation 17).
 4. The pasting-failure witness (obligation 15), after 1.
 5. Two-carrier witness for application order (obligation 17), after 3.
 6. Proposition 8 over the structure (obligation 13), last; it is the only
