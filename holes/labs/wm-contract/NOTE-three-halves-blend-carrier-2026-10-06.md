@@ -168,20 +168,30 @@ by name as carrier items K1–K3):
   auxiliary morphisms removed"). It is proved as a carrier theorem named for
   what it is (`pushout_iff_coverage`), and the module's docstring says it is
   not Goguen's optimality distinction.
-- **K2.** The optimality distinction lives in a declared **quality order over
-  cones of one span**: compare the pair of legs by (i) carried axioms (each
-  leg's `carries`, as sets), (ii) definedness (domains), and (iii)
-  identifications — the number of pairs of distinct input elements a leg
-  sends to one element, fewer is better ("the injections should be inclusions
-  as far as possible"; names matter). Conjunctive, so it is a partial order
-  and leaves incomparable blends incomparable; that incomparability is the
-  "several maximal blends the order cannot rank" that R9's default counts in
-  ambiguity. The one-point blend loses on (iii) to every other cone; the
-  water-dropping houseboat loses on (i) to houseboat.
+- **K2 (revised K2′, 2026-10-06, after packet 2a's stop).** The optimality
+  distinction lives in a declared **quality order over cones of one span**,
+  **lexicographic**: first fewer identifications on each leg (the number of
+  pairs of distinct input elements a leg sends to one element; "the
+  injections should be inclusions as far as possible", names matter), then,
+  at equal identifications, more carried axioms and larger domains on each
+  leg (conjunctive on the two legs). The first version was conjunctive over
+  all three; codex-33's quality records showed that under it the one-point
+  blend is *incomparable* with houseboat — collapsing everything to one
+  element makes every axiom "carried" — and that the amphibious RV strictly
+  dominates houseboat (it keeps `land` and `on(house,land)` at no extra
+  identification), which is Goguen's own description of the RV ("very good
+  preservation properties"), so that part stands. Under K2′: RV > houseboat
+  > water-dropping houseboat, and the one-point blend is below all three.
+  Incomparability is still possible at equal identifications with
+  incomparable carries (houseboat against a mirror blend that keeps `land`
+  and drops `water`); that is the "several maximal blends the order cannot
+  rank" that R9's default counts in ambiguity, and packet 2a carries that
+  witness.
 - **K3.** Obligation 14's witness is houseboat against the **amphibious RV**
   (Goguen 2006 p. 7, "very good preservation properties": keeps `land` and
   `water`, `on(house/boat, land)` and `on(house/boat, water)`): both consistent,
-  both pushouts under K1, incomparable under K2, non-isomorphic as cones.
+  both pushouts under K1, RV above houseboat under K2′, non-isomorphic as
+  cones (non-uniqueness does not need incomparability).
   Houseboat against the one-point blend would also witness non-uniqueness but
   says nothing.
 
