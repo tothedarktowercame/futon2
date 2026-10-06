@@ -40,8 +40,12 @@ as much content), `f.carried ⊆ g.carried` (every axiom f preserves, g does),
 and inclusiveness is `f.rel.image Prod.fst ⊆ g.rel.image Prod.fst`
 (implied by the first; stated for the record). Composition is relational
 composition with carried axioms intersected through; it preserves the
-order; identities (the diagonal on `elems`, all axioms) are maximal. That is
-the 3/2-category; `Prop`-level, proved once (obligation 13's first half).
+order; identities (the diagonal on `elems`, all axioms) are *maximal* —
+no well-formed endomap strictly extends the diagonal — and not greatest: on
+`A.elems = {0,1}` the endomap `{(0,1)}` is well-formed and incomparable with
+the identity (codex-33's counterexample, 2026-10-06, to a packet that had
+glossed Definition 6's "maximal" as "greatest"). That is the 3/2-category;
+`Prop`-level, proved once (obligation 13's first half).
 
 A **span** is `a₁ : PMap G I₁`, `a₂ : PMap G I₂`. A **cone** over it is
 `b₁ : PMap I₁ B`, `b₂ : PMap I₂ B`. **Consistency** (Definition 7): some
