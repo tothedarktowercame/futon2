@@ -361,7 +361,7 @@ What this does not settle: whether an inert token should carry a positive
 proposal is no credit; a cost would need its own measurement. Where it
 would live: the progress-count observation that `cascade_shape_g` and the
 construction lane share (`[completed-pattern-count want-met?]`) would
-count consumed tokens rather than fired patterns. Not implemented; C3 of
+count consumed tokens rather than fired patterns. Measured 2026-10-06 as a script (`REPORT-consumption-four-numbers-2026-10-06.md`): the predictions above hold on every arrangement, and today's rule scores the house of alcoves better than the diamond; the scorer itself cannot yet take the rule (its rollout state has no consumption provenance). Not implemented in `src/`; C3 of
 `E-aif-cascade` records it for Joe's decision alongside the v3 items.
 
 ## 5a. Refinement: the object is alive (Joe, 2026-10-05)
