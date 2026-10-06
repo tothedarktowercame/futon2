@@ -12,58 +12,76 @@ the runtime; a theorem about a carrier is not an endorsement of a run.
 ## 1. What the module carries
 
 Objects are **finite theories over a pinned vocabulary**: a theory is a
-`Finset Nat` of named elements (sorts, constants, relation names — all
-coded as `Nat`, as `ConstructionReceipt` codes units and tokens) together
-with a `Finset Nat` of axiom codes. Nothing semantic is attached to a code;
-the identity of a blend lives in which codes are identified, which is
-Goguen's "names matter" (v3 §1).
+`Finset Nat` of named elements (sorts, constants, relation names, all coded
+as `Nat`, as `ConstructionReceipt` codes units and tokens) together with a
+`Finset (Nat × Nat × Nat)` of axioms, each `(r, x, y)` reading "relation `r`
+holds of `(x, y)`" over the theory's own elements. Nothing semantic is
+attached to a code; the identity of a blend lives in which codes are
+identified, which is Goguen's "names matter" (v3 §1).
 
 ```lean
 structure Theory where
   elems  : Finset Nat
-  axioms : Finset Nat
-  deriving DecidableEq
+  axioms : Finset (Nat × Nat × Nat)      -- (relation, x, y), all three in elems
 
-/-- A partial map of theories: an element relation that is functional on
-its domain, with the axioms it carries across. -/
-structure PMap (A B : Theory) where
-  rel     : Finset (Nat × Nat)          -- (a, b) pairs, a ∈ A.elems, b ∈ B.elems
-  carried : Finset Nat                  -- axioms of A preserved into B
-  functional : ∀ a b b', (a, b) ∈ rel → (a, b') ∈ rel → b = b'
-  dom  : ∀ p ∈ rel, p.1 ∈ A.elems ∧ p.2 ∈ B.elems
-  axs  : carried ⊆ A.axioms ∩ B.axioms
+/-- A partial map of theories is its graph; functionality and domain are
+`wellFormed`, decided. Axiom preservation is *derived*, never declared. -/
+structure PMap where
+  rel : Finset (Nat × Nat)
+def PMap.wellFormed (f : PMap) (A B : Theory) : Bool   -- functional; rel ⊆ A.elems ×ˢ B.elems
+def PMap.carries (f : PMap) (A B : Theory) : Finset (Nat × Nat × Nat)
+  -- the axioms (r, x, y) of A with r, x, y all in f's domain whose image (f r, f x, f y) is an axiom of B
 ```
 
-The **quality order** on `PMap A B` is Goguen's three criteria read as
-inclusions (v3 §1, Definition 6): `f ≤ g` iff `f.rel ⊆ g.rel` (g preserves
-as much content), `f.carried ⊆ g.carried` (every axiom f preserves, g does),
-and inclusiveness is `f.rel.image Prod.fst ⊆ g.rel.image Prod.fst`
-(implied by the first; stated for the record). Composition is relational
-composition with carried axioms intersected through; it preserves the
-order; identities (the diagonal on `elems`, all axioms) are *maximal* —
-no well-formed endomap strictly extends the diagonal — and not greatest: on
+The **quality order** on maps `A → B` is graph inclusion, `f ≤ g iff
+f.rel ⊆ g.rel`. Goguen's three criteria (Definition 6; v3 §1) follow from
+it once axiom preservation is derived: `g` preserves as much content
+(inclusion), preserves every axiom `f` does (`carries` is monotone in the
+graph for well-formed maps: a theorem, `carries_monotone`), and is as
+inclusive (domain inclusion). Composition is relational composition;
+identities are the diagonal on `elems`. Identities are *maximal* (no
+well-formed endomap strictly extends the diagonal) and not greatest: on
 `A.elems = {0,1}` the endomap `{(0,1)}` is well-formed and incomparable with
 the identity (codex-33's counterexample, 2026-10-06, to a packet that had
 glossed Definition 6's "maximal" as "greatest"). That is the 3/2-category;
 `Prop`-level, proved once (obligation 13's first half).
 
+Revision history. Packet 1 (mathlib4 `0ae83ba6d9`) carried axioms as
+opaque codes with a declared `carried` field, so "preserves axioms" was
+literal code sharing: House, Boat and Houseboat all used codes {100, 101}
+and the legs "carried" them by convention, while Boathouse's legs carried
+nothing. The order's axiom clause then measured nothing. Packet 1b replaces
+this with the triple form above; the loss Goguen's order is about becomes
+measurable (the House → Houseboat leg carries `livein(resident, house)`
+but not `on(house, land)`, since `land` is dropped).
+
 A **span** is `a₁ : PMap G I₁`, `a₂ : PMap G I₂`. A **cone** over it is
-`b₁ : PMap I₁ B`, `b₂ : PMap I₂ B`. **Consistency** (Definition 7): some
-`d : PMap G B` with `a₁ ≫ b₁ ≤ d` and `a₂ ≫ b₂ ≤ d`. **3/2-pushout**: for
-every consistent cone `c₁, c₂` into `C`, the set
-`{h : PMap B C // b₁ ≫ h ≤ c₁ ∧ b₂ ≫ h ≤ c₂}` has a maximum. **Auxiliary**
-morphisms (v3 §1): a square record carries, per triangle, a flag
-`commutes : Bool`; the pushout condition is checked over the triangles not
-flagged auxiliary. A **square** is the record the runtime must serialise
-(v3 §5): `G I₁ I₂ B`, the four maps, the two flags, and a source pin per
-object.
+`b₁ : PMap I₁ B`, `b₂ : PMap I₂ B` with two flags `aux₁ aux₂ : Bool`: a
+flagged triangle is **auxiliary** (v3 §1) and not required to commute.
+**Consistency** (Definition 7): some `d : PMap G B` with `a₁ ≫ b₁ ≤ d` and
+`a₂ ≫ b₂ ≤ d` over the non-auxiliary triangles; since the order is
+inclusion, the join of the composites is the least such `d`, so consistency
+is "the join is well-formed" (packet 1). A cone with both flags set is
+vacuously consistent, stated as a theorem so the degenerate case is on the
+record. **3/2-pushout**: for every consistent cone `c₁, c₂` into `C`, the
+set `{h : PMap B C // b₁ ≫ h ≤ c₁ ∧ b₂ ≫ h ≤ c₂}` has a maximum. A
+**square** is the record the runtime must serialise (v3 §5): `G I₁ I₂ B`,
+the four maps, the two flags, and a source pin per object.
+
+Witnesses (Goguen 2006, Figures 1, 4, 5, read from the rendered pages):
+houseboat identifies `resident/passenger`, `house/boat` and `live in/ride`,
+drops `land`, and commutes with no auxiliary triangle; boathouse keeps
+`ride` and `livein` apart, identifies `resident/boat`, and commutes on no
+element but `on`, so it is consistent only with one triangle auxiliary
+(either side works). The two bad cases are Goguen's own statements made
+checkable: boathouse with no auxiliary flag, and houseboat with the two
+relations kept distinct, are inconsistent.
 
 Decidability: for finite theories every `PMap A B` is one of finitely many
-(a subset of `A.elems ×ˢ B.elems` with a subset of the axioms), so
-consistency and the 3/2-pushout property are decidable by enumeration, and
-small witnesses (house/boat: a handful of elements) go through
-`native_decide` as the receipt theorems do. The general theorems
-(composition, Proposition 8) are proved over the structure, not decided.
+subsets of `A.elems ×ˢ B.elems`, so the 3/2-pushout property is decidable by
+enumeration, and small witnesses go through `native_decide` as the receipt
+theorems do. The general theorems (composition, Proposition 8) are proved
+over the structure, not decided.
 
 ## 2. The two orders, as two carriers (obligation 17)
 
