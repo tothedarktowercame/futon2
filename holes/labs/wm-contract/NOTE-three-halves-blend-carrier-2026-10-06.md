@@ -247,7 +247,7 @@ What this does **not** do: connect a blend diagram to a transition kernel
 default stands), or alter `ConstructionReceipt`, which keeps serving the
 runtime receipt until the carrier fixes what the runtime must serialise.
 
-## 6. Closure (2026-10-06, ~06:45Z): obligations 13–17 on this carrier
+## 6. Closure (2026-10-06, 07:02Z): obligations 13–17 on this carrier
 
 All five of CASCADE-SPEC-v3 §6's obligations have a witness or a proof in
 `mathlib4/DarkTower/WarMachine/ThreeHalvesBlend.lean` (branch `darktower`,
