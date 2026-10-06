@@ -237,11 +237,43 @@ of the same question and is deferred with it.
    witness/consistency iff over the hom-set added. The W (Theorem 13) preserves
    consistency when its middle pushout cone is consistent.
 5. Two-carrier witness for application order (obligation 17), after 3.
-6. Proposition 8 over the structure (obligation 13), last; it is the only
-   piece that is a proof rather than a witness, and its statement must be
-   checked against the 1999 text by eye first (the extraction is garbled).
+6. (done, mathlib4 `b978697a16`, `e348beb6e7`) Proposition 8 over the structure
+   (obligation 13): holds for commuting squares with well-formed legs; fails for
+   merely consistent ones (counterexample recorded). Goguen's proof uses the
+   on-the-nose equality `b₁;c₂ = a₃;c₁`.
 
 What this does **not** do: connect a blend diagram to a transition kernel
 (v3 §7's open adequacy theorem), say how the quality order enters G (R9's
 default stands), or alter `ConstructionReceipt`, which keeps serving the
 runtime receipt until the carrier fixes what the runtime must serialise.
+
+## 6. Closure (2026-10-06, ~06:45Z): obligations 13–17 on this carrier
+
+All five of CASCADE-SPEC-v3 §6's obligations have a witness or a proof in
+`mathlib4/DarkTower/WarMachine/ThreeHalvesBlend.lean` (branch `darktower`,
+`e348beb6e7`; 711-job build; no `sorry`), produced by codex-33 in eight
+commits over nine packets and reviewed here. What was learned, each item a
+departure from the text as first read, recorded by name:
+
+| obligation | state | where the text and the carrier part company |
+|---|---|---|
+| 13 carrier + Proposition 8 | carrier: Definition 6's laws proved (identities *maximal*, not greatest — `id_not_greatest`); Prop. 8 proved for **commuting** squares (`prop8`), refuted for merely consistent ones (`prop8_fails_without_commutation`) | Goguen's proof uses `b₁;c₂ = a₃;c₁`; Definition 7 gives only ≤-consistency, weaker for partial maps |
+| 14 non-uniqueness | houseboat and the amphibious RV: both pushouts of one span, non-isomorphic (`isoCones` by bijection search; renamed copy isomorphic as control) | the RV's square does not commute on `medium`; one triangle auxiliary (K1′) |
+| 15 pasting failure | vertical pasting with a partial leg: both diamonds consistent, composite not; `inconsistencyWitness` names `(0, 5, 6)` | needs partiality; the W (Thm 13) preserves consistency when its middle cone is consistent |
+| 16 bag verdict | `Policy.verdict`: the 2026-10-05 click is `bag [[0],[1],[2],[3]]`; the outer diamond glued at observe's blend is `cascade`, construction order derived = its support | — |
+| 17 two orders | `applicationOrder` a separate evidence-tagged field; `applicationOrder_independent` by unfolding | — |
+
+The pushout notion itself (packet 2b, `pushout_iff_coverage`): on named
+sets with partial maps under graph inclusion, Definition 7's universal
+property is coverage of the blend by the legs, and uses neither
+consistency nor the hom-set hypotheses. Goguen's optimality distinctions
+therefore live in the declared quality order over cones (K2′: identifications
+first, then preservation), which ranks RV > houseboat > water-dropping
+houseboat, puts the one-point blend below all, and leaves houseboat and the
+land-keeping mirror incomparable — the concrete pair R9's default counts in
+ambiguity.
+
+Open after this: v3 §7's adequacy question (how a blend diagram determines a
+transition kernel; the `CoApplicationKernel` layer is untouched); the
+richer-morphism question (§4a, "not any kind of pushout"); `components_cover`
+in its exact-once form; source pins on `Square` for the runtime receipt.

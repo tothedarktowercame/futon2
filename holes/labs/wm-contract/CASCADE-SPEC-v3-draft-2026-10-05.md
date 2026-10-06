@@ -270,6 +270,13 @@ carrier fixes what the runtime must serialise.
 17. The two orders are separate carriers; no theorem derives application
     order from support or from construction order.
 
+**Status (2026-10-06, record, not a change to the draft):** 13–17 are
+discharged on `mathlib4/DarkTower/WarMachine/ThreeHalvesBlend.lean`
+(`e348beb6e7`): 13 with Proposition 8 proved for *commuting* squares and
+refuted for merely consistent ones; 14–17 by finite witnesses. Carrier
+decisions K1′–K3 and the departures from the text are in
+`NOTE-three-halves-blend-carrier-2026-10-06.md` §4a and §6.
+
 ## 7. Not settled by this draft
 
 - Which parts of a library pattern are its inputs and ground, outside the
