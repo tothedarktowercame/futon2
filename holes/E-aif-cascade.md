@@ -96,6 +96,7 @@ relations; a missing edge is not simultaneity); `E-outer-loop-improvement.md`
 | A5 blend squares (codex-33 `7cb4abaa8`, reviewed + note) | 14/19 units have a content-matched flexiarg (all `aif/`; `apparatus/` none; CTAU-*, SCAN, click-input, R19 without). Agreement after retyping: agrees 3 (R5, R8, R14), silent 3 (R1, R2, R7), disagrees 5 (R13, R17, R3a, R6-candidates, R6-select: token is a wire, THEN names the product), boundary artefacts 3 (R3, R16 cut; R4 Lean-absent), no-flexiarg 5. R10 working answer holds where tokens are products, bends where the token list was cut for the Lean DAG | `REPORT-r-blend-squares-2026-10-06.md` |
 | R8/C3 consumption measurement (codex-33 `146ec2675`, reviewed) | Rule (a) on §5 + alcove + B4 extended: diamond = chains = `[0 1 4 4]`; bag and extended bag refused at τ=1; alcove adds nothing; extended = its chain. Today's rule scores the alcove *better* than the diamond (1.007 vs 1.280): fired-pattern C rewards an unneeded pattern. G(a) `:unavailable` — scorer state lacks consumption provenance; unapplied diff proposed | `REPORT-consumption-four-numbers-2026-10-06.md`, `scripts/consumption_four_numbers.clj` |
 | B1d second pass (codex-33 `6a758772d`/`bbe260124`/`53f2a0216`, reviewed) | Scope: bare tokens unattributed (`relative/…`); trajectory: line-weighted, <15-line sections excluded. 94/107 scope lines, 58/107 trajectory signs changed; correlations unmoved (<0.0001); trajectory disagreements 8 → 15. `M-weird-modernism` +0.290 → +0.035, still `↑` (Mission log 120 lines at 0.367). Packet lesson: asserted a sign instead of the defect; codex-33 stopped; check now pins the mechanism | `REPORT-cheat-sheets-2026-10-06.md` |
+| Extended diamond as a `ConstructionReceipt` (codex-33, mathlib4 `3d7727b48d`, reviewed: semantics read back against the proposal edn, 584-job build, no sorry) | Seven units, nine token-carried edges (attention→minimise carries `item-attention` only; `item-unblocks` has no consumer), ten reading meets at `observe`; both linear extensions valid; the coupling edge `read-library-coupling→minimise` invalid empty and forged, and `tokenRelated 3 6 = false` — B3's choice (ii) and R8's inert token in Lean; support = token relation with no reordering; a sheet→attention chain step rejected | `ConstructionReceipt.lean` §extended |
 
 **Found in A1, needs a ruling (Lean owner: claude-2).** The two Lean
 modules disagree on which way a meet points. `CascadeOrder.IsMeet r a b m`
@@ -494,7 +495,7 @@ revisit when A5 has read a dozen R-units that way.
 | ruling | releases |
 |---|---|
 | R1–R4 | A3 (Lean receipt for the R-cascade), A4 (drawing), A5 (R-units as blend squares) |
-| R3 | re-proof of the outer diamond's `MeetWitness`; the seven-unit receipt |
+| R3 | re-proof of the outer diamond's `MeetWitness` (done, `7f497d3bd1`); the seven-unit receipt (done, mathlib4 `3d7727b48d`) |
 | R5, R6 | B4 part 2 (rank the 103 cones with the readings; compare with the live selector; ablation flags) |
 | R7 | nothing until B4 part 2; then the library edit (Joe's) |
 | R8 | measured 2026-10-06 (`REPORT-consumption-four-numbers-2026-10-06.md`); remaining: the scorer change (outcome function over predictive states with consumption provenance), owner of futon2 `src/` |
