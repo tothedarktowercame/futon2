@@ -1,0 +1,13 @@
+{:schema :wm/focus-predictive-attestation-kernel-v1
+ :kernel/id :wm/focus-predictive-attestation-kernel
+ :mode :record-only
+ :inputs [:selected-candidate-id :selected-target :selection-time-focus-class
+          :qualifying-terminal-attestation]
+ :outcome-domain [:attested-focus-increment :attested-associated-increment
+                  :attested-useful-elsewhere-increment :observed-typed-nondelivery]
+ :class-to-attested-outcome
+ {:focus :attested-focus-increment
+  :associated :attested-associated-increment
+  :useful-elsewhere :attested-useful-elsewhere-increment}
+ :failure-outcome :observed-typed-nondelivery
+ :qualification "The class prediction is conditional on a qualifying increment attestation. It predicts that attestation's focus relation, not whether work will succeed. A typed terminal failure maps to observed typed nondelivery."}

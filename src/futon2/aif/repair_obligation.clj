@@ -533,6 +533,12 @@
                  :review-job review-job
                  :review-verdict review-verdict
                  :review-text review-text
+                 :backtrace {:kind :independent-review-provenance
+                             :attempt-id attempt-id
+                             :review-job review-job
+                             :reviewer reviewer
+                             :failed-commit commit
+                             :selected-entry selected-entry}
                  :failure-stage :independent-review
                  :failure-kind failure-kind
                  :discharge-contract review-failure-discharge-contract
@@ -608,7 +614,12 @@
                  :failure-kind (:failure-kind finding)
                  :failure-error error
                  :failure-data (:failure-data finding)
-                 :backtrace (:backtrace finding)
+                 :backtrace (or (:backtrace finding)
+                                {:kind :system-failure-provenance
+                                 :attempt-id attempt-id
+                                 :failure-stage failure-stage
+                                 :failure-kind (:failure-kind finding)
+                                 :occurrence occurrence})
                  :discharge-contract (:discharge-contract finding)
                  :opened-at (or (:opened-at finding)
                                 (:observed-at observation)

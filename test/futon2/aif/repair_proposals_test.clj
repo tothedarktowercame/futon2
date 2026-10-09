@@ -86,7 +86,7 @@
         (is (some #{:repair/schema-version} (get-in declines ["repair-legacy" :missing-evidence])))
         (is (some #{[:discharge-contract :requires]} (get-in declines ["repair-bad-contract" :missing-evidence])))))))
 
-(deftest alternate-contracts-and-absent-backtraces-are-preserved-honestly
+(deftest alternate-contracts-and-legacy-backtraces-retain-derived-provenance
   (with-store
     (fn [root]
       (let [contract {:requires [:cleared-precondition :grounded-production-shaped-successor]
@@ -96,8 +96,10 @@
         (let [p (first (:proposals (supply/supply root)))]
           (is (= contract (get-in p [:evidence :discharge-contract])))
           (is (nil? (get-in p [:evidence :target])))
-          (is (= {:status :not-applicable :reason :finding-has-no-backtrace}
-                 (get-in p [:evidence :backtrace]))))))))
+          (is (= :retained
+                 (get-in p [:evidence :backtrace :status])))
+          (is (= [:backtrace]
+                 (get-in p [:evidence :backtrace :edn-path]))))))))
 
 (deftest missing-and-nil-backtraces-are-distinct-from-retained-evidence
   (with-store
@@ -107,8 +109,10 @@
             file (io/file root "findings" "repair-missing.edn")]
         (spit file (pr-str (dissoc missing :backtrace))))
       (let [by-id (into {} (map (juxt :repair/id identity)) (:proposals (supply/supply root)))]
-        (is (= :not-applicable (get-in by-id ["repair-nil" :evidence :backtrace :status])))
-        (is (= :not-applicable (get-in by-id ["repair-missing" :evidence :backtrace :status])))))))
+        (is (= :retained
+               (get-in by-id ["repair-nil" :evidence :backtrace :status])))
+        (is (= :derived-legacy-provenance
+               (get-in by-id ["repair-missing" :evidence :backtrace :status])))))))
 
 (deftest no-committed-closure-witness-means-no-executable-repair
   (with-store

@@ -749,7 +749,27 @@
             :grounded-repair :distinct-production-shaped-successor]
            (get-in requested [:discharge-contract :requires])))
     (is (= :code-commit
-           (get-in requested [:discharge-contract :artifact-shape])))))
+           (get-in requested [:discharge-contract :artifact-shape])))
+    (is (= :independent-review-provenance
+           (get-in requested [:backtrace :kind])))
+    (is (= "review-1" (get-in requested [:backtrace :review-job])))))
+
+(deftest system-finding-without-stack-retains-producer-provenance
+  (let [root (temp-root)
+        finding (repair/record-system-failure!
+                 root {:attempt-id "attempt-no-stack"
+                       :repair-class :machine-failure
+                       :failure-stage :close
+                       :outcome :incomplete
+                       :failure-kind :close-exception
+                       :error "no throwable stack was supplied"
+                       :observation {:observation/id "close-1"
+                                     :source "fixture-close"}
+                       :discharge-contract {:requires [:grounded-repair]
+                                            :artifact-shape :code-commit}})]
+    (is (= :system-failure-provenance (get-in finding [:backtrace :kind])))
+    (is (= "attempt-no-stack" (get-in finding [:backtrace :attempt-id])))
+    (is (= :close (get-in finding [:backtrace :failure-stage])))))
 
 (deftest distinct-review-outcomes-do-not-collide-in-the-finding-store
   (let [root (temp-root)
