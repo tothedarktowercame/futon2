@@ -36,6 +36,7 @@
             [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
+            [futon2.aif.policy :as selection-policy]
             [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.apparatus-certificates :as apparatus-certificates]
             [futon2.aif.wm.pattern-graph-diff :as pattern-graph-diff]
@@ -1084,7 +1085,9 @@
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
-            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])                         (get-in result [:checkpoints :selection :judgment :decision]))
+            decision (some-> (or (get-in result [:checkpoints :selection :judgment :controller-decision])
+                                 (get-in result [:checkpoints :selection :judgment :decision]))
+                             selection-policy/compact-cascade-carriers)
             record-failure (run-record-failure result)
             decision (when decision
                        (focus-receipt/join-terminal
@@ -4991,15 +4994,16 @@
             (let [cell (update @pending-selection :judgment assoc
                                :belief-source
                                (cond-> {:run/id (:run-id opts)}
-                                 trace-path (assoc :trace-path trace-path)))]
+                                 trace-path (assoc :trace-path trace-path)))
+                  durable-cell (selection-policy/compact-cascade-carriers cell)]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [event (if cohort-source
                               (cohort/append-checkpoint!
                                cohort-source (:data-root execution-cohort)
-                               attempt-id :selection cell)
+                               attempt-id :selection durable-cell)
                               (cohort/append-checkpoint!
-                               attempt-id :selection cell))]
+                               attempt-id :selection durable-cell))]
                   (swap! checkpoint-events assoc :selection event)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
@@ -5702,7 +5706,12 @@
         close! (fn [outcome data]
                  (try
                    (observe-end!)
-                   (close-core! outcome data)
+                   ;; Closing is a first-class debugger boundary.  In
+                   ;; particular, persistence/manifest failures no longer end
+                   ;; the click before an attached debugger can inspect the
+                   ;; completed selection and construction cells.
+                   (run-phase! opts @phase-context :close
+                               #(close-core! outcome data))
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
                      ;; counterexample: a close-time evidence refusal escaped

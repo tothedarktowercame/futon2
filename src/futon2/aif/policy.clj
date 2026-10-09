@@ -23,9 +23,29 @@
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
             [futon2.aif.cascade-selection :as cascade-selection]
-            [futon2.aif.ticket-queue :as ticket-queue]))
+            [futon2.aif.ticket-queue :as ticket-queue]
+            [clojure.walk :as walk]))
 
 (load-identity/register! *ns* *file*)
+
+(defn compact-cascade-carriers
+  "Lossless identity projection for durable decision records.  Construction
+   and interpretation receipts remain in their single target-construction
+   carrier; every repeated policy occurrence retains its target, arrangement,
+   guards/effects and scorer parameters but references no receipt payload."
+  [x]
+  (walk/postwalk
+   (fn [v]
+     (if (and (map? v) (= :cascade-candidate (:kind v)))
+       (-> (select-keys v [:kind :id :target :want :precedence :precedence-steps])
+           (update :precedence
+                   #(mapv (fn [p]
+                            (if (map? p)
+                              (select-keys p [:id :target :guard :produces
+                                              :predicted-effect :theta :theta-source])
+                              p)) %)))
+       v))
+   x))
 
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.
@@ -371,6 +391,20 @@
    map to QuantityStatus.computed; neutral and computedNotAttached retain
    their distinct constructors. This emits evidence, not a runtime gate."
   [beta candidates ranked novelty-inputs]
+  (let [compact-id
+        (fn [id]
+          (if-not (map? id) id
+            (-> (select-keys id [:kind :id :target :want :precedence :precedence-steps])
+                (update :precedence
+                        #(mapv (fn [p]
+                                 (if (map? p)
+                                   (select-keys p [:id :target :guard :produces
+                                                   :predicted-effect :theta :theta-source])
+                                   p)) %)))))
+        compact-candidate
+        #(-> (select-keys % [:id :habit :habit-status :f :f-status
+                             :computed-f :g :reason])
+             (update :id compact-id))]
   {:parameter-novelty (mapv #(novelty/policy-receipt % novelty-inputs) ranked)
    :beta {:value beta :status :declared}
    ;; A full candidate map is the join key. Nested labels repeat across
@@ -378,7 +412,7 @@
    :node-evaluation-traces
    (mapv (fn [entry]
            (let [certificate (:certificate entry)]
-             {:id (:action entry)
+             {:id (compact-id (:action entry))
               :horizon (:horizon-steps entry)
               :status (if (contains? certificate :node-evaluations) :recorded :missing)
               :evaluations (:node-evaluations certificate)})) ranked)
@@ -402,13 +436,13 @@
                                              :observation-model :steps
                                              :consumed-g :g-terms
                                              :c :c-source :rates-provenance])
-                               :id (:action entry)
+                               :id (compact-id (:action entry))
                                :g (:controller-score entry))])
                    ranked))
-   :candidates (mapv #(assoc % :f-consumed (cascade-selection/f-consumed-record %))
+   :candidates (mapv #(assoc (compact-candidate %) :f-consumed (cascade-selection/f-consumed-record %))
                      candidates)
    :policies (mapv (fn [c]
-                     {:id (:id c)
+                     {:id (compact-id (:id c))
                       :beta-declared beta
                       :habit (:habit c)
                       :habit-status (if (= :attached (:habit-status c))
@@ -417,8 +451,12 @@
                       :f-status (if (= :attached (:f-status c))
                                   :computed (:f-status c))
                       :reason (:reason c)
-                      :f-prefix (:f-prefix c)})
-                   candidates)})
+                      ;; The full :f-prefix embeds the policy (including its
+                      ;; construction/interpretation receipts) a second time.
+                      ;; Candidate :id above is the canonical arrangement;
+                      ;; F's consumed scalar/status remain here.
+                      :f-prefix {:status :referenced-by-candidate-id}})
+                   candidates)}))
 
 (defn select-action-cascades
   "Cascade-candidate selection at a DECLARED β (tick 1, R14 requirement).
