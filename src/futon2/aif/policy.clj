@@ -297,7 +297,10 @@
                      (and (keyword? outcome)
                           (= "progress" (namespace outcome)))
                      (pos? (Long/parseLong (name outcome)))
-                     (contains? #{:focused :related :unrelated} outcome) true
+                     ;; :unrelated is another facet, not completion of this
+                     ;; candidate's own target; class-label-of-state only
+                     ;; treats the candidate target's class as its ending.
+                     (contains? #{:focused :related} outcome) true
                      :else false))
         completion-pairs
         (for [{:keys [distribution]} c-steps
