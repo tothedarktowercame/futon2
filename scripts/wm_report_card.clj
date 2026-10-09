@@ -5,6 +5,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.wm.preregistration :as prereg]
+            [futon2.data-paths :as data-paths]
             [wm-run-facts :as run-facts]))
 
 (defn absent [reason & [source-path]]
@@ -182,7 +183,8 @@
         loc (some (fn [[[t _] v]] (when (= target t) v)) locs)]
     {:title (or (:title loc)
                 (when (and (:repo loc) (:path loc))
-                  (let [f (io/file "/home/joe/code" (str (:repo loc)) (str (:path loc)))]
+                  (let [f (io/file data-paths/production-code-root
+                                   (str (:repo loc)) (str (:path loc)))]
                     (when (.isFile f)
                       (with-open [reader (io/reader f)]
                         (when-let [heading (first (filter #(re-matches #"^#\s+.+" %)
@@ -576,7 +578,9 @@
 (defn generate!
   ([record-path] (generate! record-path {}))
   ([record-path {:keys [output-dir snap preregistration-root cards-by-run ancestor?]}]
-   (let [record (run-facts/read-edn record-path)
+   (let [record-path (data-paths/resolve-repo-path record-path)
+         output-dir (some-> output-dir data-paths/resolve-repo-path)
+         record (run-facts/read-edn record-path)
          [previous previous-path] (run-facts/lookup-previous record-path record)
          snap (or snap (run-facts/snapshot))
          run-id (:run/id record)
@@ -584,8 +588,11 @@
                           (io/file (.getParentFile (io/file record-path)) run-id)))
          run-dir (.getParentFile (io/file record-path))
          cards-by-run (or cards-by-run (prereg/discover-card-paths run-dir))
-         preregistration-root (or preregistration-root
-                                  "holes/labs/wm-contract/preregistrations")
+         preregistration-root
+         (let [p (or preregistration-root
+                     (data-paths/repo-path
+                      "holes" "labs" "wm-contract" "preregistrations"))]
+           (data-paths/resolve-repo-path p))
          all-preregs (prereg/load-registry preregistration-root cards-by-run)
          preregs (filterv #(neg? (compare (str (get-in % [:against :run-id]))
                                           (str run-id))) all-preregs)

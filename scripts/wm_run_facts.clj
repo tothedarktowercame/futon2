@@ -9,6 +9,7 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.previous-run :as previous-run]))
 
@@ -56,13 +57,14 @@
   is retained as a typed snapshot absence."
   ([] (snapshot {}))
   ([{:keys [code-root agency-json]
-     :or {code-root "/home/joe/code"}}]
+     :or {code-root data-paths/production-code-root}}]
    (let [missions (registry/load-missions code-root)
          tickets (registry/load-tickets code-root)
          excursions (registry/load-excursions code-root)
          patterns (files-under (str code-root "/futon3/library") ".flexiarg")
          agency-url (str (or (System/getenv "AGENCY_BASE_URL")
                              "http://localhost:7070") "/api/alpha/agents")
+         agency-json (some-> agency-json data-paths/resolve-repo-path)
          roster (try
                   (json/parse-string (if agency-json (slurp agency-json)
                                          (slurp agency-url)) true)
@@ -469,7 +471,8 @@
 
 (defn -main [& args]
   (if (= "--run" (first args))
-    (let [path (second args)
+    (let [supplied (second args)
+          path (data-paths/resolve-repo-path supplied)
           snap (snapshot)
           record (read-edn path)
           [previous previous-path] (lookup-previous path record)]
@@ -477,8 +480,9 @@
                 (facts-for-record record path snap previous previous-path)
                 {:pretty true})))
     (let [[run-dir output] args
-          dir (or run-dir "data/wm-runs")
-        out (or output "holes/labs/wm-contract/RUN-FACTS-history-2026-09-30.md")
+          dir (data-paths/resolve-repo-path (or run-dir "data/wm-runs"))
+        out (data-paths/resolve-repo-path
+             (or output "holes/labs/wm-contract/RUN-FACTS-history-2026-09-30.md"))
         paths (->> (.listFiles (io/file dir))
                    (filter #(.isFile ^java.io.File %))
                    (filter #(re-matches #"tick-run-record-.*\.edn" (.getName ^java.io.File %)))
