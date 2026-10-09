@@ -889,6 +889,16 @@
           {:assumption "the horizon relative to the proposed chain"
            :state "T is one common declared-or-computed horizon per tick (resolve-cascade-horizon); :max-moves (construction budget, default 4) is a different quantity that also reads 4 in the receipt above. In that receipt T = 4 with 7 unit applications in the proposed order and 3 wants :beyond-horizon; the chain is longer than the horizon it is scored over."}]}
 
+  {:id :dirichlet-observation-prior
+   :latex "A_{o\\mid s} := \\mathbb{E}_{\\operatorname{Dir}(\\alpha_{s})}[A_{o\\mid s}] = \\alpha_{s,o}/\\sum_{o'}\\alpha_{s,o'}"
+   :defines :A-dirichlet :node :CTAU-CLASS :class :stack-defined :ref :dacosta2020
+   :imports [:A-tok]
+   :formal "For the synthetic class/progress observation model, each hidden emission label has a declared Dirichlet prior. The expected A row is consumed at scoring time. The prior is a Jeffreys 1/2 concentration on every outcome plus one labelled pseudo-observation on the state-associated outcome (3/2 there, 1/2 elsewhere). The concentrations are a declared uncertainty model, not accumulated data; q7-belief-novelty may replace the map with its learned posterior at the model seam."
+   :justification "Jeffreys' Dirichlet(1/2,...,1/2) is the noninformative multinomial baseline; the single labelled pseudo-count makes the state/emission correspondence explicit without asserting certainty."
+   :code "futon2 src/futon2/aif/observation_model.clj (expected-dirichlet-row, emission-row, state-information-gain); src/futon2/aif/wm/cascade_decision.clj (class-observation-model :dirichlet-prior)"
+   :lean-absent {:absent :runtime-observation-model-only
+                 :detail "The Lean carrier remains the policy-horizon equation; this declared synthetic A prior is not accumulated or proved as a theorem."}}
+
   {:id :class-preference-schedule
    :latex "\\begin{aligned}
            C^{\\mathrm{cls}}_{T} &= \\{\\,\\texttt{focused} \\mapsto 0.55,\\ \\texttt{related} \\mapsto 0.35,\\

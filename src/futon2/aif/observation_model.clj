@@ -73,7 +73,7 @@
   "Validate a declared bounded model. No rate, independence or authority default."
   [{:keys [schema backend kind universe rates components provenance parameters
             horizon class-universe acceptance target-class class-preference
-            progress-tokens want progress-preference] :as model}]
+            progress-tokens want progress-preference dirichlet-prior] :as model}]
   (when-not (= :wm/observation-model-v1 schema)
     (refuse! :invalid-model-schema {}))
   (when-not (= :exact-enumeration backend)
@@ -91,6 +91,19 @@
                  (string? (:source provenance)) (seq (:source provenance)))
     (refuse! :synthetic-provenance-required {}))
   (require-parameters! model)
+  ;; A declared Dirichlet prior is the observation model's A matrix.  The
+  ;; scorer consumes its expectation; a later learned posterior can replace
+  ;; this map at the same seam without changing the query contract.
+  (when (contains? model :dirichlet-prior)
+    (when-not (and (map? dirichlet-prior) (seq dirichlet-prior)
+                   (every? (fn [[_ row]]
+                             (and (map? row) (seq row)
+                                  (every? (fn [[_ concentration]]
+                                            (and (number? concentration)
+                                                 (pos? (double concentration))
+                                                 (Double/isFinite (double concentration)))) row)))
+                           dirichlet-prior))
+      (refuse! :invalid-dirichlet-prior {:dirichlet-prior dirichlet-prior})))
   (case kind
     :exact-checks
     (let [resolved (require-rates! universe rates parameters)]
@@ -112,8 +125,9 @@
     (do
       (when-not (and (pos-int? horizon) (<= horizon 10))
         (refuse! :invalid-class-horizon {:horizon horizon}))
-      (when-not (= [:focused :related :unrelated :stop-the-line
-                    :ending/not-yet-evaluated] class-universe)
+      (when-not (and (vector? class-universe) (seq class-universe)
+                     (every? keyword? class-universe)
+                     (= (count class-universe) (count (set class-universe))))
         (refuse! :invalid-class-universe {:class-universe (:class-universe model)}))
       (when-not (and (set? acceptance) (set/subset? acceptance universe))
         (refuse! :invalid-class-acceptance {:acceptance acceptance}))
@@ -197,6 +211,42 @@
   (- (reduce + 0.0 (for [[_ p] (ordered distribution) :when (pos? p)]
                      (* (double p) (Math/log (double p)))))))
 
+(defn- expected-dirichlet-row [row]
+  (let [total (double (reduce + 0 (vals row)))]
+    (update-vals row #(/ (double %) total))))
+
+(defn- emission-row
+  "Return E[A(.|hidden)] from the declared Dirichlet prior.  The
+   deterministic fallback is retained for legacy models and adversarial
+   tests; production WM models declare :dirichlet-prior explicitly."
+  [model hidden deterministic]
+  (if-let [row (get (:dirichlet-prior model) hidden)]
+    (expected-dirichlet-row row)
+    deterministic))
+
+(defn- state-information-gain
+  "E_Q(o|pi) KL[Q(s|o,pi)||Q(s|pi)] for the same A used by ambiguity."
+  [belief rows prediction]
+  (let [posteriors
+        (into {}
+              (for [[o _] (ordered prediction)]
+                [o (let [weighted (into {}
+                                       (for [[s mass] (ordered belief)]
+                                         [s (* (double mass) (double (get-in rows [s o] 0.0)))]))
+                         total (reduce + 0.0 (vals weighted))]
+                     (if (zero? total)
+                       {}
+                       (into {} (for [[s w] weighted :when (pos? w)] [s (/ w total)]))))]))]
+    (reduce + 0.0
+            (for [[o po] (ordered prediction) :when (pos? po)
+                  :let [posterior (get posteriors o)]]
+              (* (double po)
+                 (reduce + 0.0
+                         (for [[s q] posterior :when (pos? q)]
+                           (* (double q)
+                              (Math/log (/ (double q)
+                                           (double (get belief s))))))))))))
+
 (defn- observation!
   [model observation context]
   (when-not (= :observed (:status observation))
@@ -211,7 +261,7 @@
   (when (empty? (set/union (:present observation) (:absent observation)))
     (refuse! :missing-observation {:observation observation})))
 
-(defn- class-of-state
+(defn- class-label-of-state
   "PROOF-wm-works 1.3 handoff A (codex-20): the CANDIDATE's own target's
    ending class. Before the horizon every state emits
    :ending/not-yet-evaluated UNCONDITIONALLY (an acceptance reached early is
@@ -222,9 +272,11 @@
    of its target's acceptance is :stop-the-line per Joe's ruling
    (unmeasured/not reached). One target per candidate: the emission is
    deterministic and ambiguity is genuinely 0."
-  [{:keys [acceptance target-class]} state target terminal?]
+  [{:keys [acceptance target-class progress-classes]} state target tau terminal?]
   (if-not terminal?
-    {:ending/not-yet-evaluated 1}
+    (or (get progress-classes (count (filter #(and (= target (first %))
+                                                   (contains? state %)) acceptance)))
+        :progress-0)
     (let [own (some (fn [token] (when (and (= target (first token))
                                            (contains? state token))
                                   token))
@@ -241,14 +293,24 @@
                     :possible-costs {:focused (- (Math/log 0.55))
                                      :related (- (Math/log 0.35))
                                      :unrelated (- (Math/log 0.05))}})
-          (if c {c 1} {:stop-the-line 1}))))))
+          (if c c :stop-the-line))))))
 
 (defn- class-predictive
   [{:keys [horizon] :as model} belief tau target]
   (let [terminal? (>= tau horizon)]
     (apply merge-with +
-           (for [[state mass] belief]
-             (update-vals (class-of-state model state target terminal?) #(* mass %))))))
+            (for [[state mass] (ordered belief)]
+             (let [label (class-label-of-state model state target tau terminal?)
+                   deterministic {label 1}
+                   row (emission-row model label deterministic)]
+               (update-vals row #(* (double mass) %)))))))
+
+(defn- class-rows
+  [{:keys [horizon] :as model} belief tau target]
+  (into {}
+        (for [[state _] (ordered belief)]
+          (let [label (class-label-of-state model state target tau (>= (int tau) (int horizon)))]
+            [state (emission-row model label {label 1})]))))
 
 (defn- class-preference-for
   [model tau]
@@ -303,11 +365,14 @@
               tau (or tau (:horizon model))
               pref (class-preference! model (class-preference-for model tau))
               prediction (class-predictive model belief tau target)
+              rows (class-rows model belief tau target)
+              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
+                                        (* (double mass) (entropy (get rows s)))))
+              information-gain (state-information-gain belief rows prediction)
               risk (m/outcome-risk (ordered prediction) pref)]
-          ;; Deterministic emission: ambiguity is exactly 0 at every step;
-          ;; before the horizon the single :ending/not-yet-evaluated symbol
-          ;; against preference 1 gives risk exactly 0.
-          {:prediction prediction :risk risk :ambiguity 0.0
+          {:prediction prediction :risk risk :ambiguity ambiguity
+           :information-gain information-gain
+           :observation-rows rows
            :g-evaluation :class-emission
            :tau tau
            :g (cond (= :infinite risk) ##Inf
@@ -333,9 +398,22 @@
         (belief! model belief)
         (let [tau (or tau (:horizon model))
               pref (get-in model [:progress-preference tau])
-              prediction (progress-predictive model belief)
+              rows (into {} (for [[state _] (ordered belief)]
+                              [state (emission-row model
+                                                    (progress-outcome model state)
+                                                    {(progress-outcome model state) 1})]))
+              prediction (reduce (fn [out [state mass]]
+                                   (merge-with + out
+                                               (update-vals (get rows state)
+                                                            #(* (double mass) %))))
+                                 {} (ordered belief))
+              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
+                                        (* (double mass) (entropy (get rows s)))))
+              information-gain (state-information-gain belief rows prediction)
               risk (m/outcome-risk (ordered prediction) pref)]
-          {:prediction prediction :risk risk :ambiguity 0.0
+          {:prediction prediction :risk risk :ambiguity ambiguity
+           :information-gain information-gain
+           :observation-rows rows
            :g-evaluation :progress-count :tau tau
            :g (if (= :infinite risk) ##Inf (double risk))}))
       :condition

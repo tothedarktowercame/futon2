@@ -155,8 +155,12 @@
                                                  :observation observation :context prediction-context})
         raw-risk (reduce + 0.0 (map :risk steps))
         raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
-        raw-information (if (= :beta-pattern (:parameter-information-mode opts))
-                          (candidate-information-gain candidate) 0.0)
+        ;; State EIG is supplied by the observation model.  Parameter
+        ;; novelty remains an optional, separate codex-33 seam.
+        raw-state-information (reduce + 0.0 (map #(double (or (:information-gain %) 0.0)) steps))
+        raw-parameter-information (if (= :beta-pattern (:parameter-information-mode opts))
+                                    (candidate-information-gain candidate) 0.0)
+        raw-information (+ raw-state-information raw-parameter-information)
         normalize? (= :per-step-capacity-and-pattern (:g-normalization opts))
         pattern-count (max 1 (count (set (map #(or (:pattern-id %) (:id %))
                                                 (precedence-patterns (:precedence candidate))))))
@@ -201,6 +205,12 @@
                                            {:absent :no-c-source-in-cascade-spec})
                              :g-terms {:risk risk :ambiguity ambiguity
                                        :expected-information-gain information-gain
+                                       :state-information-gain (if normalize?
+                                                                 (/ raw-state-information horizon-steps)
+                                                                 raw-state-information)
+                                       :parameter-information-gain (if normalize?
+                                                                      (/ raw-parameter-information pattern-count)
+                                                                      raw-parameter-information)
                                        :combination :risk-plus-ambiguity-minus-information-gain
                                        :normalization (if normalize?
                                                         {:risk :per-horizon-step-and-log-outcome-support
