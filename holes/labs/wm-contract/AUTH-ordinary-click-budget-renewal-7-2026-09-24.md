@@ -163,3 +163,21 @@ would like to evaluate the results." This authorizes exactly one further
 ordinary click and its post-hoc evaluation, including the R20 certificate.
 Per this document's standing rule, `allocated` rises from 46 to **47**.
 Issue-time accounting and the existing refund rules are unchanged.
+
+## Joe's grant to claude-12, 2026-10-09 — one click, allocated
+
+Joe, 2026-10-09, heard directly by claude-12 in its operator buffer (emacs-repl),
+after claude-12 reported that the allocation stood at 47 consumed of 47:
+"yes the budget for 1 click is granted. if you can get token counts for zai
+please do". This authorizes exactly one further ordinary click. It runs under
+`futon2.aif.wm.debugger`, attached in the Agency JVM, following A-self-heal
+(`holes/labs/A-self-heal.md`), with the zai-1 / zai-2 / zai-3 cast. Its
+post-hoc assessment covers the Lean requirements check (`scripts/wm_run_alert.py`),
+token spend per dispatched job and phase (zai usage, futon3c `7498313b`), and
+phase timing. Per this document's standing rule, `allocated` rises from 47 to
+**48**. Issue-time accounting and the existing refund rules are unchanged.
+
+The three attempts claude-12 made earlier that day consumed nothing: the ledger
+has no entry after 2026-10-05T04:43Z. Two were refused before the runner (a
+malformed run id because `uuidgen` was missing on zone 1.1, and the absent
+`/run/futon2` lock directory), and the third was refused at the exhausted budget.
