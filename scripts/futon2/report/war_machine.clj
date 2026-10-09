@@ -6582,9 +6582,17 @@
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
                                       :registry-loading)
-        loaded-missions (mission-registry/load-missions)
-        loaded-tickets (mission-registry/load-tickets)
-        loaded-excursions (mission-registry/load-excursions)
+        ;; The Lean run facts and the selection-world census pin the primary
+        ;; checkout registries under default-code-root.  Read that exact
+        ;; authority here too.  The zero-arity mission read is substrate-2;
+        ;; using it here produced a different task universe when retained
+        ;; nullable fields or deleted entities were stale in substrate.
+        loaded-missions (mission-registry/load-missions
+                         mission-registry/default-code-root)
+        loaded-tickets (mission-registry/load-tickets
+                        mission-registry/default-code-root)
+        loaded-excursions (mission-registry/load-excursions
+                           mission-registry/default-code-root)
         _registry-loaded
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)

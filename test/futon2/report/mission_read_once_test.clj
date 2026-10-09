@@ -30,9 +30,15 @@
   ([ns judge-opts] (one-selection ns judge-opts missions))
   ([ns judge-opts mission-doc]
   (let [reads (atom 0)
+        load-args (atom [])
         targets (atom nil)
         tmp (tmp-dir)]
-    (with-redefs-fn {#'mr/load-missions (fn [& _] (swap! reads inc) mission-doc)
+    (with-redefs-fn {#'mr/load-missions (fn [& args]
+                                         (swap! reads inc)
+                                         (swap! load-args conj args)
+                                         (if (fn? mission-doc)
+                                           (apply mission-doc args)
+                                           mission-doc))
                      #'mr/load-tickets (fn [& _] {:tickets []})
                      #'mr/load-excursions (fn [& _] {:excursions []})
                      (ns-resolve ns 'assemble-cascade-problems-with-published)
@@ -47,7 +53,7 @@
                                                judge-opts))
             (catch clojure.lang.ExceptionInfo e
               (when-not (::stop (ex-data e)) (throw e)))))
-    {:reads @reads :targets @targets})))
+    {:reads @reads :load-args @load-args :targets @targets})))
 
 (def pre-fix-ns
   (delay
@@ -62,9 +68,35 @@
       (the-ns renamed))))
 
 (deftest one-selection-reads-the-registry-once
-  (let [{:keys [reads targets]} (one-selection (:ns (meta #'wm/judge)) {})]
+  (let [{:keys [reads load-args targets]}
+        (one-selection (:ns (meta #'wm/judge)) {})]
     (is (= 1 reads))
+    (is (= [[mr/default-code-root]] load-args)
+        "selection reads the same pinned checkout authority as run facts")
     (is (= ["M-live"] targets))))
+
+(deftest stale-substrate-cannot-replace-the-pinned-registry-population
+  (let [seen (atom nil)
+        loader (fn
+                 ([] {:missions [{:id "M-stale-substrate-only"
+                                  :status-class :unknown}]})
+                 ([_] {:missions [{:id "M-current-registry"
+                                   :status-class :active}]}))
+        selector (fn [{:keys [tasks]}]
+                   (reset! seen (mapv :id tasks))
+                   {:schema :wm/outer-task-selection-v1
+                    :policy {:kind :test}
+                    :support (mapv outer-task-selection/task-view tasks)
+                    :excluded []
+                    :draw {:absent :test}
+                    :chosen (outer-task-selection/task-view (first tasks))
+                    :action {:type :advance-mission
+                             :target (:id (first tasks))}})]
+    (one-selection (:ns (meta #'wm/judge))
+                   {:outer-task-selection-fn selector :cascade-sources {}}
+                   loader)
+    (is (= ["M-current-registry"] @seen))
+    (is (not (some #{"M-stale-substrate-only"} @seen)))))
 
 (deftest with-declared-sources-the-targets-are-still-the-live-missions
   ;; site 1 is guarded out; the unconditional binding still feeds the targets

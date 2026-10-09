@@ -357,6 +357,27 @@
     (is (nil? (get-in preview [:policy :meta-selection :pairwise])))
     (is (nil? (get-in preview [:excluded 0 :ineligibility-evidence])))))
 
+(deftest registry-task-census-uses-one-pinned-root
+  (let [calls (atom [])]
+    (with-redefs [registry/load-missions
+                  (fn [root]
+                    (swap! calls conj [:missions root])
+                    {:missions [{:id "M-current" :status-class :active}]})
+                  registry/load-excursions
+                  (fn [root]
+                    (swap! calls conj [:excursions root])
+                    {:excursions [{:id "E-current" :status-class :open}]})
+                  registry/load-tickets
+                  (fn [root]
+                    (swap! calls conj [:tickets root])
+                    {:tickets [{:id "T-current" :status-class :live}]})]
+      (is (= #{"M-current" "E-current" "T-current"}
+             (set (map :id (live/live-registry-tasks "/pinned/code")))))
+      (is (= #{[:missions "/pinned/code"]
+               [:excursions "/pinned/code"]
+               [:tickets "/pinned/code"]}
+             (set @calls))))))
+
 (deftest ^:slow current-data-composition-is-structurally-bounded
   (let [snapshot (live/fetch-pipeline-snapshot)
         tasks (live/live-registry-tasks)
