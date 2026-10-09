@@ -1,13 +1,16 @@
 (ns futon2.aif.observation-model-route-test
   (:require [clojure.edn :as edn]
             [clojure.set :as set]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.cascade-observation-route :as route]
             [futon2.aif.efe :as efe]
-            [futon2.aif.observation-model :as om])
+            [futon2.aif.observation-model :as om]
+            [futon2.test-support.runner-fixture :as runner-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
+
+(use-fixtures :once runner-fixture/with-hermetic-traces)
 
 (defn close? [a b]
   (< (Math/abs (- (double a) (double b))) 1e-9))

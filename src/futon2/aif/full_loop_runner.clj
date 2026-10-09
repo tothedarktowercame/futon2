@@ -77,6 +77,7 @@
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
+            [futon2.data-paths :as data-paths]
             [futon2.report.cascade-lane :as cascade])
   (:import [java.nio.file Files]
            [java.security MessageDigest]
@@ -114,7 +115,7 @@
 ;; flight clicks that never dispatch an author. A cast is now the caller's or
 ;; the env's; one not given is absent, and a tick that selects an action with
 ;; no cast records that absence where it would dispatch.
-(def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
+(def default-phase-log (data-paths/path "wm-full-loop-phases.edn.log"))
 (def default-run-record-dir
   "Where a run drops its receipt when the caller names no directory. Under
   data/ (gitignored), not the lab root: 148 receipts accumulated there and NO
@@ -122,7 +123,13 @@
   `^tick-run-record-(\\d{4}-\\d{2}-\\d{2})-(.+)\\.edn$` and a bare-UUID id
   has no date (claude-7's inbox-zero analysis, 2026-09-17). A caller that
   wants a receipt kept as evidence passes :run-record-dir explicitly."
-  "/home/joe/code/futon2/data/wm-runs")
+  (data-paths/path "wm-runs"))
+
+(defn- phase-log-path [] (data-paths/path "wm-full-loop-phases.edn.log"))
+(defn- run-record-dir [] (data-paths/path "wm-runs"))
+(defn- default-repair-root [] (data-paths/path "wm-repair-obligations"))
+(defn- learning-ledger-root [] (data-paths/path "wm-learning-trials"))
+(defn- d-task-root [] (data-paths/path "wm-d-task-enactment"))
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
@@ -311,8 +318,8 @@
            (or (some-> (System/getenv "FUTON_WM_AGENT_BUDGET_MS")
                        parse-long)
                default-agent-budget-ms)
-           :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") default-phase-log)
-           :observation-labels-path "/home/joe/code/futon2/data/wm-observation-labels/labels.edn"
+           :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") (phase-log-path))
+           :observation-labels-path (data-paths/path "wm-observation-labels" "labels.edn")
            :poll-ms 2000
            :window-days 14
            :build-cure-retries
@@ -946,7 +953,7 @@
         chronology (registered-telemetry/chronology-finish
                     (:registered-run/chronology-start raw-opts) raw-opts refresh)]
     (if (seq route)
-      (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
+      (let [dir (io/file (or (:run-record-dir raw-opts) (run-record-dir)))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
             tmp (io/file dir (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))
             pin-identity (or (get-in result [:checkpoints :selection :ground
@@ -2308,7 +2315,7 @@
     (cond
       (and (:repair/id action) (= target (str "T-" (:repair/id action))))
       (:finding (repair-discharge/bind-selected!
-                 (or repair-root repair/default-root) action (:interpretation-receipts action)))
+                 (or repair-root (default-repair-root)) action (:interpretation-receipts action)))
 
       (= :repair-machine-failure (:type action))
       (:repair-obligation action)
@@ -2882,7 +2889,7 @@
                  mission)) "\n"
        (when-let [repair-id (:repair/id mission)]
          (str "FULL REPAIR FINDING: "
-              (pr-str (str (io/file repair/default-root "findings"
+              (pr-str (str (io/file (default-repair-root) "findings"
                                    (str repair-id ".edn"))))
               "\nThe mission record above is the compact finding projection. "
               "Read the full finding for its backtrace and nested evidence; "
@@ -3965,7 +3972,7 @@
 
 (defn- retained-resolution-record
   [repair-id]
-  (let [file (io/file repair/default-root "resolutions" (str repair-id ".edn"))]
+  (let [file (io/file (default-repair-root) "resolutions" (str repair-id ".edn"))]
     (when (.isFile file)
       (parse-attempt-evidence (Files/readAllBytes (.toPath file))
                               (.getAbsolutePath file)))))
@@ -4055,7 +4062,7 @@
                    :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
                    :route (or (:route context) (:route source-record))
                    :expected (:expected context) :read-job (:read-job context)})
-        learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) learning)
+        learning (learning-ledger/record! (or (:ledger-root context) (learning-ledger-root)) learning)
         receipt (assoc receipt :learning-trial-receipt learning)
         surprises (surprise/records
                    {:comparison receipt
@@ -4737,7 +4744,7 @@
         ;; and evidence/ is enumerated into the close manifest.
         job-text-dir (if attempt-evidence-dir
                        (io/file (.getParentFile (io/file attempt-evidence-dir)) "retained")
-                       (io/file (or (:run-record-dir opts) default-run-record-dir)
+                       (io/file (or (:run-record-dir opts) (run-record-dir))
                                 (str (:run-id opts)) attempt-id))
         ;; All author/reviewer/revision/repair ports share this attempt's
         ;; retention, including injected ports. No additional Agency reads.
@@ -5020,7 +5027,7 @@
                        d-task-result
                        (when @action-occurrence
                          (d-task/complete!
-                          (or (:d-task-evidence-root opts) d-task/default-root)
+                          (or (:d-task-evidence-root opts) (d-task-root))
                           @d-task-dispatch @d-task-context
                           (assoc data :dispatch-route @author-dispatch-route
                                       :artifact-binding (or (:artifact-binding data)
@@ -5038,7 +5045,7 @@
                           {:occurrence @action-occurrence :route @author-dispatch-route
                            :selection-recorded-at (get-in @checkpoint-events [:selection :recorded-at])
                            :expected @d-task-context :read-job #(read-job! opts %)
-                           :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
+                           :ledger-root (or (:learning-trial-ledger-root opts) (learning-ledger-root))}))
                        want-outcome-accounting
                        (when selected-action
                          (selected-want-outcome/receipt
@@ -5050,7 +5057,7 @@
                        (route-attestation/retain!
                         (if attempt-evidence-dir
                           (.getParentFile (io/file attempt-evidence-dir))
-                          (io/file (or (:run-record-dir opts) default-run-record-dir)
+                          (io/file (or (:run-record-dir opts) (run-record-dir))
                                    (str (:run-id opts)) attempt-id))
                         (str (if-let [c (:cohort/id start-event)] (name c) (:run-id opts)) "/" attempt-id "/retained/route-attestation.edn")
                         (route-attestation/receipt
@@ -5244,7 +5251,7 @@
                          {:status :missing :reason :no-token-comparison-at-this-close}
                          (learning-ledger/close-b-update
                           {:ledger-root (or (:learning-trial-ledger-root opts)
-                                            learning-ledger/default-root)
+                                            (learning-ledger-root))
                            :close-path (str (io/file (or (:data-root execution-cohort)
                                                          cohort/default-data-root)
                                                      (name (:cohort/id start-event))
@@ -5414,7 +5421,7 @@
                                                            [:evidence :binding :commit])
                              :accepted-verdict accepted-increment-result
                              :ledger-root (or (:learning-trial-ledger-root opts)
-                                              learning-ledger/default-root)})
+                                              (learning-ledger-root))})
                            (catch Exception e
                              {:status :refused
                               :reason (:learning-ledger/refusal (ex-data e))
@@ -5447,7 +5454,7 @@
                            {:path (.getPath f)}))
                        discharge-result
                        (repair-discharge/finalize-run!
-                        {:root (or (:repair-root opts) repair/default-root)
+                        {:root (or (:repair-root opts) (default-repair-root))
                          :repo (or (:discharge-receipt-repo opts) "/home/joe/code/futon2")
                          :action selected-action
                          :interpretation (:interpretation-receipts selected-action)
@@ -6660,7 +6667,7 @@
                                  :artifact-dir
                                  (str (or attempt-evidence-dir
                                           (io/file (or (:run-record-dir opts)
-                                                       default-run-record-dir)
+                                                       (run-record-dir))
                                                    (str (:run-id opts)) attempt-id))
                                       "/test-registry")}))
                         increment-evidence
@@ -7029,7 +7036,7 @@
         ;; identity it records must be the identity that judged the run.
         source-check (refuse-on-runner-source-drift!)
         publication (discharge-receipt/catch-up!
-                     (or (:repair-root raw-opts) repair/default-root)
+                     (or (:repair-root raw-opts) (default-repair-root))
                      (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
         result
         (try

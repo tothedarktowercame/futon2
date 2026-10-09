@@ -54,7 +54,8 @@
             [clojure.string :as str]
             [futon2.aif.forward-model :as forward-model]
             [futon2.aif.lane-futility :as lane-futility]
-            [futon2.aif.observation :as observation])
+            [futon2.aif.observation :as observation]
+            [futon2.data-paths :as data-paths])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
            (java.time.format DateTimeFormatter)))
@@ -62,7 +63,11 @@
 (load-identity/register! *ns* *file*)
 
 (def ^:private default-trace-dir
-  (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
+  "Legacy test override. Nil means resolve through the shared data root."
+  nil)
+
+(defn- resolved-trace-dir []
+  (or default-trace-dir (data-paths/path "wm-trace")))
 
 (def ^:private date-fmt
   (DateTimeFormatter/ofPattern "yyyy-MM-dd"))
@@ -84,7 +89,7 @@
 (defn- daily-path
   "Path of the trace file for a given date (YYYY-MM-DD string) under
    the given directory. Defaults to today's date in the default dir."
-  ([] (daily-path default-trace-dir (today-date-string)))
+  ([] (daily-path (resolved-trace-dir) (today-date-string)))
   ([dir date-str] (str dir "/wm-trace-" date-str ".edn")))
 
 ;; validated-machine-q admission RETIRED with the flat decision (SPEC
@@ -827,7 +832,7 @@
      :date-str  — override date string for the filename (default today UTC)
      :return-record? — return the exact record alongside the path (default false)"
   [judge-output & {:keys [dir date-str return-record?]
-                   :or {dir default-trace-dir
+                   :or {dir (resolved-trace-dir)
                         date-str (today-date-string)}}]
   (let [judge-output (cond-> (assoc judge-output
                                     :wm/route
@@ -861,7 +866,7 @@
    (malformed EDN past tag-recovery) are skipped silently — a broken
    record doesn't poison subsequent readback."
   [& {:keys [dir date-str]
-      :or {dir default-trace-dir
+      :or {dir (resolved-trace-dir)
            date-str (today-date-string)}}]
   (let [path (daily-path dir date-str)
         f (io/file path)
@@ -882,7 +887,7 @@
   "Read trace records across a date range (inclusive). `start-date` and
    `end-date` are `LocalDate` instances. Returns a vector of all records
    in chronological order across the files."
-  [start-date end-date & {:keys [dir] :or {dir default-trace-dir}}]
+  [start-date end-date & {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (let [dates (->> (iterate #(.plusDays % 1) start-date)
                    (take-while #(not (.isAfter % end-date))))]
     (vec (mapcat #(read-trace :dir dir
@@ -903,7 +908,7 @@
   "Read every `wm-trace-YYYY-MM-DD.edn` file in lexical/date order. This is the
    deterministic cold-start fold used by the dark learned habit prior; callers
    that already have persisted state should use that state instead."
-  [& {:keys [dir] :or {dir default-trace-dir}}]
+  [& {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (let [files (trace-files dir)]
     (vec (mapcat (fn [f]
                    (let [date-str (subs (.getName f) 9 19)]
@@ -913,7 +918,7 @@
 (defn recent-trace-records
   "Return at most n trace records in chronological order without reading the
   full corpus. Daily files are visited newest-first until the bound is met."
-  [n & {:keys [dir] :or {dir default-trace-dir}}]
+  [n & {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (let [limit (max 0 (long n))]
     (if (zero? limit)
       []
@@ -955,7 +960,7 @@
    records are available; validate every form in each visited file, then return
    the newest N chronologically. Indices are one-based within the failing file.
    Unlike diagnostic read-trace, malformed forms and unknown tags never skip."
-  [n & {:keys [dir] :or {dir default-trace-dir}}]
+  [n & {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (let [root (io/file dir) limit (max 0 (long n))]
     (if-not (.isDirectory root)
       {:status :absent :reason :trace-dir-missing :path (str root)}
@@ -981,7 +986,7 @@
    DATE-STR (yyyy-MM-dd), validating every form as `read-history-strict` does.
    Used where a reader's records cannot exist before a known date, so the
    whole corpus need not be parsed."
-  [date-str & {:keys [dir] :or {dir default-trace-dir}}]
+  [date-str & {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (let [root (io/file dir)]
     (if-not (.isDirectory root)
       {:status :absent :reason :trace-dir-missing :path (str root)}
@@ -1002,7 +1007,7 @@
 (defn reduce-traces
   "Chronologically reduce the trace corpus without retaining it in memory.
   At most one daily file's parsed records is resident at a time."
-  [rf init & {:keys [dir] :or {dir default-trace-dir}}]
+  [rf init & {:keys [dir] :or {dir (resolved-trace-dir)}}]
   (reduce (fn [acc f]
             (let [date-str (subs (.getName f) 9 19)]
               (reduce rf acc (read-trace :dir dir :date-str date-str))))
@@ -1021,7 +1026,7 @@
      :lookback-days — number of UTC day buckets to scan, inclusive
                       (default 2)."
   [& {:keys [dir end-date lookback-days]
-      :or {dir default-trace-dir
+      :or {dir (resolved-trace-dir)
            end-date (LocalDate/now utc-zone)
            lookback-days 2}}]
   (let [days (max 1 (int lookback-days))

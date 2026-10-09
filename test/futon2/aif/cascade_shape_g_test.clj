@@ -1,11 +1,14 @@
 (ns futon2.aif.cascade-shape-g-test
   (:require [clojure.set :as set]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.analysis-cascade :as analysis]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.cascade-observation-scoring :as scorer]
-            [futon2.aif.learning-trial-ledger :as ledger]))
+            [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.test-support.runner-fixture :as runner-fixture]))
+
+(use-fixtures :once runner-fixture/with-hermetic-traces)
 
 (def artifacts "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 
