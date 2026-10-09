@@ -34,6 +34,7 @@
       {:ok true :schema schema :support (:support carried) :last-tick id
        :previous-tick previous-id
        :initialization (:initialization carried)
+       :origin (:origin carried)
        :lineage (:lineage carried)
        :concentrations
        (into {} (for [o os]
