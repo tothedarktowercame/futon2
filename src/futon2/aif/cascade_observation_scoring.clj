@@ -13,12 +13,20 @@
 (def max-horizon 10)
 (def max-candidates 16)
 
+(def ^:private worker-memory-budget-bytes (* 512 1024 1024))
+
+(defn- heap-worker-cap []
+  (let [heap (.maxMemory (Runtime/getRuntime))]
+    (max 1 (min 64 (quot heap worker-memory-budget-bytes)))))
+
 (defn- parallel-mapv
   "Evaluate independent target policies concurrently, retaining input order.
   The result order is never used as a ranking tie-break; canonical policy IDs
   decide ties after all workers finish."
-  [f xs]
-  (let [workers (max 1 (min 64 (.availableProcessors (Runtime/getRuntime))))
+  [f xs requested-workers]
+  (let [workers (max 1 (min (heap-worker-cap)
+                            (or requested-workers
+                                (min 16 (.availableProcessors (Runtime/getRuntime))))))
         executor (Executors/newFixedThreadPool workers)
         futures (mapv (fn [x]
                         (.submit executor ^Callable (reify Callable
@@ -303,8 +311,11 @@
                                       [tau {:distribution member
                                             :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
                                                                  (subsets (:universe model)))}]))))
+            workers (min (heap-worker-cap)
+                         (or (:scoring-parallelism opts)
+                             (min 16 (.availableProcessors (Runtime/getRuntime)))))
             entries (parallel-mapv #(score-candidate (:cascade-belief state) % opts preference)
-                                   candidates)
+                                   candidates workers)
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)
@@ -372,7 +383,10 @@
                               (assoc-in [:certificate :tie-break] (:tie-break tie-data))))))
                     ranked-order)
               {:cascade-scoring (cond-> {:model model :scope :synthetic-bounded-replay
-                                         :horizon-steps (:horizon-steps opts)}
+                                         :horizon-steps (:horizon-steps opts)
+                                         :parallelism workers
+                                         :heap-max-bytes (.maxMemory (Runtime/getRuntime))
+                                         :worker-memory-budget-bytes worker-memory-budget-bytes}
                                   ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5
                                   ;; handoff): the class path's ranked meta
                                   ;; carries a :precision-model describing

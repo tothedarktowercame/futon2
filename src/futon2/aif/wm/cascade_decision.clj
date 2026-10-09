@@ -1008,6 +1008,7 @@
                                                   [t (get scorer-class (:class c) :unknown)]))
                             :horizon T})
               rank-opts {:f-prefix-production? true
+                                        :scoring-parallelism (:scoring-parallelism opts)
                                         :horizon-steps T
                                         :observation-model class-model
                                         :upstream-initialization-conditioning
