@@ -692,10 +692,20 @@
 (defn numeric-g-target-count
   "Count lanes having at least one actually scored (numeric-G) candidate."
   [lanes candidates]
-  (let [scored-ids (into #{} (keep #(when (number? (:g %)) (:id %))) candidates)]
-    (count (filter (fn [lane]
-                     (some #(contains? scored-ids (:id %)) (:candidates lane)))
-                   lanes))))
+  (let [numeric-g? #(number? (or (:g %) (:G %) (:G-efe %)
+                                  (:controller-score %)))
+        lane-target-by-id (into {}
+                                (mapcat (fn [lane]
+                                          (map (fn [c] [(:id c) (:target lane)])
+                                               (:candidates lane))))
+                                lanes)
+        target-of #(or (:target %) (get-in % [:id :target])
+                       (get-in % [:action :target])
+                       (get lane-target-by-id (:id %)))
+        targets (into #{} (keep #(when (numeric-g? %) (target-of %))) candidates)]
+    ;; LANES is retained as an adversarial authority check: only targets that
+    ;; were actually represented by a scored lane count.
+    (count (set (keep #(when (contains? targets (:target %)) (:target %)) lanes)))))
 
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of

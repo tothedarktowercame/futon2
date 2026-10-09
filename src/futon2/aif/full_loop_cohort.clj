@@ -298,10 +298,28 @@
   ;; Keep the original pr-str bytes for readable values, including map order.
   ;; Non-EDN data is evidence of a payload defect, not a reason to halt the run.
   (let [^Path p (if (instance? Path path) path (.toPath (io/file path)))
-        bytes (.getBytes (str (:text (writable-edn value)) "\n") StandardCharsets/UTF_8)]
+        edn-data? (fn edn-data? [x]
+                    (cond
+                      (or (nil? x) (boolean? x) (number? x) (string? x)
+                          (keyword? x) (symbol? x) (char? x)) true
+                      (and (map? x) (not (record? x)))
+                      (every? (fn [[k v]] (and (edn-data? k) (edn-data? v))) x)
+                      (and (coll? x) (not (map? x))) (every? edn-data? x)
+                      :else false))]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
-    (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
-                                                         StandardOpenOption/WRITE]))
+    (if (edn-data? value)
+      (with-open [out (java.io.BufferedWriter.
+                       (java.io.OutputStreamWriter.
+                        (Files/newOutputStream p (into-array StandardOpenOption
+                                                             [StandardOpenOption/CREATE_NEW
+                                                              StandardOpenOption/WRITE]))
+                        StandardCharsets/UTF_8))]
+        (binding [*out* out *print-length* nil *print-level* nil]
+          (pr value)
+          (.write out "\n")))
+      (let [bytes (.getBytes (str (:text (writable-edn value)) "\n") StandardCharsets/UTF_8)]
+        (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
+                                                             StandardOpenOption/WRITE]))))
     (str p)))
 
 (defn- with-cohort-lock [dir f]

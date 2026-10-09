@@ -36,6 +36,7 @@
             [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]
+            [futon2.aif.policy :as selection-policy]
             [futon2.aif.wm.run-output :as run-output]
             [futon2.aif.wm.apparatus-certificates :as apparatus-certificates]
             [futon2.aif.wm.pattern-graph-diff :as pattern-graph-diff]
@@ -898,8 +899,10 @@
               (:checkpoints result))
         failure {:kind (or (get-in result [:data :failure-kind]) :close-exception)
                  :stage :close
-                 :exception-class (.getName (class original-error))
-                 :error (or (ex-message original-error) "Close persistence failed")}
+                 :exception-class (or (get-in result [:data :exception-class])
+                                      (.getName (class original-error)))
+                 :error (or (get-in result [:data :error])
+                            (ex-message original-error) "Close persistence failed")}
         base {:run/id run-id :startedAt started-at :outcome :build-failed
               :record-type :wm/terminal-persistence-failure
               :checkpoint-keys (vec (keys checkpoint-refs))
@@ -932,12 +935,20 @@
    write throws.  The retry records the original throwable as a typed close
    failure; it never re-runs the opportunity or substitutes an empty
    initialization result.  PERSIST-FN is injectable for the write-boundary
-   regression test and production storage faults."
+  regression test and production storage faults."
   [persist-fn raw-opts run-id started-at result]
-  (try
-    (merge result {:run/id run-id}
-           (persist-fn raw-opts run-id started-at result))
-    (catch Throwable e
+  (if (= :close (get-in result [:data :failure-stage]))
+    ;; A fault in manifest, delivery, retention, checkpoint persistence, or
+    ;; any other close substep already carries the real class/message in DATA.
+    ;; Do not ask the full-record path to traverse the damaged close value.
+    (let [e (ex-info (or (get-in result [:data :error]) "Close step failed")
+                     {:failure-kind (get-in result [:data :failure-kind])})]
+      (merge result {:run/id run-id}
+             (persist-small-failure-record! raw-opts run-id started-at result e)))
+    (try
+      (merge result {:run/id run-id}
+             (persist-fn raw-opts run-id started-at result))
+      (catch Throwable e
       (let [edata (if (instance? clojure.lang.ExceptionInfo e) (ex-data e) {})
             failure-kind (or (:failure-kind edata) :close-exception)
             fallback (-> result
@@ -953,7 +964,7 @@
                                           :message (or (ex-message e)
                                                        "Close persistence failed")}}))]
         (merge fallback {:run/id run-id}
-               (persist-small-failure-record! raw-opts run-id started-at fallback e))))))
+               (persist-small-failure-record! raw-opts run-id started-at fallback e)))))))
 
 (defn grounded-commit-for
   "PROOF-2b (click 13, tick-run-record-2026-09-30-1790737908): the grounded
@@ -1084,7 +1095,9 @@
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
-            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])                         (get-in result [:checkpoints :selection :judgment :decision]))
+            decision (some-> (or (get-in result [:checkpoints :selection :judgment :controller-decision])
+                                 (get-in result [:checkpoints :selection :judgment :decision]))
+                             selection-policy/compact-cascade-carriers)
             record-failure (run-record-failure result)
             decision (when decision
                        (focus-receipt/join-terminal
@@ -4991,15 +5004,16 @@
             (let [cell (update @pending-selection :judgment assoc
                                :belief-source
                                (cond-> {:run/id (:run-id opts)}
-                                 trace-path (assoc :trace-path trace-path)))]
+                                 trace-path (assoc :trace-path trace-path)))
+                  durable-cell (selection-policy/compact-cascade-carriers cell)]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [event (if cohort-source
                               (cohort/append-checkpoint!
                                cohort-source (:data-root execution-cohort)
-                               attempt-id :selection cell)
+                               attempt-id :selection durable-cell)
                               (cohort/append-checkpoint!
-                               attempt-id :selection cell))]
+                               attempt-id :selection durable-cell))]
                   (swap! checkpoint-events assoc :selection event)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
@@ -5702,7 +5716,12 @@
         close! (fn [outcome data]
                  (try
                    (observe-end!)
-                   (close-core! outcome data)
+                   ;; Closing is a first-class debugger boundary.  In
+                   ;; particular, persistence/manifest failures no longer end
+                   ;; the click before an attached debugger can inspect the
+                   ;; completed selection and construction cells.
+                   (run-phase! opts @phase-context :close
+                               #(close-core! outcome data))
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
                      ;; counterexample: a close-time evidence refusal escaped
