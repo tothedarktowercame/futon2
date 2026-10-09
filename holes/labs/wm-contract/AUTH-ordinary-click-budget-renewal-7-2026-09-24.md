@@ -191,3 +191,13 @@ chill while it runs". One click, for the post-repair verification of the
 WM Lean round (Q1-Q10), run with the restart debugger attached and phase
 breakpoints armed, each stop inspected and reported to Joe before continuing.
 `allocated` in futon3c `ordinary_click_budget.clj` rises from 48 to 49.
+
+## Joe's grant to claude-12, 2026-10-09 (third)
+
+Heard from Joe directly in claude-12's operator buffer (emacs-repl), after
+claude-12 reported the budget at 49 of 49: "ok, lets run the next click, again
+with the debugger". One click: the post-repair run that scores the nine
+preregistrations in holes/labs/wm-contract/preregistrations/ (futon2 31a5c2224)
+and publishes its report card, run with the restart debugger attached and
+watched phase by phase. `allocated` in futon3c `ordinary_click_budget.clj`
+rises from 49 to 50.
