@@ -50,7 +50,7 @@
     (is (= ["author"] (exported "seatsAvailable")))
     (is (= "selectionBeforeInterpretation" (exported "interpretationOrder")))))
 
-(deftest q4-reads-certificate-scoring-and-all-preference-steps
+(deftest q4-reads-certificate-scoring-and-real-preference-steps
   (let [model {:horizon 4
                :class-preference {1 {:ending/not-yet-evaluated 1}
                                    2 {:ending/not-yet-evaluated 1}
@@ -67,6 +67,12 @@
                      :scoring {0 scored}})
         f (:facts (facts/facts-for-record r "r" snap nil nil))]
     (is (= 4 (f "horizonLength")))
-    (is (= [0 1 2 3] (f "preferenceSteps")))
+    (is (= [3] (f "preferenceSteps")))
     (is (= {"risk" true "ambiguity" true "informationGain" true}
-           (f "gTerms")))))
+           (f "gTerms")))
+    (let [adversarial (assoc-in r [:decision :selection-certificate :scoring 0 :g-terms]
+                                {:risk 1.0 :ambiguity 0.0})
+          af (:facts (facts/facts-for-record adversarial "r" snap nil nil))]
+      (is (= {"risk" true "ambiguity" false "informationGain" false}
+             (af "gTerms"))
+          "a numeric zero is still a recorded term, but absent information gain is not"))))
