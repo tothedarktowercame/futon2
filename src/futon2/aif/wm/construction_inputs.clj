@@ -37,9 +37,19 @@
   cascade-problems even when its target has no interpretation operators yet.
   Supplied sources without a census are marked absent, never recomputed from
   today's mission files. Admission refusals remain on the same assembly."
-  [{:keys [sources] :as input}]
+  [{:keys [sources targets] :as input}]
   (assoc (cascade-problems/assemble input)
          :target-sources (vec (or (:target-sources input) []))
+         :library-pin (:library-pin input)
+         :retrieval-refusals (or (:retrieval-refusals input) {})
+         :retrieval-timing (:retrieval-timing input)
+         :target-construction-inputs
+         (mapv (fn [target]
+                 {:target target
+                  :query-time-slice (get-in sources [:query-time-slices target])
+                  :cascade-problem
+                  {:interpretations (get-in sources [:interpretations target :patterns] {})}})
+               targets)
          :mission-hole-coverage
          (or (:mission-hole-coverage sources)
              {:status :absent :reason :source-coverage-not-supplied})))

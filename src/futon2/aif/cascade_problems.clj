@@ -308,19 +308,37 @@
                {:context (when (ifn? ctx-fn) (ctx-fn target))})
 
       (and (not (seq patterns)) (map? slice))
-      {:target target
+      (let [provisional-operators
+            (into {} (map (fn [pattern]
+                            [pattern {:guard {:needs #{} :forbids #{}}
+                                      :produces #{}
+                                      :status :interpretation-owed-after-selection}])
+                          slice-patterns))
+            candidates
+            (mapv (fn [i pattern]
+                    {:candidate-id (keyword (str "C" (inc i)))
+                     :precedence [pattern]
+                     :construction-receipt
+                     {:kind :query-time-pattern-selection
+                      :status :provisional
+                      :pattern pattern
+                      :attested? false}})
+                  (range) slice-patterns)]
+       {:target target
        :cascade-problem
        (assoc base
-              :precedences []
+              :interpretations provisional-operators
+              :repository {:patterns (set slice-patterns) :stands-on #{}}
+              :precedences (mapv :precedence candidates)
               :pattern-pool slice-pool
-              :pattern-operators {:status :absent
+              :pattern-operators {:status :provisional
                                   :reason :interpretation-owed-after-selection
                                   :patterns slice-patterns})
-       :constructed-candidates []
+       :constructed-candidates candidates
        :interpretation-receipts {}
        :query-time-slice slice
        :slice-size (:slice-size slice)
-       :library-size (:library-size slice)}
+       :library-size (:library-size slice)})
 
       (and (empty? constructed) (:construction-refusal built))
       (refusal target :no-constructed-candidate :construction

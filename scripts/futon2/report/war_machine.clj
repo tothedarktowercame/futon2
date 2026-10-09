@@ -33,6 +33,7 @@
    Pattern:   war-machine/operational-not-decorative"
   (:require [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.aif.wm.cascade-decision :as cd]
+            [futon2.aif.wm.library-slices :as library-slices]
             [futon2.aif.load-identity :as load-identity]
             [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -6680,6 +6681,22 @@
         ;; over cascade policies by G.  A target lacking inputs remains here
         ;; and receives a typed assembly refusal; it is never silently gated.
         (mapv :id outer-task-population)
+        target-queries
+        (mapv (fn [{:keys [id path title]}]
+                [id (or (when (and path (.isFile (io/file path)))
+                          (slurp path))
+                        title id)])
+              outer-task-population)
+        retrieval-batch
+        (or (:library-slice-batch judge-opts)
+            (library-slices/batch
+             (library-slices/library-manifest
+              (or (:pattern-library-root judge-opts)
+                  "/home/joe/code/futon3/library"))
+             target-queries
+             {:k (or (:library-slice-size judge-opts) 40)
+              :max-millis (or (:library-retrieval-budget-ms judge-opts) 30000)
+              :nano-time-fn (or (:nano-time-fn judge-opts) #(System/nanoTime))}))
         flight-cascade-assembly-input
         (flight-assembly-input
          (:flight judge-opts)
@@ -6700,7 +6717,10 @@
                                                 (:excursions loaded-excursions)))})
           ;; the horizon is resolved after the flight's input and the
           ;; published interpretations are merged (resolve-cascade-horizon)
-          :sources (cond-> cascade-sources
+          :library-pin (:library-pin retrieval-batch)
+          :retrieval-refusals (:refusals retrieval-batch)
+          :retrieval-timing (select-keys retrieval-batch [:elapsed-ms :generated-at])
+          :sources (cond-> (assoc cascade-sources :query-time-slices (:slices retrieval-batch))
                      ;; A target with admitted interpretations and no
                      ;; declared candidate is constructed here rather than
                      ;; refused (E-cascade-real D4). G is the lane's own
