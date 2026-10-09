@@ -57,6 +57,7 @@
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.machine-accumulation :as machine-accumulation]
+            [futon2.aif.parameter-novelty :as parameter-novelty]
             [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
@@ -6751,7 +6752,10 @@
                                :prospective-token-carry
                                (get-in prev-trace-record
                                        [:decision :selection-certificate :token-belief-stage
-                                        :prospective-carry])
+                                       :prospective-carry])
+                               :novelty-inputs
+                               (assoc (parameter-novelty/read-inputs)
+                                      :accumulation-state (:state accumulation))
                                :token-belief-context
                                {:occurrence-id (str "wm-live-selection-" wm-as-of)}
                                ;; B4 slice 2c: hand the declared sources map to
