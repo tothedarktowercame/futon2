@@ -165,7 +165,7 @@
       (get-in participation [:lock :path])
         (fn []
           (activation/revalidate-production-participation! participation)
-          (let [audit (capture tripwire/default-trip-root repair/default-root :test)
+          (let [audit (capture tripwire/default-trip-root (repair/resolved-root) :test)
                 input (-> (:constructor-input audit)
                           (assoc-in [:trip-authority :authority-class] :production)
                           (assoc-in [:repair-authority :authority-class] :production))

@@ -5,7 +5,8 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.cascade-prior :as prior]
-            [futon2.aif.scoring-input-receipts :as receipts])
+            [futon2.aif.scoring-input-receipts :as receipts]
+            [futon2.data-paths :as data-paths])
   (:import [java.io RandomAccessFile]
            [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
@@ -14,6 +15,12 @@
 
 (def default-path
   (str (System/getProperty "user.home") "/code/futon2/data/wm-habit/cascade-prior.edn"))
+(defn resolved-path []
+  (let [production (str (System/getProperty "user.home")
+                        "/code/futon2/data/wm-habit/cascade-prior.edn")]
+    (if (= default-path production)
+      (data-paths/path "wm-habit" "cascade-prior.edn")
+      default-path)))
 
 (def selection-basis :first-ranked-sharing-chosen-action)
 (defonce ^:private monitor (Object.))
@@ -172,7 +179,7 @@
 (defn record-selection!
   "Legacy offline-history writer, retained for historical replay fixtures.
    Live selection must not call this: reinforcement belongs to the close rule."
-  ([decision] (record-selection! default-path decision))
+  ([decision] (record-selection! (resolved-path) decision))
   ([path decision]
    (record-policy! path decision :selection-update :selection-bases selection-basis)))
 

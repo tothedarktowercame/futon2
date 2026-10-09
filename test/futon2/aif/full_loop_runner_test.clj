@@ -34,6 +34,7 @@
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.trace :as trace]
+            [futon2.data-paths :as data-paths]
             [futon2.test-support.runner-fixture :as runner-fixture]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
@@ -1185,7 +1186,7 @@
     (is (= contract (:discharge-contract projected)))
     (is (= :build-resolution (:failure-stage projected)))
     (is (str/includes? prompt
-                       (str (io/file repair/default-root "findings"
+                       (str (io/file (data-paths/path "wm-repair-obligations") "findings"
                                      "repair-prompt-test.edn"))))
     (is (str/includes? prompt "Read the full finding"))))
 

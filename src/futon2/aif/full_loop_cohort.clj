@@ -10,7 +10,8 @@
             [clojure.string :as str]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
-            [futon2.aif.fold :as fold])
+            [futon2.aif.fold :as fold]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
            [java.nio.file Files Path StandardOpenOption]
@@ -21,6 +22,10 @@
   "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn")
 
 (def default-data-root "/home/joe/code/futon2/data/wm-full-loop")
+(defn resolved-data-root []
+  (if (= default-data-root "/home/joe/code/futon2/data/wm-full-loop")
+    (data-paths/path "wm-full-loop")
+    default-data-root))
 
 (def checkpoint-order
   [:time-step :selection :construction :dispatch :build :adjudication :closed])
@@ -151,7 +156,7 @@
   (name (:cohort/id p)))
 
 (defn cohort-dir
-  ([p] (cohort-dir p default-data-root))
+  ([p] (cohort-dir p (resolved-data-root)))
   ([p data-root] (io/file data-root (cohort-name p))))
 
 (defn- sha256 [s]
@@ -313,7 +318,7 @@
   (io/file dir "activation.edn"))
 
 (defn activate!
-  ([] (activate! default-preregistration default-data-root))
+  ([] (activate! default-preregistration (resolved-data-root)))
   ([prereg-path data-root]
    (let [raw (slurp prereg-path)
          p (edn/read-string raw)
@@ -522,7 +527,7 @@
 (defn start-attempt!
   "Claim one natural scheduler opportunity. `cell` must ground the recorded
   opportunity and include :opportunity-id and :trigger in its judgment."
-  ([cell] (start-attempt! default-preregistration default-data-root cell))
+  ([cell] (start-attempt! default-preregistration (resolved-data-root) cell))
   ([prereg-path data-root cell]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
@@ -601,7 +606,7 @@
 
 (defn append-checkpoint!
   ([attempt-id checkpoint cell]
-   (append-checkpoint! default-preregistration default-data-root attempt-id checkpoint cell))
+   (append-checkpoint! default-preregistration (resolved-data-root) attempt-id checkpoint cell))
   ([prereg-path data-root attempt-id checkpoint cell]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
@@ -656,7 +661,7 @@
 
 (defn close-attempt!
   ([attempt-id cell]
-   (close-attempt! default-preregistration default-data-root attempt-id cell))
+   (close-attempt! default-preregistration (resolved-data-root) attempt-id cell))
   ([prereg-path data-root attempt-id cell]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
@@ -707,7 +712,7 @@
      :history-exclusions exclusions}))
 
 (defn ledger
-  ([] (ledger default-preregistration default-data-root))
+  ([] (ledger default-preregistration (resolved-data-root)))
   ([prereg-path data-root]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
@@ -752,7 +757,7 @@
         :attempts beyond-window-attempts}]})))
 
 (defn write-ledger!
-  ([out-path] (write-ledger! default-preregistration default-data-root out-path))
+  ([out-path] (write-ledger! default-preregistration (resolved-data-root) out-path))
   ([prereg-path data-root out-path]
    (let [value (ledger prereg-path data-root)]
      (io/make-parents out-path)
@@ -808,7 +813,7 @@
 
 (defn write-ledgers!
   ([out-edn out-html]
-   (write-ledgers! default-preregistration default-data-root out-edn out-html))
+   (write-ledgers! default-preregistration (resolved-data-root) out-edn out-html))
   ([prereg-path data-root out-edn out-html]
    (let [value (ledger prereg-path data-root)]
      (io/make-parents out-edn)

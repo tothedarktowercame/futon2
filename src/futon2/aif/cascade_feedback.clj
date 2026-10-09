@@ -8,7 +8,8 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.data-paths :as data-paths])
   (:import [clojure.lang LineNumberingPushbackReader]
            [java.io RandomAccessFile]))
 
@@ -19,6 +20,12 @@
 (def default-path
   (str (System/getProperty "user.home")
        "/code/futon2/data/wm-pattern-feedback/events.edn"))
+(defn resolved-path []
+  (let [production (str (System/getProperty "user.home")
+                        "/code/futon2/data/wm-pattern-feedback/events.edn")]
+    (if (= default-path production)
+      (data-paths/path "wm-pattern-feedback" "events.edn")
+      default-path)))
 
 (defn- selected-patterns [action]
   (->> (:precedence action) (keep :id) distinct vec))
@@ -174,7 +181,7 @@
               (recur (conj events value)))))))))
 
 (defn read-snapshot
-  ([] (read-snapshot default-path))
+  ([] (read-snapshot (resolved-path)))
   ([path]
    (let [file (.getAbsoluteFile (io/file path))
          events (read-events* file)]
@@ -186,7 +193,7 @@
 
 (defn record!
   "Append RECEIPT exactly once under a process/file lock."
-  ([receipt] (record! default-path receipt))
+  ([receipt] (record! (resolved-path) receipt))
   ([path receipt]
    (when-not (and (= receipt-schema (:schema receipt))
                   (string? (:receipt/id receipt)))
@@ -325,5 +332,5 @@
       entries)))
 
 (defn load-construction-metadata
-  ([] (load-construction-metadata default-path))
+  ([] (load-construction-metadata (resolved-path)))
   ([path] (construction-metadata (read-snapshot path))))

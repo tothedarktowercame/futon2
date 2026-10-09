@@ -17,13 +17,18 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
-            [futon2.aif.trace :as trace])
+            [futon2.aif.trace :as trace]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
 
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(defn resolved-trip-root []
+  (if (= default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+    (data-paths/path "wm-tripwires" "trips")
+    default-trip-root))
 (def default-action :record)
 (def default-agency-base "http://127.0.0.1:7070")
 (def summon-recipient "claude-6")
@@ -133,7 +138,7 @@
 
 (defn repair-snapshot
   "Immutable audit snapshot of the repair-record directories, including dispositions."
-  ([] (repair-snapshot repair/default-root))
+  ([] (repair-snapshot (repair/resolved-root)))
   ([root]
    (let [root (.getAbsolutePath (io/file root))
          inventory (repair-inventory root)
@@ -217,7 +222,7 @@
                                  (not admitted-verification?))
           statuses (when (and zero-achievement? durable-attempt-id)
                      (attempt-finding-statuses
-                      (or (:repair-root observation) repair/default-root)
+                      (or (:repair-root observation) (repair/resolved-root))
                       durable-attempt-id))]
       (cond-> []
         (not enumerated?)
@@ -690,7 +695,7 @@
 
 (defn write-trip-report!
   "Durably create one append-only EDN trip report. CREATE_NEW forbids rewrite."
-  ([report] (write-trip-report! default-trip-root report))
+  ([report] (write-trip-report! (resolved-trip-root) report))
   ([root report]
    (store-lock/with-store-lock-for root
     (fn []
@@ -868,7 +873,7 @@
     (do
       (stderr! "trip during trip handling; degraded to durable :record" nil)
       (try
-        (write-trip-report! (or (:tripwire/report-root opts) default-trip-root)
+        (write-trip-report! (or (:tripwire/report-root opts) (resolved-trip-root))
                             (assoc raw-report :trip/action :record
                                               :trip/degraded? true))
         (catch Throwable e
@@ -883,7 +888,7 @@
               report-path
               ((or (:tripwire/report-writer opts)
                    #(write-trip-report! (or (:tripwire/report-root opts)
-                                            default-trip-root)
+                                            (resolved-trip-root))
                                         %))
                report)]
           (when (str/blank? (str report-path))
@@ -914,7 +919,7 @@
                        :blocker "Tripwire refusal requires investigation and discharge"
                        :trip/witnesses witnesses}
             report-path (write-trip-report!
-                         (or (:tripwire/report-root opts) default-trip-root)
+                         (or (:tripwire/report-root opts) (resolved-trip-root))
                          (assoc discharge :trip/action :discharge
                                           :trip/observation observation))]
         (assoc discharge :trip/report-path report-path)))))
@@ -927,7 +932,7 @@
 
 (defn- with-repair-boundary [opts record]
   (let [key [(:opportunity-id record) (:phase record)]
-        root (or (:repair-root opts) repair/default-root)]
+        root (or (:repair-root opts) (repair/resolved-root))]
     (case (:transition record)
       :start (do (swap! phase-snapshots assoc key (repair-snapshot root)) record)
       :end (if-let [before (get @phase-snapshots key)]
@@ -942,7 +947,7 @@
            (= :start (:transition observation))
            (or (:cohort? opts) (:tripwire/force? observation)))
     (let [repair-state (repair-snapshot (or (:repair-root opts)
-                                            repair/default-root))
+                                            (repair/resolved-root)))
           findings (->> repair-state
                         (keep (fn [[path {:keys [record]}]]
                                 (when (str/starts-with? path "findings/")
@@ -1120,7 +1125,7 @@
   [opts record {:keys [wire-id witness observation]}]
   (let [title (get-in @wire-registry [wire-id :title])]
     (try
-      (write-trip-report! (or (:tripwire/report-root opts) default-trip-root)
+      (write-trip-report! (or (:tripwire/report-root opts) (resolved-trip-root))
                           {:trip/wire-id wire-id
                            :trip/witness witness
                            :trip/observation observation
@@ -1163,7 +1168,7 @@
           (let [observation (-> (merge record (:tripwire/snapshot record)
                                        {:cohort? (:cohort? opts)
                                         :repair-root (or (:repair-root opts)
-                                                         repair/default-root)})
+                                                         (repair/resolved-root))})
                                 (assoc :phase-budget-ms (phase-budget opts record))
                                 (#(if (enabled? opts :T6)
                                     (with-repair-boundary opts %)
