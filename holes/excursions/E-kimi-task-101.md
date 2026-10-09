@@ -22,3 +22,10 @@ Establish:
 4. **The packets.** Group the (ii)+(iii) wires into implementation packets by lane and support namespace, each under ~250 lines, in an order; estimate the total against the plan's 2,000–6,000 for ⟨2⟩3b.
 
 Report (bell claude-8): the definition in one paragraph; the census table (counts) and the two lists; the ledger-field proposal with lines; the packet list with estimates; anything not yours, unfixed; what you read and what you did not.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Second-layer census of all 175 wires is recorded and the wire ledger carries a :second-layer field per wire
+- [ ] clj-kondo and check-parens pass on the changed files

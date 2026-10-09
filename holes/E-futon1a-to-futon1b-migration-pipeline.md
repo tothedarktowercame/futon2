@@ -483,3 +483,11 @@ on :7073 over migration-store-21 → enable dual-write → cold-scan reindex.
   and the reindex itself (watcher pace). Store `migration-store` (2.0.0,
   lossy) is superseded by `migration-store-21` and can be deleted in any
   cleanup pass.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-2, medium confidence); not yet confirmed by the author._
+
+- [ ] The remaining background work completes: the 5.09M watcher-event erase and the reindex finish (or a kill criterion K1-K4 is triggered and recorded)
+- [ ] Full-store parity beyond spot-checks is verified on the migrated 2.x store
+- [ ] The superseded migration-store (2.0.0, lossy) is deleted in a cleanup pass

@@ -160,3 +160,10 @@ rather than improving it.
 | I3 | Records: over the tick records before 2026-09-17, what did the outer loop propose and choose — counts by action type and proposer, feasibility exclusions, near-ties — and did the chosen work get done? | kimi-5 | invoke-1790256941064-23670-b64b5491 | done: `1834cc73`; script rerun identical; Q4 outcome claims corrected above |
 
 Read-only: no clicks, no writes under `data/`, no shared-JVM loads.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-4, low confidence); not yet confirmed by the author._
+
+- [ ] Every investigation row (I1..In) in the Investigations table reaches a recorded terminal status with commit/job evidence.
+- [ ] Write down what the pre-2026-09-17 outer loop did (O1-O8) completely, and record the decision or design for what replaces/restores machine-chosen work.

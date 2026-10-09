@@ -227,3 +227,12 @@ S1 table delivered and reviewed; S2 escrow shape designed (deposit made
 only if armed); S3 design note written. Then the excursion closes into
 whatever mission the operator wants to grow from it — the before-picture
 (Flight 1's honest nothings) is already on the record.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, high confidence); not yet confirmed by the author._
+
+- [ ] Deliver and review the S1 table
+- [ ] Design the S2 escrow shape (deposit only if armed)
+- [ ] Write the S3 design note
+- [ ] Close the excursion into the mission the operator chooses

@@ -420,3 +420,11 @@ halo.
 
 **No seal exists for aif-head -> no blind scoring**, per the 003
 precedent. The construction is an honest proposal, not a scored answer.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Every microstep's machine-checkable gate is green with recorded evidence
+- [ ] No ⚠ARMED step runs except on Joe's word
+- [ ] A gate that was green and goes red is treated as a regression alarm and re-greened

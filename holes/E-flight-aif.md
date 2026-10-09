@@ -184,3 +184,11 @@ own triple there too.
   counts, or both?
 - Q4. Did any flight's cascade get scored as a policy, as M-first-flights
   Phase B item 8 asks?
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-2, medium confidence); not yet confirmed by the author._
+
+- [ ] The corpus pass over flights is completed, extending the W1 worked example beyond M-first-flights
+- [ ] The W1 defects (W1-a..W1-e) are each resolved or re-carried with a stated decision
+- [ ] Tail questions Q1-Q4 are answered in writing in the excursion

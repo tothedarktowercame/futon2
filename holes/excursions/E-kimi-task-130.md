@@ -71,3 +71,10 @@ Use the real tokens of the worked example where natural (futon3c `holes/labs/M-f
 - One commit by explicit path (`git commit -m ... -- <the two files>` after `git add` of those two only), never `-a`, amend, stash or `git add -A`; the checkout is shared with other agents. `git config user.name` must print `Joseph Corneli`.
 - No edits to any other file; nothing reloaded into the running JVM.
 - Report `/home/joe/code/storage/proof-2a/progress-i/REPORT.md`: test and assertion counts, each bad case with the test that caught it, the commit sha. Mark each claim Ran or Read.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Intermediate-progress checker exists as a pure function and is covered by its new test
+- [ ] clj-kondo on both changed files and arxana check-parens pass

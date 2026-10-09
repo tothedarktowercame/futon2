@@ -237,3 +237,10 @@ No `ft-*.edn` exists. No bell for a fold-turn is sent. No `fold-escrow`
 namespace is written (the seam in C is design; build follows the arming
 decision or Joe's separate go-ahead on the read-only seam). The live
 lane is untouched.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, high confidence); not yet confirmed by the author._
+
+- [ ] Record Joe's per-fold arming decision (his word alone gates any deposit)
+- [ ] Once armed or separately authorized, build the fold-escrow namespace, the ft-*.edn fold-turn shape and home, and the replay seam on the live lane

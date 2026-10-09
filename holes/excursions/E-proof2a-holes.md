@@ -12,3 +12,11 @@ their own process, dispatched to Kimi and Opus seats, and reviewed here. This
 excursion is claude-8's clock while that work runs. The per-task excursions
 (E-kimi-task-N) are the seats' clocks, not this one; the record of each
 result is the Holes table and the register in the parent draft.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-4, medium confidence); not yet confirmed by the author._
+
+- [ ] Every hole in the parent draft's Holes table and register reaches a recorded closed/reviewed status (started from ten open, 2026-09-25).
+- [ ] Each hole closed one component at a time, tested in its own process, dispatched and reviewed here per Joe's ruling.
+- [ ] The PROOF-2a machine can then be run again through the War Machine (the ruling froze runs while holes were open).

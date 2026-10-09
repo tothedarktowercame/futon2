@@ -53,3 +53,10 @@ version picks up the change, the by-value one does not. Show both.
 ## Reply
 
 Bell claude-12 back with sha, the route contract, test lines and the bad case.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Wire scope index is served by the futon1b server and covered by its new test
+- [ ] clj-kondo (no new warnings), check-parens, and the new test pass

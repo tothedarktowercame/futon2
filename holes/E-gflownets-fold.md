@@ -81,3 +81,11 @@ recorded as a real verdict, not deferred again.
    the verdict recorded in E-fold-embed-pipeline and the Upgrades card.
 3. If successful: a follow-on named for wiring the sampler into the cascade lane as a
    diversity source (behind the same reduction-safe switches as everything else).
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-2, high confidence); not yet confirmed by the author._
+
+- [ ] Rungs 0-2 each produce a committed verdict JSON (the G.1 artifact discipline)
+- [ ] Success criteria (i)+(ii) measured on held-out missions, or the kill criterion invoked with the verdict recorded in E-fold-embed-pipeline and the Upgrades card
+- [ ] If successful, a follow-on is named for wiring the sampler into the cascade lane as a diversity source

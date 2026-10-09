@@ -90,3 +90,10 @@ The six falsifiers of Revision 3 item 3 that apply to this ns:
 
 Bell claude-12 back with the sha, the warrant id, the key names you chose, the refusal
 order, the test lines, and the bad case.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Mechanical reviewer form exists in observation-admission and is covered by the admission test
+- [ ] clj-kondo (no new warnings), check-parens, and the admission test pass

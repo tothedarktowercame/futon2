@@ -87,3 +87,9 @@ per-lane review: one run, two lanes, two different verdicts.
   (v0.23 checkable forms) is the informal spec; the badge :repair fields are the lemma inventory;
   the peradam 3-witness frame is the natural certificate shape.
 
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-1, high confidence); not yet confirmed by the author._
+
+- [ ] Item 1: record gamma differing from 1.0 in a live trace (R14 variance closure, contract v0.22)
+- [ ] Item 2: forward model reads the durable join (store query replaces token-match) for the covered 138/189

@@ -25,3 +25,11 @@ Tests (`test/futon2/aif/zeta_posterior_test.clj` ~90 lines, plus one wire test i
 Gates: clj-kondo 0/0; check-parens; run once each from `/home/joe/code/futon2` (`clojure -M:test -m cognitect.test-runner -n <ns>`): the new namespace, `temporal-update-test`, `temporal-consume-test`, `likelihood-precision-test` (or what pins `tempered-rates`), `cascade-model-manifest-test` (or what pins the certificate), `flight-enact-test`, `full-loop-runner-test` if a runner file changed. Flight check before runner commits. Commit by explicit path; warrants ONCE each after the commit (AUTHOR=kimi-3) for every namespace run whose source changed. No registry edit (codex-3 holds it; report the `:likelihood-precision` row's `:code`/`:realised` update you would make as text), no map edit, nothing under `data/`.
 
 Report: sha(s), warrant ids; one `:zeta-posterior` receipt pr-str (posterior) and one `:prior-no-trials`; the numbers of test (a) in both directions; the opts route for `:zeta`; the registry text you would add; anything not yours (the row-vector ζ, the C3-vs-rates A mismatch's cost), unfixed.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] beta_zeta posterior over the flight trajectory is published on the enactment record
+- [ ] The next click's tempering consumes the published posterior
+- [ ] clj-kondo 0/0, check-parens, and the named tests (temporal-update, temporal-consume, likelihood-precision, cascade-model-manifest, flight-enact) pass once

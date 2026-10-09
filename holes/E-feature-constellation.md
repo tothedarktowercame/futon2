@@ -113,3 +113,11 @@ this v0 is a static projection, not the browseable map.
 - A clean kill is a success: if IDENTIFY/scoping finds the assets can't be aligned
   cheaply (e.g. devmap `:depends-on` is too sparse to form a real graph), that finding
   is the deliverable.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-2, medium confidence); not yet confirmed by the author._
+
+- [ ] A scoping/ARGUE pass decides node granularity, magnitude computation, surface choice, and the smallest end-to-end slice, recorded in the excursion
+- [ ] The smallest slice is built: one repo's devmap → feature nodes + magnitudes → existing pins/super-core path → render, within the ≤20 budget
+- [ ] A k-collapsible live feature map artifact exists, or the clean-kill finding (assets cannot align cheaply) is recorded as the deliverable

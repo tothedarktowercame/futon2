@@ -480,3 +480,11 @@ explicit. No build was undertaken under that earlier instruction.
   correction above; the ruled_outcome_c path (src/futon2/aif/, not checks/);
   and sec-c-vector.tex's bridge account omitting the §1b observation-domain
   gap — the paper statement is being added.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-1, high confidence); not yet confirmed by the author._
+
+- [ ] Land the modular, versioned C implementation with its callable WM adapter (INSTANTIATE C module v1 continues)
+- [ ] Verify Lean type correctness and WM interoperability for each C component as it lands
+- [ ] Record closure or deferral of the production observation model for the C-hole

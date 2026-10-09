@@ -624,3 +624,10 @@ last cheap thing standing between us and a real answer.
 If relays fail at realistic density with a homeward preference, the capability
 claim is false and the ants cannot discover bucket chains. That is the finding
 worth having, and it is one probe away.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-1, high confidence); not yet confirmed by the author._
+
+- [ ] Run the agent-density probe (the named one-line change) with homeward preference at realistic density
+- [ ] Record the capability finding in writing: relays/caching hold, or the bucket-chain capability claim is false

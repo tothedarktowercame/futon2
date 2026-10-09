@@ -199,3 +199,12 @@ gradient in the explorable region (fold-GFN 0.69, s4 +0.21). Decisive next contr
 Artifacts: `futon6/data/fold-embed-gfn/gfn-seed-verdicts-{reduced,full-PARTIAL}.json` · trainer
 `futon6/scripts/fold_embed/gfn_seed_v0.py` (`47c7566`+`928676a`) · proxy `sorry_proxy.py` · positive
 control `futon2/holes/labs/fold-gfn/`. **Pending Joe's ratification before canon.**
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-2, high confidence); not yet confirmed by the author._
+
+- [ ] The hybrid (or ablation winner) beats popularity and BGE-text-only at endpoint-recovery on held-out missions, or a measured ceiling and why is recorded
+- [ ] Laptop inference from GPU-trained embeddings confirmed sub-second
+- [ ] The pipeline plugs into E-close-the-loop's interface as the phase-2 realizer of fold(cascade, circumstance)
+- [ ] Joe ratifies the GFN seed verdicts for canon (currently pending)

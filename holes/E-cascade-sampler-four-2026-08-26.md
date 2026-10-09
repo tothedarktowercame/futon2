@@ -254,3 +254,10 @@ The cascade work remains interesting for the outer loop, whose fixture is the
 thing R10 tuning is meant to replace. But B2 above should be read as "what a
 constructed mathematical cascade would look like if anything consumed one",
 not as a description of anything running.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-1, high confidence); not yet confirmed by the author._
+
+- [ ] All four cascades constructed/documented side by side (WR patterns, APM math, on-record WM cascade, operator-turns mockup)
+- [ ] Judgment never uses C; the table reports C only as constructor output, diversity reported never credited

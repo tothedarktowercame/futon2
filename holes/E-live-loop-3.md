@@ -2215,3 +2215,9 @@ M-first-flights gated for the first time — verdict **:fail** with
 from deposit 007, AND-gate fails on the ΔF leg honestly). The remaining
 0.024 is the constructor-dilution work already chartered on card 3.
 
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Scheduled ticks read missions at sorry grain without operator hand-cranking
+- [ ] The live confirmation is recorded: M-first-flights gated by the tick with its :delta-G-source verdict

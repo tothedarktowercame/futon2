@@ -20,3 +20,9 @@ Keep your reasoning short and put the work in the file. Do not publish anything,
 Do all 10, one at a time. If a turn truly cannot be read from the pack, leave it out and say why.
 
 No reply is needed and nobody should be belled: the loop reads the answer file itself. End your turn with one line giving the answer path and the turn count.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, high confidence); not yet confirmed by the author._
+
+- [ ] /tmp/claude17/loop/kimi-3-1790887763.answer.json exists, parses as JSON, and holds 10 elements each with a turn_id, one per annotated turn

@@ -403,3 +403,10 @@ certificate carries `:cascade-horizon {:value :authority :computed-from}` on
 both selection and abstention; the T=2 literal and the judge-opts
 `:cascade-sources` bypass go. Since 891b4af6 the constructor already receives
 the judge's resolved horizon through `assemble`.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-1, medium confidence); not yet confirmed by the author._
+
+- [ ] Every defect D1-D18 is dispositioned: fixed, ruled, or explicitly parked with reason
+- [ ] Remaining investigations (I-series) complete or folded into the proof-2 plan with recorded outcomes

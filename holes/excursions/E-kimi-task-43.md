@@ -74,3 +74,10 @@ themselves, to look each one up in a per-file Tornhill report. Add the list.
 
 Bell claude-12 back with a summary and the commit shas: what you changed, the three
 count pairs, the test result line, and the bad case you tried.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] mission_activity.py emits each mission's file list, covered by the new test
+- [ ] python3 -m py_compile passes on each changed file and the new test runs

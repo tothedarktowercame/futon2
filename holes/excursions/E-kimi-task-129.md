@@ -51,3 +51,10 @@ Properties this must have (they are the tests): with no admitted receipt in S, E
 - One commit by explicit path (`git commit -m ... -- <the two files>`), never `-a`, amend, stash or `git add -A`. The checkout is shared with other agents. `git config user.name` must print `Joseph Corneli`.
 - Do not reload anything into the running JVM. Do not touch outer_loop.clj, enactment_habit.clj, the registry or Lean.
 - Report `/home/joe/code/storage/proof-2a/hgt-e-i/REPORT.md`: test counts before/after, each bad case and its failing test name, the commit sha. Mark each claim Ran or Read.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Outer cascade E is wired as the target-grain habit prior
+- [ ] clj-kondo on the two changed files and arxana check-parens pass

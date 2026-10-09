@@ -22,3 +22,10 @@ Tests (`target_field_test.clj`, extend; the 17 existing deftests stay green): a 
 Gates: clj-kondo 0/0; check-parens OK; run once each from `/home/joe/code/futon2` (`clojure -M:test -m cognitect.test-runner -n <ns>`): `target-field-test`, `target-field-overlap-test`, `outer-cascade-test`, `cascade-problems-test` (or the namespace that pins assemble-one — say which), `war-machine-cascade-decision-test` or whatever exercises `assemble-one` through the decision (say which), `flight-enact-test`. Commit by explicit path (never `git add -A`, `--amend`, `git stash`; list other lanes' dirty files untouched — codex-3 holds `aif-equations.edn`); warrants ONCE each after the commits (AUTHOR=kimi-1) for every namespace run whose source changed. Nothing under `data/`.
 
 Report: shas and warrant ids; `base-problem`'s signature and the refusal kinds it returns; what the view supplied for wants/locators/universe/β on the fixture; one value entry pr-str; the line count; anything not yours (a key `cascade-lane` reads that the view could not supply, for instance), unfixed.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, medium confidence); not yet confirmed by the author._
+
+- [ ] Ready entries are scored by the click view's own evaluator through one public base-problem (route C)
+- [ ] clj-kondo 0/0, check-parens OK, and the named cascade tests (target-field, outer-cascade, cascade-decision or the pinning ns) pass once

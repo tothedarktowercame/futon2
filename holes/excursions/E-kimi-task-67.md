@@ -29,3 +29,11 @@ For each wire: one namespace `futon3c.diagramprover.wm-wire-<writer>-<reader>-<f
 Then add each namespace's symbol to `wire-test-nses` in `wm_wire_ledger_test.clj`, run the ledger test and your tests once in futon3c's JVM (`clojure -M:test -n <ns> ...` from `/home/joe/code/futon3c`; the ledger writes `wm-wire-ledger.edn`, commit it), and register warrants for each namespace and the ledger: `AUTHOR=<your-id> /home/joe/code/futon2/scripts/wm/register-warrant.sh --pinned <sha> <ns>` run from `/home/joe/code/futon3c`. Gates: clj-kondo 0/0 on your files, `emacs --batch -l /home/joe/code/futon4/dev/check-parens.el <file>` OK, commit by explicit path (`git add <paths>`; never `git add -A`, never `--amend`, never `git stash`), nothing under `data/` except the warrant ledger, no load into the :6768 JVM, no flight, no click, no edit to the map `wm-flight-wiring.edn` (if a wire cannot be tested because the map is wrong, say so; do not fix the map). Report: for each wire its status and the record or call that witnessed it; the ledger's counts before and after; the shas and warrant ids.
 
 GENERATION RULE: commit only your test files, the ledger EDN and the ledger test's `wire-test-nses` line, by explicit path; the map, figures and matrix are another lane's; if `wm_wire_ledger_test.clj` has changed under you (another lane adds its namespaces too), re-read it before editing and never amend.
+
+## Closure criteria (provisional, 2026-10-09)
+
+_Drafted from this document's own stated goals during the War Machine status classification (zai-3, high confidence); not yet confirmed by the author._
+
+- [ ] First-layer wire tests written for all 8 lane-7b wires (Selection: refusals, failure record)
+- [ ] Each namespace added to wire-test-nses, the ledger test and the new tests pass in futon3c's JVM
+- [ ] wm-wire-ledger.edn committed and warrants registered per namespace
