@@ -51,6 +51,7 @@
                                                 :cascade-proposals-dir tmp
                                                 :repair-obligations-root tmp
                                                 :machine-interpretations-dir tmp
+                                                :trace-dir tmp
                                                 :ticket-queue ticket-queue/empty-declaration}
                                                judge-opts))
             (catch clojure.lang.ExceptionInfo e

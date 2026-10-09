@@ -517,17 +517,17 @@
   "-main's parsed output for the script at REV (nil = the working file) on
    the pinned mission with its cascades."
   [rev]
-  (let [nsym (symbol (str "extract-outcomes-" (or rev "head")))
-        path (if rev
+  (let [path (if rev
                (let [tmp (java.io.File/createTempFile "extract-outcomes-" ".clj")]
                  (spit tmp (:out (shell/sh "git" "show" (str rev ":scripts/wm/extract-outcomes.clj"))))
                  (.getPath tmp))
-               "scripts/wm/extract-outcomes.clj")]
-    (binding [*ns* (create-ns nsym)]
-      (clojure.core/refer-clojure)
-      (load-file path))
-    (edn/read-string
-     (with-out-str ((ns-resolve nsym '-main) mission-path "--cascades" cascade-dir)))))
+               "scripts/wm/extract-outcomes.clj")
+        {:keys [exit out err]}
+        (shell/sh "clojure" "-M" path mission-path "--cascades" cascade-dir)]
+    (when-not (zero? exit)
+      (throw (ex-info "extract-outcomes fixture subprocess failed"
+                      {:revision rev :exit exit :err err})))
+    (edn/read-string out)))
 
 (deftest control-m-futon-seams-output-identical-to-pre-change
   (let [before (main-output pre-change-rev)

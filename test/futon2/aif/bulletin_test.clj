@@ -71,6 +71,7 @@
    :run-era-ledger (str (.getPath (io/file dir "ledger.edn")))
    :runs-repo dir
    :runs-rel "holes/labs/demo/runs"
+   :tripwire-root (str dir "/data/wm-tripwires/trips")
    :trace-root (str dir "/data/wm-trace")
    :trace-review-ledger (str dir "/trace-review-ledger.edn")
    :out-dir out-dir
@@ -347,13 +348,19 @@
   (.isDirectory (io/file (:runs-repo bulletin/default-config) ".git")))
 
 (deftest the-live-day-collects-and-renders
-  (if-not (live-repo?)
-    (is true "no live futon2 checkout here; the fixture tests carry the logic")
-    (let [facts (bulletin/collect-facts bulletin/default-config real-day)
+  ;; This used to parse the live tripwire and trace corpus (individual files
+  ;; reached 181 MB).  The committed-shape git fixture exercises the same
+  ;; aggregation/rendering invariants without making a unit test scale with
+  ;; production history.
+  (let [repo (fixture-repo)
+        _ (write-registry-and-ledger! repo)
+        cfg (fixture-config repo (.getPath (temp-dir "bulletin-live-sample"))
+                            (.getPath (temp-dir "bulletin-live-brief")))
+        facts (bulletin/collect-facts cfg "2026-03-02")
           text (bulletin/render facts)]
       (is (pos? (get-in facts [:counts :commits]))
           "the demonstration day has commits, or the collector is not reading them")
-      (is (str/starts-with? text (str "# Morning bulletin -- " real-day)))
+      (is (str/starts-with? text "# Morning bulletin -- 2026-03-02"))
       (is (= (get-in facts [:counts :commits])
              (reduce + 0 (map (comp count :commits)
                               (filter :commits (:repo-commits facts)))))
@@ -362,9 +369,9 @@
              (reduce + 0 (map (comp count :commits)
                               (mapcat #(by-area-of %) (:repo-commits facts)))))
           "each commit lands in exactly one area bucket")
-      (is (every? #(str/starts-with? (str (:row/at %)) real-day) (:deposits facts)))
+      (is (every? #(str/starts-with? (str (:row/at %)) "2026-03-02") (:deposits facts)))
       (is (every? #(= :adopted-by-machine
                       (:status (get-in (edn/read-string
-                                        (slurp (:registry bulletin/default-config)))
+                                        (slurp (:registry cfg)))
                                        [:choices (:choice %)])))
-                  (:adopted facts))))))
+                  (:adopted facts)))))
