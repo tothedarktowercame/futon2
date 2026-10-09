@@ -6612,8 +6612,9 @@
                                       :meta-field-ranking)
         ;; The outer loop selects a task identity from current M/E/T state.
         ;; It is deliberately completed before any cascade source is loaded or
-        ;; any interpretation is constructed.  The inner loop below receives
-        ;; exactly the chosen target.
+        ;; any interpretation is constructed.  Its ranking is retained as
+        ;; ordering/prior evidence; it does not gate the policy field.  Every
+        ;; enumerated open task below enters cascade assembly (Q2/Q3).
         outer-task-population
         (vec (concat
               (map #(assoc % :kind :mission)
@@ -6636,7 +6637,6 @@
                   (hash (str (or (:run-id judge-opts) wm-as-of)))))
         outer-task-selection
         (select-outer-task judge-opts outer-task-population outer-task-seed)
-        selected-task-id (get-in outer-task-selection [:chosen :id])
         _outer-task-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
@@ -6676,10 +6676,10 @@
         substrate-tickets (map :id (filter mission-registry/live-ticket?
                                            (:tickets loaded-tickets)))
         cascade-targets
-        ;; Inner cascade construction is target-local. Declarations and saved
-        ;; proposals can enrich the selected task, but can neither introduce
-        ;; nor select a different task.
-        (if (string? selected-task-id) [selected-task-id] [])
+        ;; The outer selector may order or bias the field, but choice is made
+        ;; over cascade policies by G.  A target lacking inputs remains here
+        ;; and receives a typed assembly refusal; it is never silently gated.
+        (mapv :id outer-task-population)
         flight-cascade-assembly-input
         (flight-assembly-input
          (:flight judge-opts)

@@ -105,7 +105,7 @@
     (is (= ["M-live"] targets))
     (is (= 1 reads))))
 
-(deftest outer-task-is-selected-before-and-independently-of-cascade-material
+(deftest outer-task-ranking-does-not-gate-the-cascade-field
   (let [mission-doc {:missions [{:id "M-a" :status-class :active}
                                 {:id "M-b" :status-class :active}]}
         seed 17
@@ -128,13 +128,12 @@
         second-run (one-selection (:ns (meta #'wm/judge))
                                   {:outer-task-seed seed :cascade-sources rich-b}
                                   mission-doc)]
-    (is (= [expected] (:targets first-run)))
-    (is (= [expected] (:targets second-run))
-        "moving all prepared cascade material to the other task cannot move outer selection")
-    (is (= 1 (count (:targets first-run)))
-        "inner assembly receives exactly the already-selected task")))
+    (is (contains? (set (:targets first-run)) expected))
+    (is (= ["M-a" "M-b"] (:targets first-run)))
+    (is (= ["M-a" "M-b"] (:targets second-run))
+        "prepared cascade material cannot gate the enumerated field")))
 
-(deftest configured-meta-outer-selector-controls-the-only-inner-target
+(deftest configured-meta-outer-selector-ranks-but-does-not-gate-inner-targets
   (let [mission-doc {:missions [{:id "M-a" :status-class :active}
                                 {:id "M-b" :status-class :active}]}
         calls (atom [])
@@ -155,8 +154,8 @@
                            {:outer-task-selection-fn meta-selector
                             :cascade-sources rich-a}
                            mission-doc)]
-    (is (= ["M-b"] (:targets run))
-        "the META-selected identity, not the prepared inner material, is targeted")
+    (is (= ["M-a" "M-b"] (:targets run))
+        "META ranking cannot remove an enumerated target")
     (is (= 1 (count @calls)))
     (is (= #{"M-a" "M-b"} (set (:ids (first @calls)))))))
 
