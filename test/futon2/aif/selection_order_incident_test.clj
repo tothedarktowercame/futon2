@@ -144,8 +144,8 @@
                               targets))})
         budget (get-in result [:decision :selection-certificate :scoring-target-budget])]
     (is (= 5 (count (:problems assembled))) "all targets constructed before budgeting")
-    (is (= 6 (count (get-in result [:decision :selection-certificate :candidates]))))
-    (is (= 2 (count (:budget-exhausted-targets budget))))
-    (is (= 2 (count (filter #(and (= :scoring (:stage %))
-                                  (= :budget-exhausted (:reason %)))
-                            (:dropped-candidates result)))))))
+    (is (= 10 (count (get-in result [:decision :selection-certificate :candidates]))))
+    (is (empty? (:budget-exhausted-targets budget)))
+    (is (empty? (filter #(and (= :scoring (:stage %))
+                              (= :budget-exhausted (:reason %)))
+                        (:dropped-candidates result))))))

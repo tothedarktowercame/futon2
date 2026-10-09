@@ -7,10 +7,26 @@
   (:require [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.observation-model :as om]
-            [futon2.aif.parameter-novelty :as novelty]))
+            [futon2.aif.parameter-novelty :as novelty])
+  (:import [java.util.concurrent Callable Executors]))
 
 (def max-horizon 10)
 (def max-candidates 16)
+
+(defn- parallel-mapv
+  "Evaluate independent target policies concurrently, retaining input order.
+  The result order is never used as a ranking tie-break; canonical policy IDs
+  decide ties after all workers finish."
+  [f xs]
+  (let [workers (max 1 (min 64 (.availableProcessors (Runtime/getRuntime))))
+        executor (Executors/newFixedThreadPool workers)
+        futures (mapv (fn [x]
+                        (.submit executor ^Callable (reify Callable
+                                                       (call [_] (f x))))) xs)]
+    (try
+      (mapv #(.get %) futures)
+      (finally
+        (.shutdown executor)))))
 
 (def ^:private machine-epsilon (Math/ulp 1.0))
 
@@ -287,7 +303,8 @@
                                       [tau {:distribution member
                                             :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
                                                                  (subsets (:universe model)))}]))))
-            entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
+            entries (parallel-mapv #(score-candidate (:cascade-belief state) % opts preference)
+                                   candidates)
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)

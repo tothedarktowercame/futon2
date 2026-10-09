@@ -6726,14 +6726,14 @@
           ;; published interpretations are merged (resolve-cascade-horizon)
           :library-pin (:library-pin retrieval-batch)
           :slice-budget (:slice-budget retrieval-batch)
-          ;; Exact class-model scoring grows superlinearly with the joint
-          ;; target carrier.  Q8 requires at least half of open targets to
-          ;; reach numeric G, so production admits that exact lower bound and
-          ;; records every remainder as :budget-exhausted.
+          ;; All enumerated targets reach numeric G.  Their policy families
+          ;; are independent until the final posterior and the bounded scorer
+          ;; evaluates them concurrently; no target is excluded by position.
           :scoring-target-budget
           {:schema :wm/scoring-target-budget-v1
-           :target-limit (quot (+ (count cascade-targets) 1) 2)
-           :basis :q8-minimum-half-open-targets
+           :target-limit (count cascade-targets)
+           :basis :all-enumerated-targets
+           :parallelism :bounded-executor
            :enumerated-target-count (count cascade-targets)}
           :retrieval-refusals (:refusals retrieval-batch)
           :retrieval-timing (select-keys retrieval-batch [:elapsed-ms :generated-at])

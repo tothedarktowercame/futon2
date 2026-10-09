@@ -1463,12 +1463,11 @@
                              (mapcat :declines admissions)))
         all-admitted-problems (vec (keep :problem admissions))
         scoring-budget (:scoring-target-budget assembled)
-        target-limit (:target-limit scoring-budget)
-        [scored-problems budget-exhausted]
-        (if (and (pos-int? target-limit) (< target-limit (count all-admitted-problems)))
-          [(subvec all-admitted-problems 0 target-limit)
-           (subvec all-admitted-problems target-limit)]
-          [all-admitted-problems []])
+        ;; Every admitted target is scored.  Target order is not a resource
+        ;; policy: independent families are evaluated concurrently by the
+        ;; bounded observation scorer and final ranking is resolution-aware.
+        scored-problems all-admitted-problems
+        budget-exhausted []
         budget-drops (mapv (fn [p]
                              {:target (:target p) :stage :scoring
                               :reason :budget-exhausted
