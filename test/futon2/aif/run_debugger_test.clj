@@ -520,3 +520,56 @@
     (is (= (:outcome detached) (:outcome attached)))
     (is (= (select-keys (:failure detached) [:kind :error])
            (select-keys (:failure attached) [:kind :error])))))
+
+;; 2026-10-09 (claude-12): click 48 closed :reviewer-falsifier-failed with the
+;; debugger attached and never stopped; the refused verdict was data.
+
+(def ^:private refused-verdict
+  {:approved? false
+   :receipt {:status :refused :failed-checks [:mission-standing]}
+   :verification {:status :refused
+                  :reason :reviewer-falsifier-applicable-check-failed}})
+
+(def ^:private approved-verdict
+  {:approved? true :receipt {:status :verified} :verification {:status :verified}})
+
+(defn- verdict-run [run-id verdicts]
+  (let [calls (atom 0)
+        opts (phase-opts run-id (atom []))
+        context {:opportunity-id "op-v" :attempt-id "attempt-v" :trigger :test}]
+    {:calls calls
+     :running (future
+                (runner/review-verdict-phase!
+                 opts context
+                 #(nth verdicts (min (dec (count verdicts)) (dec (swap! calls inc))))))}))
+
+(deftest refused-verdict-is-unchanged-when-detached
+  (let [{:keys [running calls]} (verdict-run "verdict-detached" [refused-verdict])]
+    (is (= refused-verdict (deref running 2000 ::timeout)))
+    (is (= 1 @calls))
+    (is (empty? (debugger/stopped)))))
+
+(deftest refused-verdict-stops-and-continue-or-abort-keep-the-detached-verdict
+  (doseq [choice [:continue :abort]]
+    (debugger/attach!)
+    (let [run-id (str "verdict-" (name choice))
+          {:keys [running calls]} (verdict-run run-id [refused-verdict])
+          stop (wait-for-stop run-id running)]
+      (is (= :review-verdict (:phase stop)))
+      (is (= :wm/review-not-approved (get-in stop [:condition :kind])
+             (get-in stop [:ex-data :kind])))
+      (is (= [:mission-standing] (get-in stop [:ex-data :failed-checks])))
+      (debugger/continue! run-id choice)
+      (is (= refused-verdict (deref running 2000 ::timeout)) (str choice))
+      (is (= 1 @calls))
+      (debugger/detach!))))
+
+(deftest refused-verdict-retry-recomputes-after-a-repair
+  (debugger/attach!)
+  (let [run-id "verdict-retry"
+        {:keys [running calls]} (verdict-run run-id [refused-verdict approved-verdict])]
+    (wait-for-stop run-id running)
+    (debugger/continue! run-id :retry)
+    (is (= approved-verdict (deref running 2000 ::timeout)))
+    (is (= 2 @calls))
+    (is (empty? (filter #(= run-id (:run-id %)) (debugger/stopped))))))

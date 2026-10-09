@@ -443,6 +443,35 @@
                                  :debugger/dwell debugger-dwell})
                    (throw throwable)))))))))))
 
+(defn review-verdict-condition
+  "Debugger condition for a review verdict that did not approve the build.
+  Only evaluated by run-phase! while the debugger is attached. The verdict is
+  the retained value, so :continue proceeds exactly as a detached run would."
+  [verdict]
+  (when-not (:approved? verdict)
+    (ex-info "War Machine review verdict did not approve the build"
+             {:kind :wm/review-not-approved
+              :failure-stage :review-verdict
+              :outcome :build-failed
+              :falsifier-status (get-in verdict [:verification :status])
+              :falsifier-reason (get-in verdict [:verification :reason])
+              :failed-checks (get-in verdict [:receipt :failed-checks])
+              :debugger/has-result? true
+              :debugger/result verdict})))
+
+(defn review-verdict-phase!
+  "Run the review-verdict computation as a phase. A stop on a refused verdict
+  can :retry (recompute, e.g. after a falsifier repair is hot-loaded),
+  :continue, or :abort; both of the latter return the refused verdict, so the
+  run closes :build-failed with the same record as a detached run."
+  [opts context thunk]
+  (try
+    (run-phase! opts context :review-verdict thunk nil review-verdict-condition)
+    (catch clojure.lang.ExceptionInfo e
+      (if (= :wm/review-not-approved (:kind (ex-data e)))
+        (:debugger/result (ex-data e))
+        (throw e)))))
+
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
                        (.getBytes (pr-str x) "UTF-8"))]
@@ -6566,39 +6595,50 @@
                       review-gate (:review-gate revision-state)
                       reviews (:reviews revision-state)
                       revision (:revision revision-state)
-                      reviewer-falsifier-input
-                      (let [measurements
-                            (d-task/artifact-tokens
-                             (get-in @d-task-dispatch [:dispatch]) repo commit)
-                            comparison
-                            (token-outcome/compare-outcomes
-                             (get-in @checkpoints
-                                     [:selection :judgment :token-outcome-prediction])
-                             measurements commit)
-                            outcomes
-                            (selected-want-outcome/receipt
-                             {:selected-action (get-in construction [:selected-action])
-                              :token-comparison comparison})]
-                        {:target target :commit commit
-                         :mission-standing
-                         (missions/mission-standing-observation
-                          (cond-> mission
-                            (str/starts-with? target "M-") (assoc :kind :mission)))
-                         :selected-want-outcomes outcomes
-                         :disposition nil
-                         :artifact-binding artifact-binding
-                         :review-gate review-gate})
-                      reviewer-falsifier-receipt
-                      (reviewer-falsifier/receipt reviewer-falsifier-input)
+                      ;; One phase, so a refused verdict stops an attached
+                      ;; debugger (claude-12, 2026-10-09: click 48 closed
+                      ;; :reviewer-falsifier-failed with the debugger attached
+                      ;; and never stopped -- the refusal is data, not a throw).
+                      review-verdict-result
+                      (review-verdict-phase!
+                       opts @phase-context
+                       (fn []
+                         (let [input
+                               (let [measurements
+                                     (d-task/artifact-tokens
+                                      (get-in @d-task-dispatch [:dispatch]) repo commit)
+                                     comparison
+                                     (token-outcome/compare-outcomes
+                                      (get-in @checkpoints
+                                              [:selection :judgment :token-outcome-prediction])
+                                      measurements commit)
+                                     outcomes
+                                     (selected-want-outcome/receipt
+                                      {:selected-action (get-in construction [:selected-action])
+                                       :token-comparison comparison})]
+                                 {:target target :commit commit
+                                  :mission-standing
+                                  (missions/mission-standing-observation
+                                   (cond-> mission
+                                     (str/starts-with? target "M-") (assoc :kind :mission)))
+                                  :selected-want-outcomes outcomes
+                                  :disposition nil
+                                  :artifact-binding artifact-binding
+                                  :review-gate review-gate})
+                               receipt (reviewer-falsifier/receipt input)
+                               verification (reviewer-falsifier/verify receipt input)]
+                           {:receipt receipt
+                            :verification verification
+                            :approved?
+                            (reviewer-falsifier/approved?
+                             {:review-state (:state review-job)
+                              :review-verdict (review-verdict review-job)
+                              :review-gate review-gate
+                              :falsifier-verification verification})})))
+                      reviewer-falsifier-receipt (:receipt review-verdict-result)
                       reviewer-falsifier-verification
-                      (reviewer-falsifier/verify reviewer-falsifier-receipt
-                                                 reviewer-falsifier-input)
-                      approved?
-                      (reviewer-falsifier/approved?
-                       {:review-state (:state review-job)
-                        :review-verdict (review-verdict review-job)
-                        :review-gate review-gate
-                        :falsifier-verification reviewer-falsifier-verification})]
+                      (:verification review-verdict-result)
+                      approved? (:approved? review-verdict-result)]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
                   ;; wiring of an already-registered test-registry warrant
