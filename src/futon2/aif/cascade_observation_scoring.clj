@@ -144,7 +144,15 @@
                         (.submit executor ^Callable (reify Callable
                                                        (call [_] (f x))))) xs)]
     (try
-      (mapv #(.get %) futures)
+      ;; Rethrow a worker's own exception, not the ExecutionException wrapper:
+      ;; callers catch ExceptionInfo for typed refusals (for example
+      ;; :class-unknown-no-scalar-g, which declines one target), and the
+      ;; wrapper made one unscorable target abort the whole selection
+      ;; (click 49, 2026-10-09).
+      (mapv #(try (.get ^java.util.concurrent.Future %)
+                  (catch java.util.concurrent.ExecutionException e
+                    (throw (or (.getCause e) e))))
+            futures)
       (finally
         (.shutdown executor)))))
 
