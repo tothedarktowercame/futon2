@@ -145,10 +145,13 @@
        ;; pattern of every target, so live selection took >10 min).  The file
        ;; is append-only (record!), so any write changes its length and mtime
        ;; and invalidates this entry; the value equals a fresh parse.
+       ;; Deref once: the cache is one slot shared by every root, so a
+       ;; second deref could return another ledger's rows (zai-5 review).
        (let [f (io/file file)
-             cache-key [(.getCanonicalPath f) (.length f) (.lastModified f)]]
-         (if (= cache-key (:key @trials-cache))
-           (:value @trials-cache)
+             cache-key [(.getCanonicalPath f) (.length f) (.lastModified f)]
+             cached @trials-cache]
+         (if (= cache-key (:key cached))
+           (:value cached)
            (let [value (read-trials-uncached f)]
              (reset! trials-cache {:key cache-key :value value})
              value)))))))
