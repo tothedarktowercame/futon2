@@ -20,9 +20,9 @@
            [java.nio.file Files StandardOpenOption LinkOption OpenOption]
            [java.time Instant]))
 
-(def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+(def default-root (data-paths/path "wm-repair-obligations"))
 (defn resolved-root []
-  (if (= default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+  (if (= default-root (data-paths/path "wm-repair-obligations"))
     (data-paths/path "wm-repair-obligations")
     default-root))
 

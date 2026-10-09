@@ -53,7 +53,7 @@
   "D carry only: executed-with-artifacts in minted-identity space. This does
    not replace E2b or establish its E1/E2a portfolio proposition."
   ([] (production-authority nil))
-  ([expected] (production-authority expected task/default-root))
+  ([expected] (production-authority expected (task/resolved-root)))
   ([expected root]
    (task/read-predecessor root expected task/agency-job)))
 
@@ -107,7 +107,7 @@
      :observation-updates []})))
 
 (defn observation-authority
-  ([expected] (observation-authority expected task/default-root))
+  ([expected] (observation-authority expected (task/resolved-root)))
   ([expected root]
    (task/read-observations-v2 root expected task/agency-job)))
 

@@ -15,7 +15,8 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.shadow-cascade-g :as shadow])
+            [futon2.aif.shadow-cascade-g :as shadow]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files]
            [java.time Instant]))
 
@@ -544,7 +545,7 @@
   (vec (distinct (cons (:data-root identity)
                        (map #(.getCanonicalPath %)
                             (filter #(and (.isDirectory %) (str/starts-with? (.getName %) "wm-full-loop"))
-                                    (or (.listFiles (io/file "/home/joe/code/futon2/data")) [])))))))
+                                    (or (.listFiles (io/file data-paths/*data-root*)) [])))))))
 
 (defn construct
   ([record read-bytes library-root previous designated]

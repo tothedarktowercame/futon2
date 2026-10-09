@@ -36,7 +36,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.data-paths :as data-paths])
   (:import (java.lang ProcessHandle)
            (java.net InetAddress)
            (java.time Instant)
@@ -56,7 +57,7 @@
   how the tests and the negative control keep off the real lock."
   []
   (or (not-empty (str (System/getenv lock-path-env)))
-      (str (repo-root) "/data/wm-trace/.run-lock")))
+      (data-paths/path "wm-trace" ".run-lock")))
 
 (defn- hostname []
   (try (.getHostName (InetAddress/getLocalHost))

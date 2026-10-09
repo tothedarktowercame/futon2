@@ -5,7 +5,8 @@
   lock path. The lock entry's fileKey must remain stable through the critical
   section; unlink/replacement is a typed refusal. Deployment must provision a
   lock path whose parent and entry cannot be replaced by untrusted writers."
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.channels FileChannel OverlappingFileLockException]
            [java.nio.file Files LinkOption OpenOption StandardOpenOption]))
 
@@ -111,7 +112,7 @@
 (defn with-store-lock-for [root f]
   (let [root-file (.toFile (.normalize (.toAbsolutePath (.toPath (java.io.File. root)))))
         root-path (.getPath root-file)
-        canonical-data "/home/joe/code/futon2/data/"
+        canonical-data (str data-paths/production-data-root "/")
         path (or *lock-path*
                  (if (str/starts-with? (str root-path "/") canonical-data)
                    default-lock-path

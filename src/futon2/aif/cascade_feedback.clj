@@ -17,12 +17,9 @@
 
 (def receipt-schema :wm/cascade-execution-feedback-v1)
 (def metadata-schema :wm/pattern-feedback-metadata-v1)
-(def default-path
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-pattern-feedback/events.edn"))
+(def default-path (data-paths/path "wm-pattern-feedback" "events.edn"))
 (defn resolved-path []
-  (let [production (str (System/getProperty "user.home")
-                        "/code/futon2/data/wm-pattern-feedback/events.edn")]
+  (let [production (data-paths/path "wm-pattern-feedback" "events.edn")]
     (if (= default-path production)
       (data-paths/path "wm-pattern-feedback" "events.edn")
       default-path)))

@@ -11,7 +11,8 @@
             [futon2.aif.intrinsic-values :as iv]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.trace :as trace]))
+            [futon2.aif.trace :as trace]
+            [futon2.data-paths :as data-paths]))
 
 (defn- parse-long! [label x]
   (or (parse-long x)
@@ -49,7 +50,7 @@
                                 (:agent-budget-seconds flags))))))
 
 (defn- canary-path []
-  (str "/home/joe/code/futon2/data/wm-full-loop-canary/canary-"
+  (str (data-paths/path "wm-full-loop-canary") "/canary-"
        (str/replace (str (java.time.Instant/now)) #"[:.]" "-") ".edn"))
 
 (defn- print-value [x]

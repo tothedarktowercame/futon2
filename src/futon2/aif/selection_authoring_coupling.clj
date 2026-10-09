@@ -9,10 +9,11 @@
             [clojure.string :as str]
             [futon2.aif.fold-escrow :as esc]
             [futon2.aif.mana-gate :as mana]
-            [futon2.aif.mission-registry :as missions])
+            [futon2.aif.mission-registry :as missions]
+            [futon2.data-paths :as data-paths])
   (:import [java.time Instant]))
 
-(def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
+(def default-trace-dir (data-paths/path "wm-trace"))
 (def default-log-file "/home/joe/code/futon2/logs/selection-authoring-coupling.log")
 (def default-lock-dir "/home/joe/code/futon2/logs/selection-authoring-coupling")
 (def default-author-script "/home/joe/code/futon3c/scripts/author_deposit_for.sh")

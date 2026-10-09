@@ -21,9 +21,9 @@
 (def default-preregistration
   "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn")
 
-(def default-data-root "/home/joe/code/futon2/data/wm-full-loop")
+(def default-data-root (data-paths/path "wm-full-loop"))
 (defn resolved-data-root []
-  (if (= default-data-root "/home/joe/code/futon2/data/wm-full-loop")
+  (if (= default-data-root (data-paths/path "wm-full-loop"))
     (data-paths/path "wm-full-loop")
     default-data-root))
 

@@ -15,7 +15,8 @@
             [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as observation]
-            [futon2.aif.task-execution-evidence :as execution])
+            [futon2.aif.task-execution-evidence :as execution]
+            [futon2.data-paths :as data-paths])
   (:import (java.time Instant)
            (java.nio.file Files StandardOpenOption)
            (java.io PushbackReader StringReader)))
@@ -23,7 +24,11 @@
 (load-identity/register! *ns* *file*)
 
 (def authority :d-predecessor-task-authority-v1)
-(def default-root "data/wm-d-task-enactment")
+(def default-root (data-paths/path "wm-d-task-enactment"))
+(defn resolved-root []
+  (if (= default-root (data-paths/path "wm-d-task-enactment"))
+    (data-paths/path "wm-d-task-enactment")
+    default-root))
 (def scope {:certifies :executed-with-artifacts
             :does-not-establish #{:e1-portfolio-membership :r6-r11-domain
                                   :machine-enactment-correspondence}})

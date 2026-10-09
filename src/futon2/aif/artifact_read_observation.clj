@@ -9,9 +9,9 @@
            [java.util UUID]))
 
 (def schema :wm/artifact-read-observation-v1)
-(def default-root "/home/joe/code/futon2/data/wm-artifact-reads")
+(def default-root (data-paths/path "wm-artifact-reads"))
 (defn resolved-root []
-  (if (= default-root "/home/joe/code/futon2/data/wm-artifact-reads")
+  (if (= default-root (data-paths/path "wm-artifact-reads"))
     (data-paths/path "wm-artifact-reads")
     default-root))
 

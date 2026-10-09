@@ -3,7 +3,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [futon2.aif.load-identity :as load-identity]))
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.data-paths :as data-paths]))
 
 (load-identity/register! *ns* *file*)
 
@@ -223,7 +224,7 @@
         config (select-keys opts [:author :reviewer :repair-reviewer :window-days
                                   :semantic-epoch :trigger :execution-cohort])
         prior (latest-prior-record (or (:run-record-dir opts)
-                                       "/home/joe/code/futon2/data/wm-runs"))]
+                                       (data-paths/path "wm-runs")))]
     {:schema :wm/registered-run-chronology-v1
      :source-revisions-before revisions
      :configuration-digest (digest config)

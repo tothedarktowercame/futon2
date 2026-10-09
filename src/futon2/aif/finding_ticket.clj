@@ -7,11 +7,12 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.ticket-publication-io :as publication]
-            [futon2.aif.ticket-queue :as queue]))
+            [futon2.aif.ticket-queue :as queue]
+            [futon2.data-paths :as data-paths]))
 
 (identity/register! *ns* *file*)
 
-(def canonical-store "/home/joe/code/futon2/data/wm-repair-obligations")
+(def canonical-store (data-paths/path "wm-repair-obligations"))
 
 (defn destinations
   "The canonical store publishes to the primary checkout. Other store roots

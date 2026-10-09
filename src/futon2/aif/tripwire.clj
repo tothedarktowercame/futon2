@@ -24,9 +24,9 @@
            [java.time Instant]
            [java.util UUID]))
 
-(def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(def default-trip-root (data-paths/path "wm-tripwires" "trips"))
 (defn resolved-trip-root []
-  (if (= default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+  (if (= default-trip-root (data-paths/path "wm-tripwires" "trips"))
     (data-paths/path "wm-tripwires" "trips")
     default-trip-root))
 (def default-action :record)

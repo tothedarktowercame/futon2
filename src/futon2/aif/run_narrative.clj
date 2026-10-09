@@ -41,12 +41,12 @@
   [root run-id]
   (when-not (re-matches #"[A-Za-z0-9_-]+" run-id)
     (throw (ex-info "Invalid run id" {:run-id run-id})))
-  (let [record-path (str (io/file root "data/wm-runs" (str "tick-run-record-" run-id ".edn")))
+  (let [record-path (str (io/file root "data" "wm-runs" (str "tick-run-record-" run-id ".edn")))
         record (read-one record-path)
         _ (when-not (= run-id (:run/id record))
             (throw (ex-info "Run record absent or identity mismatch" {:path record-path})))
         date (re-find #"^\d{4}-\d{2}-\d{2}" run-id)
-        trace-path (str (io/file root "data/wm-trace" (str "wm-trace-" date ".edn")))
+        trace-path (str (io/file root "data" "wm-trace" (str "wm-trace-" date ".edn")))
         trace-row (unique-record (matching-forms trace-path #(= run-id (:run/id %))) :trace)
         trace (:value trace-row)
         binding-path (str (io/file root "../futon3c/data/wm-click-run-bindings"
@@ -86,7 +86,7 @@
                                    [stage {:path path :event event :judgment (get-in event [:payload :judgment])}]))
                                checkpoint-order))
         opportunity (get-in checkpoints [:time-step :judgment :opportunity-id])
-        phase-path (str (io/file root "data/wm-full-loop-phases.edn.log"))
+        phase-path (str (io/file root "data" "wm-full-loop-phases.edn.log"))
         phases (matching-forms phase-path #(or (= run-id (:run/id %))
                                                (and opportunity (= opportunity (:opportunity-id %)))))]
     {:root root :run-id run-id :record record :record-path record-path

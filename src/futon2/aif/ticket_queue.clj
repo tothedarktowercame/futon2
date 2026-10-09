@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.interoceptive-store-lock :as store-lock]
-            [futon2.aif.ticket-publication-io :as publication])
+            [futon2.aif.ticket-publication-io :as publication]
+            [futon2.data-paths :as data-paths])
   (:import [java.time Instant]))
 
 (load-identity/register! *ns* *file*)
@@ -39,7 +40,7 @@
 ;; untracked data/ root. resources/wm/ticket-queue.edn stays the versioned empty
 ;; declaration: writing entries (and a .lock) into a tracked resource dirtied
 ;; the shared checkout and made every default-reading test depend on live data.
-(def live-path "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn")
+(def live-path (data-paths/path "wm-ticket-queue" "queue.edn"))
 
 (defn read-declaration
   "Read one declaration; missing or malformed configuration refuses."

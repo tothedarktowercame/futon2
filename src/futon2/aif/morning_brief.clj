@@ -14,9 +14,9 @@
            [java.time Instant]
            [java.util UUID]))
 
-(def default-root "/home/joe/code/futon2/data/wm-morning-brief")
+(def default-root (data-paths/path "wm-morning-brief"))
 (defn resolved-root []
-  (if (= default-root "/home/joe/code/futon2/data/wm-morning-brief")
+  (if (= default-root (data-paths/path "wm-morning-brief"))
     (data-paths/path "wm-morning-brief")
     default-root))
 (def lifecycle-schema :wm/morning-brief-lifecycle-v1)

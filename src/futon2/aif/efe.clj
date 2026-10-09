@@ -154,7 +154,7 @@
    {:layer/id :habit-prior
     :source :learned-from-operator
     :author "unknown operator whose selections are recorded in wm-trace"
-    :basis "data/wm-trace/wm-trace-2026-08-30.edn sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
+    :basis "wm-trace/wm-trace-2026-08-30.edn under futon2 data root; sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
     :folded? false
     :site "Mode-dependent: :controller-augmentation keeps structural pressure additively in controller-score at src/futon2/aif/efe.clj:700-703,725-733; today's default :habit-prior replaces it with learned ln E(pi) at src/futon2/aif/habit_prior.clj:121-136 and scripts/futon2/report/war_machine.clj:4465-4472, then policy/select-action consumes that unscaled log prior at src/futon2/aif/policy.clj:368-380. OWNER AMENDMENT 2026-08-30 23:35Z (node-sim finding, verified policy.clj:234-270): in the branch the WM runs (:selection-boundary :strategic-recommendation, war_machine.clj:4503) the scores including ln E(pi) order an INSPECTABLE COUNTERFACTUAL only — chosen = (or (first controller-entries) ...), :habit-prior-applied? false; war_machine.clj:364 declares :scheduler-habit-authority :counterfactual-only. Computed and recorded at the seam; declared abstention from choosing."}])
 

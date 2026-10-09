@@ -45,12 +45,13 @@
             [clojure.string :as str]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
-            [futon2.aif.fold-realized :as fr]))
+            [futon2.aif.fold-realized :as fr]
+            [futon2.data-paths :as data-paths]))
 
 (def ^:private futon3a-dir "/home/joe/code/futon3a")
 (def ^:private fold-engine-rel "holes/labs/M-memes-arrows/fold_engine.clj")
 (def ^:private escrow-dir
-  (str (System/getProperty "user.home") "/code/futon2/data/fold-escrow"))
+  (data-paths/path "fold-escrow"))
 
 (defn- escrow-wiring
   "Read the deprecated per-mission escrow without conflating absence with an
