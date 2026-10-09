@@ -155,7 +155,14 @@
   (let [cert (get-in record [:decision :selection-certificate])
         candidates (:candidates cert)
         policies (:policies cert)
-        gpolicies (get-in record [:decision :g-term-decomposition :policies])
+        ;; The runner persists the certificate below :decision.  The
+        ;; decomposition is part of that certificate (the old reader looked
+        ;; one level too high and consequently reported every Q4 carrier as
+        ;; absent).
+        certificate-gpolicies (get-in cert [:g-term-decomposition :policies])
+        gpolicies (or certificate-gpolicies
+                      (get-in record [:decision :g-term-decomposition :policies]))
+        scoring (get-in cert [:scoring])
         world (:world-at-selection record)
         world-ids (fn [kind] (get-in world [:open-tasks kind :ids]))
         enum-ids (get-in world [:enumerated-tasks :ids])
@@ -168,16 +175,25 @@
         construction (target-construction-facts cert)
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
-        model (some-> gpolicies first (get-in [:terms :A :value]))
+        model (or (some-> gpolicies first (get-in [:terms :A :value]))
+                  (some-> scoring vals first :observation-model))
         horizon (:horizon model)
-        c-pref (:class-preference model)
+        c-pref (or (:class-preference model) (:progress-preference model))
+        ;; C_tau is a step-indexed carrier.  Only rows that assign mass away
+        ;; from the terminal waiting symbol state a real preference.  The
+        ;; exported field is zero-based, while the model is one-based.
         pref-steps (when (map? c-pref)
                      (set (for [[step row] c-pref
-                                :when (and (map? row)
+                                :when (and (integer? step) (map? row)
                                            (not= #{:ending/not-yet-evaluated}
                                                  (set (keys row))))]
                             (dec (long step)))))
         census (get cert :q9-q10-census)
+        g-term-rows (vec (keep #(get (val %) :g-terms) scoring))
+        contributing? (fn [term row]
+                        (let [v (get row term)]
+                          (and (number? v) (Double/isFinite (double v))
+                               (pos? (double v)))))
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
         previous-chosen (get-in previous [:decision :chosen])
@@ -215,10 +231,10 @@
                "horizonLength" (or horizon (nr "observation-model horizon absent"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
                                      (nr "step-indexed class preference absent"))
-               "gTerms" (if (seq candidates)
-                            {"risk" (boolean (some numeric-g? candidates))
-                             "ambiguity" (boolean (some #(number? (or (:ambiguity %) (get-in % [:terms :ambiguity]))) candidates))
-                             "informationGain" (boolean (some #(number? (or (:information-gain %) (get-in % [:terms :information-gain]))) candidates))}
+               "gTerms" (if (seq g-term-rows)
+                            {"risk" (every? #(contributing? :risk %) g-term-rows)
+                             "ambiguity" (every? #(contributing? :ambiguity %) g-term-rows)
+                             "informationGain" (every? #(contributing? :expected-information-gain %) g-term-rows)}
                             (nr "per-candidate G terms absent"))
                "interpretationOrder"
                (if-let [selected-at (:selection-ended-at world)]
