@@ -213,7 +213,8 @@
                                              (nr "selection certificate candidates absent"))
                "targetsWithG" (if (some? with-g) (sorted-ids with-g)
                                   (nr "selection certificate candidates absent"))
-               "libraryPatternCount" (count (:patterns snap))
+               "libraryPatternCount" (or (get-in cert [:library-pin :size])
+                                          (count (:patterns snap)))
                "targetConstruction" (or construction
                                           (nr "selection certificate target construction absent"))
                "constructorPatternCount" (if (some? constructor-pool)

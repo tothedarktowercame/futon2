@@ -323,7 +323,7 @@
                       :status :provisional
                       :pattern pattern
                       :attested? false}})
-                  (range) slice-patterns)]
+                  (range) (take 2 slice-patterns))]
        {:target target
        :cascade-problem
        (assoc base

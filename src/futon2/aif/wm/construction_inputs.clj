@@ -45,10 +45,15 @@
          :retrieval-timing (:retrieval-timing input)
          :target-construction-inputs
          (mapv (fn [target]
-                 {:target target
-                  :query-time-slice (get-in sources [:query-time-slices target])
-                  :cascade-problem
-                  {:interpretations (get-in sources [:interpretations target :patterns] {})}})
+                 (let [slice (get-in sources [:query-time-slices target])
+                       admitted (get-in sources [:interpretations target :patterns] {})
+                       pool (if (seq admitted)
+                              admitted
+                              (into {} (map (fn [{:keys [pattern]}] [pattern {:status :provisional}])
+                                            (:candidates slice))))]
+                   {:target target
+                    :query-time-slice slice
+                    :cascade-problem {:interpretations pool}}))
                targets)
          :mission-hole-coverage
          (or (:mission-hole-coverage sources)

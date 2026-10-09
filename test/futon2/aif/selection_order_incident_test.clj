@@ -58,11 +58,14 @@
 
 (deftest ^:incident policy-set-is-not-one
   (let [{:keys [result]} (run-fixture)
-        scored (get-in result [:decision :selection-certificate :candidates])]
-    (is (<= (count targets) (count scored))
+        scored (get-in result [:decision :selection-certificate :candidates])
+        construction (get-in result [:decision :selection-certificate :target-construction])]
+    (is (= (* 2 (count targets)) (count scored))
         (str "each open target must contribute a scored policy before any "
              "target-specific interpretation exists; decision="
-             (pr-str (:decision result))))))
+             (pr-str (:decision result))))
+    (is (every? #(= (set (:slice %)) (set (:pool %))) construction))
+    (is (every? #(= 2 (:policy-count %)) construction))))
 
 (deftest ^:incident uninterpreted-pattern-can-be-selected
   (let [{:keys [assembled result]} (run-fixture)
