@@ -1059,35 +1059,44 @@
               ;; decision refuse as before. No G is invented for the unknown
               ;; target (no worst case, no average, no default class).
               [ranked class-declines class-unknown-refusals]
-              (loop [candidates joint-candidates declines [] refused []]
-                (let [r (efe/rank-actions {:cascade-belief joint-q0}
-                                          candidates rank-opts)]
-                  (if (and (map? r) (contains? r :status)
-                           (= :class-unknown-no-scalar-g (:kind r))
-                           (some #(= (:target r) (:target %)) candidates))
-                    (let [t (:target r)
-                          remaining (filterv #(not= t (:target %)) candidates)
-                          target-declines (map (fn [c]
-                                                 {:target t
-                                                  :stage :scoring
-                                                  :candidate (:id c)
-                                                  :reason :class-unknown-no-scalar-g
-                                                  :possible-costs (:possible-costs r)})
-                                               (filter #(= t (:target %)) candidates))
-                          refusal {:target t
-                                   :kind :class-unknown-no-scalar-g
-                                   :missing :target-relation
-                                   :possible-costs (:possible-costs r)}]
-                      (if (empty? remaining)
-                        ;; Every scored candidate declined: nil ranked; the
-                        ;; body below abstains with all refusals when other
-                        ;; targets carry admission refusals, else throws.
-                        [nil (into declines target-declines)
-                         (conj refused refusal)]
-                        (recur remaining
-                               (into declines target-declines)
-                               (conj refused refusal))))
-                    [r declines refused])))
+              (let [target-q0
+                    (fn [target]
+                      (let [states (filter (fn [[state _]]
+                                             (or (empty? state)
+                                                 (every? #(= target (first %)) state)))
+                                           joint-q0)
+                            total (reduce + 0 (map second states))]
+                        (when (pos? total)
+                          (into {} (map (fn [[state mass]] [state (/ mass total)])
+                                        states)))))
+                    families (group-by :target joint-candidates)]
+                ;; Each target owns its state carrier.  Only the final
+                ;; concatenation is global; this removes the former
+                ;; cross-target powerset from every policy rollout.
+                (loop [remaining (seq families) ranked [] score-meta nil declines [] refused []]
+                  (if-let [[target candidates] (first remaining)]
+                    (let [r (efe/rank-actions {:cascade-belief (target-q0 target)}
+                                               (vec candidates) rank-opts)]
+                      (if (and (map? r) (contains? r :status)
+                               (= :class-unknown-no-scalar-g (:kind r)))
+                        (let [target-declines (map (fn [c]
+                                                     {:target target :stage :scoring
+                                                      :candidate (:id c)
+                                                      :reason :class-unknown-no-scalar-g
+                                                      :possible-costs (:possible-costs r)})
+                                                   candidates)]
+                          (recur (next remaining) ranked score-meta
+                                 (into declines target-declines)
+                                 (conj refused {:target target
+                                                :kind :class-unknown-no-scalar-g
+                                                :missing :target-relation
+                                                :possible-costs (:possible-costs r)})))
+                        (if (and (map? r) (contains? r :status))
+                          [r declines refused]
+                          (recur (next remaining) (into ranked r)
+                                 (or score-meta (meta r)) declines refused))))
+                    [(with-meta (vec ranked) score-meta)
+                     declines refused]))))
               dropped (vec (concat dropped class-declines))]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
