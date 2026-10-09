@@ -105,7 +105,6 @@
             after (counts)]
         (is (= before after))
         (is (false? (:traceWritten record)))
-        (is (not (contains? record :g-term-decomposition)))
         (is (= (get-in decision [:selection-certificate :g-term-decomposition])
                (:g-term-decomposition carried)))
         (doseq [k [:selection-law :selection-certificate :enumeration-completeness]]

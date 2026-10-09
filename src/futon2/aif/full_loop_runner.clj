@@ -1078,7 +1078,15 @@
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
                                                    :accumulation-bmr])
-                                     :g-term-decomposition (decomposition/from-result result)
+                                     ;; The selection certificate is the
+                                     ;; canonical producer.  Retain the
+                                     ;; top-level compatibility carrier, but
+                                     ;; source it from the certificate whenever
+                                     ;; present so the two copies cannot drift.
+                                     :g-term-decomposition
+                                     (or (get-in decision
+                                                 [:selection-certificate :g-term-decomposition])
+                                         (decomposition/from-result result))
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
