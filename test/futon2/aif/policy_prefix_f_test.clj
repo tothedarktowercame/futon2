@@ -85,11 +85,23 @@
         pw (into {} (map (fn [[c v]] [(:id c) v]) (get-in with [:selection-law :posterior])))
         pb (into {} (map (fn [[c v]] [(:id c) v]) pb))]
     (is (= 3 (count cands)))
-    (testing "the posterior moves, in the direction F dictates, by exactly exp(-dF)"
+    (let [scored (into {}
+                       (map (fn [c] [(:id (:id c)) c])
+                            (get-in with [:selection-certificate :candidates])))
+          ;; The Q4 observation model makes C3's G genuinely different from
+          ;; C2's.  The posterior law therefore contains both deltas:
+          ;; p3/p2 = exp((G2-G3) + (F2-F3)).
+          g2 (:g (get scored :C2))
+          g3 (:g (get scored :C3))
+          expected-ratio (Math/exp (+ (- g2 g3)
+                                     (- (:f (get scored :C2))
+                                        (or (:f (get scored :C3)) 0.0))))]
+      (is (not= g2 g3) "the observation terms are policy-sensitive")
+      (testing "the posterior moves by the complete declared score delta"
       (is (not= (pr-str pb) (pr-str pw)))
       (is (< (get pw (:id c1)) (get pw (:id c2)) (get pw (:id c3))) "higher F, lower weight; no F (not supplied) is the -F = 0 term")
       (is (< (Math/abs (- (/ (get pw (:id c2)) (get pw (:id c1))) (Math/exp 0.5))) 1e-12))
-      (is (< (Math/abs (- (/ (get pw (:id c3)) (get pw (:id c2))) (Math/exp 0.5))) 1e-12)))
+      (is (< (Math/abs (- (/ (get pw (:id c3)) (get pw (:id c2))) expected-ratio)) 1e-12))))
     (testing "the certificate says which candidates' F was computed"
       (let [fs (into {} (map (fn [c] [(let [i (:id c)] (if (map? i) (:id i) i)) (:f-status c)]) (get-in with [:selection-certificate :candidates])))]
         (is (= :computed (get fs (:id c1))))
