@@ -38,6 +38,36 @@
     (is (= "- [x] run the disruption soak test"
            (get-in source [:locators token :decl])))))
 
+(deftest dated-provisional-closure-heading-survives-source-projection
+  (let [marker {:status :provisional :date "2026-10-09"
+                :heading "## Closure criteria (provisional, 2026-10-09)"
+                :heading-line 3}
+        m {:id "M-provisional" :path "/root/repo/holes/M-provisional.md"
+           :status-class :open
+           :text (str "# Provisional\n\n"
+                      "## Closure criteria (provisional, 2026-10-09)\n\n"
+                      "- [ ] publish the measured result\n")}
+        source (mhw/mission-source "/root" m)
+        token (first (:want source))]
+    (is (= marker (get-in source [:holes 0 :criterion-status])))
+    (is (= marker (get-in source [:want-provenance token])))
+    (is (= [marker] (get-in source [:source :provisional-criteria])))
+    (is (= false (get-in source [:universe token])))
+    (is (map? (get-in source [:locators token])))))
+
+(deftest provisional-marker-is-exact-and-section-bounded
+  (let [holes (mhw/current-checkboxes
+               "M-boundary"
+               (str "## Closure criteria (provisional, someday)\n"
+                    "- [ ] undated is ordinary\n"
+                    "## Closure criteria (provisional, 2026-10-09)\n"
+                    "- [ ] dated is provisional\n"
+                    "## Notes\n"
+                    "- [ ] later is ordinary\n"))]
+    (is (= [nil :provisional nil]
+           (mapv #(get-in % [:criterion-status :status]) holes)))
+    (is (= "2026-10-09" (get-in holes [1 :criterion-status :date])))))
+
 (deftest the-locator-is-repo-relative-and-checkable
   (let [loc (first (vals (:locators (mhw/mission-source "/root" mission))))]
     (is (= :C4 (:class loc)))

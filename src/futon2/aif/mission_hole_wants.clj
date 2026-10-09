@@ -86,15 +86,35 @@
 (defn current-checkboxes
   "Unchecked checkbox observations in TEXT, in document order. Public so
   source-pinned adapters can reuse the same token/line semantics without
-  rereading a mission or copying the parser."
+  rereading a mission or copying the parser.
+
+  A level-two heading exactly shaped as
+  `## Closure criteria (provisional, YYYY-MM-DD)` marks unchecked checkbox
+  entries beneath it provisional until the next level-one/two heading. The
+  date and heading line are retained on each entry; an undated or differently
+  named heading has no authority to mark criteria provisional."
   [target text]
-  (vec (keep-indexed
-        (fn [i line]
-          (when (re-find #"^\s*[-*]\s+\[\s\]\s+\S" line)
-            {:id (str target "#" (subs (load-identity/sha256
-                                         (.getBytes (str/trim line) "UTF-8")) 0 12))
-             :kind :unchecked-task :line (inc i) :text line}))
-        (str/split-lines text))))
+  (let [provisional-heading
+        #"^## Closure criteria \(provisional, (\d{4}-\d{2}-\d{2})\)$"]
+    (loop [remaining (map-indexed vector (str/split-lines text))
+           provisional nil
+           out []]
+      (if-let [[i line] (first remaining)]
+        (let [heading (re-matches #"^(#{1,2})\s+.*$" line)
+              provisional'
+              (if heading
+                (when-let [[_ date] (re-matches provisional-heading line)]
+                  {:status :provisional :date date
+                   :heading line :heading-line (inc i)})
+                provisional)
+              hole (when (re-find #"^\s*[-*]\s+\[\s\]\s+\S" line)
+                     (cond->
+                      {:id (str target "#" (subs (load-identity/sha256
+                                                   (.getBytes (str/trim line) "UTF-8")) 0 12))
+                       :kind :unchecked-task :line (inc i) :text line}
+                       provisional' (assoc :criterion-status provisional')))]
+          (recur (next remaining) provisional' (cond-> out hole (conj hole))))
+        (vec out)))))
 
 (defn mission-source
   "One target's worth of sources, or nil when the mission states no observable
@@ -105,6 +125,10 @@
         {:keys [repo path text]} (when-not terminal? (read-current-mission code-root mission))
         holes (when text (current-checkboxes target text))
         checkbox-tokens (mapv want-token holes)
+        checkbox-provenance
+        (into {} (map (fn [h]
+                        [(want-token h)
+                         (or (:criterion-status h) {:status :declared})])) holes)
         checkbox-locators (into {} (map (fn [h] [(want-token h) (hole-locator code-root mission h)])) holes)
         criterion-result (when text
                            (criteria/wants (criteria/criteria target text)
@@ -131,15 +155,19 @@
          ;; allowed to assert false against a current checked locator.
          :universe (merge (zipmap checkbox-tokens (repeat false)) criterion-universe)
          :locators (merge checkbox-locators criterion-locators)
+         :want-provenance checkbox-provenance
          ;; A stated want does not establish any pattern's applicability.
          ;; Agent-authored declarations supply interpretations through the loader.
          :interpretation {:patterns {} :receipts {}}
          :candidates []
-         :holes (mapv (fn [h] (select-keys h [:id :kind :line :text])) holes)
+         :holes (mapv (fn [h] (select-keys h [:id :kind :line :text
+                                               :criterion-status])) holes)
          :criteria (:criteria criterion-result)
          :unlocated (:unlocated criterion-result)
          :source {:kind :current-mission-head
                   :repo repo :path path
+                  :provisional-criteria
+                  (vec (distinct (keep :criterion-status holes)))
                   :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))}}))))
 
 (defn mission-sources
