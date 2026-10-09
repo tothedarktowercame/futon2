@@ -845,11 +845,11 @@
         (take 40 lines)))
 
 (def ^:private verdict-status-class
-  {:done :complete :superseded :inactive :abandoned :inactive
+  {:done :complete :superseded :inactive :abandoned :inactive :parked :inactive
    :active :active :open :open})
 
 (def ^:private verdict-ticket-class
-  {:done :complete :superseded :inactive :abandoned :inactive
+  {:done :complete :superseded :inactive :abandoned :inactive :parked :inactive
    :active :live :open :live})
 
 (defn ticket-status-text [lines]

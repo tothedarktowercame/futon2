@@ -502,4 +502,12 @@
 (deftest verdict-requires-the-dated-provisional-form
   (is (nil? (mr/read-verdict ["**VERDICT:** DONE — undated"])))
   (is (nil? (mr/read-verdict ["**VERDICT (2026-10-09):** DONE — not marked provisional"])))
-  (is (= :superseded (:status (mr/read-verdict ["**VERDICT (2026-10-09, provisional):** SUPERSEDED by M-x — r"])))))
+  (is (= :superseded (:status (mr/read-verdict ["**VERDICT (2026-10-09, provisional):** SUPERSEDED by M-x — r"]))))
+  (is (= :parked (:status (mr/read-verdict ["**VERDICT (2026-10-09, provisional):** PARKED — seeded, not being solved yet"])))))
+
+(deftest parked-verdict-is-inactive
+  (write-primary-mission! "futon0/holes/excursions/E-parked.md"
+                          "# E-parked\n\n**VERDICT (2026-10-09, provisional):** PARKED — r\n")
+  (let [e (first (:excursions (mr/load-excursions *tmpdir*)))]
+    (is (= :inactive (:status-class e)))
+    (is (not (mr/live-excursion? e)))))
