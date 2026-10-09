@@ -1084,7 +1084,17 @@
                           target-want (set (filter #(= target (first %)) joint-want))
                           target-model (class-observation-model
                                         {:universe
-                                         (set/union (set (mapcat identity (keys q0)))
+                                         ;; Acceptance is part of the declared
+                                         ;; state space even when no current
+                                         ;; belief state or policy transition
+                                         ;; mentions every wanted token.  The
+                                         ;; observation-model validator
+                                         ;; requires acceptance to be a subset
+                                         ;; of universe; omitting it made a
+                                         ;; truthful, partially observed want
+                                         ;; set refuse before scoring.
+                                         (set/union target-want
+                                                    (set (mapcat identity (keys q0)))
                                                     (set (mapcat (fn [c]
                                                                    (mapcat (fn [p]
                                                                              (concat (:produces p)
