@@ -846,6 +846,8 @@
     (if-let [kind (:failure-kind d)]
       (cond-> {:kind kind
                :stage (or (:failure-stage d) {:absent :no-failure-stage})
+               :exception-class (or (:exception-class d)
+                                    {:absent :no-exception-class})
                :error (if (str/blank? (str (:error d)))
                         {:absent :no-error-message}
                         (:error d))
@@ -857,6 +859,101 @@
         ask (assoc :context {:phase (:failure-stage d)
                              :interpretation-ask ask}))
       {:absent :no-failure})))
+
+(defn write-edn-stream!
+  "Write one EDN value without materialising its complete printed form as a
+   Java String.  The bindings match `pr-str` for ordinary run records, except
+   that length and nesting are explicitly unlimited as the durable format
+   requires.  Flush and fsync precede the caller's atomic rename."
+  [file value]
+  (with-open [fos (java.io.FileOutputStream. ^java.io.File file)
+              osw (java.io.OutputStreamWriter. fos java.nio.charset.StandardCharsets/UTF_8)
+              out (java.io.BufferedWriter. osw)]
+    (binding [*out* out *print-length* nil *print-level* nil]
+      (pr value)
+      (.write out "\n")
+      (.flush out)
+      (.sync (.getFD fos)))))
+
+(defn- stream-sha256 [value]
+  (let [digest (MessageDigest/getInstance "SHA-256")]
+    (with-open [sink (java.security.DigestOutputStream.
+                      (java.io.OutputStream/nullOutputStream) digest)
+                out (java.io.BufferedWriter.
+                     (java.io.OutputStreamWriter.
+                      sink java.nio.charset.StandardCharsets/UTF_8))]
+      (binding [*out* out *print-length* nil *print-level* nil]
+        (pr value)
+        (.flush out)))
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest)))))
+
+(defn- persist-small-failure-record!
+  [raw-opts run-id started-at result original-error]
+  (let [dir (io/file (or (:run-record-dir raw-opts) (run-record-dir)))
+        target (io/file dir (str "tick-run-record-" run-id ".edn"))
+        tmp (io/file dir (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))
+        checkpoint-refs
+        (into (sorted-map)
+              (map (fn [[k cell]] [k {:sha256 (stream-sha256 cell)}]))
+              (:checkpoints result))
+        failure {:kind (or (get-in result [:data :failure-kind]) :close-exception)
+                 :stage :close
+                 :exception-class (.getName (class original-error))
+                 :error (or (ex-message original-error) "Close persistence failed")}
+        base {:run/id run-id :startedAt started-at :outcome :build-failed
+              :record-type :wm/terminal-persistence-failure
+              :checkpoint-keys (vec (keys checkpoint-refs))
+              :checkpoint-digests checkpoint-refs
+              :failure failure}
+        record (terminal-receipt/attach base :build-failed)
+        writer (or (:emergency-run-record-write-fn raw-opts) write-edn-stream!)]
+    (try
+      (io/make-parents target)
+      (writer tmp record)
+      (java.nio.file.Files/move
+       (.toPath tmp) (.toPath target)
+       (into-array java.nio.file.StandardCopyOption
+                   [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                    java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+      {:run-record-status :present :run-record (.getAbsolutePath target)
+       :run-record-form :typed-small-close-failure}
+      (catch Throwable emergency-error
+        (io/delete-file tmp true)
+        {:run-record-status :absent
+         :run-record-form :typed-small-close-failure
+         :run-record-error {:kind :terminal-persistence-double-failure
+                            :first {:class (.getName (class original-error))
+                                    :message (ex-message original-error)}
+                            :second {:class (.getName (class emergency-error))
+                                     :message (ex-message emergency-error)}}}))))
+
+(defn persist-with-close-fallback!
+  "Persist RESULT, retaining its completed checkpoints if the first terminal
+   write throws.  The retry records the original throwable as a typed close
+   failure; it never re-runs the opportunity or substitutes an empty
+   initialization result.  PERSIST-FN is injectable for the write-boundary
+   regression test and production storage faults."
+  [persist-fn raw-opts run-id started-at result]
+  (try
+    (merge result {:run/id run-id}
+           (persist-fn raw-opts run-id started-at result))
+    (catch Throwable e
+      (let [edata (if (instance? clojure.lang.ExceptionInfo e) (ex-data e) {})
+            failure-kind (or (:failure-kind edata) :close-exception)
+            fallback (-> result
+                         (assoc :outcome :build-failed)
+                         (update :data merge
+                                 {:outcome :build-failed
+                                  :failure-kind failure-kind
+                                  :failure-stage :close
+                                  :error (or (ex-message e) "Close persistence failed")
+                                  :exception-class (.getName (class e))
+                                  :error-data edata
+                                  :cause {:class (.getName (class e))
+                                          :message (or (ex-message e)
+                                                       "Close persistence failed")}}))]
+        (merge fallback {:run/id run-id}
+               (persist-small-failure-record! raw-opts run-id started-at fallback e))))))
 
 (defn grounded-commit-for
   "PROOF-2b (click 13, tick-run-record-2026-09-30-1790737908): the grounded
@@ -1185,12 +1282,16 @@
                      q6-exclusion
                      (assoc :q6-exclusion q6-exclusion))]
         (io/make-parents target)
-        (spit tmp (str (pr-str record) "\n"))
-        (java.nio.file.Files/move
-         (.toPath tmp) (.toPath target)
-         (into-array java.nio.file.StandardCopyOption
-                     [java.nio.file.StandardCopyOption/ATOMIC_MOVE
-                      java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+        (try
+          ((or (:run-record-write-fn raw-opts) write-edn-stream!) tmp record)
+          (java.nio.file.Files/move
+           (.toPath tmp) (.toPath target)
+           (into-array java.nio.file.StandardCopyOption
+                       [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                        java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+          (catch Throwable e
+            (io/delete-file tmp true)
+            (throw e)))
         {:run-record-status :present
          :run-record (.getAbsolutePath target)})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard
@@ -7306,5 +7407,6 @@
     ;; The SAME identity annotates the result persist-run-record! sees; the
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
-    (merge final-result {:run/id run-id}
-           (persist-run-record! raw-opts run-id started-at final-result))))
+    (persist-with-close-fallback!
+     (or (:persist-run-record-fn raw-opts) persist-run-record!)
+     raw-opts run-id started-at final-result)))
