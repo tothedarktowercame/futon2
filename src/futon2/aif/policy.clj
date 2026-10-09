@@ -24,28 +24,64 @@
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
             [futon2.aif.cascade-selection :as cascade-selection]
             [futon2.aif.ticket-queue :as ticket-queue]
-            [clojure.walk :as walk]))
+))
 
 (load-identity/register! *ns* *file*)
 
-(defn compact-cascade-carriers
-  "Lossless identity projection for durable decision records.  Construction
-   and interpretation receipts remain in their single target-construction
-   carrier; every repeated policy occurrence retains its target, arrangement,
-   guards/effects and scorer parameters but references no receipt payload."
+(def ^:private chosen-action-keys
+  "Keys under which a decision root names its chosen action. That one action
+   is what the report card, grounding and review read for interpretation
+   receipts, document locators and the construction receipt."
+  #{:chosen :chosen-action :action :selected-action})
+
+(defn- compact-candidate [v]
+  (-> (select-keys v [:kind :id :target :want :precedence :precedence-steps])
+      (update :precedence
+              #(mapv (fn [p]
+                       (if (map? p)
+                         (select-keys p [:id :target :guard :produces
+                                         :predicted-effect :theta :theta-source])
+                         p)) %))))
+
+(defn- chosen-identities
+  "[target id] of the decision's chosen action: the record decision itself or
+   a selection cell's judgment decision.  Certificate entries also carry their
+   policy under :action, so only these decision roots are read."
   [x]
-  (walk/postwalk
-   (fn [v]
-     (if (and (map? v) (= :cascade-candidate (:kind v)))
-       (-> (select-keys v [:kind :id :target :want :precedence :precedence-steps])
-           (update :precedence
-                   #(mapv (fn [p]
-                            (if (map? p)
-                              (select-keys p [:id :target :guard :produces
-                                              :predicted-effect :theta :theta-source])
-                              p)) %)))
-       v))
-   x))
+  (into #{}
+        (comp (keep (fn [path] (get-in x path)))
+              (filter #(and (map? %) (contains? % :target) (contains? % :id)))
+              (map (juxt :target :id)))
+        (for [root [[] [:judgment :decision] [:judgment :controller-decision]]
+              k chosen-action-keys]
+          (conj root k))))
+
+(defn compact-cascade-carriers
+  "Identity projection for durable decision records.  Every REPEATED policy
+   occurrence (certificate candidates, lane candidates) keeps its target,
+   arrangement, guards/effects and scorer parameters but drops its receipt
+   payload.  The chosen action, identified from the decision roots by
+   chosen-identities, is kept whole wherever it occurs (for example as its
+   own certificate candidate): claude-12's
+   review found the earlier blanket projection dropped the chosen cascade's
+   interpretation receipts and document locators from the record, and with
+   them the report card's cascade section."
+  [x]
+  (let [chosen (chosen-identities x)]
+    (letfn [(compact [v]
+              (cond
+                (map? v)
+                (if (= :cascade-candidate (:kind v))
+                  (if (contains? chosen [(:target v) (:id v)]) v (compact-candidate v))
+                  (persistent!
+                   (reduce-kv (fn [m k y]
+                                (assoc! m k (compact y)))
+                              (transient (empty v)) v)))
+                (vector? v) (mapv compact v)
+                (set? v) (into (empty v) (map compact) v)
+                (seq? v) (doall (map compact v))
+                :else v))]
+      (compact x))))
 
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.
