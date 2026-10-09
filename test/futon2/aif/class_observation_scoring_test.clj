@@ -324,6 +324,65 @@
       (is (= {:focused (- (Math/log 0.55)) :related (- (Math/log 0.35)) :unrelated (- (Math/log 0.05))}
              (:possible-costs r))))))
 
+(deftest nonmission-task-inherits-its-ledger-parent-relation
+  (let [inputs (focus/read-inputs)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                 {:focus "WM" :as-of "2026-09-22T17:31:44Z"})
+        target "E-ledger-child"
+        classifications {:status :present :path "/authority/tasks.edn" :sha256 "abc"
+                         :rows {target {:id target :kind :excursion
+                                        :category/cluster "M-aif-policy-conditioned-eig"
+                                        :evidence [{:kind :mission-context}]}}}
+        c (focus/classify-target inputs retained (:as-of retained) target
+                                 {:task-classifications classifications})]
+    (is (= :focus (:class c)))
+    (is (= "M-aif-policy-conditioned-eig" (get-in c [:derived-via :parent])))
+    (is (= :task-classification-ledger-parent
+           (get-in c [:derived-via :kind])))
+    (is (= {:path "/authority/tasks.edn" :sha256 "abc"}
+           (get-in c [:derived-via :ledger])))))
+
+(deftest repository-category-does-not-invent-a-relation
+  (let [inputs (focus/read-inputs)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                 {:focus "WM" :as-of "2026-09-22T17:31:44Z"})
+        target "E-repository-only"
+        c (focus/classify-target
+           inputs retained (:as-of retained) target
+           {:task-classifications
+            {:status :present :rows {target {:id target :kind :excursion
+                                             :category/cluster :repo/futon3c}}}})]
+    (is (= :unknown (:class c)))
+    (is (= :task-category-has-no-parent-mission
+           (get-in c [:relation :reason])))))
+
+(deftest pinned-task-document-produces-structural-facet-relation
+  (let [inputs (focus/read-inputs)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                 {:focus "WM" :as-of "2026-09-22T17:31:44Z"})
+        target "E-structural-task"
+        c (focus/classify-target
+           inputs retained (:as-of retained) target
+           {:task-classifications
+            {:status :present :path "/authority/tasks.edn" :sha256 "ledger-sha"
+             :rows {target {:id target :kind :excursion
+                            :category/cluster :repo/futon3c
+                            :evidence [{:kind :source
+                                        :path "/home/joe/code/futon3c/holes/excursions/E-structural-task.md"
+                                        :sha256 "document-sha"}]}}}})]
+    (is (= :useful-elsewhere (:class c)))
+    (is (= ":repo/futon3c" (get-in c [:relation :facet])))
+    (is (= :task-structural-facet (get-in c [:derived-via :kind])))
+    (is (= :document-structural-node (get-in c [:derived-via :facet-basis])))
+    (is (= "document-sha" (get-in c [:derived-via :document :sha256])))))
+
+(deftest reviewed-task-ledger-is-readable-by-the-producer
+  (let [authority (focus/read-task-classifications ".")]
+    (is (= :present (:status authority)))
+    (is (= 517 (count (:rows authority))))
+    (is (= 276 (count (filter #(string? (:category/cluster %))
+                              (vals (:rows authority))))))))
+
 ;; codex-20 corrections 1-3 on 84f81cb4.
 (deftest receipt-and-scorer-agree-through-real-receipt-construction
   (let [inputs (focus/read-inputs)
