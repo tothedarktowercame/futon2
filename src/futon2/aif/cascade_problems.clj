@@ -95,6 +95,10 @@
   registered passing run at current content, is AR-41 (futon2 9d5525ee)."
   #{:C3 :C4 :C5 :C6 :C8})
 
+(def provisional-policy-count
+  "Two distinct query-slice policies per open target: the Q8 minimum."
+  2)
+
 (defn problem-tokens
   "Every token a target's problem reads or writes: its facts, its want, and
   every interpreted pattern's guard and produces."
@@ -322,8 +326,9 @@
                      {:kind :query-time-pattern-selection
                       :status :provisional
                       :pattern pattern
-                      :attested? false}})
-                  (range) (take 2 slice-patterns))]
+                      :attested? false
+                      :policy-limit provisional-policy-count}})
+                  (range) (take provisional-policy-count slice-patterns))]
        {:target target
        :cascade-problem
        (assoc base

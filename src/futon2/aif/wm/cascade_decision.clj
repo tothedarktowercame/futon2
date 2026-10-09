@@ -1386,7 +1386,9 @@
   "Truthful per-target construction facts from admitted PROBLEMS and the
   certificate CANDIDATES.  A missing query-time carrier makes the census
   typed-absent; partial pins make whole-library false."
-  [problems certificate-candidates]
+  ([problems certificate-candidates]
+   (target-construction-census problems certificate-candidates nil))
+  ([problems certificate-candidates library-pin]
   (let [policy-counts (frequencies (keep (fn [p]
                                            (or (:target p)
                                                (get-in p [:id :target])))
@@ -1402,7 +1404,10 @@
                    :pool (vec (keys (:interpretations cascade-problem)))
                    :slice-from-whole-library
                    (boolean
-                    (or (:slice-from-whole-library slice)
+                    (or (and (:slice-from-whole-library slice)
+                             (= :wm/pinned-pattern-library-v1 (:schema library-pin))
+                             (= (:library-size slice) (:size library-pin))
+                             (= (:library-manifest-digest slice) (:digest library-pin)))
                         (and (= :wm/query-time-library-slice-v1 (:schema slice))
                              (pos-int? (:library-size slice))
                              (= (:library-size slice) (count pins))
@@ -1419,7 +1424,7 @@
        :targets (mapv :target
                       (remove #(= :wm/query-time-library-slice-v1
                                   (get-in % [:query-time-slice :schema]))
-                              problems))})))
+                              problems))}))))
 
 (defn cascade-decision
   "Admit explicitly paired nonempty constructions, record every decline, then
@@ -1462,7 +1467,8 @@
     (let [construction-census
           (target-construction-census
            (:target-construction-inputs assembled)
-           (get-in result [:decision :selection-certificate :candidates]))
+           (get-in result [:decision :selection-certificate :candidates])
+           (:library-pin assembled))
           interpretations-owed
           (vec (for [{:keys [target constructed-candidates]} (:problems assembled)
                      {:keys [precedence construction-receipt]} constructed-candidates
