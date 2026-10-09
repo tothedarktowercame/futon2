@@ -18,7 +18,10 @@
 
 (deftest runtime-supplies-the-report-backed-judge
   (let [seen (atom nil)
+        root (.toFile (java.nio.file.Files/createTempDirectory
+                       "runtime-predecessor-" (make-array java.nio.file.attribute.FileAttribute 0)))
         opts {:run-id "runtime-test" :flight {:target "T"}
+              :run-record-dir (.getPath root)
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"}
         expected {:judgement :selected}]
     (with-redefs [wm/accumulation-config (constantly {:accumulation :configured})
@@ -36,10 +39,60 @@
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
               :outer-task-policy :meta
               :outer-task-selection-fn meta-live/selector
+              :token-belief-predecessor-record nil
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}
              (second @seen))))))
+
+(deftest latest-completed-run-is-the-token-belief-predecessor
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "runtime-predecessor-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        older (java.io.File. root "tick-run-record-old.edn")
+        newer (java.io.File. root "tick-run-record-new.edn")]
+    (spit older (pr-str {:run/id "old" :startedAt "2026-10-09T00:00:00Z"
+                         :enactment {:status :admitted}}))
+    (spit newer (pr-str {:run/id "new" :startedAt "2026-10-09T00:00:01Z"
+                         :realized-outcome {:status :compared}}))
+    (.setLastModified older 1000)
+    (.setLastModified newer 2000)
+    (is (= "new" (:run/id (runtime/predecessor-run-record
+                            {:run-record-dir (.getPath root)}))))
+    (spit newer "{")
+    (is (= "old" (:run/id (runtime/predecessor-run-record
+                            {:run-record-dir (.getPath root)}))))))
+
+(deftest completed-run-projects-real-producers-for-token-carry
+  (let [selection-enaction {:verdict :match :evidence {:source :runner-selection}}
+        enactment {:verification {:status :admitted}}
+        outcome {:schema :wm/token-outcome-comparison-v1 :status :compared}
+        result {:d-task-context {:occurrence "run-occurrence"}
+                :d-task-enactment enactment
+                :checkpoints
+                {:construction
+                 {:judgment {:selection-enaction selection-enaction
+                             :selected-action {:id :selected}
+                             :cascade {:id :cascade}
+                             :patterns [:p]
+                             :receipted-construction
+                             {:cascade-diff {:acting-order-after [:p]}}}}
+                 :closed {:judgment {:token-outcome-comparison outcome}}}}
+        projected (runner/completed-predecessor-evidence result)]
+    (is (= {:occurrence "run-occurrence"} (:d-task-context projected)))
+    (is (= selection-enaction (:selection-enaction projected)))
+    (is (= enactment (:enactment projected)))
+    (is (= outcome (:realized-outcome projected)))
+    (is (= [:p] (:acting-order-after projected)))
+    (is (= {:schema :wm/enactment-plan-v1
+            :selected-action {:id :selected}
+            :cascade {:id :cascade}
+            :patterns [:p]}
+           (:enactment-plan projected)))
+    (let [missing (runner/completed-predecessor-evidence
+                   {:checkpoints {:construction {:judgment {}}}})]
+      (is (nil? (:selection-enaction missing)))
+      (is (nil? (:enactment missing)))
+      (is (nil? (:realized-outcome missing))))))
 
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]

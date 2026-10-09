@@ -74,6 +74,42 @@
     (is (= (:value (:initial-belief-receipt changed)) (:continuation-belief input)))
     (is (= (fixture/outcomes d) (fixture/outcomes changed)))))
 
+(deftest completed-run-makes-every-post-selection-candidate-inspectable
+  (let [completed {:run/id "completed-run"
+                   :decision {:action {:id :chosen}}
+                   :selection-enaction {:verdict :match}
+                   :enactment {:verification {:status :admitted}}
+                   :realized-outcome {:status :compared}
+                   :enactment-plan {:selected-action {:id :chosen}}
+                   :acting-order-after [:chosen]}
+        candidates (:candidates (predecessor/inspect-trace completed))]
+    ;; Candidate 0 is the decision-time action.  The five paths WM Q7 reported
+    ;; absent are the completed-run producers at indices 1 through 5.
+    (is (= predecessor/candidate-paths (mapv :path candidates)))
+    (is (every? #(= :present (:status %)) (subvec candidates 1 6)))
+    (is (every? some? (map :record (subvec candidates 1 6))))
+    ;; Absence remains honest when a completed producer did not run.
+    (is (= :absent
+           (get-in (predecessor/inspect-trace
+                    (dissoc completed :realized-outcome))
+                   [:candidates 3 :status])))))
+
+(deftest configured-evidence-root-governs-carry-authority
+  (let [seen (atom nil)
+        inspection {:task-context {:occurrence "o"}
+                    :d-task-evidence-root "/isolated/evidence"
+                    :candidates []}]
+    (with-redefs [predecessor/production-authority
+                  (fn [expected root]
+                    (reset! seen [expected root])
+                    {:status :refused :kind :no-record})]
+      (predecessor/input-receipt {:schema :wm/token-belief-stage-v1
+                                  :occurrence-id "o"
+                                  :prospective-carry {:universe []}
+                                  :initialization {:value {}}}
+                                 inspection)
+      (is (= [{:occurrence "o"} "/isolated/evidence"] @seen)))))
+
 (deftest refusal-survives-trace-and-read-time-validation
   (files/with-dir
    (fn [dir]

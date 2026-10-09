@@ -6793,7 +6793,10 @@
                                (if (contains? cascade-sources :construction)
                                  :caller-supplied-evaluator :same-observation-labels-snapshot)
                                :ticket-queue ticket-queue-declaration
-                               :token-belief-predecessor-trace prev-trace-record
+                               :token-belief-predecessor-trace
+                               (or (:token-belief-predecessor-record judge-opts)
+                                   prev-trace-record)
+                               :d-task-evidence-root (:d-task-evidence-root judge-opts)
                                :prospective-token-carry
                                (get-in prev-trace-record
                                        [:decision :selection-certificate :token-belief-stage

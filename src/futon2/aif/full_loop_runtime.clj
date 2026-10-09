@@ -1,6 +1,8 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
@@ -21,6 +23,22 @@
 (def default-pattern-graph-diff-dir
   (data-paths/path "wm-pattern-graph-diffs"))
 
+(defn predecessor-run-record
+  "Return the latest completed record.  This is the evidence-bearing
+   predecessor; the WM trace is published before enactment and cannot carry
+   the completed action or measured outcome."
+  [opts]
+  (let [dir (io/file (or (:run-record-dir opts) runner/default-run-record-dir))]
+    (->> (or (.listFiles dir) (make-array java.io.File 0))
+         (filter #(.isFile %))
+         (filter #(re-matches #"tick-run-record-.*\.edn" (.getName %)))
+         (sort-by (juxt #(.lastModified %) #(.getName %)))
+         reverse
+         (keep (fn [f]
+                 (try (edn/read-string (slurp f))
+                      (catch Throwable _ nil))))
+         first)))
+
 (defn- selection-judge
   [opts days]
   (wm/generate-war-machine
@@ -30,8 +48,10 @@
                              :loaded-code-identity :cascade-habit-path
                              :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir
+                             :d-task-evidence-root
                              :outer-task-policy :outer-task-selection-fn
                              :selection-timing/state :nano-time-fn])
+          {:token-belief-predecessor-record (predecessor-run-record opts)}
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
