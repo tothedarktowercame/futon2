@@ -976,7 +976,9 @@
               relation-context {:code-root mission-registry/default-code-root
                                 ;; WM-RELATION-I: M- targets' stated Relations are read here
                                 :ticket-dir (str f2-root "/holes/tickets")
-                                :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}
+                                :findings-dir (str f2-root "/data/wm-repair-obligations/findings")
+                                :task-classifications
+                                (focus-receipt/read-task-classifications f2-root)}
               target-classifications
               (into {}
                     (for [p problems

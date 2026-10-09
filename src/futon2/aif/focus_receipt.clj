@@ -106,6 +106,28 @@
              (some #(second (re-matches #"^\*{0,2}Parent:\*{0,2}\s+(\S+)" %))))
     (catch Exception _ nil)))
 
+(def task-classification-ledger
+  "Reviewed task-content/context authority produced by codex-35."
+  "holes/labs/wm-contract/TASK-CLASSIFICATION-LEDGER-2026-10-09.edn")
+
+(declare sha256-file)
+
+(defn read-task-classifications
+  "Read the reviewed E-/T- category ledger under the futon2 checkout.
+  Returns target -> row plus a digest of the exact ledger consumed."
+  [futon2-root]
+  (let [file (io/file futon2-root task-classification-ledger)]
+    (try
+      (let [ledger (edn/read-string (slurp file))]
+        (if (= :wm/task-content-context-classification-v2 (:schema ledger))
+          {:status :present :path (.getCanonicalPath file)
+           :sha256 (sha256-file file)
+           :rows (into {} (map (juxt :id identity)) (:rows ledger))}
+          (absent :unsupported-task-classification-ledger)))
+      (catch Exception e
+        {:status :absent :reason :task-classification-ledger-unreadable
+         :path (.getPath file) :error (ex-message e)}))))
+
 ;; ---------------------------------------------------------------------------
 ;; WM-RELATION-I: an M- target with no row derives its relation, in order,
 ;; from (a) its mission's stated ## Relations, walked through M- targets to
@@ -263,7 +285,8 @@
    outcome, and never guessed."
   ([inputs discovery as-of target]
    (classify-target inputs discovery as-of target nil))
-  ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn] :as ctx}]
+  ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn
+                                          task-classifications] :as ctx}]
    (let [row-of (fn [t] (first (filter #(and (= t (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs))))
          direct (row-of target)
          finding-record (when (and findings-dir (string? target)
@@ -280,13 +303,70 @@
                             :source {:kind :open-repair-obligation
                                      :repair-id (:repair/id finding-record)
                                      :machine-repo (:machine-repo finding-record)}})
-         parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
-                         (or (when ticket-dir
-                             (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
-                               {:kind :ticket-parent :parent p :source (str "ticket " target)}))
-                           (when-let [p (:target finding-record)]
-                             {:kind :finding-target :parent p :source (str "finding " (subs target 2))})))
+         ledger-row (get-in task-classifications [:rows target])
+         ledger-parent (when (string? (:category/cluster ledger-row))
+                         (:category/cluster ledger-row))
+         parent-source (when (and (nil? direct) (string? target))
+                         (or (when (and ticket-dir (str/starts-with? target "T-"))
+                               (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
+                                 {:kind :ticket-parent :parent p :source (str "ticket " target)}))
+                             (when-let [p (:target finding-record)]
+                               {:kind :finding-target :parent p :source (str "finding " (subs target 2))})
+                             (when ledger-parent
+                               {:kind :task-classification-ledger-parent
+                                :parent ledger-parent
+                                :ledger (select-keys task-classifications [:path :sha256])
+                                :evidence (:evidence ledger-row)})))
          parent (:parent parent-source)
+         task-source (some #(when (= :source (:kind %)) %) (:evidence ledger-row))
+         ticket-source (when (and ticket-dir (string? target)
+                                  (str/starts-with? target "T-"))
+                         (let [file (io/file ticket-dir (str target ".md"))]
+                           (when (.isFile file)
+                             {:path (.getCanonicalPath file)
+                              :sha256 (sha256-file file)})))
+         mission-source (when (and (string? target) (str/starts-with? target "M-"))
+                          ((or mission-text-fn
+                               (memoize #(default-mission-text
+                                         (or code-root (str (System/getProperty "user.home") "/code")) %)))
+                           target))
+         parent-mission-source (when parent
+                                 ((or mission-text-fn
+                                      (memoize #(default-mission-text
+                                                (or code-root (str (System/getProperty "user.home") "/code")) %)))
+                                  parent))
+         facet-source (or parent-mission-source task-source mission-source ticket-source)
+         path-facets (when facet-source
+                       (facets (map str (remove nil? [(:path facet-source)
+                                                     parent
+                                                     (:category/cluster ledger-row)
+                                                     target]))))
+         ;; `other/unattributed` means the WM/APM path recogniser found no
+         ;; named portfolio facet. It is not itself used as a class. The
+         ;; document still has a real structural node: its reviewed ledger
+         ;; category, parent mission, or mission id. A node with no focus edge
+         ;; is useful-elsewhere; that is a graph result, not a default class.
+         assigned-facet (when facet-source
+                          (if (= #{"other/unattributed"} path-facets)
+                            (str (or (:category/cluster ledger-row) parent target))
+                            (when (= 1 (count path-facets)) (first path-facets))))
+         active-facets (set (get-in discovery [:facet-graph :active]))
+         background-facets (set (get-in discovery [:facet-graph :background]))
+         structural-relation (when assigned-facet
+                               {:target target
+                                :facet assigned-facet
+                                :relation (cond (active-facets assigned-facet) "focus"
+                                                (background-facets assigned-facet) "associated"
+                                                :else "useful-elsewhere")
+                                :source {:kind :task-structural-facet
+                                         :facet-basis (if (= #{"other/unattributed"} path-facets)
+                                                        :document-structural-node
+                                                        :document-path-facet)
+                                         :category (:category/cluster ledger-row)
+                                         :document (select-keys facet-source [:path :sha256])
+                                         :ledger (when ledger-row
+                                                   (select-keys task-classifications [:path :sha256]))}
+                                :effective-from as-of})
          ;; WM-RELATION-I: an M- target with no row, when a relation context
          ;; is given (the scoring path's), derives through (a) then (b)
          m-derivation (when (and (nil? direct) ctx (string? target) (str/starts-with? target "M-"))
@@ -301,13 +381,35 @@
                               (if (:row b)
                                 (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
                                 {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
+         parent-derivation (when (and parent (nil? (row-of parent)) ctx)
+                             (let [text (or mission-text-fn
+                                            (memoize #(default-mission-text
+                                                      (or code-root (str (System/getProperty "user.home") "/code")) %)))
+                                   a (stated-relation-path parent row-of text)]
+                               (if (:row a)
+                                 a
+                                 (let [rowed (into {} (keep (fn [r]
+                                                             (when (at-or-before? (:effective-from r) as-of)
+                                                               [(:target r) r])))
+                                                   (reverse (:relations inputs)))
+                                       b (embedding-neighbour inputs parent rowed)]
+                                   (if (:row b) b {:absent (:absent b)})))))
          relation-row (or direct repair-relation
-                          (when parent
-                            (row-of parent))
-                          (:row m-derivation))
-         derived (cond active-repair? (:source repair-relation)
-                       (and parent-source relation-row (nil? direct)) parent-source
+                          (when parent (row-of parent))
+                          (:row parent-derivation)
+                          (:row m-derivation)
+                          structural-relation)
+         derived0 (cond active-repair? (:source repair-relation)
+                       (and parent-source relation-row (nil? direct))
+                       (cond-> parent-source
+                         parent-derivation (assoc :parent-relation-derivation
+                                                  (:derived-via parent-derivation)))
                        (:row m-derivation) (:derived-via m-derivation))
+         derived (or derived0
+                     (when (and structural-relation (nil? direct)
+                                (nil? repair-relation) (nil? (when parent (row-of parent)))
+                                (nil? (:row parent-derivation)) (nil? (:row m-derivation)))
+                       (:source structural-relation)))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
          eligible (or active-repair?
                       (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
@@ -319,7 +421,11 @@
                   relation-row
                   (cond-> {:status :absent
                            :reason (cond (and (nil? relation-row) (:absent m-derivation)) (:absent m-derivation)
-                                         (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
+                                         (nil? relation-row) (cond
+                                                               (and ledger-row (not ledger-parent)) :task-category-has-no-parent-mission
+                                                               (and (string? target) (or (str/starts-with? target "T-")
+                                                                                         (str/starts-with? target "E-"))) :no-parent-relation
+                                                               :else :relation-not-declared)
                                          (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
                                          :else :relation-outside-focus-facets)}
                     (and (nil? relation-row) (:absent m-derivation))
