@@ -20,6 +20,7 @@
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
+   "earlierProgressPairs" "earlierProgressNoGreaterRisk"
    "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
 
 (defn not-recomputable [s] {"not-recomputable" s})
@@ -150,6 +151,7 @@
                                            (not= #{:ending/not-yet-evaluated}
                                                  (set (keys row))))]
                             (dec (long step)))))
+        census (get cert :q9-q10-census)
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
         previous-chosen (get-in previous [:decision :chosen])
@@ -219,10 +221,24 @@
                                       (nr "Agency roster snapshot unavailable")))
                "seatsUsed" (if (seq used) (sorted-ids used)
                                (nr "participant seat ids absent"))
-               "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
-               "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
-               "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
-               "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
+               "completionPreferencePairs" (if (number? (:completion-preference-pairs census))
+                                              (:completion-preference-pairs census)
+                                              (nr "reachable completion-preference pairs absent"))
+               "completionPairsStrictlyPreferred" (if (number? (:completion-pairs-strictly-preferred census))
+                                                      (:completion-pairs-strictly-preferred census)
+                                                      (nr "strict completion-preference comparisons absent"))
+               "earlierProgressPairs" (if (number? (:earlier-progress-pairs census))
+                                         (:earlier-progress-pairs census)
+                                         (nr "earlier-progress pair census absent"))
+               "earlierProgressNoGreaterRisk" (if (number? (:earlier-progress-no-greater-risk census))
+                                                  (:earlier-progress-no-greater-risk census)
+                                                  (nr "earlier-progress risk census absent"))
+               "differentArrangementPairs" (if (number? (:different-arrangement-pairs census))
+                                               (:different-arrangement-pairs census)
+                                               (nr "same-pattern different-arrangement pair census absent"))
+               "arrangementPairsDistinguishedByG" (if (number? (:arrangement-pairs-distinguished-by-g census))
+                                                      (:arrangement-pairs-distinguished-by-g census)
+                                                      (nr "arrangement-pair distinct-policy/G census absent"))}
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
