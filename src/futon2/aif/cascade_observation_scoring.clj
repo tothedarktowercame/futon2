@@ -5,19 +5,49 @@
    observation at that horizon. The conditioned belief is retained for the
    next prediction, not substituted into the prediction being evaluated."
   (:require [clojure.set :as set]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.observation-model :as om]
             [futon2.aif.parameter-novelty :as novelty])
-  (:import [java.util.concurrent Callable Executors]))
+  (:import [java.security MessageDigest]
+           [java.util.concurrent Callable Executors]))
 
 (def max-horizon 10)
 (def max-candidates 16)
+(def cache-top-k 8)
+(def cache-refresh-count 8)
 
 (def ^:private worker-memory-budget-bytes (* 512 1024 1024))
 
 (defn- heap-worker-cap []
   (let [heap (.maxMemory (Runtime/getRuntime))]
     (max 1 (min 64 (quot heap worker-memory-budget-bytes)))))
+
+(defn- canonical-data [x]
+  (cond
+    (map? x) (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+                   (map (fn [[k v]] [k (canonical-data v)]) x))
+    (set? x) (vec (sort-by pr-str (map canonical-data x)))
+    (sequential? x) (mapv canonical-data x)
+    :else x))
+
+(defn- digest [x]
+  (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256")
+                                           (.getBytes (pr-str (canonical-data x)) "UTF-8")))))
+
+(defn- cache-path [opts]
+  (or (:scoring-cache-path opts)
+      (data-paths/path "wm-scoring-cache" "global-rank.edn")))
+
+(defn- read-cache [path]
+  (try (if (.isFile (io/file path)) (edn/read-string (slurp path)) {})
+       (catch Exception _ {})))
+
+(defn- write-cache! [path value]
+  (io/make-parents path)
+  (spit path (pr-str value)))
 
 (defn- parallel-mapv
   "Evaluate independent target policies concurrently, retaining input order.
@@ -314,8 +344,71 @@
             workers (min (heap-worker-cap)
                          (or (:scoring-parallelism opts)
                              (min 16 (.availableProcessors (Runtime/getRuntime)))))
-            entries (parallel-mapv #(score-candidate (:cascade-belief state) % opts preference)
-                                   candidates workers)
+            cache-enabled? (true? (:scoring-cache? opts))
+            cache-file (cache-path opts)
+            old-cache (if cache-enabled? (read-cache cache-file) {})
+            generation (inc (long (or (:generation old-cache) 0)))
+            old-entries (or (:entries old-cache) {})
+            work (mapv (fn [candidate]
+                         (let [key (digest {:candidate candidate :model model
+                                            :belief (:cascade-belief state)
+                                            :preference preference
+                                            :observation (:observation opts)
+                                            :prediction-context (:prediction-context opts)
+                                            :cascade-spec (:cascade-spec opts)})]
+                           {:candidate candidate :key key :record (get old-entries key)}))
+                       candidates)
+            cached-work (filterv :record work)
+            top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
+            refresh-count (long (or (:scoring-cache-refresh-count opts) cache-refresh-count))
+            head-keys (set (map :key (take top-k
+                                           (sort-by (juxt (comp :controller-score :entry :record)
+                                                          (comp pr-str :key))
+                                                         cached-work))))
+            stale-work (take refresh-count
+                             (sort-by (juxt (comp - :generation :record)
+                                            (comp pr-str :key)) cached-work))
+            refresh-keys (set (concat head-keys (map :key stale-work)))
+            fresh-work (if cache-enabled?
+                         (filterv #(or (nil? (:record %))
+                                       (refresh-keys (:key %))) work)
+                         work)
+            fresh-results (into {}
+                               (map (fn [[w entry]]
+                                      (let [cache {:status :fresh :reason
+                                                   (if (:record w) :head-or-stale-refresh
+                                                       :cache-miss)
+                                                   :generation generation
+                                                   :age 0 :digest (:key w)}]
+                                        [(:key w) (assoc entry :cache cache
+                                                         :certificate (assoc (:certificate entry)
+                                                                             :cache cache))]))
+                                    (map vector fresh-work
+                                         (parallel-mapv #(score-candidate (:cascade-belief state)
+                                                                          (:candidate %) opts preference)
+                                                        fresh-work workers))))
+            entries (mapv (fn [{:keys [key record] :as w}]
+                            (or (get fresh-results key)
+                                (let [cache {:status :cached
+                                             :reason (if (head-keys key) :top-k-revalidation
+                                                         :unchanged)
+                                             :generation generation
+                                             :age (- generation (long (:generation record)))
+                                             :digest key}
+                                      entry (:entry record)]
+                                  (assoc entry :cache cache
+                                         :certificate (assoc (:certificate entry)
+                                                             :cache cache))))) work)
+            _cache-written (when cache-enabled?
+                             (write-cache! cache-file
+                                           {:schema :wm-global-scoring-cache-v1
+                                            :generation generation
+                                            :entries (into {}
+                                                           (map (fn [entry]
+                                                                  (let [key (get-in entry [:cache :digest])]
+                                                                    [key {:generation generation
+                                                                          :entry (dissoc entry :cache)}]))
+                                                                entries))}))
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)

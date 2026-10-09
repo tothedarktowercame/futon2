@@ -1009,6 +1009,8 @@
                             :horizon T})
               rank-opts {:f-prefix-production? true
                                         :scoring-parallelism (:scoring-parallelism opts)
+                                        :scoring-cache? true
+                                        :scoring-cache-path (:scoring-cache-path opts)
                                         :horizon-steps T
                                         :observation-model class-model
                                         :upstream-initialization-conditioning
