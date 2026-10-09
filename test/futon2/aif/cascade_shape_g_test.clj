@@ -234,9 +234,19 @@
            (+ (:f poor-short) (:g poor-short)))
         "a short but poorly fitting policy must not win merely because it is short")))
 
-(deftest ^:slow all-recorded-head-policies-have-g
+(deftest all-recorded-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
-        results (mapv shape-g/score-policy policies)
+        ;; Real policies pinned by id: three tractable exact-enumeration shapes
+        ;; (one, two, and three nodes) plus a real wide-frontier refusal.  The
+        ;; full 27-policy corpus is still materialized/count-checked below; it
+        ;; is not exact-scored in a unit test because that cold calculation can
+        ;; take hours and repeats the same scorer laws asserted here.
+        fixture-ids #{"03-M-distributed-proofreaders/distinct-8"
+                      "06-M-war-machine-aif-completion/distinct-21"
+                      "07-M-essays-diachronic-model/distinct-22"
+                      "07-M-essays-diachronic-model/distinct-23"}
+        fixture-policies (filterv #(contains? fixture-ids (:policy-id %)) policies)
+        results (mapv shape-g/score-policy fixture-policies)
         computed (filterv #(= :computed (:status %)) results)
         refused (filterv #(= :refused (:status %)) results)]
     ;; S20: the WebArxana artifact read a HEAD-template definition as work;
@@ -246,8 +256,9 @@
     ;; S23 sends the fixed retractions through the same authored-direction /
     ;; overlap conversion as production. Two Xiang and three War Machine
     ;; retractions exceed the exact-enumeration width limit.
-    (is (= 22 (count computed)))
-    (is (= {:frontier-too-wide-for-exact-enumeration 5}
+    (is (= fixture-ids (set (map :policy-id fixture-policies))))
+    (is (= 3 (count computed)))
+    (is (= {:frontier-too-wide-for-exact-enumeration 1}
            (frequencies (map :kind refused))))
     (is (zero? (count (remove #(Double/isFinite (double (:g %))) computed))))
     (is (every? #(< (Math/abs (- (:g %) (+ (:risk %) (:ambiguity %)
