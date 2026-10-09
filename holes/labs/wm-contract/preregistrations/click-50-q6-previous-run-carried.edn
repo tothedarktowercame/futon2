@@ -1,0 +1,10 @@
+{:id :wm/click-50-q6-previous-run-carried
+ :against {:run-id "2026-10-09-50b78b07-a58d-43ba-af97-8a4a8b434b8f"
+  :report-card-sha256 "cf515496ae8f4c6a69d23f3194e2d3db6423436f237ba4c41b439d20e1362fec"}
+ :defect {:path [:sections 0 :rows 5] :facts {:status :not-recomputable}}
+ :change {:commits ["5375b053a"]}
+ :predictions [{:path [:sections 0 :rows 5 :status] :expect not= :value :not-recomputable}]
+ :applies-when {:path [:sections 2 :data :chosen-target] :expect present}
+ :refuted-by "Q6 is still not-recomputable although click 49's record exists as the previous run."
+ :author "claude-12"
+ :registered-for "the next run after these commits"}

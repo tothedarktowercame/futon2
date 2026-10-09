@@ -1,0 +1,13 @@
+{:id :wm/click-50-q1-q2-q3-q5-pass
+ :against {:run-id "2026-10-09-50b78b07-a58d-43ba-af97-8a4a8b434b8f"
+  :report-card-sha256 "cf515496ae8f4c6a69d23f3194e2d3db6423436f237ba4c41b439d20e1362fec"}
+ :defect {:path [:sections 0 :rows] :facts {:click-49 "not recomputable (record lost its checkpoints)"}}
+ :change {:commits ["45567c05b", "07c4c9240"]}
+ :predictions [{:path [:sections 0 :rows 0 :status] :expect = :value :pass}
+               {:path [:sections 0 :rows 1 :status] :expect = :value :pass}
+               {:path [:sections 0 :rows 2 :status] :expect = :value :pass}
+               {:path [:sections 0 :rows 4 :status] :expect = :value :pass}]
+ :applies-when {:path [:sections 2 :data :chosen-target] :expect present}
+ :refuted-by "Any of Q1, Q2, Q3, Q5 is fail or not-recomputable on a run whose selection completed."
+ :author "claude-12"
+ :registered-for "the next run after these commits"}

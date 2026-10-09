@@ -1,0 +1,11 @@
+{:id :wm/click-50-q9-fails-only-on-declared-c
+ :against {:run-id "2026-10-09-50b78b07-a58d-43ba-af97-8a4a8b434b8f"
+  :report-card-sha256 "cf515496ae8f4c6a69d23f3194e2d3db6423436f237ba4c41b439d20e1362fec"}
+ :defect {:path [:sections 0 :rows 8] :facts {:click-49-at-breakpoint {:completion-pairs 3 :strict 2 :earlier-progress-pairs 828} :c "Joe 2026-10-09: tune C from experience, not fiat; unrelated = stop-the-line = 0.05"}}
+ :change {:commits ["af3a0a9f5", "944fcd725"]}
+ :predictions [{:path [:sections 0 :rows 8 :status] :expect = :value :fail}
+               {:path [:sections 0 :rows 8 :deciding-facts "earlierProgressPairs"] :expect > :value 0}]
+ :applies-when {:path [:sections 2 :data :chosen-target] :expect present}
+ :refuted-by "Q9 passes (then C changed or the completion census changed) or is not-recomputable, or earlierProgressPairs is 0."
+ :author "claude-12"
+ :registered-for "the next run after these commits"}

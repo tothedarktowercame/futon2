@@ -1,0 +1,10 @@
+{:id :wm/click-50-review-and-falsifier-verdicts-recorded
+ :against {:run-id "2026-10-09-50b78b07-a58d-43ba-af97-8a4a8b434b8f"
+  :report-card-sha256 "cf515496ae8f4c6a69d23f3194e2d3db6423436f237ba4c41b439d20e1362fec"}
+ :defect {:path [:sections 3 :data] :facts {:click-48 "falsifier refused on mid-run prose drift; debugger did not stop"}}
+ :change {:commits ["950b8ee35", "9bc7bf6c6"]}
+ :predictions [{:path [:sections 3 :data :falsifier-verdict] :expect present}]
+ :applies-when {:path [:sections 3 :data :review-verdict] :expect present}
+ :refuted-by "A run that reaches review has no recorded falsifier verdict."
+ :author "claude-12"
+ :registered-for "the next run after these commits"}
