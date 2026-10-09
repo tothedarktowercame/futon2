@@ -8,6 +8,8 @@ rewritten, runbook ready — awaiting operator "go".
 Driver: zai-1. Reviewer: claude-16. 2026-07-10 run + fixes: claude (Fable).
 Operator gate: Joe.**
 
+**VERDICT (2026-10-09, provisional):** OPEN — Status IN PROGRESS: S1-S3 run live but quiet-window cutover awaits operator go and background erase/reindex remain. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 ## Why this excursion exists
 
 M-futon1b-port proved the XTDB 1.x → 2.x translation is faithful on a

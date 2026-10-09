@@ -8,6 +8,8 @@ afternoon — "sufficiently well specified to hand off"; claude-1 authored
 futonzero-alphazero.md, so the excursion returns to its conceptual home).
 Status: IN FLIGHT — v0 complete (checkpoints 0–4); v1 mid-flight at handoff.
 
+**VERDICT (2026-10-09, provisional):** DONE — v0/v1 contest verdicts delivered and committed (contest outcome recorded, negatives adjudicated); remaining extension is explicitly assigned to a different lane. _(WM status classification by zai-5, medium confidence; not yet confirmed by the author.)_
+
 The doubled name is the design (Joe, 2026-06-12, "stet"): this is not "build
 the GFlowNet sampler" — it is a **sampler over samplers**. Several methods
 generate budget-6 cascades for the same circumstance set; one yardstick judges

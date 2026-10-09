@@ -9,6 +9,8 @@ end-to-end.
 `E-cascade-sampler-sampler` (spectral entrant), `M-G-over-cascades` / C10 (conditioning +
 selection-semantics hand-off).
 
+**VERDICT (2026-10-09, provisional):** DONE — Both spikes are marked COMPLETE/DONE same-day with results written up. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 ## Charter
 
 Two bounded experiments arising from the ARGUE passes:

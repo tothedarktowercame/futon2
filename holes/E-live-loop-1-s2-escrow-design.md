@@ -4,6 +4,8 @@
 claude-16; arming gate Joe (per-fold, his word alone — nothing in this
 note deposits or arms anything).** Parent: `E-live-loop-1.md` S2.
 
+**VERDICT (2026-10-09, provisional):** OPEN — Status DESIGN (2026-07-04): design complete, build explicitly awaits the arming decision or Joe's go-ahead. _(WM status classification by zai-2, medium confidence; not yet confirmed by the author.)_
+
 ## What this designs
 
 The architecture already anticipated the fix (excursion finding 3):

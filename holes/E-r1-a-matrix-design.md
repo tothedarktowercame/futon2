@@ -1,5 +1,7 @@
 # E-r1-a-matrix-design — the explicit observation model A for R1 belief
 
+**VERDICT (2026-10-09, provisional):** DONE — v0 observation model A built dark with code, tests and audit context all listed; only a follow-up E6 shadow-evidence decision remains (external). _(WM status classification by zai-1, medium confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-04 · **Parcel:** M-aif-faithfulness §2.3 B-3a (author claude-7,
 reviewer claude-12) · **Status:** v0 BUILT DARK (`:likelihood-mode`, default
 `:legacy` byte-identical; flip is the operator's, arena-*-mode idiom)

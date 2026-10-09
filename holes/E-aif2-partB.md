@@ -15,6 +15,8 @@ deep-research round (§4) remains an optional hardening pass; the charter below 
 criterion). Sibling-in-method to **E-the-dark-tower-2** (written by a prior deep-research round — the
 precedent for this excursion's mode).
 
+**VERDICT (2026-10-09, provisional):** DONE — Status says FIRST-PASS DONE 2026-06-24 with results folded into futon-aif-completeness.md; the remaining adversarial round is marked optional. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 ---
 
 ## 1. The tension (Joe, 2026-06-09)

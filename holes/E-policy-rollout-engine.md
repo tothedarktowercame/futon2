@@ -21,6 +21,8 @@ ukrn `/home/joe/code/ukrn-services-simulation/notebooks/ukrn_v3_efe.clj` `:274-3
 the `G(π)` accumulator) + `:599` (`select-action`, softmax+abstain). Tests:
 `ukrn-services-simulation/test/notebooks/ukrn_v3_efe_test.clj`.
 
+**VERDICT (2026-10-09, provisional):** DONE — Status banner says LANDED + REVIEWED PASS 2026-06-09 with landed shas; contract fully closed. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 ## Warrant (the AlphaZero split)
 
 Per Joe's division of labour (via claude-1): **my rollout = the SEARCH/value; claude-3's gradient = the
