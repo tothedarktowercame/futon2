@@ -1008,6 +1008,10 @@
                                                   [t (get scorer-class (:class c) :unknown)]))
                             :horizon T})
               rank-opts {:f-prefix-production? true
+                                        :scoring-parallelism (:scoring-parallelism opts)
+                                        :scoring-cache? true
+                                        :scoring-cache-path (:scoring-cache-path opts)
+                                        :scoring-cache-prewarm? (:scoring-cache-prewarm? opts)
                                         :horizon-steps T
                                         :observation-model class-model
                                         :upstream-initialization-conditioning
@@ -1055,35 +1059,73 @@
               ;; decision refuse as before. No G is invented for the unknown
               ;; target (no worst case, no average, no default class).
               [ranked class-declines class-unknown-refusals]
-              (loop [candidates joint-candidates declines [] refused []]
-                (let [r (efe/rank-actions {:cascade-belief joint-q0}
-                                          candidates rank-opts)]
-                  (if (and (map? r) (contains? r :status)
-                           (= :class-unknown-no-scalar-g (:kind r))
-                           (some #(= (:target r) (:target %)) candidates))
-                    (let [t (:target r)
-                          remaining (filterv #(not= t (:target %)) candidates)
-                          target-declines (map (fn [c]
-                                                 {:target t
-                                                  :stage :scoring
-                                                  :candidate (:id c)
-                                                  :reason :class-unknown-no-scalar-g
-                                                  :possible-costs (:possible-costs r)})
-                                               (filter #(= t (:target %)) candidates))
-                          refusal {:target t
-                                   :kind :class-unknown-no-scalar-g
-                                   :missing :target-relation
-                                   :possible-costs (:possible-costs r)}]
-                      (if (empty? remaining)
-                        ;; Every scored candidate declined: nil ranked; the
-                        ;; body below abstains with all refusals when other
-                        ;; targets carry admission refusals, else throws.
-                        [nil (into declines target-declines)
-                         (conj refused refusal)]
-                        (recur remaining
-                               (into declines target-declines)
-                               (conj refused refusal))))
-                    [r declines refused])))
+              (let [target-q0
+                    (fn [target]
+                      (let [project (fn [state]
+                                     (into #{} (filter #(or (not (vector? %))
+                                                             (= target (first %)))
+                                                       state)))
+                            projected (reduce (fn [m [state mass]]
+                                                (update m (project state) (fnil + 0) mass))
+                                              {} joint-q0)
+                            total (reduce + 0 (vals projected))]
+                        (when (pos? total)
+                          (into {} (map (fn [[state mass]]
+                                          [state (/ (rationalize mass)
+                                                    (rationalize total))])
+                                        projected)))))
+                    families (group-by :target joint-candidates)]
+                ;; Each target owns its state carrier.  Only the final
+                ;; concatenation is global; this removes the former
+                ;; cross-target powerset from every policy rollout.
+                (loop [remaining (seq families) ranked [] score-meta nil declines [] refused []]
+                  (if-let [[target candidates] (first remaining)]
+                    (let [q0 (target-q0 target)
+                          target-want (set (filter #(= target (first %)) joint-want))
+                          target-model (class-observation-model
+                                        {:universe
+                                         (set/union (set (mapcat identity (keys q0)))
+                                                    (set (mapcat (fn [c]
+                                                                   (mapcat (fn [p]
+                                                                             (concat (:produces p)
+                                                                                     (get-in p [:guard :needs])
+                                                                                     (get-in p [:guard :forbids])
+                                                                                     (mapcat (fn [cl]
+                                                                                               (concat (:present cl)
+                                                                                                       (:absent cl)))
+                                                                                             (get-in p [:guard :clauses]))))
+                                                                           (:precedence c)))
+                                                                 candidates)))
+                                         :acceptance target-want
+                                         :target-class {target (get-in class-model [:target-class target])}
+                                         :horizon T})
+                          target-opts (assoc rank-opts
+                                             :observation-model target-model
+                                             :cascade-spec
+                                             (assoc (:cascade-spec rank-opts)
+                                                    :want target-want))
+                          r (efe/rank-actions {:cascade-belief q0}
+                                              (vec candidates) target-opts)]
+                      (if (and (map? r) (contains? r :status)
+                               (= :class-unknown-no-scalar-g (:kind r)))
+                        (let [target-declines (map (fn [c]
+                                                     {:target target :stage :scoring
+                                                      :candidate (:id c)
+                                                      :reason :class-unknown-no-scalar-g
+                                                      :possible-costs (:possible-costs r)})
+                                                   candidates)]
+                          (recur (next remaining) ranked score-meta
+                                 (into declines target-declines)
+                                 (conj refused {:target target
+                                                :kind :class-unknown-no-scalar-g
+                                                :missing :target-relation
+                                                :possible-costs (:possible-costs r)})))
+                        (if (and (map? r) (contains? r :status))
+                          [r declines refused]
+                          (recur (next remaining) (into ranked r)
+                                 (or score-meta (meta r)) declines refused))))
+                    [(with-meta (vec ranked) score-meta)
+                     declines refused])))
               dropped (vec (concat dropped class-declines))]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
@@ -1463,12 +1505,11 @@
                              (mapcat :declines admissions)))
         all-admitted-problems (vec (keep :problem admissions))
         scoring-budget (:scoring-target-budget assembled)
-        target-limit (:target-limit scoring-budget)
-        [scored-problems budget-exhausted]
-        (if (and (pos-int? target-limit) (< target-limit (count all-admitted-problems)))
-          [(subvec all-admitted-problems 0 target-limit)
-           (subvec all-admitted-problems target-limit)]
-          [all-admitted-problems []])
+        ;; Every admitted target is scored.  Target order is not a resource
+        ;; policy: independent families are evaluated concurrently by the
+        ;; bounded observation scorer and final ranking is resolution-aware.
+        scored-problems all-admitted-problems
+        budget-exhausted []
         budget-drops (mapv (fn [p]
                              {:target (:target p) :stage :scoring
                               :reason :budget-exhausted

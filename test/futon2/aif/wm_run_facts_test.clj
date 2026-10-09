@@ -136,7 +136,7 @@
                                 {:risk 1.0 :ambiguity 0.0})
           af (:facts (facts/facts-for-record adversarial "r" snap nil nil))]
       (is (= {"risk" true "ambiguity" false "informationGain" false}
-             (af "gTerms"))
+          (af "gTerms"))
           "a numeric zero is still a recorded term, but absent information gain is not"))))
 
 (deftest seats-used-counts-only-dispatched-seats
@@ -209,3 +209,24 @@
     (is (contains? (export-partial "previousOutcome") "not-recomputable"))
     (is (contains? (export-partial "previousInputDigest") "not-recomputable"))))
 
+(deftest cached-g-counts-only-with-a-valid-cache-digest
+  (let [cached (assoc-in record [:decision :selection-certificate :candidates 0]
+                         {:id :c1 :target "M-x" :controller-score 1.25
+                          :cache {:status :cached :digest "input-digest"}})
+        fresh (:facts (facts/facts-for-record cached "r" snap nil nil))
+        stale (assoc-in cached [:decision :selection-certificate :candidates 0
+                                :cache :status] :corrupt)
+        stale-facts (:facts (facts/facts-for-record stale "r" snap nil nil))
+        mismatched (assoc-in cached [:decision :selection-certificate :candidates 0
+                                     :cache :inputs-digest] "other-input")
+        mismatched-facts (:facts (facts/facts-for-record mismatched "r" snap nil nil))]
+    (is (= ["M-x"] (fresh "targetsWithG")))
+    (is (= [] (stale-facts "targetsWithG")))
+     (is (= [] (mismatched-facts "targetsWithG")))))
+
+(deftest cold-scored-g-counts-as-valid-cache-output
+  (let [cold (assoc-in record [:decision :selection-certificate :candidates 0]
+                       {:id :c1 :target "M-cold" :controller-score 1.25
+                        :cache {:status :cold-scored :digest "input-digest"}})
+        exported (:facts (facts/facts-for-record cold "r" snap nil nil))]
+    (is (= ["M-cold"] (exported "targetsWithG")))))

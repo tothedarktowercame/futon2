@@ -5,12 +5,148 @@
    observation at that horizon. The conditioned belief is retained for the
    next prediction, not substituted into the prediction being evaluated."
   (:require [clojure.set :as set]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.observation-model :as om]
-            [futon2.aif.parameter-novelty :as novelty]))
+            [futon2.aif.parameter-novelty :as novelty])
+  (:import [java.security MessageDigest]
+           [java.io FileOutputStream]
+           [java.nio.file Files Path Paths StandardCopyOption]
+           [java.util.concurrent Callable Executors]))
 
 (def max-horizon 10)
 (def max-candidates 16)
+(def cache-top-k 8)
+(def cache-refresh-count 8)
+(def shared-materiality-margin 1.0e-12)
+(def cold-score-budget-ms 120000)
+
+(def ^:private worker-memory-budget-bytes (* 512 1024 1024))
+
+(defn- heap-worker-cap []
+  (let [heap (.maxMemory (Runtime/getRuntime))]
+    (max 1 (min 64 (quot heap worker-memory-budget-bytes)))))
+
+(defn- canonical-data [x]
+  (cond
+    (map? x) (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+                   (map (fn [[k v]] [k (canonical-data v)]) x))
+    (set? x) (vec (sort-by pr-str (map canonical-data x)))
+    (sequential? x) (mapv canonical-data x)
+    :else x))
+
+(defn- digest [x]
+  (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256")
+                                           (.getBytes (pr-str (canonical-data x)) "UTF-8")))))
+
+(defn- numeric-leaves [x]
+  (cond
+    (number? x) [x]
+    (map? x) (mapcat (fn [[k v]] (concat (numeric-leaves k) (numeric-leaves v))) x)
+    (coll? x) (mapcat numeric-leaves x)
+    :else []))
+
+(defn- shared-change-bound
+  "L1 change in the shared numerical inputs.  Entry-specific derivatives
+  convert this input delta into a G interval; equal inputs have zero delta."
+  [old-shared new-shared]
+  (if (= (canonical-data old-shared) (canonical-data new-shared))
+    0.0
+    (let [a (vec (numeric-leaves old-shared))
+          b (vec (numeric-leaves new-shared))
+          n (max (count a) (count b))]
+      (let [delta (reduce + 0.0
+                           (for [i (range n)]
+                             (Math/abs (double (- (get a i 0)
+                                                  (get b i 0))))))]
+        delta))))
+
+(defn- entropy-sensitivity [distribution]
+  (reduce + 0.0 (for [[_ p] distribution :when (pos? (double p))]
+                   (+ 1.0 (Math/abs (Math/log (double p)))))))
+
+(defn- entry-sensitivity
+  "Derivative envelope for the actually consumed G terms.  Cross-entropy
+  contributes 1/p per consumed outcome; entropy contributes |1+log p|;
+  state-EIG contributes the same log-ratio envelope.  These are the closed
+  form derivatives of the scored folds, summed over this entry's steps."
+  [entry shared-delta]
+  (let [steps (get-in entry [:certificate :steps])
+        coefficient
+        (reduce + 0.0
+                (for [step steps
+                      :let [prediction (:prediction step)
+                            p (map second prediction)]]
+                  (+ (reduce + 0.0 (map #(if (pos? (double %))
+                                           (/ 1.0 (double %))
+                                           Double/POSITIVE_INFINITY) p))
+                     (entropy-sensitivity prediction)
+                     (entropy-sensitivity prediction))))]
+    (if (Double/isInfinite (double shared-delta))
+      Double/POSITIVE_INFINITY
+      (* (double shared-delta) coefficient))))
+
+(defn- cache-path [opts]
+  (or (:scoring-cache-path opts)
+      (data-paths/path "wm-scoring-cache" "global-rank.edn")))
+
+(defn- read-cache [path]
+  (try
+    (if-not (.isFile (io/file path))
+      {:status :cold-start :reason :missing-cache :value {}}
+      (let [value (edn/read-string (slurp path))]
+        (if (and (map? value)
+                 (= :wm-global-scoring-cache-v2 (:schema value))
+                 (integer? (:generation value))
+                 (map? (:entries value)))
+          {:status :ok :value value}
+          {:status :cold-start :reason :invalid-cache-schema :value {}})))
+    (catch Exception _
+      ;; A damaged cache is data, not a scorer failure.  Never reuse a
+      ;; partially readable map: the next invocation is a typed cold start.
+      {:status :cold-start :reason :corrupt-cache :value {}})))
+
+(defn- write-cache! [path value]
+  (io/make-parents path)
+  (let [tmp (str path ".tmp-" (System/nanoTime))
+        bytes (.getBytes (pr-str value) "UTF-8")]
+    (try
+      (with-open [out (FileOutputStream. tmp)]
+        (.write out bytes)
+        (.flush out)
+        (.sync (.getFD out)))
+      (try
+        (Files/move (Paths/get tmp (make-array String 0))
+                    (Paths/get path (make-array String 0))
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/ATOMIC_MOVE
+                                 StandardCopyOption/REPLACE_EXISTING]))
+        (catch java.nio.file.AtomicMoveNotSupportedException _
+          (Files/move (Paths/get tmp (make-array String 0))
+                      (Paths/get path (make-array String 0))
+                      (into-array StandardCopyOption
+                                  [StandardCopyOption/REPLACE_EXISTING]))))
+      (finally
+        (when (.exists (io/file tmp)) (.delete (io/file tmp)))))))
+
+(defn- parallel-mapv
+  "Evaluate independent target policies concurrently, retaining input order.
+  The result order is never used as a ranking tie-break; canonical policy IDs
+  decide ties after all workers finish."
+  [f xs requested-workers]
+  (let [workers (max 1 (min (heap-worker-cap)
+                            (or requested-workers
+                                (min 16 (.availableProcessors (Runtime/getRuntime))))))
+        executor (Executors/newFixedThreadPool workers)
+        futures (mapv (fn [x]
+                        (.submit executor ^Callable (reify Callable
+                                                       (call [_] (f x))))) xs)]
+    (try
+      (mapv #(.get %) futures)
+      (finally
+        (.shutdown executor)))))
 
 (def ^:private machine-epsilon (Math/ulp 1.0))
 
@@ -201,7 +337,7 @@
         g (- (+ risk ambiguity) information-gain)
         resolution (numerical-resolution steps raw-risk raw-ambiguity raw-information)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
-               :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
+               :horizon-steps horizon-steps :controller-score g :G g :g g :G-efe g :G-cascade g
                :observation-model observation-model
                :prediction {:context prediction-context :initial-belief q0 :belief predicted}
                :inference conditioned
@@ -287,7 +423,174 @@
                                       [tau {:distribution member
                                             :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
                                                                  (subsets (:universe model)))}]))))
-            entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
+            workers (min (heap-worker-cap)
+                         (or (:scoring-parallelism opts)
+                             (min 16 (.availableProcessors (Runtime/getRuntime)))))
+            cache-enabled? (true? (:scoring-cache? opts))
+            cache-file (cache-path opts)
+            cache-read (if cache-enabled?
+                         (read-cache cache-file)
+                         {:status :disabled :value {}})
+            old-cache (:value cache-read)
+            cache-cold-start? (= :cold-start (:status cache-read))
+            generation (inc (long (or (:generation old-cache) 0)))
+            old-entries (or (:entries old-cache) {})
+            shared-inputs {:observation-model model
+                           :preference preference
+                           :observation (:observation opts)
+                           :prediction-context (:prediction-context opts)}
+            shared-bound (shared-change-bound (:shared-inputs old-cache) shared-inputs)
+            materiality-margin (double (or (:scoring-cache-materiality-margin opts)
+                                           shared-materiality-margin))
+            work (mapv (fn [candidate]
+                         (let [key (digest {:candidate candidate
+                                            :cascade-spec (:cascade-spec opts)})
+                               record (get old-entries key)
+                               resolution (double (or (get-in record [:entry :certificate
+                                                                      :g-terms :numerical-resolution :value])
+                                                      0.0))
+                               sensitivity (entry-sensitivity (:entry record) shared-bound)]
+                           {:candidate candidate :key key :record record
+                            :sensitivity sensitivity
+                            :shared-bound shared-bound
+                           :resolution resolution}))
+                       candidates)
+            ;; A live click may cold-score, but it is bounded so a pathological
+            ;; model cannot monopolise the Agency JVM.  The clock is injectable
+            ;; for a deterministic budget test; the prewarm path remains an
+            ;; explicit offline caller and is never treated as a live click.
+            cold-scoring? (and cache-enabled?
+                               (not (:scoring-cache-prewarm? opts))
+                               (or cache-cold-start?
+                                   (some #(nil? (:record %)) work)))
+            cold-budget-ms (long (or (:scoring-cache-time-budget-ms opts)
+                                     cold-score-budget-ms))
+            scoring-clock (or (:scoring-cache-clock opts)
+                              #(quot (System/nanoTime) 1000000))
+            cold-start-ms (when cold-scoring? (long (scoring-clock)))
+            cached-work (filterv :record work)
+            top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
+            refresh-count (long (or (:scoring-cache-refresh-count opts) cache-refresh-count))
+            boundary-work (sort-by (juxt (comp :controller-score :entry :record)
+                                        (comp pr-str :key)) cached-work)
+            kth (when (and (pos? top-k) (seq boundary-work))
+                  (nth boundary-work (min (dec top-k) (dec (count boundary-work)))))
+            boundary-score (double (or (some-> kth :record :entry :controller-score)
+                                       Double/POSITIVE_INFINITY))
+            boundary-sensitivity (double (or (some-> kth :sensitivity)
+                                             0.0))
+            decision-refresh?
+            (fn [{:keys [record sensitivity resolution]}]
+              (or (nil? record)
+                  (and (number? (:controller-score (:entry record)))
+                       (if kth
+                         (or (<= (double (:controller-score (:entry record)))
+                                 boundary-score)
+                             (<= (Math/abs (- (double (:controller-score (:entry record)))
+                                              boundary-score))
+                                 (+ (double (or sensitivity 0.0))
+                                    boundary-sensitivity
+                                    materiality-margin)))
+                         (> (double (or sensitivity 0.0))
+                            (+ (double resolution) materiality-margin))))))
+            head-keys (set (map :key (take top-k
+                                           (sort-by (juxt (comp :controller-score :entry :record)
+                                                          (comp pr-str :key))
+                                                         cached-work))))
+            stale-work (take refresh-count
+                             (sort-by (juxt (comp - :generation :record)
+                                            (comp pr-str :key)) cached-work))
+            refresh-keys (set (concat head-keys (map :key stale-work)))
+            fresh-work (if cold-scoring?
+                         work
+                         (if cache-enabled?
+                           (filterv #(or (decision-refresh? %)
+                                         (refresh-keys (:key %))) work)
+                           work))
+            fresh-results (into {}
+                               (map (fn [[w entry]]
+                                      (let [cache {:status (if cold-scoring? :cold-scored :fresh)
+                                                   :reason (cond cold-scoring? :cold-scored
+                                                                 (:record w) :head-or-stale-refresh
+                                                                 :else :cache-miss)
+                                                   :generation generation
+                                                   :age 0 :digest (:key w)
+                                                   :inputs-digest (:key w)
+                                                   :shared-generation generation
+                                                   :shared-bound (:shared-bound w)
+                                                   :sensitivity (:sensitivity w)
+                                                   :decision :rescore}]
+                                        (let [cache (cond-> cache
+                                                       cache-cold-start?
+                                                       (assoc :cold-start-reason (:reason cache-read)))]
+                                          [(:key w) (assoc entry :cache cache
+                                                           :certificate (assoc (:certificate entry)
+                                                                               :cache cache))])))
+                                    (map vector fresh-work
+                                         (parallel-mapv #(score-candidate (:cascade-belief state)
+                                                                          (:candidate %) opts preference)
+                                                        fresh-work workers))))
+            cold-elapsed-ms (when cold-scoring?
+                              (- (long (scoring-clock)) cold-start-ms))
+            _cold-budget-check (when (and cold-scoring?
+                                          (> cold-elapsed-ms cold-budget-ms))
+                                 (throw (ex-info "live cold scoring exceeded its time budget"
+                                                 {:status :missing
+                                                  :kind :scoring-cache-time-budget-exceeded
+                                                  :elapsed-ms cold-elapsed-ms
+                                                  :budget-ms cold-budget-ms
+                                                  :cache-path cache-file})))
+            entries (mapv (fn [{:keys [key record] :as w}]
+                            (or (get fresh-results key)
+                                (let [cache {:status :cached
+                                             :reason (if (head-keys key) :top-k-revalidation
+                                                         :unchanged)
+                                             :generation generation
+                                             :age (- generation (long (:generation record)))
+                                             :digest key :inputs-digest key
+                                             :shared-generation (:shared-generation old-cache)
+                                             :shared-bound (:shared-bound w)
+                                             :sensitivity (:sensitivity w)
+                                             :decision :reuse}
+                                      entry (:entry record)]
+                                  (assoc entry :cache cache
+                                         :certificate (assoc (:certificate entry)
+                                                             :cache cache))))) work)
+            cache-policy {:schema :wm-global-scoring-cache-policy-v1
+                          :top-k top-k
+                          :refresh-width refresh-count
+                          :shared-materiality {:bound :l1-numeric-leaves
+                                               :sensitivity :entry-derived-from-closed-forms
+                                               :margin materiality-margin
+                                               :reuse-when :bound-at-most-resolution-plus-margin}
+                          :max-age-clicks (long (Math/ceil (/ (double (max 1 (count entries)))
+                                                               (double (max 1 refresh-count)))))
+                          :justification {:top-k :revalidate-resolution-tie-head
+                                          :refresh-width :bounded-oldest-first
+                                          :age-bound :ceil-entry-count-over-refresh-width}
+                          :cold-score-budget-ms cold-budget-ms}
+            _cache-written (when cache-enabled?
+                             (write-cache! cache-file
+                                           {:schema :wm-global-scoring-cache-v2
+                                            :generation generation
+                                            :shared-generation generation
+                                            :shared-inputs shared-inputs
+                                            :prewarm (when-let [m (:scoring-cache-prewarm-metadata opts)]
+                                                       (assoc m :duration-ms
+                                                              (/ (- (System/nanoTime)
+                                                                    (long (:scoring-cache-prewarm-start-ns opts)))
+                                                                 1e6)))
+                                            :cache-policy cache-policy
+                                            :cold-score (when cold-scoring?
+                                                          {:status :cold-scored
+                                                           :budget-ms cold-budget-ms
+                                                           :elapsed-ms cold-elapsed-ms})
+                                            :entries (into (sorted-map)
+                                                           (map (fn [entry]
+                                                                  (let [key (get-in entry [:cache :digest])]
+                                                                    [key {:generation generation
+                                                                          :entry (dissoc entry :cache)}]))
+                                                                entries))}))
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)
@@ -355,7 +658,19 @@
                               (assoc-in [:certificate :tie-break] (:tie-break tie-data))))))
                     ranked-order)
               {:cascade-scoring (cond-> {:model model :scope :synthetic-bounded-replay
-                                         :horizon-steps (:horizon-steps opts)}
+                                         :horizon-steps (:horizon-steps opts)
+                                         :parallelism workers
+                                         :heap-max-bytes (.maxMemory (Runtime/getRuntime))
+                                         :worker-memory-budget-bytes worker-memory-budget-bytes
+                                         :cache-policy cache-policy
+                                         :cold-score (when cold-scoring?
+                                                       {:status :cold-scored
+                                                        :budget-ms cold-budget-ms
+                                                        :elapsed-ms cold-elapsed-ms})
+                                         :cache-status (:status cache-read)
+                                         :shared-inputs {:generation generation
+                                                         :bound shared-bound
+                                                         :materiality-margin materiality-margin}}
                                   ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5
                                   ;; handoff): the class path's ranked meta
                                   ;; carries a :precision-model describing

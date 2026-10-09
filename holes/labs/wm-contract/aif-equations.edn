@@ -1923,6 +1923,22 @@
  ;; shape Clause T gives feasibility (membership in the policy support, not a
  ;; term of G). Listing it here is what makes gen_aif_dag.bb draw the box
  ;; control-stage-amendments.json declares.
+ :cache-materiality
+ {:status :declared
+  :shared-input-delta "L1 norm of changed numerical leaves in the shared observation model, preference, observation and prediction context"
+  :entry-sensitivity
+  "For each scored policy e, S_e = Delta_shared * sum_tau[
+   sum_o 1/p_tau(o) + sum_o |1 + log p_tau(o)| +
+   sum_o |1 + log p_tau(o)|]. The first term is the derivative envelope
+   of cross-entropy risk; the second is the entropy ambiguity derivative;
+   the third is the state-EIG log-ratio envelope. Zero-probability terms
+   are +infinity, so no unsupported reuse occurs."
+  :reuse
+  "Reuse is permitted only when the cached G interval [G_e-S_e,G_e+S_e]
+   cannot cross the cached Kth boundary by more than S_K plus the declared
+   numerical-resolution margin. Top-K and stale entries are rescored."
+  :margin 1.0e-12
+  :provenance "futon2.aif.cascade-observation-scoring/entry-sensitivity; derivatives of entropy, cross-entropy and KL state-EIG folds"}
  :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE :GRAIN-GATE]
  :plumbing-notes
  {:TRACE "C462 §6 (I2 slice a, claude-20, 2026-09-01; verified by claude-1 against trace.clj): the trace store drops the two quantities the theory-aligned replacements need. strip-ranked-action (trace.clj:76-127) persists a 35-key whitelist per ranked action and drops each candidate's :prediction -- its docstring calls it 'recoverable on demand by re-running forward-model/predict', which holds only if predict is deterministic given the stored belief AND the effects mode is recorded (C462 §6 item 3). strip-decision (trace.clj:128-137) dissocs :softmax-weights (Q(π), keyed by action maps) and :ranked-actions from the persisted decision. So I2's F_π (each candidate's prediction at t joined to o at t+1) and I1's β update (needs π) both require a trace WRITE before they require an equation -- a statement about trace.clj, not policy.clj."}

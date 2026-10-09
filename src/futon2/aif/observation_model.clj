@@ -211,9 +211,15 @@
   (- (reduce + 0.0 (for [[_ p] (ordered distribution) :when (pos? p)]
                      (* (double p) (Math/log (double p)))))))
 
+(defonce ^:private expected-row-cache (atom {}))
+
 (defn- expected-dirichlet-row [row]
-  (let [total (double (reduce + 0 (vals row)))]
-    (update-vals row #(/ (double %) total))))
+  (if-let [cached (get @expected-row-cache row)]
+    cached
+    (let [total (double (reduce + 0 (vals row)))
+          result (update-vals row #(/ (double %) total))]
+      (swap! expected-row-cache assoc row result)
+      result)))
 
 (defn- emission-row
   "Return E[A(.|hidden)] from the declared Dirichlet prior.  The

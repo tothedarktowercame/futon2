@@ -5,11 +5,16 @@
    Both tests are tagged :incident, which the normal green-suite selection
    excludes.  Run this open incident contract explicitly with:
      clojure -M:test -m cognitect.test-runner -n futon2.aif.selection-order-incident-test -i :incident"
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.wm.cascade-decision :as decision]
             [futon2.aif.wm.construction-inputs :as inputs]
             [futon2.aif.focus-receipt :as focus]
-            [futon2.aif.ticket-queue :as ticket-queue]))
+            [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.test-support.runner-fixture :as runner-fixture]))
+
+;; Selection reaches cascade-observation-scoring; keep its default cache and
+;; every other mutable data-path under the suite root.
+(use-fixtures :once runner-fixture/with-hermetic-traces)
 
 (def targets (mapv #(str "M-selection-order-" %) (range 5)))
 
@@ -144,8 +149,8 @@
                               targets))})
         budget (get-in result [:decision :selection-certificate :scoring-target-budget])]
     (is (= 5 (count (:problems assembled))) "all targets constructed before budgeting")
-    (is (= 6 (count (get-in result [:decision :selection-certificate :candidates]))))
-    (is (= 2 (count (:budget-exhausted-targets budget))))
-    (is (= 2 (count (filter #(and (= :scoring (:stage %))
-                                  (= :budget-exhausted (:reason %)))
-                            (:dropped-candidates result)))))))
+    (is (= 10 (count (get-in result [:decision :selection-certificate :candidates]))))
+    (is (empty? (:budget-exhausted-targets budget)))
+    (is (empty? (filter #(and (= :scoring (:stage %))
+                              (= :budget-exhausted (:reason %)))
+                        (:dropped-candidates result))))))
