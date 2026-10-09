@@ -12,6 +12,35 @@
 (def max-horizon 10)
 (def max-candidates 16)
 
+(def ^:private machine-epsilon (Math/ulp 1.0))
+
+(defn- numerical-resolution
+  "Forward error bound for the floating-point G fold.
+
+  Each observation-model term already includes its audited log evaluation;
+  this bound covers the subsequent compensated reductions and the final
+  risk+ambiguity-information combination.  It is deliberately derived from
+  the number and magnitudes of the terms for this policy, never a global
+  ranking tolerance."
+  [steps raw-risk raw-ambiguity raw-information]
+  (let [terms (mapcat (fn [step]
+                        (map #(double (or (% step) 0.0))
+                             [:risk :ambiguity :information-gain]))
+                      steps)
+        n (count terms)
+        magnitude (+ 1.0 (reduce + 0.0 (map #(Math/abs (double %)) terms)))
+        ;; Two rounding points per reduced term plus the final signed fold.
+        operations (+ (* 2 (max 1 n)) 1)
+        bound (* machine-epsilon operations magnitude)]
+    {:value bound
+     :machine-epsilon machine-epsilon
+     :term-count n
+     :operation-count operations
+     :absolute-term-sum (- magnitude 1.0)
+     :terms [:risk :ambiguity :information-gain]
+     :raw {:risk raw-risk :ambiguity raw-ambiguity
+           :expected-information-gain raw-information}}))
+
 (defn- subsets [tokens]
   (reduce (fn [ss t] (into ss (map #(conj % t) ss))) [#{}] (sort-by pr-str tokens)))
 
@@ -170,6 +199,7 @@
         ambiguity (if normalize? (/ raw-ambiguity horizon-steps) raw-ambiguity)
         information-gain (if normalize? (/ raw-information pattern-count) raw-information)
         g (- (+ risk ambiguity) information-gain)
+        resolution (numerical-resolution steps raw-risk raw-ambiguity raw-information)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
                :observation-model observation-model
@@ -219,7 +249,8 @@
                                                         :none)
                                        :raw {:risk raw-risk :ambiguity raw-ambiguity
                                              :expected-information-gain raw-information}
-                                       :units :nats}
+                                       :numerical-resolution resolution
+                                             :units :nats}
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (assoc conditioned :value (:f conditioned))}}]
@@ -263,13 +294,66 @@
                      :missing :contradiction)
            :kind :observation-family-not-selectable :model model :candidates entries
            :failures (mapv (fn [e] {:cascade-id (:cascade-id e) :inference (:inference e)}) failures)}
-          (let [sorted (sort-by :controller-score entries)
-                rank-of (zipmap (distinct (map :controller-score sorted)) (range 1 (inc (count sorted))))]
+          (let [;; Resolution-aware comparison: a difference is meaningful
+                ;; only when it exceeds both policies' forward-error bounds.
+                ;; The id is the declared, input-order-independent action
+                ;; tie-break and is also the canonical presentation order.
+                sorted (sort-by (juxt :controller-score (comp pr-str :cascade-id)) entries)
+                groups (loop [remaining sorted groups []]
+                         (if-let [entry (first remaining)]
+                           (let [previous (peek groups)
+                                 representative (first previous)
+                                 resolution (+ (double (get-in representative
+                                                               [:certificate :g-terms
+                                                                :numerical-resolution :value]
+                                                               0.0))
+                                               (double (get-in entry
+                                                               [:certificate :g-terms
+                                                                :numerical-resolution :value]
+                                                               0.0)))
+                                 tied? (and representative
+                                             (<= (Math/abs (- (double (:controller-score entry))
+                                                              (double (:controller-score representative))))
+                                                 resolution))]
+                             (recur (next remaining)
+                                    (if tied?
+                                      (conj (pop groups) (conj previous entry))
+                                      (conj groups [entry]))))
+                           groups))
+                groups (mapv #(vec (sort-by (comp pr-str :cascade-id) %)) groups)
+                ranked-order (vec (mapcat identity groups))
+                rank-of (into {}
+                              (map-indexed (fn [rank group]
+                                             [(set (map :cascade-id group)) (inc rank)])
+                                           groups))
+                group-for (into {}
+                              (mapcat (fn [group]
+                                        (map (fn [entry] [(:cascade-id entry) group]) group))
+                                      groups))]
             (with-meta
               (mapv (fn [e]
-                      (let [ties (filter #(= (:controller-score e) (:controller-score %)) sorted)]
-                        (cond-> (assoc e :rank (rank-of (:controller-score e)))
-                          (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
+                      (let [group (get group-for (:cascade-id e))
+                            ties (map :cascade-id group)
+                            resolution (+ (double (get-in (first group)
+                                                          [:certificate :g-terms
+                                                           :numerical-resolution :value]
+                                                          0.0))
+                                           (double (get-in e
+                                                          [:certificate :g-terms
+                                                           :numerical-resolution :value]
+                                                          0.0)))
+                            rank (get rank-of (set ties))
+                            tie-data {:tied-within-resolution (vec ties)
+                                      :resolution resolution
+                                      :tie-break {:rule :canonical-cascade-id
+                                                  :order (vec ties)}}]
+                        (cond-> (assoc e :rank rank)
+                          (< 1 (count ties))
+                          (-> (assoc :g-tie (vec ties))
+                              (assoc-in [:certificate :tied-within-resolution] (vec ties))
+                              (assoc-in [:certificate :resolution] resolution)
+                              (assoc-in [:certificate :tie-break] (:tie-break tie-data))))))
+                    ranked-order)
               {:cascade-scoring (cond-> {:model model :scope :synthetic-bounded-replay
                                          :horizon-steps (:horizon-steps opts)}
                                   ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5

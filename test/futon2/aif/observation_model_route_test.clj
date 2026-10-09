@@ -199,6 +199,31 @@
     (is (= :conflicting-observation-options
            (:kind (efe/rank-actions state candidates (assoc (fixture-opts :coupled-judgement) :zeta 2)))))))
 
+(deftest resolution-aware-ranking-is-input-order-independent
+  (let [candidates (:candidates fixture)
+        state {:cascade-belief (:q0 fixture)}
+        opts (fixture-opts :independent-judgement)
+        forward (efe/rank-actions state candidates opts)
+        reversed (efe/rank-actions state (vec (reverse candidates)) opts)
+        summary (fn [ranked]
+                  (mapv #(select-keys % [:cascade-id :rank :g-tie]) ranked))
+        c1 (some #(when (= :C1-test-first (:cascade-id %)) %) forward)
+        c2 (some #(when (= :C2-fix-first (:cascade-id %)) %) forward)
+        c3 (some #(when (= :C3-fix-only (:cascade-id %)) %) forward)
+        resolution (get-in c1 [:certificate :resolution])]
+    (is (= (summary forward) (summary reversed)))
+    (is (= 1 (:rank c1) (:rank c2)))
+    (is (= [:C1-test-first :C2-fix-first]
+           (get-in c1 [:certificate :tied-within-resolution])))
+    (is (number? resolution))
+    (is (> resolution (Math/abs (- (:controller-score c1)
+                                   (:controller-score c2)))))
+    (is (> (:rank c3) (:rank c1)))
+    (is (> (Math/abs (- (:controller-score c3) (:controller-score c1)))
+           (+ resolution (get-in c3 [:certificate :g-terms
+                                     :numerical-resolution :value]))))
+    (is (= :C1-test-first (:cascade-id (first forward))))))
+
 (deftest end-to-end-record-and-next-prediction
   (let [dir (Files/createTempDirectory "a-small-model-route-" (make-array FileAttribute 0))
         record-path (.resolve dir "outcome.edn")
