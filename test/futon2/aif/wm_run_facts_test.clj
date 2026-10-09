@@ -222,4 +222,11 @@
         mismatched-facts (:facts (facts/facts-for-record mismatched "r" snap nil nil))]
     (is (= ["M-x"] (fresh "targetsWithG")))
     (is (= [] (stale-facts "targetsWithG")))
-    (is (= [] (mismatched-facts "targetsWithG")))))
+     (is (= [] (mismatched-facts "targetsWithG")))))
+
+(deftest cold-scored-g-counts-as-valid-cache-output
+  (let [cold (assoc-in record [:decision :selection-certificate :candidates 0]
+                       {:id :c1 :target "M-cold" :controller-score 1.25
+                        :cache {:status :cold-scored :digest "input-digest"}})
+        exported (:facts (facts/facts-for-record cold "r" snap nil nil))]
+    (is (= ["M-cold"] (exported "targetsWithG")))))

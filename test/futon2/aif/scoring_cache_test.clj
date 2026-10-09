@@ -35,12 +35,30 @@
     (is (= 2 (get-in (meta second-run) [:cascade-scoring :cache-policy :top-k])))
     (is (.isFile (java.io.File. path)))))
 
-(deftest live-path-refuses-a-cold-cache-with-prewarm-instruction
+(deftest live-path-cold-scores-and-writes-cache
   (let [x (setup)
-        result (run (assoc x :opts (assoc (:opts x) :scoring-cache-prewarm? false)))]
-    (is (= :scoring-cache-cold (:kind result)))
+        clock (let [calls (atom 0)]
+                (fn [] (if (zero? (swap! calls inc)) 0 1)))
+        result (run (assoc x :opts (-> (:opts x)
+                                       (assoc :scoring-cache-prewarm? false)
+                                       (assoc :scoring-cache-clock clock))))]
+    (is (= [:cold-scored :cold-scored :cold-scored :cold-scored]
+           (statuses result)))
+    (is (= :cold-scored (get-in (meta result) [:cascade-scoring :cold-score :status])))
+    (is (= :wm-global-scoring-cache-v2
+           (:schema (edn/read-string (slurp (:path x))))))))
+
+(deftest live-path-cold-score-budget-is-typed
+  (let [x (setup)
+        clock (let [calls (atom 0)]
+                (fn [] (if (= 1 (swap! calls inc)) 0 120001)))
+        result (run (assoc x :opts (-> (:opts x)
+                                       (assoc :scoring-cache-prewarm? false)
+                                       (assoc :scoring-cache-clock clock)
+                                       (assoc :scoring-cache-time-budget-ms 120000))))]
+    (is (= :scoring-cache-time-budget-exceeded (:kind result)))
     (is (= :missing (:status result)))
-    (is (re-find #"scoring-cache-prewarm" (:instruction result)))))
+    (is (= 120000 (:budget-ms result)))))
 
 (deftest corrupt-cache-is-typed-cold-start-and-atomic-write-leaves-no-temp
   (let [x (setup)]

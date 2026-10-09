@@ -146,7 +146,7 @@
          ;; a valid cache status and the digest that identifies its inputs.
          ;; This prevents a stale/corrupt cache entry from inflating Q8.
          (or (nil? cache)
-             (and (#{:fresh :cached} (:status cache))
+             (and (#{:fresh :cached :cold-scored} (:status cache))
                   (string? (:digest cache))
                   (seq (:digest cache))
                   (or (nil? (:inputs-digest cache))

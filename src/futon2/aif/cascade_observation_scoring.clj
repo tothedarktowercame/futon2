@@ -21,6 +21,7 @@
 (def cache-top-k 8)
 (def cache-refresh-count 8)
 (def shared-materiality-margin 1.0e-12)
+(def cold-score-budget-ms 120000)
 
 (def ^:private worker-memory-budget-bytes (* 512 1024 1024))
 
@@ -454,16 +455,19 @@
                             :shared-bound shared-bound
                            :resolution resolution}))
                        candidates)
-            _cache-miss-refusal
-            (when (and cache-enabled? (not (:scoring-cache-prewarm? opts))
-                       (or cache-cold-start? (some #(nil? (:record %)) work)))
-              (throw (ex-info "incremental scoring cache is cold"
-                              {:status :missing :kind :scoring-cache-cold
-                               :reason (if cache-cold-start?
-                                         (:reason cache-read)
-                                         :missing-target-entry)
-                               :instruction "run futon2.aif.scoring-cache-prewarm in its own JVM"
-                               :cache-path cache-file})))
+            ;; A live click may cold-score, but it is bounded so a pathological
+            ;; model cannot monopolise the Agency JVM.  The clock is injectable
+            ;; for a deterministic budget test; the prewarm path remains an
+            ;; explicit offline caller and is never treated as a live click.
+            cold-scoring? (and cache-enabled?
+                               (not (:scoring-cache-prewarm? opts))
+                               (or cache-cold-start?
+                                   (some #(nil? (:record %)) work)))
+            cold-budget-ms (long (or (:scoring-cache-time-budget-ms opts)
+                                     cold-score-budget-ms))
+            scoring-clock (or (:scoring-cache-clock opts)
+                              #(quot (System/nanoTime) 1000000))
+            cold-start-ms (when cold-scoring? (long (scoring-clock)))
             cached-work (filterv :record work)
             top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
             refresh-count (long (or (:scoring-cache-refresh-count opts) cache-refresh-count))
@@ -497,15 +501,18 @@
                              (sort-by (juxt (comp - :generation :record)
                                             (comp pr-str :key)) cached-work))
             refresh-keys (set (concat head-keys (map :key stale-work)))
-            fresh-work (if cache-enabled?
-                         (filterv #(or (decision-refresh? %)
-                                       (refresh-keys (:key %))) work)
-                         work)
+            fresh-work (if cold-scoring?
+                         work
+                         (if cache-enabled?
+                           (filterv #(or (decision-refresh? %)
+                                         (refresh-keys (:key %))) work)
+                           work))
             fresh-results (into {}
                                (map (fn [[w entry]]
-                                      (let [cache {:status :fresh :reason
-                                                   (if (:record w) :head-or-stale-refresh
-                                                       :cache-miss)
+                                      (let [cache {:status (if cold-scoring? :cold-scored :fresh)
+                                                   :reason (cond cold-scoring? :cold-scored
+                                                                 (:record w) :head-or-stale-refresh
+                                                                 :else :cache-miss)
                                                    :generation generation
                                                    :age 0 :digest (:key w)
                                                    :inputs-digest (:key w)
@@ -523,6 +530,16 @@
                                          (parallel-mapv #(score-candidate (:cascade-belief state)
                                                                           (:candidate %) opts preference)
                                                         fresh-work workers))))
+            cold-elapsed-ms (when cold-scoring?
+                              (- (long (scoring-clock)) cold-start-ms))
+            _cold-budget-check (when (and cold-scoring?
+                                          (> cold-elapsed-ms cold-budget-ms))
+                                 (throw (ex-info "live cold scoring exceeded its time budget"
+                                                 {:status :missing
+                                                  :kind :scoring-cache-time-budget-exceeded
+                                                  :elapsed-ms cold-elapsed-ms
+                                                  :budget-ms cold-budget-ms
+                                                  :cache-path cache-file})))
             entries (mapv (fn [{:keys [key record] :as w}]
                             (or (get fresh-results key)
                                 (let [cache {:status :cached
@@ -550,7 +567,8 @@
                                                                (double (max 1 refresh-count)))))
                           :justification {:top-k :revalidate-resolution-tie-head
                                           :refresh-width :bounded-oldest-first
-                                          :age-bound :ceil-entry-count-over-refresh-width}}
+                                          :age-bound :ceil-entry-count-over-refresh-width}
+                          :cold-score-budget-ms cold-budget-ms}
             _cache-written (when cache-enabled?
                              (write-cache! cache-file
                                            {:schema :wm-global-scoring-cache-v2
@@ -563,6 +581,10 @@
                                                                     (long (:scoring-cache-prewarm-start-ns opts)))
                                                                  1e6)))
                                             :cache-policy cache-policy
+                                            :cold-score (when cold-scoring?
+                                                          {:status :cold-scored
+                                                           :budget-ms cold-budget-ms
+                                                           :elapsed-ms cold-elapsed-ms})
                                             :entries (into (sorted-map)
                                                            (map (fn [entry]
                                                                   (let [key (get-in entry [:cache :digest])]
@@ -641,6 +663,10 @@
                                          :heap-max-bytes (.maxMemory (Runtime/getRuntime))
                                          :worker-memory-budget-bytes worker-memory-budget-bytes
                                          :cache-policy cache-policy
+                                         :cold-score (when cold-scoring?
+                                                       {:status :cold-scored
+                                                        :budget-ms cold-budget-ms
+                                                        :elapsed-ms cold-elapsed-ms})
                                          :cache-status (:status cache-read)
                                          :shared-inputs {:generation generation
                                                          :bound shared-bound
