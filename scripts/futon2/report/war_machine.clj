@@ -6827,10 +6827,20 @@
                                ;; F1b-admit-I: the flights' conditioning steps,
                                ;; from the same flight records
                                :conditioning-steps
-                               (enactment-fold-source/conditioning-steps
-                                (str (io/file (or (:machine-interpretations-dir judge-opts)
-                                                  want-interpretation/default-store)
-                                              "flights")))))
+                               (let [flight-steps
+                                     (enactment-fold-source/conditioning-steps
+                                      (str (io/file (or (:machine-interpretations-dir judge-opts)
+                                                        want-interpretation/default-store)
+                                                    "flights")))
+                                     predecessor-steps
+                                     (enactment-fold-source/conditioning-step-from-completed-run
+                                      (or (:token-belief-predecessor-record judge-opts)
+                                          prev-trace-record))]
+                                 (-> flight-steps
+                                     (update :steps into (:steps predecessor-steps))
+                                     (assoc :completed-run-source
+                                            (select-keys predecessor-steps
+                                                         [:status :reason :source]))))))
         _cascade-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
