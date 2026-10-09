@@ -1226,6 +1226,7 @@
                                   :precedence-fn (constantly (or (:kernel-step ou) (:precedence ou)))
                                   :horizon T
                                   :spec spec
+                                  :target (:target action)
                                   ;; R7: the declared FIXED zeta rides the
                                   ;; opts through to the scorer (default 1,
                                   ;; byte-identical when absent).

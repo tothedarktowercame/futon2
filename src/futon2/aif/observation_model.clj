@@ -348,6 +348,22 @@
             (update out (progress-outcome model state) (fnil + 0) mass))
           {} belief))
 
+(defn completed-progress-distribution
+  "Return the scorer's per-step completed-progress receipt.  For the
+  class-emission family this is the count of the candidate target's accepted
+  criteria in each hidden state; for progress-count it is the declared
+  progress-token count.  The distribution is over the exact belief supplied
+  to the scorer, so it is not inferred from map/support size."
+  [model belief target]
+  (reduce (fn [out [state mass]]
+            (let [n (if (= :progress-count (:kind model))
+                      (count (set/intersection (:progress-tokens model) state))
+                      (count (filter #(and (= target (first %))
+                                           (contains? state %))
+                                     (:acceptance model))))]
+              (update out n (fnil + 0) mass)))
+          {} belief))
+
 (defmulti evaluate
   "Backend dispatch. query validates and records the model around this method."
   (fn [model _request] (:backend model)))

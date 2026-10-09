@@ -815,6 +815,20 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                  values (map difference (remove (:zeroed a) outcomes))]
              (or (empty? values) (every? #(= (first values) %) (rest values)))))))
 
+(defn- completed-progress-receipt
+  "Return the exact per-step distribution of this candidate's completed
+  target criterion.  Rollout states use [target criterion] tokens; preserve
+  their masses rather than collapsing the belief to support size."
+  [belief target]
+  (when target
+    (reduce (fn [out [state mass]]
+              (let [completed (count (filter #(and (vector? %)
+                                                    (= target (first %))
+                                                    (= :work/closed (second %)))
+                                              state))]
+                (update out completed (fnil + 0) mass)))
+            {} belief)))
+
 (defn- horizon-g-sparse*
   "The shared evaluation core of horizon-g-sparse. Same refusals, same
    arithmetic, same iteration order; when RECORD? is true the per-step risk
@@ -823,7 +837,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    iterated. The infinite-risk step records :risk :infinite and stops,
    matching the scalar path's early return. Returns {:g <scalar, :infinite
    or typed refusal> :steps <vector or nil>}."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe] :as m} record?]
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe target] :as m} record?]
   (let [bad (rate-bad-token rates)
         zeta (get m :zeta 1)
         ;; R7 (declared FIXED ζ): temper the per-token observation kernel ONCE,
@@ -925,11 +939,15 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                             {:g :infinite :conditioning @conditioning
                              :steps (when record?
                                       (persistent! (conj! steps {:tau tau :risk :infinite
-                                                                 :belief q :rates rates :node-evaluation evaluation
+                                                                 :belief q :completed-progress
+                                                                 (completed-progress-receipt q target)
+                                                                 :rates rates :node-evaluation evaluation
                                                                  :c-distribution (get members tau)})))}
                             (recur (inc tau) (+ total risk)
                                    (if record?
-                                     (conj! steps {:tau tau :risk risk :belief q :rates rates :node-evaluation evaluation
+                                     (conj! steps {:tau tau :risk risk :belief q :completed-progress
+                                                   (completed-progress-receipt q target)
+                                                   :rates rates :node-evaluation evaluation
                                                                  :c-distribution (get members tau)})
                                      steps)))))))))))))
         ;; WIRE-4: non-zero adjudication rates score by the FACTORIZED
@@ -1091,7 +1109,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
                                                (conj! steps {:tau tau :risk risk :ambiguity amb
-                                                             :belief q :rates rates :node-evaluation evaluation
+                                                             :belief q :completed-progress
+                                                             (completed-progress-receipt q target)
+                                                             :rates rates :node-evaluation evaluation
                                                              :c-distribution member})
                                                steps)))))))))))))))))))))
 
@@ -1203,6 +1223,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                      :steps (mapv (fn [step]
                                    {:tau (:tau step)
                                     :risk (:risk step)
+                                    :belief (:belief step)
+                                    :completed-progress (:completed-progress step)
                                     :risk-status :computed
                                     ;; WIRE-4: the factorized path records the
                                     ;; ambiguity it COMPUTED per step; the

@@ -285,28 +285,61 @@
 ;; Q9/Q10 are certificate properties, not exporter guesses.  Keep the
 ;; census beside the exact scorer inputs retained in :scoring/:candidates.
 (defn- q9-census [ranked]
-  (let [model (get-in (first ranked) [:certificate :observation-model])
-        ;; C is a shared preference model for the compared family.  Read it
+  (let [;; C is a shared preference model for the compared family.  Read it
         ;; once; repeating the same C row for every policy would count the
         ;; same reachable outcome pair multiple times.
         c-steps (get-in (first ranked) [:certificate :consumed-g :C :steps])
+        closing? (fn [outcome]
+                   (cond
+                     (and (vector? outcome) (= 2 (count outcome)))
+                     (or (true? (second outcome)) (pos? (long (first outcome))))
+                     (= outcome :progress-0) false
+                     (and (keyword? outcome)
+                          (= "progress" (namespace outcome)))
+                     (pos? (Long/parseLong (name outcome)))
+                     (contains? #{:focused :related :unrelated} outcome) true
+                     :else false))
         completion-pairs
-        (when (= :progress-count (:kind model))
-          (for [{:keys [distribution]} c-steps
-                [[_ closed?] closed-p] distribution :when closed?
-                [[_ open?] open-p] distribution :when (false? open?)
-                :when (and (number? closed-p) (number? open-p))]
-            {:closed? true :non-closing? false
-             :closed-preferred? (> (double closed-p) (double open-p))}))]
-    ;; The progress scorer does not currently retain completed-progress per
-    ;; trace step.  Do not substitute belief support: Q9's earlier-progress
-    ;; relation is therefore typed absent until that scorer receipt exists.
-    {:completion-preference-pairs (when completion-pairs (count completion-pairs))
+        (for [{:keys [distribution]} c-steps
+              [closed closed-p] distribution :when (closing? closed)
+              [open open-p] distribution :when (not (closing? open))
+              :when (and (pos? (double closed-p)) (pos? (double open-p)))]
+          {:closed closed :non-closing open
+           :closed-preferred? (> (double closed-p) (double open-p))})
+        rows (mapv (fn [e]
+                     {:id (:action e)
+                      :beliefs (mapv :belief (get-in e [:certificate :steps]))
+                      :progress (mapv :completed-progress (get-in e [:certificate :steps]))
+                      :risks (mapv :normalized-risk (get-in e [:certificate :steps]))}) ranked)
+        earlier-pairs
+        (for [[i a] (map-indexed vector rows)
+              [j b] (map-indexed vector rows) :when (< i j)
+              :let [same-terminal? (= (last (:beliefs a)) (last (:beliefs b)))
+                    ea (map #(reduce + 0.0 (for [[n p] (or % {})] (* (double n) (double p)))) (:progress a))
+                    eb (map #(reduce + 0.0 (for [[n p] (or % {})] (* (double n) (double p)))) (:progress b))
+                    a-earlier? (and same-terminal? (seq ea) (= (count ea) (count eb))
+                                    (every? true? (map >= ea eb))
+                                    (some true? (map > ea eb)))
+                    b-earlier? (and same-terminal? (seq ea) (= (count ea) (count eb))
+                                    (every? true? (map >= eb ea))
+                                    (some true? (map > eb ea)))]
+              :when (or a-earlier? b-earlier?)]
+          {:earlier (if a-earlier? (:id a) (:id b))
+           :later (if a-earlier? (:id b) (:id a))
+           :no-greater-risk?
+           (let [ra (if a-earlier? (:risks a) (:risks b))
+                 rb (if a-earlier? (:risks b) (:risks a))]
+             (and (= (count ra) (count rb))
+                  (every? number? (concat ra rb))
+                  (<= (reduce + 0.0 ra) (reduce + 0.0 rb))))})]
+    {:completion-preference-pairs (count completion-pairs)
      :completion-pairs-strictly-preferred
-     (when completion-pairs (count (filter :closed-preferred? completion-pairs)))
-     :earlier-progress-pairs nil
-     :earlier-progress-no-greater-risk nil
-     :reason (if completion-pairs nil :completed-progress-receipt-not-emitted)}))
+     (count (filter :closed-preferred? completion-pairs))
+     :earlier-progress-pairs (count earlier-pairs)
+     :earlier-progress-no-greater-risk
+     (count (filter :no-greater-risk? earlier-pairs))
+     :completion-pair-details (vec completion-pairs)
+     :earlier-progress-pair-details (vec earlier-pairs)}))
 
 (defn- arrangement-q10-census [ranked]
   (let [rows (for [e ranked

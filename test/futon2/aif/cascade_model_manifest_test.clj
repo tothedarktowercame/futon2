@@ -774,6 +774,27 @@
     (is (true? (:rates-all-zero zero-cert)))
     (is (every? #(= :reduced-identically-zero (:ambiguity-status %)) (:steps zero-cert)))))
 
+(deftest q9-classic-certificate-emits-completed-progress-receipts
+  (let [open ["target" :work/open]
+        closed ["target" :work/closed]
+        spec (m/preference-spec {:want #{closed} :evidence #{open}
+                                 :lam 1 :mu 1 :zeroed #{}})
+        rates {open {:false-neg 0 :false-pos 0}
+                closed {:false-neg 0 :false-pos 0}}
+        p {:id :p :guard {:status :interpreted :operator :and
+                          :clauses [{:status :interpreted :present #{}
+                                     :absent #{}}]}
+           :transition {:status :interpreted :operator :union
+                        :produces #{closed}}
+           :produces #{closed}}
+        result (m/horizon-g-sparse-cert
+                {:rates rates :q0 {#{open} 1}
+                 :precedence-fn (constantly [p])
+                 :horizon 2 :spec spec :target "target"})
+        cert (:certificate result)]
+    (is (= {1 1} (get-in cert [:steps 0 :completed-progress])))
+    (is (= {1 1} (get-in cert [:steps 1 :completed-progress])))))
+
 (deftest wire-4-invalid-preference-spec-still-refuses
   ;; an invalid preference spec still refuses like preference-spec
   (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 0 :false-pos 0}}

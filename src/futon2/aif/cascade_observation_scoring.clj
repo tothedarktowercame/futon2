@@ -160,7 +160,8 @@
   ranking tolerance."
   [steps raw-risk raw-ambiguity raw-information]
   (let [terms (mapcat (fn [step]
-                        (map #(double (or (% step) 0.0))
+                        (map #(let [v (% step)]
+                                (if (number? v) (double v) 0.0))
                              [:risk :ambiguity :information-gain]))
                       steps)
         n (count terms)
@@ -314,11 +315,24 @@
                                                   :preference (get-in preference [tau :probabilities])}))]
                     (recur (inc tau) next-q
                            (conj result (assoc score :tau tau :belief next-q
+                                               :completed-progress
+                                               (om/completed-progress-distribution
+                                                observation-model next-q (:target candidate))
+                                               :normalized-risk
+                                               (when (number? (:risk score))
+                                                 (/ (double (:risk score))
+                                                    (double horizon-steps)
+                                                    (Math/log (double
+                                                              (max 2 (count (get-in preference [tau :probabilities])))))))
                                                :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))
         predicted (:belief (peek steps))
         conditioned (om/query observation-model {:op :condition :belief predicted
                                                  :observation observation :context prediction-context})
-        raw-risk (reduce + 0.0 (map :risk steps))
+        raw-risk (reduce (fn [total risk]
+                           (if (= :infinite risk)
+                             ##Inf
+                             (+ total (double risk))))
+                         0.0 (map :risk steps))
         raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
         ;; State EIG is supplied by the observation model.  Parameter
         ;; novelty remains an optional, separate codex-33 seam.

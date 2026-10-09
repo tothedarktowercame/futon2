@@ -100,14 +100,23 @@
         b {:kind :cascade-candidate :id "b" :target "t"
            :precedence [{:pattern-id :q} {:pattern-id :p}]
            :controller-score 2.0}
-        entries [(assoc a :action a :f 0 :habit 1 :certificate c)
-                 (assoc b :action b :f 0 :habit 1 :certificate c)]
+        c-a (assoc c :steps [{:belief {#{} 1} :completed-progress {0 1}
+                              :normalized-risk 1.0}
+                             {:belief {#{:done} 1} :completed-progress {1 1}
+                              :normalized-risk 1.0}])
+        c-b (assoc c :steps [{:belief {#{} 1} :completed-progress {0 1}
+                              :normalized-risk 1.0}
+                             {:belief {#{:done} 1} :completed-progress {0 1}
+                              :normalized-risk 2.0}])
+        entries [(assoc a :action a :f 0 :habit 1 :certificate c-a)
+                 (assoc b :action b :f 0 :habit 1 :certificate c-b)]
         census (get-in (select entries 1) [:selection-certificate :q9-q10-census])]
     (is (= 1 (:completion-preference-pairs census)))
     (is (= 1 (:completion-pairs-strictly-preferred census)))
     (is (= 1 (:different-arrangement-pairs census)))
     (is (= 1 (:arrangement-pairs-distinguished-by-g census)))
-    (is (nil? (:earlier-progress-pairs census)))))
+    (is (= 1 (:earlier-progress-pairs census)))
+    (is (= 1 (:earlier-progress-no-greater-risk census)))))
 
 (deftest q10-does-not-count-renamed-or-unscored-policies
   (let [base {:kind :cascade-candidate :target "t" :controller-score 1.0
@@ -130,6 +139,22 @@
     (is (= 0 (:arrangement-pairs-distinguished-by-g
               (get-in (select [same-patterns unscored] 1)
                       [:selection-certificate :q9-q10-census]))))))
+
+(deftest q9-class-emission-census-recognizes-terminal-classes
+  ;; The production family model is :class-emission: progress classes are
+  ;; non-closing, while focused/related/unrelated terminal classes close the
+  ;; criterion and stop-the-line does not.
+  (let [candidate {:kind :cascade-candidate :id "class-a" :target "t"
+                   :precedence [{:pattern-id :p}]
+                   :controller-score 1.0 :f 0 :habit 1}
+        certificate {:observation-model {:kind :class-emission}
+                     :consumed-g {:C {:steps [{:tau 1 :distribution
+                                               {:progress-0 1/3 :focused 2/3}}]}}}
+        entry (assoc candidate :action candidate :certificate certificate)
+        census (get-in (select [entry] 1)
+                       [:selection-certificate :q9-q10-census])]
+    (is (= 1 (:completion-preference-pairs census)))
+    (is (= 1 (:completion-pairs-strictly-preferred census)))))
 
 (defn- rational-literal [x]
   (let [r (rationalize x)]
