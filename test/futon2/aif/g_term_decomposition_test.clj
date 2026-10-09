@@ -10,11 +10,12 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.policy :as policy]
             [futon2.aif.token-belief-carry-test :as carry-fixture]
-            [futon2.aif.token-observation-initialization-test :as observation-fixture])
+            [futon2.aif.token-observation-initialization-test :as observation-fixture]
+            [futon2.test-support.runner-fixture :as runner-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
-(use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :once hermetic/with-hermetic-stores runner-fixture/with-hermetic-traces)
 
 ;; Recorded tick-001 inputs, transcribed unchanged from
 ;; vm-test/futon2/vm/tick_001_s06_r5_test.clj, definitions T through spec.

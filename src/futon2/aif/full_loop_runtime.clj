@@ -9,6 +9,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.wm.click-ask :as click-ask]
+            [futon2.data-paths :as data-paths]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
            [java.util UUID]))
@@ -18,7 +19,7 @@
 (def default-pattern-graph-path
   "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
 (def default-pattern-graph-diff-dir
-  "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
+  (data-paths/path "wm-pattern-graph-diffs"))
 
 (defn- selection-judge
   [opts days]
@@ -80,12 +81,13 @@
                (assoc :run-id (str (subs (str (Instant/now)) 0 10)
                                    "-" (UUID/randomUUID))))
         opts (update opts :cascade-feedback-path
-                     #(or % cascade-feedback/default-path))
+                     #(or % (data-paths/path "wm-pattern-feedback" "events.edn")))
         opts (update opts :cascade-feedback-metadata
                      #(or % (cascade-feedback/load-construction-metadata
                              (:cascade-feedback-path opts))))
         opts (update opts :pattern-graph-path #(or % default-pattern-graph-path))
-        opts (update opts :pattern-graph-diff-dir #(or % default-pattern-graph-diff-dir))
+        opts (update opts :pattern-graph-diff-dir
+                     #(or % (data-paths/path "wm-pattern-graph-diffs")))
         ;; The production judge closes over OPTS before the runner adds its
         ;; other ledgers. Mint this collector here and pass the same identity
         ;; through, rather than timing into a disconnected atom.
