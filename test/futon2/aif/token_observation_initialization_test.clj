@@ -92,6 +92,20 @@
                      :assembled assembled :opts opts :first first-decision :second second-decision
                      :prior prior :trace trace :habit-reads (receipts/habit-log @reads)))))))))
 
+(deftest unobserved-wants-remain-in-the-scoring-universe
+  ;; The fixture has three declared wants, while q0 and the candidate effects
+  ;; mention only one.  Every declared acceptance token must nevertheless be
+  ;; in the per-target class model's universe; otherwise valid partial
+  ;; observation is rejected as :invalid-class-acceptance before selection.
+  (with-two-ticks
+    (fn [{:keys [first second]}]
+      (doseq [decision [first second]
+              :let [action (:action decision)
+                    produced (set (mapcat :produces (:precedence action)))]]
+        (is (= 3 (count (:want action))))
+        (is (= 1 (count produced)))
+        (is (not (every? produced (map #(vector target %) (:want action)))))))))
+
 (deftest two-ticks-use-signed-false-in-actual-selection
   (with-two-ticks
     (fn [{:keys [first second habit-reads]}]
