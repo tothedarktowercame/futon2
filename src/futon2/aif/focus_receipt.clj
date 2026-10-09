@@ -343,12 +343,14 @@
                                                      target]))))
          ;; `other/unattributed` means the WM/APM path recogniser found no
          ;; named portfolio facet. It is not itself used as a class. The
-         ;; document still has a real structural node: its reviewed ledger
-         ;; category, parent mission, or mission id. A node with no focus edge
-         ;; is useful-elsewhere; that is a graph result, not a default class.
+         ;; document has a real structural node only when the reviewed ledger
+         ;; supplies a category or the task supplies a parent mission. The
+         ;; target id by itself is identity, not relation structure: treating
+         ;; an isolated mission id as a facet would guess useful-elsewhere for
+         ;; every otherwise unresolved mission.
          assigned-facet (when facet-source
                           (if (= #{"other/unattributed"} path-facets)
-                            (str (or (:category/cluster ledger-row) parent target))
+                            (some-> (or (:category/cluster ledger-row) parent) str)
                             (when (= 1 (count path-facets)) (first path-facets))))
          active-facets (set (get-in discovery [:facet-graph :active]))
          background-facets (set (get-in discovery [:facet-graph :background]))
