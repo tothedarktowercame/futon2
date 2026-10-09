@@ -439,18 +439,28 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   ([prec q record?]
   (let [states (when record? (volatile! []))
         outgoing
+        ;; Belief and kernel maps are mathematically unordered, but these
+        ;; additions are floating-point reductions.  Canonicalize both sides
+        ;; of the push-forward so equivalent policies cannot acquire a
+        ;; different last bit merely from hash-map iteration order.
         (reduce (fn [acc [s mass]]
                   (let [evaluation (evaluate-state prec s record?)
                         k (:kernel evaluation)
                         contribution (when-not (refusal? k)
-                                       (reduce-kv (fn [r s' p] (assoc r s' (* mass p))) {} k))]
+                                       (reduce (fn [r [s' p]]
+                                                 (assoc r s' (* mass p)))
+                                               {}
+                                               (sort-by (comp pr-str key) k)))]
                     (when record?
                       (vswap! states conj (assoc evaluation :state s :mass mass
                                                 :mass-contribution contribution)))
                     (if (refusal? k)
                       (reduced k)
-                      (reduce-kv (fn [acc' s' p] (update acc' s' (fnil + 0) p)) acc contribution))))
-                {} q)]
+                      (reduce (fn [acc' [s' p]]
+                                (update acc' s' (fnil + 0) p))
+                              acc
+                              (sort-by (comp pr-str key) contribution)))))
+                {} (sort-by (comp pr-str key) q))]
     (cond-> {:belief outgoing}
       record? (assoc :evaluation
                      {:status (if (refusal? outgoing) :refused :evaluated)
@@ -950,7 +960,10 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
               ;; R7: the factorized closed forms score the TEMPERED kernel —
               ;; identical arithmetic, tempered (fn,fp) pairs.
               rates tempered
-              rates-universe (set (keys rates))]
+              rates-universe (set (keys rates))
+              ;; Keep the set for domain checks, but make every floating-point
+              ;; reduction over the exact-enumeration universe canonical.
+              ordered-universe (vec (sort-by pr-str rates-universe))]
           (if c-fn-pointwise
             {:g {:status :missing :kind :c-form-unsupported-with-rates
                  :limitation "the factorized path needs C's per-token marginals; a step-indexed pointwise C cannot supply them"}
@@ -969,15 +982,26 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                         softplus (fn [x] (if (pos? x)
                                            (+ x (Math/log1p (Math/exp (- x))))
                                            (Math/log1p (Math/exp x))))
+                        ;; Stable canonical fold for the floating-point
+                        ;; entropy/KL terms.  Canonical input order plus
+                        ;; compensation makes equivalent exact beliefs yield
+                        ;; the same score despite different map construction.
+                        stable-sum (fn [xs]
+                                     (loop [xs (seq xs) total 0.0 correction 0.0]
+                                       (if-let [x (first xs)]
+                                         (let [y (- (double x) correction)
+                                               t (+ total y)]
+                                           (recur (next xs) t (- t total y)))
+                                         total)))
                         point-mass? (fn [q] (and (= 1 (count q))
                                                  (= 1 (val (first q)))))
                         marginals (fn [q]
                                     (into {}
                                           (map (fn [v]
-                                                 [v (reduce + (map (fn [[s p]]
+                                                 [v (reduce +' (map (fn [[s p]]
                                                                      (if (contains? s v) p 0))
-                                                                   q))]))
-                                          rates-universe))
+                                                                   (sort-by (comp pr-str key) q)))]))
+                                          ordered-universe))
                         product-form? (fn [q ms]
                                         (every? (fn [[s p]]
                                                   (= p (reduce *
@@ -985,7 +1009,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                                      (if (contains? s v)
                                                                        (get ms v)
                                                                        (- 1 (get ms v))))
-                                                                   rates-universe))))
+                                                                   ordered-universe))))
                                                 q))
                         q-outside (fn [q]
                                     (some (fn [[s p]]
@@ -1024,12 +1048,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                           ln-c (into {} (map (fn [v]
                                                                (let [wv (double (get w v 0))]
                                                                  [v (- (softplus (- wv)))]))
-                                                            rates-universe))
+                                                            ordered-universe))
                                           ln-1mc (into {} (map (fn [v]
                                                                  (let [wv (double (get w v 0))]
                                                                    [v (- (softplus wv))]))
-                                                       rates-universe))
-                                          risk (reduce + 0.0
+                                                       ordered-universe))
+                                          risk (stable-sum
                                                        (map (fn [v]
                                                               (let [{:keys [false-neg false-pos]} (get rates v)
                                                                     ;; the observation marginal:
@@ -1047,12 +1071,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                                      (if (pos? qb)
                                                                        (* qb (- (Math/log qb) l1))
                                                                        0.0)))))
-                                                            rates-universe))
-                                          amb (reduce + 0.0
+                                                            ordered-universe))
+                                          amb (stable-sum
                                                       (map (fn [[s mass]]
                                                              (let [dm (double mass)]
                                                                (* dm
-                                                                  (reduce + 0.0
+                                                                  (stable-sum
                                                                           (map (fn [v]
                                                                                  (let [{:keys [false-neg false-pos]} (get rates v)
                                                                                        p (double (if (contains? s v)
@@ -1062,8 +1086,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                                                     (if (pos? p) (* -1.0 p (Math/log p)) 0.0)
                                                                                     (let [q1 (- 1.0 p)]
                                                                                       (if (pos? q1) (* -1.0 q1 (Math/log q1)) 0.0)))))
-                                                                               rates-universe)))))
-                                                           q))]
+                                                                               ordered-universe)))))
+                                                           (sort-by (comp pr-str key) q)))]
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
                                                (conj! steps {:tau tau :risk risk :ambiguity amb
