@@ -234,7 +234,7 @@
            (+ (:f poor-short) (:g poor-short)))
         "a short but poorly fitting policy must not win merely because it is short")))
 
-(deftest all-recorded-head-policies-have-g
+(deftest pinned-head-policies-have-g
   (let [policies (shape-g/materialize-policies artifacts)
         ;; Real policies pinned by id: three tractable exact-enumeration shapes
         ;; (one, two, and three nodes) plus a real wide-frontier refusal.  The
