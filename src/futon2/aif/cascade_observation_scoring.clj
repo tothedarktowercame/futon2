@@ -21,7 +21,6 @@
 (def cache-top-k 8)
 (def cache-refresh-count 8)
 (def shared-materiality-margin 1.0e-12)
-(def shared-sensitivity 4.0)
 
 (def ^:private worker-memory-budget-bytes (* 512 1024 1024))
 
@@ -43,16 +42,14 @@
 
 (defn- numeric-leaves [x]
   (cond
-    (number? x) [(double x)]
+    (number? x) [x]
     (map? x) (mapcat (fn [[k v]] (concat (numeric-leaves k) (numeric-leaves v))) x)
     (coll? x) (mapcat numeric-leaves x)
     :else []))
 
 (defn- shared-change-bound
-  "A conservative declared Lipschitz bound for shared-input reuse.  The
-  observation route has four signed folds per changed scalar; the factor is
-  recorded in the cache policy and multiplied by the L1 parameter delta.
-  Equal shared inputs have exactly zero bound."
+  "L1 change in the shared numerical inputs.  Entry-specific derivatives
+  convert this input delta into a G interval; equal inputs have zero delta."
   [old-shared new-shared]
   (if (= (canonical-data old-shared) (canonical-data new-shared))
     0.0
@@ -61,11 +58,34 @@
           n (max (count a) (count b))]
       (let [delta (reduce + 0.0
                            (for [i (range n)]
-                             (Math/abs (- (double (get a i 0.0))
-                                          (double (get b i 0.0))))))]
-        (if (zero? delta)
-          Double/POSITIVE_INFINITY
-          (* shared-sensitivity delta))))))
+                             (Math/abs (double (- (get a i 0)
+                                                  (get b i 0))))))]
+        delta))))
+
+(defn- entropy-sensitivity [distribution]
+  (reduce + 0.0 (for [[_ p] distribution :when (pos? (double p))]
+                   (+ 1.0 (Math/abs (Math/log (double p)))))))
+
+(defn- entry-sensitivity
+  "Derivative envelope for the actually consumed G terms.  Cross-entropy
+  contributes 1/p per consumed outcome; entropy contributes |1+log p|;
+  state-EIG contributes the same log-ratio envelope.  These are the closed
+  form derivatives of the scored folds, summed over this entry's steps."
+  [entry shared-delta]
+  (let [steps (get-in entry [:certificate :steps])
+        coefficient
+        (reduce + 0.0
+                (for [step steps
+                      :let [prediction (:prediction step)
+                            p (map second prediction)]]
+                  (+ (reduce + 0.0 (map #(if (pos? (double %))
+                                           (/ 1.0 (double %))
+                                           Double/POSITIVE_INFINITY) p))
+                     (entropy-sensitivity prediction)
+                     (entropy-sensitivity prediction))))]
+    (if (Double/isInfinite (double shared-delta))
+      Double/POSITIVE_INFINITY
+      (* (double shared-delta) coefficient))))
 
 (defn- cache-path [opts]
   (or (:scoring-cache-path opts)
@@ -428,16 +448,37 @@
                                resolution (double (or (get-in record [:entry :certificate
                                                                       :g-terms :numerical-resolution :value])
                                                       0.0))
-                               shared-reuse? (and record
-                                                  (<= shared-bound (+ resolution materiality-margin)))]
+                               sensitivity (entry-sensitivity (:entry record) shared-bound)]
                            {:candidate candidate :key key :record record
-                            :shared-reuse? shared-reuse?
+                            :sensitivity sensitivity
                             :shared-bound shared-bound
                             :resolution resolution}))
                        candidates)
             cached-work (filterv :record work)
             top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
             refresh-count (long (or (:scoring-cache-refresh-count opts) cache-refresh-count))
+            boundary-work (sort-by (juxt (comp :controller-score :entry :record)
+                                        (comp pr-str :key)) cached-work)
+            kth (when (and (pos? top-k) (seq boundary-work))
+                  (nth boundary-work (min (dec top-k) (dec (count boundary-work)))))
+            boundary-score (double (or (some-> kth :record :entry :controller-score)
+                                       Double/POSITIVE_INFINITY))
+            boundary-sensitivity (double (or (some-> kth :sensitivity)
+                                             0.0))
+            decision-refresh?
+            (fn [{:keys [record sensitivity resolution]}]
+              (or (nil? record)
+                  (and (number? (:controller-score (:entry record)))
+                       (if kth
+                         (or (<= (double (:controller-score (:entry record)))
+                                 boundary-score)
+                             (<= (Math/abs (- (double (:controller-score (:entry record)))
+                                              boundary-score))
+                                 (+ (double (or sensitivity 0.0))
+                                    boundary-sensitivity
+                                    materiality-margin)))
+                         (> (double (or sensitivity 0.0))
+                            (+ (double resolution) materiality-margin))))))
             head-keys (set (map :key (take top-k
                                            (sort-by (juxt (comp :controller-score :entry :record)
                                                           (comp pr-str :key))
@@ -447,8 +488,7 @@
                                             (comp pr-str :key)) cached-work))
             refresh-keys (set (concat head-keys (map :key stale-work)))
             fresh-work (if cache-enabled?
-                         (filterv #(or (nil? (:record %))
-                                       (not (:shared-reuse? %))
+                         (filterv #(or (decision-refresh? %)
                                        (refresh-keys (:key %))) work)
                          work)
             fresh-results (into {}
@@ -460,7 +500,9 @@
                                                    :age 0 :digest (:key w)
                                                    :inputs-digest (:key w)
                                                    :shared-generation generation
-                                                   :shared-bound (:shared-bound w)}]
+                                                   :shared-bound (:shared-bound w)
+                                                   :sensitivity (:sensitivity w)
+                                                   :decision :rescore}]
                                         (let [cache (cond-> cache
                                                        cache-cold-start?
                                                        (assoc :cold-start-reason (:reason cache-read)))]
@@ -480,7 +522,9 @@
                                              :age (- generation (long (:generation record)))
                                              :digest key :inputs-digest key
                                              :shared-generation (:shared-generation old-cache)
-                                             :shared-bound (:shared-bound w)}
+                                             :shared-bound (:shared-bound w)
+                                             :sensitivity (:sensitivity w)
+                                             :decision :reuse}
                                       entry (:entry record)]
                                   (assoc entry :cache cache
                                          :certificate (assoc (:certificate entry)
@@ -489,7 +533,7 @@
                           :top-k top-k
                           :refresh-width refresh-count
                           :shared-materiality {:bound :l1-numeric-leaves
-                                               :sensitivity shared-sensitivity
+                                               :sensitivity :entry-derived-from-closed-forms
                                                :margin materiality-margin
                                                :reuse-when :bound-at-most-resolution-plus-margin}
                           :max-age-clicks (long (Math/ceil (/ (double (max 1 (count entries)))
