@@ -66,6 +66,7 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -929,6 +930,8 @@
                 observed
                 (observed-route (terminal-fallback-route result)))
         grounded-commit (grounded-commit-for result)
+        q6-exclusion (get-in result [:checkpoints :selection :judgment
+                                     :q6-exclusion])
         nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
         elapsed-nanos (when-let [start (:run-timing/start-nanos raw-opts)]
                         (max 0 (- (nano-time) start)))
@@ -965,8 +968,7 @@
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
-            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])
-                         (get-in result [:checkpoints :selection :judgment :decision]))
+            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])                         (get-in result [:checkpoints :selection :judgment :decision]))
             record-failure (run-record-failure result)
             decision (when decision
                        (focus-receipt/join-terminal
@@ -1078,6 +1080,21 @@
                                              :reason :no-interpretation-ask})
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
+                    ;; Q6 carry: the previous run's choice, typed terminal
+                    ;; outcome and selection-input digest, captured at
+                    ;; selection by the typed previous-run lookup.
+                    :previous-run (or (get-in result
+                                              [:checkpoints :selection
+                                               :judgment :previous-run])
+                                      (get-in result
+                                              [:checkpoints :selection
+                                               :sorry :previous-run])
+                                      {:schema :wm/previous-run-v1
+                                       :status :absent
+                                       :reason :previous-run-not-carried})
+                    ;; Q6 enforcement evidence (attached after the record
+                    ;; map, only when exclusion fired): the excluded pair
+                    ;; and the refused previous run it repeats.
                     :route route
                     :failure record-failure
                     :repair/discharge (:repair/discharge result)
@@ -1128,7 +1145,9 @@
                      grounded-commit
                      (assoc :grounded-commit grounded-commit)
                      true
-                     (terminal-receipt/attach (:outcome result)))]
+                     (terminal-receipt/attach (:outcome result))
+                     q6-exclusion
+                     (assoc :q6-exclusion q6-exclusion))]
         (io/make-parents target)
         (spit tmp (str (pr-str record) "\n"))
         (java.nio.file.Files/move
@@ -5794,8 +5813,9 @@
                                 e))))
             interpretation-ask-fn (or (:interpretation-ask-fn opts)
                                       (get *runtime-defaults* :interpretation-ask-fn))
-            judgement0-base
-            (try
+            decide!
+            (fn []
+              (try
             (run-phase!
              opts @phase-context :selection
              #(let [_ (swap! effective-configuration assoc :evaluation :started)
@@ -5831,7 +5851,55 @@
                 ;; below), carried on the :no-selection sorry cell; so is the
                 ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
                 ;; else goes on, typed by its thrower's :kind when it has one
-                (selection-refusal! e nil)))
+                (selection-refusal! e nil))))
+            ;; Q6 carry: the previous run's choice, typed terminal outcome
+            ;; and selection-input digest, from an explicit typed lookup of
+            ;; the run record before this one (injectable as
+            ;; :previous-run-fn for hermetic tests).
+            previous-run-carrier
+            ((or (:previous-run-fn opts) previous-run/lookup)
+             (or (:run-record-dir opts) (run-record-dir))
+             (:run-id opts))
+            q6-evidence (atom nil)
+            judgement0-natural (decide!)
+            ;; Q6 enforcement (Requirements Q6): when the natural choice
+            ;; repeats the previous run's refused (target, cascade) with an
+            ;; unchanged selection-input digest, that pair is EXCLUDED from
+            ;; the admissible candidates and selection re-decides among the
+            ;; rest (previous-run/*excluded-pair* filters the judge's ranked
+            ;; candidates; the exclusion is recorded as typed evidence).
+            ;; Only when no admissible alternative remains does the click
+            ;; refuse, typed :repeat-choice-after-refusal.
+            judgement0-base
+            (or (when-let [exclusion
+                           (previous-run/exclusion-decision
+                            previous-run-carrier
+                            (chosen-summary (:decision judgement0-natural))
+                            (:selection-input-digest
+                             (selection-world/capture
+                              (:decision judgement0-natural) roster nil opts)))]
+                  (reset! q6-evidence exclusion)
+                  (try
+                    (let [redecided
+                          (binding [previous-run/*excluded-pair*
+                                    (:pair exclusion)]
+                            (decide!))]
+                      (if (get-in redecided [:decision :action])
+                        redecided
+                        (throw (ex-info "Q6 exclusion left no admissible action"
+                                        {:kind :no-acting-cascade-candidate}))))
+                    (catch Throwable e
+                      (throw (ex-info
+                              (str "Repeat (target, cascade) choice after a refusal"
+                                   " with unchanged selection-input digest;"
+                                   " no admissible alternative remains")
+                              {:outcome :refused
+                               :failure-kind :repeat-choice-after-refusal
+                               :failure-stage :selection
+                               :run/id (:run-id opts)
+                               :exclusion exclusion}
+                              e)))))
+                judgement0-natural)
             ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
             ;; step inside the tick). Only when the decision abstained
             ;; refusing at least one target :no-admitted-interpretation, at
@@ -6054,6 +6122,20 @@
                                true
                                (assoc-in [:judgment :world-at-selection]
                                          world-at-selection)
+                               true
+                               ;; Q6 carry rides beside the census so
+                               ;; persist-run-record! writes it on every
+                               ;; selected and refused tick alike.
+                               (assoc-in [:judgment :previous-run]
+                                         previous-run-carrier)
+                               ;; Q6 enforcement evidence: the excluded
+                               ;; (target, cascade) pair and the previous
+                               ;; run that refusal came from, when the
+                               ;; natural choice was excluded and selection
+                               ;; re-decided.
+                               @q6-evidence
+                               (assoc-in [:judgment :q6-exclusion]
+                                         @q6-evidence)
                                true
                                (retain-outer-task-selection
                                 (boolean entry)
