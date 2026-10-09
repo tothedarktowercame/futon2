@@ -1,5 +1,5 @@
 {:schema :wm/et-channel-offline-report-v1,
- :input "futon2/data/wmq-et-channels-input-2026-10-09.edn",
+ :input "futon2/~/runs/wmq-2026-10-09/wmq-et-channels-input-2026-10-09.edn (run data, kept outside the repo)",
  :normalisation
  {:individual
   "each observed cost is [0,1] over the same live task population",
