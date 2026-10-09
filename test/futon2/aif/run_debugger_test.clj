@@ -471,3 +471,52 @@
     (is (= [[:selection :start] [:selection :end]
             [:selection :start] [:selection :end]]
            (mapv (juxt :phase :transition) (take-nth 2 @events))))))
+
+;; 2026-10-09 (claude-12): the ration admission and the readiness checks ran
+;; before the first run-phase!, so an exhausted ration closed an attached run
+;; without a stop (run 2026-10-09-2503d598, :untyped-failure at :code-state).
+
+(defn- exhausted-ration []
+  (ex-info "Ordinary click budget exhausted. Return to Joe for renewal."
+           {:status 409 :error :ordinary-click-budget-exhausted}))
+
+(deftest exhausted-ration-stops-at-admission-and-retry-admits-after-renewal
+  (let [renewed? (atom false)
+        admissions (atom 0)
+        run-id "debug-admission-retry"
+        opts (assoc (fixture/isolated-runner-opts)
+                    :run-id run-id
+                    :readiness-admitted-fn
+                    (fn []
+                      (swap! admissions inc)
+                      (when-not @renewed? (throw (exhausted-ration)))))
+        _ (debugger/attach!)
+        running (future (runner/run-opportunity! opts))
+        stop (wait-for-stop run-id running)]
+    (is (= :admission (:phase stop)))
+    (is (= :ordinary-click-budget-exhausted (get-in stop [:ex-data :error])))
+    (reset! renewed? true)
+    (debugger/detach!)
+    (debugger/continue! run-id :retry)
+    (let [result (deref running 60000 ::timeout)]
+      (is (not= ::timeout result))
+      (is (= 2 @admissions) "retry re-attempts the ration admission")
+      (is (not= :ordinary-click-budget-exhausted
+                (get-in result [:failure :data :error])))
+      (is (empty? (filter #(= run-id (:run-id %)) (debugger/stopped)))))))
+
+(deftest exhausted-ration-abort-matches-the-detached-refusal
+  (let [refusing (fn [run-id]
+                   (assoc (fixture/isolated-runner-opts)
+                          :run-id run-id
+                          :readiness-admitted-fn #(throw (exhausted-ration))))
+        detached (runner/run-opportunity! (refusing "admission-detached"))
+        _ (debugger/attach!)
+        running (future (runner/run-opportunity! (refusing "admission-attached")))
+        _ (wait-for-stop "admission-attached" running)
+        _ (debugger/continue! "admission-attached" :abort)
+        attached (deref running 60000 ::timeout)]
+    (is (not= ::timeout attached))
+    (is (= (:outcome detached) (:outcome attached)))
+    (is (= (select-keys (:failure detached) [:kind :error])
+           (select-keys (:failure attached) [:kind :error])))))

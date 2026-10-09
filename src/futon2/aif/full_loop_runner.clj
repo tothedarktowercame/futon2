@@ -5603,34 +5603,45 @@
                         :data sorry-data
                         :closed-event closed-event}))))]
     (try
-      (when-let [e (:error roster-result)]
-        (throw (ex-info "Agent readiness observation failed"
-                        {:outcome :agent-unavailable
-                         :failure-kind :agent-readiness-failed
-                         :failure-stage :agent-readiness
-                         :failure-detail :unreachable}
-                        e)))
-      (when-let [e (:error code-state-result)]
-        (throw (ex-info "Stack code-state observation failed"
-                        {:outcome :incomplete
-                         :failure-kind :code-state-failed
-                         :failure-stage :code-state}
-                        e)))
-      ;; only a cast that was given is checked here; none given is recorded
-      ;; after selection, where a seat would be dispatched
-      (when (and author (not (available? roster author)))
-        (throw (ex-info "Configured author is unavailable"
-                        {:outcome :agent-unavailable
-                         :failure-kind :agent-unavailable
-                         :failure-stage :agent-readiness
-                         :failure-detail (agent-failure-detail roster author)
-                         :author author})))
-      ;; The ordinary-click ration is admitted by the component that owns the
-      ;; authoritative readiness observation.  Endpoint preflight is useful
-      ;; diagnostics, but cannot spend against a seat that became busy before
-      ;; this check (wm-click-32828638, 2026-10-01).
-      (when-let [admit! (:readiness-admitted-fn opts)]
-        (admit!))
+      ;; :admission is a phase so its refusals reach the attached debugger.
+      ;; Until 2026-10-09 these checks ran before the first run-phase!, so an
+      ;; exhausted ration (or an unreadable roster or code state) closed the
+      ;; run with the debugger attached and never stopped. :retry re-runs
+      ;; these checks against the SAME roster and code-state observations
+      ;; (taken above, not re-read), so it repairs a ration refusal once the
+      ;; ration is renewed, not a stale observation; :abort closes exactly as
+      ;; before.
+      (run-phase!
+       opts @phase-context :admission
+       (fn []
+         (when-let [e (:error roster-result)]
+           (throw (ex-info "Agent readiness observation failed"
+                           {:outcome :agent-unavailable
+                            :failure-kind :agent-readiness-failed
+                            :failure-stage :agent-readiness
+                            :failure-detail :unreachable}
+                           e)))
+         (when-let [e (:error code-state-result)]
+           (throw (ex-info "Stack code-state observation failed"
+                           {:outcome :incomplete
+                            :failure-kind :code-state-failed
+                            :failure-stage :code-state}
+                           e)))
+         ;; only a cast that was given is checked here; none given is recorded
+         ;; after selection, where a seat would be dispatched
+         (when (and author (not (available? roster author)))
+           (throw (ex-info "Configured author is unavailable"
+                           {:outcome :agent-unavailable
+                            :failure-kind :agent-unavailable
+                            :failure-stage :agent-readiness
+                            :failure-detail (agent-failure-detail roster author)
+                            :author author})))
+         ;; The ordinary-click ration is admitted by the component that owns the
+         ;; authoritative readiness observation.  Endpoint preflight is useful
+         ;; diagnostics, but cannot spend against a seat that became busy before
+         ;; this check (wm-click-32828638, 2026-10-01).
+         (when-let [admit! (:readiness-admitted-fn opts)]
+           (admit!))))
       (run-phase! opts @phase-context :substrate-preflight
                   #(substrate-readiness! opts)
                   readiness-event)
