@@ -13,6 +13,7 @@
                          (take 4 (cycle (:candidates route/fixture))) (range 4))
         opts (assoc (route/fixture-opts :independent-judgement)
                     :scoring-cache? true :scoring-cache-path path
+                    :scoring-cache-prewarm? true
                     :scoring-cache-top-k 2 :scoring-cache-refresh-count 1)]
     {:dir dir :path path :candidates candidates :opts opts
      :state {:cascade-belief (:q0 route/fixture)}}))
@@ -33,6 +34,13 @@
                           (efe/rank-actions state candidates (assoc opts :scoring-cache? false))))))
     (is (= 2 (get-in (meta second-run) [:cascade-scoring :cache-policy :top-k])))
     (is (.isFile (java.io.File. path)))))
+
+(deftest live-path-refuses-a-cold-cache-with-prewarm-instruction
+  (let [x (setup)
+        result (run (assoc x :opts (assoc (:opts x) :scoring-cache-prewarm? false)))]
+    (is (= :scoring-cache-cold (:kind result)))
+    (is (= :missing (:status result)))
+    (is (re-find #"scoring-cache-prewarm" (:instruction result)))))
 
 (deftest corrupt-cache-is-typed-cold-start-and-atomic-write-leaves-no-temp
   (let [x (setup)]

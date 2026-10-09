@@ -452,8 +452,18 @@
                            {:candidate candidate :key key :record record
                             :sensitivity sensitivity
                             :shared-bound shared-bound
-                            :resolution resolution}))
+                           :resolution resolution}))
                        candidates)
+            _cache-miss-refusal
+            (when (and cache-enabled? (not (:scoring-cache-prewarm? opts))
+                       (or cache-cold-start? (some #(nil? (:record %)) work)))
+              (throw (ex-info "incremental scoring cache is cold"
+                              {:status :missing :kind :scoring-cache-cold
+                               :reason (if cache-cold-start?
+                                         (:reason cache-read)
+                                         :missing-target-entry)
+                               :instruction "run futon2.aif.scoring-cache-prewarm in its own JVM"
+                               :cache-path cache-file})))
             cached-work (filterv :record work)
             top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
             refresh-count (long (or (:scoring-cache-refresh-count opts) cache-refresh-count))
@@ -547,6 +557,11 @@
                                             :generation generation
                                             :shared-generation generation
                                             :shared-inputs shared-inputs
+                                            :prewarm (when-let [m (:scoring-cache-prewarm-metadata opts)]
+                                                       (assoc m :duration-ms
+                                                              (/ (- (System/nanoTime)
+                                                                    (long (:scoring-cache-prewarm-start-ns opts)))
+                                                                 1e6)))
                                             :cache-policy cache-policy
                                             :entries (into (sorted-map)
                                                            (map (fn [entry]
