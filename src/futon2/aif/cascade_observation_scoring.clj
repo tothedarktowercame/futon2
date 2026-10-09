@@ -686,12 +686,18 @@
                                           :horizon (:horizon-steps opts)
                                           :class-preference (get-in model [:class-preference (:horizon-steps opts)])
                                           :provenance (:provenance model)
-                                          ;; the token model's :rates /
-                                          ;; :preference-spec have no class
-                                          ;; counterpart — typed absent
-                                          :rates {:status :absent
-                                                  :reason :class-emission-has-no-token-rates}
-                                          :preference-spec {:status :absent
-                                                            :reason :class-preference-not-a-token-spec}}))}))))
+                                          ;; The precision family carries the
+                                          ;; exact class model consumed by G.
+                                          ;; These are class-emission rows and
+                                          ;; class C, not token-rate claims;
+                                          ;; naming the representation keeps the
+                                          ;; carrier complete without silently
+                                          ;; coercing it into the token model.
+                                          :rates {:kind :class-emission
+                                                  :rows (:dirichlet-prior model)
+                                                  :source :declared-dirichlet-prior}
+                                          :preference-spec {:kind :class-preference
+                                                            :rows (:class-preference model)
+                                                            :source :declared-class-preference}}))}))))
       (catch clojure.lang.ExceptionInfo e
         (merge {:model model} (ex-data e))))))
