@@ -294,7 +294,10 @@ while [ -z "$clickid" ]; do
   done
 
   # ---------------------------------------------------------------- fire
-  RUNID="$(date -u +%Y-%m-%d)-$(uuidgen 2>/dev/null || date +%s)"
+  # The kernel's UUID source, not uuidgen: zone 1.1 (2026-10-09) shipped
+  # without uuid-runtime, and the old `|| date +%s` fallback minted an id the
+  # endpoint refuses as :wm-click-run-id-malformed.
+  RUNID="$(date -u +%Y-%m-%d)-$(cat /proc/sys/kernel/random/uuid)"
   echo; echo "firing click, run-id $RUNID"
   payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" <<'PYJSON'
 import json, sys
