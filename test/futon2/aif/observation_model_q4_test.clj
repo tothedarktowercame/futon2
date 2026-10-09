@@ -42,3 +42,14 @@
     (is (= :computed (:status r)))
     (is (zero? (:ambiguity r)))
     (is (pos? (:information-gain r)))))
+
+(deftest equivalent-belief-order-does-not-break-g-ties
+  (let [request {:op :score :tau 1 :target :t
+                 :preference {:progress-0 1/3 :progress-1 1/3 :focused 1/3}}
+        a (om/query (model prior)
+                    (assoc request :belief {#{} 1/2 #{[:t :done]} 1/2}))
+        b (om/query (model prior)
+                    (assoc request :belief {#{[:t :done]} 1/2 #{} 1/2}))]
+    (is (= (:g a) (:g b)))
+    (is (= (:ambiguity a) (:ambiguity b)))
+    (is (= (:information-gain a) (:information-gain b)))))

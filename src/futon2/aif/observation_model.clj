@@ -229,16 +229,16 @@
   [belief rows prediction]
   (let [posteriors
         (into {}
-              (for [o (keys prediction)]
+              (for [[o _] (ordered prediction)]
                 [o (let [weighted (into {}
-                                       (for [[s mass] belief]
+                                       (for [[s mass] (ordered belief)]
                                          [s (* (double mass) (double (get-in rows [s o] 0.0)))]))
                          total (reduce + 0.0 (vals weighted))]
                      (if (zero? total)
                        {}
                        (into {} (for [[s w] weighted :when (pos? w)] [s (/ w total)]))))]))]
     (reduce + 0.0
-            (for [[o po] prediction :when (pos? po)
+            (for [[o po] (ordered prediction) :when (pos? po)
                   :let [posterior (get posteriors o)]]
               (* (double po)
                  (reduce + 0.0
@@ -299,7 +299,7 @@
   [{:keys [horizon] :as model} belief tau target]
   (let [terminal? (>= tau horizon)]
     (apply merge-with +
-           (for [[state mass] belief]
+            (for [[state mass] (ordered belief)]
              (let [label (class-label-of-state model state target tau terminal?)
                    deterministic {label 1}
                    row (emission-row model label deterministic)]
@@ -308,7 +308,7 @@
 (defn- class-rows
   [{:keys [horizon] :as model} belief tau target]
   (into {}
-        (for [[state _] belief]
+        (for [[state _] (ordered belief)]
           (let [label (class-label-of-state model state target tau (>= (int tau) (int horizon)))]
             [state (emission-row model label {label 1})]))))
 
@@ -366,7 +366,7 @@
               pref (class-preference! model (class-preference-for model tau))
               prediction (class-predictive model belief tau target)
               rows (class-rows model belief tau target)
-              ambiguity (reduce + 0.0 (for [[s mass] belief]
+              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
                                         (* (double mass) (entropy (get rows s)))))
               information-gain (state-information-gain belief rows prediction)
               risk (m/outcome-risk (ordered prediction) pref)]
@@ -398,7 +398,7 @@
         (belief! model belief)
         (let [tau (or tau (:horizon model))
               pref (get-in model [:progress-preference tau])
-              rows (into {} (for [[state _] belief]
+              rows (into {} (for [[state _] (ordered belief)]
                               [state (emission-row model
                                                     (progress-outcome model state)
                                                     {(progress-outcome model state) 1})]))
@@ -406,8 +406,8 @@
                                    (merge-with + out
                                                (update-vals (get rows state)
                                                             #(* (double mass) %))))
-                                 {} belief)
-              ambiguity (reduce + 0.0 (for [[s mass] belief]
+                                 {} (ordered belief))
+              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
                                         (* (double mass) (entropy (get rows s)))))
               information-gain (state-information-gain belief rows prediction)
               risk (m/outcome-risk (ordered prediction) pref)]
