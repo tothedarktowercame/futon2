@@ -107,7 +107,11 @@
     (not (string? (:id candidate))) (conj :identity-invalid)
     (not (contains? task-kinds (:kind candidate))) (conj :kind-invalid)
     (contains? collisions (:id candidate)) (conj :pipeline-identity-collision)
-    (and (not (contains? collisions (:id candidate)))
+    ;; Missions are the cascade's structural population. Excursions and tickets
+    ;; are admitted by the live adapter's typed non-mission channels; requiring
+    ;; O1/O4/O5 membership here would silently discard that population.
+    (and (= :mission (:kind candidate))
+         (not (contains? collisions (:id candidate)))
          (not (contains? nodes (:id candidate)))) (conj :not-in-pipeline-cascade)
     (not (contains? #{:supported :infeasible :unknown}
                     (get-in candidate [:support :automated-feasibility])))
@@ -137,8 +141,15 @@
           (into (sorted-map)))}))
 
 (defn- pairwise [a b]
-  (let [shared (set/intersection (set (keys (:channels a)))
-                                 (set (keys (:channels b))))]
+  (let [shared-all (set/intersection (set (keys (:channels a)))
+                                     (set (keys (:channels b))))
+        ;; Cross-kind comparisons use one declared common normalization.
+        ;; Within-kind comparisons keep the pre-existing channel rule exactly,
+        ;; excluding the derived aggregate so mission ordering is unchanged.
+        shared (if (= (:kind a) (:kind b))
+                 (disj shared-all :cross-kind-task-cost)
+                 (if (contains? shared-all :cross-kind-task-cost)
+                   #{:cross-kind-task-cost} shared-all))]
     (if (empty? shared)
       {:status :unrankable :reason :no-shared-current-channel
        :left (:id a) :right (:id b) :shared-channels []}

@@ -72,6 +72,23 @@
     (is (= [:not-in-pipeline-cascade]
            (get-in receipt [:details :candidate-errors "M-not-on-map"])))))
 
+(deftest nonmission-candidates-do-not-require-mission-map-membership
+  (let [excursion (assoc (candidate "E-off-map" 0.3) :kind :excursion)
+        receipt (selector/select {:snapshot snapshot :candidates [excursion]})]
+    (is (= :selected (:status receipt)))
+    (is (= "E-off-map" (:selected receipt)))))
+
+(deftest derived-cross-kind-channel-does-not-change-mission-order
+  (let [base [(candidate "M-a" 0.2) (candidate "M-b" 0.8)]
+        with-derived (mapv #(assoc-in % [:channels :cross-kind-task-cost]
+                                     {:value (get-in % [:channels :current-priority-cost :value])
+                                      :freshness :current
+                                      :source (pin "graph" "b")}) base)]
+    (is (= (mapv :id (:ranking (selector/select {:snapshot snapshot
+                                                  :candidates base})))
+           (mapv :id (:ranking (selector/select {:snapshot snapshot
+                                                  :candidates with-derived})))))))
+
 (deftest qualified-work-identities-join-canonical-registry-identities
   (let [qualified (-> snapshot
                       (assoc-in [:graph :clusters]
