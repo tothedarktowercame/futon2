@@ -67,17 +67,18 @@
       :else
       (let [classes (set (:class-universe value))
             targets (set (map first (:acceptance value)))
-            rows (into {:ending/not-yet-evaluated {:ending/not-yet-evaluated 1}
-                        :stop-the-line {:stop-the-line 1}}
-                       (map (fn [target]
-                              (let [emission (get (:target-class value) target)]
-                                [target (cond
-                                          (keyword? emission) {emission 1}
-                                          (map? emission) emission
-                                          ;; an undeclared class stays nil and is
-                                          ;; reported as an invalid row below
-                                          :else emission)])))
-                       targets)
+            rows (into {}
+                       (for [class classes]
+                         [class {class 1}]))
+            rows (into rows
+                       (for [target targets]
+                         (let [emission (get (:target-class value) target)]
+                           [target (cond
+                                     (keyword? emission) {emission 1}
+                                     (map? emission) emission
+                                     ;; an undeclared class stays nil and is
+                                     ;; reported as an invalid row below
+                                     :else emission)])))
             valid-row? (fn [row]
                          (and (map? row) (seq row)
                               (every? #(and (contains? classes (key %))

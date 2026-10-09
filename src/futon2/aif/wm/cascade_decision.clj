@@ -513,21 +513,46 @@
    replaced -- this is an additional observation model the bounded scorer
    consumes, and live-c is still derived and recorded."
   [{:keys [universe acceptance target-class horizon]}]
-  (let [not-yet :ending/not-yet-evaluated
+  (let [progress-classes (into {} (for [n (range (inc (count acceptance)))]
+                                    [n (keyword (str "progress-" n))]))
+        progress-labels (vec (vals progress-classes))
+        terminal-labels [:focused :related :unrelated :stop-the-line]
+        class-universe (vec (concat progress-labels terminal-labels))
+        ;; Ordinal progress preference: each additional completed item gets
+        ;; one additional unit of C mass.  This is the declared completed-
+        ;; progress scale, not a waiting placeholder.
+        progress-weights (into {} (map (fn [[n label]] [label (inc n)])
+                                       progress-classes))
+        progress-total (reduce + (vals progress-weights))
+        progress-c (update-vals progress-weights #(/ % progress-total))
         joe-c class-preference-weights
         class-pref (into {} (for [tau (range 1 (inc horizon))]
-                              [tau (if (= tau horizon) joe-c {not-yet 1})]))]
+                              [tau (if (= tau horizon) joe-c progress-c)]))
+        ;; Jeffreys half-count baseline plus one declared pseudo-observation
+        ;; for the state-associated emission.  q7-belief-novelty can replace
+        ;; this map with its posterior at this seam; no accumulation occurs
+        ;; here.
+        dirichlet-prior (into {}
+                              (for [label class-universe
+                                    :let [domain (if (some #{label} progress-labels)
+                                                    progress-labels
+                                                    terminal-labels)]]
+                                [label (into {}
+                                             (for [outcome domain]
+                                               [outcome (if (= label outcome) 3/2 1/2)]))]))]
     {:schema :wm/observation-model-v1
      :backend :exact-enumeration
      :kind :class-emission
      :universe universe
      :horizon horizon
-     :class-universe [:focused :related :unrelated :stop-the-line not-yet]
+     :class-universe class-universe
      :acceptance acceptance
      :target-class target-class
+     :progress-classes progress-classes
      :class-preference class-pref
+     :dirichlet-prior dirichlet-prior
      :provenance {:status :synthetic :calibrated false
-                  :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
+                  :source "WM-Q4: ordinal completed-progress C; Dirichlet(1/2) Jeffreys baseline plus one state-emission pseudo-count; Joe terminal C 55/35/5/5"}}))
 
 (defn- cascade-family-parameters
   "Validate the declared comparison BEFORE admission can remove a target.
