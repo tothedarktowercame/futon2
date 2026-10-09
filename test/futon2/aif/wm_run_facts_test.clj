@@ -49,3 +49,24 @@
     (is (= "digest" (exported "currentInputDigest")))
     (is (= ["author"] (exported "seatsAvailable")))
     (is (= "selectionBeforeInterpretation" (exported "interpretationOrder")))))
+
+(deftest q4-reads-certificate-scoring-and-all-preference-steps
+  (let [model {:horizon 4
+               :class-preference {1 {:ending/not-yet-evaluated 1}
+                                   2 {:ending/not-yet-evaluated 1}
+                                   3 {:ending/not-yet-evaluated 1}
+                                   4 {:focused 0.55 :related 0.35
+                                      :unrelated 0.05 :stop-the-line 0.05}}}
+        scored {:g 1.5 :g-terms {:risk 1.0 :ambiguity 0.75
+                                  :expected-information-gain 0.25}
+                :observation-model model}
+        r (assoc-in record [:decision :selection-certificate]
+                    {:candidates [{:id :c1 :target "M-x" :g 1.5}]
+                     :g-term-decomposition {:policies
+                                            [{:terms {:A {:value model}}}]}
+                     :scoring {0 scored}})
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (is (= 4 (f "horizonLength")))
+    (is (= [0 1 2 3] (f "preferenceSteps")))
+    (is (= {"risk" true "ambiguity" true "informationGain" true}
+           (f "gTerms")))))
