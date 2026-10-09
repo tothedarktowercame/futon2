@@ -1,7 +1,10 @@
 (ns futon2.aif.wm-report-card-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [futon2.data-paths :as data-paths]
             [wm-report-card :as card]))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
@@ -39,9 +42,12 @@
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-report-card" (make-array java.nio.file.attribute.FileAttribute 0)))
         record (io/file root "tick-run-record-fixture-full.edn")
-        out (io/file root "out")]
+        out (io/file root "out")
+        preregs (io/file root "empty-preregs")]
+    (.mkdirs preregs)
     (spit record (pr-str full-record))
-    (let [paths (card/generate! (.getPath record) {:output-dir (.getPath out) :snap snap})
+    (let [paths (card/generate! (.getPath record) {:output-dir (.getPath out) :snap snap
+                                                   :preregistration-root (.getPath preregs)})
           result (edn/read-string (slurp (:edn paths)))]
       (is (= [:verdict :run :cascade :outcome :example-text :preregistrations]
              (mapv :id (:sections result))))
@@ -99,3 +105,24 @@
     (is (= 1 (get-in result [:preregistrations :counts :confirmed])))
     (is (= :confirmed (get-in result [:preregistrations :entries 0 :status])))
     (is (= :preregistrations (get-in result [:sections 5 :id])))))
+
+(deftest repository-paths-do-not-follow-the-serving-process-cwd
+  (let [foreign (.toFile (java.nio.file.Files/createTempDirectory
+                          "wm-foreign-cwd" (make-array java.nio.file.attribute.FileAttribute 0)))
+        launch-root (io/file (System/getProperty "user.dir"))
+        separator (System/getProperty "path.separator")
+        classpath (->> (str/split (System/getProperty "java.class.path")
+                                  (re-pattern (java.util.regex.Pattern/quote separator)))
+                       (map #(let [f (io/file %)]
+                               (.getCanonicalPath
+                                (if (.isAbsolute f) f (io/file launch-root %)))))
+                       (str/join separator))
+        expression (str "(require 'futon2.data-paths) "
+                        "(print (futon2.data-paths/resolve-repo-path "
+                        "\"holes/labs/wm-contract/preregistrations\"))")
+        result (shell/sh "java" "-cp" classpath "clojure.main" "-e" expression
+                         :dir (.getPath foreign))]
+    (is (= 0 (:exit result)) (:err result))
+    (is (= (data-paths/repo-path "holes" "labs" "wm-contract" "preregistrations")
+           (:out result)))
+    (is (not (str/starts-with? (:out result) (.getPath foreign))))))

@@ -3,7 +3,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [futon2.data-paths :as data-paths]))
 
 (def predicates '#{= not= > >= < <= contains present absent})
 (def decisive-statuses #{:confirmed :refuted})
@@ -66,7 +67,7 @@
     prereg))
 
 (defn default-ancestor? [commit source-revision]
-  (zero? (:exit (shell/sh "git" "-C" "/home/joe/code/futon2"
+  (zero? (:exit (shell/sh "git" "-C" data-paths/production-repo-root
                           "merge-base" "--is-ancestor" commit source-revision))))
 
 (defn observed [card path]
