@@ -1814,11 +1814,22 @@
   entered construction at all; asking for and publishing an interpretation
   is the in-tick way to create that missing construction input."
   [decision]
-  (when (and (map? decision) (= :abstained (:status decision)))
-    (vec (filter #(contains? #{:no-query-time-slice
-                               :no-admitted-interpretation}
-                             (:kind %))
-                 (:refusals decision)))))
+  (when (map? decision)
+    (if (= :abstained (:status decision))
+      (vec (filter #(contains? #{:no-query-time-slice
+                                 :no-admitted-interpretation}
+                               (:kind %))
+                   (:refusals decision)))
+      (let [chosen (:action decision)
+            target (:target chosen)
+            chosen-pattern (some-> chosen :precedence first :id)
+            debt (some #(when (and (= target (:target %))
+                                   (= chosen-pattern (:pattern %))) %)
+                       (get-in decision [:selection-certificate :interpretations-owed]))]
+        (when debt
+          [{:target target :kind :no-admitted-interpretation
+            :missing :chosen-pattern-interpretation
+            :selected-pattern chosen-pattern}])))))
 
 (defn- interpretable-refusal
   "The first :no-admitted-interpretation refusal whose target classifies to
@@ -1846,7 +1857,9 @@
       (and (map? decision) (= :abstained (:status decision))) nil
       (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
       (let [action (:action decision)]
-        {:action action
+        (when-not (= :query-time-pattern-selection
+                     (get-in action [:construction-receipt :kind]))
+          {:action action
          :rank (or (:rank decision) 1)
          :G-efe (:controller-score decision)
          :controller-score (:controller-score decision)
@@ -1856,7 +1869,7 @@
          ;; stop-lines and mission lookup, and the action itself must NOT
          ;; grow a key (its value is digested into the occurrence identity,
          ;; the trial configuration and the dedup key).
-         :enacted-steps (get-in decision [:selection-law :enacted-steps])})
+           :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
       :else nil)))
 
 (defn selection-terminal-condition

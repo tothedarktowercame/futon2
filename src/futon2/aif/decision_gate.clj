@@ -127,6 +127,8 @@
 (defn- check-candidate-receipts!
   [posterior]
   (doseq [candidate (keys posterior)]
+    (let [provisional? (= :query-time-pattern-selection
+                          (get-in candidate [:construction-receipt :kind]))]
     (when-not (and (map? candidate) (= :cascade-candidate (:kind candidate)))
       (refuse! :posterior-over-non-cascade {:candidate candidate}))
     (when-not (some? (:construction-receipt candidate))
@@ -135,12 +137,13 @@
     (when-not (some? (:interpretation-receipts candidate))
       (refuse! :missing-interpretation-receipts
                {:candidate candidate}))
-    (when (and (seq (:precedence candidate))
+    (when (and (not provisional?)
+               (seq (:precedence candidate))
                (empty? (:interpretation-receipts candidate)))
       (refuse! :empty-interpretation-receipts
                {:candidate candidate
                 :precedence-count (count (:precedence candidate))}))
-    (check-guard-locators! candidate)))
+    (check-guard-locators! candidate))))
 
 (defn- marginal-mass
   "Sum the recorded posterior over candidates whose first acting pattern is

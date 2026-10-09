@@ -760,12 +760,15 @@
                         qual (partial qualification t)
                         patterns
                         (into {}
-                              (map (fn [[id {:keys [guard produces]}]]
+                              (map (fn [[id {:keys [guard produces] :as declared}]]
                                      [id (-> (cascade-policy/token-interpretation
                                               id {:guard {:needs (set (map qual (:needs guard)))
                                                           :forbids (set (map qual (:forbids guard)))}
                                                   :produces (set (map qual produces))})
-                                             (assoc :target t))]))
+                                             (assoc :target t)
+                                             (merge (select-keys declared
+                                                                 [:theta :theta-source
+                                                                  :predicted-effect])))]))
                               (:interpretations cp))]
                     (mapv (fn [{:keys [candidate-id precedence construction-receipt]}]
                             {:kind :cascade-candidate :id candidate-id :target t
@@ -956,6 +959,9 @@
                                 (mapv (fn [p]
                                         (let [ft (get theta-consumption (:id p))]
                                           (cond
+                                            (= :retrieval-rank-likelihood (:theta-source p))
+                                            p
+
                                             ;; recorded trials: theta from the ledger
                                             (= :recorded-trials (:status ft))
                                             (assoc p :theta (:theta ft)
@@ -1328,18 +1334,23 @@
         receipts (:interpretation-receipts problem)
         checked
         (mapv (fn [{:keys [candidate-id precedence construction-receipt] :as pair}]
-                (let [missing (cond-> []
+                (let [provisional? (= :query-time-pattern-selection
+                                      (:kind construction-receipt))
+                      missing (cond-> []
                                 (not (and (vector? precedence) (seq precedence)))
                                 (conj :nonempty-precedence)
                                 (nil? construction-receipt) (conj :construction-receipt)
-                                (and (map? construction-receipt)
+                                (and (not provisional?) (map? construction-receipt)
                                      (not (machine-construction-relations-valid?
                                            precedence patterns construction-receipt)))
                                 (conj :construction-relations)
                                 (some #(not (map? (get patterns %))) precedence)
                                 (conj :pattern-interpretation)
-                                (or (not (seq receipts))
-                                    (some #(not (and (map? (get receipts %)) (seq (get receipts %)))) precedence))
+                                (and (not provisional?)
+                                     (or (not (seq receipts))
+                                         (some #(not (and (map? (get receipts %))
+                                                         (seq (get receipts %))))
+                                               precedence)))
                                 (conj :interpretation-receipt))]
                   (if (seq missing)
                     {:decline {:target target :stage :candidate-admission
@@ -1350,7 +1361,8 @@
                                          (some #{:construction-relations} missing) :machine-construction-relations-invalid
                                          :else :interpretation-receipts-missing)
                                :missing-evidence missing}}
-                    (if-let [no-progress (candidate-want-progress (:cascade-problem problem) precedence)]
+                    (if-let [no-progress (when-not provisional?
+                                          (candidate-want-progress (:cascade-problem problem) precedence))]
                       {:decline (merge {:target target :stage :candidate-admission
                                         :candidate candidate-id
                                         :missing-evidence [(if (= :no-new-wanted-token (:reason no-progress))
@@ -1380,7 +1392,9 @@
   "Truthful per-target construction facts from admitted PROBLEMS and the
   certificate CANDIDATES.  A missing query-time carrier makes the census
   typed-absent; partial pins make whole-library false."
-  [problems certificate-candidates]
+  ([problems certificate-candidates]
+   (target-construction-census problems certificate-candidates nil))
+  ([problems certificate-candidates library-pin]
   (let [policy-counts (frequencies (keep (fn [p]
                                            (or (:target p)
                                                (get-in p [:id :target])))
@@ -1395,10 +1409,15 @@
                    ;; are the constructor's actual permission boundary.
                    :pool (vec (keys (:interpretations cascade-problem)))
                    :slice-from-whole-library
-                   (and (= :wm/query-time-library-slice-v1 (:schema slice))
-                        (pos-int? (:library-size slice))
-                        (= (:library-size slice) (count pins))
-                        (every? #(and (:id %) (:sha256 %) (:revision %)) pins))
+                   (boolean
+                    (or (and (:slice-from-whole-library slice)
+                             (= :wm/pinned-pattern-library-v1 (:schema library-pin))
+                             (= (:library-size slice) (:size library-pin))
+                             (= (:library-manifest-digest slice) (:digest library-pin)))
+                        (and (= :wm/query-time-library-slice-v1 (:schema slice))
+                             (pos-int? (:library-size slice))
+                             (= (:library-size slice) (count pins))
+                             (every? #(and (:id %) (:sha256 %) (:revision %)) pins))))
                    :library-size (:library-size slice)
                    :policy-count (get policy-counts target 0)}))
               problems)]
@@ -1411,7 +1430,7 @@
        :targets (mapv :target
                       (remove #(= :wm/query-time-library-slice-v1
                                   (get-in % [:query-time-slice :schema]))
-                              problems))})))
+                              problems))}))))
 
 (defn cascade-decision
   "Admit explicitly paired nonempty constructions, record every decline, then
@@ -1427,8 +1446,22 @@
                                            :reason (:kind r) :missing-evidence [(:missing r)]})
                                   (:refusals assembled))
                              (mapcat :declines admissions)))
+        all-admitted-problems (vec (keep :problem admissions))
+        scoring-budget (:scoring-target-budget assembled)
+        target-limit (:target-limit scoring-budget)
+        [scored-problems budget-exhausted]
+        (if (and (pos-int? target-limit) (< target-limit (count all-admitted-problems)))
+          [(subvec all-admitted-problems 0 target-limit)
+           (subvec all-admitted-problems target-limit)]
+          [all-admitted-problems []])
+        budget-drops (mapv (fn [p]
+                             {:target (:target p) :stage :scoring
+                              :reason :budget-exhausted
+                              :missing-evidence []})
+                           budget-exhausted)
+        dropped (into dropped budget-drops)
         admitted (assoc assembled
-                        :problems (vec (keep :problem admissions))
+                        :problems scored-problems
                         :refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
                         :dropped-candidates dropped)
         queue (ticket-queue/validate! (if (contains? opts :ticket-queue)
@@ -1453,8 +1486,16 @@
                  result)]
     (let [construction-census
           (target-construction-census
-           (:problems admitted)
-           (get-in result [:decision :selection-certificate :candidates]))]
+           (:target-construction-inputs assembled)
+           (get-in result [:decision :selection-certificate :candidates])
+           (:library-pin assembled))
+          interpretations-owed
+          (vec (for [{:keys [target constructed-candidates]} (:problems assembled)
+                     {:keys [precedence construction-receipt]} constructed-candidates
+                     :when (= :query-time-pattern-selection (:kind construction-receipt))
+                     pattern precedence]
+                 {:kind :interpretation-owed-after-selection
+                  :target target :pattern pattern :attested? false}))]
       (cond-> (-> result
                 ;; cascade-decision-admitted's own :dropped-candidates (when
                 ;; it ran a scored family) already carries this wrapper's
@@ -1473,6 +1514,27 @@
       true
       (assoc-in [:decision :selection-certificate :target-construction]
                 construction-census)
+      true
+      (assoc-in [:decision :selection-certificate :library-pin]
+                (:library-pin assembled))
+      true
+      (assoc-in [:decision :selection-certificate :slice-budget]
+                (:slice-budget assembled))
+      true
+      (assoc-in [:decision :selection-certificate :scoring-target-budget]
+                (when scoring-budget
+                  (assoc scoring-budget
+                         :scored-target-count (count scored-problems)
+                         :budget-exhausted-targets (mapv :target budget-exhausted))))
+      true
+      (assoc-in [:decision :selection-certificate :retrieval-refusals]
+                (:retrieval-refusals assembled))
+      true
+      (assoc-in [:decision :selection-certificate :retrieval-timing]
+                (:retrieval-timing assembled))
+      (seq interpretations-owed)
+      (assoc-in [:decision :selection-certificate :interpretations-owed]
+                interpretations-owed)
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))

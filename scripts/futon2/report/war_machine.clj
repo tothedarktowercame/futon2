@@ -33,6 +33,7 @@
    Pattern:   war-machine/operational-not-decorative"
   (:require [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.aif.wm.cascade-decision :as cd]
+            [futon2.aif.wm.library-slices :as library-slices]
             [futon2.aif.load-identity :as load-identity]
             [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -6612,8 +6613,9 @@
                                       :meta-field-ranking)
         ;; The outer loop selects a task identity from current M/E/T state.
         ;; It is deliberately completed before any cascade source is loaded or
-        ;; any interpretation is constructed.  The inner loop below receives
-        ;; exactly the chosen target.
+        ;; any interpretation is constructed.  Its ranking is retained as
+        ;; ordering/prior evidence; it does not gate the policy field.  Every
+        ;; enumerated open task below enters cascade assembly (Q2/Q3).
         outer-task-population
         (vec (concat
               (map #(assoc % :kind :mission)
@@ -6636,7 +6638,6 @@
                   (hash (str (or (:run-id judge-opts) wm-as-of)))))
         outer-task-selection
         (select-outer-task judge-opts outer-task-population outer-task-seed)
-        selected-task-id (get-in outer-task-selection [:chosen :id])
         _outer-task-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
@@ -6682,10 +6683,27 @@
         substrate-tickets (map :id (filter mission-registry/live-ticket?
                                            (:tickets loaded-tickets)))
         cascade-targets
-        ;; Inner cascade construction is target-local. Declarations and saved
-        ;; proposals can enrich the selected task, but can neither introduce
-        ;; nor select a different task.
-        (if (string? selected-task-id) [selected-task-id] [])
+        ;; The outer selector may order or bias the field, but choice is made
+        ;; over cascade policies by G.  A target lacking inputs remains here
+        ;; and receives a typed assembly refusal; it is never silently gated.
+        (mapv :id outer-task-population)
+        target-queries
+        (mapv (fn [{:keys [id path title]}]
+                [id (or (when (and path (.isFile (io/file path)))
+                          (slurp path))
+                        title id)])
+              outer-task-population)
+        retrieval-batch
+        (or (:library-slice-batch judge-opts)
+            (library-slices/batch
+             (library-slices/library-manifest
+              (or (:pattern-library-root judge-opts)
+                  "/home/joe/code/futon3/library"))
+             target-queries
+             {:k (or (:library-slice-size judge-opts)
+                     (:value library-slices/slice-budget))
+              :max-millis (or (:library-retrieval-budget-ms judge-opts) 30000)
+              :nano-time-fn (or (:nano-time-fn judge-opts) #(System/nanoTime))}))
         flight-cascade-assembly-input
         (flight-assembly-input
          (:flight judge-opts)
@@ -6706,7 +6724,20 @@
                                                 (:excursions loaded-excursions)))})
           ;; the horizon is resolved after the flight's input and the
           ;; published interpretations are merged (resolve-cascade-horizon)
-          :sources (cond-> cascade-sources
+          :library-pin (:library-pin retrieval-batch)
+          :slice-budget (:slice-budget retrieval-batch)
+          ;; Exact class-model scoring grows superlinearly with the joint
+          ;; target carrier.  Q8 requires at least half of open targets to
+          ;; reach numeric G, so production admits that exact lower bound and
+          ;; records every remainder as :budget-exhausted.
+          :scoring-target-budget
+          {:schema :wm/scoring-target-budget-v1
+           :target-limit (quot (+ (count cascade-targets) 1) 2)
+           :basis :q8-minimum-half-open-targets
+           :enumerated-target-count (count cascade-targets)}
+          :retrieval-refusals (:refusals retrieval-batch)
+          :retrieval-timing (select-keys retrieval-batch [:elapsed-ms :generated-at])
+          :sources (cond-> (assoc cascade-sources :query-time-slices (:slices retrieval-batch))
                      ;; A target with admitted interpretations and no
                      ;; declared candidate is constructed here rather than
                      ;; refused (E-cascade-real D4). G is the lane's own

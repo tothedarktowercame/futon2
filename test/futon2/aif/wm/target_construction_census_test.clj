@@ -37,3 +37,18 @@
            absent))
     (is (= :absent
            (:status (decision/target-construction-census [] []))))))
+
+(deftest shared-manifest-reference-must-match-before-whole-library-is-true
+  (let [slice {:schema :wm/query-time-library-slice-v1
+               :candidates [{:pattern :p1} {:pattern :p2}]
+               :library-size 12 :library-manifest-digest "good"
+               :slice-from-whole-library true}
+        candidates [{:target "M-x"} {:target "M-x"}]
+        good {:schema :wm/pinned-pattern-library-v1 :size 12 :digest "good"}
+        bad (assoc good :digest "other")]
+    (is (true? (:slice-from-whole-library
+                (first (decision/target-construction-census
+                        [(problem slice)] candidates good)))))
+    (is (false? (:slice-from-whole-library
+                 (first (decision/target-construction-census
+                         [(problem slice)] candidates bad)))))))

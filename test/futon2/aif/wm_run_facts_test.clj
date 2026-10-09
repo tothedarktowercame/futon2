@@ -41,6 +41,13 @@
            (exported "targetConstruction")))
     (is (= 2 (exported "constructorPatternCount")))))
 
+(deftest recorded-library-pin-is-the-construction-denominator
+  (let [carried (assoc-in record [:decision :selection-certificate :library-pin]
+                          {:schema :wm/pinned-pattern-library-v1
+                           :digest "pin" :size 1436})
+        exported (:facts (facts/facts-for-record carried "r" snap nil nil))]
+    (is (= 1436 (exported "libraryPatternCount")))))
+
 (deftest typed-absent-construction-carrier-is-never-read-as-an-empty-pool
   (let [carried (assoc-in record [:decision :selection-certificate :target-construction]
                           {:status :absent :reason :query-time-construction-slice-not-recorded})

@@ -422,6 +422,15 @@
                     (get-in % [:cascade-problem :pattern-pool 0 :provenance]))
                 (:problems assembled)))))
 
+(deftest retrieval-rank-likelihood-is-declared-and-bounded
+  (is (= {:theta 3/4 :source :retrieval-rank-likelihood
+          :rank 1 :slice-size 3 :raw-score 0.9
+          :formula "(k-r+1)/(k+1)"}
+         (cp/retrieval-effect {:slice-rank 1 :score 0.9} 3)))
+  (is (= 1/4 (:theta (cp/retrieval-effect {:slice-rank 3} 3))))
+  (is (nil? (cp/retrieval-effect {:slice-rank 0} 3)))
+  (is (nil? (cp/retrieval-effect {:slice-rank 4} 3))))
+
 (deftest interpretation-backed-assembly-retains-the-construction-slice
   (let [before (assemble* {:targets [target] :sources full-sources})
         with-unread-slice
