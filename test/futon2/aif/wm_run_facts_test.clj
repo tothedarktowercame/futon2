@@ -33,6 +33,42 @@
   (let [exported (:facts (facts/facts-for-record record "r" snap nil nil))]
     (is (= (set facts/run-fact-fields) (set (keys exported))))))
 
+(deftest computed-falsifier-receipt-is-present-not-an-absence
+  (let [receipt {:schema :wm/reviewer-falsifier-v1 :target "M-x"
+                 :commit "c0" :status :refused
+                 :receipt/id "abc" :failed-checks [:mission-standing]
+                 :checks {:mission-standing {:status :fail}}}
+        planted (assoc-in record [:failure :detail]
+                          {:reviewer-falsifier receipt})
+        export (facts/facts-for-record planted "r" snap nil nil)]
+    (is (= 0 (get-in export [:facts "pathAbsenceCount"])))
+    (is (= [] (get-in export [:diagnostics :absencePaths])))))
+
+(deftest schema-tagged-absence-record-is-still-counted
+  ;; Adversarial: a :schema tag names the field type, not a computed record.
+  ;; Genuine typed absences wearing schemas (g-term-decomposition :missing,
+  ;; accumulation-bmr :absent) must remain counted.
+  (let [planted (assoc-in record [:decision :g-term-decomposition]
+                          {:schema :wm/g-term-decomposition-v1
+                           :status :missing :policies []})
+        export (facts/facts-for-record planted "r" snap nil nil)]
+    (is (= 1 (get-in export [:facts "pathAbsenceCount"])))
+    (is (= ["[:decision :g-term-decomposition]"]
+           (get-in export [:diagnostics :absencePaths])))))
+
+(deftest bare-typed-refusal-in-failure-detail-is-still-counted
+  ;; Adversarial: the exclusion is for computed machine records, not for
+  ;; every :refused map. A bare refusal with no record identity remains a
+  ;; counted typed absence.
+  (let [planted (assoc-in record [:failure :detail]
+                          {:reviewer-falsifier-verification
+                           {:status :refused
+                            :reason :reviewer-falsifier-applicable-check-failed}})
+        export (facts/facts-for-record planted "r" snap nil nil)]
+    (is (= 1 (get-in export [:facts "pathAbsenceCount"])))
+    (is (= ["[:failure :detail :reviewer-falsifier-verification]"]
+           (get-in export [:diagnostics :absencePaths])))))
+
 (deftest new-world-carrier-removes-record-nr-fields
   (let [world {:open-tasks {:missions {:ids ["M-x"]}
                             :excursions {:ids []} :tickets {:ids []}}
