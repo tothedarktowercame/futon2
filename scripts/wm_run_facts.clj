@@ -17,7 +17,9 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
-   "gTerms" "interpretationOrder" "pathAbsenceCount" "previousChoice"
+   "gTerms" "gradedPreferenceSteps" "policiesWithRiskTerm"
+   "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
+   "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
@@ -210,7 +212,7 @@
                  (set (keep #(when (numeric-g? %) (candidate-target %)) candidates)))
         cascade-ids (when (vector? candidates) (set (keep candidate-id candidates)))
         policy-ids (when (vector? policies)
-                     (set (map #(or (:id %) (:policy-id %) (pr-str %)) policies)))
+                     (set (map #(or (candidate-id %) (:policy-id %) (pr-str %)) policies)))
         construction (target-construction-facts cert)
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
@@ -227,8 +229,20 @@
                                            (not= #{:ending/not-yet-evaluated}
                                                  (set (keys row))))]
                             (dec (long step)))))
+        graded-pref-steps
+        (when (map? c-pref)
+          (set (for [[step row] c-pref
+                     :when (and (integer? step) (map? row) (seq row)
+                                (every? #(and (keyword? %)
+                                              (or (= "progress" (namespace %))
+                                                  (str/starts-with? (name %) "progress-")))
+                                        (keys row)))]
+                 (dec (long step)))))
         census (get cert :q9-q10-census)
         g-term-rows (vec (keep #(get (val %) :g-terms) scoring))
+        recorded-term? (fn [term row]
+                         (let [v (get row term ::absent)]
+                           (and (number? v) (Double/isFinite (double v)))))
         contributing? (fn [term row]
                         (let [v (get row term)]
                           (and (number? v) (Double/isFinite (double v))
@@ -317,11 +331,24 @@
                "horizonLength" (or horizon (nr "observation-model horizon absent"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
                                      (nr "step-indexed class preference absent"))
+               "gradedPreferenceSteps"
+               (if (some? graded-pref-steps) (vec (sort graded-pref-steps))
+                   (nr "completed-progress preference rows absent"))
                "gTerms" (if (seq g-term-rows)
                             {"risk" (every? #(contributing? :risk %) g-term-rows)
                              "ambiguity" (every? #(contributing? :ambiguity %) g-term-rows)
                              "informationGain" (every? #(contributing? :expected-information-gain %) g-term-rows)}
                             (nr "per-candidate G terms absent"))
+               "policiesWithRiskTerm"
+               (if (seq g-term-rows) (count (filter #(recorded-term? :risk %) g-term-rows))
+                   (nr "per-policy risk terms absent"))
+               "policiesWithAmbiguityTerm"
+               (if (seq g-term-rows) (count (filter #(recorded-term? :ambiguity %) g-term-rows))
+                   (nr "per-policy ambiguity terms absent"))
+               "policiesWithInformationTerm"
+               (if (seq g-term-rows)
+                 (count (filter #(recorded-term? :expected-information-gain %) g-term-rows))
+                 (nr "per-policy expected-information terms absent"))
                "interpretationOrder"
                (if-let [selected-at (:selection-ended-at world)]
                  (if-let [asked-at (:interpretation-issued-at world)]

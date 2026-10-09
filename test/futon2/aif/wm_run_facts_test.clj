@@ -139,6 +139,46 @@
           (af "gTerms"))
           "a numeric zero is still a recorded term, but absent information gain is not"))))
 
+(deftest current-q4-carriers-export-graded-steps-and-per-policy-term-counts
+  (let [model {:horizon 2
+               :class-preference {1 {:progress-0 1/3 :progress-1 2/3}
+                                  2 {:focused 1}}}
+        r (assoc-in record [:decision :selection-certificate]
+                    {:candidates [{:id :c1 :target "M-x" :g 1.5}]
+                     :policies [{:id :c1}]
+                     :g-term-decomposition {:policies [{:terms {:A {:value model}}}]}
+                     :scoring {0 {:g-terms {:risk 1.0 :ambiguity 0.0
+                                            :expected-information-gain 0.0}}}})
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (is (= [0] (f "gradedPreferenceSteps")))
+    (is (= 1 (f "policiesWithRiskTerm")))
+    (is (= 1 (f "policiesWithAmbiguityTerm")))
+    (is (= 1 (f "policiesWithInformationTerm")))))
+
+(deftest compared-policy-id-does-not-expand-the-whole-candidate-map
+  (let [policy {:id {:kind :cascade-candidate :id :C1 :target "M-x"
+                     :precedence [{:id :p1 :reading (apply str (repeat 500 "x"))}]}}
+        r (assoc-in record [:decision :selection-certificate :policies] [policy])
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (is (= [":C1"] (f "comparedPolicies")))))
+
+(deftest current-q9-q10-census-is-exported-verbatim
+  (let [census {:completion-preference-pairs 3
+                :completion-pairs-strictly-preferred 2
+                :earlier-progress-pairs 4
+                :earlier-progress-no-greater-risk 4
+                :different-arrangement-pairs 5
+                :arrangement-pairs-distinguished-by-g 5}
+        r (assoc-in record [:decision :selection-certificate :q9-q10-census] census)
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (doseq [[k v] {"completionPreferencePairs" 3
+                   "completionPairsStrictlyPreferred" 2
+                   "earlierProgressPairs" 4
+                   "earlierProgressNoGreaterRisk" 4
+                   "differentArrangementPairs" 5
+                   "arrangementPairsDistinguishedByG" 5}]
+      (is (= v (f k))))))
+
 (deftest seats-used-counts-only-dispatched-seats
   ;; Lean: "Stable ids of seats included in dispatch or behavior counts for
   ;; the run." A role's identity counts only when the record shows a
