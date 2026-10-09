@@ -120,6 +120,9 @@
                (or (get-in row [:trial :effect])
                    (:effect row))))
 
+(defonce ^:private trials-cache (atom nil))
+(declare ^:private read-trials-uncached)
+
 (defn read-trials
   "PROOF-wm-works ⟨1⟩4: the production reader. Reads every recorded trial
    (v1 record-only events included — interpreted, never duplicated or
@@ -137,6 +140,20 @@
    (locking mutex
      (if-not (.exists (io/file file))
        []
+       ;; Parse once per unchanged ledger file (claude-12, 2026-10-09: the
+       ;; per-target pattern-theta loop re-parsed the 2.6 MB ledger for every
+       ;; pattern of every target, so live selection took >10 min).  The file
+       ;; is append-only (record!), so any write changes its length and mtime
+       ;; and invalidates this entry; the value equals a fresh parse.
+       (let [f (io/file file)
+             cache-key [(.getCanonicalPath f) (.length f) (.lastModified f)]]
+         (if (= cache-key (:key @trials-cache))
+           (:value @trials-cache)
+           (let [value (read-trials-uncached f)]
+             (reset! trials-cache {:key cache-key :value value})
+             value)))))))
+
+(defn- read-trials-uncached [file]
        (with-open [raf (RandomAccessFile. (io/file file) "r")]
          (let [bytes (byte-array (.length raf))]
            (.readFully raf bytes)
@@ -156,7 +173,7 @@
                     ;; :trial; v2 rows are read without a veto
                     :contract-version (if (get-in row [:trial :consumption]) :v1 :v2)
                     :row row})
-                 (records (String. bytes "UTF-8")))))))))
+                 (records (String. bytes "UTF-8"))))))
 
 ;; ---------------------------------------------------------------------------
 ;; B-C (PROOF-2 strategy row 34): the concentration carrier recorded at the
