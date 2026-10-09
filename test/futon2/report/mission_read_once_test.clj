@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.mission-hole-wants :as holes]
             [futon2.aif.mission-registry :as mr]
             [futon2.aif.outer-task-selection :as outer-task-selection]
             [futon2.aif.ticket-queue :as ticket-queue]
@@ -40,7 +41,8 @@
                                            (apply mission-doc args)
                                            mission-doc))
                      #'mr/load-tickets (fn [& _] {:tickets []})
-                     #'mr/load-excursions (fn [& _] {:excursions []})
+                     #'mr/load-excursions (fn [& _]
+                                            {:excursions (vec (::excursions judge-opts))})
                      (ns-resolve ns 'assemble-cascade-problems-with-published)
                      (fn [_ input & _]
                        (reset! targets (:targets input))
@@ -159,6 +161,26 @@
         "the META-selected identity, not the prepared inner material, is targeted")
     (is (= 1 (count @calls)))
     (is (= #{"M-a" "M-b"} (set (:ids (first @calls)))))))
+
+(deftest excursion-documents-enter-the-current-head-want-reader
+  (let [captured (atom nil)
+        excursion {:id "E-readable" :kind :excursion :status-class :open
+                   :path "/fixture/repo/holes/E-readable.md"
+                   :text "# E-readable\n\n- [ ] report the measured result\n"}]
+    (with-redefs [holes/merge-into-sources
+                  (fn [declared _ rows _]
+                    (reset! captured (mapv :id rows))
+                    declared)]
+      (one-selection (:ns (meta #'wm/judge))
+                     {:outer-task-selection-fn
+                      (fn [{:keys [tasks]}]
+                        {:schema :wm/outer-task-selection-v1
+                         :policy {:kind :test} :support tasks :excluded []
+                         :draw {:absent :test} :chosen (first tasks)
+                         :action {:type :advance-excursion :target "E-readable"}})
+                      ::excursions [excursion]}
+                     {:missions []}))
+    (is (= ["E-readable"] @captured))))
 
 (deftest meta-is-fail-closed-and-seeded-baseline-is-explicit
   (is (thrown-with-msg?

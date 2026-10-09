@@ -6648,7 +6648,13 @@
                              (cascade-sources/load-declared
                               (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))
                              mission-registry/default-code-root
-                             (:missions loaded-missions)
+                             ;; Missions and excursions share the same HEAD
+                             ;; document authority and criterion grammar.  The
+                             ;; task census has always included both, but the
+                             ;; source reader formerly received missions only,
+                             ;; silently leaving every excursion undeclared.
+                             (concat (:missions loaded-missions)
+                                     (:excursions loaded-excursions))
                              :WM)
                             mission-registry/default-code-root
                             (:tickets loaded-tickets)

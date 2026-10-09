@@ -33,7 +33,7 @@
    have one: the line carries a checkbox that closing it flips."
   [hole]
   (and (= :unchecked-task (:kind hole))
-       (re-find #"^[-*]\s+\[\s\]\s+\S" (str (:text hole)))))
+       (re-find #"^\s*[-*]\s+\[\s\]\s+\S" (str (:text hole)))))
 
 (defn want-token
   "The outcome token for a hole, from its stable content-addressed id.
@@ -90,7 +90,7 @@
   [target text]
   (vec (keep-indexed
         (fn [i line]
-          (when (re-find #"^[-*]\s+\[\s\]\s+\S" line)
+          (when (re-find #"^\s*[-*]\s+\[\s\]\s+\S" line)
             {:id (str target "#" (subs (load-identity/sha256
                                          (.getBytes (str/trim line) "UTF-8")) 0 12))
              :kind :unchecked-task :line (inc i) :text line}))

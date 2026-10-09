@@ -27,6 +27,17 @@
   (testing "the witness is presence of a checked item, never absence of an unchecked one"
     (is (re-find #"\[x\]" (:decl (first (vals (:locators (mhw/mission-source "/root" mission)))))))))
 
+(deftest indented-excursion-checkbox-is-an-observable-want
+  (let [excursion {:id "E-indented" :path "/root/repo/holes/E-indented.md"
+                   :status-class :open
+                   :text "# Excursion\n\n  - [ ] run the disruption soak test\n"}
+        source (mhw/mission-source "/root" excursion)
+        token (first (:want source))]
+    (is (= 1 (count (:want source))))
+    (is (= false (get-in source [:universe token])))
+    (is (= "- [x] run the disruption soak test"
+           (get-in source [:locators token :decl])))))
+
 (deftest the-locator-is-repo-relative-and-checkable
   (let [loc (first (vals (:locators (mhw/mission-source "/root" mission))))]
     (is (= :C4 (:class loc)))
