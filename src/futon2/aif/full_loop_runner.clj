@@ -5813,13 +5813,20 @@
                                 e))))
             interpretation-ask-fn (or (:interpretation-ask-fn opts)
                                       (get *runtime-defaults* :interpretation-ask-fn))
+            ;; One lookup supplies both Q6 enforcement and the focus carried
+            ;; into selection from the immediately preceding run.
+            previous-run-carrier
+            ((or (:previous-run-fn opts) previous-run/lookup)
+             (or (:run-record-dir opts) (run-record-dir))
+             (:run-id opts))
             decide!
             (fn []
               (try
             (run-phase!
              opts @phase-context :selection
              #(let [_ (swap! effective-configuration assoc :evaluation :started)
-                    generated (selection-judge window-days)
+                    generated (binding [previous-run/*carrier* previous-run-carrier]
+                                (selection-judge window-days))
                     judgement (:judgement generated)
                     _ (reset! effective-configuration
                               (or (:effective-run-configuration judgement)
@@ -5852,14 +5859,6 @@
                 ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
                 ;; else goes on, typed by its thrower's :kind when it has one
                 (selection-refusal! e nil))))
-            ;; Q6 carry: the previous run's choice, typed terminal outcome
-            ;; and selection-input digest, from an explicit typed lookup of
-            ;; the run record before this one (injectable as
-            ;; :previous-run-fn for hermetic tests).
-            previous-run-carrier
-            ((or (:previous-run-fn opts) previous-run/lookup)
-             (or (:run-record-dir opts) (run-record-dir))
-             (:run-id opts))
             q6-evidence (atom nil)
             judgement0-natural (decide!)
             ;; Q6 enforcement (Requirements Q6): when the natural choice
@@ -5953,7 +5952,8 @@
               (try
                 (run-phase!
                  opts @phase-context :selection-redecision
-                 #(let [generated (selection-judge window-days)
+                 #(let [generated (binding [previous-run/*carrier* previous-run-carrier]
+                                    (selection-judge window-days))
                         j ((or (:judgement-transform-fn opts) identity)
                            (:judgement generated))
                         _ (when (or (:require-loop-node-exercise? opts)

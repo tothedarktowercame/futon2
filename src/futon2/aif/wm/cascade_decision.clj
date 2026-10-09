@@ -944,6 +944,11 @@
                           :let [t (:target p)]]
                       [t (focus-receipt/classify-target
                           focus-inputs focus-info (:as-of focus-info) t relation-context)]))
+              previous-focus-context
+              (or (previous-run/focus-context previous-run/*carrier*)
+                  (when (:focus focus-established)
+                    {:focus (:focus focus-established)
+                     :as-of established-as-of}))
               ;; relation vocabulary -> scorer classes (the close side maps
               ;; the same keywords through the facet-map)
               scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated}
@@ -1239,9 +1244,7 @@
                 decision (focus-receipt/attach
                           decision focus-inputs
                           {:as-of decision-as-of
-                           :previous-focus (when (:focus focus-established)
-                                             {:focus (:focus focus-established)
-                                              :as-of established-as-of})
+                           :previous-focus previous-focus-context
                            :relation-context relation-context
                            :classifications target-classifications})
                 authorized (controller-authority/authorize decision ranked)
