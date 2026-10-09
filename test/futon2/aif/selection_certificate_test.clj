@@ -89,6 +89,48 @@
            (try (select [{:action :a :controller-score 1 :f f}] 1)
                 (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))))
 
+(deftest q9-q10-census-is-derived-from-scored-candidates
+  (let [c {:schema :wm/bounded-observation-score-v1
+           :observation-model {:kind :progress-count}
+           :consumed-g {:C {:steps [{:tau 1 :distribution
+                                     {[1 true] 2/3 [0 false] 1/3}}]}}}
+        a {:kind :cascade-candidate :id "a" :target "t"
+           :precedence [{:pattern-id :p} {:pattern-id :q}]
+           :controller-score 1.0}
+        b {:kind :cascade-candidate :id "b" :target "t"
+           :precedence [{:pattern-id :q} {:pattern-id :p}]
+           :controller-score 2.0}
+        entries [(assoc a :action a :f 0 :habit 1 :certificate c)
+                 (assoc b :action b :f 0 :habit 1 :certificate c)]
+        census (get-in (select entries 1) [:selection-certificate :q9-q10-census])]
+    (is (= 1 (:completion-preference-pairs census)))
+    (is (= 1 (:completion-pairs-strictly-preferred census)))
+    (is (= 1 (:different-arrangement-pairs census)))
+    (is (= 1 (:arrangement-pairs-distinguished-by-g census)))
+    (is (nil? (:earlier-progress-pairs census)))))
+
+(deftest q10-does-not-count-renamed-or-unscored-policies
+  (let [base {:kind :cascade-candidate :target "t" :controller-score 1.0
+              :f 0 :habit 1 :certificate {:consumed-g {:C {:steps []}}}}
+        candidate-a (assoc base :id "a"
+                           :precedence [{:pattern-id :p} {:pattern-id :q}])
+        candidate-b (assoc base :id "b"
+                           :precedence [{:pattern-id :x} {:pattern-id :y}])
+        candidate-c (assoc base :id "c"
+                           :precedence [{:pattern-id :q} {:pattern-id :p}])
+        same-patterns (assoc candidate-a :action candidate-a)
+        renamed (assoc candidate-b :action candidate-b)
+        unscored (assoc candidate-c :action candidate-c :controller-score nil)]
+    (is (= 0 (:different-arrangement-pairs
+              (get-in (select [same-patterns renamed] 1)
+                      [:selection-certificate :q9-q10-census]))))
+    (is (= 1 (:different-arrangement-pairs
+              (get-in (select [same-patterns unscored] 1)
+                      [:selection-certificate :q9-q10-census]))))
+    (is (= 0 (:arrangement-pairs-distinguished-by-g
+              (get-in (select [same-patterns unscored] 1)
+                      [:selection-certificate :q9-q10-census]))))))
+
 (defn- rational-literal [x]
   (let [r (rationalize x)]
     (if (ratio? r)

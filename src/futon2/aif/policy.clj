@@ -282,6 +282,54 @@
      :computed-f computed-f
      :f-prefix (:f-prefix entry)}))
 
+;; Q9/Q10 are certificate properties, not exporter guesses.  Keep the
+;; census beside the exact scorer inputs retained in :scoring/:candidates.
+(defn- q9-census [ranked]
+  (let [model (get-in (first ranked) [:certificate :observation-model])
+        ;; C is a shared preference model for the compared family.  Read it
+        ;; once; repeating the same C row for every policy would count the
+        ;; same reachable outcome pair multiple times.
+        c-steps (get-in (first ranked) [:certificate :consumed-g :C :steps])
+        completion-pairs
+        (when (= :progress-count (:kind model))
+          (for [{:keys [distribution]} c-steps
+                [[_ closed?] closed-p] distribution :when closed?
+                [[_ open?] open-p] distribution :when (false? open?)
+                :when (and (number? closed-p) (number? open-p))]
+            {:closed? true :non-closing? false
+             :closed-preferred? (> (double closed-p) (double open-p))}))]
+    ;; The progress scorer does not currently retain completed-progress per
+    ;; trace step.  Do not substitute belief support: Q9's earlier-progress
+    ;; relation is therefore typed absent until that scorer receipt exists.
+    {:completion-preference-pairs (when completion-pairs (count completion-pairs))
+     :completion-pairs-strictly-preferred
+     (when completion-pairs (count (filter :closed-preferred? completion-pairs)))
+     :earlier-progress-pairs nil
+     :earlier-progress-no-greater-risk nil
+     :reason (if completion-pairs nil :completed-progress-receipt-not-emitted)}))
+
+(defn- arrangement-q10-census [ranked]
+  (let [rows (for [e ranked
+                  :let [a (:action e)
+                        precedence (vec (or (:precedence a) []))
+                        patterns (set (map #(or (:pattern-id %) (:id %) %) precedence))]]
+              {:id (or (get-in a [:id :id]) (:id a)) :patterns patterns
+               :arrangement (pr-str precedence) :g (:controller-score e)})
+        pairs (for [[i a] (map-indexed vector rows)
+                    [j b] (map-indexed vector rows)
+                    :when (and (< i j)
+                               (= (:patterns a) (:patterns b))
+                               (not= (:arrangement a) (:arrangement b)))]
+                {:left (:id a) :right (:id b)
+                 ;; Each row is a separate policy entry; scorer admission
+                 ;; requires unique ids and its own controller score.
+                 :separate-policy-g? (and (not= (:id a) (:id b))
+                                          (number? (:g a)) (number? (:g b)))})]
+    {:different-arrangement-pairs (count pairs)
+     :arrangement-pairs-distinguished-by-g
+     (count (filter :separate-policy-g? pairs))
+     :arrangement-pair-details (vec pairs)}))
+
 (defn- selection-certificate
   "One Lean SelectionCertificate per policy; raw computed F stays in the
    accompanying candidates, outside the finite Lean fields. Attached inputs
@@ -300,6 +348,8 @@
               :status (if (contains? certificate :node-evaluations) :recorded :missing)
               :evaluations (:node-evaluations certificate)})) ranked)
    :g-term-decomposition (decomposition/census ranked candidates)
+   :q9-q10-census (merge (q9-census ranked)
+                         (arrangement-q10-census ranked))
    ;; F-ABS (PROOF-2 packet 27): name the law that actually ran. Evidence only.
    :law-applied (cascade-selection/law-receipt candidates)
    ;; Retain every candidate's own scorer provenance. Indexing by position
