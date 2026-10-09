@@ -156,6 +156,19 @@
     (is (= 1 (:completion-preference-pairs census)))
     (is (= 1 (:completion-pairs-strictly-preferred census)))))
 
+(deftest q9-class-emission-unrelated-is-not-own-target-completion
+  (let [candidate {:kind :cascade-candidate :id "class-unrelated" :target "t"
+                   :precedence [{:pattern-id :p}]
+                   :controller-score 1.0 :f 0 :habit 1}
+        certificate {:observation-model {:kind :class-emission}
+                     :consumed-g {:C {:steps [{:tau 1 :distribution
+                                               {:progress-0 1/2 :unrelated 1/2}}]}}}
+        census (get-in (select [(assoc candidate :action candidate
+                                        :certificate certificate)] 1)
+                       [:selection-certificate :q9-q10-census])]
+    (is (= 0 (:completion-preference-pairs census)))
+    (is (= 0 (:completion-pairs-strictly-preferred census)))))
+
 (defn- rational-literal [x]
   (let [r (rationalize x)]
     (if (ratio? r)
