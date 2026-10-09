@@ -678,6 +678,25 @@
                    :classes (vec (sort-by pr-str (distinct (vals class-of))))}
             (seq refusals) (assoc :refusals refusals)))))))
 
+(defn lane-local-dropped-candidates
+  "Attach only the declines belonging to each lane's target.  The complete
+   family vector remains at the result's top level as the single lossless
+   audit carrier."
+  [lanes dropped]
+  (let [by-target (group-by :target dropped)]
+    (mapv (fn [lane]
+            (let [local (vec (get by-target (:target lane)))]
+              (cond-> lane (seq local) (assoc :dropped-candidates local))))
+          lanes)))
+
+(defn numeric-g-target-count
+  "Count lanes having at least one actually scored (numeric-G) candidate."
+  [lanes candidates]
+  (let [scored-ids (into #{} (keep #(when (number? (:g %)) (:id %))) candidates)]
+    (count (filter (fn [lane]
+                     (some #(contains? scored-ids (:id %)) (:candidates lane)))
+                   lanes))))
+
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today),
@@ -1180,11 +1199,7 @@
                               {:status :abstained
                                :refusals (into (vec (:refusals assembled))
                                                class-unknown-refusals)})
-                   :lanes (mapv (fn [lane]
-                                  (cond-> lane
-                                    (seq dropped)
-                                    (assoc :dropped-candidates dropped)))
-                                lanes)
+                   :lanes (lane-local-dropped-candidates lanes dropped)
                    :dropped-candidates dropped
                    :cascade-problems assembled}
                   (throw (ex-info "cascade decision refused"
@@ -1308,11 +1323,7 @@
                               {:scheme :target-token-pair
                                :form "[target token]"
                                :pattern-maps-carry :target})
-             :lanes (mapv (fn [lane]
-                            (cond-> lane
-                              (seq dropped)
-                              (assoc :dropped-candidates dropped)))
-                          lanes)
+             :lanes (lane-local-dropped-candidates lanes dropped)
              :dropped-candidates dropped
              :cascade-problems assembled}))))))
 
@@ -1572,7 +1583,11 @@
                            (precision-carry/advance {:previous previous-beta
                              :initialized-beta (:initialized-beta previous-beta)
                              :model-id (:model-id previous-beta)}))
-                 result)]
+                 result)
+        scored-target-count
+        (numeric-g-target-count
+         (:lanes result)
+         (get-in result [:decision :selection-certificate :candidates]))]
     (let [construction-census
           (target-construction-census
            (:target-construction-inputs assembled)
@@ -1613,7 +1628,7 @@
       (assoc-in [:decision :selection-certificate :scoring-target-budget]
                 (when scoring-budget
                   (assoc scoring-budget
-                         :scored-target-count (count scored-problems)
+                         :scored-target-count scored-target-count
                          :budget-exhausted-targets (mapv :target budget-exhausted))))
       true
       (assoc-in [:decision :selection-certificate :retrieval-refusals]
