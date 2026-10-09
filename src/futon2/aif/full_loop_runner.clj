@@ -899,8 +899,10 @@
               (:checkpoints result))
         failure {:kind (or (get-in result [:data :failure-kind]) :close-exception)
                  :stage :close
-                 :exception-class (.getName (class original-error))
-                 :error (or (ex-message original-error) "Close persistence failed")}
+                 :exception-class (or (get-in result [:data :exception-class])
+                                      (.getName (class original-error)))
+                 :error (or (get-in result [:data :error])
+                            (ex-message original-error) "Close persistence failed")}
         base {:run/id run-id :startedAt started-at :outcome :build-failed
               :record-type :wm/terminal-persistence-failure
               :checkpoint-keys (vec (keys checkpoint-refs))
@@ -933,12 +935,20 @@
    write throws.  The retry records the original throwable as a typed close
    failure; it never re-runs the opportunity or substitutes an empty
    initialization result.  PERSIST-FN is injectable for the write-boundary
-   regression test and production storage faults."
+  regression test and production storage faults."
   [persist-fn raw-opts run-id started-at result]
-  (try
-    (merge result {:run/id run-id}
-           (persist-fn raw-opts run-id started-at result))
-    (catch Throwable e
+  (if (= :close (get-in result [:data :failure-stage]))
+    ;; A fault in manifest, delivery, retention, checkpoint persistence, or
+    ;; any other close substep already carries the real class/message in DATA.
+    ;; Do not ask the full-record path to traverse the damaged close value.
+    (let [e (ex-info (or (get-in result [:data :error]) "Close step failed")
+                     {:failure-kind (get-in result [:data :failure-kind])})]
+      (merge result {:run/id run-id}
+             (persist-small-failure-record! raw-opts run-id started-at result e)))
+    (try
+      (merge result {:run/id run-id}
+             (persist-fn raw-opts run-id started-at result))
+      (catch Throwable e
       (let [edata (if (instance? clojure.lang.ExceptionInfo e) (ex-data e) {})
             failure-kind (or (:failure-kind edata) :close-exception)
             fallback (-> result
@@ -954,7 +964,7 @@
                                           :message (or (ex-message e)
                                                        "Close persistence failed")}}))]
         (merge fallback {:run/id run-id}
-               (persist-small-failure-record! raw-opts run-id started-at fallback e))))))
+               (persist-small-failure-record! raw-opts run-id started-at fallback e)))))))
 
 (defn grounded-commit-for
   "PROOF-2b (click 13, tick-run-record-2026-09-30-1790737908): the grounded
