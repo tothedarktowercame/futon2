@@ -58,7 +58,7 @@
     (is (= :not-recomputable (get-in result [:sections 0 :rows 0 :status])))
     (is (= :absent (get-in result [:sections 2 :data :chosen-target :status])))
     (is (= :absent (get-in result [:sections 3 :data :run-output :status])))
-    (is (re-find #":status :absent" (card/markdown result)))))
+    (is (re-find #"absent: chosen target absent" (card/markdown result)))))
 
 (deftest public-html-removes-host-paths-and-secret-url-components
   (let [r (-> full-record
@@ -69,3 +69,19 @@
     (is (not (re-find #"/home/joe" html)))
     (is (not (re-find #"password|token=secret" html)))
     (is (re-find #"futon2/data/run.edn" html))))
+
+(deftest readable-card-separates-work-wall-and-summarizes-verdict-lists
+  (let [r (assoc full-record :registered-run/timing
+                 {:wall-clock-ms 30
+                  :phase-timings-ms {:construction 6}
+                  :phase-wall-timings-ms {:construction 21}
+                  :debugger-dwell-receipts
+                  [{:phase :construction :duration-ms 15 :restart-choice :continue}]})
+        result (card/build-card r "fixture.edn" snap)
+        md (card/markdown result)
+        phase (first (get-in result [:sections 1 :data :phase-timeline]))]
+    (is (= [6 21 15] ((juxt :work-ms :wall-ms :debugger-dwell-ms) phase)))
+    (is (re-find #"Outcome:.*Lean:" md))
+    (is (re-find #"\| :construction \| 6 \| 21 \| 15 \|" md))
+    (is (= {:count 1 :sample ["M-x"] :omitted 0}
+           (get-in result [:sections 0 :rows 0 :deciding-facts "openMissions"])))))

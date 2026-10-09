@@ -118,13 +118,29 @@
               (= (f "arrangementPairsDistinguishedByG")
                  (f "differentArrangementPairs")))))
 
+(defn summarize
+  "Bound a value for human verdict tables. The complete exporter snapshot
+  remains in report-card.edn, but public deciding facts never print hundreds
+  of ids."
+  [x]
+  (cond
+    (and (string? x) (> (count x) 160))
+    {:characters (count x) :sample (str (subs x 0 157) "…")
+     :omitted (- (count x) 157)}
+    (and (sequential? x) (not (string? x)))
+    {:count (count x) :sample (mapv summarize (take 3 x))
+     :omitted (max 0 (- (count x) 3))}
+    (set? x) (summarize (sort-by pr-str x))
+    (map? x) (into {} (map (fn [[k v]] [k (summarize v)]) x))
+    :else x))
+
 (defn verdict-rows [export]
   (let [facts (:facts export)]
     (mapv (fn [q]
             (let [deps (q-deps q)
                   unavailable (vec (filter #(or (not (contains? facts %))
                                                 (nr? (facts %))) deps))
-                  deciding (select-keys facts deps)]
+                  deciding (summarize (select-keys facts deps))]
               (if (seq unavailable)
                 {:requirement q :status :not-recomputable
                  :deciding-facts deciding
@@ -163,7 +179,15 @@
   (let [locs (or (get-in chosen-candidate [:f-prefix :policy :observation-locators])
                  (:observation-locators chosen-candidate))
         loc (some (fn [[[t _] v]] (when (= target t) v)) locs)]
-    {:title (or (:title loc) (absent "document title not recorded"))
+    {:title (or (:title loc)
+                (when (and (:repo loc) (:path loc))
+                  (let [f (io/file "/home/joe/code" (str (:repo loc)) (str (:path loc)))]
+                    (when (.isFile f)
+                      (with-open [reader (io/reader f)]
+                        (when-let [heading (first (filter #(re-matches #"^#\s+.+" %)
+                                                         (line-seq reader)))]
+                          (str/replace heading #"^#\s+" ""))))))
+                (absent "document title not recorded or readable"))
      :reference (if (and (:repo loc) (:path loc))
                   (str (:repo loc) "/" (:path loc))
                   (absent "document reference not recorded"))
@@ -174,26 +198,49 @@
 
 (defn- run-section [record]
   (let [timing (:registered-run/timing record)
-        phases (or (:phase-timings-ms timing) (:phase-wall-timings-ms timing))
-        jobs (get-in record [:registered-run/model-usage :jobs])]
+        work (:phase-timings-ms timing)
+        wall (:phase-wall-timings-ms timing)
+        dwells (:debugger-dwell-receipts timing)
+        phases (sort (set/union (set (keys work)) (set (keys wall))
+                                (set (keep :phase dwells))))
+        jobs (get-in record [:registered-run/model-usage :jobs])
+        roles (get-in record [:participants :roles])
+        jobs-by-seat (group-by #(get-in % [:role :agent]) jobs)]
     {:started-at (value-at record [:startedAt] "run start absent")
      :duration-ms (or (:wall-clock-ms timing) (absent "run duration absent"))
      :outcome (or (get-in record [:terminal-receipt :failure-kind])
                   (get-in record [:terminal-receipt :outcome])
                   (absent "terminal outcome absent"))
-     :phase-timeline (if (map? phases)
-                       (mapv (fn [[phase duration]] {:phase phase :duration-ms duration}) phases)
+     :phase-timeline (if (seq phases)
+                       (mapv (fn [phase]
+                               (let [stops (filter #(= phase (:phase %)) dwells)]
+                                 {:phase phase
+                                  :work-ms (or (get work phase)
+                                               (absent "phase work time absent"))
+                                  :wall-ms (or (get wall phase)
+                                               (absent "phase wall time absent"))
+                                  :debugger-dwell-ms (reduce + 0 (keep :duration-ms stops))
+                                  :outcome (if (some #(= :wm/phase-failure (:condition-kind %)) stops)
+                                             :failed-then-restarted :completed)
+                                  :restarts (mapv :restart-choice stops)})) phases)
                        (absent "phase timings absent"))
      :debugger (if (contains? timing :debugger-dwell-receipts)
                  {:stopped-ms (:debugger-stopped-ms timing)
                   :stops (:debugger-dwell-receipts timing)}
                  (absent "debugger records absent"))
-     :seats-and-roles (or (get-in record [:participants :roles])
-                          (absent "participant roles absent"))
-     :token-usage (if (seq jobs)
-                    (mapv #(select-keys % [:role :job-id :phase :status :model
-                                           :input-tokens :output-tokens :total-tokens]) jobs)
-                    (absent "no per-seat token usage recorded"))
+     :seats (if (map? roles)
+              (mapv (fn [[role entry]]
+                      (let [seat (:identity entry) seat-jobs (get jobs-by-seat seat)]
+                        {:role role :seat seat
+                         :job (if (seq seat-jobs) (mapv :job-id seat-jobs)
+                                  (absent "seat was not dispatched"))
+                         :tokens-in (if (seq seat-jobs)
+                                      (reduce + 0 (keep :input-tokens seat-jobs))
+                                      (absent "no dispatched token usage"))
+                         :tokens-out (if (seq seat-jobs)
+                                       (reduce + 0 (keep :output-tokens seat-jobs))
+                                       (absent "no dispatched token usage"))})) roles)
+              (absent "participant roles absent"))
      :terminal-receipt (value-at record [:terminal-receipt] "terminal receipt absent")}))
 
 (defn- cascade-section [record]
@@ -205,6 +252,7 @@
                                           (= (:id chosen) (candidate-id %))) candidates))
                      (first (filter #(= target (candidate-target %)) candidates)))
         scoring (:scoring cert)
+        gpolicies (get-in cert [:g-term-decomposition :policies])
         ranked (->> candidates
                     (map-indexed (fn [i c] {:index i :candidate c}))
                     (filter #(number? (candidate-g (:candidate %))))
@@ -222,11 +270,23 @@
                               {:rank (inc rank)
                                :target (candidate-target candidate)
                                :policy (candidate-id candidate)
+                               :patterns (mapv pattern-id (candidate-patterns candidate))
                                :G (candidate-g candidate)
-                               :terms (or (:g-terms candidate)
-                                          (get-in candidate [:certificate :g-terms])
-                                          (get-in scoring [index :g-terms])
-                                          (absent "risk/ambiguity/EIG/F terms absent"))}
+                               :risk (or (get-in candidate [:g-terms :risk])
+                                         (get-in scoring [index :g-terms :risk])
+                                         (absent "risk term absent"))
+                               :ambiguity (or (get-in candidate [:g-terms :ambiguity])
+                                              (get-in scoring [index :g-terms :ambiguity])
+                                              (absent "ambiguity term absent"))
+                               :EIG (or (get-in candidate [:g-terms :expected-information-gain])
+                                        (get-in scoring [index :g-terms :expected-information-gain])
+                                        (absent "EIG term absent"))
+                               :F (let [f (get-in gpolicies [index :terms :F])]
+                                    (if (= :present (:status f)) (:value f)
+                                        (absent (or (:reason f) "F term absent"))))
+                               :tie-group (or (:tie-group candidate)
+                                              (get-in scoring [index :tie-group])
+                                              (absent "tie group absent"))}
                               (absent (str "rank " (inc rank)
                                            " policy absent; fewer than four numeric policies recorded"))))
                           (range 4))
@@ -238,7 +298,9 @@
                     (mapv (fn [p]
                             {:pattern p
                              :interpretation-receipt
-                             (or (get receipts p)
+                             (if-let [receipt (get receipts p)]
+                               (select-keys receipt [:kind :reading :scope-limit :source
+                                                     :answered-by :at])
                                  (absent "interpretation receipt absent"))}) patterns)
                     (absent "chosen pattern arrangement absent"))
      :selection-redecision (or (:selection-redecision record)
@@ -301,13 +363,21 @@
   ([record record-path snap previous previous-path]
    (let [export (run-facts/facts-for-record record record-path snap previous previous-path)
          cascade (cascade-section record)
-         outcome (outcome-section record)]
+         outcome (outcome-section record)
+         verdicts (verdict-rows export)
+         counts (frequencies (map :status verdicts))
+         run-outcome (or (get-in record [:terminal-receipt :failure-kind])
+                         (get-in record [:terminal-receipt :outcome]) :absent)
+         target (:chosen-target cascade)]
      (sanitize
       {:schema :wm/report-card-v1
        :run-id (or (:run/id record) (absent "run id absent"))
        :source-record record-path
+       :headline {:outcome run-outcome :target target
+                  :pass (get counts :pass 0) :fail (get counts :fail 0)
+                  :not-recomputable (get counts :not-recomputable 0)}
        :sections
-       [{:id :verdict :title "Verdict" :rows (verdict-rows export)
+       [{:id :verdict :title "Verdict" :rows verdicts
          :export-snapshot export}
         {:id :run :title "Run" :data (run-section record)}
         {:id :cascade :title "Cascade" :data cascade}
@@ -320,9 +390,27 @@
       (str/replace ">" "&gt;") (str/replace "\"" "&quot;")
       (str/replace "'" "&#39;")))
 
+(defn- display [x]
+  (if (absent? x) (str "absent: " (:reason x))
+      (if (string? x) x (pr-str x))))
+
+(defn- md-cell [x]
+  (-> (display x) (str/replace "|" "\\|") (str/replace #"\s+" " ")))
+
+(defn- md-row [xs]
+  (str "| " (str/join " | " (map md-cell xs)) " |\n"))
+
+(defn- headline-text [card]
+  (let [{:keys [outcome target pass fail not-recomputable]} (:headline card)]
+    (format "Outcome: %s · Target: %s · Lean: %d pass / %d fail / %d not recomputable"
+            (display outcome) (display target) pass fail not-recomputable)))
+
 (defn markdown [card]
-  (let [[verdict run cascade outcome example] (:sections card)]
+  (let [[verdict run cascade outcome example] (:sections card)
+        rd (:data run) cd (:data cascade) od (:data outcome)
+        comparisons (get-in cd [:why-it-won :comparison])]
     (str "# War Machine report card: " (:run-id card) "\n\n"
+         "**" (headline-text card) "**\n\n"
          "Source: `" (:source-record card) "`\n\n"
          "## Verdict\n\n| Requirement | Status | Reason | Deciding facts |\n"
          "|---|---|---|---|\n"
@@ -330,9 +418,50 @@
                       (format "| %s | **%s** | %s | `%s` |\n"
                               (name (:requirement r)) (name (:status r))
                               (:reason r) (pr-str (:deciding-facts r)))))
-         "\n## Run\n\n```clojure\n" (pr-str (:data run)) "\n```\n"
-         "\n## Cascade\n\n```clojure\n" (pr-str (:data cascade)) "\n```\n"
-         "\n## Outcome\n\n```clojure\n" (pr-str (:data outcome)) "\n```\n"
+         "\n## Run\n\n"
+         (format "Started: %s · Duration: %s ms · Outcome: %s\n\n"
+                 (display (:started-at rd)) (display (:duration-ms rd)) (display (:outcome rd)))
+         "### Phase timeline\n\n| Phase | Work ms | Wall ms | Debugger dwell ms | Outcome | Restarts |\n"
+         "|---|---:|---:|---:|---|---|\n"
+         (if (vector? (:phase-timeline rd))
+           (apply str (for [r (:phase-timeline rd)]
+                        (md-row [(:phase r) (:work-ms r) (:wall-ms r)
+                                 (:debugger-dwell-ms r) (:outcome r) (:restarts r)])))
+           (str (display (:phase-timeline rd)) "\n"))
+         "\n### Seats\n\n| Role | Seat | Job | Tokens in | Tokens out |\n"
+         "|---|---|---|---:|---:|\n"
+         (if (vector? (:seats rd))
+           (apply str (for [r (:seats rd)]
+                        (md-row [(:role r) (:seat r) (:job r)
+                                 (:tokens-in r) (:tokens-out r)])))
+           (str (display (:seats rd)) "\n"))
+         "\nTerminal receipt: " (display (:terminal-receipt rd)) "\n"
+         "\n## Cascade\n\n"
+         "Target: **" (display (:chosen-target cd)) "** — "
+         (display (get-in cd [:document :title])) " (`"
+         (display (get-in cd [:document :reference])) "`)\n\n"
+         "### G comparison\n\n| Rank | Policy | Patterns in order | Risk | Ambiguity | EIG | F | G | Tie group |\n"
+         "|---:|---|---|---:|---:|---:|---:|---:|---|\n"
+         (if (vector? comparisons)
+           (apply str (for [r comparisons]
+                        (if (absent? r)
+                          (md-row [(or (:rank r) "—") (display r) "—" "—" "—" "—" "—" "—" "—"])
+                          (md-row [(:rank r) (:policy r) (:patterns r) (:risk r)
+                                   (:ambiguity r) (:EIG r) (:F r) (:G r) (:tie-group r)]))))
+           (str (display (get-in cd [:why-it-won])) "\n"))
+         "\n### Interpretation receipts\n\n"
+         (if (vector? (:arrangement cd))
+           (apply str (for [{:keys [pattern interpretation-receipt]} (:arrangement cd)]
+                        (str "- **" pattern ":** "
+                             (if (absent? interpretation-receipt)
+                               (display interpretation-receipt)
+                               (str (display (:reading interpretation-receipt))
+                                    " Scope: " (display (:scope-limit interpretation-receipt)))) "\n")))
+           (str (display (:arrangement cd)) "\n"))
+         "\nSelection redecision: " (display (:selection-redecision cd)) "  \n"
+         "Author request: " (display (:author-request cd)) "\n"
+         "\n## Outcome\n\n"
+         (apply str (for [[k v] od] (str "- **" (name k) ":** " (display v) "\n")))
          "\n## Example text\n\n"
          (if (absent? (:data example)) (str "`" (pr-str (:data example)) "`")
              (str (get-in example [:data :paragraph]) "\n\nSources: `"
@@ -341,7 +470,10 @@
 
 (defn html [card]
   (let [[verdict run cascade outcome example] (:sections card)
-        pre (fn [x] (str "<pre>" (html-escape (pr-str x)) "</pre>"))]
+        rd (:data run) cd (:data cascade) od (:data outcome)
+        comparisons (get-in cd [:why-it-won :comparison])
+        cell (fn [x] (str "<td>" (html-escape (display x)) "</td>"))
+        row (fn [xs] (str "<tr>" (apply str (map cell xs)) "</tr>"))]
     (str "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
          "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
          "<title>WM report card " (html-escape (:run-id card)) "</title>"
@@ -349,7 +481,8 @@
          "<style>body{max-width:1100px;margin:auto;padding:2rem}pre{white-space:pre-wrap}"
          "table{border-collapse:collapse;width:100%}td,th{border:1px solid #aaa;padding:.4rem;vertical-align:top}</style>"
          "</head><body><main><h1>War Machine report card: "
-         (html-escape (:run-id card)) "</h1><p>Source: <code>"
+         (html-escape (:run-id card)) "</h1><p class=\"headline\"><strong>"
+         (html-escape (headline-text card)) "</strong></p><p>Source: <code>"
          (html-escape (:source-record card)) "</code></p>"
          "<h2>Verdict</h2><table><thead><tr><th>Requirement</th><th>Status</th>"
          "<th>Reason</th><th>Deciding facts</th></tr></thead><tbody>"
@@ -357,14 +490,60 @@
                       (str "<tr><td>" (html-escape (name (:requirement r))) "</td><td>"
                            (html-escape (name (:status r))) "</td><td>"
                            (html-escape (:reason r)) "</td><td>"
-                           (pre (:deciding-facts r)) "</td></tr>")))
-         "</tbody></table><h2>Run</h2>" (pre (:data run))
-         "<h2>Cascade</h2>" (pre (:data cascade))
-         "<h2>Outcome</h2>" (pre (:data outcome))
+                           (html-escape (display (:deciding-facts r))) "</td></tr>")))
+         "</tbody></table><h2>Run</h2><p>Started: " (html-escape (display (:started-at rd)))
+         " · Duration: " (html-escape (display (:duration-ms rd))) " ms · Outcome: "
+         (html-escape (display (:outcome rd))) "</p>"
+         "<h3>Phase timeline</h3><table><thead><tr><th>Phase</th><th>Work ms</th><th>Wall ms</th>"
+         "<th>Debugger dwell ms</th><th>Outcome</th><th>Restarts</th></tr></thead><tbody>"
+         (if (vector? (:phase-timeline rd))
+           (apply str (for [r (:phase-timeline rd)]
+                        (row [(:phase r) (:work-ms r) (:wall-ms r) (:debugger-dwell-ms r)
+                              (:outcome r) (:restarts r)])))
+           (row [(:phase-timeline rd)]))
+         "</tbody></table><h3>Seats</h3><table><thead><tr><th>Role</th><th>Seat</th><th>Job</th>"
+         "<th>Tokens in</th><th>Tokens out</th></tr></thead><tbody>"
+         (if (vector? (:seats rd))
+           (apply str (for [r (:seats rd)]
+                        (row [(:role r) (:seat r) (:job r) (:tokens-in r) (:tokens-out r)])))
+           (row [(:seats rd)]))
+         "</tbody></table><p><strong>Terminal receipt:</strong> "
+         (html-escape (display (:terminal-receipt rd))) "</p>"
+         "<h2>Cascade</h2><p><strong>Target:</strong> "
+         (html-escape (display (:chosen-target cd))) " — "
+         (html-escape (display (get-in cd [:document :title]))) " (<code>"
+         (html-escape (display (get-in cd [:document :reference]))) "</code>)</p>"
+         "<h3>G comparison</h3><table><thead><tr><th>Rank</th><th>Policy</th><th>Patterns in order</th>"
+         "<th>Risk</th><th>Ambiguity</th><th>EIG</th><th>F</th><th>G</th><th>Tie group</th></tr></thead><tbody>"
+         (if (vector? comparisons)
+           (apply str (for [r comparisons]
+                        (if (absent? r) (row ["—" r "—" "—" "—" "—" "—" "—" "—"])
+                            (row [(:rank r) (:policy r) (:patterns r) (:risk r) (:ambiguity r)
+                                  (:EIG r) (:F r) (:G r) (:tie-group r)]))))
+           (row [(get-in cd [:why-it-won])]))
+         "</tbody></table><h3>Interpretation receipts</h3><ul>"
+         (if (vector? (:arrangement cd))
+           (apply str (for [{:keys [pattern interpretation-receipt]} (:arrangement cd)]
+                        (str "<li><strong>" (html-escape pattern) ":</strong> "
+                             (html-escape (if (absent? interpretation-receipt)
+                                            (display interpretation-receipt)
+                                            (str (display (:reading interpretation-receipt))
+                                                 " Scope: " (display (:scope-limit interpretation-receipt)))))
+                             "</li>")))
+           (str "<li>" (html-escape (display (:arrangement cd))) "</li>"))
+         "</ul><p><strong>Selection redecision:</strong> "
+         (html-escape (display (:selection-redecision cd))) "</p><p><strong>Author request:</strong> "
+         (html-escape (display (:author-request cd))) "</p>"
+         "<h2>Outcome</h2><ul>"
+         (apply str (for [[k v] od] (str "<li><strong>" (html-escape (name k))
+                                          ":</strong> " (html-escape (display v)) "</li>")))
+         "</ul>"
          "<h2>Example text</h2>"
-         (if (absent? (:data example)) (pre (:data example))
+         (if (absent? (:data example)) (str "<p>" (html-escape (display (:data example))) "</p>")
              (str "<p>" (html-escape (get-in example [:data :paragraph])) "</p>"
-                  (pre (mapv :source-path (get-in example [:data :sentences])))))
+                  "<p>Sources: <code>" (html-escape (pr-str (mapv :source-path
+                                                           (get-in example [:data :sentences]))))
+                  "</code></p>"))
          "</main></body></html>")))
 
 (defn generate!
