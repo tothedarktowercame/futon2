@@ -70,9 +70,13 @@
        :discovered-at as-of
        :interpretation {:kind :machine-requested-pattern-readings
                         :receipts (:interpretation-receipts payload)}
-       :review-publication {:kind :runtime-construction-validation
-                            :checks [:candidate-shape :pattern-interpretations
-                                     :observation-locators :scoring-admission]}
+       :review-publication
+       {:kind :runtime-construction-validation
+        :construction-receipt-sha256 (ce/canonical-sha256 receipt)
+        :results (select-keys receipt [:relations :coverage :checks-added
+                                      :stop-reason :unknown-read-as-not-established])
+        :interpretation-receipt-sha256
+        (ce/canonical-sha256 (:interpretation-receipts payload))}
        :admission {:kind :scoring-boundary-admission}
        :acceptance {:kind :criterion-locator-coverage :locators locators}
        :scope {:target (:target payload)

@@ -48,7 +48,7 @@
       (is (= :held (get-in receipt [:outcome-domain :unrepresented-class-mass :status])))
       (is (= {:focus 0.55 :associated 0.35 :useful-elsewhere 0.05 :known-failure 0.05}
              (get-in receipt [:global-preference :masses])))
-      (is (= :not-applicable (get-in receipt [:kernel :status])))
+      (is (= :absent (get-in receipt [:kernel :status])))
       (doseq [bad [(assoc-in receipt [:candidates 0 :class] :irrelevant)
                    (assoc-in receipt [:global-preference :masses :focus] 1)
                    (assoc-in receipt [:discovery :focus] "EOI")]]
@@ -64,7 +64,7 @@
         f2 (first (filter #(= "M-wm-08-external-f2" (:target %)) rows))
         eoi (first (filter #(= "M-expressions-of-interest" (:target %)) rows))]
     (is (= :focus (:class f2)))
-    (is (= :not-applicable (get-in f2 [:embedding :status])))
+    (is (= :retained (get-in f2 [:embedding :status])))
     (is (= :attested-outcome-not-inferred-from-prediction (get-in f2 [:outcome :reason])))
     (is (= :unknown (:class eoi)))
     (is (= :relation-not-declared (get-in eoi [:relation :reason])))
@@ -87,6 +87,27 @@
     (is (= :unknown (get-in a [:candidates 0 :class])))
     (is (= :embedding-node-not-retained (get-in a [:candidates 0 :embedding :reason])))
     (is (= :unknown (get-in (focus/build d {:status :absent} context) [:discovery :status])))))
+
+(deftest terminal-failure-replaces-pending-focus-outcome
+  (let [d (:decision (frozen "1789952479"))
+        selected (focus/attach d inputs context)
+        joined (focus/join-terminal selected
+                                    {:failure {:kind :reviewer-falsifier-failed
+                                               :stage :independent-review}})]
+    (is (= :pending-terminal-observation
+           (get-in selected [:selection-certificate :focus-receipt :attestation :status])))
+    (is (= :observed
+           (get-in joined [:selection-certificate :focus-receipt :attestation :status])))
+    (is (= :known-typed-failure
+           (get-in joined [:selection-certificate :focus-receipt :attestation :kind])))
+    (is (not-any? #(= :pending-observation (:status %))
+                  (map :outcome (get-in joined [:selection-certificate :focus-receipt :candidates]))))))
+
+(deftest missing-terminal-authority-remains-a-countable-absence
+  (let [d (focus/attach (:decision (frozen "1789952479")) inputs context)
+        joined (focus/join-terminal d {:failure {:absent :no-failure}})]
+    (is (= {:status :absent :reason :terminal-focus-attestation-unavailable}
+           (get-in joined [:selection-certificate :focus-receipt :attestation])))))
 
 ;; PROOF-wm-works 1.3 (2026-09-22): resources/wm/ paths are WM work. The
 ;; private facets fn is exercised directly (var-resolved) because the public
