@@ -1,5 +1,7 @@
 # E-cascade-tokamak-run1 — the pattern cascade ran the tokamak
 
+**VERDICT (2026-10-09, provisional):** DONE — The run happened and its outcome was recorded in a committed report; the remaining Next is optional ('if pursued'). _(WM status classification by zai-3, medium confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-16. Joe: *"I think it would be great to try it! Even if it
 fails spectacularly it would be interesting."* It did not fail spectacularly. It
 failed **narrowly and informatively**, in the one place it had staked a claim.

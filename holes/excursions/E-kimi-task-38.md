@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-25T15:10:41Z, job invoke-1790347416890-24209-4bac644d, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition completed as part of the 38-task batch confirmed done in git. _(WM status classification by zai-2, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-12 for kimi-33 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

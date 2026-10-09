@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-26T02:49:26Z, job invoke-1790387079827-24611-d415a1ad, state cancelled
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition recorded state cancelled and the working tree had unrelated uncommitted changes; no completion recorded. _(WM status classification by zai-1, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-12 for kimi-3 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

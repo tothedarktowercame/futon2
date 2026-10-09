@@ -1,5 +1,7 @@
 # Excursion: precision over policies — the γ term (E-precision-over-policies)
 
+**VERDICT (2026-10-09, provisional):** DONE — Status CLOSED 2026-06-27 with a DELIVERED section: γ built, wired, gated, regression-pinned; scope-outs explicitly named as other work. _(WM status classification by zai-1, high confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-06-26 · **Status:** CLOSED 2026-06-27 (driven by claude-11; gated; performance-reading confirmed by Joe; lock-in regression pins self-calibration; see §7).
 **Authored by:** claude-10. **Driven by:** claude-11.
 

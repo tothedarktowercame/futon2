@@ -1,5 +1,7 @@
 # E-KL-refinements
 
+**VERDICT (2026-10-09, provisional):** DONE — Header states CLOSED by Joe with all five items resolved and git records the production flip close. _(WM status classification by zai-2, high confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-03 · **Status:** ✅ **CLOSED** (Joe, 2026-07-03 — "if the work is
 done the excursion can close"; closed at the §15 `:kl` production flip. Exit criteria
 were met the same day — owner: claude-5, Joe-assigned 2026-07-03.) All five items resolved same-day: 1+2 built claude-10

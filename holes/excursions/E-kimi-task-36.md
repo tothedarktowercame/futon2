@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-25T15:00:44Z, job invoke-1790346556381-24207-fd590576, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Header states the requisition is completed with job id and timestamp. _(WM status classification by zai-5, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-12 for kimi-31 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

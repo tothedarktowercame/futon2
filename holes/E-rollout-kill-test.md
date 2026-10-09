@@ -4,6 +4,8 @@
 one bounded question with a pre-registered threshold, single-owner,
 answerable in a session or two. Owner: TBD. Reviewer: claude-16.**
 
+**VERDICT (2026-10-09, provisional):** DONE — Bounded kill/keep question resolved by operator ruling the same day it opened: 'retired on theory (the level error)', successor chartered separately via E-gflownets-fold. _(WM status classification by zai-1, medium confidence; not yet confirmed by the author.)_
+
 ## The question (pre-registered in futonzero-alphazero.md §5, 2026-06-09)
 
 "After scope-grain v2, ≥ ~15% of top-ranked policies should be

@@ -461,3 +461,45 @@
       (is (= 2 (count @parsed)))
       (is (= #{primary-x primary-y} (set @parsed))
           "neither worktree layout reaches the real parser"))))
+
+(deftest provisional-verdict-states-lifecycle-and-stays-marked-provisional
+  (let [verdict (fn [s] (str "**VERDICT (2026-10-09, provisional):** " s
+                             " — reason _(WM status classification by zai-1, high confidence; not yet confirmed by the author.)_"))]
+    ;; A stale author Status line is overridden, and the Status line is kept.
+    (write-primary-mission! "futon0/holes/excursions/E-stale.md"
+                            (str "# E-stale\n\n**Status:** OPEN (plan of record)\n\n"
+                                 (verdict "DONE") "\n\nBody.\n"))
+    ;; Inserted after a Requisition line: the requisition still parses.
+    (write-primary-mission! "futon0/holes/excursions/E-req-done.md"
+                            (str "# E-req-done\n\n**Requisition:** completed — state done\n\n"
+                                 (verdict "DONE") "\n"))
+    (write-primary-mission! "futon0/holes/excursions/E-gone.md"
+                            (str "# E-gone\n\n" (verdict "ABANDONED") "\n"))
+    (write-primary-mission! "futon0/holes/excursions/E-live.md"
+                            (str "# E-live\n\n" (verdict "OPEN") "\n"))
+    (write-primary-mission! "futon0/holes/excursions/E-plain.md"
+                            "# E-plain\n\nNo status at all.\n")
+    (write-primary-mission! "futon0/holes/tickets/T-done.md"
+                            (str "# T-done\n\n" (verdict "DONE") "\n\n- [ ] item\n"))
+    (write-primary-mission! "futon0/holes/tickets/T-open.md"
+                            (str "# T-open\n\n" (verdict "OPEN") "\n\n- [ ] item\n"))
+    (let [ex (into {} (map (juxt :id identity)) (:excursions (mr/load-excursions *tmpdir*)))
+          tk (into {} (map (juxt :id identity)) (:tickets (mr/load-tickets *tmpdir*)))]
+      (is (= :complete (:status-class (ex "E-stale"))))
+      (is (= "OPEN (plan of record)" (:status-line (ex "E-stale"))))
+      (is (= {:date "2026-10-09" :status :done :provisional? true}
+             (select-keys (:verdict (ex "E-stale")) [:date :status :provisional?])))
+      (is (= :completed (get-in (ex "E-req-done") [:requisition :state])))
+      (is (= :inactive (:status-class (ex "E-gone"))))
+      (is (= :open (:status-class (ex "E-live"))))
+      (is (mr/live-excursion? (ex "E-live")))
+      (is (not (mr/live-excursion? (ex "E-stale"))))
+      (is (nil? (:verdict (ex "E-plain"))))
+      (is (= :complete (:status-class (tk "T-done"))))
+      (is (= :live (:status-class (tk "T-open"))))
+      (is (true? (get-in (tk "T-done") [:verdict :provisional?]))))))
+
+(deftest verdict-requires-the-dated-provisional-form
+  (is (nil? (mr/read-verdict ["**VERDICT:** DONE — undated"])))
+  (is (nil? (mr/read-verdict ["**VERDICT (2026-10-09):** DONE — not marked provisional"])))
+  (is (= :superseded (:status (mr/read-verdict ["**VERDICT (2026-10-09, provisional):** SUPERSEDED by M-x — r"])))))

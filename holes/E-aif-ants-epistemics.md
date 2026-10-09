@@ -1,5 +1,7 @@
 # Excursion: E-aif-ants-epistemics — bring the epistemic half online
 
+**VERDICT (2026-10-09, provisional):** OPEN — S1/S2 results recorded 2026-08-02 but the goal (epistemic half online) is not achieved; tail states a remaining probe ('one probe away') with no completion. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 **Type:** E-prefix excursion (bounded scope-out, single-agent-owned end-to-end).
 **Spawned:** 2026-08-01, on the close of M-aif-stack S1 (Slice 5 confirmation).
 **Owner:** TBD. **Operator:** Joe.

@@ -826,6 +826,32 @@
 ;; DONE* -> complete; SUPERSEDED/DEFERRED/PARKED/ARCHIVED -> inactive;
 ;; WATCH/FINDING/DESIGN CONSTRAINT or awaiting Joe/Joe's call -> not-actionable;
 ;; PARTIAL/OPEN/STILL-OPEN/SCOPED/DESIGNED/RECLASSIFY and unknown -> live.
+;; A provisional VERDICT line (2026-10-09 WM status classification, Joe:
+;; "apply all of them but call it VERDICT and date it so that it is clear this
+;; is provisional") states a task's lifecycle where its own Status line is
+;; absent or stale.  It is read before the Status line, and the entry keeps
+;; the verdict (date, status, provisional? true) so every consumer can see the
+;; state is provisional rather than author-declared.
+(def ^:private verdict-line-pattern
+  #"^\*\*VERDICT \((\d{4}-\d{2}-\d{2}), provisional\):\*\*\s+([A-Z]+)\b.*$")
+
+(defn read-verdict
+  "The provisional VERDICT line within the first 40 LINES, or nil."
+  [lines]
+  (some (fn [line]
+          (when-let [[_ date status] (re-matches verdict-line-pattern line)]
+            {:date date :status (keyword (str/lower-case status))
+             :provisional? true :line line}))
+        (take 40 lines)))
+
+(def ^:private verdict-status-class
+  {:done :complete :superseded :inactive :abandoned :inactive
+   :active :active :open :open})
+
+(def ^:private verdict-ticket-class
+  {:done :complete :superseded :inactive :abandoned :inactive
+   :active :live :open :live})
+
 (defn ticket-status-text [lines]
   (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %)) lines))
 
@@ -866,11 +892,15 @@
                 (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
                       text (slurp path)
                       lines (str/split-lines text)
-                      status (ticket-status-text lines)]
+                      status (ticket-status-text lines)
+                      verdict (read-verdict lines)]
                   {:id id :kind :ticket :path path
                    :item-line (first-open-checkbox-line lines)
                    :title (mission-title-from-lines id lines)
-                   :status-line status :status-class (classify-ticket-status status)
+                   :status-line status
+                   :status-class (or (some-> verdict :status verdict-ticket-class)
+                                     (classify-ticket-status status))
+                   :verdict verdict
                    :requisition (task-requisition/read-state text)
                    :source {:path path :sha256 (sha256-text text)}
                    :parent (some #(when (re-find #"(?i)parent" %)
@@ -921,11 +951,14 @@
         lines (str/split-lines text)
         id (second (re-matches excursion-path-pattern path))
         status-line (some (fn [line] (when-let [[_ status] (re-matches status-line-pattern line)] status))
-                          (take 20 lines))]
+                          (take 20 lines))
+        verdict (read-verdict lines)]
     {:id id :kind :excursion :path path
      :title (mission-title-from-lines id lines)
      :status-line status-line
-     :status-class (classify-status status-line)
+     :status-class (or (some-> verdict :status verdict-status-class)
+                       (classify-status status-line))
+     :verdict verdict
      :requisition (task-requisition/read-state text)
      :source {:path path :sha256 (sha256-text text)}}))
 

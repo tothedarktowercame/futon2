@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-25T19:32:13Z, job invoke-1790363880129-24289-3fae6888, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition header states completed with job state done, confirmed by git commit 'requisition completed (done)'. _(WM status classification by zai-3, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-12 for kimi-30 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # WM-01 P-4b: width repair and runtime reference boundary
 
+**VERDICT (2026-10-09, provisional):** OPEN — Ticket states partial delivery, not acceptance, with the shared conversion removal unimplemented and next steps named. _(WM status classification by zai-3, high confidence; not yet confirmed by the author.)_
+
 Author: codex-1, 2026-09-19. Partial delivery; not node acceptance.
 
 The numerical test now keeps rational endpoints through subtraction, ordering,

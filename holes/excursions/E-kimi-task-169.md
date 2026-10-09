@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-10-01T21:28:39Z, job invoke-1790890049818-29867-973fd4df, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition completed with state done; pattern-stage reading delivered. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 Clocked in by pattern-stage-read-loop for kimi-3 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

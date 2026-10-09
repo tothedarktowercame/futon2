@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-26T15:35:16Z, job invoke-1790433627454-24897-17c5440a, state failed
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition completed with state failed; the 9 lane-1 wire tests show no delivered outcome. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-5 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

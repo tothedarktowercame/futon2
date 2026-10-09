@@ -8,6 +8,8 @@ gap that makes the act-gate abstain. Parent: [[M-wm-policies]] (Track 2, the rol
 Cross-ref: [[E-vwm]] (the 0.5 stall threshold), [[E-llm-fold]] (an LLM reads a cascade → construction),
 `futon6/scripts/clean_structure_embed.py` (the structure-embedding precedent: verified N=7 — same-family NN-match 0.86 structure vs 0.14 text; NN-sim 0.95 vs 0.25).
 
+**VERDICT (2026-10-09, provisional):** DONE — Status: witness PASSED + structure-embedding BUILT with both checklist items struck DONE and the n=1 metric witness delivered. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 ---
 
 ## The gap (Joe, 2026-06-25)

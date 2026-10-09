@@ -2,6 +2,8 @@
 
 **Requisition:** in-progress — dispatched 2026-10-01T20:49:38Z to kimi-1 as invoke-1790887781344-29833-e839f25c
 
+**VERDICT (2026-10-09, provisional):** ACTIVE — Backfill pack dispatched 2026-10-01 and still marked in-progress; the loop reads the answer file itself. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by xiang-backfill-loop for kimi-1 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

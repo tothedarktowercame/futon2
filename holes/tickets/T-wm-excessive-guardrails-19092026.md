@@ -1,5 +1,7 @@
 # T-wm-excessive-guardrails-19092026 — the day the safety layer stopped the machine
 
+**VERDICT (2026-10-09, provisional):** DONE — Ticket's defusal work landed: halt-before-repair undone (8f7799b7) and tripwires made observe-and-continue by default per the closing commits. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Joe's verdict, 2026-09-19 (paraphrased, then evidenced):
 
 > All this work has just been to turn off — not really turn off, but *undo* —

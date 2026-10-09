@@ -1,5 +1,7 @@
 # Q-B magnet-quality scorecard — E-have-want-pairs
 
+**VERDICT (2026-10-09, provisional):** DONE — The Q-B probe was run to a recorded verdict and committed as a durable artifact; its question is answered. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 **Probe by:** claude-6 · **Date:** 2026-07-01 · **For:** C-cascade-real E1/E2 gate (via claude-4).
 **Charter:** `E-have-want-pairs.md` §Q-B. **Sim-only; 0 :7071 writes.**
 

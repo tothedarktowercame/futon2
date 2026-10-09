@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-25T02:58:21Z, job invoke-1790304588428-24125-f1b68e1e, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition state done with an Outcome section recording the landing (8f85742a) and warrant. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-6 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

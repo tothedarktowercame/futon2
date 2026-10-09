@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-27T03:45:53Z, job invoke-1790480746091-25287-3c61de1a, state failed
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition completed with state failed; zeta-posterior build not shown delivered anywhere later in the doc. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-3 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

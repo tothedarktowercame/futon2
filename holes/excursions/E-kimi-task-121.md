@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-28T19:56:22Z, job invoke-1790624328407-26182-130a1fa0, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition header and git commit both record the kimi job completed with state done; spot-check of task-98 found its deliverable (ready-delta-g) in src. _(WM status classification by zai-1, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-1 on 2026-09-28 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

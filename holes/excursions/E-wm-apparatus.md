@@ -1,5 +1,7 @@
 # E-wm-apparatus — the war machine as apparatus: the assurances the mathematics does not give us
 
+**VERDICT (2026-10-09, provisional):** DONE — Commissioned cross-referencing write-up recorded as PROMOTED by Joe (2026-09-08); later candidate items accrue elsewhere (C583). _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Commissioned by Joe, 2026-09-08 ("create an E-wm-apparatus.md excursion that
 cross references them and explains the assurances we need to build into the
 WM, above and beyond the R-number and wm-organization / wm-workflow aspects

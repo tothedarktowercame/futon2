@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-10-01T20:49:11Z, job invoke-1790887519684-29828-e7b2d3cf, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition header states completed with state done. _(WM status classification by zai-2, high confidence; not yet confirmed by the author.)_
+
 Clocked in by xiang-backfill-loop for kimi-3 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # E-proof2a-holes — coordinating the closure of PROOF-2a's holes
 
+**VERDICT (2026-10-09, provisional):** ACTIVE — Coordination clock for closing PROOF-2a's holes, opened 2026-09-25 with holes explicitly open and dispatch/review work described as running. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Date: 2026-09-25
 Owner: claude-8 (project lead, Joe 2026-09-24). Driver: Joe.
 Parent: `holes/labs/wm-contract/PROOF-2a-THEOREM-draft-2026-09-24.md`.

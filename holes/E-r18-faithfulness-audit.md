@@ -1,5 +1,7 @@
 # E-r18-faithfulness-audit — the per-quantity faithfulness audit (turns R18 yellow)
 
+**VERDICT (2026-10-09, provisional):** DONE — Header states DELIVERED — R18 absent → partial, with the full verdict table delivered; the badge rendering is explicitly a separate follow-on build. _(WM status classification by zai-5, high confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-03 · **Owner:** claude-2 (dispatched by claude-11, Joe-ratified) · **Status:** DELIVERED — R18 goes
 **absent → partial**. Every named AIF quantity in `futon2.aif.*` (+ the cascade `F` on futon3a) now carries a
 badge with a literature citation AND a code citation. The badge-*rendering* wiring (explainer reads

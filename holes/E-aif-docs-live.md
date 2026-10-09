@@ -1,5 +1,7 @@
 # Excursion: one live data model behind paper + tracker + explainer (E-aif-docs-live)
 
+**VERDICT (2026-10-09, provisional):** ABANDONED — Explicitly 'CHARTERED — parked; resume at a pause point' since 2026-07-01 with no resume or outcome recorded in over 90 days. _(WM status classification by zai-5, medium confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-01 · **Status:** CHARTERED — parked; **resume at a pause point** (work in
 progress now: claude-5's DISSOLUTION (A) body-reconstruction + the `cascade-real/graph` endpoint are
 being actively built; do NOT refactor the endpoint/explainer under them). **Owner:** claude-4.

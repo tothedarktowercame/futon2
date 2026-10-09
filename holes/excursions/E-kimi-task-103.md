@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-27T03:43:35Z, job invoke-1790480560756-25285-96bdc7a7, state failed
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition completed with state failed; HG2-Ic scoring route shows no delivered outcome. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-1 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

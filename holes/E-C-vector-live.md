@@ -1,5 +1,7 @@
 # Excursion: a LIVE C-vector — the WM's preferences, kept current (E-C-vector-live)
 
+**VERDICT (2026-10-09, provisional):** DONE — Header declares the excursion DELIVERED through §12 with all gates passing in the tail; only a separate D4-gated PROOF-store promotion remains outside its scope. _(WM status classification by zai-3, high confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-06-25 · **Status:** DELIVERED through §12 (live C §9 · predictive risk §10 · durable-join steps 1–4 + reconcile §11–12); full PROOF-store promotion stays D4-gated.
 **Authored by:** claude-2 (scoping only — not the driver).
 **Parent / relates:**

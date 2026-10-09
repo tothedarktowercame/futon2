@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-25T01:34:19Z, job invoke-1790298329569-24087-d5187a85, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition completed with state done; AR-43 fix task delivered. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

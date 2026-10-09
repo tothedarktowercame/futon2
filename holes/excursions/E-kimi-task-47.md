@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-26T09:46:46Z, job invoke-1790415400765-24749-00f5fa24, state done
 
+**VERDICT (2026-10-09, provisional):** DONE — Requisition completed with state done; Neo4j sidecar prototype measured and reported. _(WM status classification by zai-4, high confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-12 for kimi-6 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

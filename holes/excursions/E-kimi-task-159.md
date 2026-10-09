@@ -2,6 +2,8 @@
 
 **Requisition:** in-progress — dispatched 2026-10-01T20:49:24Z to kimi-3 as invoke-1790887764293-29832-24cd4bb2
 
+**VERDICT (2026-10-09, provisional):** ACTIVE — Requisition header says in-progress (dispatched 2026-10-01) with the backfill pack live in git. _(WM status classification by zai-2, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by xiang-backfill-loop for kimi-3 on 2026-10-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

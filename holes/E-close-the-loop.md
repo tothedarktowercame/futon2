@@ -1,5 +1,7 @@
 # Excursion: close the loop — nail the fold INTERFACE first (E-close-the-loop)
 
+**VERDICT (2026-10-09, provisional):** DONE — Final section records INSTANTIATE — LIVE WIRING with the loop closing live and commits landing it on 2026-07-02. _(WM status classification by zai-5, high confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-06-26 · **Status:** DERIVE (the interface, as a sorry) — charter for the driver (claude-10).
 **Authored by:** claude-10 (with Joe, 2026-06-26).
 **Parent / relates:**

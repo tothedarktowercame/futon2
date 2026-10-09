@@ -4,6 +4,8 @@
 (this box) as the proving ground. Parent: E-futon1a-to-futon1b-migration-pipeline
 (data leg, proven). Boundary: BOUNDARY-futon1a-to-futon1b-2026-07-10.md.**
 
+**VERDICT (2026-10-09, provisional):** DONE — Git commits record PHASE D COMPLETE with lucy fully switched, 0 failures, and services under systemd — the stated goal achieved. _(WM status classification by zai-5, high confidence; not yet confirmed by the author.)_
+
 ## The inversion (Joe, 2026-07-10)
 
 The migration excursion proved the *data* can move. This excursion inverts

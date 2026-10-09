@@ -1,5 +1,7 @@
 # Excursion: the GFlowNet fold sampler, reopened on executable reward (E-gflownets-fold)
 
+**VERDICT (2026-10-09, provisional):** OPEN — Charter status only (CHARTERED, owner TBD, CPU rungs first); no rung outcomes recorded since 2026-07-03. _(WM status classification by zai-1, medium confidence; not yet confirmed by the author.)_
+
 **Date:** 2026-07-03 · **Status:** CHARTERED (IDENTIFY/MAP — Joe: "we have the empirical data
 that was blocking that before") · **Owner:** TBD (hand-off charter; CPU rungs first).
 **Naming note (Joe's question):** plain `E-gflownets-fold`, no JAX — the vendored GFN library is

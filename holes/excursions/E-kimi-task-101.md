@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-27T03:43:48Z, job invoke-1790480333591-25278-e848d7b6, state failed
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition closed but the job ended in state failed, so the task's work was not achieved and the goal remains. _(WM status classification by zai-3, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-2 on 2026-09-27 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

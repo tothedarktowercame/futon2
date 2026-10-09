@@ -2,6 +2,8 @@
 
 **Requisition:** completed — 2026-09-26T15:35:46Z, job invoke-1790433603841-24894-184883b9, state failed
 
+**VERDICT (2026-10-09, provisional):** OPEN — Requisition recorded state failed; the packet's goal (route/tests/wires) shows no completion and no redelivery is recorded here. _(WM status classification by zai-1, medium confidence; not yet confirmed by the author.)_
+
 Clocked in by claude-8 for kimi-1 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

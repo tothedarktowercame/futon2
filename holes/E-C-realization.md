@@ -1,5 +1,7 @@
 # E-C-realization — the interactive lane for making C real
 
+**VERDICT (2026-10-09, provisional):** OPEN — Ongoing interactive lane with a running log (24th entry) and an in-flight paper correction; no completion verdict recorded. _(WM status classification by zai-4, medium confidence; not yet confirmed by the author.)_
+
 Opened 2026-09-09 by claude-1 under Joe's ruling
 (holes/labs/wm-contract/RULINGS-walkthrough-2026-09-09.md Items 18c-18d):
 "I am not happy to kick the can without real work to make C real... if we are
