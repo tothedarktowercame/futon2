@@ -67,11 +67,43 @@
              :observation-initialization observations)
       base)))
 
+(defn record-observation
+  "Close a V2 stage with the independently admitted input receipt.  The
+   posterior is copied from the receipt actually consumed by scoring; no
+   observation is inferred from a prediction."
+  [stage input]
+  (if-not (= :wm/token-belief-stage-v2 (:schema stage))
+    stage
+    (assoc stage
+           :conditioning-status (:conditioning-status input)
+           :observation
+           {:status (if (some #(= :updated (:status %)) (:observation-updates input))
+                      :conditioned :not-conditioned)
+            :reason (:reason input)
+            :occurrence-id (:occurrence-id stage)
+            :placement :next-selection
+            :updates (:observation-updates input)
+            :posterior (:continuation-belief input)
+            :authority (select-keys (:observation-authority input)
+                                    [:schema :authority :scope :status
+                                     :occurrence :carry-occurrence-id
+                                     :record-sha256 :source])})))
+
 (defn valid-stage?
   "Check the staged chain against the independently checked initialization.
    An asserted posterior, invented update, changed carry or consumed value
    cannot be passed off as staged evidence. No numerical conditioning runs."
   [receipt initialization]
+  (let [recorded-observation (:observation receipt)
+        closed? (and (= :wm/token-belief-stage-v2 (:schema receipt))
+                     (contains? recorded-observation :posterior))
+        receipt (if closed?
+                  (assoc receipt
+                         :conditioning-status :awaiting-observation-admission
+                         :observation {:status :pending :reason :input-admission-required
+                                       :occurrence-id (:occurrence-id receipt)
+                                       :placement :next-selection})
+                  receipt)]
   (and (= (:inputs initialization)
           (mapv (fn [{:keys [target declaration]}]
                   {:target target :facts (:facts declaration)})
@@ -80,4 +112,4 @@
                          (:prospective-prior receipt)
                          (cond-> {:occurrence-id (:occurrence-id receipt)}
                            (= :wm/token-belief-stage-v2 (:schema receipt))
-                           (assoc :observation-initialization (:observation-initialization receipt)))))))
+                           (assoc :observation-initialization (:observation-initialization receipt))))))))

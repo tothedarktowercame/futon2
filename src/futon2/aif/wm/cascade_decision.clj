@@ -770,6 +770,8 @@
                                   token-belief-stage
                                   (token-predecessor/inspect-trace
                                    (:token-belief-predecessor-trace opts) opts))
+              recorded-token-belief-stage
+              (token-carry/record-observation token-belief-stage token-belief-input)
               joint-q0 (:continuation-belief token-belief-input)
               lanes
               (mapv (fn [problem]
@@ -1108,7 +1110,7 @@
                 decision (assoc-in decision [:selection-certificate :token-rate-lanes]
                                    (into {} (map (juxt :target :token-rate-scoring)) lanes))
                 decision (assoc-in decision [:selection-certificate :token-belief-stage]
-                                   token-belief-stage)
+                                   recorded-token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 ;; B4 slice 2b (PROOF-2 P₀ carrier): one derivation entry per

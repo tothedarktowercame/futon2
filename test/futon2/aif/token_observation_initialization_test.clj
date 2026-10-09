@@ -113,6 +113,11 @@
               "the declared rate is present and is not certainty")
           (is (= declared-prediction updater-prediction)))
         (is (= :observed-initialization (:conditioning-status input)))
+        (is (= :conditioned (get-in stage [:observation :status])))
+        (is (= (:continuation-belief input)
+               (get-in stage [:observation :posterior])))
+        (is (= (:observation-updates input)
+               (get-in stage [:observation :updates])))
         (is (= [:updated false] ((juxt :status :observed) (updates updater))))
         (is (= :not-updated (:status (updates unknown))))
         (is (= :observation-missing (:kind (updates unknown))))
@@ -129,6 +134,16 @@
           (is (= :invalid (:status (receipts/validate-record
                                    (assoc-in record [:decision :selection-certificate :token-belief-input
                                                      :continuation-belief] {#{updater} 1}))))))))))
+
+(deftest recorded-stage-cannot-substitute-a-predicted-posterior
+  (with-two-ticks
+    (fn [{:keys [second]}]
+      (let [stage (get-in second [:selection-certificate :token-belief-stage])
+            input (get-in second [:selection-certificate :token-belief-input])]
+        (is (= (:continuation-belief input) (get-in stage [:observation :posterior])))
+        (is (not= {#{:fabricated} 1} (get-in stage [:observation :posterior])))
+        (is (not (predecessor/valid-input?
+                  (assoc input :continuation-belief {#{:fabricated} 1}) stage)))))))
 
 (deftest wrong-occurrence-domain-and-stale-observations-refuse
   (with-two-ticks
