@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.aif.wm.preregistration :as prereg]
             [wm-run-facts :as run-facts]))
 
 (defn absent [reason & [source-path]]
@@ -359,8 +360,12 @@
         (absent "record contains no fields from which to compose example text"))))
 
 (defn build-card
-  ([record record-path snap] (build-card record record-path snap nil nil))
+  ([record record-path snap] (build-card record record-path snap nil nil {}))
   ([record record-path snap previous previous-path]
+   (build-card record record-path snap previous previous-path {}))
+  ([record record-path snap previous previous-path
+    {:keys [preregistrations preregistration-options]
+     :or {preregistrations [] preregistration-options {}}}]
    (let [export (run-facts/facts-for-record record record-path snap previous previous-path)
          cascade (cascade-section record)
          outcome (outcome-section record)
@@ -368,9 +373,8 @@
          counts (frequencies (map :status verdicts))
          run-outcome (or (get-in record [:terminal-receipt :failure-kind])
                          (get-in record [:terminal-receipt :outcome]) :absent)
-         target (:chosen-target cascade)]
-     (sanitize
-      {:schema :wm/report-card-v1
+         target (:chosen-target cascade)
+         base {:schema :wm/report-card-v1
        :run-id (or (:run/id record) (absent "run id absent"))
        :source-record record-path
        :headline {:outcome run-outcome :target target
@@ -383,7 +387,13 @@
         {:id :cascade :title "Cascade" :data cascade}
         {:id :outcome :title "Outcome" :data outcome}
         {:id :example-text :title "Example text"
-         :data (example-text record cascade outcome)}]}))))
+         :data (example-text record cascade outcome)}]}
+         evaluated (prereg/evaluate preregistrations base record preregistration-options)]
+     (sanitize
+      (-> base
+          (assoc :preregistrations evaluated)
+          (update :sections conj {:id :preregistrations :title "Preregistrations"
+                                  :data evaluated}))))))
 
 (defn- html-escape [x]
   (-> (str x) (str/replace "&" "&amp;") (str/replace "<" "&lt;")
@@ -406,7 +416,7 @@
             (display outcome) (display target) pass fail not-recomputable)))
 
 (defn markdown [card]
-  (let [[verdict run cascade outcome example] (:sections card)
+  (let [[verdict run cascade outcome example prereg-section] (:sections card)
         rd (:data run) cd (:data cascade) od (:data outcome)
         comparisons (get-in cd [:why-it-won :comparison])]
     (str "# War Machine report card: " (:run-id card) "\n\n"
@@ -466,10 +476,17 @@
          (if (absent? (:data example)) (str "`" (pr-str (:data example)) "`")
              (str (get-in example [:data :paragraph]) "\n\nSources: `"
                   (pr-str (mapv :source-path (get-in example [:data :sentences]))) "`"))
+         "\n\n## Preregistrations\n\nCounts: `"
+         (pr-str (get-in prereg-section [:data :counts])) "`\n\n"
+         (if (seq (get-in prereg-section [:data :entries]))
+           (apply str (for [entry (get-in prereg-section [:data :entries])]
+                        (str "- **" (:id entry) ":** " (:status entry)
+                             (when-let [run (:deciding-run entry)] (str " in " run)) "\n")))
+           "No preregistrations applied to this run.\n")
          "\n")))
 
 (defn html [card]
-  (let [[verdict run cascade outcome example] (:sections card)
+  (let [[verdict run cascade outcome example prereg-section] (:sections card)
         rd (:data run) cd (:data cascade) od (:data outcome)
         comparisons (get-in cd [:why-it-won :comparison])
         cell (fn [x] (str "<td>" (html-escape (display x)) "</td>"))
@@ -544,18 +561,42 @@
                   "<p>Sources: <code>" (html-escape (pr-str (mapv :source-path
                                                            (get-in example [:data :sentences]))))
                   "</code></p>"))
+         "<h2>Preregistrations</h2><p>Counts: <code>"
+         (html-escape (pr-str (get-in prereg-section [:data :counts]))) "</code></p><ul>"
+         (if (seq (get-in prereg-section [:data :entries]))
+           (apply str (for [entry (get-in prereg-section [:data :entries])]
+                        (str "<li><strong>" (html-escape (:id entry)) ":</strong> "
+                             (html-escape (:status entry))
+                             (when-let [run (:deciding-run entry)]
+                               (str " in " (html-escape run))) "</li>")))
+           "<li>No preregistrations applied to this run.</li>")
+         "</ul>"
          "</main></body></html>")))
 
 (defn generate!
   ([record-path] (generate! record-path {}))
-  ([record-path {:keys [output-dir snap]}]
+  ([record-path {:keys [output-dir snap preregistration-root cards-by-run ancestor?]}]
    (let [record (run-facts/read-edn record-path)
          [previous previous-path] (run-facts/lookup-previous record-path record)
          snap (or snap (run-facts/snapshot))
          run-id (:run/id record)
          out (io/file (or output-dir
                           (io/file (.getParentFile (io/file record-path)) run-id)))
-         card (build-card record record-path snap previous previous-path)
+         run-dir (.getParentFile (io/file record-path))
+         cards-by-run (or cards-by-run (prereg/discover-card-paths run-dir))
+         preregistration-root (or preregistration-root
+                                  "holes/labs/wm-contract/preregistrations")
+         all-preregs (prereg/load-registry preregistration-root cards-by-run)
+         preregs (filterv #(neg? (compare (str (get-in % [:against :run-id]))
+                                          (str run-id))) all-preregs)
+         prior-cards (->> cards-by-run
+                          (filter (fn [[rid _]] (neg? (compare (str rid) (str run-id)))))
+                          (map (fn [[_ path]] (prereg/read-edn path))) vec)
+         card (build-card record record-path snap previous previous-path
+                          {:preregistrations preregs
+                           :preregistration-options
+                           (cond-> {:prior-cards prior-cards}
+                             ancestor? (assoc :ancestor? ancestor?))})
          paths {:edn (io/file out "report-card.edn")
                 :markdown (io/file out "report-card.md")
                 :html (io/file out "report-card.html")}]

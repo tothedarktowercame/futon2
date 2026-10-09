@@ -43,7 +43,7 @@
     (spit record (pr-str full-record))
     (let [paths (card/generate! (.getPath record) {:output-dir (.getPath out) :snap snap})
           result (edn/read-string (slurp (:edn paths)))]
-      (is (= [:verdict :run :cascade :outcome :example-text]
+      (is (= [:verdict :run :cascade :outcome :example-text :preregistrations]
              (mapv :id (:sections result))))
       (is (every? #(.isFile (io/file %)) (vals paths)))
       (is (= 10 (count (get-in result [:sections 0 :rows]))))
@@ -85,3 +85,17 @@
     (is (re-find #"\| :construction \| 6 \| 21 \| 15 \|" md))
     (is (= {:count 1 :sample ["M-x"] :omitted 0}
            (get-in result [:sections 0 :rows 0 :deciding-facts "openMissions"])))))
+
+(deftest card-exposes-preregistration-counts-for-the-index
+  (let [p {:id :wm/card-index
+           :change {:commits ["abcdef1"]}
+           :predictions [{:path [:run-id] :expect '= :value "fixture-full"}]
+           :applies-when {:path [:headline :pass] :expect 'present}}
+        r (assoc full-record :registered-run/chronology
+                 {:source-revisions-before {"futon2" "head"}})
+        result (card/build-card r "fixture.edn" snap nil nil
+                 {:preregistrations [p]
+                  :preregistration-options {:ancestor? (constantly true)}})]
+    (is (= 1 (get-in result [:preregistrations :counts :confirmed])))
+    (is (= :confirmed (get-in result [:preregistrations :entries 0 :status])))
+    (is (= :preregistrations (get-in result [:sections 5 :id])))))
