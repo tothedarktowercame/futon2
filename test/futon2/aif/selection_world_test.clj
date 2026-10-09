@@ -38,6 +38,24 @@
     (is (= 1 (get-in x [:enumerated-tasks :count]))
         "a selected live policy can no longer be reported beside zero enumerated tasks")))
 
+(deftest outer-task-receipt-is-the-enumeration-boundary
+  (let [d (assoc decision :outer-task-selection
+                 {:schema :wm/outer-task-selection-v1
+                  :support [{:id "M-a"} {:id "E-a"}]
+                  :excluded [{:id "T-a" :eligible false
+                              :ineligible-reason :pipeline/not-on-current-map}]})
+        x (world/capture d {} nil opts)]
+    (is (= ["E-a" "M-a" "T-a"] (get-in x [:enumerated-tasks :ids])))
+    (is (= 3 (get-in x [:enumerated-tasks :count])))))
+
+(deftest malformed-outer-receipt-cannot-inflate-enumeration
+  (let [d (assoc decision :outer-task-selection
+                 {:schema :wm/outer-task-selection-v2
+                  :support [{:id "M-invented"}]})
+        x (world/capture d {} nil opts)]
+    (is (= ["E-a" "M-a" "T-a"] (get-in x [:enumerated-tasks :ids])))
+    (is (not (some #{"M-invented"} (get-in x [:enumerated-tasks :ids]))))))
+
 (deftest failed-roster-is-counted
   (let [x (world/capture decision nil nil opts)]
     (is (= 1 (:failure-count x)))
