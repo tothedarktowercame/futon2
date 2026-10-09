@@ -232,6 +232,14 @@
     (is (contains? learn-targets :address-sorry))
     (is (contains? learn-targets :fire-pattern))))
 
+(deftest resolved-status-is-terminal-test
+  (write-primary-mission! "futon0/holes/missions/M-resolved.md"
+                          "**Status:** RESOLVED (2026-10-09)\n# Resolved\n")
+  (let [loaded (mr/load-missions *tmpdir*)
+        entry (first (filter #(= "M-resolved" (:id %)) (:missions loaded)))]
+    (is (= :complete (:status-class entry)))
+    (is (not (some #(= "M-resolved" (:id %)) (mr/open-missions loaded))))))
+
 (deftest sub-phase-keywords-do-not-terminally-classify-test
   ;; Mission statuses describe per-phase progress; a mid-line terminal keyword
   ;; (complete/done/deferred/draft for a SUB-phase) must NOT exclude a still-live

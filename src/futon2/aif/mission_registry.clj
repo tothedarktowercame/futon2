@@ -152,7 +152,7 @@
       (prefix? #{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"
                  "FROZEN"})                                           :inactive
       (prefix? #{"COMPLETE" "COMPLETED" "CLOSED" "DONE" "DISCHARGED"
-                 "ANSWERED" "DISSOLVED"})                                :complete
+                 "ANSWERED" "DISSOLVED" "RESOLVED"})                     :complete
       (= "ACTIVE" head)                                                 :active
       (= "OPEN" head)                                                   :open
       (= "PARTIAL" head)                                                :partial
