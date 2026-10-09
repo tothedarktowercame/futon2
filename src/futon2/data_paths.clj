@@ -10,6 +10,28 @@
 
 (def production-data-root "/home/joe/code/futon2/data")
 
+(def production-repo-root
+  "Canonical futon2 checkout root. Code/config paths must resolve here, never
+  against the serving JVM's process working directory."
+  (.getPath (.getParentFile (io/file production-data-root))))
+
+(def production-code-root
+  "Canonical parent containing the futon repositories."
+  (.getPath (.getParentFile (io/file production-repo-root))))
+
+(defn repo-path [& parts]
+  (str (apply io/file production-repo-root parts)))
+
+(defn resolve-repo-path
+  "Resolve P absolutely. Relative paths are rooted at canonical futon2,
+  never at the process working directory."
+  [p]
+  (let [f (io/file p)]
+    (.getPath (if (.isAbsolute f) f (io/file production-repo-root p)))))
+
+(defn code-path [& parts]
+  (str (apply io/file production-code-root parts)))
+
 (def test-mode?
   (= "true" (System/getProperty "futon2.data-root.test")))
 
