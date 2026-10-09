@@ -1122,6 +1122,7 @@
                                      {:actions (when-let [a (get-in decision
                                                        [:selection-law :per-policy-argmax :action])]
                                                  [a])
+                                      :as-of decision-as-of
                                       :sources (:cascade-sources opts)}))
                 ;; CERT-S v1 §0/§5: the certificate declares its schema.
                 decision (assoc-in decision [:selection-certificate :certificate-schema]

@@ -234,7 +234,7 @@
                         :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}))
         record (edn/read-string (slurp (:run-record result)))]
     (is (= 0 @asks) "the ask fn was never invoked")
-    (is (= {:status :absent :reason :no-interpretation-ask}
+    (is (= {:status :not-requested :reason :no-interpretation-ask}
            (:interpretation-ask record)))
     (is (= :wm/world-at-selection-v1
            (get-in record [:world-at-selection :schema])))

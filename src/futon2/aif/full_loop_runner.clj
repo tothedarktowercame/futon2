@@ -1033,7 +1033,7 @@
                                             (get-in result
                                                     [:checkpoints :selection :sorry
                                                      :interpretation-ask])
-                                            {:status :absent
+                                            {:status :not-requested
                                              :reason :no-interpretation-ask})
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection

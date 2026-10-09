@@ -71,10 +71,10 @@
      :window (if window (assoc (dissoc window :commits)
                               :source-until (:until window)
                               :until (if (at-or-before? as-of (:until window)) as-of (:until window)))
-                 (absent :discovery-window-unavailable))
+                 {:status :not-applicable :reason :retained-focus-needs-no-current-window})
      :commit-count (count rows) :facet-credit credits :commits rows
      :previous-focus (or previous (absent :previous-focus-not-retained))
-     :completion (absent :completion-authority-not-consumed)
+     :completion {:status :not-consumed :reason :record-only-no-completion-authority}
      :transition {:status :held :reason :record-only-no-transition-authority}
      :focus-origin (if retained? :retained-unfinished-focus
                        (if (:focus previous) :retained-unfinished-focus :commit-facets))
@@ -325,8 +325,9 @@
      :derived-via derived-via
      :embedding (if (some #{node} (get-in inputs [:embedding :nodes]))
                   {:status :present :node node :authority :presence-only}
-                  (absent :embedding-node-not-retained))
-     :outcome (absent :attested-outcome-not-inferred-from-prediction)}))
+                  {:status :not-applicable :reason :embedding-node-not-retained})
+     :outcome {:status :pending-observation
+               :reason :attested-outcome-not-inferred-from-prediction}}))
 
 (defn build
   ([decision inputs context]
@@ -360,11 +361,14 @@
                             :associated :attested-associated-increment
                             :useful-elsewhere :attested-useful-elsewhere-increment
                             :known-failure :observed-typed-nondelivery}
-                      :unobserved (absent :observation-is-not-a-valued-outcome)
+                      :unobserved {:kind :domain-sentinel
+                                   :reason :observation-is-not-a-valued-outcome}
                       :unrepresented-class-mass {:status :held :reason :outcome-kernel-unavailable
                                                  :declared-masses (get-in inputs [:global-preference :masses])}}
-     :attestation (absent :attestation-join-not-wired)
-     :kernel (absent :predictive-attestation-kernel-not-declared)
+     :attestation {:status :pending-terminal-observation
+                   :reason :selection-precedes-attestation}
+     :kernel {:status :not-applicable
+              :reason :record-only-receipt-does-not-supply-scoring-kernel}
      :local-C {:status :held :reason :conditional-outcome-kernel-unavailable}})))
 
 (defn attach

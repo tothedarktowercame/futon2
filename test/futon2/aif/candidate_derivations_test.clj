@@ -98,6 +98,28 @@
     (is (= :admitted (:status (:C1 d))))
     (is (= :derived-from-task (:kind (:construction (:C1 d)))))))
 
+(deftest machine-construction-records-runtime-provenance
+  (let [machine (-> c1
+                    (assoc-in [:id :construction-receipt :kind] :machine-constructed)
+                    (assoc-in [:id :observation-locators]
+                              {[target :restoration-accepted] {:class :C4}})
+                    (assoc-in [:id :interpretation-receipts]
+                              {:apparatus/done-is-observed-running {:kind :machine-requested}}))
+        e (:C1 (cd/derivations [machine] s0 {:as-of "2026-10-09T00:00:00Z"}))]
+    (is (= :machine-construction (:source-kind e)))
+    (is (= "2026-10-09T00:00:00Z" (:discovered-at e)))
+    (is (= #{:restoration-accepted} (get-in e [:scope :criterion-tokens])))
+    (doseq [k [:source-revision :source-content-sha256 :review-publication
+               :acceptance :scope :discovered-at]]
+      (is (not (and (map? (get e k)) (= :missing (:status (get e k)))))))
+    (is (= :admitted (:status e)))))
+
+(deftest declared-candidate-is-not-laundered-as-machine-provenance
+  (let [e (:C1 (cd/derivations [c1] s0 {:as-of "2026-10-09T00:00:00Z"}))]
+    (is (= :declared-file (:source-kind e)))
+    (is (= :missing (get-in e [:source-revision :status])))
+    (is (= :inadmissible (:status e)))))
+
 (deftest id-mismatch-refuses
   ;; Bug this catches: a partial map on a bijectivity break would leave P₀
   ;; joining silently truncated (condition 5). An argmax action naming an id

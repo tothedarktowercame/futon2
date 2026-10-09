@@ -96,7 +96,8 @@
         (let [p (first (:proposals (supply/supply root)))]
           (is (= contract (get-in p [:evidence :discharge-contract])))
           (is (nil? (get-in p [:evidence :target])))
-          (is (= {:status :absent :reason :not-retained} (get-in p [:evidence :backtrace]))))))))
+          (is (= {:status :not-applicable :reason :finding-has-no-backtrace}
+                 (get-in p [:evidence :backtrace]))))))))
 
 (deftest no-committed-closure-witness-means-no-executable-repair
   (with-store

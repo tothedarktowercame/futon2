@@ -48,7 +48,7 @@
       (is (= :held (get-in receipt [:outcome-domain :unrepresented-class-mass :status])))
       (is (= {:focus 0.55 :associated 0.35 :useful-elsewhere 0.05 :known-failure 0.05}
              (get-in receipt [:global-preference :masses])))
-      (is (= :absent (get-in receipt [:kernel :status])))
+      (is (= :not-applicable (get-in receipt [:kernel :status])))
       (doseq [bad [(assoc-in receipt [:candidates 0 :class] :irrelevant)
                    (assoc-in receipt [:global-preference :masses :focus] 1)
                    (assoc-in receipt [:discovery :focus] "EOI")]]
@@ -64,7 +64,7 @@
         f2 (first (filter #(= "M-wm-08-external-f2" (:target %)) rows))
         eoi (first (filter #(= "M-expressions-of-interest" (:target %)) rows))]
     (is (= :focus (:class f2)))
-    (is (= :absent (get-in f2 [:embedding :status])))
+    (is (= :not-applicable (get-in f2 [:embedding :status])))
     (is (= :attested-outcome-not-inferred-from-prediction (get-in f2 [:outcome :reason])))
     (is (= :unknown (:class eoi)))
     (is (= :relation-not-declared (get-in eoi [:relation :reason])))
