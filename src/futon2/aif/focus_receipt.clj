@@ -396,16 +396,20 @@
                                                    (reverse (:relations inputs)))
                                        b (embedding-neighbour inputs parent rowed)]
                                    (if (:row b) b {:absent (:absent b)})))))
-         relation-row (or direct repair-relation
+         ;; A ticket's declared Parent is its target-specific structural
+         ;; authority.  An open repair obligation establishes that the ticket
+         ;; is WM work, but must not erase a more specific parent relation.
+         relation-row (or direct
                           (when parent (row-of parent))
                           (:row parent-derivation)
+                          repair-relation
                           (:row m-derivation)
                           structural-relation)
-         derived0 (cond active-repair? (:source repair-relation)
-                       (and parent-source relation-row (nil? direct))
+         derived0 (cond (and parent-source relation-row (nil? direct))
                        (cond-> parent-source
                          parent-derivation (assoc :parent-relation-derivation
                                                   (:derived-via parent-derivation)))
+                       (= relation-row repair-relation) (:source repair-relation)
                        (:row m-derivation) (:derived-via m-derivation))
          derived (or derived0
                      (when (and structural-relation (nil? direct)
@@ -413,7 +417,7 @@
                                 (nil? (:row parent-derivation)) (nil? (:row m-derivation)))
                        (:source structural-relation)))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
-         eligible (or active-repair?
+         eligible (or (and active-repair? (= relation-row repair-relation))
                       (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
                        (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row)))))]
