@@ -10,6 +10,7 @@
             [futon2.aif.wm.construction-inputs :as inputs]
             [futon2.aif.focus-receipt :as focus]
             [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.data-paths :as data-paths]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
 ;; Selection reaches cascade-observation-scoring; keep its default cache and
@@ -64,6 +65,7 @@
      :result (decision/cascade-decision
               assembled
               {:ticket-queue ticket-queue/empty-declaration
+               :scoring-cache-path (data-paths/path "wm-scoring-cache" "global-rank.edn")
                :focus-inputs
                (assoc (focus/read-inputs)
                       :relations
@@ -87,12 +89,12 @@
   (let [{:keys [result]} (run-fixture)
         scored (get-in result [:decision :selection-certificate :candidates])
         construction (get-in result [:decision :selection-certificate :target-construction])]
-    (is (= (* 2 (count targets)) (count scored))
+    (is (= (* 4 (count targets)) (count scored))
         (str "each open target must contribute a scored policy before any "
              "target-specific interpretation exists; decision="
              (pr-str (:decision result))))
     (is (every? #(= (set (:slice %)) (set (:pool %))) construction))
-    (is (every? #(= 2 (:policy-count %)) construction))))
+    (is (every? #(= 4 (:policy-count %)) construction))))
 
 (deftest ^:incident uninterpreted-pattern-can-be-selected
   (let [{:keys [assembled result]} (run-fixture)
@@ -116,10 +118,20 @@
 (deftest ^:incident provisional-likelihood-makes-g-policy-dependent
   (let [scores (compact-scores (:result (run-fixture)))
         first-target (filter #(= (first targets) (:target %)) scores)]
-    (is (= 2 (count (set (map :g first-target))))
+    (is (<= 2 (count (set (map :g first-target))))
         (str "provisional policies must not be a G tie: " (pr-str first-target)))
     (is (every? pos? (map :ambiguity scores)))
     (is (every? pos? (map :expected-information-gain scores)))))
+
+(deftest ^:incident provisional-cascades-witness-q9-and-q10
+  (let [census (get-in (:result (run-fixture))
+                       [:decision :selection-certificate :q9-q10-census])]
+    (is (pos? (:earlier-progress-pairs census)))
+    (is (= (:earlier-progress-pairs census)
+           (:earlier-progress-no-greater-risk census)))
+    (is (pos? (:different-arrangement-pairs census)))
+    (is (= (:different-arrangement-pairs census)
+           (:arrangement-pairs-distinguished-by-g census)))))
 
 (deftest ^:incident policy-choice-is-invariant-to-slice-serialization-order
   (let [forward (:result (run-fixture library-slice))
@@ -139,6 +151,7 @@
         result (decision/cascade-decision
                 assembled
                 {:ticket-queue ticket-queue/empty-declaration
+                 :scoring-cache-path (data-paths/path "wm-scoring-cache" "global-rank.edn")
                  :focus-inputs
                  (assoc (focus/read-inputs) :relations
                         (mapv (fn [target]
@@ -149,7 +162,7 @@
                               targets))})
         budget (get-in result [:decision :selection-certificate :scoring-target-budget])]
     (is (= 5 (count (:problems assembled))) "all targets constructed before budgeting")
-    (is (= 10 (count (get-in result [:decision :selection-certificate :candidates]))))
+    (is (= 20 (count (get-in result [:decision :selection-certificate :candidates]))))
     (is (empty? (:budget-exhausted-targets budget)))
     (is (empty? (filter #(and (= :scoring (:stage %))
                               (= :budget-exhausted (:reason %)))
