@@ -7,13 +7,18 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
 
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
+(defn resolved-root []
+  (if (= default-root "/home/joe/code/futon2/data/wm-morning-brief")
+    (data-paths/path "wm-morning-brief")
+    default-root))
 (def lifecycle-schema :wm/morning-brief-lifecycle-v1)
 
 (defn- sha256 [^bytes bytes]
@@ -138,7 +143,7 @@
               (item-summary source item)))
 
 (defn queue-item!
-  ([item] (queue-item! default-root item))
+  ([item] (queue-item! (resolved-root) item))
   ([root {:keys [attempt-id] :as item}]
    (when-not (and (string? attempt-id) (not (str/blank? attempt-id)))
      (throw (ex-info "Morning Brief item requires attempt-id" {:item item})))
@@ -171,7 +176,7 @@
 
 (defn queue-operator-gate!
   "Queue one typed operator gate unless the same mission+kind is already open."
-  ([operator-action] (queue-operator-gate! default-root operator-action))
+  ([operator-action] (queue-operator-gate! (resolved-root) operator-action))
   ([root {:keys [mission gate-kind gate-text date] :as operator-action}]
    (when-not (and (nonblank-string? (str mission))
                   (nonblank-string? (str gate-kind))
@@ -209,7 +214,7 @@
         (read-records (io/file root "items"))))
 
 (defn lifecycle-events
-  ([] (lifecycle-events default-root))
+  ([] (lifecycle-events (resolved-root)))
   ([root]
    (->> (or (.listFiles (io/file root "lifecycle")) [])
         (filter #(.isDirectory %))
@@ -234,7 +239,7 @@
       :else {:status :verified :identity-sha256 expected :transitions transitions})))
 
 (defn lifecycle-state
-  ([attempt-id] (lifecycle-state default-root attempt-id))
+  ([attempt-id] (lifecycle-state (resolved-root) attempt-id))
   ([root attempt-id]
    (let [item (item-by-attempt root attempt-id)
          events (filterv #(= attempt-id (get-in % [:identity :attempt-id]))
@@ -251,7 +256,7 @@
 
 (defn open-item!
   "The Field Desk's single-item read boundary. Listing never calls this."
-  ([attempt-id consumer] (open-item! default-root attempt-id consumer))
+  ([attempt-id consumer] (open-item! (resolved-root) attempt-id consumer))
   ([root attempt-id consumer]
    (let [item (item-by-attempt root attempt-id)]
      (when-not item
@@ -300,7 +305,7 @@
 
 (defn review!
   ([attempt-id objective answer note reviewer]
-   (review! default-root attempt-id objective answer note reviewer))
+   (review! (resolved-root) attempt-id objective answer note reviewer))
   ([root attempt-id objective answer note reviewer]
    (let [item (item-by-attempt root attempt-id)
          spec (get objective-specs objective)
@@ -356,7 +361,7 @@
 (defn addendum!
   "Append a reproducibility or rationale note to an existing attempt."
   ([attempt-id kind title body author]
-   (addendum! default-root attempt-id kind title body author))
+   (addendum! (resolved-root) attempt-id kind title body author))
   ([root attempt-id kind title body author]
    (when-not (item-by-attempt root attempt-id)
      (throw (ex-info "Unknown Morning Brief attempt" {:attempt-id attempt-id})))
@@ -379,21 +384,21 @@
      record)))
 
 (defn reviews
-  ([] (reviews default-root))
+  ([] (reviews (resolved-root)))
   ([root] (read-records (io/file root "reviews"))))
 
 (defn items
-  ([] (items default-root))
+  ([] (items (resolved-root)))
   ([root] (read-records (io/file root "items"))))
 
 (defn summaries
   "Read compact inbox envelopes without parsing full audit records."
-  ([] (summaries default-root))
+  ([] (summaries (resolved-root)))
   ([root] (read-records (io/file root "summaries"))))
 
 (defn ensure-summaries!
   "Backfill missing compact envelopes. Existing envelopes are immutable."
-  ([] (ensure-summaries! default-root))
+  ([] (ensure-summaries! (resolved-root)))
   ([root]
    (let [known (set (map :attempt-id (summaries root)))]
      (reduce (fn [result file]
@@ -406,7 +411,7 @@
              (edn-files (io/file root "items"))))))
 
 (defn addenda
-  ([] (addenda default-root))
+  ([] (addenda (resolved-root)))
   ([root]
    (->> (read-records (io/file root "addenda"))
         (sort-by :created-at)
@@ -419,7 +424,7 @@
                     (item-objectives item)))))
 
 (defn pending-items
-  ([] (pending-items default-root))
+  ([] (pending-items (resolved-root)))
   ([root]
    (let [review-records (reviews root)]
      (->> (items root)
@@ -429,7 +434,7 @@
 
 (defn unseen-belief-events
   "Return QA events not named in consumed-ids."
-  ([consumed-ids] (unseen-belief-events default-root consumed-ids))
+  ([consumed-ids] (unseen-belief-events (resolved-root) consumed-ids))
   ([root consumed-ids]
    (let [seen (set consumed-ids)]
      (->> (reviews root)

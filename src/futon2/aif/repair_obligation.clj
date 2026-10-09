@@ -13,13 +13,18 @@
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.substrate :as substrate]
-            [futon2.aif.finding-ticket :as finding-ticket])
+            [futon2.aif.finding-ticket :as finding-ticket]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
            [java.nio.file Files StandardOpenOption LinkOption OpenOption]
            [java.time Instant]))
 
 (def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+(defn resolved-root []
+  (if (= default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+    (data-paths/path "wm-repair-obligations")
+    default-root))
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
 (defonce ^:private finding-publication-monitors (atom {}))
@@ -499,7 +504,7 @@
    :artifact-shape :code-commit})
 
 (defn record-review-failure!
-  ([finding] (record-review-failure! default-root finding))
+  ([finding] (record-review-failure! (resolved-root) finding))
   ([root finding] (record-review-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id target commit selected-entry reviewer review-job
                  review-verdict review-text occurrence observation]
@@ -548,7 +553,7 @@
   code defect. `:repair/class` distinguishes machine failures, environmental
   holds, and recoverable incomplete work. Selection fields are optional
   because readiness and substrate failures can precede policy selection."
-  ([finding] (record-system-failure! default-root finding))
+  ([finding] (record-system-failure! (resolved-root) finding))
   ([root finding] (record-system-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error
                  occurrence observation]
@@ -749,14 +754,14 @@
 
 (defn historical-verification-candidate
   "Read and validate a candidate without changing stop-line state."
-  ([evidence] (historical-verification-candidate default-root evidence))
+  ([evidence] (historical-verification-candidate (resolved-root) evidence))
   ([root evidence] (admission-from! root evidence)))
 
 (defn commit-historical-verification!
   "Execute a selected historical verification action. Canonical finding and
   verification bytes are the only identity sources."
   ([execution-attempt evidence]
-   (commit-historical-verification! default-root execution-attempt evidence))
+   (commit-historical-verification! (resolved-root) execution-attempt evidence))
   ([root execution-attempt evidence]
    (when-not (execution-identity? execution-attempt)
      (throw (ex-info "Historical verification execution identity invalid" {})))
@@ -776,7 +781,7 @@
 (defn record-historical-verification!
   "Compatibility wrapper. The supplied obligation is deliberately not an
   authority; canonical store bytes determine the transition."
-  ([obligation evidence] (record-historical-verification! default-root obligation evidence))
+  ([obligation evidence] (record-historical-verification! (resolved-root) obligation evidence))
   ([root _obligation evidence]
    (commit-historical-verification!
     root {:kind :runner-execution
@@ -811,7 +816,7 @@
 (defn commit-historical-resolution!
   "Persist a terminal-reader-authorized, distinct production successor. Maps
   and caller witness flags are deliberately not accepted."
-  ([repair-id authority] (commit-historical-resolution! default-root repair-id authority))
+  ([repair-id authority] (commit-historical-resolution! (resolved-root) repair-id authority))
   ([root repair-id authority]
    (when-not (satisfies? HistoricalSuccessorAuthority authority)
      (throw (ex-info "Historical successor lacks reader authority" {})))
@@ -918,7 +923,7 @@
   "All immutable findings for an attempt, enriched with any implementation and
   resolution or administrative-dismissal records. Unlike `open-obligations`,
   this is an audit view."
-  ([attempt-id] (obligation-history default-root attempt-id))
+  ([attempt-id] (obligation-history (resolved-root) attempt-id))
   ([root attempt-id]
    (let [implementations (indexed-records root "implementations")
          verifications (verified-admissions root)
@@ -943,7 +948,7 @@
                            (get dismissals (:repair/id finding))))))))))
 
 (defn open-obligations
-  ([] (open-obligations default-root))
+  ([] (open-obligations (resolved-root)))
   ([root]
    (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
          dismissed (set (map :repair/id (records (io/file root "dismissals"))))
@@ -979,7 +984,7 @@
   not facts inferred from age, a missing agent, or a failed readiness check.
   An implementation awaiting validation must complete its existing route."
   ([finding-id disposition]
-   (dismiss-wontfix! default-root finding-id disposition))
+   (dismiss-wontfix! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [authority reason actor] :as disposition}]
    (when-not (and (string? finding-id)
                   (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1014,7 +1019,7 @@
   :observation nonempty-map}. The actor is accountable for its relevance and
   interpretation; this is neither repair validation nor permanent retirement."
   ([finding-id disposition]
-   (dismiss-condition-cleared! default-root finding-id disposition))
+   (dismiss-condition-cleared! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [evidence actor reason] :as disposition}]
    (when-not (and (string? finding-id)
                   (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1058,7 +1063,7 @@
   [:failure-data :author-job :execution]. Missing or internally inconsistent
   evidence receives no benefit of the doubt."
   ([finding-id disposition]
-   (dismiss-unexecuted! default-root finding-id disposition))
+   (dismiss-unexecuted! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [authority reason cause-fix actor] :as disposition}]
    (when-not (and (string? finding-id)
                   (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1122,7 +1127,7 @@
   or augment its membership. Findings and their source records remain
   immutable and audit-visible."
   ([finding-id disposition]
-   (dismiss-echo! default-root finding-id disposition))
+   (dismiss-echo! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [authority reason actor cause-note] :as disposition}]
    (when-not (and (string? finding-id)
                   (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1201,7 +1206,7 @@
   before considering absent resolution data. Otherwise both claimed and
   resolved repository paths must be retained and distinct."
   ([finding-id disposition]
-   (dismiss-fixture-pollution! default-root finding-id disposition))
+   (dismiss-fixture-pollution! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [authority reason actor cause-fix] :as disposition}]
    (when-not (and (string? finding-id)
                   (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1284,7 +1289,7 @@
   Ancestor targets, caller-supplied proof and ambiguous short attempt aliases
   cannot establish supersession. This does not validate the target's repair."
   ([finding-id disposition]
-   (dismiss-superseded-attempt! default-root finding-id disposition))
+   (dismiss-superseded-attempt! (resolved-root) finding-id disposition))
   ([root finding-id {:keys [authority reason actor] :as disposition}]
    (when-not (and (string? finding-id)
                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
@@ -1424,7 +1429,7 @@
    stands. This dismissal says the finding misdiagnosed a store-side
    degradation as an ungrounded run; it does not say any repair landed."
   ([finding-id disposition]
-   (dismiss-grounding-readback-degraded-impl! default-root finding-id disposition {}))
+   (dismiss-grounding-readback-degraded-impl! (resolved-root) finding-id disposition {}))
   ([root finding-id disposition]
    (dismiss-grounding-readback-degraded-impl! root finding-id disposition {})))
 
@@ -1568,7 +1573,7 @@
    is gone and the ledger could never have seen it; it does not say the
    discharge path ran."
   ([finding-id disposition]
-   (dismiss-repaired-elsewhere-impl! default-root finding-id disposition))
+   (dismiss-repaired-elsewhere-impl! (resolved-root) finding-id disposition))
   ([root finding-id disposition]
    (dismiss-repaired-elsewhere-impl! root finding-id disposition)))
 
@@ -1769,7 +1774,7 @@
   clear the line: a distinct production-shaped successor must still validate
   the repaired machine."
   ([obligation implementation]
-   (record-implementation! default-root obligation implementation))
+   (record-implementation! (resolved-root) obligation implementation))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as implementation}]
    (let [context (discharge-context! :implementation obligation implementation)
@@ -1843,7 +1848,7 @@
   it to the typed successor finding that now owns the stop line. This is not a
   successful repair resolution and requires no fabricated grounding witness."
   ([obligation successor reason]
-   (supersede! default-root obligation successor reason))
+   (supersede! (resolved-root) obligation successor reason))
   ([root obligation successor reason]
    (when-not (and (= :incomplete-recoverable (:repair/class obligation))
                   (= :open (:repair/status obligation))
@@ -1866,7 +1871,7 @@
      record)))
 
 (defn resolve!
-  ([obligation resolution] (resolve! default-root obligation resolution))
+  ([obligation resolution] (resolve! (resolved-root) obligation resolution))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as resolution}]
    (let [context (discharge-context! :successor-validation obligation resolution)

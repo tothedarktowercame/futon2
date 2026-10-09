@@ -6,12 +6,17 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.data-paths :as data-paths])
   (:import [java.io RandomAccessFile PushbackReader StringReader]))
 
 (load-identity/register! *ns* *file*)
 ;; Absolute, like the cohort root: the serving JVM runs with futon3c as cwd.
 (def default-root "/home/joe/code/futon2/data/wm-learning-trials")
+(defn resolved-root []
+  (if (= default-root "/home/joe/code/futon2/data/wm-learning-trials")
+    (data-paths/path "wm-learning-trials")
+    default-root))
 (defonce ^:private mutex (Object.))
 
 (defn- records [text]
@@ -448,7 +453,7 @@
    later consumption."
   [{:keys [ledger-root close-path close-judgment close-roots close-record-files
            learning-trial-receipt]}]
-  (let [root (or ledger-root default-root)
+  (let [root (or ledger-root (resolved-root))
         file (io/file root "attempts.edn")]
     (try
       (if-not (.isFile file)
@@ -510,7 +515,7 @@
     (throw (ex-info "B update writes only after an accepted close"
                     {:learning-ledger/refusal :close-not-accepted
                      :verdict accepted-verdict})))
-  (let [trials (read-trials (or ledger-root default-root))
+  (let [trials (read-trials (or ledger-root (resolved-root)))
         ;; FAMILY is a pattern id -- the parameter key. It was compared
         ;; against :family, the trial-CONFIGURATION digest, so it never
         ;; matched: trials-n was always 0 and the reported theta was always
@@ -568,7 +573,7 @@
      ;; path at the accepted close; this function computes and states the
      ;; update, and refuses re-computation over an already-recorded
      ;; occurrence).
-     :read-back (let [again (read-trials (or ledger-root default-root))]
+     :read-back (let [again (read-trials (or ledger-root (resolved-root)))]
                   {:trials (count again)
                    ;; by the PARAMETER key: this counted on :family, the
                    ;; configuration digest, so the field whose job is to
@@ -600,7 +605,7 @@
    effects: the kernel fires the whole :produces set at once, so theta
    reads as the pattern's per-token delivery rate -- the approximation the
    Lean InterpretedPattern already makes."
-  ([pattern-id] (pattern-theta pattern-id default-root))
+  ([pattern-id] (pattern-theta pattern-id (resolved-root)))
   ([pattern-id root]
    (try
      (let [all (read-trials root)

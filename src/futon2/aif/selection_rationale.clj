@@ -41,7 +41,8 @@
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [futon2.data-paths :as data-paths]))
 
 (def schema-version
   "Bumped when a field is added or its meaning changes. Readers that fold a
@@ -62,6 +63,11 @@
    `holes/labs/wm-contract/runs/<run-id>/` is assembled from here exactly as
    `wm-trace-s5.edn` was assembled from `data/wm-trace/`."
   (str (System/getProperty "user.home") "/code/futon2/data/wm-rationale"))
+(defn resolved-store-dir []
+  (let [production (str (System/getProperty "user.home") "/code/futon2/data/wm-rationale")]
+    (if (= default-store-dir production)
+      (data-paths/path "wm-rationale")
+      default-store-dir)))
 
 (def contract-path
   "The mathlib4 hole contract whose `:source :git-sha` is the pin RE3's
@@ -368,7 +374,7 @@
      :trace-path -- the trace file this decision was persisted to"
   ([record] (emit! record {}))
   ([record {:keys [dir] :as opts}]
-   (let [dir (or dir default-store-dir)
+   (let [dir (or dir (resolved-store-dir))
          rationale (rationale-record record opts)
          ds (defects rationale)]
      (when (seq ds)

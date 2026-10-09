@@ -1,7 +1,8 @@
 (ns futon2.aif.artifact-read-observation
   "Append-only observations made only by a consumer's actual artifact read."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
@@ -9,6 +10,10 @@
 
 (def schema :wm/artifact-read-observation-v1)
 (def default-root "/home/joe/code/futon2/data/wm-artifact-reads")
+(defn resolved-root []
+  (if (= default-root "/home/joe/code/futon2/data/wm-artifact-reads")
+    (data-paths/path "wm-artifact-reads")
+    default-root))
 
 (defn sha256 [^bytes bytes]
   (format "%064x" (BigInteger. 1 (.digest (doto (MessageDigest/getInstance "SHA-256")
@@ -17,7 +22,7 @@
 (defn read-artifact!
   "Read bytes first, verify their declared SHA, optionally parse EDN, then append
    the observation. Merely registering or generating PATH calls none of this."
-  ([authority] (read-artifact! default-root authority))
+  ([authority] (read-artifact! (resolved-root) authority))
   ([root {:keys [consumer path content-sha256 producer-run producer-click
                  producer-commit purpose parse] :as authority}]
    (when-not (and (every? #(and (string? %) (seq %))
@@ -52,7 +57,7 @@
        {:value value :receipt receipt}))))
 
 (defn receipts
-  ([] (receipts default-root))
+  ([] (receipts (resolved-root)))
   ([root]
    (->> (or (.listFiles (io/file root)) [])
         (filter #(.isFile %))
@@ -61,7 +66,7 @@
         vec)))
 
 (defn usage-projection
-  ([] (usage-projection default-root))
+  ([] (usage-projection (resolved-root)))
   ([root]
    (->> (receipts root)
         (group-by (juxt #(get-in % [:artifact :content-sha256]) :consumer))

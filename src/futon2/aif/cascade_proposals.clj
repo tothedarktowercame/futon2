@@ -116,7 +116,7 @@
   "Combine retained retrieval evidence with a fresh open-repair-store read."
   [{:keys [proposal-dir repair-root]}]
   (let [retrieved (load-proposals (or proposal-dir default-dir))
-        findings (repairs/supply (or repair-root repair/default-root))]
+        findings (repairs/supply (or repair-root (repair/resolved-root)))]
     (-> retrieved
         (update :proposals into (:proposals findings))
         (update :declines into (:declines findings))

@@ -70,7 +70,7 @@
 (defn supply
   "Fresh read each tick: dispositions are never cached as open proposals.
    Resolution/dismissal filtering delegates to the real repair-store reader."
-  ([] (supply repair/default-root))
+  ([] (supply (repair/resolved-root)))
   ([root]
    (let [open (repair/open-obligations root)
          entries (mapv #(finding-proposal root (:repair/id %)) open)]
