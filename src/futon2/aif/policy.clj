@@ -346,11 +346,13 @@
                   :let [a (:action e)
                         precedence (vec (or (:precedence a) []))
                         patterns (set (map #(or (:pattern-id %) (:id %) %) precedence))]]
-              {:id (or (get-in a [:id :id]) (:id a)) :patterns patterns
+              {:id (or (get-in a [:id :id]) (:id a)) :target (:target a)
+               :patterns patterns
                :arrangement (pr-str precedence) :g (:controller-score e)})
         pairs (for [[i a] (map-indexed vector rows)
                     [j b] (map-indexed vector rows)
                     :when (and (< i j)
+                               (= (:target a) (:target b))
                                (= (:patterns a) (:patterns b))
                                (not= (:arrangement a) (:arrangement b)))]
                 {:left (:id a) :right (:id b)

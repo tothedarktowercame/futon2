@@ -302,7 +302,11 @@
         steps (loop [tau 1 q q0 result []]
                 (if (> tau horizon-steps)
                   result
-                  (let [evaluated (m/rollout-evaluation (constantly (:precedence candidate)) q 1)
+                  (let [precedence-at (fn [step]
+                                        (if-let [steps (:precedence-steps candidate)]
+                                          (get steps (dec step) [])
+                                          (:precedence candidate)))
+                        evaluated (m/rollout-evaluation (constantly (precedence-at tau)) q 1)
                         next-q (checked (:belief evaluated))
                         score (checked (om/query observation-model
                                                  ;; PROOF-wm-works 1.3 handoff A:

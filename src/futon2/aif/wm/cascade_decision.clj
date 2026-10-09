@@ -786,14 +786,34 @@
                                                                   :predicted-effect])))]))
                               (:interpretations cp))]
                     (mapv (fn [{:keys [candidate-id precedence construction-receipt]}]
+                            (let [local-declared (:step-operators construction-receipt)
+                                  local-patterns
+                                  (when (seq local-declared)
+                                    (into {}
+                                          (map (fn [[id {:keys [guard produces] :as declared}]]
+                                                 [id (-> (cascade-policy/token-interpretation
+                                                          id {:guard {:needs (set (map qual (:needs guard)))
+                                                                      :forbids (set (map qual (:forbids guard)))}
+                                                              :produces (set (map qual produces))})
+                                                         (assoc :target t)
+                                                         (merge (select-keys declared
+                                                                             [:theta :theta-source
+                                                                              :predicted-effect])))]))
+                                          local-declared))
+                                  policy-patterns (or local-patterns patterns)
+                                  ordered (mapv policy-patterns precedence)]
                             {:kind :cascade-candidate :id candidate-id :target t
                              :want (vec (:want cp))
-                             :precedence (mapv patterns precedence)
+                             :precedence ordered
+                             ;; One declared occurrence per horizon step.  A
+                             ;; failed stochastic attempt is not silently
+                             ;; retried ahead of the next arrangement unit.
+                             :precedence-steps (when local-patterns (mapv vector ordered))
                              :observation-locators
                              (into {} (map (fn [[token locator]] [(qual token) locator]))
                                    (:locators cp))
                              :construction-receipt construction-receipt
-                             :interpretation-receipts (:interpretation-receipts problem)})
+                             :interpretation-receipts (:interpretation-receipts problem)}))
                           (:constructed-candidates problem))))
                 problems))
               dropped (:dropped-candidates assembled)

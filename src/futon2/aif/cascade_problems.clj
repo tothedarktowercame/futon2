@@ -95,9 +95,46 @@
   registered passing run at current content, is AR-41 (futon2 9d5525ee)."
   #{:C3 :C4 :C5 :C6 :C8})
 
-(def provisional-policy-count
-  "Two distinct query-slice policies per open target: the Q8 minimum."
-  2)
+(defn provisional-policy-family
+  "Construct singles plus both orders of every two-pattern arrangement from
+  the top N slice patterns, where N=min(slice size, horizon).  Thus the family
+  size N + N(N-1)=N² is derived entirely from the query slice and horizon.
+  Each receipt carries policy-local step operators: one scheduled attempt per
+  pattern, and the best-ranked member of an arrangement is its completion
+  producer.  Reversing the same pair therefore changes completion time while
+  preserving the terminal distribution."
+  [slice-patterns effects want horizon]
+  (let [n (min (count slice-patterns) (long horizon))
+        top (vec (take n slice-patterns))
+        marker (fn [p] [:wm/provisional-pattern-applied p])
+        operator (fn [p completion?]
+                   (let [effect (get effects p)]
+                     {:guard {:needs #{} :forbids #{}}
+                      :produces (cond-> #{(marker p)} completion? (into (set want)))
+                      :theta (:theta effect) :theta-source (:source effect)
+                      :predicted-effect effect
+                      :status :interpretation-owed-after-selection}))
+        specs (concat
+               (map (fn [p] {:kind :single :order [p] :completion-pattern p}) top)
+               (for [a top b top :when (not= a b)]
+                 {:kind :ordered-pair :order [a b]
+                  ;; TOP is rank ordered, so this is source-derived.
+                  :completion-pattern (first (filter #{a b} top))}))]
+    (mapv (fn [i {:keys [kind order completion-pattern]}]
+            {:candidate-id (keyword (str "C" (inc i)))
+             :precedence order
+             :construction-receipt
+             {:kind :query-time-pattern-selection
+              :construction-form :provisional-pattern-cascade
+              :status :provisional :attested? false
+              :family-rule :singles-plus-all-ordered-pairs-over-min-slice-horizon
+              :family-size (* n n) :source-pattern-count n
+              :arrangement-kind kind :patterns order
+              :completion-pattern completion-pattern
+              :step-operators
+              (into {} (map (fn [p] [p (operator p (= p completion-pattern))])) order)
+              :predicted-effects (select-keys effects order)}})
+          (range) specs)))
 
 (defn retrieval-effect
   "Declared provisional likelihood from rank r in a slice of k: the Weibull
@@ -343,18 +380,7 @@
                                         :predicted-effect effect
                                         :status :interpretation-owed-after-selection}]))
                           slice-patterns))
-            candidates
-            (mapv (fn [i pattern]
-                    {:candidate-id (keyword (str "C" (inc i)))
-                     :precedence [pattern]
-                     :construction-receipt
-                     {:kind :query-time-pattern-selection
-                      :status :provisional
-                      :pattern pattern
-                      :attested? false
-                      :policy-limit provisional-policy-count
-                      :predicted-effect (get effects pattern)}})
-                  (range) (take provisional-policy-count slice-patterns))]
+            candidates (provisional-policy-family slice-patterns effects want horizon)]
        {:target target
        :cascade-problem
        (assoc base

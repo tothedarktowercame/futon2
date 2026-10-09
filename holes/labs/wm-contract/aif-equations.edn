@@ -1055,6 +1055,14 @@
    :imports [:pi :G :A]
    :code "src/futon2/aif/cascade_problems.clj (retrieval-effect, provisional operator); src/futon2/aif/wm/cascade_decision.clj (theta preservation into the existing policy scorer)"
    :limits "This is an ordinal empirical likelihood, not a claim of calibrated causal success. It expires when a target-specific interpretation is admitted; recorded trials remain authoritative for interpreted pattern families."}
+  :provisional-cascade-family
+  {:observed :singles-and-reversed-pairs-from-query-slice
+   :status :declared-stack-specialisation
+   :mapping "Let n := min(querySliceSize, horizon). Construct each of the n singleton policies and every ordered pair (p,q), p != q, over those n rank-ordered patterns: n + n(n-1) = n^2 policies. For a pair, the better-ranked member is the completion producer in both arrangements. Each arrangement schedules exactly one stochastic pattern attempt per horizon step, in precedence order, retaining each pattern's Weibull theta."
+   :justification "Singletons retain the prior one-pattern control. All two-pattern permutations are the complete, unsampled Q10 control at the smallest nontrivial cascade geometry; no pair count is hand selected. The n bound comes only from available slice evidence and the declared scoring horizon. Scheduling one occurrence per step makes AB and BA share an exact terminal distribution while exposing the completion-producing pattern at different steps, so Q9 compares timing under the same endpoint rather than different success probabilities."
+   :imports [:pi :G :A]
+   :code "src/futon2/aif/cascade_problems.clj (provisional-policy-family); src/futon2/aif/wm/cascade_decision.clj (target qualification and step schedule); src/futon2/aif/cascade_observation_scoring.clj (scheduled rollout consumption)"
+   :limits "The step operators are provisional predictions, not admitted interpretations. A winning member retains :interpretation-owed-after-selection and cannot be enacted before interpretation."}
   :query-time-slice-budget
   {:observed :forty-pattern-bounded-whole-library-slice
    :status :declared-stack-specialisation
