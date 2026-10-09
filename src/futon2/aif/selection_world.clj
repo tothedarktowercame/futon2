@@ -90,7 +90,15 @@
   production cascade clicks.  Reading only it produced the impossible receipt
   `0 enumerated` beside a selected policy."
   [decision]
-  (let [legacy (mapcat (fn [kind]
+  (let [outer (:outer-task-selection decision)
+        ;; Enumeration happens at the outer task boundary, before one target is
+        ;; chosen for cascade construction.  Both admitted support and typed
+        ;; exclusions were inspected by that enumerator.  The inner cascade
+        ;; candidates cover only the chosen target and therefore cannot be the
+        ;; population census (click 48 exposed this as 1 beside 694 open tasks).
+        outer-targets (when (= :wm/outer-task-selection-v1 (:schema outer))
+                        (keep :id (concat (:support outer) (:excluded outer))))
+        legacy (mapcat (fn [kind]
                          (enumeration/enumerated-targets kind
                                                          (:controller-ranking decision)))
                        [:mission :excursion :ticket])
@@ -101,7 +109,9 @@
                          (get-in candidate [:f-prefix :policy :target])
                          (get-in candidate [:action :target])))
                    policies)]
-    (distinct (concat legacy live))))
+    (distinct (if (some? outer-targets)
+                outer-targets
+                (concat legacy live)))))
 
 (defn capture
   "Capture after DECISION is final. Dependencies are injectable for hermetic

@@ -539,11 +539,13 @@
    :action (:action receipt)})
 
 (defn live-registry-tasks
-  "Read the authoritative registries once into the outer-task input shape."
-  []
-  (let [missions (registry/load-missions)
-        excursions (registry/load-excursions)
-        tickets (registry/load-tickets)
+  "Read the pinned primary-checkout registries once into the outer-task input
+  shape.  This is the same authority used by run-fact open-task census."
+  ([] (live-registry-tasks registry/default-code-root))
+  ([code-root]
+  (let [missions (registry/load-missions code-root)
+        excursions (registry/load-excursions code-root)
+        tickets (registry/load-tickets code-root)
         tasks (vec (concat
                     (map #(assoc % :kind :mission)
                          (registry/open-missions missions))
@@ -554,7 +556,7 @@
                          (filter registry/live-ticket? (:tickets tickets)))))
         snapshot (registry-snapshot tasks)]
     (with-meta tasks
-      {:registry-snapshot snapshot})))
+      {:registry-snapshot snapshot}))))
 
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by

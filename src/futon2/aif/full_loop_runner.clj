@@ -5887,7 +5887,14 @@
                   (retain-redecision-failure! e interpretation-ask-record)))
               judgement0-base)
             world-at-selection (selection-world/capture
-                                (:decision judgement0) roster
+                                ;; The outer receipt is a sibling of :decision
+                                ;; on the judge result.  Carry it only into the
+                                ;; record-only census so the census can observe
+                                ;; the actual task enumerator boundary; it is
+                                ;; never returned to or consumed by scoring.
+                                (assoc (:decision judgement0)
+                                       :outer-task-selection
+                                       (:outer-task-selection judgement0)) roster
                                 interpretation-ask-record opts)
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
