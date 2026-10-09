@@ -32,7 +32,9 @@
    :q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
         "libraryPatternCount" "constructorPatternCount"]
    :q3 ["cascadesWithoutG"]
-   :q4 ["horizonLength" "preferenceSteps" "gTerms"]
+   :q4 ["horizonLength" "preferenceSteps" "gradedPreferenceSteps" "gTerms"
+        "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
+        "policiesWithInformationTerm" "comparedPolicies"]
    :q5 ["interpretationOrder"]
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
@@ -41,7 +43,8 @@
         "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
         "targetConstruction" "constructedCascades" "comparedPolicies"
         "seatsAvailable" "seatsUsed"]
-   :q9 ["completionPreferencePairs" "completionPairsStrictlyPreferred"]
+   :q9 ["completionPreferencePairs" "completionPairsStrictlyPreferred"
+        "earlierProgressPairs" "earlierProgressNoGreaterRisk"]
    :q10 ["differentArrangementPairs" "arrangementPairsDistinguishedByG"]})
 
 (defn evidence [facts q]
@@ -54,10 +57,15 @@
                               (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))))
         :q3 (ev-known (str "cascadesWithoutG := " (fs (facts "cascadesWithoutG"))))
         :q4 (let [g (facts "gTerms")]
-              (ev-known (format "horizonLength := %d, preferenceSteps := %s, gTerms := ⟨%s, %s, %s⟩"
+              (ev-known (format "horizonLength := %d, preferenceSteps := %s, gradedPreferenceSteps := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
                                 (facts "horizonLength") (nat-fs (facts "preferenceSteps"))
+                                (nat-fs (facts "gradedPreferenceSteps"))
                                 (bool-lit (g "risk")) (bool-lit (g "ambiguity"))
-                                (bool-lit (g "informationGain")))))
+                                (bool-lit (g "informationGain"))
+                                (facts "policiesWithRiskTerm")
+                                (facts "policiesWithAmbiguityTerm")
+                                (facts "policiesWithInformationTerm")
+                                (fs (facts "comparedPolicies")))))
         :q2 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, targetConstruction := %s, libraryPatternCount := %d, constructorPatternCount := %d"
                               (fs (facts "openMissions")) (fs (facts "openExcursions"))
                               (fs (facts "openTickets")) (target-construction (facts "targetConstruction"))
@@ -75,8 +83,9 @@
                               (facts "libraryPatternCount") (target-construction (facts "targetConstruction"))
                               (fs (facts "constructedCascades")) (fs (facts "comparedPolicies"))
                               (fs (facts "seatsAvailable")) (fs (facts "seatsUsed"))))
-        :q9 (ev-known (format "completionPreferencePairs := %d, completionPairsStrictlyPreferred := %d"
-                              (facts "completionPreferencePairs") (facts "completionPairsStrictlyPreferred")))
+        :q9 (ev-known (format "completionPreferencePairs := %d, completionPairsStrictlyPreferred := %d, earlierProgressPairs := %d, earlierProgressNoGreaterRisk := %d"
+                              (facts "completionPreferencePairs") (facts "completionPairsStrictlyPreferred")
+                              (facts "earlierProgressPairs") (facts "earlierProgressNoGreaterRisk")))
         :q10 (ev-known (format "differentArrangementPairs := %d, arrangementPairsDistinguishedByG := %d"
                                (facts "differentArrangementPairs") (facts "arrangementPairsDistinguishedByG")))))))
 
