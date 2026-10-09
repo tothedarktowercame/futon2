@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.enactment-fold-source :as enactment-source]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.observation-checks :as checks]
@@ -40,6 +41,7 @@
 (defn- scoring [lane] (:cascade-scoring (meta (:ranked lane))))
 (defn- score [r]
   (pr-str (select-keys (:decision r) [:action :softmax-weights :selection-law])))
+
 (defn- captured [opts after-lane]
   (let [lanes (atom []) real wm-cd/cascade-lane
         result (with-redefs [wm-cd/cascade-lane
@@ -47,6 +49,40 @@
                                         (swap! lanes conj lane) (after-lane) lane))]
                  (decision opts))]
     {:result result :lane (first @lanes)}))
+
+(deftest completed-predecessor-outcome-admits-numeric-f
+  (fill! 5)
+  (let [{:keys [result]} (captured {:observation-labels-path (path)} (fn []))
+        d (:decision result)
+        saved (#'runner/persist-run-record!
+               {:run-record-dir (str (io/file *dir* "records"))
+                :scan-render-fn (fn [& _] nil)}
+               "offline-predecessor" "2026-09-26T00:00:00Z"
+               {:outcome :offline-no-selection
+                :checkpoints {:selection {:judgment {:controller-decision d}}}})
+        record (edn/read-string (slurp (:run-record saved)))
+        target (get-in record [:decision :chosen :target])
+        token (second (first (keys (get-in record [:decision :measured-a :rates]))))
+        predecessor (assoc-in record [:d-task-enactment :verification]
+                              {:status :admitted
+                               :present #{[target token]}
+                               :unknown #{}})
+        source (enactment-source/conditioning-step-from-completed-run predecessor)
+        step (-> source :steps first :step)]
+    (is (= :present (:status source)))
+    (is (= :present (:status step)))
+    (is (number? (:f step)))
+    (is (pos? (:p-o step)))
+    (is (= :completed-predecessor-run
+           (get-in step [:observation-source :kind])))
+    (is (false? (get-in step [:observation-source :same-run-prediction-counted?])))))
+
+(deftest prospective-prediction-without-measured-outcome-is-not-admitted
+  (let [record {:decision {:chosen {:target "T" :precedence [:p]}
+                           :selection-certificate
+                           {:token-belief-stage {:observation {:status :computed}}}}}]
+    (is (= :predecessor-has-no-measured-a
+           (:reason (enactment-source/conditioning-step-from-completed-run record))))))
 
 (deftest one-real-population-reaches-lanes-measured-a-and-disk
   (fill! 5)

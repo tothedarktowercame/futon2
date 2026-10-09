@@ -18,7 +18,10 @@
   refusal."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.enactment-habit :as enactment-habit]
+            [futon2.aif.cascade-prior :as prior]
+            [futon2.aif.flight :as flight]
             [futon2.aif.load-identity :as load-identity])
   (:import [java.security MessageDigest]))
 
@@ -106,3 +109,48 @@
       {:steps [] :read [] :unread []}
       (flight-files dir))
      :dir (str dir))))
+
+(defn conditioning-step-from-completed-run
+  "Build one admitted observation from a predecessor run's measured D-task
+  outcome. Predictions from the current selection are intentionally ignored."
+  [record]
+  (let [chosen (get-in record [:decision :chosen])
+        target (:target chosen)
+        precedence (vec (:precedence chosen))
+        verification (get-in record [:d-task-enactment :verification])
+        present (set (or (:present verification) #{}))
+        target-present (set (for [[t token] present :when (= t target)] token))
+        measured-a (get-in record [:decision :measured-a])
+        run-id (:run/id record)]
+    (cond
+      (nil? record) {:steps [] :status :absent :reason :no-predecessor-run}
+      (or (nil? target) (empty? precedence))
+      {:steps [] :status :absent :reason :predecessor-has-no-chosen-policy}
+      (nil? measured-a)
+      {:steps [] :status :absent :reason :predecessor-has-no-measured-a}
+      (empty? target-present)
+      {:steps [] :status :absent :reason :predecessor-has-no-present-observation}
+      :else
+      (let [unknown (set (or (:unknown verification) #{}))
+            checked (set (for [[t token] (set/union present unknown)
+                               :when (= t target)] token))
+            observation {:status :observed :o target-present :checked checked
+                         :channel (zipmap checked (repeat :D-task-measured))}
+            policy-key (prior/policy-key {:mission target :shown precedence
+                                          :semilattice {}})
+            step (flight/conditioning-step
+                  {:run-record record :target target
+                   :flight-id (str "completed-run-" run-id) :click-id run-id
+                   :observation observation :policy-key policy-key
+                   :precedence precedence :enactments []})]
+        (if (= :present (:status step))
+          {:steps [{:step (assoc step :observation-source
+                                  {:kind :completed-predecessor-run
+                                   :run/id run-id
+                                   :same-run-prediction-counted? false})
+                     :path (str "run-record:" run-id)
+                     :sha256 (sha256 (.getBytes (pr-str record) "UTF-8"))}]
+           :status :present :source :completed-predecessor-run}
+          {:steps [] :status :absent
+           :reason (or (:reason step) :predecessor-observation-refused)
+           :detail (select-keys step [:status :reason :inputs :tokens])})))))
