@@ -55,7 +55,13 @@
                          :finding-source pin
                          :backtrace (if (some? (:backtrace finding))
                                       (assoc pin :status :retained :edn-path [:backtrace])
-                                      {:status :not-applicable :reason :finding-has-no-backtrace})
+                                      {:status :derived-legacy-provenance
+                                       :finding-source pin
+                                       :producer (select-keys finding
+                                                              [:repair/id :attempt-id :repair/class
+                                                               :failure-kind :failure-stage :opened-at
+                                                               :review-job :reviewer :failed-commit
+                                                               :repair/occurrence])})
                          :closure-observation
                          {:status :unavailable
                           :reason :unversioned-resolution-has-no-admitted-locator

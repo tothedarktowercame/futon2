@@ -889,6 +889,23 @@
           {:assumption "the horizon relative to the proposed chain"
            :state "T is one common declared-or-computed horizon per tick (resolve-cascade-horizon); :max-moves (construction budget, default 4) is a different quantity that also reads 4 in the receipt above. In that receipt T = 4 with 7 unit applications in the proposed order and 3 wants :beyond-horizon; the chain is longer than the horizon it is scored over."}]}
 
+  {:id :focus-predictive-attestation-kernel
+   :defines :wm/focus-predictive-attestation-kernel
+   :node :CTAU-CLASS
+   :class :stack-defined
+   :imports [:C-class]
+   :formal "For a selected candidate with selection-time focus class k, conditional on a qualifying terminal increment attestation, K_focus(k) is the corresponding attested focus outcome: focus -> attested-focus-increment, associated -> attested-associated-increment, useful-elsewhere -> attested-useful-elsewhere-increment. A typed terminal failure maps to observed-typed-nondelivery. K_focus does not predict success probability; it predicts the focus relation of an attested increment and classifies observed failure."
+   :inputs [:selected-candidate-id :selected-target :selection-time-focus-class
+            :qualifying-terminal-attestation]
+   :outcomes [:attested-focus-increment :attested-associated-increment
+              :attested-useful-elsewhere-increment :observed-typed-nondelivery]
+   :declaration "resources/wm/focus/predictive-attestation-kernel-v1.edn"
+   :code "src/futon2/aif/focus_receipt.clj (kernel-declaration, predicted-attestation, build, join-terminal)"
+   :live-status {:implemented true
+                 :consumed-by [:focus-receipt :run-record-terminal-join]
+                 :record-only true
+                 :qualification "Conditional class prediction only; no unmeasured probability of successful delivery is introduced."}}
+
   {:id :dirichlet-observation-prior
    :latex "A_{o\\mid s} := \\mathbb{E}_{\\operatorname{Dir}(\\alpha_{s})}[A_{o\\mid s}] = \\alpha_{s,o}/\\sum_{o'}\\alpha_{s,o'}"
    :defines :A-dirichlet :node :CTAU-CLASS :class :stack-defined :ref :dacosta2020

@@ -18,6 +18,14 @@
     (json/parse-string (slurp (io/resource "wm/focus/commit-facets-v1.json")) true)
     (catch Exception _ (absent :discovery-inputs-unavailable))))
 
+(def kernel-resource "wm/focus/predictive-attestation-kernel-v1.edn")
+
+(defn kernel-declaration []
+  (edn/read-string (slurp (io/resource kernel-resource))))
+
+(defn- predicted-attestation [candidate-class]
+  (get-in (kernel-declaration) [:class-to-attested-outcome candidate-class]))
+
 (defn- facets [paths]
   ;; resources/wm/ counts as WM (PROOF-wm-works 1.3, 2026-09-22): the machine's
   ;; own runtime resources live there (cascade-sources, rechecks, eig), and
@@ -76,7 +84,8 @@
                    (absent :discovery-window-unavailable)))
      :commit-count (count rows) :facet-credit credits :commits rows
      :previous-focus (or previous (absent :previous-focus-not-retained))
-     :completion (absent :completion-authority-not-consumed)
+     :completion {:status :pending-terminal-attestation
+                  :authority :wm/run-ending-classification-receipt-v1}
      :transition {:status :held :reason :record-only-no-transition-authority}
      :focus-origin (if retained? :retained-unfinished-focus
                        (if (:focus previous) :retained-unfinished-focus :commit-facets))
@@ -372,9 +381,27 @@
                                                  :declared-masses (get-in inputs [:global-preference :masses])}}
      :attestation {:status :pending-terminal-observation
                    :reason :selection-precedes-attestation}
-     :kernel {:status :absent
-              :reason :predictive-attestation-kernel-not-declared
-              :required-declaration :wm/focus-predictive-attestation-kernel}
+     :kernel (let [declaration (kernel-declaration)]
+               {:status :declared
+                :id (:kernel/id declaration)
+                :resource kernel-resource
+                :inputs-sha256 (identity/digest
+                                {:selection-classes
+                                 (mapv #(select-keys % [:candidate-id :target :class])
+                                       (mapv (fn [c]
+                                               (let [t (:target (:id c))
+                                                     {:keys [class]} (classify t)]
+                                                 {:candidate-id (:id c) :target t :class class}))
+                                             candidates))
+                                 :outcome-domain (:outcome-domain declaration)})
+                :predictions
+                (mapv (fn [c]
+                        (let [t (:target (:id c))
+                              {:keys [class]} (classify t)]
+                          {:candidate-id (:id c) :class class
+                           :conditional-on :qualifying-terminal-attestation
+                           :outcome (predicted-attestation class)}))
+                      candidates)})
      :local-C {:status :held :reason :conditional-outcome-kernel-unavailable}})))
 
 (defn attach
@@ -400,10 +427,22 @@
                           :kind :known-typed-failure
                           :failure (select-keys failure [:kind :stage :target])}
                  :else (absent :terminal-focus-attestation-unavailable))
+        completion (cond
+                     ending? {:status :observed
+                              :authority :wm/run-ending-classification-receipt-v1
+                              :terminal-class (:class run-ending)
+                              :focus-completed? false
+                              :reason :attested-increment-is-not-focus-completion}
+                     failed? {:status :observed
+                              :authority :typed-terminal-failure
+                              :terminal-class :known-typed-failure
+                              :focus-completed? false}
+                     :else (absent :terminal-completion-authority-unavailable))
         chosen-id (or (get-in decision [:selection-law :candidate])
                       (get-in decision [:action :id]))]
     (-> decision
         (assoc-in [:selection-certificate :focus-receipt :attestation] joined)
+        (assoc-in [:selection-certificate :focus-receipt :discovery :completion] completion)
         (update-in [:selection-certificate :focus-receipt :candidates]
                    (fn [rows]
                      (mapv (fn [row]
@@ -413,8 +452,25 @@
                            rows))))))
 
 (defn valid? [decision receipt]
-  (try (= receipt (build decision (:inputs receipt) (:context receipt)))
-       (catch Exception _ false)))
+  (try
+    (let [base (build decision (:inputs receipt) (:context receipt))
+          terminal? (= :observed (get-in receipt [:attestation :status]))
+          normalized (if terminal?
+                       (-> receipt
+                           (assoc :attestation (:attestation base))
+                           (assoc-in [:discovery :completion]
+                                     (get-in base [:discovery :completion]))
+                           (assoc :candidates
+                                  (mapv (fn [actual expected]
+                                          (assoc actual :outcome (:outcome expected)))
+                                        (:candidates receipt) (:candidates base))))
+                       receipt)]
+      (and (= normalized base)
+           (or (not terminal?)
+               (and (= :observed (get-in receipt [:discovery :completion :status]))
+                    (contains? #{:run-ending-classification :known-typed-failure}
+                               (get-in receipt [:attestation :kind]))))))
+    (catch Exception _ false)))
 
 (defn decision-focus
   "The focus context a decision taken at DECISION-AS-OF classifies against
