@@ -20,6 +20,8 @@
 (def max-candidates 16)
 (def cache-top-k 8)
 (def cache-refresh-count 8)
+(def shared-materiality-margin 1.0e-12)
+(def shared-sensitivity 4.0)
 
 (def ^:private worker-memory-budget-bytes (* 512 1024 1024))
 
@@ -39,6 +41,32 @@
   (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256")
                                            (.getBytes (pr-str (canonical-data x)) "UTF-8")))))
 
+(defn- numeric-leaves [x]
+  (cond
+    (number? x) [(double x)]
+    (map? x) (mapcat (fn [[k v]] (concat (numeric-leaves k) (numeric-leaves v))) x)
+    (coll? x) (mapcat numeric-leaves x)
+    :else []))
+
+(defn- shared-change-bound
+  "A conservative declared Lipschitz bound for shared-input reuse.  The
+  observation route has four signed folds per changed scalar; the factor is
+  recorded in the cache policy and multiplied by the L1 parameter delta.
+  Equal shared inputs have exactly zero bound."
+  [old-shared new-shared]
+  (if (= (canonical-data old-shared) (canonical-data new-shared))
+    0.0
+    (let [a (vec (numeric-leaves old-shared))
+          b (vec (numeric-leaves new-shared))
+          n (max (count a) (count b))]
+      (let [delta (reduce + 0.0
+                           (for [i (range n)]
+                             (Math/abs (- (double (get a i 0.0))
+                                          (double (get b i 0.0))))))]
+        (if (zero? delta)
+          Double/POSITIVE_INFINITY
+          (* shared-sensitivity delta))))))
+
 (defn- cache-path [opts]
   (or (:scoring-cache-path opts)
       (data-paths/path "wm-scoring-cache" "global-rank.edn")))
@@ -49,7 +77,7 @@
       {:status :cold-start :reason :missing-cache :value {}}
       (let [value (edn/read-string (slurp path))]
         (if (and (map? value)
-                 (= :wm-global-scoring-cache-v1 (:schema value))
+                 (= :wm-global-scoring-cache-v2 (:schema value))
                  (integer? (:generation value))
                  (map? (:entries value)))
           {:status :ok :value value}
@@ -386,14 +414,26 @@
             cache-cold-start? (= :cold-start (:status cache-read))
             generation (inc (long (or (:generation old-cache) 0)))
             old-entries (or (:entries old-cache) {})
+            shared-inputs {:observation-model model
+                           :preference preference
+                           :observation (:observation opts)
+                           :prediction-context (:prediction-context opts)}
+            shared-bound (shared-change-bound (:shared-inputs old-cache) shared-inputs)
+            materiality-margin (double (or (:scoring-cache-materiality-margin opts)
+                                           shared-materiality-margin))
             work (mapv (fn [candidate]
-                         (let [key (digest {:candidate candidate :model model
-                                            :belief (:cascade-belief state)
-                                            :preference preference
-                                            :observation (:observation opts)
-                                            :prediction-context (:prediction-context opts)
-                                            :cascade-spec (:cascade-spec opts)})]
-                           {:candidate candidate :key key :record (get old-entries key)}))
+                         (let [key (digest {:candidate candidate
+                                            :cascade-spec (:cascade-spec opts)})
+                               record (get old-entries key)
+                               resolution (double (or (get-in record [:entry :certificate
+                                                                      :g-terms :numerical-resolution :value])
+                                                      0.0))
+                               shared-reuse? (and record
+                                                  (<= shared-bound (+ resolution materiality-margin)))]
+                           {:candidate candidate :key key :record record
+                            :shared-reuse? shared-reuse?
+                            :shared-bound shared-bound
+                            :resolution resolution}))
                        candidates)
             cached-work (filterv :record work)
             top-k (long (or (:scoring-cache-top-k opts) cache-top-k))
@@ -408,6 +448,7 @@
             refresh-keys (set (concat head-keys (map :key stale-work)))
             fresh-work (if cache-enabled?
                          (filterv #(or (nil? (:record %))
+                                       (not (:shared-reuse? %))
                                        (refresh-keys (:key %))) work)
                          work)
             fresh-results (into {}
@@ -417,7 +458,9 @@
                                                        :cache-miss)
                                                    :generation generation
                                                    :age 0 :digest (:key w)
-                                                   :inputs-digest (:key w)}]
+                                                   :inputs-digest (:key w)
+                                                   :shared-generation generation
+                                                   :shared-bound (:shared-bound w)}]
                                         (let [cache (cond-> cache
                                                        cache-cold-start?
                                                        (assoc :cold-start-reason (:reason cache-read)))]
@@ -435,7 +478,9 @@
                                                          :unchanged)
                                              :generation generation
                                              :age (- generation (long (:generation record)))
-                                             :digest key :inputs-digest key}
+                                             :digest key :inputs-digest key
+                                             :shared-generation (:shared-generation old-cache)
+                                             :shared-bound (:shared-bound w)}
                                       entry (:entry record)]
                                   (assoc entry :cache cache
                                          :certificate (assoc (:certificate entry)
@@ -443,6 +488,10 @@
             cache-policy {:schema :wm-global-scoring-cache-policy-v1
                           :top-k top-k
                           :refresh-width refresh-count
+                          :shared-materiality {:bound :l1-numeric-leaves
+                                               :sensitivity shared-sensitivity
+                                               :margin materiality-margin
+                                               :reuse-when :bound-at-most-resolution-plus-margin}
                           :max-age-clicks (long (Math/ceil (/ (double (max 1 (count entries)))
                                                                (double (max 1 refresh-count)))))
                           :justification {:top-k :revalidate-resolution-tie-head
@@ -450,8 +499,10 @@
                                           :age-bound :ceil-entry-count-over-refresh-width}}
             _cache-written (when cache-enabled?
                              (write-cache! cache-file
-                                           {:schema :wm-global-scoring-cache-v1
+                                           {:schema :wm-global-scoring-cache-v2
                                             :generation generation
+                                            :shared-generation generation
+                                            :shared-inputs shared-inputs
                                             :cache-policy cache-policy
                                             :entries (into (sorted-map)
                                                            (map (fn [entry]
@@ -531,7 +582,10 @@
                                          :heap-max-bytes (.maxMemory (Runtime/getRuntime))
                                          :worker-memory-budget-bytes worker-memory-budget-bytes
                                          :cache-policy cache-policy
-                                         :cache-status (:status cache-read)}
+                                         :cache-status (:status cache-read)
+                                         :shared-inputs {:generation generation
+                                                         :bound shared-bound
+                                                         :materiality-margin materiality-margin}}
                                   ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5
                                   ;; handoff): the class path's ranked meta
                                   ;; carries a :precision-model describing

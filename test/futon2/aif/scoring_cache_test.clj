@@ -25,7 +25,7 @@
         edited (assoc x :opts (assoc opts :cascade-spec (assoc (:cascade-spec opts) :mu 2)))
         edited-run (run edited)]
     (is (= [:fresh :fresh :fresh :fresh] (statuses first-run)))
-    (is (= 3 (count (filter #{:fresh} (statuses second-run)))))
+    (is (= 2 (count (filter #{:fresh} (statuses second-run)))))
     (is (= 4 (count (filter #{:fresh} (statuses edited-run)))))
     (is (= (mapv :controller-score (sort-by :cascade-id first-run))
            (mapv :controller-score
@@ -42,7 +42,7 @@
       (is (every? #{:fresh} (statuses again)))
       (is (every? #(= :corrupt-cache (get-in % [:cache :cold-start-reason])) again))
       (is (not-any? #(re-find #"\.tmp-" (.getName %)) (.listFiles (.toFile (:dir x)))))
-      (is (= :wm-global-scoring-cache-v1 (:schema (edn/read-string (slurp (:path x)))))))))
+      (is (= :wm-global-scoring-cache-v2 (:schema (edn/read-string (slurp (:path x)))))))))
 
 (deftest stale-entries-are-refreshed-with-a-declared-age-bound
   (let [base (setup)
@@ -61,3 +61,26 @@
     (is (= (slurp (:path a)) (slurp (:path b))))
     (is (= (mapv :cascade-id ra) (mapv :cascade-id rb)))
     (is (= (mapv :rank ra) (mapv :rank rb)))))
+
+(deftest shared-materiality-reuses-small-change-and-refreshes-large-change
+  (let [base (setup)
+        opts (assoc (:opts base) :scoring-cache-top-k 0 :scoring-cache-refresh-count 0)
+        x (assoc base :opts opts)
+        first-run (run x)
+        rate-key (first (keys (get-in opts [:observation-model :rates])))
+        rate-path [:observation-model :rates rate-key :false-neg]
+        small (assoc x :opts (update-in opts rate-path #(+ % 1/1000000000000000)))
+        large (assoc x :opts (update-in opts rate-path #(+ % 1/10)))
+        small-run (run small)
+        large-run (run large)
+        fresh-small (efe/rank-actions (:state small) (:candidates small)
+                                      (assoc (:opts small) :scoring-cache? false))]
+    (is (every? #{:cached} (statuses small-run)))
+    (is (every? #{:fresh} (statuses large-run)))
+    (is (every? true?
+                (map (fn [cached fresh]
+                       (<= (Math/abs (- (double (:controller-score cached))
+                                        (double (:controller-score fresh))))
+                           (+ (double (get-in cached [:cache :shared-bound]))
+                              1.0e-12)))
+                     small-run fresh-small)))))
