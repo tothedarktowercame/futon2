@@ -33,7 +33,9 @@
     (map? (:flight opts)) (-> (dissoc :temporal-previous)
                               (assoc :temporal-context? true))
     (contains? (:flight opts) :temporal-previous)
-    (assoc :temporal-previous (get-in opts [:flight :temporal-previous])))))
+    (assoc :temporal-previous (get-in opts [:flight :temporal-previous]))
+    (:d-task-evidence-root opts)
+    (assoc :d-task-evidence-root (:d-task-evidence-root opts)))))
 
 (defn- reject-candidate [{:keys [path status record] :as candidate}]
   (assoc candidate :admission :refused
@@ -51,8 +53,9 @@
   "D carry only: executed-with-artifacts in minted-identity space. This does
    not replace E2b or establish its E1/E2a portfolio proposition."
   ([] (production-authority nil))
-  ([expected]
-   (task/read-predecessor task/default-root expected task/agency-job)))
+  ([expected] (production-authority expected task/default-root))
+  ([expected root]
+   (task/read-predecessor root expected task/agency-job)))
 
 (defn- valid-authority? [a inspection]
   (and (= task/authority (:authority a))
@@ -74,7 +77,10 @@
   "Refused carry -> fresh fact initialization -> consumed belief. This is an
    admission receipt, never an observation update or an impossible observation."
   ([stage inspection]
-   (legacy-input-receipt stage inspection (production-authority (:task-context inspection))))
+   (legacy-input-receipt stage inspection
+                         (if-let [root (:d-task-evidence-root inspection)]
+                           (production-authority (:task-context inspection) root)
+                           (production-authority (:task-context inspection)))))
   ([stage inspection admission]
   (let [previous (:prospective-prior stage)
         universe (get-in stage [:prospective-carry :universe])
@@ -100,8 +106,10 @@
      :continuation-belief (get-in stage [:initialization :value])
      :observation-updates []})))
 
-(defn observation-authority [expected]
-  (task/read-observations-v2 task/default-root expected task/agency-job))
+(defn observation-authority
+  ([expected] (observation-authority expected task/default-root))
+  ([expected root]
+   (task/read-observations-v2 root expected task/agency-job)))
 
 (defn- valid-observation-authority? [a inspection]
   (and (= :wm/d-task-token-observations-v2 (:schema a))
@@ -122,9 +130,14 @@
   "V3 authorizes only declared next-selection initialization from signed checks.
    The old execution admission remains separate (including for precision carry)."
   ([stage inspection]
-   (initialization-input-receipt stage inspection (production-authority (:task-context inspection))
+   (initialization-input-receipt stage inspection
+                  (if-let [root (:d-task-evidence-root inspection)]
+                    (production-authority (:task-context inspection) root)
+                    (production-authority (:task-context inspection)))
                   (when (policy/enabled? (:observation-initialization stage))
-                    (observation-authority (:task-context inspection)))))
+                    (if-let [root (:d-task-evidence-root inspection)]
+                      (observation-authority (:task-context inspection) root)
+                      (observation-authority (:task-context inspection))))))
   ([stage inspection admission]
    (initialization-input-receipt stage inspection admission nil))
   ([stage inspection admission observations]

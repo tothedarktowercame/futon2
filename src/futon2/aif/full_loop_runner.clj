@@ -923,6 +923,25 @@
             [(if selected? :judgment :sorry) :outer-task-selection]
             receipt))
 
+(defn completed-predecessor-evidence
+  "Project the five completed-run producers inspected by token carry.  Values
+   appear only when their phase actually produced evidence."
+  [result]
+  (let [construction (get-in result [:checkpoints :construction :judgment])
+        closed (get-in result [:checkpoints :closed :judgment])]
+    {:d-task-context (:d-task-context result)
+     :selection-enaction (:selection-enaction construction)
+     :enactment (or (:d-task-enactment result) (:d-task-enactment closed))
+     :realized-outcome (or (:token-outcome-comparison closed)
+                           (:token-outcome-comparison result))
+     :enactment-plan (when construction
+                       {:schema :wm/enactment-plan-v1
+                        :selected-action (:selected-action construction)
+                        :cascade (:cascade construction)
+                        :patterns (:patterns construction)})
+     :acting-order-after
+     (get-in construction [:receipted-construction :cascade-diff :acting-order-after])}))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -991,6 +1010,9 @@
             declaration-reads (cascade-sources/provenance
                                (some-> (:declaration-reads/state raw-opts) deref))
             participants-record (participants/record-value raw-opts)
+            {:keys [d-task-context selection-enaction enactment realized-outcome
+                    enactment-plan acting-order-after]}
+            (completed-predecessor-evidence result)
             world-at-selection (or (get-in result
                                             [:checkpoints :selection :judgment
                                              :world-at-selection])
@@ -1105,6 +1127,12 @@
                     ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
                     :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
                                  {:absent :refresh-not-reached})}
+                     d-task-context (assoc :d-task-context d-task-context)
+                     selection-enaction (assoc :selection-enaction selection-enaction)
+                     enactment (assoc :enactment enactment)
+                     realized-outcome (assoc :realized-outcome realized-outcome)
+                     enactment-plan (assoc :enactment-plan enactment-plan)
+                     acting-order-after (assoc :acting-order-after acting-order-after)
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
@@ -5388,6 +5416,7 @@
                        result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :job-texts @job-text-records
+                               :d-task-context @d-task-context
                                :d-task-enactment d-task-result
                                :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
