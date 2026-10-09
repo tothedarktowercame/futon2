@@ -1063,6 +1063,14 @@
                     (fn [target]
                       (let [states (filter (fn [[state _]]
                                              (or (empty? state)
+                                                 ;; Production's continuation
+                                                 ;; carrier may still be the
+                                                 ;; unqualified token carrier;
+                                                 ;; retain that whole state for
+                                                 ;; each target, while the
+                                                 ;; qualified carrier partitions
+                                                 ;; exactly by target.
+                                                 (every? #(not (vector? %)) state)
                                                  (every? #(= target (first %)) state)))
                                            joint-q0)
                             total (reduce + 0 (map second states))]
@@ -1096,7 +1104,7 @@
                           (recur (next remaining) (into ranked r)
                                  (or score-meta (meta r)) declines refused))))
                     [(with-meta (vec ranked) score-meta)
-                     declines refused]))))
+                     declines refused])))
               dropped (vec (concat dropped class-declines))]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
