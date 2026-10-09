@@ -198,7 +198,11 @@
     (is (every? (fn [step]
                   (every? vector? (keys (:distribution step))))
                 (get-in early [:certificate :consumed-g :C :steps]))
-        "no step uses ending/not-yet-evaluated as its preferred outcome")))
+        "no step uses ending/not-yet-evaluated as its preferred outcome")
+    (is (= 2 (count (get-in early [:certificate :steps])))
+        "the scorer retains one completed-progress receipt per horizon step")
+    (is (every? #(== 1.0 (reduce + (vals (:completed-progress %))))
+                (get-in early [:certificate :steps])))))
 
 (defn- chain-cascade [n]
   (let [patterns (mapv #(str "p/" %) (range n))]
