@@ -1,0 +1,40 @@
+{:schema :wm/task-map-producer-audit-v1
+ :observed-at "2026-10-09"
+ :edges
+ [{:dimension :O1 :type "code/v05/mined-move"
+   :writer "futon3c/scripts/d4_feeder_b_load.bb --write"
+   :when "manual land of the pinned differentiable-substrate mine"
+   :input "futon6/data/diffsub-moves-mined.edn rows with :confidence :mined-structural"
+   :scope "canonical mission/doc have endpoints plus generated mission head/phase wants"
+   :nonmission-gap "the pinned mine and canonical-node census are mission-only"}
+  {:dimension :O2 :type "mine/meme"
+   :writer "futon6 meme-mine extraction/ingest pipeline"
+   :when "human-to-agent asks are sampled, LLM-extracted, resolved, and ingested"
+   :input "conversation asks, then data/meme-mine/memes.edn and resolved-memes.json"
+   :scope "semantic have/want memes; not a task registry"
+   :nonmission-gap "task documents are not the producer input and should not be fabricated as memes"}
+  {:dimension :O3 :type "clock/clocked-on"
+   :writer "futon3c.agency.clock-lineage/persist-clock! (also WM clock transition path)"
+   :when "an agent clock target changes"
+   :input "live clock state, selecting ticket > excursion > mission > campaign"
+   :scope "already supports excursions and tickets, but writes only when a verified canonical endpoint exists"
+   :nonmission-gap "many E/T documents have no canonical substrate entity, so fail closed before write"}
+  {:dimension :O4 :type "cascade/cluster-member"
+   :writer "futon3c/scripts/o4_upward_clusters.py output, landed by its documented bb lander"
+   :when "manual regeneration from a complete paged citation layer"
+   :input "mission-scope/pattern citations joined to BGE mission embeddings, fixed 12-cluster model"
+   :scope "canonical missions only by explicit generator contract"
+   :nonmission-gap "E/T lack mission-scope/pattern rows and mission BGE vectors; extending only the file scan would be dishonest"}
+  {:dimension :O5 :type "cascade/hole-target"
+   :writer "futon3c/scripts/o5_honest_holes.py --land"
+   :when "manual regeneration/landing of computed coverage gaps"
+   :input "BGE mission census, canonical entities, O1/O4 core, capability-scope edges"
+   :scope "coverage gaps of canonical missions"
+   :nonmission-gap "E/T are outside the BGE/capability population and are not O5 holes merely by being tasks"}]
+ :selector-recommendation
+ {:rule "do not require mission-structural O1/O4/O5 membership for nonmission tasks"
+  :equivalent-signals ["O3 clock/clocked-on centrality when a canonical endpoint exists"
+                       "document/finding freshness"
+                       "declared priority and ownership"]
+  :reason "O1/O4/O5 encode mission geometry and coverage; manufacturing those edges for E/T changes their meaning"}
+ :writes []}
