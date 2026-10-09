@@ -280,9 +280,15 @@
    deterministic and ambiguity is genuinely 0."
   [{:keys [acceptance target-class progress-classes]} state target tau terminal?]
   (if-not terminal?
-    (or (get progress-classes (count (filter #(and (= target (first %))
-                                                   (contains? state %)) acceptance)))
-        :progress-0)
+    ;; Models written before the completed-progress carrier used the
+    ;; terminal-only class universe. Preserve their declared pre-horizon
+    ;; class; otherwise a synthetic :progress-0 label is absent from their C
+    ;; and the risk correctly (but unintentionally here) becomes +Inf.
+    (if (seq progress-classes)
+      (or (get progress-classes (count (filter #(and (= target (first %))
+                                                     (contains? state %)) acceptance)))
+          :progress-0)
+      :ending/not-yet-evaluated)
     (let [own (some (fn [token] (when (and (= target (first token))
                                            (contains? state token))
                                   token))
@@ -308,8 +314,11 @@
             (for [[state mass] (ordered belief)]
              (let [label (class-label-of-state model state target tau terminal?)
                    deterministic {label 1}
-                   row (emission-row model label deterministic)]
-               (update-vals row #(* (double mass) %)))))))
+                   row (emission-row model label deterministic)
+                   exact? (nil? (:dirichlet-prior model))]
+               ;; Legacy deterministic models retain their exact numeric
+               ;; carrier; declared Dirichlet rows are intentionally doubles.
+               (update-vals row #(if exact? (* mass %) (* (double mass) %))))))))
 
 (defn- class-rows
   [{:keys [horizon] :as model} belief tau target]
