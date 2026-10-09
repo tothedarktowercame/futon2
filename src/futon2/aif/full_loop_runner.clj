@@ -960,6 +960,11 @@
             terminal-context (terminal-record-context raw-opts result)
             decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])
                          (get-in result [:checkpoints :selection :judgment :decision]))
+            record-failure (run-record-failure result)
+            decision (when decision
+                       (focus-receipt/join-terminal
+                        decision {:run-ending (:run-ending-classification result)
+                                  :failure record-failure}))
             ;; D8/AR-16: an abstained tick throws before a judgment cell is
             ;; written; its decision and the judge's dropped candidates
             ;; travel on the :no-selection sorry cell instead.
@@ -1062,12 +1067,12 @@
                                             (get-in result
                                                     [:checkpoints :selection :sorry
                                                      :interpretation-ask])
-                                            {:status :absent
+                                            {:status :not-requested
                                              :reason :no-interpretation-ask})
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :route route
-                    :failure (run-record-failure result)
+                    :failure record-failure
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)

@@ -55,7 +55,7 @@
                          :finding-source pin
                          :backtrace (if (some? (:backtrace finding))
                                       (assoc pin :status :retained :edn-path [:backtrace])
-                                      {:status :absent :reason :not-retained})
+                                      {:status :not-applicable :reason :finding-has-no-backtrace})
                          :closure-observation
                          {:status :unavailable
                           :reason :unversioned-resolution-has-no-admitted-locator

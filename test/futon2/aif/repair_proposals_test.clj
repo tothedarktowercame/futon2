@@ -96,7 +96,19 @@
         (let [p (first (:proposals (supply/supply root)))]
           (is (= contract (get-in p [:evidence :discharge-contract])))
           (is (nil? (get-in p [:evidence :target])))
-          (is (= {:status :absent :reason :not-retained} (get-in p [:evidence :backtrace]))))))))
+          (is (= {:status :not-applicable :reason :finding-has-no-backtrace}
+                 (get-in p [:evidence :backtrace]))))))))
+
+(deftest missing-and-nil-backtraces-are-distinct-from-retained-evidence
+  (with-store
+    (fn [root]
+      (finding! root "repair-nil" {:backtrace nil})
+      (let [missing (finding! root "repair-missing")
+            file (io/file root "findings" "repair-missing.edn")]
+        (spit file (pr-str (dissoc missing :backtrace))))
+      (let [by-id (into {} (map (juxt :repair/id identity)) (:proposals (supply/supply root)))]
+        (is (= :not-applicable (get-in by-id ["repair-nil" :evidence :backtrace :status])))
+        (is (= :not-applicable (get-in by-id ["repair-missing" :evidence :backtrace :status])))))))
 
 (deftest no-committed-closure-witness-means-no-executable-repair
   (with-store

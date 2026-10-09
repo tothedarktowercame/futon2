@@ -71,7 +71,9 @@
      :window (if window (assoc (dissoc window :commits)
                               :source-until (:until window)
                               :until (if (at-or-before? as-of (:until window)) as-of (:until window)))
-                 (absent :discovery-window-unavailable))
+                 (if retained?
+                   {:status :not-applicable :reason :retained-focus-needs-no-current-window}
+                   (absent :discovery-window-unavailable)))
      :commit-count (count rows) :facet-credit credits :commits rows
      :previous-focus (or previous (absent :previous-focus-not-retained))
      :completion (absent :completion-authority-not-consumed)
@@ -323,10 +325,14 @@
     {:candidate-id id :target target :class class
      :relation (if (= :unknown class) relation relation)
      :derived-via derived-via
-     :embedding (if (some #{node} (get-in inputs [:embedding :nodes]))
+     :embedding (cond
+                  (nil? node) (absent :embedding-node-not-retained)
+                  (some #{node} (get-in inputs [:embedding :nodes]))
                   {:status :present :node node :authority :presence-only}
-                  (absent :embedding-node-not-retained))
-     :outcome (absent :attested-outcome-not-inferred-from-prediction)}))
+                  :else {:status :retained :node node
+                         :membership :outside-pinned-embedding})
+     :outcome {:status :pending-observation
+               :reason :attested-outcome-not-inferred-from-prediction}}))
 
 (defn build
   ([decision inputs context]
@@ -360,17 +366,51 @@
                             :associated :attested-associated-increment
                             :useful-elsewhere :attested-useful-elsewhere-increment
                             :known-failure :observed-typed-nondelivery}
-                      :unobserved (absent :observation-is-not-a-valued-outcome)
+                      :unobserved {:kind :domain-sentinel
+                                   :reason :observation-is-not-a-valued-outcome}
                       :unrepresented-class-mass {:status :held :reason :outcome-kernel-unavailable
                                                  :declared-masses (get-in inputs [:global-preference :masses])}}
-     :attestation (absent :attestation-join-not-wired)
-     :kernel (absent :predictive-attestation-kernel-not-declared)
+     :attestation {:status :pending-terminal-observation
+                   :reason :selection-precedes-attestation}
+     :kernel {:status :absent
+              :reason :predictive-attestation-kernel-not-declared
+              :required-declaration :wm/focus-predictive-attestation-kernel}
      :local-C {:status :held :reason :conditional-outcome-kernel-unavailable}})))
 
 (defn attach
   ([decision] (attach decision (read-inputs) {:as-of (str (Instant/now))}))
   ([decision inputs context]
    (assoc-in decision [:selection-certificate :focus-receipt] (build decision inputs context))))
+
+(defn join-terminal
+  "Replace the selection-time pending attestation with the terminal authority.
+  A run-ending receipt supplies an attested increment/class; a typed run
+  failure supplies the known-failure observation. If neither exists, retain a
+  typed absence rather than leaving `:pending-observation` forever."
+  [decision {:keys [run-ending failure]}]
+  (let [ending? (= :recorded (:status run-ending))
+        failed? (keyword? (:kind failure))
+        joined (cond
+                 ending? {:status :observed
+                          :kind :run-ending-classification
+                          :class (:class run-ending)
+                          :attestation (:attestation run-ending)
+                          :receipt-sha256 (identity/digest run-ending)}
+                 failed? {:status :observed
+                          :kind :known-typed-failure
+                          :failure (select-keys failure [:kind :stage :target])}
+                 :else (absent :terminal-focus-attestation-unavailable))
+        chosen-id (or (get-in decision [:selection-law :candidate])
+                      (get-in decision [:action :id]))]
+    (-> decision
+        (assoc-in [:selection-certificate :focus-receipt :attestation] joined)
+        (update-in [:selection-certificate :focus-receipt :candidates]
+                   (fn [rows]
+                     (mapv (fn [row]
+                             (if (= chosen-id (get-in row [:candidate-id :id]))
+                               (assoc row :outcome joined)
+                               (assoc row :outcome {:status :not-enacted})))
+                           rows))))))
 
 (defn valid? [decision receipt]
   (try (= receipt (build decision (:inputs receipt) (:context receipt)))

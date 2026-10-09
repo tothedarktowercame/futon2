@@ -56,6 +56,33 @@
     (let [k (m/cascade-kernel (get-in candidate [:id :precedence]) s0)]
       (if (refusal? k) k k))))
 
+(defn- machine-authored
+  "Provenance the runtime can attest from the exact machine construction
+  admitted to scoring. It must not fall through the declared-file lane."
+  [candidate as-of]
+  (let [payload (:id candidate)
+        receipt (:construction-receipt payload)
+        locators (:observation-locators payload)]
+    (when (= :machine-constructed (:kind receipt))
+      {:source-kind :machine-construction
+       :source-revision (ce/canonical-sha256 receipt)
+       :source-content-sha256 (ce/canonical-sha256 payload)
+       :discovered-at as-of
+       :interpretation {:kind :machine-requested-pattern-readings
+                        :receipts (:interpretation-receipts payload)}
+       :review-publication
+       {:kind :runtime-construction-validation
+        :construction-receipt-sha256 (ce/canonical-sha256 receipt)
+        :results (select-keys receipt [:relations :coverage :checks-added
+                                      :stop-reason :unknown-read-as-not-established])
+        :interpretation-receipt-sha256
+        (ce/canonical-sha256 (:interpretation-receipts payload))}
+       :admission {:kind :scoring-boundary-admission}
+       :acceptance {:kind :criterion-locator-coverage :locators locators}
+       :scope {:target (:target payload)
+               :criterion-tokens (set (map second (keys locators)))
+               :precedence (:precedence payload)}})))
+
 (defn- entry
   "One candidate's P₀ entry, built from the candidate map itself (the shape
   at [:decision :selection-certificate :candidates], whose payload sits
@@ -117,7 +144,8 @@
               (let [n (ce/normalize candidate)]
                 (if (:status n) n (:normalized-cascade-sha256 n)))
               :transition-rows (transition-rows candidate s0)}
-        e (merge base (get-in opts [:authored id]))
+        e (merge base (machine-authored candidate (:as-of opts))
+                 (get-in opts [:authored id]))
         v (ce/admissible-provenance? e)
         admitted? (:admissible v)]
     (cond-> e
