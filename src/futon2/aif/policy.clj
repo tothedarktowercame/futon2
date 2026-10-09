@@ -443,7 +443,7 @@
                                    p)) %)))))
         compact-candidate
         #(-> (select-keys % [:id :habit :habit-status :f :f-status
-                             :computed-f :g :reason])
+                             :computed-f :g :reason :habit-provenance])
              (update :id compact-id))]
   {:parameter-novelty (mapv #(novelty/policy-receipt % novelty-inputs) ranked)
    :beta {:value beta :status :declared}
