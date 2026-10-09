@@ -137,8 +137,20 @@
   (or (get-in candidate [:id :precedence]) (:precedence candidate)))
 
 (defn- numeric-g? [candidate]
-  (number? (or (:G candidate) (:g candidate) (:expected-free-energy candidate)
-               (get-in candidate [:score :G]) (get-in candidate [:score :g]))))
+  (let [g (or (:G candidate) (:g candidate) (:expected-free-energy candidate)
+              (:controller-score candidate)
+              (get-in candidate [:score :G]) (get-in candidate [:score :g]))
+        cache (or (:cache candidate) (get-in candidate [:certificate :cache]))]
+    (and (number? g)
+         ;; Cached values are admissible only when the scorer recorded both
+         ;; a valid cache status and the digest that identifies its inputs.
+         ;; This prevents a stale/corrupt cache entry from inflating Q8.
+         (or (nil? cache)
+             (and (#{:fresh :cached} (:status cache))
+                  (string? (:digest cache))
+                  (seq (:digest cache))
+                  (or (nil? (:inputs-digest cache))
+                      (= (:digest cache) (:inputs-digest cache))))))))
 
 (defn- target-construction-facts [certificate]
   (when (vector? (:target-construction certificate))

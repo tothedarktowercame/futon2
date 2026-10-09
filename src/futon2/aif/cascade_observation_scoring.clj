@@ -12,6 +12,8 @@
             [futon2.aif.observation-model :as om]
             [futon2.aif.parameter-novelty :as novelty])
   (:import [java.security MessageDigest]
+           [java.io FileOutputStream]
+           [java.nio.file Files Path Paths StandardCopyOption]
            [java.util.concurrent Callable Executors]))
 
 (def max-horizon 10)
@@ -42,12 +44,43 @@
       (data-paths/path "wm-scoring-cache" "global-rank.edn")))
 
 (defn- read-cache [path]
-  (try (if (.isFile (io/file path)) (edn/read-string (slurp path)) {})
-       (catch Exception _ {})))
+  (try
+    (if-not (.isFile (io/file path))
+      {:status :cold-start :reason :missing-cache :value {}}
+      (let [value (edn/read-string (slurp path))]
+        (if (and (map? value)
+                 (= :wm-global-scoring-cache-v1 (:schema value))
+                 (integer? (:generation value))
+                 (map? (:entries value)))
+          {:status :ok :value value}
+          {:status :cold-start :reason :invalid-cache-schema :value {}})))
+    (catch Exception _
+      ;; A damaged cache is data, not a scorer failure.  Never reuse a
+      ;; partially readable map: the next invocation is a typed cold start.
+      {:status :cold-start :reason :corrupt-cache :value {}})))
 
 (defn- write-cache! [path value]
   (io/make-parents path)
-  (spit path (pr-str value)))
+  (let [tmp (str path ".tmp-" (System/nanoTime))
+        bytes (.getBytes (pr-str value) "UTF-8")]
+    (try
+      (with-open [out (FileOutputStream. tmp)]
+        (.write out bytes)
+        (.flush out)
+        (.sync (.getFD out)))
+      (try
+        (Files/move (Paths/get tmp (make-array String 0))
+                    (Paths/get path (make-array String 0))
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/ATOMIC_MOVE
+                                 StandardCopyOption/REPLACE_EXISTING]))
+        (catch java.nio.file.AtomicMoveNotSupportedException _
+          (Files/move (Paths/get tmp (make-array String 0))
+                      (Paths/get path (make-array String 0))
+                      (into-array StandardCopyOption
+                                  [StandardCopyOption/REPLACE_EXISTING]))))
+      (finally
+        (when (.exists (io/file tmp)) (.delete (io/file tmp)))))))
 
 (defn- parallel-mapv
   "Evaluate independent target policies concurrently, retaining input order.
@@ -255,7 +288,7 @@
         g (- (+ risk ambiguity) information-gain)
         resolution (numerical-resolution steps raw-risk raw-ambiguity raw-information)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
-               :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
+               :horizon-steps horizon-steps :controller-score g :G g :g g :G-efe g :G-cascade g
                :observation-model observation-model
                :prediction {:context prediction-context :initial-belief q0 :belief predicted}
                :inference conditioned
@@ -346,7 +379,11 @@
                              (min 16 (.availableProcessors (Runtime/getRuntime)))))
             cache-enabled? (true? (:scoring-cache? opts))
             cache-file (cache-path opts)
-            old-cache (if cache-enabled? (read-cache cache-file) {})
+            cache-read (if cache-enabled?
+                         (read-cache cache-file)
+                         {:status :disabled :value {}})
+            old-cache (:value cache-read)
+            cache-cold-start? (= :cold-start (:status cache-read))
             generation (inc (long (or (:generation old-cache) 0)))
             old-entries (or (:entries old-cache) {})
             work (mapv (fn [candidate]
@@ -379,10 +416,14 @@
                                                    (if (:record w) :head-or-stale-refresh
                                                        :cache-miss)
                                                    :generation generation
-                                                   :age 0 :digest (:key w)}]
-                                        [(:key w) (assoc entry :cache cache
-                                                         :certificate (assoc (:certificate entry)
-                                                                             :cache cache))]))
+                                                   :age 0 :digest (:key w)
+                                                   :inputs-digest (:key w)}]
+                                        (let [cache (cond-> cache
+                                                       cache-cold-start?
+                                                       (assoc :cold-start-reason (:reason cache-read)))]
+                                          [(:key w) (assoc entry :cache cache
+                                                           :certificate (assoc (:certificate entry)
+                                                                               :cache cache))])))
                                     (map vector fresh-work
                                          (parallel-mapv #(score-candidate (:cascade-belief state)
                                                                           (:candidate %) opts preference)
@@ -394,16 +435,25 @@
                                                          :unchanged)
                                              :generation generation
                                              :age (- generation (long (:generation record)))
-                                             :digest key}
+                                             :digest key :inputs-digest key}
                                       entry (:entry record)]
                                   (assoc entry :cache cache
                                          :certificate (assoc (:certificate entry)
                                                              :cache cache))))) work)
+            cache-policy {:schema :wm-global-scoring-cache-policy-v1
+                          :top-k top-k
+                          :refresh-width refresh-count
+                          :max-age-clicks (long (Math/ceil (/ (double (max 1 (count entries)))
+                                                               (double (max 1 refresh-count)))))
+                          :justification {:top-k :revalidate-resolution-tie-head
+                                          :refresh-width :bounded-oldest-first
+                                          :age-bound :ceil-entry-count-over-refresh-width}}
             _cache-written (when cache-enabled?
                              (write-cache! cache-file
                                            {:schema :wm-global-scoring-cache-v1
                                             :generation generation
-                                            :entries (into {}
+                                            :cache-policy cache-policy
+                                            :entries (into (sorted-map)
                                                            (map (fn [entry]
                                                                   (let [key (get-in entry [:cache :digest])]
                                                                     [key {:generation generation
@@ -479,7 +529,9 @@
                                          :horizon-steps (:horizon-steps opts)
                                          :parallelism workers
                                          :heap-max-bytes (.maxMemory (Runtime/getRuntime))
-                                         :worker-memory-budget-bytes worker-memory-budget-bytes}
+                                         :worker-memory-budget-bytes worker-memory-budget-bytes
+                                         :cache-policy cache-policy
+                                         :cache-status (:status cache-read)}
                                   ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5
                                   ;; handoff): the class path's ranked meta
                                   ;; carries a :precision-model describing
