@@ -427,13 +427,19 @@
     ;; Supply the finding this assertion consumes. The live findings directory is
     ;; generated state and is deliberately absent from warrant worktrees.
     (spit (io/file findings-dir (str (subs t 2) ".edn"))
-          (pr-str {:target "M-aif-policy-conditioned-eig"}))
-    ;; the real ticket has BOTH a Parent line and a finding: ticket wins, kind recorded
+          (pr-str {:target "M-aif-policy-conditioned-eig"
+                   :repair/status :open
+                   :repair/id (subs t 2)
+                   :machine-repo "futon2"}))
+    ;; The real ticket has BOTH a Parent line and an active repair obligation:
+    ;; its declared Parent is the more specific structural authority.
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "holes/tickets"
-                                    :findings-dir "data/wm-repair-obligations/findings"})]
+                                    :findings-dir (.getPath findings-dir)})]
       (is (= :ticket-parent (:kind (:derived-via c)))) (pr-str c))
     ;; findings-only: the finding fallback supplies the parent, kind says so
+    (spit (io/file findings-dir (str (subs t 2) ".edn"))
+          (pr-str {:target "M-aif-policy-conditioned-eig"}))
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "/nonexistent"
                                     :findings-dir (.getPath findings-dir)})]
@@ -444,7 +450,7 @@
   ;; The ticket/finding directories must resolve from ANY working directory
   ;; (the serving JVM runs from futon3c). Spawn a clojure subprocess with a
   ;; different cwd and assert the reference ticket still classifies :focus.
-  (let [f2-root (str (System/getProperty "user.home") "/code/futon2")
+  (let [checkout-root (.getCanonicalPath (io/file "."))
         script (io/file (System/getProperty "java.io.tmpdir") "class_observation_scoring_cwd_probe.clj")]
     (spit script
           "(require '[futon2.aif.focus-receipt :as focus])\n"
@@ -465,8 +471,8 @@
     (let [f3c (str (System/getProperty "user.home") "/code/futon3c")
           ;; -Spath emits repo-RELATIVE entries; anchoring each to f2-root
           ;; lets the JVM run from futon3c on futon2's classpath.
-          cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
-                  (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
+          cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir checkout-root))) #":")
+                  (map #(if (.isAbsolute (io/file %)) % (str checkout-root "/" %)))
                   (str/join ":"))
           _ (assert (seq cp) "classpath")
           out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
@@ -551,7 +557,7 @@
   ;; mission-registry/default-code-root + "/futon2" + relative dirs), run in
   ;; a JVM whose working directory is futon3c. Reverting the production
   ;; paths to bare relatives would resolve them against futon3c and fail.
-  (let [f2-root (str (System/getProperty "user.home") "/code/futon2")
+  (let [checkout-root (.getCanonicalPath (io/file "."))
         f3c (str (System/getProperty "user.home") "/code/futon3c")
         script (io/file (System/getProperty "java.io.tmpdir") "class_observation_scoring_prod_ctx_probe.clj")]
     (spit script
@@ -568,8 +574,8 @@
                "                                :findings-dir (str root \"/data/wm-repair-obligations/findings\")})]\n"
                "  (println :cwd (System/getProperty \"user.dir\"))\n"
                "  (println :class (:class c) :kind (get-in c [:derived-via :kind])))\n"))
-    (let [cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
-                  (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
+    (let [cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir checkout-root))) #":")
+                  (map #(if (.isAbsolute (io/file %)) % (str checkout-root "/" %)))
                   (str/join ":"))
           out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
                                      (str (.getPath script))
