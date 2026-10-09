@@ -268,6 +268,46 @@
      :open-holes (open-holes mission-id status-class lines)
      :open-hole-count (open-hole-count mission-id status-class lines)}))
 
+(defn- git-file-text
+  "Content of relpath at an immutable revision, or nil when the revision
+  cannot produce it."
+  [repo revision relpath]
+  (let [{:keys [exit out]} (shell/sh "git" "-C" repo "show"
+                                     (str revision ":" relpath))]
+    (when (zero? exit) out)))
+
+(def ^:private pinned-history-scan-limit 500)
+
+(defn- pinned-text
+  "Recover the historical content of relpath whose sha256 equals the
+  selection-time pin, searching the file's commit history newest-first.
+  Nil when no reachable version of the file matches the pin."
+  [repo relpath pin]
+  (when (string? pin)
+    (let [{:keys [exit out]} (shell/sh "git" "-C" repo "log"
+                                       "--format=%H" "--" relpath)]
+      (when (zero? exit)
+        (reduce (fn [_ revision]
+                  (let [text (git-file-text repo revision relpath)]
+                    (if (and text (= pin (sha256-text text)))
+                      (reduced text)
+                      nil)))
+                nil
+                (take pinned-history-scan-limit (str/split-lines out)))))))
+
+(def ^:private checkbox-line-pattern #"(?i)^\s*[-*]\s+\[[ xX]\]\s+\S.*$")
+
+(defn- standing-bearing-lines
+  "The lines that carry standing: criterion checkbox lines (ticked or not)
+  and terminal lifecycle status lines. Prose — dated update blocks and the
+  like — may change freely under review; these lines may not."
+  [text]
+  (set (for [line (str/split-lines text)
+             :when (or (re-find checkbox-line-pattern line)
+                       (and (re-find terminal-standing-label-pattern line)
+                            (re-find terminal-standing-state-pattern line)))]
+         (str/trim line))))
+
 (defn mission-standing-observation
   "Read one mission task's pinned source and report contradictory current
    standing without deciding which declaration supersedes the other.
@@ -291,11 +331,9 @@
             ;; 2026-10-09: click 48 refused on exactly this mid-run drift.)
             read-at (when (and (string? repo) (string? commit) (string? path))
                       {:repo repo :commit commit})
-            git-text (when (and read-at (str/starts-with? path (str repo "/")))
-                       (let [relpath (subs path (inc (count repo)))
-                             {:keys [exit out]} (shell/sh "git" "-C" repo "show"
-                                                          (str commit ":" relpath))]
-                         (when (zero? exit) out)))
+            relpath (when (and read-at (str/starts-with? path (str repo "/")))
+                      (subs path (inc (count repo))))
+            git-text (when relpath (git-file-text repo commit relpath))
             text (if (some? git-text)
                    git-text
                    (do (when read-at
@@ -308,10 +346,34 @@
                             :content-sha256-at-commit (sha256-text git-text))
                      source)
             actual-sha (sha256-text text)
+            ;; Self-certification guard: an author may add prose freely, but
+            ;; may not edit standing-bearing lines (criterion checkboxes,
+            ;; terminal status lines) of the mission it is judged against.
+            ;; Compare the pinned version (recovered from git history by its
+            ;; selection-time sha256) with the reviewed commit on exactly
+            ;; those lines. Typed refusals, never a silent fallback.
+            guard
+            (when (and git-text (not= sha256 actual-sha))
+              (if-let [pinned (pinned-text repo relpath sha256)]
+                (let [pinned-lines (standing-bearing-lines pinned)
+                      commit-lines (standing-bearing-lines git-text)
+                      changed (sort (concat
+                                     (remove pinned-lines commit-lines)
+                                     (remove commit-lines pinned-lines)))]
+                  (when (seq changed)
+                    {:status :refused
+                     :reason :mission-standing-edited-under-review
+                     :changed-lines (vec changed)
+                     :source source}))
+                {:status :refused :reason :mission-standing-pin-unrecoverable
+                 :source source :pinned-sha256 sha256}))
             lines (vec (str/split-lines text))]
-        (if (and (nil? git-text) (not= sha256 actual-sha))
+        (cond
+          guard guard
+          (and (nil? git-text) (not= sha256 actual-sha))
           {:status :unknown :reason :mission-standing-source-mismatch
            :source source :actual-sha256 actual-sha}
+          :else
           (let [terminal (->> lines
                               (keep-indexed
                                (fn [i line]

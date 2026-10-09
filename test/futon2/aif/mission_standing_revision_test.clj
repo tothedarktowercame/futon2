@@ -110,3 +110,55 @@ Update 2026-10-09 (author): progress note appended mid-run.
                   :commit "0000000000000000000000000000000000000000"})]
         (is (= :unknown (:status obs)))
         (is (= :mission-standing-source-unavailable (:reason obs))))))))
+
+;; --- review round 2: self-certification guard (claude-12 review of 2d9f83abf) ---
+
+(defn- commit-doc! [repo doc msg]
+  (spit (str repo "/holes/M-q7-standing.md") doc)
+  (run-git repo "add" ".")
+  (run-git repo "commit" "-q" "-m" msg))
+
+(defn- standing-at-head [repo pinned-sha]
+  (registry/mission-standing-observation
+   {:kind :mission
+    :source {:path (str repo "/holes/M-q7-standing.md") :sha256 pinned-sha}
+    :repo repo :commit (run-git repo "rev-parse" "HEAD")}))
+
+(deftest review-tick-own-criterion-checkbox-is-refused-with-changed-line
+  (with-temp-repo
+    (fn [repo]
+      (let [pinned-sha (do (commit-doc! repo base-doc "base")
+                           (sha256-of base-doc))
+            ;; The author ticks its own criterion checkbox mid-run (on top
+            ;; of an otherwise-legitimate dated prose update).
+            ]
+        (commit-doc! repo (str/replace progressed-doc "- [ ] criterion one"
+                                       "- [x] criterion one")
+                     "progress plus tick")
+        (let [obs (standing-at-head repo pinned-sha)]
+          (is (= :refused (:status obs)))
+          (is (= :mission-standing-edited-under-review (:reason obs)))
+          (is (= ["- [ ] criterion one" "- [x] criterion one"]
+                 (:changed-lines obs))))))))
+
+(deftest review-reworded-criterion-is-refused
+  (with-temp-repo
+    (fn [repo]
+      (let [pinned-sha (do (commit-doc! repo base-doc "base")
+                           (sha256-of base-doc))
+            reworded (str/replace base-doc "criterion one" "criterion one, tightened")]
+        (commit-doc! repo reworded "reword")
+        (let [obs (standing-at-head repo pinned-sha)]
+          (is (= :refused (:status obs)))
+          (is (= :mission-standing-edited-under-review (:reason obs)))
+          (is (= 2 (count (:changed-lines obs)))))))))
+
+(deftest review-unrecoverable-pin-is-a-typed-refusal
+  (with-temp-repo
+    (fn [repo]
+      (commit-doc! repo base-doc "base")
+      (commit-doc! repo progressed-doc "progress")
+      ;; A pin that matches no reachable version of the file.
+      (let [obs (standing-at-head repo (sha256-of "never committed"))]
+        (is (= :refused (:status obs)))
+        (is (= :mission-standing-pin-unrecoverable (:reason obs)))))))
