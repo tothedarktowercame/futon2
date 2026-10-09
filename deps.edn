@@ -33,6 +33,7 @@
   ;; Run: clojure -M:test:vm-test -m cognitect.test-runner -d vm-test
   :vm-test {:extra-paths ["vm-test"]}
   :test {:extra-paths ["test"]
+         :jvm-opts ["-Dfuton2.data-root.test=true"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       babashka/fs {:mvn/version "0.5.25"}
                       babashka/process {:mvn/version "0.5.22"}
