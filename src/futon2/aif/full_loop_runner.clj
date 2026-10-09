@@ -6581,9 +6581,14 @@
                               :token-comparison comparison})]
                         {:target target :commit commit
                          :mission-standing
+                         ;; The falsifier judges the build at `commit`; the
+                         ;; mission document must be read at that same
+                         ;; revision, not against the live file (which the
+                         ;; author may have legitimately advanced mid-run).
                          (missions/mission-standing-observation
                           (cond-> mission
-                            (str/starts-with? target "M-") (assoc :kind :mission)))
+                            (str/starts-with? target "M-")
+                            (assoc :kind :mission :repo repo :commit commit)))
                          :selected-want-outcomes outcomes
                          :disposition nil
                          :artifact-binding artifact-binding

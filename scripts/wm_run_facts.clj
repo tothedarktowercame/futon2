@@ -83,9 +83,22 @@
 (def absence-statuses #{:absent :not-supplied :missing :refused :failed
                         "absent" "not-supplied" "missing" "refused" "failed"})
 
+(defn- computed-record?
+  "A map carrying a content-addressed identity (:receipt/id) or a full check
+  census (:checks) is a present, fully computed value even when its :status
+  is :refused — e.g. a reviewer-falsifier receipt that documents *why* a
+  build was refused is evidence the machine produced, not a carrier it
+  failed to supply. A bare :schema tag alone does NOT qualify: schema-typed
+  absence records such as {:schema :wm/g-term-decomposition-v1 :status
+  :missing} are genuine typed absences and must stay counted."
+  [x]
+  (or (contains? x :receipt/id) (contains? x :checks)))
+
 (defn absence-paths
   "Count one typed absence/refusal map per path, only below the persisted
-  selection-to-receipt roots named here."
+  selection-to-receipt roots named here. Maps that identify themselves as
+  computed machine records (see computed-record?) are present values and are
+  not counted."
   [record]
   (let [roots [[:world-at-selection :failures] [:decision] [:selection-event]
                [:interpretation-ask] [:terminal-receipt] [:failure]]]
@@ -95,6 +108,7 @@
         (when-let [x (get-in record root)]
           (for [[p _] (paths-with x
                           #(and (map? %)
+                                (not (computed-record? %))
                                 (or (contains? absence-statuses (:status %))
                                     (contains? absence-statuses (:outcome %))
                                     (= :typed-refusal (:kind %)))))]

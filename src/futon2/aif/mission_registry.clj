@@ -17,6 +17,7 @@
    `:provenance/*` props."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm]
@@ -276,15 +277,39 @@
    of words such as 'complete' and historical unchecked lists elsewhere do not
    establish either side.  Exact lines and the caller's source authority are
    retained for admission and replay evidence."
-  [{:keys [kind source]}]
+  [{:keys [kind source repo commit]}]
   (if (not= :mission kind)
     {:status :not-applicable}
     (try
       (let [{:keys [path sha256]} source
-            text (slurp path)
+            ;; With an explicit git authority (repo + commit) the document is
+            ;; read at that immutable revision, so in-run author progress on
+            ;; the mission file (dated update blocks, checkbox ticks) cannot
+            ;; masquerade as a source mismatch: the standing judged is the
+            ;; document at the revision under review, and the read is
+            ;; replayable because the commit is immutable. (T-wmq-q7,
+            ;; 2026-10-09: click 48 refused on exactly this mid-run drift.)
+            read-at (when (and (string? repo) (string? commit) (string? path))
+                      {:repo repo :commit commit})
+            git-text (when (and read-at (str/starts-with? path (str repo "/")))
+                       (let [relpath (subs path (inc (count repo)))
+                             {:keys [exit out]} (shell/sh "git" "-C" repo "show"
+                                                          (str commit ":" relpath))]
+                         (when (zero? exit) out)))
+            text (if (some? git-text)
+                   git-text
+                   (do (when read-at
+                         (throw (ex-info "git authority did not yield the pinned document"
+                                         {:repo repo :commit commit :path path})))
+                       (slurp path)))
+            source (if git-text
+                     (assoc source
+                            :read-at read-at
+                            :content-sha256-at-commit (sha256-text git-text))
+                     source)
             actual-sha (sha256-text text)
             lines (vec (str/split-lines text))]
-        (if (not= sha256 actual-sha)
+        (if (and (nil? git-text) (not= sha256 actual-sha))
           {:status :unknown :reason :mission-standing-source-mismatch
            :source source :actual-sha256 actual-sha}
           (let [terminal (->> lines
