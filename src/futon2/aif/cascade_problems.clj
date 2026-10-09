@@ -200,7 +200,15 @@
       (assoc :pattern-feedback
              (or (get-in sources [:pattern-feedback target])
                  (get-in sources [:pattern-feedback :wm/global])))
-      (and (map? slice) (not (seq patterns))) (assoc :query-time-slice slice))))
+      ;; The slice is construction provenance, not merely a bridge used until
+      ;; an interpretation arrives.  Retain it after interpretation so the
+      ;; eventual decision can say which library result bounded construction.
+      (map? slice) (assoc :query-time-slice slice
+                          :pattern-pool
+                          (mapv #(select-keys % [:pattern :slice-rank :rank
+                                                 :retriever-rank :retriever
+                                                 :provenance :raw :judgment])
+                                (:candidates slice))))))
 
 (defn base-problem
   "Assemble the candidate-independent problem, or its first typed refusal:
@@ -342,7 +350,10 @@
        ;; can require them per candidate without the caller reaching back
        ;; into the source map. Absent receipts stay {} — the gate then
        ;; refuses, honestly, rather than a default being invented here.
-       (or (:receipts interp) {})})))
+       (or (:receipts interp) {})
+       :query-time-slice slice
+       :slice-size (:slice-size slice)
+       :library-size (:library-size slice)})))
 
 (defn assemble
   "Assemble one `:cascade-problem` per fully supplied target, plus one typed

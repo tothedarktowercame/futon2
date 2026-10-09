@@ -29,6 +29,25 @@
     (is (not= 0 construction))
     (is (not= [] construction))))
 
+(deftest recorded-construction-is-exported-with-the-actual-union-pool
+  (let [carried (assoc-in record [:decision :selection-certificate :target-construction]
+                          [{:target "M-x" :slice [:p1 :p2] :pool [:p1 :p2]
+                            :slice-from-whole-library true :library-size 1436
+                            :policy-count 2}])
+        exported (:facts (facts/facts-for-record carried "r" snap nil nil))]
+    (is (= [{"targets" ["M-x"] "slice" [":p1" ":p2"]
+             "pool" [":p1" ":p2"] "sliceFromWholeLibrary" true
+             "policyCount" 2}]
+           (exported "targetConstruction")))
+    (is (= 2 (exported "constructorPatternCount")))))
+
+(deftest typed-absent-construction-carrier-is-never-read-as-an-empty-pool
+  (let [carried (assoc-in record [:decision :selection-certificate :target-construction]
+                          {:status :absent :reason :query-time-construction-slice-not-recorded})
+        exported (:facts (facts/facts-for-record carried "r" snap nil nil))]
+    (is (contains? (exported "targetConstruction") "not-recomputable"))
+    (is (contains? (exported "constructorPatternCount") "not-recomputable"))))
+
 (deftest runfacts-field-set-is-exact
   (let [exported (:facts (facts/facts-for-record record "r" snap nil nil))]
     (is (= (set facts/run-fact-fields) (set (keys exported))))))
