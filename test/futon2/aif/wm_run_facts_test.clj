@@ -138,3 +138,74 @@
       (is (= {"risk" true "ambiguity" false "informationGain" false}
              (af "gTerms"))
           "a numeric zero is still a recorded term, but absent information gain is not"))))
+
+(deftest seats-used-counts-only-dispatched-seats
+  ;; Lean: "Stable ids of seats included in dispatch or behavior counts for
+  ;; the run." A role's identity counts only when the record shows a
+  ;; dispatched job for it; configured-but-idle roles (click 48's
+  ;; repair-reviewer zai-3) are not used seats.
+  (let [participant-record
+        (assoc record
+               :participants
+               {:schema :wm/run-participants-v1
+                :roles {:author {:status :present :identity "zai-1"}
+                        :reviewer-of-record {:status :present :identity "zai-2"}
+                        :repair-reviewer {:status :present :identity "zai-3"}
+                        :issuing-caller {:status :present :identity "claude-12"
+                                         :source :wm-click-http-boundary}}}
+               :registered-run/model-usage
+               {:unit :tokens
+                :jobs [{:role {:agent "zai-1" :caller "wm-full-loop"}
+                        :job-id "invoke-1" :phase :author-dispatch
+                        :status :complete}
+                       {:role {:agent "zai-2" :caller "wm-full-loop"}
+                        :job-id "invoke-2" :phase :review
+                        :status :complete}
+                       ;; a ledger row with no job id is not a dispatch
+                       {:role {:agent "zai-4"} :status :planned}]})
+        exported (:facts (facts/facts-for-record participant-record "r" snap nil nil))]
+    (is (= ["zai-1" "zai-2"] (exported "seatsUsed")))
+    (is (not (some #{"zai-3" "claude-12" "zai-4"} (exported "seatsUsed"))))))
+
+(deftest seats-used-falls-back-to-present-roles-without-a-job-ledger
+  ;; legacy records with no model-usage ledger keep the typed-participants
+  ;; reading; the HTTP issuing caller is never a used seat.
+  (let [participant-record
+        (assoc record :participants
+               {:schema :wm/run-participants-v1
+                :roles {:author {:status :present :identity "zai-1"}
+                        :reviewer-of-record {:status :present :identity "zai-2"}}})
+        exported (:facts (facts/facts-for-record participant-record "r" snap nil nil))]
+    (is (= ["zai-1" "zai-2"] (exported "seatsUsed")))))
+
+(deftest previous-run-carrier-supplies-q6-facts
+  (let [carrier {:schema :wm/previous-run-v1 :status :present
+                 :run/id "prev-run"
+                 :choice {:status :present :target "M-prev"
+                          :precedence [:p1 :p2]}
+                 :outcome {:status :present :outcome :refused}
+                 :input-digest {:status :present :digest "abc"}}
+        with-carrier (assoc record :previous-run carrier)
+        export-with (:facts (facts/facts-for-record with-carrier "r" snap nil nil))
+        partial-carrier (assoc record :previous-run
+                               {:schema :wm/previous-run-v1 :status :present
+                                :run/id "prev-run"
+                                :choice {:status :absent
+                                         :reason :previous-run-chose-nothing}
+                                :outcome {:status :absent :reason :x}
+                                :input-digest {:status :absent :reason :x}})
+        export-partial (:facts (facts/facts-for-record partial-carrier "r" snap nil nil))]
+    (is (= {"target" "M-prev" "cascade" "[:p1 :p2]"}
+           (export-with "previousChoice")))
+    (is (= "refused" (export-with "previousOutcome")))
+    (is (= "abc" (export-with "previousInputDigest")))
+    ;; the carrier is the source, not the threaded previous record
+    (is (= "r" (get-in (facts/facts-for-record with-carrier "r" snap
+                                               {:decision {:chosen {:target "M-other"}}}
+                                               "prev.edn")
+                       [:sources "previousChoice"])))
+    ;; a previous run that genuinely chose nothing stays typed-absent
+    (is (contains? (export-partial "previousChoice") "not-recomputable"))
+    (is (contains? (export-partial "previousOutcome") "not-recomputable"))
+    (is (contains? (export-partial "previousInputDigest") "not-recomputable"))))
+

@@ -9,7 +9,8 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
-            [futon2.aif.mission-registry :as registry]))
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.previous-run :as previous-run]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -29,6 +30,18 @@
 
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
+
+(defn lookup-previous
+  "Explicit typed lookup of the record before RECORD-PATH in the same
+  run-record directory, for --run mode: the parsed previous record and its
+  path, or nil. Records written before the Q6 carry fix have no
+  :previous-run carrier; this reads the previous record itself."
+  [record-path record]
+  (when-let [file (previous-run/previous-record-file
+                   (.getParentFile (io/file record-path)) (:run/id record))]
+    (let [read (previous-run/read-record file)]
+      (when (= :present (:status read))
+        [(:record read) (.getPath ^java.io.File file)]))))
 
 (defn- files-under [root suffix]
   (->> (file-seq (io/file root))
@@ -137,16 +150,30 @@
              "policyCount" policy-count})
           (:target-construction certificate))))
 
+(defn- classify-outcome [x]
+  (case x
+    (:grounded-change :changed) "changed"
+    (:grounded-no-change :already-satisfied) "alreadySatisfied"
+    :question "question"
+    (:guardrail-refusal :refused :abstained) "refused"
+    (:timed-out :timeout) "timedOut"
+    (if x "invalid" (not-recomputable "terminal outcome absent"))))
+
+(def ^:private typed-outcomes
+  "The vocabulary a previous run's terminal outcome must come from to count
+  as typed. An untyped close (e.g. :untyped-failure) stays not-recomputable
+  rather than exported as Lean's `invalid`."
+  #{:grounded-change :changed :grounded-no-change :already-satisfied
+    :question :guardrail-refusal :refused :abstained :timed-out :timeout})
+
+(defn- classify-previous-outcome [x]
+  (if (contains? typed-outcomes x) (classify-outcome x)
+    (not-recomputable "previous run terminal outcome not typed")))
+
 (defn- outcome [record]
   (let [x (or (get-in record [:terminal-receipt :outcome])
               (:failure-outcome record) (get-in record [:failure :outcome]))]
-    (case x
-      (:grounded-change :changed) "changed"
-      (:grounded-no-change :already-satisfied) "alreadySatisfied"
-      :question "question"
-      (:guardrail-refusal :refused :abstained) "refused"
-      (:timed-out :timeout) "timedOut"
-      (if x "invalid" (not-recomputable "terminal outcome absent")))))
+    (classify-outcome x)))
 
 (defn facts-for-record
   "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}.
@@ -196,10 +223,56 @@
                                (pos? (double v)))))
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
-        previous-chosen (get-in previous [:decision :chosen])
-        used (set (keep identity [(get-in record [:participants :author])
-                                  (get-in record [:participants :reviewer])
-                                  (get-in record [:interpretation-ask :seat])]))
+        prev-carrier (:previous-run record)
+        prev-carrier? (= :present (:status prev-carrier))
+        previous-chosen (if prev-carrier?
+                          (when (= :present (get-in prev-carrier [:choice :status]))
+                            {:target (get-in prev-carrier [:choice :target])
+                             :precedence (get-in prev-carrier [:choice :precedence])})
+                          (let [c (get-in previous [:decision :chosen])]
+                            (when (and (map? c) (not (:status c)) (:target c)) c)))
+        prev-outcome (if prev-carrier?
+                       (let [o (get-in prev-carrier [:outcome :outcome])]
+                         (if (some? o) o ::absent))
+                       (let [receipt (:terminal-receipt previous)]
+                         (when (map? receipt)
+                           (or (when (contains? receipt :outcome)
+                                 (:outcome receipt))
+                               (:failure-kind receipt)))))
+        prev-digest (if prev-carrier?
+                      (when (= :present (get-in prev-carrier [:input-digest :status]))
+                        (get-in prev-carrier [:input-digest :digest]))
+                      (get-in previous [:world-at-selection
+                                        :selection-input-digest]))
+        roles (:roles (:participants record))
+        ;; Q10 seatsUsed: a seat counts only when the record shows it was
+        ;; dispatched (a job with an id in the registered-run usage ledger,
+        ;; or an issued interpretation ask). Configured-but-idle roles
+        ;; (click 48's repair-reviewer) are not used seats.
+        dispatched-jobs (vec (for [job (get-in record
+                                           [:registered-run/model-usage :jobs])
+                                   :when (:job-id job)]
+                               (get-in job [:role :agent])))
+        ask-seat (get-in record [:interpretation-ask :seat])
+        ask-dispatched? (and ask-seat
+                              (not= :absent (get-in record
+                                                    [:interpretation-ask :status])))
+        used (if (or (seq dispatched-jobs) ask-dispatched?)
+               (set (keep identity (conj dispatched-jobs
+                                         (when ask-dispatched? ask-seat))))
+               ;; legacy records with no job ledger: the typed participants
+               ;; carrier (wm/run-participants-v1), best effort. The
+               ;; issuing caller is the HTTP boundary caller, not a seat
+               ;; the run performed work with.
+               (set (keep identity
+                          (concat
+                           (for [[role r] roles
+                                 :when (and (not= :issuing-caller role)
+                                            (= :present (:status r)))]
+                             (:identity r))
+                           [(get-in record [:participants :author])
+                            (get-in record [:participants :reviewer])]
+                           [ask-seat]))))
         nr (fn [s] (not-recomputable s))
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
@@ -248,11 +321,20 @@
                "previousChoice" (if previous-chosen
                                     {"target" (str (:target previous-chosen))
                                      "cascade" (pr-str (:precedence previous-chosen))}
-                                    (nr "previous run or previous chosen action absent"))
-               "previousOutcome" (if previous (outcome previous)
-                                      (nr "previous run absent"))
-               "previousInputDigest" (or (get-in previous [:world-at-selection :selection-input-digest])
-                                           (nr "previous selection-input digest absent"))
+                                    (nr (if prev-carrier?
+                                          "previous run chose no action"
+                                          "previous run or previous chosen action absent")))
+               "previousOutcome" (cond
+                                   prev-carrier? (if (= ::absent prev-outcome)
+                                                   (nr "previous run terminal outcome absent")
+                                                   (classify-previous-outcome prev-outcome))
+                                   (some? prev-outcome) (classify-previous-outcome prev-outcome)
+                                   previous (nr "previous run terminal outcome absent")
+                                   :else (nr "previous run absent"))
+               "previousInputDigest" (or prev-digest
+                                           (nr (if prev-carrier?
+                                                 "previous selection-input digest absent"
+                                                 "previous run or previous selection-input digest absent")))
                "currentChoice" (if (and (map? chosen) (not (:status chosen)))
                                    {"target" (str (:target chosen))
                                     "cascade" (pr-str (:precedence chosen))}
@@ -288,7 +370,10 @@
                         [field (cond
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
-                                 (str/starts-with? field "previous") previous-path
+                                 (str/starts-with? field "previous")
+                                 (if (and (map? (:previous-run record))
+                                          (= :present (:status (:previous-run record))))
+                                   record-path previous-path)
                                  :else record-path)]))]
     {:facts facts :sources sources
      :diagnostics {:absencePaths (mapv pr-str apaths)
@@ -346,9 +431,11 @@
 (defn -main [& args]
   (if (= "--run" (first args))
     (let [path (second args)
-          snap (snapshot)]
+          snap (snapshot)
+          record (read-edn path)
+          [previous previous-path] (lookup-previous path record)]
       (println (json/generate-string
-                (facts-for-record (read-edn path) path snap nil nil)
+                (facts-for-record record path snap previous previous-path)
                 {:pretty true})))
     (let [[run-dir output] args
           dir (or run-dir "data/wm-runs")

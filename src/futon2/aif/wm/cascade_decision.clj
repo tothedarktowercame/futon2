@@ -8,6 +8,7 @@
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.controller-authority :as controller-authority]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.efe :as efe]
             [futon2.aif.focus-receipt :as focus-receipt]
@@ -281,8 +282,22 @@
     ;; so the lane's route carries each node exactly once.
     (step :R14 "futon2.aif.policy/select-action-cascades"
           (fn []
-            (let [decision (policy/select-action-cascades (policy-prefix/production-ranked (get @state :R5) nil)
+            (let [;; Q6: a bound futon2.aif.previous-run/*excluded-pair*
+                  ;; (a re-decision after a refusal with an unchanged
+                  ;; selection-input digest) removes that exact
+                  ;; (target, cascade) pair from the admissible candidates
+                  ;; before selection; the exclusion is recorded as typed
+                  ;; evidence on the decision.
+                  ranked (previous-run/excluded-ranked
+                          (policy-prefix/production-ranked (get @state :R5) nil))
+                  decision (policy/select-action-cascades (:kept ranked)
                                                           {:beta beta})
+                  decision (cond-> decision
+                             (seq (:excluded ranked))
+                             (assoc :q6-exclusion
+                                    {:excluded-by :q6-repeat-after-refusal
+                                     :pair (:pair ranked)
+                                     :excluded-count (count (:excluded ranked))}))
                   ;; The candidates' :precedence carries manifest pattern MAPS
                   ;; (that is what R4/R5 consume), so select-action-cascades
                   ;; keys the action marginal by the pattern map; re-key it by

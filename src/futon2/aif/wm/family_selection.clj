@@ -8,6 +8,7 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.target-policy-family :as target-family]
             [futon2.aif.target-reading-registry :as reading-registry]))
 
@@ -181,12 +182,21 @@
         failures (vec (mapcat :failures rows))
         summaries (mapv #(dissoc % :scored) rows)]
     (if (seq ranked)
-      {:status :selected
-       :decision (policy/select-action-cascades ranked opts)
-       :ranked ranked
-       :target-policy-families summaries
-       :failures failures
-       :failure-count (count failures)}
+      (let [;; Q6: a bound previous-run/*excluded-pair* (re-decision after
+            ;; a refusal with an unchanged selection-input digest) removes
+            ;; that exact pair before selection, recorded as evidence.
+            q6 (previous-run/excluded-ranked ranked)]
+        {:status :selected
+         :decision (cond-> (policy/select-action-cascades (:kept q6) opts)
+                     (seq (:excluded q6))
+                     (assoc :q6-exclusion
+                            {:excluded-by :q6-repeat-after-refusal
+                             :pair (:pair q6)
+                             :excluded-count (count (:excluded q6))}))
+         :ranked (:kept q6)
+         :target-policy-families summaries
+         :failures failures
+         :failure-count (+ (count failures) (count (:excluded q6)))})
       {:status :abstained
        :decision {:status :abstained :kind :no-computed-policy-family}
        :ranked []
