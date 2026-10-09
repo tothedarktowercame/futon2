@@ -181,3 +181,13 @@ The three attempts claude-12 made earlier that day consumed nothing: the ledger
 has no entry after 2026-10-05T04:43Z. Two were refused before the runner (a
 malformed run id because `uuidgen` was missing on zone 1.1, and the absent
 `/run/futon2` lock directory), and the third was refused at the exhausted budget.
+
+## Joe's grant to claude-12, 2026-10-09 (second)
+
+Heard from Joe directly in claude-12's operator buffer (emacs-repl), answering
+"A click budget, to confirm all of it live": "4 sure, but the way you ran it
+before was intransparent. you need to use the debugger and watch it not just
+chill while it runs". One click, for the post-repair verification of the
+WM Lean round (Q1-Q10), run with the restart debugger attached and phase
+breakpoints armed, each stop inspected and reported to Joe before continuing.
+`allocated` in futon3c `ordinary_click_budget.clj` rises from 48 to 49.
