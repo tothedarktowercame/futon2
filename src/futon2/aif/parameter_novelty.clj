@@ -56,6 +56,50 @@
     {:contract contract :ledger (read-ledger (:ledger contract))
      :prior (edn/read-string (slurp (io/resource "wm/learning-trial-prior.edn")))}))
 
+(defn declared-policy-model
+  "Bind the attempt-endpoint parameter model to one concrete policy.  The
+   observation channel is the declared post-build boolean measurement; the
+   binding digest changes with the complete action and its locators."
+  ([action] (declared-policy-model action nil))
+  ([action inputs]
+  (let [effects (into #{} (mapcat :produces) (:precedence action))
+        accumulation (:accumulation-state inputs)
+        binding (identity/digest
+                 {:schema :wm/attempt-endpoint-parameter-binding-v1
+                  :action action
+                  :observation-contract attempt/contract-resource
+                  :strategic-accumulation
+                  (when accumulation
+                    (select-keys accumulation [:schema :support :concentrations
+                                               :last-tick :lineage :origin]))})]
+    {:schema :wm/attempt-endpoint-parameter-model-v1
+     :authority :illustrative
+     :source (str "sha256:" binding)
+     :strategic-accumulation-binding
+     (when accumulation
+       {:schema (:schema accumulation)
+        :state-sha256 (identity/digest accumulation)
+        :coordinate-relation :distinct-channel-status-provenance
+        :consumption :not-a-token-rate})
+     :route {:kind :selected-cascade-effect-attempt
+             :target (:target action) :cascade (:id action)}
+     :observation {:schema :wm/perfect-attempt-endpoint-v1
+                   :placement :post-build-artifact-revision}
+     :meanings (into {} (map (fn [effect]
+                              [effect (identity/digest
+                                       {:action binding :effect effect})])) effects)
+     :factorization (when (> (count effects) 1)
+                      {:status :declared-independent
+                       :source attempt/contract-resource
+                       :effects (vec (sort-by pr-str effects))})})))
+
+(defn information-gain
+  "Q4 interface: return the computed policy information gain in nats, or the
+   typed refusal that explains why it is unavailable."
+  [receipt]
+  (let [x (:expected-kl receipt)]
+    (if (= :computed (:status x)) (:nats x) x)))
+
 (defn- endpoint-prior [inputs family model]
   (let [{:keys [ledger contract prior]} inputs
         rows (filter #(= (identity/digest family) (:family %)) (:records ledger))
@@ -150,7 +194,8 @@
   "One policy, actual retained trajectory, and explicit prospective endpoint model.
    Models are keyed by the full action. No route/likelihood/factorization is inferred."
   [entry inputs]
-  (let [a (:action entry) c (:certificate entry) model (get-in inputs [:models a])
+  (let [a (:action entry) c (:certificate entry)
+        model (or (get-in inputs [:models a]) (declared-policy-model a inputs))
         contract (:contract inputs) horizon (:horizon c)
         q0 (get-in c [:consumed-g :D]) terminal (get-in c [:consumed-g :Q :steps])
         q (:belief (last terminal))

@@ -34,7 +34,8 @@
       (is (= (:observation r) (get-in r [:accumulation-update-input :observation])))
       (is (= (get-in r [:mu-post entity]) (get-in r [:accumulation-update-input :belief-post]))))
     (is (= 4.0 (get-in cr [:accumulation-state :concentrations :c0 :spawned])))
-    (is (= :accumulation-migration-required (refusal #(step (dissoc br :accumulation-state) "bad"))))
+    (is (= {:accumulation/origin :declared-prior :since "bad" :predecessor "t2"}
+           (get-in (step (dissoc br :accumulation-state) "bad") [:state :origin])))
     (is (= :carry-chain-gap (refusal #(step (assoc-in ar [:accumulation-state :last-tick] "wrong") "bad"))))
     (is (= :support-mismatch
            (refusal #(wm/accumulation-step-for-tick
@@ -100,9 +101,16 @@
       (is (= 3.0 (get-in r [:accumulation-state :concentrations :c0 :spawned])))
       (is (= receipt (get-in r [:decision :accumulation]))))))
 
-(deftest missing-state-is-recorded-not-reinitialized
+(deftest missing-state-starts-an-explicit-declared-prior-epoch
   (publish {:run/id "old" :observation obs :belief beliefs :decision decision})
-  (assert-absent :accumulation-migration-required (inputs)))
+  (let [j (judged (inputs))]
+    (is (= :accumulated (get-in j [:decision :accumulation :status])))
+    (is (= {:accumulation/origin :declared-prior :since "next" :predecessor "old"}
+           (get-in j [:decision :accumulation :origin])))
+    (is (= (get-in j [:decision :accumulation :origin])
+           (get-in j [:accumulation-state :origin])))
+    (is (= (get-in j [:decision :accumulation :origin])
+           (get-in j [:accumulation-initialization :origin])))))
 
 (deftest strict-failures-do-not-call-the-adapter
   (let [file (io/file *dir* "wm-trace-2026-09-25.edn")]
@@ -179,11 +187,12 @@
       (same-selection b saved)
       (is (= ["a" "b"] (mapv :run/id (:records (trace/read-history-strict 12 :dir (str *dir*)))))))))
 
-(deftest receipt-only-tail-does-not-reinitialize-or-skip
+(deftest receipt-only-tail-opens-a-new-declared-prior-epoch
   (publish (judged (assoc (inputs) :tick-id "a")))
   (publish (judged (assoc (inputs) :tick-id "b" :enabled? false)))
-  (is (= :accumulation-migration-required
-         (get-in (judged (assoc (inputs) :tick-id "c")) [:accumulation-receipt :reason]))))
+  (is (= {:accumulation/origin :declared-prior :since "c" :predecessor "b"}
+         (get-in (judged (assoc (inputs) :tick-id "c"))
+                 [:accumulation-receipt :origin]))))
 
 (deftest default-flight-judge-forwards-configuration-with-one-publisher
   (let [captured (atom nil)]
@@ -196,7 +205,10 @@
       (is (= {:accumulation-entity-id entity :accumulation-initialization init
               :trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}
               :trace? false :include-advisory-lanes? false :defer-render? true}
-             (second @captured))))))
+             (select-keys (second @captured)
+                          [:accumulation-entity-id :accumulation-initialization
+                           :trace-dir :run-id :flight :trace?
+                           :include-advisory-lanes? :defer-render?]))))))
 
 (deftest unreadable-configuration-is-a-recorded-absence
   (with-redefs-fn {#'wm/accumulation-config-path (str (io/file *dir* "no-config.edn"))}

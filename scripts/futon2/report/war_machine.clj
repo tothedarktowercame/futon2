@@ -57,6 +57,7 @@
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.machine-accumulation :as machine-accumulation]
+            [futon2.aif.parameter-novelty :as parameter-novelty]
             [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
@@ -1601,16 +1602,26 @@
         _ (when (or (= ::missing pre) (= ::missing post))
             (throw (ex-info "Single-entity accumulation belief missing"
                             {:refusal :single-entity-belief-missing :entity/id entity-id})))
-        carried (if previous-record
-                  (or (:accumulation-state previous-record)
-                      (throw (ex-info "Existing trace predates accumulation state"
-                                      {:refusal :accumulation-migration-required :previous-id previous-id})))
-                  (do (when-not (and (= :declared (:authority initialization))
-                                     (number? (:prior initialization)))
-                        (throw (ex-info "Declared accumulation initialization required"
-                                        {:refusal :accumulation-initialization-required})))
-                      (machine-accumulation/initialize
-                       (vec (sort (keys observation))) (vec (sort (keys post))) (:prior initialization))))
+        migration? (nil? (:accumulation-state previous-record))
+        _ (when (and migration?
+                     (not (and (= :declared (:authority initialization))
+                               (number? (:prior initialization)))))
+            (throw (ex-info "Declared accumulation initialization required"
+                            {:refusal :accumulation-initialization-required})))
+        origin (when migration?
+                 {:accumulation/origin :declared-prior
+                  :since tick-id
+                  :predecessor previous-id})
+        carried (if migration?
+                  (assoc (machine-accumulation/initialize
+                          (vec (sort (keys observation)))
+                          (vec (sort (keys post)))
+                          (:prior initialization))
+                         :origin origin
+                         ;; The epoch starts after the retained predecessor;
+                         ;; no earlier observations are reconstructed.
+                         :last-tick previous-id)
+                  (:accumulation-state previous-record))
         _ (when-not (:ok carried)
             (throw (ex-info "Accumulation initialization refused"
                             {:refusal (get-in carried [:refusal :kind])
@@ -1619,7 +1630,7 @@
         _ (when-not (some? (:model/revision lineage))
             (throw (ex-info "Accumulation model revision missing"
                             {:refusal :accumulation-model-revision-missing})))
-        _ (when (and previous-record (not= lineage (:lineage carried)))
+        _ (when (and (not migration?) (not= lineage (:lineage carried)))
             (throw (ex-info "Accumulation entity or model changed"
                             {:refusal :accumulation-lineage-mismatch})))
         _ (when-not (= :declared (get-in carried [:initialization :authority]))
@@ -1636,7 +1647,8 @@
     (when-not (:ok result)
       (throw (ex-info "Accumulation step refused"
                       {:refusal (get-in result [:refusal :kind]) :detail (:refusal result)})))
-    {:state result :update-input input :initialization (when-not previous-record initialization)}))
+    {:state result :update-input input
+     :initialization (when migration? (assoc initialization :origin origin))}))
 
 (defn accumulation-outcome-for-tick
   "Read accumulation's own strict predecessor, then record one update or typed
@@ -1659,7 +1671,8 @@
                     :state-sha256 (load-identity/sha256 (.getBytes (pr-str (:state result)) "UTF-8"))
                     :previous-id (:previous-id update-input) :tick-id (:tick-id update-input)
                     :entity (:entity/id update-input) :model/revision (:model/revision update-input)
-                    :initialization? (boolean (:initialization result))}))))
+                    :initialization? (boolean (:initialization result))
+                    :origin (get-in result [:state :origin])}))))
       (catch Exception e
         {:receipt {:status :absent :reason (or (:refusal (ex-data e)) :accumulation-failed)
                    :detail (ex-data e)
@@ -6747,7 +6760,10 @@
                                :prospective-token-carry
                                (get-in prev-trace-record
                                        [:decision :selection-certificate :token-belief-stage
-                                        :prospective-carry])
+                                       :prospective-carry])
+                               :novelty-inputs
+                               (assoc (parameter-novelty/read-inputs)
+                                      :accumulation-state (:state accumulation))
                                :token-belief-context
                                {:occurrence-id (str "wm-live-selection-" wm-as-of)}
                                ;; B4 slice 2c: hand the declared sources map to

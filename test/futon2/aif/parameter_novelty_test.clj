@@ -40,6 +40,35 @@
   (is (= :invalid-beta-prior (:reason (novelty/beta-information 0 1))))
   (is (= 0.0 (get-in (receipt (assoc-in inputs [:models action :prior] {:kind :known-parameter :theta 0.5})) [:expected-kl :nats]))))
 
+(deftest production-policy-model-is-bound-and-computes-information
+  (let [accumulation {:schema :wm/declared-accumulation-v1
+                      :support {:observation [:channel] :state [:spawned]}
+                      :concentrations {:channel {:spawned 3}}
+                      :last-tick "tick-1"}
+        x (assoc (dissoc inputs :models) :accumulation-state accumulation)
+        r (receipt x)
+        binding (get-in r [:parameter-model :binding])]
+    (is (string? binding))
+    (is (.startsWith binding "sha256:"))
+    (is (= :wm/perfect-attempt-endpoint-v1
+           (get-in r [:observation-model :schema])))
+    (is (= (identity/digest accumulation)
+           (get-in (novelty/declared-policy-model action x)
+                   [:strategic-accumulation-binding :state-sha256])))
+    (is (= :not-a-token-rate
+           (get-in (novelty/declared-policy-model action x)
+                   [:strategic-accumulation-binding :consumption])))
+    (is (number? (novelty/information-gain r)))
+    (is (= (get-in r [:expected-kl :nats]) (novelty/information-gain r)))
+    (let [changed (novelty/policy-receipt
+                   (assoc entry :action (assoc action :id :C2)) x)]
+      (is (not= binding (get-in changed [:parameter-model :binding]))))))
+
+(deftest information-interface-preserves-refusal
+  (let [r (receipt (dissoc inputs :contract))]
+    (is (= {:status :absent :reason :observation-contract-unsupported}
+           (novelty/information-gain r)))))
+
 (deftest attempt-grain-and-refusals
   (let [r (receipt inputs)]
     (is (= :wm/parameter-novelty-v1 (:schema r)))
