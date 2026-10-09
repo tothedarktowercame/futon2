@@ -23,6 +23,8 @@
 
 (def ^:private repair-ticket-id #"^T-(repair-occ-[0-9a-f]{64})$")
 (def ^:private root-task-id #"^[MET]-[^/]+$")
+(def ^:private classification-ledger-relative
+  "futon2/holes/labs/wm-contract/TASK-CLASSIFICATION-LEDGER-2026-10-09.edn")
 
 (defn- pin [path body]
   {:path path :sha256 (field/sha256 (.getBytes ^String body "UTF-8"))})
@@ -153,21 +155,115 @@
                                        :cost-rule "1 / (1 + occurrence count)"}}])))
           tasks)))
 
+(defn- clock-occurrences [graph]
+  (frequencies
+   (keep meta/canonical-work-id
+         (mapcat (juxt :mission :target :predecessor :successor)
+                 (:lineage graph)))))
+
+(defn- normalized-clock-centrality [tasks snapshot]
+  (let [occurrences (clock-occurrences (:graph snapshot))
+        source (:graph-source snapshot)]
+    (into {}
+          (keep (fn [{:keys [id kind]}]
+                  (when (and (contains? #{:excursion :ticket} kind)
+                             (contains? occurrences id))
+                    (let [n (get occurrences id)]
+                      [id {:value (/ 1.0 (inc (double n)))
+                           :freshness :current :source source
+                           :observation {:field :clock-lineage-occurrences
+                                         :value n
+                                         :cost-rule "1 / (1 + occurrence count)"}}]))))
+          tasks)))
+
+(defn- ownership-costs [tasks snapshot]
+  (into {}
+        (keep (fn [{:keys [id kind ownership]}]
+                (when (and (contains? #{:excursion :ticket} kind)
+                           (= :unowned (:state ownership)))
+                  [id {:value 0.5 :freshness :current
+                       :source (:agency-source snapshot)
+                       :observation {:field :ownership-state :value :unowned
+                                     :cost-rule "unowned neutral cost = 0.5"}}])))
+        tasks))
+
+(defn- mission-context-costs [tasks centrality freshness]
+  (let [by-id (into {} (map (juxt :id identity)) tasks)]
+    (into {}
+          (keep (fn [{:keys [id kind parent source mission-context]}]
+                  (let [parent (or (:parent mission-context) parent)
+                        source (or (:source mission-context) source)]
+                  (when (and (contains? #{:excursion :ticket} kind)
+                             (string? parent) (contains? by-id parent))
+                    (let [readings (keep #(get-in % [parent :value])
+                                         [centrality freshness])]
+                      (when (seq readings)
+                        [id {:value (/ (reduce + readings) (double (count readings)))
+                             :freshness :current :source source
+                             :observation {:field :parent-mission-cost
+                                           :parent parent :weight 1.0
+                                           :cost-rule "mean of current parent mission channels"}}]))))))
+          tasks)))
+
+(defn- attach-ledger-context [tasks code-root]
+  (let [path (str (java.io.File. code-root classification-ledger-relative))]
+    (if-not (.isFile (java.io.File. path))
+      tasks
+      (let [text (slurp path)
+            source (pin path text)
+            rows (:rows (edn/read-string text))
+            context (into {}
+                          (keep (fn [{:keys [id] :as row}]
+                                  (let [parent (:category/cluster row)]
+                                    (when (and (string? parent)
+                                               (str/starts-with? parent "M-"))
+                                      [id {:parent parent :source source}]))))
+                          rows)]
+        (mapv #(cond-> % (get context (:id %))
+                 (assoc :mission-context (get context (:id %)))) tasks)))))
+
 (defn task-state-candidates
   "Project current task evidence. Missing channels remain absent, never zero."
   [tasks snapshot]
   (let [priority-by-id (normalized-priorities tasks)
         freshness-by-id (normalized-pipeline-freshness tasks snapshot)
-        centrality-by-id (normalized-pipeline-centrality tasks snapshot)]
+        centrality-by-id (normalized-pipeline-centrality tasks snapshot)
+        clock-by-id (normalized-clock-centrality tasks snapshot)
+        ownership-by-id (ownership-costs tasks snapshot)
+        context-by-id (mission-context-costs tasks centrality-by-id freshness-by-id)]
     (mapv (fn [{:keys [id kind automated-feasibility]}]
-            (let [channels (cond-> {}
+            (let [base-channels (cond-> {}
                              (get priority-by-id id)
                              (assoc :declared-priority-cost (get priority-by-id id))
                              (get centrality-by-id id)
                              (assoc :pipeline-structural-centrality-cost
                                     (get centrality-by-id id))
                              (get freshness-by-id id)
-                             (assoc :pipeline-freshness-cost (get freshness-by-id id)))]
+                             (assoc :pipeline-freshness-cost (get freshness-by-id id))
+                             (get clock-by-id id)
+                             (assoc :clock-lineage-centrality-cost (get clock-by-id id))
+                             (get ownership-by-id id)
+                             (assoc :ownership-cost (get ownership-by-id id))
+                             (get context-by-id id)
+                             (assoc :mission-context-cost (get context-by-id id)))
+                  ;; One common scale for cross-kind comparisons. Each input is
+                  ;; already a [0,1] cost normalized over the same live task
+                  ;; population; the arithmetic mean prevents kinds with more
+                  ;; observed channels from receiving a count penalty.
+                  channels (if (seq base-channels)
+                             (assoc base-channels :cross-kind-task-cost
+                                    {:value (/ (reduce + (map :value (vals base-channels)))
+                                               (double (count base-channels)))
+                                     :freshness :current
+                                     :source (:graph-source snapshot)
+                                     :observation
+                                     {:field :mean-current-task-cost
+                                      :contributions
+                                      (into (sorted-map)
+                                            (map (fn [[k v]] [k (:value v)]))
+                                            base-channels)
+                                      :cost-rule "arithmetic mean of available normalized costs"}})
+                             base-channels)]
               {:id id :kind kind
              :support {:automated-feasibility
                        (if (contains? #{:supported :infeasible :unknown}
@@ -181,7 +277,16 @@
                  (not (contains? channels :pipeline-structural-centrality-cost))
                  (conj :pipeline-structural-centrality-cost)
                  (not (contains? channels :pipeline-freshness-cost))
-                 (conj :pipeline-freshness-cost))}))
+                 (conj :pipeline-freshness-cost)
+                 (and (contains? #{:excursion :ticket} kind)
+                      (not (contains? channels :clock-lineage-centrality-cost)))
+                 (conj :clock-lineage-centrality-cost)
+                 (and (contains? #{:excursion :ticket} kind)
+                      (not (contains? channels :ownership-cost)))
+                 (conj :ownership-cost)
+                 (and (contains? #{:excursion :ticket} kind)
+                      (not (contains? channels :mission-context-cost)))
+                 (conj :mission-context-cost))}))
           tasks)))
 
 (defn- exactly-one [xs]
@@ -476,7 +581,9 @@
         ;; Git provenance is useful only for structural map members.  Resolve
         ;; membership before spawning provenance reads so the complete ticket
         ;; inventory cannot make browser latency grow with every file in it.
-        raw-on-map (filterv #(contains? nodes (:id %)) standing-admitted)
+        raw-on-map (filterv #(or (contains? nodes (:id %))
+                                 (contains? #{:excursion :ticket} (:kind %)))
+                            standing-admitted)
         attributed-tasks (attach-work-attribution raw-on-map snapshot)
         actively-owned (filterv #(contains? #{:active :ambiguous}
                                              (get-in % [:ownership :state]))
@@ -495,6 +602,7 @@
               actively-owned)
         on-map selectable-tasks
         off-map (->> standing-admitted
+                     (filter #(= :mission (:kind %)))
                      (remove #(contains? nodes (:id %)))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
@@ -554,6 +662,7 @@
                                  (:excursions excursions)))
                     (map #(assoc % :kind :ticket)
                          (filter registry/live-ticket? (:tickets tickets)))))
+        tasks (attach-ledger-context tasks code-root)
         snapshot (registry-snapshot tasks)]
     (with-meta tasks
       {:registry-snapshot snapshot}))))

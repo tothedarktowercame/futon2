@@ -183,9 +183,31 @@
         candidates (live/task-state-candidates rows snapshot)]
     (doseq [candidate candidates]
       (is (= {} (:channels candidate)))
-      (is (= #{:declared-priority-cost :pipeline-structural-centrality-cost
-               :pipeline-freshness-cost}
-             (set (:unsupported-channels candidate)))))))
+      (is (every? (set (:unsupported-channels candidate))
+                  #{:declared-priority-cost :pipeline-structural-centrality-cost
+                    :pipeline-freshness-cost})))
+    (is (every? (set (:unsupported-channels (first candidates)))
+                #{:clock-lineage-centrality-cost :ownership-cost
+                  :mission-context-cost}))))
+
+(deftest off-map-excursion-is-ranked-by-nonmission-channels
+  (let [e {:id "E-work" :kind :excursion :priority 1
+           :source (pin "E-work.md" "e")}
+        s (-> snapshot
+              (update-in [:graph :tickets :items]
+                         conj {:stem "E-work" :mtime-ms 150})
+              (update-in [:graph :lineage]
+                         conj {:target "repo-d/excursion/work"}))
+        receipt (live/select-live {:tasks (conj tasks e)
+                                   :fetch-snapshot (constantly s)})
+        ranked (some #(when (= "E-work" (:id %)) %)
+                     (get-in receipt [:policy :meta-selection :ranking]))]
+    (is (some #(= "E-work" (:id %)) (:support receipt)))
+    (is ranked)
+    (is (contains? (:channels ranked) :clock-lineage-centrality-cost))
+    (is (not-any? #(and (= "E-work" (:id %))
+                        (= :pipeline/not-on-current-map (:ineligible-reason %)))
+                  (:excluded receipt)))))
 
 (deftest partial-live-snapshot-remains-a-typed-outer-refusal
   (let [receipt (live/select-live
@@ -318,7 +340,19 @@
                                               :agency-source (pin "agency" "e")
                                               :agency {:agents {}})})]
           (is (= :unowned (get-in stale [:support 0 :ownership :state])))
-          (is (= :agent-authored (get-in stale [:support 0 :last-touch :state]))))))))
+          (is (= :agent-authored (get-in stale [:support 0 :last-touch :state])))))
+      (testing "an off-map excursion with a current owner remains excluded"
+        (let [excursion (assoc (committed-task repo "E-held" "codex-8")
+                               :kind :excursion)
+              s (assoc agency-snapshot :agency {:agents
+                                                {:codex-8 {:excursion-id "E-held"
+                                                           :session-id "e-session"
+                                                           :status :idle}}})
+              receipt (live/select-live {:tasks [excursion]
+                                         :fetch-snapshot (constantly s)})]
+          (is (empty? (:support receipt)))
+          (is (= :ownership/actively-held
+                 (get-in receipt [:excluded 0 :ineligible-reason]))))))))
 
 (deftest missing-commit-provenance-is-unknown-and-source-mutation-is-refused
   (let [repo (.toFile (java.nio.file.Files/createTempDirectory
@@ -394,10 +428,13 @@
         support-ids (set (map :id (:support receipt)))
         excluded-by-id (into {} (map (juxt :id identity)) (:excluded receipt))]
     (is inventory-only "current inventory contains a registry file off the cascade")
-    (is (every? nodes support-ids))
-    (is (= :pipeline/not-on-current-map
-           (get-in excluded-by-id [(:id inventory-only) :ineligible-reason])))
-    (is (< (count (:support receipt)) (count inventory-ids)))
+    (is (every? #(or (contains? nodes (:id %))
+                     (contains? #{:excursion :ticket} (:kind %)))
+                (:support receipt)))
+    (if (= :mission (:kind inventory-only))
+      (is (= :pipeline/not-on-current-map
+             (get-in excluded-by-id [(:id inventory-only) :ineligible-reason])))
+      (is (contains? support-ids (:id inventory-only))))
     (is (< elapsed-ms 30000)
         (str "bounded browser composition took " elapsed-ms "ms"))))
 

@@ -1,0 +1,173 @@
+{:schema :wm/et-channel-offline-report-v1,
+ :input "futon2/data/wmq-et-channels-input-2026-10-09.edn",
+ :normalisation
+ {:individual
+  "each observed cost is [0,1] over the same live task population",
+  :cross-kind "arithmetic mean of available normalized costs",
+  :missing "typed unsupported channel; never zero",
+  :same-kind
+  "pre-existing shared-channel comparison; derived aggregate excluded"},
+ :would-produce
+ {:support 568,
+  :excluded 124,
+  :selected "M-interim-director-proxy-metric-inventory"},
+ :top-20
+ [{:rank 1,
+   :id "M-interim-director-proxy-metric-inventory",
+   :kind :mission,
+   :pairwise-losses 0,
+   :channel-contributions
+   {:cross-kind-task-cost 0.010526315789473684,
+    :pipeline-structural-centrality-cost 0.010526315789473684}}
+  {:rank 2,
+   :id "M-categorical-code",
+   :kind :mission,
+   :pairwise-losses 1,
+   :channel-contributions
+   {:cross-kind-task-cost 0.03274137671243709,
+    :pipeline-freshness-cost 0.023816086758207514,
+    :pipeline-structural-centrality-cost 0.041666666666666664}}
+  {:rank 3,
+   :id "M-or-training-as-learning-system",
+   :kind :mission,
+   :pairwise-losses 2,
+   :channel-contributions
+   {:cross-kind-task-cost 0.035721099803700966,
+    :pipeline-freshness-cost 0.023823151988354312,
+    :pipeline-structural-centrality-cost 0.047619047619047616}}
+  {:rank 4,
+   :id "M-simulating-or-training-as-learning-system",
+   :kind :mission,
+   :pairwise-losses 4,
+   :channel-contributions
+   {:cross-kind-task-cost 0.039689353745590364,
+    :pipeline-freshness-cost 0.023823151935625172,
+    :pipeline-structural-centrality-cost 0.05555555555555555}}
+  {:rank 5,
+   :id "M-the-perfect-crime",
+   :kind :mission,
+   :pairwise-losses 4,
+   :channel-contributions
+   {:cross-kind-task-cost 0.05,
+    :pipeline-structural-centrality-cost 0.05}}
+  {:rank 6,
+   :id "M-futonzero-mvp",
+   :kind :mission,
+   :pairwise-losses 5,
+   :channel-contributions
+   {:cross-kind-task-cost 0.04320447713401522,
+    :pipeline-freshness-cost 0.02390895426803044,
+    :pipeline-structural-centrality-cost 0.0625}}
+  {:rank 7,
+   :id "M-vsatarcs-writer",
+   :kind :mission,
+   :pairwise-losses 6,
+   :channel-contributions
+   {:cross-kind-task-cost 0.0476215884335298,
+    :pipeline-freshness-cost 0.023814605438488175,
+    :pipeline-structural-centrality-cost 0.07142857142857142}}
+  {:rank 8,
+   :id "M-vsatarcs-invariants-integration",
+   :kind :mission,
+   :pairwise-losses 7,
+   :channel-contributions
+   {:cross-kind-task-cost 0.047621588459894365,
+    :pipeline-freshness-cost 0.023814605491217312,
+    :pipeline-structural-centrality-cost 0.07142857142857142}}
+  {:rank 9,
+   :id "M-weird-modernism",
+   :kind :mission,
+   :pairwise-losses 8,
+   :channel-contributions
+   {:cross-kind-task-cost 0.05040302158004174,
+    :pipeline-freshness-cost 0.023882966237006562,
+    :pipeline-structural-centrality-cost 0.07692307692307693}}
+  {:rank 10,
+   :id "M-futon-enrichment",
+   :kind :mission,
+   :pairwise-losses 9,
+   :channel-contributions
+   {:cross-kind-task-cost 0.05357824271357296,
+    :pipeline-freshness-cost 0.02382315209381259,
+    :pipeline-structural-centrality-cost 0.08333333333333333}}
+  {:rank 11,
+   :id "M-stack-stereolithography",
+   :kind :mission,
+   :pairwise-losses 10,
+   :channel-contributions
+   {:cross-kind-task-cost 0.06189831366643826,
+    :pipeline-freshness-cost 0.02379662733287652,
+    :pipeline-structural-centrality-cost 0.1}}
+  {:rank 12,
+   :id "M-essays-edit-cycle",
+   :kind :mission,
+   :pairwise-losses 11,
+   :channel-contributions
+   {:cross-kind-task-cost 0.0619142411358101,
+    :pipeline-freshness-cost 0.0238284822716202,
+    :pipeline-structural-centrality-cost 0.1}}
+  {:rank 13,
+   :id "M-trip-journal",
+   :kind :mission,
+   :pairwise-losses 12,
+   :channel-contributions
+   {:cross-kind-task-cost 0.06745386922199381,
+    :pipeline-freshness-cost 0.02379662733287652,
+    :pipeline-structural-centrality-cost 0.1111111111111111}}
+  {:rank 14,
+   :id "M-peeragogy-rewrite",
+   :kind :mission,
+   :pairwise-losses 13,
+   :channel-contributions
+   {:cross-kind-task-cost 0.0674671315497327,
+    :pipeline-freshness-cost 0.023823151988354312,
+    :pipeline-structural-centrality-cost 0.1111111111111111}}
+  {:rank 15,
+   :id "M-pattern-application-diagnostic",
+   :kind :mission,
+   :pairwise-losses 14,
+   :channel-contributions
+   {:cross-kind-task-cost 0.06749987871824789,
+    :pipeline-freshness-cost 0.023888646325384687,
+    :pipeline-structural-centrality-cost 0.1111111111111111}}
+  {:rank 16,
+   :id "M-patterns-done-right",
+   :kind :mission,
+   :pairwise-losses 15,
+   :channel-contributions
+   {:cross-kind-task-cost 0.06751003266320621,
+    :pipeline-freshness-cost 0.023908954215301304,
+    :pipeline-structural-centrality-cost 0.1111111111111111}}
+  {:rank 17,
+   :id "M-joe-told-me-about-futon",
+   :kind :mission,
+   :pairwise-losses 17,
+   :channel-contributions
+   {:cross-kind-task-cost 0.07067394702037513,
+    :pipeline-freshness-cost 0.016347894040750273,
+    :pipeline-structural-centrality-cost 0.125}}
+  {:rank 18,
+   :id "M-a-sorry-enterprise",
+   :kind :mission,
+   :pairwise-losses 18,
+   :channel-contributions
+   {:cross-kind-task-cost 0.07439980566380837,
+    :pipeline-freshness-cost 0.023799611327616745,
+    :pipeline-structural-centrality-cost 0.125}}
+  {:rank 19,
+   :id "M-expressions-of-interest",
+   :kind :mission,
+   :pairwise-losses 18,
+   :channel-contributions
+   {:cross-kind-task-cost 0.1111111111111111,
+    :pipeline-structural-centrality-cost 0.1111111111111111}}
+  {:rank 20,
+   :id "M-web-arxana-ui-improvements",
+   :kind :mission,
+   :pairwise-losses 19,
+   :channel-contributions
+   {:cross-kind-task-cost 0.08333587414781551,
+    :pipeline-freshness-cost 0.023814605438488175,
+    :pipeline-structural-centrality-cost 0.14285714285714285}}],
+ :live-before {:support 106, :excluded 575},
+ :writes []}
