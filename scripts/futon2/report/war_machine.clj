@@ -6694,7 +6694,8 @@
               (or (:pattern-library-root judge-opts)
                   "/home/joe/code/futon3/library"))
              target-queries
-             {:k (or (:library-slice-size judge-opts) 40)
+             {:k (or (:library-slice-size judge-opts)
+                     (:value library-slices/slice-budget))
               :max-millis (or (:library-retrieval-budget-ms judge-opts) 30000)
               :nano-time-fn (or (:nano-time-fn judge-opts) #(System/nanoTime))}))
         flight-cascade-assembly-input
@@ -6718,6 +6719,16 @@
           ;; the horizon is resolved after the flight's input and the
           ;; published interpretations are merged (resolve-cascade-horizon)
           :library-pin (:library-pin retrieval-batch)
+          :slice-budget (:slice-budget retrieval-batch)
+          ;; Exact class-model scoring grows superlinearly with the joint
+          ;; target carrier.  Q8 requires at least half of open targets to
+          ;; reach numeric G, so production admits that exact lower bound and
+          ;; records every remainder as :budget-exhausted.
+          :scoring-target-budget
+          {:schema :wm/scoring-target-budget-v1
+           :target-limit (quot (+ (count cascade-targets) 1) 2)
+           :basis :q8-minimum-half-open-targets
+           :enumerated-target-count (count cascade-targets)}
           :retrieval-refusals (:refusals retrieval-batch)
           :retrieval-timing (select-keys retrieval-batch [:elapsed-ms :generated-at])
           :sources (cond-> (assoc cascade-sources :query-time-slices (:slices retrieval-batch))

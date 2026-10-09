@@ -1030,6 +1030,29 @@
             :consequence "F7 (cascade construction: two or more distinct cascades constructed and scored for one target) is the only path to inhabiting pi; it was already in the work seat when this entry was written. F1 slice 2 waits on F7, not on Joe -- F1's :blocker is to be rewritten at the next board pause to name F7 as its gate, so the row leaves the needs-joe channel. The census runs/F1-machine-q/02-policy-family-census.edn stays as the measurement of why the cascade grain is uninhabited today: evidence for the build, not grounds to reopen the grain."}
    :evidence "machine_q.clj:150 (:refusal/policy-selection-distribution -- the boundary already refuses the selection grain); runs/F1-machine-q/02-policy-family-census.edn (889/889 stable identities, all selections; 0/889 offer a cascade choice); habit_prior.clj:13-14 (the namespace's own disclaimer)"
    :statement "This entry exists because the ruling previously lived in EPIC-run-era.md and the strategy note but NOT in this registry, and F1's seat -- correctly consulting this registry under its no-ruling discipline -- found no entry and re-opened a settled question (2026-09-05). A ruling not present in the registry the lanes consult is not a ruling for the lanes."}
+  :provisional-policy-likelihood
+  {:observed :retrieval-rank-supplies-pre-interpretation-transition-likelihood
+   :status :declared-stack-specialisation
+   :mapping "For rank r in a pinned query-time slice of size k, theta(p,target) := (k-r+1)/(k+1), the Weibull empirical-CDF plotting position. The provisional transition produces the target's declared wants with this probability; guard knowledge remains empty. Interpretation replaces the provisional operator and this theta source."
+   :justification "Retrieval rank is the only per-pattern evidence available before interpretation. The Weibull plotting position turns that observed ordering into an interior empirical probability without a fitted or hand-picked smoothing constant: denominator k+1 supplies the two open endpoints. Therefore every provisional policy is uncertain (0 < theta < 1), so the existing class observation model contributes positive H.s ambiguity and state information gain. The raw lexical score is retained as provenance but is not calibrated as a probability."
+   :imports [:pi :G :A]
+   :code "src/futon2/aif/cascade_problems.clj (retrieval-effect, provisional operator); src/futon2/aif/wm/cascade_decision.clj (theta preservation into the existing policy scorer)"
+   :limits "This is an ordinal empirical likelihood, not a claim of calibrated causal success. It expires when a target-specific interpretation is admitted; recorded trials remain authoritative for interpreted pattern families."}
+  :query-time-slice-budget
+  {:observed :forty-pattern-bounded-whole-library-slice
+   :status :declared-stack-specialisation
+   :value 40
+   :unit :patterns-per-target
+   :source "The existing interpretation retriever's embedding pool uses k=40 (src/futon2/aif/interpretation_request.clj)."
+   :justification "Q8's 10 is an acceptance floor, not a coverage choice. Forty reuses the established retrieval envelope while keeping construction/scoring bounded; the whole 1436-pattern library would create an unbounded 2872-policy minimum census. The effective override and this authority are recorded in each selection certificate."
+   :code "src/futon2/aif/wm/library_slices.clj (slice-budget and batch); scripts/futon2/report/war_machine.clj (production caller)"}
+  :all-target-scoring-budget
+  {:observed :exact-half-of-enumerated-targets-reach-joint-exact-scoring
+   :status :declared-stack-specialisation
+   :mapping "targetLimit := ceil(enumeratedTargetCount/2). Retrieval and construction still run for every admitted enumerated target; the suffix beyond targetLimit is retained as typed :budget-exhausted at :scoring."
+   :justification "Q8 explicitly requires at least half of open tasks to reach numeric G. A 694-target/1388-policy exact run with the provisional stochastic transitions exceeded 458.8 seconds before interruption, so scoring the full joint carrier is not a sane synchronous selection phase. The exact Q8 lower bound is therefore the non-arbitrary operational budget until the scorer is batched by independent target carrier."
+   :code "scripts/futon2/report/war_machine.clj (budget construction); src/futon2/aif/wm/cascade_decision.clj (typed partition and certificate)"
+   :limits "Ordering decides which half reaches scoring and is therefore a declared prior, not a hidden gate. Every excluded target and the complete excluded target vector remain in the certificate."}
   :cascade-decision-target
   {:observed :cascade-lane-prepends-ranked-decision-target
    :status :decided

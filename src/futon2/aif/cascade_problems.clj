@@ -99,6 +99,17 @@
   "Two distinct query-slice policies per open target: the Q8 minimum."
   2)
 
+(defn retrieval-effect
+  "Declared provisional likelihood from rank r in a slice of k: the Weibull
+  empirical-CDF plotting position (k-r+1)/(k+1). Interpretation replaces it."
+  [candidate k]
+  (let [rank (or (:slice-rank candidate) (:rank candidate))]
+    (when (and (pos-int? k) (pos-int? rank) (<= rank k))
+      {:theta (/ (inc (- k rank)) (inc k))
+       :source :retrieval-rank-likelihood
+       :rank rank :slice-size k :raw-score (:score candidate)
+       :formula "(k-r+1)/(k+1)"})))
+
 (defn problem-tokens
   "Every token a target's problem reads or writes: its facts, its want, and
   every interpreted pattern's guard and produces."
@@ -250,9 +261,14 @@
         interp (get-in sources [:interpretations target])
         patterns (:interpretations base)
         slice (:query-time-slice base)
-        slice-pool (mapv #(select-keys % [:pattern :slice-rank :rank :retriever-rank
-                                          :retriever :provenance :raw :judgment])
-                         (:candidates slice))
+        ;; Rank, not collection order, is retrieval authority.  This keeps a
+        ;; replay/serialization permutation from changing the policy family.
+        slice-pool (->> (:candidates slice)
+                        (map #(select-keys % [:pattern :slice-rank :rank :retriever-rank
+                                              :retriever :provenance :raw :score :judgment]))
+                        (sort-by (juxt #(or (:slice-rank %) (:rank %) Long/MAX_VALUE)
+                                       (comp str :pattern)))
+                        vec)
         slice-patterns (mapv :pattern slice-pool)
         want (get-in sources [:wants target])
         beta (:beta base)
@@ -312,11 +328,20 @@
                {:context (when (ifn? ctx-fn) (ctx-fn target))})
 
       (and (not (seq patterns)) (map? slice))
-      (let [provisional-operators
+      (let [k (count slice-pool)
+            effects (into {} (keep (fn [candidate]
+                                     (when-let [effect (retrieval-effect candidate k)]
+                                       [(:pattern candidate) effect])))
+                                   slice-pool)
+            provisional-operators
             (into {} (map (fn [pattern]
-                            [pattern {:guard {:needs #{} :forbids #{}}
-                                      :produces #{}
-                                      :status :interpretation-owed-after-selection}])
+                            (let [effect (get effects pattern)]
+                              [pattern {:guard {:needs #{} :forbids #{}}
+                                        :produces (set want)
+                                        :theta (:theta effect)
+                                        :theta-source (:source effect)
+                                        :predicted-effect effect
+                                        :status :interpretation-owed-after-selection}]))
                           slice-patterns))
             candidates
             (mapv (fn [i pattern]
@@ -327,7 +352,8 @@
                       :status :provisional
                       :pattern pattern
                       :attested? false
-                      :policy-limit provisional-policy-count}})
+                      :policy-limit provisional-policy-count
+                      :predicted-effect (get effects pattern)}})
                   (range) (take provisional-policy-count slice-patterns))]
        {:target target
        :cascade-problem

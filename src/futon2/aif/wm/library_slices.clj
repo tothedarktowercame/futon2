@@ -6,6 +6,21 @@
             [futon2.aif.selection-world :as world])
   (:import [java.time Instant]))
 
+(def slice-budget
+  "Declared query-time retrieval budget.  Ten is Q8's acceptance floor, not
+  a useful coverage budget; the existing interpretation retrievers already
+  use a 40-candidate embedding pool.  Taking the whole library would turn a
+  bounded query into 1436 candidates and 2872 minimum policies per census."
+  {:schema :wm/library-slice-budget-v1
+   :value 40
+   :unit :patterns-per-target
+   :source {:kind :existing-retriever-contract
+            :path "src/futon2/aif/interpretation_request.clj"
+            :setting :embedding-pool-k
+            :value 40}
+   :q8-minimum 10
+   :reason :reuse-established-retrieval-coverage-under-bounded-selection})
+
 (defn tokens [x]
   (set (re-seq #"[a-z][a-z0-9-]+" (str/lower-case (str x)))))
 
@@ -48,7 +63,8 @@
   "Return shared pin plus per-target slices/refusals. OPTIONS supplies an
   optional monotonic NANO-TIME-FN, MAX-MILLIS and K."
   [manifest target-queries {:keys [k max-millis nano-time-fn]
-                            :or {k 40 max-millis 30000 nano-time-fn #(System/nanoTime)}}]
+                            :or {k (:value slice-budget)
+                                 max-millis 30000 nano-time-fn #(System/nanoTime)}}]
   (let [started (nano-time-fn)
         over? #(> (/ (- (nano-time-fn) started) 1e6) max-millis)
         step (fn [{:keys [slices refusals exhausted?] :as acc} [target query]]
@@ -72,9 +88,11 @@
                             :slice-size (min k (:size manifest))
                             :library-size (:size manifest)
                             :library-manifest-digest (:digest manifest)
+                            :retrieval-budget (assoc slice-budget :effective-value k)
                             :slice-from-whole-library true})))]
     (assoc (reduce step {:slices {} :refusals {} :exhausted? false}
                    target-queries)
            :library-pin (dissoc manifest :patterns)
+           :slice-budget (assoc slice-budget :effective-value k)
            :elapsed-ms (/ (- (nano-time-fn) started) 1e6)
            :generated-at (str (Instant/now)))))

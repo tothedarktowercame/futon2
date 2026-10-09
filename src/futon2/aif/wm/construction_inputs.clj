@@ -41,6 +41,8 @@
   (assoc (cascade-problems/assemble input)
          :target-sources (vec (or (:target-sources input) []))
          :library-pin (:library-pin input)
+         :slice-budget (:slice-budget input)
+         :scoring-target-budget (:scoring-target-budget input)
          :retrieval-refusals (or (:retrieval-refusals input) {})
          :retrieval-timing (:retrieval-timing input)
          :target-construction-inputs

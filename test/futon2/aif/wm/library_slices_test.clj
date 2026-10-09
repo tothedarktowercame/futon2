@@ -18,6 +18,9 @@
     (is (= 12 (:library-size slice)))
     (is (true? (:slice-from-whole-library slice)))
     (is (= "library-digest" (:library-manifest-digest slice)))
+    (is (= 40 (get-in result [:slice-budget :value])))
+    (is (= 10 (get-in result [:slice-budget :effective-value])))
+    (is (= (:slice-budget result) (:retrieval-budget slice)))
     (is (= ["family/p0" "family/p1"]
            (mapv :pattern (take 2 (:candidates slice)))))))
 

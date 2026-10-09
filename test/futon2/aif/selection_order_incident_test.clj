@@ -8,6 +8,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.wm.cascade-decision :as decision]
             [futon2.aif.wm.construction-inputs :as inputs]
+            [futon2.aif.focus-receipt :as focus]
             [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def targets (mapv #(str "M-selection-order-" %) (range 5)))
@@ -24,7 +25,8 @@
   "Five open targets with query-time library candidates and deliberately no
    published target-specific interpretation.  :query-time-slices is the input
    the incident says must enter construction and assembly must retain it."
-  []
+  ([] (fixture-input library-slice))
+  ([slice-candidates]
   {:targets targets
    :sources
    {:universes (into {} (map (fn [t] [t {:work/open true :work/closed false}]) targets))
@@ -40,21 +42,41 @@
                     [t {:schema :wm/query-time-library-slice-v1
                         :target t
                         :query "close the target"
-                        :candidates library-slice
+                        :candidates slice-candidates
                         :failures []
                         :slice-size (count library-slice)
                         :library-size 100}])
                   targets))
     :horizon-steps 2
     :beta-by-context {:WM {:beta 1}}
-    :context-of (constantly :WM)}})
+    :context-of (constantly :WM)}}))
 
-(defn run-fixture []
-  (let [assembled (inputs/assemble-cascade-problems (fixture-input))]
+(defn run-fixture
+  ([] (run-fixture library-slice))
+  ([slice-candidates]
+  (let [assembled (inputs/assemble-cascade-problems (fixture-input slice-candidates))]
     {:assembled assembled
      :result (decision/cascade-decision
               assembled
-              {:ticket-queue ticket-queue/empty-declaration})}))
+              {:ticket-queue ticket-queue/empty-declaration
+               :focus-inputs
+               (assoc (focus/read-inputs)
+                      :relations
+                      (mapv (fn [target]
+                              {:target target :facet "WM" :relation "focus"
+                               :source {:repo "fixture" :commit "0" :path "test"
+                                        :section "fixture"}
+                               :effective-from "2026-01-01T00:00:00Z"})
+                            targets))})})))
+
+(defn compact-scores [result]
+  (let [cert (get-in result [:decision :selection-certificate])]
+    (mapv (fn [i c]
+            (merge {:target (get-in c [:id :target])
+                    :pattern (get-in c [:id :precedence 0 :id])
+                    :g (:g c)}
+                   (get-in cert [:scoring i :g-terms])))
+          (range) (:candidates cert))))
 
 (deftest ^:incident policy-set-is-not-one
   (let [{:keys [result]} (run-fixture)
@@ -85,3 +107,45 @@
           (str "chosen patterns need typed interpretation debt and must not be "
                "presented as attested; certificate="
                (pr-str (get-in result [:decision :selection-certificate])))))))
+
+(deftest ^:incident provisional-likelihood-makes-g-policy-dependent
+  (let [scores (compact-scores (:result (run-fixture)))
+        first-target (filter #(= (first targets) (:target %)) scores)]
+    (is (= 2 (count (set (map :g first-target))))
+        (str "provisional policies must not be a G tie: " (pr-str first-target)))
+    (is (every? pos? (map :ambiguity scores)))
+    (is (every? pos? (map :expected-information-gain scores)))))
+
+(deftest ^:incident policy-choice-is-invariant-to-slice-serialization-order
+  (let [forward (:result (run-fixture library-slice))
+        reversed (:result (run-fixture (vec (reverse library-slice))))
+        chosen (fn [r] [(get-in r [:decision :action :target])
+                        (get-in r [:decision :action :precedence 0 :id])])]
+    (is (= (chosen forward) (chosen reversed)))
+    (is (= (mapv #(select-keys % [:target :pattern :g]) (compact-scores forward))
+           (mapv #(select-keys % [:target :pattern :g]) (compact-scores reversed))))))
+
+(deftest ^:incident scoring-budget-never-silences-enumerated-targets
+  (let [assembled (assoc (inputs/assemble-cascade-problems (fixture-input))
+                         :scoring-target-budget
+                         {:schema :wm/scoring-target-budget-v1
+                          :target-limit 3 :basis :adversarial-fixture
+                          :enumerated-target-count 5})
+        result (decision/cascade-decision
+                assembled
+                {:ticket-queue ticket-queue/empty-declaration
+                 :focus-inputs
+                 (assoc (focus/read-inputs) :relations
+                        (mapv (fn [target]
+                                {:target target :facet "WM" :relation "focus"
+                                 :source {:repo "fixture" :commit "0" :path "test"
+                                          :section "fixture"}
+                                 :effective-from "2026-01-01T00:00:00Z"})
+                              targets))})
+        budget (get-in result [:decision :selection-certificate :scoring-target-budget])]
+    (is (= 5 (count (:problems assembled))) "all targets constructed before budgeting")
+    (is (= 6 (count (get-in result [:decision :selection-certificate :candidates]))))
+    (is (= 2 (count (:budget-exhausted-targets budget))))
+    (is (= 2 (count (filter #(and (= :scoring (:stage %))
+                                  (= :budget-exhausted (:reason %)))
+                            (:dropped-candidates result)))))))
