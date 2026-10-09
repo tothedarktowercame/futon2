@@ -52,20 +52,32 @@
         absent (previous-run/lookup tmp "2026-10-09-bbbb")]
     (is (= :absent (:status absent)))
     (is (= :previous-run-record-absent (:reason absent)))
-    (let [file (write-record! tmp "tick-run-record-2026-10-08-aaaa.edn"
+    (let [_ (write-record! tmp "tick-run-record-2026-10-08-aaaa.edn"
                               {:run/id "2026-10-08-aaaa"
                                :startedAt "2026-10-08T10:00:00Z"
-                               :decision {:chosen {:target "M-t"
-                                                   :precedence [:p1]}}
                                :terminal-receipt {:outcome :guardrail-refusal}
                                :world-at-selection
-                               {:selection-input-digest "d0"}})
+                               {:selection-input-digest "d0"}
+                               :decision {:chosen {:target "M-t"
+                                                   :precedence [:p1]}
+                                          :selection-certificate
+                                          {:focus-receipt
+                                           {:discovery
+                                            {:status :retained
+                                             :focus "WM"
+                                             :as-of "2026-10-08T10:00:00Z"
+                                             :retained-evidence-as-of
+                                             "2026-09-22T17:31:44Z"}}}}})
           carrier (previous-run/lookup tmp "2026-10-09-bbbb")]
       (is (= :present (:status carrier)))
       (is (= "2026-10-08-aaaa" (:run/id carrier)))
       (is (= {:status :present :target "M-t" :precedence [:p1]} (:choice carrier)))
       (is (= {:status :present :outcome :guardrail-refusal} (:outcome carrier)))
       (is (= {:status :present :digest "d0"} (:input-digest carrier)))
+      (is (= {:focus "WM"
+              :as-of "2026-10-08T10:00:00Z"
+              :retained-evidence-as-of "2026-09-22T17:31:44Z"}
+             (previous-run/focus-context carrier)))
       ;; the current run's own record is never its previous run
       (write-record! tmp "tick-run-record-2026-10-09-bbbb.edn"
                      {:run/id "2026-10-09-bbbb"})
@@ -78,7 +90,9 @@
         (is (= :present (:status empty)))
         (is (= :absent (get-in empty [:choice :status])))
         (is (= :absent (get-in empty [:outcome :status])))
-        (is (= :absent (get-in empty [:input-digest :status])))))))
+        (is (= :absent (get-in empty [:input-digest :status])))
+        (is (= :absent (get-in empty [:focus :status])))
+        (is (nil? (previous-run/focus-context empty)))))))
 
 (deftest lookup-orders-by-recorded-start-time-not-filename
   ;; Same-day run ids are random uuids: bbbb sorts after aaaa but STARTED
@@ -225,6 +239,20 @@
         {:keys [record]} (selection-run (constantly carrier))]
     (is (= carrier (:previous-run record)))
     (is (nil? (:q6-exclusion record)) "no exclusion without a Q6 trigger")))
+
+(deftest runner-binds-the-persisted-carrier-during-selection
+  (let [carrier (assoc (refusal-carrier "d-old"
+                                        {:target "M-old" :precedence [:old]})
+                       :focus {:status :present :focus "WM"
+                               :as-of "2026-10-08T12:00:00Z"
+                               :source :previous-run-focus-receipt})
+        seen (atom [])
+        judge (fn [_]
+                (swap! seen conj previous-run/*carrier*)
+                ((q6-aware-judge two-candidate-ranked) nil))]
+    (selection-run (constantly carrier) judge)
+    (is (seq @seen))
+    (is (every? #(= carrier %) @seen))))
 
 (deftest q6-repeat-excludes-the-pair-and-chooses-the-alternative
   (let [{:keys [record]} (selection-run)

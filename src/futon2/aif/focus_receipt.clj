@@ -356,7 +356,12 @@
                         (classify-target inputs discovery as-of target relation-context)))]
     {:schema :wm/focus-receipt-v1 :mode :record-only
      :inputs inputs :inputs-sha256 (identity/digest inputs)
-     :context {:as-of as-of :previous-focus previous-focus}
+     ;; Replay must retain both authorities used by the serving classifier.
+     ;; Dropping these made valid? rebuild candidates without the relation
+     ;; graph and turn recorded relations back into typed absences.
+     :context (cond-> {:as-of as-of :previous-focus previous-focus}
+                relation-context (assoc :relation-context relation-context)
+                classifications (assoc :classifications classifications))
      :rule (:rule inputs) :heads (:heads inputs) :discovery discovery
      :candidates (mapv (fn [c]
                          (let [t (:target (:id c))

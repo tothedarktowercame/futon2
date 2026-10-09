@@ -74,6 +74,33 @@
     (is (re-find #"Discovered focus: WM" (narrative/focus-text result)))
     (is (re-find #"M-expressions-of-interest/.* = unknown" (narrative/focus-text result)))))
 
+(deftest serving-relation-authority-is-retained-for-replay
+  (let [d {:selection-certificate
+           {:candidates [{:id {:target "M-example" :id :C1}}]}}
+        classification {:class :associated
+                        :relation {:relation :supports :focus "WM"}
+                        :derived-via {:kind :fixture-relation-authority}}
+        context {:as-of "2026-10-09T12:00:00Z"
+                 :previous-focus {:focus "WM" :as-of "2026-10-08T12:00:00Z"}
+                 :relation-context {:code-root "/fixture/code"
+                                    :ticket-dir "/fixture/tickets"
+                                    :findings-dir "/fixture/findings"}
+                 :classifications {"M-example" classification}}
+        selected (focus/attach d inputs context)
+        receipt (get-in selected [:selection-certificate :focus-receipt])]
+    (is (= (:relation-context context)
+           (get-in receipt [:context :relation-context])))
+    (is (= classification
+           (get-in receipt [:context :classifications "M-example"])))
+    (is (= (:relation classification)
+           (get-in receipt [:candidates 0 :relation])))
+    (is (focus/valid? selected receipt))
+    ;; Exact former defect: dropping the serving relation authorities makes
+    ;; replay classify from no graph and must no longer validate.
+    (is (not (focus/valid? selected
+                           (update receipt :context dissoc
+                                   :relation-context :classifications))))))
+
 (deftest receipt-is-attached-by-the-real-serving-selection
   (serving-fixture/with-two-ticks
    (fn [{:keys [first second]}]

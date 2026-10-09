@@ -95,6 +95,19 @@
       {:status :present :digest d}
       {:status :absent :reason :previous-run-selection-input-digest-absent})))
 
+(defn- previous-focus [record]
+  (let [discovery (get-in record [:decision :selection-certificate
+                                  :focus-receipt :discovery])]
+    (if (and (map? discovery)
+             (contains? #{:discovered :retained} (:status discovery))
+             (some? (:focus discovery)))
+      {:status :present
+       :focus (:focus discovery)
+       :as-of (:as-of discovery)
+       :retained-evidence-as-of (:retained-evidence-as-of discovery)
+       :source :previous-run-focus-receipt}
+      {:status :absent :reason :previous-run-focus-absent})))
+
 (defn carrier
   "The typed Q6 carrier for the run record found at FILE, or the typed
   absence when READ (from read-record) failed or FILE is nil."
@@ -114,7 +127,21 @@
              :startedAt (:startedAt record)
              :choice (previous-choice record)
              :outcome (previous-outcome record)
-             :input-digest (previous-digest record)})))
+             :input-digest (previous-digest record)
+             :focus (previous-focus record)})))
+
+(def ^:dynamic *carrier*
+  "The typed previous-run carrier bound while the runner asks selection to
+  decide. This is the same carrier persisted on the current run record."
+  nil)
+
+(defn focus-context
+  "The focus context retained by a present previous-run carrier, in the
+  shape focus-receipt/discover consumes. nil for every typed absence."
+  [carrier]
+  (when (= :present (get-in carrier [:focus :status]))
+    (select-keys (:focus carrier)
+                 [:focus :as-of :retained-evidence-as-of])))
 
 (defn lookup
   "Default carrier lookup for the runner: the run before CURRENT-RUN-ID in
