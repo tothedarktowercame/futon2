@@ -1348,6 +1348,43 @@
                 {:target target :kind :no-constructed-candidate
                  :missing (:missing-evidence target-decline)})}))
 
+(defn target-construction-census
+  "Truthful per-target construction facts from admitted PROBLEMS and the
+  certificate CANDIDATES.  A missing query-time carrier makes the census
+  typed-absent; partial pins make whole-library false."
+  [problems certificate-candidates]
+  (let [policy-counts (frequencies (keep (fn [p]
+                                           (or (:target p)
+                                               (get-in p [:id :target])))
+                                         certificate-candidates))
+        rows
+        (mapv (fn [{:keys [target query-time-slice cascade-problem]}]
+                (let [slice (or query-time-slice (:query-time-slice cascade-problem))
+                      pins (:library-pins slice)]
+                  {:target target
+                   :slice (mapv :pattern (:candidates slice))
+                   ;; The admitted operators, rather than every unjudged hit,
+                   ;; are the constructor's actual permission boundary.
+                   :pool (vec (keys (:interpretations cascade-problem)))
+                   :slice-from-whole-library
+                   (and (= :wm/query-time-library-slice-v1 (:schema slice))
+                        (pos-int? (:library-size slice))
+                        (= (:library-size slice) (count pins))
+                        (every? #(and (:id %) (:sha256 %) (:revision %)) pins))
+                   :library-size (:library-size slice)
+                   :policy-count (get policy-counts target 0)}))
+              problems)]
+    (if (and (seq problems)
+             (every? #(= :wm/query-time-library-slice-v1
+                         (get-in % [:query-time-slice :schema]))
+                     problems))
+      rows
+      {:status :absent :reason :query-time-construction-slice-not-recorded
+       :targets (mapv :target
+                      (remove #(= :wm/query-time-library-slice-v1
+                                  (get-in % [:query-time-slice :schema]))
+                              problems))})))
+
 (defn cascade-decision
   "Admit explicitly paired nonempty constructions, record every decline, then
   score/select only admitted candidates. An all-declined family abstains."
@@ -1386,7 +1423,11 @@
                              :initialized-beta (:initialized-beta previous-beta)
                              :model-id (:model-id previous-beta)}))
                  result)]
-    (cond-> (-> result
+    (let [construction-census
+          (target-construction-census
+           (:problems admitted)
+           (get-in result [:decision :selection-certificate :candidates]))]
+      (cond-> (-> result
                 ;; cascade-decision-admitted's own :dropped-candidates (when
                 ;; it ran a scored family) already carries this wrapper's
                 ;; assembly/admission declines PLUS any scoring-stage
@@ -1401,10 +1442,13 @@
                 (update :decision #(assoc % :live-c-coverage
                                            (or (:live-c-coverage %)
                                                {:status :absent :reason :no-admitted-cascade-problems}))))
+      true
+      (assoc-in [:decision :selection-certificate :target-construction]
+                construction-census)
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))
-      (assoc-in [:decision :reason] :no-acting-cascade-candidate))))
+        (assoc-in [:decision :reason] :no-acting-cascade-candidate)))))
 
 (defn select-and-record-cascade!
   "Select using the existing habit snapshot, without reinforcing the selection.

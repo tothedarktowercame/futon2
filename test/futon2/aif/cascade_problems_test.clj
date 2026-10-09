@@ -379,7 +379,7 @@
         printed (pr-str (mapv #(cp/assemble {:sources % :targets [target]}) variants))
         digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
                         (.getBytes printed "UTF-8"))]
-    (is (= "163ebd2771963294e582feb81266feffb990804fe8f1f07cfc5c22195158047c"
+    (is (= "b2744668a42503a6eada28a630c087a6c6cd7ac0fe80ae742786fce7eac9e562"
            (apply str (map #(format "%02x" %) digest))))
     (is (= (dissoc (get-in (cp/assemble {:sources s :targets [target]})
                            [:problems 0 :cascade-problem]) :precedences)
@@ -422,7 +422,7 @@
                     (get-in % [:cascade-problem :pattern-pool 0 :provenance]))
                 (:problems assembled)))))
 
-(deftest interpretation-backed-assembly-is-unchanged-by-slice-support
+(deftest interpretation-backed-assembly-retains-the-construction-slice
   (let [before (assemble* {:targets [target] :sources full-sources})
         with-unread-slice
         (assemble* {:targets [target]
@@ -431,4 +431,9 @@
                                         :target target :query "unused"
                                         :candidates [{:pattern :library/not-admitted}]
                                         :failures [] :slice-size 1 :library-size 1})})]
-    (is (= before with-unread-slice))))
+    (is (nil? (get-in before [:problems 0 :query-time-slice])))
+    (is (= :wm/query-time-library-slice-v1
+           (get-in with-unread-slice [:problems 0 :query-time-slice :schema])))
+    (is (= [:library/not-admitted]
+           (mapv :pattern (get-in with-unread-slice
+                                  [:problems 0 :cascade-problem :pattern-pool]))))))
