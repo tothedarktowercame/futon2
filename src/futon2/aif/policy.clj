@@ -68,15 +68,19 @@
    them the report card's cascade section."
   [x]
   (let [chosen (chosen-identities x)]
-    (letfn [(compact [v]
+    (letfn [(map-value [m wanted]
+              (some (fn [[k v]] (when (= wanted k) v)) m))
+            (compact [v]
               (cond
                 (map? v)
-                (if (= :cascade-candidate (:kind v))
-                  (if (contains? chosen [(:target v) (:id v)]) v (compact-candidate v))
-                  (persistent!
-                   (reduce-kv (fn [m k y]
-                                (assoc! m k (compact y)))
-                              (transient (empty v)) v)))
+                (if (= :cascade-candidate (map-value v :kind))
+                  (if (contains? chosen [(map-value v :target) (map-value v :id)])
+                    v (compact-candidate v))
+                  ;; Do not reuse a sorted map's comparator: production
+                  ;; certificates contain integer scoring keys alongside
+                  ;; keyword metadata, and rebuilding through an empty
+                  ;; PersistentTreeMap compares unlike key classes.
+                  (reduce-kv (fn [m k y] (assoc m k (compact y))) {} v))
                 (vector? v) (mapv compact v)
                 (set? v) (into (empty v) (map compact) v)
                 (seq? v) (doall (map compact v))
