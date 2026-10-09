@@ -1061,30 +1061,51 @@
               [ranked class-declines class-unknown-refusals]
               (let [target-q0
                     (fn [target]
-                      (let [states (filter (fn [[state _]]
-                                             (or (empty? state)
-                                                 ;; Production's continuation
-                                                 ;; carrier may still be the
-                                                 ;; unqualified token carrier;
-                                                 ;; retain that whole state for
-                                                 ;; each target, while the
-                                                 ;; qualified carrier partitions
-                                                 ;; exactly by target.
-                                                 (every? #(not (vector? %)) state)
-                                                 (every? #(= target (first %)) state)))
-                                           joint-q0)
-                            total (reduce + 0 (map second states))]
+                      (let [project (fn [state]
+                                     (into #{} (filter #(or (not (vector? %))
+                                                             (= target (first %)))
+                                                       state)))
+                            projected (reduce (fn [m [state mass]]
+                                                (update m (project state) (fnil + 0) mass))
+                                              {} joint-q0)
+                            total (reduce + 0 (vals projected))]
                         (when (pos? total)
-                          (into {} (map (fn [[state mass]] [state (/ mass total)])
-                                        states)))))
+                          (into {} (map (fn [[state mass]]
+                                          [state (/ (rationalize mass)
+                                                    (rationalize total))])
+                                        projected)))))
                     families (group-by :target joint-candidates)]
                 ;; Each target owns its state carrier.  Only the final
                 ;; concatenation is global; this removes the former
                 ;; cross-target powerset from every policy rollout.
                 (loop [remaining (seq families) ranked [] score-meta nil declines [] refused []]
                   (if-let [[target candidates] (first remaining)]
-                    (let [r (efe/rank-actions {:cascade-belief (target-q0 target)}
-                                               (vec candidates) rank-opts)]
+                    (let [q0 (target-q0 target)
+                          target-want (set (filter #(= target (first %)) joint-want))
+                          target-model (class-observation-model
+                                        {:universe
+                                         (set/union (set (mapcat identity (keys q0)))
+                                                    (set (mapcat (fn [c]
+                                                                   (mapcat (fn [p]
+                                                                             (concat (:produces p)
+                                                                                     (get-in p [:guard :needs])
+                                                                                     (get-in p [:guard :forbids])
+                                                                                     (mapcat (fn [cl]
+                                                                                               (concat (:present cl)
+                                                                                                       (:absent cl)))
+                                                                                             (get-in p [:guard :clauses]))))
+                                                                           (:precedence c)))
+                                                                 candidates)))
+                                         :acceptance target-want
+                                         :target-class {target (get-in class-model [:target-class target])}
+                                         :horizon T})
+                          target-opts (assoc rank-opts
+                                             :observation-model target-model
+                                             :cascade-spec
+                                             (assoc (:cascade-spec rank-opts)
+                                                    :want target-want))
+                          r (efe/rank-actions {:cascade-belief q0}
+                                              (vec candidates) target-opts)]
                       (if (and (map? r) (contains? r :status)
                                (= :class-unknown-no-scalar-g (:kind r)))
                         (let [target-declines (map (fn [c]
