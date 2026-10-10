@@ -1,5 +1,6 @@
 (ns futon2.aif.cascade-revision-producer-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-revision :as revision]
             [futon2.aif.cascade-revision-producer :as producer]
@@ -9,6 +10,9 @@
 (def target "M-hand")
 (def want :caller-converted)
 (def library-root (.getCanonicalPath (io/file "test/fixtures/want-interp-library")))
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 
 (def sources
   {:universes {target {:sites-enumerated true :one-producer true
@@ -36,7 +40,8 @@
              :sha256 "9771eca50e93c42de6b1ea22e188c770635d62830ca190f5ae4ca18056a069cd"}
     :reading "Transfer the caller-conversion function from the operator."
     :scope-limit "Only the identified caller conversion transfers."
-    :by "codex-test"}})
+    :by "codex-test"
+    :blend-square blend-square}})
 
 (def context
   {:target target

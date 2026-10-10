@@ -90,6 +90,25 @@ used without normal admission; the revised cascade is not compared with and
 linked to its predecessor; the enabled step is not enacted; or the Morning
 Briefing cannot reconstruct the refinement chain from durable receipts.
 
+2026-10-10 first durable exemplar: the existing reviewer-negative revision
+boundary now emits `:wm/open-cascade-refinement-v1`.  It compacts the existing
+receipts: blocker and library query/snapshot evidence; retained retrieval hits
+with selected/rejected disposition; selected existing pattern; prior and
+revised cascade identities; revised construction-receipt digest and admission;
+enabled pattern step; revision commit joined to enacted commit; outcome; and
+typed gaps.  Only `:retrieved-existing` is implemented.  `:authored-new` is
+typed absent as `:revision-producer-cannot-author-pattern`.  A missing or
+mismatched revised-to-enacted commit refuses the certificate.
+
+The certificate is attached to durable run/close data and the immutable
+Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
+prior/revised identities, admission, enabled/enacted step, outcome, and gaps.
+This slice remains runtime-only: current Lean declarations do not state the
+reviewer observation, retrieve/author branch, or prior→revised relation.  The
+future theorem must say an admitted refinement preserves the prior identity,
+produces a distinct admitted revised identity, and the enabled revised step is
+the step named by the enactment witness.  No 3/2 gate is weakened.
+
 This extends the already recorded property in `M-G-wm-wiring.md`: G applies
 to partial cascades, which are constructed progressively per problem.  The
 new requirement is that progressive construction remains live during the

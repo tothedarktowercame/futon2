@@ -129,6 +129,20 @@
                   :source-path (.getPath (io/file source))
                   :achievement {:build (when build {:present true})})
       (:failure item) (assoc :failure (select-keys (:failure item) [:kind :stage]))
+      (:open-cascade-refinement item)
+      (assoc :open-cascade-refinement
+             (let [r (:open-cascade-refinement item)]
+               {:status (:status r)
+                :blocker (select-keys (:blocker r) [:stage :kind])
+                :branch (:branch r)
+                :pattern (:pattern r)
+                :prior-identity (get-in r [:prior :identity])
+                :revised-identity (get-in r [:revised :identity])
+                :admission-verdict (get-in r [:revised :admission :status])
+                :enabled-step (get-in r [:enabled-step :pattern])
+                :enacted-step (get-in r [:enactment :enacted-commit])
+                :outcome (:outcome r)
+                :typed-gaps (:typed-gaps r)}))
       (:feature-card item) (assoc :feature-card
                                   (select-keys (:feature-card item)
                                                [:built :matches-intent?])))))

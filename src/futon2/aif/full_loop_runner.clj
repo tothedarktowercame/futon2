@@ -65,6 +65,7 @@
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
@@ -4863,9 +4864,11 @@
                                                     [:judgment :code-state])}
                                :discharge-contract
                                (discharge-contract repair-class)})))
-                       data (assoc data :effective-run-configuration @effective-configuration
-                                   :repair-obligation
-                                   (if admitted-verification? existing-finding finding))
+                       data (open-cascade-refinement/attach-to-run-data
+                             (assoc data :effective-run-configuration @effective-configuration
+                                    :repair-obligation
+                                    (if admitted-verification? existing-finding finding))
+                             outcome)
                        parked-transition
                        (when (and finding (not admitted-verification?))
                          (park-r16-stop-line! opts external-attempt-id finding))
@@ -4946,6 +4949,10 @@
 
                          (seq (:reviews data))
                          (assoc :reviews (:reviews data))
+
+                         (:open-cascade-refinement data)
+                         (assoc :open-cascade-refinement
+                                (:open-cascade-refinement data))
 
                          (and (#{:grounded-change :grounded-progress} outcome)
                               (:feature-card data))

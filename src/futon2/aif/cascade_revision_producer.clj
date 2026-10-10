@@ -173,6 +173,28 @@
                              :revision-query-source (:revision-query-source request)
                              :pattern (first (keys (:interpretation validated)))
                              :pattern-source (get-in validated [:receipt :source])
+                             :library-search
+                             {:status :recorded
+                              :snapshot {:query-source (:revision-query-source request)
+                                         :retrieval-sha256
+                                         (when (:retrieval request)
+                                           (evidence/value-digest (:retrieval request)))}
+                              :query-sha256 (evidence/value-digest
+                                             (select-keys request [:target :want :context :retrieval]))
+                              :considered
+                              (let [selected (first (keys (:interpretation validated)))
+                                    hits (mapcat :candidates (get-in request [:retrieval :runs]))]
+                                (if (seq hits)
+                                  (mapv (fn [hit]
+                                          (let [id (or (:pattern hit) (:id hit))]
+                                            {:pattern id
+                                             :disposition (if (= (str id) (str selected))
+                                                            :selected :rejected)
+                                             :reason (if (= (str id) (str selected))
+                                                       :admitted-reading
+                                                       :not-selected-by-interpreter)})) hits)
+                                  [{:status :absent
+                                    :reason :retriever-returned-no-retained-candidates}]))}
                              :admission :want-interpretation-validate-response
                              :construction :machine-constructed}}))))
           (catch Exception e
