@@ -381,6 +381,25 @@ Agency snapshots, registered evaluator function, and injected update relation;
 the adapter does not generate any of them.  This slice remains unwired and
 does not alter strict R14 behavior.
 
+Defect-17 executable-identity correction: evaluator and update-relation
+functions are no longer accepted as naked ID-to-function maps.  Each must be
+supplied through an explicit executable-registry entry whose sealed descriptor
+binds kind, executable ID, version, and the exact authorized implementation
+digest.  A separate terminal external registry job must reproduce that
+descriptor, and the injected function carries the descriptor digest as its
+registration token.  The law/update descriptor and executable registration
+are joined on all four fields; successful route and transition receipts retain
+the executable-registration digest.  Substitution under the same ID without a
+matching registration now refuses.  Transition-law falsifiers are reauthorized
+after mutation, so their epoch/ledger/evidence failures are semantic checks,
+not stale-envelope failures.
+
+This is the smallest honest Clojure TCB: the caller-supplied executable
+registry attests the mapping from a pinned source descriptor to a loaded
+function.  Clojure cannot prove that a function's semantics came from those
+bytes, and the adapter claims neither cryptographic code loading nor semantic
+correspondence.  The namespace remains unwired.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact

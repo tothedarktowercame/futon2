@@ -16,6 +16,7 @@
 (defn c [id content] (sut/seal {:id id :content content}))
 (def authority-id "prior-author")
 (def registry-id "law-registry")
+(def executable-registry-id "executable-registry")
 (def update-id "update-author")
 (defn terminal-job [job-id agent result]
   (let [j {:job-id job-id :agent-id agent :state "done" :result result}]
@@ -39,15 +40,24 @@
                                   {:schema :wm/prefix-f-bootstrap-prior-v1 :prior prior0})
          prior (sut/seal (assoc prior0 :authority (auth-ref prior-job0)))
          law0 {:id "law-1" :model "model-1" :version "v1" :authority "law-author"
-               :evaluator-id :fixture-evaluator :source-pin law-pin
+               :evaluator-id :fixture-evaluator :evaluator-version "v1" :source-pin law-pin
                :implementation-digest (:sha256 law-pin)}
          registry-job (terminal-job "registry-job" registry-id
                                     {:schema :wm/calibration-law-authorization-v1 :law law0})
          law (assoc law0 :registry-authority (auth-ref registry-job))
+         descriptor (sut/seal {:id "fixture-evaluator-registration"
+                               :kind :calibration-evaluator :executable-id :fixture-evaluator
+                               :version "v1" :implementation-digest (:sha256 law-pin)})
+         executable-job (terminal-job "evaluator-registry-job" executable-registry-id
+                                      {:schema :wm/executable-registry-authorization-v1
+                                       :descriptor descriptor})
+         executable (assoc (sut/registered-executable descriptor (fn [_] 1.25))
+                           :authority (auth-ref executable-job))
          context {:captured-sources captured
-                  :authority-jobs {"prior-job" prior-job0 "registry-job" registry-job}
+                  :authority-jobs {"prior-job" prior-job0 "registry-job" registry-job
+                                   "evaluator-registry-job" executable-job}
                   :law-registry {"law-1" law}
-                  :evaluators {:fixture-evaluator (fn [_] 1.25)}}]
+                  :executable-registry {:fixture-evaluator executable}}]
      {:request {:policy key :candidate cand :raw-records [] :bootstrap-prior prior
                 :scorer-authority "scorer"}
       :context context})))
@@ -65,6 +75,7 @@
         bootstrap (sut/evaluate! request context)
         empirical (sut/evaluate! (assoc request :raw-records [(step policy "1" 0.5)]) context)]
     (is (= [:bootstrap 1.25] [(:route bootstrap) (:f bootstrap)]))
+    (is (string? (get-in bootstrap [:law :executable-registration-digest])))
     (is (= [:empirical 0.5] [(:route empirical) (:f empirical)]))))
 
 (deftest bootstrap-refusals
@@ -83,10 +94,16 @@
     (is (= :authority-payload-mismatch
            (refusal request (assoc-in context [:law-registry "law-1" :evaluator-id]
                                       :substituted-evaluator))))
+    (is (= :executable-registration-mismatch
+           (refusal request (assoc-in context [:executable-registry :fixture-evaluator :executable]
+                                      (fn [_] -999.0)))))
     (is (= :supplied-f-forbidden
            (refusal (update request :bootstrap-prior #(reseal-prior (assoc % :supplied-f -999))) context)))
     (is (= :bootstrap-f-nonfinite
-           (refusal request (assoc-in context [:evaluators :fixture-evaluator] (fn [_] ##Inf)))))
+           (let [entry (get-in context [:executable-registry :fixture-evaluator])
+                 replacement (with-meta (fn [_] ##Inf) (meta (:executable entry)))]
+             (refusal request (assoc-in context [:executable-registry :fixture-evaluator :executable]
+                                        replacement)))))
     (doseq [k [:ledger :evidence]]
       (let [p (update (get request :bootstrap-prior) k #(sut/seal (assoc-in % [:content :stale] true)))]
         (is (= :authority-payload-mismatch
@@ -105,28 +122,55 @@
   (let [before (c "before" {:parameters {:a 1} :ledger-digest "l1" :epoch "e1" :evidence-id "old"})
         after (c "after" {:parameters {:a 1} :ledger-digest "l2" :epoch "e2"})
         new-evidence (c "new" {:occurrence "run-1"}) rule (c "rule" {:relation :fixture-update})
-        impl {:relation-id :fixture-update :source-pin update-pin :implementation-digest (:sha256 update-pin)}
+        impl {:relation-id :fixture-update :version "v1" :source-pin update-pin
+              :implementation-digest (:sha256 update-pin)}
         t0 {:before before :after after :new-evidence new-evidence :update-implementation impl
             :raw-records [(step policy "1" 0.5)] :policy policy :candidate candidate :update-rule rule}
         job (terminal-job "update-job" update-id
                           {:schema :wm/prefix-f-calibration-update-v1 :transition t0})
         t (assoc t0 :authority (auth-ref job))
-        ctx {:captured-sources captured :authority-jobs {"update-job" job}
-             :update-relations {:fixture-update (fn [_] true)} :scorer-authority "scorer"}]
+        descriptor (sut/seal {:id "fixture-update-registration"
+                              :kind :calibration-update-relation :executable-id :fixture-update
+                              :version "v1" :implementation-digest (:sha256 update-pin)})
+        registry-job (terminal-job "update-registry-job" executable-registry-id
+                                   {:schema :wm/executable-registry-authorization-v1
+                                    :descriptor descriptor})
+        executable (assoc (sut/registered-executable descriptor (fn [_] true))
+                          :authority (auth-ref registry-job))
+        ctx {:captured-sources captured
+             :authority-jobs {"update-job" job "update-registry-job" registry-job}
+             :executable-registry {:fixture-update executable} :scorer-authority "scorer"}]
     [t ctx]))
+(defn reauthorize-transition [t ctx]
+  (let [job (terminal-job "update-job" update-id
+                          {:schema :wm/prefix-f-calibration-update-v1
+                           :transition (dissoc t :authority)})]
+    [(assoc t :authority (auth-ref job)) (assoc-in ctx [:authority-jobs "update-job"] job)]))
 (defn transition-refusal [t ctx]
   (try (sut/validate-transition! t ctx) nil
        (catch clojure.lang.ExceptionInfo e (:prefix-f-cold-start/refusal (ex-data e)))))
 
 (deftest calibration-transition-falsifiers
   (let [[t ctx] (transition-fixture)]
-    (is (= :valid (:status (sut/validate-transition! t ctx))))
+    (let [validated (sut/validate-transition! t ctx)]
+      (is (= :valid (:status validated)))
+      (is (string? (:executable-registration-digest validated))))
     (is (= :epoch-not-advanced
-           (transition-refusal (update t :after #(sut/seal (assoc-in % [:content :epoch] "e1"))) ctx)))
+           (let [[t* ctx*] (reauthorize-transition
+                            (update t :after #(sut/seal (assoc-in % [:content :epoch] "e1"))) ctx)]
+             (transition-refusal t* ctx*))))
     (is (= :ledger-not-advanced
-           (transition-refusal (update t :after #(sut/seal (assoc-in % [:content :ledger-digest] "l1"))) ctx)))
+           (let [[t* ctx*] (reauthorize-transition
+                            (update t :after #(sut/seal (assoc-in % [:content :ledger-digest] "l1"))) ctx)]
+             (transition-refusal t* ctx*))))
     (is (= :old-evidence-reused
-           (transition-refusal (assoc t :new-evidence (c "old" {:occurrence "run-1"})) ctx)))))
+           (let [[t* ctx*] (reauthorize-transition
+                            (assoc t :new-evidence (c "old" {:occurrence "run-1"})) ctx)]
+             (transition-refusal t* ctx*))))
+    (is (= :executable-registration-mismatch
+           (transition-refusal
+            t
+            (assoc-in ctx [:executable-registry :fixture-update :executable] (fn [_] true)))))))
 
 (deftest multiple-policy-route-value-alignment
   (let [a (fixture candidate) b (fixture candidate2)

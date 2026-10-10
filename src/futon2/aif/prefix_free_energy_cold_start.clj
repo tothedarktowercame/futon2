@@ -29,6 +29,28 @@
     (need! (= expected (:result job)) :authority-payload-mismatch path)
     job))
 
+(defn registered-executable
+  "Creates the caller-attested executable object consumed by this unwired adapter.
+  Metadata is an identity token, not proof that the function implements the bytes."
+  [descriptor f]
+  {:descriptor descriptor
+   :executable (with-meta f {:wm/executable-registration-digest (:digest descriptor)})})
+
+(defn- executable!
+  [kind id version implementation-digest registry authority-jobs path]
+  (let [{:keys [descriptor executable authority]} (get registry id)]
+    (carrier! descriptor (conj path :descriptor))
+    (need! (= {:kind kind :executable-id id :version version :implementation-digest implementation-digest}
+              (select-keys descriptor [:kind :executable-id :version :implementation-digest]))
+           :executable-descriptor-mismatch (conj path :descriptor))
+    (need! (fn? executable) :executable-unavailable (conj path :executable))
+    (need! (= (:digest descriptor) (:wm/executable-registration-digest (meta executable)))
+           :executable-registration-mismatch (conj path :executable))
+    (job! authority authority-jobs
+          {:schema :wm/executable-registry-authorization-v1 :descriptor descriptor}
+          (conj path :authority))
+    {:fn executable :registration-digest (:digest descriptor)}))
+
 (defn- empirical [policy raw-records candidate]
   (if (empty? raw-records)
     {:kind :unseen}
@@ -45,7 +67,7 @@
 
 (defn evaluate!
   [{:keys [policy candidate raw-records bootstrap-prior scorer-authority]}
-   {:keys [captured-sources authority-jobs law-registry evaluators]}]
+   {:keys [captured-sources authority-jobs law-registry executable-registry]}]
   (need! (= policy (admission/candidate-key candidate)) :policy-key-mismatch [:policy])
   (let [assessment (empirical policy raw-records candidate)]
     (case (:kind assessment)
@@ -85,20 +107,23 @@
         (job! (:authority bootstrap-prior) authority-jobs
               {:schema :wm/prefix-f-bootstrap-prior-v1
                :prior (dissoc bootstrap-prior :authority :digest)} [:bootstrap-prior :authority])
-        (let [eval-fn (get evaluators (:evaluator-id law))]
-          (need! (fn? eval-fn) :calibration-evaluator-unavailable [:calibration-law :evaluator-id])
-          (let [f (eval-fn {:parameters (:parameters bootstrap-prior)
-                            :distribution (:distribution bootstrap-prior)
-                            :evidence (:evidence bootstrap-prior)})]
-            (need! (finite? f) :bootstrap-f-nonfinite [:calibration-law :evaluation])
-            {:schema :wm/prefix-f-route-v1 :policy policy :route :bootstrap :f (double f)
-             :law {:id law-id :model (:model law) :version (:version law)
-                   :implementation-digest (:implementation-digest law)}
-             :prior-digest (:digest bootstrap-prior)})))))))
+        (let [{eval-fn :fn registration-digest :registration-digest}
+              (executable! :calibration-evaluator (:evaluator-id law) (:evaluator-version law)
+                           (:implementation-digest law) executable-registry authority-jobs
+                           [:calibration-law :evaluator])
+              f (eval-fn {:parameters (:parameters bootstrap-prior)
+                          :distribution (:distribution bootstrap-prior)
+                          :evidence (:evidence bootstrap-prior)})]
+          (need! (finite? f) :bootstrap-f-nonfinite [:calibration-law :evaluation])
+          {:schema :wm/prefix-f-route-v1 :policy policy :route :bootstrap :f (double f)
+           :law {:id law-id :model (:model law) :version (:version law)
+                 :implementation-digest (:implementation-digest law)
+                 :executable-registration-digest registration-digest}
+           :prior-digest (:digest bootstrap-prior)}))))))
 
 (defn validate-transition!
   [{:keys [before after new-evidence authority update-implementation raw-records policy candidate update-rule] :as t}
-   {:keys [captured-sources authority-jobs update-relations scorer-authority]}]
+   {:keys [captured-sources authority-jobs executable-registry scorer-authority]}]
   (doseq [[k v] [[:before before] [:after after] [:new-evidence new-evidence]
                  [:update-rule update-rule]]] (carrier! v [k]))
   (need! (not= (:id new-evidence) (get-in before [:content :evidence-id])) :old-evidence-reused [:new-evidence])
@@ -113,12 +138,15 @@
   (need! (not= scorer-authority (:authority authority)) :self-authored-update [:authority])
   (job! authority authority-jobs
         {:schema :wm/prefix-f-calibration-update-v1 :transition (dissoc t :authority)} [:authority])
-  (let [relation (get update-relations (:relation-id update-implementation))]
-    (need! (fn? relation) :update-relation-unavailable [:update-implementation :relation-id])
+  (let [{relation :fn registration-digest :registration-digest}
+        (executable! :calibration-update-relation (:relation-id update-implementation)
+                     (:version update-implementation) (:implementation-digest update-implementation)
+                     executable-registry authority-jobs [:update-implementation :relation])]
     (need! (true? (relation {:before before :after after :new-evidence new-evidence
                              :raw-records raw-records :policy policy :update-rule update-rule}))
-           :update-relation-refused [:update-implementation]))
-  (assoc t :schema :wm/prefix-f-calibration-transition-v1 :status :valid))
+           :update-relation-refused [:update-implementation])
+    (assoc t :schema :wm/prefix-f-calibration-transition-v1 :status :valid
+           :executable-registration-digest registration-digest)))
 
 (defn evaluate-menu! [requests context]
   (mapv (fn [request]
