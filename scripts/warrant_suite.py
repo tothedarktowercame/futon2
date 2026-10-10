@@ -15,7 +15,7 @@ For each namespace under test/:
 Usage:
   scripts/warrant_suite.py              # check all, rerun only stale ones
   scripts/warrant_suite.py --dry-run    # report fresh/stale, run nothing
-  scripts/warrant_suite.py -j 3 NS...   # limit to named namespaces
+  scripts/warrant_suite.py -j 1 NS...   # limit to named namespaces
 
 Index: data/test-warrants/index.json  {ns: {"entry-id", "git-head", ...}}.
 Checks go to the serving JVM's /api/alpha/test-registry/check; runs go to
@@ -126,7 +126,12 @@ def run(ns, test_path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-j", type=int, default=3)
+    # Each worker launches a registry JVM which launches the test JVM.  A
+    # serial default is deliberate: on the production host, parallel cold JVM
+    # startup can exhaust native threads/memory and masquerade as test failure.
+    ap.add_argument("-j", type=int, default=1)
+    ap.add_argument("--check-j", type=int, default=16,
+                    help="parallel serving-JVM warrant checks (default: 16)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("ns", nargs="*")
     a = ap.parse_args()
@@ -135,26 +140,39 @@ def main():
         nss = {k: v for k, v in nss.items() if k in a.ns}
     index = json.loads(INDEX.read_text()) if INDEX.exists() else {}
 
-    def one(ns):
+    def inspect(ns):
         entry = index.get(ns)
         if entry and entry.get("entry-id"):
             c = check(entry)
             if c.get("warrant?") is True:
                 return ns, "fresh", entry
-            if a.dry_run:
-                return ns, "stale:" + str(c.get("reason")), entry
-        elif a.dry_run:
-            return ns, "stale:no-warrant", entry
+            return ns, "stale:" + str(c.get("reason")), entry
+        return ns, "stale:no-warrant", entry
+
+    def execute(ns):
         new = run(ns, nss[ns])
+        if not new.get("entry-id") or new.get("error"):
+            return ns, "error", new
         return ns, ("minted" if new["warrant?"] else "failed"), new
 
     tally = {}
+    with ThreadPoolExecutor(max_workers=a.check_j) as pool:
+        inspected = list(f.result() for f in as_completed(
+                         [pool.submit(inspect, ns) for ns in nss]))
+
+    fresh = [row for row in inspected if row[1] == "fresh"]
+    stale = [row[0] for row in inspected if row[1] != "fresh"]
+
     def results():
+        yield from fresh
+        if a.dry_run:
+            yield from (row for row in inspected if row[1] != "fresh")
+            return
         with ThreadPoolExecutor(max_workers=a.j) as pool:
             yield from (f.result() for f in as_completed(
-                [pool.submit(one, ns) for ns in nss if ns not in SERIAL]))
-        for ns in sorted(n for n in nss if n in SERIAL):
-            yield one(ns)
+                        [pool.submit(execute, ns) for ns in stale if ns not in SERIAL]))
+        for ns in sorted(n for n in stale if n in SERIAL):
+            yield execute(ns)
 
     for ns, status, entry in results():
         if True:
@@ -167,6 +185,8 @@ def main():
                   entry.get("results") if entry and status == "failed" else "",
                   flush=True)
     print(json.dumps(tally), flush=True)
+    if tally.get("error"):
+        return 2
     return 1 if tally.get("failed") else 0
 
 
