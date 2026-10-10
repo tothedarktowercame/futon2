@@ -42,12 +42,17 @@
 (def matching-pattern-use
   {:schema sut/pattern-use-schema :status :verified :pattern :p/new
    :action-sha256 (identity/digest revised-action)
-   :source {:authority :reviewed-pattern-application}})
+   :artifact-commit "bbb2222"
+   :pattern-source {:path "patterns/p-new.md" :sha256 "source-pin"}
+   :application-claims [{:path "src/example.clj" :evidence "changed guarded branch"}]
+   :reviewer {:verdict :approve :job-id "review-job"}
+   :observation-sha256 "observation-digest"})
 
 (deftest matching-observed-use-is-durable-and-briefable
-  (let [cert (sut/certificate {:revision (fixture-revision revised-action "bbb2222")
+  (let [revision (assoc (fixture-revision revised-action "bbb2222")
+                        :pattern-use-observation matching-pattern-use)
+        cert (sut/certificate {:revision revision
                                :artifact-commit "bbb2222"
-                               :pattern-use matching-pattern-use
                                :outcome {:status :recorded :value :grounded-change}})
         summary (brief/item-summary "/fixture/item.edn"
                                     {:attempt-id "attempt-r" :outcome :grounded-change
@@ -65,6 +70,10 @@
     (is (= {:id :p/new} (get-in summary [:open-cascade-refinement :dispatched-step])))
     (is (= "bbb2222" (get-in summary [:open-cascade-refinement :artifact-commit])))
     (is (= :verified (get-in summary [:open-cascade-refinement :pattern-use-status])))
+    (is (= "review-job"
+           (get-in summary [:open-cascade-refinement :pattern-use-reviewer :job-id])))
+    (is (= "observation-digest"
+           (get-in summary [:open-cascade-refinement :pattern-use-observation-sha256])))
     (is (= [] (get-in summary [:open-cascade-refinement :typed-gaps])))))
 
 (deftest same-commit-with-different-dispatched-action-refuses

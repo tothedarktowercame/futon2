@@ -66,6 +66,7 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
+            [futon2.aif.revision-pattern-use :as revision-pattern-use]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
@@ -3020,6 +3021,13 @@
        "Address the findings without widening scope. Preserve existing history: "
        "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
        "or otherwise replace prior commits. Run the repository-required gates.\n"
+       "Report pattern application on one exact EDN line: "
+       revision-pattern-use/author-marker
+       " {:schema :wm/revision-pattern-application-claim-v1 "
+       ":pattern <pattern-id> :dispatched-action-sha256 <digest> "
+       ":artifact-commit <sha> :loci [{:path <changed-path> "
+       ":evidence <specific checkable application>}]} . "
+       "The values must describe the dispatched construction above and the new commit. "
        "Finish with FULL_LOOP_AUTHOR: DONE <new-commit-sha> and list validations. "
         "If no safe correction is possible, make no commit and finish with "
         "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
@@ -3043,6 +3051,8 @@
                             [:job-id :state :artifact-ref
                              :repo-observed-artifact-ref
                              :result-summary :execution])) "\n"
+       "AUTHOR PATTERN APPLICATION CLAIM: "
+       (pr-str (revision-pattern-use/author-claim (job-text revision-author-job))) "\n"
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings remain in force: "
               (pr-str (prompt-findings stop-lines)) "\n"))
@@ -3055,7 +3065,14 @@
        "FULL_LOOP_REVIEW: APPROVE\n"
        "or FULL_LOOP_REVIEW: REQUEST_CHANGES <reason>\n"
        "or FULL_LOOP_REVIEW: REJECT <reason>\n"
-       "You may add FULL_LOOP_REVIEWER_NOTE: <short note> on a second line."))
+       "Then independently verify the structured author application against the "
+       "amendment delta and dispatched construction. Emit one exact EDN line: "
+       revision-pattern-use/reviewer-marker
+       " {:schema :wm/revision-pattern-application-review-v1 :verdict :verified "
+       ":pattern <pattern-id> :dispatched-action-sha256 <digest> "
+       ":artifact-commit <sha> :loci-sha256 <digest-of-author-loci>} . "
+       "Omit it or use :verdict :refused when the application is not independently checkable. "
+       "You may add FULL_LOOP_REVIEWER_NOTE: <short note>."))
 
 (def ^:private commit-ish-pattern
   "A git object name: 7-40 hex digits. Short refs are normal here — an Agency
@@ -3271,7 +3288,18 @@
               (assoc revision-dispatch-base :evidence
                      {:boundary :revision-author-contract
                       :author-job (:job-id revision-author-job)
-                      :reviewer-job (:job-id re-review-job)})]
+                      :reviewer-job (:job-id re-review-job)})
+              pattern-use-observation
+              (revision-pattern-use/observation
+               {:author-text (job-text revision-author-job)
+                :reviewer-text (job-text re-review-job)
+                :pattern (get-in cascade-revision-result [:proposal-production :pattern])
+                :pattern-source (get-in cascade-revision-result
+                                        [:proposal-production :pattern-source])
+                :action-sha256 (:dispatched-action-sha256 action-dispatch)
+                :artifact-commit revision-commit
+                :reviewer-job-id (:job-id re-review-job)
+                :reviewer-verdict (review-verdict re-review-job)})]
         {:commit revision-commit
          :repo (:repo revision-build)
          :files (:files revision-build)
@@ -3285,6 +3313,7 @@
                     :author-job (:job-id revision-author-job)
                     :cascade-revision cascade-revision-result
                     :selection-dispatch action-dispatch
+                    :pattern-use-observation pattern-use-observation
                     :artifact-binding {:commit revision-commit}
                     :review (second reviews)}})))))
 

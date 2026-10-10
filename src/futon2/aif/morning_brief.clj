@@ -147,7 +147,12 @@
                 :artifact-commit (get-in r [:artifact :observed-commit])
                 :artifact-linked? (get-in r [:artifact :linked?])
                 :pattern-use-status (get-in r [:pattern-use :status])
-                :pattern-use-source (get-in r [:pattern-use :source])
+                :pattern-use-pattern (get-in r [:pattern-use :pattern])
+                :pattern-use-source (get-in r [:pattern-use :pattern-source])
+                :pattern-use-claims (get-in r [:pattern-use :application-claims])
+                :pattern-use-reviewer (get-in r [:pattern-use :reviewer])
+                :pattern-use-observation-sha256
+                (get-in r [:pattern-use :observation-sha256])
                 :outcome (:outcome r)
                 :typed-gaps (:typed-gaps r)}))
       (:feature-card item) (assoc :feature-card

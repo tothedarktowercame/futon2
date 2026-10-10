@@ -126,6 +126,21 @@ producer is a reviewer-verified pattern-application observation in the
 revision return/result receipt, retained through close.  Prompt inclusion,
 approval, commit existence, and grounded change are not substitutes.
 
+2026-10-10 producer slice: the revision protocol now requires an exact
+`WM_REVISION_PATTERN_APPLICATION:` EDN block from the author, containing the
+retrieved pattern, dispatched-action digest, amendment commit, and nonempty
+checkable artifact loci.  The re-review prompt carries that structured claim;
+the independent reviewer must inspect the delta and return an exact
+`WM_REVISION_PATTERN_VERIFICATION:` EDN block binding the same pattern, action,
+commit, and loci digest.  `revision-pattern-use/observation` accepts no prose
+guessing: absent/malformed blocks are typed absent, and any pattern, action,
+artifact, loci, or verdict mismatch is typed refused.  A verified observation
+retains the source pin, concrete claims, approving reviewer job identity, and
+its own digest as `:wm/revision-pattern-use-observation-v1` inside revision
+data.  The close/run certificate and Morning Brief preserve and expose it.
+Thus author assertion alone remains `:dispatched`; only the matching independent
+review reaches `:verified-used`.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
