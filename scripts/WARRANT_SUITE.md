@@ -24,6 +24,8 @@ warrants.
 
 Registry authority is
 `/home/joe/code/storage/test-registry/warrant-index.sqlite`; immutable logs are
-in `/home/joe/code/storage/registry-ledger`. The local
-`data/test-warrants/index.json` only maps namespaces to registry entry IDs and
-may be rebuilt by running the script.
+in `/home/joe/code/storage/registry-ledger`. The namespace-to-entry cache is
+`/home/joe/code/storage/test-registry/futon2-suite/index.json`; it is registry
+bookkeeping, deliberately outside futon2's guarded production-data tree. On
+first use the script seeds it from the legacy `data/test-warrants/index.json`
+when present, without changing or deleting the legacy file.
