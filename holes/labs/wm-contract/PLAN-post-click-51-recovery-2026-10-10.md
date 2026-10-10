@@ -956,6 +956,30 @@ or weaken an existing definition merely to accommodate current Clojure.
   and the selected-revised-to-enacted identity/close receipt.  No production
   path was broadened in this audit.
 
+- 2026-10-10, Q8 incremental-frontier disposition (Joe-approved): Q8's
+  current breadth clauses are incompatible with the target-local architecture.
+  Requiring half of enumerated tasks to reach cascade scoring and two cascade
+  policies per open task recreates the rejected all-target cross-product.  The
+  replacement separates two certificates.  A durable task-frontier entry binds
+  one task to its ranking observation, ranking-law/version, dependency set and
+  evidence digest.  A world delta invalidates exactly entries whose declared
+  dependencies intersect the changed observations (plus added/removed tasks);
+  unaffected entries retain their prior evidence and comparison key.  Selection
+  may use the retained frontier without global reindexing, but must refuse if a
+  stale relevant entry could participate in the winner comparison.  The outer
+  receipt names retained, invalidated, recomputed, added and removed entries and
+  proves coverage of the current open-task set.  Separately, the selected
+  target's canonical cascade certificate proves an exact identity bijection
+  between constructed, admitted, scored and posterior policies, with multiple
+  policies required only when multiple admissible cascades exist.  Q1 remains
+  responsible for complete open-task enumeration; cascade G remains exclusively
+  target-local.  Required falsifiers are: an unchanged dependency spuriously
+  invalidated; a changed dependency retained; an affected/new task omitted; a
+  removed task selectable; selection with an unresolved stale contender; and
+  any constructed/scored/posterior identity mismatch.  This is deliberately a
+  Q8 specification replacement, not a relabelling of the historical 343-target
+  experiment.  Lean and runtime carriers remain to be implemented.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
