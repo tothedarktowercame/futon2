@@ -48,7 +48,7 @@
 (defn agency-result-digest [job]
   (evidence/value-digest (dissoc job :result-digest)))
 
-(defn- authority! [authority authority-results path]
+(defn- authority! [authority authority-results judgment-index judgment path]
   (require! (map? authority) :authority-invalid path)
   (let [job (get authority-results (:job-id authority))]
     (require! (map? job) :authority-job-unresolved path)
@@ -59,10 +59,15 @@
               :authority-result-mismatch path)
     (require! (= (:result-digest job) (agency-result-digest job))
               :authority-result-digest-mismatch path)
+    (require! (= :wm/open-cascade-pattern-judgments-v1 (get-in job [:result :schema]))
+              :authority-result-schema-invalid (conj path :result))
+    (require! (= (dissoc judgment :authority)
+                 (get-in job [:result :judgments judgment-index]))
+              :authority-judgment-mismatch path)
     ;; Trust boundary: an immutable caller-supplied Agency snapshot, not a signature.
     job))
 
-(defn- legacy-receipt! [pattern source-pin receipt path]
+(defn- legacy-receipt! [pattern source-pin source-bytes receipt path]
   ;; This is the existing find-receipt carrier: structured antecedent plus an
   ;; authored-text/edge citation. A score or naked boolean cannot project.
   (require! (map? receipt) :legacy-receipt-unprojectable path)
@@ -78,12 +83,15 @@
                     :legacy-receipt-source-mismatch (conj path :citation :path))
           (require! (= (:sha256 source-pin) (:sha256 citation))
                     :legacy-receipt-source-mismatch (conj path :citation :sha256))
-          (require! (and (vector? (:lines citation)) (= 2 (count (:lines citation)))
-                         (every? pos-int? (:lines citation)) (nonblank? (:quote citation)))
-                    :legacy-receipt-unprojectable (conj path :citation)))
+          (let [[a b :as span] (:lines citation)
+                lines (vec (str/split-lines (String. ^bytes source-bytes "UTF-8")))]
+            (require! (and (vector? span) (= 2 (count span))
+                           (pos-int? a) (pos-int? b) (<= a b (count lines)))
+                      :legacy-receipt-span-invalid (conj path :citation :lines))
+            (require! (= (str/join "\n" (subvec lines (dec a) b)) (:quote citation))
+                      :legacy-receipt-quote-mismatch (conj path :citation :quote))))
       :authored-edges
-      (require! (vector? (:tail citation)) :legacy-receipt-unprojectable
-                (conj path :citation :tail))
+      (refuse! :authored-edge-carrier-unavailable (conj path :citation))
       (refuse! :legacy-receipt-unprojectable (conj path :citation :kind))))
   {:pattern pattern :receipt receipt})
 
@@ -131,7 +139,7 @@
                 (map-indexed
                  (fn [i j]
                    (let [path [:judgments i] pin (get-in member-by-id [(:pattern j) :source-pin])]
-                     (authority! (:authority j) authority-results (conj path :authority))
+                     (authority! (:authority j) authority-results i j (conj path :authority))
                      (require! (not= (get-in j [:authority :id])
                                      (get-in r [:search-implementation :id]))
                                :judgment-self-authority (conj path :authority))
@@ -142,6 +150,7 @@
                      (case (:verdict j)
                        :admissible [(:pattern j)
                                     (legacy-receipt! (:pattern j) pin
+                                                     (get captured-sources [(:path pin) (:revision pin)])
                                                      (get-in j [:evidence :legacy-receipt])
                                                      (conj path :evidence :legacy-receipt))]
                        :rejected (do (require! (nonblank? (get-in j [:evidence :reason]))

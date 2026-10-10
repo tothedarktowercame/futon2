@@ -15,27 +15,31 @@
 (defn carrier [id content]
   (let [c {:id id :content content}]
     (assoc c :digest (evidence/value-digest c))))
+(defn legacy [id]
+  {:if true :route :structured-antecedent :warrant {:file (:path (pin id))}
+   :citation {:kind :pattern-text :path (:path (pin id)) :sha256 (:sha256 (pin id))
+              :lines [3 3] :quote "  authored"}})
+(defn bare-judgment [id verdict]
+  {:pattern id :verdict verdict
+   :evidence (cond-> {:source-pin (pin id)}
+               (= verdict :admissible) (assoc :legacy-receipt (legacy id))
+               (= verdict :rejected) (assoc :reason "not applicable"))})
 (def reviewer-job
   (let [j {:job-id "review-job-1" :agent-id "reviewer-1" :state "done"
-           :result {:schema :wm/external-pattern-judgments-v1 :patterns [:fixture/a :fixture/b]}}]
+           :result {:schema :wm/open-cascade-pattern-judgments-v1
+                    :judgments [(bare-judgment :fixture/a :admissible)
+                                (bare-judgment :fixture/b :rejected)]}}]
     (assoc j :result-digest (sut/agency-result-digest j))))
 (def context {:captured-sources captured-sources
               :authority-results {"review-job-1" reviewer-job}})
 (def authority {:id "reviewer-1" :job-id "review-job-1"
                 :result-digest (:result-digest reviewer-job)})
-(defn legacy [id]
-  {:if true :route :structured-antecedent :warrant {:file (:path (pin id))}
-   :citation {:kind :pattern-text :path (:path (pin id)) :sha256 (:sha256 (pin id))
-              :lines [1 1] :quote "authored"}})
 (defn repository [ids]
   (let [r {:identity "library" :version "r1"
            :members (mapv (fn [id] {:id id :source-pin (pin id)}) ids)}]
     (assoc r :digest (sut/repository-digest r))))
 (defn judgment [id verdict]
-  {:pattern id :authority authority :verdict verdict
-   :evidence (cond-> {:source-pin (pin id)}
-               (= verdict :admissible) (assoc :legacy-receipt (legacy id))
-               (= verdict :rejected) (assoc :reason "not applicable"))})
+  (assoc (bare-judgment id verdict) :authority authority))
 (defn base
   ([] (base :bounded))
   ([scope]
@@ -54,6 +58,14 @@
             :repository-global-absence nil}]
      (sut/seal r))))
 (defn reseal [r] (sut/seal (dissoc r :receipt-digest :projection)))
+(defn authorize [r]
+  (let [bare (mapv #(dissoc % :authority) (:judgments r))
+        job (let [j {:job-id "review-job-1" :agent-id "reviewer-1" :state "done"
+                     :result {:schema :wm/open-cascade-pattern-judgments-v1 :judgments bare}}]
+              (assoc j :result-digest (sut/agency-result-digest j)))
+        auth {:id "reviewer-1" :job-id "review-job-1" :result-digest (:result-digest job)}]
+    [(reseal (update r :judgments #(mapv (fn [j] (assoc j :authority auth)) %)))
+     {:captured-sources captured-sources :authority-results {"review-job-1" job}}]))
 (defn refusal
   ([r] (refusal r context))
   ([r ctx] (try (sut/validate! r ctx) nil
@@ -101,7 +113,25 @@
            (refusal (base) (assoc context :authority-results {"review-job-1" tampered})))))
   (let [r (assoc (base) :search-implementation
                  (carrier "reviewer-1" {:name "captured-search" :version 1}))]
-    (is (= :judgment-self-authority (refusal (reseal r))))))
+    (is (= :judgment-self-authority (refusal (reseal r)))))
+  (doseq [r [(assoc-in (base) [:judgments 0 :verdict] :rejected)
+             (assoc-in (base) [:judgments 1 :evidence :reason] "invented reason")
+             (assoc-in (base) [:judgments 0 :evidence :legacy-receipt :citation :quote] "invented")]]
+    (is (= :authority-judgment-mismatch (refusal (reseal r))))))
+
+(deftest projected-citation-is-checked-against-resolved-bytes
+  (doseq [[mutation expected]
+          [[#(assoc-in % [:judgments 0 :evidence :legacy-receipt :citation :quote] "wrong")
+            :legacy-receipt-quote-mismatch]
+           [#(assoc-in % [:judgments 0 :evidence :legacy-receipt :citation :lines] [4 4])
+            :legacy-receipt-span-invalid]
+           [#(assoc-in % [:judgments 0 :evidence :legacy-receipt :citation :lines] [3 2])
+            :legacy-receipt-span-invalid]
+           [#(assoc-in % [:judgments 0 :evidence :legacy-receipt :citation]
+                       {:kind :authored-edges :tail []})
+            :authored-edge-carrier-unavailable]]]
+    (let [[r ctx] (authorize (mutation (base)))]
+      (is (= expected (refusal r ctx))))))
 
 (deftest judgment-authority-and-priority-falsifiers
   (is (= :judgment-coverage-or-order-mismatch (refusal (reseal (update (base) :judgments pop)))))
@@ -111,23 +141,23 @@
          (refusal (reseal (assoc (base) :priority [:fixture/a :fixture/a :fixture/b])))))
   (is (= :chosen-not-first-admissible
          (refusal (reseal (assoc-in (base) [:result :pattern] :fixture/b)))))
-  (is (= :chosen-not-first-admissible
-         (refusal (reseal (-> (base)
-                              (assoc-in [:judgments 0] (judgment :fixture/a :rejected))
-                              (assoc-in [:result :pattern] :fixture/a))))))
+  (let [[r ctx] (authorize (-> (base)
+                               (assoc-in [:judgments 0] (judgment :fixture/a :rejected))
+                               (assoc-in [:result :pattern] :fixture/a)))]
+    (is (= :chosen-not-first-admissible (refusal r ctx))))
   (is (= :no-match-has-admissible-member
          (refusal (reseal (assoc (base) :result {:kind :no-admissible-match})))))
-  (is (= :legacy-receipt-unprojectable
-         (refusal (reseal (assoc-in (base) [:judgments 0 :evidence :legacy-receipt] nil))))))
+  (let [[r ctx] (authorize (assoc-in (base) [:judgments 0 :evidence :legacy-receipt] nil))]
+    (is (= :legacy-receipt-unprojectable (refusal r ctx)))))
 
 (deftest no-match-and-bounded-global-absence
-  (let [r (-> (base :complete)
-              (assoc :judgments [(judgment :fixture/a :rejected) (judgment :fixture/b :rejected)]
-                     :result {:kind :no-admissible-match}
-                     :repository-global-absence :no-pattern-addresses-this-tension)
-              reseal)]
+  (let [[r ctx] (authorize
+                 (-> (base :complete)
+                     (assoc :judgments [(judgment :fixture/a :rejected) (judgment :fixture/b :rejected)]
+                            :result {:kind :no-admissible-match}
+                            :repository-global-absence :no-pattern-addresses-this-tension)))]
     (is (= :no-pattern-addresses-this-tension
-           (get-in (sut/validate! r context) [:projection :repository-global-absence]))))
+           (get-in (sut/validate! r ctx) [:projection :repository-global-absence]))))
   (is (= :bounded-global-absence-forbidden
          (refusal (reseal (assoc (base) :repository-global-absence
                                  :no-pattern-addresses-this-tension))))))

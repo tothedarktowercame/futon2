@@ -246,9 +246,9 @@ judgment.  It is intentionally absent from the runner and revision flow.
 | bounded limitation/subset | `[:domain :limitation/:members]` | nonblank limitation, unique repository subset |
 | query/blocker/prior cascade | `[:query]`, `[:blocker]`, `[:prior-cascade]` | retained content plus ID; digest recomputed over both |
 | external judgment coverage/order | `[:judgments]` | exactly one judgment per domain member in domain order |
-| authority separation | `[:judgments i :authority]`, `[:search-implementation]` | authority job/agent/result digest must join a separately supplied terminal Agency result snapshot; authority agent differs from the content-bound search implementation identity |
+| authority separation and authorship | `[:judgments i :authority]`, `[:search-implementation]` | authority job/agent/result digest must join a separately supplied terminal Agency result whose versioned structured output contains the exact ordered judgment (verdict and evidence included); authority agent differs from the content-bound search implementation identity |
 | admissible/rejected evidence | `[:judgments i :verdict/:evidence]` | typed verdict, nonempty evidence, exact member source pin; rejection reason required |
-| evidence-derived F11 receipt | `[:judgments i :evidence :legacy-receipt]` | admissible evidence must carry the existing structured-antecedent/warrant/citation carrier, with citation bound to the member source pin |
+| evidence-derived F11 receipt | `[:judgments i :evidence :legacy-receipt]` | admissible evidence must carry the existing structured-antecedent/warrant/citation carrier; pattern-text citation path/hash and exact 1-based inclusive line quote are checked against resolved bytes; authored-edge projection is refused until a pinned graph carrier exists |
 | priority order and `Nodup` | `[:priority]` | unique vector whose set exactly covers the domain |
 | first-admissible choice/no-match | `[:result]` | chosen ID is first admissible in priority; no-match has no admissible judgment |
 | complete versus bounded absence | `[:repository-global-absence]` | required only for complete no-match and forbidden for bounded scope |
@@ -274,11 +274,22 @@ content and hash the `{id, content}` carrier rather than accepting a digest-
 shaped string.
 
 Each judgment names an agent, job, and result digest which must join the
-external terminal snapshot; the snapshot's digest is independently recomputed.
+external terminal snapshot; the snapshot's digest is independently recomputed,
+and its `:wm/open-cascade-pattern-judgments-v1` output must reproduce the
+receipt's complete ordered judgment payload.  A terminal job that merely names
+candidate patterns is not authorship evidence.  Changing a verdict, rejection
+reason, or projected legacy evidence while retaining the old job now refuses.
 This is an immutability/join boundary over the caller-supplied Agency record,
 not cryptographic signing or proof that Agency's agent made a semantically
 correct judgment.  Production wiring must supply these already-retained inputs;
 this namespace still neither reads Agency nor generates a judgment.
+
+Pattern-text projection uses newline-normalized (`split-lines`) UTF-8 source
+bytes and exact 1-based inclusive spans; the cited quote must equal those lines
+joined by `\n`.  The former fixture's `[1 1]`/`"authored"` citation was false
+(line 1 is the `@flexiarg` declaration) and is corrected to the exact authored
+line.  `:authored-edges` is typed refused as
+`:authored-edge-carrier-unavailable` rather than accepting an unverified tail.
 
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
