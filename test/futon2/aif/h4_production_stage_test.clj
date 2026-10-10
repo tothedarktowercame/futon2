@@ -11,23 +11,20 @@
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
-(deftest actual-production-decision-records-missing-prefix
+(deftest actual-production-decision-refuses-missing-prefix
   (stores/with-store
    (fn [path]
      (with-redefs [habit/default-path path task/default-root (str path "-missing-task-store")]
        (let [assembled (problems/assemble
                         {:targets [fixture/tick-1-target]
                          :sources (locators/locate-all fixture/tick-1-sources)})
-             result (wm-cd/cascade-decision assembled (assoc fixture/live-c-opts :cascade-habit-path path))
-             cs (get-in result [:decision :selection-certificate :candidates])]
-         (is (seq cs) (pr-str result))
-         (doseq [c cs]
-           (is (= :not-supplied (:f-status c)))
-           (is (nil? (:f c)))
-           (is (= (:id c) (get-in c [:f-prefix :policy])))
-           ;; F1c-I: admission ran and found no flight records; that is the
-           ;; typed absence, and no dependency is pending
-           (is (= :no-flight-records (get-in c [:f-prefix :reason])))
-           (is (nil? (get-in c [:f-prefix :pending-dependency]))))
-         (println "H4-PRODUCTION-DECISION-TEMP-STORES-NO-CLICK"
-                  (pr-str (mapv #(select-keys % [:id :f :f-status :f-prefix]) cs))))))))
+             refusal (try
+                       (wm-cd/cascade-decision
+                        assembled (assoc fixture/live-c-opts :cascade-habit-path path))
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+         (is (= :free-energy-not-supplied
+                (get-in refusal [:refusal :kind])))
+         (is (= 3 (get-in refusal [:refusal :detail :n-candidates])))
+         (is (= 3 (get-in refusal [:refusal :detail :n-without-f])))
+         (is (= 3 (count (get-in refusal [:refusal :detail :candidate-ids])))))))))

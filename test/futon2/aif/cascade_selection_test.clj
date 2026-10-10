@@ -161,26 +161,18 @@
            (cs/law-receipt [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied :g 1.0}
                             {:id :c2 :habit 1.0 :f 0.5 :f-status :attached :g 2.0}])))))
 
-(deftest law-receipt-arithmetic-unchanged
-  (testing "ARITHMETIC-UNCHANGED CONTROL: on the all-absent field the posterior
-            and the Bayes action are BYTE-IDENTICAL to what the pre-change code
-            produced. Pre-change the omitted term scored exactly like a supplied
-            F = 0.0 (both contribute 0.0), so the absent-F field must equal the
-            existing :f 0.0 fixture number for number. Catches: any diff that
-            moved the law's arithmetic while adding the receipt."
+(deftest absent-f-refuses-the-posterior
+  (testing "PrefixFreeEnergyPosterior: no admitted steps is absence, never F=0"
     (let [absent-field [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied :g 1.0}
                         {:id :c2 :habit 1.0 :f nil :f-status :not-supplied :g 2.0}]
           supplied-zero [{:id :c1 :habit 1.0 :f 0.0 :f-status :attached :g 1.0}
                          {:id :c2 :habit 1.0 :f 0.0 :f-status :attached :g 2.0}]
-          post-absent (cs/selection-posterior {:beta 1.0 :candidates absent-field})
+          refusal (try (cs/selection-posterior {:beta 1.0 :candidates absent-field})
+                       nil (catch clojure.lang.ExceptionInfo e (ex-data e)))
           post-zero (cs/selection-posterior {:beta 1.0 :candidates supplied-zero})]
-      (is (= post-zero post-absent))
-      (is (= (cs/bayes-choice post-zero {:c1 :a :c2 :b})
-             (cs/bayes-choice post-absent {:c1 :a :c2 :b})))
-      ;; and the numbers themselves are the pinned fixture values, not NaN
-      (is (< (abs (- (/ (get post-absent :c2) (get post-absent :c1))
-                     (Math/exp -1.0)))
-             tol)))))
+      (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind])))
+      (is (= [:c1 :c2] (get-in refusal [:refusal :detail :candidate-ids])))
+      (is (= 1.0 (reduce + (vals post-zero)))))))
 
 (deftest g-term-decomposition-f-absent-says-omitted-from-law
   (testing "the decomposition's F term says :status :absent :reason

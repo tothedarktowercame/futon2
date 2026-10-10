@@ -91,3 +91,11 @@ writer keeps the gate closed.
   record shape, this removes one reporting-induced absence while leaving the
   seven substantive failures visible: two reviewer-falsifier refusals and
   five missing policy-prefix F carriers.  No Lean change is required.
+
+- 2026-10-10, selected-policy F correspondence: the runtime no longer runs a
+  reduced `sigma(log E - gamma G)` law when a menu policy has no admitted
+  prefix F.  It now returns typed `:free-energy-not-supplied`, naming every
+  affected policy, as `Proof2/PrefixFreeEnergyPosterior.lean` requires.
+  Contradictory prefixes retain zero weight.  This repairs the false posterior
+  rather than relabelling the five missing carriers; producing sufficient
+  policy-grain history remains an operational prerequisite for selection.

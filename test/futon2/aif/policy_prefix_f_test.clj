@@ -77,25 +77,26 @@
    :path "p" :sha256 "h"})
 
 (deftest the-tick-selects-with-its-f-term
-  (let [base (tick-decision {})
-        cands (sort-by :id (keys (get-in base [:selection-law :posterior])))
+  (let [missing (try (tick-decision {}) nil
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
+        cands (sort-by :id (get-in missing [:refusal :detail :candidate-ids]))
         [c1 c2 c3] cands
-        with (tick-decision {:conditioning-steps {:steps [(steps-for c1 1.0) (steps-for c2 0.5)] :read [] :unread []}})
-        pb (get-in base [:selection-law :posterior])
-        pw (into {} (map (fn [[c v]] [(:id c) v]) (get-in with [:selection-law :posterior])))
-        pb (into {} (map (fn [[c v]] [(:id c) v]) pb))]
+        with (tick-decision {:conditioning-steps
+                             {:steps [(steps-for c1 1.0)
+                                      (steps-for c2 0.5)
+                                      (steps-for c3 0.0)]
+                              :read [] :unread []}})
+        pw (into {} (map (fn [[c v]] [(:id c) v])
+                         (get-in with [:selection-law :posterior])))]
     (is (= 3 (count cands)))
+    (is (= :free-energy-not-supplied (get-in missing [:refusal :kind])))
     (testing "the posterior moves, in the direction F dictates, by exactly exp(-dF)"
-      (is (not= (pr-str pb) (pr-str pw)))
-      (is (< (get pw (:id c1)) (get pw (:id c2)) (get pw (:id c3))) "higher F, lower weight; no F (not supplied) is the -F = 0 term")
+      (is (< (get pw (:id c1)) (get pw (:id c2)) (get pw (:id c3)))
+          "higher F, lower weight")
       (is (< (Math/abs (- (/ (get pw (:id c2)) (get pw (:id c1))) (Math/exp 0.5))) 1e-12))
       (is (< (Math/abs (- (/ (get pw (:id c3)) (get pw (:id c2))) (Math/exp 0.5))) 1e-12)))
     (testing "the certificate says which candidates' F was computed"
       (let [fs (into {} (map (fn [c] [(let [i (:id c)] (if (map? i) (:id i) i)) (:f-status c)]) (get-in with [:selection-certificate :candidates])))]
         (is (= :computed (get fs (:id c1))))
         (is (= :computed (get fs (:id c2))))
-        (is (= :not-supplied (get fs (:id c3))))))
-    (testing "with no steps the posterior is today's (no admitted prefix anywhere)"
-      (let [today (with-redefs [adm/prefixes (constantly nil)] (tick-decision {}))]
-        (is (= (pr-str (get-in today [:selection-law :posterior]))
-               (pr-str (get-in base [:selection-law :posterior]))))))))
+        (is (= :computed (get fs (:id c3))))))))

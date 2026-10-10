@@ -68,6 +68,8 @@
    Refuses with typed outcomes:
    - :invalid-temperature  — β not a positive number (PolicyPrecision: β > 0).
    - :invalid-habit        — any candidate's :habit not a positive number.
+   - :free-energy-not-supplied — at least one menu policy has no admitted
+     observed prefix (PrefixFreeEnergyPosterior.machineWeightsAtPrefixF).
    - :no-admissible-candidate — no candidates, or all have G = :infinite
      (the posterior normaliser would be 0)."
   [{:keys [beta candidates]}]
@@ -89,6 +91,16 @@
                   (nil? f)
                   (and (number? f) (Double/isFinite (double f))))
         (refuse! :invalid-free-energy {:id (:id c) :f f}))))
+  ;; PrefixFreeEnergyPosterior.machineWeightsAtPrefixF is an Except: a menu
+  ;; policy with no admitted history makes the weights absent.  Earlier code
+  ;; silently omitted -F (numerically substituting the same contribution as
+  ;; F=0), which is precisely the false carrier the Lean model forbids.
+  (let [without-f (filterv #(= :not-supplied (:f-status %)) candidates)]
+    (when (seq without-f)
+      (refuse! :free-energy-not-supplied
+               {:candidate-ids (mapv :id without-f)
+                :n-candidates (count candidates)
+                :n-without-f (count without-f)})))
   (let [;; WM-06 C-4 (2026-09-18): a numeric ##Inf G is EReal ⊤ arriving as a
         ;; double, not as the :infinite keyword — the same hole the F fix
         ;; above closed one field over. rank-cascade-actions attaches ##Inf
@@ -108,8 +120,7 @@
                 :n-infinite (count infinite)}))
     (let [scores (mapv (fn [c]
                          (+ (math/log (double (:habit c)))
-                            ;; Missing prefix contributes no term, not a measured F=0.
-                            (if (= :not-supplied (:f-status c)) 0.0 (- (double (:f c))))
+                            (- (double (:f c)))
                             (- (/ (double (:g c)) (double beta)))))
                        finite)
           lse (log-sum-exp scores)
