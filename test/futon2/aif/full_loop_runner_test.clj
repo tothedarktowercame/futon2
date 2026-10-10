@@ -6624,3 +6624,31 @@
         (do (is (= :unknown (get-in @sent [:harness :kind])))
             (is (string? (get-in @sent [:harness :reason])))
             (is (not (contains? (:harness @sent) :execution-id))))))))
+
+(deftest a-woken-seat-is-read-again-until-its-wake-settles
+  ;; D28 (2026-10-10 14:00, codex-23): the roster re-read right after the
+  ;; readiness wake still showed the wake's own job ("invoking"), and the
+  ;; click was refused :busy.
+  (let [reads (atom 0)
+        roster-fn (fn [_]
+                    (let [n (swap! reads inc)]
+                      {:codex-23 {:invoke-ready? true
+                                  :status (cond (= 1 n) "restored"
+                                                (< n 4) "invoking"
+                                                :else "idle")}}))
+        r (runner/agent-readiness! {:agency-base "http://test" :roster-fn roster-fn
+                                    :wake-agent-fn (fn [& _] nil)
+                                    :readiness-poll-ms 1}
+                                   "codex-23")]
+    (is (= :woken (:readiness/wake-result r)))
+    (is (= 4 @reads)))
+  (testing "bounded: a seat that never settles is reported, not waited on forever"
+    (let [r (runner/agent-readiness!
+             {:agency-base "http://test"
+              :roster-fn (let [n (atom 0)]
+                           (fn [_] {:codex-23 {:invoke-ready? true
+                                               :status (if (= 1 (swap! n inc)) "restored" "invoking")}}))
+              :wake-agent-fn (fn [& _] nil)
+              :readiness-poll-ms 1 :readiness-settle-ms 30}
+             "codex-23")]
+      (is (= :no-reply (:readiness/wake-result r))))))
