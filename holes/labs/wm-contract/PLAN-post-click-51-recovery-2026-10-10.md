@@ -359,6 +359,28 @@ implementation bytes or an equivalent immutable digest, then supplies the
 corresponding evaluator.  No such runtime registry or producer is claimed by
 this Lean-only correction.
 
+2026-10-10 unwired cold-start correspondence (defect 17):
+`futon2.aif.prefix-free-energy-cold-start` is a pure adapter; no selection or
+runner namespace references it.
+
+| Lean carrier/law | Clojure carrier/check |
+|---|---|
+| complete `PolicyKey` | `:policy`, checked against `policy-prefix-admission/candidate-key` |
+| `assessEmpirical` unseen/coherent/malformed/contradiction | raw-record vector is tested for literal absence before `admit`; any present foreign/refused/chain-broken record is malformed; admitted nonempty history is passed through existing `policy-prefix-evidence/prefix-f`; contradiction refuses |
+| `BootstrapPrior` exact identity | sealed `:wm/prefix-f-bootstrap-prior-v1`, binding policy key, law ID/model/version, parameter/distribution/evidence/ledger/update-rule carriers, epoch, rationale, and external authority job payload |
+| `CalibrationLaw` identity and authorization | registered descriptor with ID/model/version/authority/evaluator ID and captured implementation path/revision/SHA; registry authority terminal job must reproduce the descriptor |
+| evaluator-derived finite F | evaluator is injected by registered ID and run over retained parameters/distribution/evidence; no `:supplied-f` field is permitted; nonnumeric and infinite results refuse |
+| route precedence | coherent empirical history returns `:empirical` and never validates/uses bootstrap; bootstrap is consulted only when raw records are literally empty |
+| posterior route/value alignment | `evaluate-menu!` evaluates each distinct policy once and retains its policy, route, and that same F value in order |
+| `ValidCalibrationTransition` | separately validated before/after parameter-ledger-epoch carriers, new evidence, external authority job payload, captured update implementation, and injected authorized update relation |
+| epoch/ledger/evidence advancement | unchanged epoch, unchanged ledger digest, or reuse of prior evidence identity refuses; parameter equality remains allowed |
+
+All carrier, source-byte, and terminal-job result digests are recomputed.  The
+trust boundary remains the caller-supplied captured revision bytes, immutable
+Agency snapshots, registered evaluator function, and injected update relation;
+the adapter does not generate any of them.  This slice remains unwired and
+does not alter strict R14 behavior.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
