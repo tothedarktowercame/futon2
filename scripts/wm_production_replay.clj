@@ -150,8 +150,6 @@
                :surprise-root data-root
                :trace-dir trace-dir
                :phase-log-fn #(swap! events conj %)
-               :repair-open-fn (constantly [])
-               :previous-run-fn (fn [& _] nil)
                :refresh-fn (fn [] {:outcome :ok :source :offline-replay})
                :substrate-preflight-fn (fn [_] {:route :offline-replay})
                :roster-fn (fn [_] {:offline-author {:status "idle" :invoke-ready? true}
@@ -178,7 +176,9 @@
                                :execution {:executed false :reason :offline-production-replay}})}
         base-opts (cond-> base-opts
                     (not live-selection?)
-                    (assoc :judge-fn (fn [_] {:judgement judgement})))
+                    (assoc :judge-fn (fn [_] {:judgement judgement})
+                           :repair-open-fn (constantly [])
+                           :previous-run-fn (fn [& _] nil)))
         defaults (runtime/production-defaults base-opts)
         opts (merge defaults base-opts)]
     (binding [runner/*runtime-defaults* defaults]

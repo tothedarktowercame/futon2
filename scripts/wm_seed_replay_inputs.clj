@@ -67,10 +67,15 @@
       manifest)))
 
 (defn -main [& args]
-  (let [[source destination] args]
-    (when-not (and source destination)
-      (throw (ex-info "Usage: SOURCE-DATA-ROOT DESTINATION" {})))
-    (pp/pprint (seed! source destination))))
+  (try
+    (let [[source destination] args]
+      (when-not (and source destination)
+        (throw (ex-info "Usage: SOURCE-DATA-ROOT DESTINATION" {})))
+      (pp/pprint (seed! source destination)))
+    (finally
+      ;; clojure.java.shell uses agent thread pools, which otherwise keep this
+      ;; one-shot pre-JVM snapshot process alive after the copy is complete.
+      (shutdown-agents))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
