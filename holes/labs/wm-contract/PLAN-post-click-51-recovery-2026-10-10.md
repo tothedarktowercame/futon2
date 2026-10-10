@@ -75,3 +75,12 @@ writer keeps the gate closed.
   carriers are recorded for that policy.  This is an honest Q4 failure and
   removes the later 5,413-term/16-policy contradiction.  Q7 and Q8
   correspondence work remains open.
+
+- 2026-10-10, item 3/Q7 correspondence: repaired `pathAbsenceCount` to walk
+  the enacted candidate and its selection-to-terminal receipts, or the typed
+  abstention carrier when no action was chosen.  It no longer walks rejected
+  candidates or population-wide certificate diagnostics.  On the real
+  2026-10-05 record this changes the count from 65 to 8.  All eight remaining
+  absences belong to the selected candidate/receipt path and therefore remain
+  honest Q7 failures rather than being waived.  Q8 correspondence remains
+  open, as does repair of the eight selected-path absences.

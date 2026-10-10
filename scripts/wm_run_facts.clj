@@ -85,16 +85,57 @@
 (def absence-statuses #{:absent :not-supplied :missing :refused :failed
                         "absent" "not-supplied" "missing" "refused" "failed"})
 
-(defn absence-paths
-  "Count one typed absence/refusal map per path, only below the persisted
-  selection-to-receipt roots named here."
+(defn- selected-candidate
+  "Return the certificate row for the enacted target/cascade.  Candidate ids
+  are action maps in older records and plain ids in newer ones, so require the
+  target and, when present, the local candidate id and precedence."
   [record]
-  (let [roots [[:world-at-selection :failures] [:decision] [:selection-event]
-               [:interpretation-ask] [:terminal-receipt] [:failure]]]
+  (let [chosen (get-in record [:decision :chosen])
+        candidates (get-in record [:decision :selection-certificate :candidates])
+        target (:target chosen)
+        local-id (or (:candidate chosen) (:id chosen))
+        precedence (:precedence chosen)]
+    (when (and (map? chosen) (sequential? candidates))
+      (first
+       (filter
+        (fn [candidate]
+          (let [id (:id candidate)
+                candidate-target (or (:target candidate) (:target id))
+                candidate-id (or (:candidate candidate) (:candidate id)
+                                 (when-not (map? id) id) (:id id))
+                raw-precedence (or (:precedence candidate) (:precedence id))
+                candidate-precedence
+                (when raw-precedence
+                  (mapv #(if (map? %) (:id %) %) raw-precedence))]
+            (and (= target candidate-target)
+                 (or (nil? local-id) (= local-id candidate-id))
+                 (or (nil? precedence) (= precedence candidate-precedence)))))
+        candidates)))))
+
+(defn absence-paths
+  "Count typed absences/refusals on the enacted selection-to-receipt path.
+
+  The selection certificate retains rejected candidates and population-wide
+  diagnostics.  Those are evidence about alternatives, not nodes on the
+  enacted path, and must not inflate Q7.  A selected run therefore contributes
+  its chosen summary and matching candidate only.  An abstention contributes
+  its abstention carrier instead."
+  [record]
+  (let [chosen (get-in record [:decision :chosen])
+        candidate (selected-candidate record)
+        abstention (get-in record [:decision :abstention])
+        roots (cond-> [[[:selection-event] (:selection-event record)]
+                       [[:interpretation-ask] (:interpretation-ask record)]
+                       [[:terminal-receipt] (:terminal-receipt record)]
+                       [[:failure] (:failure record)]]
+                (map? chosen) (conj [[:decision :chosen] chosen])
+                candidate (conj [[:decision :selected-candidate] candidate])
+                (and (not (map? chosen)) abstention)
+                (conj [[:decision :abstention] abstention]))]
     (vec
      (mapcat
-      (fn [root]
-        (when-let [x (get-in record root)]
+      (fn [[root x]]
+        (when (some? x)
           (for [[p _] (paths-with x
                           #(and (map? %)
                                 (or (contains? absence-statuses (:status %))

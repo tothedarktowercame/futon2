@@ -16,7 +16,7 @@
 
 (deftest typed-not-supplied-increments-absence-count
   (let [base (facts/facts-for-record record "r" snap nil nil)
-        planted (assoc-in record [:decision :selection-certificate :f]
+        planted (assoc-in record [:terminal-receipt :f]
                           {:status :not-supplied :reason :plant})
         changed (facts/facts-for-record planted "r" snap nil nil)]
     (is (= (inc (get-in base [:facts "pathAbsenceCount"]))
@@ -91,3 +91,33 @@
     (doseq [field ["gTerms" "policiesWithRiskTerm"
                    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"]]
       (is (contains? (f field) "not-recomputable") field))))
+
+(deftest q7-counts-only-the-enacted-candidate-and-receipt-path
+  (let [chosen {:target "M-selected" :candidate :C1
+                :precedence [:pattern/selected]}
+        selected {:id {:target "M-selected" :candidate :C1
+                       :precedence [:pattern/selected]}
+                  :selected-input {:status :absent}}
+        rejected {:id {:target "M-rejected" :candidate :C2
+                       :precedence [:pattern/rejected]}
+                  :large-alternative-tree
+                  [{:status :absent} {:outcome :failed} {:kind :typed-refusal}]}
+        r {:decision {:chosen chosen
+                      :selection-certificate {:candidates [rejected selected]
+                                              :parameter-novelty
+                                              (repeat 100 {:status :absent})}}
+           :selection-event {:status :ok}
+           :terminal-receipt {:review {:outcome :refused}}}]
+    (is (= [[:terminal-receipt :review]
+            [:decision :selected-candidate :selected-input]]
+           (facts/absence-paths r)))))
+
+(deftest q7-counts-the-abstention-path-when-nothing-was-chosen
+  (let [r {:decision {:chosen nil
+                      :abstention {:kind :typed-refusal
+                                   :reason {:status :missing}}
+                      :selection-certificate
+                      {:candidates [{:status :absent}]}}}]
+    (is (= [[:decision :abstention]
+            [:decision :abstention :reason]]
+           (facts/absence-paths r)))))
