@@ -18,7 +18,8 @@
 
   It runs at the wm-build-loop's end-of-session stop (`wm-build-loop.sh`,
   `bulletin()`), not on a timer and not as a daemon."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -223,11 +224,12 @@
            (mapcat (fn [f]
                      (with-open [r (java.io.PushbackReader. (io/reader f))]
                        (loop [records []]
-                         (let [record (edn/read {:eof ::eof
-                                                :default (fn [tag value]
-                                                           {:trace/edn-tag tag
-                                                            :trace/value value})}
-                                               r)]
+                         (let [record (durable-hydrate/hydrate
+                                       (edn/read {:eof ::eof
+                                                  :default (fn [tag value]
+                                                             {:trace/edn-tag tag
+                                                              :trace/value value})}
+                                                 r))]
                            (if (= ::eof record)
                              records
                              (recur

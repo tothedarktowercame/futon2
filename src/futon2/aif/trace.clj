@@ -46,7 +46,8 @@
    stamp (git sha + dirty flag, the resolved mode/flag set, and
    `trace-schema-version`). Present-only; see `wm-version-stamp` /
    `wm-version-of`."
-  (:require [futon2.aif.accumulation-bmr :as accumulation-bmr]
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [futon2.aif.accumulation-bmr :as accumulation-bmr]
             [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -875,7 +876,7 @@
       (with-open [rdr (io/reader f)
                   pbr (PushbackReader. rdr)]
         (loop [out []]
-          (let [next-val (try (edn/read opts pbr)
+          (let [next-val (try (durable-hydrate/hydrate (edn/read opts pbr))
                               (catch Exception _ ::skip))]
             (cond
               (= ::eof next-val) out
@@ -938,7 +939,7 @@
       (with-open [r (PushbackReader. (io/reader file))]
         (loop [records [] index 1]
           (let [item (try
-                       (let [value (edn/read {:eof eof} r)]
+                       (let [value (durable-hydrate/hydrate (edn/read {:eof eof} r))]
                          (if (or (identical? eof value) (map? value))
                            {:value value}
                            (throw (ex-info "Trace record is not a map" {}))))
