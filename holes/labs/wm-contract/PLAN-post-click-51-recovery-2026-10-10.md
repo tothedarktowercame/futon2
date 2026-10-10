@@ -241,12 +241,12 @@ judgment.  It is intentionally absent from the runner and revision flow.
 | Lean field/law | Clojure receipt path | Validator check |
 |---|---|---|
 | `PinnedPatternRepository.identity/version/digest` | `[:repository :identity/:version/:digest]` | nonblank identity/version; digest recomputed over the ordered carrier |
-| repository members and `nodup` | `[:repository :members]` (`:id`, `:source-pin`) | ordered vector, unique IDs, path/revision/SHA-256 pins |
+| repository members and `nodup` | `[:repository :members]` (`:id`, `:source-pin`) | ordered vector and unique IDs; every path/revision resolves in the separately supplied captured-source map and SHA-256 matches those bytes |
 | `SearchDomainScope.complete` equality | `[:domain {:scope :complete :members ...}]` | exact ordered equality with repository IDs |
 | bounded limitation/subset | `[:domain :limitation/:members]` | nonblank limitation, unique repository subset |
-| query/blocker/prior cascade | `[:query]`, `[:blocker]`, `[:prior-cascade]` | nonblank ID plus digest for each |
+| query/blocker/prior cascade | `[:query]`, `[:blocker]`, `[:prior-cascade]` | retained content plus ID; digest recomputed over both |
 | external judgment coverage/order | `[:judgments]` | exactly one judgment per domain member in domain order |
-| authority separation | `[:judgments i :authority]`, `[:search-implementation :id]` | nonblank and unequal |
+| authority separation | `[:judgments i :authority]`, `[:search-implementation]` | authority job/agent/result digest must join a separately supplied terminal Agency result snapshot; authority agent differs from the content-bound search implementation identity |
 | admissible/rejected evidence | `[:judgments i :verdict/:evidence]` | typed verdict, nonempty evidence, exact member source pin; rejection reason required |
 | evidence-derived F11 receipt | `[:judgments i :evidence :legacy-receipt]` | admissible evidence must carry the existing structured-antecedent/warrant/citation carrier, with citation bound to the member source pin |
 | priority order and `Nodup` | `[:priority]` | unique vector whose set exactly covers the domain |
@@ -262,6 +262,23 @@ priority, evidence projection, and outcome into
 `OpenCascadeSearchReceipt`, then elaborates `chosenExample_valid`-equivalent
 validity from those same values.  This slice does not claim that hand-written
 Lean constants are a generated fixture witness.
+
+Review correction: the outer repository and whole-receipt digests establish
+envelope integrity only; they are not source truth.  `validate!` therefore now
+requires two read-only inputs that are not taken from the search receipt: a
+captured-source map keyed by `[path revision]`, whose bytes authenticate every
+member SHA-256, and retained Agency terminal job results keyed by job ID.  A
+fully resealed invented path/revision/SHA is refused against captured bytes.
+Likewise query, blocker, prior cascade, and search implementation retain their
+content and hash the `{id, content}` carrier rather than accepting a digest-
+shaped string.
+
+Each judgment names an agent, job, and result digest which must join the
+external terminal snapshot; the snapshot's digest is independently recomputed.
+This is an immutability/join boundary over the caller-supplied Agency record,
+not cryptographic signing or proof that Agency's agent made a semantically
+correct judgment.  Production wiring must supply these already-retained inputs;
+this namespace still neither reads Agency nor generates a judgment.
 
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,

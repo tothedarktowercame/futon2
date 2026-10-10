@@ -28,16 +28,39 @@
 (defn seal [receipt]
   (assoc receipt :receipt-digest (receipt-digest receipt)))
 
-(defn- source-pin! [pin path]
+(defn- source-pin! [pin captured-sources path]
   (require! (map? pin) :source-pin-invalid path)
   (doseq [k [:path :revision]]
     (require! (nonblank? (get pin k)) :source-pin-invalid (conj path k)))
-  (require! (digest? (:sha256 pin)) :source-pin-invalid (conj path :sha256)))
+  (require! (digest? (:sha256 pin)) :source-pin-invalid (conj path :sha256))
+  (let [bytes (get captured-sources [(:path pin) (:revision pin)])]
+    (require! (bytes? bytes) :source-revision-unresolved path)
+    (require! (= (:sha256 pin) (evidence/sha256 bytes)) :source-pin-stale path)))
 
 (defn- identity! [x path]
   (require! (map? x) :identity-invalid path)
   (require! (nonblank? (:id x)) :identity-invalid (conj path :id))
-  (require! (digest? (:digest x)) :identity-invalid (conj path :digest)))
+  (require! (map? (:content x)) :identity-content-required (conj path :content))
+  (require! (digest? (:digest x)) :identity-invalid (conj path :digest))
+  (require! (= (:digest x) (evidence/value-digest (dissoc x :digest)))
+            :identity-digest-mismatch (conj path :digest)))
+
+(defn agency-result-digest [job]
+  (evidence/value-digest (dissoc job :result-digest)))
+
+(defn- authority! [authority authority-results path]
+  (require! (map? authority) :authority-invalid path)
+  (let [job (get authority-results (:job-id authority))]
+    (require! (map? job) :authority-job-unresolved path)
+    (require! (= "done" (:state job)) :authority-job-not-terminal path)
+    (require! (= (:id authority) (:agent-id job)) :authority-agent-mismatch path)
+    (require! (= (:job-id authority) (:job-id job)) :authority-job-mismatch path)
+    (require! (= (:result-digest authority) (:result-digest job))
+              :authority-result-mismatch path)
+    (require! (= (:result-digest job) (agency-result-digest job))
+              :authority-result-digest-mismatch path)
+    ;; Trust boundary: an immutable caller-supplied Agency snapshot, not a signature.
+    job))
 
 (defn- legacy-receipt! [pattern source-pin receipt path]
   ;; This is the existing find-receipt carrier: structured antecedent plus an
@@ -67,7 +90,9 @@
 (defn validate!
   "Validate and adapt an externally supplied receipt. Returns the receipt with
   :projection containing only evidence-backed F11 legacy receipts."
-  [r]
+  [r {:keys [captured-sources authority-results]}]
+  (require! (map? captured-sources) :captured-sources-required [:captured-sources])
+  (require! (map? authority-results) :authority-results-required [:authority-results])
   (require! (= schema (:schema r)) :schema-invalid [:schema])
   (require! (= implementation (:implementation r)) :implementation-invalid [:implementation])
   (require! (= (implementation-digest) (:implementation-digest r))
@@ -82,7 +107,7 @@
     (require! (unique? (map :id members)) :repository-members-duplicate [:repository :members])
     (doseq [[i member] (map-indexed vector members)]
       (require! (keyword? (:id member)) :pattern-id-invalid [:repository :members i :id])
-      (source-pin! (:source-pin member) [:repository :members i :source-pin]))
+      (source-pin! (:source-pin member) captured-sources [:repository :members i :source-pin]))
     (require! (= (repository-digest repo) (:digest repo))
               :repository-digest-mismatch [:repository :digest])
     (require! (and (map? domain) (vector? domain-members) (unique? domain-members))
@@ -106,8 +131,9 @@
                 (map-indexed
                  (fn [i j]
                    (let [path [:judgments i] pin (get-in member-by-id [(:pattern j) :source-pin])]
-                     (require! (and (nonblank? (:authority j))
-                                    (not= (:authority j) (get-in r [:search-implementation :id])))
+                     (authority! (:authority j) authority-results (conj path :authority))
+                     (require! (not= (get-in j [:authority :id])
+                                     (get-in r [:search-implementation :id]))
                                :judgment-self-authority (conj path :authority))
                      (require! (and (map? (:evidence j)) (seq (:evidence j)))
                                :judgment-evidence-required (conj path :evidence))
