@@ -14,17 +14,38 @@
 
 (def canonical-store (data-paths/path "wm-repair-obligations"))
 
+(defn- production-store? [root]
+  (= (.getCanonicalPath (io/file root))
+     (.getCanonicalPath (io/file data-paths/production-data-root
+                                 "wm-repair-obligations"))))
+
+(def live-destinations
+  "Where the production store publishes: the primary checkout's tickets, and
+   the live queue, which is untracked runtime state (never a tracked resource)."
+  {:ticket-dir (data-paths/repo-path "holes" "tickets")
+   :queue-path queue/live-path})
+
 (defn destinations
-  "The canonical store publishes to the primary checkout. Other store roots
-   own an isolated publication tree; callers may supply explicit destinations."
+  "The production store publishes to the primary checkout (live-destinations).
+   Every other store root owns an isolated publication tree. A test JVM may
+   not publish from the production store at all.
+
+   The comparison is with the PRODUCTION store, not canonical-store: that is
+   resolved through data-paths, so under a test data root it names the test
+   store, and comparing with it sent the test store's tickets into the real
+   checkout (offline replay, 2026-10-10: commit 79a523906 on main, D21)."
   [root]
-  (let [repo (if (= (.getCanonicalPath (io/file root)) canonical-store)
-               (io/file "/home/joe/code/futon2")
-               (io/file root "ticket-publication"))]
-    {:ticket-dir (str (io/file repo "holes/tickets"))
-     :queue-path (if (= repo (io/file "/home/joe/code/futon2"))
-                   queue/live-path
-                   (str (io/file repo "resources/wm/ticket-queue.edn")))}))
+  (cond
+    (and (production-store? root) data-paths/test-mode?)
+    (throw (ex-info "A test JVM may not publish tickets from the production repair store"
+                    {:kind :production-store-in-test-mode :root (str root)}))
+
+    (production-store? root) live-destinations
+
+    :else
+    (let [repo (io/file root "ticket-publication")]
+      {:ticket-dir (str (io/file repo "holes/tickets"))
+       :queue-path (str (io/file repo "resources/wm/ticket-queue.edn"))})))
 
 (defn- description [value]
   (let [s (str/replace (str value) #"[\r\n]+" " ")]
@@ -64,6 +85,13 @@
     (if-not (zero? (:exit discovery))
       (assoc discovery :stage :repository)
       (let [repo (str/trim (:out discovery))
+            _ (when (and data-paths/test-mode?
+                         (= (.getCanonicalPath (io/file repo))
+                            (.getCanonicalPath (io/file data-paths/production-repo-root))))
+                ;; Defence in depth for D21: a test JVM never commits to the
+                ;; canonical checkout, whatever path it was handed.
+                (throw (ex-info "Refusing to commit a ticket to the canonical futon2 checkout from a test JVM"
+                                {:kind :ticket-commit-refused-in-test-mode :repo repo})))
             relative (str (.relativize (.toPath (io/file repo)) (.toPath path)))
             present (git repo "cat-file" "-e" (str "HEAD:" relative))
             unchanged? (and (zero? (:exit present))

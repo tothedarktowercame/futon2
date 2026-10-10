@@ -5702,7 +5702,10 @@
                        discharge-result
                        (repair-discharge/finalize-run!
                         {:root (or (:repair-root opts) (default-repair-root))
-                         :repo (or (:discharge-receipt-repo opts) "/home/joe/code/futon2")
+                         ;; Same rule as the tick-start catch-up (D21).
+                         :repo (or (:discharge-receipt-repo opts)
+                                   (when-not data-paths/test-mode?
+                                     data-paths/production-repo-root))
                          :action selected-action
                          :interpretation (:interpretation-receipts selected-action)
                          :b-update b-update-result
@@ -7382,9 +7385,19 @@
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
         source-check (refuse-on-runner-source-drift!)
-        publication (discharge-receipt/catch-up!
-                     (or (:repair-root raw-opts) (default-repair-root))
-                     (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
+        ;; A test JVM never publishes discharge receipts into the canonical
+        ;; checkout (D21: the offline replay committed to main via the ticket
+        ;; publisher; this is the same capability). Tests that exercise
+        ;; publication pass their own :discharge-receipt-repo.
+        discharge-repo (or (:discharge-receipt-repo raw-opts)
+                           (when-not data-paths/test-mode?
+                             data-paths/production-repo-root))
+        publication (if discharge-repo
+                      (discharge-receipt/catch-up!
+                       (or (:repair-root raw-opts) (default-repair-root))
+                       discharge-repo)
+                      [{:status :publication-not-run
+                        :reason :no-discharge-repo-in-test-mode}])
         result
         (try
       (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)

@@ -152,9 +152,13 @@
         (is (= "unchanged" (slurp outside)))))))
 
 (deftest canonical-store-queue-is-untracked-runtime-state
-  ;; The live queue must not be written into a tracked resource.
-  (let [{:keys [queue-path ticket-dir]} (publisher/destinations publisher/canonical-store)]
-    (is (= (data-paths/path "wm-ticket-queue" "queue.edn") queue-path))
+  ;; The live queue must not be written into a tracked resource. (This test
+  ;; used to call destinations on canonical-store inside the test JVM and
+  ;; expect the REAL checkout: it asserted the D21 leak. The production
+  ;; mapping is now a value that can be checked without publishing.)
+  (let [{:keys [queue-path ticket-dir]} publisher/live-destinations]
+    (is (= queue/live-path queue-path))
+    (is (not (str/includes? queue-path "/resources/")))
     (is (= "/home/joe/code/futon2/holes/tickets" ticket-dir))))
 
 (defn- git! [repo & args]
@@ -201,3 +205,15 @@
               (publisher/publish! store id opts)
               (is (= head (git! repo "rev-parse" "HEAD")))
               (is (= bytes (slurp receipt-file))))))))))
+
+(deftest a-test-jvm-never-publishes-to-the-canonical-checkout
+  ;; D21 (offline replay, 2026-10-10).
+  (is (true? data-paths/test-mode?))
+  (testing "canonical-store under a test root is an isolated tree"
+    (let [{:keys [ticket-dir queue-path]} (publisher/destinations publisher/canonical-store)]
+      (is (not (str/starts-with? ticket-dir data-paths/production-repo-root)))
+      (is (not= queue/live-path queue-path))))
+  (testing "the production store is refused outright"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"may not publish"
+          (publisher/destinations (io/file data-paths/production-data-root
+                                           "wm-repair-obligations"))))))
