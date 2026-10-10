@@ -215,6 +215,24 @@ they cannot instantiate this model.  The next prerequisite is an authorized
 independent judgment producer; no Clojure gate or authored-new branch is
 claimed by this Lean-only slice.
 
+Review correction: completeness is not a label.  The Lean carrier now keeps a
+separately pinned repository (identity, version, digest, membership) and makes
+the complete-domain constructor carry a proof that search membership equals
+repository membership.  A bounded domain instead carries a nonempty scope
+limitation and subset proof.  Consequently only a proved complete-domain
+no-match can project repository-global F11 absence; a truncated fixture cannot
+be falsely tagged complete.  Priority is also `Nodup`, so it is a genuine
+declared order rather than a membership-equivalent list with duplicates.
+
+The F11 receipt projection was corrected at the same boundary.  Admissible
+external evidence must project to a concrete non-self-certifying
+`LegacyReceipt`; erasure selects that projected receipt from the actual
+judgment rather than manufacturing a constant receipt.  Missing or
+unprojectable citation/edge evidence makes the search certificate invalid.
+The still-owed runtime producer must therefore pin the full repository/domain
+relationship and provide independently authorized evidence with an explicit
+legacy receipt projection; unjudged top-k rows satisfy neither obligation.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
