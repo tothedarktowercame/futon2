@@ -1,0 +1,10 @@
+{:schema :wm/attempt-learning-count-v1
+ :identity "fixture-one-authority-success"
+ :family "fixture-trial-configuration"
+ :observed true
+ :increment {:success 1 :failure 0}
+ :effect ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+ :selected-cascade
+ {:precedence
+  [{:id :apparatus/one-authority-per-question
+    :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]}}

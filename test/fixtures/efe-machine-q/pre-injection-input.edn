@@ -1,0 +1,8 @@
+{:schema :wm/compute-efe-pre-injection-input-v1
+ :captured-from "804b37fe9541740f3a79378014d7d5dce158933e"
+ :preference-stack-basis
+ {:layer-id :habit-prior
+  :source "data/wm-trace/wm-trace-2026-08-30.edn"
+  :source-sha256 "6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
+  :basis "data/wm-trace/wm-trace-2026-08-30.edn sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"}
+ :note "compute-efe did not read the trace at runtime; this provenance value was embedded in its result and is the only input changed by the hermetic-root commit."}
