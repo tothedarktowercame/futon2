@@ -280,6 +280,32 @@
     (catch Exception _ {:text "<printing failed>" :readable? false})
     (catch StackOverflowError _ {:text "<printing overflowed>" :readable? false})))
 
+(def ^:private always-readable
+  "Classes whose printed form the EDN reader always reads back (no custom
+  print-method is installed for them in this codebase)."
+  #{String Long Double Boolean clojure.lang.Ratio clojure.lang.BigInt
+    java.math.BigDecimal java.math.BigInteger Integer})
+
+(defonce ^:private readable-names (java.util.concurrent.ConcurrentHashMap.))
+
+(defn- readable-scalar?
+  "printed-edn's verdict, without printing and re-reading every leaf: core
+  scalar classes always read back; keywords and symbols can be unreadable
+  (:hole/2f9b03b16170 is one), and are checked once per distinct name. On
+  click 51's checkpoint the per-leaf print/read cost about 100 s (D16)."
+  [x]
+  (cond
+    (nil? x) true
+    (contains? always-readable (class x)) true
+    (or (keyword? x) (symbol? x))
+    (let [cached (.get ^java.util.concurrent.ConcurrentHashMap readable-names x)]
+      (if (some? cached)
+        cached
+        (let [r (boolean (:readable? (printed-edn x)))]
+          (.put ^java.util.concurrent.ConcurrentHashMap readable-names x r)
+          r)))
+    :else (boolean (:readable? (printed-edn x)))))
+
 (defn- non-edn-placeholder [text]
   (let [prefix (-> (subs text 0 (min 256 (count text)))
                    (str/replace #"[\p{Cc}\p{Cf}]" " ")
@@ -324,7 +350,7 @@
                        (map? x) (every? (fn [[k v]] (and (plain-edn? k)
                                                         (plain-edn? v))) x)
                        (coll? x) (every? plain-edn? x)
-                       :else (:readable? (printed-edn x))))]
+                       :else (readable-scalar? x)))]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
     (if (plain-edn? value)
       ;; Click 51's selection checkpoint printed 2.38 GB, 95% of it exact
