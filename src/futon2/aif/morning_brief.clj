@@ -140,7 +140,12 @@
                 :revised-identity (get-in r [:revised :identity])
                 :admission-verdict (get-in r [:revised :admission :status])
                 :enabled-step (get-in r [:enabled-step :pattern])
-                :enacted-step (get-in r [:enactment :enacted-commit])
+                :selected-action-identity (get-in r [:selection-enaction :selected-action-sha256])
+                :enacted-action-identity (get-in r [:enactment :action-identity])
+                :enacted-step (get-in r [:enactment :step])
+                :enacted-step-identity (get-in r [:enactment :step-identity])
+                :artifact-commit (get-in r [:artifact :enacted-commit])
+                :artifact-linked? (get-in r [:artifact :linked?])
                 :outcome (:outcome r)
                 :typed-gaps (:typed-gaps r)}))
       (:feature-card item) (assoc :feature-card

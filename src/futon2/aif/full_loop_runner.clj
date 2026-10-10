@@ -66,6 +66,7 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
@@ -3139,6 +3140,23 @@
                              observed-author-commit
                              commit)]
             pre-revision-head (observe-repo-head opts repo)
+            revision-selected-action (:revised cascade-revision-result)
+            revision-enacted-action (:selected-action effective-construction)
+            revision-selected-step
+            (:enacted-step (enacted-step-pattern revision-selected-action))
+            revision-enacted-step
+            (:enacted-step (enacted-step-pattern revision-enacted-action))
+            revision-enaction-base
+            {:schema :wm/revision-selection-enaction-v1
+             :verdict (if (and (= revision-selected-action revision-enacted-action)
+                               (= revision-selected-step revision-enacted-step))
+                        :match :typed-divergence)
+             :selected-action-sha256 (identity/digest revision-selected-action)
+             :enacted-action-sha256 (identity/digest revision-enacted-action)
+             :selected-step-sha256 (identity/digest revision-selected-step)
+             :enacted-step-sha256 (identity/digest revision-enacted-step)
+             :selected-step revision-selected-step
+             :enacted-step revision-enacted-step}
             revision-response
             (run-phase!
              opts phase-context :revision-dispatch
@@ -3249,6 +3267,11 @@
             reviews [(review-record 1 commit review-job review-gate)
                      (review-record 2 revision-commit
                                     re-review-job re-review-gate)]]
+        (let [action-enaction
+              (assoc revision-enaction-base :evidence
+                     {:boundary :revision-author-contract
+                      :author-job (:job-id revision-author-job)
+                      :reviewer-job (:job-id re-review-job)})]
         {:commit revision-commit
          :repo (:repo revision-build)
          :files (:files revision-build)
@@ -3261,7 +3284,9 @@
                     :commits [commit revision-commit]
                     :author-job (:job-id revision-author-job)
                     :cascade-revision cascade-revision-result
-                    :review (second reviews)}}))))
+                    :selection-enaction action-enaction
+                    :artifact-binding {:commit revision-commit}
+                    :review (second reviews)}})))))
 
 (defn- find-commit-repo [commit]
   (some (fn [repo]

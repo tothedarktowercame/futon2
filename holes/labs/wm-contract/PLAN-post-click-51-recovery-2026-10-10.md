@@ -98,7 +98,21 @@ revised cascade identities; revised construction-receipt digest and admission;
 enabled pattern step; revision commit joined to enacted commit; outcome; and
 typed gaps.  Only `:retrieved-existing` is implemented.  `:authored-new` is
 typed absent as `:revision-producer-cannot-author-pattern`.  A missing or
-mismatched revised-to-enacted commit refuses the certificate.
+mismatched artifact commit refuses the artifact-binding portion of the
+certificate independently of action enactment.
+
+Correction after review: git commit equality is only artifact binding and is
+not selected-to-enacted cascade evidence.  The revision author-contract
+boundary now emits `:wm/revision-selection-enaction-v1` from the revised action
+selected by the revision receipt and the exact effective construction supplied
+to both revision author and reviewer.  It separately records selected/enacted
+action digests and selected/enacted step digests under the existing equality
+rule.  The refinement certificate refuses when that carrier is missing or
+divergent even if the git commit matches.  Conversely, a matching action with a
+wrong commit refuses under the distinct `:artifact-binding` gap.  Admission is
+now `:admitted` only when the proposal producer's actual admission receipt says
+so and binds the construction-receipt digest; `:status :revised` alone is not
+admission evidence.
 
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,

@@ -195,7 +195,11 @@
                                                        :not-selected-by-interpreter)})) hits)
                                   [{:status :absent
                                     :reason :retriever-returned-no-retained-candidates}]))}
-                             :admission :want-interpretation-validate-response
+                             :admission
+                             {:status :admitted
+                              :authority :want-interpretation-validate-response
+                              :construction-receipt-sha256
+                              (evidence/value-digest (:construction-receipt action))}
                              :construction :machine-constructed}}))))
           (catch Exception e
             {:status :refused :kind :revision-proposal-production-failed
