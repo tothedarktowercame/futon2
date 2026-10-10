@@ -192,6 +192,27 @@ writer keeps the gate closed.
   preference-schedule and run-facts namespaces are clean together (18 tests,
   62 assertions).
 
+- 2026-10-10, prefix-F operational-satisfiability diagnosis: the most recent
+  persisted selection menu is
+  `data/wm-runs/tick-run-record-2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda.edn`.
+  Its selection certificate contains 5,413 policies and 5,413 distinct,
+  non-nil complete `PolicyKey`s.  Read-only folding of the current production
+  store `data/wm-interpretations/flights` reads all seven flight records with
+  no unreadable records, but finds zero `:wm/conditioning-step-v1` entries;
+  current coverage is therefore 0 keys with admitted history and 5,413 keys
+  without it.  There are no stored policy keys to be dropped or mismatched.
+  `PrefixFreeEnergyPosterior.lean` requires a nonempty admitted prefix for
+  every menu policy and makes absence `notSupplied`, while
+  `flight/conditioning-step` is recorded only after a policy has been selected
+  and enacted.  Consequently a newly constructed, previously unseen complete
+  `PolicyKey` cannot acquire the required history before its first selection
+  under the current protocol.  This is an operational/design blocker, not a
+  bounded implementation defect.  Before another click, the specification
+  must explicitly choose and formalize a bootstrap authority (for example an
+  admitted prior/history for unseen policies), or constrain menus to keys with
+  prior enacted history and separately specify how new policies enter.  Either
+  choice changes the model/protocol; the runtime must not infer `F = 0`.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
