@@ -170,9 +170,17 @@
                table (volatile! (transient {}))]
            (letfn [(rewrite [v]
                      (cond
-                       (map? v) (persistent!
-                                 (reduce-kv (fn [acc k y] (assoc! acc k (ref-or-inline y)))
-                                            (transient (empty v)) v))
+                       (map? v)
+                       (let [blank (empty v)]
+                         ;; Sorted maps and other persistent map types need
+                         ;; not implement IEditableCollection. Preserve their
+                         ;; comparator/type with ordinary assoc in that case.
+                         (if (instance? clojure.lang.IEditableCollection blank)
+                           (persistent!
+                            (reduce-kv (fn [acc k y] (assoc! acc k (ref-or-inline y)))
+                                       (transient blank) v))
+                           (reduce-kv (fn [acc k y] (assoc acc k (ref-or-inline y)))
+                                      blank v)))
                        (vector? v) (mapv ref-or-inline v)
                        (set? v) (into (empty v) (map ref-or-inline) v)
                        (seq? v) (doall (map ref-or-inline v))

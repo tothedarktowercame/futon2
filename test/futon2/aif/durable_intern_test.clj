@@ -87,6 +87,16 @@
     (is (di/interned? enc))
     (is (= m (di/hydrate (edn/read-string (pr-str enc)))))))
 
+(deftest sorted-maps-are-rewritten-without-requiring-transients
+  (let [shared (big :shared 50)
+        ordered (sorted-map :a shared :b shared)
+        m {:ordered ordered :again ordered}
+        back (printed-round-trip m)]
+    ;; EDN has no sorted-map tag, so round-trip equality—not the concrete map
+    ;; class—is the codec promise. The encoder must nevertheless not call
+    ;; transient on PersistentTreeMap while preparing the printed form.
+    (is (= m back))))
+
 (deftest printed-sha256-equals-hashing-the-pr-str-bytes
   (let [v {:a [1 2N 3.5 "é ü 漢 😀 \n\"q\"" #{:k} '(x y)] :b (big :b 5)}
         md (java.security.MessageDigest/getInstance "SHA-256")
