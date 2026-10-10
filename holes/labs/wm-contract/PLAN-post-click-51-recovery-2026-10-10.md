@@ -329,6 +329,15 @@ writer keeps the gate closed.
   truthful reviewer-falsifier refusal, so it supplies no successful close or
   evidence that all four selected patterns were used.
 
+  This historical record is evidence about carrier continuity only.  It was
+  produced during the pre-recovery period and has not been shown to satisfy
+  the canonical cascade construction/admissibility contract in
+  `GOverCascades.lean`.  Its four-pattern key must therefore not be cited as a
+  conformant policy or as evidence that canonical cascade construction worked.
+  The source trace and focused tests establish that whatever selected action
+  reaches construction is rendered into both contracts; conformance of that
+  selected action is a separate, earlier gate.
+
 - 2026-10-10, item 5 evidence-retention boundary: Agency's persisted prompt
   event is deliberately truncated, so the record cannot later reproduce or
   independently verify every byte of the actual author/reviewer prompts.
