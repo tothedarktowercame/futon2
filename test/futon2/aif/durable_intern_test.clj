@@ -39,6 +39,23 @@
     (is (instance? clojure.lang.BigInt (first (:big2 back))))
     (is (instance? Long (first (:long2 back))))))
 
+(deftest compound-map-and-set-members-retain-nested-scalar-kinds
+  ;; Clojure equality treats [1] and [1N] as the same map key/set member.
+  ;; The first production codec compared only the outer collection class and
+  ;; silently hydrated both repeated subtrees as the first one encountered.
+  (let [pad (vec (range 200))
+        long-map {[1] pad :tag :same}
+        bigint-map {[1N] pad :tag :same}
+        long-set #{[1] [:pad pad]}
+        bigint-set #{[1N] [:pad pad]}
+        m {:lm1 long-map :lm2 long-map :bm1 bigint-map :bm2 bigint-map
+           :ls1 long-set :ls2 long-set :bs1 bigint-set :bs2 bigint-set}
+        back (printed-round-trip m)]
+    (is (instance? Long (first (ffirst (:lm1 back)))))
+    (is (instance? clojure.lang.BigInt (first (ffirst (:bm1 back)))))
+    (is (some #(instance? Long (first %)) (:ls1 back)))
+    (is (some #(instance? clojure.lang.BigInt (first %)) (:bs1 back)))))
+
 (deftest small-records-are-unchanged
   (let [m {:a (big :a 50) :b (big :a 50)}]
     (is (identical? m (di/encode m)) "below the default total-size threshold")
@@ -47,4 +64,9 @@
 (deftest hydrate-leaves-plain-values-alone-and-refuses-a-dangling-ref
   (is (= {:a 1} (di/hydrate {:a 1})))
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"no table entry"
-                        (di/hydrate {:a {:durable/ref "missing"} :durable/interned {}}))))
+                        (di/hydrate {:a {:durable/ref "missing"} :durable/interned {}})))
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"contain a cycle"
+                        (di/hydrate {:a {:durable/ref "a"}
+                                     :durable/interned
+                                     {"a" {:nested {:durable/ref "b"}}
+                                      "b" {:nested {:durable/ref "a"}}}}))))

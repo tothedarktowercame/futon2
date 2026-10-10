@@ -21,7 +21,7 @@
   record also needs far less heap than reading the original did."
   (:import [java.io Writer]
            [java.security MessageDigest]
-           [java.util HashMap IdentityHashMap]))
+           [java.util HashMap HashSet IdentityHashMap]))
 
 (def table-key :durable/interned)
 (def ref-key :durable/ref)
@@ -77,6 +77,13 @@
   (cond (map? x) :map (vector? x) :vector (set? x) :set (seq? x) :seq
         (sequential? x) :sequential :else (class x)))
 
+(declare typed=)
+
+(deftype ^:private Typed [v]
+  Object
+  (hashCode [_] (hash v))
+  (equals [_ o] (and (instance? Typed o) (typed= v (.-v ^Typed o)))))
+
 (defn- typed=
   "Clojure = that also requires the same collection kinds and scalar classes
   throughout: = treats [1 2] and '(1 2), or 1 and 1N, as equal, and interning
@@ -86,22 +93,20 @@
       (and (= (kind a) (kind b))
            (cond
              (map? a) (and (= (count a) (count b))
-                           (every? (fn [[k v]]
-                                     (let [e (find b k)]
-                                       (and e (= (class k) (class (key e)))
-                                            (typed= v (val e)))))
-                                   a))
+                           (let [typed-b (HashMap.)]
+                             (doseq [[k v] b] (.put typed-b (Typed. k) v))
+                             (every? (fn [[k v]]
+                                       (let [tk (Typed. k)]
+                                         (and (.containsKey typed-b tk)
+                                              (typed= v (.get typed-b tk)))))
+                                     a)))
              (sequential? a) (and (= (count a) (count b))
                                   (every? true? (map typed= a b)))
-             (set? a) (and (= a b)
-                           (= (set (map (juxt identity class) a))
-                              (set (map (juxt identity class) b))))
+             (set? a) (and (= (count a) (count b))
+                           (let [typed-b (HashSet.)]
+                             (doseq [v b] (.add typed-b (Typed. v)))
+                             (every? #(.contains typed-b (Typed. %)) a)))
              :else (= a b)))))
-
-(deftype ^:private Typed [v]
-  Object
-  (hashCode [_] (hash v))
-  (equals [_ o] (and (instance? Typed o) (typed= v (.-v ^Typed o)))))
 
 (defn- internable? [v]
   (and (coll? v) (not (record? v)) (> (count v) 1)))
@@ -197,16 +202,22 @@
   (if-not (interned? x)
     x
     (let [table (get x table-key)
-          done (HashMap.)]
+          done (HashMap.)
+          resolving (HashSet.)]
       (letfn [(resolve-id [id]
                 (or (.get done id)
                     (let [entry (get table id ::missing)]
                       (when (identical? entry ::missing)
                         (throw (ex-info "Durable reference has no table entry"
                                         {:durable/ref id})))
-                      (let [v (walk entry)]
-                        (.put done id v)
-                        v))))
+                      (when-not (.add resolving id)
+                        (throw (ex-info "Durable references contain a cycle"
+                                        {:durable/ref id})))
+                      (try
+                        (let [v (walk entry)]
+                          (.put done id v)
+                          v)
+                        (finally (.remove resolving id))))))
               (walk [v]
                 (if-let [id (ref-id v)]
                   (resolve-id id)
