@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.interpretation-request :as interpretation-request]
             [futon2.aif.close-retention :as retention]
             [futon2.aif.evidence-manifest :as manifest]
                         [futon2.aif.full-loop-runner :as runner]
@@ -35,8 +36,6 @@
                                          :sha256 (evidence/sha256 bs) :revision "retained-fixture-bytes"})
                  (swap! captured assoc file bs)
                  id))
-        cite (fn [s] {:source (add! (:path s)) :lines (:lines s) :quote (:quote s)})
-        mission-cite (cite (get-in old [:target :status-source]))
         clause (fn [path text]
                  (let [lines (vec (str/split-lines (slurp path)))
                        norm #(str/replace (str/trim %) #"\s+" " ")
@@ -47,6 +46,15 @@
                    (assert span (str "Fixture clause missing: " path))
                    {:source (add! path) :lines [(inc (first span)) (second span)]
                     :quote (str/join "\n" (subvec lines (first span) (second span)))}))
+        ;; Re-run the production-style verbatim capture against the exact
+        ;; current pinned bytes. Historical line numbers are not authority
+        ;; after their source moves.
+        cite (fn [s] (clause (:path s) (:quote s)))
+        mission-path (get-in old [:target :status-source :path])
+        mission-source (add! mission-path)
+        mission-cite (first (:citations
+                             (interpretation-request/tension-selection
+                              :mission mission-source (slurp mission-path))))
         facts (mapv (fn [f] {:id (:id f) :meaning (:meaning f) :value (:q0 f)
                              :citations [(cite (:source f))] :observed-at at
                              :method :mission-document-assertion :scope "documented capability"}) (:facts old))
@@ -110,6 +118,7 @@
     (is (= record (edn/read-string (pr-str (evidence/validate-sources! record captured)))))
     (doseq [[reason alter]
             [[:source-digest-mismatch #(assoc-in % [:sources 0 :sha256] (apply str (repeat 64 "0")))]
+             [:citation-text-mismatch #(update-in % [:target :citations 0 :quote] str " stale")]
              [:undeclared-fact #(assoc-in % [:interpretations 0 :guard] [:fact "invented"])]
              [:undeclared-fact #(assoc-in % [:interpretations 0 :effect] {"invented" true})]
              [:citation-missing #(assoc-in % [:interpretations 0 :clauses :if] nil)]

@@ -181,6 +181,18 @@ selection/tie law, and rejection reasons.  Only that law can authorize the
 chosen-existing versus `:no-admissible-match` conclusion and the required
 falsifiers.  Inventing a similarity threshold in this repair would be a facade.
 
+Verification correction: the interpretation-evidence commissioning fixture
+had retained a historical mission citation while pinning the current
+`M-zaif-harness-v1.md` bytes.  Production validation correctly refused
+`:citation-text-mismatch`; its source/citation checks were not weakened.  The
+fixture now regenerates its mission citation by applying the real
+`interpretation-request/tension-selection` capture rule to the exact current
+pinned bytes, while its other retained clauses are re-located and quoted
+verbatim from their current sources.  A dedicated falsifier mutates a citation
+quote without changing its pin and requires `:citation-text-mismatch`, so
+fixture drift cannot again masquerade as a positive admission or perturb later
+refusal-order assertions.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
