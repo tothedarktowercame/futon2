@@ -45,6 +45,8 @@ a fixture is evidence only when no real artifact is available.
 | D26 | A faithful isolated replay needs a point-in-time copy of every mutable production input read by selection before data-owning namespaces load. Durable repair evidence contains absolute paths and digests, so a byte copy alone fails its validation contract after relocation. | live replay `9afb57c34`, 2026-10-10 | FIXED AND VERIFIED for the replay harness through `29480e7a3`: `data-paths/path` tracing, enabled before namespace load and retained through the full live run, now derives the snapshot roots; the seeder consumes that trace instead of a hand list. The observed set added the previously omitted `wm-interpretations`, plus `wm-observation-labels` and `wm-scoring-cache` during selection. The replay passed stop-line-memory and the complete selection-to-close path. |
 | D27 | The `9afb57c34` replay returned `:no-selection`; codex-68 initially attributed this to inner selection choosing a target the outer selector excluded. | live replay `9afb57c34`, exact click-51 source, 2026-10-10 | INITIAL DIAGNOSIS WITHDRAWN. Claude-12 correctly identified the mechanism: `selected-entry` refuses a provisional `:query-time-pattern-selection`. The hand snapshot omitted `wm-interpretations`, so the winner had no receipt. With the observed snapshot, the same target won as a `:machine-constructed` interpreted cascade with `:structure/unresolved-tensions-at-closure`, and the run reached construction and dispatch. The independent design question—inner G-selection may choose an outer-excluded target—remains, but did not cause this replay failure and is not presently judged a launch blocker. |
 | D28 | Admission re-read the roster immediately after its own readiness wake; the woken seat still read `invoking`, so the click was refused `:busy`. | run `2026-10-10-4bb54313`, admission only | FIXED AND VERIFIED in `52b019f9a`, merged as `f7cef971c`: `agent-readiness!` polls until the woken seat is available, bounded by `readiness-settle-ms` (20,000 ms). Independent targeted rerun of the new regression and the existing restored-agent readiness test passed: 2 tests, 12 assertions. PID 39171 reports 20,000 ms and exact loaded/canonical runner SHA-256 identity. |
+| D29 | The post-click requirements alert checked the run but futon1b refused its evidence copy with HTTP 403 because `wm_run_alert.py` omitted `x-penholder`. | clicks 48 onward | FIXED AND VERIFIED in `82eaf0977`, merged as `1f73c5330`: the script sends `FUTON1B_PENHOLDER`, falling back through `FUTON1A_PENHOLDER` to allowed penholder `api`. A local HTTP capture of the real script path received the POST and header; futon1b's current gate resolves that header and its default allow-list contains `api`. This is a post-click script and requires no JVM load. |
+| D30 | `test_good_fixture_conforms` in `wm_run_alert_test.py` is stale against the current external Requirements checker: Q4 and Q9 return `unverifiable`. | focused D29 verification, 2026-10-10 | JUDGED NOT TO AFFECT THIS CLICK: D29 changes only the later evidence POST; the stale fixture runs with `--no-evidence` and therefore does not exercise the changed code. The other 3 alert tests pass, a local end-to-end POST verifies the header, and production treats an unverifiable requirement as a visible post-click alert rather than suppressing or altering the click. Fixture upkeep remains test debt. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -294,3 +296,20 @@ the previously reviewed debugger phase breakpoints. Any further source change,
 load, JVM restart, unreviewed debugger stop, or click already in progress voids
 it and requires re-verification. Claude-12 may ask Joe for the click; this
 sign-off does not initiate one.
+
+**2026-10-10 14:28 UTC — codex-68 ALERT ADDENDUM TO THE RENEWED ONE-CLICK
+SIGN-OFF.** The serving-JVM identity and D28 verification above remain
+unchanged: `1f73c5330` changes only post-click script
+`scripts/wm_run_alert.py`, so no additional JVM load is required. I reviewed
+and exercised that exact script blob (`984d1c5a2f9b7fa388b18b692ccd055780315065`,
+SHA-256 `b7df18f3452e965bafde46f5321b4743262a728840d7a8a7b7f7653521de845f`).
+Its evidence POST was captured end-to-end with `x-penholder`; futon1b's live
+source contract accepts the header and allows the default `api` identity.
+
+The alert test file produced 3 passes and one pre-existing/stale fixture
+failure (D30), not a false claim of a clean suite. D30 cannot affect admission,
+selection, dispatch, or close, and the production failure mode is a visible
+post-click alert. Every known entry D1–D30 is therefore adequately addressed
+for this click. The renewed one-click sign-off remains in force on exactly the
+runner/JVM state above plus this exact post-click script; its other invalidation
+conditions are unchanged.
