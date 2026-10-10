@@ -3141,22 +3141,22 @@
                              commit)]
             pre-revision-head (observe-repo-head opts repo)
             revision-selected-action (:revised cascade-revision-result)
-            revision-enacted-action (:selected-action effective-construction)
+            revision-dispatched-action (:selected-action effective-construction)
             revision-selected-step
             (:enacted-step (enacted-step-pattern revision-selected-action))
-            revision-enacted-step
-            (:enacted-step (enacted-step-pattern revision-enacted-action))
-            revision-enaction-base
-            {:schema :wm/revision-selection-enaction-v1
-             :verdict (if (and (= revision-selected-action revision-enacted-action)
-                               (= revision-selected-step revision-enacted-step))
+            revision-dispatched-step
+            (:enacted-step (enacted-step-pattern revision-dispatched-action))
+            revision-dispatch-base
+            {:schema :wm/revision-selection-dispatch-v1
+             :verdict (if (and (= revision-selected-action revision-dispatched-action)
+                               (= revision-selected-step revision-dispatched-step))
                         :match :typed-divergence)
              :selected-action-sha256 (identity/digest revision-selected-action)
-             :enacted-action-sha256 (identity/digest revision-enacted-action)
+             :dispatched-action-sha256 (identity/digest revision-dispatched-action)
              :selected-step-sha256 (identity/digest revision-selected-step)
-             :enacted-step-sha256 (identity/digest revision-enacted-step)
+             :dispatched-step-sha256 (identity/digest revision-dispatched-step)
              :selected-step revision-selected-step
-             :enacted-step revision-enacted-step}
+             :dispatched-step revision-dispatched-step}
             revision-response
             (run-phase!
              opts phase-context :revision-dispatch
@@ -3267,8 +3267,8 @@
             reviews [(review-record 1 commit review-job review-gate)
                      (review-record 2 revision-commit
                                     re-review-job re-review-gate)]]
-        (let [action-enaction
-              (assoc revision-enaction-base :evidence
+        (let [action-dispatch
+              (assoc revision-dispatch-base :evidence
                      {:boundary :revision-author-contract
                       :author-job (:job-id revision-author-job)
                       :reviewer-job (:job-id re-review-job)})]
@@ -3284,7 +3284,7 @@
                     :commits [commit revision-commit]
                     :author-job (:job-id revision-author-job)
                     :cascade-revision cascade-revision-result
-                    :selection-enaction action-enaction
+                    :selection-dispatch action-dispatch
                     :artifact-binding {:commit revision-commit}
                     :review (second reviews)}})))))
 

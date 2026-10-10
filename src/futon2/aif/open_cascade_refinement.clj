@@ -5,34 +5,55 @@
 (def schema :wm/open-cascade-refinement-v1)
 (defn- pattern-id [step] (if (map? step) (:id step) step))
 
-(defn certificate [{:keys [revision enacted-commit outcome]}]
+(def pattern-use-schema :wm/revision-pattern-use-observation-v1)
+
+(defn certificate [{:keys [revision artifact-commit outcome pattern-use]}]
   (let [cascade (:cascade-revision revision)
         production (:proposal-production cascade)
         [prior revised] (:history cascade)
         revised-action (:revised cascade)
-        enaction (:selection-enaction revision)
+        dispatch (:selection-dispatch revision)
         admission (:admission production)
         revision-commit (second (:commits revision))
         branch (if (= :revised (:status cascade)) :retrieved-existing :none)
-        gaps (cond-> []
+        selected-pattern (or (:pattern production) (first (get-in cascade [:delta :added])))
+        use-present? (map? pattern-use)
+        use-matches? (and (= pattern-use-schema (:schema pattern-use))
+                          (= :verified (:status pattern-use))
+                          (= selected-pattern (:pattern pattern-use))
+                          (= (:dispatched-action-sha256 dispatch)
+                             (:action-sha256 pattern-use)))
+        hard-gaps (cond-> []
                (not= :revised (:status cascade)) (conj {:field :revised-cascade :reason :no-admitted-revision})
                (nil? (:identity prior)) (conj {:field :prior-identity :reason :missing})
                (nil? (:identity revised)) (conj {:field :revised-identity :reason :missing})
                (not= :admitted (:status admission))
                (conj {:field :canonical-admission :reason :admission-receipt-missing})
-               (not= :match (:verdict enaction))
-               (conj {:field :selected-to-enacted :reason :action-or-step-identity-mismatch})
-               (nil? (:selected-action-sha256 enaction))
+               (not= :match (:verdict dispatch))
+               (conj {:field :selected-to-dispatched :reason :action-or-step-contract-mismatch})
+               (nil? (:selected-action-sha256 dispatch))
                (conj {:field :selected-action-identity :reason :missing})
-               (nil? (:enacted-action-sha256 enaction))
-               (conj {:field :enacted-action-identity :reason :missing})
-               (nil? (:enacted-step-sha256 enaction))
-               (conj {:field :enacted-step-identity :reason :missing})
-               (nil? enacted-commit) (conj {:field :artifact-binding :reason :missing-commit})
-               (and revision-commit enacted-commit (not= revision-commit enacted-commit))
+               (nil? (:dispatched-action-sha256 dispatch))
+               (conj {:field :dispatched-action-identity :reason :missing})
+               (nil? (:dispatched-step-sha256 dispatch))
+               (conj {:field :dispatched-step-identity :reason :missing})
+               (nil? artifact-commit) (conj {:field :artifact-binding :reason :missing-commit})
+               (and revision-commit artifact-commit (not= revision-commit artifact-commit))
                (conj {:field :artifact-binding :reason :commit-mismatch
-                      :selected revision-commit :enacted enacted-commit}))]
-    {:schema schema :status (if (seq gaps) :refused :complete)
+                      :selected revision-commit :observed artifact-commit}))
+        use-gap (when-not use-matches?
+                  {:field :pattern-use
+                   :reason (if use-present? :observation-mismatch
+                               :observation-unavailable)
+                   :expected-pattern selected-pattern
+                   :observed-pattern (:pattern pattern-use)})
+        gaps (cond-> hard-gaps use-gap (conj use-gap))
+        status (cond
+                 (seq hard-gaps) :refused
+                 (and use-present? (not use-matches?)) :refused
+                 use-matches? :verified-used
+                 :else :dispatched)]
+    {:schema schema :status status
      :boundary :reviewer-negative-verdict :blocker (:blocker cascade)
      :branch branch
      :branch-capabilities
@@ -40,7 +61,7 @@
       :authored-new {:status :absent :reason :revision-producer-cannot-author-pattern}}
      :library-search (or (:library-search production)
                          {:status :absent :reason :search-evidence-not-retained})
-     :pattern (or (:pattern production) (first (get-in cascade [:delta :added])))
+     :pattern selected-pattern
      :prior {:identity (:identity prior) :patterns (:patterns prior)}
      :revised {:identity (:identity revised) :patterns (:patterns revised)
                :admission {:status (or (:status admission) :absent)
@@ -49,14 +70,17 @@
                            :construction-receipt-sha256
                            (when (:construction-receipt revised-action)
                              (identity/digest (:construction-receipt revised-action)))}}
-     :selection-enaction enaction
-     :enabled-step {:pattern (pattern-id (:selected-step enaction))
-                    :identity (:selected-step-sha256 enaction)}
-     :enactment {:action-identity (:enacted-action-sha256 enaction)
-                 :step (:enacted-step enaction)
-                 :step-identity (:enacted-step-sha256 enaction)}
-     :artifact {:selected-commit revision-commit :enacted-commit enacted-commit
-                :linked? (and revision-commit (= revision-commit enacted-commit))}
+     :selection-dispatch dispatch
+     :enabled-step {:pattern (pattern-id (:selected-step dispatch))
+                    :identity (:selected-step-sha256 dispatch)}
+     :dispatch {:action-identity (:dispatched-action-sha256 dispatch)
+                 :step (:dispatched-step dispatch)
+                 :step-identity (:dispatched-step-sha256 dispatch)}
+     :artifact {:selected-commit revision-commit :observed-commit artifact-commit
+                :linked? (and revision-commit (= revision-commit artifact-commit))}
+     :pattern-use (or pattern-use
+                      {:schema pattern-use-schema :status :absent
+                       :reason :revision-pattern-use-observation-not-produced})
      :outcome (or outcome {:status :absent :reason :outcome-not-yet-recorded})
      :typed-gaps gaps}))
 
@@ -65,5 +89,6 @@
     (:revision data)
     (assoc :open-cascade-refinement
            (certificate {:revision (:revision data)
-                         :enacted-commit (:commit data)
+                         :artifact-commit (:commit data)
+                         :pattern-use (:revision-pattern-use data)
                          :outcome {:status :recorded :value outcome}}))))

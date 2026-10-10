@@ -101,22 +101,35 @@ typed absent as `:revision-producer-cannot-author-pattern`.  A missing or
 mismatched artifact commit refuses the artifact-binding portion of the
 certificate independently of action enactment.
 
-Correction after review: git commit equality is only artifact binding and is
-not selected-to-enacted cascade evidence.  The revision author-contract
-boundary now emits `:wm/revision-selection-enaction-v1` from the revised action
-selected by the revision receipt and the exact effective construction supplied
-to both revision author and reviewer.  It separately records selected/enacted
-action digests and selected/enacted step digests under the existing equality
-rule.  The refinement certificate refuses when that carrier is missing or
-divergent even if the git commit matches.  Conversely, a matching action with a
-wrong commit refuses under the distinct `:artifact-binding` gap.  Admission is
-now `:admitted` only when the proposal producer's actual admission receipt says
-so and binds the construction-receipt digest; `:status :revised` alone is not
-admission evidence.
+Correction after review: git commit equality is only artifact binding.  The
+revision author-contract boundary now emits
+`:wm/revision-selection-dispatch-v1` from the revised action selected by the
+revision receipt and the exact effective construction supplied to both
+revision author and reviewer.  It separately records selected/dispatched
+action and step digests.  Divergence refuses even when the git commit matches;
+a matching dispatch with a wrong commit refuses under the separate
+`:artifact-binding` gap.  Admission is `:admitted` only when the proposal
+producer's actual admission receipt says so and binds the construction-receipt
+digest; `:status :revised` alone is not admission evidence.
+
+This dispatch carrier does **not** prove that the author used the retrieved
+pattern.  Existing post-author carriers do not close that gap: the build
+judgment deliberately records `:patterns-used []` with use pending; the D-task
+occurrence and cascade feedback remain bound to the original pre-revision
+action; feature-card, reviewer approval, grounding, and artifact commit do not
+attribute the change to the newly retrieved pattern.  A production refinement
+certificate therefore ends at `:dispatched` with typed gap
+`:pattern-use/:observation-unavailable`.  `:verified-used` requires a separate
+`:wm/revision-pattern-use-observation-v1` matching the retrieved pattern and
+dispatched-action digest; mismatched evidence refuses.  The narrow missing
+producer is a reviewer-verified pattern-application observation in the
+revision return/result receipt, retained through close.  Prompt inclusion,
+approval, commit existence, and grounded change are not substitutes.
 
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
-prior/revised identities, admission, enabled/enacted step, outcome, and gaps.
+prior/revised identities, admission, enabled/dispatched step, separate artifact
+commit, observed-use stage, outcome, and gaps.
 This slice remains runtime-only: current Lean declarations do not state the
 reviewer observation, retrieve/author branch, or prior→revised relation.  The
 future theorem must say an admitted refinement preserves the prior identity,

@@ -8,19 +8,19 @@
   {:precedence [{:id :p/new}]
    :construction-receipt {:kind :machine-constructed}})
 
-(defn fixture-revision [enacted-action enacted-commit]
+(defn fixture-revision [dispatched-action artifact-commit]
   {:round 2 :commits ["aaa1111" "bbb2222"]
-   :artifact-binding {:commit enacted-commit}
-   :selection-enaction
+   :artifact-binding {:commit artifact-commit}
+   :selection-dispatch
    (let [selected-step {:id :p/new}
-         enacted-step (first (:precedence enacted-action))]
-     {:schema :wm/revision-selection-enaction-v1
-      :verdict (if (= revised-action enacted-action) :match :typed-divergence)
+         dispatched-step (first (:precedence dispatched-action))]
+     {:schema :wm/revision-selection-dispatch-v1
+      :verdict (if (= revised-action dispatched-action) :match :typed-divergence)
       :selected-action-sha256 (identity/digest revised-action)
-      :enacted-action-sha256 (identity/digest enacted-action)
+      :dispatched-action-sha256 (identity/digest dispatched-action)
       :selected-step-sha256 (identity/digest selected-step)
-      :enacted-step-sha256 (identity/digest enacted-step)
-      :selected-step selected-step :enacted-step enacted-step})
+      :dispatched-step-sha256 (identity/digest dispatched-step)
+      :selected-step selected-step :dispatched-step dispatched-step})
    :cascade-revision
    {:status :revised
     :blocker {:stage :reviewer-verdict :kind :review-request-changes}
@@ -39,14 +39,20 @@
                                     :reason :admitted-reading}]}}
     :revised revised-action}})
 
-(deftest complete-retrieval-refinement-is-durable-and-briefable
+(def matching-pattern-use
+  {:schema sut/pattern-use-schema :status :verified :pattern :p/new
+   :action-sha256 (identity/digest revised-action)
+   :source {:authority :reviewed-pattern-application}})
+
+(deftest matching-observed-use-is-durable-and-briefable
   (let [cert (sut/certificate {:revision (fixture-revision revised-action "bbb2222")
-                               :enacted-commit "bbb2222"
+                               :artifact-commit "bbb2222"
+                               :pattern-use matching-pattern-use
                                :outcome {:status :recorded :value :grounded-change}})
         summary (brief/item-summary "/fixture/item.edn"
                                     {:attempt-id "attempt-r" :outcome :grounded-change
                                      :open-cascade-refinement cert})]
-    (is (= :complete (:status cert)))
+    (is (= :verified-used (:status cert)))
     (is (= :retrieved-existing (:branch cert)))
     (is (= :absent (get-in cert [:branch-capabilities :authored-new :status])))
     (is (= {:stage :reviewer-verdict :kind :review-request-changes}
@@ -56,21 +62,38 @@
     (is (= "revised-id" (get-in summary [:open-cascade-refinement :revised-identity])))
     (is (= :admitted (get-in summary [:open-cascade-refinement :admission-verdict])))
     (is (= :p/new (get-in summary [:open-cascade-refinement :enabled-step])))
-    (is (= {:id :p/new} (get-in summary [:open-cascade-refinement :enacted-step])))
+    (is (= {:id :p/new} (get-in summary [:open-cascade-refinement :dispatched-step])))
     (is (= "bbb2222" (get-in summary [:open-cascade-refinement :artifact-commit])))
+    (is (= :verified (get-in summary [:open-cascade-refinement :pattern-use-status])))
     (is (= [] (get-in summary [:open-cascade-refinement :typed-gaps])))))
 
-(deftest same-commit-with-different-enacted-action-refuses
+(deftest same-commit-with-different-dispatched-action-refuses
   (let [different (assoc revised-action :precedence [{:id :p/different}])
         cert (sut/certificate {:revision (fixture-revision different "bbb2222")
-                               :enacted-commit "bbb2222"
+                               :artifact-commit "bbb2222"
                                :outcome {:status :recorded :value :grounded-change}})]
     (is (= :refused (:status cert)))
-    (is (= :selected-to-enacted (get-in cert [:typed-gaps 0 :field])))))
+    (is (= :selected-to-dispatched (get-in cert [:typed-gaps 0 :field])))))
+
+(deftest matching-dispatch-and-commit-without-observed-use-is-not-verified-use
+  (let [cert (sut/certificate {:revision (fixture-revision revised-action "bbb2222")
+                               :artifact-commit "bbb2222"
+                               :outcome {:status :recorded :value :grounded-change}})]
+    (is (= :dispatched (:status cert)))
+    (is (= :pattern-use (get-in cert [:typed-gaps 0 :field])))
+    (is (= :observation-unavailable (get-in cert [:typed-gaps 0 :reason])))))
+
+(deftest observed-use-for-a-different-pattern-refuses
+  (let [cert (sut/certificate {:revision (fixture-revision revised-action "bbb2222")
+                               :artifact-commit "bbb2222"
+                               :pattern-use (assoc matching-pattern-use :pattern :p/other)
+                               :outcome {:status :recorded :value :grounded-change}})]
+    (is (= :refused (:status cert)))
+    (is (= :observation-mismatch (get-in cert [:typed-gaps 0 :reason])))))
 
 (deftest matching-action-with-wrong-artifact-commit-refuses-separately
   (let [cert (sut/certificate {:revision (fixture-revision revised-action "bbb2222")
-                               :enacted-commit "ccc3333"
+                               :artifact-commit "ccc3333"
                                :outcome {:status :recorded :value :grounded-change}})]
     (is (= :refused (:status cert)))
     (is (= :artifact-binding (get-in cert [:typed-gaps 0 :field])))
@@ -81,6 +104,6 @@
                                       :commit "bbb2222"}
                                      :grounded-change)]
     (is (= sut/schema (get-in data [:open-cascade-refinement :schema])))
-    (is (= :complete (get-in data [:open-cascade-refinement :status])))
+    (is (= :dispatched (get-in data [:open-cascade-refinement :status])))
     (is (= "revised-id"
            (get-in data [:open-cascade-refinement :revised :identity])))))
