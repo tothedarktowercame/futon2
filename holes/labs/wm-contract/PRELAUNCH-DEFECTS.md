@@ -73,6 +73,12 @@ data root `/tmp/futon2-test-data-609246017081230561/`.
   checkpoint summaries despite the evidence above (D20).
 - Harness tests before launch: 4 tests, 8 assertions, 0 failures/errors.
 
+## claude-12 turn 3 (2026-10-10): D21 fixed, D19 diagnosed, D22 found
+
+- D21 FIXED on main (51a9b0e7f): finding-ticket/destinations compared the store with canonical-store, which data-paths resolves to the TEST store under a test root, so the test store published into /home/joe/code/futon2. It now compares with the production store, refuses the production store in a test JVM, and the committer refuses the canonical checkout in test mode. The existing test canonical-store-queue-is-untracked-runtime-state ASSERTED the leak; rewritten. The same capability at runner start (discharge-receipt catch-up!) and close (finalize-run!) defaulted to the hard-coded checkout; a test JVM now gets no default repo. 79a523906 reverted on main (1c52c50bf, never pushed).
+- D19 DIAGNOSED: re-running d-task/capture on the replay record's own :d-task-context throws :precision-family-tampered (policy_precision_carry validate-binding! -> intact?). capture-result hid it (now fixed: refusals carry class, message, kind, ex-data). Cause: interpretation-evidence/value-digest (`stable`) sorts maps and descends vectors only, never sets or seqs; the family holds 103,563 sets, so a SEALED family read back from disk never passes intact?. Click 51's ORIGINAL checkpoint (never interned) fails intact? too, so this is not interning. The replay fed the persisted family (selection bypassed, D8); production seals and validates in memory. So D19 is a replay artifact, PROVIDED nothing mutates the family between seal and dispatch in production; the replay must run selection live to show that.
+- D22 (new): value-digest is not stable across an EDN round trip (sets and seqs are not canonicalized), so any sealed value with sets cannot be re-verified after persistence (construction_receipt_lean_adapter.clj:666 checks intact? on a persisted precision state). Not on the click path (claude-12's reading: policy.clj:580's beta-state has no sets). Changing value-digest would invalidate every stored seal, so the fix needs a versioned digest. OPEN; codex-68 to judge whether it bears on launch.
+
 ## Sign-offs
 
 (none yet)
