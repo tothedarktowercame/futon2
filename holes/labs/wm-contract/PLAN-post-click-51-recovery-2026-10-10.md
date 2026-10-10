@@ -343,6 +343,22 @@ route receipts from one collected list of supplied values.  It no longer calls
 the supplier again while computing weights, so the compared values cannot
 diverge from the retained routes.
 
+Final trust-boundary correction: `CalibrationLaw` now carries an explicit law
+identity and authority as well as model/version and evaluator.  The bootstrap
+binds that law identity.  `ValidBootstrap` requires the law authority to differ
+from the scorer and requires an external registry relation over the exact
+`(identity, version, evaluator function, authority)` tuple.  Consequently the
+same model/version strings do not authorize a substituted evaluator;
+`selfAuthoredCalibrationLaw_refuses` and
+`unauthorizedSubstitutedEvaluator_refuses` are the negative witnesses.
+
+This is authoritative function identity at the Lean boundary, not
+cryptographic or source-byte pinning.  Runtime correspondence still owes a
+pinned registry record that resolves law identity/version/authority to exact
+implementation bytes or an equivalent immutable digest, then supplies the
+corresponding evaluator.  No such runtime registry or producer is claimed by
+this Lean-only correction.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
