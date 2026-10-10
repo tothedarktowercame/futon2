@@ -9,11 +9,16 @@
             [futon2.aif.interpretation-request :as request]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.repair-proposals :as repairs]
-            [futon2.aif.repair-obligation :as repair])
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardOpenOption]
            [java.util UUID]))
 
-(def default-dir (str (io/file registry/default-code-root "futon2" "data" "wm-cascade-proposals")))
+(def default-dir (data-paths/path "wm-cascade-proposals"))
+(defn resolved-dir []
+  (if (= default-dir (data-paths/path "wm-cascade-proposals"))
+    (data-paths/path "wm-cascade-proposals")
+    default-dir))
 
 (defn- decline [target reason details]
   {:target target :stage :proposal-supply :reason reason :missing-evidence details})
@@ -102,7 +107,7 @@
         {:target target :proposals [] :declines (:declines record)}))))
 
 (defn load-proposals
-  ([] (load-proposals default-dir))
+  ([] (load-proposals (resolved-dir)))
   ([dir]
    (let [files (->> (file-seq (io/file dir))
                     (filter #(and (.isFile %) (= "proposal.edn" (.getName %))))
@@ -115,7 +120,7 @@
 (defn load-supply
   "Combine retained retrieval evidence with a fresh open-repair-store read."
   [{:keys [proposal-dir repair-root]}]
-  (let [retrieved (load-proposals (or proposal-dir default-dir))
+  (let [retrieved (load-proposals (or proposal-dir (resolved-dir)))
         findings (repairs/supply (or repair-root (repair/resolved-root)))]
     (-> retrieved
         (update :proposals into (:proposals findings))
@@ -124,7 +129,7 @@
 
 (defn -main [target kind dir]
   (try
-    (println (pr-str (generate-retrieval! target (keyword kind) (or dir default-dir))))
+    (println (pr-str (generate-retrieval! target (keyword kind) (or dir (resolved-dir)))))
     (finally (shutdown-agents))))
 
 (defn record-supply

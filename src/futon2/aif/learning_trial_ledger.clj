@@ -12,9 +12,9 @@
 
 (load-identity/register! *ns* *file*)
 ;; Absolute, like the cohort root: the serving JVM runs with futon3c as cwd.
-(def default-root "/home/joe/code/futon2/data/wm-learning-trials")
+(def default-root (data-paths/path "wm-learning-trials"))
 (defn resolved-root []
-  (if (= default-root "/home/joe/code/futon2/data/wm-learning-trials")
+  (if (= default-root (data-paths/path "wm-learning-trials"))
     (data-paths/path "wm-learning-trials")
     default-root))
 (defonce ^:private mutex (Object.))

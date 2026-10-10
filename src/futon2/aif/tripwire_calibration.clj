@@ -4,18 +4,17 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.tripwire :as tripwire])
+            [futon2.aif.tripwire :as tripwire]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardOpenOption]
            [java.time Instant]))
 
 (def default-phase-log
-  "/home/joe/code/futon2/data/wm-tripwires/incidents/attempt-006-author-wait.edn.log")
-(def attempt-006-source-ledger
-  "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
-(def default-coverage-path
-  "/home/joe/code/futon2/data/wm-tripwires/coverage-v2.edn")
+  (data-paths/path "wm-tripwires" "incidents" "attempt-006-author-wait.edn.log"))
+(def attempt-006-source-ledger (data-paths/path "wm-full-loop-phases.edn.log"))
+(def default-coverage-path (data-paths/path "wm-tripwires" "coverage-v2.edn"))
 (def run-5b-incident-path
-  "/home/joe/code/futon2/data/wm-tripwires/incidents/run-5b-artifact-binding.edn")
+  (data-paths/path "wm-tripwires" "incidents" "run-5b-artifact-binding.edn"))
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory

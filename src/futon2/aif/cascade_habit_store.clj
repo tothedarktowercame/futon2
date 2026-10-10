@@ -13,11 +13,9 @@
 
 (load-identity/register! *ns* *file*)
 
-(def default-path
-  (str (System/getProperty "user.home") "/code/futon2/data/wm-habit/cascade-prior.edn"))
+(def default-path (data-paths/path "wm-habit" "cascade-prior.edn"))
 (defn resolved-path []
-  (let [production (str (System/getProperty "user.home")
-                        "/code/futon2/data/wm-habit/cascade-prior.edn")]
+  (let [production (data-paths/path "wm-habit" "cascade-prior.edn")]
     (if (= default-path production)
       (data-paths/path "wm-habit" "cascade-prior.edn")
       default-path)))

@@ -24,7 +24,8 @@
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.interpretation-request :as ireq])
+            [futon2.aif.interpretation-request :as ireq]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
 
@@ -345,7 +346,7 @@
   "Machine-published interpretations, one file per target. Kept apart from
   resources/wm/cascade-sources (hand-written declarations), which win on any
   pattern they both name."
-  "/home/joe/code/futon2/data/wm-interpretations")
+  (data-paths/path "wm-interpretations"))
 
 (defn content-id [kind x]
   (str (name kind) "-" (subs (evidence/sha256 (.getBytes (pr-str x) "UTF-8")) 0 16)))

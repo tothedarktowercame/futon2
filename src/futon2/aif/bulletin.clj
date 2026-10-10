@@ -22,7 +22,8 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [futon2.aif.morning-brief :as brief])
+            [futon2.aif.morning-brief :as brief]
+            [futon2.data-paths :as data-paths])
   (:import [java.time LocalDate]))
 
 (def ^:private home (System/getProperty "user.home"))
@@ -42,12 +43,12 @@
    :run-era-ledger (str home "/code/futon2/holes/labs/wm-contract/run-era-ledger.edn")
    :runs-repo (str home "/code/futon2")
    :runs-rel "holes/labs/wm-contract/runs"
-   :tripwire-root "/home/joe/code/futon2/data/wm-tripwires/trips"
-   :trace-root "/home/joe/code/futon2/data/wm-trace"
+   :tripwire-root (data-paths/path "wm-tripwires" "trips")
+   :trace-root (data-paths/path "wm-trace")
    :trace-review-ledger (str home "/code/futon2/holes/labs/zaif-harness/trace-review-ledger.edn")
    :out-dir (str home "/code/futon2/holes/labs/wm-contract/bulletins")
    :bulletin-rel-dir "holes/labs/wm-contract/bulletins"
-   :brief-root brief/default-root})
+   :brief-root (brief/resolved-root)})
 
 ;; ---------------------------------------------------------------- git reads
 
@@ -508,7 +509,7 @@
           "so rather than disappearing.")
      ""
      (str "Machine-readable twin: morning-brief item `bulletin-" date
-          "` under `" brief/default-root "/items/`. Its two typed questions --"
+          "` under `" (brief/resolved-root) "/items/`. Its two typed questions --"
           " *was this the best available policy selection?* and *did the result"
           " substantively advance the selected target?* -- are answered with"
           " `futon2.aif.morning-brief/review!`, the review path that already"

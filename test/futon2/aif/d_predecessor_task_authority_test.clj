@@ -12,10 +12,18 @@
             [futon2.aif.task-execution-evidence :as execution]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.trace :as trace]
+            [futon2.data-paths :as data-paths]
             [clojure.edn :as edn])
   (:import (java.nio.file Files) (java.time Instant) (java.util UUID)))
 
 (def ^:dynamic *git-environment* (into {} (System/getenv)))
+
+(deftest historical-production-defaults-resolve-through-test-authority
+  (let [expected (data-paths/path "wm-d-task-enactment")
+        canonical (str (io/file data-paths/production-data-root
+                                "wm-d-task-enactment"))]
+    (is (= expected (#'task/effective-root "data/wm-d-task-enactment")))
+    (is (= expected (#'task/effective-root canonical)))))
 
 (def ^:private git-routing-environment-keys
   ["GIT_DIR" "GIT_WORK_TREE" "GIT_INDEX_FILE" "GIT_COMMON_DIR"])

@@ -6,7 +6,8 @@
             [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.observation-checks :as checks]))
+            [futon2.aif.observation-checks :as checks]
+            [futon2.data-paths :as data-paths]))
 
 (load-identity/register! *ns* *file*)
 
@@ -196,7 +197,7 @@
    :source {:path :sha256} — the record file and its digest — so
    collect-window can verify the tie."
   ([] (rows-from-runs nil nil))
-  ([declaration] (rows-from-runs declaration "data/wm-runs"))
+  ([declaration] (rows-from-runs declaration (data-paths/path "wm-runs")))
   ([declaration run-root]
    (let [mapping-entry (read-mapping)
          mapping (:mapping mapping-entry)
@@ -229,7 +230,7 @@
 
 (defn snapshot
   "Compute the collection packet from the declaration and durable run ledger."
-  ([declaration] (snapshot declaration "data/wm-runs"))
+  ([declaration] (snapshot declaration (data-paths/path "wm-runs")))
   ([declaration run-root]
    (collect-window declaration (rows-from-runs declaration run-root))))
 
@@ -261,7 +262,7 @@
   "Atomically materialize the collection packet. The disposition is therefore
   written only when collect-window has verified enough durable source rows."
   ([declaration-path output-path]
-   (write-snapshot! declaration-path "data/wm-runs" output-path))
+   (write-snapshot! declaration-path (data-paths/path "wm-runs") output-path))
   ([declaration-path run-root output-path]
    (let [declaration (edn/read-string (slurp declaration-path))
          packet (snapshot declaration run-root)

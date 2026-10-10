@@ -8,11 +8,12 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.selection-gain :as selection-gain])
+            [futon2.aif.selection-gain :as selection-gain]
+            [futon2.data-paths :as data-paths])
   (:import (java.io RandomAccessFile)
            (java.nio.file Files StandardCopyOption)))
 
-(def default-trace-dir "data/wm-trace")
+(def default-trace-dir (data-paths/path "wm-trace"))
 (def default-expected-coverage-dg -0.25)
 (def default-futility-threshold 5)
 

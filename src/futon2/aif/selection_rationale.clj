@@ -62,9 +62,9 @@
    (`.gitignore:49`); a run-store slice under
    `holes/labs/wm-contract/runs/<run-id>/` is assembled from here exactly as
    `wm-trace-s5.edn` was assembled from `data/wm-trace/`."
-  (str (System/getProperty "user.home") "/code/futon2/data/wm-rationale"))
+  (data-paths/path "wm-rationale"))
 (defn resolved-store-dir []
-  (let [production (str (System/getProperty "user.home") "/code/futon2/data/wm-rationale")]
+  (let [production (data-paths/path "wm-rationale")]
     (if (= default-store-dir production)
       (data-paths/path "wm-rationale")
       default-store-dir)))

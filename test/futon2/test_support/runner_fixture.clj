@@ -113,6 +113,10 @@
                         :codex-7 {:status "idle" :invoke-ready? true}
                         :codex-1 {:status "idle" :invoke-ready? true}})
     :judge-fn (fn [_] {:judgement judgement})
+    ;; Keep dynamically loaded historical runners hermetic too.  Some pinned
+    ;; sources predate data-paths and otherwise fall back to a CWD-relative
+    ;; data/wm-d-task-enactment root.
+    :d-task-evidence-root (data-paths/path "wm-d-task-enactment")
     :refresh-fn (fn [])
     :substrate-preflight-fn (fn [_] {:route :test})
     :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
