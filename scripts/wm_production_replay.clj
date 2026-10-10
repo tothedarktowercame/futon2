@@ -90,6 +90,11 @@
                          (= attempt-id (.getName ^java.io.File %)))
                    (file-seq (io/file data-root))))))
 
+(defn cohort-attempt-dir [data-root cohort-id attempt-id]
+  (when (and cohort-id attempt-id)
+    (let [directory (io/file data-root (name cohort-id) attempt-id)]
+      (when (.isDirectory directory) directory))))
+
 (defn replay!
   [{:keys [selection output-root run-id live-selection?]
     :or {run-id (str "offline-replay-" (UUID/randomUUID))}}]
@@ -192,7 +197,9 @@
       (try
         (let [result (runner/run-opportunity! opts)
               record-path (.getPath (io/file record-dir (str "tick-run-record-" run-id ".edn")))
-              attempt-dir (find-attempt-dir data-root (:attempt-id result))
+              attempt-dir (cohort-attempt-dir data-root
+                                              :wm-offline-production-replay-v1
+                                              (:attempt-id result))
               checkpoints (when attempt-dir
                             (into (sorted-map)
                                   (for [f (file-seq attempt-dir)

@@ -50,6 +50,21 @@
     (is (= (.getCanonicalPath attempt)
            (.getCanonicalPath (replay/find-attempt-dir root "attempt-001"))))))
 
+(deftest cohort-attempt-discovery-does-not-select-a-copied-production-attempt
+  (let [root (.toFile (Files/createTempDirectory
+                       "wm-replay-cohort-attempt-test-"
+                       (make-array FileAttribute 0)))
+        copied (io/file root "wm-full-loop" "old" "attempt-001")
+        replay-attempt (io/file root "wm-offline-production-replay-v1"
+                                "attempt-001")]
+    (.mkdirs copied)
+    (.mkdirs replay-attempt)
+    (is (= (.getCanonicalPath replay-attempt)
+           (.getCanonicalPath
+            (replay/cohort-attempt-dir root
+                                       :wm-offline-production-replay-v1
+                                       "attempt-001"))))))
+
 (deftest isolation-change-is-a-typed-refusal
   (is (true? (replay/assert-isolation! {:head "a"} {:head "a"})))
   (try
