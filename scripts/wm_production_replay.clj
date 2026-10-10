@@ -24,6 +24,8 @@
 (def phases [:selection :selection-persist :construction :d-task-capture
              :author-dispatch :close])
 
+(defn no-interpretation-ask [& _] nil)
+
 (defn read-edn! [path]
   ;; Checkpoints may be interned (durable-intern).
   (with-open [r (java.io.PushbackReader. (io/reader path))]
@@ -149,7 +151,10 @@
                :roster-fn (fn [_] {:offline-author {:status "idle" :invoke-ready? true}
                                     :offline-reviewer {:status "idle" :invoke-ready? true}
                                     :offline-repair-reviewer {:status "idle" :invoke-ready? true}})
-               :interpretation-ask-fn nil
+               ;; A nil option falls back to production's click-ask function.
+               ;; Supply a real no-op so the replay has exactly one external
+               ;; boundary: the stubbed author dispatch below.
+               :interpretation-ask-fn no-interpretation-ask
                :trace-fn (fn [_] (.getPath (io/file trace-dir (str run-id ".edn"))))
                ;; This is the sole simulated external boundary.  Refusal is
                ;; intentional: no repository or substrate actuator follows it.

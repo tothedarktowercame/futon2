@@ -57,3 +57,7 @@
     (is false "changed canonical state must refuse")
     (catch clojure.lang.ExceptionInfo e
       (is (= :replay-isolation-violation (:failure-kind (ex-data e)))))))
+
+(deftest interpretation-ask-is-explicitly-disabled
+  (is (fn? replay/no-interpretation-ask))
+  (is (nil? (replay/no-interpretation-ask :any :arguments))))
