@@ -12,7 +12,11 @@
   {:P {:guard {:needs #{} :forbids #{}} :produces #{:q}}
    :Q {:guard {:needs #{:q} :forbids #{}} :produces #{:w}}
    :R {:guard {:needs #{} :forbids #{}} :produces #{:r}}})
-(def receipts (zipmap (keys interpretations) (repeat {:kind :fixture-interpretation :by "test"})))
+(def blend-square
+  (edn/read-string (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+(def receipts
+  (zipmap (keys interpretations)
+          (repeat {:kind :fixture-interpretation :by "test" :blend-square blend-square})))
 (def observation {:q false :w false :r false})
 (defn model-order [patterns order]
   (mapv #(policy/token-interpretation % (get patterns %)) order))
@@ -110,6 +114,35 @@
                  (get-in bad [:declines 0 :reason])))
           (is (= [:construction-relations]
                  (get-in bad [:declines 0 :missing-evidence]))))))))
+
+(deftest three-halves-square-is-required-before-g
+  (let [candidates (:candidates (sut/construct input))
+        assembled (problems/assemble
+                   {:targets [(:target input)]
+                    :sources {:universes {(:target input) observation}
+                              :wants {(:target input) [:w]}
+                              :interpretations {(:target input) {:patterns interpretations
+                                                                 :receipts receipts}}
+                              :locators {(:target input) (zipmap (keys observation)
+                                                                 (repeat {:class :C4}))}
+                              :candidates {(:target input) candidates}
+                              :horizon-steps 2 :beta-by-context {:WM 1}
+                              :context-of (constantly :WM)}})
+        problem (first (:problems assembled))
+        admit #'wm-cd/admit-cascade-problem
+        missing (-> problem
+                    (update :interpretation-receipts
+                            #(update % :P dissoc :blend-square))
+                    (update :constructed-candidates
+                            (fn [candidates]
+                              (mapv #(assoc-in % [:construction-receipt :blend-squares :P] nil)
+                                    candidates)))
+                    admit)]
+    (is (nil? (:problem missing)))
+    (is (= :three-halves-square-invalid (get-in missing [:declines 0 :reason])))
+    (is (= :square-schema
+           (get-in missing [:declines 0 :evidence :three-halves-square :P
+                            :missing-evidence 0])))))
 
 (deftest limits-and-economics-are-not-overridden
   (doseq [[edit kind] [[#(dissoc % :budget) :budget-required]
@@ -282,7 +315,7 @@
 (defn- without-relation-contract [result]
   (update result :candidates
           #(mapv (fn [candidate]
-                   (update candidate :construction-receipt dissoc :relations)) %)))
+                   (update candidate :construction-receipt dissoc :relations :blend-squares)) %)))
 
 (deftest nf-1-one-nan-is-left-out-the-finite-two-are-compared
   (let [r (sut/construct (three-input {:P ##NaN :P2 1.5 :P3 2}))

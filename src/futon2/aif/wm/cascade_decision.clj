@@ -27,6 +27,7 @@
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
@@ -1312,7 +1313,15 @@
         receipts (:interpretation-receipts problem)
         checked
         (mapv (fn [{:keys [candidate-id precedence construction-receipt] :as pair}]
-                (let [missing (cond-> []
+                (let [square-findings
+                      (into {}
+                            (map (fn [id]
+                                   [id (three-halves-square/validate
+                                        (or (get-in pair [:interpretation-receipts id :blend-square])
+                                            (get-in receipts [id :blend-square])
+                                            (get-in construction-receipt [:blend-squares id])))]))
+                            precedence)
+                      missing (cond-> []
                                 (not (and (vector? precedence) (seq precedence)))
                                 (conj :nonempty-precedence)
                                 (nil? construction-receipt) (conj :construction-receipt)
@@ -1322,18 +1331,28 @@
                                 (conj :construction-relations)
                                 (some #(not (map? (get patterns %))) precedence)
                                 (conj :pattern-interpretation)
+                                (some #(not= :valid (:status (get square-findings %))) precedence)
+                                (conj :three-halves-square)
                                 (or (not (seq receipts))
                                     (some #(not (and (map? (get receipts %)) (seq (get receipts %)))) precedence))
                                 (conj :interpretation-receipt))]
                   (if (seq missing)
-                    {:decline {:target target :stage :candidate-admission
+                    {:decline (cond-> {:target target :stage :candidate-admission
                                :candidate candidate-id
                                :reason (cond
                                          (some #{:nonempty-precedence} missing) :empty-cascade
                                          (some #{:construction-receipt} missing) :construction-receipt-unmatched
                                          (some #{:construction-relations} missing) :machine-construction-relations-invalid
+                                         (some #{:three-halves-square} missing) :three-halves-square-invalid
                                          :else :interpretation-receipts-missing)
-                               :missing-evidence missing}}
+                               :missing-evidence missing}
+                                (some #{:three-halves-square} missing)
+                                (assoc :evidence
+                                       {:three-halves-square
+                                        (into {}
+                                              (filter (fn [[_ result]]
+                                                        (not= :valid (:status result))))
+                                              square-findings)}))}
                     (if-let [no-progress (candidate-want-progress (:cascade-problem problem) precedence)]
                       {:decline (merge {:target target :stage :candidate-admission
                                         :candidate candidate-id

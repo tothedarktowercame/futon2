@@ -51,6 +51,45 @@ not a reason to disregard the requirement.
    - stop or emit a typed repair obligation when no warranted refinement is
      available.
 
+### Open-cascade refinement certificate
+
+Joe, 2026-10-10: keeping the cascade open as the run progresses is the largest
+architectural change.  A stuck run must not merely fail and defer the problem.
+It performs one of two explicitly receipted moves:
+
+1. search the pattern library for related patterns, select a warranted result,
+   revise the live cascade, and use that pattern to get unstuck; or
+2. when the search finds no adequate pattern, author a new pattern, admit it
+   through the same interpretation/construction checks, revise the live
+   cascade, and use it to get unstuck.
+
+The refinement certificate must retain at least:
+
+- the selected cascade and the observation/blocker that opened refinement;
+- the library snapshot and search query/evidence;
+- every related pattern considered and the reason for selection or rejection;
+- either the existing pattern selected, or the full newly authored pattern
+  with provenance and admission evidence;
+- the revised cascade, its relation to the prior cascade, and its canonical
+  construction/admission certificate;
+- the concrete next step enabled by the revision and its selected-to-enacted
+  identity; and
+- the result of applying it, including another typed refinement or stop if it
+  still does not progress.
+
+These certificates are first-class Morning Briefing inputs.  The briefing
+must show which runs became stuck, which branch was taken (retrieve or author),
+what pattern changed the cascade, whether it enabled progress, and any case
+where neither branch produced an admissible revision.  A repair obligation may
+remain as escalation evidence, but writing one without first executing and
+certifying the retrieve-or-author process does not satisfy this requirement.
+
+Falsifiers include: a stuck boundary closes directly to a repair obligation;
+search results or rejected candidates are absent; a newly written pattern is
+used without normal admission; the revised cascade is not compared with and
+linked to its predecessor; the enabled step is not enacted; or the Morning
+Briefing cannot reconstruct the refinement chain from durable receipts.
+
 This extends the already recorded property in `M-G-wm-wiring.md`: G applies
 to partial cascades, which are constructed progressively per problem.  The
 new requirement is that progressive construction remains live during the
@@ -462,6 +501,34 @@ or weaken an existing definition merely to accommodate current Clojure.
   `CascadeEFE.Policy`.  `CandidateFamily.scored` remains deliberately
   post-score.  Thus defect 7's “wholly owed” wording is retracted, while its
   refusal to bless the historical generated population remains correct.
+
+- 2026-10-10, first additive 3/2 runtime-certificate slice: one occurrence
+  can now carry an explicit `:wm/three-halves-square-v1` reading in its pinned
+  interpretation receipt.  It records named finite theories and source pins
+  for `G/I1/I2/B`, the four partial-map graphs, and both auxiliary flags.
+  `futon2.aif.three-halves-square/validate` checks theory/map well-formedness,
+  required commutation, and `Cone.consistent`'s functional active-route join;
+  `admit-cascade-problem` refuses a missing or invalid occurrence before G as
+  `:three-halves-square-invalid` and retains the per-pattern evidence gaps.
+  The positive fixture is the v3-documented
+  `ukrns/publication-cadence` reading (one publication address, living input,
+  frozen input, both discoverable as the blend), pinned to the real library
+  bytes.  Its Nat codes have an exact `:names` table and are therefore not
+  anonymous substitutes for the reading.
+
+  Lean's additive `ThreeHalvesRuntimeCertificate.Receipt` projects directly
+  to the existing `ThreeHalvesBlend.Square`; `Receipt.valid` checks the same
+  pins, four hom-set memberships, required commutation, and consistency, and
+  `valid_projects_consistent` exposes the bridge.  The generated
+  `ThreeHalvesRuntimeWitness.publicationCadence_valid` elaborates from the
+  same fixture.  Adversarial tests reject a reversed map, a well-formed but
+  noncommuting pair of routes, inconsistent active routes, and an absent
+  square at the composition root.
+
+  This slice does **not** assert `Cone.isPushout`, coverage, gluings,
+  components, pasting, application-order evidence, or blend-to-transition
+  adequacy.  Those remain subsequent additive slices; consequently this is
+  not yet full `CascadeEFE.Policy` conformance.
 
 - 2026-10-10, item 5 stuck/refinement audit: the formal transition model does
   not derive a new pattern when a cascade is blocked.

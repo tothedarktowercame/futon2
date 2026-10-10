@@ -355,7 +355,13 @@
                                                        ;; :cyclic-containment
                                                        ;; refusal)
                                                        :order order
-                                                       :relations (construction/relation-witnesses c order))
+                                                       :relations (construction/relation-witnesses c order)
+                                                       :blend-squares
+                                                       (into {}
+                                                             (map (fn [id]
+                                                                    [id (get-in interpretation-receipts
+                                                                                [id :blend-square])]))
+                                                             (:precedence c)))
                                                     pattern-feedback
                                                     (assoc :pattern-feedback-prior
                                                            (feedback-prior c))))

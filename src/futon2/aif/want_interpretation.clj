@@ -85,6 +85,11 @@
                                                     :sha256 "of the bytes read"}
                                            :reading "how the pattern applies to this criterion"
                                            :scope-limit "what of the pattern does not transfer"
+                                           :blend-square
+                                           {:schema :wm/three-halves-square-v1
+                                            :objects "G/I1/I2/B, each with text, source pin, and named finite theory"
+                                            :maps "a1/a2/b1/b2 as sets of [source-code target-code] pairs"
+                                            :auxiliary "{:b1 boolean :b2 boolean}; never defaulted"}
                                            :by "answering agent id"}}
                   :or "a typed decline naming why no library pattern produces this want"}}
     retrieval (assoc :retrieval retrieval)))

@@ -131,6 +131,12 @@
 (def seams-text (slurp "test/fixtures/mission-criteria/M-futon-seams@futon3c-d05cb755.md"))
 (def proposals (clojure.edn/read-string
                 (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
+(def square-fixture
+  (clojure.edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+(defn- with-square [response]
+  (if (:decline response) response
+      (assoc-in response [:receipt :blend-square] square-fixture)))
 
 (defn- seams-sources []
   (let [w (mc/wants (mc/criteria "M-futon-seams" seams-text)
@@ -168,7 +174,7 @@
 (defn- req [want] {:target "M-futon-seams" :want {:token want}})
 
 (defn- validate [want resp sources]
-  (wi/validate-response (req want) resp
+  (wi/validate-response (req want) (with-square resp)
                         {:sources sources :constraints [owner-constraint]
                          :admit #'wm-cd/admit-cascade-problem
                          ;; the two library files' bytes, pinned: the receipt
@@ -247,7 +253,7 @@
                   :evaluate-g wm-cd/constructed-candidate-g}})
 
 (defn- validate-hand [resp]
-  (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} resp
+  (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} (with-square resp)
                         {:sources (hand-sources) :constraints []
                          :admit #'wm-cd/admit-cascade-problem
                          :code-root library-root}))

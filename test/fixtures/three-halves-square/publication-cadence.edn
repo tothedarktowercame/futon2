@@ -1,0 +1,24 @@
+{:schema :wm/three-halves-square-v1
+ :pattern :ukrns/publication-cadence
+ :objects
+ {:G {:text "one publication address"
+      :source {:path "futon3/library/ukrns/publication-cadence.flexiarg"
+               :sha256 "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"}
+      :theory {:elems #{0} :names {0 "publication-address"} :axioms #{}}}
+  :I1 {:text "living rendering at that address"
+       :source {:path "futon3/library/ukrns/publication-cadence.flexiarg"
+                :sha256 "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"}
+       :theory {:elems #{10 11} :names {10 "publication-address" 11 "living-rendering"} :axioms #{}}}
+  :I2 {:text "frozen citable snapshot at that address"
+       :source {:path "futon3/library/ukrns/publication-cadence.flexiarg"
+                :sha256 "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"}
+       :theory {:elems #{20 21} :names {20 "publication-address" 21 "frozen-snapshot"} :axioms #{}}}
+  :B {:text "living rendering and citable snapshot discoverable at one address"
+      :source {:path "futon3/library/ukrns/publication-cadence.flexiarg"
+               :sha256 "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"}
+      :theory {:elems #{30 31 32}
+               :names {30 "publication-address" 31 "living-rendering" 32 "frozen-snapshot"}
+               :axioms #{}}}}
+ :maps {:a1 #{[0 10]} :a2 #{[0 20]}
+        :b1 #{[10 30] [11 31]} :b2 #{[20 30] [21 32]}}
+ :auxiliary {:b1 false :b2 false}}

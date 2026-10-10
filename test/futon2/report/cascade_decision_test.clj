@@ -8,7 +8,8 @@
   declared β, and passes the result through decision-gate/emit!. With no
   problems it is the gated abstention. Different T or β across problems
   refuses :incommensurable-family."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.cascade-problems :as cp]
@@ -22,7 +23,33 @@
   "cp/assemble with every token given a fixture C3 locator (P5 locator
   requirement); tests about locators call cp/assemble directly."
   [m]
-  (cp/assemble (update m :sources locfix/locate-all)))
+  (let [square (edn/read-string
+                (slurp "test/fixtures/three-halves-square/publication-cadence.edn"))
+        m (update-in m [:sources :interpretations]
+                     (fn [targets]
+                       (into {}
+                             (map (fn [[target v]]
+                                    [target (update v :receipts
+                                                    (fn [receipts]
+                                                      (into {}
+                                                            (map (fn [[id receipt]]
+                                                                   [id (assoc receipt :blend-square square)]))
+                                                            receipts)))])
+                                  targets))))]
+    (update (cp/assemble (update m :sources locfix/locate-all)) :problems
+            (fn [problems]
+              (mapv (fn [problem]
+                      (let [attach (fn [receipts]
+                                     (into {} (map (fn [[id r]]
+                                                     [id (assoc r :blend-square square)])) receipts))]
+                        (-> problem
+                            (update :interpretation-receipts attach)
+                            (update :constructed-candidates
+                                    (fn [candidates]
+                                      (mapv (fn [candidate]
+                                              (update candidate :interpretation-receipts attach))
+                                            candidates))))))
+                    problems)))))
 
 (def tick-1-target :wm-tick-001-observation-crash)
 
