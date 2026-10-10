@@ -17,7 +17,7 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
-   "gradedPreferenceSteps" "progressivePreferenceRequired" "gTerms" "policiesWithRiskTerm"
+   "gradedPreferenceSteps" "preferenceSemantics" "gTerms" "policiesWithRiskTerm"
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice"
@@ -199,8 +199,26 @@
         construction (target-construction-facts cert)
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
-        model (or (some-> gpolicies first (get-in [:terms :A :value]))
-                  (some-> scoring vals first :observation-model))
+        scoring-rows (when (map? scoring) (vec (map val (sort-by key scoring))))
+        models (when scoring-rows
+                 (mapv (fn [idx row]
+                         (or (:observation-model row)
+                             (get-in gpolicies [idx :terms :A :value])))
+                       (range (count scoring-rows)) scoring-rows))
+        model-signature (fn [m]
+                          (when (and (map? m)
+                                     (contains? #{:terminal-only :constant :progressive}
+                                                (:preference-semantics m)))
+                            {:horizon (:horizon m)
+                             :preference (or (:class-preference m)
+                                             (:progress-preference m))
+                             :semantics (:preference-semantics m)}))
+        signatures (mapv model-signature models)
+        q4-model-coherent? (and (seq models)
+                                (= (count models) (count policy-ids))
+                                (every? some? signatures)
+                                (apply = signatures))
+        model (when q4-model-coherent? (first models))
         horizon (:horizon model)
         c-pref (or (:class-preference model) (:progress-preference model))
         pref-steps (when (map? c-pref)
@@ -264,14 +282,16 @@
                                         (set (for [c candidates :when (numeric-g? c)]
                                                (action-identity/digest (:id c))))))
                                       (nr "constructed cascades or per-candidate numeric G absent"))
-               "horizonLength" (or horizon (nr "observation-model horizon absent"))
+               "horizonLength" (or horizon (nr "common declared per-policy observation model unavailable"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
-                                     (nr "step-indexed class preference absent"))
+                                     (nr "common declared per-policy preference schedule unavailable"))
                "gradedPreferenceSteps"
                (if (some? graded-pref-steps) (vec (sort graded-pref-steps))
-                   (nr "completed-progress preference rows absent"))
-               "progressivePreferenceRequired"
-               (= :progressive (:preference-semantics model))
+                   (nr "common declared per-policy graded schedule unavailable"))
+               "preferenceSemantics"
+               (if q4-model-coherent?
+                 (name (:preference-semantics model))
+                 (nr "per-policy horizon/preference/semantics missing or non-uniform"))
                "gTerms" (if (and (seq g-term-rows) q4-counts-coherent?)
                             {"risk" (every? #(recorded-term? :risk %) g-term-rows)
                              "ambiguity" (every? #(recorded-term? :ambiguity %) g-term-rows)

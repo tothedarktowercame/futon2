@@ -475,12 +475,18 @@ or weaken an existing definition merely to accommodate current Clojure.
   ambiguity/information values are evaluated terms, not missing carriers, and
   its waiting rows at taus 1--3 are preferences, not absent C-tau rows.  The
   repaired Q4 distinguishes finite carrier presence from numeric positivity;
-  it requires graded rows only when `:preference-semantics :progressive` is
-  declared.  Read-only export of the exact 2026-10-05 record now measures one
-  compared policy, horizon 4, preference steps `[0 1 2 3]`, graded steps `[]`,
-  `progressivePreferenceRequired=false`, all three G-term carriers true, and
-  all three per-policy carrier counts equal to one.  No runtime score,
-  observation distribution, preference value, or persisted record changed.
+  it requires graded rows only when explicit `:preference-semantics
+  :progressive` is declared, while explicit `:terminal-only` or `:constant`
+  may waive grading.  A follow-up grain audit found that the exact 2026-10-05
+  record carries no `:preference-semantics` declaration at all.  It therefore
+  remains Q4-unverifiable: semantics, common horizon, and common preference
+  schedule export as typed NR rather than silently treating absence as
+  terminal-only.  Its three zero-or-finite G-term carriers and per-policy
+  counts remain truthfully present.  The exporter now compares the model
+  signature of every policy occurrence at the exact posterior grain; missing,
+  mixed, or unknown semantics, horizons, or schedules cannot be projected from
+  the first row.  No runtime score, observation distribution, preference value,
+  or persisted record changed.
 
 - 2026-10-10, item 3/Q7 correspondence: repaired `pathAbsenceCount` to walk
   the enacted candidate and its selection-to-terminal receipts, or the typed

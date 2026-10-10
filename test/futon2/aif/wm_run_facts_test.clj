@@ -94,7 +94,7 @@
     (is (= 4 (f "horizonLength")))
     (is (= [0 1 2 3] (f "preferenceSteps")))
     (is (= [1 2] (f "gradedPreferenceSteps")))
-    (is (true? (f "progressivePreferenceRequired")))
+    (is (= "progressive" (f "preferenceSemantics")))
     (is (= {"risk" true "ambiguity" true "informationGain" true}
            (f "gTerms")))
     (is (= [1 1 1]
@@ -116,7 +116,7 @@
                         {{:id :c1 :target "M-x"} 1.0}))
         f (:facts (facts/facts-for-record r "r" snap nil nil))]
     (is (= [0 1] (f "preferenceSteps")))
-    (is (false? (f "progressivePreferenceRequired")))
+    (is (= "terminal-only" (f "preferenceSemantics")))
     (is (= {"risk" true "ambiguity" true "informationGain" true} (f "gTerms")))))
 
 (deftest q4-retains-declared-progressive-obligation
@@ -133,8 +133,49 @@
               (assoc-in [:decision :selection-law :posterior]
                         {{:id :c1 :target "M-x"} 1.0}))
         f (:facts (facts/facts-for-record r "r" snap nil nil))]
-    (is (true? (f "progressivePreferenceRequired")))
+    (is (= "progressive" (f "preferenceSemantics")))
     (is (= [] (f "gradedPreferenceSteps")))))
+
+(defn q4-two-policy-facts [model-a model-b]
+  (let [scored (fn [model] {:g 0.0 :g-terms {:risk 0.0 :ambiguity 0.0
+                                              :expected-information-gain 0.0}
+                            :observation-model model})
+        r (-> record
+              (assoc-in [:decision :selection-certificate]
+                        {:candidates [{:id :c1 :target "M-x" :g 0.0}
+                                      {:id :c2 :target "M-x" :g 0.0}]
+                         :policies [{:id :pi1} {:id :pi2}]
+                         :scoring {0 (scored model-a) 1 (scored model-b)}})
+              (assoc-in [:decision :selection-law :posterior]
+                        {{:id :c1 :target "M-x"} 0.5
+                         {:id :c2 :target "M-x"} 0.5}))]
+    (:facts (facts/facts-for-record r "r" snap nil nil))))
+
+(deftest q4-requires-explicit-authorized-preference-semantics
+  (let [schedule {1 {:ending/not-yet-evaluated 1.0}}
+        missing (q4-two-policy-facts {:horizon 1 :class-preference schedule}
+                                     {:horizon 1 :class-preference schedule})
+        unknown (q4-two-policy-facts {:horizon 1 :preference-semantics :mystery
+                                      :class-preference schedule}
+                                     {:horizon 1 :preference-semantics :mystery
+                                      :class-preference schedule})]
+    (is (contains? (missing "preferenceSemantics") "not-recomputable"))
+    (is (contains? (unknown "preferenceSemantics") "not-recomputable"))))
+
+(deftest q4-requires-one-common-model-at-policy-grain
+  (let [terminal {:horizon 1 :preference-semantics :terminal-only
+                  :class-preference {1 {:ending/changed 1.0}}}
+        progressive {:horizon 1 :preference-semantics :progressive
+                     :class-preference {1 {:progress/zero 1.0}}}
+        horizon-two (assoc terminal :horizon 2
+                          :class-preference {1 {:ending/not-yet-evaluated 1.0}
+                                             2 {:ending/changed 1.0}})
+        schedule-two (assoc terminal :class-preference {1 {:ending/refused 1.0}})]
+    (doseq [export [(q4-two-policy-facts terminal progressive)
+                    (q4-two-policy-facts terminal horizon-two)
+                    (q4-two-policy-facts terminal schedule-two)]]
+      (is (contains? (export "preferenceSemantics") "not-recomputable"))
+      (is (contains? (export "horizonLength") "not-recomputable")))))
 
 (deftest q4-refuses-to-mix-scoring-occurrences-with-reused-policy-labels
   (let [scored {:g 1.0
