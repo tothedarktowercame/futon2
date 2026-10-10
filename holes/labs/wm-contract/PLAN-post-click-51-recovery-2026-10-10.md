@@ -119,3 +119,14 @@ writer keeps the gate closed.
   positive policy count: those are Q2 requirements, and a real mismatch must
   fail rather than be normalized away.  Historical records without the new
   carrier remain non-recomputable.
+
+- 2026-10-10, selected-policy F identity repair: policy-prefix admission no
+  longer indexes histories by constructor-local labels such as `:C1`, which
+  collide across targets.  Prefixes are now stored and consumed by Lean's
+  complete cascade `PolicyKey` (target, ordered patterns, semilattice).  A
+  two-target regression with the same local label proves that each policy
+  receives only its own observed F.  The Lean rule remains strict: every menu
+  policy needs a nonempty admitted history; no initial `F = 0` is invented.
+  Several older joint-decision fixtures still assert selection without such
+  histories and must be repaired to carry per-policy steps or expect the
+  specified typed refusal.

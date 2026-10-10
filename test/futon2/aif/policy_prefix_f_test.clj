@@ -48,17 +48,38 @@
 
 (deftest the-consumer-refuses-a-broken-chain-rather-than-summing-it
   (let [pr (ppe/production-ranked [entry] nil
-                                  {:c1 (prefix (step "run-1" {#{} 1} {#{:t} 1} 0.25)
-                                               (step "run-2" {#{:x} 1} {#{:t :u} 1} 0.5))})
+                                  {k (prefix (step "run-1" {#{} 1} {#{:t} 1} 0.25)
+                                             (step "run-2" {#{:x} 1} {#{:t :u} 1} 0.5))})
         fp (:f-prefix (first pr))]
     (is (= :not-supplied (:status fp)) "never scored")
     (is (= :chain-broken (get-in fp [:refused :reason])))
     (is (= 1 (get-in fp [:refused :index]))))
   (testing "a prefix under another policy key is refused too"
     (let [fp (:f-prefix (first (ppe/production-ranked [entry] nil
-                                                     {:c1 (assoc (prefix (step "run-1" {#{} 1} {#{:t} 1} 0.25))
-                                                                 :policy-key [:pattern-cascade "M-a" [:p/b] {}])})))]
+                                                     {k (assoc (prefix (step "run-1" {#{} 1} {#{:t} 1} 0.25))
+                                                               :policy-key [:pattern-cascade "M-a" [:p/b] {}])})))]
       (is (= :foreign-prefix (get-in fp [:refused :reason]))))))
+
+(deftest production-lookup-does-not-collide-on-local-candidate-label
+  (let [a {:id :C1 :target "M-a" :precedence [{:id :p/a}]}
+        b {:id :C1 :target "M-b" :precedence [{:id :p/b}]}
+        ka (adm/candidate-key a)
+        kb (adm/candidate-key b)
+        prefix-for (fn [key click f]
+                     {:policy-key key :conditioning-status :admitted
+                      :observation-updates
+                      [{:status :present :policy-key key
+                        :occurrence {:flight "fl" :click click}
+                        :s-prev {:value {#{} 1}} :q {#{} 1} :f f}]})
+        ranked [{:action a :controller-score 1.0}
+                {:action b :controller-score 1.0}]
+        supplied (ppe/production-ranked ranked nil
+                                        {ka (prefix-for ka "a" 0.25)
+                                         kb (prefix-for kb "b" 0.75)})]
+    (is (= [0.25 0.75] (mapv #(get-in % [:f-prefix :f]) supplied)))
+    (is (= [ka kb]
+           (mapv #(adm/candidate-key (get-in % [:f-prefix :policy]))
+                 supplied)))))
 
 (deftest the-posterior-moves-by-exp-minus-delta-f
   (testing "selection-posterior, two candidates identical but for F"

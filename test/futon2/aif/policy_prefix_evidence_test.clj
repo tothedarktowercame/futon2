@@ -93,15 +93,20 @@
                                     :f-prefix-production? true}))
         supplied (prefix/production-ranked ranked {:conditioning-status :not-wired
                                                    :observation-updates []})
-        decision (policy/select-action-cascades supplied {:beta 2 :cascade-habit-path (str dir "/absent.edn")})
-        c (first (get-in decision [:selection-certificate :candidates]))]
+        refusal (try
+                  (policy/select-action-cascades supplied
+                                                {:beta 2 :cascade-habit-path (str dir "/absent.edn")})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (ex-data e)))
+        c (first supplied)]
     (is (vector? ranked))
-    (is (= :not-supplied (:f-status c)))
+    (is (= :not-supplied (get-in c [:f-prefix :status])))
     (is (nil? (:f c)))
-    (is (= :no-admitted-policy-prefix (:reason c)))
+    (is (= :no-admitted-policy-prefix (get-in c [:f-prefix :reason])))
     (is (= :not-wired (get-in c [:f-prefix :conditioning :conditioning-status])))
     (is (= prefix/pending-dependency (get-in c [:f-prefix :pending-dependency])))
     (is (= action (get-in c [:f-prefix :policy])))
+    (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind])))
     (println "H4-STAGED-PRODUCTION-SHAPE" (pr-str (select-keys c [:id :f :f-status :f-prefix])))
     (is (= :not-supplied
            (get-in (first (prefix/production-ranked [(assoc (first ranked) :f 123)] nil))

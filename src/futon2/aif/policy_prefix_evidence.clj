@@ -116,7 +116,8 @@
    any caller that has no admitted prefixes) every entry is :not-supplied with
    the reason chain preserved: caller options and synthetic receipts cannot
    authorize nonempty history. With PREFIXES ({candidate-id prefix}, the
-   tick's policy-prefix-admission/prefixes), each entry's F comes from its own
+   tick's policy-prefix-admission/prefixes), keyed by the complete policy key,
+   each entry's F comes from its own
    admitted prefix (prefix-f). :f is removed either way: F reaches the
    selection only through :f-prefix."
   ([ranked conditioning] (production-ranked ranked conditioning nil))
@@ -125,7 +126,9 @@
      (mapv (fn [entry]
              (let [ranked-entry (dissoc entry :f)]
                (assoc ranked-entry :f-prefix
-                      (if-let [prefix (and prefixes (get prefixes (:id (:action entry))))]
+                      (if-let [prefix (and prefixes
+                                          (get prefixes
+                                               (admission/candidate-key (:action entry))))]
                         (let [fp (prefix-f entry prefix conditioning)]
                           ;; an invalid prefix is refused as data, never
                           ;; scored: the selection sees it :not-supplied

@@ -80,7 +80,10 @@
     (into (sorted-map-by #(compare (str %1) (str %2)))
           (for [c candidates
                 :let [k (candidate-key c)]]
-            [(:id c)
+            ;; Local constructor labels repeat across targets. Prefix evidence
+            ;; is policy-grain, so key it by the complete PolicyKey carried by
+            ;; the conditioning steps.
+            [k
              (cond
                (nil? k) {:conditioning-status :no-policy-key}
                none? (cond-> {:policy-key k :conditioning-status :no-flight-records}

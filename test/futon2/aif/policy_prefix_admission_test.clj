@@ -52,6 +52,23 @@
     (is (= [ka] (distinct (map :policy-key (:observation-updates r)))))
     (is (= 1 (:foreign r)))))
 
+(deftest repeated-local-labels-remain-distinct-policy-prefixes
+  (let [ca {:id :C1 :target "M-a" :precedence [{:id :p/a}]}
+        cb {:id :C1 :target "M-b" :precedence [{:id :p/b}]}
+        ka' (adm/candidate-key ca)
+        kb' (adm/candidate-key cb)
+        steps {:steps [(wrap (step ka' "run-a" {#{} 1} {#{:a} 1}))
+                       (wrap (step kb' "run-b" {#{} 1} {#{:b} 1}))]}
+        prefixes (adm/prefixes [ca cb] steps)]
+    (is (not= ka' kb'))
+    (is (= #{ka' kb'} (set (keys prefixes))))
+    (is (= ["run-a"]
+           (mapv #(get-in % [:occurrence :click])
+                 (:observation-updates (get prefixes ka')))))
+    (is (= ["run-b"]
+           (mapv #(get-in % [:occurrence :click])
+                 (:observation-updates (get prefixes kb')))))))
+
 (deftest a-refused-step-ends-the-prefix-there
   (let [r (adm/admit ka (map wrap [(step ka "run-1" {#{} 1} {#{:t} 1})
                                    {:status :refused :reason :unmeasured-class :policy-key ka
@@ -64,7 +81,7 @@
   (let [dir (str (io/file (str (.toFile (Files/createTempDirectory "f1ba" (make-array FileAttribute 0)))) "absent"))
         c {:id :c1 :target "M-a" :precedence [{:id :p/a}]}]
     (is (= {:policy-key ka :conditioning-status :no-flight-records :dir-status {:absent :no-flights-dir}}
-           (get (adm/prefixes [c] (src/conditioning-steps dir)) :c1)))))
+           (get (adm/prefixes [c] (src/conditioning-steps dir)) ka)))))
 
 (deftest the-reader-gathers-steps-from-flight-records
   (let [dir (.toFile (Files/createTempDirectory "f1ba" (make-array FileAttribute 0)))
@@ -73,7 +90,7 @@
     (spit (io/file dir "fl.edn") (pr-str {:flight {:enactments [{:click-id "run-1" :step s1} {:click-id "run-2" :step s2}]}}))
     (spit (io/file dir "junk.edn") "{:flight")
     (let [read (src/conditioning-steps (str dir))
-          r (get (adm/prefixes [{:id :c1 :target "M-a" :precedence [{:id :p/a}]}] read) :c1)]
+          r (get (adm/prefixes [{:id :c1 :target "M-a" :precedence [{:id :p/a}]}] read) ka)]
       (is (= 2 (count (:steps read))))
       (is (= 1 (count (:unread read))) "an unreadable record is noted, not skipped silently")
       (is (= :admitted (:conditioning-status r)))
@@ -82,21 +99,25 @@
 (deftest the-tick-records-the-prefix
   (let [assemble* @#'cdt/assemble*
         assembled (assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})
-        base (:decision (wm-cd/cascade-decision assembled cdt/live-c-opts))
-        k (adm/candidate-key (:action base))
-        s1 (step k "run-1" {#{} 1} {#{:t} 1})
+        candidates (for [{:keys [target constructed-candidates]} (:problems assembled)
+                         {:keys [candidate-id precedence]} constructed-candidates]
+                     {:id candidate-id :target target :precedence precedence})
+        policy-keys (mapv adm/candidate-key candidates)
+        steps (mapv (fn [i k]
+                      (wrap (step k (str "run-" i) {#{} 1} {#{:t} 1})))
+                    (range) policy-keys)
+        missing (try (wm-cd/cascade-decision assembled cdt/live-c-opts) nil
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
         with (:decision (wm-cd/cascade-decision assembled
                                              (assoc cdt/live-c-opts :conditioning-steps
-                                                    {:steps [(wrap s1)] :read [] :unread []})))
-        chosen (get-in base [:action :id])]
+                                                    {:steps steps :read [] :unread []})))
+        chosen-key (adm/candidate-key (:action with))]
     (testing "the prefix is recorded per candidate"
-      (is (= :admitted (get-in with [:selection-certificate :token-belief-input :policy-prefixes chosen :conditioning-status])))
-      (is (= :no-flight-records
-             (get-in base [:selection-certificate :token-belief-input :policy-prefixes chosen :conditioning-status]))
-          "no flight steps in opts: the typed absence"))
-    ;; the posterior now moves with the prefix's F: F1c-I's tests
-    ;; (policy-prefix-f-test) assert how
-    (testing "the rest of the token-belief input is untouched"
-      (is (= (dissoc (get-in base [:selection-certificate :token-belief-input]) :policy-prefixes)
-             (dissoc (get-in with [:selection-certificate :token-belief-input]) :policy-prefixes))
-          "the rest of the token-belief input, top-level :observation-updates included, is untouched"))))
+      (is (= :free-energy-not-supplied (get-in missing [:refusal :kind])))
+      (is (= (set policy-keys)
+             (set (clojure.core/keys
+                   (get-in with [:selection-certificate :token-belief-input
+                                 :policy-prefixes])))))
+      (is (= :admitted
+             (get-in with [:selection-certificate :token-belief-input
+                           :policy-prefixes chosen-key :conditioning-status]))))))
