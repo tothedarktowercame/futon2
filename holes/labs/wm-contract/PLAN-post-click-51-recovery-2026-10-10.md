@@ -352,6 +352,57 @@ writer keeps the gate closed.
   semantics or whole refinement loop is invented here; item 5 remains open
   beyond this first dispatch audit.
 
+- 2026-10-10, canonical cascade population audit: a complete `PolicyKey` is
+  only the stable identity `(target, ordered pattern ids, semilattice)`; its
+  hash does not establish that the identified value is a canonical cascade.
+  `GOverCascades.lean` instead aliases the policy to `CascadeEFE.Policy`: the
+  carrier contains actual pattern nodes, guarded transition interpretations,
+  typed edges and precedence, while `CascadeEFEPolicies.CandidateFamily`
+  separately requires a nonempty duplicate-free family, admissible order, one
+  common predictive model/preference horizon, and a successful canonical
+  score for every member.  Runtime correspondence additionally needs pinned
+  pattern/interpretation authority, witnessed construction relations,
+  observation locators and acceptance/admission evidence.  The Lean module
+  explicitly leaves `CascadeGrainSeam.owed`; therefore no theorem currently
+  says that a runtime map or a `PolicyKey` inhabits that carrier.
+
+- 2026-10-10, first missing conformance check before G: current main has real
+  checks, but no single canonical admission.  `cascade-sources/load-declared`
+  canonicalises namespaced pattern ids and verifies document-backed
+  interpretation source bytes; `interpretation-construction` requires typed
+  guards/effects, observed tokens, receipts and a supported order;
+  `admit-cascade-problem` rejects empty orders, absent interpretations and
+  receipts, unwitnessed support/meet/precedence relations, and candidates
+  making no horizon progress.  After those checks,
+  `wm.cascade-decision/cascade-decision-admitted` constructs plain candidate
+  maps and calls `efe/rank-actions`.  Only *after scoring and selection* does
+  it emit `candidate-derivations/derivations`; the existing
+  `cascade-equivalence/admissible-provenance?` check and the stricter
+  `construction-receipt-lean-adapter` admission are thus certificate/audit
+  consumers, not a pre-G population gate.  This is the first missing check
+  that allowed generated all-target identities to be treated as policies.
+  The former 5,413 rows are retained only as a falsifier of that seam, never
+  as positive cascade-policy evidence.
+
+- 2026-10-10, canonical-gate disposition: no bounded wiring repair is
+  justified from the existing definitions.  The available validators prove
+  different pieces and accept different carriers: source loading proves byte
+  identity, construction admission proves internal relation witnesses,
+  cascade equivalence normalises interpreted effects and rejects three
+  forbidden provenance kinds, and the Lean adapter checks a selected recorded
+  candidate after the fact.  None validates, before G, the full conjunction
+  of actual library membership, interpretation authority, construction
+  admissibility, predictive-model correspondence, and CandidateFamily score
+  correspondence; indeed the latter includes successful scoring and cannot
+  itself be used as a pre-score shape check.  Wiring any one fragment as
+  “canonical” would create the facade forbidden by
+  `problems/g-over-cascade-is-undefined`.  The minimal specification/build
+  decision is to define the runtime-to-`CascadeEFE.Policy` projection and its
+  evidence type, separate the pre-score admissibility portion from the
+  post-score `CandidateFamily.scored` proof, and designate the composition
+  root that must refuse with the missing evidence before invoking G.  No
+  validator or runtime refusal was invented in this audit.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
