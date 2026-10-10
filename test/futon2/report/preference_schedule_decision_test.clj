@@ -45,6 +45,20 @@
                  (manifest/preference-member claimed universe horizon tau)))
             (range 1 (inc horizon)))))
 
+(deftest q9-characterization-the-declared-c-has-one-nonstrict-completion-pair
+  (let [c wm-cd/class-preference-weights
+        closing [:focused :related :unrelated]
+        non-closing :stop-the-line
+        pairs (mapv (fn [ending]
+                      {:ending ending
+                       :strict? (> (get c ending) (get c non-closing))})
+                    closing)]
+    (is (= 1 (reduce + (vals c))) "C is normalized")
+    (is (= 3 (count pairs)))
+    (is (= 2 (count (filter :strict? pairs))))
+    (is (= [{:ending :unrelated :strict? false}]
+           (vec (remove :strict? pairs))))))
+
 (deftest token-placement-and-scales-are-the-consumed-values
   (doseq [[declaration placement source]
           [[(declared-source) :terminal [:declared (:target (declared-source))]]

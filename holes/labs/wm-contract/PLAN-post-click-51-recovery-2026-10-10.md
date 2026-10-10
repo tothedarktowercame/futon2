@@ -139,3 +139,16 @@ writer keeps the gate closed.
   is clean again (16 tests, 107 assertions).  This is test repair, not a
   production waiver: the runtime still refuses any real menu containing a
   never-executed policy, exactly as the current Lean specification says.
+
+- 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
+  defect, not an exporter classification error.  The class model defines
+  `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
+  own acceptance criterion was reached; `:stop-the-line` means it was not.
+  Joe's fixed 2026-09-22 terminal distribution is 55/35/5/5, so the
+  `:unrelated` completion outcome ties the non-closing outcome.  A focused
+  characterization test pins the exact three comparisons and the single
+  falsifier.  `Requirements.Q9` requires every represented completion pair
+  to be strict, while `CTauClassPreference.terminal_order` explicitly proves
+  this tie.  Repair therefore requires an explicit specification decision;
+  neither the census nor the meaning of `:unrelated` may be changed to hide
+  it.
