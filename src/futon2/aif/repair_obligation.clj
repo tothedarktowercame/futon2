@@ -661,19 +661,23 @@
   (let [base (.getCanonicalFile (io/file root))
         directory (io/file base child)
         path (.toPath directory)]
-    (when-not (and (.isDirectory base)
-                   (not (Files/isSymbolicLink path))
-                   (= base (.getCanonicalFile (.getParentFile directory)))
-                   (= directory (.getCanonicalFile directory)))
-      (throw (ex-info "Historical store directory outside authority" {:child child})))
-    (when (and create? (not (.exists directory)))
-      (Files/createDirectory path (make-array java.nio.file.attribute.FileAttribute 0))
-      (with-open [parent (FileChannel/open (.toPath base)
-                                           (make-array StandardOpenOption 0))]
-        (.force parent true)))
-    (when (and (.exists directory) (not (.isDirectory directory)))
-      (throw (ex-info "Historical store directory malformed" {:child child})))
-    (when (.isDirectory directory) directory)))
+    (when (and create? (not (.exists base)))
+      (Files/createDirectories (.toPath base)
+                               (make-array java.nio.file.attribute.FileAttribute 0)))
+    (when (.exists base)
+      (when-not (and (.isDirectory base)
+                     (not (Files/isSymbolicLink path))
+                     (= base (.getCanonicalFile (.getParentFile directory)))
+                     (= directory (.getCanonicalFile directory)))
+        (throw (ex-info "Historical store directory outside authority" {:child child})))
+      (when (and create? (not (.exists directory)))
+        (Files/createDirectory path (make-array java.nio.file.attribute.FileAttribute 0))
+        (with-open [parent (FileChannel/open (.toPath base)
+                                             (make-array StandardOpenOption 0))]
+          (.force parent true)))
+      (when (and (.exists directory) (not (.isDirectory directory)))
+        (throw (ex-info "Historical store directory malformed" {:child child})))
+      (when (.isDirectory directory) directory))))
 
 (defn- write-new-durable! [root child record-id value]
   (with-contended-store-lock root
