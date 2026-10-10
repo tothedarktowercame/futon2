@@ -155,6 +155,14 @@ production data remained unchanged. Evidence:
 - Evidence:
   `/home/joe/runs/wmq-2026-10-10/offline-replay-snapshot-9afb57c34/`.
 
+## claude-12 turn 5 (2026-10-10): what D27's no-selection actually is; D25 fixed
+
+- D27 MECHANISM (correcting both my turn-4 reading and the outer-exclusion reading): the no-selection is produced by selected-entry (full_loop_runner.clj), which returns nil when the decision's action has construction-receipt :kind :query-time-pattern-selection, i.e. a PROVISIONAL cascade whose interpretation is owed. In production the runner then makes an interpretation ask and re-decides; the replay disables asks (D23), so a provisional best policy always ends the replay as :no-selection. The outer selector's exclusion is a separate mismatch that does not gate inner choice: war_machine.clj says "The outer selector may order or bias the field, but choice is made over cascade policies by G."
+- Evidence (snapshot replay 9afb57c34, its 002-selection sorry): chosen action T-repair-occ-487ca3f2 :C1, receipt kind :query-time-pattern-selection, status :provisional, NO interpretation receipts; :interpretation-ask nil. In click 51 the same target's chosen cascade WAS interpreted (structure/unresolved-tensions-at-closure, receipt by codex-proof2c, G 2.39).
+- Likely cause, to be TESTED, not assumed: the snapshot's 10 stores omit wm-interpretations (want_interpretation.clj:349), so every interpreted cascade lost its receipt and fell back to provisional. Proposed: derive the snapshot list from every data-paths root read during selection (not a hand list), include wm-interpretations, and rerun; then also test the production path for a provisional winner: an ask through a STUB Agency (agency-guard allows an explicit non-production base) and the re-decision.
+- Open question (unchanged, for Joe/codex-68): outer task selection excludes repair-of-repair tickets as :repair-finding/root-not-current (a finding whose :target is another ticket), while inner selection chose such a ticket in clicks 49-51.
+- D25 FIXED (main): a :no-selection record keeps the certificate from the sorry decision, keeps :chosen absent, and adds :decision :no-selection {:kind :provisional-choice-without-interpretation :target :id ...}; the card shows it instead of "chosen target absent".
+
 ## Sign-offs
 
 (none yet)
