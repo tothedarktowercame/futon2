@@ -319,6 +319,30 @@ must be supplied externally and learned/tuned through the declared ledger; the
 model deliberately does not derive values from a desired selection verdict.
 No Clojure producer, validator, or runner wiring is added here.
 
+Review correction: bootstrap F is no longer a field of `BootstrapPrior`.
+`CalibrationLaw` pins model/version and supplies the sole evaluator from
+parameters, distribution, and evidence to an optional F.  Validity requires
+that exact law identity, a successful evaluation, and an F that is neither
+`⊤` nor `⊥`, in addition to the existing external-authority, ledger, parameter,
+distribution, and update declarations.  Thus an authority cannot tune a free
+`:suppliedF` alongside otherwise identical evidence;
+`bootstrapValue_determinedByCalibrationLaw` proves the evaluated value is
+unique for the same carrier and law.
+
+The two post-enactment claims are now separate.  The renamed
+`empiricalHistory_supersedesBootstrap` proves only current-F route precedence.
+`ValidCalibrationTransition` separately carries before/after parameter-ledger-
+epoch state, a new evidence identity, an external transition authority, the
+coherent enacted prefix, and the declared update-law relation.  A valid
+transition must advance epoch and ledger and bind the new evidence, while
+parameters may truthfully remain unchanged.  No claim that observing history
+alone executed the learning rule remains.
+
+Finally, `machineWeightsAtSuppliedF` constructs both posterior weights and
+route receipts from one collected list of supplied values.  It no longer calls
+the supplier again while computing weights, so the compared values cannot
+diverge from the retained routes.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
