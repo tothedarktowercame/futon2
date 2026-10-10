@@ -537,6 +537,36 @@ or weaken an existing definition merely to accommodate current Clojure.
   authority and weaken mission-statement immutability.  No producer or
   exporter repair is justified, and the historical pair remains counted.
 
+- 2026-10-10, Defect 19/Q7 closed-path audit: the 81,384 verdict is retained at
+  `data/wm-runs/tick-run-record-2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda.edn.requirements.edn`.
+  It was produced by the pre-`10b3dade1` traversal, whose broad `:decision`
+  root recursively included the complete selection certificate and therefore
+  rejected candidate/scorer populations.  The historical verdict stores only
+  the aggregate, not its individual paths.  Reapplying that exact legacy root
+  traversal to the current 270,306,985-byte run artifact yields 16,699 typed
+  maps, all grouped under `[:decision :selection-certificate]`; therefore the
+  old 81,384 path multiset is not independently reconstructible from the
+  retained current bytes, although its recorded aggregate remains evidence of
+  the former exporter behavior.
+
+  | Path class | Included? | Reason |
+  |---|---:|---|
+  | chosen summary and identity-matched selected candidate | yes | selected certificate path |
+  | selection event | yes | selection-to-enactment boundary |
+  | interpretation ask | yes | selected-pattern interpretation boundary |
+  | terminal receipt and typed failure detail | yes | enacted outcome/stop evidence |
+  | explicit abstention when no candidate is selected | yes | sole enacted decision path |
+  | rejected candidates and population scoring/novelty diagnostics | no | counterfactual alternatives, not enacted-path completeness |
+  | world and historical snapshots | no | selection context, not a selected-path receipt |
+
+  On the current exact c82068b4 bytes the closed traversal is 0 (the run's
+  failure carrier is untyped, so Q7 does not manufacture a typed absence).  On
+  the exact 2026-10-05 c9d25d6a bytes it is 8: selected candidate 5,
+  interpretation ask 1, and failure detail 2.  The latter two are exactly the
+  truthful reviewer-falsifier refusal and verification paths and remain
+  counted.  The reduction is attributable to scope correction, not relabelling
+  or deleting enacted-path failures.
+
 - 2026-10-10, selected-policy F correspondence: the runtime no longer runs a
   reduced `sigma(log E - gamma G)` law when a menu policy has no admitted
   prefix F.  It now returns typed `:free-energy-not-supplied`, naming every

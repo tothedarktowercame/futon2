@@ -273,6 +273,26 @@
             [:decision :abstention :reason]]
            (facts/absence-paths r)))))
 
+(deftest q7-retains-reviewer-falsifier-refusals-on-the-enacted-path
+  (let [r {:decision {:chosen {:target "M-selected" :candidate :C1}
+                      :selection-certificate
+                      {:candidates [{:id {:target "M-selected" :candidate :C1}}]}}
+           :failure {:kind :reviewer-falsifier-failed
+                     :detail {:reviewer-falsifier {:status :refused}
+                              :reviewer-falsifier-verification
+                              {:kind :typed-refusal}}}}]
+    (is (= [[:failure :detail :reviewer-falsifier]
+            [:failure :detail :reviewer-falsifier-verification]]
+           (facts/absence-paths r)))))
+
+(deftest q7-does-not-count-population-diagnostics-without-selection
+  (let [r {:decision {:chosen nil
+                      :abstention {:status :not-abstained}
+                      :selection-certificate
+                      {:candidates (repeat 100 {:status :absent})
+                       :scoring {0 {:diagnostic {:kind :typed-refusal}}}}}}]
+    (is (empty? (facts/absence-paths r)))))
+
 (deftest q8-uses-global-action-identities-not-reused-local-labels
   (let [a {:id :C1 :target "M-a" :precedence [:p]}
         b {:id :C1 :target "M-b" :precedence [:p]}
