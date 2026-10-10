@@ -111,7 +111,8 @@
     (is (= {:status :refused
             :kind :frontier-too-wide-for-exact-enumeration
             :policy-id "wide" :target "t" :units 13 :roots 13
-            :bound 13 :limit shape-g/exact-enumeration-frontier-limit}
+            :bound 13 :limit shape-g/exact-enumeration-completion-set-limit
+            :completion-set-count 8192}
            result))
     (is (< elapsed-ms 1000.0))))
 

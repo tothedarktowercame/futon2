@@ -170,10 +170,35 @@
         distribution (update-vals weights #(/ % total))]
     (into {} (for [tau (range 1 (inc horizon))] [tau distribution]))))
 
-;; Measured 2026-09-30 on unordered fixtures in the tooling JVM: widths 5..9
-;; scored in 0.43, 0.47, 0.56, 0.80 and 1.59 seconds; width 10 took 2.90
-;; seconds. Exact enumeration is therefore admitted through width 9.
-(def exact-enumeration-frontier-limit 9)
+;; Exact enumeration cost is driven by reachable completion sets (order
+;; ideals), not the width alone.  The count below is exact for the small
+;; arrangements admitted by this scorer; checking 2^n masks is deliberately
+;; done before constructing the expensive belief carrier.
+;; Calibration sample (2026-10-10, current scorer): distinct-11 has 64 sets;
+;; distinct-4 has 1536 sets and took 33.95s cold (1095236KB peak RSS).
+;; The former width=9 guard admitted the latter without describing this cost;
+;; 512 sets is the declared frontier, keeping the admitted head census at the
+;; measured <=10s regime (64 sets for distinct-11; 1536 is refused).
+(def exact-enumeration-completion-set-limit 512)
+
+(defn- reachable-completion-set-count [units edges]
+  (let [units (vec units)
+        indices (zipmap units (range))
+        predecessor-masks
+        (reduce (fn [m {:keys [from to kind]}]
+                  (if (= :overlap kind)
+                    m
+                    (update m (indices to) (fnil bit-or 0)
+                            (bit-shift-left 1 (indices from)))))
+                (vec (repeat (count units) 0)) edges)
+        total (bit-shift-left 1 (count units))]
+    (count (filter (fn [mask]
+                     (every? (fn [i]
+                               (or (zero? (bit-and mask (bit-shift-left 1 i)))
+                                   (= (bit-and mask (get predecessor-masks i))
+                                      (get predecessor-masks i))))
+                             (range (count units))))
+                   (range total)))))
 
 (defn- reachable-from [outgoing start]
   (loop [todo (seq (get outgoing start)) seen #{}]
@@ -221,6 +246,8 @@
                                (:edges occurrence-shape))
          directed (remove #(= :overlap (:kind %)) (:edges occurrence-shape))
          roots (count (remove (set (map :to directed)) units))
+         completion-set-count (when-not cycle
+                                (reachable-completion-set-count units (:edges occurrence-shape)))
          bound (when-not cycle
                  (maximum-antichain-bound units (:edges occurrence-shape)))]
      (cond
@@ -228,10 +255,11 @@
        {:status :refused :kind :cyclic-arrangement :cycle cycle
         :policy-id id :target target}
 
-       (> bound exact-enumeration-frontier-limit)
+       (> completion-set-count exact-enumeration-completion-set-limit)
        {:status :refused :kind :frontier-too-wide-for-exact-enumeration
         :policy-id id :target target :units (count units) :roots roots
-        :bound bound :limit exact-enumeration-frontier-limit}
+        :bound bound :limit exact-enumeration-completion-set-limit
+        :completion-set-count completion-set-count}
 
        :else
        (let [read-theta ledger/pattern-theta
@@ -272,6 +300,7 @@
          information (get-in entry [:certificate :g-terms :expected-information-gain])
          result {:status (if entry :computed :refused)
                  :policy-id id :target target :candidate candidate
+                 :completion-set-count completion-set-count
                  :horizon horizon :terminals terminals
                  :preference-at-each-step preference
                  :risk (get-in entry [:certificate :g-terms :risk])
@@ -379,7 +408,10 @@
                       {} precedence)]
     {:distinct-patterns (count (set (map :pattern nodes)))
      :nodes (count nodes)
-     :longest-dependency-chain (reduce max 0 (vals depth))}))
+     :longest-dependency-chain (reduce max 0 (vals depth))
+     :reachable-completion-sets
+     (reachable-completion-set-count
+      (mapv #(or (:occurrence-id %) (:pattern %) (:id %) %) nodes) edges)}))
 
 (defn structural-identity
   "The shared policy identity: target/mission scope, node sequence, and

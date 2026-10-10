@@ -203,13 +203,25 @@
                                (empty? (set/intersection absent o)))] p)))
 
 (defn- ordered [distribution]
-  (sort-by (fn [[state _]] (pr-str (if (set? state) (sort-by pr-str state) state))) distribution))
+  ;; Decorate once: the former sort-by recomputed the canonical state key for
+  ;; every comparison. Preserve the stable ordering and reduction order.
+  (->> distribution
+       (map (fn [[state mass]]
+              [(pr-str (if (set? state) (sort-by pr-str state) state))
+               [state mass]]))
+       (sort-by first)
+       (map second)))
+
+(defn- entropy-ordered
+  "Entropy for an already canonically ordered distribution."
+  [ordered-distribution]
+  (- (reduce + 0.0 (for [[_ p] ordered-distribution :when (pos? p)]
+                     (* (double p) (Math/log (double p)))))))
 
 (defn entropy
   "Natural-log entropy; zero masses contribute zero."
   [distribution]
-  (- (reduce + 0.0 (for [[_ p] (ordered distribution) :when (pos? p)]
-                     (* (double p) (Math/log (double p)))))))
+  (entropy-ordered (ordered distribution)))
 
 (defonce ^:private expected-row-cache (atom {}))
 
@@ -232,19 +244,19 @@
 
 (defn- state-information-gain
   "E_Q(o|pi) KL[Q(s|o,pi)||Q(s|pi)] for the same A used by ambiguity."
-  [belief rows prediction]
+  [belief ordered-belief rows ordered-prediction]
   (let [posteriors
         (into {}
-              (for [[o _] (ordered prediction)]
+              (for [[o _] ordered-prediction]
                 [o (let [weighted (into {}
-                                       (for [[s mass] (ordered belief)]
+                                       (for [[s mass] ordered-belief]
                                          [s (* (double mass) (double (get-in rows [s o] 0.0)))]))
                          total (reduce + 0.0 (vals weighted))]
                      (if (zero? total)
                        {}
                        (into {} (for [[s w] weighted :when (pos? w)] [s (/ w total)]))))]))]
     (reduce + 0.0
-            (for [[o po] (ordered prediction) :when (pos? po)
+            (for [[o po] ordered-prediction :when (pos? po)
                   :let [posterior (get posteriors o)]]
               (* (double po)
                  (reduce + 0.0
@@ -311,7 +323,7 @@
   [{:keys [horizon] :as model} belief tau target]
   (let [terminal? (>= tau horizon)]
     (apply merge-with +
-            (for [[state mass] (ordered belief)]
+            (for [[state mass] belief]
              (let [label (class-label-of-state model state target tau terminal?)
                    deterministic {label 1}
                    row (emission-row model label deterministic)
@@ -323,7 +335,7 @@
 (defn- class-rows
   [{:keys [horizon] :as model} belief tau target]
   (into {}
-        (for [[state _] (ordered belief)]
+        (for [[state _] belief]
           (let [label (class-label-of-state model state target tau (>= (int tau) (int horizon)))]
             [state (emission-row model label {label 1})]))))
 
@@ -395,12 +407,15 @@
                            {:reason "class emission is per candidate: the candidate's target must travel with the score query"}))
               tau (or tau (:horizon model))
               pref (class-preference! model (class-preference-for model tau))
-              prediction (class-predictive model belief tau target)
-              rows (class-rows model belief tau target)
-              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
-                                        (* (double mass) (entropy (get rows s)))))
-              information-gain (state-information-gain belief rows prediction)
-              risk (m/outcome-risk (ordered prediction) pref)]
+              ordered-belief (ordered belief)
+              prediction (class-predictive model ordered-belief tau target)
+              ordered-prediction (ordered prediction)
+              rows (class-rows model ordered-belief tau target)
+              row-entropies (into {} (for [[s row] rows] [s (entropy row)]))
+              ambiguity (reduce + 0.0 (for [[s mass] ordered-belief]
+                                        (* (double mass) (get row-entropies s))))
+              information-gain (state-information-gain belief ordered-belief rows ordered-prediction)
+              risk (m/outcome-risk ordered-prediction pref)]
           {:prediction prediction :risk risk :ambiguity ambiguity
            :information-gain information-gain
            :observation-rows rows
@@ -429,7 +444,8 @@
         (belief! model belief)
         (let [tau (or tau (:horizon model))
               pref (get-in model [:progress-preference tau])
-              rows (into {} (for [[state _] (ordered belief)]
+              ordered-belief (ordered belief)
+              rows (into {} (for [[state _] ordered-belief]
                               [state (emission-row model
                                                     (progress-outcome model state)
                                                     {(progress-outcome model state) 1})]))
@@ -437,11 +453,13 @@
                                    (merge-with + out
                                                (update-vals (get rows state)
                                                             #(* (double mass) %))))
-                                 {} (ordered belief))
-              ambiguity (reduce + 0.0 (for [[s mass] (ordered belief)]
-                                        (* (double mass) (entropy (get rows s)))))
-              information-gain (state-information-gain belief rows prediction)
-              risk (m/outcome-risk (ordered prediction) pref)]
+                                 {} ordered-belief)
+              ordered-prediction (ordered prediction)
+              row-entropies (into {} (for [[s row] rows] [s (entropy row)]))
+              ambiguity (reduce + 0.0 (for [[s mass] ordered-belief]
+                                        (* (double mass) (get row-entropies s))))
+              information-gain (state-information-gain belief ordered-belief rows ordered-prediction)
+              risk (m/outcome-risk ordered-prediction pref)]
           {:prediction prediction :risk risk :ambiguity ambiguity
            :information-gain information-gain
            :observation-rows rows
