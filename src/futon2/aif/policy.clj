@@ -27,6 +27,52 @@
 
 (load-identity/register! *ns* *file*)
 
+(def ^:private chosen-action-keys
+  #{:chosen :chosen-action :action :selected-action})
+
+(defn- compact-candidate [v]
+  (-> (select-keys v [:kind :id :target :want :precedence :precedence-steps
+                       :g :controller-score :risk :ambiguity
+                       :expected-information-gain :free-energy])
+      (update :precedence
+              #(mapv (fn [p]
+                       (if (map? p)
+                         (select-keys p [:id :target :guard :produces
+                                         :predicted-effect :theta :theta-source])
+                         p)) %))))
+
+(defn- chosen-identities [x]
+  (into #{}
+        (comp (keep (fn [path] (get-in x path)))
+              (filter #(and (map? %) (contains? % :target) (contains? % :id)))
+              (map (juxt :target :id)))
+        (for [root [[] [:judgment :decision] [:judgment :controller-decision]]
+              k chosen-action-keys]
+          (conj root k))))
+
+(defn compact-cascade-carriers
+  "Project repeated cascade candidates only in a copy destined for durable
+   storage. The chosen identity remains byte-equal and complete. In-memory
+   decisions supplied to gates, dispatch, feedback and ticket queues are never
+   passed through this function."
+  [x]
+  (let [chosen (chosen-identities x)]
+    (letfn [(compact [v]
+              (cond
+                (map? v)
+                (if (= :cascade-candidate (:kind v))
+                  (if (contains? chosen [(:target v) (:id v)])
+                    v
+                    (compact-candidate v))
+                  (persistent!
+                   (reduce-kv (fn [m k y] (assoc! m k (compact y)))
+                              (transient (empty v)) v)))
+                (vector? v) (mapv compact v)
+                (set? v) (into (empty v) (map compact) v)
+                (seq? v) (doall (map compact v))
+                :else v))]
+      (compact x))))
+
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.
 
