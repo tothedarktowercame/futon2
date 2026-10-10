@@ -70,3 +70,19 @@
                                      :durable/interned
                                      {"a" {:nested {:durable/ref "b"}}
                                       "b" {:nested {:durable/ref "a"}}}}))))
+
+(deftest only-keys-leaves-other-top-level-values-exactly-as-given
+  (let [shared (big :shared 50)
+        m {:decision {:a shared :b shared} :route shared :run/id "r1"}
+        enc (di/encode m {:min-bytes 64 :min-total-bytes 0 :only-keys [:decision]})]
+    (is (identical? (:route m) (:route enc)) "outside the scope nothing is rewritten")
+    (is (= "r1" (:run/id enc)))
+    (is (di/interned? enc))
+    (is (= m (di/hydrate (edn/read-string (pr-str enc)))))))
+
+(deftest repeats-beneath-one-key-maps-and-one-element-vectors-are-found
+  (let [shared (big :shared 50)
+        m {:x {:only shared} :y [[shared]] :z 1}
+        enc (di/encode m {:min-bytes 64 :min-total-bytes 0})]
+    (is (di/interned? enc))
+    (is (= m (di/hydrate (edn/read-string (pr-str enc)))))))

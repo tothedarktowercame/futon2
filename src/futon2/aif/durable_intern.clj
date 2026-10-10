@@ -19,12 +19,13 @@
   hydrate is the inverse. It returns the value the original would read back
   as, with each interned subtree shared rather than copied, so a hydrated
   record also needs far less heap than reading the original did."
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate])
   (:import [java.io Writer]
            [java.security MessageDigest]
            [java.util HashMap HashSet IdentityHashMap]))
 
-(def table-key :durable/interned)
-(def ref-key :durable/ref)
+(def table-key durable-hydrate/table-key)
+(def ref-key durable-hydrate/ref-key)
 
 (def default-min-bytes
   "Subtrees smaller than this stay inline. Measured on click 51: almost all
@@ -118,20 +119,28 @@
   ^HashMap [root]
   (let [by-identity (IdentityHashMap.)
         by-value (HashMap.)]
-    (letfn [(walk [v]
-              (when (internable? v)
-                (if (.containsKey by-identity v)
-                  (let [canon (.get by-identity v)]
-                    (.put by-value canon (inc (long (.get by-value canon)))))
-                  (let [k (Typed. v)]
-                    (if-let [n (.get by-value k)]
-                      (do (.put by-identity v k)
-                          (.put by-value k (inc (long n))))
-                      (do (.put by-identity v k)
-                          (.put by-value k 1)
-                          (if (map? v)
-                            (doseq [[_ y] v] (walk y))
-                            (doseq [y v] (walk y)))))))))]
+    (letfn [(descend [v]
+              (if (map? v)
+                (doseq [[_ y] v] (walk y))
+                (doseq [y v] (walk y))))
+            (walk [v]
+              ;; Descend into EVERY collection; count only the internable
+              ;; ones. (Gating the descent on internable? hid every repeat
+              ;; beneath a one-key map or one-element vector.)
+              (cond
+                (not (coll? v)) nil
+                (not (internable? v)) (descend v)
+                (.containsKey by-identity v)
+                (let [canon (.get by-identity v)]
+                  (.put by-value canon (inc (long (.get by-value canon)))))
+                :else
+                (let [k (Typed. v)]
+                  (if-let [n (.get by-value k)]
+                    (do (.put by-identity v k)
+                        (.put by-value k (inc (long n))))
+                    (do (.put by-identity v k)
+                        (.put by-value k 1)
+                        (descend v))))))]
       (walk root))
     by-value))
 
@@ -144,18 +153,21 @@
 (defn encode
   "Return M with each repeated subtree of at least MIN-BYTES written once,
   when M prints to at least MIN-TOTAL-BYTES. Map keys are never interned;
-  neither is M itself."
+  neither is M itself. With ONLY-KEYS, only the values under those top-level
+  keys are searched and rewritten; every other top-level value is written
+  exactly as given, so readers of those fields need not hydrate."
   ([m] (encode m {}))
-  ([m {:keys [min-bytes min-total-bytes]
+  ([m {:keys [min-bytes min-total-bytes only-keys]
        :or {min-bytes default-min-bytes min-total-bytes default-min-total-bytes}}]
    (if (or (not (map? m)) (< (printed-size m) min-total-bytes))
      m
-     (let [counts (occurrence-counts m)
+     (let [scope (if only-keys (select-keys m only-keys) m)
+           counts (occurrence-counts scope)
            chosen (HashMap.)]
        ;; Size only the repeated values; most subtrees occur once.
        (doseq [[^Typed k n] counts
                :let [v (.-v k)]
-               :when (and (>= (long n) 2) (not (identical? v m))
+               :when (and (>= (long n) 2) (not (identical? v scope))
                           (>= (printed-size v) min-bytes))]
          (.put chosen k true))
        (if (.isEmpty chosen)
@@ -186,47 +198,16 @@
                                       id))]
                          {ref-key id})
                        (rewrite v)))]
-             (let [body (rewrite m)]
+             (let [body (if only-keys
+                          (reduce (fn [acc k] (if (contains? m k)
+                                                (assoc acc k (ref-or-inline (get m k)))
+                                                acc))
+                                  m only-keys)
+                          (rewrite m))]
                (assoc body table-key (persistent! @table))))))))))
 
-(defn interned? [x]
-  (and (map? x) (contains? x table-key)))
+(def interned? durable-hydrate/interned?)
 
-(defn- ref-id [v]
-  (when (and (map? v) (= 1 (count v)))
-    (get v ref-key)))
-
-(defn hydrate
-  "Inverse of encode. Returns X unchanged when it carries no table."
-  [x]
-  (if-not (interned? x)
-    x
-    (let [table (get x table-key)
-          done (HashMap.)
-          resolving (HashSet.)]
-      (letfn [(resolve-id [id]
-                (or (.get done id)
-                    (let [entry (get table id ::missing)]
-                      (when (identical? entry ::missing)
-                        (throw (ex-info "Durable reference has no table entry"
-                                        {:durable/ref id})))
-                      (when-not (.add resolving id)
-                        (throw (ex-info "Durable references contain a cycle"
-                                        {:durable/ref id})))
-                      (try
-                        (let [v (walk entry)]
-                          (.put done id v)
-                          v)
-                        (finally (.remove resolving id))))))
-              (walk [v]
-                (if-let [id (ref-id v)]
-                  (resolve-id id)
-                  (cond
-                    (map? v) (persistent!
-                              (reduce-kv (fn [acc k y] (assoc! acc k (walk y)))
-                                         (transient (empty v)) v))
-                    (vector? v) (mapv walk v)
-                    (set? v) (into (empty v) (map walk) v)
-                    (seq? v) (doall (map walk v))
-                    :else v)))]
-        (walk (dissoc x table-key))))))
+(def hydrate
+  "Inverse of encode; see futon2.aif.durable-hydrate."
+  durable-hydrate/hydrate)
