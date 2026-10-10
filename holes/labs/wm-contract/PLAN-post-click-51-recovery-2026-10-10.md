@@ -233,6 +233,36 @@ The still-owed runtime producer must therefore pin the full repository/domain
 relationship and provide independently authorized evidence with an explicit
 legacy receipt projection; unjudged top-k rows satisfy neither obligation.
 
+2026-10-10 unwired runtime correspondence (defect 15):
+`futon2.aif.open-cascade-pattern-search/validate!` accepts externally supplied
+`:wm/open-cascade-pattern-search-v1` data but neither searches nor produces a
+judgment.  It is intentionally absent from the runner and revision flow.
+
+| Lean field/law | Clojure receipt path | Validator check |
+|---|---|---|
+| `PinnedPatternRepository.identity/version/digest` | `[:repository :identity/:version/:digest]` | nonblank identity/version; digest recomputed over the ordered carrier |
+| repository members and `nodup` | `[:repository :members]` (`:id`, `:source-pin`) | ordered vector, unique IDs, path/revision/SHA-256 pins |
+| `SearchDomainScope.complete` equality | `[:domain {:scope :complete :members ...}]` | exact ordered equality with repository IDs |
+| bounded limitation/subset | `[:domain :limitation/:members]` | nonblank limitation, unique repository subset |
+| query/blocker/prior cascade | `[:query]`, `[:blocker]`, `[:prior-cascade]` | nonblank ID plus digest for each |
+| external judgment coverage/order | `[:judgments]` | exactly one judgment per domain member in domain order |
+| authority separation | `[:judgments i :authority]`, `[:search-implementation :id]` | nonblank and unequal |
+| admissible/rejected evidence | `[:judgments i :verdict/:evidence]` | typed verdict, nonempty evidence, exact member source pin; rejection reason required |
+| evidence-derived F11 receipt | `[:judgments i :evidence :legacy-receipt]` | admissible evidence must carry the existing structured-antecedent/warrant/citation carrier, with citation bound to the member source pin |
+| priority order and `Nodup` | `[:priority]` | unique vector whose set exactly covers the domain |
+| first-admissible choice/no-match | `[:result]` | chosen ID is first admissible in priority; no-match has no admissible judgment |
+| complete versus bounded absence | `[:repository-global-absence]` | required only for complete no-match and forbidden for bounded scope |
+| implementation and receipt identity | `[:implementation]`, `[:implementation-digest]`, `[:receipt-digest]` | exact adapter/version, recomputed implementation digest, recomputed whole-receipt digest |
+
+The positive Clojure fixture is finite and structurally corresponds to the
+existing Lean `chosenExample`, but no repository generator currently translates
+this new EDN carrier into a Lean declaration.  The exact owed witness is an
+adapter that maps the fixture's ordered repository/domain, external judgments,
+priority, evidence projection, and outcome into
+`OpenCascadeSearchReceipt`, then elaborates `chosenExample_valid`-equivalent
+validity from those same values.  This slice does not claim that hand-written
+Lean constants are a generated fixture witness.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
