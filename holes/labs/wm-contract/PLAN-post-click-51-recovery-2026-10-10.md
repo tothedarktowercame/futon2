@@ -141,6 +141,46 @@ data.  The close/run certificate and Morning Brief preserve and expose it.
 Thus author assertion alone remains `:dispatched`; only the matching independent
 review reaches `:verified-used`.
 
+2026-10-10 pattern-search/no-match audit (defect 13): implementation stops at a
+specification boundary; no `:wm/open-cascade-pattern-search-v1` is emitted yet.
+The canonical query path (`interpretation-request/captured-request!`) pins the
+target, both retriever implementations and indices, and every library source,
+then returns two bounded lists: embedding `k=40` and tier-0 `k=8`.
+`query-time-slice` labels every returned row `:judgment :unjudged`; the Python
+port explicitly performs “no ... relevance judgments.”  Top-k is truncation,
+not an exhaustive library decision.  `want-interpretation` then permits an
+agent to interpret a returned pattern or search the captured library further.
+There is no declared admissibility predicate, common score domain, threshold,
+or exhaustive-search rule from which Clojure could derive either per-candidate
+rejection or `:no-admissible-match`.
+
+The relevant Lean boundary agrees with that limitation.
+`F11Conformance.ConformantFind` requires containment, typed absence *after* an
+empty selection, receipts for selected patterns, and non-self-certification;
+`FindFalsifiable` requires exclusion of at least one repository member.  It
+does not define which patterns address a tension or authorize an admissibility
+threshold.  In particular `findRefusing` is conformant, demonstrating that F11
+cannot supply the missing relatedness law by itself.
+
+Read-only persisted falsifier:
+`data/wm-full-loop-machinery-98/wm-contract-machinery-98-v1/attempt-001/007-closed.edn`
+records a real reviewer blocker for `M-autonomous-pattern-lifecycle`, prior
+cascade identity
+`ef0d2974ecf9b2fff23ef5490559b16233023375a4d6bf8c932db2f469e1d72b`,
+and a retrieved/validated choice `:musn/pattern-action-rpc` with pinned source
+SHA-256 `309ac16f...f71948`.  Its historical production receipt retains the
+chosen source and query pins but neither the complete returned candidate set,
+scores, rejection reasons, nor an admissibility rule.  Current code improves
+candidate retention but still calls those hits unjudged, so this record cannot
+be upgraded into a search/no-match certificate.
+
+Minimal specification decision before the authored-new branch: declare a
+relatedness/admissibility judgment over the pinned query and complete pinned
+repository (or explicitly bounded domain), including comparable evidence,
+selection/tie law, and rejection reasons.  Only that law can authorize the
+chosen-existing versus `:no-admissible-match` conclusion and the required
+falsifiers.  Inventing a similarity threshold in this repair would be a facade.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
