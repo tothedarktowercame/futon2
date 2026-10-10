@@ -103,3 +103,13 @@
         expected (apply str (map #(format "%02x" (bit-and % 0xff))
                                  (.digest md (.getBytes (pr-str v) "UTF-8"))))]
     (is (= expected (di/printed-sha256 v)))))
+
+(defrecord ProbeRecord [a b])
+
+(deftest records-inside-the-scope-are-written-as-they-are
+  (let [shared (big :shared 50)
+        rec (->ProbeRecord 1 shared)
+        m {:decision {:r rec :x shared :y shared}}
+        enc (di/encode m {:min-bytes 64 :min-total-bytes 0 :only-keys [:decision]})]
+    (is (identical? rec (get-in enc [:decision :r])))
+    (is (di/interned? enc))))

@@ -170,6 +170,9 @@
                table (volatile! (transient {}))]
            (letfn [(rewrite [v]
                      (cond
+                       ;; A record is written as it is: (empty record) throws,
+                       ;; and internable? already keeps records out of the table.
+                       (record? v) v
                        (map? v)
                        (let [blank (empty v)]
                          ;; Sorted maps and other persistent map types need

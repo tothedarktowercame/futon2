@@ -5,7 +5,8 @@
   no exception from a wire or trip action is allowed to reach the runner.  The
   richer `:tripwire/snapshot` key is an observational input seam for ledgers
   whose facts are not themselves phase telemetry."
-  (:require [babashka.http-client :as http]
+  (:require [futon2.aif.agency-guard :as agency-guard]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -757,7 +758,7 @@
     (park-fn opts payload)
     (successful-response!
      :tripwire-park
-     (http/post (str (agency-base opts) "/api/alpha/park")
+     (http/post (agency-guard/dispatch-url (agency-base opts) "/api/alpha/park")
                 {:headers {"Content-Type" "application/json"}
                  :body (json/generate-string payload)
                  :timeout 10000 :throw false}))))
@@ -779,7 +780,7 @@
                  (bell-fn opts payload)
                  (successful-response!
                   :tripwire-bell
-                  (http/post (str (agency-base opts) "/api/alpha/bell")
+                  (http/post (agency-guard/dispatch-url (agency-base opts) "/api/alpha/bell")
                              {:headers {"Content-Type" "application/json"}
                               :body (json/generate-string payload)
                               :timeout 10000 :throw false})))]
