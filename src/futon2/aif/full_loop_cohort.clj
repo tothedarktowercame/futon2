@@ -9,6 +9,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.close-retention :as close-retention]
+            [futon2.aif.durable-intern :as durable-intern]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold :as fold]
             [futon2.data-paths :as data-paths])
@@ -56,8 +57,10 @@
     :historical-verification-refused})
 
 (defn read-edn [path]
+  ;; Checkpoints are written with repeated subtrees interned once
+  ;; (futon2.aif.durable-intern); hydrate returns the value as written.
   (with-open [reader (java.io.PushbackReader. (io/reader path))]
-    (edn/read reader)))
+    (durable-intern/hydrate (edn/read reader))))
 
 (defn typed-sorry? [x]
   (and (map? x) (keyword? (get-in x [:sorry :kind]))))
@@ -324,6 +327,9 @@
                        :else (:readable? (printed-edn x))))]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
     (if (plain-edn? value)
+      ;; Click 51's selection checkpoint printed 2.38 GB, 95% of it exact
+      ;; repeats; interned it is 164 MB and reads back identical.
+      (let [value (durable-intern/encode value {:min-bytes 256})]
       (with-open [channel (FileChannel/open p (into-array StandardOpenOption
                                                           [StandardOpenOption/CREATE_NEW
                                                            StandardOpenOption/WRITE]))
@@ -331,7 +337,7 @@
                                         (Channels/newOutputStream channel)
                                         StandardCharsets/UTF_8))]
         (write-edn-to-writer! out value)
-        (.force channel true))
+        (.force channel true)))
       (let [bytes (.getBytes (str (:text (writable-edn value)) "\n")
                              StandardCharsets/UTF_8)]
         (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW

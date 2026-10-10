@@ -67,7 +67,6 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.previous-run :as previous-run]
-            [futon2.aif.policy :as selection-policy]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -1123,8 +1122,11 @@
                        (focus-receipt/join-terminal
                         decision {:run-ending (:run-ending-classification result)
                                   :failure record-failure}))
-            durable-decision (some-> decision
-                                     selection-policy/compact-cascade-carriers)
+            ;; Written whole: futon2.aif.durable-intern removes the repeats
+            ;; losslessly. The lossy candidate projection that stood here
+            ;; broke 9 test namespaces (previous-run, g-term-decomposition,
+            ;; selection-always, ...): readers lost :chosen and receipts.
+            durable-decision decision
             ;; D8/AR-16: an abstained tick throws before a judgment cell is
             ;; written; its decision and the judge's dropped candidates
             ;; travel on the :no-selection sorry cell instead.
@@ -1216,10 +1218,9 @@
                                      ;; source it from the certificate whenever
                                      ;; present so the two copies cannot drift.
                                      :g-term-decomposition
-                                     (selection-policy/compact-cascade-carriers
-                                      (or (get-in decision
-                                                  [:selection-certificate :g-term-decomposition])
-                                          (decomposition/from-result result)))
+                                     (or (get-in decision
+                                                 [:selection-certificate :g-term-decomposition])
+                                         (decomposition/from-result result))
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
@@ -5043,7 +5044,8 @@
                                :belief-source
                                (cond-> {:run/id (:run-id opts)}
                                  trace-path (assoc :trace-path trace-path)))
-                  durable-cell (selection-policy/compact-cascade-carriers cell)]
+                  ;; The cohort writer interns repeats losslessly.
+                  durable-cell cell]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [event (if cohort-source
