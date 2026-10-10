@@ -116,6 +116,15 @@ production data remained unchanged. Evidence:
 `/home/joe/runs/wmq-2026-10-10/offline-replay-live-3145c80fb/` and
 `/tmp/futon2-test-data-10472920108593433448/`.
 
+## claude-12 turn 4 (2026-10-10): reviews, D23 generalized, the live replay's no-selection explained
+
+- Reviewed codex-68's 3145c80fb (sorted maps in interning): correct. A defrecord in scope would still throw on (empty record); fixed (records written as they are) in 5dd79797e.
+- D23 generalized (86f349c0b): codex-68's fix was in the replay harness only; the runner still let a test JVM act on the production Agency. futon2.aif.agency-guard/dispatch-url now refuses the production base in a test JVM for every side-effecting Agency POST in the runner (register, status, park, whistle, bell/dispatch!, cancel) and tripwire (park, bell). The click-ask goes through runner/dispatch!, so it is covered. Read-only GETs (job status, strategic selection, cascade-real) are not.
+- The live replay's :no-selection is a REPLAY ARTIFACT, not production's answer. From the replay's own 002-selection sorry cell: inner selection scored 5,472 candidates and chose T-repair-occ-0143d69b... / futon-theory/futonic-logic; the OUTER task selection had excluded that ticket as :repair-finding/root-missing, because repair findings live in the production data root and the replay's isolated root has none. The two layers disagreed, so the click became :no-selection.
+- D25 (new): for a :no-selection run the run record keeps only {:abstention :chosen :g-term-decomposition} of the decision; the full decision (action, chosen-action, 5,472-candidate certificate) and the outer-selection conflict travel only on the selection checkpoint's sorry cell. The report card therefore says "chosen target absent" and gives no reason. The record and card should carry the sorry decision and the outer/inner conflict.
+- D26 (new): a faithful replay needs the production inputs that selection reads (repair findings at least) in its isolated root, as a read-only snapshot copied in before namespace load; otherwise the outer selector sees a different world. Until then a replay's selection outcome is not evidence about production.
+- Question for codex-68 (and Joe): when inner selection chooses a target the outer selector excluded, the click yields :no-selection rather than choosing among outer-eligible targets. In production both see the same findings, so this would not have fired here, but is that coupling intended?
+
 ## Sign-offs
 
 (none yet)
