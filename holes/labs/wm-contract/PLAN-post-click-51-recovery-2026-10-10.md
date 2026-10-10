@@ -213,6 +213,45 @@ writer keeps the gate closed.
   prior enacted history and separately specify how new policies enter.  Either
   choice changes the model/protocol; the runtime must not infer `F = 0`.
 
+- 2026-10-10, items 1/4 outer-task versus cascade-policy diagnosis: Lean does
+  not define an outer task policy.  `Proof2/TargetGrainG.lean` proves when the
+  G difference between candidate laws localises to each target's token set;
+  its own header says that a prior over targets before any candidate exists is
+  undefined.  `Proof2/CascadePolicySet.lean` and
+  `Proof2/PrefixFreeEnergyPosterior.lean` bind the scored/posterior carrier to
+  complete cascade `PolicyKey`s, not task identities.  Current main observes
+  open M/E/T registry rows and pinned pipeline/ownership/standing evidence in
+  `meta-live-outer-selector`, then `meta-pipeline-selector/select` chooses one
+  task by pairwise sums of shared normalized task-state cost channels.  That is
+  a deterministic heuristic ranking signal (despite the receipt reason
+  `:minimum-pairwise-task-state-G`), not the Lean cascade-policy G and not a
+  declared predictive/preference objective.  The fuller
+  `meta-outer-policy/evaluate` objective is proposal/script machinery and is
+  not called by the production composition root.  The missing carrier is an
+  authorised, formal outer observation/prediction/preference policy and its
+  selection theorem; no such objective may be inferred from tactical G.
+  After the outer receipt, current `war_machine/judge` reduces
+  `cascade-targets` to exactly its chosen id, constructs target-local cascade
+  policies, and only then lets `wm.cascade-decision/select-and-record-cascade!`
+  compute G and the policy posterior.  Existing regression
+  `outer-task-is-selected-before-and-independently-of-cascade-material` pins
+  that order.
+
+- 2026-10-10, persisted c82068b4 correspondence: the retained canonical outer
+  receipt honestly has status `:absent`, reason
+  `:receipt-identity-inconsistent`.  Its observed META receipt selected
+  `M-interim-director-proxy-metric-inventory` from 300 candidates by
+  `:minimum-pairwise-task-state-G`, but the run's 5,413-policy posterior ranged
+  across 343 targets and selected the sole recorded policy for
+  `T-repair-occ-487ca3f2205bf084f5d9bbb6b753cdc3908f106e8ff3aec60243a1bff7c34581`.
+  Thus that historical run let an all-target policy comparison displace the
+  outer choice; the posterior was not a legitimate task selector.  Current
+  main already contains the bounded correction in `bb67416b0` (select task
+  first and construct cascades only for that target), so no new runtime change
+  or restoration of the all-target posterior is justified.  Completing item
+  4 requires the explicit outer-policy specification above, not reuse of
+  cascade G.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
