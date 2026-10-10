@@ -63,6 +63,17 @@ known click-path defects are fixed and verified in the serving process.  A
 reporting contradiction, unbounded memory path, or unexercised production
 writer keeps the gate closed.
 
+## Specification-extension authority
+
+Joe, 2026-10-10: where an existing Lean carrier substantially defines the
+required behavior, the natural repair may extend that Lean model and the
+runtime certificates together.  Such a change should be additive where
+possible: state the missing bridge or evidence field, add the Lean declaration
+and falsifier, emit the corresponding runtime receipt, and gate the production
+composition root on it.  Do not stop at “the specification is incomplete”
+when the existing formal work determines a faithful extension; do not replace
+or weaken an existing definition merely to accommodate current Clojure.
+
 ## Progress
 
 - 2026-10-10, item 3/Q4 correspondence: repaired the Clojure exporter and
@@ -402,6 +413,55 @@ writer keeps the gate closed.
   post-score `CandidateFamily.scored` proof, and designate the composition
   root that must refuse with the missing evidence before invoking G.  No
   validator or runtime refusal was invented in this audit.
+
+- 2026-10-10, corrected category-theoretic carrier audit: the preceding
+  diagnosis was too broad.  The runtime-to-policy projection is **not wholly
+  undefined**.  `ConstructionReceipt.lean` already defines a decidable,
+  executable pre-score receipt for the token-order projection, and current
+  Clojure emits and gates that carrier in `relation-witnesses` and
+  `admit-cascade-problem`.  `ThreeHalvesBlend.lean` additionally defines the
+  richer 3/2-blend carrier and its coverage/consistency laws, but current
+  Clojure does not serialize that carrier.  The exact correspondence is:
+
+  | Canonical pre-G obligation | Lean declaration | Receipt/runtime field | Current producer or validator | Status |
+  |---|---|---|---|---|
+  | Pattern occurrence semantics | `ConstructionReceipt.UnitSemantics` (`produces`, `needs`) | interpreted pattern `:produces`, `[:guard :needs]` | `interpretation-construction`, `construction-receipt-lean-adapter` | Implemented and emitted |
+  | Exact token-supported edge | `EdgeWitness`, `edgeValid`, `tokenRelated` | `[:relations :support :relations]` | `construction/relation-witnesses`; `machine-construction-relations-valid?` | Implemented and pre-G gated |
+  | Common-origin meet with connected paths | `MeetWitness`, `pathValid`, `meetValid`; `CascadeOrder.IsMeet` direction | `[:relations :meet :relations]` | same producer/validator and Lean adapter | Implemented and pre-G gated after the direction repair below |
+  | Precedence equals support and order is a clean linear extension | `Receipt`, `valid` | `:precedence`, `:linear-extension`, `:violations` | same producer/validator | Implemented and pre-G gated |
+  | Per-occurrence blend objects and four partial maps | `ThreeHalvesBlend.Theory`, `PMap`, `Square` (`G`, `I₁`, `I₂`, `B`) | none | none | Absent |
+  | Auxiliary-leg meaning, square commutation, consistency | `Square.commutes`, `Cone.consistent`, `inconsistencyWitness` | none | none | Absent |
+  | 3/2-pushout coverage | `Cone.isPushout`, `pushout_iff_coverage` | none | none | Absent |
+  | Adjacent-square pasting | `pastedDiamond`, `prop8` (requires commutation/well-formed maps) | none | none | Absent |
+  | Shared-object gluing and construction/application orders | `Gluing`, `Policy`, `Policy.wellFormed`, `Policy.components` | only the unrelated token order/`:precedence` exists | none for blend squares/gluings or separate `applicationOrder` | Absent |
+  | Predictive interpretation consumed by G | `CascadeEFE.Model.interpretation`, `policyKernel` | admitted interpretation receipts and model identity | source/admission checks plus scoring model | Present as runtime data; no theorem bridges a `ThreeHalvesBlend.Policy` to the transition kernel |
+  | Successful score for every family member | `CascadeEFEPolicies.CandidateFamily.scored` | scoring entries | post-construction scoring | Post-score by definition; not a pre-G gate |
+
+  The narrowest already-defined receipt for the structural/token-order part
+  of a pre-score `CascadeEFE.Policy` is therefore
+  `ConstructionReceipt.valid`, supplied with the exact interpreted
+  `UnitSemantics`; it is not by itself a full 3/2-blend/canonical-policy
+  admission.  The Clojure receipt is the same carrier through the pinned Lean
+  adapter, not merely a namesake.  The executable witness exposed one real
+  mismatch: after the Lean common-origin ruling, Clojure still emitted the
+  superseded greatest-common-descendant and paths from operands to that
+  descendant.  The previously checked-in
+  `ConstructionReceiptRuntimeWitness.lean` consequently failed
+  `native_decide`.  The producer, pre-G validator, fixture, and adversarial
+  regression now use a closest common origin with paths from the meet to both
+  operands; a structurally complete old-direction receipt is refused before
+  scoring.
+
+- 2026-10-10, narrowed remaining bridge: no honest full canonical gate can
+  yet be wired.  The missing runtime fields are the per-square pinned source
+  objects `G/I₁/I₂/B`, all four partial maps, auxiliary flags, gluing/shared
+  objects, consistency and pushout-coverage verdicts, pasting evidence, and a
+  separate application order.  The missing theorem/build step is the
+  adequacy projection from a validated `ThreeHalvesBlend.Policy` to the
+  guarded transition carrier and predictive interpretation consumed by
+  `CascadeEFE.Policy`.  `CandidateFamily.scored` remains deliberately
+  post-score.  Thus defect 7's “wholly owed” wording is retracted, while its
+  refusal to bless the historical generated population remains correct.
 
 - 2026-10-10, item 5 stuck/refinement audit: the formal transition model does
   not derive a new pattern when a cascade is blocked.
