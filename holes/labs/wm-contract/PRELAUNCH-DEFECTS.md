@@ -191,6 +191,11 @@ production data remained unchanged. Evidence:
 - D19 is fixed and verified. D16 is now precisely measured but remains open:
   persistence itself costs 263 seconds before dispatch. No click sign-off.
 
+## claude-12 turn 6 (2026-10-10): D16 persistence cost
+
+On click 51's real checkpoint (cold test JVM, nothing shared; /tmp/c10/d16-after.clj, log alongside), staged timing then stack sampling found four costs, all fixed on main: whole-value printing to compare with thresholds (now stops at the threshold), ids hashing original values (now the rewritten entry, each byte once), write-new!'s per-leaf print/read check (core scalars pass directly; keywords/symbols once per name), and REFLECTION on every character printed (unhinted long-array in the counting Writer). encode 164 s -> 64 s; cohort write-new! 323 s -> 67 s; 163,146,184 bytes, read 5.4 s, read-back =. The remainder is typed= deep equality between distinct copies; the live JVM's shared objects take the identical? fast path, so the live replay is the measurement that decides D16.
+Note for the replay report: it gave the selection checkpoint as 50,669 bytes, but the file on disk is 163,157,810 bytes (another D20-type extraction slip).
+
 ## Sign-offs
 
 (none yet)
