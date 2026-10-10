@@ -17,7 +17,7 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
-   "gradedPreferenceSteps" "gTerms" "policiesWithRiskTerm"
+   "gradedPreferenceSteps" "progressivePreferenceRequired" "gTerms" "policiesWithRiskTerm"
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice"
@@ -205,9 +205,7 @@
         c-pref (or (:class-preference model) (:progress-preference model))
         pref-steps (when (map? c-pref)
                      (set (for [[step row] c-pref
-                                :when (and (map? row)
-                                           (not= #{:ending/not-yet-evaluated}
-                                                 (set (keys row))))]
+                                :when (and (integer? step) (map? row) (seq row))]
                             (dec (long step)))))
         graded-pref-steps
         (when (map? c-pref)
@@ -223,10 +221,6 @@
         recorded-term? (fn [term row]
                          (let [v (get row term ::absent)]
                            (and (number? v) (Double/isFinite (double v)))))
-        contributing? (fn [term row]
-                        (let [v (get row term)]
-                          (and (number? v) (Double/isFinite (double v))
-                               (pos? (double v)))))
         ;; Q4 compares these counts with comparedPolicies.card.  If the
         ;; scoring table and policy population are different grains, the
         ;; exporter has no honest Q4 fact: report NR rather than combining
@@ -276,11 +270,13 @@
                "gradedPreferenceSteps"
                (if (some? graded-pref-steps) (vec (sort graded-pref-steps))
                    (nr "completed-progress preference rows absent"))
+               "progressivePreferenceRequired"
+               (= :progressive (:preference-semantics model))
                "gTerms" (if (and (seq g-term-rows) q4-counts-coherent?)
-                            {"risk" (every? #(contributing? :risk %) g-term-rows)
-                             "ambiguity" (every? #(contributing? :ambiguity %) g-term-rows)
+                            {"risk" (every? #(recorded-term? :risk %) g-term-rows)
+                             "ambiguity" (every? #(recorded-term? :ambiguity %) g-term-rows)
                              "informationGain"
-                             (every? #(contributing? :expected-information-gain %)
+                             (every? #(recorded-term? :expected-information-gain %)
                                      g-term-rows)}
                             (nr "per-candidate G terms absent"))
                "policiesWithRiskTerm"

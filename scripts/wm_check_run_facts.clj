@@ -32,7 +32,8 @@
    :q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
         "libraryPatternCount" "constructorPatternCount"]
    :q3 ["cascadesWithoutG"]
-   :q4 ["horizonLength" "preferenceSteps" "gradedPreferenceSteps" "gTerms"
+   :q4 ["horizonLength" "preferenceSteps" "gradedPreferenceSteps"
+        "progressivePreferenceRequired" "gTerms"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
         "policiesWithInformationTerm" "comparedPolicies"]
    :q5 ["interpretationOrder"]
@@ -56,9 +57,10 @@
                               (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))))
         :q3 (ev-known (str "cascadesWithoutG := " (fs (facts "cascadesWithoutG"))))
         :q4 (let [g (facts "gTerms")]
-              (ev-known (format "horizonLength := %d, preferenceSteps := %s, gradedPreferenceSteps := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
+              (ev-known (format "horizonLength := %d, preferenceSteps := %s, gradedPreferenceSteps := %s, progressivePreferenceRequired := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
                                 (facts "horizonLength") (nat-fs (facts "preferenceSteps"))
                                 (nat-fs (facts "gradedPreferenceSteps"))
+                                (bool-lit (facts "progressivePreferenceRequired"))
                                 (bool-lit (g "risk")) (bool-lit (g "ambiguity"))
                                 (bool-lit (g "informationGain"))
                                 (facts "policiesWithRiskTerm")

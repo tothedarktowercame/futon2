@@ -466,6 +466,22 @@ or weaken an existing definition merely to accommodate current Clojure.
   regression or implementation repair can be written.  No term was made
   positive, no field was renamed, and no preference row was synthesized.
 
+- 2026-10-10, Defect 18/Q4 first-principles correction: the prior “design
+  blocker” conclusion above was too broad.  `CascadeEFEPolicies.lean` proves
+  canonical deterministic observation models with ambiguity exactly zero,
+  `CascadeEFE.step_decomposition` identifies information gain even when its
+  numeric value is zero, and `PolicyHorizon` explicitly permits constant C-tau
+  as a special case of the step-indexed family.  Thus the real record's zero
+  ambiguity/information values are evaluated terms, not missing carriers, and
+  its waiting rows at taus 1--3 are preferences, not absent C-tau rows.  The
+  repaired Q4 distinguishes finite carrier presence from numeric positivity;
+  it requires graded rows only when `:preference-semantics :progressive` is
+  declared.  Read-only export of the exact 2026-10-05 record now measures one
+  compared policy, horizon 4, preference steps `[0 1 2 3]`, graded steps `[]`,
+  `progressivePreferenceRequired=false`, all three G-term carriers true, and
+  all three per-policy carrier counts equal to one.  No runtime score,
+  observation distribution, preference value, or persisted record changed.
+
 - 2026-10-10, item 3/Q7 correspondence: repaired `pathAbsenceCount` to walk
   the enacted candidate and its selection-to-terminal receipts, or the typed
   abstention carrier when no action was chosen.  It no longer walks rejected
