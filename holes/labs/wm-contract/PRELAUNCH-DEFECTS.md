@@ -41,6 +41,9 @@ a fixture is evidence only when no real artifact is available.
 | D22 | `interpretation-evidence/value-digest` is not stable across an EDN round trip because its canonicalizer descends maps and vectors but not sets or seqs. Any sealed value containing sets cannot be re-verified after persistence. | D19 diagnosis; click-51 family contains 103,563 sets | OPEN, but judged not to affect the next click's live in-memory seal/validate path. A durable fix needs a versioned digest so it does not invalidate existing seals. It remains relevant to persisted precision-state readers. |
 | D23 | The live-selection replay set `:interpretation-ask-fn nil`, but nil means “use the production default.” It dispatched real Agency job `invoke-1791611767087-1281-b6439847` during selection redecision, before the intended author-dispatch stub. The job was already terminal when cancellation was attempted; the replay was then interrupted. | live replay `8f63f9aa5`, 2026-10-10 | FIXED AND VERIFIED in `076caea76`: an explicit no-op function prevents fallback; 242,568 ms of live selection completed without an interpretation dispatch. The run selected no action, so author dispatch was not reached. |
 | D24 | Durable interning assumes `(empty map)` supports transients. A live no-selection close contained a `PersistentTreeMap`; encoding it threw `ClassCastException: PersistentTreeMap cannot be cast to IEditableCollection`, then close fallback lacked required checkpoints. | live replay `076caea76`, 2026-10-10 | FIXED AND VERIFIED in `3145c80fb`: non-editable maps use persistent assoc; the identical live path closed successfully in 131,730 ms and wrote every checkpoint, a 46,064,128-byte run record, and all report cards. |
+| D25 | A `:no-selection` run record and report card discard the sorry cell's full inner decision and outer/inner conflict. | live-selection replays | OPEN (claude-12 owns). |
+| D26 | A faithful isolated replay needs a point-in-time copy of every mutable production input read by selection before data-owning namespaces load. Durable repair evidence contains absolute paths and digests, so a byte copy alone fails its validation contract after relocation. | live replay `9afb57c34`, 2026-10-10 | FIXED AND VERIFIED for the replay harness in `dbe52e1b1`, `2920f897f`, `432561ff1`, and `9afb57c34`: the pre-JVM seeder copied ten stores (2,200 files, 347,713,047 source bytes), relocated 123 repair-evidence files, rebound finding/evidence digests, and the real replay passed stop-line-memory in 3,694 ms. The source stores were only read. |
+| D27 | Inner selection can choose a target that outer task selection explicitly excluded. With production inputs faithfully snapshotted, inner chose `T-repair-occ-487ca3f2...` / `futon-theory/futonic-logic`, while outer excluded that target as `:repair-finding/root-not-current` and chose `M-interim-director-proxy-metric-inventory`; the runner then returned `:no-selection` without reaching construction or Agency dispatch. | live replay `9afb57c34`, exact click-51 source, 2026-10-10 | OPEN, launch-blocking. This confirms the cross-layer mismatch is not cured by supplying repair findings. D19 therefore remains unverified. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -124,6 +127,33 @@ production data remained unchanged. Evidence:
 - D25 (new): for a :no-selection run the run record keeps only {:abstention :chosen :g-term-decomposition} of the decision; the full decision (action, chosen-action, 5,472-candidate certificate) and the outer-selection conflict travel only on the selection checkpoint's sorry cell. The report card therefore says "chosen target absent" and gives no reason. The record and card should carry the sorry decision and the outer/inner conflict.
 - D26 (new): a faithful replay needs the production inputs that selection reads (repair findings at least) in its isolated root, as a read-only snapshot copied in before namespace load; otherwise the outer selector sees a different world. Until then a replay's selection outcome is not evidence about production.
 - Question for codex-68 (and Joe): when inner selection chooses a target the outer selector excluded, the click yields :no-selection rather than choosing among outer-eligible targets. In production both see the same findings, so this would not have fired here, but is that coupling intended?
+
+## codex-68 turn 5 (2026-10-10): production-input snapshot and faithful live replay
+
+- Commits: `dbe52e1b1` adds the pre-JVM snapshot seeder and configurable test
+  root; `9497732c1` makes live mode use the seeded previous-run and repair
+  inputs; `2920f897f`, `432561ff1`, and `9afb57c34` relocate and rehash the
+  absolute-path-bound repair evidence and stub the remaining Agency park/bell
+  boundaries. Focused result: 9 tests, 19 assertions, zero failures/errors;
+  clj-kondo clean.
+- Enumerated mutable inputs: `wm-repair-obligations`, `wm-pattern-feedback`,
+  `wm-habit`, `wm-learning-trials`, `wm-observation-labels`,
+  `wm-scoring-cache`, `wm-rationale`, `wm-cascade-proposals`,
+  `wm-ticket-queue`, and `wm-runs`. Snapshot: 2,200 files and 347,713,047
+  source bytes; 123 repair-evidence files required relocation.
+- Full replay on exact source checkpoint (2,381,602,039 bytes), futon2
+  `9afb57c34`: stop-line-memory 3,694 ms; selection 245,242 ms; close 146,343
+  ms; total harness time 427,667 ms. Peak RSS 7,932,868 KiB, no swap.
+  Durable selection checkpoint 163,387,901 bytes; run record 46,071,591
+  bytes; all report-card formats generated.
+- Result was not a clean launch replay: inner chose
+  `T-repair-occ-487ca3f2...`, outer chose
+  `M-interim-director-proxy-metric-inventory` and excluded the inner target as
+  `:repair-finding/root-not-current`; outcome `:no-selection`, zero dispatches.
+  This is D27, not the earlier missing-input replay artifact. D19 and the D16
+  construction-to-close measurement remain OPEN.
+- Evidence:
+  `/home/joe/runs/wmq-2026-10-10/offline-replay-snapshot-9afb57c34/`.
 
 ## Sign-offs
 
