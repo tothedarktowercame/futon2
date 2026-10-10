@@ -201,3 +201,12 @@ preregistrations in holes/labs/wm-contract/preregistrations/ (futon2 31a5c2224)
 and publishes its report card, run with the restart debugger attached and
 watched phase by phase. `allocated` in futon3c `ordinary_click_budget.clj`
 rises from 49 to 50.
+
+## Joe's grant to claude-12, 2026-10-10
+
+Heard from Joe directly in claude-12's operator buffer (emacs-repl), after the
+warrant re-seed check: "ok, please check it. if it looks goid, run 1 click wiyh
+yhe debugger engaged". One click, run with the restart debugger attached, after
+the close-overflow fix (futon2 43f3d6157) and the scorer speedup (5ac3df140)
+were merged and hot-loaded. `allocated` in futon3c `ordinary_click_budget.clj`
+rises from 50 to 51.
