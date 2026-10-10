@@ -210,3 +210,14 @@ yhe debugger engaged". One click, run with the restart debugger attached, after
 the close-overflow fix (futon2 43f3d6157) and the scorer speedup (5ac3df140)
 were merged and hot-loaded. `allocated` in futon3c `ordinary_click_budget.clj`
 rises from 50 to 51.
+
+## Joe's grant to claude-12, 2026-10-10 (second)
+
+Heard from Joe directly in claude-12's operator buffer (emacs-repl), after
+codex-68's one-click sign-off (PRELAUNCH-DEFECTS.md, futon2 68bd35ea5): "ok,
+please run 1 click". One click, run with the restart debugger attached. The
+first attempt (run 2026-10-10-4bb54313) was refused at admission before the
+ration (D28, readiness wake race) and aborted, spending nothing; after the D28
+fix and codex-68's re-sign (d55665682, 418da732c) the click (run
+2026-10-10-c82068b4) stopped at admission on the exhausted budget, 51 of 51.
+`allocated` in futon3c `ordinary_click_budget.clj` rises from 51 to 52.
