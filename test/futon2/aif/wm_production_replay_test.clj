@@ -76,3 +76,16 @@
 (deftest interpretation-ask-is-explicitly-disabled
   (is (fn? replay/no-interpretation-ask))
   (is (nil? (replay/no-interpretation-ask :any :arguments))))
+
+(deftest production-storage-writers-cannot-be-shadowed-by-replay-callbacks
+  (let [root (.toFile (Files/createTempDirectory
+                       "wm-replay-writers-test-"
+                       (make-array FileAttribute 0)))
+        events (atom [])
+        opts (replay/production-writer-options root events)]
+    (is (= (.getPath (io/file root "wm-trace")) (:trace-dir opts)))
+    (is (= (.getPath (io/file root "wm-full-loop-phases.edn.log"))
+           (:phase-log opts)))
+    (is (identical? events (:phase-events opts)))
+    (is (empty? (select-keys opts [:trace-fn :phase-log-fn :refresh-fn]))
+        "trace, phase, and refresh must execute their production implementations")))

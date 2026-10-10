@@ -95,6 +95,15 @@
     (let [directory (io/file data-root (name cohort-id) attempt-id)]
       (when (.isDirectory directory) directory))))
 
+(defn production-writer-options
+  "Paths/state for writers the replay must exercise through the runner's real
+  production implementations.  Keep this map free of callback overrides: a
+  callback here can silently turn a launch check into a writer stub (D32)."
+  [data-root events]
+  {:trace-dir (.getPath (io/file data-root "wm-trace"))
+   :phase-log (.getPath (io/file data-root "wm-full-loop-phases.edn.log"))
+   :phase-events events})
+
 (defn replay!
   [{:keys [selection output-root run-id live-selection?]
     :or {run-id (str "offline-replay-" (UUID/randomUUID))}}]
@@ -125,7 +134,6 @@
         ;; paths in top-level vars (D12).
         data-root data-paths/test-data-root
         record-dir (.getPath (io/file data-root "wm-runs"))
-        trace-dir (.getPath (io/file data-root "wm-trace"))
         repair-root (.getPath (io/file data-root "wm-repair-obligations"))
         _ (.mkdirs (io/file repair-root))
         prereg-path (.getPath (io/file data-root "offline-cohort.edn"))
@@ -144,7 +152,9 @@
         dispatches (atom [])
         canonical-before {:git (git-snapshot data-paths/production-repo-root)
                           :data (tree-snapshot data-paths/production-data-root)}
-        base-opts {:run-id run-id
+        base-opts (merge
+              (production-writer-options data-root events)
+              {:run-id run-id
                :cohort? true
                :execution-cohort execution-cohort
                :author "offline-author"
@@ -153,9 +163,6 @@
                :run-record-dir record-dir
                :repair-root repair-root
                :surprise-root data-root
-               :trace-dir trace-dir
-               :phase-log-fn #(swap! events conj %)
-               :refresh-fn (fn [] {:outcome :ok :source :offline-replay})
                :substrate-preflight-fn (fn [_] {:route :offline-replay})
                :roster-fn (fn [_] {:offline-author {:status "idle" :invoke-ready? true}
                                     :offline-reviewer {:status "idle" :invoke-ready? true}
@@ -171,7 +178,6 @@
                                              :source :offline-replay})
                :r16-park-fn (fn [_ _] {:status :parked
                                         :source :offline-replay})
-               :trace-fn (fn [_] (.getPath (io/file trace-dir (str run-id ".edn"))))
                ;; This is the sole simulated external boundary.  Refusal is
                ;; intentional: no repository or substrate actuator follows it.
                :dispatch-fn (fn [_ actor _ target _]
@@ -185,7 +191,7 @@
                :read-job-fn (fn [_ job-id]
                               {:job-id job-id :state "done"
                                :result-summary "FULL_LOOP_AUTHOR: REFUSE offline production replay"
-                               :execution {:executed false :reason :offline-production-replay}})}
+                               :execution {:executed false :reason :offline-production-replay}})})
         base-opts (cond-> base-opts
                     (not live-selection?)
                     (assoc :judge-fn (fn [_] {:judgement judgement})
