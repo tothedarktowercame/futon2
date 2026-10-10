@@ -112,6 +112,28 @@ writer keeps the gate closed.
   seven substantive failures visible: two reviewer-falsifier refusals and
   five missing policy-prefix F carriers.  No Lean change is required.
 
+- 2026-10-10, real-run Q7 reviewer-falsifier diagnosis: the same persisted
+  2026-10-05 record still exports `pathAbsenceCount = 8`, including exactly
+  `[:failure :detail :reviewer-falsifier]` and
+  `[:failure :detail :reviewer-falsifier-verification]`.  These are truthful
+  runtime refusals, not absent detail misclassified by the exporter: the
+  retained failure is `:reviewer-falsifier-failed`, the receipt is
+  `:refused`, and independent reconstruction refuses with
+  `:reviewer-falsifier-applicable-check-failed`.  Selection pinned
+  `futon7/holes/M-interim-director-proxy-metric-inventory.md` at revision
+  `ae45d5472d7764c99ab4cbb182b247f7adebd56e`, content SHA-256
+  `f9fcb8c2b6dd2700687d7732de395bbc6a495d5c60f4781cd27e98f2f8601d98`.
+  Author commit `7a9113dfd245ab9918da304f32fc62845ef65741` changed that mission
+  document to SHA-256
+  `7df9b4de959ff80d08bddd208e8fc34b80b37053fc2ec158d8f7aa36b956a544`;
+  its diff rewrote acceptance-section status prose and did not perform the
+  executor-only witnessed checkbox advancement provided by `actuator-a3`.
+  `mission-standing-observation` therefore correctly refused the source
+  mismatch before interpreting standing.  Re-pinning the falsifier to the
+  author's changed mission statement would discard the selected source
+  authority and weaken mission-statement immutability.  No producer or
+  exporter repair is justified, and the historical pair remains counted.
+
 - 2026-10-10, selected-policy F correspondence: the runtime no longer runs a
   reduced `sigma(log E - gamma G)` law when a menu policy has no admitted
   prefix F.  It now returns typed `:free-energy-not-supplied`, naming every
