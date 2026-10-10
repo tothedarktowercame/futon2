@@ -98,6 +98,12 @@
   (when-not data-paths/test-mode?
     (throw (ex-info "Offline production replay requires -Dfuton2.data-root.test=true"
                     {:failure-kind :replay-isolation-not-process-wide})))
+  (when (and live-selection?
+             (not (.isFile (io/file data-paths/test-data-root
+                                    ".wm-production-input-snapshot.edn"))))
+    (throw (ex-info "Live replay requires a pre-JVM production-input snapshot"
+                    {:failure-kind :replay-input-snapshot-missing
+                     :data-root data-paths/test-data-root})))
   (let [root (io/file (or output-root
                           (.getPath (.toFile (Files/createTempDirectory
                                              "wm-production-replay-"

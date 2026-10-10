@@ -36,8 +36,20 @@
   (= "true" (System/getProperty "futon2.data-root.test")))
 
 (defn- fresh-test-root []
-  (str (.toFile (Files/createTempDirectory
-                 "futon2-test-data-" (make-array FileAttribute 0)))))
+  (if-let [configured (System/getProperty "futon2.data-root.test.path")]
+    (let [f (.getCanonicalFile (io/file configured))
+          production (.getCanonicalFile (io/file production-data-root))]
+      (when (= f production)
+        (throw (ex-info "Test data root cannot be the production data root"
+                        {:failure-kind :test-data-root-is-production
+                         :path (.getPath f)})))
+      (when-not (.isDirectory f)
+        (throw (ex-info "Configured test data root does not exist"
+                        {:failure-kind :test-data-root-missing
+                         :path (.getPath f)})))
+      (.getPath f))
+    (str (.toFile (Files/createTempDirectory
+                   "futon2-test-data-" (make-array FileAttribute 0))))))
 
 (def test-data-root
   "One process-visible mutable-data root per test JVM."
