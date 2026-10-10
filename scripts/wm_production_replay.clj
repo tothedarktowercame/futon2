@@ -159,6 +159,11 @@
                ;; Supply a real no-op so the replay has exactly one external
                ;; boundary: the stubbed author dispatch below.
                :interpretation-ask-fn no-interpretation-ask
+               :tripwire/park-fn (fn [_ _] {:status :parked
+                                             :source :offline-replay})
+               :tripwire/bell-fn (fn [_ _] {:accepted true
+                                             :job-id "offline-agency/tripwire"
+                                             :source :offline-replay})
                :trace-fn (fn [_] (.getPath (io/file trace-dir (str run-id ".edn"))))
                ;; This is the sole simulated external boundary.  Refusal is
                ;; intentional: no repository or substrate actuator follows it.

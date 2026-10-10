@@ -5,7 +5,8 @@
   replay JVM loads data-owning namespaces. The destination must not exist."
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.pprint :as pp])
+            [clojure.pprint :as pp]
+            [clojure.string :as str])
   (:import [java.time Instant]))
 
 (def input-paths
@@ -25,6 +26,23 @@
     {:files (count (filter #(.isFile ^java.io.File %) (file-seq root)))
      :bytes (reduce + 0 (map #(.length ^java.io.File %)
                             (filter #(.isFile ^java.io.File %) (file-seq root))))}))
+
+(defn relocate-root-references!
+  "Relocate absolute data-root references retained by repair evidence.  Those
+  paths are part of its validation contract, so a byte-for-byte directory copy
+  is not a usable isolated snapshot."
+  [directory source-root destination-root]
+  (reduce
+   (fn [n file]
+     (if-not (.isFile ^java.io.File file)
+       n
+       (let [before (slurp file)
+             after (str/replace before source-root destination-root)]
+         (if (= before after)
+           n
+           (do (spit file after) (inc n))))))
+   0
+   (file-seq (io/file directory))))
 
 (defn seed! [source-root destination]
   (let [source (.getCanonicalFile (io/file source-root))
@@ -57,10 +75,14 @@
                              :source source-before}
                             (file-census dst)))))))
            input-paths)
+          relocated (relocate-root-references!
+                     (io/file dest "wm-repair-obligations")
+                     (.getPath source) (.getPath dest))
           manifest {:schema :wm/production-input-snapshot-v1
                     :created-at (str (Instant/now))
                     :source-root (.getPath source)
                     :destination (.getPath dest)
+                    :relocated-root-reference-files relocated
                     :entries entries}
           marker (io/file dest ".wm-production-input-snapshot.edn")]
       (spit marker (with-out-str (pp/pprint manifest)))
