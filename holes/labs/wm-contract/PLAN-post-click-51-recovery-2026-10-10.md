@@ -258,6 +258,62 @@ writer keeps the gate closed.
   4 requires the explicit outer-policy specification above, not reuse of
   cascade G.
 
+- 2026-10-10, item 5 selected-cascade dispatch audit: the selected cascade is
+  not discarded before author or reviewer dispatch.  The applicable Lean
+  minimum is explicit selected/enacted identity, not an inference from a
+  selection certificate: `CertificateStates.SelectionEnaction` distinguishes
+  an exact match, a typed grounded divergence, and refusal, while
+  `ConstructionReceipt.Receipt` binds the ordered construction and its
+  precedence evidence.  In current Clojure, `selected-entry` carries the
+  selected action and enacted step into `construct-selected-action`; the
+  resulting construction retains the exact action, ordered `:precedence`,
+  interpretation and construction receipts, guards, transitions/products,
+  observation locators, and enacted-step acceptance criterion.
+  `cascade-plan/cascade-plan-text` renders those carriers into both
+  `author-prompt` and `reviewer-prompt`.  Before dispatch,
+  `d-predecessor-task-authority/capture-result` verifies that the occurrence's
+  action equals the selected action and records a `:candidate-to-minted-join`
+  whose selected and enacted action digests match.  `dispatch!` sends the full
+  prompt prefixed by a digest of that D-task dispatch, and `complete!` retains
+  the join at close.  Build reporting separately starts with
+  `:patterns-selected` equal to the construction order and `:patterns-used []`;
+  selection therefore is not reported as proof of pattern use.
+
+- 2026-10-10, persisted task-local dispatch evidence: the most recent retained
+  task-local run reaching author dispatch is
+  `data/wm-runs/tick-run-record-2026-10-09-513e6445-4ce6-4bc4-a685-c5a5617a56de.edn`.
+  It selected `M-interim-director-proxy-metric-inventory` and complete key
+  `[:pattern-cascade "M-interim-director-proxy-metric-inventory"
+  [:ukrns/reader-run-path :war-machine/state-capture
+  :orchestration/recorded-handoff
+  :measurement/warrant-travels-with-the-number] {}]`.  The corresponding
+  persisted D-task record is
+  `/home/joe/code/futon3c/data/wm-d-task-enactment/action-235aed91-2265-4a14-93c1-13512c40b54a.edn`.
+  It retains all four ordered pattern records and their guards and
+  transitions/products, and verifies equal selected/enacted action digest
+  `c67a47285abce5b67df6e08d948be2b56a6a29883c316c583ed671518cb41d87`.
+  The author job `invoke-1791552084371-607-eeb17721` received the first enacted
+  step `:ukrns/reader-run-path` and returned futon7 commit
+  `ce2159c0d710ff7f42edd9140119dc8744d08941`; the independent reviewer job
+  `invoke-1791552309089-611-d0691474` received the same construction and
+  approved the bounded artifact.  The run subsequently stopped on its
+  truthful reviewer-falsifier refusal, so it supplies no successful close or
+  evidence that all four selected patterns were used.
+
+- 2026-10-10, item 5 evidence-retention boundary: Agency's persisted prompt
+  event is deliberately truncated, so the record cannot later reproduce or
+  independently verify every byte of the actual author/reviewer prompts.
+  The D-task retains the complete selected action and binds the exact dispatch
+  action digest, and current deterministic prompt construction demonstrably
+  renders that action into both prompts; this establishes no carrier-drop
+  code defect, but it is not a byte-level prompt-enactment certificate.  The
+  minimum remaining specification decision is whether the selected-action
+  digest plus deterministic renderer is the intended binding, or whether
+  exact author and reviewer prompt bytes (or their digests) must be retained
+  and joined to the returned artifact and close receipt.  No prompt-binding
+  semantics or whole refinement loop is invented here; item 5 remains open
+  beyond this first dispatch audit.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
