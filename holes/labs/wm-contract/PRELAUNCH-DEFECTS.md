@@ -48,7 +48,10 @@ a fixture is evidence only when no real artifact is available.
 | D29 | The post-click requirements alert checked the run but futon1b refused its evidence copy with HTTP 403 because `wm_run_alert.py` omitted `x-penholder`. | clicks 48 onward | FIXED AND VERIFIED in `82eaf0977`, merged as `1f73c5330`: the script sends `FUTON1B_PENHOLDER`, falling back through `FUTON1A_PENHOLDER` to allowed penholder `api`. A local HTTP capture of the real script path received the POST and header; futon1b's current gate resolves that header and its default allow-list contains `api`. This is a post-click script and requires no JVM load. |
 | D30 | `test_good_fixture_conforms` in `wm_run_alert_test.py` is stale against the current external Requirements checker: Q4 and Q9 return `unverifiable`. | focused D29 verification, 2026-10-10 | JUDGED NOT TO AFFECT THIS CLICK: D29 changes only the later evidence POST; the stale fixture runs with `--no-evidence` and therefore does not exercise the changed code. The other 3 alert tests pass, a local end-to-end POST verifies the header, and production treats an unverifiable requirement as a visible post-click alert rather than suppressing or altering the click. Fixture upkeep remains test debt. |
 | D31 | The signed-off retry reached admission after the ordinary-click allocation was exhausted at 51/51. | run `2026-10-10-c82068b4`, admission only | FIXED AND VERIFIED by Joe's recorded one-click grant: futon2 authorization `1c5247dab` and futon3c budget-only commit `717ae4a2` raise allocation to 52. PID 39171 reports `allocated` 52; receipt 52 was consumed by the current retry, and the runner source remains the signed-off `f7cef971c` digest. The budget namespace does not change futon2 WM behavior. |
-| D32 | The production replay replaced `trace/write-trace!` with a path-returning `:trace-fn`. The real click therefore first exercised a trace record containing the full >2 GB judgement; `append-indexed-trace!` attempted `(str (pr-str record) "\n")` and threw `OutOfMemoryError: Requested array size exceeds VM limit` before selection persistence. | run `2026-10-10-c82068b4`; replay audit 2026-10-10 | OPEN. The replay harness fix `2952c3275` removes its `:trace-fn`, `:phase-log-fn`, and `:refresh-fn` overrides so trace, phase-log, and refresh writers execute their production implementations under the isolated process-wide data root. The focused harness suite passes (10 tests, 19 assertions). The trace representation fix and a clean production-scale replay through the real trace writer are still required before another sign-off. |
+| D32 | The production replay replaced `trace/write-trace!` with a path-returning `:trace-fn`. The real click therefore first exercised a trace record containing the full >2 GB judgement; `append-indexed-trace!` attempted `(str (pr-str record) "\n")` and threw `OutOfMemoryError: Requested array size exceeds VM limit` before selection persistence. | run `2026-10-10-c82068b4`; replay audit 2026-10-10 | FIXED AND VERIFIED. `862a20ee0` (merged `117ec62df`) streams the trace line with `:decision` durably interned and hydrates production readers. The exact live-selection replay on `117ec62df`, with the real trace/phase/refresh writers, wrote a 196,730,846-byte trace in the isolated root; `trace/read-trace` hydrated the decision and exact selected target. It then persisted selection in 16,546 ms, reached Agency, closed in 147,898 ms, wrote the run record and all report-card formats, and exited 0. |
+| D33 | `clojure -M:dev-admin load-file PATH` now reports `Syntax error macroexpanding at (1:1)` for every file. | D32 serving-JVM load | JUDGED NOT TO AFFECT THIS CLICK: the four D32 namespaces were loaded with an attributed dev-admin evaluation of plain Clojure `(load-file ...)`, and post-load behavior plus source identity were checked. This is an operator tooling defect, not a runner path; fix before relying on that subcommand again. |
+| D34 | Babashka/Python utilities that parse `wm-trace` directly and inspect `:decision` will see durable refs in new records unless they hydrate. | D32 reader audit | JUDGED NOT TO AFFECT THIS CLICK: every Clojure production reader on the click path hydrates, and the full replay traversed prior-trace reads and new-trace readback. Migrate offline utilities to the bb-safe `futon2.aif.durable-hydrate`. |
+| D35 | After removal of `:phase-log-fn`, `replay-report.edn :phase-timings` is empty because the real phase writer does not also populate the harness atom. | D32 production replay | JUDGED NOT TO AFFECT THIS CLICK: the real isolated phase log is complete and independently yielded selection 276,508 ms, persistence 16,546 ms, construction 47 ms, D-task capture 1,807 ms, dispatch 3 ms, and close 147,898 ms. Repair the report extraction before the next launch check. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -331,3 +334,40 @@ D31 is adequately addressed and this isolated authorization-counter load does
 not alter selection, construction, dispatch, or close. I renew the sign-off
 for the already-running receipt-52 click; it may continue. Any further load or
 source change still requires another check.
+
+**2026-10-10 15:12 UTC — codex-68 D32 REPLAY VERIFICATION AND RENEWED
+SIGN-OFF FOR ONE CLICK.** The receipt-52 click failed before selection
+persistence and is closed; no work was dispatched. D32 is fixed and verified
+at production scale on futon2 main `117ec62df` containing implementation
+`862a20ee0`. The launch replay used a fresh snapshot of all 16 production data
+roots observed during live selection and the exact 2,381,602,039-byte click-51
+source. Unlike every earlier replay, it used the real trace, phase-log, and
+refresh writers.
+
+The replay exited 0 after 637,153 ms of runner/report work (11:42 wall time),
+with peak RSS 22,262,664 KiB and no swap. Live selection took 276,508 ms; the
+real trace plus selection persistence took 16,546 ms; construction 47 ms;
+D-task capture 1,807 ms; author dispatch reached the sole external Agency stub
+in 3 ms; close completed in 147,898 ms. It wrote a 164,044,198-byte selection
+checkpoint, 270,980,109-byte run record, closed checkpoint, and EDN/Markdown/
+HTML report cards. The new 196,730,846-byte daily trace read back through
+`trace/read-trace`; its hydrated decision names the exact selected target
+`T-repair-occ-487ca3f2205bf084f5d9bbb6b753cdc3908f106e8ff3aec60243a1bff7c34581`.
+Git and production-data snapshots remained unchanged. Evidence root:
+`/home/joe/runs/wmq-2026-10-10/offline-replay-d32-117ec62df/`.
+
+Serving PID 39171 has not restarted and reports no click running. Its runner
+remains exact futon2 `f7cef971c`, SHA-256
+`b105dc8dd79f638bf8740ae2de7d2c7f47e7ad962616559a3da8a28c4c1ba54b`.
+The D32 implementation loaded into that PID consists exactly of
+`futon2.aif.lane-futility`, `futon2.aif.trace`, `futon2.aif.bulletin`, and
+`futon2.aif.run-narrative` from implementation `862a20ee0` / merged main
+`117ec62df`; the earlier budget-only futon3c load remains `717ae4a2`, and the
+post-click alert script remains futon2 `1f73c5330`.
+
+Every known entry D1–D35 is adequately addressed for this click: fixed and
+verified, or expressly judged not to affect it with the reason recorded above.
+This sign-off covers **one click on exactly that loaded PID 39171 state** and
+the previously reviewed debugger phase breakpoints. Any further source change,
+load, JVM restart, or unreviewed debugger stop voids it and requires another
+check. Claude-12 may ask Joe for the click; this sign-off does not initiate it.
