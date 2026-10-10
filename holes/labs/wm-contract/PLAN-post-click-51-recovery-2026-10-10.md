@@ -403,6 +403,49 @@ writer keeps the gate closed.
   root that must refuse with the missing evidence before invoking G.  No
   validator or runtime refusal was invented in this audit.
 
+- 2026-10-10, item 5 stuck/refinement audit: the formal transition model does
+  not derive a new pattern when a cascade is blocked.
+  `CascadeTransition.cascadeKernel_of_noEnabled` makes a no-enabled state an
+  identity transition, and `R15StrategicTarget.outcomeClass` classifies no
+  reached target as stop-the-line.  The library patterns likewise distinguish
+  warranted behavior rather than supplying an automatic selector:
+  `process-coherence/stuck-means-signal` requires alert-and-stop instead of an
+  unchanged retry; `futon-theory/stop-the-line` permits observation and
+  verification while blocking production change; and
+  `cascade-construction/order-by-what-each-step-needs` says an unmet guard must
+  become an explicit check candidate.  The older `M-wm-policies` Track 3
+  `:acquire-patterns` implementation belongs to the legacy portfolio/flat-field
+  selector and proposes a cascade; it is not the task-local post-selection
+  enactment loop and is not evidence that the current selected cascade refines
+  itself.
+
+  | Post-selection boundary | Current main behavior | Pattern-guided refinement? |
+  |---|---|---|
+  | Construction/fold refusal | Throws typed `:construction-failed`; close records and parks an R16 repair obligation. | No library retrieval or cascade revision. |
+  | No enabled transition | Predictive kernel holds the state fixed; initial admission rejects known no-progress candidates, but there is no distinct mid-run reconsideration hook after selection. | No. A later failure becomes a repair obligation. |
+  | Author failure | A known artifact-free Agency infrastructure failure may retry the same author contract once; other failures close to R16. | No; retry is not a pattern consultation. |
+  | Reviewer `REQUEST_CHANGES`/`REJECT` with findings | With the default one revision round, `run-revision-round` invokes `cascade-revision-producer`: it pins the original selected action and whole mission, asks for an additional interpretation, validates it through `want-interpretation`, reconstructs and admits an executable candidate, and sends the revised cascade and acceptance contract to author and reviewer. | **Yes, provisionally and only at this boundary.** The original and revised identities are retained. Selection among proposals uses recorded pattern-evidence prior, not cascade-grain G. |
+  | Reviewer-falsifier failure | Stops, closes the failed attempt, and records/parks a repair obligation. | No second refinement pass. |
+  | Grounding failure or grounded no-change | Stops and records/parks a repair obligation carrying the selected entry and failure evidence. | No pattern retrieval or revised policy comparison. |
+  | Close failure | The close fallback writes a typed failure close and durable machine-failure repair obligation. | No refinement; this is containment and later repair work. |
+
+- 2026-10-10, item 5 refinement disposition: an existing bounded
+  blocker-responsive path is already wired, not bypassed, but it does not
+  satisfy the requested general refinement law.  It fires only on a negative
+  reviewer verdict with textual findings and remaining revision budget; its
+  revision is explicitly provisional, and proposal choice is by
+  `pattern-evidence-prior`.  Generalising it to the other boundaries would
+  invent trigger, authority, and selection semantics, while calling it a
+  canonical refinement would conflict with the still-owed
+  runtime-to-`CascadeEFE.Policy` projection.  The additive specification
+  needed for item 5 must define: the typed observation that opens refinement
+  at each boundary; which current-cascade state and whole-mission evidence are
+  authoritative; how retrieved/new patterns become admissible candidate
+  revisions; cascade-grain G and prefix-F comparison over original plus
+  revisions; a stop condition and repair obligation when none is warranted;
+  and the selected-revised-to-enacted identity/close receipt.  No production
+  path was broadened in this audit.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
