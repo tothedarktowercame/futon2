@@ -405,8 +405,16 @@
 (defn capture-result [inputs]
   (try {:status :captured :dispatch (capture inputs)}
        (catch Exception e
+         ;; Keep the cause. This used to report only :dispatch-evidence-
+         ;; unavailable, which hid :precision-family-tampered from the
+         ;; precision-carry check in the 2026-10-10 offline replay (D19).
          {:status :refused :authority authority :scope scope
-          :kind (or (:d-predecessor/refusal (ex-data e)) :dispatch-evidence-unavailable)})))
+          :kind (or (:d-predecessor/refusal (ex-data e)) :dispatch-evidence-unavailable)
+          :cause {:class (.getName (class e))
+                  :message (ex-message e)
+                  :kind (:kind (ex-data e))
+                  :data-edn (let [s (pr-str (dissoc (or (ex-data e) {}) :cell))]
+                              (subs s 0 (min 4000 (count s))))}})))
 
 (defn complete! [root captured expected data read-job]
   (if (:historical? data)
