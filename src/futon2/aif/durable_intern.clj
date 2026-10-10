@@ -32,24 +32,40 @@
   of the repetition is in subtrees far larger than this."
   4096)
 
-(defn- counting-writer
-  "A Writer that only counts characters; never holds them."
-  ^Writer [^longs n]
-  (proxy [Writer] []
-    (write
-      ([x]
-       (cond (string? x) (aset n 0 (+ (aget n 0) (count x)))
-             (integer? x) (aset n 0 (inc (aget n 0)))
-             :else (aset n 0 (+ (aget n 0) (alength ^chars x)))))
-      ([x off len] (aset n 0 (+ (aget n 0) (long len)))))
-    (flush [])
-    (close [])))
+(def ^:private ^Throwable enough
+  ;; One preallocated signal with no stack trace: prints-at-least? stops a
+  ;; print by throwing it. A fresh ex-info captured the deep print stack every
+  ;; time (88,336 times on click 51's checkpoint), which was most of encode's
+  ;; cost (sampled, D16).
+  (proxy [RuntimeException] ["enough" nil false false]))
 
-(defn- printed-size [v]
-  (let [n (long-array 1)]
-    (binding [*out* (counting-writer n) *print-length* nil *print-level* nil]
-      (pr v))
-    (aget n 0)))
+(defn- prints-at-least?
+  "Whether V prints to at least LIMIT characters, stopping as soon as it
+  does. encode only needs the comparison; printing whole values to compare
+  them with a threshold cost 46 s (the record) plus 30 s (88,336 repeated
+  subtrees, 1.39 GB printed) on click 51's checkpoint (D16)."
+  [v ^long limit]
+  ;; ^longs matters: unhinted, every aset/aget below was a reflective call,
+  ;; once per character printed (sampled: Class.getMethods dominated, D16).
+  (let [^longs n (long-array 1)
+        w (proxy [Writer] []
+            (write
+              ([x]
+               (aset n 0 (+ (aget n 0)
+                            (long (cond (string? x) (count x)
+                                        (integer? x) 1
+                                        :else (alength ^chars x)))))
+               (when (>= (aget n 0) limit) (throw enough)))
+              ([x off len]
+               (aset n 0 (+ (aget n 0) (long len)))
+               (when (>= (aget n 0) limit) (throw enough))))
+            (flush [])
+            (close []))]
+    (try
+      (binding [*out* w *print-length* nil *print-level* nil] (pr v))
+      (>= (aget n 0) limit)
+      (catch RuntimeException e
+        (if (identical? e enough) true (throw e))))))
 
 (defn printed-sha256
   "Lowercase hex SHA-256 of V's pr output as UTF-8, computed by streaming:
@@ -107,10 +123,12 @@
   (and (coll? v) (not (record? v)) (> (count v) 1)))
 
 (defn- occurrence-counts
-  "Typed value -> occurrence count, walking each distinct subtree only once.
+  "[typed value -> occurrence count, object -> its typed key], walking each
+  distinct subtree only once. The identity map lets encode's rewrite find a
+  node's key without a deep equality test.
   Identity is checked first: in the live JVM most repeats are the same
   object, so this rarely needs a deep equality test."
-  ^HashMap [root]
+  [root]
   (let [by-identity (IdentityHashMap.)
         by-value (HashMap.)]
     (letfn [(descend [v]
@@ -136,7 +154,7 @@
                         (.put by-value k 1)
                         (descend v))))))]
       (walk root))
-    by-value))
+    [by-value by-identity]))
 
 (def default-min-total-bytes
   "Records smaller than this are written exactly as before: interning is for
@@ -153,16 +171,16 @@
   ([m] (encode m {}))
   ([m {:keys [min-bytes min-total-bytes only-keys]
        :or {min-bytes default-min-bytes min-total-bytes default-min-total-bytes}}]
-   (if (or (not (map? m)) (< (printed-size m) min-total-bytes))
+   (if (or (not (map? m)) (not (prints-at-least? m min-total-bytes)))
      m
      (let [scope (if only-keys (select-keys m only-keys) m)
-           counts (occurrence-counts scope)
+           [counts ^IdentityHashMap key-of] (occurrence-counts scope)
            chosen (HashMap.)]
        ;; Size only the repeated values; most subtrees occur once.
        (doseq [[^Typed k n] counts
                :let [v (.-v k)]
                :when (and (>= (long n) 2) (not (identical? v scope))
-                          (>= (printed-size v) min-bytes))]
+                          (prints-at-least? v min-bytes))]
          (.put chosen k true))
        (if (.isEmpty chosen)
          m
@@ -189,16 +207,22 @@
                        (seq? v) (doall (map ref-or-inline v))
                        :else v))
                    (ref-or-inline [v]
-                     (if (and (internable? v) (.containsKey chosen (Typed. v)))
-                       (let [k (Typed. v)
+                     (if (and (internable? v)
+                              (.containsKey chosen (or (.get key-of v) (Typed. v))))
+                       (let [k (or (.get key-of v) (Typed. v))
                              id (or (.get ids k)
-                                    (let [id (printed-sha256 v)
-                                          _ (.put ids k id)
-                                          ;; Rewrite BEFORE touching the table:
+                                    (let [;; Rewrite BEFORE touching the table:
                                           ;; the rewrite adds nested entries,
                                           ;; and vswap! would read the table
                                           ;; first and drop them.
-                                          entry (rewrite v)]
+                                          entry (rewrite v)
+                                          ;; The id hashes the REWRITTEN entry,
+                                          ;; whose children are already refs, so
+                                          ;; every byte is hashed once (hashing
+                                          ;; the original re-printed each nested
+                                          ;; value once per ancestor, D16).
+                                          id (printed-sha256 entry)]
+                                      (.put ids k id)
                                       (vswap! table assoc! id entry)
                                       id))]
                          {ref-key id})
