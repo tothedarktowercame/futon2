@@ -193,6 +193,28 @@ quote without changing its pin and requires `:citation-text-mismatch`, so
 fixture drift cannot again masquerade as a positive admission or perturb later
 refusal-order assertions.
 
+2026-10-10 additive Lean specification (defect 14):
+`DarkTower/WarMachine/F11OpenCascadeSearch.lean` now defines the missing search
+certificate without selecting a similarity metric or numeric threshold.
+`SearchDomainKind` distinguishes a pinned complete domain from a bounded domain
+that must name its limitation.  `ValidOpenCascadeSearch` requires exact
+judgment coverage of that declared domain, external judgment authorities
+distinct from the search authority, and either the first admissible member
+under the declared priority order or evidence-backed rejection of every domain
+member.  Its erasure supplies ordinary F11 receipts for a chosen pattern and
+preserves domain-local F11 conformance.  Only complete-domain no-match erases
+to repository absence; bounded no-match deliberately does not.
+
+The runtime correspondence remains owed.  A future
+`:wm/open-cascade-pattern-search-v1` producer must durably encode the domain
+kind and limitation, exact pinned membership, query/blocker/prior-cascade
+identity, priority order, one externally authorized evidence-bearing judgment
+per member, chosen/no-match outcome, authority identities, implementation
+version, and receipt digest.  Current retrievers emit bounded unjudged hits, so
+they cannot instantiate this model.  The next prerequisite is an authorized
+independent judgment producer; no Clojure gate or authored-new branch is
+claimed by this Lean-only slice.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
