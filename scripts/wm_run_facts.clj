@@ -9,6 +9,7 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.mission-registry :as registry]))
 
 (def run-fact-fields
@@ -144,8 +145,6 @@
             (vec (concat root p)))))
       roots))))
 
-(defn- candidate-id [candidate]
-  (or (get-in candidate [:id :id]) (:id candidate) (:candidate candidate)))
 (defn- candidate-target [candidate]
   (or (get-in candidate [:id :target]) (:target candidate)))
 (defn- candidate-precedence [candidate]
@@ -172,7 +171,6 @@
   [record record-path snap previous previous-path]
   (let [cert (get-in record [:decision :selection-certificate])
         candidates (:candidates cert)
-        policies (:policies cert)
         gpolicies (or (get-in cert [:g-term-decomposition :policies])
                       (get-in record [:decision :g-term-decomposition :policies]))
         scoring (get-in cert [:scoring])
@@ -182,9 +180,14 @@
         reaching (when (vector? candidates) (set (keep candidate-target candidates)))
         with-g (when (vector? candidates)
                  (set (keep #(when (numeric-g? %) (candidate-target %)) candidates)))
-        cascade-ids (when (vector? candidates) (set (keep candidate-id candidates)))
-        policy-ids (when (vector? policies)
-                     (set (map #(or (:id %) (:policy-id %) (pr-str %)) policies)))
+        ;; Local labels such as :C1 repeat across targets and are not policy
+        ;; identities.  Q8/Q4 require stable identities of complete arranged
+        ;; actions, and comparedPolicies is specifically the posterior menu.
+        cascade-ids (when (vector? candidates)
+                      (set (map #(action-identity/digest (:id %)) candidates)))
+        posterior (get-in record [:decision :selection-law :posterior])
+        policy-ids (when (map? posterior)
+                     (set (map (comp action-identity/digest key) posterior)))
         precedence (when (vector? candidates) (mapcat #(or (candidate-precedence %) []) candidates))
         model (or (some-> gpolicies first (get-in [:terms :A :value]))
                   (some-> scoring vals first :observation-model))
@@ -219,7 +222,7 @@
         ;; exporter has no honest Q4 fact: report NR rather than combining
         ;; (for example) thousands of target-policy occurrences with sixteen
         ;; reused local labels.
-        q4-counts-coherent? (and (vector? policies)
+        q4-counts-coherent? (and (map? posterior)
                                  (= (count g-term-rows) (count policy-ids)))
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
@@ -248,11 +251,13 @@
                "constructedCascades" (if cascade-ids (sorted-ids cascade-ids)
                                          (nr "constructed candidate ids absent"))
                "comparedPolicies" (if policy-ids (sorted-ids policy-ids)
-                                      (nr "policy list absent"))
+                                      (nr "selection posterior absent"))
                "cascadesWithoutG" (if (and cascade-ids (some? with-g))
-                                      (sorted-ids (set/difference cascade-ids
-                                                                  (set (for [c candidates :when (numeric-g? c)]
-                                                                         (candidate-id c)))))
+                                      (sorted-ids
+                                       (set/difference
+                                        cascade-ids
+                                        (set (for [c candidates :when (numeric-g? c)]
+                                               (action-identity/digest (:id c))))))
                                       (nr "constructed cascades or per-candidate numeric G absent"))
                "horizonLength" (or horizon (nr "observation-model horizon absent"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))

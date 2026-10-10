@@ -99,3 +99,11 @@ writer keeps the gate closed.
   Contradictory prefixes retain zero weight.  This repairs the false posterior
   rather than relabelling the five missing carriers; producing sufficient
   policy-grain history remains an operational prerequisite for selection.
+
+- 2026-10-10, item 3/Q8 identity correspondence: `constructedCascades` and
+  `comparedPolicies` now use the canonical full-action SHA-256 identity already
+  used by the runtime.  The compared population comes from the actual
+  selection posterior, not a separate certificate list, and repeated local
+  labels such as `:C1` no longer collapse policies belonging to different
+  targets.  Missing per-target slice/pool receipts still make Q8 honestly
+  non-recomputable; this change does not manufacture them.
