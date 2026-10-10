@@ -384,8 +384,19 @@
      :candidate-to-minted-join :not-established
      :declaration-pins (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
 
+(defn- effective-root [root]
+  ;; Historical runners passed either the old CWD-relative default or its
+  ;; canonical production expansion.  Under the test alias neither spelling
+  ;; is authority to escape the process data root.
+  (if (or (= root (str (io/file "data" "wm-d-task-enactment")))
+          (= root (str (io/file data-paths/production-data-root
+                                "wm-d-task-enactment"))))
+    (resolved-root)
+    root))
+
 (defn produce! [root inputs expected read-job]
-  (let [record (claim inputs)
+  (let [root (effective-root root)
+        record (claim inputs)
         verification (verify record expected read-job)
         source (write-claim! root record)]
     {:authority authority :scope (:scope verification)
