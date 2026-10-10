@@ -16,7 +16,9 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
-   "gTerms" "interpretationOrder" "pathAbsenceCount" "previousChoice"
+   "gradedPreferenceSteps" "gTerms" "policiesWithRiskTerm"
+   "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
+   "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
@@ -130,7 +132,9 @@
   (let [cert (get-in record [:decision :selection-certificate])
         candidates (:candidates cert)
         policies (:policies cert)
-        gpolicies (get-in record [:decision :g-term-decomposition :policies])
+        gpolicies (or (get-in cert [:g-term-decomposition :policies])
+                      (get-in record [:decision :g-term-decomposition :policies]))
+        scoring (get-in cert [:scoring])
         world (:world-at-selection record)
         world-ids (fn [kind] (get-in world [:open-tasks kind :ids]))
         enum-ids (get-in world [:enumerated-tasks :ids])
@@ -141,15 +145,41 @@
         policy-ids (when (vector? policies)
                      (set (map #(or (:id %) (:policy-id %) (pr-str %)) policies)))
         precedence (when (vector? candidates) (mapcat #(or (candidate-precedence %) []) candidates))
-        model (some-> gpolicies first (get-in [:terms :A :value]))
+        model (or (some-> gpolicies first (get-in [:terms :A :value]))
+                  (some-> scoring vals first :observation-model))
         horizon (:horizon model)
-        c-pref (:class-preference model)
+        c-pref (or (:class-preference model) (:progress-preference model))
         pref-steps (when (map? c-pref)
                      (set (for [[step row] c-pref
                                 :when (and (map? row)
                                            (not= #{:ending/not-yet-evaluated}
                                                  (set (keys row))))]
                             (dec (long step)))))
+        graded-pref-steps
+        (when (map? c-pref)
+          (set (for [[step row] c-pref
+                     :when (and (integer? step) (map? row) (seq row)
+                                (every? #(and (keyword? %)
+                                              (or (= "progress" (namespace %))
+                                                  (str/starts-with? (name %)
+                                                                    "progress-")))
+                                        (keys row)))]
+                 (dec (long step)))))
+        g-term-rows (vec (keep #(get (val %) :g-terms) scoring))
+        recorded-term? (fn [term row]
+                         (let [v (get row term ::absent)]
+                           (and (number? v) (Double/isFinite (double v)))))
+        contributing? (fn [term row]
+                        (let [v (get row term)]
+                          (and (number? v) (Double/isFinite (double v))
+                               (pos? (double v)))))
+        ;; Q4 compares these counts with comparedPolicies.card.  If the
+        ;; scoring table and policy population are different grains, the
+        ;; exporter has no honest Q4 fact: report NR rather than combining
+        ;; (for example) thousands of target-policy occurrences with sixteen
+        ;; reused local labels.
+        q4-counts-coherent? (and (vector? policies)
+                                 (= (count g-term-rows) (count policy-ids)))
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
         previous-chosen (get-in previous [:decision :chosen])
@@ -186,11 +216,29 @@
                "horizonLength" (or horizon (nr "observation-model horizon absent"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
                                      (nr "step-indexed class preference absent"))
-               "gTerms" (if (seq candidates)
-                            {"risk" (boolean (some numeric-g? candidates))
-                             "ambiguity" (boolean (some #(number? (or (:ambiguity %) (get-in % [:terms :ambiguity]))) candidates))
-                             "informationGain" (boolean (some #(number? (or (:information-gain %) (get-in % [:terms :information-gain]))) candidates))}
+               "gradedPreferenceSteps"
+               (if (some? graded-pref-steps) (vec (sort graded-pref-steps))
+                   (nr "completed-progress preference rows absent"))
+               "gTerms" (if (and (seq g-term-rows) q4-counts-coherent?)
+                            {"risk" (every? #(contributing? :risk %) g-term-rows)
+                             "ambiguity" (every? #(contributing? :ambiguity %) g-term-rows)
+                             "informationGain"
+                             (every? #(contributing? :expected-information-gain %)
+                                     g-term-rows)}
                             (nr "per-candidate G terms absent"))
+               "policiesWithRiskTerm"
+               (if (and (seq g-term-rows) q4-counts-coherent?)
+                 (count (filter #(recorded-term? :risk %) g-term-rows))
+                 (nr "coherent per-policy risk terms absent"))
+               "policiesWithAmbiguityTerm"
+               (if (and (seq g-term-rows) q4-counts-coherent?)
+                 (count (filter #(recorded-term? :ambiguity %) g-term-rows))
+                 (nr "coherent per-policy ambiguity terms absent"))
+               "policiesWithInformationTerm"
+               (if (and (seq g-term-rows) q4-counts-coherent?)
+                 (count (filter #(recorded-term? :expected-information-gain %)
+                                g-term-rows))
+                 (nr "coherent per-policy expected-information terms absent"))
                "interpretationOrder"
                (if-let [selected-at (:selection-ended-at world)]
                  (if-let [asked-at (:interpretation-issued-at world)]

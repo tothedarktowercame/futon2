@@ -49,3 +49,45 @@
     (is (= "digest" (exported "currentInputDigest")))
     (is (= ["author"] (exported "seatsAvailable")))
     (is (= "selectionBeforeInterpretation" (exported "interpretationOrder")))))
+
+(deftest q4-is-exported-at-one-coherent-policy-grain
+  (let [model {:horizon 4
+               :class-preference {1 {:ending/not-yet-evaluated 1}
+                                  2 {:progress/zero 0.7 :progress/one 0.3}
+                                  3 {:progress/zero 0.2 :progress/one 0.8}
+                                  4 {:focused 0.55 :related 0.35}}}
+        scored {:g 1.5
+                :g-terms {:risk 1.0 :ambiguity 0.75
+                          :expected-information-gain 0.25}
+                :observation-model model}
+        r (assoc-in record [:decision :selection-certificate]
+                    {:candidates [{:id :c1 :target "M-x" :g 1.5}]
+                     :policies [{:id :pi1}]
+                     :g-term-decomposition {:policies
+                                            [{:terms {:A {:value model}}}]}
+                     :scoring {0 scored}})
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (is (= 4 (f "horizonLength")))
+    (is (= [1 2 3] (f "preferenceSteps")))
+    (is (= [1 2] (f "gradedPreferenceSteps")))
+    (is (= {"risk" true "ambiguity" true "informationGain" true}
+           (f "gTerms")))
+    (is (= [1 1 1]
+           (mapv f ["policiesWithRiskTerm" "policiesWithAmbiguityTerm"
+                    "policiesWithInformationTerm"])))))
+
+(deftest q4-refuses-to-mix-scoring-occurrences-with-reused-policy-labels
+  (let [scored {:g 1.0
+                :g-terms {:risk 1.0 :ambiguity 1.0
+                          :expected-information-gain 1.0}
+                :observation-model {:horizon 1
+                                    :class-preference {1 {:focused 1.0}}}}
+        r (assoc-in record [:decision :selection-certificate]
+                    {:candidates [{:id :c1 :target "M-a" :g 1.0}
+                                  {:id :c1 :target "M-b" :g 1.0}]
+                     :policies [{:id :pi1}]
+                     :scoring {0 scored 1 scored}})
+        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+    (doseq [field ["gTerms" "policiesWithRiskTerm"
+                   "policiesWithAmbiguityTerm" "policiesWithInformationTerm"]]
+      (is (contains? (f field) "not-recomputable") field))))
