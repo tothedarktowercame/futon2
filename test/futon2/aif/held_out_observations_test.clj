@@ -6,12 +6,30 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.held-out-observations :as obs]
-            [futon2.aif.observation-checks :as checks]))
+            [futon2.aif.observation-checks :as checks]
+            [futon2.data-paths :as data-paths]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
 (def declaration
   (edn/read-string (slurp (io/resource "wm/eig/held-out-split-v2.edn"))))
+
+(def fixture-repo-root
+  (let [record-file (io/file (io/resource "fixtures/held-out-corpus/data/wm-runs/tick-run-record-2026-09-23-1790184736.edn"))]
+    (.getPath (.getParentFile (.getParentFile (.getParentFile record-file))))))
+
+(def fixture-run-root (str (io/file fixture-repo-root "data" "wm-runs")))
+(def production-run-root
+  (str (io/file data-paths/production-data-root "wm-runs")))
+
+(defn- with-fixture-corpus [f]
+  (binding [obs/*repo-root* fixture-repo-root]
+    (f (obs/rows-from-runs declaration fixture-run-root))))
+
+(defn- production-corpus-rows []
+  ;; Intentionally read-only: these assertions are about the live corpus,
+  ;; rather than about the collector in isolation.
+  (obs/rows-from-runs declaration production-run-root))
 
 (defn- fabricated-rows []
   ;; two rows that pass every ORIGINAL hygiene check — distinct run-ids,
@@ -37,25 +55,27 @@
   ;; window-closed? true) and would have made the C4 locator observe
   ;; HELD-OUT-OBSERVATIONS-COLLECTED. AFTER: each is :hygiene :invalid with
   ;; :source-missing and the window stays open.
-  (let [w (obs/collect-window declaration (fabricated-rows))]
-    (is (= :open (:status w)) (pr-str (select-keys w [:status])))
-    (is (zero? (:valid-count w)))
-    (is (= :source-missing (-> w :observations first :hygiene-reason)))
-    (is (= :source-missing (-> w :observations second :hygiene-reason)))))
+  (binding [obs/*repo-root* fixture-repo-root]
+    (let [w (obs/collect-window declaration (fabricated-rows))]
+      (is (= :open (:status w)) (pr-str (select-keys w [:status])))
+      (is (zero? (:valid-count w)))
+      (is (= :source-missing (-> w :observations first :hygiene-reason)))
+      (is (= :source-missing (-> w :observations second :hygiene-reason))))))
 
 (deftest doctored-row-disagrees-with-source
-  ;; a row whose source names the REAL record with the RIGHT digest but
+  ;; a row whose source names the pinned real-shaped record with the RIGHT digest but
   ;; whose outcome-class disagrees with what the record says
-  (let [rows (obs/rows-from-runs declaration)
-        real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows)) ;; outcome :grounded-no-change → :no-result
-        doctored (assoc real :outcome-class :result)]
-    (is (some #(= "2026-09-23-1790184736" (:run-id %)) rows))
-    (let [w (obs/collect-window declaration [doctored])]
-      (is (= :row-disagrees-with-source
-             (-> w :observations first :hygiene-reason)))
-      (is (= :open (:status w))))))
+  (with-fixture-corpus
+    (fn [rows]
+      (let [real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows))
+            doctored (assoc real :outcome-class :result)]
+        (is (some? real))
+        (let [w (obs/collect-window declaration [doctored])]
+          (is (= :row-disagrees-with-source
+                 (-> w :observations first :hygiene-reason)))
+          (is (= :open (:status w))))))))
 
-(deftest real-records-and-exclusions
+(deftest production-corpus-records-and-exclusions-read-only
   ;; rows-from-runs over the real root yields exactly this ticket's runs.
   ;;
   ;; This pinned the COUNTS -- 4 rows, 1 valid, window open -- which are
@@ -65,7 +85,7 @@
   ;; is this ticket's and carries provenance, and the registration instant
   ;; partitions the rows exactly (claude-5). A closing paren also made the
   ;; :open assertion the MESSAGE argument of the one above it.
-  (let [rows (obs/rows-from-runs declaration)
+  (let [rows (production-corpus-rows)
         registered (java.time.Instant/parse (:registered-at declaration))
         w (obs/collect-window declaration rows)
         before? (fn [r] (.isBefore (java.time.Instant/parse (:recorded-at r)) registered))]
@@ -89,17 +109,18 @@
 
 (deftest unmapped-outcome-not-counted
   ;; an unmapped outcome is retained, reported, does not count
-  (let [rows (obs/rows-from-runs declaration)
-        real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows))
-        unmapped-val (:unmapped-outcome
-                     (edn/read-string
-                      (slurp (io/resource "wm/eig/held-out-outcome-class-mapping.edn"))))
-        unmapped-row (assoc real :outcome-class unmapped-val :unmapped? true)
-        w (obs/collect-window declaration [unmapped-row])]
-    (is (= :unclassified-outcome-not-counted
-           (-> w :observations first :hygiene-reason)))
-    (is (zero? (:valid-count w)))
-    (is (= :open (:status w)))))
+  (with-fixture-corpus
+    (fn [rows]
+      (let [real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows))
+            unmapped-val (:unmapped-outcome
+                          (edn/read-string
+                           (slurp (io/resource "wm/eig/held-out-outcome-class-mapping.edn"))))
+            unmapped-row (assoc real :outcome-class unmapped-val :unmapped? true)
+            w (obs/collect-window declaration [unmapped-row])]
+        (is (= :unclassified-outcome-not-counted
+               (-> w :observations first :hygiene-reason)))
+        (is (zero? (:valid-count w)))
+        (is (= :open (:status w)))))))
 
 ;; claude-5, reviewing 61c573a8. :recorded-at was the one field a row could
 ;; state freely: verify-source! checked run-id, target and outcome-class
@@ -109,20 +130,20 @@
 ;; outcome was already known into the held-out window, which is the single
 ;; thing the split exists to prevent.
 (deftest a-doctored-instant-cannot-move-a-known-run-into-the-window
-  (let [rows (obs/rows-from-runs declaration)
-        before (first (filter #(= "2026-09-23-1790161992" (:run-id %)) rows))]
-    (is (some? before) "precondition: the 11:13 run is among the rows")
-    (is (= :before-registration
-           (-> (obs/collect-window declaration [before]) :observations first :hygiene-reason))
-        "precondition: it is excluded only by its instant")
-    ;; move it past registration, changing nothing else
-    (let [doctored (assoc before :recorded-at "2026-09-23T13:00:00Z")
-          w (obs/collect-window declaration [doctored])]
-      (is (= :row-disagrees-with-source
-             (-> w :observations first :hygiene-reason))
-          "the instant is checked against the record, not taken on trust")
-      (is (zero? (:valid-count w)))
-      (is (= :open (:status w))))))
+  (with-fixture-corpus
+    (fn [rows]
+      (let [before (first (filter #(= "2026-09-23-1790161992" (:run-id %)) rows))]
+        (is (some? before) "precondition: the 11:13 run is among the rows")
+        (is (= :before-registration
+               (-> (obs/collect-window declaration [before]) :observations first :hygiene-reason))
+            "precondition: it is excluded only by its instant")
+        (let [doctored (assoc before :recorded-at "2026-09-23T13:00:00Z")
+              w (obs/collect-window declaration [doctored])]
+          (is (= :row-disagrees-with-source
+                 (-> w :observations first :hygiene-reason))
+              "the instant is checked against the record, not taken on trust")
+          (is (zero? (:valid-count w)))
+          (is (= :open (:status w))))))))
 
 ;; The resource is the artifact the C4 locator observes and the only thing a
 ;; later reader has. It was committed with a leading "# regenerated ..." line,
@@ -138,9 +159,9 @@
 ;; valid row the resource claims must still be valid against the records, and
 ;; the disposition head may appear only when the records themselves close the
 ;; window (claude-5).
-(deftest the-committed-resource-parses-and-never-claims-more-than-the-records-support
+(deftest committed-resource-never-claims-more-than-production-corpus-read-only
   (let [committed (edn/read-string (slurp (io/resource "wm/eig/held-out-observations.edn")))
-        computed (obs/collect-window declaration (obs/rows-from-runs declaration))
+        computed (obs/collect-window declaration (production-corpus-rows))
         valid-of (fn [w] (set (map :run-id (filter #(= :valid (:hygiene %)) (:observations w)))))]
     (is (map? committed) "the resource parses as EDN")
     (is (clojure.set/subset? (valid-of committed) (valid-of computed))
@@ -192,7 +213,8 @@
     (with-redefs [obs/render-packet (fn [packet]
                                       (str "{:status :closed :disposition "
                                            (:disposition packet) "}\n"))]
-      (let [thrown (try (obs/write-snapshot! decl-path "data/wm-runs" out)
+      (let [thrown (try (binding [obs/*repo-root* fixture-repo-root]
+                          (obs/write-snapshot! decl-path fixture-run-root out))
                         nil
                         (catch clojure.lang.ExceptionInfo e (ex-data e)))]
         (is (= :disposition-head-not-observable (:held-out/refusal thrown))

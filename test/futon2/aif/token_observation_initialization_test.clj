@@ -1,8 +1,10 @@
 (ns futon2.aif.token-observation-initialization-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.cascade-sources :as sources]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.d-predecessor-task-authority-test :as fixture]
@@ -46,11 +48,16 @@
     :before-files {"holes/missions/M-aif-policy-conditioned-eig.md"
                    (slurp "test/fixtures/M-aif-policy-conditioned-eig-pre-aeb352f8.md")}}
    (fn [{:keys [inputs expected jobs root] :as env}]
-     (task/produce! root inputs expected jobs)
-     (let [signed (task/read-observations-v2 root expected jobs)
-           execution (task/read-predecessor root expected jobs)
-           declaration (clojure.core/first (get-in inputs [:dispatch :declarations]))
-           current {:policy on :declaration-sha256 (:sha256 declaration)
+     (let [ledger-root (str root "/learning-trials")]
+       (io/make-parents (io/file ledger-root "attempts.edn"))
+       (spit (io/file ledger-root "attempts.edn")
+             (slurp "test/fixtures/learning-trial/one-authority-success.edn"))
+       (with-redefs [ledger/default-root ledger-root]
+         (task/produce! root inputs expected jobs)
+         (let [signed (task/read-observations-v2 root expected jobs)
+               execution (task/read-predecessor root expected jobs)
+               declaration (clojure.core/first (get-in inputs [:dispatch :declarations]))
+               current {:policy on :declaration-sha256 (:sha256 declaration)
                     :locators fixture-locators
                     :schedule (sources/observation-schedule (:snapshot declaration))
                     :observations (into {} (map (fn [[t l]] [t ((if (= :C3 (:class l))
@@ -76,11 +83,11 @@
                  :live-c {:derived {:want #{(keyword "alive" target)}
                                    :weights {(keyword "alive" target) 1} :lam 1
                                    :entries [] :gaps [] :refusals nil :signature "fixture"}}}]
-       (is (= :admitted (:status signed)))
-       (is (= 1 (count (:problems assembled))))
-       (with-redefs [predecessor/production-authority (fn [_] execution)
-                     predecessor/observation-authority (fn [_] signed)]
-         (let [first-decision (:decision (wm-cd/cascade-decision assembled opts))
+           (is (= :admitted (:status signed)))
+           (is (= 1 (count (:problems assembled))))
+           (with-redefs [predecessor/production-authority (fn [_] execution)
+                         predecessor/observation-authority (fn [_] signed)]
+             (let [first-decision (:decision (wm-cd/cascade-decision assembled opts))
                prior (get-in first-decision [:selection-certificate :token-belief-stage :prospective-carry])
                trace {:decision first-decision :d-task-context expected}
                reads (atom [])
@@ -88,9 +95,9 @@
                                  (:decision (wm-cd/cascade-decision assembled
                                            (assoc opts :prospective-token-carry prior
                                                   :token-belief-predecessor-trace trace))))]
-           (f (assoc env :signed signed :execution execution :current current
-                     :assembled assembled :opts opts :first first-decision :second second-decision
-                     :prior prior :trace trace :habit-reads (receipts/habit-log @reads)))))))))
+               (f (assoc env :signed signed :execution execution :current current
+                         :assembled assembled :opts opts :first first-decision :second second-decision
+                         :prior prior :trace trace :habit-reads (receipts/habit-log @reads)))))))))))
 
 (deftest unobserved-wants-remain-in-the-scoring-universe
   ;; The fixture has three declared wants, while q0 and the candidate effects
