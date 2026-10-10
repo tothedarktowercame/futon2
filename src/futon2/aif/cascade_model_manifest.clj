@@ -434,6 +434,16 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
 
 (defn- refusal? [x] (and (map? x) (contains? x :status)))
 
+(defn- canonical-entries
+  "Entries in the historical canonical order, computing each key once.
+  Push-forward is called for every rollout state; sort-by's comparison
+  function otherwise rebuilds the printed state key O(log n) times."
+  [m]
+  (->> m
+       (map (fn [[state value]] [(pr-str state) [state value]]))
+       (sort-by first)
+       (map second)))
+
 (defn- push-forward
   ([prec q] (:belief (push-forward prec q false)))
   ([prec q record?]
@@ -450,7 +460,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                        (reduce (fn [r [s' p]]
                                                  (assoc r s' (* mass p)))
                                                {}
-                                               (sort-by (comp pr-str key) k)))]
+                                               (canonical-entries k)))]
                     (when record?
                       (vswap! states conj (assoc evaluation :state s :mass mass
                                                 :mass-contribution contribution)))
@@ -459,8 +469,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                       (reduce (fn [acc' [s' p]]
                                 (update acc' s' (fnil + 0) p))
                               acc
-                              (sort-by (comp pr-str key) contribution)))))
-                {} (sort-by (comp pr-str key) q))]
+                              (canonical-entries contribution)))))
+                {} (canonical-entries q))]
     (cond-> {:belief outgoing}
       record? (assoc :evaluation
                      {:status (if (refusal? outgoing) :refused :evaluated)
@@ -1018,7 +1028,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                           (map (fn [v]
                                                  [v (reduce +' (map (fn [[s p]]
                                                                      (if (contains? s v) p 0))
-                                                                   (sort-by (comp pr-str key) q)))]))
+                                                                   (canonical-entries q)))]))
                                           ordered-universe))
                         product-form? (fn [q ms]
                                         (every? (fn [[s p]]
@@ -1105,7 +1115,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                                                     (let [q1 (- 1.0 p)]
                                                                                       (if (pos? q1) (* -1.0 q1 (Math/log q1)) 0.0)))))
                                                                                ordered-universe)))))
-                                                           (sort-by (comp pr-str key) q)))]
+                                                           (canonical-entries q)))]
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
                                                (conj! steps {:tau tau :risk risk :ambiguity amb
