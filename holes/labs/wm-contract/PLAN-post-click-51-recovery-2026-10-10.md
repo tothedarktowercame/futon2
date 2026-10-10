@@ -76,6 +76,26 @@ writer keeps the gate closed.
   removes the later 5,413-term/16-policy contradiction.  Q7 and Q8
   correspondence work remains open.
 
+- 2026-10-10, real-run Q4 producer diagnosis: replaying
+  `data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn`
+  reproduces one scoring row with risk `1.0498221244986776`, ambiguity `0.0`,
+  expected information gain `0.0`, horizon 4, preference steps `[3]`, and no
+  graded progress steps.  The first responsible producer is
+  `futon2.aif.wm.cascade-decision/class-observation-model`: it deliberately
+  defines deterministic class emission and a unit-mass
+  `:ending/not-yet-evaluated` preference at taus 1--3, followed by the fixed
+  terminal class preference at tau 4.  Accordingly,
+  `cascade-observation-scoring` computes genuinely zero observation entropy;
+  this is not a missing ambiguity carrier.  The joint scorer also does not
+  enable its separate Beta-pattern parameter-information mode.  Although
+  `cascade-shape-g` has a separate `:progress-count` model and progressive C,
+  replacing the joint class model with it would change the declared
+  observation and preference semantics rather than recover dropped data.
+  Q4 therefore has a design blocker: define the joint policy's epistemic
+  observation and per-tau progressive preference before a falsifying producer
+  regression or implementation repair can be written.  No term was made
+  positive, no field was renamed, and no preference row was synthesized.
+
 - 2026-10-10, item 3/Q7 correspondence: repaired `pathAbsenceCount` to walk
   the enacted candidate and its selection-to-terminal receipts, or the typed
   abstention carrier when no action was chosen.  It no longer walks rejected
