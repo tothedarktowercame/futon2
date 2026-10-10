@@ -860,6 +860,16 @@
                              :interpretation-ask ask}))
       {:absent :no-failure})))
 
+(defn write-edn-to-writer!
+  "Print VALUE incrementally.  PRINTER is an allocation-free test seam used
+   to exercise byte counts above Integer/MAX_VALUE."
+  ([writer value] (write-edn-to-writer! writer value pr))
+  ([writer value printer]
+   (binding [*out* writer *print-length* nil *print-level* nil]
+     (printer value)
+     (.write ^java.io.Writer writer "\n")
+     (.flush ^java.io.Writer writer))))
+
 (defn write-edn-stream!
   "Write one EDN value without materialising its complete printed form as a
    Java String.  The bindings match `pr-str` for ordinary run records, except
@@ -869,11 +879,8 @@
   (with-open [fos (java.io.FileOutputStream. ^java.io.File file)
               osw (java.io.OutputStreamWriter. fos java.nio.charset.StandardCharsets/UTF_8)
               out (java.io.BufferedWriter. osw)]
-    (binding [*out* out *print-length* nil *print-level* nil]
-      (pr value)
-      (.write out "\n")
-      (.flush out)
-      (.sync (.getFD fos)))))
+    (write-edn-to-writer! out value)
+    (.sync (.getFD fos))))
 
 (defn- stream-sha256 [value]
   (let [digest (MessageDigest/getInstance "SHA-256")]
@@ -896,10 +903,17 @@
         (into (sorted-map)
               (map (fn [[k cell]] [k {:sha256 (stream-sha256 cell)}]))
               (:checkpoints result))
+        supplied-error? (map? original-error)
+        error-class (if supplied-error?
+                      (:class original-error)
+                      (.getName (class original-error)))
+        error-message (if supplied-error?
+                        (:message original-error)
+                        (ex-message original-error))
         failure {:kind (or (get-in result [:data :failure-kind]) :close-exception)
                  :stage :close
-                 :exception-class (.getName (class original-error))
-                 :error (or (ex-message original-error) "Close persistence failed")}
+                 :exception-class error-class
+                 :error (or error-message "Close persistence failed")}
         base {:run/id run-id :startedAt started-at :outcome :build-failed
               :record-type :wm/terminal-persistence-failure
               :checkpoint-keys (vec (keys checkpoint-refs))
@@ -922,8 +936,8 @@
         {:run-record-status :absent
          :run-record-form :typed-small-close-failure
          :run-record-error {:kind :terminal-persistence-double-failure
-                            :first {:class (.getName (class original-error))
-                                    :message (ex-message original-error)}
+                            :first {:class error-class
+                                    :message error-message}
                             :second {:class (.getName (class emergency-error))
                                      :message (ex-message emergency-error)}}}))))
 
@@ -935,8 +949,18 @@
    regression test and production storage faults."
   [persist-fn raw-opts run-id started-at result]
   (try
-    (merge result {:run/id run-id}
-           (persist-fn raw-opts run-id started-at result))
+    ;; A failure already caught by close! must not be fed back through the
+    ;; potentially huge normal-record path.  Persist its bounded typed receipt
+    ;; directly, retaining checkpoint identities by streaming digest.
+    (if (= :close (get-in result [:data :failure-stage]))
+      (merge result {:run/id run-id}
+             (persist-small-failure-record!
+              raw-opts run-id started-at result
+              {:class (or (get-in result [:data :exception-class])
+                          "java.lang.Throwable")
+               :message (or (get-in result [:data :error]) "Close failed")}))
+      (merge result {:run/id run-id}
+             (persist-fn raw-opts run-id started-at result)))
     (catch Throwable e
       (let [edata (if (instance? clojure.lang.ExceptionInfo e) (ex-data e) {})
             failure-kind (or (:failure-kind edata) :close-exception)
@@ -5702,13 +5726,15 @@
         close! (fn [outcome data]
                  (try
                    (observe-end!)
-                   (close-core! outcome data)
+                   (run-phase! opts @phase-context :close
+                               #(close-core! outcome data))
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
                      ;; counterexample: a close-time evidence refusal escaped
                      ;; and left no 007.  This boundary must always attempt the
                      ;; durable typed close before returning to the caller.
-                     (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
+                     (try
+                       (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
                                           (ex-data e) {})
                            refusal-kind (or (:interpretation-evidence/refusal failure-data)
                                             (:limb-evidence/refusal failure-data)
@@ -5810,9 +5836,28 @@
                        {:attempt-id attempt-id
                         :opportunity-id opportunity-id
                         :outcome :build-failed
-                        :checkpoints @checkpoints
-                        :data sorry-data
-                        :closed-event closed-event}))))]
+                       :checkpoints @checkpoints
+                       :data sorry-data
+                        :closed-event closed-event})
+                       (catch Throwable fallback-error
+                         ;; Even recording/QA inside the rich close fallback is
+                         ;; fallible.  Return a bounded result containing the
+                         ;; ORIGINAL close exception; final persistence routes
+                         ;; this directly to the emergency record.
+                         {:attempt-id attempt-id
+                          :opportunity-id opportunity-id
+                          :outcome :build-failed
+                          :checkpoints @checkpoints
+                          :data {:outcome :build-failed
+                                 :failure-kind :close-exception
+                                 :failure-stage :close
+                                 :error (.getMessage e)
+                                 :exception-class (.getName (class e))
+                                 :refusal-data (if (instance? clojure.lang.ExceptionInfo e)
+                                                 (ex-data e) {})
+                                 :close-fallback-error
+                                 {:class (.getName (class fallback-error))
+                                  :message (.getMessage fallback-error)}}})))))]
     (try
       ;; :admission is a phase so its refusals reach the attached debugger.
       ;; Until 2026-10-09 these checks ran before the first run-phase!, so an

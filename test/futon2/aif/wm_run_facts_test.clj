@@ -2,6 +2,14 @@
   (:require [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]))
 
+(deftest run-record-reader-consumes-a-stream-without-slurp
+  (let [file (java.io.File/createTempFile "wm-run-facts-stream-" ".edn")
+        value {:run/id "streamed" :decision {:candidates (vec (range 1000))}}]
+    (spit file (str (pr-str value) "\n"))
+    (with-redefs [clojure.core/slurp
+                  (fn [& _] (throw (AssertionError. "whole-file slurp used")))]
+      (is (= value (facts/read-edn file))))))
+
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
            :pins {:test true}})

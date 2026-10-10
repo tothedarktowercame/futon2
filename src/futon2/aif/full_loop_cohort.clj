@@ -12,11 +12,24 @@
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold :as fold]
             [futon2.data-paths :as data-paths])
-  (:import [java.nio.channels FileChannel]
+  (:import [java.io BufferedWriter OutputStreamWriter Writer]
+           [java.nio.channels Channels FileChannel]
            [java.nio.charset StandardCharsets]
            [java.nio.file Files Path StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]))
+
+(defn write-edn-to-writer!
+  "Print VALUE incrementally to WRITER.  The optional printer is a test seam
+   for proving counts beyond the JVM String/array limit without allocating
+   such a value; production always uses Clojure's streaming `pr`."
+  ([^Writer writer value]
+   (write-edn-to-writer! writer value pr))
+  ([^Writer writer value printer]
+   (binding [*out* writer *print-length* nil *print-level* nil]
+     (printer value)
+     (.write writer "\n")
+     (.flush writer))))
 
 (def default-preregistration
   "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn")
@@ -298,10 +311,30 @@
   ;; Keep the original pr-str bytes for readable values, including map order.
   ;; Non-EDN data is evidence of a payload defect, not a reason to halt the run.
   (let [^Path p (if (instance? Path path) path (.toPath (io/file path)))
-        bytes (.getBytes (str (:text (writable-edn value)) "\n") StandardCharsets/UTF_8)]
+        ;; Ordinary Clojure/EDN trees are safe to print directly.  Keep the
+        ;; legacy repair path for custom/unreadable payloads; importantly, a
+        ;; large valid selection cell never passes through pr-str/getBytes.
+        plain-edn? (fn plain-edn? [x]
+                     (cond
+                       (record? x) false
+                       (map? x) (every? (fn [[k v]] (and (plain-edn? k)
+                                                        (plain-edn? v))) x)
+                       (coll? x) (every? plain-edn? x)
+                       :else (:readable? (printed-edn x))))]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
-    (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
-                                                         StandardOpenOption/WRITE]))
+    (if (plain-edn? value)
+      (with-open [channel (FileChannel/open p (into-array StandardOpenOption
+                                                          [StandardOpenOption/CREATE_NEW
+                                                           StandardOpenOption/WRITE]))
+                  out (BufferedWriter. (OutputStreamWriter.
+                                        (Channels/newOutputStream channel)
+                                        StandardCharsets/UTF_8))]
+        (write-edn-to-writer! out value)
+        (.force channel true))
+      (let [bytes (.getBytes (str (:text (writable-edn value)) "\n")
+                             StandardCharsets/UTF_8)]
+        (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
+                                                             StandardOpenOption/WRITE]))))
     (str p)))
 
 (defn- with-cohort-lock [dir f]
