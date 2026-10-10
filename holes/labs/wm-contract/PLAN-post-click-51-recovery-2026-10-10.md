@@ -488,6 +488,17 @@ or weaken an existing definition merely to accommodate current Clojure.
   the first row.  No runtime score, observation distribution, preference value,
   or persisted record changed.
 
+  Final grain correction: equal row/population counts are not identity
+  evidence.  Each scoring map key is now resolved to the candidate at that
+  exact index, the candidate's complete action identity is digested, duplicate
+  identities are rejected, and the resulting set must equal the posterior's
+  complete action-digest set bijectively.  An out-of-range scoring index or an
+  equal-sized but disjoint population makes Q4 NR.  A `g-term-decomposition`
+  model is accepted as fallback only when its row at that same candidate index
+  carries the identical complete action digest.  The exact 2026-10-05 record
+  still exports Q4 as NR because preference semantics is absent; its scoring
+  identity does join to its singleton posterior and does not alter that result.
+
 - 2026-10-10, item 3/Q7 correspondence: repaired `pathAbsenceCount` to walk
   the enacted candidate and its selection-to-terminal receipts, or the typed
   abstention carrier when no action was chosen.  It no longer walks rejected

@@ -199,12 +199,32 @@
         construction (target-construction-facts cert)
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
-        scoring-rows (when (map? scoring) (vec (map val (sort-by key scoring))))
-        models (when scoring-rows
-                 (mapv (fn [idx row]
-                         (or (:observation-model row)
-                             (get-in gpolicies [idx :terms :A :value])))
-                       (range (count scoring-rows)) scoring-rows))
+        scoring-entries (when (map? scoring) (vec (sort-by key scoring)))
+        scored-bindings
+        (when scoring-entries
+          (mapv (fn [[idx row]]
+                  (let [candidate (when (and (integer? idx) (<= 0 idx)
+                                             (< idx (count candidates)))
+                                    (nth candidates idx))
+                        identity (some-> candidate :id action-identity/digest)
+                        gp (when (and (vector? gpolicies) (integer? idx)
+                                      (<= 0 idx) (< idx (count gpolicies)))
+                             (nth gpolicies idx))
+                        fallback (when (and identity
+                                            (= identity (some-> gp :id action-identity/digest)))
+                                   (get-in gp [:terms :A :value]))]
+                    {:index idx :identity identity :row row
+                     :model (or (:observation-model row) fallback)}))
+                scoring-entries))
+        scored-identities (mapv :identity scored-bindings)
+        q4-identity-coherent?
+        (and (map? posterior) (vector? candidates) (seq scored-bindings)
+             (every? some? scored-identities)
+             (= (count scored-identities) (count (set scored-identities)))
+             (= (set scored-identities) policy-ids)
+             (= (count scored-identities) (count policy-ids)))
+        scoring-rows (mapv :row scored-bindings)
+        models (mapv :model scored-bindings)
         model-signature (fn [m]
                           (when (and (map? m)
                                      (contains? #{:terminal-only :constant :progressive}
@@ -214,8 +234,7 @@
                                              (:progress-preference m))
                              :semantics (:preference-semantics m)}))
         signatures (mapv model-signature models)
-        q4-model-coherent? (and (seq models)
-                                (= (count models) (count policy-ids))
+        q4-model-coherent? (and q4-identity-coherent?
                                 (every? some? signatures)
                                 (apply = signatures))
         model (when q4-model-coherent? (first models))
@@ -235,7 +254,7 @@
                                                                     "progress-")))
                                         (keys row)))]
                  (dec (long step)))))
-        g-term-rows (vec (keep #(get (val %) :g-terms) scoring))
+        g-term-rows (mapv :g-terms scoring-rows)
         recorded-term? (fn [term row]
                          (let [v (get row term ::absent)]
                            (and (number? v) (Double/isFinite (double v)))))
@@ -244,8 +263,8 @@
         ;; exporter has no honest Q4 fact: report NR rather than combining
         ;; (for example) thousands of target-policy occurrences with sixteen
         ;; reused local labels.
-        q4-counts-coherent? (and (map? posterior)
-                                 (= (count g-term-rows) (count policy-ids)))
+        q4-counts-coherent? (and q4-identity-coherent?
+                                 (every? map? g-term-rows))
         apaths (absence-paths record)
         chosen (get-in record [:decision :chosen])
         previous-chosen (get-in previous [:decision :chosen])
