@@ -263,7 +263,16 @@
         receipts (or (get-in selected [:f-prefix :policy :interpretation-receipts])
                      (:interpretation-receipts selected))
         patterns (vec (or (:precedence chosen) (map pattern-id (candidate-patterns selected))))]
-    {:chosen-target (or target (absent "chosen target absent"))
+    {:chosen-target (or target
+                        ;; D25: say why nothing was chosen when the record knows.
+                        (when-let [ns (get-in record [:decision :no-selection])]
+                          (absent (str "no selection: " (name (:kind ns))
+                                       (when (:target ns)
+                                         (str " (best policy " (:target ns) " " (pr-str (:id ns))
+                                              (when (:construction-status ns)
+                                                (str ", " (name (:construction-status ns))))
+                                              ")")))))
+                        (absent "chosen target absent"))
      :document (if target (document record selected target)
                    (absent "chosen target absent"))
      :why-it-won

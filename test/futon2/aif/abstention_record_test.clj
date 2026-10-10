@@ -100,3 +100,20 @@
          (runner/abstention-carrier {:status :selected} [])))
   (is (= :absent (:status (runner/abstention-carrier nil nil)))
       "no recorded decision is a typed absence, never :not-abstained"))
+
+(deftest a-no-selection-says-why-when-the-best-policy-is-provisional
+  ;; D25 (offline replays 2026-10-10): the record said only "chosen target
+  ;; absent" although selection had weighed 5,472 candidates.
+  (is (= {:kind :provisional-choice-without-interpretation
+          :target "T-x" :id :C1 :construction-status :provisional
+          :patterns ["social/ARGUMENT"] :controller-score 3.04}
+         (runner/no-selection-reason
+          {:selection-law {:applied :cascade-selection-posterior}
+           :controller-score 3.04
+           :action {:target "T-x" :id :C1
+                    :construction-receipt {:kind :query-time-pattern-selection
+                                           :status :provisional
+                                           :patterns ["social/ARGUMENT"]}}})))
+  (is (= :abstained (:kind (runner/no-selection-reason {:status :abstained}))))
+  (is (= :no-addressable-action
+         (:kind (runner/no-selection-reason {:selection-law {:applied :other}})))))
