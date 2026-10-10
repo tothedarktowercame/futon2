@@ -84,3 +84,10 @@ writer keeps the gate closed.
   absences belong to the selected candidate/receipt path and therefore remain
   honest Q7 failures rather than being waived.  Q8 correspondence remains
   open, as does repair of the eight selected-path absences.
+
+- 2026-10-10, item 3/Q7 producer repair: a completed selection that correctly
+  requires no interpretation request is now retained as typed
+  `:not-applicable`, not falsely as `:absent`.  Applied to the 2026-10-05
+  record shape, this removes one reporting-induced absence while leaving the
+  seven substantive failures visible: two reviewer-falsifier refusals and
+  five missing policy-prefix F carriers.  No Lean change is required.

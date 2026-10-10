@@ -886,6 +886,13 @@
             [(if selected? :judgment :sorry) :outer-task-selection]
             receipt))
 
+(defn- retained-interpretation-ask [result]
+  (or (get-in result [:checkpoints :selection :judgment :interpretation-ask])
+      ;; Typed refusal/re-decision records travel on the sorry cell.
+      (get-in result [:checkpoints :selection :sorry :interpretation-ask])
+      {:status :not-applicable
+       :reason :selection-complete-no-ask-required}))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -1018,23 +1025,11 @@
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
                                      :chosen (chosen-summary decision))
-                    ;; PROOF-2b: the click's interpretation ask (nil when
-                    ;; nothing was asked — a selected tick, a refusal of
-                    ;; another kind, or no ask-fn installed).
-                    :interpretation-ask (or (get-in result
-                                                    [:checkpoints :selection :judgment
-                                                     :interpretation-ask])
-                                            ;; the judge-refusal sorry cell
-                                            ;; (a typed refusal of the
-                                            ;; decision or of the PROOF-2b
-                                            ;; re-decision) and the bare
-                                            ;; sorry cell of an untyped
-                                            ;; re-decision throw
-                                            (get-in result
-                                                    [:checkpoints :selection :sorry
-                                                     :interpretation-ask])
-                                            {:status :absent
-                                             :reason :no-interpretation-ask})
+                    ;; PROOF-2b: the click's interpretation ask.  Once a tick
+                    ;; has selected an admitted action, an ask is not missing:
+                    ;; it is inapplicable.  Keep that distinct from the typed
+                    ;; absence/refusal produced when an ask was required.
+                    :interpretation-ask (retained-interpretation-ask result)
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :route route
