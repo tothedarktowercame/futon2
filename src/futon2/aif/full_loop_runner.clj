@@ -145,6 +145,10 @@
 (def default-revision-rounds 1)
 (def ^:private historical-verification-completion-token (Object.))
 (def readiness-wake-timeout-ms 30000)
+(def readiness-settle-ms
+  "How long, after a readiness wake returns, to wait for the woken seat to
+  read idle before admission judges it (D28)."
+  20000)
 (def substrate-retry-delay-ms 5000)
 (def strategic-selection-retry-delay-ms 5000)
 
@@ -1487,9 +1491,22 @@
       (try
         ((or (:wake-agent-fn opts) wake-agent!) opts agent)
         (catch Throwable _ nil))
-      (let [refreshed (try
-                        ((or (:roster-fn opts) agent-roster) (:agency-base opts))
-                        (catch Throwable _ roster))]
+      (let [read-roster #(try ((or (:roster-fn opts) agent-roster) (:agency-base opts))
+                              (catch Throwable _ roster))
+            ;; D28: the wake is itself a job, so the seat reads "invoking"
+            ;; until Agency settles it, about 2 s after the whistle returns.
+            ;; One immediate re-read saw that and refused the click as :busy
+            ;; (2026-10-10 14:00, codex-23); admission's :retry reuses the same
+            ;; observation, so it could not recover. Poll until the woken
+            ;; seat is available, bounded.
+            deadline (+ (System/currentTimeMillis)
+                        (long (or (:readiness-settle-ms opts) readiness-settle-ms)))
+            refreshed (loop [r (read-roster)]
+                        (if (or (available? r agent)
+                                (>= (System/currentTimeMillis) deadline))
+                          r
+                          (do (Thread/sleep (long (or (:readiness-poll-ms opts) 1000)))
+                              (recur (read-roster)))))]
         {:roster refreshed
          :readiness/wake-attempted true
          :readiness/wake-result (if (available? refreshed agent)
