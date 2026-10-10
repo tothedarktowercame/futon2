@@ -219,6 +219,35 @@ writer keeps the gate closed.
   prior enacted history and separately specify how new policies enter.  Either
   choice changes the model/protocol; the runtime must not infer `F = 0`.
 
+- 2026-10-10, correction to the preceding diagnosis: the c82068b4 population
+  is **quarantined as non-canonical** and must not support a conclusion about
+  the current cascade-policy protocol.  A policy is not made canonical merely
+  by fitting the structural shape of a `PolicyKey`.  The governing definition
+  is `DarkTower.WarMachine.GOverCascades.CascadePolicy`, backed by
+  `CascadeEFE.Policy`: an interpreted, admissible composition of design
+  patterns retaining nodes, edges, precedence, guarded transitions and the
+  predictive model on which cascade-grain G is defined.  The historical run's
+  5,413 automatically generated keys across 343 targets came from the
+  all-target experiment that displaced the separately chosen task.  That
+  population did not establish conformance with the canonical cascade source
+  and should have been refused before scoring.  Its 0/5,413 prefix-history
+  census is consequently descriptive only of the aberrant run; the claimed
+  current operational cold-start blocker is retracted pending measurement on
+  a conformant, target-local cascade menu.  The abstract Lean rule that an
+  admitted prefix cannot be invented remains in force, but this record does
+  not show which conformant policies would encounter it.
+
+- 2026-10-10, process diagnosis for that mistake: the recovery audit began
+  from Claude's failed run and its report-card fields, then treated a complete
+  `PolicyKey` digest as sufficient evidence of policy identity.  It did not
+  begin from `GOverCascades.lean`, `CascadeEFEPolicies`, the months of work in
+  `M-G-over-cascades.md`, or the existing
+  `problems/g-over-cascade-is-undefined` warning.  This repeated the precise
+  failure documented by `TN-G-over-cascades-revisited.md`: accepting a typed
+  collection supplied by the runtime without auditing where its cascades came
+  from.  Subsequent recovery evidence must establish canonical cascade
+  construction and admissibility before counting or scoring a policy menu.
+
 - 2026-10-10, items 1/4 outer-task versus cascade-policy diagnosis: Lean does
   not define an outer task policy.  `Proof2/TargetGrainG.lean` proves when the
   G difference between candidate laws localises to each target's token set;
