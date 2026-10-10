@@ -44,6 +44,7 @@ a fixture is evidence only when no real artifact is available.
 | D25 | A `:no-selection` record/card discarded the sorry decision and reason. | live-selection replays | FIXED by claude-12 on main: the record retains the certificate and typed no-selection reason; report-card coverage passes. |
 | D26 | A faithful isolated replay needs a point-in-time copy of every mutable production input read by selection before data-owning namespaces load. Durable repair evidence contains absolute paths and digests, so a byte copy alone fails its validation contract after relocation. | live replay `9afb57c34`, 2026-10-10 | FIXED AND VERIFIED for the replay harness through `29480e7a3`: `data-paths/path` tracing, enabled before namespace load and retained through the full live run, now derives the snapshot roots; the seeder consumes that trace instead of a hand list. The observed set added the previously omitted `wm-interpretations`, plus `wm-observation-labels` and `wm-scoring-cache` during selection. The replay passed stop-line-memory and the complete selection-to-close path. |
 | D27 | The `9afb57c34` replay returned `:no-selection`; codex-68 initially attributed this to inner selection choosing a target the outer selector excluded. | live replay `9afb57c34`, exact click-51 source, 2026-10-10 | INITIAL DIAGNOSIS WITHDRAWN. Claude-12 correctly identified the mechanism: `selected-entry` refuses a provisional `:query-time-pattern-selection`. The hand snapshot omitted `wm-interpretations`, so the winner had no receipt. With the observed snapshot, the same target won as a `:machine-constructed` interpreted cascade with `:structure/unresolved-tensions-at-closure`, and the run reached construction and dispatch. The independent design question—inner G-selection may choose an outer-excluded target—remains, but did not cause this replay failure and is not presently judged a launch blocker. |
+| D28 | Admission re-read the roster immediately after its own readiness wake; the woken seat still read `invoking`, so the click was refused `:busy`. | run `2026-10-10-4bb54313`, admission only | FIXED AND VERIFIED in `52b019f9a`, merged as `f7cef971c`: `agent-readiness!` polls until the woken seat is available, bounded by `readiness-settle-ms` (20,000 ms). Independent targeted rerun of the new regression and the existing restored-agent readiness test passed: 2 tests, 12 assertions. PID 39171 reports 20,000 ms and exact loaded/canonical runner SHA-256 identity. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -271,3 +272,25 @@ This sign-off covers **one click on the currently loaded PID 39171 state**.
 Any source change, additional load, JVM restart, armed debugger stop, or click
 already in progress invalidates it and requires re-verification. Claude-12 may
 now ask Joe for that click; this sign-off does not itself initiate one.
+
+**2026-10-10 14:26 UTC — codex-68 RENEWED SIGN-OFF FOR ONE CLICK AFTER D28.**
+The refused run `2026-10-10-4bb54313` reached admission only and dispatched no
+work. D28 is adequately addressed: I reviewed the bounded settle loop and
+independently reran its changed path (2 tests, 12 assertions, zero failures or
+errors). Serving PID 39171 has not restarted and reports no click running. It
+reports runner Git HEAD `f7cef971cbd3c3c00e76db4ca18dd4c7739da459`, tree
+`660ac623c9dc946ae0caaf5839ef49e861934b19`, loaded at
+`2026-10-10T14:23:48.634382073Z`, and content SHA-256
+`b105dc8dd79f638bf8740ae2de7d2c7f47e7ad962616559a3da8a28c4c1ba54b`.
+That digest exactly equals canonical main's
+`src/futon2/aif/full_loop_runner.clj`; the live namespace independently reports
+the same loaded and canonical digests, `:runner/source-check :current`, and
+`readiness-settle-ms` 20,000.
+
+Every register entry D1–D28 is adequately addressed for this click: fixed and
+verified, or expressly judged not to affect it with the recorded reason. This
+renewed sign-off covers **one click on exactly this PID 39171 state**, including
+the previously reviewed debugger phase breakpoints. Any further source change,
+load, JVM restart, unreviewed debugger stop, or click already in progress voids
+it and requires re-verification. Claude-12 may ask Joe for the click; this
+sign-off does not initiate one.
