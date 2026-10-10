@@ -130,3 +130,12 @@ writer keeps the gate closed.
   Several older joint-decision fixtures still assert selection without such
   histories and must be repaired to carry per-policy steps or expect the
   specified typed refusal.
+
+- 2026-10-10, prefix-F fixture correspondence: repaired the joint-decision
+  suite so tests whose subject is downstream of prefix admission supply one
+  explicit admitted step for every fixture policy.  The diagnostic
+  single-lane helper, which has no flight carrier, now asserts its specified
+  R14 `:free-energy-not-supplied` boundary.  The full joint-decision namespace
+  is clean again (16 tests, 107 assertions).  This is test repair, not a
+  production waiver: the runtime still refuses any real menu containing a
+  never-executed policy, exactly as the current Lean specification says.
