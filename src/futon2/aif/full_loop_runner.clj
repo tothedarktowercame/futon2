@@ -6546,7 +6546,8 @@
                                (assoc :wiring-refusal (:fold-output wiring-result)))
                              {:kind :decision-pinned-construction
                               :selected-action (:action entry)})]
-          (persist-selection! trace-path)
+          (run-phase! opts @phase-context :selection-persist
+                      #(persist-selection! trace-path))
           (checkpoint! :construction construction-cell)
           (when (:interpretation-receipt (:judgment construction-cell))
             (reset! measurement-state
@@ -6714,11 +6715,13 @@
                                         :target-repository-head
                                         (:head head-observation))
                                  target mission construction stop-lines))
-                _ (reset! d-task-dispatch
-                          (d-task/capture-result
-                           (assoc @d-task-context
-                                  :declaration-reads (some-> (:declaration-reads/state opts) deref)
-                                  :before pre-author-head)))
+                _ (run-phase!
+                   opts @phase-context :d-task-capture
+                   #(reset! d-task-dispatch
+                            (d-task/capture-result
+                             (assoc @d-task-context
+                                    :declaration-reads (some-> (:declaration-reads/state opts) deref)
+                                    :before pre-author-head))))
                 _ (when-not (= :captured (:status @d-task-dispatch))
                     (throw (ex-info "Selected action could not be bound to the D task dispatch"
                                     {:outcome :incomplete

@@ -1,5 +1,5 @@
 (ns wm-production-replay
-  "Offline full-loop replay over a persisted production selection checkpoint.
+  "Offline full-loop replay using production inputs at production scale.
 
   Mutable Futon data is rooted in a fresh directory.  The only live-system
   boundary replaced is Agency: the synthetic author returns a typed refusal,
@@ -7,6 +7,7 @@
   dispatch, and close without changing a source repository."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
             [clojure.stacktrace :as stacktrace]
             [futon2.aif.durable-hydrate :as durable-hydrate]
@@ -20,7 +21,8 @@
            [java.time Instant]
            [java.util UUID]))
 
-(def phases [:selection :construction :author-dispatch :close])
+(def phases [:selection :selection-persist :construction :d-task-capture
+             :author-dispatch :close])
 
 (defn read-edn! [path]
   ;; Checkpoints may be interned (durable-intern).
@@ -47,6 +49,7 @@
                       end (last (filter #(= :end (:transition %)) xs))]
                 :when (and start end)]
             [phase {:elapsed-ms (or (:elapsed-ms end)
+                                    (:duration-ms end)
                                     (when (and (:at-ms start) (:at-ms end))
                                       (- (:at-ms end) (:at-ms start))))
                     :transition (:transition end)}]))))
@@ -54,8 +57,39 @@
 (defn file-size [path]
   (when (and path (.isFile (io/file path))) (.length (io/file path))))
 
+(defn tree-snapshot [root]
+  (let [root (io/file root)]
+    (into (sorted-map)
+          (comp (filter #(.isFile ^java.io.File %))
+                (map (fn [^java.io.File f]
+                       [(.toString (.relativize (.toPath root) (.toPath f)))
+                        [(.length f) (.lastModified f)]])))
+          (if (.isDirectory root) (file-seq root) []))))
+
+(defn git-snapshot [repo]
+  (let [run (fn [& args]
+              (let [r (apply shell/sh "git" "-C" repo args)]
+               (when-not (zero? (:exit r))
+                 (throw (ex-info "git snapshot failed" {:repo repo :args args :result r})))
+               (.trim ^String (:out r))))]
+    {:head (run "rev-parse" "HEAD")
+     :status (run "status" "--porcelain=v1" "--untracked-files=all")}))
+
+(defn assert-isolation! [before after]
+  (when-not (= before after)
+    (throw (ex-info "Offline replay changed canonical production state"
+                    {:failure-kind :replay-isolation-violation
+                     :before before :after after})))
+  true)
+
+(defn find-attempt-dir [data-root attempt-id]
+  (when attempt-id
+    (first (filter #(and (.isDirectory ^java.io.File %)
+                         (= attempt-id (.getName ^java.io.File %)))
+                   (file-seq (io/file data-root))))))
+
 (defn replay!
-  [{:keys [selection output-root run-id]
+  [{:keys [selection output-root run-id live-selection?]
     :or {run-id (str "offline-replay-" (UUID/randomUUID))}}]
   (when-not selection
     (throw (ex-info "--selection is required" {})))
@@ -69,9 +103,10 @@
         _ (.mkdirs root)
         events (atom [])
         exception (atom nil)
-        started (System/nanoTime)
-        cell (read-edn! selection)
-        judgement (checkpoint->judgement cell)
+        started-ns (System/nanoTime)
+        started-at (str (Instant/now))
+        judgement (when-not live-selection?
+                    (checkpoint->judgement (read-edn! selection)))
         ;; This must be selected before namespaces load. A dynamic binding is
         ;; insufficient because several data-owning namespaces retain derived
         ;; paths in top-level vars (D12).
@@ -94,10 +129,9 @@
                           :cohort-id :wm-offline-production-replay-v1
                           :sha256 prereg-sha}
         dispatches (atom [])
-        defaults (runtime/production-defaults {})
-        opts (merge
-              defaults
-              {:run-id run-id
+        canonical-before {:git (git-snapshot data-paths/production-repo-root)
+                          :data (tree-snapshot data-paths/production-data-root)}
+        base-opts {:run-id run-id
                :cohort? true
                :execution-cohort execution-cohort
                :author "offline-author"
@@ -115,7 +149,6 @@
                :roster-fn (fn [_] {:offline-author {:status "idle" :invoke-ready? true}
                                     :offline-reviewer {:status "idle" :invoke-ready? true}
                                     :offline-repair-reviewer {:status "idle" :invoke-ready? true}})
-               :judge-fn (fn [_] {:judgement judgement})
                :interpretation-ask-fn nil
                :trace-fn (fn [_] (.getPath (io/file trace-dir (str run-id ".edn"))))
                ;; This is the sole simulated external boundary.  Refusal is
@@ -131,15 +164,17 @@
                :read-job-fn (fn [_ job-id]
                               {:job-id job-id :state "done"
                                :result-summary "FULL_LOOP_AUTHOR: REFUSE offline production replay"
-                               :execution {:executed false :reason :offline-production-replay}})})]
+                               :execution {:executed false :reason :offline-production-replay}})}
+        base-opts (cond-> base-opts
+                    (not live-selection?)
+                    (assoc :judge-fn (fn [_] {:judgement judgement})))
+        defaults (runtime/production-defaults base-opts)
+        opts (merge defaults base-opts)]
     (binding [runner/*runtime-defaults* defaults]
       (try
         (let [result (runner/run-opportunity! opts)
               record-path (.getPath (io/file record-dir (str "tick-run-record-" run-id ".edn")))
-              attempt-dir (when-let [attempt-id (:attempt-id result)]
-                            (first (filter #(and (.isDirectory ^java.io.File %)
-                                                 (= attempt-id (.getName ^java.io.File %)))
-                                           (file-seq (io/file data-root "wm-full-loop")))))
+              attempt-dir (find-attempt-dir data-root (:attempt-id result))
               checkpoints (when attempt-dir
                             (into (sorted-map)
                                   (for [f (file-seq attempt-dir)
@@ -153,8 +188,12 @@
                          record-path {:output-dir (.getPath (io/file root "report-card"))
                                       :preregistration-root registry
                                       :cards-by-run {}})))
+              canonical-after {:git (git-snapshot data-paths/production-repo-root)
+                               :data (tree-snapshot data-paths/production-data-root)}
+              _ (assert-isolation! canonical-before canonical-after)
               report {:schema :wm/offline-production-replay-v1
-                      :started-at (str (Instant/now))
+                      :started-at started-at
+                      :live-selection? (boolean live-selection?)
                       :source-selection (.getCanonicalPath (io/file selection))
                       :source-selection-bytes (file-size selection)
                       :data-root (.getCanonicalPath (io/file data-root))
@@ -162,7 +201,7 @@
                       :result (select-keys result [:attempt-id :outcome :data])
                       :dispatches @dispatches
                       :phase-timings (phase-summary @events)
-                      :total-elapsed-ms (long (/ (- (System/nanoTime) started) 1000000))
+                      :total-elapsed-ms (long (/ (- (System/nanoTime) started-ns) 1000000))
                       :checkpoint-bytes checkpoints
                       :run-record {:path record-path :bytes (file-size record-path)}
                       :report-card cards
@@ -178,7 +217,7 @@
                         :source-selection selection
                         :data-root data-root
                         :phase-timings (phase-summary @events)
-                        :total-elapsed-ms (long (/ (- (System/nanoTime) started) 1000000))
+                        :total-elapsed-ms (long (/ (- (System/nanoTime) started-ns) 1000000))
                         :caught-exception @exception}
                 report-path (io/file root "replay-report.edn")]
             (spit report-path (with-out-str (pp/pprint report)))
@@ -189,5 +228,6 @@
   (let [m (apply hash-map args)
         result (replay! {:selection (get m "--selection")
                          :output-root (get m "--output-root")
-                         :run-id (get m "--run-id")})]
+                         :run-id (get m "--run-id")
+                         :live-selection? (= "true" (get m "--live-selection"))})]
     (pp/pprint result)))
