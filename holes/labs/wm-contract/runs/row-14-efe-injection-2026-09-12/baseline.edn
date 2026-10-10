@@ -1,5 +1,5 @@
 {:schema :wm/compute-efe-baseline-pin-v1
- :captured-from "804b37fe9541740f3a79378014d7d5dce158933e"
+ :captured-from "ddcaddd8ae740bbf46ff31df89099977419419fe"
  :input {:state :efe-machine-q-test/state :action :efe-machine-q-test/action-a :opts {}}
  :encoding :clojure-pr-str-utf8-sha256
- :result-sha256 "e00e160d8b76a117d4790ebf51bae74516c30392ce15e5930ef964c49bd3d4c4"}
+ :result-sha256 "517a08f7f595c14763c332263611c47e870928386179bbdc322c723077fab21b"}

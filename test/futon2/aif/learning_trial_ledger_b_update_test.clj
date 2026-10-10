@@ -24,7 +24,7 @@
     (is (= :record-only (:mode v1)))))
 
 (deftest reader-interprets-old-trials-never-duplicates
-  (let [snapshot (slurp (io/file ledger/default-root "attempts.edn"))
+  (let [snapshot (slurp "test/fixtures/learning-trial/reader-v1-v2.edn")
         recorded (with-open [reader (java.io.PushbackReader. (java.io.StringReader. snapshot))]
                    (loop [rows []]
                      (let [row (edn/read {:eof ::eof} reader)]

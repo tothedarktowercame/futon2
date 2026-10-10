@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
+            [futon2.data-paths :as data-paths]
             [futon2.wm-run-lock :as lock])
   (:import (java.lang ProcessHandle)))
 
@@ -155,4 +156,5 @@
           "a tick that throws still releases, or the next run is blocked by a ghost"))))
 
 (deftest default-path-sits-beside-the-trace-files-test
-  (is (str/ends-with? (lock/default-lock-path) "/data/wm-trace/.run-lock")))
+  (is (= (data-paths/path "wm-trace" ".run-lock")
+         (lock/default-lock-path))))
