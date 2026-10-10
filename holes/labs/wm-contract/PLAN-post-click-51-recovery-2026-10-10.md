@@ -291,6 +291,34 @@ joined by `\n`.  The former fixture's `[1 1]`/`"authored"` citation was false
 line.  `:authored-edges` is typed refused as
 `:authored-edge-carrier-unavailable` rather than accepting an unverified tail.
 
+2026-10-10 Lean cold-start prefix-F model (defect 16):
+`DarkTower/WarMachine/Proof2/PrefixFreeEnergyColdStart.lean` adds a distinct,
+explicit bootstrap route without changing `prefixF` or weakening R14.  A
+`BootstrapPrior` binds one complete `PolicyKey`, model/version, abstract
+parameter and distribution carriers, supplied F, rationale/evidence,
+calibration epoch, declared update rule, evidence ledger, and authority.
+`ValidBootstrap` requires independent predicates for parameter validity,
+distribution validity, ledger authorization, and update-rule declaration, plus
+authority distinct from the scorer.  No distribution family or numeric values
+are selected by this slice.
+
+`assessEmpirical` separates truly unseen history from coherent nonempty history,
+malformed history, and contradiction.  `supplyF` consults bootstrap only in the
+unseen arm.  Coherent empirical evidence takes precedence; malformed and
+contradictory evidence are typed refusals even when a prior is present.
+`machineWeightsAtSuppliedF` compares the same menu while retaining an
+`:empirical`/`:bootstrap` route alongside every policy.  Missing input has no
+zero arm.  `BootstrapUpdateObligation` requires a coherent enacted prefix in
+the evidence ledger under the declared update rule, after which the proved
+route is empirical rather than silently permanent bootstrap.
+
+This is specification only.  Runtime still requires an authorized choice of
+parameter carrier, predictive distribution family, calibration evidence,
+ledger schema, and update rule before it can emit such a prior.  Those choices
+must be supplied externally and learned/tuned through the declared ledger; the
+model deliberately does not derive values from a desired selection verdict.
+No Clojure producer, validator, or runner wiring is added here.
+
 The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
