@@ -1089,6 +1089,8 @@
      :acting-order-after
      (get-in construction [:receipted-construction :cascade-diff :acting-order-after])}))
 
+(declare no-selection-reason)
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -1227,7 +1229,13 @@
                     :traceWritten (boolean (:trace-path result))
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
-                    :decision (assoc (select-keys durable-decision
+                    :decision (cond->
+                               (assoc (select-keys (or durable-decision
+                                                       ;; D25: a :no-selection run's decision
+                                                       ;; travels on the sorry cell; keep its
+                                                       ;; certificate so the record and card
+                                                       ;; can say what was weighed.
+                                                       (:decision selection-sorry))
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
                                                    :accumulation-bmr])
@@ -1244,6 +1252,9 @@
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
                                      :chosen (chosen-summary decision))
+                               (and (nil? decision) (:decision selection-sorry))
+                               (assoc :no-selection
+                                      (no-selection-reason (:decision selection-sorry))))
                     ;; PROOF-2b: the click's interpretation ask (nil when
                     ;; nothing was asked — a selected tick, a refusal of
                     ;; another kind, or no ask-fn installed).
@@ -2083,6 +2094,31 @@
          ;; the trial configuration and the dedup key).
            :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
       :else nil)))
+
+(defn no-selection-reason
+  "Why a decision that exists named no addressable action (D25). Nothing was
+  enacted, so the run record's :chosen stays absent; this says what the
+  selection weighed and why it stopped. The common case: the policy with the
+  best G is a provisional query-time cascade whose interpretation is owed,
+  which selected-entry refuses."
+  [decision]
+  (let [action (:action decision)
+        receipt-kind (get-in action [:construction-receipt :kind])]
+    (cond
+      (= :abstained (:status decision))
+      {:kind :abstained :reason (:reason decision)}
+
+      (= :query-time-pattern-selection receipt-kind)
+      {:kind :provisional-choice-without-interpretation
+       :target (:target action) :id (:id action)
+       :construction-status (get-in action [:construction-receipt :status])
+       :patterns (get-in action [:construction-receipt :patterns])
+       :controller-score (:controller-score decision)}
+
+      :else
+      {:kind :no-addressable-action
+       :selection-law (get-in decision [:selection-law :applied])
+       :target (:target action)})))
 
 (defn selection-terminal-condition
   "Return the debugger condition for a completed selection result that chose
