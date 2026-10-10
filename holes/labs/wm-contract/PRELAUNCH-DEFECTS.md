@@ -40,7 +40,7 @@ a fixture is evidence only when no real artifact is available.
 | D21 | The supposedly isolated replay mutated and committed to the canonical futon2 source repository. Its synthetic `dispatch-evidence-unavailable` failure published `holes/tickets/T-repair-occ-182f...md` and created commit `79a523906` on main at 05:33:42, exactly when close began. The data-root isolation does not cover repair ticket publication. | offline replay on main `f6c66ecbe` | FIXED AND VERIFIED by `a77f627e9` plus replay assertions in `8f63f9aa5`: both subsequent live runs left canonical Git HEAD/worktree and production data unchanged. `79a523906` was reverted by `1c52c50bf`. |
 | D22 | `interpretation-evidence/value-digest` is not stable across an EDN round trip because its canonicalizer descends maps and vectors but not sets or seqs. Any sealed value containing sets cannot be re-verified after persistence. | D19 diagnosis; click-51 family contains 103,563 sets | OPEN, but judged not to affect the next click's live in-memory seal/validate path. A durable fix needs a versioned digest so it does not invalidate existing seals. It remains relevant to persisted precision-state readers. |
 | D23 | The live-selection replay set `:interpretation-ask-fn nil`, but nil means “use the production default.” It dispatched real Agency job `invoke-1791611767087-1281-b6439847` during selection redecision, before the intended author-dispatch stub. The job was already terminal when cancellation was attempted; the replay was then interrupted. | live replay `8f63f9aa5`, 2026-10-10 | FIXED AND VERIFIED in `076caea76`: an explicit no-op function prevents fallback; 242,568 ms of live selection completed without an interpretation dispatch. The run selected no action, so author dispatch was not reached. |
-| D24 | Durable interning assumes `(empty map)` supports transients. A live no-selection close contained a `PersistentTreeMap`; encoding it threw `ClassCastException: PersistentTreeMap cannot be cast to IEditableCollection`, then close fallback lacked required checkpoints. | live replay `076caea76`, 2026-10-10 | OPEN. Fix the encoder to preserve non-editable map types without transients and rerun the close path. |
+| D24 | Durable interning assumes `(empty map)` supports transients. A live no-selection close contained a `PersistentTreeMap`; encoding it threw `ClassCastException: PersistentTreeMap cannot be cast to IEditableCollection`, then close fallback lacked required checkpoints. | live replay `076caea76`, 2026-10-10 | FIXED AND VERIFIED in `3145c80fb`: non-editable maps use persistent assoc; the identical live path closed successfully in 131,730 ms and wrote every checkpoint, a 46,064,128-byte run record, and all report cards. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -106,6 +106,15 @@ selection from current production inputs, with all mutable data isolated.
 - Evidence:
   `/home/joe/runs/wmq-2026-10-10/offline-replay-live-076caea76/` and
   `/tmp/futon2-test-data-15082814072842854534/`.
+
+D24 follow-up on exact futon2 `3145c80fb`: the same live selection again
+returned no action after 200,750 ms, but close now completed in 131,730 ms.
+It produced a 161,613,774-byte selection checkpoint, all seven lifecycle
+checkpoints, a 46,064,128-byte run record, and all report-card formats. Total
+wall time was 7:01.64; peak RSS 10,449,648 KiB; no swap. Canonical Git and
+production data remained unchanged. Evidence:
+`/home/joe/runs/wmq-2026-10-10/offline-replay-live-3145c80fb/` and
+`/tmp/futon2-test-data-10472920108593433448/`.
 
 ## Sign-offs
 
