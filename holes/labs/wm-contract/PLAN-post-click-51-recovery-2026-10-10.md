@@ -192,15 +192,21 @@ writer keeps the gate closed.
   preference-schedule and run-facts namespaces are clean together (18 tests,
   62 assertions).
 
-- 2026-10-10, prefix-F operational-satisfiability diagnosis: the most recent
-  persisted selection menu is
+- 2026-10-10, prefix-F operational-satisfiability diagnosis: the failed
+  historical all-target run is
   `data/wm-runs/tick-run-record-2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda.edn`.
-  Its selection certificate contains 5,413 policies and 5,413 distinct,
+  Its selection certificate contains 5,413 candidate policies across 343
+  targets and 5,413 distinct,
   non-nil complete `PolicyKey`s.  Read-only folding of the current production
   store `data/wm-interpretations/flights` reads all seven flight records with
   no unreadable records, but finds zero `:wm/conditioning-step-v1` entries;
-  current coverage is therefore 0 keys with admitted history and 5,413 keys
-  without it.  There are no stored policy keys to be dropped or mismatched.
+  coverage for that historical menu is therefore 0 keys with admitted history
+  and 5,413 keys without it.  There are no stored policy keys to be dropped or
+  mismatched.  These are not a standing population of current policies:
+  current main selects one outer task first and constructs only that target's
+  policy family, as recorded below.  The historical measurement demonstrates
+  that the all-target run had no prefix-F support; it does not measure the size
+  or history coverage of a prospective current-main menu.
   `PrefixFreeEnergyPosterior.lean` requires a nonempty admitted prefix for
   every menu policy and makes absence `notSupplied`, while
   `flight/conditioning-step` is recorded only after a policy has been selected
