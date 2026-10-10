@@ -96,7 +96,19 @@
       (.addShutdownHook (Runtime/getRuntime) hook)
       hook)))
 
+(defonce ^:private path-trace-lock (Object.))
+
+(defn- trace-path! [resolved]
+  (when-let [trace (System/getProperty "futon2.data-path.trace")]
+    (locking path-trace-lock
+      (spit trace (str (pr-str {:root *data-root* :path resolved}) "\n")
+            :append true))))
+
 (defn path
-  "Resolve PARTS beneath the currently bound futon2 data root."
+  "Resolve PARTS beneath the currently bound futon2 data root.  A replay may
+  set futon2.data-path.trace before namespace loading to obtain the complete,
+  conservative set of mutable roots resolved by the live selection path."
   [& parts]
-  (str (apply io/file *data-root* parts)))
+  (let [resolved (str (apply io/file *data-root* parts))]
+    (trace-path! resolved)
+    resolved))

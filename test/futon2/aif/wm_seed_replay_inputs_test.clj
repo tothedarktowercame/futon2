@@ -11,19 +11,28 @@
                        "wm-seed-test-" (make-array FileAttribute 0)))
         source (io/file base "source")
         destination (io/file base "destination")]
-    (doseq [relative seed/input-paths]
+    (doseq [relative ["wm-repair-obligations" "wm-interpretations"]]
       (.mkdirs (io/file source relative)))
     (spit (io/file source "wm-repair-obligations" "finding.edn")
           (pr-str {:path (.getPath (io/file source "wm-repair-obligations" "e.edn"))}))
-    (let [manifest (seed/seed! source destination)
+    (let [trace (io/file base "paths.edn")
+          _ (spit trace (str (pr-str {:root (.getPath source)
+                                      :path (.getPath (io/file source "wm-interpretations" "x.edn"))})
+                             "\n"
+                             (pr-str {:root (.getPath source)
+                                      :path (.getPath (io/file source "wm-repair-obligations"))})
+                             "\n"))
+          paths (seed/input-paths-from-trace trace)
+          manifest (seed/seed! source destination paths)
           marker (edn/read-string
                   (slurp (io/file destination
                                   ".wm-production-input-snapshot.edn")))]
       (is (= :wm/production-input-snapshot-v1 (:schema manifest)))
+      (is (= ["wm-interpretations" "wm-repair-obligations"] paths))
       (is (= manifest marker))
       (is (= 1 (:relocated-root-reference-files manifest)))
       (is (= {:path (.getPath (io/file destination "wm-repair-obligations" "e.edn"))}
              (edn/read-string (slurp (io/file destination
                                               "wm-repair-obligations" "finding.edn")))))
       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"already exists"
-                            (seed/seed! source destination))))))
+                            (seed/seed! source destination paths))))))

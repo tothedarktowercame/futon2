@@ -44,17 +44,17 @@
                                 (sha256-file finding)))]
         (spit file (pr-str record'))))))
 
-(def input-paths
-  ["wm-repair-obligations"
-   "wm-pattern-feedback"
-   "wm-habit"
-   "wm-learning-trials"
-   "wm-observation-labels"
-   "wm-scoring-cache"
-   "wm-rationale"
-   "wm-cascade-proposals"
-   "wm-ticket-queue"
-   "wm-runs"])
+(defn input-paths-from-trace [trace-file]
+  (with-open [reader (io/reader trace-file)]
+    (->> (line-seq reader)
+         (map edn/read-string)
+         (keep (fn [{:keys [root path]}]
+                 (let [root-path (.toPath (.getCanonicalFile (io/file root)))
+                       path-path (.toPath (.getCanonicalFile (io/file path)))]
+                   (when (.startsWith path-path root-path)
+                     (some-> (.relativize root-path path-path)
+                             .iterator iterator-seq first str)))))
+         distinct sort vec)))
 
 (defn file-census [root]
   (let [root (io/file root)]
@@ -79,7 +79,7 @@
    0
    (file-seq (io/file directory))))
 
-(defn seed! [source-root destination]
+(defn seed! [source-root destination input-paths]
   (let [source (.getCanonicalFile (io/file source-root))
         dest (.getCanonicalFile (io/file destination))]
     (when (.exists dest)
@@ -126,10 +126,11 @@
 
 (defn -main [& args]
   (try
-    (let [[source destination] args]
-      (when-not (and source destination)
-        (throw (ex-info "Usage: SOURCE-DATA-ROOT DESTINATION" {})))
-      (pp/pprint (seed! source destination)))
+    (let [[source destination trace-file] args]
+      (when-not (and source destination trace-file)
+        (throw (ex-info "Usage: SOURCE-DATA-ROOT DESTINATION DATA-PATH-TRACE" {})))
+      (pp/pprint (seed! source destination
+                        (input-paths-from-trace trace-file))))
     (finally
       ;; clojure.java.shell uses agent thread pools, which otherwise keep this
       ;; one-shot pre-JVM snapshot process alive after the copy is complete.
