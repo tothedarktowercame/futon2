@@ -2,7 +2,8 @@
   "Read retained run evidence and write Markdown with two adjacent SVG figures.
   CLI: clojure -M -m futon2.aif.run-narrative <run-id> [out.md].
   FUTON2_NARRATIVE_ROOT selects the evidence checkout (default current directory)."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -21,7 +22,8 @@
       (let [x (edn/read {:eof ::eof} r)]
         (when (or (= ::eof x) (not= ::eof (edn/read {:eof ::eof} r)))
           (throw (ex-info "Expected one retained EDN record" {:path (str file)})))
-        x))))
+        ;; Run records and checkpoints may be interned (durable-intern).
+        (durable-hydrate/hydrate x)))))
 
 (defn- matching-forms [file pred]
   (if-not (.isFile (io/file file)) []

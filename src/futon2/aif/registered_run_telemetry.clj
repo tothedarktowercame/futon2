@@ -1,6 +1,6 @@
 (ns futon2.aif.registered-run-telemetry
   "Evidence projection used by registered War Machine opportunities."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.run-record-io :as run-record-io]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [futon2.aif.load-identity :as load-identity]
@@ -211,7 +211,7 @@
                     (sort-by #(.lastModified ^java.io.File %) >)
                     first)]
     (try
-      (let [r (edn/read-string (slurp f))]
+      (let [r (run-record-io/read-record f {:default nil})]
         {:run/id (:run/id r)
          :source-revisions-after (get-in r [:registered-run/chronology
                                             :source-revisions-after])})

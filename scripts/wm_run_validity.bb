@@ -45,6 +45,10 @@
 (require '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.string :as str])
+(require '[babashka.classpath :as bb-classpath])
+;; Run records may be interned (futon2.aif.durable-intern): hydrate them.
+(bb-classpath/add-classpath (str (.getParent (.getParentFile (.getAbsoluteFile (java.io.File. ^String *file*)))) "/src"))
+(require '[futon2.aif.durable-hydrate :as durable-hydrate])
 
 (def run-dir (str (System/getProperty "user.home") "/code/futon2/data/wm-runs"))
 (def max-depth 8)
@@ -372,7 +376,8 @@
     nil
     (let [files (run-files args)
           verdicts (doall (for [f files]
-                            (report-run! f (edn/read-string
-                                            {:default (fn [_ v] v)} (slurp f)))))]
+                            (report-run! f (durable-hydrate/hydrate
+                                            (edn/read-string
+                                             {:default (fn [_ v] v)} (slurp f))))))]
       (println "\n== summary" (pr-str (frequencies verdicts)))
       (println "   (invalid runs do not fail this process: evidence, not a gate)"))))

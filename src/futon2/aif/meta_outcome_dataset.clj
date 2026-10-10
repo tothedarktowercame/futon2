@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-outcome-dataset
   "Pure empirical META outcome rows from an externally pinned run manifest."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.meta-field-observation :as field])
@@ -122,7 +123,7 @@
             (not= sha256 actual)
             (refusal :record-source-drift {:path path :expected sha256 :actual actual})
             :else
-            (let [record (try (edn/read-string (String. ^bytes bytes "UTF-8"))
+            (let [record (try (durable-hydrate/hydrate (edn/read-string (String. ^bytes bytes "UTF-8")))
                               (catch Throwable _ ::invalid))]
               (if (= ::invalid record)
                 (recur (next entries) rows

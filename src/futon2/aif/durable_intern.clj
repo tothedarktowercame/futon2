@@ -51,27 +51,21 @@
       (pr v))
     (aget n 0)))
 
-(defn- digest-writer
-  "A Writer that feeds UTF-8 bytes of what is printed into md."
-  ^Writer [^MessageDigest md]
-  (let [put (fn [^String s] (.update md (.getBytes s "UTF-8")))]
-    (proxy [Writer] []
-      (write
-        ([x]
-         (cond (string? x) (put x)
-               (integer? x) (put (str (char x)))
-               :else (put (String. ^chars x))))
-        ([x off len]
-         (if (string? x)
-           (put (subs x off (+ off len)))
-           (put (String. ^chars x (int off) (int len))))))
-      (flush [])
-      (close []))))
-
-(defn- printed-sha256 [v]
+(defn printed-sha256
+  "Lowercase hex SHA-256 of V's pr output as UTF-8, computed by streaming:
+  the same digest as (sha256 (.getBytes (pr-str v) \"UTF-8\")) without ever
+  holding the printed form, which for a run record can exceed the 2 GB
+  String limit. A real UTF-8 encoder is required: pr writes strings one
+  char at a time, so a character outside the BMP arrives as two surrogate
+  halves that must be encoded as one code point."
+  [v]
   (let [md (MessageDigest/getInstance "SHA-256")]
-    (binding [*out* (digest-writer md) *print-length* nil *print-level* nil]
-      (pr v))
+    (with-open [out (java.io.OutputStreamWriter.
+                     (java.security.DigestOutputStream.
+                      (java.io.OutputStream/nullOutputStream) md)
+                     java.nio.charset.StandardCharsets/UTF_8)]
+      (binding [*out* out *print-length* nil *print-level* nil]
+        (pr v)))
     (apply str (map #(format "%02x" (bit-and % 0xff)) (.digest md)))))
 
 (defn- kind [x]

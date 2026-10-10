@@ -2,7 +2,8 @@
   "Identity-preserving adapter from a pinned runtime construction receipt to
   DarkTower.WarMachine.ConstructionReceipt.  The generated theorem evaluates
   the decoded value; source occurrence is not treated as correspondence."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -116,7 +117,8 @@
           trailing (edn/read {:eof eof} reader)]
       (when (identical? eof value) (refuse! :adapter/empty-input {}))
       (when-not (identical? eof trailing) (refuse! :adapter/trailing-form {}))
-      value)
+      ;; Run records may be interned (durable-intern); identity otherwise.
+      (durable-hydrate/hydrate value))
     (catch clojure.lang.ExceptionInfo failure (throw failure))
     (catch Throwable failure
       (refuse! :adapter/malformed-edn {:cause (.getMessage failure)}))))

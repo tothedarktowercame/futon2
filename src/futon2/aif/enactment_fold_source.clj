@@ -19,6 +19,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
+            [futon2.aif.durable-intern :as durable-intern]
             [futon2.aif.enactment-habit :as enactment-habit]
             [futon2.aif.cascade-prior :as prior]
             [futon2.aif.flight :as flight]
@@ -149,7 +150,9 @@
                                    :run/id run-id
                                    :same-run-prediction-counted? false})
                      :path (str "run-record:" run-id)
-                     :sha256 (sha256 (.getBytes (pr-str record) "UTF-8"))}]
+                     ;; Streamed: the same digest as hashing (pr-str record),
+                     ;; which exceeds the String limit for a large record.
+                     :sha256 (durable-intern/printed-sha256 record)}]
            :status :present :source :completed-predecessor-run}
           {:steps [] :status :absent
            :reason (or (:reason step) :predecessor-observation-refused)

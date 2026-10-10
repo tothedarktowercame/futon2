@@ -5,9 +5,13 @@
 ;; debugger page and hands it to the repair seat (Joe, 2026-09-29: an
 ;; abstained click is a problem to debug, not a pattern to learn from).
 (require '[clojure.edn :as edn] '[cheshire.core :as json])
+(require '[babashka.classpath :as bb-classpath])
+;; Run records may be interned (futon2.aif.durable-intern): hydrate them.
+(bb-classpath/add-classpath (str (.getParent (.getParentFile (.getAbsoluteFile (java.io.File. ^String *file*)))) "/src"))
+(require '[futon2.aif.durable-hydrate :as durable-hydrate])
 
 (let [[path] *command-line-args*
-      r (edn/read-string {:default (fn [_ v] v)} (slurp path))
+      r (durable-hydrate/hydrate (edn/read-string {:default (fn [_ v] v)} (slurp path)))
       targets (get-in r [:decision :abstention :targets])
       kind-of (fn [t] (str (name (or (:kind t) :unknown)) "/" (name (or (:missing t) :unknown))))]
   (println

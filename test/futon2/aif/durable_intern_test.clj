@@ -86,3 +86,10 @@
         enc (di/encode m {:min-bytes 64 :min-total-bytes 0})]
     (is (di/interned? enc))
     (is (= m (di/hydrate (edn/read-string (pr-str enc)))))))
+
+(deftest printed-sha256-equals-hashing-the-pr-str-bytes
+  (let [v {:a [1 2N 3.5 "é ü 漢 😀 \n\"q\"" #{:k} '(x y)] :b (big :b 5)}
+        md (java.security.MessageDigest/getInstance "SHA-256")
+        expected (apply str (map #(format "%02x" (bit-and % 0xff))
+                                 (.digest md (.getBytes (pr-str v) "UTF-8"))))]
+    (is (= expected (di/printed-sha256 v)))))

@@ -1,6 +1,6 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.run-record-io :as run-record-io]
             [clojure.java.io :as io]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
@@ -35,7 +35,9 @@
          (sort-by (juxt #(.lastModified %) #(.getName %)))
          reverse
          (keep (fn [f]
-                 (try (edn/read-string (slurp f))
+                 ;; {:default nil} keeps the old behaviour: a record with an
+                 ;; unknown tag is skipped, as edn/read-string skipped it.
+                 (try (run-record-io/read-record f {:default nil})
                       (catch Throwable _ nil))))
          first)))
 
