@@ -304,9 +304,9 @@
       (is (= [[:p1 :p2] [:p2 :p3]] (:descent order)))
       (is (= [{:unit :p1 :pattern :p1} {:unit :p2 :pattern :p2} {:unit :p3 :pattern :p3}]
              (:units order)))
-      ;; every pair overlaps and has its meet; nothing is missing
+      ;; every pair has a common origin and a meet; nothing is missing
       (is (empty? (:missing-meets order)))
-      (is (= {[:p1 :p2] :p2 [:p1 :p3] :p3 [:p2 :p3] :p3} (:meets order)))
+      (is (= {[:p1 :p2] :p1 [:p1 :p3] :p1 [:p2 :p3] :p2} (:meets order)))
       ;; r is total (a chain) and precedence respects every edge, so
       ;; precedence is the ONLY linear extension of r
       (is (every? (fn [[a b]] (or (contains? (below a) b) (contains? (below b) a)))
@@ -339,8 +339,7 @@
       (is (not (contains? none :precedence-violations)) "no precedence, nothing to check"))))
 
 (deftest containment-order-disjoint-pairs-need-no-meet
-  (testing "clause 0 restricts the semilattice condition to OVERLAPPING
-            pairs: two patterns sharing no descendant record nothing"
+  (testing "pairs with no common origin record no meet"
     (let [disjoint {:precedence [:a :b]
                     :patterns [{:id :a :guard {:needs #{} :forbids #{}} :produces #{:x}}
                                {:id :b :guard {:needs #{} :forbids #{}} :produces #{:y}}]}

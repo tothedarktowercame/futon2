@@ -41,10 +41,10 @@
     (is (= {:status :computed
             :support {:relations [{:from :P :to :Q :tokens #{:q}}]
                       :basis :produced-token-consumed-by-guard}
-            :meet {:relations [{:pair [:P :Q] :meet :Q
-                                :evidence {:left-path [{:from :P :to :Q :tokens #{:q}}]
-                                           :right-path []}}]
-                   :missing [] :basis :greatest-common-descendant}
+            :meet {:relations [{:pair [:P :Q] :meet :P
+                                :evidence {:left-path []
+                                           :right-path [{:from :P :to :Q :tokens #{:q}}]}}]
+                   :missing [] :basis :closest-common-origin}
             :precedence {:relations [{:from :P :to :Q :tokens #{:q}}]
                          :basis :generative-support
                          :linear-extension [:P :Q]
@@ -95,8 +95,13 @@
                          (-> %
                              (assoc-in [:construction-receipt :relations :support :relations 0 :tokens] forged)
                              (assoc-in [:construction-receipt :relations :precedence :relations 0 :tokens] forged)))
-                      #(assoc-in % [:construction-receipt :relations :meet :relations 0
-                                    :evidence :left-path 0 :to] :P)]]
+                      ;; The superseded common-descendant direction is a
+                      ;; structurally complete receipt, but must be refused.
+                      #(-> %
+                           (assoc-in [:construction-receipt :relations :meet :relations 0 :meet] :Q)
+                           (assoc-in [:construction-receipt :relations :meet :relations 0 :evidence]
+                                     {:left-path [{:from :P :to :Q :tokens #{:q}}]
+                                      :right-path []}))]]
         (let [bad-problem (update (first (:problems assembled)) :constructed-candidates
                                   (fn [cs] (mapv damage cs)))
               bad (admit bad-problem)]
@@ -190,7 +195,7 @@
   (edn/read-string
    (slurp "test/fixtures/want-interp-library/M-futon-seams-instance-6@futon3c-6149272b.edn")))
 
-(deftest instance-6-order-has-one-missing-meet-with-the-conflicting-pair-maximal
+(deftest instance-6-order-records-missing-common-origin-meets
   (let [interpretations (into {}
                               (map (fn [[id p]] [id (select-keys p [:guard :produces])]))
                               (:patterns instance-6))
@@ -220,16 +225,23 @@
     (testing "the derived descent is exactly the instance's recorded :above"
       (is (= (set (map (juxt :context :pattern) (:above instance-6)))
              (set (:descent order)))))
-    (testing "the one overlapping pair without a meet names the pair and the
-             maximal units of their common part — the two incomparable
-             conflicting patterns (clause 0: the missing meet and the
-             frontier conflict are the same fact)"
-      (is (= [{:pair [:cascade-construction/choose-the-grain-where-state-lives
-                      :or3/count-every-card-back]
-               :common-maximal [:realtime/mode-gate
-                                :war-room/wr-8-typed-files-are-sources-of-truth]}]
+    (testing "ambiguous closest common origins remain explicit findings"
+      (is (= [{:pair [:apparatus/one-authority-per-question :realtime/mode-gate]
+               :common-closest [:cascade-construction/choose-the-grain-where-state-lives
+                                :or3/count-every-card-back]}
+              {:pair [:apparatus/one-authority-per-question
+                      :war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied]
+               :common-closest [:cascade-construction/choose-the-grain-where-state-lives
+                                :or3/count-every-card-back]}
+              {:pair [:realtime/mode-gate :war-room/wr-8-typed-files-are-sources-of-truth]
+               :common-closest [:cascade-construction/choose-the-grain-where-state-lives
+                                :or3/count-every-card-back]}
+              {:pair [:war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied
+                      :war-room/wr-8-typed-files-are-sources-of-truth]
+               :common-closest [:cascade-construction/choose-the-grain-where-state-lives
+                                :or3/count-every-card-back]}]
              (:missing-meets order))))
-    (is (= 27 (count (:meets order))))
+    (is (= 24 (count (:meets order))))
     (testing "all three relation kinds are explicit and token-witnessed"
       (let [relations (get-in c [:construction-receipt :relations])]
         (is (= :computed (:status relations)))
@@ -239,7 +251,7 @@
                (get-in relations [:precedence :relations])))
         (is (= (:precedence c) (get-in relations [:precedence :linear-extension])))
         (is (= (:missing-meets order) (get-in relations [:meet :missing])))
-        (is (= 27 (count (get-in relations [:meet :relations]))))
+        (is (= 24 (count (get-in relations [:meet :relations]))))
         (is (every? (fn [{:keys [evidence]}]
                       (every? (fn [path] (every? (comp seq :tokens) path))
                               ((juxt :left-path :right-path) evidence)))

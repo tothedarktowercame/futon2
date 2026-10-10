@@ -18,9 +18,9 @@
     (is (.contains lean "| 0 => ⟨{0}, ∅⟩"))
     (is (.contains lean "| 1 => ⟨{1}, {0}⟩"))
     (is (.contains lean "support := [⟨0, 1, {0}⟩]"))
-    (is (.contains lean "meets := [⟨0, 1, 1, [⟨0, 1, {0}⟩], []⟩]"))
+    (is (.contains lean "meets := [⟨0, 1, 0, [], [⟨0, 1, {0}⟩]⟩]"))
     (is (.contains lean "theorem decoded_runtime_receipt_valid"))
-    (is (= "99be41624409ce82e7b39ceaa824fb6b22156194faaf1918c61a4f3c38cc9abb"
+    (is (= "d427c0004b68d821a7e89c42e6941890188bf5a4610e905dbde61b4a22c06183"
            (adapter/sha256 (.getBytes lean java.nio.charset.StandardCharsets/UTF_8))))))
 
 (deftest pins-and-domain-fail-closed

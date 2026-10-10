@@ -11,13 +11,13 @@
    {:basis :produced-token-consumed-by-guard
     :relations [{:from :P :to :Q :tokens #{:q}}]}
    :meet
-   {:basis :greatest-common-descendant
+   {:basis :closest-common-origin
     :missing []
     :relations
-    [{:pair [:P :Q] :meet :Q
+    [{:pair [:P :Q] :meet :P
       :evidence
-      {:left-path [{:from :P :to :Q :tokens #{:q}}]
-       :right-path []}}]}
+      {:left-path []
+       :right-path [{:from :P :to :Q :tokens #{:q}}]}}]}
    :precedence
    {:basis :generative-support
     :relations [{:from :P :to :Q :tokens #{:q}}]

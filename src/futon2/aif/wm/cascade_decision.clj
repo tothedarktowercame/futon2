@@ -1286,14 +1286,14 @@
                              (every? units pair) (contains? units meet)
                              (map? evidence)
                              (witnessed-path? units patterns positions
-                                              (first pair) meet (:left-path evidence))
+                                              meet (first pair) (:left-path evidence))
                              (witnessed-path? units patterns positions
-                                              (second pair) meet (:right-path evidence))))]
+                                              meet (second pair) (:right-path evidence))))]
       (and (= :computed (:status relations))
            (= :produced-token-consumed-by-guard (get-in relations [:support :basis]))
            (vector? support)
            (every? #(witnessed-relation? units patterns positions %) support)
-           (= :greatest-common-descendant (get-in relations [:meet :basis]))
+           (= :closest-common-origin (get-in relations [:meet :basis]))
            (vector? meet) (every? meet-valid? meet)
            (vector? (get-in relations [:meet :missing]))
            (= :generative-support (get-in relations [:precedence :basis]))

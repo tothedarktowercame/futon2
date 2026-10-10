@@ -135,8 +135,8 @@
   Returns
     {:units         [{:unit u :pattern id} …]
      :descent       [[above below] …]     ; r itself
-     :meets         {[a b] m …}           ; overlapping pairs with a meet
-     :missing-meets [{:pair [a b] :common-maximal [u …]} …]
+     :meets         {[a b] m …}           ; pairs with a common origin
+     :missing-meets [{:pair [a b] :common-closest [u …]} …]
      :precedence-violations [[a b] …]}    ; descent edges :precedence reverses
                                           ; (absent when no :precedence;
                                           ; :units-not-mapped-to-precedence
@@ -144,11 +144,11 @@
 
   Meets follow DarkTower.WarMachine.CascadeOrder: Below is reflexive
   (a = b ∨ Reach r a b), and the semilattice condition is restricted to
-  OVERLAPPING pairs — two units sharing a descendant must have their
-  greatest common descendant as a unit of the cascade. An overlapping pair
-  without one is the typed finding :missing-meets naming the pair and the
-  maximal units of their common part, not a failure. Disjoint pairs need no
-  meet and are not recorded.
+  pairs having a common origin: IsMeet requires Below r m a and Below r m b.
+  The recorded meet is the unique closest common origin (the common ancestor
+  with no strictly lower common ancestor). A pair without a unique closest
+  origin is the typed finding :missing-meets. Pairs with no common origin need
+  no meet and are not recorded.
 
   A cyclic containment is REFUSED with the typed reason
   :cyclic-containment naming the cycle: CascadeOrder.acyclicDescent r is
@@ -192,20 +192,21 @@
             pairs (for [a unit-ids b unit-ids
                         :when (neg? (compare (pr-str a) (pr-str b)))]
                     [a b])
+            above (into {}
+                        (for [u (keys by-unit)]
+                          [u (set (for [[origin descendants] below
+                                       :when (contains? descendants u)]
+                                   origin))]))
             overlaps (for [[a b] pairs
-                           :let [common (set/intersection (below a) (below b))]
+                           :let [common (set/intersection (above a) (above b))]
                            :when (seq common)]
-                       (let [maximal (vec (sort-by pr-str
-                                                   (remove (fn [d]
-                                                             (some #(contains? (below %) d)
-                                                                   (disj common d)))
-                                                           common)))
-                             meet (when (= 1 (count maximal))
-                                    (let [m (first maximal)]
-                                      (when (every? #(contains? (below m) %)
-                                                    common)
-                                        m)))]
-                         {:pair [a b] :common-maximal maximal :meet meet}))]
+                       (let [closest (vec (sort-by pr-str
+                                                  (remove (fn [origin]
+                                                            (some #(contains? (below origin) %)
+                                                                  (disj common origin)))
+                                                          common)))
+                             meet (when (= 1 (count closest)) (first closest))]
+                         {:pair [a b] :common-closest closest :meet meet}))]
         (cond-> {:units units
                  :descent descent
                  :meets (into {}
@@ -213,10 +214,10 @@
                                       (when meet [pair meet])))
                               overlaps)
                  :missing-meets (into []
-                                      (keep (fn [{:keys [pair common-maximal meet]}]
+                                      (keep (fn [{:keys [pair common-closest meet]}]
                                               (when-not meet
                                                 {:pair pair
-                                                 :common-maximal common-maximal})))
+                                                 :common-closest common-closest})))
                                       overlaps)}
           ;; the candidate's :precedence must be a linear extension of r:
           ;; every descent edge [a b] has a before b. Edges it reverses are
@@ -244,7 +245,7 @@
   "PROOF-2b's explicit three-relation construction record for CANDIDATE.
   Nothing is inferred from pattern names: every direct support/precedence edge
   names the produced token(s) consumed by its target.  A meet names the two
-  token-witnessed paths from its pair to the common unit.  The candidate's
+  token-witnessed paths from the common origin to its pair.  The candidate's
   executable :precedence remains a linear extension, not evidence by itself.
 
   Missing meets and a refused containment order remain explicit; neither is
@@ -275,13 +276,13 @@
                    (walk from #{})))
           meets (mapv (fn [[[left right] meet]]
                         {:pair [left right] :meet meet
-                         :evidence {:left-path (path left meet)
-                                    :right-path (path right meet)}})
+                         :evidence {:left-path (path meet left)
+                                    :right-path (path meet right)}})
                       (sort-by (comp pr-str key) (:meets order)))]
       {:status :computed
        :support {:relations supports :basis :produced-token-consumed-by-guard}
        :meet {:relations meets :missing (:missing-meets order)
-              :basis :greatest-common-descendant}
+              :basis :closest-common-origin}
        :precedence {:relations supports :basis :generative-support
                     :linear-extension (vec (:precedence candidate))
                     :violations (:precedence-violations order)}})))
