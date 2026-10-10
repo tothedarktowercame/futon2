@@ -5,9 +5,40 @@
   replay JVM loads data-owning namespaces. The destination must not exist."
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.edn :as edn]
             [clojure.pprint :as pp]
             [clojure.string :as str])
   (:import [java.time Instant]))
+
+(defn sha256-file [file]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [in (io/input-stream file)]
+      (let [buf (byte-array 65536)]
+        (loop []
+          (let [n (.read in buf)]
+            (when (pos? n)
+              (.update digest buf 0 n)
+              (recur))))))
+    (apply str (map #(format "%02x" (bit-and 255 %)) (.digest digest)))))
+
+(defn rebind-repair-evidence! [repair-root]
+  (let [evidence-dir (io/file repair-root "verification-evidence")
+        admission-dir (io/file repair-root "verifications")]
+    (doseq [file (filter #(.isFile ^java.io.File %) (file-seq evidence-dir))]
+      (let [record (edn/read-string (slurp file))
+            finding (some-> record :finding :path io/file)
+            record' (if (and finding (.isFile finding))
+                      (assoc-in record [:finding :sha256] (sha256-file finding))
+                      record)]
+        (spit file (pr-str record'))))
+    (doseq [file (filter #(.isFile ^java.io.File %) (file-seq admission-dir))]
+      (let [record (edn/read-string (slurp file))
+            artifact (some-> record :verification-artifact :path io/file)
+            record' (if (and artifact (.isFile artifact))
+                      (assoc-in record [:verification-artifact :sha256]
+                                (sha256-file artifact))
+                      record)]
+        (spit file (pr-str record'))))))
 
 (def input-paths
   ["wm-repair-obligations"
@@ -78,6 +109,7 @@
           relocated (relocate-root-references!
                      (io/file dest "wm-repair-obligations")
                      (.getPath source) (.getPath dest))
+          _ (rebind-repair-evidence! (io/file dest "wm-repair-obligations"))
           manifest {:schema :wm/production-input-snapshot-v1
                     :created-at (str (Instant/now))
                     :source-root (.getPath source)

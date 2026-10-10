@@ -164,6 +164,8 @@
                :tripwire/bell-fn (fn [_ _] {:accepted true
                                              :job-id "offline-agency/tripwire"
                                              :source :offline-replay})
+               :r16-park-fn (fn [_ _] {:status :parked
+                                        :source :offline-replay})
                :trace-fn (fn [_] (.getPath (io/file trace-dir (str run-id ".edn"))))
                ;; This is the sole simulated external boundary.  Refusal is
                ;; intentional: no repository or substrate actuator follows it.
