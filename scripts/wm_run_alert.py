@@ -80,9 +80,18 @@ def main(argv=None):
           "evidence/claim-type":"observation","evidence/at":started.isoformat(),"evidence/author":"wm-run-alert",
           "evidence/body":{"event":"wm-requirements","conforms":not bad,"verdict-file":str(verdict),"block":block},
           "evidence/tags":["war-machine","requirements","alert"]}
-        req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"},method="POST")
-        with urllib.request.urlopen(req,timeout=10) as response:
-          if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
+        # futon1b refuses writes without a penholder (403 missing-penholder);
+        # same header and default as futon3c's futon1b backend.
+        penholder=os.environ.get("FUTON1B_PENHOLDER") or os.environ.get("FUTON1A_PENHOLDER") or "api"
+        req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json","x-penholder":penholder},method="POST")
+        try:
+          with urllib.request.urlopen(req,timeout=10) as response:
+            if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
+        except Exception as e:
+          # The requirements WERE checked (verdict file and alerts.log are
+          # written above); only the evidence copy failed. Say so.
+          print(f"requirements checked (verdict {verdict}); evidence POST FAILED: {e}", flush=True)
+          return 2
       if not verdict.is_file(): raise RuntimeError("verdict file absent after check")
       return 1 if bad else 0
     except Exception as e:
