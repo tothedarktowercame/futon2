@@ -36,6 +36,17 @@ a fixture is evidence only when no real artifact is available.
 | D17 | Live readers parse whole run records to read a field or two: previous_run.clj:57-73 `previous-record-file` parses EVERY record of the newest earlier date (slurp + read-string) to get :startedAt, on every click; full_loop_runtime.clj:26-40 parses the newest record on each judge call; registered_run_telemetry.clj:208-218 at every runner start. With click-51-sized records each parse is about a GB. Possibly behind D7/D8 (unmeasured). | claude-12 reader audit 2026-10-10 | OPEN (claude-12, D15 turn) |
 | D18 | enactment_fold_source.clj:152 computes sha256 of `(pr-str record)` for the WHOLE predecessor run record on the live path (full_loop_runtime predecessor -> conditioning-step-from-completed-run). A click-51-sized record exceeds the 2 GB String limit here, interned on disk or not. | claude-12 reader audit | OPEN (claude-12, D15 turn) |
 
+## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
+
+Merged on futon2 main (wmq/durable-selection-real; includes codex-68's 28e12195c kind-sensitive keys and cycle refusal). Real-scale measurements (/tmp/c10/d15-real.clj, log /tmp/c10/d15-real.log; 72 GB JVM in its own scope), every read-back `=` to the original:
+- Selection checkpoint through cohort write-new!/read-edn: 2,380,766,904 -> 163,146,184 bytes; write 323 s (test JVM, no sharing: D16 still OPEN), read 6.5 s.
+- Run record built from click 51's real controller decision, through write-run-record-stream! / run-record-io/read-record: decision about 1,167 MB printed -> 148,283,833-byte record; write 62 s, read 5.8 s.
+- previous-run ordering reads only the `;; wm/run-head` line: 1 ms (was a full parse of every record of the day). D17 fixed for previous_run; full_loop_runtime and registered_run_telemetry still read the newest record whole, but through the streaming reader at about 6 s.
+- D18: the predecessor digest streams (printed-sha256; equal to hashing pr-str bytes, tested with non-BMP characters).
+- Bugs found and fixed on the way: repeats beneath one-element collections were never found (counting walk); the UTF-8 digest mis-encoded surrogate pairs (interning ids could collide).
+- futon3c readers use only top-level fields (reader audit), which stay plain; they were not changed.
+Next: codex-68 reruns the production replay on main.
+
 ## Sign-offs
 
 (none yet)
