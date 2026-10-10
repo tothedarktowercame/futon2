@@ -7,6 +7,7 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.live-c :as live-c]
             [futon2.aif.locator-fixtures :as locfix]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
@@ -31,7 +32,44 @@
    (slurp (io/resource "wm/cascade-sources/M-f11-find-production-successor.edn"))))
 
 (defn- problem [assembled]
-  (get-in assembled [:problems 0 :cascade-problem]))
+  (assoc (get-in assembled [:problems 0 :cascade-problem])
+         :target (get-in assembled [:problems 0 :target])))
+
+(defn- admitted-history
+  "One explicit policy-grain prefix step for every constructed menu policy."
+  [assembled]
+  {:steps
+   (mapv (fn [i {:keys [target candidate-id precedence]}]
+           (let [policy-key (prefix-admission/candidate-key
+                             {:id candidate-id
+                              :target target
+                              :precedence precedence})]
+             {:step {:status :present
+                     :policy-key policy-key
+                     :occurrence {:flight "preference-schedule-fixture"
+                                  :click (str "run-" i)}
+                     :s-prev {:value {#{} 1}}
+                     :q {#{} 1}
+                     :f 0.0}
+              :path "preference-schedule-decision-test"
+              :sha256 "fixture"}))
+         (range)
+         (mapcat (fn [{:keys [target constructed-candidates]}]
+                   (conj (mapv #(assoc % :target target) constructed-candidates)
+                         {:candidate-id :C0 :target target :precedence []}))
+                 (:problems assembled)))
+   :read []
+   :unread []})
+
+(defn- lane [assembled]
+  (wm-cd/cascade-lane
+   (problem assembled)
+   {:conditioning-steps (admitted-history assembled)}))
+
+(defn- decision [assembled]
+  (wm-cd/cascade-decision
+   assembled
+   (assoc fixture/live-c-opts :conditioning-steps (admitted-history assembled))))
 
 (defn- placement-matches-consumption?
   "Compare the record's claimed family with real preference-member at every tau.
@@ -64,8 +102,8 @@
           [[(declared-source) :terminal [:declared (:target (declared-source))]]
            [nil :every-step :defaulted]]]
     (testing (str source)
-      (let [p (problem (assembled declaration))
-            lane (wm-cd/cascade-lane p)
+      (let [a (assembled declaration)
+            lane (lane a)
             spec (get-in (meta (:ranked lane)) [:cascade-scoring :spec])
             record (get-in lane [:decision :preference-schedule])
             universe (get-in (meta (:ranked lane)) [:cascade-scoring :universe])]
@@ -80,8 +118,10 @@
             "BAD CASE: a contradictory placement fails against the real member")))))
 
 (deftest missing-schedule-does-not-introduce-a-scorer-default
-  (let [p (update (problem (assembled nil)) :cascade-spec dissoc :c-schedule)
-        lane (wm-cd/cascade-lane p)
+  (let [a (assembled nil)
+        p (update (problem a) :cascade-spec dissoc :c-schedule)
+        lane (wm-cd/cascade-lane
+              p {:conditioning-steps (admitted-history a)})
         spec (get-in (meta (:ranked lane)) [:cascade-scoring :spec])
         record (get-in lane [:decision :preference-schedule])]
     (is (not (contains? spec :c-schedule)))
@@ -89,13 +129,15 @@
     (is (placement-matches-consumption? record spec (set (:want spec)) 2))))
 
 (deftest scales-come-from-scored-spec-not-default-definitions
-  (let [p (update (problem (assembled nil)) :cascade-spec assoc :lam 7/3 :mu 2/5)
-        lane (wm-cd/cascade-lane p)]
+  (let [a (assembled nil)
+        p (update (problem a) :cascade-spec assoc :lam 7/3 :mu 2/5)
+        lane (wm-cd/cascade-lane
+              p {:conditioning-steps (admitted-history a)})]
     (is (= [7/3 2/5]
            ((juxt :lam :mu) (get-in lane [:decision :preference-schedule]))))))
 
 (deftest joint-record-carries-class-and-retains-lane-token-receipt
-  (let [result (wm-cd/cascade-decision (assembled nil) fixture/live-c-opts)
+  (let [result (decision (assembled nil))
         record (get-in result [:decision :preference-schedule])]
     (is (= :class (:family record)))
     (is (= :terminal (:placement record)))
@@ -107,21 +149,31 @@
 
 (deftest writes-do-not-change-scores
   (doseq [declaration [(declared-source) nil]]
-    (let [p (problem (assembled declaration))
-          with-write (wm-cd/cascade-lane p)
+    (let [a (assembled declaration)
+          p (problem a)
+          opts {:conditioning-steps (admitted-history a)}
+          with-write (wm-cd/cascade-lane p opts)
           without-write (with-redefs [wm-cd/token-preference-schedule (constantly nil)]
-                          (wm-cd/cascade-lane p))]
+                          (wm-cd/cascade-lane p opts))]
       (is (some? (get-in with-write [:decision :preference-schedule])))
       (is (nil? (get-in without-write [:decision :preference-schedule])))
       (is (= (pr-str (:ranked with-write)) (pr-str (:ranked without-write))))
       (is (= (pr-str (dissoc (:decision with-write) :preference-schedule))
              (pr-str (dissoc (:decision without-write) :preference-schedule))))))
   (let [a (assembled nil)
-        with-write (:decision (wm-cd/cascade-decision a fixture/live-c-opts))
+        opts (assoc fixture/live-c-opts :conditioning-steps (admitted-history a))
+        with-write (:decision (wm-cd/cascade-decision a opts))
         without-write (with-redefs [wm-cd/token-preference-schedule (constantly nil)
                                    wm-cd/class-preference-schedule (constantly nil)]
-                        (:decision (wm-cd/cascade-decision a fixture/live-c-opts)))
+                        (:decision (wm-cd/cascade-decision a opts)))
         score #(pr-str (select-keys % [:action :softmax-weights :selection-law]))]
     (is (some? (:preference-schedule with-write)))
     (is (nil? (:preference-schedule without-write)))
     (is (= (score with-write) (score without-write)))))
+
+(deftest missing-policy-history-refuses-at-r14
+  (let [lane (wm-cd/cascade-lane (problem (assembled nil)))]
+    (is (= :R14 (:stopped-at lane)))
+    (is (= :free-energy-not-supplied
+           (get-in lane [:refusal :data :refusal :kind])))
+    (is (seq (get-in lane [:refusal :data :refusal :detail :candidate-ids])))))

@@ -281,7 +281,17 @@
     ;; so the lane's route carries each node exactly once.
     (step :R14 "futon2.aif.policy/select-action-cascades"
           (fn []
-            (let [decision (policy/select-action-cascades (policy-prefix/production-ranked (get @state :R5) nil)
+            (let [ranked0 (get @state :R5)
+                  ranked (with-meta
+                           (mapv #(update % :action assoc :target (:target problem)) ranked0)
+                           (meta ranked0))
+                  candidates (mapv #(assoc % :target (:target problem))
+                                   (:candidates (get @state :R4)))
+                  prefixes (prefix-admission/prefixes
+                            candidates
+                            (or (:conditioning-steps lane-opts)
+                                {:steps [] :dir-status {:absent :no-flight-steps-in-opts}}))
+                  decision (policy/select-action-cascades (policy-prefix/production-ranked ranked nil prefixes)
                                                           {:beta beta})
                   ;; The candidates' :precedence carries manifest pattern MAPS
                   ;; (that is what R4/R5 consume), so select-action-cascades
@@ -300,7 +310,7 @@
                                         (:softmax-weights decision)))]
               {:decision decision
                :authorization (controller-authority/authorize decision
-                                                              (get @state :R5))})))
+                                                              ranked)})))
     ;; R16 — the enactment PLAN: acting order for the chosen cascade on the
     ;; facts. Interpretations are translated into acting-order's Strong-Kleene
     ;; guard language (one conjunctive clause per reading: every :needs token
@@ -773,8 +783,10 @@
               joint-q0 (:continuation-belief token-belief-input)
               lanes
               (mapv (fn [problem]
-                      (let [lane (cascade-lane (:cascade-problem problem)
+                      (let [lane (cascade-lane (assoc (:cascade-problem problem)
+                                                      :target (:target problem))
                                                (merge (zeta-posterior/lane-options token-belief-input)
+                                                      (select-keys opts [:conditioning-steps])
                                                       {:observation-labels (observation-label-inputs
                                                                             (:observation-labels-view opts))}))]
                         {:target (:target problem)

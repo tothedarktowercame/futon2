@@ -140,6 +140,16 @@ writer keeps the gate closed.
   production waiver: the runtime still refuses any real menu containing a
   never-executed policy, exactly as the current Lean specification says.
 
+- 2026-10-10, preference-schedule fixture correspondence: repaired the
+  preference-schedule decision suite with one explicit admitted step keyed by
+  the complete `PolicyKey` for every menu policy, including the no-op policy.
+  The lane entry point now consumes those supplied conditioning steps at R14,
+  and the joint diagnostic lane forwards the same carrier.  A focused
+  no-history case still stops at R14 with typed
+  `:free-energy-not-supplied`; no initial F value is inferred.  The targeted
+  preference-schedule and run-facts namespaces are clean together (18 tests,
+  62 assertions).
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
