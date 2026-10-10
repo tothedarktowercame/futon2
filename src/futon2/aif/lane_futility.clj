@@ -8,6 +8,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [futon2.aif.durable-hydrate :as durable-hydrate]
+            [futon2.aif.durable-intern :as durable-intern]
             [futon2.aif.selection-gain :as selection-gain]
             [futon2.data-paths :as data-paths])
   (:import (java.io RandomAccessFile)
@@ -32,7 +34,7 @@
   [file]
   (with-open [r (io/reader file)]
     (doall
-     (map #(edn/read-string {:default (fn [_tag value] value)} %)
+     (map #(durable-hydrate/hydrate (edn/read-string {:default (fn [_tag value] value)} %))
           (remove str/blank? (line-seq r))))))
 
 (defn trace-records
@@ -196,6 +198,21 @@
        (assoc (index-state-from-records (trace-records trace-dir))
               :fingerprint fingerprint)))))
 
+(defn- append-trace-line!
+  "Append RECORD as one line, its :decision interned (durable-intern) and the
+  whole streamed to the file. (spit path (str (pr-str record) ...)) built the
+  line as one String; the selection certificate made it exceed the 2 GB
+  String limit and the click of 2026-10-10 (run c82068b4) died in
+  publish-selection-trace! (D32). Readers hydrate (durable-hydrate)."
+  [path record]
+  (with-open [w (java.io.BufferedWriter.
+                 (java.io.OutputStreamWriter.
+                  (java.io.FileOutputStream. (str path) true)
+                  java.nio.charset.StandardCharsets/UTF_8))]
+    (binding [*out* w *print-length* nil *print-level* nil]
+      (pr (durable-intern/encode record {:min-bytes 256 :only-keys [:decision]})))
+    (.write w "\n")))
+
 (defn append-indexed-trace!
   "Finalize and append under the same cross-process trace/index lock.
    Three arguments retain the path return; four return the exact final record."
@@ -207,7 +224,7 @@
      (fn []
        (let [record (finalize record)
              state (current-index-state! trace-dir)]
-         (spit path (str (pr-str record) "\n") :append true)
+         (append-trace-line! path record)
          (write-index-state!
           trace-dir
           (assoc (add-record-to-index state record)

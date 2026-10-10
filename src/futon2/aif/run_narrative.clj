@@ -29,7 +29,7 @@
   (if-not (.isFile (io/file file)) []
     (with-open [r (java.io.PushbackReader. (io/reader file))]
       (loop [i 1 matches []]
-        (let [x (edn/read {:eof ::eof} r)]
+        (let [x (durable-hydrate/hydrate (edn/read {:eof ::eof} r))]
           (if (= ::eof x) matches
               (recur (inc i) (cond-> matches (pred x) (conj {:form i :value x})))))))))
 

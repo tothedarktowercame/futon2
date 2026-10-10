@@ -84,3 +84,17 @@
       (finally
         (doseq [f (reverse (file-seq (io/file dir)))]
           (.delete f))))))
+
+(deftest a-trace-line-is-streamed-and-its-decision-interned
+  ;; D32 (click 2026-10-10 c82068b4): the line was built with pr-str and the
+  ;; selection certificate made it exceed the 2 GB String limit.
+  (let [dir (java.nio.file.Files/createTempDirectory "d32-trace" (make-array java.nio.file.attribute.FileAttribute 0))
+        path (str (.resolve dir "wm-trace-2026-10-10.edn"))
+        shared (vec (range 400000)) ; ~2.7 MB printed, x4 > the 8 MB threshold
+        record {:run/id "r1" :mode :live
+                :decision {:selection-certificate {:a shared :b shared :c [shared shared]}}}]
+    (futility/append-indexed-trace! (str dir) path record)
+    (let [raw (slurp path)]
+      (is (clojure.string/includes? raw ":durable/interned"))
+      (is (< (count raw) (count (pr-str record)))))
+    (is (= [record] (futility/read-trace-file (clojure.java.io/file path))))))
