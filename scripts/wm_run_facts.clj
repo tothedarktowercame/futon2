@@ -32,7 +32,11 @@
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
 
 (defn read-edn [path]
-  (edn/read-string {:default tagged-literal} (slurp path)))
+  ;; Run records can exceed the JVM's single String limit.  `edn/read` consumes
+  ;; the character stream directly, preserving the same value without first
+  ;; materialising the whole file as `slurp`/`read-string` did.
+  (with-open [reader (java.io.PushbackReader. (io/reader path))]
+    (edn/read {:default tagged-literal} reader)))
 
 (defn lookup-previous
   "Explicit typed lookup of the record before RECORD-PATH in the same
