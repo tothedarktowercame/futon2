@@ -152,3 +152,13 @@ writer keeps the gate closed.
   this tie.  Repair therefore requires an explicit specification decision;
   neither the census nor the meaning of `:unrelated` may be changed to hide
   it.
+
+- 2026-10-10, item 2/Q9 design disposition: do not repair the tie by changing
+  5% to an adjacent arbitrary value.  `Q9-FACTOR-C-DESIGN-2026-10-10.md`
+  separates closure from relevance-given-closure, recommends aggregate
+  closure dominance as the Q9 law, and records the stronger admissibility
+  constraint required if every individual completion class must dominate.
+  It also distinguishes learning predictive outcome frequencies from changing
+  normative C: the latter requires registered evaluative evidence and
+  authority.  Runtime and Lean semantics remain unchanged pending acceptance
+  of that specification decision.
