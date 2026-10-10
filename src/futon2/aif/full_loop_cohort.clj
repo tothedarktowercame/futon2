@@ -56,7 +56,8 @@
     :historical-verification-refused})
 
 (defn read-edn [path]
-  (edn/read-string (slurp path)))
+  (with-open [reader (java.io.PushbackReader. (io/reader path))]
+    (edn/read reader)))
 
 (defn typed-sorry? [x]
   (and (map? x) (keyword? (get-in x [:sorry :kind]))))
@@ -383,6 +384,43 @@
   ;; Mutation checks remain strict: never append to a partially read attempt.
   (mapv #(read-edn (.getPath %)) (attempt-files attempt-dir)))
 
+(defn attempt-event-headers
+  "Read the append-authority metadata without replaying checkpoint payloads.
+   Sequence and type are fixed by the immutable filename; attempt ordinal is
+   read from the small time-step event.  This is the only information append
+   and close ordering require."
+  [attempt-dir]
+  (let [files (attempt-files attempt-dir)
+        first-event (when-let [f (first files)] (read-edn f))
+        headers
+        (mapv (fn [expected file]
+                (let [[_ sequence checkpoint]
+                      (re-matches #"(\d{3})-([a-z-]+)\.edn" (.getName file))
+                      sequence (parse-long sequence)]
+                  (when-not (= expected sequence)
+                    (throw (ex-info "checkpoint sequence gap"
+                                    {:expected expected :actual sequence
+                                     :file (.getPath file)})))
+                  {:attempt/id (:attempt/id first-event)
+                   :attempt/ordinal (:attempt/ordinal first-event)
+                   :event/sequence sequence
+                   :checkpoint/type (keyword checkpoint)}))
+              (range 1 (inc (count files))) files)]
+    headers))
+
+(def ^:private max-history-payload-bytes (* 100 1024 1024))
+
+(defn- file-sha256 [file]
+  (let [digest (MessageDigest/getInstance "SHA-256")
+        buffer (byte-array 65536)]
+    (with-open [in (io/input-stream file)]
+      (loop []
+        (let [n (.read in buffer)]
+          (when (pos? n)
+            (.update digest buffer 0 n)
+            (recur)))))
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest)))))
+
 (defn attempt-history
   "Read historical checkpoints independently, retaining typed exclusions.
   The target of an unreadable record cannot be recovered from its bytes;
@@ -391,7 +429,16 @@
   [attempt-dir]
   (reduce (fn [result file]
             (let [read-result
-                  (try {:event (read-edn file)}
+                  (try (if (> (.length file) max-history-payload-bytes)
+                         {:exclusion
+                          {:history/status :excluded
+                           :history/refusal :history-payload-over-durable-limit
+                           :target (.getName (io/file attempt-dir))
+                           :target-kind :attempt
+                           :path (.getAbsolutePath file)
+                           :bytes (.length file)
+                           :sha256 (file-sha256 file)}}
+                         {:event (read-edn file)})
                        (catch Exception e
                          {:exclusion
                           {:history/status (if (= "001-time-step.edn" (.getName file))
@@ -659,7 +706,7 @@
        (fn []
          (when-not (.isDirectory attempt-dir)
            (throw (ex-info "unknown attempt" {:attempt-id attempt-id})))
-         (let [events (attempt-events attempt-dir)
+         (let [events (attempt-event-headers attempt-dir)
                last-event (last events)
                last-type (:checkpoint/type last-event)]
            (when (= :closed last-type)
@@ -698,7 +745,7 @@
   ([prereg-path data-root attempt-id cell]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
-         events (attempt-events (io/file dir attempt-id))
+         events (attempt-event-headers (io/file dir attempt-id))
          present (set (map :checkpoint/type events))
          missing (remove present (:required-before-close p))
          errors (when (grounded-term? cell)

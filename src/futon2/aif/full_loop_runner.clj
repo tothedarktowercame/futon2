@@ -67,6 +67,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.policy :as selection-policy]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -914,7 +915,14 @@
                  :stage :close
                  :exception-class error-class
                  :error (or error-message "Close persistence failed")}
-        base {:run/id run-id :startedAt started-at :outcome :build-failed
+        base {:run/id run-id :click/id (:click-id raw-opts)
+              :opportunity-id (:opportunity-id result)
+              :attempt-id (:attempt-id result)
+              :runner/source (:runner/source result)
+              :startedAt started-at :outcome :build-failed
+              :caught-exception (or (get-in result [:data :caught-exception])
+                                    (get-in result [:data :originating-exception])
+                                    {:class error-class :message error-message})
               :record-type :wm/terminal-persistence-failure
               :checkpoint-keys (vec (keys checkpoint-refs))
               :checkpoint-digests checkpoint-refs
@@ -1108,12 +1116,15 @@
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
-            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])                         (get-in result [:checkpoints :selection :judgment :decision]))
+            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])
+                         (get-in result [:checkpoints :selection :judgment :decision]))
             record-failure (run-record-failure result)
             decision (when decision
                        (focus-receipt/join-terminal
                         decision {:run-ending (:run-ending-classification result)
                                   :failure record-failure}))
+            durable-decision (some-> decision
+                                     selection-policy/compact-cascade-carriers)
             ;; D8/AR-16: an abstained tick throws before a judgment cell is
             ;; written; its decision and the judge's dropped candidates
             ;; travel on the :no-selection sorry cell instead.
@@ -1195,7 +1206,7 @@
                     :traceWritten (boolean (:trace-path result))
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
-                    :decision (assoc (select-keys decision
+                    :decision (assoc (select-keys durable-decision
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
                                                    :accumulation-bmr])
@@ -1205,9 +1216,10 @@
                                      ;; source it from the certificate whenever
                                      ;; present so the two copies cannot drift.
                                      :g-term-decomposition
-                                     (or (get-in decision
-                                                 [:selection-certificate :g-term-decomposition])
-                                         (decomposition/from-result result))
+                                     (selection-policy/compact-cascade-carriers
+                                      (or (get-in decision
+                                                  [:selection-certificate :g-term-decomposition])
+                                          (decomposition/from-result result)))
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
@@ -4663,6 +4675,21 @@
       (select-keys s [:cause :cause-cut-at])
       {:absent :no-cause})))
 
+(defn caught-exception
+  "Bounded, durable identity of an exception caught by the opportunity
+   boundary. Includes ex-data and enough stack to locate the actual throw."
+  [^Throwable e]
+  (assoc (flight/throwable-summary e)
+         :ex-data (or (ex-data e) {})
+         :stack (mapv str (take 64 (.getStackTrace e)))))
+
+(defn- log-caught-exception! [opts caught]
+  ((or (:caught-exception-log-fn opts)
+       (fn [x] (binding [*out* *err*]
+                 (println "[wm-full-loop] caught opportunity exception")
+                 (prn x))))
+   caught))
+
 (defn finding-failure-cause
   "A repair finding's :failure-cause, or {:absent :cause-not-on-record} for a
   finding written before WM-CAUSE-ON-RECORD-I (or by a writer that never
@@ -5015,15 +5042,16 @@
             (let [cell (update @pending-selection :judgment assoc
                                :belief-source
                                (cond-> {:run/id (:run-id opts)}
-                                 trace-path (assoc :trace-path trace-path)))]
+                                 trace-path (assoc :trace-path trace-path)))
+                  durable-cell (selection-policy/compact-cascade-carriers cell)]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [event (if cohort-source
                               (cohort/append-checkpoint!
                                cohort-source (:data-root execution-cohort)
-                               attempt-id :selection cell)
+                               attempt-id :selection durable-cell)
                               (cohort/append-checkpoint!
-                               attempt-id :selection cell))]
+                               attempt-id :selection durable-cell))]
                   (swap! checkpoint-events assoc :selection event)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
@@ -5785,6 +5813,7 @@
                                        :failure-stage :close
                                        :error (.getMessage e)
                                        :exception-class exception-class
+                                       :originating-exception (:caught-exception data)
                                        :refusal-data failure-data
                                        :repair-obligation finding
                                        ;; the production close contract
@@ -7162,6 +7191,7 @@
                                 (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
         (observe-end!)
+        (log-caught-exception! opts (caught-exception e))
         (if @closing?
           ;; Cohort-53 attempt-001 is retained as the historical counterexample:
           ;; a typed evidence refusal escaped this branch and orphaned the attempt
@@ -7202,6 +7232,7 @@
                             :failure-stage :close
                             :error (.getMessage e)
                             :exception-class exception-class
+                            :caught-exception (caught-exception e)
                             :refusal-data failure-data
                             :repair-obligation finding
                             :duration-ms (- (System/currentTimeMillis) started)
@@ -7286,6 +7317,7 @@
                         :error (.getMessage e)
                         :error-class (.getName (class e))
                         :error-data failure
+                        :caught-exception (caught-exception e)
                         :cause (close-cause e)
                         :build-retries (when (seq (:build-retries failure))
                                          (:build-retries failure))}
