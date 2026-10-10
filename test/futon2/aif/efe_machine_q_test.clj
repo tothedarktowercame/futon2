@@ -20,18 +20,32 @@
 (def action-a {:type :no-op :policy "a"})
 (def action-b {:type :no-op :policy "b"})
 
+(def pre-injection-input
+  (edn/read-string
+   (slurp "test/fixtures/efe-machine-q/pre-injection-input.edn")))
+
+(defn compute-with-pre-injection-input
+  ([] (compute-with-pre-injection-input {}))
+  ([opts]
+   (let [{:keys [layer-id basis]} (:preference-stack-basis pre-injection-input)
+         stack (mapv #(if (= layer-id (:layer/id %)) (assoc % :basis basis) %)
+                     efe/preference-stack-record)]
+     (with-redefs [efe/preference-stack-record stack]
+       (efe/compute-efe state action-a opts)))))
+
 (defn sha256 [x]
   (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
                         (.getBytes (pr-str x) "UTF-8"))]
     (apply str (map #(format "%02x" (bit-and 255 %)) digest))))
 
 (deftest absent-option-is-identical
-  (let [actual (efe/compute-efe state action-a)
+  (let [actual (compute-with-pre-injection-input)
         pin (edn/read-string
              (slurp "holes/labs/wm-contract/runs/row-14-efe-injection-2026-09-12/baseline.edn"))]
     (is (= (:result-sha256 pin) (sha256 actual)))
-    (is (= actual (efe/compute-efe state action-a {}))))
-  (is (not (contains? (efe/compute-efe state action-a) :machine-q))))
+    (is (= actual (compute-with-pre-injection-input {})))
+    (is (= (:fixtures pin) ["test/fixtures/efe-machine-q/pre-injection-input.edn"])))
+  (is (not (contains? (compute-with-pre-injection-input) :machine-q))))
 
 (deftest real-predictive-provider-and-c-flip
   (model-test/with-example

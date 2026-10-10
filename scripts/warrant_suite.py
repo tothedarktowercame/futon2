@@ -17,7 +17,8 @@ Usage:
   scripts/warrant_suite.py --dry-run    # report fresh/stale, run nothing
   scripts/warrant_suite.py -j 1 NS...   # limit to named namespaces
 
-Index: data/test-warrants/index.json  {ns: {"entry-id", "git-head", ...}}.
+Index: /home/joe/code/storage/test-registry/futon2-suite/index.json
+       {ns: {"entry-id", "git-head", ...}}.
 Checks go to the serving JVM's /api/alpha/test-registry/check; runs go to
 futon3c's registry CLI in their own JVMs.
 """
@@ -35,8 +36,9 @@ from pathlib import Path
 
 REPO = Path("/home/joe/code/futon2")
 FUTON3C = Path("/home/joe/code/futon3c")
-INDEX = REPO / "data/test-warrants/index.json"
 ARTIFACTS = Path("/home/joe/code/storage/test-registry/futon2-suite")
+INDEX = ARTIFACTS / "index.json"
+LEGACY_INDEX = REPO / "data/test-warrants/index.json"
 AGENCY = os.environ.get("AGENCY_URL", "http://localhost:7070")
 # These write the same on-disk artifact (wm08 Route-A re-expression under
 # holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/), so running
@@ -138,7 +140,10 @@ def main():
     nss = namespaces()
     if a.ns:
         nss = {k: v for k, v in nss.items() if k in a.ns}
-    index = json.loads(INDEX.read_text()) if INDEX.exists() else {}
+    # The index is warrant-system state, not WM production data. Seed once
+    # from the old location without modifying or deleting it.
+    source_index = INDEX if INDEX.exists() else LEGACY_INDEX
+    index = json.loads(source_index.read_text()) if source_index.exists() else {}
 
     def inspect(ns):
         entry = index.get(ns)
