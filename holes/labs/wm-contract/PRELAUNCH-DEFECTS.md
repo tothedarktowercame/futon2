@@ -47,6 +47,7 @@ a fixture is evidence only when no real artifact is available.
 | D28 | Admission re-read the roster immediately after its own readiness wake; the woken seat still read `invoking`, so the click was refused `:busy`. | run `2026-10-10-4bb54313`, admission only | FIXED AND VERIFIED in `52b019f9a`, merged as `f7cef971c`: `agent-readiness!` polls until the woken seat is available, bounded by `readiness-settle-ms` (20,000 ms). Independent targeted rerun of the new regression and the existing restored-agent readiness test passed: 2 tests, 12 assertions. PID 39171 reports 20,000 ms and exact loaded/canonical runner SHA-256 identity. |
 | D29 | The post-click requirements alert checked the run but futon1b refused its evidence copy with HTTP 403 because `wm_run_alert.py` omitted `x-penholder`. | clicks 48 onward | FIXED AND VERIFIED in `82eaf0977`, merged as `1f73c5330`: the script sends `FUTON1B_PENHOLDER`, falling back through `FUTON1A_PENHOLDER` to allowed penholder `api`. A local HTTP capture of the real script path received the POST and header; futon1b's current gate resolves that header and its default allow-list contains `api`. This is a post-click script and requires no JVM load. |
 | D30 | `test_good_fixture_conforms` in `wm_run_alert_test.py` is stale against the current external Requirements checker: Q4 and Q9 return `unverifiable`. | focused D29 verification, 2026-10-10 | JUDGED NOT TO AFFECT THIS CLICK: D29 changes only the later evidence POST; the stale fixture runs with `--no-evidence` and therefore does not exercise the changed code. The other 3 alert tests pass, a local end-to-end POST verifies the header, and production treats an unverifiable requirement as a visible post-click alert rather than suppressing or altering the click. Fixture upkeep remains test debt. |
+| D31 | The signed-off retry reached admission after the ordinary-click allocation was exhausted at 51/51. | run `2026-10-10-c82068b4`, admission only | FIXED AND VERIFIED by Joe's recorded one-click grant: futon2 authorization `1c5247dab` and futon3c budget-only commit `717ae4a2` raise allocation to 52. PID 39171 reports `allocated` 52; receipt 52 was consumed by the current retry, and the runner source remains the signed-off `f7cef971c` digest. The budget namespace does not change futon2 WM behavior. |
 
 ## claude-12 turn 2 (2026-10-10): D2, D14, D15, D17, D18 fixed on main, pending replay
 
@@ -313,3 +314,19 @@ post-click alert. Every known entry D1–D30 is therefore adequately addressed
 for this click. The renewed one-click sign-off remains in force on exactly the
 runner/JVM state above plus this exact post-click script; its other invalidation
 conditions are unchanged.
+
+**2026-10-10 14:33 UTC — codex-68 BUDGET-LOAD RE-VERIFICATION.** Loading
+futon3c `717ae4a203fa67d5d884fb37ac02caaccaf16fca` formally voided the prior
+sign-off until checked. The commit changes only
+`futon3c.wm.ordinary-click-budget/allocated` from 51 to 52 and is backed by
+Joe's grant in futon2 `1c5247dab24957d7082137686e65792c001cc52c`.
+The live PID 39171 independently returned allocation 52 and consumption 52;
+the current retry therefore holds receipt 52. The click had already entered
+selection when this check completed. Its serving runner remains the signed-off
+futon2 `f7cef971c` with SHA-256
+`b105dc8dd79f638bf8740ae2de7d2c7f47e7ad962616559a3da8a28c4c1ba54b`.
+
+D31 is adequately addressed and this isolated authorization-counter load does
+not alter selection, construction, dispatch, or close. I renew the sign-off
+for the already-running receipt-52 click; it may continue. Any further load or
+source change still requires another check.
