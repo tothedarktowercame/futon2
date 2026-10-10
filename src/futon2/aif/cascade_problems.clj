@@ -200,7 +200,11 @@
       (assoc :pattern-feedback
              (or (get-in sources [:pattern-feedback target])
                  (get-in sources [:pattern-feedback :wm/global])))
-      (and (map? slice) (not (seq patterns))) (assoc :query-time-slice slice))))
+      ;; The slice remains construction provenance after interpretations have
+      ;; arrived.  Dropping it here made the eventual selection certificate
+      ;; unable to state which pinned library result bounded construction.
+      (map? slice)
+      (assoc :query-time-slice slice))))
 
 (defn base-problem
   "Assemble the candidate-independent problem, or its first typed refusal:
@@ -331,18 +335,23 @@
                {:context (when (ifn? ctx-fn) (ctx-fn target))})
 
       :else
-      {:target target
-       :cascade-problem
-       ;; Only constructed nonempty orders enter the executable family.
-       (assoc (base-problem sources horizon target) :precedences (mapv :precedence constructed))
-       :constructed-candidates
-       (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
-       :interpretation-receipts
-       ;; the interpretations source's own receipts, carried so the E1 gate
-       ;; can require them per candidate without the caller reaching back
-       ;; into the source map. Absent receipts stay {} — the gate then
-       ;; refuses, honestly, rather than a default being invented here.
-       (or (:receipts interp) {})})))
+      (cond->
+       {:target target
+        :cascade-problem
+        ;; Only constructed nonempty orders enter the executable family.
+        (assoc (base-problem sources horizon target) :precedences (mapv :precedence constructed))
+        :constructed-candidates
+        (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
+        :interpretation-receipts
+        ;; the interpretations source's own receipts, carried so the E1 gate
+        ;; can require them per candidate without the caller reaching back
+        ;; into the source map. Absent receipts stay {} — the gate then
+        ;; refuses, honestly, rather than a default being invented here.
+        (or (:receipts interp) {})}
+        (map? slice)
+        (assoc :query-time-slice slice
+               :slice-size (:slice-size slice)
+               :library-size (:library-size slice))))))
 
 (defn assemble
   "Assemble one `:cascade-problem` per fully supplied target, plus one typed

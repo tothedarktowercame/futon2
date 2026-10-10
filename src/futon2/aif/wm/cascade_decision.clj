@@ -1348,6 +1348,42 @@
                 {:target target :kind :no-constructed-candidate
                  :missing (:missing-evidence target-decline)})}))
 
+(defn target-construction-census
+  "Record per-target construction facts from assembled problems and the actual
+  scored certificate population. Missing slice provenance is typed absent;
+  incomplete library pins never warrant a whole-library claim."
+  [problems certificate-candidates]
+  (let [policy-counts
+        (frequencies
+         (keep (fn [candidate]
+                 (or (:target candidate) (get-in candidate [:id :target])))
+               certificate-candidates))
+        missing (vec (keep (fn [{:keys [target query-time-slice]}]
+                             (when-not (= :wm/query-time-library-slice-v1
+                                          (:schema query-time-slice))
+                               target))
+                           problems))]
+    (if (and (seq problems) (empty? missing))
+      (mapv
+       (fn [{:keys [target query-time-slice cascade-problem]}]
+         (let [pins (:library-pins query-time-slice)]
+           {:target target
+            :slice (mapv :pattern (:candidates query-time-slice))
+            ;; These are the operators actually admitted to construction. A
+            ;; mismatch with the retrieval slice is evidence, not something
+            ;; to conceal by copying the slice into this field.
+            :pool (vec (keys (:interpretations cascade-problem)))
+            :slice-from-whole-library
+            (and (pos-int? (:library-size query-time-slice))
+                 (= (:library-size query-time-slice) (count pins))
+                 (every? #(and (:id %) (:sha256 %) (:revision %)) pins))
+            :library-size (:library-size query-time-slice)
+            :policy-count (get policy-counts target 0)}))
+       problems)
+      {:status :absent
+       :reason :query-time-construction-slice-not-recorded
+       :targets (if (seq problems) missing [])})))
+
 (defn cascade-decision
   "Admit explicitly paired nonempty constructions, record every decline, then
   score/select only admitted candidates. An all-declined family abstains."
@@ -1385,7 +1421,14 @@
                            (precision-carry/advance {:previous previous-beta
                              :initialized-beta (:initialized-beta previous-beta)
                              :model-id (:model-id previous-beta)}))
-                 result)]
+                 result)
+        construction-census
+        (target-construction-census
+         ;; Census every assembled construction, including one later declined
+         ;; by admission. Its policy-count then remains honestly zero and Q2
+         ;; can detect the missing action instead of losing the target row.
+         (:problems assembled)
+         (get-in result [:decision :selection-certificate :candidates]))]
     (cond-> (-> result
                 ;; cascade-decision-admitted's own :dropped-candidates (when
                 ;; it ran a scored family) already carries this wrapper's
@@ -1401,6 +1444,9 @@
                 (update :decision #(assoc % :live-c-coverage
                                            (or (:live-c-coverage %)
                                                {:status :absent :reason :no-admitted-cascade-problems}))))
+      true
+      (assoc-in [:decision :selection-certificate :target-construction]
+                construction-census)
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))

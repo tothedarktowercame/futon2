@@ -147,12 +147,20 @@
 
 (defn- candidate-target [candidate]
   (or (get-in candidate [:id :target]) (:target candidate)))
-(defn- candidate-precedence [candidate]
-  (or (get-in candidate [:id :precedence]) (:precedence candidate)))
 
 (defn- numeric-g? [candidate]
   (number? (or (:G candidate) (:g candidate) (:expected-free-energy candidate)
                (get-in candidate [:score :G]) (get-in candidate [:score :g]))))
+
+(defn- target-construction-facts [certificate]
+  (when (vector? (:target-construction certificate))
+    (mapv (fn [{:keys [target slice pool slice-from-whole-library policy-count]}]
+            {"targets" [(str target)]
+             "slice" (sorted-ids slice)
+             "pool" (sorted-ids pool)
+             "sliceFromWholeLibrary" (boolean slice-from-whole-library)
+             "policyCount" policy-count})
+          (:target-construction certificate))))
 
 (defn- outcome [record]
   (let [x (or (get-in record [:terminal-receipt :outcome])
@@ -188,7 +196,9 @@
         posterior (get-in record [:decision :selection-law :posterior])
         policy-ids (when (map? posterior)
                      (set (map (comp action-identity/digest key) posterior)))
-        precedence (when (vector? candidates) (mapcat #(or (candidate-precedence %) []) candidates))
+        construction (target-construction-facts cert)
+        constructor-pool (when construction
+                           (set (mapcat #(get % "pool") construction)))
         model (or (some-> gpolicies first (get-in [:terms :A :value]))
                   (some-> scoring vals first :observation-model))
         horizon (:horizon model)
@@ -244,10 +254,11 @@
                "targetsWithG" (if (some? with-g) (sorted-ids with-g)
                                   (nr "selection certificate candidates absent"))
                "libraryPatternCount" (count (:patterns snap))
-               "targetConstruction" (nr "record does not carry query-time slice ids and whole-library pin for each target")
-               "constructorPatternCount" (if (vector? candidates)
-                                             (count (set precedence))
-                                             (nr "candidate precedence absent"))
+               "targetConstruction" (or construction
+                                          (nr "selection certificate target construction absent"))
+               "constructorPatternCount" (if (some? constructor-pool)
+                                             (count constructor-pool)
+                                             (nr "selection certificate target construction absent"))
                "constructedCascades" (if cascade-ids (sorted-ids cascade-ids)
                                          (nr "constructed candidate ids absent"))
                "comparedPolicies" (if policy-ids (sorted-ids policy-ids)

@@ -199,10 +199,14 @@
       (is (= [receipt receipt receipt] (mapv :construction-receipt (:constructed-candidates problem)))
           "each candidate's construction receipt travels with the problem")
       (let [lane (wm-cd/cascade-lane (:cascade-problem problem))]
-        (is (and (nil? (:refusal lane)) (nil? (:stopped-at lane)))
-            "the real cascade-lane accepts the assembled problem end-to-end")
-        (is (= [:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9] (mapv :node (:route lane)))
-            "the lane runs the full node sequence on the assembled problem")))
+        ;; This unit helper has no flight-prefix carrier. Since
+        ;; PrefixFreeEnergyPosterior became mandatory, the honest endpoint is
+        ;; a typed R14 refusal rather than an invented F=0 continuation.
+        (is (= :free-energy-not-supplied
+               (get-in lane [:refusal :data :refusal :kind])))
+        (is (= :R14 (:stopped-at lane)))
+        (is (= [:R1 :R6 :R13 :R4 :R5 :R14] (mapv :node (:route lane)))
+            "the lane reaches selection before refusing absent prefix F")))
     (is (= (mapv :precedence candidates)
            (get-in (first problems) [:cascade-problem :precedences]))
         "only the real constructed orders enter the family")))
@@ -422,7 +426,7 @@
                     (get-in % [:cascade-problem :pattern-pool 0 :provenance]))
                 (:problems assembled)))))
 
-(deftest interpretation-backed-assembly-is-unchanged-by-slice-support
+(deftest interpretation-backed-assembly-retains-slice-without-changing-pool
   (let [before (assemble* {:targets [target] :sources full-sources})
         with-unread-slice
         (assemble* {:targets [target]
@@ -431,4 +435,10 @@
                                         :target target :query "unused"
                                         :candidates [{:pattern :library/not-admitted}]
                                         :failures [] :slice-size 1 :library-size 1})})]
-    (is (= before with-unread-slice))))
+    (is (nil? (get-in before [:problems 0 :query-time-slice])))
+    (is (= :wm/query-time-library-slice-v1
+           (get-in with-unread-slice [:problems 0 :query-time-slice :schema])))
+    (is (= (get-in before [:problems 0 :cascade-problem :interpretations])
+           (get-in with-unread-slice [:problems 0 :cascade-problem :interpretations])))
+    (is (nil? (get-in with-unread-slice
+                      [:problems 0 :cascade-problem :pattern-pool])))))

@@ -107,3 +107,15 @@ writer keeps the gate closed.
   labels such as `:C1` no longer collapse policies belonging to different
   targets.  Missing per-target slice/pool receipts still make Q8 honestly
   non-recomputable; this change does not manufacture them.
+
+- 2026-10-10, item 3/Q2/Q8 construction correspondence: query-time slices
+  now remain attached as provenance after interpretation, without replacing
+  or widening the admitted interpretation pool.  Selection records, for
+  every assembled target, the retrieved slice, actual constructor pool,
+  whole-library-pin verdict, and number of policies that reached the scoring
+  certificate; missing slice provenance is typed absent.  The exporter emits
+  this receipt and derives `constructorPatternCount` from the union of the
+  recorded pools.  It deliberately does not force `pool = slice` or a
+  positive policy count: those are Q2 requirements, and a real mismatch must
+  fail rather than be normalized away.  Historical records without the new
+  carrier remain non-recomputable.
