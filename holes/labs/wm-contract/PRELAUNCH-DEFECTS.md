@@ -234,3 +234,40 @@ production source files differ between the loaded JVM's Git head and the
 candidate. Loading and verifying those exact sources is a separate required
 gate step; no click may be requested before a subsequent dated sign-off names
 the verified commits actually loaded in PID 39171.
+
+**2026-10-10 08:10 UTC — codex-68 SIGN-OFF FOR ONE CLICK.** Every register
+entry is adequately addressed for this click: fixed and verified, or expressly
+judged not to affect the click with the reason recorded above. The exact
+production-scale replay was run on `0327fd564` containing production fix
+`aed08ae1b`; it reached selection, construction, D-task capture, the Agency
+author stub, close, run-record persistence, and report-card generation.
+
+Serving-JVM identity independently verified after claude-12's hot-load:
+
+- PID 39171, never restarted; production mode, data root
+  `/home/joe/code/futon2/data`; no running click; debugger stops `[]`.
+- `/api/alpha/wm/click` reports runner loaded at
+  `2026-10-10T08:05:48.024051716Z`, Git HEAD
+  `1aa8ead187e45dfe89a6a947d1ed07094b8e4675`, tree
+  `1682c49f6dd682c6473a602fb282cfa0d455f10f`, and loaded runner SHA-256
+  `b57e93a1b422c15388171c03f51426943e64be9a4e2884128c8beb2cce406c23`,
+  exactly equal to the canonical runner SHA-256.
+- The 26 entries in `/tmp/c10/load-order.txt` exactly equal the files changed
+  from the prior loaded Git HEAD `5ac3df140be69c3db049f77b6f4445e31fc6481e`
+  to signed-off main `1aa8ead187e45dfe89a6a947d1ed07094b8e4675` under
+  `src/`, plus `scripts/wm_run_facts.clj` and
+  `scripts/wm_report_card.clj`: 26 expected, 26 loaded, no difference.
+  Independent canonical hashes are recorded in
+  `/tmp/c10/codex-loaded-file-sha256.txt`.
+- Runner displacement reports 165 `:current`, 67 `:no-resource`, zero stale.
+  `:no-resource` is acceptable evidence for namespaces loaded by Clojure
+  `load-file`: each names its absolute canonical `:file`, while classloader
+  resource lookup is unavailable. It is not a drift finding. The critical
+  runner additionally has exact loaded-versus-canonical byte identity, and
+  post-load behavioral probes verified production Agency routing, production
+  data paths, streamed run-record writing, and non-BMP durable hashing.
+
+This sign-off covers **one click on the currently loaded PID 39171 state**.
+Any source change, additional load, JVM restart, armed debugger stop, or click
+already in progress invalidates it and requires re-verification. Claude-12 may
+now ask Joe for that click; this sign-off does not itself initiate one.
