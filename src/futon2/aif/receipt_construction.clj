@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.close-retention :as retention]
+            [futon2.aif.durable-intern :as durable-intern]
             [futon2.aif.evidence-manifest :as manifest]
             [futon2.aif.find-receipt :as finder]
             [futon2.aif.find-expectations :as find-expectations]
@@ -27,7 +28,7 @@
 (defn- bytes [file] (Files/readAllBytes (.toPath (io/file file))))
 (defn- read-one [file]
   (with-open [r (java.io.PushbackReader. (io/reader file))]
-    (let [eof (Object.) x (edn/read {:eof eof} r)]
+    (let [eof (Object.) x (durable-intern/hydrate (edn/read {:eof eof} r))]
       (need! (and (map? x) (identical? eof (edn/read {:eof eof} r))) :invalid-history-record {:file (str file)}) x)))
 (defn reaches? [edges a b]
   (let [rel (reduce (fn [m [u v]] (update m u (fnil conj #{}) v)) {} edges)]

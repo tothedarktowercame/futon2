@@ -6,7 +6,8 @@
   Kept apart from futon2.aif.flight so the flight core stays pure and its
   tests need no runner."
   (:import [java.util.concurrent Executors])
-  (:require [babashka.http-client]
+  (:require [futon2.aif.run-record-io :as run-record-io]
+            [babashka.http-client]
             [cheshire.core]
             [clojure.edn]
             [clojure.java.io :as io]
@@ -542,7 +543,7 @@
         newest (when (seq files) (apply max-key #(.lastModified ^java.io.File %) files))]
     (if-not newest
       {:absent :no-run-record :dir (str run-record-dir)}
-      (let [record (clojure.edn/read-string {:default tagged-literal} (slurp newest))
+      (let [record (run-record-io/read-record newest)
             r (get-in record [:runner/source :loaded-displacement])]
         (merge {:from-run-record (:run/id record) :started-at (:startedAt record)}
                (if r (displacement/summary r) {:absent :no-loaded-displacement-on-run-record}))))))
@@ -587,7 +588,7 @@
                                                :body (cheshire.core/parse-string true))))
         read-record! (or read-record! (fn [run-id]
                                         (let [f (io/file run-record-dir (str "tick-run-record-" run-id ".edn"))]
-                                          (when (.isFile f) (clojure.edn/read-string {:default tagged-literal} (slurp f))))))]
+                                          (when (.isFile f) (run-record-io/read-record f)))))]
     (fn [judge-opts]
       (let [flight (:flight judge-opts)
             target (:target flight)

@@ -31,7 +31,8 @@
   through POST /api/alpha/wm/click (budget and cast-seat preflight apply),
   and a flight record written under the store, whose path is printed with
   every request, answer job, publication and click."
-  (:require [clojure.edn]
+  (:require [futon2.aif.run-record-io :as run-record-io]
+            [clojure.edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
@@ -221,7 +222,7 @@
         fetch-run-record (fn [click-id]
                            (let [p (io/file (record-path click-id))]
                              (when (.isFile p)
-                               (clojure.edn/read-string {:default tagged-literal} (slurp p)))))
+                               (run-record-io/read-record p))))
         dispatch-step! (or dispatch-step!
                            (when dispatch-seat
                              (fr/agency-dispatch-step! (cond-> {:seat dispatch-seat :opts (runner/config {})}

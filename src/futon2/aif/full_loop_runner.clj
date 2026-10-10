@@ -62,12 +62,13 @@
             [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
+            [futon2.aif.durable-intern :as durable-intern]
+            [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.previous-run :as previous-run]
-            [futon2.aif.policy :as selection-policy]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -883,6 +884,22 @@
     (write-edn-to-writer! out value)
     (.sync (.getFD fos))))
 
+(defn write-run-record-stream!
+  "Write a run record: the `;; wm/run-head` comment line (run-record-io),
+  then the record with the large values under :decision and
+  :world-at-selection interned once (durable-intern). Top-level fields are
+  written exactly as before, so readers of those alone need not hydrate.
+  Readers of the nested values read through futon2.aif.run-record-io."
+  [file record]
+  (with-open [fos (java.io.FileOutputStream. ^java.io.File file)
+              osw (java.io.OutputStreamWriter. fos java.nio.charset.StandardCharsets/UTF_8)
+              out (java.io.BufferedWriter. osw)]
+    (.write out ^String (run-record-io/head-line record))
+    (write-edn-to-writer! out (durable-intern/encode
+                               record {:min-bytes 256
+                                       :only-keys [:decision :world-at-selection]}))
+    (.sync (.getFD fos))))
+
 (defn- stream-sha256 [value]
   (let [digest (MessageDigest/getInstance "SHA-256")]
     (with-open [sink (java.security.DigestOutputStream.
@@ -1123,8 +1140,11 @@
                        (focus-receipt/join-terminal
                         decision {:run-ending (:run-ending-classification result)
                                   :failure record-failure}))
-            durable-decision (some-> decision
-                                     selection-policy/compact-cascade-carriers)
+            ;; Written whole: futon2.aif.durable-intern removes the repeats
+            ;; losslessly. The lossy candidate projection that stood here
+            ;; broke 9 test namespaces (previous-run, g-term-decomposition,
+            ;; selection-always, ...): readers lost :chosen and receipts.
+            durable-decision decision
             ;; D8/AR-16: an abstained tick throws before a judgment cell is
             ;; written; its decision and the judge's dropped candidates
             ;; travel on the :no-selection sorry cell instead.
@@ -1216,10 +1236,9 @@
                                      ;; source it from the certificate whenever
                                      ;; present so the two copies cannot drift.
                                      :g-term-decomposition
-                                     (selection-policy/compact-cascade-carriers
-                                      (or (get-in decision
-                                                  [:selection-certificate :g-term-decomposition])
-                                          (decomposition/from-result result)))
+                                     (or (get-in decision
+                                                 [:selection-certificate :g-term-decomposition])
+                                         (decomposition/from-result result))
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
@@ -1319,7 +1338,7 @@
                      (assoc :q6-exclusion q6-exclusion))]
         (io/make-parents target)
         (try
-          ((or (:run-record-write-fn raw-opts) write-edn-stream!) tmp record)
+          ((or (:run-record-write-fn raw-opts) write-run-record-stream!) tmp record)
           (java.nio.file.Files/move
            (.toPath tmp) (.toPath target)
            (into-array java.nio.file.StandardCopyOption
@@ -5043,7 +5062,8 @@
                                :belief-source
                                (cond-> {:run/id (:run-id opts)}
                                  trace-path (assoc :trace-path trace-path)))
-                  durable-cell (selection-policy/compact-cascade-carriers cell)]
+                  ;; The cohort writer interns repeats losslessly.
+                  durable-cell cell]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [event (if cohort-source

@@ -1,6 +1,7 @@
 (ns futon2.aif.held-out-observations
   "Pure hygiene boundary for a preregistered held-out observation window."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.run-record-io :as run-record-io]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
@@ -62,7 +63,7 @@
    a default; nil when it will not parse at all."
   [file]
   (try
-    (edn/read-string {:default (fn [_tag value] value)} (slurp file))
+    (run-record-io/read-record file {:default (fn [_tag value] value)})
     (catch Exception _ nil)))
 
 ;; The four fields below are read STRUCTURALLY. They were read by regex over

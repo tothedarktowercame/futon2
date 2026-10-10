@@ -3,7 +3,8 @@
   store. A flight envelope supplies click order, target, advanced wants and
   enactment citations; the caller explicitly supplies the click run-record
   directory because the flight does not retain it."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.run-record-io :as run-record-io]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.progress-check :as progress-check]))
 
@@ -13,7 +14,7 @@
 
 (defn- read-edn [path]
   (try
-    (edn/read-string {:default tagged-literal} (slurp path))
+    (run-record-io/read-record path)
     (catch Exception _ ::unreadable)))
 
 (defn- produced-for [enactments click-id]

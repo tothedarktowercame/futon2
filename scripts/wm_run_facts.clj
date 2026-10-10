@@ -6,6 +6,7 @@
   records the record path or snapshot command for every RunFacts field."
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
+            [futon2.aif.run-record-io :as run-record-io]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -35,8 +36,8 @@
   ;; Run records can exceed the JVM's single String limit.  `edn/read` consumes
   ;; the character stream directly, preserving the same value without first
   ;; materialising the whole file as `slurp`/`read-string` did.
-  (with-open [reader (java.io.PushbackReader. (io/reader path))]
-    (edn/read {:default tagged-literal} reader)))
+  ;; run-record-io also hydrates interned records (durable-intern).
+  (run-record-io/read-record path))
 
 (defn lookup-previous
   "Explicit typed lookup of the record before RECORD-PATH in the same

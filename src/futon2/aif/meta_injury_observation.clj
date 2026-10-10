@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-injury-observation
   "Reconstruct a META injury observation from immutable WM run-record bytes."
-  (:require [clojure.edn :as edn])
+  (:require [futon2.aif.durable-hydrate :as durable-hydrate]
+            [clojure.edn :as edn])
   (:import [java.security MessageDigest]))
 
 (def schema :wm/injury-observation-v1)
@@ -78,7 +79,8 @@
     :else
     (try
       (let [record (edn/read-string (String. ^bytes source-bytes "UTF-8"))
-            run-record (edn/read-string (String. ^bytes run-record-bytes "UTF-8"))
+            run-record (durable-hydrate/hydrate
+                        (edn/read-string (String. ^bytes run-record-bytes "UTF-8")))
             expected-projection (project-run-record run-record expected-run-record-pin)
             evidence
             {:source-record (:source-record record)

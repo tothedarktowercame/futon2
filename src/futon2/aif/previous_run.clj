@@ -22,15 +22,24 @@
   among the rest (binding *excluded-pair* around the judge); only when no
   admissible alternative remains does the click refuse, typed
   :repeat-choice-after-refusal."
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [futon2.aif.run-record-io :as run-record-io]))
 
 (def record-name-re #"tick-run-record-(\d{4}-\d{2}-\d{2})-([^.\s]+)\.edn$")
 
 (defn read-record [^java.io.File file]
   (try
     {:status :present
-     :record (edn/read-string {:default tagged-literal} (slurp file))}
+     :record (run-record-io/read-record file)}
+    (catch Exception e
+      {:status :unreadable :error (ex-message e)})))
+
+(defn- read-started-at
+  "The record's :startedAt from its head line (one line read), falling back
+  to the whole record for records written before head lines existed."
+  [^java.io.File file]
+  (try
+    {:status :present :startedAt (:startedAt (run-record-io/read-head file))}
     (catch Exception e
       {:status :unreadable :error (ex-message e)})))
 
@@ -61,9 +70,9 @@
     (when (seq dates)
       (let [group (groups (last dates))
             started (keep (fn [^java.io.File f]
-                            (let [read (read-record f)]
+                            (let [read (read-started-at f)]
                               (when (= :present (:status read))
-                                (let [at (:startedAt (:record read))]
+                                (let [at (:startedAt read)]
                                   (when (and at (not (map? at)))
                                     [(str at) (record-name f) f])))))
                           group)]

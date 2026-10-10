@@ -9,6 +9,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.stacktrace :as stacktrace]
+            [futon2.aif.durable-hydrate :as durable-hydrate]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -22,8 +23,9 @@
 (def phases [:selection :construction :author-dispatch :close])
 
 (defn read-edn! [path]
+  ;; Checkpoints may be interned (durable-intern).
   (with-open [r (java.io.PushbackReader. (io/reader path))]
-    (edn/read r)))
+    (durable-hydrate/hydrate (edn/read r))))
 
 (defn checkpoint->judgement [cell]
   (let [cell (or (:payload cell) cell)
