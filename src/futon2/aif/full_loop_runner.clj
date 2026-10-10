@@ -62,6 +62,7 @@
             [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
+            [futon2.aif.agency-guard :as agency-guard]
             [futon2.aif.durable-intern :as durable-intern]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.receipt-construction :as receipt-construction]
@@ -206,7 +207,7 @@
      ^Runnable
      (fn []
        (try
-         (http/post (str agency-base "/api/alpha/agents/" wm-agent-id "/status")
+         (http/post (agency-guard/dispatch-url agency-base (str "/api/alpha/agents/" wm-agent-id "/status"))
                     {:headers {"Content-Type" "application/json"}
                      :body (json/generate-string payload)
                      :timeout 1500
@@ -226,7 +227,7 @@
   a registration outage must not consume the attempt it was protecting."
   [{:keys [agency-base]}]
   (try
-    (http/post (str agency-base "/api/alpha/agents")
+    (http/post (agency-guard/dispatch-url agency-base "/api/alpha/agents")
                {:headers {"Content-Type" "application/json"}
                 :body (json/generate-string
                        {:agent-id "wm-full-loop"
@@ -280,7 +281,7 @@
                                :attempt-id attempt-id})))
           response
           (http/post
-           (str agency-base "/api/alpha/park")
+           (agency-guard/dispatch-url agency-base "/api/alpha/park")
            {:headers {"Content-Type" "application/json"}
             :body (json/generate-string
                    {:agent wm-agent-id
@@ -1451,7 +1452,7 @@
 (defn wake-agent!
   "Send one bounded readiness whistle to an invoke-ready restored agent."
   [opts agent]
-  (let [r (http/post (str (:agency-base opts) "/api/alpha/whistle")
+  (let [r (http/post (agency-guard/dispatch-url (:agency-base opts) "/api/alpha/whistle")
                      {:headers {"Content-Type" "application/json"}
                       :body (json/generate-string
                              {:agent-id agent
@@ -1812,7 +1813,7 @@
                             {:failure-kind :wm-job-ledger-unavailable
                              :run-id run-id :click-id (:click-id opts)})))
         response
-        (post-json! (str agency-base "/api/alpha/bell")
+        (post-json! (agency-guard/dispatch-url agency-base "/api/alpha/bell")
                     {:agent-id agent :caller caller :mission-id (str mission)
                      :harness (if wm-run?
                                 {:kind :war-machine :basis :producer-context
@@ -1838,7 +1839,7 @@
   "Cancel one Agency job through its single-finalizer endpoint. The Agency
    records cancelled/operator-cancelled before interrupting the process tree."
   [{:keys [agency-base]} job-id caller reason]
-  (post-json! (str agency-base "/api/alpha/invoke/jobs/" job-id "/cancel")
+  (post-json! (agency-guard/dispatch-url agency-base (str "/api/alpha/invoke/jobs/" job-id "/cancel"))
               (cond-> {:caller caller}
                 (not (str/blank? reason)) (assoc :reason reason))))
 
