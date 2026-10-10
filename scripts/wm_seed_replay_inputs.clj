@@ -34,10 +34,14 @@
     (doseq [file (filter #(.isFile ^java.io.File %) (file-seq admission-dir))]
       (let [record (edn/read-string (slurp file))
             artifact (some-> record :verification-artifact :path io/file)
-            record' (if (and artifact (.isFile artifact))
-                      (assoc-in record [:verification-artifact :sha256]
+            finding (some-> record :finding-artifact :path io/file)
+            record' (cond-> record
+                      (and artifact (.isFile artifact))
+                      (assoc-in [:verification-artifact :sha256]
                                 (sha256-file artifact))
-                      record)]
+                      (and finding (.isFile finding))
+                      (assoc-in [:finding-artifact :sha256]
+                                (sha256-file finding)))]
         (spit file (pr-str record'))))))
 
 (def input-paths
