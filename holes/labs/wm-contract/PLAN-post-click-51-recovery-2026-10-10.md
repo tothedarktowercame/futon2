@@ -1565,3 +1565,26 @@ or weaken an existing definition merely to accommodate current Clojure.
   repository-completeness carrier.  The serving `run-revision-round` still
   uses its existing producer.  Persisting this receipt through the production
   close/Morning Brief path begins only after those two authorities are supplied.
+
+- 2026-10-11, SUT item 4 controlled Q9 integration:
+  `futon2.aif.factorized-preference-sut/compose-and-score!` validates the exact
+  `:wm/factorized-preference-v1` carrier exported by Q9, plus runtime-only
+  source/implementation pins for the independently authorized calibration and
+  factorization laws.  Typed outcomes keep completion separate from conditional
+  relevance: completed rows require focused/related/unrelated, observed
+  noncompletion has no relevance, and unmeasured is refused before scoring
+  rather than mapped to stop-the-line.  The sealed factorization implementation
+  derives an exact rational terminal kernel from the authorized strict costs;
+  its noncompletion tier is structurally beyond the whole relevance range.
+  Policy identities, semantics, horizon and schedule join exactly before the
+  existing `cascade-observation-scoring/rank-cascade-actions` boundary, and the
+  returned scorer certificates are checked to have consumed that same kernel.
+
+  Production remains **OPEN** and unchanged.  The historical
+  `cascade-decision/class-observation-model` still uses 55/35/5/5 and conflates
+  unreached with unmeasured.  The controlled entrypoint refuses production mode
+  because no commissioned calibration/factorization registries, implementation
+  loader pins, selector authority, or typed per-policy outcome producer exist.
+  Once commissioned, the retained carrier and scorer-consumption receipt must
+  be added to the decision record for the existing Q9 exporter and Morning
+  Brief; this namespace is not referenced by the serving path.
