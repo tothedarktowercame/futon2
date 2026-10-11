@@ -1307,3 +1307,13 @@ or weaken an existing definition merely to accommodate current Clojure.
   `persist-run-record!`'s explicit decision allowlist at
   `src/futon2/aif/full_loop_runner.clj:1022-1030`.  None of those runtime seams
   was changed in this discovery slice.
+
+- 2026-10-11, 3/2 auxiliary-flag measurement: focused Lean witnesses in
+  `ThreeHalvesRuntimeWitness.lean` and runtime tests in
+  `three_halves_square_test.clj` agree on the current formula.  With a covered
+  square whose two routes disagree, neither flag refuses; aux1 alone, aux2
+  alone, and both flags pass.  Both flags make consistency vacuous because no
+  route remains active, but do not waive K1' coverage: removing blend identity
+  32 still refuses.  A covered partial-route square whose active-route union is
+  functional still refuses for noncommutation.  No semantic change was made;
+  this closes the missing flag-combination and coverage falsifiers only.

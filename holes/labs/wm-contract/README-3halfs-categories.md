@@ -101,9 +101,15 @@ Primary code and proofs:
 The pinned `ukrns/publication-cadence` fixture is the current positive
 runtime-shaped witness.  Removing a cone-leg pair leaves one blend identity
 uncovered and is rejected by Lean, the focused validator, and the composition
-root.  That witness has both auxiliary flags false.  No positive/adversarial
-witness currently exercises one-aux or both-aux admission; in particular, the
-both-aux consistency-vacuous path still needs an explicit falsifier suite.
+root.  The measured flag matrix now has executable Lean and Clojure witnesses:
+an inconsistent, noncommuting but jointly covered square refuses with neither
+flag, passes with aux1 only, passes with aux2 only, and passes with both flags.
+With both flags, the active-route consistency join is empty and therefore
+vacuous.  Coverage is still joint and mandatory: the same both-aux receipt
+refuses when identity 32 is removed from the union of the two cone-leg images.
+A separate partial-route witness is consistent and covered but refuses solely
+for noncommutation.  These witnesses document the current semantics; they do
+not endorse or revise it.
 
 ## What remains open
 
