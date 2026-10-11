@@ -35,6 +35,58 @@
    [{:receipt 105 :identity 106 :version 1 :authority 107
      :law :completion-then-conditional-relevance}]})
 
+(def q8-entry
+  {:task "M-x" :observation "obs-x" :evidence "evidence-x"
+   :ranking-law "outer-law" :ranking-version 1
+   :dependencies #{"obs-x"} :comparison-key 7 :freshness-epoch 3})
+
+(def q8-carrier
+  {:schema :wm/q8-frontier-certificate-v1
+   :frontier-refresh
+   {:prior [q8-entry] :current [q8-entry] :retained [q8-entry]
+    :invalidated [] :recomputed [] :removed #{}
+    :delta {:changed-observations #{} :added-tasks #{} :removed-tasks #{}}
+    :current-open-tasks #{"M-x"}}
+   :frontier-selection {:selected q8-entry :current-epoch 3}
+   :selected-cascade
+   {:selected-task "M-x" :available-admissible #{"cascade-x"}
+    :constructed #{"cascade-x"} :admitted #{"cascade-x"}
+    :scored #{"cascade-x"} :posterior #{"cascade-x"}}})
+
+(defn q8-export [carrier]
+  (:facts (facts/facts-for-record
+           (cond-> record carrier (assoc-in [:certificates :q8] carrier))
+           "r" snap nil nil)))
+
+(deftest q8-absent-carrier-is-not-recomputable
+  (doseq [carrier [nil (update-in q8-carrier [:frontier-selection :selected]
+                                  dissoc :evidence)]]
+    (let [export (q8-export carrier)]
+      (doseq [field ["frontierRefresh" "frontierSelection" "selectedCascade"]]
+        (is (contains? (export field) "not-recomputable") field))
+      (is (.contains (checker/lean-source {"facts" export} "q8Absent")
+                     "q8 := .nr")))))
+
+(deftest q8-exact-frontier-and-target-local-cascade-join-emits-current-lean-carrier
+  (let [export (q8-export q8-carrier)
+        source (checker/lean-source {"facts" export} "q8Joined")]
+    (is (= (:frontier-refresh q8-carrier) (export "frontierRefresh")))
+    (is (= (:frontier-selection q8-carrier) (export "frontierSelection")))
+    (is (= (:selected-cascade q8-carrier) (export "selectedCascade")))
+    (is (.contains source "frontierRefresh := {prior :="))
+    (is (.contains source "selectedCascade := {selectedTask :="))
+    (is (not (.contains source "targetsReachingScoring :=")))))
+
+(deftest q8-stale-omitted-and-population-mismatches-remain-known-for-lean-refusal
+  (let [stale (-> q8-carrier
+                  (assoc-in [:frontier-refresh :delta :changed-observations] #{"obs-x"}))
+        omitted (assoc-in q8-carrier [:frontier-refresh :current] [])
+        mismatch (assoc-in q8-carrier [:selected-cascade :posterior] #{"other-cascade"})]
+    (doseq [carrier [stale omitted mismatch]]
+      (let [source (checker/lean-source {"facts" (q8-export carrier)} "q8Adversarial")]
+        (is (.contains source "q8 := .known"))
+        (is (not (.contains source "q8 := .nr")))))))
+
 (defn q9-export [r]
   (:facts (facts/facts-for-record r "r" snap nil nil)))
 

@@ -30,6 +30,31 @@
                        (format "{ targets := %s, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d }"
                                (fs (x "targets")) (fs (x "slice")) (fs (x "pool"))
                                (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")))) "]"))
+(defn entry-term [entry]
+  (format "{task := %d, observation := %d, evidence := %d, rankingLaw := %d, rankingVersion := %d, dependencies := %s, comparisonKey := %d, freshnessEpoch := %d}"
+          (id (field entry :task)) (id (field entry :observation))
+          (id (field entry :evidence)) (id (field entry :ranking-law))
+          (field entry :ranking-version) (fs (field entry :dependencies))
+          (field entry :comparison-key) (field entry :freshness-epoch)))
+(defn entry-list [entries]
+  (str "[" (str/join ", " (map entry-term entries)) "]"))
+(defn refresh-term [refresh]
+  (let [delta (field refresh :delta)]
+    (format "{prior := %s, current := %s, retained := %s, invalidated := %s, recomputed := %s, removed := %s, delta := {changedObservations := %s, addedTasks := %s, removedTasks := %s}, currentOpenTasks := %s}"
+            (entry-list (field refresh :prior)) (entry-list (field refresh :current))
+            (entry-list (field refresh :retained)) (entry-list (field refresh :invalidated))
+            (entry-list (field refresh :recomputed)) (fs (field refresh :removed))
+            (fs (field delta :changed-observations)) (fs (field delta :added-tasks))
+            (fs (field delta :removed-tasks)) (fs (field refresh :current-open-tasks)))))
+(defn selection-term [selection]
+  (format "{selected := %s, currentEpoch := %d}"
+          (entry-term (field selection :selected)) (field selection :current-epoch)))
+(defn cascade-term [cascade]
+  (format "{selectedTask := %d, availableAdmissible := %s, constructed := %s, admitted := %s, scored := %s, posterior := %s}"
+          (id (field cascade :selected-task))
+          (fs (field cascade :available-admissible)) (fs (field cascade :constructed))
+          (fs (field cascade :admitted)) (fs (field cascade :scored))
+          (fs (field cascade :posterior))))
 (def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
                "question" ".question" "refused" ".refused" "invalid" ".invalid"
                "timedOut" ".timedOut"})
@@ -47,10 +72,8 @@
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
    :q7 ["pathAbsenceCount"]
-   :q8 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
-        "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
-        "targetConstruction" "constructedCascades" "comparedPolicies"
-        "seatsAvailable" "seatsUsed"]
+   :q8 ["openMissions" "openExcursions" "openTickets"
+        "frontierRefresh" "frontierSelection" "selectedCascade"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
         "factorizationAuthorizations"]
    :q10 ["differentArrangementPairs" "arrangementPairsDistinguishedByG"]})
@@ -87,13 +110,12 @@
                               (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
                               (id (facts "currentInputDigest"))))
         :q7 (ev-known (str "pathAbsenceCount := " (facts "pathAbsenceCount")))
-        :q8 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, enumeratedTasks := %s, targetsReachingScoring := %s, targetsWithG := %s, libraryPatternCount := %d, targetConstruction := %s, constructedCascades := %s, comparedPolicies := %s, seatsAvailable := %s, seatsUsed := %s"
+        :q8 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, frontierRefresh := %s, frontierSelection := %s, selectedCascade := %s"
                               (fs (facts "openMissions")) (fs (facts "openExcursions"))
-                              (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))
-                              (fs (facts "targetsReachingScoring")) (fs (facts "targetsWithG"))
-                              (facts "libraryPatternCount") (target-construction (facts "targetConstruction"))
-                              (fs (facts "constructedCascades")) (fs (facts "comparedPolicies"))
-                              (fs (facts "seatsAvailable")) (fs (facts "seatsUsed"))))
+                              (fs (facts "openTickets"))
+                              (refresh-term (facts "frontierRefresh"))
+                              (selection-term (facts "frontierSelection"))
+                              (cascade-term (facts "selectedCascade"))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (calibration-term calibration)

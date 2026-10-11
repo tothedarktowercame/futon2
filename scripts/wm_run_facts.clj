@@ -25,11 +25,37 @@
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
    "factorizationAuthorizations"
+   "frontierRefresh" "frontierSelection" "selectedCascade"
    "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
 
 (defn not-recomputable [s] {"not-recomputable" s})
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
+
+(defn- q8-frontier-facts [record]
+  (let [carrier (or (get-in record [:certificates :q8])
+                    (get-in record [:controlled-sut :certificates :q8])
+                    (get-in record [:terminal-receipt :certificates :q8]))
+        refresh (:frontier-refresh carrier)
+        selection (:frontier-selection carrier)
+        cascade (:selected-cascade carrier)
+        entries (concat (:prior refresh) (:current refresh) (:retained refresh)
+                        (:invalidated refresh) (:recomputed refresh)
+                        [(:selected selection)])
+        has-keys? (fn [m ks] (and (map? m) (every? #(contains? m %) ks)))
+        entry? #(has-keys? % [:task :observation :evidence :ranking-law
+                              :ranking-version :dependencies :comparison-key
+                              :freshness-epoch])]
+    (when (and (= :wm/q8-frontier-certificate-v1 (:schema carrier))
+               (has-keys? refresh [:prior :current :retained :invalidated
+                                   :recomputed :removed :delta :current-open-tasks])
+               (has-keys? (:delta refresh) [:changed-observations :added-tasks
+                                            :removed-tasks])
+               (has-keys? selection [:selected :current-epoch])
+               (has-keys? cascade [:selected-task :available-admissible
+                                   :constructed :admitted :scored :posterior])
+               (every? entry? entries))
+      carrier)))
 
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
@@ -316,6 +342,7 @@
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
         factorized (factorized-preference-facts record)
+        q8-frontier (q8-frontier-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -414,6 +441,15 @@
                "factorizationAuthorizations"
                (if factorized (:factorization-registry factorized)
                    (nr "factorized preference law registry absent or invalid"))
+               "frontierRefresh"
+               (if q8-frontier (:frontier-refresh q8-frontier)
+                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
+               "frontierSelection"
+               (if q8-frontier (:frontier-selection q8-frontier)
+                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
+               "selectedCascade"
+               (if q8-frontier (:selected-cascade q8-frontier)
+                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         sources (into {}
