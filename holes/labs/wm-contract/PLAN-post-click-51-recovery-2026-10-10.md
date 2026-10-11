@@ -803,6 +803,55 @@ or weaken an existing definition merely to accommodate current Clojure.
   `outer-task-is-selected-before-and-independently-of-cascade-material` pins
   that order.
 
+- 2026-10-11 formal outer-objective slice: mathlib4
+  `DarkTower/WarMachine/OuterTaskObjective.lean` defines a distinct,
+  parametric pre-cascade objective over declared channel observations.  An
+  evaluation certificate binds task identity, exact channel/evidence/value
+  identities, dependency set, freshness epoch, objective identity/version,
+  and the resulting stable comparison key.  A frontier certificate is valid
+  only when its evaluation entries are in exact order/population bijection
+  with `IncrementalTaskFrontier.RefreshCertificate.current`; selection is the
+  deterministic minimum by objective key then stable task identity.  Theorems
+  `selected_is_minimum` and
+  `selected_belongs_to_fully_refreshed_frontier` state the selection result;
+  `retained_objective_entry_is_identical` and
+  `affected_objective_entry_must_be_recomputed` connect it to incremental
+  retention; `objective_substitution_invalid` prevents equal-score law
+  substitution.  `tie_breaks_by_stable_task_identity` is the closed tie
+  witness.  No weights or channel semantics are selected in Lean, and this
+  module neither imports nor aliases cascade-policy G.
+
+  Runtime correspondence stops at a carrier boundary.  The current live
+  candidate projection retains per-channel numeric value, source pin,
+  freshness, and an observation description
+  (`meta_live_outer_selector.clj`, `task-state-candidates`).  But
+  `meta_pipeline_selector.clj:132-151` computes a *different shared-channel
+  sum for each pair*, and `:200-224` chooses the sole undefeated candidate.
+  Thus there is no single declared objective evaluator/value per task.  The
+  receipt also lacks objective identity/version, per-entry dependency digest,
+  refresh epoch and prior/current retained-invalidated-recomputed partition.
+  Its label `:minimum-pairwise-task-state-G` is therefore a heuristic reason,
+  not an instance of the formal objective.
+
+  The minimum runtime producer signature still required is:
+
+  ```
+  evaluate-outer-frontier! :
+    { objective : {identity, version, implementation/source authority}
+    , channels  : Map TaskId (Vector DeclaredChannelObservation)
+    , prior     : Optional CertifiedOuterFrontier
+    , delta     : {changed-observation-digests, added-tasks, removed-tasks}
+    }
+    -> Either TypedOuterRefusal
+              {refresh-certificate, evaluations, selected, tie-law}
+  ```
+
+  Each evaluation must expose the same objective's score decomposition and
+  exact dependency digests; the returned task identities must biject exactly
+  with Q1's refreshed open-task population.  No existing authority/config
+  declares that evaluator or how the present heterogeneous channels combine,
+  so no Clojure validator is added and the current heuristic is not blessed.
+
 - 2026-10-10, persisted c82068b4 correspondence: the retained canonical outer
   receipt honestly has status `:absent`, reason
   `:receipt-identity-inconsistent`.  Its observed META receipt selected
