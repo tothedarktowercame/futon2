@@ -1087,11 +1087,15 @@
              "Repaired the Agency 200-character prefix contract and added "
              "regression coverage for the full-loop runner.")
         squashed (subs author-response 0 200)
+        cohort (retention-cohort "agency-squashed-prefix-card")
+        decision (token-loop-exercised-decision)
         {:keys [result item]}
-        (run-feature-card-attempt {:author-summary squashed})]
+        (run-token-feature-card-attempt
+         cohort decision {:author-summary squashed})]
     (is (= 200 (count squashed)))
     (is (str/ends-with? squashed "Repaired the Agency "))
-    (is (= :grounded-change (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (= "Durable compact author-card contract"
            (get-in item [:feature-card :built])))
     (is (= ["runner tests -> green"]
