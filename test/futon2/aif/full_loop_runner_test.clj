@@ -2233,7 +2233,7 @@
     (is (= :request-changes (:review-verdict (first @findings))))))
 
 (defn- run-revision-attempt
-  [review-verdicts & [{:keys [revision-rounds]}]]
+  [review-verdicts & [{:keys [revision-rounds runner-options author-commits]}]]
   (let [phases (atom [])
         dispatches (atom [])
         queued (atom [])
@@ -2284,15 +2284,19 @@
            (fn [_ job-id]
              (case job-id
                "author-1"
-               {:job-id job-id :state "done" :artifact-ref "abc123"
+               {:job-id job-id :state "done"
+                :artifact-ref (or (first author-commits) "abc123")
                 :feature-card feature-card-claim
                 :execution successful-execution
-                :result-summary "FULL_LOOP_AUTHOR: DONE abc123"}
+                :result-summary (str "FULL_LOOP_AUTHOR: DONE "
+                                     (or (first author-commits) "abc123"))}
 
                "author-2"
-               {:job-id job-id :state "done" :artifact-ref "def456"
+               {:job-id job-id :state "done"
+                :artifact-ref (or (second author-commits) "def456")
                 :execution successful-execution
-                :result-summary "FULL_LOOP_AUTHOR: DONE def456"}
+                :result-summary (str "FULL_LOOP_AUTHOR: DONE "
+                                     (or (second author-commits) "def456"))}
 
                "review-1"
                {:job-id job-id :state "done"
@@ -2316,7 +2320,8 @@
            :delivery-qa-fn
            (fn [_ item]
              (swap! deliveries conj item)
-             {:morning-brief/addendum-id "revision-qa"})})
+             {:morning-brief/addendum-id "revision-qa"})}
+          runner-options)
           (some? revision-rounds)
           (assoc :revision-rounds revision-rounds))
         result (runner/run-opportunity! opts)]
@@ -2328,12 +2333,65 @@
      :grounded @grounded}))
 
 (deftest rejected-review-is-revised-and-approved-once
-  (let [first-review
-        (str "FULL_LOOP_REVIEW: REQUEST_CHANGES preserve the typed gate\n"
-             "Finding: the negative path is untested.")
-        {:keys [result phases dispatches deliveries grounded]}
-        (run-revision-attempt
-         [first-review "FULL_LOOP_REVIEW: APPROVE\nAmendment verified."])
+  (token-fixture/with-artifact
+   (fn [_unrelated-sha]
+    (let [first-review
+          (str "FULL_LOOP_REVIEW: REQUEST_CHANGES preserve the typed gate\n"
+               "Finding: the negative path is untested.")
+          token-repo (io/file observation-checks/repo-root "futon2")
+          initial-sha (token-fixture/command token-repo "rev-parse" "HEAD~1")
+          mission-path (io/file token-repo
+                                "holes/missions/M-aif-policy-conditioned-eig.md")
+          _ (spit mission-path
+                  (str/replace
+                   (slurp mission-path)
+                   "- [ ] **Mint the shared posterior updater, then unify the two paths through"
+                   "- [x] **Mint the shared posterior updater, then unify the two paths through"))
+          _ (token-fixture/command token-repo "add" ".")
+          _ (token-fixture/command
+             token-repo "-c" "user.name=Fixture"
+             "-c" "user.email=fixture@example.invalid"
+             "commit" "-qm" "complete selected updater want")
+          revised-sha (token-fixture/command token-repo "rev-parse" "HEAD")
+          evidence-root (io/file (.getParentFile token-repo)
+                                 "revision-evidence")
+          _ (.mkdirs evidence-root)
+          evidence-file (io/file evidence-root "d-task.edn")
+          _ (spit evidence-file
+                  (pr-str {:after-token-evidence
+                           (token-fixture/measurements revised-sha)}))
+          {:keys [result phases dispatches deliveries grounded]}
+          (binding [cascade-sources/*code-roots*
+                    ["test/fixtures/library-pins/r7fc6a050"
+                     "test/fixtures/library-pins/current"]]
+            (with-redefs [d-task/complete!
+                          (fn [& _]
+                            {:source {:path (.getPath evidence-file)
+                                      :sha256 (digest/sha256
+                                               (slurp evidence-file))}})]
+              (run-revision-attempt
+               [first-review "FULL_LOOP_REVIEW: APPROVE\nAmendment verified."]
+               {:author-commits [initial-sha revised-sha]
+                :runner-options
+                {:judge-fn
+                 (fn [_]
+                   {:judgement (assoc judgement :decision
+                                      (token-loop-exercised-decision))})
+                 :mission-fn
+                 (fn [_]
+                   (#'missions/mission-doc->entry (.getPath mission-path)))
+                 :construct-fn
+                 (fn [entry]
+                   {:construction-kind :revision-test
+                    :capability-contract {:must :preserve-contract}
+                    :shown [:P1]
+                    :semilattice []
+                    :selected-action (:action entry)})
+                 :target-repo-fn (fn [& _] (.getPath token-repo))
+                 :resolve-build-fn
+                 (fn [_] {:repo (.getPath token-repo)
+                          :files ["unrelated.clj"]})
+                 :d-task-evidence-root (.getPath evidence-root)}})))
         build (get-in result [:checkpoints :build :judgment])
         revision-phases
         (->> phases
@@ -2342,10 +2400,13 @@
                               :re-review-dispatch :re-review-wait}
                             (:phase %))))
              (mapv :phase))]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :grounded-progress (:outcome result))
+        "the selected updater want is observed at the grounded revision")
     (is (= 2 (get-in build [:revision :round])))
-    (is (= ["abc123" "def456"] (get-in build [:revision :commits])))
+    (is (= [initial-sha revised-sha] (get-in build [:revision :commits])))
     (is (= :approve (get-in build [:revision :review :verdict])))
+    (is (= :verified
+           (get-in build [:validation :reviewer-falsifier-verification :status])))
     (is (= [:request-changes :approve]
            (mapv :verdict (:reviews build))))
     (is (= [:revision-dispatch :revision-wait :revision-build
@@ -2359,13 +2420,15 @@
     (is (= (:reviews build) (:reviews (first deliveries)))
         "both verdicts reach the delivery-QA body")
     (let [revision-prompt (:prompt (nth dispatches 2))]
-      (is (str/includes? revision-prompt "SELECTED TARGET: \"M-selected\""))
+      (is (str/includes? revision-prompt
+                         (str "SELECTED TARGET: \"" token-fixture/target "\"")))
       (is (str/includes? revision-prompt
                          "CONSTRUCTION CONTRACT: {:construction-kind :revision-test"))
-      (is (str/includes? revision-prompt "YOUR PRIOR COMMIT SHAS: [\"abc123\"]"))
+      (is (str/includes? revision-prompt
+                         (str "YOUR PRIOR COMMIT SHAS: [\"" initial-sha "\"]")))
       (is (str/includes? revision-prompt first-review)
           "review findings are included verbatim")
-      (is (str/includes? revision-prompt "do not force-push")))))
+      (is (str/includes? revision-prompt "do not force-push")))))))
 
 (deftest second-rejection-closes-with-both-review-records
   (let [{:keys [result deliveries]}
