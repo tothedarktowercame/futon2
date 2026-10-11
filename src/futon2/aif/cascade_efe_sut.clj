@@ -16,6 +16,19 @@
 (defn- distribution? [m]
   (and (map? m) (seq m) (every? finite-number? (vals m))
        (= 1 (reduce + (vals m)))))
+(defn- subsets [tokens]
+  (reduce (fn [ss t] (into ss (map #(conj % t) ss))) [#{}]
+          (sort-by pr-str tokens)))
+(defn- enabled? [state {:keys [guard produces]}]
+  (and (every? state (:needs guard))
+       (not-any? state (:forbids guard))
+       (not-every? state produces)))
+(defn- derived-transition [state-space interpretation]
+  (let [produces (:produces interpretation)]
+    (into {} (for [state state-space]
+               [state {(if (enabled? state interpretation)
+                         (into state produces)
+                         state) 1}]))))
 (defn- pinned? [x captured]
   (three-halves/declaration-source-valid? (:source x) x captured))
 
@@ -40,6 +53,8 @@
               squares (mapv :square-id (:squares policy-carrier))
               expected-construction (application-order/policy-construction-order policy-carrier)
               transitions (:transitions predictive)
+              state-space (:state-space predictive)
+              declared-universe (:universe preference-input)
               selector-authority (:selector-authority predictive)
               additions (:organizer-additions predictive)
               all-edges (vec (concat expected-construction additions))
@@ -52,6 +67,8 @@
                 (not= sequence (:authorized-precedence predictive))
                 (conj :authorized-precedence)
                 (not (pos-int? selector-authority)) (conj :selector-authority)
+                (not= (set state-space) (set (subsets declared-universe)))
+                (conj :finite-state-space)
                 (not (dag? (range (count squares)) all-edges)) (conj :organizer-cycle)
                 (not (pos-int? (:horizon predictive))) (conj :finite-horizon)
                 (not= (:horizon predictive) (get-in problem [:cascade-problem :horizon-steps]))
@@ -80,7 +97,9 @@
                                     (some? (:implementation-pin t))
                                     (= (:guard t) (:guard interpretation))
                                     (= (:produces t) (:produces interpretation))
-                                    (distribution? (:kernel t)))))) transitions)
+                                    (= (:kernel t)
+                                       (derived-transition state-space interpretation))))))
+                      transitions)
                 (conj :transition-kernel))]
           (if (seq structural-gaps)
             (refuse (first structural-gaps) structural-gaps)
@@ -89,9 +108,24 @@
                 (refuse :factorized-preference-refused preferred)
                 (let [certified-observation (get-in predictive [:observation :kernel])
                       consumed-observation (get-in preferred [:kernel :probabilities])
-                      initial (get-in predictive [:initial-state :kernel])]
+                      initial (get-in predictive [:initial-state :kernel])
+                      node-rows (mapcat #(get-in % [:certificate :node-evaluations])
+                                        (:scored preferred))
+                      transition-consumed?
+                      (and (= (* (count (:scored preferred)) (:horizon predictive))
+                              (count node-rows))
+                           (every?
+                            (fn [node]
+                              (and (seq (:states node))
+                                   (every? (fn [{:keys [pattern-id state kernel]}]
+                                             (= kernel
+                                                (get-in transitions
+                                                        [pattern-id :kernel state])))
+                                           (:states node))))
+                            node-rows))]
                   (if (or (not= certified-observation consumed-observation)
-                          (not= initial (get-in preference-input [:state :cascade-belief])))
+                          (not= initial (get-in preference-input [:state :cascade-belief]))
+                          (not transition-consumed?))
                     (refuse :predictive-kernel-consumption-mismatch)
                     (let [prefix-result (prefix-f/compose-menu!
                                          (assoc prefix-input :ranked (:scored preferred))

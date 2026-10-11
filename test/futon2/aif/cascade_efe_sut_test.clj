@@ -13,6 +13,19 @@
 (defn pinned [name declaration]
   (policy-fixture/with-pin name declaration))
 
+(defn all-states [universe]
+  (reduce (fn [states token] (into states (map #(conj % token) states)))
+          [#{}] (sort-by pr-str universe)))
+
+(defn derived-kernel [state-space {:keys [guard produces]}]
+  (into {}
+        (for [state state-space]
+          [state {(if (and (every? state (:needs guard))
+                           (not-any? state (:forbids guard))
+                           (not-every? state produces))
+                    (into state produces)
+                    state) 1}])))
+
 (defn fixture-data []
   (let [{:keys [problem controlled]} (order-fixture/fixture-data)
         app-candidate (first (:constructed-candidates problem))
@@ -24,12 +37,14 @@
         policy-row {:policy-id (:id token-candidate) :target (:target token-candidate)
                     :completion :completed :relevance :focused
                     :semantics :q9-factorized :horizon 3 :schedule :terminal}
+        universe #{["controlled-3halves" :q]
+                   ["controlled-3halves" :r]
+                   ["controlled-3halves" :w]}
+        state-space (all-states universe)
         preference-input {:mode :controlled-sut :carrier preference-fixture/carrier
                           :policies [policy-row] :candidates [token-candidate]
                           :state {:cascade-belief {#{} 1}}
-                          :universe #{["controlled-3halves" :q]
-                                      ["controlled-3halves" :r]
-                                      ["controlled-3halves" :w]}
+                          :universe universe
                           :acceptance #{["controlled-3halves" :w]}
                           :horizon 3 :schedule :terminal}
         preference-preview (preference/compose-and-score! preference-input)
@@ -45,7 +60,7 @@
         (into {} (for [[id interpretation] (get-in problem [:cascade-problem :interpretations])]
                    [id (pinned (str "transition-" (name id))
                                {:guard (:guard interpretation) :produces (:produces interpretation)
-                                :kernel {#{} 1} :authority 711
+                                :kernel (derived-kernel state-space interpretation) :authority 711
                                 :implementation-pin :sut/deterministic-token-transition-v1})]))
         initial (pinned "initial-kernel" {:kernel {#{} 1} :authority 712
                                            :implementation-pin :sut/initial-state-v1})
@@ -55,6 +70,7 @@
         predictive0 {:nodes [:s0 :s1 :s2] :construction-edges []
                      :organizer-additions [[0 1] [1 2]]
                      :authorized-precedence [:P :Q :R] :horizon 3
+                     :state-space state-space
                      :initial-state initial :observation observation
                      :transitions transitions :selector-authority 714}
         predictive (pinned "predictive-policy" predictive0)
@@ -70,7 +86,22 @@
     (is (= 1 (count (set (vals (:identity-chain r))))))
     (is (= 1 (count (set (vals (:identity-digests r))))))
     (is (= :ready-for-posterior (get-in r [:prefix-f :status])))
-    (is (seq (:efe-terms r)))
+    (is (every? #(every? some? ((juxt :risk :ambiguity :EIG :preference
+                                      :observation-model) %))
+                (:efe-terms r)))
+    (is (= (mapv #(select-keys (get-in % [:certificate :g-terms])
+                               [:risk :ambiguity :expected-information-gain])
+                 (get-in r [:preference :scored]))
+           (mapv (fn [term] {:risk (:risk term) :ambiguity (:ambiguity term)
+                             :expected-information-gain (:EIG term)})
+                 (:efe-terms r))))
+    (let [nodes (get-in r [:preference :scored 0 :certificate :node-evaluations])
+          q ["controlled-3halves" :q]
+          rr ["controlled-3halves" :r]
+          w ["controlled-3halves" :w]]
+      (is (= [:P :Q :R] (mapv (comp :pattern-id first :states) nodes)))
+      (is (= [{#{q} 1} {#{q rr} 1} {#{q rr w} 1}]
+             (mapv :outgoing-belief nodes))))
     (is (= [:P :Q :R] (get-in r [:order :dispatch :consumed-order])))))
 
 (deftest predictive-carrier-refuses-at-first-mismatch
@@ -99,7 +130,27 @@
       (is (= :predictive-source-pin
              (:reason (sut/compose!
                        (assoc-in base [:predictive :transitions :Q :authority] 999))))))
+    (testing "a source-pinned but semantically different reachable successor refuses"
+      (let [q ["controlled-3halves" :q]
+            bad-transition (pinned "transition-Q-substituted"
+                                   (-> transition
+                                       (dissoc :source)
+                                       (assoc-in [:kernel #{q}] {#{q} 1})))
+            predictive (reseal "semantic-kernel"
+                               (assoc-in (:predictive base) [:transitions :Q] bad-transition))]
+        (is (= :transition-kernel (:reason (run predictive))))))
     (is (map? transition))))
+
+(deftest actual-scorer-node-rows-must-consume-certified-transitions
+  (let [base (fixture-data)
+        real preference/compose-and-score!]
+    (with-redefs [preference/compose-and-score!
+                  (fn [input]
+                    (assoc-in (real input)
+                              [:scored 0 :certificate :node-evaluations 0 :states 0 :kernel]
+                              {#{} 1}))]
+      (is (= :predictive-kernel-consumption-mismatch
+             (:reason (sut/compose! base)))))))
 
 (deftest downstream-population-and-preference-fallbacks-refuse
   (let [base (fixture-data)]

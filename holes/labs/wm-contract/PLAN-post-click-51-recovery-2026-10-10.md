@@ -43,7 +43,13 @@ kernel, and Prefix-F routes. It calls the real class-observation EFE scorer
 and production posterior selector, retains risk/ambiguity/EIG/preference and
 observation certificates, and requires one digest identity across
 construction, all admissions, scoring, posterior, selection, dispatch, and
-acting-order preparation. This does not commission production authorities or
+acting-order preparation. The transition carrier is not metadata: for the
+declared complete finite state space, each firing carries the exact transition
+table independently derived from its admitted guard/effect, and every actual
+per-state node evaluation retained by the real scorer must equal the
+corresponding certified row. The controlled P/Q/R witness therefore evolves
+`{}` to `{q}`, `{q,r}`, then `{q,r,w}`; a resealed semantic substitution or a
+scorer result that ignores the certified row refuses. This does not commission production authorities or
 close persistence, Morning Briefing, debugger, or final integrated-SUT work.
 
 This note records the worklist resulting from review of the restored
