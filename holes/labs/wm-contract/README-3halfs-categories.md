@@ -148,6 +148,33 @@ only runtime implementation currently validates one square.  If such a report
 is added, it must label these as supplied/raw components, or expose admitted
 connectivity only after the policy well-formedness gate.
 
+#### Cycle coherence (Lean model; runtime carrier still missing)
+
+Pairwise validity is not diagram coherence.  The smallest executable witness
+uses three identical two-element objects: the `0→1` and `1→2` gluings are
+identity maps, while the supplied `0→2` gluing swaps the two elements.  Every
+gluing is individually well formed, the raw graph is connected, and the
+existing verdict is `.cascade`, but the composite transport is not the direct
+transport.  `GluingTriangleCertificate.valid` is an additive check for an
+explicitly supplied triangle; it rejects this witness and accepts the same
+policy with an identity direct edge.  It does not strengthen
+`Policy.wellFormed` or redefine `Policy.verdict`.
+
+| Lean evidence/check | Runtime evidence today | Exact missing producer field |
+|---|---|---|
+| Stable indices into `Policy.gluings` | No multi-square policy receipt | Stable `:gluing-id` on every admitted gluing |
+| Triangle `(first, second, direct)` | None | `:coherence-triangles` entries naming the three gluing IDs |
+| Matching square indices and endpoint roles | No cross-square endpoint carrier | Source-pinned `:from`/`:to` square IDs and roles for each gluing |
+| `PMap.comp first.iso second.iso = direct.iso` | No transport graph carrier | The complete finite `:iso` graph for each gluing, retained exactly |
+| Coverage of all cycles | None; not proved in Lean by this slice | A source-pinned complete fundamental-cycle basis (for example a spanning forest plus one triangle/path certificate per non-tree edge) |
+
+A caller-supplied list of successful triangles may omit the bad cycle.  Before
+coherent connectivity can justify pasting or any colimit claim, Lean still
+needs (1) a theorem that the supplied certificates cover a cycle basis of the
+admitted gluing graph and (2) path independence derived from coherence on that
+basis.  Runtime correspondingly needs an independently produced, source-pinned
+complete basis, not a selector-authored subset.
+
 ### Pasting
 
 Lean defines **vertical** `pastedDiamond` and proves one preservation theorem,

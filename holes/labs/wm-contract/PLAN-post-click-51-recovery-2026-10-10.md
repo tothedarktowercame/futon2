@@ -1330,3 +1330,16 @@ or weaken an existing definition merely to accommodate current Clojure.
   say `raw/supplied components`, or filter through policy admission before
   claiming cascade connectivity.  No admissibility or runtime behavior was
   changed.
+
+- 2026-10-11, gluing-cycle coherence slice: Lean now has an additive
+  `GluingTriangleCertificate` over three supplied gluings.  A three-square
+  witness with identity transports on `0→1` and `1→2` and a swap on `0→2` is
+  pairwise well formed, connected, and receives the historical `.cascade`
+  verdict, yet the certificate rejects it because composition differs from the
+  direct edge.  Replacing the swap with identity is accepted.  This deliberately
+  does not alter `Policy.wellFormed` or the verdict.  Runtime has no stable
+  gluing IDs, cross-square typed endpoints, retained isomorphism graphs, or
+  source-pinned complete fundamental-cycle basis, so no runtime certificate was
+  added.  Before pasting or a colimit claim, Lean needs a cycle-basis coverage
+  theorem and path-independence theorem; validating an arbitrarily supplied
+  subset of triangles is insufficient.
