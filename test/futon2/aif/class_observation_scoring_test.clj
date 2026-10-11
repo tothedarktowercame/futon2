@@ -4,6 +4,7 @@
   real loaders, the real qualifier (replicated from war_machine.clj:6145)
   and the real bounded scorer rank-cascade-actions. No stubs."
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.set :as set]
             [clojure.test :refer [deftest is]]
@@ -139,7 +140,7 @@
 (deftest two-step-never-accepted-is-one-ln20-not-two
   ;; A two-step rollout that never accepts: only the terminal step carries
   ;; risk (codex-20's probe showed 2*ln20 before the tau fix).
-  (let [ta "A" tb "B"
+  (let [ta "A"
         step (cpol/token-interpretation :p {:guard {:needs #{[ta :s]} :forbids #{[ta :x]}}
                                           :produces #{[ta :x]}})
         q0 {#{[ta :s]} 1}
@@ -287,14 +288,15 @@
                                   {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
         ctx {:ticket-dir "holes/tickets"
              :findings-dir "data/wm-repair-obligations/findings"}]
-    ;; the reference ticket derives :focused via its Parent in BOTH focus
-    ;; contexts, with the derivation recorded
+    ;; The canonical finding is still :open, so the explicit relation-source
+    ;; law chooses the operative repair obligation before the DONE ticket's
+    ;; historical Parent in BOTH focus contexts.
     (is (= :retained (:status retained)))
     (doseq [disc [established retained]]
       (let [c (focus/classify-target inputs disc (:as-of disc) t ctx)]
         (is (= :focus (:class c)) (pr-str c))
-        (is (= :ticket-parent (:kind (:derived-via c))))
-        (is (= "M-aif-policy-conditioned-eig" (get-in c [:derived-via :parent])))))
+        (is (= :open-repair-obligation (:kind (:derived-via c))))
+        (is (= (subs t 2) (get-in c [:derived-via :repair-id])))))
     ;; an M- target reads its corpus row directly, no derivation
     (let [c (focus/classify-target inputs retained (:as-of retained)
                                    "M-aif-policy-conditioned-eig" ctx)]
@@ -369,16 +371,42 @@
     ;; generated state and is deliberately absent from warrant worktrees.
     (spit (io/file findings-dir (str (subs t 2) ".edn"))
           (pr-str {:target "M-aif-policy-conditioned-eig"}))
-    ;; the real ticket has BOTH a Parent line and a finding: ticket wins, kind recorded
+    ;; Ticket plus a non-open historical finding: ticket Parent wins.
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "holes/tickets"
-                                    :findings-dir "data/wm-repair-obligations/findings"})]
+                                    :findings-dir (.getPath findings-dir)})]
       (is (= :ticket-parent (:kind (:derived-via c)))) (pr-str c))
     ;; findings-only: the finding fallback supplies the parent, kind says so
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir "/nonexistent"
                                     :findings-dir (.getPath findings-dir)})]
       (is (= :finding-target (:kind (:derived-via c)))) (pr-str c))))
+
+(deftest active-repair-precedes-ticket-parent-explicitly
+  (let [inputs (focus/read-inputs)
+        established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
+        root (.toFile (java.nio.file.Files/createTempDirectory
+                       "relation-precedence" (make-array java.nio.file.attribute.FileAttribute 0)))
+        tickets (doto (io/file root "tickets") .mkdirs)
+        findings (doto (io/file root "findings") .mkdirs)
+        repair-id (subs t 2)]
+    (spit (io/file tickets (str t ".md"))
+          "# simultaneous evidence\n\nParent: M-aif-policy-conditioned-eig\n")
+    (spit (io/file findings (str repair-id ".edn"))
+          (pr-str {:repair/status :open :repair/id repair-id
+                   :machine-repo "/controlled/repo"
+                   :target "M-aif-policy-conditioned-eig"}))
+    (is (= [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
+            :stated-relation :embedding-neighbour]
+           focus/relation-source-precedence))
+    (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
+                                   {:ticket-dir (.getPath tickets)
+                                    :findings-dir (.getPath findings)})]
+      (is (= :focus (:class c)))
+      (is (= :open-repair-obligation (get-in c [:derived-via :kind])))
+      (is (= repair-id (get-in c [:derived-via :repair-id]))))))
 
 ;; codex-20 corrections on bf6ee6f3: cwd-independence, replay-evidence, family stop.
 (deftest relation-context-is-working-directory-independent
@@ -406,18 +434,18 @@
     (let [f3c (str (System/getProperty "user.home") "/code/futon3c")
           ;; -Spath emits repo-RELATIVE entries; anchoring each to f2-root
           ;; lets the JVM run from futon3c on futon2's classpath.
-          cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
+          cp (->> (str/split (str/trim (:out (shell/sh "clojure" "-Spath" :dir f2-root))) #":")
                   (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
                   (str/join ":"))
           _ (assert (seq cp) "classpath")
-          out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
+          out (shell/sh "java" "-cp" cp "clojure.main"
                                      (str (.getPath script))
                                      :dir f3c)
           lines (str/split-lines (:out out))]
       (is (zero? (:exit out)) (str (:err out)))
       (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
           "the probe really ran from futon3c")
-      (is (some #(re-find #":class :focus :kind :ticket-parent" %) lines)
+      (is (some #(re-find #":class :focus :kind :open-repair-obligation" %) lines)
           (str "from futon3c cwd the ticket still classifies: " (pr-str lines))))))
 
 (deftest family-stops-when-any-acceptance-target-is-unresolved
@@ -509,17 +537,17 @@
                "                                :findings-dir (str root \"/data/wm-repair-obligations/findings\")})]\n"
                "  (println :cwd (System/getProperty \"user.dir\"))\n"
                "  (println :class (:class c) :kind (get-in c [:derived-via :kind])))\n"))
-    (let [cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
+    (let [cp (->> (str/split (str/trim (:out (shell/sh "clojure" "-Spath" :dir f2-root))) #":")
                   (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
                   (str/join ":"))
-          out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
+          out (shell/sh "java" "-cp" cp "clojure.main"
                                      (str (.getPath script))
                                      :dir f3c)
           lines (str/split-lines (:out out))]
       (is (zero? (:exit out)) (str (:err out)))
       (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
           "the probe really ran from futon3c")
-      (is (some #(re-find #":class :focus :kind :ticket-parent" %) lines)
+      (is (some #(re-find #":class :focus :kind :open-repair-obligation" %) lines)
           (str "the PRODUCTION context expression classifies from futon3c: " (pr-str lines))))))
 
 ;; claude-5 handoff: the class certificate says what was actually consumed.

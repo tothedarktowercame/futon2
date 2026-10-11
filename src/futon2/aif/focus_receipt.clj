@@ -95,6 +95,15 @@
              (some #(second (re-matches #"^\*{0,2}Parent:\*{0,2}\s+(\S+)" %))))
     (catch Exception _ nil)))
 
+(def relation-source-precedence
+  "Explicit source law for target classification. A direct corpus row is the
+   declared relation. For a repair ticket without one, a still-open canonical
+   repair obligation is the operative focus relation; ticket Parent and the
+   finding's historical target are fallbacks only after that obligation is no
+   longer open. The order must never depend on directory or map iteration."
+  [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
+   :stated-relation :embedding-neighbour])
+
 ;; ---------------------------------------------------------------------------
 ;; WM-RELATION-I: an M- target with no row derives its relation, in order,
 ;; from (a) its mission's stated ## Relations, walked through M- targets to
@@ -290,6 +299,8 @@
                               (if (:row b)
                                 (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
                                 {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
+         ;; relation-source-precedence, written out so changing this policy is
+         ;; a reviewable semantic edit rather than incidental collection order.
          relation-row (or direct repair-relation
                           (when parent
                             (row-of parent))
