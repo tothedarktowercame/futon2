@@ -3760,16 +3760,19 @@
                         :resolved? true :dial-moved? true
                         :implementation-id "impl"})
           :queue-fn identity})]
-    (is (= :build-failed (:outcome result)))
-    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :grounded-change (:outcome result)))
+    (is (= :verified
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier-verification :status])))
     (is (= :pass
-           (get-in result [:data :error-data :reviewer-falsifier :checks
-                           :artifact-binding :status])))
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier :checks :work-evidence :status])))
+    (is (= :not-applicable
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier :checks
+                           :selected-want-accounting :status])))
     (is (= "original-head"
            (get-in result [:data :artifact-binding :pre-dispatch-head])))
-    (is (= #{:selected-want-accounting :evidence-authority}
-           (set (get-in result [:data :error-data :reviewer-falsifier
-                                :failed-checks]))))
     (is (= ["codex-1"] @dispatches)
         "deferred-completion dispatches only the standing Ground Control reviewer")
     ;; Substrate insertion is not a finding-specific repair observation.

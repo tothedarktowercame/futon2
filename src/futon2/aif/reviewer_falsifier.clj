@@ -7,7 +7,7 @@
 
 (def schema :wm/reviewer-falsifier-v1)
 (def check-order
-  [:mission-standing :selected-want-accounting :evidence-authority
+  [:mission-standing :work-evidence :selected-want-accounting :evidence-authority
    :standing-disposition :artifact-binding :review-execution])
 
 (defn- check [status reason evidence]
@@ -26,6 +26,40 @@
   (if (= :verified (:status outcomes))
     (check :pass nil (select-keys outcomes [:receipt/id :target :selected-wants :outcomes]))
     (check :fail (or (:reason outcomes) :selected-want-accounting-unverifiable) outcomes)))
+
+(defn- repair-binding-check
+  [{:keys [selected-action durable-finding repair-contract] :as evidence}]
+  (let [obligation (:repair-obligation selected-action)
+        repair-id (:repair/id durable-finding)
+        declared-discharge (:discharge-contract durable-finding)
+        discharge (:discharge repair-contract)]
+    (if (and (= :repair-machine-failure (:type selected-action))
+             (string? repair-id)
+             (= repair-id (:target selected-action))
+             (= durable-finding obligation)
+             (= repair-id (:repair-id repair-contract))
+             (= (:repair/class durable-finding) (:repair-class repair-contract))
+             (= (:attempt-id durable-finding) (:failed-attempt repair-contract))
+             (= (:failure-stage durable-finding) (:failure-stage repair-contract))
+             (= (:failure-kind durable-finding) (:failure-kind repair-contract))
+             (map? discharge)
+             (seq (:requires discharge))
+             (or (nil? declared-discharge) (= declared-discharge discharge)))
+      (check :pass nil
+             {:kind :repair-machine-failure
+              :repair/id repair-id
+              :repair/class (:repair/class durable-finding)
+              :discharge-contract discharge
+              :selected-action-sha256 (identity/digest selected-action)
+              :durable-finding-sha256 (identity/digest durable-finding)})
+      (check :fail :repair-work-evidence-mismatch evidence))))
+
+(defn- work-evidence-check [{:keys [kind] :as evidence}]
+  (case kind
+    :ordinary-cascade (check :not-applicable :ordinary-cascade-uses-selected-wants
+                             {:kind kind})
+    :repair-machine-failure (repair-binding-check evidence)
+    (check :fail :work-evidence-kind-unavailable evidence)))
 
 (defn- authoritative-row? [{:keys [result after-locator]} commit]
   (and (boolean? (:observed result))
@@ -68,11 +102,25 @@
 
 (defn receipt
   [{:keys [target commit mission-standing selected-want-outcomes disposition
-           artifact-binding review-gate]}]
-  (let [checks {:mission-standing (standing-check mission-standing)
-                :selected-want-accounting (want-check selected-want-outcomes)
-                :evidence-authority (authority-check selected-want-outcomes commit)
-                :standing-disposition (disposition-check selected-want-outcomes disposition)
+           artifact-binding review-gate work-evidence]}]
+  (let [repair? (= :repair-machine-failure (:kind work-evidence))
+        checks {:mission-standing (standing-check mission-standing)
+                :work-evidence (work-evidence-check work-evidence)
+                :selected-want-accounting
+                (if repair?
+                  (check :not-applicable :repair-uses-durable-finding-contract
+                         {:repair/id (get-in work-evidence [:durable-finding :repair/id])})
+                  (want-check selected-want-outcomes))
+                :evidence-authority
+                (if repair?
+                  (check :not-applicable :repair-uses-grounded-discharge-evaluator
+                         {:repair/id (get-in work-evidence [:durable-finding :repair/id])})
+                  (authority-check selected-want-outcomes commit))
+                :standing-disposition
+                (if repair?
+                  (check :not-applicable :repair-disposition-follows-grounded-close
+                         {:repair/id (get-in work-evidence [:durable-finding :repair/id])})
+                  (disposition-check selected-want-outcomes disposition))
                 :artifact-binding (artifact-check target commit artifact-binding)
                 :review-execution (execution-check review-gate)}
         applicable (remove #(= :not-applicable (get-in checks [% :status])) check-order)

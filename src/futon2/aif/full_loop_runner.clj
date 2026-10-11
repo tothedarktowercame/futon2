@@ -6687,6 +6687,14 @@
                              {:selected-action (get-in construction [:selected-action])
                               :token-comparison comparison})]
                         {:target target :commit commit
+                         :work-evidence
+                         (if (= :repair-machine-failure
+                                (get-in construction [:selected-action :type]))
+                           {:kind :repair-machine-failure
+                            :selected-action (get-in construction [:selected-action])
+                            :durable-finding stop-line
+                            :repair-contract (:repair-contract construction)}
+                           {:kind :ordinary-cascade})
                          :mission-standing
                          (missions/mission-standing-observation
                           (cond-> mission

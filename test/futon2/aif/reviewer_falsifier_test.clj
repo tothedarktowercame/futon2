@@ -22,6 +22,7 @@
 
 (defn inputs []
   {:target target :commit commit
+   :work-evidence {:kind :ordinary-cascade}
    :mission-standing {:status :consistent
                       :source {:path "/missions/M-clean.md" :sha256 "source-sha"}
                       :declarations []}
@@ -32,6 +33,31 @@
    :review-gate {:required? true :code-files ["src/x.clj"] :executed? true
                  :tool-events 2 :execution-source :job-events :passed? true}})
 
+(defn repair-inputs []
+  (let [finding {:repair/id "repair-1" :repair/class :machine-failure
+                 :discharge-contract
+                 {:artifact-shape :code-commit
+                  :requires [:distinct-repair-commit :independent-review
+                             :grounded-repair :distinct-production-shaped-successor]}}
+        action {:type :repair-machine-failure :target "repair-1"
+                :repair-obligation finding}
+        repair-contract {:repair-id "repair-1" :repair-class :machine-failure
+                         :failed-attempt nil :failure-stage nil :failure-kind nil
+                         :discharge (:discharge-contract finding)}]
+    {:target "repair-1" :commit commit
+     :work-evidence {:kind :repair-machine-failure
+                     :selected-action action :durable-finding finding
+                     :repair-contract repair-contract}
+     :mission-standing {:status :not-applicable :reason :non-mission-target}
+     :selected-want-outcomes
+     {:schema :wm/selected-want-outcome-v1 :status :refused
+      :reason :selected-want-identity-missing}
+     :artifact-binding {:repo "/repo" :commit commit :observed-head commit
+                        :pre-dispatch-head (apply str (repeat 40 "b"))
+                        :corroborates? true}
+     :review-gate {:required? true :code-files ["src/x.clj"] :executed? true
+                   :tool-events 2 :execution-source :job-events :passed? true}}))
+
 (deftest clean-partial-progress-is-verified-and-still-live
   (let [in (inputs) receipt (falsifier/receipt in)]
     (is (= :verified (:status receipt)))
@@ -39,6 +65,35 @@
     (is (= :still-live
            (get-in receipt [:checks :standing-disposition :evidence :expected])))
     (is (= :verified (:status (falsifier/verify receipt in))))))
+
+(deftest repair-review-uses-the-bound-finding-not-ordinary-token-wants
+  (let [in (repair-inputs)
+        receipt (falsifier/receipt in)]
+    (is (= :verified (:status receipt)))
+    (is (= :pass (get-in receipt [:checks :work-evidence :status])))
+    (is (= :not-applicable
+           (get-in receipt [:checks :selected-want-accounting :status])))
+    (is (= :not-applicable
+           (get-in receipt [:checks :evidence-authority :status])))
+    (is (= :verified (:status (falsifier/verify receipt in))))
+    (testing "a different repair identity refuses"
+      (let [bad (assoc-in in [:work-evidence :durable-finding :repair/id] "repair-2")]
+        (is (= :repair-work-evidence-mismatch
+               (get-in (falsifier/receipt bad) [:checks :work-evidence :reason])))))
+    (testing "an altered discharge contract refuses"
+      (let [bad (update-in in [:work-evidence :repair-contract :discharge]
+                           assoc :requires [:independent-review])]
+        (is (= :repair-work-evidence-mismatch
+               (get-in (falsifier/receipt bad) [:checks :work-evidence :reason])))))))
+
+(deftest ordinary-review-without-wants-still-refuses
+  (let [in (assoc (inputs) :selected-want-outcomes
+                  {:schema :wm/selected-want-outcome-v1 :status :refused
+                   :reason :selected-want-identity-missing})
+        receipt (falsifier/receipt in)]
+    (is (= :selected-want-identity-missing
+           (get-in receipt [:checks :selected-want-accounting :reason])))
+    (is (= :refused (:status receipt)))))
 
 (deftest approval-prose-cannot-overrule-standing-or-authority
   (testing "the evaluated click's conflicting declarations"
