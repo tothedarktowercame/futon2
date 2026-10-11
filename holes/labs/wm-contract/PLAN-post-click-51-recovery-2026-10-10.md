@@ -1010,8 +1010,12 @@ or weaken an existing definition merely to accommodate current Clojure.
   by `ThreeHalvesBlend.Cone.isPushout`: the blend object's finite element set
   and both cone-leg graphs.  `ThreeHalvesRuntimeCertificate.Receipt.valid`
   now derives K1' coverage from those fields and
-  `valid_projects_pushout` exposes the certified result; no producer-supplied
-  validity boolean was added.  Runtime `three-halves-square/validate` computes
+  `valid_projects_pushout` exposes the executable result.  The stronger
+  `valid_projects_semantic_pushout` applies `pushout_iff_coverage` using the
+  receipt's four well-formed map proofs and yields
+  `IsThreeHalvesPushout`; the pinned witness instantiates that semantic
+  theorem.  No producer-supplied validity boolean was added.  Runtime
+  `three-halves-square/validate` computes
   the same union of cone-leg images and reports the concrete uncovered blend
   identities.  The existing `admit-cascade-problem` composition root therefore
   refuses an uncovered square before G.  The pinned publication-cadence
