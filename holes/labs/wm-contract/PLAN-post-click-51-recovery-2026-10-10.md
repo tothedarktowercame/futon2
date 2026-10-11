@@ -1524,3 +1524,22 @@ or weaken an existing definition merely to accommodate current Clojure.
   authority, implementation pin, or configuration source exists yet.  The next
   boundary is external commissioning/configuration of those values followed by
   an explicit decision to replace—not relabel—the current pairwise selector.
+
+- 2026-10-11, SUT item 2 controlled Prefix-F integration: the unwired
+  `futon2.aif.prefix-free-energy-sut/compose-menu!` uses the production
+  `candidate-key`, `prefixes`, `prefix-f`, and `production-ranked` path, then
+  stops at `:before-policy/select-action-cascades`.  Every complete PolicyKey
+  has exactly one full route receipt aligned with the numeric F placed in the
+  posterior input.  Coherent empirical evidence wins without consulting a
+  prior; only a genuinely unseen key can use the injected pinned calibration
+  law, executable registry and terminal authority records.  Malformed or
+  contradictory evidence refuses rather than falling through.  The controlled
+  post-enactment boundary validates the registered update relation and requires
+  the next route to be empirical, explicitly retiring bootstrap.
+
+  Production remains **OPEN** and unchanged.  With no injected calibration,
+  executable and authority registries the controlled entrypoint refuses before
+  posterior selection.  The live `cascade-decision-admitted` path still calls
+  `production-ranked` directly and has no commissioned production law/prior,
+  retained authority-job source, executable loader, or update-transition
+  producer.  This namespace is not required by the serving path.
