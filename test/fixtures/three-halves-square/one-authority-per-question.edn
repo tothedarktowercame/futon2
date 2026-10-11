@@ -1,0 +1,49 @@
+;; Semantic reading for the updater-only initialization declaration:
+;; G is the one answered posterior question; I1 is its owner/write-gate view;
+;; I2 is the deliberate-pin/comparator view.  B preserves the shared answer
+;; while retaining the two distinct obligations: mutations pass through the
+;; owner and disagreement at the pin stops dependent publication.
+{:schema :wm/three-halves-square-v1
+ :pattern :apparatus/one-authority-per-question
+ :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+          :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+          :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+ :interpretation-correspondence
+ {:reading "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete."
+  :guard {:needs #{:admission/task-stated}
+          :forbids #{:hole/h6378c65a4012}}
+  :produces #{:hole/h6378c65a4012}}
+ :objects
+ {:G {:text "One posterior question has one authoritative answer."
+      :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+               :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+               :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+      :theory {:elems #{0} :names {0 "authoritative posterior answer"} :axioms #{}}}
+  :I1 {:text "The shared updater owns the answer and gates both mutation paths."
+       :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+                :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+                :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+       :theory {:elems #{10 11}
+                :names {10 "authoritative posterior answer" 11 "owner and write gate"}
+                :axioms #{}}}
+  :I2 {:text "A second posterior view is only a deliberate pin read by its comparator."
+       :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+                :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+                :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+       :theory {:elems #{20 21}
+                :names {20 "authoritative posterior answer" 21 "deliberate pin and comparator"}
+                :axioms #{}}}
+  :B {:text "The updater authority and comparator-protected pin share the answer; disagreement stops publication."
+      :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+               :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+               :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+      :theory {:elems #{30 31 32}
+               :names {30 "shared posterior answer"
+                       31 "owner-gated authority"
+                       32 "comparator-protected pin"}
+               :axioms #{}}}}
+ :maps {:a1 #{[0 10]}
+        :a2 #{[0 20]}
+        :b1 #{[10 30] [11 31]}
+        :b2 #{[20 30] [21 32]}}
+ :auxiliary {:b1 false :b2 false}}

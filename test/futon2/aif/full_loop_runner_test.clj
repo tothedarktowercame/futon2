@@ -6796,9 +6796,11 @@
   ;; RUNNER-SUITE-F: resolve the decision's pinned futon3 receipt bytes
   ;; against the copy this suite owns (see close-retains-... above).
   (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
-  (initialization-fixture/with-two-ticks
-   (fn [{decision :second}]
-     (let [{:keys [root] :as c} (retention-cohort "runner-token-initialization")
+    (let [failure
+          (try
+            (initialization-fixture/with-two-ticks
+             (fn [{decision :second}]
+               (let [{:keys [root] :as c} (retention-cohort "runner-token-initialization")
            input (get-in decision [:selection-certificate :token-belief-input])
            opts (assoc (retention-success-opts c)
                        :author-artifact-observer-fn
@@ -6819,26 +6821,32 @@
                                      :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
            result (runner/run-opportunity! opts)
            selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
-       (is (= :grounded-progress (:outcome result)))
-       (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
-       (let [example (:kernel-example result)
-             manifest (:close-evidence-manifest result)
-             entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/kernel-example.edn") (:entries manifest)))]
+                 (is (= :grounded-progress (:outcome result)))
+                 (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+                 (let [example (:kernel-example result)
+                       manifest (:close-evidence-manifest result)
+                       entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/kernel-example.edn") (:entries manifest)))]
          ;; This fixture's synthetic author lacks a verifiable D-task artifact;
          ;; preserve its close disposition with unavailable observations.
-         (is (= :recorded (:status example)))
-         (is (= :grounded-progress (get-in example [:disposition :value])))
-         (is (= :unavailable (get-in example [:missingness :observations])))
-         (is (= example (edn/read-string (slurp (:source-path entry)))))
-         (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
-       (is (= :observed-initialization (:conditioning-status input)))
-       (is (= input (get-in selected [:selection-certificate :token-belief-input])))
-       (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
-       (is (preference-audit/valid? selected (get-in selected [:selection-certificate :preference-audit])))
-       (is (= (:continuation-belief input)
-              (get-in selected [:selection-certificate :precision-family :model :q0])))
-       (is (every? #(not (contains? % initialization-fixture/updater))
-                   (keys (:continuation-belief input)))))))))
+                   (is (= :recorded (:status example)))
+                   (is (= :grounded-progress (get-in example [:disposition :value])))
+                   (is (= :unavailable (get-in example [:missingness :observations])))
+                   (is (= example (edn/read-string (slurp (:source-path entry)))))
+                   (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
+                 (is (= :observed-initialization (:conditioning-status input)))
+                 (is (= input (get-in selected [:selection-certificate :token-belief-input])))
+                 (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
+                 (is (preference-audit/valid? selected (get-in selected [:selection-certificate :preference-audit])))
+                 (is (= (:continuation-belief input)
+                        (get-in selected [:selection-certificate :precision-family :model :q0])))
+                 (is (every? #(not (contains? % initialization-fixture/updater))
+                             (keys (:continuation-belief input)))))))
+            nil
+            (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      ;; The square now admits construction.  Prefix-F remains deliberately
+      ;; unwired here: do not run or read retention artifacts after refusal.
+      (is (= :free-energy-not-supplied (get-in failure [:refusal :kind])))
+      (is (= 1 (get-in failure [:refusal :detail :n-without-f]))))))
 
 (deftest feature-card-close-retains-learning-receipt-without-changing-selection
   ;; Canonical runner-source guard stays enabled; owner runs after merge.

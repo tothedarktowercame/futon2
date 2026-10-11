@@ -1,6 +1,7 @@
 (ns futon2.aif.three-halves-square-test
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.token-observation-initialization-test :as initialization]
             [futon2.aif.three-halves-square :as sut]))
 
 (def fixture (edn/read-string
@@ -8,6 +9,32 @@
 
 (deftest real-library-reading-validates
   (is (= :valid (:status (sut/validate fixture)))))
+
+(deftest one-authority-square-validates-and-joins-exact-interpretation
+  (let [pattern :apparatus/one-authority-per-question
+        declaration (initialization/declaration-with-one-authority-square)
+        interpretation (get-in declaration [:patterns pattern])
+        receipt (get-in declaration [:interpretation-receipts pattern])
+        square (:blend-square receipt)]
+    (is (= :valid (:status (sut/validate square))))
+    (is (initialization/exact-one-authority-square?
+         square pattern interpretation (dissoc receipt :blend-square)))
+    (testing "a different pattern cannot borrow this square"
+      (is (false? (initialization/exact-one-authority-square?
+                   square :apparatus/done-is-observed-running
+                   interpretation (dissoc receipt :blend-square)))))
+    (testing "a mutated source pin cannot join the retained receipt"
+      (is (false? (initialization/exact-one-authority-square?
+                   (assoc-in square [:source :sha256] (apply str (repeat 64 "0")))
+                   pattern interpretation (dissoc receipt :blend-square)))))
+    (testing "an uncovered blend object is refused"
+      (is (= :refused
+             (:status (sut/validate (assoc-in square [:maps :b2] #{[20 30]}))))))
+    (testing "inconsistent routes cannot commute"
+      (let [bad (assoc-in square [:maps :b2] #{[20 32] [21 30]})
+            gaps (:missing-evidence (sut/validate bad))]
+        (is (some #{:noncommutation} gaps))
+        (is (some #{:inconsistency} gaps))))))
 
 (deftest adversarial-square-evidence-refuses
   (testing "wrong map direction"

@@ -13,6 +13,7 @@
             [futon2.aif.token-initialization-policy :as policy]
             [futon2.aif.token-outcome :as outcome]
             [futon2.aif.token-outcome-test :as want]
+            [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
@@ -29,6 +30,39 @@
          :artifact {:class :C3 :repo "repo" :sha "HEAD" :path "created.clj"}
          :missing-revision {:class :C4 :repo "repo" :sha "unavailable"
                             :path "created.clj" :decl "(ns created)"}))
+
+(def one-authority-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/one-authority-per-question.edn")))
+
+(defn exact-one-authority-square?
+  "The generic square validator proves the diagram.  This join additionally
+  proves that this diagram interprets the declaration's exact retained receipt."
+  [square pattern interpretation receipt]
+  (let [source (:source receipt)]
+    (and (= :valid (:status (three-halves-square/validate square)))
+         (= pattern (:pattern square))
+         (= source (:source square))
+         (every? #(= source (get-in square [:objects % :source]))
+                 three-halves-square/roles)
+         (= (:reading receipt)
+            (get-in square [:interpretation-correspondence :reading]))
+         (= (:guard interpretation)
+            (get-in square [:interpretation-correspondence :guard]))
+         (= (:produces interpretation)
+            (get-in square [:interpretation-correspondence :produces])))))
+
+(defn declaration-with-one-authority-square []
+  (let [pattern :apparatus/one-authority-per-question
+        interpretation (get-in want/declaration [:patterns pattern])
+        receipt (get-in want/declaration [:interpretation-receipts pattern])]
+    (when-not (exact-one-authority-square? one-authority-square pattern interpretation receipt)
+      (throw (ex-info "Three-halves square does not join the retained interpretation"
+                      {:failure-kind :three-halves-square-identity-mismatch
+                       :pattern pattern})))
+    (assoc-in want/declaration
+              [:interpretation-receipts pattern :blend-square]
+              one-authority-square)))
 
 (deftest replay-updates-applies-only-admitted-observations
   ;; {a}:1/2, {b}:1/2 --observe x--> {a,x}:1/2, {b,x}:1/2
@@ -50,6 +84,7 @@
      (let [signed (task/read-observations-v2 root expected jobs)
            execution (task/read-predecessor root expected jobs)
            declaration (clojure.core/first (get-in inputs [:dispatch :declarations]))
+           cascade-declaration (declaration-with-one-authority-square)
            current {:policy on :declaration-sha256 (:sha256 declaration)
                     :locators fixture-locators
                     :schedule (sources/observation-schedule (:snapshot declaration))
@@ -63,11 +98,11 @@
                        (:observations current))
            facts (assoc facts :artifact :unknown)
            current (assoc-in current [:observations :artifact] {:status :missing :kind :reader-unavailable})
-           src {:universes {target facts} :wants {target (:want want/declaration)}
+           src {:universes {target facts} :wants {target (:want cascade-declaration)}
                 :locators {target fixture-locators}
-                :interpretations {target {:patterns (:patterns want/declaration)
-                                          :receipts (:interpretation-receipts want/declaration)}}
-                :candidates {target (:candidates want/declaration)}
+                :interpretations {target {:patterns (:patterns cascade-declaration)
+                                          :receipts (:interpretation-receipts cascade-declaration)}}
+                :candidates {target (:candidates cascade-declaration)}
                 :context-of (constantly :WM) :beta-by-context {:WM {:beta 1 :status :declared}}
                 :horizon-steps 1 :token-initialization {target current}}
            assembled (problems/assemble {:targets [target] :sources src})
