@@ -40,11 +40,12 @@
     (boolean (reduce (fn [done n] (when done (visit n #{} done))) #{} nodes))))
 
 (defn compose!
-  [{:keys [mode problem order-control predictive preference-input
+  [{:keys [mode problem order-control ordered predictive preference-input
            prefix-input prefix-context beta]}]
   (if-not (= :controlled-sut mode)
     (refuse :production-registries-unconfigured)
-    (let [ordered (decision/controlled-application-order-run order-control problem)]
+    (let [ordered (or ordered
+                      (decision/controlled-application-order-run order-control problem))]
       (if-not (= :prepared-for-enactment (:status ordered))
         (refuse :application-order-refused ordered)
         (let [policy-carrier (:policy order-control)

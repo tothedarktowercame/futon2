@@ -124,6 +124,7 @@
     (is (= [:selection :construction :admission :scoring :dispatch :revision
             :dispatch :grounding :close] @events))
     (is (= [1 2] (mapv :attempt @(:dispatch-calls input))))
+    (is (= (:construction result) (get-in result [:scoring :order])))
     (is (= (get-in result [:scoring :identity-chain :selected])
            (get-in @(:dispatch-calls input) [0 :policy-key])))
     (is (= (get-in result [:revision :dispatch :dispatched-action-sha256])

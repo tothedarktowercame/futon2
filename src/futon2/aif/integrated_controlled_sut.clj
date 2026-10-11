@@ -32,7 +32,7 @@
     (catch Exception _ nil)))
 
 (defn run-controlled!
-  [{:keys [mode phase-hook outer-input efe-input construction-fn
+  [{:keys [mode phase-hook outer-input efe-input
            dispatch-fn dispatch-authority revision-input-fn grounding-fn
            persistence-input]}]
   (if-not (= :controlled-sut mode)
@@ -51,9 +51,9 @@
         (let [target (:selected-task selected)
               problem (:problem efe-input)
               constructed-target (:target problem)
-              construct (or construction-fn decision/controlled-application-order-run)
               construction (phase! :construction
-                                   #(construct (:order-control efe-input) problem))]
+                                   #(decision/controlled-application-order-run
+                                     (:order-control efe-input) problem))]
           (if-not (and (= target constructed-target)
                        (= :prepared-for-enactment (:status construction))
                        (= :ready-for-g (get-in construction [:composition :status])))
@@ -61,7 +61,8 @@
                     {:selected target :constructed constructed-target
                      :receipt construction})
             (let [_ (phase! :admission #(get-in construction [:composition :certificate]))
-                  scored (phase! :scoring #(efe/compose! efe-input))]
+                  scored (phase! :scoring #(efe/compose! (assoc efe-input
+                                                                :ordered construction)))]
               (if-not (= :prepared-for-enactment (:status scored))
                 (refuse (if (= :application-order-refused (:reason scored))
                           :admission :scoring)
