@@ -950,15 +950,35 @@
 (deftest r16-completion-queues-a-surfacing-discharge
   ;; Same live record pin as the parked-transition test above: run
   ;; 36820e88-3d68-499d-b359-2d8dbe9743de and its verbatim timestamp.
-  (let [{:keys [result item]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim :grounded? true})]
-    (is (= :grounded-change (:outcome result)))
+  (let [cohort (retention-cohort "r16-surfacing-success")
+        {:keys [result item]}
+        (run-token-feature-card-attempt
+         cohort (token-loop-exercised-decision))]
+    (is (= :grounded-progress (:outcome result))
+        "the real increment is grounded progress, not declared closure")
+    (is (= :verified
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier-verification :status])))
     (is (= {:node :R16 :stage :surfaced
-            :attempt-id (:attempt-id result)
-            :outcome :grounded-change
+            :attempt-id (:attempt-id item)
+            :outcome (:outcome result)
             :parked-transition nil}
-           (:lifecycle/discharge item)))))
+           (:lifecycle/discharge item))
+        "the queued discharge preserves the exact close classification and identity"))
+  (let [cohort (retention-cohort "r16-surfacing-failed")
+        {:keys [result item]}
+        (run-token-feature-card-attempt
+         cohort (token-loop-exercised-decision)
+         {:reviewer-execution {:executed false
+                               :tool-events 0
+                               :command-events 0}})
+        discharge (:lifecycle/discharge item)]
+    (is (= :build-failed (:outcome result)))
+    (is (= :build-failed (:outcome discharge)))
+    (is (= :surfaced (:stage discharge)))
+    (is (= (:attempt-id item) (:attempt-id discharge)))
+    (is (some? (:parked-transition discharge))
+        "a failed close durably parks the surfaced repair finding")))
 
 ;; DELETED (flat, SPEC flat-removal H4 2026-09-17):
 ;; judge-operator-actions-queue-at-the-runner-persistence-boundary — it
