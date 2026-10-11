@@ -1043,8 +1043,14 @@
                     :route-attestation-ref (:route-attestation-ref result)
                     :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))
                     ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
-                    :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
+                     :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
                                  {:absent :refresh-not-reached})}
+                     ;; Controlled integrated SUT certificates are already
+                     ;; validated before this production-owned persistence
+                     ;; boundary. Retain the exact carrier; never reconstruct
+                     ;; seven independent certificates from the record.
+                     (:controlled-sut result)
+                     (assoc :controlled-sut (:controlled-sut result))
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
