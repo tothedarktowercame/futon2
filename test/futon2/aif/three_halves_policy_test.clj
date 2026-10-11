@@ -92,9 +92,11 @@
         (is (some #{expected} (:missing-evidence (validate changed))))))))
 
 (def interpretations
-  {:P {:guard {:needs #{} :forbids #{}} :produces #{:q}}
-   :Q {:guard {:needs #{:q} :forbids #{}} :produces #{:r}}
-   :R {:guard {:needs #{:r} :forbids #{}} :produces #{:w}}})
+  {:P {:guard {:needs #{} :forbids #{}} :produces #{["controlled-3halves" :q]}}
+   :Q {:guard {:needs #{["controlled-3halves" :q]} :forbids #{}}
+       :produces #{["controlled-3halves" :r]}}
+   :R {:guard {:needs #{["controlled-3halves" :r]} :forbids #{}}
+       :produces #{["controlled-3halves" :w]}}})
 (def receipts (zipmap (keys interpretations)
                       (repeat {:kind :fixture :blend-square square})))
 (defn score [{:keys [patterns precedence]}]
@@ -103,10 +105,17 @@
      {:q0 {#{} 1}
       :precedence-fn (constantly
                       (mapv #(policy/token-interpretation % (get by-id %)) precedence))
-      :horizon 3 :universe #{:q :w :r} :masked #{} :cap 0
-      :rates (zipmap [:q :w :r] (repeat {:false-pos 0 :false-neg 0}))
-      :c-fn-pointwise (fn [_ o] (/ (if (contains? o :w) 3 1) 16))})))
-(def input {:target "controlled-3halves" :want [:w] :observation {:q false :w false :r false}
+      :horizon 3 :universe #{["controlled-3halves" :q]
+                             ["controlled-3halves" :r]
+                             ["controlled-3halves" :w]} :masked #{} :cap 0
+      :rates (zipmap [["controlled-3halves" :q] ["controlled-3halves" :r]
+                      ["controlled-3halves" :w]]
+                     (repeat {:false-pos 0 :false-neg 0}))
+      :c-fn-pointwise (fn [_ o] (/ (if (contains? o ["controlled-3halves" :w]) 3 1) 16))})))
+(def input {:target "controlled-3halves" :want [["controlled-3halves" :w]]
+            :observation {["controlled-3halves" :q] false
+                          ["controlled-3halves" :r] false
+                          ["controlled-3halves" :w] false}
             :interpretations interpretations :interpretation-receipts receipts
             :budget {:max-moves 2 :max-expansions 40} :horizon 3
             :move-cost 0 :evaluate-g score})

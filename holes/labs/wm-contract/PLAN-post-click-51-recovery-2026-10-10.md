@@ -34,6 +34,18 @@ actual input to `receipt-construction/acting-order`; their digests must agree.
 The live path remains unchanged and no production order-law registry exists,
 so production invocation refuses before rollout.
 
+## 2026-10-11 — SUT item 7 controlled CascadeEFE composition
+
+`cascade-efe-sut/compose!` now joins the validated multi-square nodes,
+construction/organizer DAG, authorized precedence, independently sealed
+initial/observation/per-firing transition carriers, factorized preference
+kernel, and Prefix-F routes. It calls the real class-observation EFE scorer
+and production posterior selector, retains risk/ambiguity/EIG/preference and
+observation certificates, and requires one digest identity across
+construction, all admissions, scoring, posterior, selection, dispatch, and
+acting-order preparation. This does not commission production authorities or
+close persistence, Morning Briefing, debugger, or final integrated-SUT work.
+
 This note records the worklist resulting from review of the restored
 pre-claude-12 runtime, the Lean requirements, and run
 `2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda`.  The run's reports are
