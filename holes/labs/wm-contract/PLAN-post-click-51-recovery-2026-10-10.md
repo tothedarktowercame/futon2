@@ -1257,3 +1257,53 @@ or weaken an existing definition merely to accommodate current Clojure.
   completion-pair counts are promoted into a certificate.  This is a
   read-only exporter classification; runtime selection, class weights, and
   calibration remain unchanged.
+
+- 2026-10-11, item 2/Q9 production-producer blocker: no runtime authority or
+  configuration currently produces the accepted factorized-preference
+  certificate.  The live class model is constructed in
+  `src/futon2/aif/wm/cascade_decision.clj:501-541` from the fixed synthetic
+  55/35/5/5 table; its provenance explicitly says `:calibrated false`, and it
+  conflates unreached/unmeasured outcomes into `:stop-the-line`.  It therefore
+  cannot authorize the separate completion/relevance semantics or supply the
+  external calibration required by `FactorizedPreferenceSemantics`.  The
+  existing `meta_preference_authority.clj` governs a different outer-task
+  provisional prior, explicitly claims no empirical calibration, and has the
+  wrong outcome vocabulary.  The EIG held-out calibration records likewise
+  authorize an experiment model, not normative completion/relevance costs.
+  Repository search found no factorization-law registry, calibration registry,
+  or independent producer for `:wm/factorized-preference-v1`.
+
+  The minimal missing external configuration/producer contract is:
+
+      {:schema :wm/factorized-preference-authority-v1
+       :source-pin {:path nonblank :sha256 64-hex}
+       :registry-authority external-id
+       :calibrations
+       [{:receipt nonzero-id
+         :calibration {:identity nonzero-id :version positive-nat
+                       :authority external-id :registration-token nonzero-id
+                       :focused-cost value :related-cost value
+                       :unrelated-cost value}
+         :authorized-by external-id} ...]
+       :factorizations
+       [{:receipt nonzero-id :identity nonzero-id :version positive-nat
+         :authority external-id
+         :law :completion-then-conditional-relevance} ...]
+       :selection {:calibration-receipt nonzero-id
+                   :factorization-receipt nonzero-id}}
+
+  A pure reader must verify the source pin, distinct nonzero selector and
+  registry authorities, exact receipt joins, strict conditional relevance
+  order, and the fixed factorization-law identity; malformed or absent input
+  is a typed refusal, never a fallback to the flat table.  It must also receive
+  a separately authored outcome mapping that distinguishes observed
+  non-completion from unmeasured, because today's class emission cannot do so.
+  The first integration boundary is configuration loading before
+  `cd/select-and-record-cascade!` in
+  `scripts/futon2/report/war_machine.clj:6731`; the verified carrier would be
+  passed as immutable decision input, not created by the selector.  Retention
+  then requires adding the unchanged `:factorized-preference` value to the
+  decision assembled by `select-and-record-cascade!` and to
+  `persist-run-record!`'s explicit decision allowlist at
+  `src/futon2/aif/full_loop_runner.clj:1022-1030`.  None of those runtime seams
+  was changed in this discovery slice.
