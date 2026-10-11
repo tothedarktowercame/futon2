@@ -852,6 +852,23 @@ or weaken an existing definition merely to accommodate current Clojure.
   declares that evaluator or how the present heterogeneous channels combine,
   so no Clojure validator is added and the current heuristic is not blessed.
 
+  Review correction: the objective certificate now closes three
+  self-exemptions.  `requiredDependencies` is the exact union of the external
+  objective-registration token and every channel ID, observation ID, evidence
+  ID, and value digest; the task input and frontier entry must both carry it.
+  `changed_channel_with_omitted_dependencies_invalid` is the adversarial
+  witness.  Channel IDs must be unique
+  (`duplicate_channel_identity_invalid`).  Finally, `Authorized` joins the
+  objective to an external registry entry on identity, version, registration
+  token, authority, and evaluator-function equality, while requiring the
+  registry authority to differ from the selector authority;
+  `evaluator_substitution_invalid` proves that labels cannot authorize a
+  substituted evaluator.  The retention theorem now produces the matching
+  valid evaluation from the exact current population and states its objective
+  identity, version, and evaluated key rather than tautological self-equalities.
+  These corrections strengthen the still-unwired model and do not alter the
+  runtime blocker above.
+
 - 2026-10-10, persisted c82068b4 correspondence: the retained canonical outer
   receipt honestly has status `:absent`, reason
   `:receipt-identity-inconsistent`.  Its observed META receipt selected
