@@ -1503,3 +1503,24 @@ or weaken an existing definition merely to accommodate current Clojure.
   provide a real external objective registration/configuration and translate
   production channel evidence into the exact carrier before changing that
   boundary.  The only evaluator in phase A is visibly test-authority data.
+
+- 2026-10-11, SUT item 1 phase-B controlled integration: the unwired
+  `futon2.aif.outer-objective-sut/run-controlled` calls the production
+  `meta-live-outer-selector/live-registry-tasks` M/E/T enumerator and
+  `task-state-candidates` channel normalizer, then converts every present
+  normalized channel into the exact phase-A carrier.  Its evidence identity is
+  the retained source pin; observation and value identities are deterministic
+  digests of those exact fields.  It constructs the initial added-task delta,
+  strict refresh, fully corresponding frontier, and stable selection receipt.
+  Isolated SUT tests use realistic mission/excursion/ticket stores and an
+  explicitly test-only sealed authority.  A second world snapshot changes one
+  task's pinned value dependency: only that task is invalidated/recomputed and
+  other receipts remain literally equal.
+
+  Production remains unchanged and **OPEN**.  Calling the controlled boundary
+  without an injected sealed registration and separate selector authority
+  refuses before registry enumeration.  Neither `full-loop-runtime` nor the
+  serving selector references this namespace; no production objective,
+  authority, implementation pin, or configuration source exists yet.  The next
+  boundary is external commissioning/configuration of those values followed by
+  an explicit decision to replace—not relabel—the current pairwise selector.

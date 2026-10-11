@@ -183,15 +183,26 @@
        (every? #(evaluation-valid? sealed selector-authority objective %)
                (:evaluations frontier))))
 
+(defn select-produced-minimum
+  "Select a frontier returned by `produce-refresh` without reevaluating keys.
+  This is the producer composition path; `select-minimum` remains the validator
+  for externally supplied certificates and therefore dispatches the evaluator."
+  [{:keys [refresh evaluations]}]
+  (if-not (and (refresh-valid? refresh)
+               (= evaluations (:current refresh))
+               (every? #(= :valid (:status %)) evaluations))
+    {:status :refused :reason :outer-frontier-certificate-invalid}
+    (if-let [selected (first (sort-by (juxt #(get-in % [:entry :comparison-key])
+                                             #(get-in % [:entry :task/id]))
+                                       evaluations))]
+      {:status :selected :selected (get-in selected [:entry :task/id])
+       :comparison-key (get-in selected [:entry :comparison-key])
+       :tie-law :comparison-key-then-stable-task-id :evaluation selected}
+      {:status :refused :reason :empty-current-frontier})))
+
 (defn select-minimum
   "Select the fully refreshed minimum by comparison key then stable task id."
   [sealed selector-authority objective frontier]
   (if-not (frontier-valid? sealed selector-authority objective frontier)
     {:status :refused :reason :outer-frontier-certificate-invalid}
-    (if-let [selected (first (sort-by (juxt #(get-in % [:entry :comparison-key])
-                                             #(get-in % [:entry :task/id]))
-                                       (:evaluations frontier)))]
-      {:status :selected :selected (get-in selected [:entry :task/id])
-       :comparison-key (get-in selected [:entry :comparison-key])
-       :tie-law :comparison-key-then-stable-task-id :evaluation selected}
-      {:status :refused :reason :empty-current-frontier})))
+    (select-produced-minimum frontier)))
