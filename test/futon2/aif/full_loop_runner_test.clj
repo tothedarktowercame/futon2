@@ -644,6 +644,7 @@
 
 (defn synthetic-artifact-binding [_repo before author-job]
   {:fresh-author? true
+   :fixture/job-id (:job-id author-job)
    :repo "/repo"
    :pre-dispatch-head (:head before)
    :observed-head (:artifact-ref author-job)
@@ -739,6 +740,7 @@
                (fn [repo before author-job]
                  {:fresh-author? true
                   :repo repo
+                  :fixture/job-id (:job-id author-job)
                   :pre-dispatch-head (:head before)
                   :observed-head (:artifact-ref author-job)
                   :corroborates? true
@@ -819,6 +821,7 @@
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
                             judgement-transform-fn author-summary author-result
                             artifacts? reviewer-execution reviewer-events grounded?
+                            cure-card cure-artifact-ref
                             runner-options]}]
    (token-fixture/with-artifact
    (fn [sha]
@@ -845,9 +848,13 @@
                          {:source {:path (.getPath record)
                                    :sha256 (digest/sha256 (slurp record))}})]
            (let [result (run-feature-card-attempt
-                         {:author-card feature-card-claim
+                         {:author-card (when-not cure-card feature-card-claim)
                           :grounded? (if (some? grounded?) grounded? true)
                           :author-summary author-summary
+                          :cure-card cure-card
+                          :cure-commit (when cure-card
+                                         (or cure-artifact-ref sha))
+                          :cure-observed-commit (when cure-card sha)
                           :reviewer-execution reviewer-execution
                           :reviewer-events reviewer-events
                           :judgement-transform-fn judgement-transform-fn
@@ -859,7 +866,7 @@
                             :execution successful-execution}
                             author-result
                             (assoc :result author-result)
-                            (nil? author-summary)
+                            (and (nil? author-summary) (nil? cure-card))
                             (assoc :feature-card feature-card-claim))
                           :runner-options
                           (merge
@@ -881,12 +888,16 @@
                                              (conj "logic/feature-witness.edn"))})
                            :author-artifact-observer-fn
                            (fn [_ before job]
-                             (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
-                                    :repo (.getPath token-repo)))}
+                             (cond->
+                              (assoc (synthetic-artifact-binding
+                                      (.getPath token-repo) before job)
+                                     :repo (.getPath token-repo))
+                               (and cure-card (= "feature-cure" (:job-id job)))
+                               (assoc :commit sha :observed-head sha)))}
                             dispatch-fn (assoc :dispatch-fn dispatch-fn)
                             ground-fn (assoc :ground-fn ground-fn))
                            runner-options)})]
-             (cond-> result
+             (cond-> (assoc result :artifact-sha sha)
                artifacts? (assoc :fold-file fold-file
                                   :proof-file proof-file
                                   :rendered-feature-acceptance
@@ -4056,16 +4067,21 @@
 ;; ---------------------------------------------------------------------------
 
 (deftest card-failure-cured-on-first-bounce-grounds-the-change
-  (let [{:keys [result]}
-        (run-feature-card-attempt
-         {:author-card nil
-          :cure-card feature-card-claim
-          :artifacts? true})]
-    (is (= :grounded-change (:outcome result)))
+  (let [cohort (retention-cohort "card-cure-first-bounce")
+        {:keys [result]}
+        (run-token-feature-card-attempt
+         cohort (token-loop-exercised-decision)
+         {:cure-card feature-card-claim :artifacts? true})]
+    (is (= :grounded-progress (:outcome result)))
     (is (= :feature-card-missing-or-invalid
            (get-in result [:data :build-retries 0 :failure-kind])))
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
-    (is (= 1 (count (:build-retries (:data result)))))))
+    (is (= 1 (count (:build-retries (:data result)))))
+    (is (= "feature-cure"
+           (get-in result
+                   [:checkpoints :build :judgment :validation
+                    :artifact-binding :fixture/job-id]))
+        "reviewer falsification is bound to the terminal cure artifact")))
 
 (deftest feature-card-cure-prompt-repeats-the-required-schema
   ;; Measured reproduction: the initial prompt specified the four-field card,
@@ -4096,16 +4112,15 @@
   ;; extracted "/eoi_network_test.clj" as its artifact-ref.  A metadata-only
   ;; card cure must use the valid terminal claim rather than treating the path
   ;; as a replacement commit.  The feature-card gate itself remains unchanged.
-  (let [{:keys [result]}
-        (run-feature-card-attempt
-         {:author-card nil
-          :cure-card feature-card-claim
-          :cure-commit "/eoi_network_test.clj"
-          :cure-observed-commit nil
-          :cure-summary "FULL_LOOP_AUTHOR: DONE feature123"
+  (let [cohort (retention-cohort "card-cure-path-ref")
+        {:keys [result artifact-sha]}
+        (run-token-feature-card-attempt
+         cohort (token-loop-exercised-decision)
+         {:cure-card feature-card-claim
+          :cure-artifact-ref "/eoi_network_test.clj"
           :artifacts? true})]
-    (is (= :grounded-change (:outcome result)))
-    (is (= "feature123" (get-in result [:data :commit])))
+    (is (= :grounded-progress (:outcome result)))
+    (is (= artifact-sha (get-in result [:data :commit])))
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
     (is (nil? (get-in result [:data :build-retries 0 :cure-rejected])))))
 

@@ -3411,7 +3411,9 @@
   validations. When retries are exhausted, throws exactly as today (same
   outcome, same failure-kind, same repair-obligation path) with :build-retries
   included in the ex-data. Returns a map with the final :commit, :repo,
-  :files, :author-job, and :build-retries.
+  :files, :author-job, :artifact-binding, and :build-retries. The artifact
+  binding advances with each successfully observed cure commit, so subsequent
+  validation and retries are bound to the artifact they actually inspect.
 
   When :build-cure-retries is 0, no cure is attempted and the behavior is
   byte-identical to the pre-cure throws."
@@ -3422,6 +3424,7 @@
            repo repo
            files files
            author-job author-job
+           artifact-binding artifact-binding
            retries-left max-retries
            build-retries []]
       (if-let [failure (build-cure-validation files author-job commit target)]
@@ -3479,7 +3482,7 @@
               ;; commit-shaped at all is :cure-commit-malformed — nothing
               ;; extracted a commit, so the fault is upstream in extraction and
               ;; the author is not the one to look at. Both still reject.
-              (recur commit repo files author-job
+              (recur commit repo files author-job artifact-binding
                      (dec retries-left)
                      (conj build-retries
                            {:failure-kind failure-kind
@@ -3492,6 +3495,12 @@
                             :claimed-commit new-commit}))
               (let [new-repo (or (:repo new-build) repo)
                     new-files (or (:files new-build) files)
+                    new-artifact-binding
+                    (if (and fresh-author?
+                             cure-observed
+                             (= new-commit cure-observed))
+                      cure-binding
+                      artifact-binding)
                     new-author-job (cond-> cure-job
                                      (and fresh-author? cure-observed)
                                      (assoc :repo-observed-artifact-ref cure-observed
@@ -3508,9 +3517,11 @@
                   ;; Cured: proceed with the new values.
                   {:commit new-commit :repo new-repo :files new-files
                    :author-job new-author-job
+                   :artifact-binding new-artifact-binding
                    :build-retries (conj build-retries retry-entry)}
                   ;; Not cured yet: try again if retries remain.
                   (recur new-commit new-repo new-files new-author-job
+                         new-artifact-binding
                          (dec retries-left)
                          (conj build-retries retry-entry))))))
           ;; Retries exhausted: throw exactly as today. When no bounces
@@ -3525,6 +3536,7 @@
         ;; No failure: pass through with empty (or accumulated) retries.
         {:commit commit :repo repo :files files
          :author-job author-job
+         :artifact-binding artifact-binding
          :build-retries build-retries}))))
 
 (defn- implementation-id [commit]
@@ -6520,7 +6532,8 @@
                                    :author-verdict (:verdict (author-verdict author-job))
                                    :author-job author-job})))
                 (reset! measurement-artifact {:repository repo :commit commit :paths files})
-                (let [{:keys [commit repo files author-job build-retries]}
+                (let [{:keys [commit repo files author-job artifact-binding
+                              build-retries]}
                       (build-cure-loop opts @phase-context author dispatched-turns
                                        target commit repo files author-job
                                        fresh-author? artifact-binding)
