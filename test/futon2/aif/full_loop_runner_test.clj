@@ -821,7 +821,8 @@
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
                             judgement-transform-fn author-summary author-result
                             artifacts? reviewer-execution reviewer-events grounded?
-                            cure-card cure-artifact-ref
+                            cure-card cure-artifact-ref initial-author-card
+                            initial-artifact-ref build-files-fn
                             runner-options]}]
    (token-fixture/with-artifact
    (fn [sha]
@@ -848,7 +849,8 @@
                          {:source {:path (.getPath record)
                                    :sha256 (digest/sha256 (slurp record))}})]
            (let [result (run-feature-card-attempt
-                         {:author-card (when-not cure-card feature-card-claim)
+                         {:author-card (or initial-author-card
+                                           (when-not cure-card feature-card-claim))
                           :grounded? (if (some? grounded?) grounded? true)
                           :author-summary author-summary
                           :cure-card cure-card
@@ -860,14 +862,18 @@
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
                           (cond->
-                           {:job-id "feature-author" :state "done" :artifact-ref sha
+                           {:job-id "feature-author" :state "done"
+                            :artifact-ref (or initial-artifact-ref sha)
                             :result-summary (or author-summary
-                                                (str "FULL_LOOP_AUTHOR: DONE " sha))
+                                                (str "FULL_LOOP_AUTHOR: DONE "
+                                                     (or initial-artifact-ref sha)))
                             :execution successful-execution}
                             author-result
                             (assoc :result author-result)
-                            (and (nil? author-summary) (nil? cure-card))
-                            (assoc :feature-card feature-card-claim))
+                            (or initial-author-card
+                                (and (nil? author-summary) (nil? cure-card)))
+                            (assoc :feature-card
+                                   (or initial-author-card feature-card-claim)))
                           :runner-options
                           (merge
                            (cond->
@@ -882,10 +888,13 @@
                              (when mission-observer (mission-observer target))
                              (#'missions/mission-doc->entry (.getPath mission-path)))
                            :resolve-build-fn
-                           (fn [_] {:repo (.getPath token-repo)
-                                    :files (cond-> ["unrelated.clj"]
-                                             artifacts?
-                                             (conj "logic/feature-witness.edn"))})
+                           (fn [commit]
+                             {:repo (.getPath token-repo)
+                              :files (if build-files-fn
+                                       (build-files-fn commit)
+                                       (cond-> ["unrelated.clj"]
+                                         artifacts?
+                                         (conj "logic/feature-witness.edn")))})
                            :author-artifact-observer-fn
                            (fn [_ before job]
                              (cond->
@@ -4284,85 +4293,23 @@
     (is (empty? (:build-retries (:data result))))))
 
 (deftest artifact-only-failure-bounces-and-substantive-cure-commits-grounds
-  (let [root (.toFile (java.nio.file.Files/createTempDirectory
-                       "wm-artifact-cure-"
-                       (make-array java.nio.file.attribute.FileAttribute 0)))
-        queued (atom [])
-        dispatches (atom [])
-        _ (spit (io/file root "M-selected.md") "# test mission\n")
-        mission-file (io/file root "M-selected.md")
-        fold-file (io/file root "M-selected.executed.edn")
-        proof-file (io/file root "logic/feature-witness.edn")
-        _ (io/make-parents fold-file)
-        _ (spit fold-file (pr-str {:boxes [:author :store]
-                                   :want-coverage [:feature-card]}))
-        _ (io/make-parents proof-file)
-        _ (spit proof-file (pr-str {:witness :feature-card-persisted}))
-        resolve-call (atom 0)
-        result
-        (runner/run-opportunity!
-         (merge
-          (isolated-runner-opts)
-          {:repair-open-fn (constantly [])
-           :target-repo-fn (fn [& _] (.getPath root))
-           :repair-system-record-fn
-           (fn [finding] (assoc finding :repair/id "test-repair"))
-           :mission-fn (fn [target] {:id target :path (.getPath mission-file)})
-           :trace-fn (constantly (.getPath (io/file root "trace.edn")))
-           :author-artifact-observer-fn
-           (fn [repo before author-job]
-             {:fresh-author? true
-              :repo repo
-              :pre-dispatch-head (:head before)
-              :observed-head (:artifact-ref author-job)
-              :corroborates? true
-              :commit (:artifact-ref author-job)})
-           :dispatch-fn
-           (fn [_ agent _ _ _]
-             (swap! dispatches conj agent)
-             {:job-id (if (= agent "zai-5")
-                        (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
-                          "cure-job"
-                          "author-job")
-                        "review-job")})
-           :poll-fn
-           (fn [_ job-id]
-             (case job-id
-               "author-job"
-               {:job-id job-id :state "done" :artifact-ref "bad-commit"
-                :feature-card feature-card-claim
-                :result-summary "FULL_LOOP_AUTHOR: DONE bad-commit"
-                :execution successful-execution}
-               "cure-job"
-               {:job-id job-id :state "done" :artifact-ref "good-commit"
-                :feature-card feature-card-claim
-                :result-summary "FULL_LOOP_AUTHOR: DONE good-commit"
-                :execution successful-execution}
-               ;; reviewer
-               {:job-id job-id :state "done"
-                :execution successful-execution
-                :result-summary
-                (str "FULL_LOOP_REVIEW: APPROVE\n"
-                     "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}))
-           :resolve-build-fn
-           (fn [_]
-             ;; First resolution (bad-commit): artifact-only files.
-             ;; Second resolution (good-commit): substantive files.
-             (swap! resolve-call inc)
-             (if (= @resolve-call 1)
-               {:repo (.getPath root)
-                :files ["data/fold-turns/selection-authoring-flights.edn"]}
-               {:repo (.getPath root)
-                :files ["src/feature.clj" "logic/feature-witness.edn"]}))
-           :ground-fn
-           (fn [& _]
-             {:before {:implementation-entity nil}
-              :after {:implementation-entity {:id "feature-impl"}}
-              :resolved? true :dial-moved? true
-              :implementation-id "feature-impl"
-              :discharge-id "feature-discharge"})
-           :queue-fn #(swap! queued conj %)}))]
-    (is (= :grounded-change (:outcome result)))
+  (let [cohort (retention-cohort "artifact-cure")
+        {:keys [result]}
+        (run-token-feature-card-attempt
+         cohort (token-loop-exercised-decision)
+         {:initial-author-card feature-card-claim
+          :initial-artifact-ref "bad-commit"
+          :cure-card feature-card-claim
+          :artifacts? true
+          :build-files-fn
+          (fn [commit]
+            (if (= "bad-commit" commit)
+              ["data/fold-turns/selection-authoring-flights.edn"]
+              ["src/feature.clj" "logic/feature-witness.edn"]))})]
+    (is (= :grounded-progress (:outcome result)))
+    (is (= :verified
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier-verification :status])))
     (is (= :artifact-only
            (get-in result [:data :build-retries 0 :failure-kind])))
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
