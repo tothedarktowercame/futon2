@@ -66,7 +66,9 @@ existing precedence vector.
 | Exact square population/no duplicates | `:square-population` joined bijectively to policy square IDs | Missing policy-level runtime carrier |
 | Law identity/version | `:order-law {:identity ... :version ...}` | Missing external registry/configuration |
 | Law authority/receipt | `:order-law {:authority ... :receipt ...}` joined to a retained registry entry | Missing |
+| Selector authority and separation | `:selector-authority` nonzero and distinct from the law authority | Missing |
 | Registered decoder and relation | Registry entry specifying triple decoding and the construction/application relation | Missing; must not be selector-authored |
+| Registry implementation provenance | Source/implementation digest covering the decoder and relation | Missing |
 
 The minimal receipt shape is therefore:
 
@@ -79,14 +81,25 @@ The minimal receipt shape is therefore:
  :application-sequence [square-id ...]
  :order-law {:identity nonzero-id :version positive-nat
              :authority external-id :receipt nonzero-id}
+ :selector-authority distinct-nonzero-id
  :source-pin {:path path :sha256 digest}}
 ```
 
 The external registry entry must supply the decoder and relation selected by
-the four law fields.  Same membership is not ordered correspondence: the Lean
+the four law fields, carry a source/implementation pin for those functions,
+and be retained outside selector control.  Lean requires the selector authority
+to be nonzero and different from the matched law authority.  Same membership is not ordered correspondence: the Lean
 witness `[0,2,1,3]` contains exactly the same squares as `[0,1,2,3]` but is
 rejected by the registered exact-order law.  Separate witnesses reject a
 duplicate, omission, unknown index, and substituted law identity.
+
+An adversarial law with the same identity/version/authority/receipt but a
+changed acceptance function does not validate a certificate against the fixed
+registry.  If the caller replaces the trusted registry with that adversarial
+implementation, the same certificate can validate: Lean treats the registry
+as a trust premise and does not cryptographically authenticate functions.
+Therefore the runtime registry boundary must verify and retain the external
+source/implementation digest; matching labels alone are insufficient.
 
 The first integration boundary is policy construction in
 `src/futon2/aif/interpretation_construction.clj`, before its single

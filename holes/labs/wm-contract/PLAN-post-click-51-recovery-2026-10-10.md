@@ -1358,3 +1358,13 @@ or weaken an existing definition merely to accommodate current Clojure.
   external law registry.  The first integration boundary is
   `interpretation_construction.clj` before that vector is reused by rollout and
   G; refusal must precede cascade decision.  No runtime behavior changed.
+
+- 2026-10-11, application-order authority correction: certificate validity now
+  carries a nonzero selector authority and requires it to differ from the
+  matched order-law authority; a self-authorized witness fails.  A substituted
+  decoder/relation with identical identity/version/authority/receipt fails
+  against the fixed registry, while replacing the registry itself makes the
+  crafted certificate pass.  Thus the registry is explicitly an external
+  trust premise, not cryptographic authentication by Lean.  Runtime must retain
+  a source/implementation digest for the registered functions at the registry
+  boundary in addition to the selector authority and separation check.
