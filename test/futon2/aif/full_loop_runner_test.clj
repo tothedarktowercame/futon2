@@ -3700,7 +3700,16 @@
                    :attempt-id "attempt-006"
                    :failure-stage :author-wait
                    :failure-kind :agent-budget-expired
-                   :failure-data {:job-id "late-author-job"}}
+                   :failure-data
+                   {:job-id "late-author-job"
+                    :deferred-author-dispatch-context
+                    {:schema :wm/deferred-author-dispatch-context-v1
+                     :target "repair-attempt-006-deferred-completion"
+                     :repository "/repo"
+                     :pre-author-head {:repo "/repo" :head "original-head"
+                                       :observed-at-ms 1000}
+                     :job-id "late-author-job"
+                     :prompt-sha256 (digest/sha256 "original request")}}}
         result
         (runner/run-opportunity!
          {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
@@ -3736,18 +3745,55 @@
                       :execution successful-execution
                       :result-summary "FULL_LOOP_REVIEW: APPROVE"})
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+          :author-artifact-observer-fn
+          (fn [repo before job]
+            {:fresh-author? true :repo repo
+             :pre-dispatch-head (:head before)
+             :author-window-start-ms (:observed-at-ms before)
+             :author-window-end-ms 2000
+             :observed-head (:artifact-ref job)
+             :corroborates? true :disagreement? false
+             :commit (:artifact-ref job)})
           :ground-fn (fn [& _]
                        {:before {:implementation-entity nil}
                         :after {:implementation-entity {:id "impl"}}
                         :resolved? true :dial-moved? true
                         :implementation-id "impl"})
           :queue-fn identity})]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :build-failed (:outcome result)))
+    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :pass
+           (get-in result [:data :error-data :reviewer-falsifier :checks
+                           :artifact-binding :status])))
+    (is (= "original-head"
+           (get-in result [:data :artifact-binding :pre-dispatch-head])))
+    (is (= #{:selected-want-accounting :evidence-authority}
+           (set (get-in result [:data :error-data :reviewer-falsifier
+                                :failed-checks]))))
     (is (= ["codex-1"] @dispatches)
         "deferred-completion dispatches only the standing Ground Control reviewer")
     ;; Substrate insertion is not a finding-specific repair observation.
     (is (empty? @resolutions))
     (is (= :evidence-unavailable (get-in result [:repair/discharge :status])))))
+
+(deftest deferred-author-context-refuses-missing-and-foreign-jobs
+  (let [job {:job-id "late-author-job"}
+        context {:schema :wm/deferred-author-dispatch-context-v1
+                 :target "repair-x" :repository "/repo"
+                 :pre-author-head {:head "before" :observed-at-ms 1}
+                 :job-id "late-author-job" :prompt-sha256 "request-digest"}
+        obligation {:target "repair-x" :failure-data {}}]
+    (is (= :deferred-author-context-missing
+           (runner/deferred-author-context-failure obligation job)))
+    (is (= :deferred-author-context-job-mismatch
+           (runner/deferred-author-context-failure
+            (assoc-in obligation [:failure-data :deferred-author-dispatch-context]
+                      context)
+            {:job-id "foreign-job"})))
+    (is (nil? (runner/deferred-author-context-failure
+               (assoc-in obligation [:failure-data :deferred-author-dispatch-context]
+                         context)
+               job)))))
 
 (deftest recoverable-late-review-completion-skips-both-replacement-turns
   (let [dispatches (atom [])

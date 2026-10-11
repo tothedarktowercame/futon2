@@ -4563,6 +4563,25 @@
     ((or (:read-job-fn opts) read-job!)
      opts (deferred-completion-job-id obligation))))
 
+(defn deferred-author-context-failure
+  "Return the typed defect in a persisted author dispatch context, or nil."
+  [obligation late-job]
+  (let [context (get-in obligation
+                        [:failure-data :deferred-author-dispatch-context])]
+    (cond
+      (nil? context) :deferred-author-context-missing
+      (not= :wm/deferred-author-dispatch-context-v1 (:schema context))
+      :deferred-author-context-malformed
+      (not= (:job-id context) (:job-id late-job))
+      :deferred-author-context-job-mismatch
+      (or (not (string? (:repository context)))
+          (nil? (:pre-author-head context))
+          (not (string? (:prompt-sha256 context))))
+      :deferred-author-context-incomplete
+      (and (:target obligation)
+           (not= (:target obligation) (:target context)))
+      :deferred-author-context-target-mismatch)))
+
 (defn unvalidated-artifact-failure
   "Which failure, if any, a fresh author's unvalidated artifact-ref represents.
 
@@ -6374,12 +6393,35 @@
                                          :repair-obligation successor}
                                   artifact-ref
                                   (assoc :artifact-ref artifact-ref))))))
+                deferred-author-context
+                (when (and deferred-author-job
+                           (= :author-wait deferred-completion-stage))
+                  (get-in stop-line
+                          [:failure-data :deferred-author-dispatch-context]))
+                deferred-context-failure
+                (when (and deferred-author-job
+                           (= :author-wait deferred-completion-stage))
+                  (deferred-author-context-failure stop-line deferred-author-job))
+                _ (when deferred-context-failure
+                    (let [error "Deferred author completion lacks its original dispatch context"
+                          successor
+                          (supersede-deferred-completion!
+                           :machine-failure deferred-context-failure :author-wait error
+                           {:job-id (:job-id deferred-author-job)
+                            :dispatch-context deferred-author-context})]
+                      (throw (ex-info error
+                                      {:outcome :incomplete
+                                       :failure-kind deferred-context-failure
+                                       :failure-stage :author-wait
+                                       :repair-obligation successor}))))
                 fresh-author? (nil? deferred-author-job)
                 _ (reset! author-dispatch-route (if fresh-author? :fresh-author :deferred-completion))
-                author-repo (when fresh-author?
-                              (target-repository opts entry mission code-state))
-                pre-author-head (when fresh-author?
-                                  (observe-repo-head opts author-repo))
+                author-repo (if fresh-author?
+                              (target-repository opts entry mission code-state)
+                              (:repository deferred-author-context))
+                pre-author-head (if fresh-author?
+                                  (observe-repo-head opts author-repo)
+                                  (:pre-author-head deferred-author-context))
                 prompt-for-head
                 (fn [head-observation]
                   (author-prompt (assoc prompt-opts
@@ -6443,7 +6485,14 @@
                          (ex-info (.getMessage e)
                                   (merge (ex-data e)
                                          {:failure-stage :author-wait
-                                          :author-job-id author-job-id})
+                                          :author-job-id author-job-id
+                                          :deferred-author-dispatch-context
+                                          {:schema :wm/deferred-author-dispatch-context-v1
+                                           :target target
+                                           :repository author-repo
+                                           :pre-author-head pre-author-head
+                                           :job-id author-job-id
+                                           :prompt-sha256 (sha256 author-prompt-text)}})
                                   e)))))
                   retry-author?
                   (and fresh-author?
@@ -6486,15 +6535,16 @@
                                   (seq author-retries)
                                   (assoc :author-retries author-retries)))))
               (throw-if-author-refused! author-job target :author-wait)
-              (let [artifact-binding
-                    (when fresh-author?
+              (let [bound-author? (or fresh-author? (some? deferred-author-context))
+                    artifact-binding
+                    (when bound-author?
                       (fresh-artifact-binding opts author-repo
                                               effective-pre-author-head
                                               author-job))
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
                     _ (when-let [failure (unvalidated-artifact-failure
-                                          fresh-author? text-commit observed-commit)]
+                                          bound-author? text-commit observed-commit)]
                         (throw
                          (ex-info (:message failure)
                                   (cond-> {:outcome :build-failed
@@ -6505,9 +6555,9 @@
                                            :artifact-binding artifact-binding}
                                     (:artifact-ref failure)
                                     (assoc :artifact-ref (:artifact-ref failure))))))
-                    commit (if fresh-author? observed-commit text-commit)
+                    commit (if bound-author? observed-commit text-commit)
                     author-job (cond-> author-job
-                                 fresh-author?
+                                 bound-author?
                                  (assoc :repo-observed-artifact-ref commit
                                         :artifact-binding artifact-binding))
                     build (run-phase! opts @phase-context :build-resolution
@@ -6515,7 +6565,7 @@
                                          (resolve-target-build opts author-repo commit)))
                     repo (:repo build)
                     files (:files build)]
-                (when (and fresh-author? repo
+                (when (and bound-author? repo
                            (not= repo (:repo artifact-binding)))
                   (throw
                    (ex-info "Observed author artifact resolved outside the target repository"
@@ -6536,9 +6586,9 @@
                               build-retries]}
                       (build-cure-loop opts @phase-context author dispatched-turns
                                        target commit repo files author-job
-                                       fresh-author? artifact-binding)
+                                       bound-author? artifact-binding)
                     artifact-snapshot
-                      (when fresh-author?
+                      (when bound-author?
                         {:artifact-binding/fresh-author? true
                          :artifact-binding/repo (:repo artifact-binding)
                          :artifact-binding/reviewer-commit commit
