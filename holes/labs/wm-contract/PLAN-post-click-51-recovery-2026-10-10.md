@@ -1424,3 +1424,22 @@ or weaken an existing definition merely to accommodate current Clojure.
   no pasting or colimit claim is made.  Runtime needs stable ordered gluing IDs,
   explicit path orientations, and retained isomorphism graphs, but no Clojure
   behavior was added.
+
+- 2026-10-11, gluing-forest adequacy theorem blocker: the requested typed
+  unique-path theorem is false for the current square-index graph.  The focused
+  Lean witness `square_tree_need_not_have_typed_transport_path` has two
+  individually well-formed identity gluings, `0.G→1.G` and `1.I₁→2.G`.
+  `Policy.gluingForest = [0,1]` and the square graph is connected
+  (`[[0,1,2]]`), but `gluingPathInfo [(0,false),(1,false)] = none`: the
+  intermediate typed endpoints `(1,G)` and `(1,I₁)` differ.  Thus graph
+  acyclicity/spanning on square indices cannot imply an oriented transport path,
+  let alone unique transport or arbitrary path independence.
+
+  The minimal missing specification is either (a) build the forest over typed
+  vertices `(square-index, Role)` and state connectivity only within those
+  components, or (b) supply independently validated intra-square role-change
+  transports and their coherence laws.  Only after that choice can one prove
+  forest acyclicity/connectivity, unique typed paths, and reduce arbitrary path
+  equality to the existing non-tree obligations.  Proving square-graph facts
+  (1)–(3) alone would not close the requested theorem and was not presented as
+  adequacy.  No runtime or certificate semantics changed.
