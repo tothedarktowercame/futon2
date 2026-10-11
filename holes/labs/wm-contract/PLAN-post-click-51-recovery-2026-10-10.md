@@ -254,6 +254,56 @@ judgment.  It is intentionally absent from the runner and revision flow.
 | complete versus bounded absence | `[:repository-global-absence]` | required only for complete no-match and forbidden for bounded scope |
 | implementation and receipt identity | `[:implementation]`, `[:implementation-digest]`, `[:receipt-digest]` | exact adapter/version, recomputed implementation digest, recomputed whole-receipt digest |
 
+2026-10-11 `:found-related` production integration stop (defect 2): the
+retrieval half exists, but the required independent judgment producer does
+not.  `want-interpretation/request!` delegates to the canonical captured
+retrieval and preserves its ordered runs/candidates.  The revision producer
+then calls one `ask!` at `cascade_revision_producer.clj:141-149`, asking that
+same interpreter to choose or author an interpretation.  It validates only
+the chosen response and records every other retrieval hit after the fact as
+`:not-selected-by-interpreter` (`:184-197`).  That is neither a judgment nor
+evidence of rejection.
+
+The production composition root supplies only that interpreter port:
+`full_loop_runtime.clj:48-58` constructs `make-proposals-fn` with the selected
+judgment snapshot, while the invocation contract exposes `ask!` as reply text.
+Although the general runner can dispatch, poll, and durably retain terminal
+Agency jobs (`full_loop_runner.clj:1542-1581,1650-1687`), no revision-search
+configuration designates a distinct pattern-judgment authority, requests one
+judgment per ordered retrieval member, or returns the exact terminal job maps
+to `open-cascade-pattern-search/validate!`.  Reusing the interpreter would also
+violate the adapter's external-authority separation rather than close it.
+
+Therefore the accepted adapter cannot honestly be wired yet.  The minimum
+new producer/composition-root contract is:
+
+```
+judge-related! :
+  { query              : PinnedQuery
+  , repository         : PinnedPatternRepository
+  , ordered-domain     : Vector PatternIdentity
+  , search-implementation : ContentIdentity
+  , authority-role     : IndependentPatternJudgmentAuthority
+  }
+  -> TerminalAgencyJob
+
+TerminalAgencyJob.result =
+  { schema    :wm/open-cascade-pattern-judgments-v1
+  , judgments : Vector Judgment  ; exact ordered-domain population
+  }
+```
+
+The composition root must retain the complete terminal job (job ID, agent ID,
+terminal state, exact result, and recomputed result digest), pass it as
+`:authority-results`, and build a bounded-domain search receipt whose member
+vector is exactly the canonical ordered retrieval output.  Only the
+validator's deterministic first-admissible result may reach
+`executable-action`; its validated search receipt must be copied into revision
+close and Morning Brief data.  Missing, reordered, duplicated, foreign, or
+partial judgments must refuse before revision dispatch.  No threshold,
+rejection, repository-global no-match, or authority identity is inferred in
+this stop; `:authored-new` remains out of scope.
+
 The positive Clojure fixture is finite and structurally corresponds to the
 existing Lean `chosenExample`, but no repository generator currently translates
 this new EDN carrier into a Lean declaration.  The exact owed witness is an
