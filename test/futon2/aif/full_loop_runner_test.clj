@@ -807,8 +807,10 @@
 (defn- run-token-feature-card-attempt
   "Run the feature-card harness against the token fixture's actual Git object,
   mission bytes, and commit-bound D-task observations."
-  [cohort decision]
-  (token-fixture/with-artifact
+  ([cohort decision]
+   (run-token-feature-card-attempt cohort decision {}))
+  ([cohort decision {:keys [mission-observer dispatch-fn ground-fn]}]
+   (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
            mission-path (io/file token-repo
@@ -832,22 +834,27 @@
                            :feature-card feature-card-claim
                            :execution successful-execution}
                           :runner-options
-                          {:cohort? true :execution-cohort (:binding cohort)
+                          (cond->
+                           {:cohort? true :execution-cohort (:binding cohort)
                            :d-task-evidence-root (str (io/file (:root cohort) "d-task"))
                            :learning-trial-ledger-root
                            (str (io/file (:root cohort) "learning-ledger"))
                            :judge-fn
                            (fn [_] {:judgement (assoc judgement :decision decision)})
                            :mission-fn
-                           (fn [_] (#'missions/mission-doc->entry (.getPath mission-path)))
+                           (fn [target]
+                             (when mission-observer (mission-observer target))
+                             (#'missions/mission-doc->entry (.getPath mission-path)))
                            :resolve-build-fn
                            (fn [_] {:repo (.getPath token-repo)
                                     :files ["unrelated.clj"]})
                            :author-artifact-observer-fn
-                          (fn [_ before job]
-                            (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
-                                   :repo (.getPath token-repo)))}})]
-             result)))))))
+                           (fn [_ before job]
+                             (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
+                                    :repo (.getPath token-repo)))}
+                           dispatch-fn (assoc :dispatch-fn dispatch-fn)
+                           ground-fn (assoc :ground-fn ground-fn))})]
+             result))))))))
 
 (deftest r16-stop-line-registers-a-distinct-durable-park
   ;; Live pin: wm-trace run 36820e88-3d68-499d-b359-2d8dbe9743de records
@@ -6180,45 +6187,51 @@
 
 (deftest cascade-selection-carries-mission-through-readers
   ;; Exact action copied from the recorded decision's :per-policy-argmax.
-  (let [action (edn/read-string
-                (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
+  (let [recorded-action (edn/read-string
+                         (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
+        action (assoc recorded-action :want (:want token-fixture/declaration))
+        comparator (assoc action
+                          :id :test/mission-reader-comparator
+                          :cascade-id :test/mission-reader-comparator
+                          :precedence (conj (:precedence action)
+                                            :test/mission-reader-followup))
+        decision (-> (policy/select-action-cascades
+                      [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
+                       (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
+                      {:beta 2.0})
+                     with-token-fixture-carry)
         mission-id "M-aif-policy-conditioned-eig"
-        entry {:action action}
+        entry {:action recorded-action}
         prompts (atom [])
         mission-reads (atom [])
+        cohort (retention-cohort "mission-reader")
         {:keys [docs opts]} (substrate-fixture)
         {:keys [result item]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :judgement-transform-fn
-          #(assoc % :decision
-                  (with-test-carry
-                    (policy/select-action-cascades
-                     [{:action action :controller-score -2.0 :rank 1}]
-                     {:beta 2.0})))
-          :runner-options
-          {:mission-fn (fn [target]
-                         (swap! mission-reads conj target)
-                         (get {mission-id {:id mission-id :title "Shared posterior updater"}}
-                              target))
-           :dispatch-fn (fn [_ agent _ _ prompt]
-                          (swap! prompts conj prompt)
-                          {:job-id (if (= agent "zai-5")
-                                     "feature-author" "feature-review")})
-           :ground-fn (fn [& args]
-                        (apply runner/ground-commit!
-                               (concat (butlast args) [(merge (last args) opts)])))}})
+        (run-token-feature-card-attempt
+         cohort decision
+         {:mission-observer #(swap! mission-reads conj %)
+          :dispatch-fn (fn [_ agent _ _ prompt]
+                         (swap! prompts conj prompt)
+                         {:job-id (if (= agent "zai-5")
+                                    "feature-author" "feature-review")})
+          :ground-fn (fn [& args]
+                       (apply runner/ground-commit!
+                              (concat (butlast args) [(merge (last args) opts)])))})
         selection (get-in result [:checkpoints :selection :judgment])
         construction (get-in result [:checkpoints :construction :judgment])
-        implementation (get @docs "full-loop/implementation/feature123")
+        implementation (first (filter #(= :implementation/commit (:entity/type %)) (vals @docs)))
         discharge (first (filter #(= :discharge (:entity/type %)) (vals @docs)))
         root (.toFile (Files/createTempDirectory "mission-brief-" (make-array FileAttribute 0)))]
     (is (= mission-id (#'runner/selected-target entry)))
+    (is (= (select-keys recorded-action [:kind :id :target])
+           (select-keys (:action decision) [:kind :id :target])))
+    (is (= decision (loop-node-exercise/require-complete! decision)))
     (is (= :grounded-progress (:outcome result))
         "a grounded commit without mechanically accepted declared products is progress, not closure")
     (is (= [mission-id] @mission-reads))
     (is (str/includes? (first @prompts) (str "SELECTED TARGET: " (pr-str mission-id))))
-    (is (str/includes? (first @prompts) "Shared posterior updater"))
+    (is (str/includes? (first @prompts)
+                       "Mission: Policy-conditioned expected information gain"))
     (is (not (str/includes? (first @prompts) "SELECTED TARGET: :C1")))
     (doseq [target [(:selected-mission selection) (:mission construction)
                     (:implementation/target implementation) (:discharge/mission discharge)
