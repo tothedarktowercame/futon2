@@ -1407,3 +1407,20 @@ or weaken an existing definition merely to accommodate current Clojure.
   after construction/application-order validation and before
   `cascade-decision-admitted` invokes G.  The structural projection alone must
   never be reported as full predictive adequacy.
+
+- 2026-10-11, gluing coherence coverage correction: the earlier per-triangle
+  certificate is no longer the completeness boundary.  Lean now derives a
+  deterministic forest from the supplied-order, individually well-formed
+  gluing edges and requires exactly one transport-equality obligation for
+  every resulting non-tree edge.  Trees accept an empty obligation list;
+  coherent/incoherent triangles accept/refuse respectively; a two-independent-
+  cycle witness requires both non-tree edges and refuses when one is omitted.
+  Reversed duplicates remain explicit obligations.  Malformed gluings are
+  excluded from the admitted basis and the enclosing malformed policy cannot
+  validate.  `valid_covers_required_edges` proves exact obligation population
+  and per-obligation validity.  Still unproved are forest acyclicity/spanning,
+  unique simple forest paths, and the reduction theorem from these fundamental
+  cycle equations to equality of arbitrary composable transports; therefore
+  no pasting or colimit claim is made.  Runtime needs stable ordered gluing IDs,
+  explicit path orientations, and retained isomorphism graphs, but no Clojure
+  behavior was added.

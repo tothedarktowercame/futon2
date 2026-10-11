@@ -168,12 +168,31 @@ policy with an identity direct edge.  It does not strengthen
 | `PMap.comp first.iso second.iso = direct.iso` | No transport graph carrier | The complete finite `:iso` graph for each gluing, retained exactly |
 | Coverage of all cycles | None; not proved in Lean by this slice | A source-pinned complete fundamental-cycle basis (for example a spanning forest plus one triangle/path certificate per non-tree edge) |
 
-A caller-supplied list of successful triangles may omit the bad cycle.  Before
-coherent connectivity can justify pasting or any colimit claim, Lean still
-needs (1) a theorem that the supplied certificates cover a cycle basis of the
-admitted gluing graph and (2) path independence derived from coherence on that
-basis.  Runtime correspondingly needs an independently produced, source-pinned
-complete basis, not a selector-authored subset.
+A caller-supplied list of successful triangles may omit the bad cycle.  Lean
+now closes that executable coverage hole with
+`GluingCoherenceCertificate.valid`: supplied-order processing deterministically
+selects a spanning forest from well-formed gluings and makes every admitted
+non-tree edge a required obligation.  The certificate's edge list must equal
+that derived list exactly, and each obligation supplies a duplicate-free path
+using forest edges whose composed transport equals the direct edge.  A tree
+therefore requires no obligations; parallel and reversed duplicate edges are
+explicit non-tree obligations; malformed edges never enter the admitted
+basis, while any malformed policy still fails certificate validity.
+
+| Deterministic Lean field/check | Required future runtime field |
+|---|---|
+| Supplied ordered, stable gluing indices | Stable `:gluing-id` plus retained source order |
+| Derived `gluingForest` | No caller boolean; recompute from admitted gluing receipts |
+| Derived `requiredCycleEdges` | Exact ordered `:cycle-obligations` population |
+| Oriented forest steps `(gluing-id, reversed?)` | `:forest-path` with explicit orientation |
+| Composed graph equals direct graph | Retained isomorphism graphs, recomputed composition/equality |
+
+`valid_covers_required_edges` proves exact non-tree-edge coverage and validity
+of every listed transport equation.  The remaining semantic theorem, required
+before coherent connectivity can justify pasting or a colimit claim, is that
+the selected forest is acyclic and spanning with a unique simple path, followed
+by reduction of arbitrary path equality to these fundamental-cycle equations.
+That theorem is not claimed by the executable certificate slice.
 
 ### Pasting
 
