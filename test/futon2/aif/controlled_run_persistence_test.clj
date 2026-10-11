@@ -2,8 +2,10 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.controlled-report-card :as report-card]
             [futon2.aif.controlled-run-persistence :as sut]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.run-record-io :as run-record-io])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -74,8 +76,10 @@
     (is (= (get-in persisted [:trace :record])
            (get-in persisted [:hydrated :trace])))
     (is (= "controlled-a0" (get-in persisted [:hydrated :morning-brief :attempt-id])))
-    (is (= {:status :absent :reason :writer-not-in-futon2}
+    (is (= {:status :absent :reason :controlled-checker-authority-unconfigured}
            (:report-card persisted)))
+    (is (= (:report-card persisted)
+           (get-in persisted [:hydrated :morning-brief :report-card])))
     (is (= {:type :selection :status :closed}
            (get-in persisted [:checkpoint :value])))))
 
@@ -100,3 +104,48 @@
         (is (contains? #{:controlled-path-isolation-failed
                          :production-default-path-refused}
                        (:kind (ex-data e))))))))
+
+(def checker-descriptor
+  {:identity :sut/lean-requirements-reader :version 1 :authority 901
+   :implementation-pin "test-only:wm-check-run-facts+RequirementsReader:v1"})
+
+(def all-unverifiable
+  (into {} (map #(vector (keyword (str "q" %)) :unverifiable) (range 1 11))))
+
+(defn terminal [request output & [alter]]
+  (let [base {:schema :wm/requirements-checker-terminal-v1
+              :checker (:checker request)
+              :request-digest (:request-digest request)
+              :source-digest (:source-digest request)
+              :exit 0 :output output
+              :output-digest (evidence/value-digest output)}
+        value (if alter (alter base) base)]
+    (assoc value :terminal-digest (evidence/value-digest value))))
+
+(defn report-config [executor]
+  {:checker checker-descriptor :executor executor
+   :snapshot {:open-missions #{} :open-excursions #{} :open-tickets #{}
+              :patterns #{} :seats #{} :pins {:controlled true}}})
+
+(deftest controlled-report-card-binds-request-source-checker-and-parsed-outcomes
+  (let [output (pr-str {:schema :wm/lean-requirements-result-v1
+                        :outcomes all-unverifiable})
+        good #(terminal % output)
+        card (report-card/produce result (report-config good))]
+    (is (= :verified (:status card)))
+    (is (= all-unverifiable (:outcomes card)))
+    (is (= checker-descriptor (:checker card)))
+    (doseq [bad [(fn [request]
+                   (terminal request output #(assoc % :request-digest "copied")))
+                 (fn [request]
+                   (terminal request output #(assoc % :source-digest "altered-source")))
+                 (fn [request]
+                   (terminal request
+                             (pr-str {:schema :wm/lean-requirements-result-v1
+                                      :outcomes (dissoc all-unverifiable :q10)})))
+                 (fn [request]
+                   (terminal request output
+                             #(assoc-in % [:checker :implementation-pin]
+                                        "substituted-checker")))]]
+      (is (= :checker-terminal-invalid
+             (:reason (report-card/produce result (report-config bad))))))))

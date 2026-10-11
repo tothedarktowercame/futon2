@@ -6,6 +6,7 @@
   (:require [clojure.java.io :as io]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.controlled-report-card :as report-card]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.trace :as trace]))
 
@@ -39,7 +40,7 @@
   checkpoint validity is owned by the preregistered cohort."
   [{:keys [schema run-id started-at result trace-output trace-date brief-item
            checkpoint-write] :as closed-run}
-    {:keys [sut-root paths writer-opts]}]
+    {:keys [sut-root paths writer-opts report-card-config]}]
   (validate-paths! sut-root paths)
   (when-not (and (= :wm/closed-run-v1 schema) run-id started-at (map? result)
                  trace-output brief-item checkpoint-write)
@@ -56,12 +57,15 @@
                           :observation-labels-path
                           (str (io/file sut-root "observation-labels.edn")))
                    run-id started-at result)
-        brief-path (brief/queue-item! (:morning-brief-root paths) brief-item)
         record (run-record-io/hydrate-run-record (:run-record run-write))
+        card (report-card/produce record report-card-config)
+        card-write (report-card/write! sut-root card)
+        brief-item (assoc brief-item :report-card card)
+        brief-path (brief/queue-item! (:morning-brief-root paths) brief-item)
         traces (trace/read-trace :dir (:trace-dir paths) :date-str trace-date)
         briefs (brief/items (:morning-brief-root paths))]
     {:schema schema :status :persisted
      :checkpoint checkpoint :trace trace-write :run-record run-write
-     :morning-brief brief-path
+     :morning-brief brief-path :report-card-write card-write
      :hydrated {:run-record record :trace (last traces) :morning-brief (last briefs)}
-     :report-card {:status :absent :reason :writer-not-in-futon2}}))
+     :report-card card}))

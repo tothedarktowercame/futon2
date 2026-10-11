@@ -62,6 +62,26 @@
   (let [j {:job-id id :agent-id authority :state "done" :result result}]
     (assoc j :result-digest (evidence/value-digest j))))
 
+(def checker-descriptor
+  {:identity :sut/lean-requirements-reader :version 1 :authority 901
+   :implementation-pin "test-only:wm-check-run-facts+RequirementsReader:v1"})
+
+(def checker-outcomes
+  (merge (into {} (map #(vector (keyword (str "q" %)) :unverifiable)
+                       (range 1 11)))
+         {:q3 :holds :q7 :holds :q8 :holds}))
+
+(defn- checker-executor [request]
+  (let [output (pr-str {:schema :wm/lean-requirements-result-v1
+                        :outcomes checker-outcomes})
+        terminal {:schema :wm/requirements-checker-terminal-v1
+                  :checker (:checker request)
+                  :request-digest (:request-digest request)
+                  :source-digest (:source-digest request)
+                  :exit 0 :output output
+                  :output-digest (evidence/value-digest output)}]
+    (assoc terminal :terminal-digest (evidence/value-digest terminal))))
+
 (defn- checkpoint-write [dir closed]
   (let [path (io/file dir "selection.edn")
         value {:schema :wm/controlled-selection-checkpoint-v1
@@ -110,7 +130,12 @@
                                 :achievement {:summary "seven-seam controlled SUT"}}
                    :checkpoint-write checkpoint-write}
       :options {:sut-root root :paths paths
-                :writer-opts (persist-fixture/writer-opts root)}}}))
+                :writer-opts (persist-fixture/writer-opts root)
+                :report-card-config
+                {:checker checker-descriptor :executor checker-executor
+                 :snapshot {:open-missions #{target} :open-excursions #{}
+                            :open-tickets #{} :patterns #{} :seats #{}
+                            :pins {:controlled true}}}}}}))
 
 (deftest all-seven-seams-revise-close-and-hydrate
   (let [events (atom []) cwd (System/getProperty "user.dir")
@@ -167,8 +192,11 @@
       (is (.contains source "q8 := .known")))
     (is (= "integrated-controlled-sut"
            (get-in persisted [:hydrated :morning-brief :attempt-id])))
-    (is (= {:status :absent :reason :writer-not-in-futon2}
-           (:report-card persisted)))
+    (is (= :verified (get-in persisted [:report-card :status])))
+    (is (= (:report-card persisted)
+           (get-in persisted [:report-card-write :value])))
+    (is (= (:report-card persisted)
+           (get-in persisted [:hydrated :morning-brief :report-card])))
     (is (pos? (get-in result [:telemetry :total-ms])))
     (is (map? (get-in result [:telemetry :phase-ms])))
     (is (every? pos? (vals (get-in result [:telemetry :artifact-bytes]))))
