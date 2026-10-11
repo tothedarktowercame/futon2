@@ -23,6 +23,8 @@
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
+   "factorizedPreference" "calibrationAuthorizations"
+   "factorizationAuthorizations"
    "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
 
 (defn not-recomputable [s] {"not-recomputable" s})
@@ -173,6 +175,47 @@
       (:timed-out :timeout) "timedOut"
       (if x "invalid" (not-recomputable "terminal outcome absent")))))
 
+(defn- factorized-preference-facts [record]
+  (let [carrier (get-in record [:decision :factorized-preference])
+        certificate (:certificate carrier)
+        calibration (:calibration certificate)
+        calibration-registry (:calibration-authorizations carrier)
+        factorization-registry (:factorization-authorizations carrier)
+        calibration-receipt (:calibration-authorization certificate)
+        factorization-receipt (:factorization-authorization certificate)
+        calibration-entry (first (filter #(= calibration-receipt (:receipt %))
+                                         calibration-registry))
+        factorization-entry (first (filter #(= factorization-receipt (:receipt %))
+                                           factorization-registry))
+        positive? #(and (integer? %) (pos? %))
+        valid? (and (= :wm/factorized-preference-v1 (:schema carrier))
+                    (map? certificate) (map? calibration)
+                    (vector? calibration-registry) (vector? factorization-registry)
+                    (every? positive? [(:identity calibration) (:version calibration)
+                                       (:authority calibration) (:registration-token calibration)
+                                       (:selector-authority certificate)
+                                       (:factorization-identity certificate)
+                                       (:factorization-version certificate)
+                                       (:factorization-authority certificate)
+                                       calibration-receipt factorization-receipt])
+                    (not= (:authority calibration) (:selector-authority certificate))
+                    (not= (:factorization-authority certificate)
+                          (:selector-authority certificate))
+                    (every? integer? [(:focused-cost calibration) (:related-cost calibration)
+                                      (:unrelated-cost calibration)])
+                    (< (:focused-cost calibration) (:related-cost calibration)
+                       (:unrelated-cost calibration))
+                    (= calibration (:calibration calibration-entry))
+                    (= (:authority calibration) (:authorized-by calibration-entry))
+                    (= (:factorization-identity certificate) (:identity factorization-entry))
+                    (= (:factorization-version certificate) (:version factorization-entry))
+                    (= (:factorization-authority certificate) (:authority factorization-entry))
+                    (= :completion-then-conditional-relevance (:law factorization-entry)))]
+    (when valid?
+      {:certificate certificate
+       :calibration-registry calibration-registry
+       :factorization-registry factorization-registry})))
+
 (defn facts-for-record
   "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}.
   PREVIOUS is the previous parsed record, if available."
@@ -272,6 +315,7 @@
                                   (get-in record [:participants :reviewer])
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
+        factorized (factorized-preference-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -361,6 +405,15 @@
                                (nr "participant seat ids absent"))
                "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
                "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
+               "factorizedPreference"
+               (if factorized (:certificate factorized)
+                   (nr "authorized :wm/factorized-preference-v1 carrier absent or invalid"))
+               "calibrationAuthorizations"
+               (if factorized (:calibration-registry factorized)
+                   (nr "factorized preference calibration registry absent or invalid"))
+               "factorizationAuthorizations"
+               (if factorized (:factorization-registry factorized)
+                   (nr "factorized preference law registry absent or invalid"))
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         sources (into {}

@@ -1243,3 +1243,17 @@ or weaken an existing definition merely to accommodate current Clojure.
   normative C: the latter requires registered evaluative evidence and
   authority.  Runtime and Lean semantics remain unchanged pending acceptance
   of that specification decision.
+
+- 2026-10-11, item 2/Q9 historical exporter disposition: Q9 now consumes only
+  an explicitly retained `:wm/factorized-preference-v1` carrier at
+  `[:decision :factorized-preference]`.  The exporter checks the certificate's
+  calibration and factorization identity/version/authority/receipt against
+  the exact retained calibration and factorization authorization registries;
+  absent carriers, missing registry entries, and substituted factorization
+  identity/version are reported NR.  The persisted click record
+  `tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn`
+  contains no such carrier or registries, so its Q9 is NR even though it
+  contains historical flat class preferences.  Neither 55/35/5/5 nor the old
+  completion-pair counts are promoted into a certificate.  This is a
+  read-only exporter classification; runtime selection, class weights, and
+  calibration remain unchanged.

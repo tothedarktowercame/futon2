@@ -1,6 +1,7 @@
 (ns futon2.aif.wm-run-facts-test
   (:require [clojure.test :refer [deftest is]]
-            [wm-run-facts :as facts]))
+            [wm-run-facts :as facts]
+            [wm-check-run-facts :as checker]))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
@@ -13,6 +14,67 @@
                :policies [{:id :pi1}]}}
    :participants {:author "author"}
    :terminal-receipt {:outcome :changed}})
+
+(def factorized-carrier
+  {:schema :wm/factorized-preference-v1
+   :certificate
+   {:calibration {:identity 101 :version 1 :authority 102
+                  :registration-token 103
+                  :focused-cost 0 :related-cost 1 :unrelated-cost 2}
+    :selector-authority 108
+    :factorization-identity 106 :factorization-version 1
+    :factorization-authority 107
+    :calibration-authorization 104 :factorization-authorization 105}
+   :calibration-authorizations
+   [{:receipt 104
+     :calibration {:identity 101 :version 1 :authority 102
+                   :registration-token 103
+                   :focused-cost 0 :related-cost 1 :unrelated-cost 2}
+     :authorized-by 102}]
+   :factorization-authorizations
+   [{:receipt 105 :identity 106 :version 1 :authority 107
+     :law :completion-then-conditional-relevance}]})
+
+(defn q9-export [r]
+  (:facts (facts/facts-for-record r "r" snap nil nil)))
+
+(deftest q9-absent-and-flat-preference-carriers-remain-not-recomputable
+  (doseq [r [record
+             (assoc-in record [:decision :selection-certificate :scoring 0
+                               :observation-model :class-preference]
+                       {1 {:focused 0.55 :related 0.35 :unrelated 0.05
+                           :stop-the-line 0.05}})]]
+    (let [export (q9-export r)]
+      (doseq [field ["factorizedPreference" "calibrationAuthorizations"
+                     "factorizationAuthorizations"]]
+        (is (contains? (export field) "not-recomputable") field)))))
+
+(deftest q9-historical-click-record-has-no-authorized-factorization
+  (let [historical (facts/read-edn
+                    "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn")
+        export (q9-export historical)]
+    (is (contains? (export "factorizedPreference") "not-recomputable"))
+    (is (contains? (export "calibrationAuthorizations") "not-recomputable"))
+    (is (contains? (export "factorizationAuthorizations") "not-recomputable"))))
+
+(deftest q9-complete-joined-carrier-exports-a-lean-pass-shape
+  (let [export (q9-export (assoc-in record [:decision :factorized-preference]
+                                    factorized-carrier))
+        source (checker/lean-source {"facts" export} "q9Joined")]
+    (is (= (:certificate factorized-carrier) (export "factorizedPreference")))
+    (is (= (:calibration-authorizations factorized-carrier)
+           (export "calibrationAuthorizations")))
+    (is (.contains source "factorizedPreference := some"))
+    (is (.contains source "factorizationIdentity := 106"))))
+
+(deftest q9-substituted-factorization-or-missing-registry-is-not-recomputable
+  (doseq [carrier [(assoc-in factorized-carrier
+                             [:certificate :factorization-identity] 999)
+                   (assoc-in factorized-carrier
+                             [:certificate :factorization-version] 2)
+                   (assoc factorized-carrier :factorization-authorizations [])]]
+    (let [export (q9-export (assoc-in record [:decision :factorized-preference] carrier))]
+      (is (contains? (export "factorizedPreference") "not-recomputable")))))
 
 (deftest typed-not-supplied-increments-absence-count
   (let [base (facts/facts-for-record record "r" snap nil nil)

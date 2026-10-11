@@ -12,6 +12,7 @@
 (defn fs [xs] (str "{" (str/join ", " (map id xs)) "}"))
 (defn nat-fs [xs] (str "{" (str/join ", " xs) "}"))
 (defn bool-lit [x] (if x "true" "false"))
+(defn field [m k] (or (get m k) (get m (name k))))
 (defn ev-nr [facts ks]
   (let [missing (filter #(or (not (contains? facts %)) (nr? (get facts %))) ks)]
     (str ".nr \"not recomputable: " (str/join "," missing) "\"")))
@@ -44,7 +45,8 @@
         "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
         "targetConstruction" "constructedCascades" "comparedPolicies"
         "seatsAvailable" "seatsUsed"]
-   :q9 ["completionPreferencePairs" "completionPairsStrictlyPreferred"]
+   :q9 ["factorizedPreference" "calibrationAuthorizations"
+        "factorizationAuthorizations"]
    :q10 ["differentArrangementPairs" "arrangementPairsDistinguishedByG"]})
 
 (defn evidence [facts q]
@@ -86,8 +88,35 @@
                               (facts "libraryPatternCount") (target-construction (facts "targetConstruction"))
                               (fs (facts "constructedCascades")) (fs (facts "comparedPolicies"))
                               (fs (facts "seatsAvailable")) (fs (facts "seatsUsed"))))
-        :q9 (ev-known (format "completionPreferencePairs := %d, completionPairsStrictlyPreferred := %d"
-                              (facts "completionPreferencePairs") (facts "completionPairsStrictlyPreferred")))
+        :q9 (let [certificate (facts "factorizedPreference")
+                  calibration (field certificate :calibration)
+                  calibration-term
+                  (format "{%s := %d, version := %d, authority := %d, registrationToken := %d, focusedCost := %d, relatedCost := %d, unrelatedCost := %d}"
+                          "identity" (field calibration :identity) (field calibration :version)
+                          (field calibration :authority) (field calibration :registration-token)
+                          (field calibration :focused-cost) (field calibration :related-cost)
+                          (field calibration :unrelated-cost))
+                  calibration-registry
+                  (str "[" (str/join ", "
+                                  (for [entry (facts "calibrationAuthorizations")]
+                                    (format "{receipt := %d, calibration := %s, authorizedBy := %d}"
+                                            (field entry :receipt) calibration-term
+                                            (field entry :authorized-by)))) "]")
+                  factorization-registry
+                  (str "[" (str/join ", "
+                                  (for [entry (facts "factorizationAuthorizations")]
+                                    (format "{receipt := %d, identity := %d, version := %d, authority := %d, law := .completionThenConditionalRelevance}"
+                                            (field entry :receipt) (field entry :identity)
+                                            (field entry :version) (field entry :authority)))) "]")]
+              (ev-known
+               (format "factorizedPreference := some {calibration := %s, selectorAuthority := %d, factorizationIdentity := %d, factorizationVersion := %d, factorizationAuthority := %d, calibrationAuthorization := %d, factorizationAuthorization := %d}, calibrationAuthorizations := %s, factorizationAuthorizations := %s"
+                       calibration-term (field certificate :selector-authority)
+                       (field certificate :factorization-identity)
+                       (field certificate :factorization-version)
+                       (field certificate :factorization-authority)
+                       (field certificate :calibration-authorization)
+                       (field certificate :factorization-authorization)
+                       calibration-registry factorization-registry)))
         :q10 (ev-known (format "differentArrangementPairs := %d, arrangementPairsDistinguishedByG := %d"
                                (facts "differentArrangementPairs") (facts "arrangementPairsDistinguishedByG")))))))
 
