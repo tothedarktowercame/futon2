@@ -822,7 +822,7 @@
                             judgement-transform-fn author-summary author-result
                             artifacts? reviewer-execution reviewer-events grounded?
                             cure-card cure-artifact-ref initial-author-card
-                            initial-artifact-ref build-files-fn
+                            initial-artifact-ref initial-author-job build-files-fn
                             runner-options]}]
    (token-fixture/with-artifact
    (fn [sha]
@@ -861,19 +861,20 @@
                           :reviewer-events reviewer-events
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
-                          (cond->
-                           {:job-id "feature-author" :state "done"
-                            :artifact-ref (or initial-artifact-ref sha)
-                            :result-summary (or author-summary
-                                                (str "FULL_LOOP_AUTHOR: DONE "
-                                                     (or initial-artifact-ref sha)))
-                            :execution successful-execution}
-                            author-result
-                            (assoc :result author-result)
-                            (or initial-author-card
-                                (and (nil? author-summary) (nil? cure-card)))
-                            (assoc :feature-card
-                                   (or initial-author-card feature-card-claim)))
+                          (or initial-author-job
+                              (cond->
+                               {:job-id "feature-author" :state "done"
+                                :artifact-ref (or initial-artifact-ref sha)
+                                :result-summary (or author-summary
+                                                    (str "FULL_LOOP_AUTHOR: DONE "
+                                                         (or initial-artifact-ref sha)))
+                                :execution successful-execution}
+                                author-result
+                                (assoc :result author-result)
+                                (or initial-author-card
+                                    (and (nil? author-summary) (nil? cure-card)))
+                                (assoc :feature-card
+                                       (or initial-author-card feature-card-claim))))
                           :runner-options
                           (merge
                            (cond->
@@ -1011,9 +1012,11 @@
   ;; never retried); invoke-exception is the historical spelling kept for the
   ;; incident record. Both must retry; each is one deftest body below.
   (doseq [code ["invoke-error" "invoke-exception"]]
-    (let [{:keys [result dispatches]}
-          (run-feature-card-attempt
-           {:author-card feature-card-claim
+    (let [cohort (retention-cohort (str "invoke-retry-" code))
+          {:keys [result dispatches]}
+          (run-token-feature-card-attempt
+           cohort (token-loop-exercised-decision)
+           {:initial-author-card feature-card-claim
             :cure-card feature-card-claim
             :initial-author-job
             {:job-id "feature-author"
@@ -1022,7 +1025,10 @@
              :terminal-code code
              :terminal-message "invocation failed below the author contract"
              :events [{:type "failed" :code code}]}})]
-      (is (= :grounded-change (:outcome result)) (str code " retried"))
+      (is (= :grounded-progress (:outcome result)) (str code " retried"))
+      (is (= :verified
+             (get-in result [:checkpoints :build :judgment :validation
+                             :reviewer-falsifier-verification :status])))
       (is (= ["zai-5" "zai-5" "codex-7"] dispatches)
           (str code ": one replacement author is dispatched before independent review"))
       (is (= "feature-author"
