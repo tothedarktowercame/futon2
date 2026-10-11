@@ -67,6 +67,21 @@
     (is (.contains source "factorizedPreference := some"))
     (is (.contains source "factorizationIdentity := 106"))))
 
+(deftest q9-lean-emitter-preserves-each-calibration-registry-entry
+  (let [second-calibration {:identity 201 :version 2 :authority 202
+                            :registration-token 203
+                            :focused-cost 3 :related-cost 4 :unrelated-cost 5}
+        second-authorization {:receipt 204 :calibration second-calibration
+                              :authorized-by 202}
+        carrier (update factorized-carrier :calibration-authorizations
+                        conj second-authorization)
+        export (q9-export (assoc-in record [:decision :factorized-preference] carrier))
+        source (checker/lean-source {"facts" export} "q9TwoCalibrations")]
+    (is (.contains source
+                   "identity := 101, version := 1, authority := 102, registrationToken := 103, focusedCost := 0, relatedCost := 1, unrelatedCost := 2"))
+    (is (.contains source
+                   "receipt := 204, calibration := {identity := 201, version := 2, authority := 202, registrationToken := 203, focusedCost := 3, relatedCost := 4, unrelatedCost := 5}, authorizedBy := 202"))))
+
 (deftest q9-substituted-factorization-or-missing-registry-is-not-recomputable
   (doseq [carrier [(assoc-in factorized-carrier
                              [:certificate :factorization-identity] 999)

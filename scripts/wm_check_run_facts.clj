@@ -13,6 +13,12 @@
 (defn nat-fs [xs] (str "{" (str/join ", " xs) "}"))
 (defn bool-lit [x] (if x "true" "false"))
 (defn field [m k] (or (get m k) (get m (name k))))
+(defn calibration-term [calibration]
+  (format "{%s := %d, version := %d, authority := %d, registrationToken := %d, focusedCost := %d, relatedCost := %d, unrelatedCost := %d}"
+          "identity" (field calibration :identity) (field calibration :version)
+          (field calibration :authority) (field calibration :registration-token)
+          (field calibration :focused-cost) (field calibration :related-cost)
+          (field calibration :unrelated-cost)))
 (defn ev-nr [facts ks]
   (let [missing (filter #(or (not (contains? facts %)) (nr? (get facts %))) ks)]
     (str ".nr \"not recomputable: " (str/join "," missing) "\"")))
@@ -90,17 +96,13 @@
                               (fs (facts "seatsAvailable")) (fs (facts "seatsUsed"))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
-                  calibration-term
-                  (format "{%s := %d, version := %d, authority := %d, registrationToken := %d, focusedCost := %d, relatedCost := %d, unrelatedCost := %d}"
-                          "identity" (field calibration :identity) (field calibration :version)
-                          (field calibration :authority) (field calibration :registration-token)
-                          (field calibration :focused-cost) (field calibration :related-cost)
-                          (field calibration :unrelated-cost))
+                  selected-calibration-term (calibration-term calibration)
                   calibration-registry
                   (str "[" (str/join ", "
                                   (for [entry (facts "calibrationAuthorizations")]
                                     (format "{receipt := %d, calibration := %s, authorizedBy := %d}"
-                                            (field entry :receipt) calibration-term
+                                            (field entry :receipt)
+                                            (calibration-term (field entry :calibration))
                                             (field entry :authorized-by)))) "]")
                   factorization-registry
                   (str "[" (str/join ", "
@@ -110,7 +112,7 @@
                                             (field entry :version) (field entry :authority)))) "]")]
               (ev-known
                (format "factorizedPreference := some {calibration := %s, selectorAuthority := %d, factorizationIdentity := %d, factorizationVersion := %d, factorizationAuthority := %d, calibrationAuthorization := %d, factorizationAuthorization := %d}, calibrationAuthorizations := %s, factorizationAuthorizations := %s"
-                       calibration-term (field certificate :selector-authority)
+                       selected-calibration-term (field certificate :selector-authority)
                        (field certificate :factorization-identity)
                        (field certificate :factorization-version)
                        (field certificate :factorization-authority)
