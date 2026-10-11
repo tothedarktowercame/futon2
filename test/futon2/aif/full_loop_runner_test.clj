@@ -533,13 +533,7 @@
   The full loop requires the same retained multi-step/class-emission evidence
   that production cascade scoring places under :certificate/:f."
   [action controller-score rank]
-  {:action action
-   :controller-score controller-score
-   :rank rank
-   :certificate
-   {:f {:model {:kind :class-emission
-                :horizon 2
-                :class-preference {2 {:focused 1.0}}}}}})
+  (runner-fixture/loop-exercised-ranked-entry action controller-score rank))
 
 (defn with-test-carry [decision]
   (-> decision

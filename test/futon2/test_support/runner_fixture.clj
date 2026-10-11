@@ -60,20 +60,35 @@
 
 (def ^:private selected-action
   {:kind :cascade-candidate :cascade-id :test/selected :id :test/selected
-   :target "M-selected" :precedence [:test/selected-pattern]
+   :target "M-selected"
+   :precedence [:test/selected-pattern :test/selected-followup]
    :construction-receipt {:cascade/id :test/selected :moves 1
                           :family-searched :unit :coverage 1}
    :interpretation-receipts [{:pattern :test/selected-pattern
                               :admitted-by :test-suite}]})
 
+(defn loop-exercised-ranked-entry
+  "Build a selector entry with the retained evidence required at the real
+  full-loop launch gate. Tests may vary the malformed evidence downstream,
+  but must not accidentally omit upstream rollout/class-scoring evidence."
+  [action controller-score rank]
+  {:action action
+   :controller-score controller-score
+   :rank rank
+   :certificate
+   {:f {:model {:kind :class-emission
+                :horizon 2
+                :class-preference {2 {:focused 1.0}}}}}})
+
 (def ^:private judgement
   {:decision (assoc-in
               (policy/select-action-cascades
-               [{:action selected-action :controller-score -2.0 :rank 1}
-                {:action (assoc selected-action
-                                :cascade-id "M-rank-head" :id "M-rank-head"
-                                :precedence [:test/other-pattern])
-                 :controller-score -1.0 :rank 2}]
+               [(loop-exercised-ranked-entry selected-action -2.0 1)
+                (loop-exercised-ranked-entry
+                 (assoc selected-action
+                        :cascade-id "M-rank-head" :id "M-rank-head"
+                        :precedence [:test/other-pattern :test/other-followup])
+                 -1.0 2)]
                {:beta 2.0})
               [:selection-certificate :token-belief-stage :prospective-carry]
               {:schema :wm/prospective-token-carry-v1
