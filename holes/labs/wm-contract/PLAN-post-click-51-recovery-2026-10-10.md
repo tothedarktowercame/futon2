@@ -859,7 +859,7 @@ or weaken an existing definition merely to accommodate current Clojure.
   | Predictive interpretation consumed by G | `CascadeEFE.Model.interpretation`, `policyKernel` | admitted interpretation receipts and model identity | source/admission checks plus scoring model | Present as runtime data; no theorem bridges a `ThreeHalvesBlend.Policy` to the transition kernel |
   | Successful score for every family member | `CascadeEFEPolicies.CandidateFamily.scored` | scoring entries | post-construction scoring | Post-score by definition; not a pre-G gate |
   | Durable incremental task frontier | `IncrementalTaskFrontier.Entry`, `WorldDelta`, `RefreshCertificate.Valid` | none | none | Lean specification implemented; runtime unwired |
-  | Current-key selection with stale-contender refusal | `IncrementalTaskFrontier.SelectionCertificate.Valid` | none | none | Lean specification implemented; distinct from cascade G |
+  | Strict refresh-before-selection over current keys | `IncrementalTaskFrontier.RefreshCertificate.Valid`, `SelectionCertificate.Valid` | none | none | Lean specification implemented; distinct from cascade G |
   | Selected-target cascade identity correspondence | `IncrementalTaskFrontier.TargetCascadeCertificate.Valid` | constructed/admitted/scored/posterior identities are not yet exported as one receipt | none | Lean specification implemented; runtime unwired |
 
   The narrowest already-defined receipt for the structural/token-order part
@@ -990,14 +990,18 @@ or weaken an existing definition merely to accommodate current Clojure.
   retained/invalidated/removed partition, literal retention, recomputation of
   invalidated and added tasks, and exact current-open coverage.
   `SelectionCertificate.Valid` compares current stable keys without ordinal
-  reindexing and rejects any unresolved stale entry that could beat or tie the
-  winner.  `TargetCascadeCertificate.Valid` is deliberately selected-task
-  local and equates constructed, admitted, scored and posterior identity sets;
-  it requires multiple posterior policies only for multiple admissible
-  cascades.  `Requirements.Q8` now consumes these three certificates, while
+  reindexing.  The corrected protocol is strict refresh-before-selection:
+  every affected or added task must have a recomputed current entry, so there
+  is no caller-supplied stale list that can omit a contender.  Added tasks are
+  disjoint from prior tasks and from removals.  `TargetCascadeCertificate.Valid`
+  is deliberately selected-task local and equates the evidence-carrying set
+  of available admissible identities with constructed, admitted, scored and
+  posterior identity sets; multiplicity is derived from that set's cardinality,
+  not a claimed count.  `Requirements.Q8` consumes these certificates, while
   Q1 alone retains full open-task enumeration responsibility.  Positive and
   adversarial closed witnesses cover retention, invalidation/addition,
-  stale-contender refusal and cascade-set mismatch.  This is a Lean-only
+  omitted affected recomputation, two-admissible/one-posterior failure and
+  cascade-set mismatch.  This is a Lean-only
   repair: no Clojure runtime producer, reload, replay or production write was
   added.
 
