@@ -6798,14 +6798,26 @@
   (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
     (let [failure
           (try
-            (initialization-fixture/with-two-ticks
-             (fn [{decision :second}]
-               (let [{:keys [root] :as c} (retention-cohort "runner-token-initialization")
+            (initialization-fixture/with-two-ticks true
+             (fn [{decision :second artifact-repo :repo artifact-commit :commit
+                   d-task-root :root inputs :inputs}]
+               (let [c (retention-cohort "runner-token-initialization")
+           mission-path (io/file artifact-repo
+                                 "holes/missions/M-aif-policy-conditioned-eig.md")
            input (get-in decision [:selection-certificate :token-belief-input])
            opts (assoc (retention-success-opts c)
+                       :d-task-evidence-root d-task-root
+                       :target-repo-fn (fn [& _] (.getPath artifact-repo))
+                       :mission-fn (fn [_]
+                                     (#'missions/mission-doc->entry
+                                      (.getPath mission-path)))
+                       :resolve-build-fn (fn [_]
+                                           {:repo (.getPath artifact-repo)
+                                            :files ["created.clj"]})
                        :author-artifact-observer-fn
-                       (fn [r before job]
-                         (assoc (synthetic-artifact-binding r before job) :repo root))
+                       (fn [_ _ _]
+                         (assoc (:artifact-binding inputs)
+                                :repo (.getPath artifact-repo)))
                        :ground-fn (fn [& _] {:before {:implementation-entity nil}
                                              :after {:implementation-entity {:id "retained"}}
                                              :resolved? true :dial-moved? true
@@ -6814,8 +6826,8 @@
                        :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
                        :poll-fn (fn [_ id]
                                   (if (= id "retention-author")
-                                    {:job-id id :state "done" :artifact-ref "retained123"
-                                     :result-summary "FULL_LOOP_AUTHOR: DONE retained123"
+                                    {:job-id id :state "done" :artifact-ref artifact-commit
+                                     :result-summary (str "FULL_LOOP_AUTHOR: DONE " artifact-commit)
                                      :feature-card feature-card-claim :execution successful-execution}
                                     {:job-id id :state "done" :execution successful-execution
                                      :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
@@ -6835,6 +6847,9 @@
                    (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
                  (is (= :observed-initialization (:conditioning-status input)))
                  (is (= input (get-in selected [:selection-certificate :token-belief-input])))
+                 (is (= :ready-for-posterior
+                        (get-in selected
+                                [:selection-certificate :prefix-f-routing :status])))
                  (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
                  (is (preference-audit/valid? selected (get-in selected [:selection-certificate :preference-audit])))
                  (is (= (:continuation-belief input)
@@ -6843,10 +6858,7 @@
                              (keys (:continuation-belief input)))))))
             nil
             (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      ;; The square now admits construction.  Prefix-F remains deliberately
-      ;; unwired here: do not run or read retention artifacts after refusal.
-      (is (= :free-energy-not-supplied (get-in failure [:refusal :kind])))
-      (is (= 1 (get-in failure [:refusal :detail :n-without-f]))))))
+      (is (nil? failure) "authorized Prefix-F commissioning reaches close"))))
 
 (deftest feature-card-close-retains-learning-receipt-without-changing-selection
   ;; Canonical runner-source guard stays enabled; owner runs after merge.

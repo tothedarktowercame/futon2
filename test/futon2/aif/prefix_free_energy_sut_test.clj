@@ -3,7 +3,8 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.policy-prefix-admission :as admission]
             [futon2.aif.prefix-free-energy-cold-start :as cold]
-            [futon2.aif.prefix-free-energy-sut :as sut]))
+            [futon2.aif.prefix-free-energy-sut :as sut]
+            [futon2.aif.wm.cascade-decision :as cascade-decision]))
 
 (def a {:id :a :target "M-a" :precedence [{:id :p/a}]})
 (def b {:id :b :target "M-b" :precedence [{:id :p/b}]})
@@ -70,6 +71,18 @@
         j (job (str "prior-" (hash policy)) "prior-author"
                {:schema :wm/prefix-f-bootstrap-prior-v1 :prior p0})]
     [(cold/seal (assoc p0 :authority (auth-ref j))) j]))
+
+(defn commissioning-for
+  "Controlled external commissioning for one exact candidate PolicyKey.
+  Test fixtures use this carrier instead of supplying a numeric F."
+  [candidate]
+  (let [policy (admission/candidate-key candidate)
+        context (authority-fixture)
+        [bootstrap-prior prior-job] (prior policy)]
+    {:bootstrap-priors {policy bootstrap-prior}
+     :scorer-authority "scorer"
+     :context (update context :authority-jobs assoc
+                      (:job-id prior-job) prior-job)}))
 
 (defn step [policy click f & [s-prev q]]
   {:step {:status :present :policy-key policy
@@ -162,6 +175,37 @@
                           input (assoc-in context
                                           [:executable-registry :sut-evaluator :executable]
                                           replacement)))))))))
+
+(deftest commissioned-selection-boundary-is-explicit-and-refusal-default
+  (reset! calls 0)
+  (let [ranked [{:id :rank-a :action a :g 2.0}]
+        token-input {:policy-prefixes
+                     (admission/prefixes [a]
+                                         {:steps []
+                                          :dir-status {:absent :fixture}})}
+        uncommissioned (#'cascade-decision/prefix-f-posterior-input
+                        ranked [a] token-input {})
+        commissioned (#'cascade-decision/prefix-f-posterior-input
+                      ranked [a] token-input
+                      {:prefix-f-commissioning (commissioning-for a)})]
+    (is (= :not-supplied
+           (get-in uncommissioned [:ranked 0 :f-prefix :status])))
+    (is (= :ready-for-posterior (get-in commissioned [:receipt :status])))
+    (is (= :bootstrap
+           (get-in commissioned [:ranked 0 :f-prefix :route])))
+    (is (= 1 @calls) "the commissioned evaluator is invoked exactly once")
+    (testing "an invalid commissioning refuses before posterior selection"
+      (is (= :self-authored-calibration-law
+             (try
+               (#'cascade-decision/prefix-f-posterior-input
+                ranked [a] token-input
+                {:prefix-f-commissioning
+                 (assoc-in (commissioning-for a)
+                           [:context :law-registry "law-1" :authority]
+                           "scorer")})
+               nil
+               (catch clojure.lang.ExceptionInfo e
+                 (:prefix-f-cold-start/refusal (ex-data e)))))))))
 
 (defn transition-fixture [raw-records]
   (let [before (carrier "before" {:ledger-digest "l1" :epoch "e1"

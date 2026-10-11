@@ -26,6 +26,7 @@
             [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
+            [futon2.aif.prefix-free-energy-sut :as prefix-f-sut]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
@@ -47,6 +48,40 @@
        (pos? beta)
        (string? authority)
        (not (str/blank? authority))))
+
+(defn- prefix-f-posterior-input
+  "Prepare the exact ranked population consumed by the posterior selector.
+
+  With no explicit commissioning this is the historical empirical-only path.
+  A commissioning is refusal-by-default and must pass the controlled Prefix-F
+  validator before any bootstrap value can enter selection."
+  [ranked candidates token-belief-input opts]
+  (let [conditioning-steps (or (:conditioning-steps opts)
+                               {:steps []
+                                :dir-status {:absent :no-flight-steps-in-opts}})
+        empirical (policy-prefix/production-ranked
+                   ranked
+                   (select-keys token-belief-input
+                                [:conditioning-status :reason :observation-updates])
+                   (:policy-prefixes token-belief-input))]
+    (if-let [{:keys [bootstrap-priors scorer-authority context] :as commissioning}
+             (:prefix-f-commissioning opts)]
+      (let [result (prefix-f-sut/compose-menu!
+                    {:candidates candidates
+                     :ranked ranked
+                     :conditioning-steps conditioning-steps
+                     :bootstrap-priors bootstrap-priors
+                     :scorer-authority scorer-authority}
+                    context)]
+        (if (= :ready-for-posterior (:status result))
+          {:ranked (:posterior-input result)
+           :receipt result}
+          (throw (ex-info "commissioned Prefix-F preparation refused"
+                          {:kind :prefix-f-commissioning-refused
+                           :reason (:reason result)
+                           :details (:details result)
+                           :commissioning-keys (set (keys commissioning))}))))
+      {:ranked empirical})))
 
 (defn- lane-step
   "Run one cascade-lane node call. A typed refusal — an ex-info thrown by the
@@ -1104,11 +1139,11 @@
                                            joint-candidates
                                            (or (:conditioning-steps opts)
                                                {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})))
+                prefix-f-input (prefix-f-posterior-input
+                                ranked joint-candidates token-belief-input opts)
                 decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
                                   (policy/select-action-cascades
-                                    (policy-prefix/production-ranked ranked
-                                      (select-keys token-belief-input [:conditioning-status :reason :observation-updates])
-                                      (:policy-prefixes token-belief-input))
+                                    (:ranked prefix-f-input)
                                     {:beta (:beta beta-state) :beta-state beta-state
                                      :cascade-habit-path (:cascade-habit-path opts)
                                      :pattern-feedback (:pattern-feedback opts)
@@ -1119,6 +1154,10 @@
                                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
+                decision (cond-> decision
+                           (:receipt prefix-f-input)
+                           (assoc-in [:selection-certificate :prefix-f-routing]
+                                     (:receipt prefix-f-input)))
                 decision (assoc-in decision [:selection-certificate :precision-family]
                                    (precision-carry/family decision precision-model schedules))
                 decision (assoc-in decision [:selection-certificate :token-rate-lanes]

@@ -7,6 +7,7 @@
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.d-predecessor-task-authority-test :as fixture]
             [futon2.aif.observation-checks :as checks]
+            [futon2.aif.prefix-free-energy-sut-test :as prefix-f-fixture]
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.aif.token-belief-carry :as carry]
             [futon2.aif.token-belief-predecessor :as predecessor]
@@ -73,8 +74,10 @@
                                  {:status :not-updated :token :ignored :observed true}
                                  {:status :updated :token :a :observed false}]))))
 
-(defn with-two-ticks [f]
-  (fixture/with-artifact
+(defn with-two-ticks
+  ([f] (with-two-ticks true f))
+  ([commission-prefix-f? f]
+   (fixture/with-artifact
    {:target target :locators fixture-locators
     :universe (set (map q (keys fixture-locators)))
     :before-files {"holes/missions/M-aif-policy-conditioned-eig.md"
@@ -106,11 +109,16 @@
                 :context-of (constantly :WM) :beta-by-context {:WM {:beta 1 :status :declared}}
                 :horizon-steps 1 :token-initialization {target current}}
            assembled (problems/assemble {:targets [target] :sources src})
-           opts {:cascade-habit-path (str root "/absent-habit.edn")
+           opts (cond-> {:cascade-habit-path (str root "/absent-habit.edn")
                  :token-belief-context {:occurrence-id "carry"}
                  :live-c {:derived {:want #{(keyword "alive" target)}
                                    :weights {(keyword "alive" target) 1} :lam 1
-                                   :entries [] :gaps [] :refusals nil :signature "fixture"}}}]
+                                   :entries [] :gaps [] :refusals nil :signature "fixture"}}}
+                  commission-prefix-f?
+                  (assoc :prefix-f-commissioning
+                         (prefix-f-fixture/commissioning-for
+                          (assoc (first (:candidates cascade-declaration))
+                                 :target target))))]
        (is (= :admitted (:status signed)))
        (is (= 1 (count (:problems assembled))))
        (with-redefs [predecessor/production-authority (fn [_] execution)
@@ -125,7 +133,7 @@
                                                   :token-belief-predecessor-trace trace))))]
            (f (assoc env :signed signed :execution execution :current current
                      :assembled assembled :opts opts :first first-decision :second second-decision
-                     :prior prior :trace trace :habit-reads (receipts/habit-log @reads)))))))))
+                     :prior prior :trace trace :habit-reads (receipts/habit-log @reads))))))))))
 
 (deftest two-ticks-use-signed-false-in-actual-selection
   (with-two-ticks
