@@ -5863,10 +5863,34 @@
   ;; Round-2 review: the durable tick record never contained :runner/source.
   ;; The same identity that gated the run must be readable back from the
   ;; persisted record.
-  (let [record-dir (.getPath (.toFile (Files/createTempDirectory
+  ;; 2026-10-11 repair: commit 98ed636d6 ("Gate clicks on current META
+  ;; selection composition") requires the four critical namespaces below to
+  ;; be :current before the attempt runs; this fixture predates that gate and
+  ;; registered only the runner, so the gate (correctly) refused with
+  ;; :stale-outer-selection-composition before any assertion could run. The
+  ;; critical namespaces are now registered at their live canonical disk
+  ;; digests; futon2.aif.policy stays deliberately unregistered (asserted
+  ;; below). No production gate is altered.
+  (let [critical ['futon2.aif.full-loop-runtime
+                  'futon2.report.war-machine
+                  'futon2.aif.meta-live-outer-selector
+                  'futon2.aif.meta-pipeline-selector]
+        disk-digest (fn [n]
+                      (load-identity/sha256
+                       (load-identity/read-bytes
+                        (get load-identity/required-sources n))))
+        register (fn [corrupt]
+                   (into {'futon2.aif.full-loop-runner
+                          {:sha256 (load-identity/sha256 (.getBytes "live" "UTF-8"))}}
+                         (map (fn [n]
+                                [n {:sha256 (if (= n corrupt)
+                                              (load-identity/sha256 (.getBytes "dead" "UTF-8"))
+                                              (disk-digest n))}])
+                              critical)))
+        record-dir (.getPath (.toFile (Files/createTempDirectory
                                        "wm-src-record-" (make-array FileAttribute 0))))]
     (with-redefs-fn
-      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 (.getBytes "live" "UTF-8"))}})
+      {#'load-identity/registry (atom (register nil))
        #'runner/canonical-runner-bytes (fn [] (.getBytes "live" "UTF-8"))
        #'runner/run-opportunity-core!
        (fn [_] {:attempt-id "s" :outcome :no-op-change
@@ -5880,7 +5904,28 @@
           (is (= :unregistered (get-in record [:runner/source :namespaces 'futon2.aif.policy :status]))
               "the durable report retains missing namespace registrations")
           (is (= :current (get-in record [:runner/source :runner/source-check]))
-              "recorded identity is the one that gated the run"))))))
+              "recorded identity is the one that gated the run"))))
+    ;; Adversarial falsifier: corrupt exactly one critical namespace's
+    ;; registered digest. The pre-attempt gate must refuse, name precisely
+    ;; that namespace (:stale against disk, the others untouched), and the
+    ;; attempt must never run -- proving the composition gate binds
+    ;; per-namespace rather than passing vacuously.
+    (let [poisoned 'futon2.aif.meta-pipeline-selector
+          thrown (try
+                   (with-redefs-fn
+                     {#'load-identity/registry (atom (register poisoned))
+                      #'runner/canonical-runner-bytes (fn [] (.getBytes "live" "UTF-8"))
+                      #'runner/run-opportunity-core!
+                      (fn [_] (throw (ex-info "attempt must not run past a refused gate"
+                                              {:failure-kind :falsifier})))}
+                     #(runner/run-opportunity! {:run-record-dir record-dir}))
+                   (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :stale-outer-selection-composition (:failure-kind thrown))
+          "a corrupted critical digest refuses the tick")
+      (is (= [poisoned] (keys (:critical-namespaces thrown)))
+          "the refusal names exactly the corrupted namespace")
+      (is (= :stale (get-in thrown [:critical-namespaces poisoned :status]))
+          "corruption is disk-mismatch (:stale), not missing registration"))))
 
 (deftest stop-line-implementation-carries-the-authority-qualified-attempt-id
   ;; repair-ea1-b0eeafa0 attempt-001 (2026-09-13): grounded, approved,
