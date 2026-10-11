@@ -30,6 +30,7 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
+            [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
@@ -521,11 +522,24 @@
 ;; select-action-cascades decision. Mission and cascade identities are distinct.
 (def selected-action
   {:kind :cascade-candidate :cascade-id :test/selected :id :test/selected :target "M-selected"
-   :precedence [:test/selected-pattern]
+   :precedence [:test/selected-pattern :test/selected-followup]
    :construction-receipt {:cascade/id :test/selected :moves 1
                           :family-searched :unit :coverage 1}
    :interpretation-receipts [{:pattern :test/selected-pattern
                               :admitted-by :test-suite}]})
+
+(defn loop-exercised-ranked-entry
+  "Build the shared runner fixture at the selector's real evidence boundary.
+  The full loop requires the same retained multi-step/class-emission evidence
+  that production cascade scoring places under :certificate/:f."
+  [action controller-score rank]
+  {:action action
+   :controller-score controller-score
+   :rank rank
+   :certificate
+   {:f {:model {:kind :class-emission
+                :horizon 2
+                :class-preference {2 {:focused 1.0}}}}}})
 
 (defn with-test-carry [decision]
   (-> decision
@@ -538,15 +552,31 @@
 (def judgement
   {:decision (with-test-carry
               (policy/select-action-cascades
-               [{:action selected-action :controller-score -2.0 :rank 1}
-                {:action (assoc selected-action
-                                :cascade-id "M-rank-head" :id "M-rank-head"
-                                :precedence [:test/other-pattern])
-                 :controller-score -1.0 :rank 2}]
+               [(loop-exercised-ranked-entry selected-action -2.0 1)
+                (loop-exercised-ranked-entry
+                 (assoc selected-action
+                        :cascade-id "M-rank-head" :id "M-rank-head"
+                        :precedence [:test/other-pattern :test/other-followup])
+                 -1.0 2)]
                {:beta 2.0}))
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})
+
+(deftest selection-without-retained-loop-evidence-still-refuses
+  (let [decision (policy/select-action-cascades
+                  [{:action selected-action :controller-score -2.0 :rank 1}
+                   {:action (assoc selected-action :id :test/bare-other)
+                    :controller-score -1.0 :rank 2}]
+                  {:beta 2.0})]
+    (try
+      (loop-node-exercise/require-complete! decision)
+      (is false "a genuinely unexercised required node must refuse")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :required-loop-node-unexercised
+               (:failure-kind (ex-data e))))
+        (is (= #{:R13 :CTAU-CLASS}
+               (set (map :node (:refused (ex-data e))))))))))
 
 (defn explicitly-selected-repair-judgement
   "Select a repair through the real posterior, against a distinct ordinary
@@ -561,8 +591,8 @@
                         :repair-obligation obligation}
                   admission (assoc :admission admission))
          decision (policy/select-action-cascades
-                   [{:action action :controller-score -2.0 :rank 1}
-                    {:action selected-action :controller-score -1.0 :rank 2}]
+                   [(loop-exercised-ranked-entry action -2.0 1)
+                    (loop-exercised-ranked-entry selected-action -1.0 2)]
                    {:beta 2.0})]
      (is (= action (:action decision))
          "the real selector must choose the explicit repair from distinct candidates")
