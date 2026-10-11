@@ -22,6 +22,8 @@
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.mission-registry :as missions]
+            [futon2.aif.observation-checks :as observation-checks]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.accepted-increment :as accepted-increment]
@@ -30,6 +32,7 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
@@ -543,6 +546,35 @@
                  :occurrence-id "test-selection-carry"
                  :universe (set (keys (get-in decision [:action :observation-locators])))})))
 
+(defn- token-loop-exercised-decision []
+  (let [token-decision (token-fixture/decision)
+        action (assoc (:action token-decision) :want (:want token-fixture/declaration))
+        old-family (get-in token-decision [:selection-certificate :precision-family])
+        candidates (mapv #(if (= (:id %) (:action token-decision))
+                            (assoc % :id action)
+                            %)
+                         (:candidates old-family))
+        family (precision-carry/seal
+                (assoc (dissoc old-family :sha256)
+                       :candidates candidates
+                       :selected-action action
+                       :model-id (precision-carry/model-identity
+                                  (:model old-family) candidates
+                                  (:observation-schedules old-family))))
+        comparator (assoc action :cascade-id :test/token-comparator
+                          :id :test/token-comparator
+                          :precedence (conj (:precedence action)
+                                            :test/token-comparator-followup))]
+    (-> (policy/select-action-cascades
+         [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
+          (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
+         {:beta 2.0})
+        (assoc-in [:selection-certificate :precision-family]
+                  family)
+        (assoc-in [:selection-certificate :token-belief-stage]
+                  (get-in token-decision [:selection-certificate :token-belief-stage]))
+        with-test-carry)))
+
 (def judgement
   {:decision (with-test-carry
               (policy/select-action-cascades
@@ -753,6 +785,51 @@
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
+
+(defn- run-token-feature-card-attempt
+  "Run the feature-card harness against the token fixture's actual Git object,
+  mission bytes, and commit-bound D-task observations."
+  [cohort decision]
+  (token-fixture/with-artifact
+   (fn [sha]
+     (let [token-repo (io/file observation-checks/repo-root "futon2")
+           mission-path (io/file token-repo
+                                 "holes/missions/M-aif-policy-conditioned-eig.md")
+           record (io/file (:root cohort) "d-task.edn")
+           _ (spit record
+                   (pr-str {:after-token-evidence
+                            (token-fixture/measurements sha)}))]
+       (binding [cascade-sources/*code-roots*
+                 ["test/fixtures/library-pins/r7fc6a050"
+                  "test/fixtures/library-pins/current"]]
+         (with-redefs [d-task/complete!
+                       (fn [& _]
+                         {:source {:path (.getPath record)
+                                   :sha256 (digest/sha256 (slurp record))}})]
+           (let [result (run-feature-card-attempt
+                         {:author-card feature-card-claim
+                          :initial-author-job
+                          {:job-id "feature-author" :state "done" :artifact-ref sha
+                           :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
+                           :feature-card feature-card-claim
+                           :execution successful-execution}
+                          :runner-options
+                          {:cohort? true :execution-cohort (:binding cohort)
+                           :d-task-evidence-root (str (io/file (:root cohort) "d-task"))
+                           :learning-trial-ledger-root
+                           (str (io/file (:root cohort) "learning-ledger"))
+                           :judge-fn
+                           (fn [_] {:judgement (assoc judgement :decision decision)})
+                           :mission-fn
+                           (fn [_] (#'missions/mission-doc->entry (.getPath mission-path)))
+                           :resolve-build-fn
+                           (fn [_] {:repo (.getPath token-repo)
+                                    :files ["unrelated.clj"]})
+                           :author-artifact-observer-fn
+                          (fn [_ before job]
+                            (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
+                                   :repo (.getPath token-repo)))}})]
+             result)))))))
 
 (deftest r16-stop-line-registers-a-distinct-durable-park
   ;; Live pin: wm-trace run 36820e88-3d68-499d-b359-2d8dbe9743de records
@@ -6551,17 +6628,14 @@
   ;; Passing grounded fixture; keep the canonical runner source guard enabled.
   (let [{:keys [root] :as c} (retention-cohort "focus-receipt-feature-card")
         d (focus-receipt/attach
-           (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
+           (token-loop-exercised-decision)
            (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
         {:keys [result]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :runner-options {:cohort? true :execution-cohort (:binding c)
-                           :d-task-evidence-root (str (io/file root "d-task"))
-                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
-                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        (run-token-feature-card-attempt c d)
         selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
     (is (= :grounded-progress (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt d))))
+    (is (= (:action d) (get-in d [:selection-certificate :candidates 0 :id])))
     (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))
     (is (= (get-in d [:selection-certificate :focus-receipt])
            (get-in selected [:selection-certificate :focus-receipt])))
@@ -6591,15 +6665,10 @@
   ;; Canonical runner-source guard blocks this in a worktree; owner runs on main.
   (let [{:keys [root] :as c} (retention-cohort "run-ending-feature-card")
         d (focus-receipt/attach
-           (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
+           (token-loop-exercised-decision)
            (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
         {:keys [result]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :runner-options {:cohort? true :execution-cohort (:binding c)
-                           :d-task-evidence-root (str (io/file root "d-task"))
-                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
-                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        (run-token-feature-card-attempt c d)
         close-file (io/file root "test-cohort-exhaustion" (:attempt-id result) "007-closed.edn")
         close (cohort/read-edn close-file)
         receipt (get-in close [:payload :judgment :run-ending-classification])
@@ -6611,6 +6680,17 @@
     (is (run-ending/verify-close close receipt))
     (is (= receipt (edn/read-string (slurp (:source-path entry)))))
     (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))))
+
+(deftest feature-card-missing-measurements-reaches-reviewer-falsifier
+  (let [c (retention-cohort "run-ending-wrong-token")
+        d (token-loop-exercised-decision)
+        {:keys [result]}
+        (with-redefs [d-task/artifact-tokens (fn [& _] [])]
+          (run-token-feature-card-attempt c d))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :reviewer-wait (get-in result [:data :failure-stage])))
+    (is (= :complete (:status (loop-node-exercise/receipt d))))))
 
 (deftest reviewer-standing-template-passes-the-close-validator
   ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
