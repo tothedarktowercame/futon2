@@ -3803,6 +3803,15 @@
         resolutions (atom [])
         author-job {:job-id "author-job" :state "done"
                     :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
+                    :repo-observed-artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
+                    :artifact-binding
+                    {:fresh-author? true :repo "/repo"
+                     :pre-dispatch-head "original-head"
+                     :author-window-start-ms 1000
+                     :author-window-end-ms 2000
+                     :observed-head "1a7e1234567890abcdef1234567890abcdef1234"
+                     :corroborates? true :disagreement? false
+                     :commit "1a7e1234567890abcdef1234567890abcdef1234"}
                     :feature-card feature-card-claim
                     :execution successful-execution}
         stop-line {:repair/id "repair-attempt-007-review-deferred-completion"
@@ -3854,6 +3863,62 @@
     (is (empty? @dispatches))
     (is (empty? @resolutions)
         "recovered review alone cannot discharge without an admitted evaluator")))
+
+(deftest recoverable-late-review-without-retained-artifact-binding-refuses
+  (let [dispatches (atom [])
+        author-job {:job-id "author-job" :state "done"
+                    :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
+                    :feature-card feature-card-claim
+                    :execution successful-execution}
+        stop-line {:repair/id "repair-attempt-007-review-unbound"
+                   :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-007"
+                   :failure-stage :reviewer-wait
+                   :failure-kind :agent-budget-expired
+                   :failure-data {:job-id "late-review-job"
+                                  :author-job author-job
+                                  :commit "1a7e1234567890abcdef1234567890abcdef1234"
+                                  :repository "/repo"
+                                  :files ["src/real.clj"]}}
+        result
+        (runner/run-opportunity!
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [stop-line])
+          :repair-record-fn
+          (fn [finding]
+            (assoc finding :repair/id "repair-late-review-unbound-rejection"))
+          :repair-supersede-fn (fn [& _] {:repair/status :superseded})
+          :read-job-fn (fn [_ job-id]
+                         {:job-id job-id :state "done"
+                          :execution successful-execution
+                          :result-summary "FULL_LOOP_REVIEW: REJECT"})
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [target] {:id target})
+          :construct-fn runner/construct-for-decision
+          :construction-wiring-fn enriched-test-fold
+          :dispatch-fn (fn [& args]
+                         (swap! dispatches conj args)
+                         (throw (ex-info "unexpected replacement dispatch" {})))
+          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+          :queue-fn identity})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :fail
+           (get-in result [:data :error-data :reviewer-falsifier :checks
+                           :artifact-binding :status])))
+    (is (empty? @dispatches)
+        "missing retained provenance cannot trigger replacement turns")))
 
 (deftest reviewer-deferred-completion-without-author-provenance-fails-before-dispatch
   (let [dispatches (atom [])

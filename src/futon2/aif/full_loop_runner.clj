@@ -6536,11 +6536,20 @@
                                   (assoc :author-retries author-retries)))))
               (throw-if-author-refused! author-job target :author-wait)
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
+                    retained-artifact-binding
+                    (let [binding (:artifact-binding author-job)]
+                      (when (and deferred-review-job
+                                 (= (:artifact-ref author-job)
+                                    (:repo-observed-artifact-ref author-job)
+                                    (:commit binding))
+                                 (true? (:corroborates? binding)))
+                        binding))
                     artifact-binding
-                    (when bound-author?
+                    (if bound-author?
                       (fresh-artifact-binding opts author-repo
                                               effective-pre-author-head
-                                              author-job))
+                                              author-job)
+                      retained-artifact-binding)
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
                     _ (when-let [failure (unvalidated-artifact-failure
@@ -6555,7 +6564,7 @@
                                            :artifact-binding artifact-binding}
                                     (:artifact-ref failure)
                                     (assoc :artifact-ref (:artifact-ref failure))))))
-                    commit (if bound-author? observed-commit text-commit)
+                    commit (if artifact-binding observed-commit text-commit)
                     author-job (cond-> author-job
                                  bound-author?
                                  (assoc :repo-observed-artifact-ref commit
@@ -6565,7 +6574,7 @@
                                          (resolve-target-build opts author-repo commit)))
                     repo (:repo build)
                     files (:files build)]
-                (when (and bound-author? repo
+                (when (and artifact-binding repo
                            (not= repo (:repo artifact-binding)))
                   (throw
                    (ex-info "Observed author artifact resolved outside the target repository"
