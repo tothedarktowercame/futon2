@@ -6378,12 +6378,13 @@
 (deftest cohort-grounding-uses-the-started-cohort-and-run
   ;; Requires the canonical checkout's source guard; the owner runs this on
   ;; merged main. Direct ground-commit! coverage is in full-loop-discharge-test.
-  (let [{:keys [binding]} (retention-cohort "runner-discharge-cohort")
+  (let [{:keys [binding] :as cohort} (retention-cohort "runner-discharge-cohort")
         {:keys [docs opts]} (substrate-fixture)
+        decision (token-loop-exercised-decision)
         {:keys [result item]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :runner-options
+        (run-token-feature-card-attempt
+         cohort decision
+         {:runner-options
           {:cohort? true :execution-cohort binding :run-id "cohort-discharge-run"
            ;; The recorded start event, not this caller-supplied hint, owns it.
            :cohort-id :wrong-caller-hint
@@ -6391,7 +6392,8 @@
                         (apply runner/ground-commit!
                                (concat (butlast args) [(merge opts (last args))])))}})
         discharge (first (filter #(= :discharge (:entity/type %)) (vals @docs)))]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (= "full-loop/discharge/cohort/test-cohort-exhaustion/run/cohort-discharge-run/attempt/attempt-001"
            (:xt/id discharge)))
     (is (= :test-cohort-exhaustion (:discharge/cohort-id discharge)))
