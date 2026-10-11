@@ -1368,3 +1368,42 @@ or weaken an existing definition merely to accommodate current Clojure.
   trust premise, not cryptographic authentication by Lean.  Runtime must retain
   a source/implementation digest for the registered functions at the registry
   boundary in addition to the selector authority and separation check.
+
+- 2026-10-11, ThreeHalves-to-CascadeEFE adequacy projection: the maximal
+  derivable bridge is structural, because `CascadeEFE.Policy` itself contains
+  only a `Cascade` plus decidable node membership.  The additive Lean module
+  `ThreeHalvesCascadeBridge` records the exact correspondence:
+
+  | `CascadeEFE` field/obligation | ThreeHalves source | Projection status |
+  |---|---|---|
+  | `cascade.nodes` | indices `< p.squares.length` | Derived exactly |
+  | `nodeDecidable` | decidable Nat bound above | Derived exactly |
+  | `cascade.edges` | membership in `p.constructionOrder` | Derived exactly |
+  | `cascade.precedence` | valid authorized `ApplicationOrderCertificate.applicationSequence` | Derived exactly |
+  | `cascade.addedByOrganise` | no corresponding ThreeHalves field | Explicit `StructuralResidual` input, constrained to nodes |
+  | `cascade.acyclic` | not implied by pairwise gluing validity | Explicit proof in `StructuralResidual` |
+  | ThreeHalves structural admission | `p.wellFormed` and valid application-order registry join | Required by `StructuralEvidence` |
+  | `Model.initial` | none | Unresolved EFE residual |
+  | `Model.observation` | none | Unresolved EFE residual |
+  | `Model.guard` | none | Unresolved EFE residual |
+  | `Model.interpretation` transition kernels | no transition semantics in `Theory`/`PMap` | Unresolved EFE residual; successful `resolve` required |
+  | horizon-indexed predictive preferences | none | Unresolved EFE residual |
+  | candidate-family scoring/posterior | none; necessarily post-score | Not projected |
+
+  `valid_projects_structural_policy` exposes every projected field.  The
+  one-square positive witness checks nodes, empty organiser additions, empty
+  construction edges, and precedence.  The adversarial model assigns `none`
+  to every transition interpretation;
+  `missing_transition_prevents_full_efe_residual` proves that it cannot inhabit
+  the typed EFE residual, regardless of horizon or preferences.  Thus no
+  default dynamics or predictive/preference semantics were invented.
+
+  Runtime correspondence remains blocked at the same pre-G composition root:
+  besides the source-pinned ThreeHalves policy and application-order evidence,
+  it must independently supply the organiser-added node set, an acyclicity
+  proof/receipt for projected construction edges, initial/observation kernels,
+  guarded transition interpretations for every firing entry, a horizon, and
+  horizon-indexed preference kernels.  The first integration boundary is
+  after construction/application-order validation and before
+  `cascade-decision-admitted` invokes G.  The structural projection alone must
+  never be reported as full predictive adequacy.
