@@ -6,6 +6,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.morning-brief :as morning-brief]
+            [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace])
   (:import [java.nio.file Files]
@@ -79,6 +80,30 @@
    {:f {:model {:kind :class-emission
                 :horizon 2
                 :class-preference {2 {:focused 1.0}}}}}})
+
+(defn with-loop-exercise-evidence
+  "Augment an existing selector entry at the real loop-evidence field without
+  reconstructing its certificate. In particular, parameter-novelty and other
+  independently produced certificate fields remain byte/field-identical."
+  [ranked-entry]
+  (let [action (:action ranked-entry)
+        target (:target action)
+        wants (->> (:observation-locators action)
+                   keys
+                   (remove #(= :admission/task-stated (second %)))
+                   (mapv second))
+        followup (cascade-policy/token-interpretation
+                  :test/loop-evidence-followup
+                  {:guard {:needs #{[target :test/loop-evidence-input]}
+                           :forbids #{}}
+                   :produces #{}})]
+    (-> ranked-entry
+      (assoc-in [:action :want] wants)
+      (update-in [:action :precedence] conj followup)
+      (assoc-in [:certificate :f :model]
+                {:kind :class-emission
+                 :horizon 2
+                 :class-preference {2 {:focused 1.0}}}))))
 
 (def ^:private judgement
   {:decision (assoc-in

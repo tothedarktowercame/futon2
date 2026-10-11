@@ -575,6 +575,24 @@
                   (get-in token-decision [:selection-certificate :token-belief-stage]))
         with-test-carry)))
 
+(defn- with-token-fixture-carry [decision]
+  (let [token-decision (token-fixture/decision)
+        action (:action decision)
+        old-family (get-in token-decision [:selection-certificate :precision-family])
+        candidates (mapv #(assoc % :id action) (:candidates old-family))
+        family (precision-carry/seal
+                (assoc (dissoc old-family :sha256)
+                       :candidates candidates
+                       :selected-action action
+                       :model-id (precision-carry/model-identity
+                                  (:model old-family) candidates
+                                  (:observation-schedules old-family))))]
+    (-> decision
+        (assoc-in [:selection-certificate :precision-family] family)
+        (assoc-in [:selection-certificate :token-belief-stage]
+                  (get-in token-decision [:selection-certificate :token-belief-stage]))
+        with-test-carry)))
+
 (def judgement
   {:decision (with-test-carry
               (policy/select-action-cascades
@@ -6569,24 +6587,23 @@
 (deftest grounded-close-retains-parameter-novelty-selection-receipt
   ;; Runner source-authority guard stays enabled; owner runs on canonical main.
   (let [{:keys [root] :as c} (retention-cohort "parameter-novelty")
-        ranked (novelty-fixture/frozen-ranked "1789964661")
+        original-ranked (novelty-fixture/frozen-ranked "1789964661")
+        ranked (mapv runner-fixture/with-loop-exercise-evidence original-ranked)
         select! (requiring-resolve 'futon2.aif.policy/select-action-cascades)
-        d (with-test-carry
-            (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
-                             :novelty-inputs novelty-fixture/inputs}))
+        d (with-token-fixture-carry
+           (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
+                            :novelty-inputs novelty-fixture/inputs}))
         {:keys [result]}
         (with-redefs [brief/default-root (str (io/file root "morning-brief"))]
-          (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :runner-options {:cohort? true :execution-cohort (:binding c)
-                           :d-task-evidence-root (str (io/file root "d-task"))
-                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
-                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}}))
+          (run-token-feature-card-attempt c d))
         attempt-dir (io/file root "test-cohort-exhaustion" (:attempt-id result))
         selection (get-in (cohort/read-edn (io/file attempt-dir "002-selection.edn"))
                           [:payload :judgment :controller-decision])
         closed (get-in (cohort/read-edn (io/file attempt-dir "007-closed.edn")) [:payload :judgment])]
     (is (= :grounded-progress (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt d))))
+    (is (= (mapv #(dissoc % :f) (mapv :certificate original-ranked))
+           (mapv #(dissoc % :f) (mapv :certificate ranked))))
     (is (map? closed))
     (is (= 3 (count (get-in selection [:selection-certificate :parameter-novelty]))))
     (is (= (get-in d [:selection-certificate :parameter-novelty])
