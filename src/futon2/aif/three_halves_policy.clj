@@ -19,16 +19,16 @@
   "Test/adapter helper for an externally stored declaration digest. The
   returned body must itself be retained by the authority named in the pin."
   [declaration]
-  (pr-str {:schema :wm/sealed-three-halves-declaration-v1
+  (pr-str {:schema :wm/sealed-declaration-v1
            :declaration-digest (declaration-digest declaration)}))
 
-(defn- pin-valid? [pin declaration captured]
+(defn declaration-source-valid? [pin declaration captured]
   (and (string? (:path pin)) (string? (:revision pin))
        (string? (:sha256 pin))
        (let [body (get captured [(:path pin) (:revision pin)])]
          (and (string? body) (= (:sha256 pin) (sha256 body))
               (try
-                (= {:schema :wm/sealed-three-halves-declaration-v1
+                (= {:schema :wm/sealed-declaration-v1
                     :declaration-digest (declaration-digest declaration)}
                    (edn/read-string body))
                 (catch Exception _ false))))))
@@ -118,7 +118,7 @@
                         (roles from-role) (roles to-role))
                (endpoints g id->index))
         gaps (cond-> []
-               (not (pin-valid? (:source g) g captured)) (conj :source-pin)
+               (not (declaration-source-valid? (:source g) g captured)) (conj :source-pin)
                (nil? ends) (conj :typed-endpoint)
                (and ends (= (first ends) (second ends))) (conj :typed-self-loop)
                (not (and (functional? rel) (functional? inv))) (conj :functional-bijection)
@@ -151,7 +151,7 @@
                  (= (:square-id s) (get (:squares projected) position)))))
         square-results (mapv (fn [s]
                                {:id (:square-id s)
-                                :valid? (and (pin-valid? (:source s) s captured-sources)
+                                :valid? (and (declaration-source-valid? (:source s) s captured-sources)
                                              (occurrence-valid? s)
                                              (= :valid (:status (square/validate (:receipt s)))))})
                              squares)
@@ -161,7 +161,8 @@
         checked-gluings (mapv :value gluing-results)
         base-gaps (cond-> []
                     (not= schema (:schema receipt)) (conj :policy-schema)
-                    (not (pin-valid? (:source receipt) receipt captured-sources)) (conj :policy-source-pin)
+                    (not (declaration-source-valid? (:source receipt) receipt captured-sources))
+                    (conj :policy-source-pin)
                     (not (and (map? projection) (some? (:target projection))
                               (vector? (:candidates projection)))) (conj :policy-projection)
                     (not (vector? squares)) (conj :stable-square-order)

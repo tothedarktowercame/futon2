@@ -23,6 +23,17 @@ receipt. The gate requires equality of constructed population, policy
 projection, and admitted population; an unrelated valid triangle for the
 same target no longer authorizes admission.
 
+## 2026-10-11 — SUT item 6 controlled application order
+
+The additive runtime certificate now binds item-5 policy identity, exact
+square population, derived construction edges, authored rows, decoded square
+sequence, and separated law/selector authorities to a sealed executable
+registration. The decoded indices project through square occurrences to
+patterns. That order is the actual real R1–R5 scoring precedence and the
+actual input to `receipt-construction/acting-order`; their digests must agree.
+The live path remains unchanged and no production order-law registry exists,
+so production invocation refuses before rollout.
+
 This note records the worklist resulting from review of the restored
 pre-claude-12 runtime, the Lean requirements, and run
 `2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda`.  The run's reports are

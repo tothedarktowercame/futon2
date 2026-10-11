@@ -281,3 +281,16 @@ Morning Brief rendering, production policy authority, application order, and
 predictive-kernel admission remain open. Current witness tooling has no
 EDN-to-`ThreeHalvesBlend.Policy` generator (the nearby fold converter targets
 an unrelated CLean carrier), so no generated Lean witness is claimed.
+
+### Controlled application-order consumer
+
+`futon2.aif.application-order-certificate` projects Lean's additive
+`ApplicationOrderLaw`/certificate without equating application and
+construction order. A source-pinned external registration selects a sealed
+non-production executable by implementation pin; the caller cannot inject
+`decode` or `accepts`. Decoding is recomputed, covers every square index once,
+and is projected through each item-5 square occurrence to pattern order.
+`controlled-application-order-run` makes that projected order the sole
+precedence consumed by the real R1–R5 lane and the input to real
+`receipt-construction/acting-order`; both consumed-order digests are retained.
+No live caller uses this seam and absence of a production registry refuses.

@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.aif.application-order-certificate :as application-order]
             [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
@@ -11,6 +12,7 @@
             [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.efe :as efe]
             [futon2.aif.focus-receipt :as focus-receipt]
+            [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.live-c :as live-c]
@@ -1434,6 +1436,77 @@
             {:status :refused :stage :pre-g-composition
              :reason :cascade-admission-refused
              :certificate certificate :admission admission}))))))))
+
+(defn controlled-application-order-run
+  "Controlled-SUT application-order gate and real R1..R16 consumer. The live
+  pipeline does not call this entrypoint and no production law is defaulted."
+  [{:keys [application-certificate application-registry captured-sources]
+    :as controlled} problem]
+  (let [composition (controlled-three-halves-admission controlled problem)]
+    (if (not= :ready-for-g (:status composition))
+      composition
+      (let [policy (:policy controlled)
+            order (application-order/validate
+                   application-certificate
+                   {:policy policy :policy-certificate (:certificate composition)
+                    :registry application-registry :captured-sources captured-sources})]
+        (if (not= :valid (:status order))
+          {:status :refused :stage :pre-rollout-application-order
+           :reason :application-order-invalid :certificate order
+           :composition composition}
+          (let [pattern-sequence (get-in order [:computed :pattern-sequence])
+                attempted-mismatch
+                (cond
+                  (and (contains? controlled :scoring-order)
+                       (not= pattern-sequence (:scoring-order controlled)))
+                  :scoring-order-mismatch
+                  (and (contains? controlled :enactment-order)
+                       (not= pattern-sequence (:enactment-order controlled)))
+                  :dispatch-order-mismatch)]
+            (if attempted-mismatch
+              {:status :refused :stage :pre-rollout-application-order
+               :reason attempted-mismatch :application-order order}
+          (let [admitted (get-in composition [:admission :problem])
+                lane-problem (assoc (:cascade-problem admitted)
+                                    :precedences [pattern-sequence])
+                lane (cascade-lane lane-problem {:through :R5})
+                chosen-action (some #(when (= pattern-sequence (mapv :id (:precedence %))) %)
+                                    (:candidates lane))
+                chosen (mapv :id (:precedence chosen-action))
+                digest (interpretation-evidence/value-digest pattern-sequence)
+                scoring-consumed? (some #(= pattern-sequence (mapv :id (:precedence %)))
+                                        (:candidates lane))
+                dispatch-consumed? (= pattern-sequence chosen)
+                sk-interpretations
+                (into {} (map (fn [[id {:keys [guard produces]}]]
+                                [id {:guard (into [:and]
+                                                 (concat (map (fn [t] [:fact t]) (:needs guard))
+                                                         (map (fn [t] [:not [:fact t]])
+                                                              (:forbids guard))))
+                                     :effect (into {} (map (fn [t] [t true]) produces))}]))
+                      (:interpretations lane-problem))
+                all-tokens (cascade-problems/problem-tokens
+                            (:facts lane-problem) (:want lane-problem)
+                            (:interpretations lane-problem))
+                facts-closed (into {} (map (fn [t] [t (true? (get (:facts lane-problem) t))]))
+                                   all-tokens)
+                acting-order (when dispatch-consumed?
+                               (receipt-construction/acting-order
+                                sk-interpretations facts-closed chosen))]
+            (if (and (nil? (:refusal lane)) scoring-consumed? dispatch-consumed?)
+              {:status :prepared-for-enactment
+               :composition composition :application-order order
+               :lane (assoc lane :selected-action chosen-action
+                                 :enactment-plan {:acting-order acting-order})
+               :scoring {:consumed-order pattern-sequence :order-digest digest}
+               :dispatch {:consumed-order chosen :order-digest
+                          (interpretation-evidence/value-digest chosen)
+                          :acting-order acting-order}}
+              {:status :refused :stage :application-order-consumption
+               :reason (cond (:refusal lane) :rollout-refused
+                             (not scoring-consumed?) :scoring-order-mismatch
+                             :else :dispatch-order-mismatch)
+               :application-order order :lane lane})))))))))
 
 (defn target-construction-census
   "Record per-target construction facts from assembled problems and the actual
