@@ -698,7 +698,7 @@
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
            cure-observed-commit
            initial-author-job operator-actions delivery-qa-fn
-           judgement-transform-fn runner-options]
+           judgement-transform-fn dispatch-observer runner-options]
     :or {grounded? true artifacts? false
          cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -751,6 +751,8 @@
                             (:artifact-ref author-job))})
                :dispatch-fn
                (fn [_ agent _ _ prompt]
+                 (when dispatch-observer
+                   (dispatch-observer agent prompt))
                  (swap! dispatches conj agent)
                  (let [job-id (if (= agent "zai-5")
                                 (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
@@ -819,6 +821,7 @@
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
+                            dispatch-observer
                             judgement-transform-fn author-summary author-result
                             artifacts? reviewer-execution reviewer-events grounded?
                             cure-card cure-artifact-ref initial-author-card
@@ -859,6 +862,7 @@
                           :cure-observed-commit (when cure-card sha)
                           :reviewer-execution reviewer-execution
                           :reviewer-events reviewer-events
+                          :dispatch-observer dispatch-observer
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
                           (or initial-author-job
@@ -6365,54 +6369,51 @@
         evidence-file (io/file root "test-cohort-exhaustion" "attempt-001"
                                "evidence" "standing.edn")
         decision {:schema :wm/target-standing-decision-v1
-                  :entity/id "M-selected" :decision :still-live
+                  :entity/id "M-aif-policy-conditioned-eig" :decision :still-live
                   :decided-by "codex-7" :implementation-author "zai-5"
                   :decided-at "2026-09-14T18:00:00Z"
                   :evidence ["subject-obligation.edn"]
                   :explanation
                   (str "This independent review explains how the cited records "
                        "bear on whether the exact selected target remains live.")}
-        base (retention-success-opts c)
-        opts (assoc base
-                    :measured-acquisition? true
-                    :repair-resolution-read-fn (constantly nil)
-                    ;; the stock synthetic binding pins :repo "/repo", which
-                    ;; the T13 repo-consistency check (48dfa037) refuses
-                    ;; against the fixture's temp-root build — the other
-                    ;; retention tests never notice because they assert only
-                    ;; retention properties of the resulting typed close.
-                    ;; This test needs the GROUNDED path, so the observer
-                    ;; must echo the real target repo.
-                    :author-artifact-observer-fn
-                    (fn [repo before job]
-                      (assoc (synthetic-artifact-binding repo before job)
-                             :repo repo))
-                    :poll-fn
-                    (fn [o job-id]
-                      (cond-> ((:poll-fn base) o job-id)
-                        (= job-id "retention-author")
-                        (assoc :feature-card feature-card-claim)))
-                    ;; the stock ground-fn's :before nil refuses
-                    ;; :grounded-change at the cohort close validation
-                    :ground-fn
-                    (fn [& _] {:before {:id "pre-retained"}
-                               :after {:id "retained"}
-                               :resolved? true :dial-moved? true
-                               :implementation-id "retained"
-                               :discharge-id "retained-discharge"})
-                    :resolve-build-fn
-                    (fn [x]
-                      (io/make-parents evidence-file)
-                      (spit evidence-file (pr-str decision))
-                      ((:resolve-build-fn base) x)))
-        result (runner/run-opportunity! opts)
+        {:keys [result]}
+        (run-token-feature-card-attempt
+         c (token-loop-exercised-decision)
+         {:dispatch-observer
+          (fn [_ prompt]
+            (when (str/includes? prompt "Deposit the standing decision")
+              (io/make-parents evidence-file)
+              (spit evidence-file (pr-str decision))))
+          :runner-options
+          {:measured-acquisition? true
+           :repair-resolution-read-fn (constantly nil)}})]
+    (is (= :grounded-progress (:outcome result))
+        "an honest measured increment is progress, not declared closure")
+    (is (= :verified
+           (get-in result [:checkpoints :build :judgment :validation
+                           :reviewer-falsifier-verification :status])))
+    (let [close (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                          "attempt-001" "007-closed.edn"))]
+      (is (= {:entity/id "M-aif-policy-conditioned-eig" :decision :still-live
+              :decided-by "codex-7"}
+             (get-in close [:payload :judgment :standing-readback]))
+          "the measured completion deposit is durably visible to later observers"))))
+
+(deftest measured-close-without-standing-record-refuses-readback
+  (let [{:keys [root] :as c} (retention-cohort "runner-standing-missing")
+        {:keys [result]}
+        (run-token-feature-card-attempt
+         c (token-loop-exercised-decision)
+         {:runner-options
+          {:measured-acquisition? true
+           :repair-resolution-read-fn (constantly nil)}})
         close (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                         "attempt-001" "007-closed.edn"))]
-    (is (= :grounded-change (:outcome result)))
-    (is (= {:entity/id "M-selected" :decision :still-live
-            :decided-by "codex-7"}
-           (get-in close [:payload :judgment :standing-readback]))
-        "the annotated readback is durably in the close for later observers")))
+    (is (= :incomplete (:outcome result)))
+    (is (= :standing-evidence-insufficient
+           (get-in result [:data :failure-kind])))
+    (is (nil? (get-in close [:payload :judgment :standing-readback]))
+        "a missing standing record never manufactures a durable readback")))
 
 (deftest measured-prompts-declare-required-completion
   (let [opts {:author "author-1" :reviewer "reviewer-1"
