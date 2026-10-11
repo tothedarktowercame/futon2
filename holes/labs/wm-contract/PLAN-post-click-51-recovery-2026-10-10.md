@@ -1025,6 +1025,38 @@ or weaken an existing definition merely to accommodate current Clojure.
   distinct application order, or transition/predictive-kernel adequacy; those
   remain separate certificate seams.
 
+- 2026-10-11, multi-square gluing admission blocker: the runtime currently
+  records only a map from pattern id to an independently source-pinned square
+  (`interpretation_construction.clj:359-364`).  Its construction relations
+  record token support, common-origin paths, and a linear extension
+  (`construction.clj:282-288`), but no relation identifies a role/object of
+  one square with a role/object of another.  Those order relations cannot
+  soundly supply `ThreeHalvesBlend.Gluing` (`ThreeHalvesBlend.lean:809-815`):
+  `Gluing.wellFormed` additionally needs two square indices, two roles, an
+  explicit isomorphism graph and its inverse, total endpoint coverage, and
+  axiom carriage in both directions (`:823-832`).  Therefore no gluing or
+  connectivity verdict was synthesized from precedence, and no admission
+  code was added.
+
+  The minimal missing producer carrier is a source-pinned policy receipt of
+  the following shape (names illustrative, fields normative):
+
+      {:schema :wm/three-halves-policy-v1
+       :squares [{:square-id id :receipt <three-halves-square-v1>} ...]
+       :gluings [{:from {:square-id id-i :role :G|:I1|:I2|:B}
+                   :to {:square-id id-j :role :G|:I1|:I2|:B}
+                   :iso #{[source-name target-name] ...}
+                   :source {:path nonblank :sha256 64-hex}
+                   :reading nonblank} ...]}
+
+  Square ids must be unique, every endpoint must resolve to a recorded square
+  and role, and `:iso` must be evidence rather than a map inferred from equal
+  printed names.  Once an authoritative producer supplies this carrier, the
+  next slice can validate exactly `Policy.wellFormed` and refuse bad indices,
+  partial/non-bijective graphs, and failed bidirectional axiom carriage before
+  G.  A cascade verdict remains conditional on actual connected components;
+  application order remains a separate later carrier.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's
