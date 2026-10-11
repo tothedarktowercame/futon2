@@ -404,6 +404,54 @@ The certificate is attached to durable run/close data and the immutable
 Morning Brief item.  Its compact summary exposes blocker, branch, pattern,
 prior/revised identities, admission, enabled/dispatched step, separate artifact
 commit, observed-use stage, outcome, and gaps.
+
+2026-10-11 production prefix-F integration stop (defect 1): the production
+decision seam still cannot be changed without a protocol ruling.  The traced
+path is `wm/cascade_decision.clj:1091-1108`: it admits per-complete-`PolicyKey`
+prefixes, calls `policy-prefix-evidence/production-ranked`, and immediately
+passes the menu to `policy/select-action-cascades`.  At
+`policy_prefix_evidence.clj:126-138`, an unseen key becomes
+`:not-supplied`; selection presently treats that as omission of the numeric F
+term.  That is the forbidden historical no-F fallback.
+
+No authoritative production bootstrap carrier exists.  Repository search
+finds calibration-law, bootstrap-prior, captured-source, authority-job, and
+executable-registry inputs only in the pure unwired
+`prefix-free-energy-cold-start` adapter and its tests.  In particular, no
+runner/config/resource constructs the inputs required by `evaluate!` at
+`prefix_free_energy_cold_start.clj:68-122`.  Consequently empirical histories
+can be routed, but a mixed menu containing an unseen key cannot yet be given a
+truthful total route population.
+
+The remaining semantic choice is exactly the one already identified above:
+does one unseen complete key without an authorized prior (a) refuse the whole
+menu before posterior construction, or (b) exclude that key and select over a
+strictly smaller menu?  Exclusion changes the admitted policy population and
+requires its own law and receipt; whole-menu refusal changes availability.
+Neither rule is currently declared.  The minimum producer/configuration
+signature needed before implementation is:
+
+```
+route-menu! : Vector CompletePolicy
+           -> Map PolicyKey EmpiricalHistory
+           -> Map PolicyKey AuthorizedBootstrapPrior
+           -> PrefixFRouteContext
+           -> Either PrefixFMenuRefusal PrefixFMenuReceipt
+
+PrefixFMenuReceipt =
+  { policy-keys       : Vector PolicyKey       ; exact input identity/order
+  , routes            : Vector PrefixFRoute    ; one evaluation per key
+  , unseen-rule       : :refuse-menu | :exclude-with-authorized-law
+  , population-proof  : ExactBijection policy-keys routes.policy
+  }
+```
+
+For `:exclude-with-authorized-law`, the signature additionally needs the
+source-pinned exclusion law/authority and the exact excluded identities; it
+must define whether posterior normalization and the selection certificate use
+the original or reduced population.  Until that ruling and producer exist,
+the production path remains unchanged: the pure adapter is not wired and no
+numeric prior or per-key exclusion is inferred.
 This slice remains runtime-only: current Lean declarations do not state the
 reviewer observation, retrieve/author branch, or prior→revised relation.  The
 future theorem must say an admitted refinement preserves the prior identity,
