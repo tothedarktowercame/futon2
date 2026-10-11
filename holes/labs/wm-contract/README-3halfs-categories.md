@@ -256,3 +256,20 @@ is not a substitute for pre-G admission.
 
 The detailed evidence ledger and correspondence tables live in
 `PLAN-post-click-51-recovery-2026-10-10.md`.
+
+## Controlled multi-square producer (2026-10-11)
+
+`futon2.aif.three-halves-policy` is the controlled-SUT projection of the Lean
+policy/coherence certificate. Its ordered square/gluing vectors are Lean list
+order; typed endpoints, iso/inverse graphs, and both axiom-carriage results
+are retained and recomputed. The validator derives the supplied-order typed
+greedy forest and requires exactly the non-tree edges with their canonical
+oriented forest paths and equal composed transport.
+
+`wm.cascade-decision/controlled-three-halves-admission` runs this certificate
+before the existing real candidate-admission seam. It is not called by the
+live pipeline: production mode or a missing policy refuses. Persistence,
+Morning Brief rendering, production policy authority, application order, and
+predictive-kernel admission remain open. Current witness tooling has no
+EDN-to-`ThreeHalvesBlend.Policy` generator (the nearby fold converter targets
+an unrelated CLean carrier), so no generated Lean witness is claimed.

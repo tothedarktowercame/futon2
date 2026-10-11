@@ -28,6 +28,7 @@
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.three-halves-square :as three-halves-square]
+            [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
@@ -1378,6 +1379,34 @@
      :refusal (when target-decline
                 {:target target :kind :no-constructed-candidate
                  :missing (:missing-evidence target-decline)})}))
+
+(defn controlled-three-halves-admission
+  "Controlled-SUT pre-G composition gate. The production pipeline does not
+  call this entrypoint: without an explicit controlled mode and pinned policy
+  it refuses instead of falling back to the historical one-square gate."
+  [{:keys [mode policy captured-sources]} problem]
+  (cond
+    (not= :controlled-sut mode)
+    {:status :refused :stage :pre-g-composition :reason :controlled-authority-absent}
+
+    (nil? policy)
+    {:status :refused :stage :pre-g-composition :reason :three-halves-policy-absent}
+
+    :else
+    (let [certificate (three-halves-policy/validate
+                       policy {:captured-sources captured-sources})]
+      (if (not= :valid (:status certificate))
+        {:status :refused :stage :pre-g-composition
+         :reason :three-halves-policy-invalid :certificate certificate}
+        (let [admission (admit-cascade-problem problem)]
+          (if-let [admitted (:problem admission)]
+            {:status :ready-for-g :stage :pre-g-composition
+             :constructed-identity (:target problem)
+             :admitted-identity (:target admitted)
+             :certificate certificate :admission admission}
+            {:status :refused :stage :pre-g-composition
+             :reason :cascade-admission-refused
+             :certificate certificate :admission admission}))))))
 
 (defn target-construction-census
   "Record per-target construction facts from assembled problems and the actual

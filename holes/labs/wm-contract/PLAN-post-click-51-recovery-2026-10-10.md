@@ -3,6 +3,20 @@
 **Status:** review and repair; no click authorized.
 **Authority:** Joe, 2026-10-10, in discussion with codex-68.
 
+## 2026-10-11 — SUT item 5 controlled multi-square gate
+
+The additive `:wm/three-halves-policy-v1` validator now recomputes square
+validity, exact source pins, total bijective gluings and inverse/axiom
+carriage, the supplied-order typed greedy forest, and exact canonical cycle
+obligations. A controlled-only entrypoint gates the real
+`admit-cascade-problem` seam and refuses absent production configuration; the
+live call graph is unchanged. A three-square cyclic policy reaches
+`:ready-for-g`; malformed endpoints, partial maps, self-loops, role mismatch,
+bad pins, incoherent paths, and missing independent-cycle evidence refuse
+before G. Production persistence/Morning Brief retention, application order,
+and transition/predictive adequacy remain open. No policy EDN-to-Lean
+generator currently exists.
+
 This note records the worklist resulting from review of the restored
 pre-claude-12 runtime, the Lean requirements, and run
 `2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda`.  The run's reports are
