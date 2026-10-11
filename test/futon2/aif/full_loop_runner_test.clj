@@ -6846,31 +6846,29 @@
         frozen (edn/read-string (slurp "test/fixtures/learning-trial/1789964661.edn"))
         ;; Replace only the posterior: the runner needs the law's :applied
         ;; marker to treat this as a cascade selection.
-        d (assoc-in (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
+        d (assoc-in (token-loop-exercised-decision)
                     [:selection-law :posterior] (:posterior frozen))
         {:keys [result]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :runner-options {:cohort? true :execution-cohort (:binding c)
-                           :d-task-evidence-root (str (io/file root "d-task"))
-                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
-                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        (run-token-feature-card-attempt c d)
+        token-path (io/file root "test-cohort-exhaustion" (:attempt-id result)
+                            "retained" "token-outcome.edn")
+        surprise-path (io/file root "test-cohort-exhaustion" (:attempt-id result)
+                               "retained" "surprises.edn")
+        _ (is (= :complete (:status (loop-node-exercise/receipt d))))
+        _ (is (= :grounded-progress (:outcome result)))
+        _ (is (= :verified
+                 (get-in result [:checkpoints :build :judgment :validation
+                                 :reviewer-falsifier-verification :status])))
+        _ (is (.exists token-path))
+        _ (is (.exists surprise-path))
         ;; The close judgment is the cohort's durable close event; the
         ;; returned :checkpoints map stops at adjudication.
         closed (get-in (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                                  (:attempt-id result) "007-closed.edn"))
                        [:payload :judgment])
         receipt (:learning-trial-receipt closed)
-        surprise-path (io/file root "test-cohort-exhaustion" (:attempt-id result) "retained" "surprises.edn")
         surprises (cohort/read-edn surprise-path)]
-    (is (= :grounded-progress (:outcome result)))
-    ;; This grounded fixture uses feature123, not a resolvable Git artifact.
-    ;; Missing measurements remain non-surprises; the real artifact helper
-    ;; below separately pins the one-surprise retention/manifest case.
-    (is (= [] surprises))
     (is (= (mapv :surprise/id surprises) (:surprise-ids closed)))
-    (is (every? #(= :observation-missing (:verdict %))
-                (get-in closed [:token-outcome-comparison :tokens])))
     (is (some #(= (.getAbsolutePath surprise-path) (:source-path %))
               (:entries (:close-evidence-manifest result))))
     (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
@@ -6880,6 +6878,28 @@
     (is (= (pr-str (:selection-law d))
            (pr-str (get-in result [:checkpoints :selection :judgment :controller-decision :selection-law]))))
     (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))))
+
+(deftest learning-receipt-missing-one-loop-carrier-retains-no-token-files
+  (let [{:keys [root] :as cohort} (retention-cohort "learning-trial-unexercised")
+        decision (update-in
+                  (token-loop-exercised-decision)
+                  [:selection-certificate :candidates]
+                  (fn [candidates]
+                    (mapv #(assoc-in % [:computed-f :model :horizon] 1)
+                          candidates)))
+        {:keys [result]} (run-token-feature-card-attempt cohort decision)
+        retained (io/file root "test-cohort-exhaustion" "attempt-001" "retained")]
+    (is (= :incomplete (:status (loop-node-exercise/receipt decision))))
+    (let [failure (try
+                    (loop-node-exercise/require-complete! decision)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :required-loop-node-unexercised (:failure-kind failure)))
+      (is (= [:R13] (mapv :node (:refused failure)))))
+    (is (= :build-failed (:outcome result)))
+    (is (= :invalid-close-outcome (get-in result [:data :failure-kind])))
+    (doseq [name ["token-outcome.edn" "surprises.edn"]]
+      (is (not (.exists (io/file retained name)))))))
 
 (deftest aligned-example-retention-binds-real-evidence-and-manifest
   (kernel-fixture/with-example
