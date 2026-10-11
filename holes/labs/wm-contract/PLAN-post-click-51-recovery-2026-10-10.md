@@ -1317,3 +1317,16 @@ or weaken an existing definition merely to accommodate current Clojure.
   32 still refuses.  A covered partial-route square whose active-route union is
   functional still refuses for noncommutation.  No semantic change was made;
   this closes the missing flag-combination and coverage falsifiers only.
+
+- 2026-10-11, malformed-gluing component measurement: a minimal Lean policy
+  with two squares and one empty/non-total `G`-to-`G` gluing computes raw
+  components `[[0, 1]]`, but `Policy.wellFormed = false` and the verdict is
+  `.bag [[0, 1]]`.  Thus malformed input can influence the raw diagnostic
+  graph but cannot produce the admitted `.cascade` verdict, whose existing
+  gate requires well-formedness.  `Policy.components` is now documented as
+  raw-input diagnostics.  A repository trace found no runtime or Morning
+  Brief path that currently exposes three-halves policy components/verdicts;
+  `three_halves_square.clj` validates one square only.  Future reporting must
+  say `raw/supplied components`, or filter through policy admission before
+  claiming cascade connectivity.  No admissibility or runtime behavior was
+  changed.

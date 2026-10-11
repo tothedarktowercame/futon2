@@ -138,6 +138,16 @@ equivalence with ordinary graph connectivity.  A runtime diagnostic must not
 present those raw components as certified connectivity without first filtering
 or validating the gluings.
 
+The executable malformed-merge witness makes that distinction concrete: an
+empty, non-total gluing between two nonempty `G` objects merges the raw graph
+to `[[0, 1]]`, while `Policy.wellFormed = false` and `Policy.verdict` is
+`.bag [[0, 1]]`, never `.cascade`.  The Lean API documentation therefore calls
+`Policy.components` **raw-input components**.  Repository tracing found no
+futon2 three-halves policy/component renderer or Morning Brief consumer; the
+only runtime implementation currently validates one square.  If such a report
+is added, it must label these as supplied/raw components, or expose admitted
+connectivity only after the policy well-formedness gate.
+
 ### Pasting
 
 Lean defines **vertical** `pastedDiamond` and proves one preservation theorem,
