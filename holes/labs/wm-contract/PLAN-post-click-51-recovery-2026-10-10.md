@@ -1343,3 +1343,18 @@ or weaken an existing definition merely to accommodate current Clojure.
   added.  Before pasting or a colimit claim, Lean needs a cycle-basis coverage
   theorem and path-independence theorem; validating an arbitrarily supplied
   subset of triangles is insufficient.
+
+- 2026-10-11, application-order certificate slice: Lean now binds the exact
+  derived construction edges, declared application triples, decoded square
+  sequence, and a nonzero externally registered order-law
+  identity/version/authority/receipt.  Population validation rejects duplicate,
+  omitted, and unknown square indices independently of the law.  A positive
+  diamond witness validates; a permutation with identical square membership
+  but different order and a substituted law identity both fail.  The law owns
+  triple decoding and the construction/application relation, so equality with
+  construction order is not assumed globally.  Runtime remains blocked: it
+  produces only the overloaded `:precedence`, with no independent declared
+  application order, stable policy square population, decoded sequence, or
+  external law registry.  The first integration boundary is
+  `interpretation_construction.clj` before that vector is reused by rollout and
+  G; refusal must precede cascade decision.  No runtime behavior changed.

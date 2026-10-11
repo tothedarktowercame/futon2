@@ -6,6 +6,15 @@ The runtime does not carry an application order distinct from construction
 precedence.  No sound pre-G application-order certificate can be added until
 the specification defines that carrier and its relation to observed execution.
 
+Lean now has an **additive parametric certificate** for that future carrier.
+It does not authorize the current runtime precedence or change policy
+admission.  `ApplicationOrderCertificate.valid` binds the policy's derived
+construction edges and declared application triples exactly, decodes the
+triples through an externally registered law, requires every square index
+exactly once, and applies that law's relation.  The relation is not hard-coded
+to construction-order equality, so a future independently authorized
+application law can differ.
+
 ## Evidence
 
 - `DarkTower/WarMachine/ThreeHalvesBlend.lean` defines
@@ -46,3 +55,43 @@ Only then can runtime emit a source-pinned `:wm/application-order-v1` receipt
 and Lean state its validity and selected-to-enacted correspondence.  This audit
 does not alter production behavior or infer application semantics from the
 existing precedence vector.
+
+## Exact Lean/runtime correspondence still required
+
+| Lean carrier | Required runtime field | Status |
+|---|---|---|
+| `Policy.constructionOrder` snapshot | `:construction-order` (ordered square-ID edge pairs) | Not produced independently; current `:precedence` is overloaded |
+| `Policy.applicationOrder` snapshot | `:declared-application-order` (retained triples) | Missing |
+| Authorized decoder output `applicationSequence` | `:application-sequence` (ordered stable square IDs) | Missing |
+| Exact square population/no duplicates | `:square-population` joined bijectively to policy square IDs | Missing policy-level runtime carrier |
+| Law identity/version | `:order-law {:identity ... :version ...}` | Missing external registry/configuration |
+| Law authority/receipt | `:order-law {:authority ... :receipt ...}` joined to a retained registry entry | Missing |
+| Registered decoder and relation | Registry entry specifying triple decoding and the construction/application relation | Missing; must not be selector-authored |
+
+The minimal receipt shape is therefore:
+
+```clojure
+{:schema :wm/application-order-v1
+ :policy-id stable-id
+ :square-population [square-id ...]
+ :construction-order [[from-id to-id] ...]
+ :declared-application-order [[a b witness] ...]
+ :application-sequence [square-id ...]
+ :order-law {:identity nonzero-id :version positive-nat
+             :authority external-id :receipt nonzero-id}
+ :source-pin {:path path :sha256 digest}}
+```
+
+The external registry entry must supply the decoder and relation selected by
+the four law fields.  Same membership is not ordered correspondence: the Lean
+witness `[0,2,1,3]` contains exactly the same squares as `[0,1,2,3]` but is
+rejected by the registered exact-order law.  Separate witnesses reject a
+duplicate, omission, unknown index, and substituted law identity.
+
+The first integration boundary is policy construction in
+`src/futon2/aif/interpretation_construction.clj`, before its single
+`:precedence` vector is reused by rollout and G.  An independently supplied
+and source-pinned application-order receipt must enter there as immutable
+evidence; validation must refuse before cascade decision/G.  Enactment in
+`src/futon2/aif/flight_runner.clj` may consume it only after the distinct
+selected-to-enacted correspondence is specified and checked.
