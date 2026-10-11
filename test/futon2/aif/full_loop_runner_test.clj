@@ -812,7 +812,7 @@
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
-                            judgement-transform-fn]}]
+                            judgement-transform-fn author-summary]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -831,12 +831,16 @@
                                    :sha256 (digest/sha256 (slurp record))}})]
            (let [result (run-feature-card-attempt
                          {:author-card feature-card-claim
+                          :author-summary author-summary
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
-                          {:job-id "feature-author" :state "done" :artifact-ref sha
-                           :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
-                           :feature-card feature-card-claim
-                           :execution successful-execution}
+                          (cond->
+                           {:job-id "feature-author" :state "done" :artifact-ref sha
+                            :result-summary (or author-summary
+                                                (str "FULL_LOOP_AUTHOR: DONE " sha))
+                            :execution successful-execution}
+                            (nil? author-summary)
+                            (assoc :feature-card feature-card-claim))
                           :runner-options
                           (cond->
                            {:cohort? true :execution-cohort (:binding cohort)
@@ -1058,10 +1062,14 @@
                      ":matches-intent? true :things-to-try [\"feature id -> card\"]}\n"
                      "FULL_LOOP_AUTHOR: DONE feature123")
         durable-prefix (subs summary 0 (min 200 (count summary)))
+        cohort (retention-cohort "agency-prefix-card")
+        decision (token-loop-exercised-decision)
         {:keys [result item]}
-        (run-feature-card-attempt {:author-summary durable-prefix})]
+        (run-token-feature-card-attempt
+         cohort decision {:author-summary durable-prefix})]
     (is (<= (count (first (str/split-lines summary))) 200))
-    (is (= :grounded-change (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (= "compact repair" (get-in item [:feature-card :built])))
     (is (= ["feature id -> card"]
            (get-in item [:feature-card :things-to-try])))))
