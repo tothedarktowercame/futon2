@@ -2595,17 +2595,83 @@
                         phases)))))
 
 (deftest first-review-approval-skips-revision-machinery
-  (let [{:keys [result phases dispatches]}
-        (run-revision-attempt ["FULL_LOOP_REVIEW: APPROVE"])
-        build (get-in result [:checkpoints :build :judgment])]
-    (is (= :grounded-change (:outcome result)))
-    (is (= ["abc123"] (:commits build)))
-    (is (not (contains? build :revision)))
-    (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
-    (is (empty? (filter #(#{:revision-dispatch :revision-wait :revision-build
-                            :re-review-dispatch :re-review-wait}
-                          (:phase %))
-                        phases)))))
+  ;; attempt-003, 2026-10-11: the bare harness predated the reviewer-falsifier
+  ;; gate (907c151b3) and supplied none of its inputs, so a first-review
+  ;; approval was refused as :build-failed for fixture reasons.  The falsifier
+  ;; inputs travel the same authoritative carriers the revision sibling uses:
+  ;; a real mission entry (standing), the cascade construction's selected
+  ;; action (selected-want identity), and D-task measurements at the author's
+  ;; commit (evidence authority).
+  (token-fixture/with-artifact
+   (fn [_unrelated-sha]
+     (let [token-repo (io/file observation-checks/repo-root "futon2")
+           mission-path (io/file token-repo
+                                 "holes/missions/M-aif-policy-conditioned-eig.md")
+           _ (spit mission-path
+                   (str/replace
+                    (slurp mission-path)
+                    "- [ ] **Mint the shared posterior updater, then unify the two paths through"
+                    "- [x] **Mint the shared posterior updater, then unify the two paths through"))
+           _ (token-fixture/command token-repo "add" ".")
+           _ (token-fixture/command
+              token-repo "-c" "user.name=Fixture"
+              "-c" "user.email=fixture@example.invalid"
+              "commit" "-qm" "complete selected updater want")
+           approved-sha (token-fixture/command token-repo "rev-parse" "HEAD")
+           evidence-root (io/file (.getParentFile token-repo)
+                                  "first-approval-evidence")
+           _ (.mkdirs evidence-root)
+           evidence-file (io/file evidence-root "d-task.edn")
+           _ (spit evidence-file
+                   (pr-str {:after-token-evidence
+                            (token-fixture/measurements approved-sha)}))
+           {:keys [result phases dispatches]}
+           (binding [cascade-sources/*code-roots*
+                     ["test/fixtures/library-pins/r7fc6a050"
+                      "test/fixtures/library-pins/current"]]
+             (with-redefs [d-task/complete!
+                           (fn [& _]
+                             {:source {:path (.getPath evidence-file)
+                                       :sha256 (digest/sha256
+                                                (slurp evidence-file))}})]
+               (run-revision-attempt
+                ["FULL_LOOP_REVIEW: APPROVE"]
+                {:author-commits [approved-sha]
+                 :runner-options
+                 {:judge-fn
+                  (fn [_]
+                    {:judgement (assoc judgement :decision
+                                       (token-loop-exercised-decision))})
+                  :mission-fn
+                  (fn [_]
+                    (#'missions/mission-doc->entry (.getPath mission-path)))
+                  :construct-fn
+                  (fn [entry]
+                    {:construction-kind :revision-test
+                     :capability-contract {:must :preserve-contract}
+                     :shown [:P1]
+                     :semilattice []
+                     :selected-action (:action entry)})
+                  :target-repo-fn (fn [& _] (.getPath token-repo))
+                  :resolve-build-fn
+                  (fn [_] {:repo (.getPath token-repo)
+                           :files ["unrelated.clj"]})
+                  :d-task-evidence-root (.getPath evidence-root)}})))
+           build (get-in result [:checkpoints :build :judgment])]
+       ;; the token-exercised selection judges the observed want as progress,
+       ;; as in the revision sibling — the first-approval path is identical
+       ;; from the falsifier on; only the revision round is skipped
+       (is (= :grounded-progress (:outcome result)))
+       (is (= [approved-sha] (:commits build)))
+       (is (not (contains? build :revision)))
+       (is (= :verified
+              (get-in build [:validation :reviewer-falsifier-verification :status]))
+           "first-review approval reaches the falsifier honestly and passes it")
+       (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
+       (is (empty? (filter #(#{:revision-dispatch :revision-wait :revision-build
+                              :re-review-dispatch :re-review-wait}
+                            (:phase %))
+                           phases)))))))
 
 (deftest negative-review-without-findings-does-not-spend-revision-round
   (let [{:keys [result phases dispatches]}
