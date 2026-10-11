@@ -812,7 +812,7 @@
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
-                            judgement-transform-fn author-summary]}]
+                            judgement-transform-fn author-summary author-result]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -839,6 +839,8 @@
                             :result-summary (or author-summary
                                                 (str "FULL_LOOP_AUTHOR: DONE " sha))
                             :execution successful-execution}
+                            author-result
+                            (assoc :result author-result)
                             (nil? author-summary)
                             (assoc :feature-card feature-card-claim))
                           :runner-options
@@ -1205,14 +1207,15 @@
                        ":matches-intent? true "
                        ":things-to-try [\"exhaust cohort -> :cohort-complete\"]}")
         reply (str card-line "\nFULL_LOOP_AUTHOR: DONE feature123")
+        cohort (retention-cohort "attempt-051-verbose-card")
+        decision (token-loop-exercised-decision)
         {:keys [result item dispatches]}
-        (run-feature-card-attempt
-         {:initial-author-job
-          {:job-id "feature-author" :state "done" :artifact-ref "feature123"
-           :result-summary (subs reply 0 200)
-           :result reply
-           :execution successful-execution}})]
-    (is (= :grounded-change (:outcome result)))
+        (run-token-feature-card-attempt
+         cohort decision
+         {:author-summary (subs reply 0 200)
+          :author-result reply})]
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (empty? (get-in result [:data :build-retries])))
     ;; Author dispatched once, reviewer once — no cure dispatch.
     (is (= ["zai-5" "codex-7"] dispatches))
