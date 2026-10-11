@@ -817,7 +817,7 @@
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
                             judgement-transform-fn author-summary author-result
-                            artifacts? reviewer-execution reviewer-events]}]
+                            artifacts? reviewer-execution reviewer-events grounded?]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -844,6 +844,7 @@
                                    :sha256 (digest/sha256 (slurp record))}})]
            (let [result (run-feature-card-attempt
                          {:author-card feature-card-claim
+                          :grounded? (if (some? grounded?) grounded? true)
                           :author-summary author-summary
                           :reviewer-execution reviewer-execution
                           :reviewer-events reviewer-events
@@ -1562,13 +1563,13 @@
     (is (= :grounded-progress (get-in item [:achievement :tier])))))
 
 (deftest non-grounded-attempt-never-persists-author-card
-  (let [{:keys [result item]}
-        (run-feature-card-attempt {:author-card feature-card-claim
-                                   :grounded? false
-                                   :artifacts? true})
-        rendered (-> {:attempt item}
-                     cli/feature-acceptance
-                     cli/render-feature-acceptance)]
+  (let [cohort (retention-cohort "non-grounded-feature-card")
+        decision (token-loop-exercised-decision)
+        {:keys [result item rendered-feature-acceptance]}
+        (run-token-feature-card-attempt
+         cohort decision {:grounded? false :artifacts? true})
+        rendered rendered-feature-acceptance]
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
     (is (= :grounded-no-change (:outcome result)))
     (is (nil? (:feature-card item)))
     (is (re-find #"not rendered for this attempt ⟵ build-time gap" rendered))
