@@ -1443,3 +1443,24 @@ or weaken an existing definition merely to accommodate current Clojure.
   equality to the existing non-tree obligations.  Proving square-graph facts
   (1)–(3) alone would not close the requested theorem and was not presented as
   adequacy.  No runtime or certificate semantics changed.
+
+- 2026-10-11, conservative typed-forest correction: coherence now constructs
+  its deterministic forest over `(square-index, Role)` endpoints, while
+  `Policy.components/verdict` deliberately retain square-level structural
+  connectivity.  No intra-square transport is inferred.  The role-mismatch
+  witness consequently has two typed components, both edges remain forest
+  edges, it needs no cycle obligation, and the nonexistent composed path is
+  never requested.  Same-role coherent/incoherent triangles, two independent
+  cycles, reversed duplicates, and malformed refusal retain their measured
+  outcomes.  `gluingForest_edge_admitted` proves every chosen forest edge came
+  from a supplied individually well-formed gluing; exact required non-tree
+  coverage remains proved by `valid_covers_required_edges`.
+
+  Remaining theorem boundary: establish the greedy typed-closure invariant
+  giving forest acyclicity, equality with admitted typed connectivity, and
+  unique simple oriented edge-index paths.  Full arbitrary-path transport
+  equality additionally needs `reversePMap` two-sided-inverse laws for admitted
+  isomorphisms and associativity of `PMap.comp` on the relevant well-formed
+  maps.  Those algebraic results are not yet present, so no path-independence,
+  pasting, or colimit claim is made.  Runtime correspondence now explicitly
+  requires typed endpoints and must not collapse roles.

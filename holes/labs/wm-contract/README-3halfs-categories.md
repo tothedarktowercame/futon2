@@ -171,8 +171,9 @@ policy with an identity direct edge.  It does not strengthen
 A caller-supplied list of successful triangles may omit the bad cycle.  Lean
 now closes that executable coverage hole with
 `GluingCoherenceCertificate.valid`: supplied-order processing deterministically
-selects a spanning forest from well-formed gluings and makes every admitted
-non-tree edge a required obligation.  The certificate's edge list must equal
+selects a forest on typed vertices `(square-id, role)` from well-formed gluings
+and makes every admitted non-tree edge a required obligation.  There are no
+implicit intra-square role transports.  The certificate's edge list must equal
 that derived list exactly, and each obligation supplies a duplicate-free path
 using forest edges whose composed transport equals the direct edge.  A tree
 therefore requires no obligations; parallel and reversed duplicate edges are
@@ -182,17 +183,26 @@ basis, while any malformed policy still fails certificate validity.
 | Deterministic Lean field/check | Required future runtime field |
 |---|---|
 | Supplied ordered, stable gluing indices | Stable `:gluing-id` plus retained source order |
-| Derived `gluingForest` | No caller boolean; recompute from admitted gluing receipts |
+| Typed endpoints `(square-id, role)` | Exact retained `:from`/`:to` endpoints; never collapse roles |
+| Derived typed `gluingForest` | No caller boolean; recompute from admitted gluing receipts |
 | Derived `requiredCycleEdges` | Exact ordered `:cycle-obligations` population |
 | Oriented forest steps `(gluing-id, reversed?)` | `:forest-path` with explicit orientation |
 | Composed graph equals direct graph | Retained isomorphism graphs, recomputed composition/equality |
 
-`valid_covers_required_edges` proves exact non-tree-edge coverage and validity
-of every listed transport equation.  The remaining semantic theorem, required
-before coherent connectivity can justify pasting or a colimit claim, is that
-the selected forest is acyclic and spanning with a unique simple path, followed
-by reduction of arbitrary path equality to these fundamental-cycle equations.
-That theorem is not claimed by the executable certificate slice.
+`gluingForest_edge_admitted` proves generally that every selected forest edge
+is a supplied individually well-formed gluing.  `valid_covers_required_edges`
+proves exact non-tree-edge coverage and validity of every listed transport
+equation.  The former role-mismatch witness now forms two typed components and
+requires no nonexistent composite path, while its raw square-level
+`Policy.components` remains connected as intended.
+
+The remaining semantic proof boundary is a general invariant for the finite
+typed closure algorithm: forest acyclicity, equality of forest/admitted typed
+connectivity, and uniqueness of simple oriented edge-index paths.  Arbitrary
+transport path independence then additionally needs algebraic lemmas that
+`reversePMap` is a two-sided inverse on admitted isomorphisms and that
+`PMap.comp` is associative on the relevant well-formed maps.  Neither result is
+silently assumed, so no pasting or colimit claim follows yet.
 
 ### Pasting
 
