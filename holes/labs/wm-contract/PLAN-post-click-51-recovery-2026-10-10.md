@@ -17,6 +17,12 @@ before G. Production persistence/Morning Brief retention, application order,
 and transition/predictive adequacy remain open. No policy EDN-to-Lean
 generator currently exists.
 
+Correction: policy pins now seal the full declaration content, and square
+pins seal occurrence/candidate identity plus the exact retained one-square
+receipt. The gate requires equality of constructed population, policy
+projection, and admitted population; an unrelated valid triangle for the
+same target no longer authorizes admission.
+
 This note records the worklist resulting from review of the restored
 pre-claude-12 runtime, the Lean requirements, and run
 `2026-10-10-c82068b4-6ba2-4480-b162-cf77a8d66fda`.  The run's reports are

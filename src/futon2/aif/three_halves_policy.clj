@@ -1,6 +1,7 @@
 (ns futon2.aif.three-halves-policy
   "Controlled-SUT runtime projection of ThreeHalvesBlend.Policy coherence."
-  (:require [futon2.aif.three-halves-square :as square])
+  (:require [clojure.edn :as edn]
+            [futon2.aif.three-halves-square :as square])
   (:import (java.math BigInteger)
            (java.security MessageDigest)))
 
@@ -11,11 +12,26 @@
   (format "%064x" (BigInteger. 1 (.digest (doto (MessageDigest/getInstance "SHA-256")
                                            (.update (.getBytes (str s) "UTF-8")))))))
 
-(defn- pin-valid? [pin captured]
+(defn declaration-digest [declaration]
+  (sha256 (pr-str (dissoc declaration :source))))
+
+(defn sealed-source
+  "Test/adapter helper for an externally stored declaration digest. The
+  returned body must itself be retained by the authority named in the pin."
+  [declaration]
+  (pr-str {:schema :wm/sealed-three-halves-declaration-v1
+           :declaration-digest (declaration-digest declaration)}))
+
+(defn- pin-valid? [pin declaration captured]
   (and (string? (:path pin)) (string? (:revision pin))
        (string? (:sha256 pin))
        (let [body (get captured [(:path pin) (:revision pin)])]
-         (and (string? body) (= (:sha256 pin) (sha256 body))))))
+         (and (string? body) (= (:sha256 pin) (sha256 body))
+              (try
+                (= {:schema :wm/sealed-three-halves-declaration-v1
+                    :declaration-digest (declaration-digest declaration)}
+                   (edn/read-string body))
+                (catch Exception _ false))))))
 
 (defn- functional? [rel]
   (and (set? rel)
@@ -102,7 +118,7 @@
                         (roles from-role) (roles to-role))
                (endpoints g id->index))
         gaps (cond-> []
-               (not (pin-valid? (:source g) captured)) (conj :source-pin)
+               (not (pin-valid? (:source g) g captured)) (conj :source-pin)
                (nil? ends) (conj :typed-endpoint)
                (and ends (= (first ends) (second ends))) (conj :typed-self-loop)
                (not (and (functional? rel) (functional? inv))) (conj :functional-bijection)
@@ -124,9 +140,19 @@
         square-ids (mapv :square-id squares) gluing-ids (mapv :gluing-id gluings)
         unique-squares? (= (count square-ids) (count (set square-ids)))
         unique-gluings? (= (count gluing-ids) (count (set gluing-ids)))
+        projection (:projection receipt)
+        projected-square-ids (vec (mapcat :squares (:candidates projection)))
+        occurrence-valid?
+        (fn [s]
+          (let [{:keys [candidate-id pattern-id position]} (:occurrence s)
+                projected (some #(when (= candidate-id (:candidate-id %)) %) (:candidates projection))]
+            (and projected (nat-int? position)
+                 (= pattern-id (get (:precedence projected) position))
+                 (= (:square-id s) (get (:squares projected) position)))))
         square-results (mapv (fn [s]
                                {:id (:square-id s)
-                                :valid? (and (pin-valid? (:source s) captured-sources)
+                                :valid? (and (pin-valid? (:source s) s captured-sources)
+                                             (occurrence-valid? s)
                                              (= :valid (:status (square/validate (:receipt s)))))})
                              squares)
         square-by-id (into {} (map (juxt :square-id identity)) squares)
@@ -135,11 +161,14 @@
         checked-gluings (mapv :value gluing-results)
         base-gaps (cond-> []
                     (not= schema (:schema receipt)) (conj :policy-schema)
-                    (not (pin-valid? (:source receipt) captured-sources)) (conj :policy-source-pin)
+                    (not (pin-valid? (:source receipt) receipt captured-sources)) (conj :policy-source-pin)
+                    (not (and (map? projection) (some? (:target projection))
+                              (vector? (:candidates projection)))) (conj :policy-projection)
                     (not (vector? squares)) (conj :stable-square-order)
                     (not (vector? gluings)) (conj :stable-gluing-order)
                     (not unique-squares?) (conj :duplicate-square-id)
                     (not unique-gluings?) (conj :duplicate-gluing-id)
+                    (not= square-ids projected-square-ids) (conj :square-occurrence-population)
                     (some (complement :valid?) square-results) (conj :square-invalid)
                     (some :gaps gluing-results) (conj :gluing-invalid))]
     (if (seq base-gaps)

@@ -266,6 +266,14 @@ are retained and recomputed. The validator derives the supplied-order typed
 greedy forest and requires exactly the non-tree edges with their canonical
 oriented forest paths and equal composed transport.
 
+Each square also binds a constructed-candidate ID, pattern occurrence, and
+position, while `:projection` binds the exact ordered candidate population.
+The controlled gate equates that projection before and after real admission
+and compares every square receipt to the receipt already retained for that
+pattern. Pins authenticate EDN containing a recomputed digest of the complete
+square, gluing, or policy declaration; arbitrary bytes or a self-asserted
+carrier digest are insufficient.
+
 `wm.cascade-decision/controlled-three-halves-admission` runs this certificate
 before the existing real candidate-admission seam. It is not called by the
 live pipeline: production mode or a missing policy refuses. Persistence,

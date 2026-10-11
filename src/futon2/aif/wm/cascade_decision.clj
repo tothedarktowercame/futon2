@@ -1398,15 +1398,42 @@
       (if (not= :valid (:status certificate))
         {:status :refused :stage :pre-g-composition
          :reason :three-halves-policy-invalid :certificate certificate}
-        (let [admission (admit-cascade-problem problem)]
-          (if-let [admitted (:problem admission)]
+        (let [candidate-view (fn [p]
+                               {:target (:target p)
+                                :candidates
+                                (mapv #(select-keys % [:candidate-id :precedence])
+                                      (:constructed-candidates p))})
+              projected (update (:projection policy) :candidates
+                                #(mapv (fn [c] (select-keys c [:candidate-id :precedence])) %))
+              square-receipts-join?
+              (every?
+               (fn [{:keys [receipt occurrence]}]
+                 (let [{:keys [candidate-id pattern-id]} occurrence
+                       candidate (some #(when (= candidate-id (:candidate-id %)) %)
+                                       (:constructed-candidates problem))]
+                   (= receipt
+                      (or (get-in candidate [:interpretation-receipts pattern-id :blend-square])
+                          (get-in problem [:interpretation-receipts pattern-id :blend-square])
+                          (get-in candidate [:construction-receipt :blend-squares pattern-id])))))
+               (:squares policy))]
+          (if (or (not= projected (candidate-view problem))
+                  (not square-receipts-join?))
+            {:status :refused :stage :pre-g-composition
+             :reason :three-halves-policy-projection-mismatch
+             :certificate certificate}
+            (let [admission (admit-cascade-problem problem)]
+              (if-let [admitted (:problem admission)]
+                (if (= projected (candidate-view admitted))
             {:status :ready-for-g :stage :pre-g-composition
-             :constructed-identity (:target problem)
-             :admitted-identity (:target admitted)
+             :constructed-identity (candidate-view problem)
+             :admitted-identity (candidate-view admitted)
              :certificate certificate :admission admission}
+                  {:status :refused :stage :pre-g-composition
+                   :reason :admitted-policy-population-mismatch
+                   :certificate certificate :admission admission})
             {:status :refused :stage :pre-g-composition
              :reason :cascade-admission-refused
-             :certificate certificate :admission admission}))))))
+             :certificate certificate :admission admission}))))))))
 
 (defn target-construction-census
   "Record per-target construction facts from assembled problems and the actual
