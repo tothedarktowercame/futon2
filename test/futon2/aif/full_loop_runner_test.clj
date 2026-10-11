@@ -6642,44 +6642,19 @@
   ;; close-refuses-when-owned-pin-bytes-drift below) without the result
   ;; depending on futon3's HEAD.
   (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
-  (token-fixture/with-artifact
-   (fn [sha]
-     (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
-           decision (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
-           record (io/file root "d-task.edn")
-           _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
-           ;; A fresh-author artifact must bind in the repository the build
-           ;; resolves in (the cohort root), not the synthetic default "/repo".
-           opts (assoc (retention-success-opts c)
-                       :author-artifact-observer-fn
-                       (fn [r before job]
-                         (assoc (synthetic-artifact-binding r before job) :repo root))
-                       ;; The retention fixture's witness has :before nil, which
-                       ;; the close validator rejects for a grounded change.
-                       :ground-fn (fn [& _] {:before {:implementation-entity nil}
-                                             :after {:implementation-entity {:id "retained"}}
-                                             :resolved? true :dial-moved? true
-                                             :implementation-id "retained"
-                                             :discharge-id "retained-discharge"})
-                       :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
-                       :poll-fn (fn [_ id]
-                                  (if (= id "retention-author")
-                                    {:job-id id :state "done" :artifact-ref sha
-                                     :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
-                                     :feature-card feature-card-claim
-                                     :execution successful-execution}
-                                    {:job-id id :state "done" :execution successful-execution
-                                     :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
-           result (with-redefs [d-task/complete!
-                               (fn [& _] {:source {:path (.getPath record)
-                                                   :sha256 (digest/sha256 (slurp record))}})]
-                    (runner/run-opportunity! opts))
+    (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
+          decision (token-loop-exercised-decision)
+          {:keys [result]} (run-token-feature-card-attempt c decision)
            close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                                 (:attempt-id result) "007-closed.edn"))
            receipt (get-in close-event [:payload :judgment :token-outcome-comparison])
            entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/token-outcome.edn")
                                 (get-in close-event [:payload :close-evidence-manifest :entries])))]
+       (is (= :complete (:status (loop-node-exercise/receipt decision))))
        (is (= :grounded-progress (:outcome result)))
+       (is (= :verified
+              (get-in result [:checkpoints :build :judgment :validation
+                              :reviewer-falsifier-verification :status])))
        ;; Retained files must not disturb the closed attempt's exact file set.
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
        (is (= :wm/action-transition-occurrence-v2
@@ -6692,7 +6667,18 @@
        (is (= receipt (edn/read-string (slurp (:source-path entry)))))
        (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
        (is (.isBefore (Instant/parse (:admitted-at entry))
-                      (Instant/parse (:recorded-at close-event)))))))))
+                      (Instant/parse (:recorded-at close-event)))))))
+
+(deftest token-mismatch-without-complete-loop-receipt-retains-nothing
+  (let [{:keys [root] :as cohort} (retention-cohort "runner-token-unexercised")
+        {:keys [result]}
+        (run-token-feature-card-attempt cohort (token-fixture/decision))
+        retained (io/file root "test-cohort-exhaustion" "attempt-001" "retained")]
+    (is (= :build-failed (:outcome result)))
+    (is (= :invalid-close-outcome (get-in result [:data :failure-kind])))
+    (doseq [name ["token-outcome.edn" "surprises.edn"]]
+      (is (not (.exists (io/file retained name)))
+          (str "selection refusal precedes retained/" name)))))
 
 
 (deftest close-refuses-when-owned-pin-bytes-drift
@@ -6707,7 +6693,7 @@
   (token-fixture/with-artifact
    (fn [sha]
      (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
-           decision (with-test-carry (merge (:decision judgement) (token-fixture/decision)))
+           decision (token-loop-exercised-decision)
            record (io/file root "d-task.edn")
            _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
            opts (assoc (retention-success-opts c)
