@@ -817,7 +817,7 @@
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
                             judgement-transform-fn author-summary author-result
-                            artifacts?]}]
+                            artifacts? reviewer-execution reviewer-events]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -845,6 +845,8 @@
            (let [result (run-feature-card-attempt
                          {:author-card feature-card-claim
                           :author-summary author-summary
+                          :reviewer-execution reviewer-execution
+                          :reviewer-events reviewer-events
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
                           (cond->
@@ -1531,9 +1533,12 @@
            (get-in item [:failure :kind])))))
 
 (deftest reviewer-tool-ledger-corroborates-a-stale-execution-summary
-  (let [{:keys [result item]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
+  (let [cohort (retention-cohort "reviewer-tool-ledger")
+        decision (token-loop-exercised-decision)
+        {:keys [result item]}
+        (run-token-feature-card-attempt
+         cohort decision
+         {
           :reviewer-execution {:executed false :tool-events 0 :command-events 0}
           :reviewer-events [{:seq 4 :type "text" :text "Inspecting."}
                             {:seq 5 :type "tool_use" :tools ["Bash"]
@@ -1541,7 +1546,8 @@
                             {:seq 6 :type "tool_use" :tools ["Read"]}]})
         validation (get-in result [:checkpoints :build :judgment :validation])
         gate (:review-gate validation)]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (:passed? gate))
     (is (:executed? gate))
     (is (= 2 (:tool-events gate)))
@@ -1553,7 +1559,7 @@
            (:review-text validation)))
     (is (= (:reviewer validation) (:execution gate)))
     (is (= :job-events (:execution-source gate)))
-    (is (= :fully-grounded (get-in item [:achievement :tier])))))
+    (is (= :grounded-progress (get-in item [:achievement :tier])))))
 
 (deftest non-grounded-attempt-never-persists-author-card
   (let [{:keys [result item]}
