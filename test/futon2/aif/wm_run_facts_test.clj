@@ -392,6 +392,40 @@
             [:decision :selected-candidate :selected-input]]
            (facts/absence-paths r)))))
 
+(defn prefix-selected-candidate [prefix-status]
+  (let [action {:target "M-selected" :candidate :C1 :precedence [:pattern/selected]}
+        prefix {:schema :wm/policy-prefix-evidence-v1 :policy action
+                :status prefix-status :f 1.25 :route :bootstrap}]
+    {:id action :f 1.25 :f-status :computed
+     :inputs {:f {:status :computed :value 1.25
+                  :presence :prefix-receipt :reason nil}}
+     :f-prefix prefix
+     :computed-f {:f {:value 0.0 :status :not-supplied
+                      :reason :class-model-unconditioned-at-selection}
+                  :value {:value 0.0 :status :not-supplied
+                          :reason :class-model-unconditioned-at-selection}}}))
+
+(defn q7-prefix-record [candidate]
+  {:decision {:chosen (:id candidate)
+              :selection-certificate {:candidates [candidate]}}})
+
+(deftest q7-excludes-only-superseded-computed-f-after-exact-prefix-consumption
+  (let [candidate (prefix-selected-candidate :computed)]
+    (is (empty? (facts/absence-paths (q7-prefix-record candidate))))
+    (is (= [[:decision :selected-candidate :other]]
+           (facts/absence-paths
+            (q7-prefix-record (assoc candidate :other {:status :absent})))))))
+
+(deftest q7-prefix-exclusion-requires-an-exact-consumed-receipt
+  (let [candidate (prefix-selected-candidate :computed)]
+    (doseq [changed [(dissoc candidate :f-prefix)
+                     (assoc-in candidate [:f-prefix :status] :refused)
+                     (assoc-in candidate [:f-prefix :policy :candidate] :other)
+                     (assoc candidate :f 9.0)
+                     (assoc-in candidate [:inputs :f :value] 9.0)]]
+      (is (some #{[:decision :selected-candidate :computed-f :f]}
+                (facts/absence-paths (q7-prefix-record changed)))))))
+
 (deftest q7-counts-the-abstention-path-when-nothing-was-chosen
   (let [r {:decision {:chosen nil
                       :abstention {:kind :typed-refusal

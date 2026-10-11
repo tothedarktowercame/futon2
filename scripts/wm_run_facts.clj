@@ -141,6 +141,19 @@
                  (or (nil? precedence) (= precedence candidate-precedence)))))
         candidates)))))
 
+(defn- consumed-prefix-f? [candidate]
+  (let [prefix (:f-prefix candidate)
+        input (get-in candidate [:inputs :f])
+        f (:f prefix)]
+    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+         (= (:id candidate) (:policy prefix))
+         (= :computed (:status prefix))
+         (number? f) (Double/isFinite (double f))
+         (= f (:f candidate))
+         (= :computed (:f-status candidate))
+         (= {:status :computed :value f :presence :prefix-receipt :reason nil}
+            (select-keys input [:status :value :presence :reason])))))
+
 (defn absence-paths
   "Count typed absences/refusals on the enacted selection-to-receipt path.
 
@@ -158,7 +171,10 @@
                        [[:terminal-receipt] (:terminal-receipt record)]
                        [[:failure] (:failure record)]]
                 (map? chosen) (conj [[:decision :chosen] chosen])
-                candidate (conj [[:decision :selected-candidate] candidate])
+                candidate (conj [[:decision :selected-candidate]
+                                 (if (consumed-prefix-f? candidate)
+                                   (dissoc candidate :computed-f)
+                                   candidate)])
                 (and (not (map? chosen)) abstention)
                 (conj [[:decision :abstention] abstention]))]
     (vec
