@@ -9,6 +9,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.open-cascade-relatedness-sut :as relatedness]
             [futon2.aif.outer-objective-sut :as outer]
+            [futon2.aif.q8-frontier-certificate :as q8]
             [futon2.aif.wm.cascade-decision :as decision]))
 
 (def schema :wm/integrated-controlled-sut-v1)
@@ -67,12 +68,18 @@
                 (refuse (if (= :application-order-refused (:reason scored))
                           :admission :scoring)
                         (:reason scored) scored)
-                (let [selected-key (get-in scored [:identity-chain :selected])
+                (let [q8-result (q8/project {:outer-objective selected
+                                             :efe-input efe-input
+                                             :construction construction
+                                             :scored scored})
+                      selected-key (get-in scored [:identity-chain :selected])
                       original (get-in scored [:posterior :action])
                       request-1 {:schema :wm/controlled-dispatch-request-v1 :attempt 1
-                                 :policy-key selected-key :action original}
-                      first-dispatch (phase! :dispatch #(dispatch-fn request-1))]
-                  (if-not (and (request-bound-job? first-dispatch dispatch-authority request-1)
+                                 :policy-key selected-key :action original}]
+                  (if-not (= :valid (:status q8-result))
+                    (refuse :scoring (:reason q8-result) q8-result)
+                    (let [first-dispatch (phase! :dispatch #(dispatch-fn request-1))]
+                      (if-not (and (request-bound-job? first-dispatch dispatch-authority request-1)
                                (= selected-key (get-in first-dispatch [:result :policy-key])))
                     (refuse :dispatch :dispatch-authority-or-identity-mismatch)
                     (let [revision-input (revision-input-fn original first-dispatch)
@@ -97,7 +104,8 @@
                                                     :predictive (:predictive scored)
                                                     :prefix-f (:prefix-f scored)
                                                     :factorized-preference (:preference scored)
-                                                    :relatedness (:search revised)}
+                                                    :relatedness (:search revised)
+                                                    :q8 (:certificate q8-result)}
                                       grounding-request {:schema :wm/controlled-grounding-request-v1
                                                          :original-identity selected-key
                                                          :revised-identity revised-digest
@@ -146,4 +154,4 @@
                                    :persistence persisted
                                    :telemetry {:phase-ms @timings :total-ms elapsed
                                                :peak-rss-bytes @peak
-                                               :artifact-bytes artifact-bytes}})))))))))))))))))
+                                   :artifact-bytes artifact-bytes}})))))))))))))))))))

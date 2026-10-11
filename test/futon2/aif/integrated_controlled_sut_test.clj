@@ -9,7 +9,10 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.open-cascade-relatedness-sut-test :as revision-fixture]
             [futon2.aif.outer-objective-sut-test :as outer-fixture]
-            [futon2.aif.pattern-registry :as registry]))
+            [futon2.aif.pattern-registry :as registry]
+            [futon2.aif.q8-frontier-certificate :as q8]
+            [wm-check-run-facts :as checker]
+            [wm-run-facts :as run-facts]))
 
 (use-fixtures :once outer-fixture/isolated-store)
 
@@ -129,11 +132,39 @@
            (get-in @(:dispatch-calls input) [0 :policy-key])))
     (is (= (get-in result [:revision :dispatch :dispatched-action-sha256])
            (get-in @(:dispatch-calls input) [1 :action-sha256])))
-    (is (= 7 (count certs)))
+    (is (= 8 (count certs)))
+    (is (= :wm/q8-frontier-certificate-v1 (get-in certs [:q8 :schema])))
     (is (= certs (get-in persisted [:checkpoint :value :certificates])))
     (is (= certs (get-in persisted [:hydrated :run-record :controlled-sut :certificates])))
     (is (= certs (get-in persisted [:hydrated :morning-brief
                                     :controlled-sut :certificates])))
+    (let [projection-input {:outer-objective (:selection result)
+                            :efe-input (:efe-input input)
+                            :construction (:construction result)
+                            :scored (:scoring result)}
+          stale (assoc-in projection-input
+                          [:outer-objective :frontier :refresh :current 0
+                           :entry :freshness-epoch] 99)
+          wrong-target (assoc-in projection-input [:outer-objective :selected-task]
+                                 "another-target")
+          omitted-scored (update-in projection-input [:scored :preference :scored] pop)]
+      (is (= (:q8 certs) (:certificate (q8/project projection-input))))
+      (is (= :outer-refresh-invalid (first (:errors (q8/project stale)))))
+      (is (some #{:selected-target-mismatch} (:errors (q8/project wrong-target))))
+      (is (some #{:target-local-policy-population-mismatch}
+                (:errors (q8/project omitted-scored)))))
+    (let [snap {:open-missions #{target} :open-excursions #{} :open-tickets #{}
+                :patterns #{} :seats #{} :pins {:controlled true}}
+          exported (:facts (run-facts/facts-for-record
+                            (get-in persisted [:hydrated :run-record])
+                            "controlled-run-record" snap nil nil))
+          source (checker/lean-source {"facts" exported} "integratedQ8")]
+      (is (= (:q8 certs)
+             {:schema :wm/q8-frontier-certificate-v1
+              :frontier-refresh (exported "frontierRefresh")
+              :frontier-selection (exported "frontierSelection")
+              :selected-cascade (exported "selectedCascade")}))
+      (is (.contains source "q8 := .known")))
     (is (= "integrated-controlled-sut"
            (get-in persisted [:hydrated :morning-brief :attempt-id])))
     (is (= {:status :absent :reason :writer-not-in-futon2}
