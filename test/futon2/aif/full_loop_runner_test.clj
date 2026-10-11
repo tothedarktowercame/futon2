@@ -816,13 +816,22 @@
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
-                            judgement-transform-fn author-summary author-result]}]
+                            judgement-transform-fn author-summary author-result
+                            artifacts?]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
            mission-path (io/file token-repo
                                  "holes/missions/M-aif-policy-conditioned-eig.md")
+           fold-file (io/file token-repo
+                              "holes/missions/M-aif-policy-conditioned-eig.executed.edn")
+           proof-file (io/file token-repo "logic/feature-witness.edn")
            record (io/file (:root cohort) "d-task.edn")
+           _ (when artifacts?
+               (spit fold-file (pr-str {:boxes [:author :store]
+                                        :want-coverage [:feature-card]}))
+               (io/make-parents proof-file)
+               (spit proof-file (pr-str {:witness :feature-card-persisted})))
            _ (spit record
                    (pr-str {:after-token-evidence
                             (token-fixture/measurements sha)}))]
@@ -861,14 +870,22 @@
                              (#'missions/mission-doc->entry (.getPath mission-path)))
                            :resolve-build-fn
                            (fn [_] {:repo (.getPath token-repo)
-                                    :files ["unrelated.clj"]})
+                                    :files (cond-> ["unrelated.clj"]
+                                             artifacts?
+                                             (conj "logic/feature-witness.edn"))})
                            :author-artifact-observer-fn
                            (fn [_ before job]
                              (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
                                     :repo (.getPath token-repo)))}
                            dispatch-fn (assoc :dispatch-fn dispatch-fn)
                            ground-fn (assoc :ground-fn ground-fn))})]
-             result))))))))
+             (cond-> result
+               artifacts? (assoc :fold-file fold-file
+                                  :proof-file proof-file
+                                  :rendered-feature-acceptance
+                                  (-> {:attempt (:item result)}
+                                      cli/feature-acceptance
+                                      cli/render-feature-acceptance)))))))))))
 
 (deftest r16-stop-line-registers-a-distinct-durable-park
   ;; Live pin: wm-trace run 36820e88-3d68-499d-b359-2d8dbe9743de records
@@ -1467,15 +1484,16 @@
     (is (re-find #"make no commit and REFUSE" prompt))))
 
 (deftest grounded-author-feature-card-is-persisted-and-rendered
-  (let [{:keys [result item fold-file proof-file]}
-        (run-feature-card-attempt {:author-card feature-card-claim
-                                   :artifacts? true})
-        rendered (-> {:attempt item}
-                     cli/feature-acceptance
-                     cli/render-feature-acceptance)
+  (let [cohort (retention-cohort "grounded-author-feature-card")
+        decision (token-loop-exercised-decision)
+        {:keys [result item fold-file proof-file rendered-feature-acceptance]}
+        (run-token-feature-card-attempt
+         cohort decision {:artifacts? true})
+        rendered rendered-feature-acceptance
         absent-artifacts
         (:item (run-feature-card-attempt {:author-card feature-card-claim}))]
-    (is (= :grounded-change (:outcome result)))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
     (is (= (.getPath fold-file) (get-in item [:feature-card :fold-ref])))
     (is (= (.getPath proof-file) (get-in item [:feature-card :proof-ref])))
     (is (= "Replay steps verified."
