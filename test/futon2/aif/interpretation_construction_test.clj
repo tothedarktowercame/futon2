@@ -144,6 +144,35 @@
            (get-in missing [:declines 0 :evidence :three-halves-square :P
                             :missing-evidence 0])))))
 
+(deftest uncovered-blend-object-is-refused-at-composition-root
+  (let [candidates (:candidates (sut/construct input))
+        assembled (problems/assemble
+                   {:targets [(:target input)]
+                    :sources {:universes {(:target input) observation}
+                              :wants {(:target input) [:w]}
+                              :interpretations {(:target input) {:patterns interpretations
+                                                                 :receipts receipts}}
+                              :locators {(:target input) (zipmap (keys observation)
+                                                                 (repeat {:class :C4}))}
+                              :candidates {(:target input) candidates}
+                              :horizon-steps 2 :beta-by-context {:WM 1}
+                              :context-of (constantly :WM)}})
+        damage #(assoc-in % [:maps :b2] #{[20 30]})
+        problem (-> (first (:problems assembled))
+                    (update-in [:interpretation-receipts :P :blend-square] damage)
+                    (update :constructed-candidates
+                            (fn [cs]
+                              (mapv (fn [c]
+                                      (update-in c [:construction-receipt :blend-squares :P] damage))
+                                    cs))))
+        result (#'wm-cd/admit-cascade-problem problem)]
+    (is (nil? (:problem result)))
+    (is (= :three-halves-square-invalid (get-in result [:declines 0 :reason])))
+    (is (= {:kind :pushout-coverage :uncovered #{32}}
+           (some #(when (map? %) %)
+                 (get-in result [:declines 0 :evidence :three-halves-square :P
+                                 :missing-evidence]))))))
+
 (deftest limits-and-economics-are-not-overridden
   (doseq [[edit kind] [[#(dissoc % :budget) :budget-required]
                        [#(assoc-in % [:budget :max-expansions] 1) :search-budget-exhausted]

@@ -1005,6 +1005,22 @@ or weaken an existing definition merely to accommodate current Clojure.
   repair: no Clojure runtime producer, reload, replay or production write was
   added.
 
+- 2026-10-11, canonical pre-G bridge, pushout-coverage slice: the existing
+  source-pinned one-square receipt already contains the exact carrier needed
+  by `ThreeHalvesBlend.Cone.isPushout`: the blend object's finite element set
+  and both cone-leg graphs.  `ThreeHalvesRuntimeCertificate.Receipt.valid`
+  now derives K1' coverage from those fields and
+  `valid_projects_pushout` exposes the certified result; no producer-supplied
+  validity boolean was added.  Runtime `three-halves-square/validate` computes
+  the same union of cone-leg images and reports the concrete uncovered blend
+  identities.  The existing `admit-cascade-problem` composition root therefore
+  refuses an uncovered square before G.  The pinned publication-cadence
+  witness remains valid; removing the `21 -> 32` cone-leg pair leaves identity
+  `32` uncovered and is rejected in Lean, the focused runtime validator, and
+  the composition-root test.  This slice does not claim gluing, pasting,
+  distinct application order, or transition/predictive-kernel adequacy; those
+  remain separate certificate seams.
+
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
   `:focused`, `:related`, and `:unrelated` as outcomes where the candidate's

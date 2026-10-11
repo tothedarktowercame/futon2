@@ -1,6 +1,7 @@
 (ns futon2.aif.three-halves-square
   "Decidable runtime projection of one ThreeHalvesBlend.Square."
-  (:require [clojure.string :as str]))
+  (:require [clojure.set :as set]
+            [clojure.string :as str]))
 
 (def schema :wm/three-halves-square-v1)
 (def roles [:G :I1 :I2 :B])
@@ -48,12 +49,20 @@
         active-routes (concat (when-not (:b1 aux) route1)
                               (when-not (:b2 aux) route2))
         consistent? (and (empty? map-gap) (functional? active-routes))
+        blend-elems (get-in objects [:B :theory :elems])
+        covered-elems (when (empty? map-gap)
+                        (set (concat (map second (:b1 maps))
+                                     (map second (:b2 maps)))))
+        uncovered (when (and (set? blend-elems) (set? covered-elems))
+                    (set/difference blend-elems covered-elems))
         gaps (cond-> []
                (not= schema (:schema receipt)) (conj :square-schema)
                (seq object-gap) (conj {:kind :object-pin-or-theory :roles object-gap})
                (seq map-gap) (conj {:kind :map-direction-or-functionality :maps map-gap})
                (and (empty? map-gap) (not required-commutes?)) (conj :noncommutation)
-               (and (empty? map-gap) (not consistent?)) (conj :inconsistency))]
+               (and (empty? map-gap) (not consistent?)) (conj :inconsistency)
+               (and (empty? map-gap) (seq uncovered))
+               (conj {:kind :pushout-coverage :uncovered uncovered}))]
     (if (seq gaps)
       {:status :refused :kind :three-halves-square-invalid :missing-evidence gaps}
       (assoc receipt :status :valid))))

@@ -24,3 +24,10 @@
                   (assoc-in [:maps :b2] #{[20 33] [21 32]}))
           result (sut/validate bad)]
       (is (some #{:inconsistency} (:missing-evidence result))))))
+
+(deftest uncovered-blend-object-refuses
+  (let [result (sut/validate (assoc-in fixture [:maps :b2] #{[20 30]}))]
+    (is (= :refused (:status result)))
+    (is (= {:kind :pushout-coverage :uncovered #{32}}
+           (some #(when (and (map? %) (= :pushout-coverage (:kind %))) %)
+                 (:missing-evidence result))))))
