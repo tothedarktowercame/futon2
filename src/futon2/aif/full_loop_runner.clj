@@ -70,6 +70,7 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
+            [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.selection-timing :as selection-timing]
@@ -896,7 +897,7 @@
       {:status :not-applicable
        :reason :selection-complete-no-ask-required}))
 
-(defn- persist-run-record!
+(defn persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
         route (if (seq observed)
@@ -929,7 +930,6 @@
     (if (seq route)
       (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
-            tmp (io/file dir (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))
             pin-identity (or (get-in result [:checkpoints :selection :ground
                                              :run4/task-pin])
                              (get-in result [:checkpoints :construction :judgment
@@ -1086,15 +1086,8 @@
                      (assoc :grounded-commit grounded-commit)
                      true
                      (terminal-receipt/attach (:outcome result)))]
-        (io/make-parents target)
-        (spit tmp (str (pr-str record) "\n"))
-        (java.nio.file.Files/move
-         (.toPath tmp) (.toPath target)
-         (into-array java.nio.file.StandardCopyOption
-                     [java.nio.file.StandardCopyOption/ATOMIC_MOVE
-                      java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
         {:run-record-status :present
-         :run-record (.getAbsolutePath target)})
+         :run-record (run-record-io/write-run-record-stream! dir run-id record)})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard
       ;; as a fail-closed invariant rather than silently publishing no record.
       (throw (ex-info "Terminal result has no recordable route"

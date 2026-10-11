@@ -61,7 +61,7 @@
 
 (load-identity/register! *ns* *file*)
 
-(def ^:private default-trace-dir
+(def default-trace-dir
   (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
 
 (def ^:private date-fmt
