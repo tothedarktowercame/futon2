@@ -806,6 +806,7 @@
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
+     :dispatch-requests @dispatch-requests
      :fold-file fold-file :proof-file proof-file}))
 
 (declare retention-cohort)
@@ -817,7 +818,8 @@
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
                             judgement-transform-fn author-summary author-result
-                            artifacts? reviewer-execution reviewer-events grounded?]}]
+                            artifacts? reviewer-execution reviewer-events grounded?
+                            runner-options]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -860,8 +862,9 @@
                             (nil? author-summary)
                             (assoc :feature-card feature-card-claim))
                           :runner-options
-                          (cond->
-                           {:cohort? true :execution-cohort (:binding cohort)
+                          (merge
+                           (cond->
+                            {:cohort? true :execution-cohort (:binding cohort)
                            :d-task-evidence-root (str (io/file (:root cohort) "d-task"))
                            :learning-trial-ledger-root
                            (str (io/file (:root cohort) "learning-ledger"))
@@ -880,8 +883,9 @@
                            (fn [_ before job]
                              (assoc (synthetic-artifact-binding (.getPath token-repo) before job)
                                     :repo (.getPath token-repo)))}
-                           dispatch-fn (assoc :dispatch-fn dispatch-fn)
-                           ground-fn (assoc :ground-fn ground-fn))})]
+                            dispatch-fn (assoc :dispatch-fn dispatch-fn)
+                            ground-fn (assoc :ground-fn ground-fn))
+                           runner-options)})]
              (cond-> result
                artifacts? (assoc :fold-file fold-file
                                   :proof-file proof-file
@@ -1587,70 +1591,41 @@
           "/home/joe/code/futon3/library/coordination/capability-gate.flexiarg")))
 
 (deftest real-opportunity-pins-construction-and-separates-review
-  (let [constructed (atom nil)
-        dispatches (atom [])
-        queued (atom [])
+  (let [cohort (retention-cohort "real-opportunity-construction")
+        decision (token-loop-exercised-decision)
+        selected (:action decision)
         phases (atom [])
-        result
-        (runner/run-opportunity!
-         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
-          :batch-id "overnight-2026-07-16"
-          :phase-log-fn #(swap! phases conj %)
-          :repair-open-fn (constantly [])
-          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}
-                              :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement judgement})
-          :refresh-fn (fn [] nil)
-          :substrate-preflight-fn (fn [_] {:route :test})
-          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
-                                 :git-dirty? false :repo-heads {}})
-          :mode-flags-fn (fn [] {:likelihood-mode :aif})
-          :version-stamp-fn identity
-          :mission-fn (fn [target] {:id target :path "/mission.md"})
-          :trace-fn (fn [_] "/tmp/test-trace.edn")
-          :construction-wiring-fn enriched-test-fold
-          :construct-fn (fn [entry]
-                          (reset! constructed entry)
-                          {:shown [:P1] :psi :psi :cascade-score 1.0
-                           :semilattice [] :policy-holes []})
-          :author-artifact-observer-fn synthetic-artifact-binding
-          :dispatch-fn (fn [_ agent _ _ prompt]
-                         (swap! dispatches conj {:agent agent :prompt prompt})
-                         {:job-id (if (= agent "zai-5") "author-job" "review-job")})
-          :poll-fn (fn [_ job-id]
-                     (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "abc123"
-                        :feature-card feature-card-claim
-                        :execution successful-execution
-                        :events [{:text "FULL_LOOP_AUTHOR: DONE abc123"}]}
-                       {:job-id job-id :state "done"
-                        :execution successful-execution
-                        :result-summary "FULL_LOOP_REVIEW: APPROVE\nLooks good."
-                        :events [{:type "prompt"
-                                  :text "FULL_LOOP_REVIEW: REQUEST_CHANGES"}]}))
-          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
-          :ground-fn (fn [& _]
-                       {:before {:implementation-entity nil}
-                        :after {:implementation-entity {:id "impl"}}
-                        :resolved? true :dial-moved? true
-                        :implementation-id "impl" :discharge-id "discharge"})
-          :queue-fn #(swap! queued conj %)})]
-    (is (= :grounded-change (:outcome result)))
-    (is (= selected-action (:action @constructed))
-        "construction follows the selected action, not the raw rank head")
-    (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
+        {:keys [result item dispatches dispatch-requests]}
+        (run-token-feature-card-attempt
+         cohort decision
+         {:runner-options
+          {:batch-id "overnight-2026-07-16"
+           :phase-log-fn #(swap! phases conj %)}})]
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))
+    (is (= (:id selected)
+           (get-in result [:checkpoints :construction :judgment
+                           :selected-cascade]))
+        "construction pins the selected cascade, not the raw rank head")
+    (is (= (:target selected)
+           (get-in result [:checkpoints :construction :judgment :mission]))
+        "construction remains bound to the selected target")
+    (is (= (mapv (comp str :id) (:precedence selected))
+           (get-in result [:checkpoints :construction :judgment :patterns]))
+        "construction uses exactly the selected cascade's ordered patterns")
+    (is (= ["zai-5" "codex-7"] dispatches))
     (is (re-find #"FULL_LOOP_FEATURE_CARD:"
-                 (:prompt (first @dispatches))))
+                 (get-in dispatch-requests ["feature-author" :prompt])))
     (is (re-find #"command or action -> expected observation"
-                 (:prompt (first @dispatches))))
-    (is (re-find #"Do not edit or commit" (:prompt (second @dispatches))))
-    (is (= :grounded-change (:outcome (first @queued))))
-    (is (= "overnight-2026-07-16" (:batch-id (first @queued))))
-    (is (= selected-action
-           (get-in (first @queued) [:selection-review :selected-action])))
+                 (get-in dispatch-requests ["feature-author" :prompt])))
+    (is (re-find #"Do not edit or commit"
+                 (get-in dispatch-requests ["feature-review" :prompt])))
+    (is (= :grounded-progress (:outcome item)))
+    (is (= "overnight-2026-07-16" (:batch-id item)))
+    (is (= selected
+           (get-in item [:selection-review :selected-action])))
     (is (= "Was this the best available selection?"
-           (get-in (first @queued) [:selection-review :question])))
+           (get-in item [:selection-review :question])))
     (is (= [:opportunity :agent-readiness :agent-readiness :code-state :code-state
             :substrate-preflight :substrate-preflight
             :preference-refresh :preference-refresh
@@ -1658,7 +1633,8 @@
             :construction :construction :author-dispatch :author-dispatch
             :author-wait :author-wait :build-resolution :build-resolution
             :reviewer-dispatch :reviewer-dispatch :reviewer-wait :reviewer-wait
-            :grounding :grounding :delivery-qa :delivery-qa :opportunity]
+            :grounding :grounding :delivery-qa :delivery-qa
+            :close-evidence-manifest :close-evidence-manifest :opportunity]
            (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
