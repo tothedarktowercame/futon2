@@ -858,6 +858,9 @@ or weaken an existing definition merely to accommodate current Clojure.
   | Shared-object gluing and construction/application orders | `Gluing`, `Policy`, `Policy.wellFormed`, `Policy.components` | only the unrelated token order/`:precedence` exists | none for blend squares/gluings or separate `applicationOrder` | Absent |
   | Predictive interpretation consumed by G | `CascadeEFE.Model.interpretation`, `policyKernel` | admitted interpretation receipts and model identity | source/admission checks plus scoring model | Present as runtime data; no theorem bridges a `ThreeHalvesBlend.Policy` to the transition kernel |
   | Successful score for every family member | `CascadeEFEPolicies.CandidateFamily.scored` | scoring entries | post-construction scoring | Post-score by definition; not a pre-G gate |
+  | Durable incremental task frontier | `IncrementalTaskFrontier.Entry`, `WorldDelta`, `RefreshCertificate.Valid` | none | none | Lean specification implemented; runtime unwired |
+  | Current-key selection with stale-contender refusal | `IncrementalTaskFrontier.SelectionCertificate.Valid` | none | none | Lean specification implemented; distinct from cascade G |
+  | Selected-target cascade identity correspondence | `IncrementalTaskFrontier.TargetCascadeCertificate.Valid` | constructed/admitted/scored/posterior identities are not yet exported as one receipt | none | Lean specification implemented; runtime unwired |
 
   The narrowest already-defined receipt for the structural/token-order part
   of a pre-score `CascadeEFE.Policy` is therefore
@@ -978,7 +981,25 @@ or weaken an existing definition merely to accommodate current Clojure.
   removed task selectable; selection with an unresolved stale contender; and
   any constructed/scored/posterior identity mismatch.  This is deliberately a
   Q8 specification replacement, not a relabelling of the historical 343-target
-  experiment.  Lean and runtime carriers remain to be implemented.
+  experiment.
+
+- 2026-10-11, Q8 Lean correspondence implemented: the durable carrier is
+  `IncrementalTaskFrontier.Entry` (task, observation/evidence identity,
+  ranking-law identity/version, dependencies, stable comparison key and
+  freshness epoch).  `RefreshCertificate.Valid` gives an exact
+  retained/invalidated/removed partition, literal retention, recomputation of
+  invalidated and added tasks, and exact current-open coverage.
+  `SelectionCertificate.Valid` compares current stable keys without ordinal
+  reindexing and rejects any unresolved stale entry that could beat or tie the
+  winner.  `TargetCascadeCertificate.Valid` is deliberately selected-task
+  local and equates constructed, admitted, scored and posterior identity sets;
+  it requires multiple posterior policies only for multiple admissible
+  cascades.  `Requirements.Q8` now consumes these three certificates, while
+  Q1 alone retains full open-task enumeration responsibility.  Positive and
+  adversarial closed witnesses cover retention, invalidation/addition,
+  stale-contender refusal and cascade-set mismatch.  This is a Lean-only
+  repair: no Clojure runtime producer, reload, replay or production write was
+  added.
 
 - 2026-10-10, item 2/Q9 diagnosis: the reported 2-of-3 result is a real C
   defect, not an exporter classification error.  The class model defines
