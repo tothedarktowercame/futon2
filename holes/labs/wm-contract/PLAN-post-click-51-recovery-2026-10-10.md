@@ -1543,3 +1543,25 @@ or weaken an existing definition merely to accommodate current Clojure.
   `production-ranked` directly and has no commissioned production law/prior,
   retained authority-job source, executable loader, or update-transition
   producer.  This namespace is not required by the serving path.
+
+- 2026-10-11, SUT item 3 controlled open-cascade relatedness integration:
+  `futon2.aif.open-cascade-relatedness-sut/run-controlled!` derives its ordered
+  domain only from `pattern-registry/aggregate-pattern-candidates`, retaining
+  each canonical artifact path and byte digest.  Because that production
+  retriever is intrinsically top-k and emits no completeness proof, the seam
+  certifies only `:bounded` searches with an explicit limitation and refuses a
+  `:complete` request.  Independent terminal judgment jobs must cover the
+  exact ordered domain; the search validator deterministically selects the
+  first admissible member and projects its checked citation into the existing
+  F11 legacy carrier.  A separate interpreter response must name that same
+  member before the real `cascade-revision-producer` admission path runs.  The
+  result retains the search, authority, proposal, old/new identities and a
+  `:wm/revision-selection-dispatch-v1` identity join; only external Agency
+  execution is omitted.
+
+  Production remains **OPEN** and unchanged.  The controlled entrypoint
+  refuses without `:controlled-sut`; there is no commissioned independent
+  judgment-job producer/configuration, and canonical retrieval has no
+  repository-completeness carrier.  The serving `run-revision-round` still
+  uses its existing producer.  Persisting this receipt through the production
+  close/Morning Brief path begins only after those two authorities are supplied.
