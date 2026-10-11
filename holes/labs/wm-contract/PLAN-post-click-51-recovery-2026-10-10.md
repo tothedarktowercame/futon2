@@ -1464,3 +1464,21 @@ or weaken an existing definition merely to accommodate current Clojure.
   maps.  Those algebraic results are not yet present, so no path-independence,
   pasting, or colimit claim is made.  Runtime correspondence now explicitly
   requires typed endpoints and must not collapse roles.
+
+- 2026-10-11, executable/semantic coherence closure (mathlib `149037da8d`):
+  the typed greedy forest is now connected to unique simple typed paths and
+  exact oriented indexed-step reconstruction.  `GluingCycleObligation.valid_sound`
+  proves that every executable-valid obligation is the semantic canonical-path
+  obligation for its required non-tree edge, including exclusion of typed
+  self-loops.  `GluingCoherenceCertificate.valid_sound` lifts this over exact
+  `requiredCycleEdges` coverage, and `valid_iff_Valid` proves equivalence because
+  semantic validity retains executable validity.  Semantic witnesses cover a
+  coherent tree, coherent triangle, and two independent cycles; omitted,
+  incoherent, malformed, and self-loop cases remain negative.  The focused
+  target build and printed axiom audit pass with no `sorryAx`.
+
+  This closes the Lean executable-to-semantic certificate seam only.  SUT gate
+  item 5 remains **OPEN**: futon2 still lacks the source-pinned multi-square
+  receipt producer, typed endpoint/isomorphism carrier, exact cycle-obligation
+  producer, pre-G integration gate, retained run evidence, and adversarial SUT
+  coverage.  No Clojure runtime behavior or production state changed.

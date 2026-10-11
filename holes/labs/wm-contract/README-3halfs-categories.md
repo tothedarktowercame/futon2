@@ -190,19 +190,25 @@ basis, while any malformed policy still fails certificate validity.
 | Composed graph equals direct graph | Retained isomorphism graphs, recomputed composition/equality |
 
 `gluingForest_edge_admitted` proves generally that every selected forest edge
-is a supplied individually well-formed gluing.  `valid_covers_required_edges`
-proves exact non-tree-edge coverage and validity of every listed transport
-equation.  The former role-mismatch witness now forms two typed components and
-requires no nonexistent composite path, while its raw square-level
-`Policy.components` remains connected as intended.
+is a supplied individually well-formed gluing.  The typed forest is acyclic,
+spans exactly admitted typed connectivity, and has a unique simple path between
+connected typed vertices.  The inverse conversion theorems recover that path
+from a nonempty, composable, duplicate-free oriented step list.
+`GluingCycleObligation.valid_sound` consequently proves that executable
+validity names the required edge's canonical forest steps and implies semantic
+`GluingCycleObligation.Valid`; `GluingCoherenceCertificate.valid_sound` lifts
+this over the exact required-edge population, and
+`valid_iff_Valid` closes the executable/semantic gap.  Coherent tree,
+triangle, and two-cycle witnesses are semantically valid; omitted,
+incoherent, malformed, and typed-self-loop cases refuse.  These results are in
+mathlib commit `149037da8d` and have no `sorryAx`.
 
-The remaining semantic proof boundary is a general invariant for the finite
-typed closure algorithm: forest acyclicity, equality of forest/admitted typed
-connectivity, and uniqueness of simple oriented edge-index paths.  Arbitrary
-transport path independence then additionally needs algebraic lemmas that
-`reversePMap` is a two-sided inverse on admitted isomorphisms and that
-`PMap.comp` is associative on the relevant well-formed maps.  Neither result is
-silently assumed, so no pasting or colimit claim follows yet.
+This still does not establish arbitrary transport path independence, pasting,
+or a colimit.  Those claims additionally need the algebraic laws for
+`reversePMap` and `PMap.comp`.  More immediately, futon2 still has no runtime
+producer or integration gate for the typed gluing/coherence receipt described
+above; the Lean closure is a model and validator boundary, not production
+admission evidence.
 
 ### Pasting
 
