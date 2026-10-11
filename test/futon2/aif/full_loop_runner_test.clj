@@ -6366,33 +6366,71 @@
             "target" "/tmp/attempt/evidence")))))
 
 (deftest effective-configuration-survives-success-and-containment
+  ;; The close's mechanical reviewer falsifiers require the ordinary selected
+  ;; action to carry target-bound wants with token prediction, measurements
+  ;; against a real artifact, and a pinned mission source: the authoritative
+  ;; token/mission harness (run-token-feature-card-attempt) supplies exactly
+  ;; that carrier; the judge configuration rides the judgement's own
+  ;; :effective-run-configuration channel, as before the falsifiers.
   (doseq [containment? [false true]]
-    (let [{:keys [root] :as c} (retention-cohort "effective-config-close")
-          expected {:schema :wm/effective-run-configuration-v1
+    (let [expected {:schema :wm/effective-run-configuration-v1
                     :evaluation :evaluated :run/id "close-retention-success"
                     :effective-horizon 3 :effective-depth 3
                     :policy-details? true :fpi-dark? true :fpi-posterior? false}
-          base (retention-success-opts c)
-          opts (assoc base
-                      :judge-fn (fn [_] {:judgement (assoc judgement :effective-run-configuration expected)})
-                      :author-artifact-observer-fn
-                      (fn [repo before job] (assoc (synthetic-artifact-binding repo before job) :repo repo))
-                      :poll-fn (fn [o id] (cond-> ((:poll-fn base) o id)
-                                           (= id "retention-author") (assoc :feature-card feature-card-claim)))
-                      :ground-fn (fn [& _] {:before {:id "before"} :after {:id "after"}
-                                           :resolved? true :dial-moved? true
-                                           :implementation-id "retained" :discharge-id "discharge"}))
-          result (if containment?
-                   (with-redefs-fn {#'runner/checkpoint-evidence-manifest
-                                   (fn [& _] (throw (ex-info "controlled manifest failure"
-                                                            {:evidence-manifest/refusal :source-unavailable})))}
-                     #(runner/run-opportunity! opts))
-                   (runner/run-opportunity! opts))
-          close (cohort/read-edn (io/file root "test-cohort-exhaustion" "attempt-001" "007-closed.edn"))]
-      (is (= (if containment? :build-failed :grounded-change) (:outcome result)))
+          cohort (retention-cohort "effective-config-close")
+          decision (token-loop-exercised-decision)
+          run (fn []
+                (run-token-feature-card-attempt
+                 cohort decision
+                 {:runner-options
+                  {:run-id "close-retention-success"
+                   ;; The runner snapshots :effective-run-configuration off the
+                   ;; judgement before :judgement-transform-fn runs, so the
+                   ;; config rides the judge channel itself, the same way the
+                   ;; pre-falsifier fixture injected it.
+                   :judge-fn (fn [_]
+                               {:judgement (assoc judgement
+                                                  :decision decision
+                                                  :effective-run-configuration expected)})}}))
+          {:keys [result]}
+          (if containment?
+            (with-redefs-fn {#'runner/checkpoint-evidence-manifest
+                             (fn [& _] (throw (ex-info "controlled manifest failure"
+                                                       {:evidence-manifest/refusal :source-unavailable})))}
+              run)
+            (run))
+          close (cohort/read-edn (io/file (:root cohort) "test-cohort-exhaustion"
+                                          "attempt-001" "007-closed.edn"))]
+      ;; The authoritative artifact is an honest increment, not a declared-
+      ;; product closure, so the success arm closes as :grounded-progress
+      ;; (classify-grounded-outcome); the configuration-retention purpose is
+      ;; the three retention assertions, unchanged.
+      (is (= (if containment? :build-failed :grounded-progress) (:outcome result)))
       (is (= expected (get-in result [:checkpoints :selection :judgment :effective-run-configuration])))
       (is (= expected (get-in result [:data :effective-run-configuration])))
       (is (= expected (get-in close [:payload :judgment :effective-run-configuration]))))))
+
+(deftest ordinary-bare-selection-close-is-refused
+  ;; Adversarial control for the falsifier contract the test above relies on:
+  ;; an ordinary cascade whose selected action declares no wants (and whose
+  ;; mission has no pinned source) must be refused before build approval.
+  (let [{:as c} (retention-cohort "effective-config-bare")
+        base (retention-success-opts c)
+        result (runner/run-opportunity!
+                (assoc base
+                       :author-artifact-observer-fn
+                       (fn [repo before job]
+                         (assoc (synthetic-artifact-binding repo before job) :repo repo))
+                       :poll-fn (fn [o id] (cond-> ((:poll-fn base) o id)
+                                            (= id "retention-author")
+                                            (assoc :feature-card feature-card-claim)))))
+        falsifier (get-in result [:data :error-data :reviewer-falsifier])]
+    (is (= :build-failed (:outcome result)))
+    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :selected-want-identity-missing
+           (get-in falsifier [:checks :selected-want-accounting :evidence :reason])))
+    (is (= #{:mission-standing :selected-want-accounting :evidence-authority}
+           (set (:failed-checks falsifier))))))
 
 (deftest pre-judge-failure-keeps-loaded-configuration-only
   (let [{:keys [root] :as c} (retention-cohort "effective-config-early")
