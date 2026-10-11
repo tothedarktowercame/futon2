@@ -3262,20 +3262,20 @@
     (is (= ["zai-5"] @dispatches))))
 
 (deftest open-repair-memory-preserves-selection-and-repair-requires-evaluator
-  (doseq [repair-selected? [false true]]
-   (let [dispatches (atom [])
-        implementations (atom [])
-        implementation-records (atom [])
-        resolutions (atom [])
-        store-opts (hermetic/runner-repair-options)
-        transform-called? (atom false)
-        stop-line {:repair/id "repair-failed-1"
+  (let [stop-line {:repair/id "repair-failed-1"
                    :repair/status :open
                    :repair/class :machine-failure
                    :attempt-id "failed-1"
+                   :failure-stage :reviewer-wait
+                   :failure-kind :review-execution-evidence-missing
                    :failed-commit "bad123"
                    :review-verdict :request-changes
                    :review-text "trusted provenance is mandatory"
+                   :discharge-contract
+                   {:requires [:distinct-repair-commit :independent-review
+                               :grounded-repair
+                               :distinct-production-shaped-successor]
+                    :artifact-shape :code-commit}
                    :selected-entry {:action {:type :address-sorry
                                              :target :sorry/g2}
                                     :controller-score 4.0}}
@@ -3288,98 +3288,78 @@
                          :repair/id "repair-other"
                          :attempt-id "failed-other"
                          :target :sorry/other
-                         :review-text "unrelated finding")
-        result
-        (runner/run-opportunity!
-         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
-          :phase-log-fn (fn [_])
-          :repair-open-fn (constantly [unrelated stop-line follow-up])
-          :repair-implement-fn (fn [obligation implementation]
-                                 (swap! implementations conj [obligation implementation])
-                                 (let [record ((:repair-implement-fn store-opts)
-                                               obligation implementation)]
-                                   (swap! implementation-records conj record)
-                                   record))
-          :repair-resolve-fn (fn [& args]
-                               (swap! resolutions conj args)
-                               (throw (ex-info "repair needs a distinct successor" {})))
-          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}
-                              :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_]
-                      {:judgement (if repair-selected?
-                                    (explicitly-selected-repair-judgement stop-line)
-                                    judgement)})
-          :judgement-transform-fn
-          (fn [incoming]
-            (reset! transform-called? true)
-            (assoc incoming :campaign/selected? true))
-          :refresh-fn (fn [])
-          :substrate-preflight-fn (fn [_] {:route :test})
-          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
-                                 :git-dirty? false :repo-heads {}})
-          :mode-flags-fn (fn [] {})
-          :version-stamp-fn identity
-          :mission-fn (fn [target] {:id target})
-          :trace-fn (fn [_] "/tmp/test-trace.edn")
-          :construction-wiring-fn enriched-test-fold
-          :construct-fn (fn [entry]
-                          {:mission (get-in entry [:action :target])
-                           :shown [:P1] :psi :psi :cascade-score 1.0
-                           :semilattice [] :policy-holes []})
-          :author-artifact-observer-fn synthetic-artifact-binding
-          :dispatch-fn (fn [_ agent _ target prompt]
-                         (swap! dispatches conj {:agent agent :target target
-                                                :prompt prompt})
-                         {:job-id (if (= agent "zai-5")
-                                    "author-job" "review-job")})
-          :poll-fn (fn [_ job-id]
-                     (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "good456"
-                        :feature-card feature-card-claim
-                        :execution successful-execution}
-                       {:job-id job-id :state "done"
-                        :execution successful-execution
-                        :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
-          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
-          :ground-fn (fn [& _]
-                       {:resolved? true :dial-moved? true
-                        :implementation-id "impl"})
-          :queue-fn identity})]
-    (is (= :grounded-change (:outcome result)))
-    (assert-construction-validator-record! result)
-    (is (true? (get-in result [:checkpoints :construction :judgment :shape-validation :ok])))
-    (is (true? (get-in result [:checkpoints :construction :judgment :correspondence-validation :ok])))
-    (is (true? @transform-called?)
-        "both ordinary and explicit repair decisions pass through selection transforms")
-    (is (= {:count 3 :ids ["repair-other" "repair-failed-1" "repair-failed-2"]}
-           (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
-        "all observed obligations remain evidence, regardless of what was selected")
-    (if repair-selected?
-      (do
-        (is (= :repair-machine-failure
-               (get-in result [:checkpoints :selection :judgment :selected-action :type])))
-        (is (= ["repair-failed-1" "repair-failed-1"] (mapv :target @dispatches)))
-        (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
-            "explicit repair uses the standing independent repair reviewer")
-        (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
-        (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %)) @dispatches))
-        (is (every? #(not (re-find #"caller-controlled identity is spoofable" (:prompt %))) @dispatches))
-        (is (empty? @implementations)
-            "substrate grounding cannot register an implementation without evaluator evidence")
-        (is (= :evidence-unavailable (get-in result [:repair/discharge :status])))
-        (is (empty? @implementation-records))
-        (is (empty? @resolutions) "a canary does not resolve its own repair")
-        (is (not (.exists (io/file (:repair-root store-opts) "implementations"
-                                  "repair-failed-1.edn"))))
-      )
-      (do
-        (is (= selected-action
-               (get-in result [:checkpoints :selection :judgment :selected-action])))
-        (is (= ["M-selected" "M-selected"] (mapv :target @dispatches)))
-        (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
-        (is (empty? @implementations)
-            "ordinary selection does not consume repair obligations"))))))
+                         :review-text "unrelated finding")]
+    (let [cohort (retention-cohort "open-repair-ordinary")
+          {:keys [result]}
+          (run-token-feature-card-attempt
+           cohort (token-loop-exercised-decision)
+           {:runner-options {:repair-open-fn
+                             (constantly [unrelated stop-line follow-up])}})]
+      (is (= :grounded-progress (:outcome result)))
+      (is (= :verified
+             (get-in result [:checkpoints :build :judgment :validation
+                             :reviewer-falsifier-verification :status])))
+      (is (= (:action (token-loop-exercised-decision))
+             (get-in result [:checkpoints :selection :judgment :selected-action])))
+      (is (= {:count 3 :ids ["repair-other" "repair-failed-1" "repair-failed-2"]}
+             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))))
+    (let [cohort (retention-cohort "open-repair-selected")
+          store-opts (hermetic/runner-repair-options)
+          finding-file (io/file (:repair-root store-opts) "findings"
+                                "repair-failed-1.edn")
+          evaluator-runs (atom 0)
+          _ (io/make-parents finding-file)
+          _ (spit finding-file (pr-str stop-line))
+          {:keys [result]}
+          (run-token-feature-card-attempt
+           cohort (token-loop-exercised-decision)
+           {:runner-options
+            (merge store-opts
+                   {:repair-open-fn (constantly [unrelated stop-line follow-up])
+                    :judge-fn (fn [_]
+                                {:judgement
+                                 (explicitly-selected-repair-judgement stop-line)})
+                    :mission-fn (fn [target] {:id target})
+                    :construct-fn runner/construct-for-decision
+                    :repair-evaluators {}
+                    :repair-evaluator-registry
+                    {:test (fn [& _] (swap! evaluator-runs inc))}})})]
+      (is (= :grounded-change (:outcome result)))
+      (is (= :repair-machine-failure
+             (get-in result [:checkpoints :selection :judgment :selected-action :type])))
+      (is (= :pass
+             (get-in result [:checkpoints :build :judgment :validation
+                             :reviewer-falsifier :checks :work-evidence :status])))
+      (is (= :verified
+             (get-in result [:checkpoints :build :judgment :validation
+                             :reviewer-falsifier-verification :status])))
+      (is (= :evidence-unavailable (get-in result [:repair/discharge :status])))
+      (is (zero? @evaluator-runs))
+      (is (not (.exists (io/file (:repair-root store-opts) "implementations"
+                                 "repair-failed-1.edn"))))
+      (is (not (.exists (io/file (:repair-root store-opts) "resolutions"
+                                 "repair-failed-1.edn"))))
+      (let [sibling (assoc-in stop-line [:discharge-contract :requires]
+                              [:distinct-repair-commit])
+            sibling-result
+            (:result
+             (run-token-feature-card-attempt
+              (retention-cohort "open-repair-sibling-contract")
+              (token-loop-exercised-decision)
+              {:runner-options
+               (merge store-opts
+                      {:repair-open-fn (constantly [sibling])
+                       :judge-fn (fn [_]
+                                   {:judgement
+                                    (explicitly-selected-repair-judgement stop-line)})
+                       :mission-fn (fn [target] {:id target})
+                       :construct-fn runner/construct-for-decision
+                       :repair-evaluators {}})}))]
+        (is (= :build-failed (:outcome sibling-result)))
+        (is (= :repair-work-evidence-mismatch
+               (get-in sibling-result [:data :error-data :reviewer-falsifier
+                                       :checks :work-evidence :reason])))
+        (is (zero? @evaluator-runs))))))
 
 (deftest job-activity-prefers-the-latest-parseable-agency-event
   (let [started "2026-07-14T10:00:00Z"
