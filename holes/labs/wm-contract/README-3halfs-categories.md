@@ -24,19 +24,28 @@ The four objects are finite theories:
 - `I1` and `I2`: two partial interpretations or input views;
 - `B`: the blend produced from them.
 
-The arrows are partial functional maps.  Auxiliary flags can mark a triangle
-as intentionally absent from the active consistency check.  A square is useful
-only when its objects and maps are well formed, its required routes commute,
-its active routes are consistent, and both cone legs cover the blend.  Lean
-proves that this executable finite coverage test corresponds to the semantic
-3/2-pushout predicate used by the model.
+The arrows are partial functions on element names.  Square-leg
+`PMap.wellFormed` checks endpoints and functionality, not preservation of the
+theories' axioms; axiom preservation is currently required only for gluings.
+
+Auxiliary flags have exact, deliberately limited semantics.  Either flag drops
+the on-the-nose commutation requirement for the whole square; each flagged
+triangle is omitted from the active consistency join.  With both flags set,
+consistency is vacuous.  Coverage is different: auxiliary flags do not exempt
+either cone leg, and the images of `b1` and `b2` **together** must cover `B`.
+Lean proves that consistency plus this joint finite coverage corresponds to
+the model's semantic 3/2-pushout predicate.  That predicate is a lax/maximal
+mediator construction for cones carrying the same auxiliary flags, not the
+ordinary unique-mediator pushout readers may expect.
 
 Several squares form a policy only when explicit gluings identify objects in
 one square with objects in another.  A gluing is not an ordering hint: it needs
-the two square identities, the two object roles, a genuine isomorphism graph,
-its inverse, total endpoint coverage, and axiom preservation in both
-directions.  Connected, validly glued squares constitute a cascade; disconnected
-squares remain a bag.
+the two square identities, the two object roles, and a total, surjective,
+functional graph whose transpose is also functional and which preserves
+axioms in both directions.  Lean's current cascade verdict means a connected
+graph of individually well-formed pairwise gluings.  It does **not** yet prove
+that isomorphisms compose coherently around cycles or that duplicate gluings
+agree; any colimit or whole-cascade pasting claim needs that additional law.
 
 ## Why this is before G
 
@@ -70,7 +79,9 @@ adversarial witnesses.
 2. **One source-pinned square per occurrence.** Runtime receipt
    `:wm/three-halves-square-v1` records named `G/I1/I2/B` theories, all four
    map graphs, and auxiliary flags.  Validation checks source/theory/map shape,
-   required commutation, and consistency.
+   required commutation, and consistency.  Lean's `ObjectReceipt.valid` checks
+   only the digest string's shape; correspondence with captured source bytes is
+   a runtime boundary outside that Lean predicate.
 3. **Pushout coverage.** Coverage is computed from `B` and the images of `b1`
    and `b2`; no caller supplies a validity Boolean.  Lean theorem
    `valid_projects_semantic_pushout` projects a valid runtime receipt to
@@ -90,7 +101,9 @@ Primary code and proofs:
 The pinned `ukrns/publication-cadence` fixture is the current positive
 runtime-shaped witness.  Removing a cone-leg pair leaves one blend identity
 uncovered and is rejected by Lean, the focused validator, and the composition
-root.
+root.  That witness has both auxiliary flags false.  No positive/adversarial
+witness currently exercises one-aux or both-aux admission; in particular, the
+both-aux consistency-vacuous path still needs an explicit falsifier suite.
 
 ## What remains open
 
@@ -111,13 +124,25 @@ identification or isomorphism.  The missing producer is approximately:
 ```
 
 This evidence must be authored and source-pinned.  It cannot be synthesized
-from precedence or coincident names.
+from precedence or coincident names.  `Policy.wellFormed` checks each gluing
+separately and does not yet enforce diagram coherence.  `Policy.components`
+also traverses all supplied gluings, including malformed ones; only
+`components_cover` is proved, not exact-once component membership or an
+equivalence with ordinary graph connectivity.  A runtime diagnostic must not
+present those raw components as certified connectivity without first filtering
+or validating the gluings.
 
 ### Pasting
 
-Lean defines `pastedDiamond` and proves the conditions under which vertically
-pasted pushouts remain pushouts.  Runtime cannot certify pasting before the
-shared-object/gluing carrier exists.
+Lean defines **vertical** `pastedDiamond` and proves one preservation theorem,
+`prop8`.  It requires on-the-nose shared-object/map equalities
+`d2.G = d1.I1`, `d2.I2 = d1.B`, and `d2.a2 = d1.b1`; a general gluing supplies
+only an isomorphism.  Runtime therefore needs either identity-restricted
+gluings or a new theorem transporting pushouts along those isomorphisms.
+`prop8` also requires the second square to commute on the nose.  Since an
+auxiliary flag can admit a square without that commutation check, such a square
+cannot automatically serve in the second position.  The gluing carrier is
+necessary but not sufficient for pasting.
 
 ### Application order
 
@@ -126,6 +151,10 @@ Runtime currently uses the same `:precedence` vector for construction, model
 rollout, G scoring, and enactment.  The meaning of an application-order triple
 and its correspondence to observed execution still need specification.  See
 `APPLICATION-ORDER-AUDIT-2026-10-11.md`.
+
+Lean's derived `Policy.constructionOrder` is itself narrower than all gluings:
+it emits an edge only when exactly one endpoint role is `B`.  `B`–`B` and
+non-`B`–non-`B` gluings add no construction edge.
 
 ### Predictive-kernel adequacy
 
