@@ -708,6 +708,7 @@
         queued (atom [])
         queued-operator-actions (atom [])
         dispatches (atom [])
+        dispatch-requests (atom {})
         _ (spit mission-file "# test mission\n")
         _ (when artifacts?
             (io/make-parents fold-file)
@@ -747,13 +748,15 @@
                             cure-observed-commit
                             (:artifact-ref author-job))})
                :dispatch-fn
-               (fn [_ agent _ _ _]
+               (fn [_ agent _ _ prompt]
                  (swap! dispatches conj agent)
-                 {:job-id (if (= agent "zai-5")
-                            (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
-                              cure-id
-                              "feature-author")
-                            "feature-review")})
+                 (let [job-id (if (= agent "zai-5")
+                                (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
+                                  cure-id
+                                  "feature-author")
+                                "feature-review")]
+                   (swap! dispatch-requests assoc job-id {:prompt prompt})
+                   {:job-id job-id}))
                :poll-fn
                (fn [_ job-id]
                  (condp = job-id
@@ -776,7 +779,8 @@
                    (cond-> {:job-id job-id :state "done"
                             :execution (or reviewer-execution successful-execution)
                             :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
-                                                 "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}
+                                                 "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")
+                            :request (get @dispatch-requests job-id)}
                      reviewer-events (assoc :events reviewer-events))))
                :resolve-build-fn
                (fn [_]
@@ -1219,8 +1223,28 @@
     (is (empty? (get-in result [:data :build-retries])))
     ;; Author dispatched once, reviewer once — no cure dispatch.
     (is (= ["zai-5" "codex-7"] dispatches))
+    (let [review-job (get-in result [:data :review-job])
+          grounded-commit (get-in result [:data :witness :commit])]
+      (is (string? (get-in review-job [:request :prompt])))
+      (is (empty? (tripwire/evaluate-wire
+                   :T5 {:grounded-commit grounded-commit
+                        :cohort? true
+                        :reviewer-job review-job}))))
     (is (str/starts-with? (get-in item [:feature-card :built])
                           "cohort stopping-rule"))))
+
+(deftest t5-refuses-copied-or-missing-review-prompt
+  (let [sha "0123456789abcdef"
+        observation {:grounded-commit sha :cohort? true}]
+    (doseq [reviewer-job [{:job-id "review-copy"
+                           :request {:prompt "Review fedcba9876543210"}}
+                          {:job-id "review-missing"}]]
+      (is (= [{:kind :review-grounding-commit-mismatch
+               :grounded-commit sha
+               :review-job-id (:job-id reviewer-job)
+               :prompt-present? (boolean (get-in reviewer-job [:request :prompt]))}]
+             (tripwire/evaluate-wire
+              :T5 (assoc observation :reviewer-job reviewer-job)))))))
 
 (deftest cure-claiming-an-unresolvable-commit-fails-closed
   ;; A cure turn that claims a NEW commit the runner cannot resolve to any
