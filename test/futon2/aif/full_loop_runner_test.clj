@@ -804,12 +804,15 @@
      :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
 
+(declare retention-cohort)
+
 (defn- run-token-feature-card-attempt
   "Run the feature-card harness against the token fixture's actual Git object,
   mission bytes, and commit-bound D-task observations."
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
-  ([cohort decision {:keys [mission-observer dispatch-fn ground-fn]}]
+  ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
+                            judgement-transform-fn]}]
    (token-fixture/with-artifact
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
@@ -828,6 +831,7 @@
                                    :sha256 (digest/sha256 (slurp record))}})]
            (let [result (run-feature-card-attempt
                          {:author-card feature-card-claim
+                          :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
                           {:job-id "feature-author" :state "done" :artifact-ref sha
                            :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
@@ -904,15 +908,21 @@
 
 (deftest opt-in-judgement-transform-runs-inside-the-selection-phase
   (let [seen (atom nil)
+        cohort (retention-cohort "judgement-transform")
+        decision (token-loop-exercised-decision)
         {:keys [result]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :judgement-transform-fn
+        (run-token-feature-card-attempt
+         cohort decision
+         {:judgement-transform-fn
           (fn [incoming]
             (reset! seen incoming)
             (assoc incoming :instrumented/campaign? true))})]
-    (is (= (assoc judgement :operator-actions []) @seen))
-    (is (= :grounded-change (:outcome result)))))
+    (is (= (:action decision) (get-in @seen [:decision :action])))
+    (is (= (:action decision)
+           (get-in result [:checkpoints :selection :judgment
+                           :controller-decision :action])))
+    (is (= :complete (:status (loop-node-exercise/receipt decision))))
+    (is (= :grounded-progress (:outcome result)))))
 
 (deftest delivered-commit-cannot-close-without-field-desk-qa
   (let [{:keys [result]}
