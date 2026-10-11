@@ -3425,11 +3425,13 @@
                :decision
                (policy/select-action-cascades
                 ;; identical G: the posterior cannot discriminate
-                [{:action selected-action :controller-score 4.0 :rank 1}
-                 {:action (assoc selected-action
-                                 :cascade-id "M-flat-b" :id "M-flat-b"
-                                 :precedence [:test/other-pattern])
-                  :controller-score 4.0 :rank 2}]
+                [(runner-fixture/loop-exercised-ranked-entry
+                  selected-action 4.0 1)
+                 (runner-fixture/loop-exercised-ranked-entry
+                  (assoc selected-action
+                         :cascade-id "M-flat-b" :id "M-flat-b"
+                         :precedence [:test/other-pattern])
+                  4.0 2)]
                 {:beta 2.0}))
         result
         (runner/run-opportunity!
