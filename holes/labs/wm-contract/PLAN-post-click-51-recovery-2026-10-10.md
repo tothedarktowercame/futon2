@@ -1482,3 +1482,24 @@ or weaken an existing definition merely to accommodate current Clojure.
   receipt producer, typed endpoint/isomorphism carrier, exact cycle-obligation
   producer, pre-G integration gate, retained run evidence, and adversarial SUT
   coverage.  No Clojure runtime behavior or production state changed.
+
+- 2026-10-11, SUT item 1 phase-A outer-objective certificate: the unwired pure
+  namespace `futon2.aif.outer-objective-certificate` mirrors the accepted Lean
+  boundary without blessing the current pairwise heuristic.  Correspondence:
+
+  | Lean carrier/check | Clojure phase-A carrier/check |
+  |---|---|
+  | `ObjectiveRegistration` / `Authorized` | sealed `registry`, `:wm/outer-objective-registration-v1`, exact identity/version/token/authority/implementation pin and selector-authority separation |
+  | `ChannelObservation` | unique `:channel/id` plus observation, evidence, value digest and fixture-only value |
+  | `requiredDependencies` | exact union of registration token and all four channel identities |
+  | `EvaluationCertificate.Valid` | `evaluate-task` plus `evaluation-valid?`; evaluator dispatch exists only inside the matched sealed registry |
+  | `RefreshCertificate.Valid` | `produce-refresh` and `refresh-errors`: exact retained/invalidated/recomputed/added/removed/current partition, literal retention, and exact open-task population |
+  | `objectiveLE` | deterministic `[comparison-key, stable task id]` in `select-minimum` |
+
+  The namespace is deliberately unwired.  The first production integration
+  boundary remains between `meta-live-outer-selector/task-state-candidates`
+  and `meta-pipeline-selector/select`; the latter still reports
+  `:minimum-pairwise-task-state-G` and is not this objective.  Phase B must
+  provide a real external objective registration/configuration and translate
+  production channel evidence into the exact carrier before changing that
+  boundary.  The only evaluator in phase A is visibly test-authority data.
