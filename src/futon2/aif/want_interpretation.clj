@@ -24,6 +24,7 @@
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.legacy-three-halves-registry :as legacy-square]
             [futon2.aif.interpretation-request :as ireq])
   (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
@@ -545,7 +546,17 @@
                       (assoc-in [:machine-interpretations-overridden target] overridden))
                     (update-in [:interpretations target :patterns] merge (into {} fresh))
                     (update-in [:interpretations target :receipts] merge
-                               (select-keys receipts (map key fresh)))
+                               (into {}
+                                     (map (fn [[id receipt]]
+                                            [id (if (:blend-square receipt)
+                                                  receipt
+                                                  (cond-> receipt
+                                                    (legacy-square/square
+                                                     "/home/joe/code" target id receipt)
+                                                    (assoc :blend-square
+                                                           (legacy-square/square
+                                                            "/home/joe/code" target id receipt))))]))
+                                     (select-keys receipts (map key fresh))))
                     (assoc-in [:machine-interpretations target] (vec (sort-by str (map key fresh))))))
               srcs))
           sources
