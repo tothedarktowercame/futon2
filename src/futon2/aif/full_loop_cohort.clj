@@ -22,6 +22,13 @@
 
 (def default-data-root "/home/joe/code/futon2/data/wm-full-loop")
 
+(def max-checkpoint-bytes
+  "Hard durability/readback bound for one cohort event. Historical selection
+  payloads have amplified retained evidence into 164 MB and 2.38 GB records;
+  neither the writer nor lineage discovery may materialize such a record in
+  memory. 32 MiB is above the largest known legitimate checkpoint (< 7 MiB)."
+  (* 32 1024 1024))
+
 (def checkpoint-order
   [:time-step :selection :construction :dispatch :build :adjudication :closed])
 
@@ -37,8 +44,20 @@
     :historical-verification-awaiting-validation
     :historical-verification-refused})
 
+(defn- refuse-oversized-checkpoint! [path size]
+  (throw (ex-info "Cohort checkpoint exceeds the bounded event size"
+                  {:failure-kind :cohort-checkpoint-oversized
+                   :reason :checkpoint-size-limit-exceeded
+                   :path (str path)
+                   :size-bytes size
+                   :max-bytes max-checkpoint-bytes})))
+
 (defn read-edn [path]
-  (edn/read-string (slurp path)))
+  (let [file (io/file path)
+        size (Files/size (.toPath file))]
+    (when (> size max-checkpoint-bytes)
+      (refuse-oversized-checkpoint! (.getAbsolutePath file) size))
+    (edn/read-string (slurp file))))
 
 (defn typed-sorry? [x]
   (and (map? x) (keyword? (get-in x [:sorry :kind]))))
@@ -289,11 +308,36 @@
           (let [placeholder (non-edn-placeholder text)]
             {:value placeholder :text (pr-str placeholder) :changed? true}))))))
 
+(defn- assert-bounded-print! [value]
+  ;; Check before `writable-edn` calls pr-str. The writer retains at most the
+  ;; configured number of characters, so an explosive value cannot first
+  ;; allocate a multi-gigabyte StringBuilder merely in order to be refused.
+  (let [n (volatile! 0)
+        count! (fn [amount]
+                 (let [next (+ (long @n) (long amount))]
+                   (when (> next max-checkpoint-bytes)
+                     (refuse-oversized-checkpoint! :pending-write next))
+                   (vreset! n next)))
+        writer (proxy [java.io.Writer] []
+                 (write
+                   ([x]
+                    (count! (if (number? x) 1 (count x))))
+                   ([x offset length]
+                    (count! length)))
+                 (flush [])
+                 (close []))]
+    (binding [*out* writer]
+      (pr value)
+      (.flush ^java.io.Writer writer))))
+
 (defn- write-new! [path value]
   ;; Keep the original pr-str bytes for readable values, including map order.
   ;; Non-EDN data is evidence of a payload defect, not a reason to halt the run.
+  (assert-bounded-print! value)
   (let [^Path p (if (instance? Path path) path (.toPath (io/file path)))
         bytes (.getBytes (str (:text (writable-edn value)) "\n") StandardCharsets/UTF_8)]
+    (when (> (alength bytes) max-checkpoint-bytes)
+      (refuse-oversized-checkpoint! (str p) (alength bytes)))
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
     (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
                                                          StandardOpenOption/WRITE]))

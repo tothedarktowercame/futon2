@@ -1141,6 +1141,43 @@
     (is (= original (slurp quarantine)))
     (is (= original (slurp poison)))))
 
+(deftest oversized-history-is-excluded-without-being-read
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        first-event (open! root "history/oversized")
+        attempt (:attempt/id first-event)
+        dir (io/file root (name (:cohort/id first-event)) attempt)
+        oversized (io/file dir "002-selection.edn")]
+    ;; A sparse file reproduces the production boundary without allocating or
+    ;; writing a 32 MiB payload in the test process.
+    (with-open [file (java.io.RandomAccessFile. oversized "rw")]
+      (.setLength file (inc cohort/max-checkpoint-bytes)))
+    (let [history (cohort/attempt-history dir)
+          exclusion (first (:exclusions history))]
+      (is (= [first-event] (:events history)))
+      (is (= :history-discovery-invalid (:history/refusal exclusion)))
+      (is (= :unreadable-or-malformed-record (:reason exclusion)))
+      (is (= "clojure.lang.ExceptionInfo" (:error-class exclusion)))
+      (is (re-find #"bounded event size" (:error-message exclusion))))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"exceeds the bounded event size"
+                          (cohort/attempt-events dir))
+        "the strict append reader refuses rather than skipping the event")))
+
+(deftest oversized-checkpoint-is-refused-before-file-creation
+  (let [root (tmp-root)
+        path (io/file root "oversized.edn")
+        value {:payload (apply str (repeat (inc cohort/max-checkpoint-bytes) "x"))}
+        failure (try
+                  (#'cohort/write-new! path value)
+                  nil
+                  (catch clojure.lang.ExceptionInfo e e))]
+    (is (= :cohort-checkpoint-oversized
+           (:failure-kind (ex-data failure))))
+    (is (= cohort/max-checkpoint-bytes
+           (:max-bytes (ex-data failure))))
+    (is (false? (.exists path)))))
+
 (deftest opportunity-identity-comes-only-from-the-authoritative-file
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)
