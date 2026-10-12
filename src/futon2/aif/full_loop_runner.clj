@@ -3375,8 +3375,7 @@
   disagreement leaves the original pin in place and therefore still refuses."
   [mission repo commit]
   (let [source-path (get-in mission [:source :path])]
-    (if (and (= :mission (:kind mission))
-             (string? source-path) (string? repo) (string? commit))
+    (if (and (string? source-path) (string? repo) (string? commit))
       (try
         (let [repo-file (.getCanonicalFile (io/file repo))
               source-file (.getCanonicalFile (io/file source-path))

@@ -62,8 +62,7 @@
     (is (zero? (:exit (command "git" "-C" repo "-c" "user.name=Test"
                                 "-c" "user.email=test@example.invalid"
                                 "commit" "-q" "-m" "initial"))))
-    (let [selected (assoc (#'missions/mission-doc->entry (.getAbsolutePath mission-file))
-                          :kind :mission)]
+    (let [selected (#'missions/mission-doc->entry (.getAbsolutePath mission-file))]
       (spit mission-file "# Reviewed\n\nStatus: OPEN\n\n## Acceptance\n- [ ] reviewed increment\n")
       (is (zero? (:exit (command "git" "-C" repo "add" "."))))
       (is (zero? (:exit (command "git" "-C" repo "-c" "user.name=Test"
@@ -71,11 +70,14 @@
                                   "commit" "-q" "-m" "reviewed"))))
       (let [commit (str/trim (:out (command "git" "-C" repo "rev-parse" "HEAD")))
             advanced (#'runner/reviewed-mission-entry selected repo commit)]
-        (is (= :consistent (:status (missions/mission-standing-observation advanced))))
+        (is (= :consistent
+               (:status (missions/mission-standing-observation
+                         (assoc advanced :kind :mission)))))
         (spit mission-file (str (slurp mission-file) "ambient mutation\n"))
         (let [refused (#'runner/reviewed-mission-entry selected repo commit)]
           (is (= :mission-standing-source-mismatch
-                 (:reason (missions/mission-standing-observation refused)))))))))
+                 (:reason (missions/mission-standing-observation
+                           (assoc refused :kind :mission))))))))))
 
 (deftest grounded-change-requires-the-enacted-closure-claim-test
   (let [action {:target "M-example"
