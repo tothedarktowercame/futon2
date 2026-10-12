@@ -1,15 +1,23 @@
 #!/usr/bin/env bb
 (ns checks.policy-posterior-fpi-flagged-witness
   (:require [clojure.edn :as edn]
-            [clojure.pprint :as pp])
+            [clojure.pprint :as pp]
+            [clojure.java.shell :as shell])
   (:import [java.math BigInteger] [java.security MessageDigest]))
 
 (def fixture "holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn")
 (def fixture-sha "aaeccaf477dfd16bcc73064aa979f1fefa9753e2eec4ccd053e5e17acf8efdbf")
 (def receipt "holes/labs/wm-contract/policy-posterior-fpi-flagged-witness.edn")
-(def source-pins {"scripts/futon2/report/war_machine.clj" "e91f9a9776a34600cfd4db1592c75c3f3ff800e8be0c120d95795e2fe87356f4"
-                  "src/futon2/aif/policy.clj" "3980d203d4997d9fd3019540652119a6ecc295d045d89bbcf5d5922e2695bd17"
-                  "src/futon2/aif/policy_precision.clj" "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b"})
+(def source-pins
+  {"scripts/futon2/report/war_machine.clj"
+   {:revision "34fb1758d65cf383aae8b1abe7a31402791dbab5"
+    :sha256 "e91f9a9776a34600cfd4db1592c75c3f3ff800e8be0c120d95795e2fe87356f4"}
+   "src/futon2/aif/policy.clj"
+   {:revision "381c9fd6615ca4813a4c05a966f10258e4029b55"
+    :sha256 "3980d203d4997d9fd3019540652119a6ecc295d045d89bbcf5d5922e2695bd17"}
+   "src/futon2/aif/policy_precision.clj"
+   {:revision "4625524f8aa6b014aeb9ea51d0860d76eb2d80da"
+    :sha256 "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b"}})
 (def mutation-causes
   {"--negative-remove-f" :eligible-record-lacks-identity-joined-candidate-f
    "--negative-misjoin" :eligible-record-lacks-identity-joined-candidate-f})
@@ -71,13 +79,26 @@
     "--negative-remove-f" (assoc-in xs [0 :f-pi-by-candidate-id :by-candidate-id "rank/1" :value] nil)
     "--negative-misjoin" (assoc-in xs [0 :f-pi-by-candidate-id :by-candidate-id "rank/1" :candidate-identity] [:wrong [:target "wrong"]])
     nil))
+(defn pinned-source-bytes [path {:keys [revision]}]
+  (let [{:keys [exit out err]} (shell/sh "git" "show" (str revision ":" path))]
+    (when-not (zero? exit)
+      (throw (ex-info "Pinned source blob is unavailable"
+                      {:path path :revision revision :exit exit :error err})))
+    out))
 (defn preflight [text]
   (let [digest (sha256 text)
         source-drift (into {}
-                           (keep (fn [[p pin]]
-                                   (let [actual (sha256 (slurp p))]
-                                     (when (not= pin actual)
-                                       [p {:expected pin :actual actual}]))))
+                           (keep (fn [[p {:keys [revision] :as pin}]]
+                                   (try
+                                     (let [expected (:sha256 pin)
+                                           actual (sha256 (pinned-source-bytes p pin))]
+                                       (when (not= expected actual)
+                                         [p {:revision revision
+                                             :expected expected :actual actual}]))
+                                     (catch Exception e
+                                       [p {:revision revision
+                                           :expected (:sha256 pin)
+                                           :error (ex-message e)}]))))
                            source-pins)]
     (cond (seq source-drift) {:pass? false :reason :source-digest-mismatch :drift source-drift}
       (not= digest fixture-sha)

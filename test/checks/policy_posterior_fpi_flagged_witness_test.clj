@@ -25,7 +25,9 @@
 
 (deftest baseline-drift-cannot-masquerade-as-mutation-detection
   (let [source-drift (with-redefs [w/source-pins
-                                   {"src/futon2/aif/policy.clj" "planted-stale-pin"}]
+                                   {"src/futon2/aif/policy.clj"
+                                    {:revision "381c9fd6615ca4813a4c05a966f10258e4029b55"
+                                     :sha256 "planted-stale-pin"}}]
                        (w/run text "--negative-remove-f"))
         fixture-drift (with-redefs [w/fixture-sha "planted-stale-pin"]
                         (w/run text "--negative-remove-f"))]
