@@ -5978,7 +5978,9 @@
               judgement0-base)
             world-at-selection (selection-world/capture
                                 (:decision judgement0) roster
-                                interpretation-ask-record opts)
+                                interpretation-ask-record
+                                (:outer-task-selection judgement0)
+                                opts)
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             entry ordinary-entry

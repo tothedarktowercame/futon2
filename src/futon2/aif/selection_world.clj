@@ -103,10 +103,43 @@
                    policies)]
     (distinct (concat legacy live))))
 
+(defn- outer-task-population
+  "Return the exact task field retained by the outer selector.  Support and
+  exclusions are both members of the enumerated field: exclusion is a typed
+  selection result, not evidence that the task was never seen."
+  [outer-selection]
+  (when outer-selection
+    (when-not (= :wm/outer-task-selection-v1 (:schema outer-selection))
+      (throw (ex-info "Outer task selection has the wrong schema"
+                      {:schema (:schema outer-selection)})))
+    (let [rows (vec (concat (:support outer-selection)
+                            (:excluded outer-selection)))
+          invalid (filterv #(or (not (some? (:id %)))
+                                (not (contains? #{:mission :excursion :ticket}
+                                                (:kind %))))
+                           rows)
+          ids (mapv (comp str :id) rows)]
+      (when (seq invalid)
+        (throw (ex-info "Outer task selection contains malformed task rows"
+                        {:invalid-count (count invalid)})))
+      (when-not (= (count ids) (count (distinct ids)))
+        (throw (ex-info "Outer task selection contains duplicate task ids"
+                        {:task-count (count ids)
+                         :distinct-count (count (distinct ids))})))
+      rows)))
+
+(defn- population-task-sets [population]
+  (reduce (fn [sets {:keys [id kind]}]
+            (update sets (keyword (str (name kind) "s")) conj (str id)))
+          {:missions [] :excursions [] :tickets []}
+          population))
+
 (defn capture
   "Capture after DECISION is final. Dependencies are injectable for hermetic
   tests. A failed part is explicit and does not throw into the runner."
-  [decision roster interpretation-ask opts]
+  ([decision roster interpretation-ask opts]
+   (capture decision roster interpretation-ask nil opts))
+  ([decision roster interpretation-ask outer-selection opts]
   (let [failures (atom [])
         part (fn [name f]
                (try (f) (catch Throwable e
@@ -114,10 +147,19 @@
                                                 :error (ex-message e)})
                           {:status :failed :part name})))
         code-root (or (:code-root opts) "/home/joe/code")
-        task-sets (part :open-tasks #((or (:world-task-sets-fn opts)
-                                          default-task-sets) code-root))
+        outer-population (part :outer-task-population
+                               #(outer-task-population outer-selection))
+        retained-outer-population? (and outer-selection
+                                        (not= :failed (:status outer-population)))
+        task-sets (part :open-tasks
+                        #(if retained-outer-population?
+                           (population-task-sets outer-population)
+                           ((or (:world-task-sets-fn opts)
+                                default-task-sets) code-root)))
         enumerated (part :enumerated-tasks
-                         #(live-enumerated-targets decision))
+                         #(if retained-outer-population?
+                            (map :id outer-population)
+                            (live-enumerated-targets decision)))
         library (part :pattern-library
                       #((or (:world-pattern-manifest-fn opts) pattern-manifest)
                         (or (:pattern-library-root opts)
@@ -137,7 +179,10 @@
                 :pattern-library library :seat-roster seat-carrier
                 :decision-input (select-keys decision
                                              [:controller-ranking :proposal-supply
-                                              :mission-hole-coverage])}]
+                                              :mission-hole-coverage])
+                :outer-task-population
+                (when retained-outer-population?
+                  (select-keys outer-selection [:schema :support :excluded]))}]
     {:schema :wm/world-at-selection-v1
      :open-tasks task-carrier
      :enumerator {:source enumerator-source
@@ -155,4 +200,4 @@
                                       (:at interpretation-ask)
                                       (str (now-fn))))
      :failure-count (count @failures)
-     :failures @failures}))
+     :failures @failures})))

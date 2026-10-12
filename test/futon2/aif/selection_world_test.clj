@@ -38,6 +38,38 @@
     (is (= 1 (get-in x [:enumerated-tasks :count]))
         "a selected live policy can no longer be reported beside zero enumerated tasks")))
 
+(deftest outer-selection-population-is-the-authoritative-selection-world
+  (let [outer {:schema :wm/outer-task-selection-v1
+               :support [{:id "M-live" :kind :mission}]
+               :excluded [{:id "E-held" :kind :excursion
+                           :ineligible-reason :ownership/actively-held}
+                          {:id "T-off-map" :kind :ticket
+                           :ineligible-reason :pipeline/not-on-current-map}]}
+        ;; The independent task census deliberately disagrees. Once selection
+        ;; has retained its input field, rereading mutable registries here
+        ;; would create a world that the selector never observed.
+        x (world/capture {:selection-certificate
+                          {:candidates [{:target "M-live"}]}}
+                         {} nil outer opts)]
+    (is (= ["M-live" "E-held" "T-off-map"]
+           (mapv :id (concat (:support outer) (:excluded outer)))))
+    (is (= #{"M-live" "E-held" "T-off-map"}
+           (set (get-in x [:enumerated-tasks :ids]))))
+    (is (= ["M-live"] (get-in x [:open-tasks :missions :ids])))
+    (is (= ["E-held"] (get-in x [:open-tasks :excursions :ids])))
+    (is (= ["T-off-map"] (get-in x [:open-tasks :tickets :ids])))
+    (is (= (set (get-in x [:enumerated-tasks :ids]))
+           (set (mapcat :ids (vals (:open-tasks x))))))))
+
+(deftest malformed-outer-population-is-retained-as-a-failure
+  (let [x (world/capture decision {} nil
+                         {:schema :wm/outer-task-selection-v1
+                          :support [{:id "M-a" :kind :unknown}]
+                          :excluded []}
+                         opts)]
+    (is (= 1 (:failure-count x)))
+    (is (= :outer-task-population (get-in x [:failures 0 :part])))))
+
 (deftest failed-roster-is-counted
   (let [x (world/capture decision nil nil opts)]
     (is (= 1 (:failure-count x)))
