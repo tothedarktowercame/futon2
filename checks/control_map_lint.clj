@@ -14,13 +14,21 @@
 ;; drawn it.  Labels are descriptive, so identity is the endpoint pair + kind.
 (def expected-drawn-edges
   #{{:from :R1 :to :R4 :kind :control}
+    {:from :R1 :to :R3 :kind :control}
+    {:from :R1 :to :R3a :kind :control}
     {:from :R2 :to :R3 :kind :control}
+    {:from :R2 :to :R3a :kind :control}
+    {:from :R2 :to :R8 :kind :control}
     {:from :R3 :to :R1 :kind :control}
+    {:from :R3a :to :R3 :kind :control}
+    {:from :R3a :to :R7 :kind :control}
     {:from :R4 :to :R5 :kind :control}
     {:from :R5 :to :R6 :kind :control}
+    {:from :R6 :to :R4 :kind :control}
     {:from :R6 :to :R13 :kind :control}
     {:from :R11 :to :R16 :kind :control}
     {:from :R13 :to :R14 :kind :control}
+    {:from :R14 :to :R6 :kind :control}
     {:from :R14 :to :R16 :kind :control}
     {:from :R16 :to :R2 :kind :control}
     {:from :R6 :to :R11 :kind :support}
