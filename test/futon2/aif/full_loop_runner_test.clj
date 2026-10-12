@@ -49,6 +49,34 @@
 
 (use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)
 
+(deftest reviewed-mission-pin-advances-only-to-reviewed-bytes
+  (let [root (.toFile (Files/createTempDirectory "reviewed-mission-pin"
+                                                 (make-array FileAttribute 0)))
+        repo (.getAbsolutePath root)
+        mission-file (io/file root "holes/M-reviewed.md")
+        command (fn [& args] (apply shell/sh args))]
+    (.mkdirs (.getParentFile mission-file))
+    (spit mission-file "# Reviewed\n\nStatus: OPEN\n")
+    (is (zero? (:exit (command "git" "-C" repo "init" "-q"))))
+    (is (zero? (:exit (command "git" "-C" repo "add" "."))))
+    (is (zero? (:exit (command "git" "-C" repo "-c" "user.name=Test"
+                                "-c" "user.email=test@example.invalid"
+                                "commit" "-q" "-m" "initial"))))
+    (let [selected (assoc (#'missions/mission-doc->entry (.getAbsolutePath mission-file))
+                          :kind :mission)]
+      (spit mission-file "# Reviewed\n\nStatus: OPEN\n\n## Acceptance\n- [ ] reviewed increment\n")
+      (is (zero? (:exit (command "git" "-C" repo "add" "."))))
+      (is (zero? (:exit (command "git" "-C" repo "-c" "user.name=Test"
+                                  "-c" "user.email=test@example.invalid"
+                                  "commit" "-q" "-m" "reviewed"))))
+      (let [commit (str/trim (:out (command "git" "-C" repo "rev-parse" "HEAD")))
+            advanced (#'runner/reviewed-mission-entry selected repo commit)]
+        (is (= :consistent (:status (missions/mission-standing-observation advanced))))
+        (spit mission-file (str (slurp mission-file) "ambient mutation\n"))
+        (let [refused (#'runner/reviewed-mission-entry selected repo commit)]
+          (is (= :mission-standing-source-mismatch
+                 (:reason (missions/mission-standing-observation refused)))))))))
+
 (deftest grounded-change-requires-the-enacted-closure-claim-test
   (let [action {:target "M-example"
                 :precedence [{:id :p :produces #{["M-example" :hole/x]}}]}

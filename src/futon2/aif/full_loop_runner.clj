@@ -3367,6 +3367,33 @@
     (resolve-fn commit)
     (resolve-build commit target-repo)))
 
+(defn- reviewed-mission-entry
+  "Advance a selected mission's source pin only when its current bytes are
+  exactly the bytes in the reviewed commit. Selection intentionally pins the
+  pre-author source; a legitimate mission edit would otherwise look like
+  ambient source drift at the reviewer falsifier. Any path, Git, or byte
+  disagreement leaves the original pin in place and therefore still refuses."
+  [mission repo commit]
+  (let [source-path (get-in mission [:source :path])]
+    (if (and (= :mission (:kind mission))
+             (string? source-path) (string? repo) (string? commit))
+      (try
+        (let [repo-file (.getCanonicalFile (io/file repo))
+              source-file (.getCanonicalFile (io/file source-path))
+              repo-path (.toPath repo-file)
+              source-nio-path (.toPath source-file)]
+          (if (and (.startsWith source-nio-path repo-path) (.isFile source-file))
+            (let [relative (str (.relativize repo-path source-nio-path))
+                  committed (git repo "show" (str commit ":" relative))
+                  current-bytes (java.nio.file.Files/readAllBytes source-nio-path)
+                  current (String. current-bytes "UTF-8")]
+              (if (and (zero? (:exit committed)) (= current (:out committed)))
+                (assoc-in mission [:source :sha256] (sha256-bytes current-bytes))
+                mission))
+            mission))
+        (catch Throwable _ mission))
+      mission)))
+
 (defn- artifact-only-files? [files]
   (and (seq files)
        (every? #(or (str/includes? % "data/fold-turns")
@@ -6723,7 +6750,7 @@
                            {:kind :ordinary-cascade})
                          :mission-standing
                          (missions/mission-standing-observation
-                          (cond-> mission
+                          (cond-> (reviewed-mission-entry mission repo commit)
                             (str/starts-with? target "M-") (assoc :kind :mission)))
                          :selected-want-outcomes outcomes
                          :disposition nil
