@@ -9,7 +9,7 @@
   {"M-interim-director-proxy-metric-inventory"
    {:target-source
     {:path "futon7/holes/M-interim-director-proxy-metric-inventory.md"
-     :sha256 "19cfda4445117f6356728cee91795675860ab52337c556ff9eb1d242c3cef1e3"}
+     :sha256 "b8cc99cafd574380f0d09033d7bf5a97b477017b8a8df3a8d0092303219ee643"}
     :patterns
     {:orchestration/recorded-handoff
      {:path "futon3/library/orchestration/recorded-handoff.flexiarg"
