@@ -622,6 +622,22 @@
         (is (= #{:R13 :CTAU-CLASS}
                (set (map :node (:refused (ex-data e))))))))))
 
+(deftest content-addressed-decision-ground-keeps-large-selection-checkpoint-bounded
+  ;; Click 54 selected and constructed, then the duplicated 16 MiB decision
+  ;; made its selection event exceed the cohort's 32 MiB durability bound.
+  (let [decision {:selection-certificate
+                  {:token-belief-input
+                   {:inspection (apply str (repeat (* 17 1024 1024) "x"))}}}
+        ground (#'runner/decision-ground decision)
+        cell {:judgment {:controller-decision decision} :ground ground}
+        old-cell {:judgment {:controller-decision decision}
+                  :ground {:kind :wm-judgement :decision decision}}
+        size #(alength (.getBytes (pr-str %) "UTF-8"))]
+    (is (> (size old-cell) cohort/max-checkpoint-bytes))
+    (is (< (size cell) cohort/max-checkpoint-bytes))
+    (is (= [:judgment :controller-decision] (:source ground)))
+    (is (= (#'runner/sha256 decision) (:sha256 ground)))))
+
 (defn explicitly-selected-repair-judgement
   "Select a repair through the real posterior, against a distinct ordinary
   candidate. Open repair memory alone does not select this action."

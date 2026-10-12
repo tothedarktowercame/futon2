@@ -452,6 +452,18 @@
                        (.getBytes (pr-str x) "UTF-8"))]
     (apply str (map #(format "%02x" (bit-and 0xff %)) bytes))))
 
+(defn- decision-ground
+  "Content-address the controller decision without retaining a second copy.
+
+  The selection judgment is the authoritative durable carrier.  Older cells
+  repeated the complete decision under `:ground`; production decisions now
+  exceed 16 MiB, so that repetition alone could push an otherwise valid
+  checkpoint over the 32 MiB durability bound."
+  [decision]
+  {:kind :content-addressed-controller-decision
+   :source [:judgment :controller-decision]
+   :sha256 (sha256 decision)})
+
 (defn- route-node-str [node]
   (cond
     (keyword? node) (name node)
@@ -4682,13 +4694,15 @@
 (defn- reconcile-selection-publication [cell record]
   (if-not (contains? record :accumulation-receipt)
     cell
-    (cond-> (-> cell
-        (assoc-in [:judgment :controller-decision :accumulation] (:accumulation-receipt record))
-        (assoc-in [:ground :decision :accumulation] (:accumulation-receipt record)))
-      ;; ITEM6-CONSUMER-I: the SAME BMR receipt rides beside it.
-      (contains? record :bmr-receipt)
-      (-> (assoc-in [:judgment :controller-decision :accumulation-bmr] (:bmr-receipt record))
-          (assoc-in [:ground :decision :accumulation-bmr] (:bmr-receipt record))))))
+    (let [cell (cond-> (assoc-in cell
+                                 [:judgment :controller-decision :accumulation]
+                                 (:accumulation-receipt record))
+                 ;; ITEM6-CONSUMER-I: the SAME BMR receipt rides beside it.
+                 (contains? record :bmr-receipt)
+                 (assoc-in [:judgment :controller-decision :accumulation-bmr]
+                           (:bmr-receipt record)))]
+      (assoc cell :ground
+             (decision-ground (get-in cell [:judgment :controller-decision]))))))
 
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
@@ -6031,8 +6045,7 @@
                                      :trace-persistence (if repair-action?
                                                           :repair-action-not-traced
                                                           :after-construction)}
-                                    (cond-> {:kind :wm-judgement
-                                             :decision (:decision judgement)}
+                                    (cond-> (decision-ground (:decision judgement))
                                      (and historical-action? (:run4/requested-pin opts))
                                      (assoc :run4/requested-pin (:run4/requested-pin opts)
                                             :run4/enacted-action (:action entry))))

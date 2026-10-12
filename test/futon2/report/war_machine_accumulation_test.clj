@@ -236,8 +236,10 @@
         (is (= :accumulation-stale-predecessor (:reason receipt)))
         (is (= receipt (get-in flight [:judgement :decision :accumulation])
                (get-in cell [:judgment :controller-decision :accumulation])
-               (get-in cell [:ground :decision :accumulation])
                (get-in disk [:decision :accumulation])))
+        (is (= [:judgment :controller-decision] (get-in cell [:ground :source])))
+        (is (= (#'runner/sha256 (get-in cell [:judgment :controller-decision]))
+               (get-in cell [:ground :sha256])))
         (is (not (contains? (:judgement flight) :accumulation-state)))
         (same-selection b (:judgement flight))))))
 
@@ -522,8 +524,9 @@
                   :checkpoints {:selection cell}})
           disk (edn/read-string (slurp (:run-record saved)))]
       (is (= receipt (get-in cell [:judgment :controller-decision :accumulation-bmr])
-             (get-in cell [:ground :decision :accumulation-bmr])
-             (get-in disk [:decision :accumulation-bmr]))))))
+             (get-in disk [:decision :accumulation-bmr])))
+      (is (= (#'runner/sha256 (get-in cell [:judgment :controller-decision]))
+             (get-in cell [:ground :sha256]))))))
 
 (deftest scan-learner-is-enabled-exactly-as-accumulation-is
   ;; The production route calls judge with :trace? false and the accumulation
