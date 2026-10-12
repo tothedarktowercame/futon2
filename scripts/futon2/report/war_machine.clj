@@ -1567,6 +1567,22 @@
                        :chosen chosen :action-target (get-in receipt [:action :target])})))
     receipt))
 
+(defn- outer-task-refusal
+  "Preserve a canonical META refusal when no outer task was selected.
+
+  The outer selector runs before target-local cascade construction, so this is
+  necessarily a field-level refusal rather than a refusal attributed to one
+  task.  Its typed absent target is deliberate: copying an arbitrary task id
+  here would turn failure to choose into a claim that one target failed inner
+  admission."
+  [receipt]
+  (when-not (get-in receipt [:chosen :id])
+    (let [selection (get-in receipt [:policy :meta-selection])]
+      {:target {:absent :outer-task-not-selected}
+       :kind :outer-task-selection-refused
+       :missing :outer-task-selection
+       :selection (select-keys selection [:schema :status :reason :details])})))
+
 ;; ---------------------------------------------------------------------------
 ;; U21 -- selection -> clocking, the same-tick half. `mission-action-types` and
 ;; the durable clock write live further down (`record-selection-clock!`); this
@@ -6717,6 +6733,17 @@
          ;; machine ignored work it had been given because a registry did not
          ;; list it.
          cascade-assembly-input)
+        ;; The META policy can truthfully refuse to choose from a nonempty
+        ;; field (for example because its pinned graph sections are incomplete
+        ;; or no unique minimum exists).  That refusal used to disappear when
+        ;; `selected-task-id` was nil: inner assembly received zero targets and
+        ;; decision-gate correctly rejected the resulting empty refusal list.
+        ;; Retain the outer refusal as such; do not mislabel it as a target's
+        ;; inner-construction failure and do not weaken the empty-list gate.
+        raw-cascade-assembled
+        (if-let [refusal (outer-task-refusal outer-task-selection)]
+          (update raw-cascade-assembled :refusals (fnil conj []) refusal)
+          raw-cascade-assembled)
         ;; The tick-level horizon, common to the compared family, recorded
         ;; on the judgement (selection and abstention) with its authority.
         cascade-horizon (:cascade-horizon raw-cascade-assembled)

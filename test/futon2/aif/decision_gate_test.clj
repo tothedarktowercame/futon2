@@ -108,6 +108,15 @@
     (is (= :empty-refusals
            (refusal-of #(gate/emit! {:status :abstained :refusals []}))))))
 
+(deftest typed-outer-task-refusal-is-an-admissible-abstention
+  (let [refusal {:target {:absent :outer-task-not-selected}
+                 :kind :outer-task-selection-refused
+                 :missing :outer-task-selection
+                 :selection {:status :refused
+                             :reason :pipeline-snapshot-invalid}}
+        decision {:status :abstained :refusals [refusal]}]
+    (is (= decision (gate/emit! decision)))))
+
 (deftest chosen-mass-not-the-marginal-is-refused
   (testing "the chosen action's recorded mass is the mass of ONE cascade while
             two share the action: not the marginal of the posterior"

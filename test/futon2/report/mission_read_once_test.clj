@@ -139,6 +139,21 @@
                   [{:id "M-a" :kind :mission}] 1)
                  [:chosen :id]))))
 
+(deftest refused-meta-selection-is-preserved-as-an-outer-refusal
+  (let [receipt {:schema :wm/outer-task-selection-v1
+                 :policy {:kind :meta-pipeline-task-state
+                          :meta-selection {:schema :wm/meta-pipeline-selection-v1
+                                           :status :refused
+                                           :reason :pipeline-snapshot-invalid
+                                           :details {:errors [:cascade-section-incomplete]}}}
+                 :support [] :excluded []
+                 :chosen {:absent :pipeline-snapshot-invalid}}
+        refusal (#'wm/outer-task-refusal receipt)]
+    (is (= :outer-task-selection-refused (:kind refusal)))
+    (is (= {:absent :outer-task-not-selected} (:target refusal)))
+    (is (= :outer-task-selection (:missing refusal)))
+    (is (= (get-in receipt [:policy :meta-selection]) (:selection refusal)))))
+
 (deftest the-pre-fix-selection-read-twice
   ;; the bad case: judge at e3bdcfdb, no pass-through
   (let [{:keys [reads targets]} (one-selection @pre-fix-ns {})]
