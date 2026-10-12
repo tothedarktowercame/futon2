@@ -14,8 +14,10 @@
 
   Pin 1 replays admission over the four admitted targets' declared sources
   at HEAD (resources/wm/cascade-sources/, read-only) and asserts the
-  record carrier names each with :no-constructed-candidate and its
-  :no-new-wanted-token declines. Test 2 is the falsifier: a decision whose
+  record carrier names each with :no-constructed-candidate at the current
+  first boundary: no source-pinned three-halves square exists for these exact
+  pattern identities. It must not relabel that refusal as the historical
+  downstream :no-new-wanted-token result. Test 2 is the falsifier: a decision whose
   refusals are non-empty but whose record carrier is missing or
   :not-abstained fails abstention-record-ok?. Test 3: an abstention with
   no refusal list is a typed absence, never an empty vector."
@@ -27,7 +29,7 @@
 
 (def click2-targets
   "The four admitted targets of CLICK2-D Part 2, each declined
-  :no-constructed-candidate on :new-wanted-token-within-horizon."
+  :no-constructed-candidate at the current three-halves admission boundary."
   #{"M-f11-find-production-successor"
     "M-aif-policy-conditioned-eig"
     "M-wm-08-external-f2"
@@ -56,7 +58,7 @@
     {:decision {:status :abstained :refusals refusals}
      :dropped-candidates dropped}))
 
-(deftest click2-pin-carrier-names-four-targets-typed-declines
+(deftest click2-pin-carrier-retains-current-three-halves-first-boundary
   (let [{:keys [decision dropped-candidates]} (replay-click2-admission)
         carrier (runner/abstention-carrier decision dropped-candidates)
         by-target (into {} (map (juxt :target identity)) (:targets carrier))]
@@ -65,11 +67,14 @@
     (doseq [target click2-targets]
       (is (= :no-constructed-candidate (get-in by-target [target :kind]))
           (str target " refused :no-constructed-candidate"))
-      (is (= [:new-wanted-token-within-horizon] (get-in by-target [target :missing]))
-          (str target " missing :new-wanted-token-within-horizon"))
-      (is (some #(= :no-new-wanted-token (:reason %))
-                (get-in by-target [target :declines]))
-          (str target " carries a :no-new-wanted-token decline"))
+      (is (= [:three-halves-square] (get-in by-target [target :missing]))
+          (str target " missing :three-halves-square"))
+      (is (every? #(= :three-halves-square-invalid (:reason %))
+                  (get-in by-target [target :declines]))
+          (str target " retains the first-boundary square refusal"))
+      (is (not-any? #(= :no-new-wanted-token (:reason %))
+                    (get-in by-target [target :declines]))
+          (str target " does not manufacture the old downstream decline"))
       (is (every? #(and (:candidate %) (:reason %) (vector? (:missing-evidence %)))
                   (get-in by-target [target :declines]))
           (str target " declines are typed, not substituted values")))))

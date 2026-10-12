@@ -16,10 +16,11 @@
   cascade (G=10 for the empty precedence, 0 otherwise) — it is NOT the
   judge's G, and the assertion is about construction, not ranking.
 
-  Pin 1: every fixture loads and reproduces the pre-D4 behaviour — WITHOUT
-  :construction, assemble + admit still refuses each of the four targets
-  :no-constructed-candidate (the same replay shape as
-  futon2.aif.abstention-record-test).
+  Pin 1: every fixture loads and, without an exact source-pinned
+  three-halves square, assemble + admit refuses each of the four targets at
+  that current first boundary (the same replay shape as
+  futon2.aif.abstention-record-test). The old downstream no-token refusal is
+  historical evidence, not the result of replaying today's admission order.
 
   Pin 2: the constructor called directly on the
   M-aif-policy-conditioned-eig fixture returns :status :constructed (D15,
@@ -85,10 +86,7 @@
              (set (keys (:interpretation-receipts m))))
           (str target " every interpretation carries a receipt")))))
 
-(deftest without-construction-all-four-targets-still-refuse
-  ;; The pre-D4 behaviour, pinned: with the declared sources as they stand
-  ;; (no :construction injection), assembly + admission refuses each target
-  ;; :no-constructed-candidate on :new-wanted-token-within-horizon.
+(deftest without-three-halves-evidence-all-four-targets-refuse-first
   (let [sources (cascade-sources/with-context-fn (cascade-sources/load-declared))
         horizon (or (:horizon-steps sources) 2)
         assembled (construction-inputs/assemble-cascade-problems
@@ -99,7 +97,9 @@
         by-target (into {} (map (juxt :target identity)) refusals)]
     (doseq [target click2-targets]
       (is (= :no-constructed-candidate (get-in by-target [target :kind]))
-          (str target " still refuses :no-constructed-candidate")))))
+          (str target " still refuses :no-constructed-candidate"))
+      (is (= [:three-halves-square] (get-in by-target [target :missing]))
+          (str target " refuses at the current first boundary")))))
 
 (deftest direct-construction-on-eig-fixture-constructs
   (let [fixture (load-fixture "M-aif-policy-conditioned-eig")
