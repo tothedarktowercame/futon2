@@ -10,7 +10,8 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.action-identity :as action-identity]
-            [futon2.aif.mission-registry :as registry]))
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.previous-run :as previous-run]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -59,6 +60,17 @@
 
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
+
+(defn lookup-previous
+  "Return the persisted record immediately preceding RECORD-PATH, when one
+  can be read. This supports legacy report cards; current records carry their
+  own typed :previous-run evidence and do not depend on this fallback."
+  [record-path record]
+  (when-let [file (previous-run/previous-record-file
+                   (.getParentFile (io/file record-path)) (:run/id record))]
+    (let [read (previous-run/read-record file)]
+      (when (= :present (:status read))
+        [(:record read) (.getPath ^java.io.File file)]))))
 
 (defn- files-under [root suffix]
   (->> (file-seq (io/file root))

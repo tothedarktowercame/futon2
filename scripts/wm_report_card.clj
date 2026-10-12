@@ -50,18 +50,17 @@
         "libraryPatternCount" "constructorPatternCount"]
    :Q3 ["cascadesWithoutG"]
    :Q4 ["gTerms" "horizonLength" "preferenceSteps" "gradedPreferenceSteps"
+        "preferenceSemantics"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
         "policiesWithInformationTerm" "comparedPolicies"]
    :Q5 ["interpretationOrder"]
    :Q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
    :Q7 ["pathAbsenceCount"]
-   :Q8 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
-        "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
-        "targetConstruction" "constructedCascades" "comparedPolicies"
-        "seatsAvailable" "seatsUsed"]
-   :Q9 ["completionPreferencePairs" "completionPairsStrictlyPreferred"
-        "earlierProgressPairs" "earlierProgressNoGreaterRisk"]
+   :Q8 ["openMissions" "openExcursions" "openTickets"
+        "frontierRefresh" "frontierSelection" "selectedCascade"]
+   :Q9 ["factorizedPreference" "calibrationAuthorizations"
+        "factorizationAuthorizations"]
    :Q10 ["differentArrangementPairs" "arrangementPairsDistinguishedByG"]})
 
 (defn- open-tasks [f]
@@ -143,10 +142,23 @@
                   unavailable (vec (filter #(or (not (contains? facts %))
                                                 (nr? (facts %))) deps))
                   deciding (summarize (select-keys facts deps))]
-              (if (seq unavailable)
+              (cond
+                (seq unavailable)
                 {:requirement q :status :not-recomputable
                  :deciding-facts deciding
                  :reason (str "Required fact unavailable: " (str/join ", " unavailable))}
+
+                ;; Q8 and Q9 now validate nested authorization/certificate
+                ;; predicates. Reimplementing those predicates here would make
+                ;; the human report a second, weaker authority. Their supplied
+                ;; carriers are displayed, while the generated Lean checker is
+                ;; the deciding authority.
+                (contains? #{:Q8 :Q9} q)
+                {:requirement q :status :not-recomputable
+                 :deciding-facts deciding
+                 :reason "Nested certificate validity requires the generated Lean checker"}
+
+                :else
                 (let [pass? (requirement-value q facts)]
                   {:requirement q :status (if pass? :pass :fail)
                    :deciding-facts deciding
