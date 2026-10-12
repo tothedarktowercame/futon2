@@ -1827,6 +1827,31 @@
          :enacted-steps (get-in decision [:selection-law :enacted-steps])})
       :else nil)))
 
+(defn no-selection-reason
+  "Why a decision that exists named no addressable action (D25). Nothing was
+  enacted, so the run record's :chosen stays absent; this says what the
+  selection weighed and why it stopped. The common case: the policy with the
+  best G is a provisional query-time cascade whose interpretation is owed,
+  which selected-entry refuses."
+  [decision]
+  (let [action (:action decision)
+        receipt-kind (get-in action [:construction-receipt :kind])]
+    (cond
+      (= :abstained (:status decision))
+      {:kind :abstained :reason (:reason decision)}
+
+      (= :query-time-pattern-selection receipt-kind)
+      {:kind :provisional-choice-without-interpretation
+       :target (:target action) :id (:id action)
+       :construction-status (get-in action [:construction-receipt :status])
+       :patterns (get-in action [:construction-receipt :patterns])
+       :controller-score (:controller-score decision)}
+
+      :else
+      {:kind :no-addressable-action
+       :selection-law (get-in decision [:selection-law :applied])
+       :target (:target action)})))
+
 (defn selection-terminal-condition
   "Return the debugger condition for a completed selection result that chose
   no addressable action.  This is only called by run-phase! while the restart
