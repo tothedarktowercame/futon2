@@ -3902,24 +3902,24 @@
 
 (defn- append-checkpoint-or-refusal-sorry!
   "Durably append CELL via APPEND-FN and record the event via RECORD-FN.
-  When the cohort refuses an invalid grounded cell, append a TYPED SORRY
-  retaining the refusal, record it, and rethrow the original error: the
-  attempt still stops on the true failure, but the checkpoint chain stays
-  complete, so the failure-path close records the honest outcome instead of
-  cascading into a required-checkpoints-missing refusal charged to a
-  synthetic initialization identity (repair-initialization-a9177cab,
-  2026-09-13: one invalid construction cell produced two stop-line findings
-  and orphaned the real attempt id)."
+  When the cohort refuses an invalid or oversized grounded cell, append a
+  small TYPED SORRY retaining the refusal, record it, and rethrow the original
+  error. The checkpoint chain then closes on the honest failure instead of
+  cascading into `required-checkpoints-missing` under a synthetic
+  initialization identity."
   [append-fn record-fn checkpoint cell]
   (try
     (record-fn (append-fn cell))
     (catch clojure.lang.ExceptionInfo e
-      (when (= :invalid-checkpoint-cell (:failure-kind (ex-data e)))
+      (when (#{:invalid-checkpoint-cell :cohort-checkpoint-oversized}
+             (:failure-kind (ex-data e)))
         (record-fn
-         (append-fn {:sorry {:kind :invalid-checkpoint-cell
+         (append-fn {:sorry {:kind (:failure-kind (ex-data e))
                              :outcome :incomplete
                              :refused-checkpoint checkpoint
-                             :cell-errors (:errors (ex-data e))}})))
+                             :details (select-keys (ex-data e)
+                                                   [:reason :size-bytes :max-bytes
+                                                    :errors])}})))
       (throw e))))
 
 (defn- mint-action-occurrence-once!
@@ -4878,13 +4878,17 @@
                                  trace-path (assoc :trace-path trace-path)))]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
-                (let [event (if cohort-source
-                              (cohort/append-checkpoint!
-                               cohort-source (:data-root execution-cohort)
-                               attempt-id :selection cell)
-                              (cohort/append-checkpoint!
-                               attempt-id :selection cell))]
-                  (swap! checkpoint-events assoc :selection event)))
+                (let [append (fn [c]
+                               (if cohort-source
+                                 (cohort/append-checkpoint!
+                                  cohort-source (:data-root execution-cohort)
+                                  attempt-id :selection c)
+                                 (cohort/append-checkpoint!
+                                  attempt-id :selection c)))]
+                  (append-checkpoint-or-refusal-sorry!
+                   append
+                   #(swap! checkpoint-events assoc :selection %)
+                   :selection cell)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
         close-core! (fn [outcome data]

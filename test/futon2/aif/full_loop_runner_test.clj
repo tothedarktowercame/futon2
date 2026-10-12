@@ -638,6 +638,28 @@
     (is (= [:judgment :controller-decision] (:source ground)))
     (is (= (#'runner/sha256 decision) (:sha256 ground)))))
 
+(deftest oversized-selection-retains-typed-sorry-before-rethrow
+  (let [writes (atom [])
+        recorded (atom nil)
+        append (fn [cell]
+                 (swap! writes conj cell)
+                 (if (= 1 (count @writes))
+                   (throw (ex-info "oversized"
+                                   {:failure-kind :cohort-checkpoint-oversized
+                                    :reason :checkpoint-size-limit-exceeded
+                                    :size-bytes (inc cohort/max-checkpoint-bytes)
+                                    :max-bytes cohort/max-checkpoint-bytes}))
+                   {:payload cell}))]
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"oversized"
+         (#'runner/append-checkpoint-or-refusal-sorry!
+          append #(reset! recorded %) :selection {:judgment :large})))
+    (is (= :cohort-checkpoint-oversized
+           (get-in @recorded [:payload :sorry :kind])))
+    (is (= :selection (get-in @recorded [:payload :sorry :refused-checkpoint])))
+    (is (= (inc cohort/max-checkpoint-bytes)
+           (get-in @recorded [:payload :sorry :details :size-bytes])))))
+
 (defn explicitly-selected-repair-judgement
   "Select a repair through the real posterior, against a distinct ordinary
   candidate. Open repair memory alone does not select this action."
