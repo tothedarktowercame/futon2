@@ -1,20 +1,51 @@
 (ns build
   (:refer-clojure :exclude [test])
-  (:require [clojure.tools.build.api :as b]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.tools.build.api :as b]))
 
 (def lib 'net.clojars.ants/clj-ants-aif)
 (def version "0.1.0-SNAPSHOT")
 (def main 'ants.clj-ants-aif)
 (def class-dir "target/classes")
+(def test-batch-size 32)
+
+(defn- test-namespaces []
+  (->> (file-seq (io/file "test"))
+       (filter #(.isFile %))
+       (map #(.getPath %))
+       (filter #(re-find #"_test\.clj$" %))
+       (map #(-> %
+                 (subs (inc (count "test")))
+                 (str/replace #"\.clj$" "")
+                 (str/replace java.io.File/separator ".")
+                 (str/replace "_" "-")
+                 symbol))
+       sort
+       vec))
+
+(defn- run-test-batch [basis batch-index namespaces]
+  (println (format "\nCI test batch %d: %d namespaces" batch-index (count namespaces)))
+  (let [main-args (into ["-m" "cognitect.test-runner"]
+                        (mapcat (fn [namespace] ["-n" (str namespace)]) namespaces))
+        command (b/java-command {:basis basis
+                                 :main 'clojure.main
+                                 :main-args main-args})]
+    (:exit (b/process command))))
 
 (defn test "Run all the tests." [opts]
-  (let [basis    (b/create-basis {:aliases [:test]})
-        cmds     (b/java-command
-                  {:basis     basis
-                   :main      'clojure.main
-                   :main-args ["-m" "cognitect.test-runner"]})
-        {:keys [exit]} (b/process cmds)]
-    (when-not (zero? exit) (throw (ex-info "Tests failed" {}))))
+  ;; A single runner retains every namespace-global executor until process
+  ;; exit.  The suite has grown beyond the bounded CI task budget, so run the
+  ;; same namespace set in sequential JVM batches.  A failed batch stops CI;
+  ;; each completed JVM also proves its processes and threads were reaped.
+  (let [basis (b/create-basis {:aliases [:test]})
+        namespaces (test-namespaces)]
+    (when (empty? namespaces)
+      (throw (ex-info "No test namespaces discovered" {})))
+    (doseq [[batch-index batch] (map-indexed vector (partition-all test-batch-size namespaces))]
+      (when-not (zero? (run-test-batch basis (inc batch-index) batch))
+        (throw (ex-info "Tests failed" {:batch (inc batch-index)
+                                         :namespaces batch})))))
   opts)
 
 (defn- uber-opts [opts]

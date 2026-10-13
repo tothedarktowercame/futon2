@@ -18,6 +18,13 @@
 (def mission-path "holes/missions/M-u88-contextual-preferences.md")
 (def mission-id "M-u88-contextual-preferences")
 
+(defn- fixture-open-missions []
+  ;; Packet validation is a repository-fixture test.  The zero-argument API is
+  ;; deliberately the production substrate read and must not make this unit
+  ;; test depend on a running futon1b service.
+  (missions/open-missions
+   (missions/load-missions missions/default-code-root)))
+
 (defn- read-text [path] (slurp path))
 
 (defn- stub-ports [resolve-mission]
@@ -35,7 +42,7 @@
       (:reason (ex-data e)))))
 
 (deftest frozen-packet-refuses-after-its-open-mission-source-advances
-  (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))
+  (let [open-by-id (into {} (map (juxt :id identity) (fixture-open-missions)))
         mission (get open-by-id mission-id)]
     (is (= :open (:status-class mission)))
     ;; The RUN4 packet is historical authority, not a floating pointer.  The
@@ -47,7 +54,7 @@
                              (stub-ports (fn [id] (get open-by-id id)))))))))
 
 (deftest production-pin-refuses-any-nonexact-action-target
-  (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))
+  (let [open-by-id (into {} (map (juxt :id identity) (fixture-open-missions)))
         pin (edn/read-string (read-text task-pin-path))
         ;; Isolate action identity from the independently tested historical
         ;; source drift by rebinding this adversary's declarations to the

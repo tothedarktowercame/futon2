@@ -158,8 +158,12 @@
         pin (io/file dir "pin/pin.edn")]
     (io/make-parents pin)
     (spit pin (pr-str {:pin/accepted-steps [{:run-id "2026-09-05-u59-a"}]}))
-    (let [{:keys [exit out err]} (shell/sh "bb" "holes/labs/wm-contract/wm_step_observe.bb"
-                                         (str dir) "2026-09-05-u59-b" "--print")]
+    (let [{:keys [exit out err]}
+          (shell/sh "env"
+                    (str "FUTON2_ROOT=" (.getCanonicalPath (io/file ".")))
+                    "FUTON_WM_RECORDING_CONTRACT=1"
+                    "bb" "holes/labs/wm-contract/wm_step_observe.bb"
+                    (str dir) "2026-09-05-u59-b" "--print")]
       (is (= 0 exit) err)
       (when (zero? exit)
         (let [r (edn/read-string out) path (io/file dir "capture.edn")]

@@ -51,7 +51,11 @@
          '[clojure.pprint :as pp]
          '[clojure.string :as str])
 
-(def repo-root (str (System/getProperty "user.home") "/code/futon2"))
+(def repo-root
+  ;; Tests and replays may point at a complete, isolated repository fixture.
+  ;; Production keeps the canonical checkout as the explicit default.
+  (or (System/getenv "FUTON2_ROOT")
+      (str (System/getProperty "user.home") "/code/futon2")))
 (classpath/add-classpath (str repo-root "/src"))
 (require '[futon2.aif.realized-recording :as recording])
 
