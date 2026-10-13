@@ -401,9 +401,17 @@
                                 chosen-precedence)}))))
     (cond
       @stopped
-      {:route @route
-       :refusal (:refusal @stopped)
-       :stopped-at (:node @stopped)}
+      (let [s @state]
+        ;; A later typed refusal must not erase evidence produced by earlier
+        ;; completed nodes.  In particular, diagnostic target lanes compute
+        ;; the observed-rate provenance at R5 even when R14 truthfully refuses
+        ;; selection for lack of an admitted Prefix-F value.
+        (cond-> {:route @route
+                 :refusal (:refusal @stopped)
+                 :stopped-at (:node @stopped)}
+          (:R4 s) (assoc :candidates (:candidates (:R4 s))
+                         :predictions (:predictions (:R4 s)))
+          (:R5 s) (assoc :ranked (:R5 s))))
       @halted
       {:route @route
        :candidates (:candidates (:R4 @state))

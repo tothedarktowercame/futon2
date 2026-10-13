@@ -7,7 +7,6 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.cascade-problems :as problems]
             [futon2.aif.efe :as efe]
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as runner]
@@ -60,7 +59,8 @@
         click (fn [opts]
                 (let [n (inc (count @calls)) id (str "click-" n)
                       pattern (if (= n 1) first-pattern (if (= n 2) (if (= first-pattern :write-b) :write-a :write-b) :write-open))
-                      assembled (problems/assemble {:targets [target] :sources (source pattern)})
+                      assembled (#'decision-fixture/assemble*
+                                 {:targets [target] :sources (source pattern)})
                       decision (:decision
                                 (with-redefs [efe/rank-actions
                                               (fn [belief actions options]
@@ -76,14 +76,20 @@
                                                 (swap! lane-inputs conj [problem options])
                                                 (let [lane (real-lane problem options)]
                                                   (swap! lane-rankings conj (:ranked lane)) lane))]
-                                  (wm-cd/cascade-decision assembled
-                                   (merge decision-fixture/live-c-opts opts
-                                          {:observation-labels-path observation-labels-path
-                                           :focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
-                                                                 conj (assoc (first (get-in decision-fixture/live-c-opts [:focus-inputs :relations]))
-                                                                             :target target))
-                                           :cascade-habit-path (str (io/file root "no-habit"))
-                                           :token-belief-context {:occurrence-id (str "selection-" n)}}))))
+                                  (#'decision-fixture/decision
+                                   assembled
+                                   (dissoc
+                                    (merge decision-fixture/live-c-opts opts
+                                           {:observation-labels-path observation-labels-path
+                                            :focus-inputs (update (:focus-inputs decision-fixture/live-c-opts) :relations
+                                                                  conj (assoc (first (get-in decision-fixture/live-c-opts [:focus-inputs :relations]))
+                                                                              :target target))
+                                            :cascade-habit-path (str (io/file root "no-habit"))
+                                            :token-belief-context {:occurrence-id (str "selection-" n)}})
+                                    ;; A previous click's courier carries the captured view.  This
+                                    ;; fixture intentionally reads the current isolated store for
+                                    ;; each click, so do not let that older snapshot shadow PATH.
+                                    :observation-labels-view))))
                       saved (#'loop-runner/persist-run-record!
                              {:run-record-dir (str (io/file root "runs")) :click-id id
                               :scan-render-fn (fn [& _] nil)}
