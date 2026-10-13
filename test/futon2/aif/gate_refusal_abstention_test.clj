@@ -18,6 +18,7 @@
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.locator-fixtures :as loc]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cfix]
             [futon2.aif.wm.cascade-decision :as wm-cd])
@@ -135,19 +136,49 @@
 (deftest the-real-gate-refusal-is-the-ticks-typed-abstention
   ;; WIRE-23-C2 (PROOF-2a <2>3 lane C2): the judge-fn drives the REAL
   ;; writer, war-machine/cascade-decision, whose decision gate refuses: the
-  ;; fixture family is admitted with one guard token's locator present but
-  ;; invalid for its class (C4 without :decl passes assembly's admission
-  ;; and fails decision-gate/emit!'s guard-locator check), so
+  ;; fixture family is admitted through the current three-halves and Prefix-F
+  ;; boundaries with one guard token's locator present but invalid for its
+  ;; class (C4 without :decl), so
   ;; cascade-decision-admitted throws ex-info "Inadmissible decision"
   ;; {:error :inadmissible-decision :reason :missing-observation-locators}.
-  (let [sources (assoc-in (loc/locate-all cfix/tick-1-sources)
-                          [:locators cfix/tick-1-target :summary-without-total-repos-throws]
-                          {:class :C4 :repo "futon2" :sha "fixture" :path "fixture/p"})
-        assembled (cp/assemble {:targets [cfix/tick-1-target] :sources sources})
+  (let [admitted (@#'cfix/assemble* {:targets [cfix/tick-1-target]
+                                     :sources cfix/tick-1-sources})
+        candidates (get-in admitted [:problems 0 :constructed-candidates])
+        steps (mapv (fn [i candidate]
+                      {:step {:status :present
+                              :policy-key
+                              (prefix-admission/candidate-key
+                               {:id (:candidate-id candidate)
+                                :target cfix/tick-1-target
+                                :precedence (:precedence candidate)})
+                              :occurrence {:flight "gate-refusal-control"
+                                           :click (str "candidate-" i)}
+                              :s-prev {:value {#{} 1}}
+                              :q {#{} 1}
+                              :f 0.0}
+                       :path "gate-refusal-abstention-test"
+                       :sha256 "fixture"})
+                    (range) candidates)
+        opts (assoc cfix/live-c-opts :conditioning-steps
+                    {:steps steps :read [] :unread []})
+        assembled (assoc-in admitted
+                            [:problems 0 :cascade-problem :locators
+                             :summary-without-total-repos-throws]
+                            {:class :C4 :repo "futon2" :sha "fixture"
+                             :path "fixture/p"})
+        generic (wm-cd/cascade-decision
+                 (cp/assemble {:targets [cfix/tick-1-target]
+                               :sources (loc/locate-all cfix/tick-1-sources)})
+                 cfix/live-c-opts)
+        selected (wm-cd/cascade-decision admitted opts)
         {:keys [result record]}
-        (run-judge (fn [_] (wm-cd/cascade-decision assembled cfix/live-c-opts))
+        (run-judge (fn [_] (wm-cd/cascade-decision assembled opts))
                    {:target "M-autoclock-in"})
         [t] (get-in record [:decision :abstention :targets])]
+    (is (= :no-acting-cascade-candidate (get-in generic [:decision :reason]))
+        "missing earlier evidence remains generic no-selection, not a gate refusal")
+    (is (some? (get-in selected [:decision :action]))
+        "the same admitted evidence with valid locators selects an action")
     (is (= :missing-observation-locators (:kind t)))
     (is (= :abstained (get-in record [:decision :abstention :status])))
     (is (= :missing-observation-locators
