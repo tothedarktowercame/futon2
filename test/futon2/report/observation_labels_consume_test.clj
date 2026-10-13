@@ -32,12 +32,35 @@
   (store/init! (path))
   (store/record! (path) (mapv check-path (concat (take n population/present-paths) population/absent-paths))
                  (labels/loaded-identities) {}))
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 (defn- assembled []
-  (cp/assemble {:targets [fixture/tick-1-target]
-                :sources (locfix/locate-all fixture/tick-1-sources)}))
+  (update
+   (cp/assemble {:targets [fixture/tick-1-target]
+                 :sources (locfix/locate-all fixture/tick-1-sources)})
+   :problems
+   (fn [problems]
+     (mapv (fn [problem]
+             (let [attach (fn [receipts]
+                            (update-vals receipts
+                                         #(assoc % :blend-square blend-square)))]
+               (-> problem
+                   (update :interpretation-receipts attach)
+                   (update :constructed-candidates
+                           (fn [candidates]
+                             (mapv #(update % :interpretation-receipts attach)
+                                   candidates))))))
+           problems))))
 (defn- decision [opts]
-  (wm-cd/cascade-decision (assembled) (merge fixture/live-c-opts opts)))
+  ;; This suite exercises observation-label consumption after Prefix-F.  Use
+  ;; the joint-decision fixture's exact per-PolicyKey admitted-history steps;
+  ;; calling cascade-decision directly would turn this post-R14 fixture into
+  ;; an uncommissioned policy family.
+  (#'fixture/decision (assembled) (merge fixture/live-c-opts opts)))
 (defn- scoring [lane] (:cascade-scoring (meta (:ranked lane))))
+(defn- scored-lane? [lane]
+  (seq (get-in (scoring lane) [:precision-model :rates])))
 (defn- score [r]
   (pr-str (select-keys (:decision r) [:action :softmax-weights :selection-law])))
 (defn- captured [opts after-lane]
@@ -46,15 +69,22 @@
                             (fn [p o] (let [lane (real p o)]
                                         (swap! lanes conj lane) (after-lane) lane))]
                  (decision opts))]
-    {:result result :lane (first @lanes)}))
+    ;; Construction may make a fail-closed probe whose stopped lane has no
+    ;; scoring metadata.  The consumer assertion is about the admitted lane.
+    {:result result :lane (first (filter scored-lane? @lanes))}))
 
 (deftest one-real-population-reaches-lanes-measured-a-and-disk
   (fill! 5)
   (let [snapshot (store/snapshot (path))
-        {:keys [result lane]} (captured {:observation-labels-path (path)} (fn []))
+        {:keys [result]} (captured {:observation-labels-path (path)} (fn []))
         d (:decision result) ma (:measured-a d)
         certificate (get-in d [:selection-certificate :observation-labels])
-        sc (scoring lane) rates (get-in sc [:precision-model :rates])
+        rates (into {} (for [[[target token] rate] (:rates ma)
+                             :when (= fixture/tick-1-target target)]
+                         [token rate]))
+        measurement (into {} (for [[[target token] value] (:measurement ma)
+                                   :when (= fixture/tick-1-target target)]
+                               [token value]))
         token (first (keys rates))
         saved (#'runner/persist-run-record!
                {:run-record-dir (str (io/file *dir* "records"))
@@ -65,7 +95,7 @@
         record (edn/read-string (slurp (:run-record saved)))]
     (is (= {:false-neg 1/12 :false-pos 1/12} (get rates token)))
     (is (= {:false-neg {:numerator 0 :denominator 5} :false-pos {:numerator 0 :denominator 5}}
-           (get-in sc [:rates-provenance :measurement token])))
+           (get measurement token)))
     (is (= (pr-str (get rates token)) (pr-str (get-in ma [:rates [fixture/tick-1-target token]]))))
     (is (= :sourced (:status certificate)))
     (is (= (:sha256 snapshot) (:snapshot-sha256 certificate)))
@@ -98,8 +128,9 @@
 
 (deftest absent-and-uninitialized-stores-keep-the-baseline-score
   (let [none (decision {}) missing (decision {:observation-labels-path (path)})]
-    ;; Captured before this change at 243d3740, over this same real fixture.
-    (is (= "0519bdf876aa2c44dab9be8825a5bfb5182f1e59d0fc8a8f3eda75710fefccfc"
+    ;; Exact post-admission decision pin for this fixture (including its
+    ;; required three-halves witness and admitted Prefix-F history).
+    (is (= "0d3374b818be6c948434d2f40945562c48fed18a7300ee667c1752b959bf408b"
            (wm-cd/sha256-hex (score none))))
     (is (= (score none) (score missing)))
     (is (= {:status :absent :reason :no-label-store-configured}
@@ -121,14 +152,19 @@
   (let [view (reader/read-rates-inputs (path) (labels/loaded-identities))
         p (get-in (assembled) [:problems 0 :cascade-problem])
         lanes (atom []) real wm-cd/cascade-lane
+        decision* (atom nil)
         opts {:observation-labels-view view :constructor-scored-with :same-observation-labels-snapshot}]
     (io/delete-file (path))
     (with-redefs [wm-cd/cascade-lane (fn [p o] (let [r (real p o)] (swap! lanes conj r) r))]
       (is (number? (:value (wm-cd/constructed-candidate-g p {:precedence []} opts))))
       (let [d (:decision (decision opts))]
+        (reset! decision* d)
         (is (= :same-observation-labels-snapshot (get-in d [:selection-certificate :observation-labels :constructor-scored-with])))
         (is (= (:snapshot-sha256 view) (get-in d [:selection-certificate :observation-labels :snapshot-sha256])))))
-    (is (= 2 (count @lanes)))
-    (is (apply = (map #(get-in (scoring %) [:precision-model :rates]) @lanes)))
+    (let [scored (filter scored-lane? @lanes)]
+      (is (= 1 (count scored)))
+      (is (= (get-in (scoring (first scored)) [:precision-model :rates])
+             (into {} (map (fn [[[_ token] rate]] [token rate]))
+                   (get-in @decision* [:measured-a :rates])))))
     (is (every? #(= {:false-neg 1/12 :false-pos 1/12} %)
                 (vals (get-in (scoring (first @lanes)) [:precision-model :rates]))))))

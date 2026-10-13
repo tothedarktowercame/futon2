@@ -29,16 +29,23 @@
               rates (get-in record [:decision :measured-a :rates])
               local-rates (into {} (for [[[t token] value] rates :when (= t target)] [token value]))
               checked (set (keys local-rates))
-              run-step (fn [change]
-                         (spit file (pr-str (change record)))
-                         (flight/conditioning-step
-                          {:run-record (edn/read-string (slurp file))
-                           :target target :flight-id "offline" :click-id "offline-conditioning"
-                           :policy-key [target precedence {}] :precedence precedence :enactments []
-                           :observation {:status :observed :o checked :checked checked
-                                         :channel (zipmap checked (repeat :C3))}}))
-              step (run-step identity)]
+              run-step (fn [{:keys [change overrides]
+                             :or {change identity overrides {}}}]
+                          (spit file (pr-str (change record)))
+                          (flight/conditioning-step
+                           (merge
+                            {:run-record (edn/read-string (slurp file))
+                             :target target :flight-id "offline" :click-id "offline-conditioning"
+                             :policy-key [target precedence {}] :precedence precedence :enactments []
+                             :observation {:status :observed :o checked :checked checked
+                                           :channel (zipmap checked (repeat :C3))}}
+                            overrides)))
+              step (run-step {})]
           (testing "real rates and measurement survive the real persistence boundary"
+            (is (= [(:target (:action decision))
+                    (mapv :id (:precedence (:action decision)))]
+                   [target precedence])
+                "EDN hydration retains the exact selected target and precedence")
             (is (= (:measured-a decision) (get-in record [:decision :measured-a])))
             (is (seq local-rates))
             (is (every? #(= {:false-neg 1/12 :false-pos 1/12} %) (vals local-rates)))
@@ -54,20 +61,33 @@
             (println "conditioning record regression" (select-keys step [:p-o :f])))
           (testing "removing measured-A from disk is a typed absence"
             (is (= :no-measured-a
-                   (:reason (run-step #(update % :decision dissoc :measured-a))))))
+                   (:reason (run-step {:change #(update % :decision dissoc :measured-a)})))))
+          (testing "substituted target and precedence do not borrow neighboring evidence"
+            (is (= :no-interpretations
+                   (:reason (run-step {:overrides {:target :substituted-target}}))))
+            (is (= :no-interpretation
+                   (:reason (run-step {:overrides {:precedence [:substituted-pattern]}})))))
+          (testing "copied measurement under another target cannot populate this policy"
+            (let [copied (fn [r]
+                           (update-in r [:decision :measured-a :measurement]
+                                      (fn [measurement]
+                                        (into {} (map (fn [[[ _ token] value]]
+                                                        [[:copied-target token] value]))
+                                              measurement))))]
+              (is (= :unmeasured-class (:reason (run-step {:change copied}))))))
           (testing "malformed stored pattern refuses before rollout"
             (let [id (first precedence)
                   inputs (get-in record [:decision :selection-certificate :token-belief-stage :domain-inputs])
                   i (first (keep-indexed (fn [n x] (when (= target (:target x)) n)) inputs))
                   path [:decision :selection-certificate :token-belief-stage :domain-inputs i
                         :declaration :interpretations id :produces]
-                  bad (run-step #(update-in % path vec))]
+                  bad (run-step {:change #(update-in % path vec)})]
               (is (= :no-interpretation (:reason bad)))
               (is (= [id] (get-in bad [:inputs :patterns])))
               (is (= :missing-pattern-interpretation (get-in bad [:inputs :refusals 0 :kind])))))
           (testing "different rates on disk reach the step"
             (let [replacement (zipmap (keys rates) (repeat {:false-neg 1/3 :false-pos 1/4}))
-                  changed (run-step #(assoc-in % [:decision :measured-a :rates] replacement))]
+                  changed (run-step {:change #(assoc-in % [:decision :measured-a :rates] replacement)})]
               (is (= :present (:status changed)))
               (is (= (zipmap checked (repeat {:false-neg 1/3 :false-pos 1/4}))
                      (get-in changed [:measured-a :rates])))
