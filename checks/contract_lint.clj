@@ -7,6 +7,8 @@
             [clojure.string :as str]))
 
 (def repo-root "/home/joe/code")
+(def default-machine-contract
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json")
 (defn- read-json [p] (json/parse-string (slurp p) true))
 (defn- read-edn [p] (edn/read-string (slurp p)))
 (defn- names [binding]
@@ -410,25 +412,76 @@
           :conformant :wrong-shape))
       (catch Exception _ :wrong-shape))))
 
+(def supported-receipt-schemas #{:legacy-run-v1 :wm/node-witness-v1})
+
+(defn- binding-owner-key [b]
+  (select-keys (:binding/owner b) [:contract-id :module]))
+
+(defn- node-receipt-valid? [b]
+  (let [rows (:node-witnesses b)]
+    (and (seq rows)
+         (every? #(and (= :wm/node-witness-v1 (:schema %))
+                       (= :admitted (:status %))
+                       (= :verified (get-in % [:verification :status]))
+                       (= :verified (get-in % [:review :status])))
+                 rows))))
+
+(defn- receipt-valid? [b]
+  (case (:binding/receipt-schema b)
+    :legacy-run-v1 (and (contains? #{:passed :failed} (:result b))
+                        (contains? b :recorded-at))
+    :wm/node-witness-v1 (node-receipt-valid? b)
+    false))
+
+(defn- lifecycle-errors [registry owners declarations]
+  (vec
+   (mapcat
+    (fn [b]
+      (let [lifecycle (:binding/lifecycle b)
+            owner (binding-owner-key b)
+            schema (:binding/receipt-schema b)]
+        (cond-> []
+          (not (contains? #{:active :retired} lifecycle))
+          (conj {:name (:witnesses b) :error :unknown-binding-lifecycle})
+          (not (contains? supported-receipt-schemas schema))
+          (conj {:name (:witnesses b) :error :unknown-receipt-schema})
+          (and (= :active lifecycle) (not (contains? owners owner)))
+          (conj {:name (:witnesses b) :error :unknown-contract-owner})
+          (and (= :active lifecycle)
+               (contains? declarations (:witnesses b))
+               (not= owner (get-in declarations [(:witnesses b) :contract/owner])))
+          (conj {:name (:witnesses b) :error :contract-owner-mismatch})
+          (and (= :active lifecycle) (not (receipt-valid? b)))
+          (conj {:name (:witnesses b) :error :missing-active-result}))))
+    registry)))
+
 (defn lint-data [{:keys [contract registry authority sha-fn read-fixture]
                   :or {sha-fn last-sha
                        read-fixture #(read-edn (artifact-path %))}}]
   (let [decls (:declarations contract)
         by-name (into {} (map (juxt :name identity) decls))
-        expanded (mapcat (fn [b] (map #(assoc b :witnesses %) (names b))) registry)
+        lifecycle? (boolean (:binding-lifecycle? contract))
+        owners (set (:contract-owners contract))
+        lifecycle-errors (if lifecycle? (lifecycle-errors registry owners by-name) [])
+        active-registry (if lifecycle?
+                          (filter #(= :active (:binding/lifecycle %)) registry)
+                          registry)
+        expanded (mapcat (fn [b] (map #(assoc b :witnesses %) (names b))) active-registry)
         unknown (vec (remove #(contains? by-name (:witnesses %)) expanded))
-        malformed (vec (filter #(or (not (contains? % :result))
+        malformed (vec (filter #(if lifecycle?
+                                  (not (receipt-valid? %))
+                                  (or (not (contains? % :result))
                                     (not (contains? #{:passed :failed} (:result %)))
-                                    (not (contains? % :recorded-at))) expanded))
+                                    (not (contains? % :recorded-at)))) expanded))
         duplicates (->> expanded (group-by :witnesses)
                         (keep (fn [[n xs]] (when (> (count xs) 1) n))) vec)
-        errors (vec (concat
+        bindings (into {} (map (juxt :witnesses identity) expanded))
+        errors (vec (concat lifecycle-errors
                      (when (empty? decls)
                        [{:error :contract-unavailable :reason :zero-declarations}])
                      (map #(hash-map :error :not-in-contract :name (:witnesses %)) unknown)
                      (map #(hash-map :error :missing-run-result :name (:witnesses %)) malformed)
                      (map #(hash-map :error :duplicate-binding :name %) duplicates)))
-        bindings (into {} (map (juxt :witnesses identity) expanded))
         source (:source contract)
         authority-ok? (and (= "DarkTower.WarMachine.Holes" (:module source))
                            (= authority (:git-sha source)))
@@ -439,9 +492,10 @@
                       snapshot? (= :pinned-git-v1 (:freshness b))
                       snapshot-readable? (when snapshot?
                                            (pinned-fixture-readable? (:fixture b) (:run-sha b)))
-                      contract-stale? (and b (not snapshot?)
+                      node-receipt? (= :wm/node-witness-v1 (:binding/receipt-schema b))
+                      contract-stale? (and b (not node-receipt?) (not snapshot?)
                                            (not= (:contract-sha b) (:git-sha source)))
-                      fixture-stale? (and b
+                      fixture-stale? (and b (not node-receipt?)
                                           (if snapshot?
                                             (not snapshot-readable?)
                                             (not= (:run-sha b) (sha-fn (:fixture b)))))
@@ -504,9 +558,37 @@
                 (into (sorted-map) (frequencies (map :stale-remediation stale-rows)))}}
      :owners owners :declarations rows :errors errors}))
 
-(defn lint-file [{:keys [contract registry authority]}]
-  (lint-data {:contract (read-json contract) :registry (read-edn registry)
-              :authority authority}))
+(defn contract-union [holes machine]
+  (let [holes-owner {:contract-id "holes" :module (get-in holes [:source :module])}
+        machine-decls
+        (mapcat (fn [c]
+                  (map #(assoc %
+                               :qualified-name (:name %)
+                               :name (last (str/split (:name %) #"\."))
+                               :contract/owner
+                               {:contract-id (:contract-id c)
+                                :module (get-in % [:source :module])})
+                       (:declarations c)))
+                (:contracts machine))
+        machine-decls (->> machine-decls (group-by :name) vals (map first) vec)]
+    (assoc holes
+           :binding-lifecycle? true
+           :contract-owners (vec (cons holes-owner
+                                       (map :contract/owner machine-decls)))
+           :declarations (vec (concat
+                               (map #(assoc % :contract/owner holes-owner)
+                                    (:declarations holes))
+                               machine-decls)))))
+
+(defn lint-file [{:keys [contract machine-contract registry authority]}]
+  (let [machine-contract (or machine-contract
+                             (when (.isFile (java.io.File. default-machine-contract))
+                               default-machine-contract))
+        holes (read-json contract)
+        contract (if machine-contract
+                   (contract-union holes (read-json machine-contract)) holes)]
+    (lint-data {:contract contract :registry (read-edn registry)
+                :authority authority})))
 
 (defn- args-map [args]
   (loop [xs args out {}]

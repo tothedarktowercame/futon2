@@ -1,16 +1,30 @@
-{:witnesses "modelUncertaintyAndEIG"
- :check {:repo "futon2"
-         :path "checks/model_uncertainty_eig_witness.clj"
-         :entrypoint "-main"}
- :fixture {:repo "futon2"
-           :path "holes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn"}
- :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/ModelUncertaintyEIGCollapsedNegative.lean" :claim :live-spread-bonus-is-not-canonical-eig}]}
- :freshness :pinned-git-v1
- :live-invariant {:check "checks/model_uncertainty_eig_witness.clj"
-                  :evidence :lean-elaboration-and-collapsed-equality-control}
- :run-sha "6f84763326eca30018574722176c7a23cb20a5ce"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
- :result :passed
- :recorded-at "2026-08-31T23:59:00Z"
- :axioms "[propext, Classical.choice, Quot.sound]; no sorryAx"
- :note "C147: re-elaborates the normalized point-mass counterexample and rejects the collapsed equality."}
+{:witnesses "modelUncertaintyAndEIG",
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :expected-rejection
+ {:mode :lean-guard-msgs,
+  :controls
+  [{:fixture
+    "DarkTower/WarMachine/ModelUncertaintyEIGCollapsedNegative.lean",
+    :claim :live-spread-bonus-is-not-canonical-eig}]},
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+ :run-sha "6f84763326eca30018574722176c7a23cb20a5ce",
+ :check
+ {:repo "futon2",
+  :path "checks/model_uncertainty_eig_witness.clj",
+  :entrypoint "-main"},
+ :binding/lifecycle :active,
+ :axioms "[propext, Classical.choice, Quot.sound]; no sorryAx",
+ :note
+ "C147: re-elaborates the normalized point-mass counterexample and rejects the collapsed equality.",
+ :recorded-at "2026-08-31T23:59:00Z",
+ :live-invariant
+ {:check "checks/model_uncertainty_eig_witness.clj",
+  :evidence :lean-elaboration-and-collapsed-equality-control},
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn"}}

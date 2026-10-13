@@ -1,9 +1,28 @@
-{:witnesses "bayesianModelReduction"
- :check {:repo "futon2" :path "checks/bayesian_model_reduction_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/bayesian-model-reduction-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/BayesianModelReductionNegative.lean" :claim :reduction-preserves-count-arithmetic}]}
- :run-sha "b048066070e1646c9105067ed6c405621381a2c9"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "bayesianModelReduction",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :expected-rejection
+ {:mode :lean-guard-msgs,
+  :controls
+  [{:fixture
+    "DarkTower/WarMachine/BayesianModelReductionNegative.lean",
+    :claim :reduction-preserves-count-arithmetic}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "b048066070e1646c9105067ed6c405621381a2c9",
+ :check
+ {:repo "futon2",
+  :path "checks/bayesian_model_reduction_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/bayesian-model-reduction-reference.edn"}}

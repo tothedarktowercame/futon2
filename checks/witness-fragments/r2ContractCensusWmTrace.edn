@@ -1,18 +1,23 @@
 {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
  :run-sha "de68356cab018b014a84a3af26ddc831c5c30557",
- :freshness :pinned-git-v1,
- :live-invariant {:check "checks/r2_pinned_snapshot_witness.clj"
-                  :evidence :pinned-801-form-snapshot},
  :check
  {:repo "futon2",
   :path "checks/r2_pinned_snapshot_witness.clj",
   :entrypoint "-main"},
+ :binding/lifecycle :active,
  :axioms
  "r2CensusWmTrace: [<name>._native.native_decide.ax_1_1] — native_decide (kernel decide hit maxRecDepth, then 200,000 heartbeats; native_decide 1.87 s — codex-1's measurement); STATED (charter 3a); not sorryAx",
  :note
  "C96: the source constant is the immutable 54-file/801-form snapshot at b2c3aeb4…; Lean native_decide proves census 2 on that same object. --negative-pin and --negative-census reject independently.",
  :recorded-at "2026-08-31T17:20:00Z",
+ :live-invariant
+ {:check "checks/r2_pinned_snapshot_witness.clj",
+  :evidence :pinned-801-form-snapshot},
  :result :passed,
  :fixture
  {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}

@@ -1,10 +1,23 @@
-{:witnesses "BeliefState"
- :check {:repo "futon2" :path "checks/belief_state_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/belief-state-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/belief-state-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :positive-evidence-limit :construction-or-projection-only
- :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
- :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "BeliefState",
+ :positive-evidence-scope
+ "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a",
+ :check
+ {:repo "futon2",
+  :path "checks/belief_state_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/belief-state-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :positive-evidence-limit :construction-or-projection-only,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/belief-state-reference.edn"}}

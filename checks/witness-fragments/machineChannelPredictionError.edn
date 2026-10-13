@@ -1048,4 +1048,9 @@
    :quantity :eps,
    :claim
    "Reference observation 3/4 with missing mean and nonfinite variance refuses both in mean-variance order.",
-   :equation :prediction-error}]}
+   :equation :prediction-error}],
+ :binding/lifecycle :active,
+ :binding/owner
+ {:contract-id "wm-machine-prediction-error",
+  :module "DarkTower.WarMachine.MachinePredictionError"},
+ :binding/receipt-schema :wm/node-witness-v1}

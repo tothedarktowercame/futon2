@@ -1,13 +1,33 @@
-{:witnesses "PreferenceDistribution"
- :check {:repo "futon2" :path "checks/preference_distribution_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :positive-evidence-limit :construction-or-projection-only
- :positive-evidence-scope "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
- :expected-rejection {:mode :lean-guard-msgs :controls
-                      [{:fixture "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean" :claim :preferences-are-unconditional}
-                       {:fixture "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean" :claim :preference-distribution-is-not-pragmatic-cost}]}
- :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "PreferenceDistribution",
+ :positive-evidence-scope
+ "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :expected-rejection
+ {:mode :lean-guard-msgs,
+  :controls
+  [{:fixture
+    "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean",
+    :claim :preferences-are-unconditional}
+   {:fixture
+    "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean",
+    :claim :preference-distribution-is-not-pragmatic-cost}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72",
+ :check
+ {:repo "futon2",
+  :path "checks/preference_distribution_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/preference-distribution-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :positive-evidence-limit :construction-or-projection-only,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/preference-distribution-reference.edn"}}

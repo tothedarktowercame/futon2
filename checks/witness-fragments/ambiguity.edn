@@ -1,11 +1,20 @@
-{:witnesses "ambiguity"
- :check {:repo "futon2"
-         :path "checks/ambiguity_witness.clj"
-         :entrypoint "-main"}
- :fixture {:repo "futon2"
-           :path "holes/labs/wm-contract/ambiguity-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/ambiguity-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "ambiguity",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413",
+ :check
+ {:repo "futon2",
+  :path "checks/ambiguity_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/ambiguity-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/ambiguity-reference.edn"}}

@@ -1,19 +1,30 @@
-{:witnesses "variationalFreeEnergy"
- :check {:repo "futon2" :path "checks/variational_free_energy_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/variational-free-energy-reference.edn"}
- :positive-proof-receipt {:repo "futon2"
-                          :path "holes/labs/wm-contract/variational-free-energy-positive-receipt.edn"
-                          :schema :PositiveLeanWitnessReceipt/v1}
+{:witnesses "variationalFreeEnergy",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :expected-rejection
- {:mode :lean-guard-msgs
+ {:mode :lean-guard-msgs,
   :controls
-  [{:fixture "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean"
+  [{:fixture "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean",
     :claim :distinct-semantic-types}
-   {:mode "--negative-weakened-positive"
+   {:mode "--negative-weakened-positive",
     :claim :positive-statement-source-identity}
-   {:mode "--unrelated-positive-edit"
-    :claim :declaration-slice-locality}]}
- :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+   {:mode "--unrelated-positive-edit",
+    :claim :declaration-slice-locality}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
+ :check
+ {:repo "futon2",
+  :path "checks/variational_free_energy_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/variational-free-energy-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/variational-free-energy-reference.edn"}}

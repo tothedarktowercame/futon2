@@ -1,11 +1,17 @@
-{:witnesses "FoldEscrowRecord"
- :check {:repo "futon2"
-         :path "checks/fold_turn_quarantine_check.clj"
-         :entrypoint "-main"}
- :fixture {:repo "futon2"
-           :path "holes/labs/wm-contract/fold-turn-quarantine.edn"}
- :run-sha "42a997e0330594c754b388e1e61a50a551ed0a37"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
- :freshness :pinned-git-v1
- :result :passed
- :recorded-at "2026-08-31T23:59:00Z"}
+{:witnesses "FoldEscrowRecord",
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+ :run-sha "42a997e0330594c754b388e1e61a50a551ed0a37",
+ :check
+ {:repo "futon2",
+  :path "checks/fold_turn_quarantine_check.clj",
+  :entrypoint "-main"},
+ :binding/lifecycle :active,
+ :recorded-at "2026-08-31T23:59:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/fold-turn-quarantine.edn"}}

@@ -132,6 +132,7 @@
         authority (get-in (json/parse-string (slurp contract-path) true) [:source :git-sha])
         result (lint/lint-file
                 {:contract "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"
+                 :machine-contract "/home/joe/code/mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json"
                  :registry "checks/witness-registry.edn"
                  :authority authority})]
     (is (true? (get-in result [:summary :pass?])))
@@ -142,6 +143,30 @@
     (is (every? #(= :closed-by-record (:judgement %))
                 (filter #(= "closed" (:kind %)) (:declarations result))))
     (is (empty? (:errors result)))))
+
+(deftest lifecycle-ownership-and-receipts-fail-closed
+  (let [owner {:contract-id "holes" :module "DarkTower.WarMachine.Holes"}
+        contract {:source source :binding-lifecycle? true
+                  :contract-owners [owner]
+                  :declarations [(decl "good" "hole" "AblationTable")]}
+        active (assoc (witness-binding "good" :passed "good")
+                      :binding/lifecycle :active
+                      :binding/owner owner
+                      :binding/receipt-schema :legacy-run-v1)
+        lint* #(lint/lint-data {:contract contract :registry %
+                                :authority "contract-sha"
+                                :sha-fn (constantly "run-sha")
+                                :read-fixture (fn [_] (fixtures "good"))})]
+    (testing "an unknown owner is rejected"
+      (is (some #(= :unknown-contract-owner (:error %))
+                (:errors (lint* [(assoc active :binding/owner
+                                        {:contract-id "unknown" :module "No.Module"})])))))
+    (testing "retired evidence cannot be counted as an active binding"
+      (let [result (lint* [(assoc active :binding/lifecycle :retired)])]
+        (is (= :unwitnessed (-> result :declarations first :judgement)))))
+    (testing "an active binding without its declared result is rejected"
+      (is (some #(= :missing-active-result (:error %))
+                (:errors (lint* [(dissoc active :result)])))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (let [{:keys [fail error]} (run-tests)]

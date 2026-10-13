@@ -1,13 +1,29 @@
-{:witnesses "foldC"
- :check {:repo "futon2" :path "checks/fold_c_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/fold-c-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/fold-c-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :positive-evidence-limit :construction-or-projection-only
- :positive-evidence-scope "Elaborates foldC on the F10 ruled carrier and proves empty-stack identity plus observable left-fold order; carries no run identity."
- :expected-rejection {:mode :lean-error-substrings
-                      :controls [{:fixture "DarkTower/WarMachine/FoldCOrderNegative.lean" :claim :ordered-fold-is-not-order-insensitive}
-                                 {:fixture "DarkTower/WarMachine/FoldCFoldedNegative.lean" :claim :unfolded-layer-does-not-leave-base-unchanged}]}
- :run-sha "cd65292d54c1ec4e46d5167c4208f1fef58cd60e"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "foldC",
+ :positive-evidence-scope
+ "Elaborates foldC on the F10 ruled carrier and proves empty-stack identity plus observable left-fold order; carries no run identity.",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :expected-rejection
+ {:mode :lean-error-substrings,
+  :controls
+  [{:fixture "DarkTower/WarMachine/FoldCOrderNegative.lean",
+    :claim :ordered-fold-is-not-order-insensitive}
+   {:fixture "DarkTower/WarMachine/FoldCFoldedNegative.lean",
+    :claim :unfolded-layer-does-not-leave-base-unchanged}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "cd65292d54c1ec4e46d5167c4208f1fef58cd60e",
+ :check
+ {:repo "futon2",
+  :path "checks/fold_c_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/fold-c-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :positive-evidence-limit :construction-or-projection-only,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2", :path "holes/labs/wm-contract/fold-c-reference.edn"}}

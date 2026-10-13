@@ -1,11 +1,29 @@
-{:witnesses "PolicyPriorKernel"
- :check {:repo "futon2" :path "checks/policy_prior_kernel_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/policy-prior-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :positive-evidence-limit :construction-or-projection-only
- :positive-evidence-scope "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour."
- :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean" :claim :policy-prior-is-unconditioned}]}
- :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+{:witnesses "PolicyPriorKernel",
+ :positive-evidence-scope
+ "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour.",
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :expected-rejection
+ {:mode :lean-guard-msgs,
+  :controls
+  [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
+    :claim :policy-prior-is-unconditioned}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
+ :check
+ {:repo "futon2",
+  :path "checks/policy_prior_kernel_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
+ :positive-evidence-limit :construction-or-projection-only,
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/policy-prior-reference.edn"}}

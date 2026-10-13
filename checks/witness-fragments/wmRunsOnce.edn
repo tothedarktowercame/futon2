@@ -1,17 +1,23 @@
 {:witnesses "wmRunsOnce",
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
  :run-sha "b45885508aa7842e1818afe464867d571c7df0c5",
- :freshness :pinned-git-v1,
- :live-invariant {:check "checks/wm_runs_once_witness.clj" :evidence :emitted-by-check},
  :check
  {:repo "futon2",
   :path "checks/wm_runs_once_witness.clj",
   :entrypoint "-main"},
+ :binding/lifecycle :active,
  :axioms
  "wmRunsOnce: [] (receipt witness only); this Clojure witness emits no Lean proof and introduces no axioms",
  :note
  "WM-RUN2 rebinds wmRunsOnce to the amended TickRunRecord at eec8279cf7: scripts/futon2/run_tick_once.clj now records split store/sample basis fields and the route-bearing receipt from one cold-JVM on-demand tick; on this seat the shared futon3c selector was not on the futon2 runtime classpath, so the run recorded selectorSeam stub:first-ranked-authorized-mission and routed around the lane_futility bb blocker with clojure -M.",
  :recorded-at "2026-08-30T20:39:14Z",
+ :live-invariant
+ {:check "checks/wm_runs_once_witness.clj",
+  :evidence :emitted-by-check},
  :result :passed,
  :fixture
  {:repo "futon2",

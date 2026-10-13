@@ -1,15 +1,25 @@
-{:witnesses "r9VerdictConsultsChecker"
- :check {:repo "futon2"
-         :path "checks/r9_proof_receipt_check.clj"
-         :entrypoint "-main"}
- :fixture {:repo "futon2"
-           :path "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"}
- :freshness :pinned-git-v1
- :live-invariant {:check "checks/r9_proof_receipt_check.clj"
-                  :evidence :lean-elaboration-and-axiom-output}
- :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
- :result :passed
- :recorded-at "2026-08-31T23:45:00Z"
- :axioms "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx"
- :note "C99: re-elaborates and inspects axioms of the exact source theorem DarkTower.WarMachine.Holes.r9VerdictConsultsChecker. Absent and tampered receipt controls are rejected."}
+{:witnesses "r9VerdictConsultsChecker",
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+ :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6",
+ :check
+ {:repo "futon2",
+  :path "checks/r9_proof_receipt_check.clj",
+  :entrypoint "-main"},
+ :binding/lifecycle :active,
+ :axioms
+ "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx",
+ :note
+ "C99: re-elaborates and inspects axioms of the exact source theorem DarkTower.WarMachine.Holes.r9VerdictConsultsChecker. Absent and tampered receipt controls are rejected.",
+ :recorded-at "2026-08-31T23:45:00Z",
+ :live-invariant
+ {:check "checks/r9_proof_receipt_check.clj",
+  :evidence :lean-elaboration-and-axiom-output},
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"}}

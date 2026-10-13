@@ -53,4 +53,9 @@
    :quantity :T,
    :claim
    "At the pinned redirected machinery capture, configured depth 3 was gated off because anticipation was unavailable; EFE received nil and the recorded effective depth 1 equals the declared machineDepth law at that input. This is not a live production-trace claim.",
-   :equation :depth}]}
+   :equation :depth}],
+ :binding/lifecycle :active,
+ :binding/owner
+ {:contract-id "wm-machine-depth",
+  :module "DarkTower.WarMachine.MachineDepth"},
+ :binding/receipt-schema :wm/node-witness-v1}

@@ -58,4 +58,8 @@
    :quantity :Q-pi,
    :claim
    "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence.",
-   :equation :policy-posterior}]}
+   :equation :policy-posterior}],
+ :binding/lifecycle :retired,
+ :binding/owner
+ {:contract-id "historical", :module "DarkTower.WarMachine.Holes"},
+ :binding/receipt-schema :wm/node-witness-v1}

@@ -92,4 +92,9 @@
    :quantity :o,
    :claim
    "For zero-valued inputs and absent variants, machineObservation's numeric projection has fourteen zero coordinates in Channel.all order.",
-   :equation :observe}]}
+   :equation :observe}],
+ :binding/lifecycle :active,
+ :binding/owner
+ {:contract-id "wm-machine-observe",
+  :module "DarkTower.WarMachine.MachineObservation"},
+ :binding/receipt-schema :wm/node-witness-v1}

@@ -1,6 +1,9 @@
 {:witnesses "PredictiveOutcomeKernel",
  :positive-evidence-scope
  "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
+ :binding/receipt-schema :wm/node-witness-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :expected-rejection
  {:mode :lean-guard-msgs,
   :controls
@@ -21,6 +24,7 @@
   :path
   "holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn",
   :schema :PositiveLeanWitnessReceipt/v1},
+ :binding/lifecycle :active,
  :positive-evidence-limit :construction-or-projection-only,
  :node-witnesses
  [{:schema :wm/node-witness-v1,

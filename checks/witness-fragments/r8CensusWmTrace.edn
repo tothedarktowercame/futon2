@@ -1,17 +1,22 @@
 {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
  :run-sha "93be32e98bbfdc413fc6aa58ef1d0da7cfdc8414",
- :freshness :pinned-git-v1,
- :live-invariant {:check "checks/r8_f_contract.clj" :evidence :live-report},
  :check
  {:repo "futon2",
   :path "checks/r8_pinned_snapshot_witness.clj",
   :entrypoint "-main"},
+ :binding/lifecycle :active,
  :axioms
  "generatedCensus / generatedEraBoundary: [propext, Classical.choice, Quot.sound, <name>._native.native_decide.ax_1_1] — EMITTED BY THE GENERATOR (R8-D4, 10826ee): the artefact states its own trust assumption (charter 3a(iii) met by the generator for the first time)",
  :note
  "C105: exact 792-row generated literal installed as the source object; native_decide proves census (755,32,5) on that object; pin c9add16a is immutable, not a current count; --negative-pin and --negative-census reject independently.",
  :recorded-at "2026-08-31T23:30:00Z",
+ :live-invariant
+ {:check "checks/r8_f_contract.clj", :evidence :live-report},
  :result :passed,
  :fixture
  {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}

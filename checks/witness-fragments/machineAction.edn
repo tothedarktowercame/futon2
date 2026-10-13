@@ -120,4 +120,8 @@
    :quantity :u,
    :claim
    "At the retained internal-branch inputs, machineAction equals the controller-head, full-score first-max, habit last-max, absent-F_pi fallback and tie-control outputs; the retained exact no-op margin satisfies abstains. This scope excludes the distinct live reason-bearing selector.",
-   :equation :action}]}
+   :equation :action}],
+ :binding/lifecycle :retired,
+ :binding/owner
+ {:contract-id "historical", :module "DarkTower.WarMachine.Holes"},
+ :binding/receipt-schema :wm/node-witness-v1}

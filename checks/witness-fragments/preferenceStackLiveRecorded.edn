@@ -1,20 +1,24 @@
 {:witnesses "preferenceStackLiveRecorded",
+ :freshness :pinned-git-v1,
+ :binding/receipt-schema :legacy-run-v1,
+ :binding/owner
+ {:contract-id "holes", :module "DarkTower.WarMachine.Holes"},
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
  :run-sha "6c87413",
- :freshness :pinned-git-v1,
- :live-invariant
- {:check "checks/preference_stack_binding_check.clj"
-  :evidence :serialized-production-value-survives-trace},
  :check
  {:repo "futon2",
   :path "checks/preference_stack_binding_check.clj",
   :entrypoint "-main"},
+ :binding/lifecycle :active,
  :axioms
  "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms",
  :note
  "C83 binds C63's serialized PreferenceStackWitness. The binding check proves that exact serialized :preference-stack equals both production compute-efe output and the v16 trace envelope. Binding-level absent and malformed controls are distinct from C63's missing-layer shape mutation.",
  :recorded-at "2026-08-31T16:52:00Z",
+ :live-invariant
+ {:check "checks/preference_stack_binding_check.clj",
+  :evidence :serialized-production-value-survives-trace},
  :result :passed,
  :fixture
- {:repo "futon2"
+ {:repo "futon2",
   :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}

@@ -125,4 +125,9 @@
    :quantity :mu,
    :claim
    "The production-facing belief reader carries all seven coordinates of the pinned 2026-05-23 bootstrapped mu-pre row unchanged; every measured coordinate delta is 0.0.",
-   :equation :belief-state}]}
+   :equation :belief-state}],
+ :binding/lifecycle :active,
+ :binding/owner
+ {:contract-id "wm-machine-belief-state",
+  :module "DarkTower.WarMachine.MachineBeliefState"},
+ :binding/receipt-schema :wm/node-witness-v1}
