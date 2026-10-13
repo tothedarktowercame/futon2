@@ -4,11 +4,11 @@
             [clojure.string :as str]
             [clojure.tools.build.api :as b]))
 
-(def lib 'net.clojars.ants/clj-ants-aif)
+(def lib 'futon2/futon2)
 (def version "0.1.0-SNAPSHOT")
-(def main 'ants.clj-ants-aif)
+(def main 'futon2.aif.full-loop-cli)
 (def class-dir "target/classes")
-(def test-batch-size 32)
+(def test-batch-size 8)
 
 (defn- test-namespaces []
   (->> (file-seq (io/file "test"))
@@ -51,14 +51,13 @@
 (defn- uber-opts [opts]
   (assoc opts
          :lib lib :main main
-         :uber-file (format "target/%s-%s.jar" lib version)
+         :uber-file (format "target/%s-%s.jar" (name lib) version)
          :basis (b/create-basis {})
          :class-dir class-dir
          :src-dirs ["src"]
          :ns-compile [main]))
 
-(defn ci "Run the CI pipeline of tests (and build the uberjar)." [opts]
-  (test opts)
+(defn uber "Build the runnable Futon2 uberjar without running tests." [opts]
   (b/delete {:path "target"})
   (let [opts (uber-opts opts)]
     (println "\nCopying source...")
@@ -68,3 +67,7 @@
     (println "\nBuilding JAR...")
     (b/uber opts))
   opts)
+
+(defn ci "Run the CI pipeline of tests (and build the uberjar)." [opts]
+  (test opts)
+  (uber opts))
