@@ -324,14 +324,22 @@
                   ranked (with-meta
                            (mapv #(update % :action assoc :target (:target problem)) ranked0)
                            (meta ranked0))
-                  candidates (mapv #(assoc % :target (:target problem))
-                                   (:candidates (get @state :R4)))
+                  ;; Commissioning's population correspondence is ordered at
+                  ;; the posterior boundary, so align candidates with the
+                  ;; ranked records rather than R6's construction order.
+                  candidates (mapv :action ranked)
                   prefixes (prefix-admission/prefixes
                             candidates
                             (or (:conditioning-steps lane-opts)
                                 {:steps [] :dir-status {:absent :no-flight-steps-in-opts}}))
-                  decision (policy/select-action-cascades (policy-prefix/production-ranked ranked nil prefixes)
+                  prefix-f-input (prefix-f-posterior-input
+                                  ranked candidates {:policy-prefixes prefixes} lane-opts)
+                  decision (policy/select-action-cascades (:ranked prefix-f-input)
                                                           {:beta beta})
+                  decision (cond-> decision
+                             (:receipt prefix-f-input)
+                             (assoc-in [:selection-certificate :prefix-f-routing]
+                                       (:receipt prefix-f-input)))
                   ;; The candidates' :precedence carries manifest pattern MAPS
                   ;; (that is what R4/R5 consume), so select-action-cascades
                   ;; keys the action marginal by the pattern map; re-key it by
