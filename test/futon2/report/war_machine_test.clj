@@ -1463,11 +1463,22 @@
     (testing "the mission-path fallback, the other source U12 read, and a parse
               that produces NO criteria still records what it read"
       (let [doc "holes/missions/M-wm-aif-policy-grain-compliance.md"
-            ranked (assoc-in u11-ranked [0 :action :mission-path] doc)
-            r (#'wm/mission-c-readback u11-clocked ranked {})]
-        (is (= doc (:criteria-source r)))
-        (is (= :no-completion-criteria-section (:criteria-reason r)))
-        (is (= (get u12-recorded-source-sha256 doc) (:criteria-source-sha256 r)))))
+            historical (shell/sh "git" "show"
+                                 "27a6dd5bf1e0e4fc327bc2f3692e33e903ce1f7a:holes/missions/M-wm-aif-policy-grain-compliance.md")
+            path (.toFile (Files/createTempFile "u12-mission-criteria-"
+                                                ".md"
+                                                (make-array FileAttribute 0)))]
+        (try
+          (is (zero? (:exit historical)))
+          (spit path (:out historical))
+          (let [ranked (assoc-in u11-ranked [0 :action :mission-path]
+                                 (.getCanonicalPath path))
+                r (#'wm/mission-c-readback u11-clocked ranked {})]
+            (is (= (.getCanonicalPath path) (:criteria-source r)))
+            (is (= :no-completion-criteria-section (:criteria-reason r)))
+            (is (= (get u12-recorded-source-sha256 doc)
+                   (:criteria-source-sha256 r))))
+          (finally (io/delete-file path true)))))
     (testing "a source that is not there is a typed absence with NO digest --
               the field never carries a nil where a hash belongs"
       (let [ranked (assoc-in u11-ranked [0 :action :mission-path]
