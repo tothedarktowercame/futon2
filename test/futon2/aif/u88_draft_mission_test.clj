@@ -28,6 +28,8 @@
 
 (defn- install-isolated! [root id body]
   (let [target (io/file root "futon2/holes/missions" (str id ".md"))]
+    ;; Mission discovery admits canonical paths only from a primary checkout.
+    (.mkdirs (io/file root "futon2/.git"))
     (io/make-parents target)
     (spit target body)
     (.getAbsolutePath target)))
@@ -45,6 +47,10 @@
             (is (empty? (missions/open-missions {:missions [parsed]})))))))))
 
 (deftest production-distinguishes-activated-u88-from-retained-f10-draft
-  (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))]
+  ;; This parser contract is hermetic: the zero-argument entry point reads the
+  ;; live substrate and can legitimately be busy during CI.
+  (let [open-by-id (into {} (map (juxt :id identity)
+                                 (missions/open-missions
+                                  (missions/load-missions "/home/joe/code"))))]
     (is (= :open (:status-class (get open-by-id "M-u88-contextual-preferences"))))
     (is (nil? (get open-by-id "M-f10-u83-blockage-reconciliation")))))
