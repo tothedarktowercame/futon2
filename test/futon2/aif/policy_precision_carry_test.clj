@@ -4,8 +4,6 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]
-            [futon2.aif.cascade-problems :as problems]
-            [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.report.cascade-habit-read-test :as stores]
             [futon2.aif.cascade-model-manifest :as m]
@@ -131,9 +129,10 @@
   (stores/with-store
    (fn [path]
      (with-redefs [task/default-root (str path "-missing-task-store")]
-       (let [assembled (problems/assemble {:targets [tick/tick-1-target]
-                                          :sources (locators/locate-all tick/tick-1-sources)})
-             decision (:decision (wm-cd/cascade-decision assembled (assoc tick/live-c-opts :cascade-habit-path path)))
+       (let [assembled (#'tick/assemble* {:targets [tick/tick-1-target]
+                                         :sources tick/tick-1-sources})
+             decision (:decision (#'tick/decision assembled
+                                  (assoc tick/live-c-opts :cascade-habit-path path)))
              state (get-in decision [:selection-certificate :policy-precision-state])
              frozen (get-in decision [:selection-certificate :precision-family])]
          (is (= :precision-no-admitted-predecessor (:reason state)))
