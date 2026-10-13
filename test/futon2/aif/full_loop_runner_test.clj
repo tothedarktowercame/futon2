@@ -688,7 +688,8 @@
            (get-in @recorded [:payload :sorry :kind])))
     (is (= :selection (get-in @recorded [:payload :sorry :refused-checkpoint])))
     (is (= (inc cohort/max-checkpoint-bytes)
-           (get-in @recorded [:payload :sorry :details :size-bytes])))))
+           (get-in @recorded [:payload :sorry :details :size-bytes])))
+    (is (not (contains? (get-in @recorded [:payload :sorry]) :cell-errors)))))
 
 (defn explicitly-selected-repair-judgement
   "Select a repair through the real posterior, against a distinct ordinary
@@ -6308,6 +6309,7 @@
     (is (= :invalid-checkpoint-cell (get-in (second @appended) [:sorry :kind])))
     (is (= [[:invalid-fold-output :x]]
            (get-in (second @appended) [:sorry :cell-errors])))
+    (is (not (contains? (get-in (second @appended) [:sorry]) :details)))
     (is (= [{:event :sorry-event}] @recorded)))
   (let [other (ex-info "unknown attempt" {})
         appended (atom [])]

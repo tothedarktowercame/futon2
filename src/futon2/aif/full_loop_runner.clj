@@ -3967,15 +3967,21 @@
   (try
     (record-fn (append-fn cell))
     (catch clojure.lang.ExceptionInfo e
-      (when (#{:invalid-checkpoint-cell :cohort-checkpoint-oversized}
-             (:failure-kind (ex-data e)))
-        (record-fn
-         (append-fn {:sorry {:kind (:failure-kind (ex-data e))
-                             :outcome :incomplete
-                             :refused-checkpoint checkpoint
-                             :details (select-keys (ex-data e)
-                                                   [:reason :size-bytes :max-bytes
-                                                    :errors])}})))
+      (let [data (ex-data e)
+            kind (:failure-kind data)]
+        (when (#{:invalid-checkpoint-cell :cohort-checkpoint-oversized} kind)
+          (record-fn
+           (append-fn
+            {:sorry
+             (merge {:kind kind
+                     :outcome :incomplete
+                     :refused-checkpoint checkpoint}
+                    (case kind
+                      :invalid-checkpoint-cell
+                      {:cell-errors (:errors data)}
+
+                      :cohort-checkpoint-oversized
+                      {:details (select-keys data [:reason :size-bytes :max-bytes])}))}))))
       (throw e))))
 
 (defn- mint-action-occurrence-once!
