@@ -1,7 +1,19 @@
 (ns futon2.aif.operational-witness-test
   (:require [clojure.edn :as edn]
+            [clojure.java.shell :as sh]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.operational-witness :as witness]))
+
+(def ants-split-revision "0b9a7b0a5eea7fe5bb766761e60e7d3629082b62")
+
+(defn- committed-ants-artifact [path]
+  (let [{:keys [exit out err]}
+        (sh/sh "git" "-C" "../futon2a" "show"
+               (str ants-split-revision ":" path))]
+    (when-not (zero? exit)
+      (throw (ex-info "Pinned ants artifact is unavailable"
+                      {:revision ants-split-revision :path path :error err})))
+    (edn/read-string out)))
 
 (defn- run-record
   [yield]
@@ -27,7 +39,7 @@
   (doseq [[path expected]
           [["holes/labs/ants-faithfulness/slice5.edn" 540]
            ["holes/labs/ants-faithfulness/authority.edn" 360]]]
-    (let [artifact (edn/read-string (slurp path))
+    (let [artifact (committed-ants-artifact path)
           ;; A re-run need not emit cells or runs in the committed order. Reverse
           ;; both to ensure reconciliation is by the full identity, not position.
           rerun (update artifact :cells
