@@ -88,14 +88,52 @@
                                  :grounded-change 1)}]})
 
 (deftest constant-checkpoint-adapter-contract
-  (let [adapter (disposition/constant-checkpoint-kernel constant-artifact)]
+  (let [canonical-support (vec (sort (:support ruled/seeded-c)))
+        adapter (disposition/constant-checkpoint-kernel constant-artifact)]
     (is (= (adapter {:mission-health 0.0}) (adapter {:mission-health 1.0})))
-    (is (= 12 (count (adapter {}))))
+    ;; The producer added :already-satisfied and :grounded-progress after this
+    ;; September fixture was written. Pin identities to its derived authority,
+    ;; never to a second, silently stale cardinality.
+    (is (= canonical-support (:support constant-artifact)))
+    (is (= canonical-support (vec (sort (keys (adapter {}))))))
     (is (= :open (:observation-model-bridge (meta adapter))))
     (is (= (:source constant-artifact) (:source (meta adapter))))
     (is (< (Math/abs (- (Math/log 2.0)
                        (disposition/disposition-risk {} adapter ruled/seeded-c))) 1.0e-12))
     (is (= (set (keys (adapter {}))) (:support ruled/seeded-c)))))
+
+(deftest canonical-support-population-is-fail-closed-at-consumption
+  (let [support (:support constant-artifact)
+        omitted (peek support)
+        unknown :unknown-checkpoint-outcome
+        artifact-with
+        (fn [new-support]
+          (assoc constant-artifact
+                 :support new-support
+                 :states [{:observation-summary
+                           {:checkpoint-trajectory [:selected :closed]}
+                           :sample-size 2
+                           :probability
+                           (assoc (zipmap new-support (repeat 0))
+                                  :grounded-change 1)}]))]
+    (doseq [[label planted expected]
+            [[:omitted (artifact-with (vec (remove #{omitted} support)))
+              :missing-disposition-support]
+             [:unknown (artifact-with (conj (pop support) unknown))
+              :missing-disposition-support]]]
+      (testing label
+        (let [adapter (disposition/constant-checkpoint-kernel planted)
+              refusal (try
+                        (disposition/disposition-risk {} adapter ruled/seeded-c)
+                        nil
+                        (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+          (is (= expected (:reason refusal)))
+          (is (seq (:missing refusal))))))
+    (testing "support order is representational, not semantic"
+      (let [reordered (artifact-with (vec (reverse support)))
+            adapter (disposition/constant-checkpoint-kernel reordered)]
+        (is (= (:support ruled/seeded-c) (set (keys (adapter {})))))
+        (is (= (vec (reverse support)) (:support (meta adapter))))))))
 
 (deftest constant-checkpoint-adapter-refusals
   (doseq [artifact [(assoc constant-artifact :support [])
