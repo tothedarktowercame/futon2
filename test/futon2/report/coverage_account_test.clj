@@ -7,6 +7,7 @@
             [futon2.aif.live-c :as live-c]
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.mission-hole-wants :as holes]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.trace :as trace]
             [futon2.aif.wm.construction-inputs :as construction-inputs]
             [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
@@ -23,6 +24,9 @@
 (def schedule {:placement {:value :terminal :status :declared}
                :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}})
 (def scales {:lam {:value 1 :status :declared} :mu {:value 0 :status :declared}})
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 (def missions
   [{:id "M-a" :path "/fixture/futon2/M-a.md" :status-class :active
     :text "# M-a\n\n- [ ] do A\n"
@@ -139,15 +143,33 @@
         supplied (-> sources
                      (assoc-in [:interpretations "M-b"]
                                {:patterns {:p {:guard {:needs #{} :forbids #{}} :produces #{token}}}
-                                :receipts {:p {:source :fixture}}})
+                                :receipts {:p {:source :fixture :blend-square blend-square}}})
                      (assoc-in [:candidates "M-b"]
                                [{:precedence [:p] :construction-receipt {:source :fixture}}]))
         omitted (assoc-in supplied [:candidates "M-b"] [])
-        decide (fn [s] (wm-cd/cascade-decision
-                        (construction-inputs/assemble-cascade-problems {:targets ["M-a" "M-b"] :sources s})
-                        {:focus-inputs (focus-inputs)
-                         :live-c {:sources live-sources}
-                         :cascade-habit-path (str (io/file *root* "habit.edn"))}))
+        decide (fn [s]
+                 (let [assembled (construction-inputs/assemble-cascade-problems
+                                  {:targets ["M-a" "M-b"] :sources s})
+                       candidates (for [{:keys [target constructed-candidates]} (:problems assembled)
+                                        {:keys [candidate-id precedence]} constructed-candidates]
+                                    {:id candidate-id :target target :precedence precedence})
+                       steps (mapv (fn [i candidate]
+                                     {:step {:status :present
+                                             :policy-key (prefix-admission/candidate-key candidate)
+                                             :occurrence {:flight "coverage-fixture"
+                                                          :click (str "run-" i)}
+                                             :s-prev {:value {#{} 1}}
+                                             :q {#{} 1}
+                                             :f 0.0}
+                                      :path "coverage-account-test"
+                                      :sha256 "fixture"})
+                                   (range) candidates)]
+                   (wm-cd/cascade-decision
+                    assembled
+                    {:focus-inputs (focus-inputs)
+                     :live-c {:sources live-sources}
+                     :conditioning-steps {:steps steps :read [] :unread []}
+                     :cascade-habit-path (str (io/file *root* "habit.edn"))})))
         before (decide supplied) after (decide omitted)
         old (get-in before [:decision :live-c-coverage])
         new (get-in after [:decision :live-c-coverage])]
