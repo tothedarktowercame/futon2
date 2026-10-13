@@ -136,16 +136,25 @@
   ;; carries a refusal, so the :live-c guard in cascade-decision-admitted
   ;; (war_machine.clj) throws ex-info "cascade decision refused"
   ;; {:kind :live-c-refused} before any scoring.
-  (let [assembled (cp/assemble {:targets [cfix/tick-1-target]
-                                :sources (loc/locate-all cfix/tick-1-sources)})
+  (let [generic (wm-cd/cascade-decision
+                 (cp/assemble {:targets [cfix/tick-1-target]
+                               :sources (loc/locate-all cfix/tick-1-sources)})
+                 cfix/live-c-opts)
+        admitted (@#'cfix/assemble* {:targets [cfix/tick-1-target]
+                                     :sources cfix/tick-1-sources})
+        selected (@#'cfix/decision admitted cfix/live-c-opts)
         {:keys [result record]}
         (run-judge (fn [_]
                      (wm-cd/cascade-decision
-                      assembled
+                      admitted
                       (assoc cfix/live-c-opts
                              :live-c {:derived {:refusals [{:kind :source-not-available}]}})))
                    {:target "M-autoclock-in"})
         carrier (get-in record [:decision :abstention])]
+    (is (= :no-acting-cascade-candidate (get-in generic [:decision :reason]))
+        "missing construction evidence remains generic no-selection")
+    (is (some? (get-in selected [:decision :action]))
+        "the admitted construction and Prefix-F evidence select successfully")
     (is (= :live-c-refused (get-in carrier [:targets 0 :kind])))
     (is (= :abstained (:status carrier)))
     (is (= :live-c-refused
