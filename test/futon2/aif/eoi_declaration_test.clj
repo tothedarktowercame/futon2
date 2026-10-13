@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as problems]
-            [futon2.aif.cascade-sources :as sources]))
+            [futon2.aif.cascade-sources :as sources]
+            [futon2.aif.observation-checks :as checks]))
 
 (def target "M-expressions-of-interest")
 (def resource "wm/cascade-sources/M-expressions-of-interest.edn")
@@ -12,29 +13,45 @@
   (problems/assemble {:targets [target]
                       :sources (assoc (sources/with-context-fn loaded) :horizon-steps 2)}))
 
-(deftest declaration-admits-with-unsatisfied-presence-wants
+(deftest declaration-keeps-unproduced-presence-wants-unknown
   (let [loaded (sources/load-declared)
         result (assemble loaded)
         observation (get-in loaded [:observations target])
         wants (set (get-in loaded [:wants target]))
-        facts (get-in loaded [:universes target])]
+        facts (get-in loaded [:universes target])
+        refusal (first (:refusals result))]
     (is (= 3 (count wants)))
     (is (= wants (set (keys facts))))
-    (is (every? false? (vals facts)))
-    (is (empty? (:refused observation)))
-    (is (every? #(= :C6 (:check %)) (vals (:results observation))))
-    (is (every? #(re-matches #"[0-9a-f]{40}" (get-in % [:evidence :resolved-sha]))
-                (vals (:results observation))))
-    (is (empty? (:refusals result)))
-    (is (= 1 (count (:problems result))))
-    (is (= 3 (count (get-in result [:problems 0 :cascade-problem :precedences]))))
+    (is (every? #{:unknown} (vals facts))
+        "absence of a produced witness is unknown, never false")
+    (is (empty? (:results observation)))
+    (is (= wants (set (keys (:refused observation)))))
+    (is (every? #(= {:status :missing :kind :no-mechanical-check
+                     :data {:class nil}}
+                    %)
+                (vals (:refused observation))))
+    (is (= :universe-not-admitted (:kind refusal)))
+    (is (= :locators (:missing refusal)))
+    (is (= wants (set (:tokens-without-checkable-locator refusal))))
+    (is (empty? (:problems result))
+        "the unobserved universe cannot reach candidate construction")
     (doseq [[_ receipt] (get-in loaded [:interpretations target :receipts])]
       (is (re-matches #"[0-9a-f]{40}" (get-in receipt [:source :sha])))
       (is (re-matches #"[0-9a-f]{64}" (get-in receipt [:source :sha256]))))
-    (doseq [[bad expected] [[(assoc-in loaded [:wants target] []) :want-not-declared]
-                            [(assoc-in loaded [:locators target] {}) :universe-not-admitted]]]
-      (is (not= loaded bad))
-      (is (= expected (get-in (assemble bad) [:refusals 0 :kind]))))
+    (let [without-wants (assoc-in loaded [:wants target] [])
+          wrong-token :not-in-declared-universe
+          wrong-universe (assoc-in loaded [:universes target wrong-token] false)
+          substituted (checks/observe
+                       {:change-authored-and-bound {:class :C7}})]
+      (is (= :want-not-declared
+             (get-in (assemble without-wants) [:refusals 0 :kind])))
+      (is (some #{wrong-token}
+                (get-in (assemble wrong-universe)
+                        [:refusals 0 :tokens-without-checkable-locator])))
+      (is (= {:status :missing :kind :no-mechanical-check
+              :data {:class :C7}}
+             (get-in substituted [:refused :change-authored-and-bound]))
+          "an unsupported substituted check stays refused"))
     (println "EOI-DECLARATION-OBSERVATIONS" (pr-str observation))))
 
 (deftest reinterpretation-source-pin-is-enforced
