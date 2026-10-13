@@ -31,13 +31,18 @@
 (def mission-text (slurp mission-file))
 (def proposals (edn/read-string
                 (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 (def document :exit/h54d16050a9dc)
 (def instatiate :exit/h4ef5c183bc55)
 
 (defn- reply-for [id]
   (str "Here is my reading.\n\n```edn\n"
        (with-out-str (pp/pprint (merge {:schema wi/response-schema :pattern id
-                                        :receipt (get-in proposals [:interpretation-receipts id])}
+                                        :receipt (assoc
+                                                  (get-in proposals [:interpretation-receipts id])
+                                                  :blend-square blend-square)}
                                        (get-in proposals [:patterns id]))))
        "```\\n"))
 
