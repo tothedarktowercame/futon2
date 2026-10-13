@@ -36,7 +36,7 @@
   (set/difference cohort/outcome-kinds non-disposition-outcomes))
 
 (def named-zero-dispositions
-  "The seven named-zero obligations, derived from the gated authority at
+  "The named-zero obligations, derived from the gated authority at
    `futon2:src/futon2/aif/full_loop_cohort.clj:31-33` rather than retyped."
   (set/difference disposition-outcomes observed-dispositions))
 

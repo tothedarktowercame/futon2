@@ -17,7 +17,8 @@
 (deftest exact-distribution-contract
   (let [seed (tagged-seed)]
     (is (= seed (c/validate-distribution seed)))
-    (is (= 7 (count (filter zero? (vals (:mass seed)))))))
+    (is (= (set (map #(vector :organization %) ruled/named-zero-dispositions))
+           (set (for [[outcome mass] (:mass seed) :when (zero? mass)] outcome)))))
   (doseq [bad [{:support [[:organization :yes]] :mass {[:organization :yes] 0.9999999999999}}
                {:support [[:organization :yes] [:organization :yes]] :mass {[:organization :yes] 1}}
                {:support [[:organization :yes]] :mass {[:organization :no] 1}}]]
