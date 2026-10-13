@@ -10,7 +10,6 @@
             [futon2.aif.observation-label-store :as store]
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-reader-test :as population]
-            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.token-a-bmr :as token-a-bmr]
@@ -53,14 +52,15 @@
         (finally (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
 
 (defn- assembled []
-  (cp/assemble {:targets [fixture/tick-1-target]
-                :sources (locfix/locate-all fixture/tick-1-sources)}))
+  (#'fixture/assemble*
+   {:targets [fixture/tick-1-target]
+    :sources (locfix/locate-all fixture/tick-1-sources)}))
 
 (defn- opts [extra]
   (merge fixture/live-c-opts extra))
 
 (defn- decision [extra-opts]
-  (:decision (wm-cd/cascade-decision (assembled) (opts extra-opts))))
+  (:decision (#'fixture/decision (assembled) (opts extra-opts))))
 
 (defn- contract []
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -116,7 +116,7 @@
 (deftest without-a-store-the-lane-is-unmeasured
   ;; No configured store preserves the historical unmeasured default.
   (let [problem (get-in (assembled) [:problems 0 :cascade-problem])
-        lane (wm-cd/cascade-lane problem)
+        lane (wm-cd/cascade-lane problem {:through :R5})
         prov (get-in (first (:ranked lane)) [:certificate :rates-provenance])
         ma (:measured-a (decision {}))]
     (is (nil? (:stopped-at lane)) (pr-str (:refusal lane)))
