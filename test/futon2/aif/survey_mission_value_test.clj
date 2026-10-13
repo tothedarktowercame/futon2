@@ -28,7 +28,7 @@
   (testing "the one doc on this field that carries the carrier"
     (when (.exists (io/file ratchet-doc))
       (let [got (smv/map-questions-from-text (slurp ratchet-doc))]
-        (is (= 260 (:heading-line got))
+        (is (= 269 (:heading-line got))
             "the heading line C492 section 4c pointed at")
         (is (= 6 (count (:questions got))))
         (is (= [1 2 3 4 5 6] (mapv :ordinal (:questions got))))

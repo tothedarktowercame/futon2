@@ -1,0 +1,29 @@
+;; Exact controlled reading of the retained browser-replay interpretation.
+;; G is the named observable walkthrough; I1 is the recorded interaction and
+;; I2 the claimed search/open behaviour it is compared with. B preserves the
+;; shared walkthrough identity while retaining both sides of that comparison.
+{:schema :wm/three-halves-square-v1
+ :pattern :pattern-interpretation/reproduce-the-recorded-run
+ :source {:path "futon3/library/pattern-interpretation/reproduce-the-recorded-run.flexiarg"
+          :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+          :sha256 "4c2cb63aa7e3d7b984944ff9b4abbad843548802abfafaf843e338de01b50796"}
+ :interpretation-correspondence
+ {:reading "Record a manual LC1 browser run from a named initial state: enter a mission query, preserve the returned ordering and mission identifiers, open a ranked result, and capture the resulting mission surface. Compare those observed steps with the claimed search-and-open behaviour and attribute any mismatch to the interface claim or implementation."
+  :guard {:needs #{} :forbids #{:hole/h54d2f6cb14fa}}
+  :produces #{:hole/h54d2f6cb14fa}}
+ :objects
+ {:G {:text "One named browser walkthrough has one observable identity."
+      :source {:path "futon3/library/pattern-interpretation/reproduce-the-recorded-run.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "4c2cb63aa7e3d7b984944ff9b4abbad843548802abfafaf843e338de01b50796"}
+      :theory {:elems #{0} :names {0 "named browser walkthrough"} :axioms #{}}}
+  :I1 {:text "The interaction records query, ordering, identifiers, and opened surface."
+       :source {:path "futon3/library/pattern-interpretation/reproduce-the-recorded-run.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "4c2cb63aa7e3d7b984944ff9b4abbad843548802abfafaf843e338de01b50796"}
+       :theory {:elems #{10 11} :names {10 "named browser walkthrough" 11 "recorded interaction"} :axioms #{}}}
+  :I2 {:text "The claimed search-and-open behaviour is independently named."
+       :source {:path "futon3/library/pattern-interpretation/reproduce-the-recorded-run.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "4c2cb63aa7e3d7b984944ff9b4abbad843548802abfafaf843e338de01b50796"}
+       :theory {:elems #{20 21} :names {20 "named browser walkthrough" 21 "claimed interface behaviour"} :axioms #{}}}
+  :B {:text "The comparison shares the walkthrough without erasing either record or claim."
+      :source {:path "futon3/library/pattern-interpretation/reproduce-the-recorded-run.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "4c2cb63aa7e3d7b984944ff9b4abbad843548802abfafaf843e338de01b50796"}
+      :theory {:elems #{30 31 32} :names {30 "shared browser walkthrough" 31 "interaction evidence" 32 "interface claim"} :axioms #{}}}}
+ :maps {:a1 #{[0 10]} :a2 #{[0 20]}
+        :b1 #{[10 30] [11 31]} :b2 #{[20 30] [21 32]}}
+ :auxiliary {:b1 false :b2 false}}
