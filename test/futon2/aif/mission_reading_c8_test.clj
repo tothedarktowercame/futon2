@@ -106,7 +106,9 @@
           (is (= [] (get-in after [:source :unlocated])))
           (is (= (set (keys published)) (set (get-in after [:source :machine-located]))))
           (is (every? false? (map #(get (:universe after) %) (:wants after))))
-          (is (= :no-entry (get-in (oc/check-registered-run (first (vals published))) [:evidence :reason]))))))
+          (is (= :no-local-record
+                 (get-in (oc/check-registered-run (first (vals published)))
+                         [:evidence :reason]))))))
     (testing "a run registered at current content: the published locator still reads false"
       (binding [oc/*registry-entry* (registry {new-id new-entry})]
         (let [after (flight/click-wants f {})]
@@ -159,7 +161,7 @@
         f (f11-flight s)
         {run-id :entry-id run-entry :entry} @gate-run
         asked (atom [])]
-    (testing "no run for the command: the locator validates, reads false :no-entry, and is published"
+    (testing "no run for the command: the locator validates, reads false :no-local-record, and is published"
       (binding [oc/*registry-latest* (fn [_ loc] (swap! asked conj loc) :absent)
                 oc/*registry-entry* (registry {})]
         (let [read ((fr/read-fn {:store s :answer-fn (answer-with gate-reply)}) f {})
@@ -170,7 +172,9 @@
           (is (every? #(= {:class :C8 :repo "futon2" :command gate} %) (vals published)))
           (is (every? false? (map #(get (:universe after) %) (:wants after))))
           (is (some #(= {:command gate} %) @asked) "asked by command, not by namespace")
-          (is (= :no-entry (get-in (oc/check-registered-run (first (vals published))) [:evidence :reason]))))))
+          (is (= :no-local-record
+                 (get-in (oc/check-registered-run (first (vals published)))
+                         [:evidence :reason]))))))
     (testing "the gate's run registered at current content: the SAME published locator reads true"
       (binding [oc/*registry-latest* (fn [_ loc] (if (= {:command gate} loc) {:entry-id run-id :resolved-by :command-lookup} :absent))
                 oc/*registry-entry* (registry {run-id run-entry})]
