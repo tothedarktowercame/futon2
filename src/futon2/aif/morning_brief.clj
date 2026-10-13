@@ -7,11 +7,14 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
 (def lifecycle-schema :wm/morning-brief-lifecycle-v1)

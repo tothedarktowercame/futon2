@@ -15,9 +15,12 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.lane-futility :as futility]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.rollout :as rollout])
   (:import [java.util.concurrent TimeUnit]))
+
+(load-identity/register! *ns* *file*)
 
 (def ^:private py "/home/joe/code/futon3a/.venv/bin/python")
 (def ^:private script "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_serve.py")

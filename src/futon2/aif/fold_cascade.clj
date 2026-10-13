@@ -6,7 +6,10 @@
   (:require [clojure.java.io :as io]
             [futon2.aif.fold-eval :as evaluation]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.observation-checks :as observation]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- source-witness [receipt]
   (let [{:keys [path sha256]} (:source receipt)]

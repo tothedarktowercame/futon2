@@ -1,6 +1,9 @@
 (ns futon2.aif.run-participants
   "Assigned run roles, observed by the runner; not evidence of agent invocation."
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (def roles [:author :configured-reviewer :reviewer-of-record :repair-reviewer
             :issuing-caller])

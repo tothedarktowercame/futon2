@@ -6,8 +6,11 @@
             [clojure.string :as str]
             [futon2.aif.observation-checks :as observation]
             [futon2.aif.repair-discharge-evidence :as evidence]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.repair-obligation :as repair])
   (:import [java.nio.file Files StandardOpenOption]))
+
+(load-identity/register! *ns* *file*)
 
 (def directory "holes/labs/wm-contract/discharges")
 (defn receipt-path [id] (str directory "/" (evidence/safe-id! id) ".edn"))

@@ -1,8 +1,11 @@
 (ns futon2.aif.limb-evidence
   "Pure validation of pre-close limb evidence records and coverage bundles."
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import (java.security MessageDigest)
            (java.time Instant)))
+
+(load-identity/register! *ns* *file*)
 
 (def limb-receipt-schema :wm/limb-receipt-v1)
 (def standing-decision-schema :wm/target-standing-decision-v1)

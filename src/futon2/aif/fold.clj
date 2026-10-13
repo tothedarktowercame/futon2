@@ -29,7 +29,10 @@
 
    `cascade` = the pattern halo condensed around the mission's (have→want) meme;
    `circumstance` = the mission/sorry context the construction must fit. HOW each
-   is obtained (query / embedding / store) is solution-side.")
+   is obtained (query / embedding / store) is solution-side."
+  (:require [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (defn valid-fold-output?
   "True iff M satisfies the fold contract: a map carrying `:wiring`, a `:coverage-score-delta`

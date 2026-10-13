@@ -32,10 +32,13 @@
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.preferences :as pref]
             [futon2.aif.substrate :as substrate])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
+
+(load-identity/register! *ns* *file*)
 
 ;; 33 open sorries share this templated :if — the boilerplate the audit found
 ;; (143 open → 110 clean). Kept identical to c_vector.bb/BOILERPLATE-IF.

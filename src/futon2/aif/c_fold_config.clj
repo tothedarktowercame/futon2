@@ -3,8 +3,11 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.disposition-risk :as risk]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.ruled-outcome-c :as ruled])
   (:import [java.security MessageDigest]))
+
+(load-identity/register! *ns* *file*)
 
 (defn sha256 [text]
   (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256")

@@ -20,9 +20,12 @@
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.task-requisition :as task-requisition])
   (:import (java.io File)))
+
+(load-identity/register! *ns* *file*)
 
 (def default-code-root
   "The scan root the registry reads mission documents under. Public because a

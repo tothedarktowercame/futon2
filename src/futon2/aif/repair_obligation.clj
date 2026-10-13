@@ -12,12 +12,15 @@
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.finding-ticket :as finding-ticket])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
            [java.nio.file Files StandardOpenOption LinkOption OpenOption]
            [java.time Instant]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
 

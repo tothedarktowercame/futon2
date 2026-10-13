@@ -20,7 +20,10 @@
    Alternative ΔG evaluations (all target the same `:coverage-score-delta` port, to compare
    later) live in `fold-eval`. See E-close-the-loop §6b."
   (:require [meme.fold :as mf]
-            [futon2.aif.fold-eval :as fe]))
+            [futon2.aif.fold-eval :as fe]
+            [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-want-signature "MissionState -> {Wiring, PolicyHoles}")
 

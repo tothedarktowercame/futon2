@@ -10,12 +10,15 @@
             [clojure.string :as str]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
-            [futon2.aif.fold :as fold])
+            [futon2.aif.fold :as fold]
+            [futon2.aif.load-identity :as load-identity])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
            [java.nio.file Files Path StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-preregistration
   "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn")

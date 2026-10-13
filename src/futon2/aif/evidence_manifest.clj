@@ -1,9 +1,12 @@
 (ns futon2.aif.evidence-manifest
   "Pure construction and validation of the close-evidence manifest v1."
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import (java.nio.file Paths)
            (java.security MessageDigest)
            (java.time Instant)))
+
+(load-identity/register! *ns* *file*)
 
 (def manifest-schema :wm/close-evidence-manifest-v1)
 

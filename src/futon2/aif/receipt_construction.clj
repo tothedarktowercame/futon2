@@ -15,9 +15,12 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.shadow-cascade-g :as shadow])
   (:import [java.nio.file Files]
            [java.time Instant]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- need! [ok reason data]
   (when-not ok (throw (ex-info "Receipted construction refused"

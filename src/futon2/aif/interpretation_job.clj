@@ -7,10 +7,13 @@
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as request]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.fact-measurement :as measurement])
   (:import [java.nio.file Files StandardOpenOption]
            [java.time Instant]
            [java.util Base64 UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- refuse! [kind data]
   (throw (ex-info "Interpretation job refused" (assoc data :interpretation/refusal kind))))

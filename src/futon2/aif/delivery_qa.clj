@@ -5,7 +5,10 @@
    the human gate from enactment to delivered-work review. Writes are accepted
    only through the Arxana Field Desk API on port 7070."
   (:require [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.morning-brief :as morning-brief]))
+
+(load-identity/register! *ns* *file*)
 
 (def endpoint-path "/api/alpha/morning-brief/addendum")
 (def decision-evidence-id "6e6f56a1-b9d7-4f83-928f-3a211ef890a0")

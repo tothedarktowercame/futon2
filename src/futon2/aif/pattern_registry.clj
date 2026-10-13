@@ -18,9 +18,12 @@
             [clojure.string :as str]
             [clojure.walk :as walk]
             [futon2.aif.action-proposer :as ap]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.forward-model :as fm])
   (:import (java.security MessageDigest)
            (java.time LocalDate ZoneId)))
+
+(load-identity/register! *ns* *file*)
 
 (defn configured-evidence-base
   "Resolve the Evidence Landscape authority used for retrieval receipts.

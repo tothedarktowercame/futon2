@@ -3,10 +3,13 @@
    Store refusals are close results, not exceptions that reopen execution close.
    No dismissal capability is exposed here."
   (:require [clojure.java.io :as io]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.repair-discharge-evidence :as evidence]
             [futon2.aif.repair-discharge-receipt :as receipt]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-evaluators :as evaluators]))
+
+(load-identity/register! *ns* *file*)
 
 (def supported-requirements
   #{:distinct-repair-commit :independent-review :grounded-repair

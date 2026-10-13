@@ -14,6 +14,7 @@
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
@@ -22,6 +23,8 @@
            [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
 (def default-action :record)

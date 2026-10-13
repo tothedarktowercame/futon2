@@ -9,7 +9,10 @@
    than one candidate: a verdict that could not come out the other way
    (stop-the-line finding, STOP-THE-LINE-2026-09-20.md)."
   (:require [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.conditioned-trajectory :as trajectory]))
+            [futon2.aif.conditioned-trajectory :as trajectory]
+            [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (def terms [:A :C :D :E :F :Q])
 

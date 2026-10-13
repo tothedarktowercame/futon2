@@ -3,10 +3,13 @@
    and independently reviewed; merely registering code grants no authority."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.repair-discharge-evidence :as evidence])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]
            [java.util.concurrent TimeUnit]))
+
+(load-identity/register! *ns* *file*)
 
 (def driver-path "src/futon2/aif/repair_history_replay.clj")
 (def launcher-path "src/futon2/aif/repair_evaluators.clj")

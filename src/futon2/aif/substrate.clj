@@ -7,8 +7,11 @@
   read-only compatibility inputs during migration."
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import [java.net URLEncoder]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-timeout-ms 60000)
 

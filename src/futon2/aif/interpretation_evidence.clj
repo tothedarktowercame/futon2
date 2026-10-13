@@ -3,10 +3,13 @@
   Validation establishes source correspondence, not semantic truth or model adequacy."
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
-            [futon2.aif.close-retention :as retention])
+            [futon2.aif.close-retention :as retention]
+            [futon2.aif.load-identity :as load-identity])
   (:import [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (def failure-schema :wm/interpretation-failure-v1)
 (def schemas #{:wm/interpretation-failure-v1 :wm/interpreted-pattern-set-v1 :wm/mission-fact-observation-v1})

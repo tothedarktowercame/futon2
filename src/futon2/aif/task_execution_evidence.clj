@@ -1,7 +1,10 @@
 (ns futon2.aif.task-execution-evidence
   "Shared artifact and review checks used by the runner and D task verifier."
-  (:require [clojure.java.shell :as shell] [clojure.string :as str])
+  (:require [clojure.java.shell :as shell] [clojure.string :as str]
+            [futon2.aif.load-identity :as load-identity])
   (:import (java.time Instant)))
+
+(load-identity/register! *ns* *file*)
 
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (defn- git [repo & args] (apply shell/sh "git" "-C" repo args))
@@ -277,4 +280,3 @@
                   (= :approve verdict)
                   (:executed? gate)
                   (:passed? gate))}))
-

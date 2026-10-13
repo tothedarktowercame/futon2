@@ -7,8 +7,11 @@
   ordinary author/reviewer approval is insufficient. Unqualified evidence is unknown."
   (:require [clojure.edn :as edn] [clojure.java.io :as io] [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.find-receipt :as finder])
   (:import [java.nio.file Files StandardOpenOption]))
+
+(load-identity/register! *ns* *file*)
 
 (def plan-file "interpretation-reader-plan.edn")
 (def forbidden #{:outcome :grounded? :prior :selected-prior :controller-score :predicted-effects :effect :interpretations})
