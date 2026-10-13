@@ -37,9 +37,10 @@
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is]]
             [clojure.walk :as walk]
-            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.locator-fixtures :as locfix]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.report.cascade-decision-test :as fixture]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def target :wm-tick-001-observation-crash)
@@ -103,15 +104,31 @@
    :context-of (fn [_] :tick-1)})
 
 (defn- assembled* []
-  (cp/assemble {:targets [target]
-                :sources (locfix/locate-all
-                          {:universes {target universe}
-                           :interpretations {target interpretations}
-                           :wants {target want}
-                           :candidates {target candidates}
-                           :horizon-steps 3
-                           :beta-by-context {:tick-1 {:beta 1}}
-                           :context-of (fn [_] :tick-1)})}))
+  (#'fixture/assemble*
+   {:targets [target]
+    :sources (locfix/locate-all sources)}))
+
+(defn- admitted-history [assembled]
+  {:steps
+   (mapv (fn [i candidate]
+           {:step {:status :present
+                   :policy-key (prefix-admission/candidate-key candidate)
+                   :occurrence {:flight "wm01-bindings-fixture"
+                                :click (str "run-" i)}
+                   :s-prev {:value {#{} 1}}
+                   :q {#{} 1}
+                   :f 0.0}
+            :path "wm01-bindings-test"
+            :sha256 "fixture"})
+         (range)
+         (mapcat (fn [{:keys [target constructed-candidates]}]
+                   (cons {:id :C0 :target target :precedence []}
+                         (map (fn [{:keys [candidate-id precedence]}]
+                                {:id candidate-id :target target
+                                 :precedence precedence})
+                              constructed-candidates)))
+                 (:problems assembled)))
+   :read [] :unread []})
 
 (def ^:private machine-model-vocabulary
   "machine-model's specialized reader vocabulary. None of it may appear in
@@ -129,9 +146,10 @@
 
 (deftest state-action-outcome-bindings-of-the-selected-occurrence
   (let [a (assembled*)
-        problem (-> a :problems first :cascade-problem)
+        problem (assoc (-> a :problems first :cascade-problem)
+                       :target (-> a :problems first :target))
         _ (is (some? problem) "assembled problem exists for the target")
-        lane (wm-cd/cascade-lane problem)
+        lane (wm-cd/cascade-lane problem {:conditioning-steps (admitted-history a)})
         ;; the lane either completes or returns a typed refusal; for this
         ;; fixture it must COMPLETE (the decision is the occurrence).
         _ (is (nil? (:stopped-at lane)) (str "lane stopped: " (:refusal lane)))
@@ -193,11 +211,12 @@
             ;; relation, and an unresolved relation gets no scalar G
             ;; (:class-unknown-no-scalar-g) -- so the fixture injects a
             ;; relation row for its own target, as cascade_decision_test does.
-            :focus-inputs (assoc (focus-receipt/read-inputs)
+           :focus-inputs (assoc (focus-receipt/read-inputs)
                                  :relations [{:target target :facet "WM"
                                               :relation "focus"
                                               :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
-                                              :effective-from "2026-01-01T00:00:00Z"}])})
+                                              :effective-from "2026-01-01T00:00:00Z"}])
+            :conditioning-steps (admitted-history (assembled*))})
         decision (:decision r)]
     (is (map? decision))
     (is (not= :abstained (:status decision)) "the occurrence yields a decision")
