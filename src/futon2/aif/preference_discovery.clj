@@ -4,6 +4,7 @@
   operation."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]))
 
 (defn- refuse! [reason data]
@@ -66,9 +67,18 @@
 
 (def landscape-kinds #{:ruling :choice :mission :design-pattern-promotion})
 
+(defn- source-text! [root {:keys [path revision]}]
+  (if revision
+    (let [{:keys [exit out err]} (sh/sh "git" "-C" root "show" (str revision ":" path))]
+      (when-not (zero? exit)
+        (refuse! :landscape-revision-unavailable
+                 {:path path :revision revision :error err}))
+      out)
+    (slurp (io/file root path))))
+
 (defn- pinned-text! [root {:keys [path lines verbatim] :as source}]
   (let [[start end] lines
-        all-lines (str/split-lines (slurp (io/file root path)))
+        all-lines (str/split-lines (source-text! root source))
         actual (str/join "\n" (subvec (vec all-lines) (dec start) end))]
     (when-not (= verbatim actual)
       (refuse! :landscape-pin-drift

@@ -6,6 +6,10 @@
 
 (def fixture-path "test/fixtures/f10-rulings-fragment.edn")
 
+(defn- refusal-reason [f]
+  (try (f) nil
+       (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))
+
 (deftest t6-extractor-provenance-and-decision-sheet
   (let [seed-before ruled/seeded-c
         fragment (edn/read-string (slurp fixture-path))
@@ -45,3 +49,10 @@
     (is (= ruled/seeded-c (:seeded-c result)))
     (is (= "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md:276-278"
            (get-in component [:provenance 0 :citation])))))
+
+(deftest landscape-refuses-an-unavailable-revision
+  (let [spec (edn/read-string
+              (slurp "holes/labs/wm-contract/preference-landscape.edn"))
+        poisoned (assoc-in spec [:sources 0 :revision] (apply str (repeat 40 "0")))]
+    (is (= :landscape-revision-unavailable
+           (refusal-reason #(discovery/extract-landscape "." poisoned ruled/seeded-c))))))
