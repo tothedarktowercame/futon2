@@ -90,9 +90,24 @@
              :construction-receipt (:construction-receipt singleton) :interpretation-receipts nil
              :shown [":apparatus/one-authority-per-question"] :semilattice [] :policy-holes []}
         c (runner/construct-selected-action {:action singleton}) r (:cascade-structure c)
+        explicit-nil (runner/construct-selected-action
+                      {:action singleton :enacted-steps nil})
+        recorded-steps {:apparatus/one-authority-per-question
+                        {:pattern/id :apparatus/one-authority-per-question}}
+        enacted (runner/construct-selected-action
+                 {:action singleton :enacted-steps recorded-steps})
         identity-bytes #(pr-str (prior/policy-key (habit/policy-view %)))]
     (is (= (dissoc old :semilattice) (dissoc c :cascade-structure)))
     (is (= singleton (:selected-action c)))
+    (is (not (contains? (:selected-action c) :enacted-steps))
+        "an entry without decision evidence must not manufacture explicit nil")
+    (is (and (contains? (:selected-action explicit-nil) :enacted-steps)
+             (nil? (get-in explicit-nil [:selected-action :enacted-steps])))
+        "an explicitly recorded nil remains distinguishable from absence")
+    (is (= recorded-steps (get-in enacted [:selected-action :enacted-steps]))
+        "actual enacted-step evidence survives construction unchanged")
+    (is (= r (:cascade-structure explicit-nil) (:cascade-structure enacted))
+        "decision evidence is retained but cannot feed back into structural measurement")
     (is (= (identity-bytes singleton) (identity-bytes (assoc singleton :cascade-structure r))
            (identity-bytes (:selected-action c))))
     (is (= r (edn/read-string (pr-str r))))

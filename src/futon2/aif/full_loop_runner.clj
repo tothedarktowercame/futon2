@@ -2024,7 +2024,12 @@
         ;; the chain-head fallback -- the fix was inert in production while
         ;; its tests passed on hand-assembled actions. selected-entry now
         ;; carries :enacted-steps and this reads it from there.
-        action (assoc (:action entry) :enacted-steps (:enacted-steps entry))]
+        action (cond-> (:action entry)
+                 ;; Absence means this caller supplied no decision evidence.
+                 ;; Preserve it rather than manufacturing explicit nil; an
+                 ;; explicitly present nil remains evidence in its own right.
+                 (contains? entry :enacted-steps)
+                 (assoc :enacted-steps (:enacted-steps entry)))]
     {:mission (:target action)
      :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
      :construction-kind :selected-cascade
