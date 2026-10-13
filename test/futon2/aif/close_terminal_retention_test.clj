@@ -15,43 +15,44 @@
 (deftest production-shaped-close-retains-the-typed-failure-once
   (isolated
    (fn []
+     ;; This test's original September harness predated the mechanical reviewer
+     ;; falsifier (907c151b3).  Use the controlled token fixture's real mission
+     ;; bytes, Git object, selected-want identity, and commit-bound D-task
+     ;; observations so the only failure introduced before terminal retention
+     ;; is the deliberately malformed first close below.
      (let [{:keys [root] :as c} (#'fixture/retention-cohort "typed-close-")
-           base (#'fixture/retention-success-opts c)
            findings (atom []) calls (atom 0) refusal (atom nil)
            close cohort/close-attempt!
-           opts (assoc base
-                       :tripwire/cohort-history [] :tripwire/a-matrix-events []
-                       :tripwire/grounding-witnesses []
-                       :repair-system-record-fn
-                       (fn [finding]
-                         (let [r (assoc finding :repair/id "isolated-close-finding")]
-                           (swap! findings conj r) r))
-                       :author-artifact-observer-fn
-                       (fn [repo before job]
-                         (assoc (fixture/synthetic-artifact-binding repo before job) :repo repo))
-                       :poll-fn (fn [o id]
-                                  (cond-> ((:poll-fn base) o id)
-                                    (= id "retention-author") (assoc :feature-card fixture/feature-card-claim)))
-                       :ground-fn (fn [& _] {:before {:id "before"} :after {:id "after"}
-                                             :resolved? true :dial-moved? true
-                                             :implementation-id "after" :discharge-id "discharge"}))]
+           record-finding (fn [finding]
+                            (let [r (assoc finding :repair/id "isolated-close-finding")]
+                              (swap! findings conj r) r))]
        (try
-         (let [result (with-redefs [cohort/close-attempt!
-                                   (fn [& args]
-                                     (let [n (swap! calls inc)
-                                           args (if (= 1 n)
-                                                  (update (vec args) (dec (count args))
-                                                          update :judgment dissoc :duration-ms :resource-use)
-                                                  args)]
-                                       (try (apply close args)
-                                            (catch clojure.lang.ExceptionInfo e
-                                              (reset! refusal (ex-data e)) (throw e)))))]
-                        (binding [runner/*wm-status-reporting?* false]
-                          (runner/run-opportunity! opts)))
+         (let [result (:result
+                       (with-redefs [cohort/close-attempt!
+                                     (fn [& args]
+                                       (let [n (swap! calls inc)
+                                             args (if (= 1 n)
+                                                    (update (vec args) (dec (count args))
+                                                            update :judgment dissoc
+                                                            :duration-ms :resource-use)
+                                                    args)]
+                                         (try (apply close args)
+                                              (catch clojure.lang.ExceptionInfo e
+                                                (reset! refusal (ex-data e)) (throw e)))))]
+                         (#'fixture/run-token-feature-card-attempt
+                          c (#'fixture/token-loop-exercised-decision)
+                          {:runner-options
+                           {:tripwire/cohort-history []
+                            :tripwire/a-matrix-events []
+                            :tripwire/grounding-witnesses []
+                            :repair-system-record-fn record-finding}})))
                events (cohort/attempt-events (io/file root "test-cohort-exhaustion" "attempt-001"))
                closed (filter #(= :closed (:checkpoint/type %)) events)]
            (is (= historical-errors (:errors @refusal)))
            (is (= :invalid-close-outcome (:failure-kind @refusal)))
+           (is (= :verified
+                  (get-in result [:checkpoints :build :judgment :validation
+                                  :reviewer-falsifier-verification :status])))
            (is (= 2 @calls) "one rejected malformed write, one accepted terminal")
            (is (= 1 (count closed)))
            (is (= 1 (count @findings)))
@@ -60,7 +61,7 @@
            (is (= historical-errors (get-in (first closed) [:payload :judgment :refusal-data :errors])))
            (is (not-any? #(= :initialization (:failure-stage %)) @findings)))
          (finally
-           (doseq [dir [root (:repair-root opts)] f (reverse (file-seq (io/file dir)))]
+           (doseq [f (reverse (file-seq (io/file root)))]
              (io/delete-file f true))))))))
 
 (deftest initialization-preserves-typed-close-data-but-contains-unknown-failure
