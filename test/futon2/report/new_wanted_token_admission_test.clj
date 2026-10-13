@@ -5,8 +5,19 @@
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+
+(defn- with-square [problem]
+  (update problem :interpretation-receipts
+          #(update-vals % (fn [receipt]
+                            (assoc receipt :blend-square blend-square)))))
+
 (defn fixture []
-  (edn/read-string (slurp (io/resource "fixtures/new-wanted-token/1789964661.edn"))))
+  (update (edn/read-string
+           (slurp (io/resource "fixtures/new-wanted-token/1789964661.edn")))
+          :problems #(mapv with-square %)))
 
 (defn admit [p] (#'wm-cd/admit-cascade-problem p))
 
@@ -29,16 +40,17 @@
     (is (= 2 (get-in drop [:evidence :horizon])))))
 
 (defn problem [horizon]
-  {:target "M-test"
-   :constructed-candidates [{:candidate-id :C1 :precedence [:finish :prepare]
-                             :construction-receipt {:source :test}}]
-   :interpretation-receipts {:finish {:source :test} :prepare {:source :test}}
-   :cascade-problem
-   {:facts {:ready true :bridge false :done false} :want [:done] :beta 1
-    :horizon-steps horizon
-    :interpretations
-    {:prepare {:guard {:needs #{:ready} :forbids #{:bridge}} :produces #{:bridge}}
-     :finish {:guard {:needs #{:bridge} :forbids #{:done}} :produces #{:done}}}}})
+  (with-square
+    {:target "M-test"
+     :constructed-candidates [{:candidate-id :C1 :precedence [:finish :prepare]
+                               :construction-receipt {:source :test}}]
+     :interpretation-receipts {:finish {:source :test} :prepare {:source :test}}
+     :cascade-problem
+     {:facts {:ready true :bridge false :done false} :want [:done] :beta 1
+      :horizon-steps horizon
+      :interpretations
+      {:prepare {:guard {:needs #{:ready} :forbids #{:bridge}} :produces #{:bridge}}
+       :finish {:guard {:needs #{:bridge} :forbids #{:done}} :produces #{:done}}}}}))
 
 (deftest horizon-is-a-real-boundary
   (let [short (admit (problem 1)) long (admit (problem 2))]
