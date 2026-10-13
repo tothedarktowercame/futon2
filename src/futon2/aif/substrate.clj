@@ -14,6 +14,8 @@
 (load-identity/register! *ns* *file*)
 
 (def default-timeout-ms 60000)
+(def default-busy-retries 10)
+(def default-busy-retry-ms 1000)
 
 (defn- strip-api-suffix [s]
   (some-> s (str/replace #"/+$" "")
@@ -60,20 +62,34 @@
                                               (System/getenv "FUTON1B_PENHOLDER")
                                               (System/getenv "FUTON1A_PENHOLDER")
                                               "api")))
-        response (http/request {:method method
-                                :uri url
-                                :headers headers
-                                :body (when body (pr-str body))
-                                :timeout (or (:substrate-timeout-ms opts)
-                                             default-timeout-ms)
-                                :throw false})
-        parsed (try (parse-body (:body response))
-                    (catch Throwable _ (:body response)))]
-    (if (<= 200 (:status response) 299)
-      parsed
-      (throw (ex-info "authoritative substrate request failed"
-                      {:method method :url url :status (:status response)
-                       :body parsed})))))
+        retries (long (or (:substrate-busy-retries opts) default-busy-retries))
+        sleep! (or (:substrate-sleep-fn opts) #(Thread/sleep %))]
+    (loop [attempt 0]
+      (let [response (http/request {:method method
+                                    :uri url
+                                    :headers headers
+                                    :body (when body (pr-str body))
+                                    :timeout (or (:substrate-timeout-ms opts)
+                                                 default-timeout-ms)
+                                    :throw false})
+            parsed (try (parse-body (:body response))
+                        (catch Throwable _ (:body response)))
+            busy? (and (= 503 (:status response))
+                       (= :expensive-read-busy (:error parsed)))]
+        (cond
+          (<= 200 (:status response) 299) parsed
+
+          (and busy? (< attempt retries))
+          (let [retry-ms (long (or (some-> (:retry-after-seconds parsed) (* 1000))
+                                   (:substrate-busy-retry-ms opts)
+                                   default-busy-retry-ms))]
+            (sleep! retry-ms)
+            (recur (inc attempt)))
+
+          :else
+          (throw (ex-info "authoritative substrate request failed"
+                          {:method method :url url :status (:status response)
+                           :body parsed :attempts (inc attempt)})))))))
 
 (defn inhabitation
   "Return input bindings with authoritative :inhabited? results, in order."

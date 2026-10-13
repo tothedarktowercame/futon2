@@ -54,6 +54,41 @@
                   "&limit=1000&include-total=false&ordered=false")
              @seen)))))
 
+(deftest expensive-read-busy-is-retried-as-advertised
+  (let [calls (atom 0)
+        sleeps (atom [])]
+    (with-redefs [http/request
+                  (fn [_]
+                    (if (= 1 (swap! calls inc))
+                      {:status 503
+                       :body (pr-str {:ok false :error :expensive-read-busy
+                                      :retry-after-seconds 2})}
+                      {:status 200
+                       :body (pr-str {:entities [{:entity/id "mission"}]})}))]
+      (is (= [{:entity/id "mission"}]
+             (substrate/entities-by-type
+              "mission" {:substrate-url "http://store.test:7073"
+                         :substrate-sleep-fn #(swap! sleeps conj %)})))
+      (is (= 2 @calls))
+      (is (= [2000] @sleeps)))))
+
+(deftest non-busy-service-failure-is-not-retried
+  (let [calls (atom 0)]
+    (with-redefs [http/request
+                  (fn [_]
+                    (swap! calls inc)
+                    {:status 503 :body (pr-str {:error :not-ready})})]
+      (try
+        (substrate/entities-by-type
+         "mission" {:substrate-url "http://store.test:7073"
+                    :substrate-sleep-fn (fn [_]
+                                          (throw (AssertionError. "must not sleep")))})
+        (is false "permanent 503 must throw")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= 503 (:status (ex-data e))))
+          (is (= 1 (:attempts (ex-data e))))))
+      (is (= 1 @calls)))))
+
 (deftest unsupported-transaction-operations-fail-loudly
   (testing "there is no backend-specific evict escape hatch"
     (is (thrown-with-msg?
