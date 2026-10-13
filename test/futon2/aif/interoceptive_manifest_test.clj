@@ -122,17 +122,27 @@
                   :repair-class :machine-failure :failure-stage :test
                   :outcome :failed :error "commissioned"
                   :failure-data {:trip/id "trip-api"}})
+        review-evidence {:job-id "review-api" :reviewer :reviewer
+                         :state "done" :verdict :approve :valid? true
+                         :execution {:executed true :tool-events 1
+                                     :command-events 1}}
+        artifact-binding {:commit "abc" :fresh-author? true
+                          :descendant? true :in-author-window? true
+                          :corroborates? true :disagreement? false}
+        implementation-input
+        {:attempt-id "implementation-api" :commit "abc"
+         :reviewer :reviewer :review-job "review-api"
+         :review-evidence review-evidence
+         :artifact-binding artifact-binding
+         :repair/discharge-context
+         {:schema :wm/repair-discharge-context-v1
+          :phase :implementation
+          :repair/id (:repair/id finding)
+          :close {:attempt/id "implementation-api"}
+          :review-job {:job-id "review-api"}}
+         :witness {:resolved? true :dial-moved? true}}
         implementation (repair/record-implementation!
-                        (.getPath repairs) finding
-                        {:attempt-id "implementation-api" :commit "abc"
-                         :reviewer :reviewer :review-job "review-api"
-                         :repair/discharge-context
-                         {:schema :wm/repair-discharge-context-v1
-                          :phase :implementation
-                          :repair/id (:repair/id finding)
-                          :close {:attempt/id "implementation-api"}
-                          :review-job {:job-id "review-api"}}
-                         :witness {:resolved? true :dial-moved? true}})
+                        (.getPath repairs) finding implementation-input)
         resolution (repair/resolve!
                     (.getPath repairs) (assoc finding :repair/implementation implementation)
                     {:attempt-id "validation-api" :commit "abc"
@@ -146,6 +156,22 @@
                      :witness {:resolved? true :dial-moved? true}
                      :validation {:production-shaped? true}})]
     (is (.isFile (java.io.File. trip)))
+    (is (false? (#'repair/grounded-review-evidence?
+                 finding (dissoc implementation-input :review-evidence)))
+        "self-asserted booleans are not review evidence")
+    (is (false? (#'repair/grounded-review-evidence?
+                 finding (assoc-in implementation-input
+                                   [:review-evidence :reviewer] :author)))
+        "self-authored review identity is not substituted for the reviewer")
+    (is (false? (#'repair/grounded-review-evidence?
+                 finding (assoc-in implementation-input
+                                   [:review-evidence :job-id] "copied-review")))
+        "copied review evidence does not bind the dispatched review job")
+    (is (false? (#'repair/grounded-review-evidence?
+                 finding (assoc-in implementation-input
+                                   [:artifact-binding :commit] "other")))
+        "artifact identity mismatch refuses")
+    (is (#'repair/grounded-review-evidence? finding implementation-input))
     (is (= :open (:repair/status finding)))
     (is (= :awaiting-validation (:repair/status implementation)))
     (is (= :resolved (:repair/status resolution)))
