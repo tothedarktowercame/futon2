@@ -56,7 +56,12 @@
                           :pins (:pins result)}))
             support (get-in model [:outcome :support])
             c-row (fn [favored]
-                    (let [small (/ 1 22) large 1/2]
+                    ;; Half the preference mass belongs to the favored outcome;
+                    ;; the other half is exactly uniform over the authoritative
+                    ;; remainder.  The original 1/22 encoded an obsolete
+                    ;; 12-outcome support and became 12/11 when support grew.
+                    (let [small (/ 1 (* 2 (dec (count support))))
+                          large 1/2]
                       (assoc (zipmap support (repeat small)) favored large)))
             qa (provider state action-a) qb (provider state action-b)
             oa (first (for [[o m] (:mass qa) :when (= 1 m)] o))
@@ -68,6 +73,10 @@
             aa (score action-a (c-record oa)) ab (score action-b (c-record oa))
             ba (score action-a (c-record ob)) bb (score action-b (c-record ob))]
         (is (= (:mass qa) (:mass (provider state action-a))))
+        (is (= 1 (reduce + (vals (:mass (c-record oa))))))
+        (is (= 1/2 (get-in (c-record oa) [:mass oa])))
+        (is (every? #{1/26}
+                    (vals (dissoc (:mass (c-record oa)) oa))))
         (is (< (:controller-score aa) (:controller-score ab)))
         (is (> (:controller-score ba) (:controller-score bb)))
         (is (= qa (get-in aa [:machine-q :q])))

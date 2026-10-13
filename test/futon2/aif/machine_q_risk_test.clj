@@ -33,6 +33,13 @@
     (is (= :missing-pins (refusal #(risk/risk (dissoc base-q :pins) base-c))))
     (is (= :missing-pins (refusal #(risk/risk base-q (dissoc base-c :provenance)))))
     (is (= :unnormalized-input (refusal #(risk/risk (assoc base-q :mass (row 1/2 1/4)) base-c))))
+    (is (= :invalid-mass
+           (refusal #(risk/risk (assoc base-q :mass (row Double/POSITIVE_INFINITY 0))
+                                base-c))))
+    (is (= :invalid-mass
+           (refusal #(risk/risk (assoc base-q :mass (row -1/2 3/2)) base-c))))
+    (is (= :unnormalized-input
+           (refusal #(risk/risk (assoc base-q :mass (row 0 0)) base-c))))
     (testing "the ruled seven-zero shape is never smoothed"
       (let [seven-zero (assoc (row 1/2 1/2) (support 0) 0 (support 1) 1)]
         (is (= :infinite-risk (refusal #(risk/risk base-q (c seven-zero)))))))))
