@@ -232,7 +232,10 @@
   (let [seen (atom [])
         cert manifest/horizon-g-sparse-cert
         lane (with-redefs [manifest/horizon-g-sparse-cert
-                           (fn [m] (swap! seen conj m) (cert m))]
+                           (fn [m]
+                             (let [result (cert m)]
+                               (swap! seen conj {:model m :result result})
+                               result))]
                (wm-cd/cascade-lane (lane-problem)))]
     {:lane lane :models @seen}))
 
@@ -248,8 +251,11 @@
 
 (deftest row5-a-measured-checkable-rate-moves-g
   (let [{:keys [lane models]} (captured-models)
-        by-id (zipmap (map :cascade-id (:ranked lane)) (map :G-efe (:ranked lane)))
-        c1-model (first (filter #(= [:p/appears] (mapv :id ((:precedence-fn %)))) models))
+        c1-record (first (filter #(= [:p/appears]
+                                     (mapv :id ((:precedence-fn (:model %)))))
+                                 models))
+        c1-model (:model c1-record)
+        lane-g (get-in c1-record [:result :g])
         sourced (rates/sourced-rates measuring-labels {:C4 16} nil (c4-locators) prod-contract)
         zero (rates/sourced-rates nil nil nil (c4-locators) prod-contract)
         g-zero (manifest/horizon-g-sparse (assoc c1-model :rates (:rates zero)))
@@ -260,7 +266,10 @@
     (testing "the captured model is the lane's own scoring of :C1 at production rates"
       (is (some? c1-model))
       (is (= (:rates zero) (:rates c1-model)))
-      (is (close? g-zero (get by-id :C1))))
+      (is (close? g-zero lane-g))
+      (is (= :free-energy-not-supplied
+             (get-in lane [:refusal :data :refusal :kind]))
+          "G is computed before the intentionally F-less fixture refuses selection"))
     (testing "against H-A-CONSUMER-D E3's committed values (futon2 0358d4c5)"
       ;; measured: E3's design-(a) value for :C1, reproduced
       (is (close? 3.7324454306095607 g-measured))
