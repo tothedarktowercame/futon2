@@ -764,7 +764,7 @@
 
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
-           reviewer-events cure-card cure-summary cure-commit build-cure-retries
+           reviewer-events reviewer-result cure-card cure-summary cure-commit build-cure-retries
            cure-observed-commit
            initial-author-job operator-actions delivery-qa-fn
            judgement-transform-fn dispatch-observer runner-options]
@@ -854,6 +854,7 @@
                             :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
                                                  "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")
                             :request (get @dispatch-requests job-id)}
+                     reviewer-result (assoc :result reviewer-result)
                      reviewer-events (assoc :events reviewer-events))))
                :resolve-build-fn
                (fn [_]
@@ -890,7 +891,7 @@
   ([cohort decision]
    (run-token-feature-card-attempt cohort decision {}))
   ([cohort decision {:keys [mission-observer dispatch-fn ground-fn
-                            dispatch-observer
+                            dispatch-observer reviewer-result
                             judgement-transform-fn author-summary author-result
                             artifacts? reviewer-execution reviewer-events grounded?
                             cure-card cure-artifact-ref initial-author-card
@@ -931,6 +932,7 @@
                           :cure-observed-commit (when cure-card sha)
                           :reviewer-execution reviewer-execution
                           :reviewer-events reviewer-events
+                          :reviewer-result reviewer-result
                           :dispatch-observer dispatch-observer
                           :judgement-transform-fn judgement-transform-fn
                           :initial-author-job
@@ -943,7 +945,9 @@
                                                          (or initial-artifact-ref sha)))
                                 :execution successful-execution}
                                 author-result
-                                (assoc :result author-result)
+                                (assoc :result (if (fn? author-result)
+                                                 (author-result sha)
+                                                 author-result))
                                 (or initial-author-card
                                     (and (nil? author-summary) (nil? cure-card)))
                                 (assoc :feature-card
