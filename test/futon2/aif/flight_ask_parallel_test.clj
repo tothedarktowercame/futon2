@@ -35,6 +35,9 @@
 
 (def mission-text (slurp "test/fixtures/mission-criteria/M-futon-seams@futon3c-20959e4f.md"))
 (def proposals (edn/read-string (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 (def argue :exit/hac75428b9c97)
 (def document :exit/h54d16050a9dc)
 (def by-want {document :writing-coherence/meet-the-reader-where-they-are
@@ -43,7 +46,9 @@
 (defn- reply-for [id]
   (str "Here is my reading.\n\n```edn\n"
        (with-out-str (pp/pprint (merge {:schema wi/response-schema :pattern id
-                                        :receipt (get-in proposals [:interpretation-receipts id])}
+                                        :receipt (assoc
+                                                  (get-in proposals [:interpretation-receipts id])
+                                                  :blend-square blend-square)}
                                        (get-in proposals [:patterns id]))))
        "```\n"))
 

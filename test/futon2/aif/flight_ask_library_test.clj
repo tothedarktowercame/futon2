@@ -30,6 +30,9 @@
 (def mission-file "test/fixtures/mission-criteria/M-futon-seams@futon3c-20959e4f.md")
 (def mission-text (slurp mission-file))
 (def proposals (edn/read-string (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
+(def blend-square
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 (def document :exit/h54d16050a9dc)
 (def argue :exit/hac75428b9c97)
 (def by-want {document :writing-coherence/meet-the-reader-where-they-are
@@ -38,7 +41,9 @@
 (defn- reply-for [id & [extra]]
   (str "```edn\n"
        (with-out-str (pp/pprint (merge {:schema wi/response-schema :pattern id
-                                        :receipt (get-in proposals [:interpretation-receipts id])}
+                                        :receipt (assoc
+                                                  (get-in proposals [:interpretation-receipts id])
+                                                  :blend-square blend-square)}
                                        (get-in proposals [:patterns id])
                                        extra)))
        "```\n"))
@@ -98,16 +103,22 @@
 (deftest the-ask-steps-publication-is-in-the-clicks-view
   (let [store (str (temp-dir "store"))
         seen (atom nil)
+        published (atom nil)
         f (flight/run! (seams-flight)
                        {:ask-fn (ask-fn store (fn [issued] {:seat "s" :job-id "j" :state "done"
                                                             :text (reply-for (by-want (get-in issued [:want :token])))}))
-                        :click-fn (fn [_] (reset! seen (set (keys (:patterns (wi/read-published store "M-futon-seams")))))
+                        :click-fn (fn [_]
+                                    (reset! published (wi/read-published store "M-futon-seams"))
+                                    (reset! seen (set (keys (:patterns @published))))
                                     {:click-id "c"})
                         :observe-fn (fn [_ _] {})
                         :sources-fn (constantly tick-sources)
                         :max-clicks 1})]
     (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis} @seen)
         "published before the click posted")
+    (is (every? #(= blend-square (:blend-square %))
+                (vals (:receipts @published)))
+        "the durable publication retains the exact admission evidence")
     (is (not= :awaiting-answer (:status f)))))
 
 (deftest a-pending-answer-is-a-pending-need-not-no-progress
