@@ -11,16 +11,22 @@
 
 (deftest grounded-construction-checkpoint-retains-structural-receipt
   ;; Owner runs on canonical main: source authority is intentionally not stubbed.
-  (let [a fixture/selected-action
-        {:keys [result]}
-        (#'fixture/run-feature-card-attempt {:author-card fixture/feature-card-claim})
-        c (get-in result [:checkpoints :construction :judgment :cascade])]
-      (is (= :grounded-change (:outcome result)))
-      (is (= (structure/receipt a) (:cascade-structure c)))
-      ;; The passing fixture uses bare pattern IDs, not interpreted guards.
-      ;; Retain the honest typed absence without changing its grounded outcome.
-      (is (= :unavailable (get-in c [:cascade-structure :status])))
-      (is (= :unsupported-pattern-interpretation
-             (get-in c [:cascade-structure :findings 0 :kind])))
-      (is (not (contains? c :semilattice)))
-      (is (= c (edn/read-string (pr-str c))))))
+  (let [{:keys [result]}
+        (#'fixture/run-token-feature-card-attempt
+         (#'fixture/retention-cohort "cascade-structure-runner")
+         (#'fixture/token-loop-exercised-decision))
+        c (get-in result [:checkpoints :construction :judgment :cascade])
+        a (:selected-action c)
+        receipt (:cascade-structure c)
+        other-action (assoc a :target "M-not-the-selected-population")]
+    (is (= :grounded-progress (:outcome result))
+        "the current authoritative fixture records a real grounded increment")
+    (is (= (structure/receipt a) receipt))
+    (is (= :computed (:status receipt)))
+    (is (= :singleton (:shape receipt)))
+    (is (not (contains? c :semilattice)))
+    (is (= c (edn/read-string (pr-str c))))
+    (is (not= (:input-sha256 receipt)
+              (:input-sha256 (structure/receipt other-action)))
+        "a receipt from another target population cannot satisfy exact identity")
+    (is (not= receipt (structure/receipt other-action)))))
