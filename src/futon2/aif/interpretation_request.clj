@@ -104,19 +104,26 @@
       ;; refused :interpretation/source-changed for bytes that matched
       ;; (2026-09-30 flake: flight-ask-test saw :request-refused needs;
       ;; in production that silently loses an ask).
-      (let [tmp (io/file dir (str "." (.getName dest) "." (System/nanoTime) ".tmp"))]
+      ;; `nanoTime` is not a unique-name allocator: concurrent callers can
+      ;; observe the same clock tick, share one temp path, and one move then
+      ;; removes the other's source.  Let the filesystem create the temp name
+      ;; exclusively before any bytes are written.
+      (let [tmp-path (Files/createTempFile (.toPath (io/file dir))
+                                           (str "." (.getName dest) ".")
+                                           ".tmp"
+                                           (make-array java.nio.file.attribute.FileAttribute 0))]
         (try
-          (Files/write (.toPath tmp) bs (into-array StandardOpenOption
-                                                    [StandardOpenOption/CREATE_NEW
-                                                     StandardOpenOption/WRITE]))
-          (Files/move (.toPath tmp) (.toPath dest)
+          (Files/write tmp-path bs (into-array StandardOpenOption
+                                               [StandardOpenOption/TRUNCATE_EXISTING
+                                                StandardOpenOption/WRITE]))
+          (Files/move tmp-path (.toPath dest)
                       (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
           (catch java.nio.file.FileAlreadyExistsException _
             ;; another request moved the same snapshot in first
             (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
                    :interpretation/source-changed {:path path}))
           (finally
-            (Files/deleteIfExists (.toPath tmp))))))
+            (Files/deleteIfExists tmp-path)))))
     {:requested-path (.getAbsolutePath file) :canonical-path path :byte-count (alength bs)
      :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision version}
      :bytes bs :snapshot (.getAbsolutePath dest)}))
