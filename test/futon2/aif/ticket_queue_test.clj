@@ -138,13 +138,18 @@
                                                      :effective-from "2026-01-01T00:00:00Z"}])
                               :live-c {:sources {} :sources-now {}
                                        :derived {:want #{} :weights {} :lam 1 :entries [] :gaps [] :refusals nil :signature (live-c/signature-of {})}}})
-            result (wm-cd/cascade-decision assembled opts)
-            d (:decision result)]
+            ;; The queue contract consumes already-admitted ranked actions.
+            ;; Exercise it directly so unrelated square/Prefix-F admission
+            ;; gates cannot mask whether an ordinary refusal blocks the
+            ;; surviving candidate.
+            survivor [(ranked "M-main" :p/do 0)]
+            d (policy/select-action-cascades
+               survivor
+               (assoc opts :ticket-queue-refusals (:refusals assembled)))]
         (is (= "M-main" (get-in d [:action :target])))
         (is (= :universe-not-admitted (get-in assembled [:refusals 0 :kind])))
         (is (= :not-admitted (get-in (receipt d) [:entries 0 :status])))
         (is (= :universe-not-admitted (get-in (receipt d) [:entries 0 :refusals 0 :kind])))
-        (is (some #(= "T-missing" (:target %)) (:dropped-candidates result)))
         (let [all-refused (problems/assemble {:targets ["T-missing"] :sources {:horizon-steps 2}})
               r (wm-cd/cascade-decision all-refused opts)]
           (is (= :abstained (get-in r [:decision :status])))
@@ -167,6 +172,11 @@
               ;; fold as E's source), pinned in selection-reads-fold-test
               (update :selection-law dissoc :enacted-steps :e-source)
               (update-in [:selection-certificate :candidates] #(mapv (fn [c] (dissoc c :f-consumed)) %))
+              ;; Exact scorer consumption joined after the frozen September
+              ;; record.  It is independently covered by consumed-record
+              ;; tests; projecting it keeps this test about queue neutrality.
+              (update-in [:selection-certificate :scoring]
+                         #(update-vals % (fn [entry] (dissoc entry :g))))
               (update :selection-certificate dissoc :law-applied))))
 
 (deftest no-entries-preserves-frozen-decision-bytes

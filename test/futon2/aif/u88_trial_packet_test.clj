@@ -4,7 +4,6 @@
    :advance-mission action targeting M-u88-contextual-preferences validates.
    Validation remains non-dispatching and returns launch permission false."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.mission-registry :as missions]
@@ -35,31 +34,33 @@
     (catch clojure.lang.ExceptionInfo e
       (:reason (ex-data e)))))
 
-(deftest production-open-mission-validates-the-exact-packet-and-action
+(deftest frozen-packet-refuses-after-its-open-mission-source-advances
   (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))
-        mission (get open-by-id mission-id)
-        envelope (task-pin/validate (read-text task-pin-path)
-                                    (stub-ports (fn [id] (get open-by-id id))))]
+        mission (get open-by-id mission-id)]
     (is (= :open (:status-class mission)))
-    (is (:valid? envelope))
-    (is (= "9cf34ffcff3a78bbe2b60e5c8cbfa674887ff3c34de5a41c49ea57315b63b717"
-           (get-in envelope [:task-pin :sha256])))
-    (is (= mission-path (-> envelope :source-pins first :path)))
-    (is (= mission-id (get-in envelope [:task-pin :selected-task-id])))
-    (is (= {:type :advance-mission :target mission-id}
-           (get-in envelope [:mission-action :action])))
-    (is (= "zai-2" (get-in envelope [:casting :author])))
-    (is (= false (:permitted? (:launch envelope))))))
+    ;; The RUN4 packet is historical authority, not a floating pointer.  The
+    ;; mission acquired later acceptance evidence, so production validation
+    ;; must preserve the old pin and refuse rather than silently rebind it.
+    (is (= :stale-source
+           (refusal-reason #(task-pin/validate
+                             (read-text task-pin-path)
+                             (stub-ports (fn [id] (get open-by-id id)))))))))
 
 (deftest production-pin-refuses-any-nonexact-action-target
   (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))
-        text (read-text task-pin-path)
-        aliased (str/replace text
-                  ":target \"M-u88-contextual-preferences\""
-                  ":target \"futon2-d/mission/u88-contextual-preferences\"")]
+        pin (edn/read-string (read-text task-pin-path))
+        ;; Isolate action identity from the independently tested historical
+        ;; source drift by rebinding this adversary's declarations to the
+        ;; exact bytes its validation call will read.
+        current (update pin :sources
+                        #(mapv (fn [source]
+                                 (assoc source :sha256
+                                        (digest/sha256 (read-text (:path source))))) %))
+        aliased (assoc-in current [:mapping :action :target]
+                          "futon2-d/mission/u88-contextual-preferences")]
     (is (= :action-mission-mismatch
            (refusal-reason #(task-pin/validate
-                             aliased
+                             (pr-str aliased)
                              (stub-ports (fn [id] (get open-by-id id)))))))))
 
 (deftest series-pin-consistency-fixture-scope
