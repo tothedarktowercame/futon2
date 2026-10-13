@@ -106,9 +106,11 @@
                             (example/validate-domain! (update domain :mapping dissoc label)))
           (str "omitting canonical outcome must refuse: " label)))))
 
-(deftest reference-1789964661-negative-updater-grounded-pair
-  ;; Read-only retained-evidence replay: real Git/C4/identity checks, retained
-  ;; independent job snapshots as the job port. No fresh Agency or store writes.
+(deftest reference-1789964661-remains-historical-without-enactment-correspondence
+  ;; Read-only retained-evidence replay. This pre-correspondence record says
+  ;; explicitly that the selected-candidate -> minted-action join was not
+  ;; established. Retain its grounded disposition, but do not admit its token
+  ;; observation by retrospectively comparing equal action payloads.
   (let [record (edn/read-string (slurp "/home/joe/code/futon3c/data/wm-d-task-enactment/action-a5d2326d-a73a-447c-8bc7-7f77c8bbc187.edn"))
         run (edn/read-string (slurp "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn"))
         dispatch (:dispatch record) occurrence (:occurrence dispatch)
@@ -130,8 +132,10 @@
                                  :outcome :grounded-change :domain (example/declaration)} expected jobs)
         updater (first (filter #(= want/updater (:token %)) (:tokens result)))]
     (is (= :recorded (:status result)) (pr-str result))
-    (is (= :admitted (get-in result [:observation-projection :status])))
-    (is (= [1 false] ((juxt :predicted :observed) updater)))
+    (is (= :not-established (get-in record [:dispatch :candidate-to-minted-join])))
+    (is (= :refused (get-in result [:observation-projection :status])))
+    (is (= [1 {:status :missing :kind :selected-enacted-action-mismatch}]
+           ((juxt :predicted :observed) updater)))
     (is (= :grounded-change (get-in result [:disposition :value])))))
 
 
