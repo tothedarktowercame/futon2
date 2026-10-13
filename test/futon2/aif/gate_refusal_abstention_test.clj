@@ -11,10 +11,12 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
+            [futon2.aif.full-loop-runtime]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.test-support.runner-fixture :as fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.locator-fixtures :as loc]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-decision-test :as cfix]
@@ -27,6 +29,35 @@
 
 (def live (edn/read-string
            (slurp (io/resource "fixtures/gate-refusal/fifth-flight-failure-data.edn"))))
+
+(def ^:private critical-source-namespaces
+  ['futon2.aif.full-loop-runtime
+   'futon2.report.war-machine
+   'futon2.aif.meta-live-outer-selector
+   'futon2.aif.meta-pipeline-selector])
+
+(deftest critical-source-registration-is-exact-and-substitution-refuses
+  ;; The runner-source gate was added after this refusal fixture. Loading the
+  ;; production composition root above registers the exact sources the test's
+  ;; real run consumes; no test registration is synthesized.
+  (doseq [n critical-source-namespaces]
+    (let [entry (get @load-identity/registry n)
+          canonical (get load-identity/required-sources n)]
+      (is (= :captured (:status entry)) (str n " is registered by its producer"))
+      (is (= (load-identity/sha256 (load-identity/read-bytes canonical))
+             (:sha256 entry))
+          (str n " is bound to the canonical bytes"))))
+  (let [poisoned 'futon2.aif.meta-pipeline-selector
+        registry (assoc-in @load-identity/registry [poisoned :sha256]
+                           (load-identity/sha256 (.getBytes "substituted" "UTF-8")))
+        failure (try
+                  (with-redefs [load-identity/registry (atom registry)]
+                    (#'runner/refuse-on-runner-source-drift!))
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :stale-outer-selection-composition (:failure-kind failure)))
+    (is (= [poisoned] (keys (:critical-namespaces failure))))
+    (is (= :stale (get-in failure [:critical-namespaces poisoned :status])))))
 
 (defn- run [judge-throws & [flight]]
   (let [findings (atom [])
