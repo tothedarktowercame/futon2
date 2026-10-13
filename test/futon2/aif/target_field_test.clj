@@ -33,6 +33,9 @@
 
 (def autoclock (slurp "test/fixtures/target-field/M-autoclock-in@futon3c-7466251c.md"))
 (def f11 (slurp "test/fixtures/mission-criteria/M-f11-find-production-successor@futon2-22fa0da9.md"))
+(def blend-square
+  (clojure.edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
 
 (def shaped
   (str/join "\n" ["# Mission: M-shaped" "" "**Status:** MAP (2026-09-25)" ""
@@ -64,7 +67,10 @@
     (spit (io/file store "M-shaped.edn")
           (pr-str {:schema :wm/machine-interpretations-v1 :target "M-shaped"
                    :patterns {:survey/list-callers {:guard {:needs #{} :forbids #{}} :produces #{map-want}}}
-                   :receipts {:survey/list-callers {:request-id "request-test" :by :test}}}))
+                   :receipts {:survey/list-callers
+                              {:request-id "request-test" :by :test
+                               :want map-want
+                               :blend-square blend-square}}}))
     {:root root :store store :map-want map-want}))
 
 (defn- field [{:keys [root store]}]
@@ -204,7 +210,10 @@
           (pr-str {:schema :wm/machine-interpretations-v1 :target "M-shaped"
                    :patterns {:survey/other {:guard {:needs #{} :forbids #{}}
                                              :produces #{(want-of "M-shaped" shaped "IDENTIFY")}}}
-                   :receipts {:survey/other {:request-id "request-test" :by :test}}}))
+                   :receipts {:survey/other
+                              {:request-id "request-test" :by :test
+                               :want (:map-want l)
+                               :blend-square blend-square}}}))
     (let [fld (field l)
           e (get (by-target (:feasible fld)) "M-shaped")]
       (is (= :ask-interpretation (:next-step e)) (pr-str e))
