@@ -19,6 +19,8 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-rates :as rates]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.prefix-free-energy-sut-test :as prefix-fixture]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
 (def contract
@@ -33,7 +35,8 @@
 ;; one want, one pattern whose guard needs nothing and produces the want
 ;; token, one candidate precedence, T=2, β=1.
 (defn- problem [& {:as overrides}]
-  (let [base {:facts {:t/observed true :t/other false}
+  (let [base {:target "wire5-sourced-rates-fixture"
+              :facts {:t/observed true :t/other false}
               :want [:t/wanted]
               :interpretations
               {:p/appears
@@ -73,9 +76,41 @@
 (defn- g-of
   "First ranked candidate's G for the problem, running the REAL cascade-lane."
   [p]
-  (let [lane (wm-cd/cascade-lane p)]
+  (let [candidates (mapv #(assoc % :target (:target p))
+                         (:candidates (wm-cd/cascade-lane p {:through :R5})))
+        context (prefix-fixture/authority-fixture)
+        pairs (mapv (comp prefix-fixture/prior prefix-admission/candidate-key)
+                    candidates)
+        opts {:prefix-f-commissioning
+              {:bootstrap-priors
+               (into {} (map (fn [candidate [prior _]]
+                               [(prefix-admission/candidate-key candidate) prior])
+                             candidates pairs))
+               :scorer-authority "scorer"
+               :context (reduce (fn [ctx [_ job]]
+                                  (assoc-in ctx [:authority-jobs (:job-id job)] job))
+                                context pairs)}}
+        lane (wm-cd/cascade-lane p opts)]
     (is (nil? (:stopped-at lane)) (str "lane stopped: " (:refusal lane)))
     (mapv (juxt :cascade-id :G-efe) (:ranked lane))))
+
+(defn- admitted-lane [p]
+  ;; Reuse g-of's authorized cold-start route, then return the same lane for
+  ;; provenance inspection.
+  (let [candidates (mapv #(assoc % :target (:target p))
+                         (:candidates (wm-cd/cascade-lane p {:through :R5})))
+        context (prefix-fixture/authority-fixture)
+        pairs (mapv (comp prefix-fixture/prior prefix-admission/candidate-key) candidates)]
+    (wm-cd/cascade-lane
+     p {:prefix-f-commissioning
+        {:bootstrap-priors
+         (into {} (map (fn [candidate [prior _]]
+                         [(prefix-admission/candidate-key candidate) prior])
+                       candidates pairs))
+         :scorer-authority "scorer"
+         :context (reduce (fn [ctx [_ job]]
+                            (assoc-in ctx [:authority-jobs (:job-id job)] job))
+                          context pairs)}})))
 
 (deftest lane-sources-rates-when-the-problem-carries-locators
   (let [before (g-of (problem))                                 ; no :locators
@@ -85,7 +120,7 @@
       ;; sourced kernel IS the exact-zero kernel, so G cannot move yet.
       (is (= before after)
           "sourced checkable kernel = identity kernel numerically"))
-    (let [sourced (wm-cd/cascade-lane (problem :locators (locators problem-tokens :C3)))
+    (let [sourced (admitted-lane (problem :locators (locators problem-tokens :C3)))
           scoring (:cascade-scoring (meta (:ranked sourced)))
           cert (get-in (first (:ranked sourced)) [:certificate :rates-provenance])]
       (testing "family meta says SOURCED, with the producer named"
@@ -96,7 +131,7 @@
       (testing "every candidate's certificate distinguishes sourced from default"
         (is (= :futon2.aif.observation-rates/sourced-rates (:source cert)))
         (is (every? #(= :checkable %) (vals (:basis cert)))))
-      (let [default (wm-cd/cascade-lane (problem))
+      (let [default (admitted-lane (problem))
             default-cert (get-in (first (:ranked default))
                                  [:certificate :rates-provenance])]
         (is (= {:status :identity-default} default-cert)

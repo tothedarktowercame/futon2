@@ -42,7 +42,7 @@
        (write-witness! repo "I assert that the event happened")
        (is (= :invalid-witness (get-in (observe locator) [:refused :probe :kind])))))))
 
-(deftest declaration-and-contract-admit-exact-presence-channel
+(deftest declaration-retains-unproduced-presence-channel-as-unknown
   (let [d (scales/declaration)
         loaded (sources/load-declared)
         contract (edn/read-string (slurp (io/resource "wm/observation-contract.edn")))
@@ -52,18 +52,17 @@
                     :sources (assoc (sources/with-context-fn loaded) :horizon-steps 2)})
         sourced (rates/sourced-rates nil nil nil (:locators d) contract)]
     (is (= 3 (count (:want d))))
-    (is (every? false? (map :observed (vals (:results observed)))))
-    (is (empty? (:refused observed)))
-    (is (empty? (:refusals assembled)))
+    (is (empty? (:results observed)))
+    (is (= (set (:want d)) (set (keys (:refused observed)))))
+    (is (= :universe-not-admitted (get-in assembled [:refusals 0 :kind])))
     (is (= :sourced (:status sourced)))
     (is (= #{:community} (set (map :owner (vals (:entries d))))))
     (is (every? #(= :not-consumed (:owner-status %)) (vals (:entries d))))
-    (is (every? #(= :C6 (:class %)) (vals (:locators d))))
-    (is (true? (get-in d [:locators :premise-refused-before-work :require-entry])))
-    (is (true? (get-in d [:locators :obligation-resolved-through-the-account :require-entry])))))
+    (is (empty? (:locators d))
+        "the phantom C6 witness locators were deliberately retired")))
 
 (deftest declared-scale-controls-still-hold
-  (let [d (scales/declaration)
+  (let [d (scales/admitted-declaration)
         two (scales/spec-from (assoc-in d [:lam :value] 2))]
     (is (= #{} (:zeroed two)))
     (is (> ((model/log-preference-fn two) (:want two))
