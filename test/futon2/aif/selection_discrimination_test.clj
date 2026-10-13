@@ -102,11 +102,13 @@
     (is (= #{:free-energy} (:decided-by a))))
   (let [entry {:action :a :controller-score 0
                :f-prefix {:policy :a :status :not-supplied :f nil}}
-        d (select [entry {:action :b :controller-score 2 :f 0}] {:beta 1} nil)
-        p (get-in d [:selection-law :policy-comparison])]
-    (is (= :not-supplied (get-in p [:winner :f-status])))
-    (is (nil? (get-in p [:winner :f])))
-    (is (= 0.0 (get-in p [:contributions :free-energy]))))
+        refusal (try
+                  (select [entry {:action :b :controller-score 2 :f 0}] {:beta 1} nil)
+                  nil
+                  (catch clojure.lang.ExceptionInfo e
+                    (get-in (ex-data e) [:refusal :kind])))]
+    (is (= :free-energy-not-supplied refusal)
+        "an admitted policy population cannot silently replace missing F with zero"))
   (is (= :invalid-free-energy
          (try (select [{:action :a :controller-score 0 :f ##Inf}] {:beta 1} nil)
               (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind]))))))

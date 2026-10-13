@@ -2,15 +2,12 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.cascade-habit-store :as habit]
-            [futon2.aif.cascade-problems :as problems]
             [futon2.aif.declaration-reads-test :as runner-fixture]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
-            [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.cascade-habit-read-test :as store-fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.report.cascade-habit-read-test :as store-fixture]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -19,10 +16,10 @@
    (fn [dir]
      (let [reads (atom [])]
        (binding [receipts/*habit-reads* reads]
-         (let [assembled (problems/assemble
+         (let [assembled (#'fixture/assemble*
                           {:targets [fixture/tick-1-target]
-                           :sources (locators/locate-all fixture/tick-1-sources)})
-               decision (:decision (wm-cd/select-and-record-cascade!
+                           :sources fixture/tick-1-sources})
+               decision (:decision (#'fixture/decision
                                     assembled (assoc fixture/live-c-opts :cascade-habit-path path)))
                saved (#'runner/persist-run-record!
                       {:run-record-dir (str dir) :habit-reads/state reads

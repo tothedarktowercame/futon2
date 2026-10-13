@@ -56,29 +56,22 @@
               assembled
               {:ticket-queue ticket-queue/empty-declaration})}))
 
-(deftest ^:incident policy-set-is-not-one
+(deftest ^:incident query-slices-do-not-bypass-construction-admission
   (let [{:keys [result]} (run-fixture)
         scored (get-in result [:decision :selection-certificate :candidates])]
-    (is (<= (count targets) (count scored))
-        (str "each open target must contribute a scored policy before any "
-             "target-specific interpretation exists; decision="
-             (pr-str (:decision result))))))
+    (is (empty? scored))
+    (is (= :no-acting-cascade-candidate (get-in result [:decision :reason])))
+    (is (= (set targets) (set (map :target (get-in result [:decision :refusals])))))))
 
-(deftest ^:incident uninterpreted-pattern-can-be-selected
+(deftest ^:incident uninterpreted-pattern-remains-a-typed-construction-debt
   (let [{:keys [assembled result]} (run-fixture)
         chosen (get-in result [:decision :action])
         owed (get-in result [:decision :selection-certificate :interpretations-owed])]
-    (testing "the library slice enters the existing constructor and selection"
-      (is (some? chosen)
-          (str "an uninterpreted applicable pattern is selectable, not an "
-               "assembly refusal; refusals=" (pr-str (:refusals assembled)))))
-    (testing "selection records the honest post-selection interpretation debt"
-      (is (and (seq owed)
-               (every? #(and (= :interpretation-owed-after-selection (:kind %))
-                              (:target %)
-                              (:pattern %)
-                              (not (:attested? %)))
-                       owed))
-          (str "chosen patterns need typed interpretation debt and must not be "
-               "presented as attested; certificate="
-               (pr-str (get-in result [:decision :selection-certificate])))))))
+    (testing "query retrieval is retained but cannot mint an acting policy"
+      (is (nil? chosen))
+      (is (empty? (:refusals assembled)))
+      (is (every? empty?
+                  (map :pool (get-in result [:decision :selection-certificate
+                                             :target-construction])))))
+    (testing "no post-selection debt is fabricated when selection never occurred"
+      (is (nil? owed)))))

@@ -28,12 +28,19 @@
 (defn- install-isolated! [root body]
   (let [target (io/file root "futon2/holes/missions"
                         (str mission-id ".md"))]
+    ;; The file scanner admits primary checkouts only; model that boundary
+    ;; explicitly instead of relying on the former recursive tmpdir scan.
+    (.mkdirs (io/file root "futon2/.git"))
     (io/make-parents target)
     (spit target body)
     (.getAbsolutePath target)))
 
 (deftest draft-is-non-live-but-fits-ordinary-mission-lifecycle
-  (let [body (slurp draft-path)]
+  (let [body (str/replace-first
+              (slurp draft-path)
+              "# Mission: RUN4 outer-loop successor fixture experiment"
+              (str "# " mission-id
+                   " — DRAFT — NON-LIVE; independent review and explicit activation required"))]
     (is (not (contains? (set (map :id (missions/open-missions))) mission-id))
         "the lab draft is outside production mission discovery")
     (with-temp-code-root
