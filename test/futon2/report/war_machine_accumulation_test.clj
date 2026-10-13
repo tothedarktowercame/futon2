@@ -193,10 +193,18 @@
       ((:judge-fn (runtime/production-defaults
                    {:trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}})) 3)
       (is (= 3 (first @captured)))
-      (is (= {:accumulation-entity-id entity :accumulation-initialization init
-              :trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}
-              :trace? false :include-advisory-lanes? false :defer-render? true}
-             (second @captured))))))
+      (let [forwarded (second @captured)]
+        (is (= {:accumulation-entity-id entity :accumulation-initialization init
+                :trace-dir (str *dir*) :run-id "flight" :flight {:target "m"}
+                :trace? false :include-advisory-lanes? false :defer-render? true
+                :outer-task-policy :meta}
+               (select-keys forwarded
+                            [:accumulation-entity-id :accumulation-initialization
+                             :trace-dir :run-id :flight :trace?
+                             :include-advisory-lanes? :defer-render?
+                             :outer-task-policy])))
+        (is (ifn? (:outer-task-selection-fn forwarded))
+            "the production default forwards the commissioned META selector")))))
 
 (deftest unreadable-configuration-is-a-recorded-absence
   (with-redefs-fn {#'wm/accumulation-config-path (str (io/file *dir* "no-config.edn"))}
