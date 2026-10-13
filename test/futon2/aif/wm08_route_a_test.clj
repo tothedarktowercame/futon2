@@ -52,21 +52,55 @@
   identity and the frozen index as the membership/index source."
   []
   (let [old (edn/read-string (slurp (str redo "interpreted-pattern-set.edn")))
+        retained-record (edn/read-string (slurp (str run-dir "REEXPRESSED-RECORD.edn")))
+        retained-sources-by-path (into {}
+                                       (map (juxt :path identity))
+                                       (:sources retained-record))
         genesis-patterns (set (map :id (:new-patterns old)))
         sources (atom {}) captured (atom {})
-        add! (fn [path*]
+        add! (fn add!
+               ([path*] (add! path* nil))
+               ([path* expected-sha]
                ;; :sources paths must be absolute (evidence schema
                ;; :path-not-absolute). The library paths already are; the two
                ;; in-repo captures are repo-relative, so absolutise here.
                (let [path (.getAbsolutePath (io/file path*))
-                     id path bs (Files/readAllBytes (.toPath (io/file path)))
-                     file (str (evidence/sha256 (bytes-of path)) ".source")]
+                     id path
+                     live-bytes (Files/readAllBytes (.toPath (io/file path)))
+                     file (str (evidence/sha256 (bytes-of path)) ".source")
+                     retained-source (get retained-sources-by-path path)
+                     expected-sha (or expected-sha (:sha256 retained-source))
+                     retained (io/file run-dir "companions"
+                                       (or (:file retained-source) file))
+                     bs (if (and expected-sha
+                                 (not= expected-sha (evidence/sha256 live-bytes))
+                                 (.exists retained))
+                          (Files/readAllBytes (.toPath retained))
+                          live-bytes)
+                     _ (when (and expected-sha
+                                  (not= expected-sha (evidence/sha256 bs)))
+                         (throw (ex-info "retained citation bytes do not match their pin"
+                                         {:path path :expected expected-sha
+                                          :observed (evidence/sha256 bs)})))]
                  (swap! sources assoc id {:id id :path path :file file
                                           :sha256 (evidence/sha256 bs)
                                           :revision "frozen-occurrence-cc231bf6"})
                  (swap! captured assoc file bs)
-                 id))
-        cite (fn [s] {:source (add! (:path s)) :lines (:lines s) :quote (:quote s)})
+                 id)))
+        cite (fn [s]
+               (let [id (add! (:path s) (:sha256 s))
+                     source (get @sources id)
+                     lines (vec (str/split-lines
+                                 (String. ^bytes (get @captured (:file source)) "UTF-8")))
+                     quote-lines (vec (str/split-lines (:quote s)))
+                     n (count quote-lines)
+                     start (some (fn [i]
+                                   (when (= quote-lines (subvec lines i (+ i n))) i))
+                                 (range (inc (- (count lines) n))))]
+                 (when-not start
+                   (throw (ex-info "citation quote not found in retained source"
+                                   {:path (:path s) :quote (:quote s)})))
+                 {:source id :lines [(inc start) (+ start n)] :quote (:quote s)}))
         mission-cite (cite (get-in old [:target :status-source]))
         norm (fn [x] (str/replace (str/trim x) #"\s+" " "))
         ;; Locating a clause's span used to scan every window of every length
@@ -78,7 +112,10 @@
         ;; that is not in the bytes refuses immediately.
         doc-of (memoize
                 (fn [path]
-                  (let [lines (vec (str/split-lines (slurp path)))
+                  (let [id (add! path)
+                        source (get @sources id)
+                        text (String. ^bytes (get @captured (:file source)) "UTF-8")
+                        lines (vec (str/split-lines text))
                         sb (StringBuilder.)
                         spans (reduce (fn [acc [i l]]
                                         (let [n (norm l)]
@@ -226,8 +263,10 @@
                       {:reason :record-invalid})))
     (.mkdirs companions)
     (doseq [[file bs] captured]
-      (Files/write (.toPath (io/file companions file)) bs
-                   (make-array java.nio.file.OpenOption 0)))
+      (let [destination (io/file companions file)]
+        (when-not (.exists destination)
+          (Files/write (.toPath destination) bs
+                       (make-array java.nio.file.OpenOption 0)))))
     (let [artifact (io/file run-dir "REEXPRESSED-RECORD.edn")]
       (when-not (.exists artifact)
         (Files/write (.toPath artifact) record-bytes (make-array java.nio.file.OpenOption 0)))

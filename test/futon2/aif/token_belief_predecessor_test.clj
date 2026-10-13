@@ -8,13 +8,12 @@
             [futon2.aif.token-belief-carry-test :as fixture]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.trace :as trace]
-            [futon2.report.cascade-decision-test :as cascade-fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.report.cascade-decision-test :as cascade-fixture]))
 
 (defn decision [previous prior]
   (with-redefs [habit/default-path fixture/absent-habit-path]
     (:decision
-     (wm-cd/cascade-decision
+     (#'cascade-fixture/decision
       (fixture/assembled)
       (assoc cascade-fixture/live-c-opts
              :cascade-habit-path fixture/absent-habit-path
