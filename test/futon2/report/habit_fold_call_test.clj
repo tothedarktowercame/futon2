@@ -20,7 +20,6 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.cascade-problems :as problems]
             [futon2.aif.enactment-habit :as eh]
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.mission-registry :as mr]
@@ -80,10 +79,11 @@
   ([ns store judge-opts]
    (let [opts (judge-selection-opts ns store judge-opts)
          reads (atom [])
-         assembled (problems/assemble {:targets [fixture/tick-1-target]
-                                       :sources (locators/locate-all fixture/tick-1-sources)})
+         assembled (#'fixture/assemble*
+                    {:targets [fixture/tick-1-target]
+                     :sources (locators/locate-all fixture/tick-1-sources)})
          d (binding [receipts/*habit-reads* reads]
-             (:decision ((deref #'wm-cd/select-and-record-cascade!)
+             (:decision (#'fixture/decision
                          assembled
                          (merge fixture/live-c-opts
                                 {:cascade-habit-path (str (io/file (tmp-dir) "absent.edn"))}
