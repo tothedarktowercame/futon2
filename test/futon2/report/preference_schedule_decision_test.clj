@@ -4,7 +4,6 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-model-manifest :as manifest]
-            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.live-c :as live-c]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -25,7 +24,8 @@
                   declaration
                   (assoc :preference-schedules {target (live-c/preference-schedule declaration)}
                          :preference-scales {target (live-c/preference-scales declaration)}))]
-    (cp/assemble {:targets [target] :sources (locfix/locate-all sources)})))
+    (#'fixture/assemble*
+     {:targets [target] :sources (locfix/locate-all sources)})))
 
 (defn- declared-source []
   (edn/read-string
