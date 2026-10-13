@@ -1,17 +1,25 @@
 {:quarantine/version 1
- :as-of "2026-08-31"
+ :as-of "2026-10-13"
  :diagnosis
  {:reason :prompt-not-reconstructable
-  :finding "Stored prose hashes and psi hashes match current inputs, and fold-prompt has not changed; these stored prompt digests did not bind the prompt reconstructible from their recorded fields."
+  :finding "Ten stored prompt digests never bound the prompt reconstructible from their recorded fields. The other eight exactly bound the legacy fold-prompt at futon2 86aef779^, but 86aef779 changed the live prompt to the enriched proof-output contract. Their prose and psi pins remain unchanged; they are now unreplayable by exact current-prompt lookup and must be quarantined rather than re-pinned."
   :disposition "Excluded from replay without deletion or digest refresh. An id, digest, or rejection-reason change invalidates the quarantine match and becomes a loud rejection again."}
  :entries
  [{:fold-turn/id "ft-aif-faithfulness-001" :prompt-sha256 "4cea144955e9d8d56ee3f64513f44b3cbe0e17fda91d05a753a69189cbd279ba" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-aif-head-004" :prompt-sha256 "4fc9ceac96a13b119e074c7f2fddb609b6e8367abbd6107d29b620f3db83e632" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-autoclock-in-001" :prompt-sha256 "5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-bayesian-structure-learning-003" :prompt-sha256 "523ca024a2fc8de4dd7447ad6bb4ad1ebc7dd0046906679a0b367a692c46fd99" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-bounded-in-flight-state-008" :prompt-sha256 "e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-canon-fingerprint-store-001" :prompt-sha256 "9217e5289eec1a8412fcea558e361ffc739e87e74dce9963119d9b437699b629" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-chipwitz-corps-001" :prompt-sha256 "62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-first-flights-007" :prompt-sha256 "a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-fold-ansatz-001" :prompt-sha256 "d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-futonzero-generative-011" :prompt-sha256 "3ce849372f4d382c3205a1a9fa701f11a607ea4217cc7b79d8b4982971483df3" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-learning-loop-010" :prompt-sha256 "279664f0030d06f005ce555b9769b677486481eaf41e1e791049a1cc379b3b29" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-legacy-sorry-cleanup-001" :prompt-sha256 "0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-live-geometric-stack-002" :prompt-sha256 "e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-operational-vocabulary-001" :prompt-sha256 "417331cdd971a24469b301bb522c271c49622147b0c74366b39d9f624f91fbd8" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-pattern-mining-011" :prompt-sha256 "c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-reachable-from-boot-001" :prompt-sha256 "9d227517968b4667e2ecf7138741c01dbbcb739db67fa0c9adc52a842257a94e" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-state-snapshot-witness-001" :prompt-sha256 "b426db580dd6ea2a17a177f3768beb36cd8662ff216ee99badc4e70e9110b820" :reason :prompt-not-reconstructable}
   {:fold-turn/id "ft-war-machine-pilot-001" :prompt-sha256 "acae14ae4cc84f5fe56d62f440ecc727d1d2e5d202e567b7a9f1ac8c29c3dff3" :reason :prompt-not-reconstructable}]}

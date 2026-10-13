@@ -6,7 +6,6 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
-            [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
             [futon2.aif.fold-llm :as fl])
   (:import [java.nio.file Files]
@@ -155,18 +154,7 @@
     "ft-state-snapshot-witness-001"
     "ft-canon-fingerprint-store-001"})
 
-(def expected-active-deposits
-  #{"ft-autoclock-in-001"
-    "ft-bounded-in-flight-state-008"
-    "ft-chipwitz-corps-001"
-    "ft-first-flights-007"
-    "ft-fold-ansatz-001"
-    "ft-legacy-sorry-cleanup-001"
-    "ft-live-geometric-stack-002"
-    "ft-pattern-mining-011"})
-
-(defn- real-prose-fn [pattern-id]
-  (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))
+(def expected-active-deposits #{})
 
 (deftest real-fold-turns-load-clean-under-pin-1b
   (let [{:keys [deposits quarantined rejected]} (esc/load-deposits)
@@ -177,24 +165,20 @@
     (is (= expected-real-deposits (into active-ids quarantined-ids)))
     (is (empty? (set/intersection active-ids quarantined-ids)))))
 
-(deftest first-flights-replays-through-enact-style-seam
-  (let [{:keys [deposits rejected]} (esc/load-deposits)
-        dep (first (filter #(= "ft-first-flights-007" (:fold-turn/id %)) deposits))
-        circumstance {:mission (:mission dep)
-                      :psi (get-in dep [:cascade :psi])}
-        entry {:mission (:mission dep)
-               :shown (get-in dep [:cascade :pattern-ids])
-               :cascade-score 1.0
-               :policy-rollout-score nil}]
+(deftest legacy-prompt-deposit-does-not-enter-current-replay-table
+  (let [{:keys [deposits quarantined rejected]} (esc/load-deposits)]
     (is (empty? rejected) (pr-str rejected))
-    (is (some? dep) "007 deposit must be present in the real fold-turn corpus")
-    (binding [cl/*escrow-replay?* true
-              cl/*classical-fold-score?* false]
-      (let [ag (cl/act-gate-from-lane-entry
-                entry circumstance
-                {:escrow-turn-fn (esc/escrow-turn-fn deposits)
-                 :prose-fn real-prose-fn})]
-        (is (= (get-in dep [:eval :coverage-score-delta]) (:coverage-score-delta ag)))
-        (is (= :fold-escrow (:coverage-score/source ag)))
-        (is (= (get-in dep [:turn :answer :boxes])
-               (get-in ag [:fold-escrow :wiring :boxes])))))))
+    (is (empty? deposits))
+    (is (some #(= "ft-first-flights-007" (:fold-turn/id %)) quarantined))))
+
+(deftest current-prompt-pin-cannot-be-hidden-by-legacy-quarantine
+  (let [record (valid-record)
+        key {:fold-turn/id (:fold-turn/id record)
+             :prompt-sha256 (get-in record [:prompt :sha256])
+             :reason :prompt-not-reconstructable}
+        dir (tmp-deposit-dir! {"ft-current.edn" record})
+        {:keys [deposits quarantined rejected]}
+        (esc/load-deposits dir {:quarantine-entries [key]})]
+    (is (= ["ft-test-001"] (mapv :fold-turn/id deposits)))
+    (is (empty? quarantined))
+    (is (empty? rejected))))

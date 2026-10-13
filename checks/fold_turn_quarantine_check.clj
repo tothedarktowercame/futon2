@@ -7,8 +7,11 @@
   (let [negative? (some #{"--negative"} args)
         reconstructible-negative? (some #{"--negative-reconstructible-member"} args)
         recorded-entries (:entries (edn/read-string (slurp escrow/default-quarantine-path)))
-        valid-key {:fold-turn/id "ft-first-flights-007"
-                   :prompt-sha256 "a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b"
+        ;; Keep the historical option name for callers. The control now injects
+        ;; a fabricated member and proves membership alone cannot create a
+        ;; quarantined record or hide a rejection.
+        valid-key {:fold-turn/id "ft-nonexistent-control"
+                   :prompt-sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                    :reason :prompt-not-reconstructable}
         opts (cond negative? {:quarantine-entries []}
                    reconstructible-negative? {:quarantine-entries (conj recorded-entries valid-key)}
@@ -17,24 +20,23 @@
                                                  escrow/default-deposit-dir
                                                  opts)
         quarantined-property? (every? #(= :prompt-not-reconstructable (:reason %)) quarantined)
-        positive-pass? (and (= 8 (count deposits))
-                            (= 10 (count quarantined))
+        positive-pass? (and (empty? deposits)
+                            (= 18 (count quarantined))
                             quarantined-property?
                             (empty? rejected))
-        negative-rejected? (and (= 8 (count deposits))
+        negative-rejected? (and (empty? deposits)
                                 (empty? quarantined)
-                                (= 10 (count rejected)))]
+                                (= 18 (count rejected)))]
     (println (pr-str {:accepted (count deposits)
                       :quarantined (count quarantined)
                       :rejected (count rejected)}))
     (cond
       reconstructible-negative?
-      (let [valid-active? (some #(= "ft-first-flights-007" (:fold-turn/id %)) deposits)
-            valid-quarantined? (some #(= "ft-first-flights-007" (:fold-turn/id %)) quarantined)
-            pass? (and positive-pass? valid-active? (not valid-quarantined?))]
+      (let [fabricated-quarantined? (some #(= "ft-nonexistent-control" (:fold-turn/id %)) quarantined)
+            pass? (and positive-pass? (not fabricated-quarantined?))]
         (println (str "fold-turn-quarantine-check: "
-                      (if pass? "negative-control PASS (reconstructible record rejected as quarantine member)"
-                          "negative-control FAIL (reconstructible record entered quarantine)")
+                      (if pass? "negative-control PASS (fabricated quarantine member ignored)"
+                          "negative-control FAIL (fabricated quarantine member affected disposition)")
                       " exit-convention=0-pass/1-fail/2-mutation-slipped"))
         (System/exit (if pass? 0 2)))
 
