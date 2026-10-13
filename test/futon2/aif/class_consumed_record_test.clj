@@ -1,7 +1,7 @@
 (ns futon2.aif.class-consumed-record-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.cascade-observation-scoring :as scoring]
+            [futon2.aif.efe :as efe]
             [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.token-belief-carry-test :as fixture]
             [futon2.aif.token-observation-initialization-test :as observation-fixture]))
@@ -13,8 +13,8 @@
 
 (defn fixture-run []
   (let [call (atom nil)
-        score scoring/rank-cascade-actions]
-    (with-redefs [scoring/rank-cascade-actions
+        score efe/rank-actions]
+    (with-redefs [efe/rank-actions
                   (fn [state candidates opts]
                     (let [result (score state candidates opts)]
                       (reset! call {:state state :candidates candidates :opts opts
@@ -64,7 +64,7 @@
 
 (deftest scorer-without-upstream-conditioning-records-no-q
   (let [{:keys [state candidates opts]} (fixture-run)
-        ranked (scoring/rank-cascade-actions
+        ranked (efe/rank-actions
                 state candidates (dissoc opts :upstream-initialization-conditioning))]
     (is (every? #(not (contains? (get-in % [:certificate :consumed-g]) :Q)) ranked))))
 
@@ -73,9 +73,9 @@
         receipt {:status :class-observation
                  :source "declared test class preference"
                  :live-c-recorded {:signature "fixture"}}
-        with-source (scoring/rank-cascade-actions
+        with-source (efe/rank-actions
                      state candidates (assoc-in opts [:cascade-spec :c] receipt))
-        without-source (scoring/rank-cascade-actions
+        without-source (efe/rank-actions
                         state candidates (update opts :cascade-spec dissoc :c))]
     (is (every? #(= receipt (get-in % [:certificate :c-source])) with-source))
     (is (every? #(= {:absent :no-c-source-in-cascade-spec}
@@ -93,8 +93,8 @@
 
 (deftest signed-false-conditioning-is-carried-verbatim
   (let [ranked-results (atom [])
-        score scoring/rank-cascade-actions]
-    (with-redefs [scoring/rank-cascade-actions
+        score efe/rank-actions]
+    (with-redefs [efe/rank-actions
                   (fn [state candidates opts]
                     (let [result (score state candidates opts)]
                       (swap! ranked-results conj result)

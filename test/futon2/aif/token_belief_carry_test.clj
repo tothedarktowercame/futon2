@@ -4,29 +4,30 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-habit-store :as habit]
             [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.cascade-problems :as problems]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.exact-belief-adapter :as adapter]
             [futon2.aif.declaration-reads-test :as files]
-            [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.scoring-input-receipts :as receipts]
             [futon2.aif.token-belief-carry :as carry]
             [futon2.aif.trace :as trace]
-            [futon2.report.cascade-decision-test :as fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.report.cascade-decision-test :as fixture]))
 
 (def absent-habit-path "resources/fixtures/d-token-carry/absent-habit.edn")
 
 (defn assembled []
-  (problems/assemble {:targets [fixture/tick-1-target]
-                      :sources (locators/locate-all fixture/tick-1-sources)}))
+  ;; Share the reference decision fixture's authoritative assembly seam.  It
+  ;; supplies both C3 locators and the current three-halves-square evidence;
+  ;; duplicating its pre-square assembly silently turned this fixture into a
+  ;; typed abstention before class scoring ran.
+  (#'fixture/assemble* {:targets [fixture/tick-1-target]
+                       :sources fixture/tick-1-sources}))
 
 (defn decision [previous]
   (when (.exists (io/file absent-habit-path))
     (throw (ex-info "Conservativity fixture requires an absent habit store"
                     {:path absent-habit-path})))
   (with-redefs [habit/default-path absent-habit-path]
-    (:decision (wm-cd/cascade-decision
+    (:decision (#'fixture/decision
                 (assembled)
                 (assoc fixture/live-c-opts
                        :cascade-habit-path absent-habit-path
