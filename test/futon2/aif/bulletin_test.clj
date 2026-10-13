@@ -71,6 +71,7 @@
    :run-era-ledger (str (.getPath (io/file dir "ledger.edn")))
    :runs-repo dir
    :runs-rel "holes/labs/demo/runs"
+   :tripwire-root (str dir "/data/wm-tripwires/trips")
    :trace-root (str dir "/data/wm-trace")
    :trace-review-ledger (str dir "/trace-review-ledger.edn")
    :out-dir out-dir
@@ -106,6 +107,25 @@
                         #:row{:seq 3 :run-id "demo-run-c" :check-id :demo-check
                               :verdict :green :at "2026-03-01T08:00:00Z"
                               :artifact "holes/labs/demo/runs/DEMO-run/README.md"}]})))
+
+(deftest fixture-collection-does-not-fall-through-to-ambient-tripwires
+  (let [repo (fixture-repo)
+        _ (write-registry-and-ledger! repo)
+        ambient (temp-dir "bulletin-ambient-tripwires")
+        ambient-record (io/file ambient "must-not-be-read.edn")
+        cfg (fixture-config repo (.getPath (temp-dir "bulletin-out"))
+                            (.getPath (temp-dir "bulletin-brief")))]
+    (spit ambient-record
+          (pr-str {:node :R20 :tripwire/check :refused
+                   :trip/id "ambient-tripwire" :status :needs-joe :class :J
+                   :statement "ambient mutable state must not enter a fixture"}))
+    (let [facts (with-redefs [bulletin/default-config
+                              (assoc bulletin/default-config
+                                     :tripwire-root (.getPath ambient))]
+                  (bulletin/collect-facts cfg "2026-03-02"))]
+      (is (str/starts-with? (:tripwire-root cfg) (:dir repo)))
+      (is (not-any? #(= "ambient-tripwire" (:id %)) (:waits-on-joe facts))
+          "an explicit fixture root must win over mutable ambient evidence"))))
 
 (deftest render-is-a-pure-function-of-the-facts
   (testing "the same facts render byte-identically, and no clock leaks in"
@@ -349,7 +369,13 @@
 (deftest the-live-day-collects-and-renders
   (if-not (live-repo?)
     (is true "no live futon2 checkout here; the fixture tests carry the logic")
-    (let [facts (bulletin/collect-facts bulletin/default-config real-day)
+    (let [cfg (assoc bulletin/default-config
+                     ;; The demonstration date predates both append-only
+                     ;; channels. Current records are not facts of that day and
+                     ;; must not make this historical fixture mutable.
+                     :tripwire-root (.getPath (temp-dir "bulletin-live-tripwires"))
+                     :trace-root (.getPath (temp-dir "bulletin-live-traces")))
+          facts (bulletin/collect-facts cfg real-day)
           text (bulletin/render facts)]
       (is (pos? (get-in facts [:counts :commits]))
           "the demonstration day has commits, or the collector is not reading them")
