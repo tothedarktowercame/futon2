@@ -35,9 +35,10 @@
 (defn- close-through-the-runner
   "One close through the runner seam, with the legacy store at PATH."
   [path]
-  (#'fixture/run-feature-card-attempt
-   {:author-card fixture/feature-card-claim
-    :runner-options {:cascade-habit-path path
+  (#'fixture/run-token-feature-card-attempt
+   (#'fixture/retention-cohort "habit-store-retirement")
+   (#'fixture/token-loop-exercised-decision)
+   {:runner-options {:cascade-habit-path path
                      :run-record-dir (str (.getParentFile (io/file path)))}}))
 
 (defn- watching-close!
@@ -64,7 +65,7 @@
      (let [before (slurp path)
            [{:keys [result]} calls] (watching-close! #(close-through-the-runner path))
            record (edn/read-string (slurp (:run-record result)))]
-       (is (= :grounded-change (:outcome result)) "the close ran")
+       (is (= :grounded-progress (:outcome result)) "the grounded close ran")
        (is (= [] calls) "habit-reinforcement/close! is not called at all")
        (is (= before (slurp path)) "the store is byte-unchanged")
        (testing "and the absence is typed, on the result and on the run record"
