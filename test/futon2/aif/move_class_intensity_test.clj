@@ -91,7 +91,7 @@
         explicit-off (efe/rank-actions state actions {:move-class-intensity-mode :off})]
     (is (= default explicit-off))))
 
-(deftest trace-persists-dark-contribution-at-birth
+(deftest trace-does-not-reintroduce-retired-flat-scoring-lane
   (let [dark (efe/compute-efe state
                               {:type :apply-cascade
                                :target "M-a"
@@ -102,8 +102,10 @@
                                     :ranked-actions [(assoc dark :rank 1)]
                                     :decision {:action (:action dark)}
                                     :mode :test})]
-    (is (= :v1 (get-in record [:ranked-actions 0 :move-class-intensity-mode])))
-    (is (= (:move-class-intensity-contribution dark)
-           (get-in record [:ranked-actions 0 :move-class-intensity-contribution])))
-    (is (= (:move-class-intensity dark)
-           (get-in record [:ranked-actions 0 :move-class-intensity])))))
+    (testing "the scorer still produces the opt-in diagnostic"
+      (is (= :v1 (:move-class-intensity-mode dark)))
+      (is (= -0.7 (:move-class-intensity-contribution dark)))
+      (is (= :apply-cascade (get-in dark [:move-class-intensity :class]))))
+    (testing "schema 30 cannot persist that retired flat-ranked projection"
+      (is (not (contains? record :ranked-actions)))
+      (is (= 30 trace/trace-schema-version)))))
