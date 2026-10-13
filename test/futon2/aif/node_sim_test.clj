@@ -16,7 +16,10 @@
   (edn/read-string {:default (fn [_ v] v)}
                    (slurp "holes/labs/wm-contract/aif-equations.edn")))
 
-(def registry-rows (filterv #(= :R5 (:node %)) (:equations equations)))
+(def r5-rows (filterv #(= :R5 (:node %)) (:equations equations)))
+(def simulated-equations (get-in ns-sim/node-registry [:R5 :equations]))
+(def registry-rows (filterv #(contains? simulated-equations (:id %)) r5-rows))
+(def unsimulated-rows (filterv #(not (contains? simulated-equations (:id %))) r5-rows))
 
 (def carriers (ns-sim/carriers! carriers-decl))
 
@@ -32,12 +35,20 @@
 ;; The pilot passes, and the numbers are pinned
 ;; ---------------------------------------------------------------------------
 
-(deftest r5-pilot-passes
+(deftest r5-core-pilot-passes
   (let [r (run-pilot)]
     (is (= :pass (:verdict r)) (str "failed checks: " (:failed r)))
     (is (empty? (:failed r)))
     (testing "every check reports a status the verdict is built from"
       (is (every? #{:pass :finding} (map :status (:checks r)))))))
+
+(deftest r5-extension-is-explicitly-outside-the-core-pilot
+  ;; :target-grain-g compares two complete G laws over a target universe. The
+  ;; F3 carrier contains one-policy risk/ambiguity inputs and cannot witness
+  ;; that localisation theorem. Keep the scope boundary visible instead of
+  ;; making the core simulator claim it implements every later R5 row.
+  (is (= [:target-grain-g] (mapv :id unsimulated-rows)))
+  (is (= #{:G :U-t} (set (:imports (first unsimulated-rows))))))
 
 (deftest r5-values-are-pinned
   (let [{:keys [values reference]} (run-pilot)]
