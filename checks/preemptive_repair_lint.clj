@@ -72,7 +72,9 @@
     ;; executable shell is suspect, and only when its publication assertion is
     ;; in the same local branch as --stage.
     (mapcat (fn [row]
-              (remove #(str/includes? (str/lower-case (:excerpt %)) "not published")
+              (remove #(let [excerpt (str/lower-case (:excerpt %))]
+                         (or (str/includes? excerpt "not published")
+                             (str/includes? excerpt "staged:")))
                       (matches row #"(?is)(?:--stage|STAGE).{0,240}(?:echo|printf).{0,80}publish(?:ed)?" :stage-described-as-published)))
             (filter #(str/ends-with? (:path %) ".sh") rows))
     (for [[stem svg pdf] [["paper" "aif-control-map-paper.svg" "aif-control-map-paper.pdf"]
@@ -119,7 +121,7 @@
 
 (defn era-findings [rows]
   (vec
-   (mapcat #(matches % #"(?mi)(?:\(is\s+\(=\s+[0-9]+[^\n]{0,180}(?:timestamp|recorded-at|startedAt)|assert(?:-equals)?\s*\(?\s*[0-9]+[^\n]{0,180}(?:timestamp|recorded-at|startedAt))(?![^\n]*(?:era|schema-version|boundary|as-of))" :timestamped-population-without-era)
+   (mapcat #(matches % #"(?mi)(?:\(is\s+\(=\s+[0-9]+[^\n]{0,180}(?:timestamp|recorded-at(?!tempt)|startedAt)|assert(?:-equals)?\s*\(?\s*[0-9]+[^\n]{0,180}(?:timestamp|recorded-at(?!tempt)|startedAt))(?![^\n]*(?:era|schema-version|boundary|as-of))" :timestamped-population-without-era)
            (filter #(re-find #"(?:^|/)(?:test|checks)/" (:path %)) rows))))
 
 (defn record-findings [rows]

@@ -41,10 +41,10 @@
                [{:repo :fixture :path "checks/report.clj"
                  :text "REPORT findings=3; process exit 3"}]))))
 
-(deftest absence-dispositions-cover-and-narrow-the-c12-population
+(deftest absence-dispositions-cover-and-close-the-c12-population
   (let [findings (lint/absence-findings [])]
-    (is (= 7 (count findings)))
-    (is (= 7 (count (filter #(= :blocked (:disposition %)) findings))))
+    (is (empty? findings)
+        "C81's formerly blocked absence population has been repaired")
     (is (not-any? #(= "src/futon2/aif/observation.clj:152" (:path %)) findings))
     (is (not-any? #(re-find #"observation.clj:117-145|trace.clj:249-260" (:path %)) findings))))
 
