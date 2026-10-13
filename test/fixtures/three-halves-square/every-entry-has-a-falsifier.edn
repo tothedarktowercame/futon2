@@ -1,0 +1,28 @@
+;; Exact controlled reading of the retained typed-Q interpretation.  G is the
+;; payload contract; I1 is the producer-side declaration and I2 its independent
+;; falsifier.  B keeps the shared payload identity while retaining both checks.
+{:schema :wm/three-halves-square-v1
+ :pattern :contracts/every-entry-has-a-falsifier
+ :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg"
+          :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+          :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
+ :interpretation-correspondence
+ {:reading "The task explicitly asks for R13-to-R4 policy and R4-to-R5 predictive-kernel payloads with executable falsifiers. Apply the pattern's correspondence discipline to those interfaces: define a typed, outcome-keyed Q(o|pi) payload with model/source pins, outcome-domain identity and a normalization receipt; make the risk consumer and existing EIG fixture accept the same constructed machine-Q row. Exercise a plausible wrong implementation with a simultaneous outcome relabelling/permutation control and a mismatched-domain or pin refusal, rather than copying expected constants from the implementation. Retain the payload specification and passing behavioral evidence before declaring this task complete."
+  :guard {:needs #{:hole/h6378c65a4012} :forbids #{:hole/h0e270aa090bc}}
+  :produces #{:hole/h0e270aa090bc}}
+ :objects
+ {:G {:text "One typed predictive payload has one identity and outcome domain."
+      :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
+      :theory {:elems #{0} :names {0 "typed predictive payload"} :axioms #{}}}
+  :I1 {:text "The producer declares the payload, pins, domain, and normalization."
+       :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
+       :theory {:elems #{10 11} :names {10 "typed predictive payload" 11 "producer declaration"} :axioms #{}}}
+  :I2 {:text "An independent falsifier checks relabelling, domain, and pins."
+       :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
+       :theory {:elems #{20 21} :names {20 "typed predictive payload" 21 "independent falsifier"} :axioms #{}}}
+  :B {:text "The admitted payload is shared by producer and falsifier without erasing either obligation."
+      :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg" :revision "21a9199ff95e850cdad64e35c81de04eade48256" :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
+      :theory {:elems #{30 31 32} :names {30 "shared typed payload" 31 "producer obligation" 32 "falsifier obligation"} :axioms #{}}}}
+ :maps {:a1 #{[0 10]} :a2 #{[0 20]}
+        :b1 #{[10 30] [11 31]} :b2 #{[20 30] [21 32]}}
+ :auxiliary {:b1 false :b2 false}}

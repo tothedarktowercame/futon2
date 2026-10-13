@@ -7,6 +7,8 @@
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.ticket-queue :as queue]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.three-halves-square :as square]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.wm.cascade-decision :as wm-cd]))
 
@@ -21,6 +23,35 @@
 ;; pin stay declared, so pin checks still cover both patterns.
 (def routed-patterns #{:contracts/every-entry-has-a-falsifier})
 (defn declaration [] (edn/read-string (slurp (io/resource source-resource))))
+
+(defn square-at-source [blend-square source]
+  (reduce (fn [s role] (assoc-in s [:objects role :source] source))
+          (assoc blend-square :source source)
+          square/roles))
+
+(def square-fixtures
+  {:apparatus/one-authority-per-question
+   (square-at-source
+    (edn/read-string (slurp "test/fixtures/three-halves-square/one-authority-per-question.edn"))
+    (get-in (declaration) [:interpretation-receipts :apparatus/one-authority-per-question :source]))
+   :contracts/every-entry-has-a-falsifier
+   (edn/read-string (slurp "test/fixtures/three-halves-square/every-entry-has-a-falsifier.edn"))})
+
+(defn declaration-with-squares [decl]
+  (reduce-kv
+   (fn [d pattern blend-square]
+     (let [receipt (get-in d [:interpretation-receipts pattern])
+           interpretation (get-in d [:patterns pattern])]
+       (when-not (and (= :valid (:status (square/validate blend-square)))
+                      (= pattern (:pattern blend-square))
+                      (= (:source receipt) (:source blend-square))
+                      (= (:reading receipt) (get-in blend-square [:interpretation-correspondence :reading]))
+                      (= (:guard interpretation) (get-in blend-square [:interpretation-correspondence :guard]))
+                      (= (:produces interpretation) (get-in blend-square [:interpretation-correspondence :produces])))
+         (throw (ex-info "Square does not join the retained interpretation"
+                         {:pattern pattern})))
+       (assoc-in d [:interpretation-receipts pattern :blend-square] blend-square)))
+   decl square-fixtures))
 
 (defn with-declaration [decl f]
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
@@ -48,10 +79,24 @@
 
 (defn decide [src dir]
   (let [assembled (problems/assemble {:targets [target] :sources (assoc src :horizon-steps 2)})
+        candidates (for [{:keys [target constructed-candidates]} (:problems assembled)
+                         {:keys [candidate-id precedence]} constructed-candidates]
+                     {:id candidate-id :target target :precedence precedence})
+        steps (mapv (fn [i candidate]
+                      {:step {:status :present
+                              :policy-key (prefix-admission/candidate-key candidate)
+                              :occurrence {:flight "eig-source-fixture" :click (str "run-" i)}
+                              :s-prev {:value {#{} 1}}
+                              :q {#{} 1}
+                              :f 0.0}
+                       :path "eig-source-remaining-test"
+                       :sha256 "fixture"})
+                    (range) candidates)
         result (wm-cd/cascade-decision
                 assembled
                 {:ticket-queue queue/empty-declaration
                  :cascade-habit-path (str (io/file dir "absent-habit.edn"))
+                 :conditioning-steps {:steps steps :read [] :unread []}
                  :novelty-inputs {}
                  :live-c {:derived {:want #{(keyword "alive" target)}
                                     :weights {(keyword "alive" target) 1}
@@ -60,7 +105,7 @@
 
 (deftest remaining-work-reaches-real-joint-selection
   (with-declaration
-    (declaration)
+    (declaration-with-squares (declaration))
     (fn [{:keys [sources dir calls]}]
       (let [result (decide sources dir)
             decision (:decision result)
@@ -84,7 +129,7 @@
 
 (deftest each-new-order-alone-progresses-within-the-common-horizon
   (doseq [pattern routed-patterns]
-    (let [decl (declaration)
+    (let [decl (declaration-with-squares (declaration))
           candidate (first (filter #(= [pattern] (:precedence %)) (:candidates decl)))]
       (is (some? candidate))
       (when candidate
