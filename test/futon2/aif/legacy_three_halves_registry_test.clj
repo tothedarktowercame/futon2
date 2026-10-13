@@ -13,7 +13,11 @@
   (let [result (sut/square "/home/joe/code" target pattern receipt)]
     (is (= :valid (:status (square/validate result))))
     (is (= target (get-in result [:migration :target])))
-    (is (= pattern (get-in result [:migration :pattern])))))
+    (is (= pattern (get-in result [:migration :pattern])))
+    (is (= "75a8378a9bdc8672242c5f471c2824dc28583532"
+           (get-in result [:objects :G :source :revision])))
+    (is (= "860a5595a58d62866b1013715934ae23934cae49"
+           (get-in result [:objects :I1 :source :revision])))))
 
 (deftest substitutions-have-no-migration-certificate
   (is (nil? (sut/square "/home/joe/code" "M-other" pattern receipt)))
