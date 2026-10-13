@@ -122,16 +122,27 @@
       (is (= :decision-snapshot-only-task-promoted
              (:reason (verify promoted tasks snapshot)))))))
 
-(deftest ^:slow current-pathless-mission-is-snapshot-authoritative-not-promoted
-  (let [tasks (live/live-registry-tasks)
-        snapshot (live/fetch-pipeline-snapshot)
+(deftest pathless-mission-is-snapshot-authoritative-not-promoted
+  (let [{fixture-tasks :tasks fixture-snapshot :snapshot} (fixture)
+        pathless {:id "M-pathless" :kind :mission
+                  :status-class :unknown :source {:path nil :sha256 nil}}
+        tasks (conj fixture-tasks pathless)
+        graph (-> (:graph fixture-snapshot)
+                  (update :clusters conj {:mission "M-pathless"})
+                  (update-in [:tickets :items]
+                             conj {:stem "M-pathless" :mtime-ms 50}))
+        graph-bytes (json/generate-string graph)
+        snapshot (-> fixture-snapshot
+                     (assoc :graph graph
+                            :graph-source (pin "graph" graph-bytes))
+                     (assoc-in [:source-bytes :graph] graph-bytes))
         receipt (live/select-live {:tasks tasks
                                    :fetch-snapshot (constantly snapshot)
                                    :retain-manifest? true})
         m (:decision-input-manifest receipt)
-        rows (filterv #(= "M-ukrns-wp" (:id %)) (:field m))
-        excluded (filterv #(= "M-ukrns-wp" (:id %)) (:excluded receipt))
-        candidates (filterv #(= "M-ukrns-wp" (:id %)) (:candidate-inputs m))
+        rows (filterv #(= "M-pathless" (:id %)) (:field m))
+        excluded (filterv #(= "M-pathless" (:id %)) (:excluded receipt))
+        candidates (filterv #(= "M-pathless" (:id %)) (:candidate-inputs m))
         verdict (manifest/verify m {:tasks tasks :snapshot snapshot
                                     :manifest-sha256
                                     (:decision-input-manifest-sha256 receipt)})]

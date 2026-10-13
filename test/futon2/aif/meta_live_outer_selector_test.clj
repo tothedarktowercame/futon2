@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-live-outer-selector-test
-  (:require [clojure.java.io :as io]
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
@@ -25,6 +26,23 @@
 (def tasks
   [{:id "M-a" :kind :mission :priority 2 :source (pin "M-a.md" "c")}
    {:id "M-b" :kind :mission :priority 8 :source (pin "M-b.md" "d")}])
+
+(defn- authorized-snapshot [snapshot]
+  (let [agency (or (:agency snapshot) {:agents {}})
+        summary-bytes (json/generate-string (:summary snapshot))
+        graph-bytes (json/generate-string (:graph snapshot))
+        agency-bytes (json/generate-string agency)
+        source (fn [path bytes]
+                 {:path path
+                  :sha256 (field/sha256 (.getBytes bytes "UTF-8"))})]
+    (assoc snapshot
+           :agency agency
+           :summary-source (source "summary" summary-bytes)
+           :graph-source (source "graph" graph-bytes)
+           :agency-source (source "agency" agency-bytes)
+           :source-bytes {:summary summary-bytes
+                          :graph graph-bytes
+                          :agency agency-bytes})))
 
 (deftest live-adapter-selects-and-translates-without-a-draw
   (let [receipt (live/select-live {:tasks tasks :fetch-snapshot (constantly snapshot)})]
@@ -357,9 +375,13 @@
     (is (nil? (get-in preview [:policy :meta-selection :pairwise])))
     (is (nil? (get-in preview [:excluded 0 :ineligibility-evidence])))))
 
-(deftest ^:slow current-data-composition-is-structurally-bounded
-  (let [snapshot (live/fetch-pipeline-snapshot)
-        tasks (live/live-registry-tasks)
+(deftest fixture-composition-is-structurally-bounded
+  (let [inventory-only-task {:id "M-inventory-only" :kind :mission
+                             :priority 0
+                             :source (pin "M-inventory-only.md" "e")}
+        snapshot (update-in snapshot [:graph :tickets :items]
+                            conj {:stem "M-inventory-only" :mtime-ms 300})
+        tasks (conj tasks inventory-only-task)
         nodes (selector/pipeline-node-ids (:graph snapshot))
         inventory-ids (set (keep (comp selector/canonical-work-id :stem)
                                  (get-in snapshot [:graph :tickets :items])))
@@ -380,11 +402,22 @@
     (is (< elapsed-ms 30000)
         (str "bounded browser composition took " elapsed-ms "ms"))))
 
-(deftest ^:slow production-vector-retains-decision-authority-without-metadata
-  (let [tasks (vec (live/live-registry-tasks))
-        receipt (live/select-live {:tasks tasks :retain-manifest? true})]
-    (is (= :captured (get-in receipt [:decision-input-manifest :status])))
-    (is (= :pending-independent-replay
-           (:decision-input-verification receipt)))
-    (is (string? (:decision-input-manifest-sha256 receipt)))
-    (is (some? (:action receipt)))))
+(deftest production-vector-retains-decision-authority-without-metadata
+  (let [repo (.toFile (java.nio.file.Files/createTempDirectory
+                       "meta-production-vector"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (git! repo "init")
+    (git! repo "config" "user.email" "test@example.invalid")
+    (git! repo "config" "user.name" "Test")
+    (let [tasks (mapv #(dissoc % :priority)
+                      [(committed-task repo "M-a" "codex-test")
+                       (committed-task repo "M-b" "codex-test")])
+          snapshot (authorized-snapshot snapshot)
+          receipt (live/select-live {:tasks tasks
+                                     :fetch-snapshot (constantly snapshot)
+                                     :retain-manifest? true})]
+      (is (= :captured (get-in receipt [:decision-input-manifest :status])))
+      (is (= :pending-independent-replay
+             (:decision-input-verification receipt)))
+      (is (string? (:decision-input-manifest-sha256 receipt)))
+      (is (some? (:action receipt))))))
