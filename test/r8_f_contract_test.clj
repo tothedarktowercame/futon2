@@ -204,6 +204,26 @@
                                 :current-contract-without-stored]))
         "F's absence is not the violation in this era")))
 
+(deftest schema-30-cascade-contract-retires-selection-gain
+  (let [{:keys [errors precision]} (channel 1.0 1.0)
+        value (-> (tick {:errors errors :precision precision
+                         :stored :absent :gain :absent :shape :controller})
+                  (assoc :producer-contract r8/current-r8-contract)
+                  (assoc-in [:wm-version :trace-schema-version] 30))
+        record {:file "wm-trace-2026-09-21.edn" :form 1
+                :file-date 20260921 :value value}
+        report (r8/analyze-corpus {:files [(:file record)] :records [record]}
+                                  r8/default-boundary)]
+    (is (= {:era :retired-f-cascade
+            :source :producer-contract+trace-schema
+            :status :declared
+            :contract r8/current-r8-contract
+            :trace-schema-version 30}
+           (r8/contract-era r8/default-boundary record)))
+    (is (true? (get-in report [:summary :pass?])))
+    (is (empty? (get-in report [:r8EraBoundary :violations
+                                :era-requires-gain])))))
+
 (deftest unknown-producer-contract-is-malformed-not-legacy
   (let [{:keys [errors precision]} (channel 1.0 1.0)
         value (assoc (tick {:errors errors :precision precision
@@ -249,6 +269,18 @@
     (is (re-find #"∀ t ∈ wmTraceR8StoredEra" lean))
     (is (not (re-find #"meanPrecision :=|uniform :=" lean)))
     (is (not (re-find #"disposition :=|freeEnergyShape :=" lean)))))
+
+(deftest typed-accumulation-bootstrap-is-not-an-r8-tick
+  (let [{:keys [errors precision]} (channel 1.0 1.0)]
+    (with-corpus
+      [(assoc (tick {:errors errors :precision precision :stored 0.5
+                     :gain {} :shape :controller})
+              :producer-contract r8/stored-f-r8-contract)
+       {:record/kind :accumulation-bootstrap :accumulation-state {:ok true}}]
+      (fn [trace-dir]
+        (let [report (r8/lint-paths {:trace-dir trace-dir})]
+          (is (= 1 (get-in report [:summary :forms])))
+          (is (= 1 (get-in report [:summary :auxiliary-records]))))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (let [{:keys [fail error]} (run-tests)]

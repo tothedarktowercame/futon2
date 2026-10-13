@@ -5,8 +5,9 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str])
-  (:import [java.math BigInteger]
-           [java.security MessageDigest]))
+  (:import [java.io OutputStreamWriter]
+           [java.math BigInteger]
+           [java.security DigestOutputStream MessageDigest]))
 
 (def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
 (def default-boundary 20260714)
@@ -36,7 +37,11 @@
    the conjuncts are now read off the era rather than off each other."
   {:pre-stored-f         {:f false :gain false :controller false}
    :stored-f-controller  {:f true  :gain true  :controller true}
-   :retired-f-controller {:f false :gain true  :controller true}})
+   :retired-f-controller {:f false :gain true  :controller true}
+   ;; Schema 30 removed the flat decision and its gamma statistic. The producer
+   ;; tag was retained, so the record-carried schema version is the additional
+   ;; discriminator for this later contract shape.
+   :retired-f-cascade    {:f false :gain false :controller true}})
 
 (def f-retirement-date
   "The trace filename day on which `compute-variational-free-energy` was
@@ -69,22 +74,26 @@
             (recur (conj forms form))))))))
 
 (defn read-corpus [trace-dir]
-  (let [files (trace-files trace-dir)]
+  (let [files (trace-files trace-dir)
+        records
+        (vec
+         (mapcat
+          (fn [path]
+            (let [file (str (fs/file-name path))
+                  [_ yyyy mm dd] (re-matches
+                                  #"wm-trace-([0-9]{4})-([0-9]{2})-([0-9]{2})\.edn"
+                                  file)
+                  file-date (parse-long (str yyyy mm dd))]
+              (map-indexed (fn [index value]
+                             {:file file :form (inc index)
+                              :file-date file-date :value value})
+                           (read-edn-forms path))))
+          files))]
     {:files files
-     :records
-     (vec
-      (mapcat
-       (fn [path]
-         (let [file (str (fs/file-name path))
-               [_ yyyy mm dd] (re-matches
-                               #"wm-trace-([0-9]{4})-([0-9]{2})-([0-9]{2})\.edn"
-                               file)
-               file-date (parse-long (str yyyy mm dd))]
-           (map-indexed (fn [index value]
-                          {:file file :form (inc index)
-                           :file-date file-date :value value})
-                        (read-edn-forms path))))
-       files))}))
+     :records (vec (remove #(= :accumulation-bootstrap
+                               (get-in % [:value :record/kind])) records))
+     :auxiliary-records (vec (filter #(= :accumulation-bootstrap
+                                         (get-in % [:value :record/kind])) records))}))
 
 ;; These three arms are kept in the same order as r8Disposition in Holes.lean.
 (defn disposition [tick]
@@ -155,11 +164,23 @@
                  (.update (.getBytes (str text) "UTF-8")))]
     (format "%064x" (BigInteger. 1 (.digest digest)))))
 
+(defn- sha256-form [value]
+  ;; Keep the established pr-str pin while avoiding a second, enormous UTF-16
+  ;; copy of production trace forms in memory.
+  (let [digest (MessageDigest/getInstance "SHA-256")]
+    (with-open [writer (OutputStreamWriter.
+                        (DigestOutputStream. (java.io.OutputStream/nullOutputStream)
+                                             digest)
+                        "UTF-8")]
+      (binding [*out* writer]
+        (pr value)))
+    (format "%064x" (BigInteger. 1 (.digest digest)))))
+
 (defn content-pin [records]
   (->> records
        ;; Hash each parsed top-level form, sort those hashes so file traversal
        ;; does not affect the pin, then hash the newline-delimited digest list.
-       (map (comp sha256 pr-str :value))
+       (map (comp sha256-form :value))
        sort
        (str/join "\n")
        sha256))
@@ -187,8 +208,14 @@
   "Choose the R8 contract from the record-carried tag. Only unversioned
    historical records may use the filename-day fallback."
   [boundary {:keys [file-date value]}]
-  (let [declared (:producer-contract value)]
+  (let [declared (:producer-contract value)
+        schema-version (get-in value [:wm-version :trace-schema-version])]
     (cond
+      (and (= current-r8-contract declared)
+           (number? schema-version) (>= schema-version 30))
+      {:era :retired-f-cascade :source :producer-contract+trace-schema
+       :status :declared :contract declared :trace-schema-version schema-version}
+
       (contains? contract-eras declared)
       {:era (get contract-eras declared) :source :producer-contract
        :status :declared :contract declared}
@@ -324,9 +351,10 @@
         with-stored (filter #(some? (:variational-free-energy (:value %)))
                             classified)
         ;; The era TABLE is still the two sides of the 20260714 date boundary;
-        ;; :retired-f-controller is a post-boundary contract, not a third side.
+        ;; both retired-F shapes are post-boundary contracts.
         before-era (filter #(= :pre-stored-f (get-in % [:contract-era :era])) classified)
-        after-era (filter #(contains? #{:stored-f-controller :retired-f-controller}
+        after-era (filter #(contains? #{:stored-f-controller :retired-f-controller
+                                       :retired-f-cascade}
                                       (get-in % [:contract-era :era]))
                           classified)
         era-violations
@@ -488,8 +516,12 @@
 
 (defn lint-paths [{:keys [trace-dir boundary]
                     :or {trace-dir default-trace-dir boundary default-boundary}}]
-  (analyze-corpus (read-corpus trace-dir) boundary nil
-                  (recorded-snapshot default-recorded-report)))
+  (let [corpus (read-corpus trace-dir)]
+    (assoc-in
+     (analyze-corpus corpus boundary nil
+                     (recorded-snapshot default-recorded-report))
+     [:summary :auxiliary-records]
+     (count (:auxiliary-records corpus)))))
 
 (defn negative-era-corpus [corpus boundary]
   (let [index (first

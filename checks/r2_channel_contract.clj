@@ -6,8 +6,9 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str])
-  (:import [java.math BigInteger]
-           [java.security MessageDigest]))
+  (:import [java.io OutputStreamWriter]
+           [java.math BigInteger]
+           [java.security DigestOutputStream MessageDigest]))
 
 (def default-observation-source
   "/home/joe/code/futon2/src/futon2/aif/observation.clj")
@@ -110,28 +111,43 @@
             (recur (conj forms form))))))))
 
 (defn read-trace-corpus [trace-dir]
-  (let [files (trace-files trace-dir)]
+  (let [files (trace-files trace-dir)
+        forms (vec (mapcat (fn [path]
+                             (map-indexed
+                              (fn [index form]
+                                {:file (str (fs/file-name path))
+                                 :form (inc index)
+                                 :value form})
+                              (read-edn-forms path)))
+                           files))]
     {:files files
-     :records
-     (vec (mapcat (fn [path]
-                    (map-indexed
-                     (fn [index form]
-                       {:file (str (fs/file-name path))
-                        :form (inc index)
-                        :value form})
-                     (read-edn-forms path)))
-                  files))}))
+     :records (vec (remove #(= :accumulation-bootstrap
+                               (get-in % [:value :record/kind])) forms))
+     :auxiliary-records (vec (filter #(= :accumulation-bootstrap
+                                         (get-in % [:value :record/kind])) forms))}))
 
 (defn- sha256 [text]
   (let [digest (doto (MessageDigest/getInstance "SHA-256")
                  (.update (.getBytes (str text) "UTF-8")))]
     (format "%064x" (BigInteger. 1 (.digest digest)))))
 
+(defn- sha256-form [value]
+  ;; `pr-str` first materialized some production trace forms as >100 MB UTF-16
+  ;; strings. Stream the identical printer bytes into the digest instead.
+  (let [digest (MessageDigest/getInstance "SHA-256")]
+    (with-open [writer (OutputStreamWriter.
+                        (DigestOutputStream. (java.io.OutputStream/nullOutputStream)
+                                             digest)
+                        "UTF-8")]
+      (binding [*out* writer]
+        (pr value)))
+    (format "%064x" (BigInteger. 1 (.digest digest)))))
+
 (defn- content-pin [records]
   ;; Owner-ruled R2/R8 pin: SHA-256 each form's canonical printed EDN, sort
   ;; those hex digests, join them with newlines, then SHA-256 the result.
   (->> records
-       (map (comp sha256 pr-str :value))
+       (map (comp sha256-form :value))
        sort
        (str/join "\n")
        sha256))
@@ -196,7 +212,7 @@
         (read-declarations opts)
         trace-dir (or trace-dir default-trace-dir)
         declared (set channels)
-        {:keys [files records]} (read-trace-corpus trace-dir)
+        {:keys [files records auxiliary-records]} (read-trace-corpus trace-dir)
         mutation-index (when (:negative? opts)
                          (first (keep-indexed
                                  (fn [index record]
@@ -261,6 +277,7 @@
     {:summary {:pass? (empty? checks)
                :files (count files)
                :forms (count records)
+               :auxiliary-records (count auxiliary-records)
                :conformant-records (- (count records) (count record-checks))
                :key-set-mismatches mismatched
                :undeclared-key-count undeclared-count

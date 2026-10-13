@@ -108,6 +108,18 @@
         (is (= 1 (get-in report [:summary :malformed-observations])))
         (is (= :not-a-map (get-in report [:checks 0 :reason])))))))
 
+(deftest typed-accumulation-bootstrap-is-not-an-r2-tick
+  (let [declared (:channels (lint/read-declarations {}))]
+    (with-corpus
+      [{:timestamp lint/annotation-health-boundary
+        :observation (observation declared)}
+       {:record/kind :accumulation-bootstrap :accumulation-state {:ok true}}]
+      (fn [trace-dir]
+        (let [report (lint/lint-paths {:trace-dir trace-dir})]
+          (is (true? (get-in report [:summary :pass?])))
+          (is (= 1 (get-in report [:summary :forms])))
+          (is (= 1 (get-in report [:summary :auxiliary-records]))))))))
+
 (deftest generated-lean-is-directly-substitutable-for-the-interface-hole
   (let [{:keys [records]} (snapshot)]
     (with-corpus
