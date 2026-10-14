@@ -89,6 +89,24 @@
     (is (= :repeated-selection (:reason (ex-data failure))))
     (is (= "M-one" (:repeated-target (ex-data failure))))))
 
+(deftest consumed-live-learning-can-explicitly-authorize-a-repeat
+  (let [calls (atom 0)]
+    (with-redefs [runner/run-opportunity!
+                  (fn [_opts]
+                    (swap! calls inc)
+                    {:outcome :grounded-change
+                     :checkpoints
+                     {:selection
+                      {:judgment
+                       {:selected-mission "M-one"
+                        :outer-task-selection
+                        {:outer-learning
+                         {:status :live-consumed
+                          :repeat-authorized? true}}}}}})]
+      (with-out-str
+        (#'cli/continuous! {:count "3" :interval-seconds "0"})))
+    (is (= 3 @calls))))
+
 (deftest batch-brief-is-one-ordered-surface
   (with-redefs [brief/items
                 (fn [] [{:attempt-id "attempt-7" :batch-id "night"

@@ -1,8 +1,9 @@
 # E-wm-learning-loop — close outcome learning around outer target selection
 
 **Date:** 2026-10-14  
-**Status:** SHADOW — observation fold, posterior, and production shadow wired;
-live authority and continuation policy remain open.
+**Status:** COMPARE — durable outcome publication, posterior consumption, and
+live-capable selection are wired; tracked authority remains shadow pending the
+supervised promotion demonstration.
 **Driver:** War Machine. **Operator:** Joe. **Repository:** `futon2`.  
 **Relates:** [[E-outer-loop-improvement]] · [[E-close-the-loop]] ·
 `src/futon2/aif/meta_live_outer_selector.clj` ·
@@ -323,8 +324,9 @@ the nearest losing alternative for its selected target.
   only if needed after posterior learning is live.
 - [x] Provide an explicit target exemption carrier for stop-the-line repair or
   an authorized active flight; require the exemption on the certificate.
-- [ ] Retire the CLI's “repeat then stop” behavior once selection itself can
-  reason about continuation; retain it as a safety backstop until then.
+- [x] Retire the CLI's unconditional “repeat then stop” behavior: retain it as
+  a safety backstop unless a consumed live certificate explicitly authorizes
+  continuation.
 
 **Acceptance:** consecutive selection is possible when warranted, but static
 centrality alone cannot monopolize repeated clicks.
@@ -334,7 +336,7 @@ centrality alone cannot monopolize repeated clicks.
 - [x] Add an outer-learning certificate to each selection containing prior revision,
   observation source, update verdict, posterior revision, and consumption path.
 - [x] Make absent, refused, shadow-only, and consumed states distinct.
-- [ ] Teach the debugger to stop when an admissible terminal outcome fails to
+- [x] Teach the debugger to stop when an admissible terminal outcome fails to
   produce its required outer update, or when selection ignores a present learned
   state.
 - [x] Add report-card rows for learning update and learned-state consumption.

@@ -75,6 +75,12 @@
 (defn- selected-target [result]
   (get-in result [:checkpoints :selection :judgment :selected-mission]))
 
+(defn- learned-repeat-authorized? [result]
+  (let [certificate (get-in result [:checkpoints :selection :judgment
+                                    :outer-task-selection :outer-learning])]
+    (and (= :live-consumed (:status certificate))
+         (true? (:repeat-authorized? certificate)))))
+
 (defn- normalize-brief-item [item]
   (assoc item
          :achievement
@@ -110,7 +116,8 @@
                              :completed-clicks (inc n)
                              :last-result result})))
           (let [target (selected-target result)]
-            (when (and target (= previous-target target))
+            (when (and target (= previous-target target)
+                       (not (learned-repeat-authorized? result)))
               (throw (ex-info "Continuous full loop stopped after repeated selection"
                               {:outcome :continuous-stopped
                                :reason :repeated-selection

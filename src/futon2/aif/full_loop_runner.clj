@@ -71,6 +71,7 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
+            [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.selection-timing :as selection-timing]
@@ -7325,9 +7326,20 @@
       (finally
         (post-wm-status! (config raw-opts)
                          {:source "wm-full-loop" :status "idle"})))
-        final-result (assoc result :runner/source source-check :repair/publication publication)]
+        final-result (assoc result :runner/source source-check :repair/publication publication)
+        persisted (persist-run-record! raw-opts run-id started-at final-result)
+        learning-publication
+        (when-let [manifest-path (:outer-learning-manifest-path raw-opts)]
+          (run-phase!
+           raw-opts
+           {:opportunity-id (:click-id raw-opts)
+            :attempt-id (:attempt-id final-result)}
+           :outer-learning-publication
+           #(outer-learning-manifest/record! manifest-path (:run-record persisted))
+           #(select-keys % [:status :manifest-path :manifest-sha256])))]
     ;; The SAME identity annotates the result persist-run-record! sees; the
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
-    (merge final-result {:run/id run-id}
-           (persist-run-record! raw-opts run-id started-at final-result))))
+    (cond-> (merge final-result {:run/id run-id} persisted)
+      learning-publication
+      (assoc :outer-learning-publication learning-publication))))

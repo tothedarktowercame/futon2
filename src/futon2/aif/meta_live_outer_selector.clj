@@ -189,47 +189,57 @@
 (defn- exactly-one [xs]
   (when (= 1 (count xs)) (first xs)))
 
-(defn- learning-certificate [outer-learning scores shadow-selection live-selection]
+(defn- learning-certificate [outer-learning scores learned-selection baseline-selection]
   (let [belief (:belief outer-learning)
         controller (:controller outer-learning)
-        all-scored? (and (seq scores) (every? #(= :scored (:status %)) scores))]
+        mode (:mode outer-learning)
+        all-scored? (and (seq scores) (every? #(= :scored (:status %)) scores))
+        selected-score (some #(when (= (:selected learned-selection) (:target %)) %)
+                             scores)
+        repeat-authorized?
+        (or (= :present (get-in selected-score [:terms :continuation-evidence :status]))
+            (= :declared (get-in selected-score [:terms :controller-exemption])))]
     (cond
       (nil? outer-learning)
       {:schema :wm/outer-learning-certificate-v1
        :status :absent :reason :outer-learning-not-configured
        :re-arm-condition :supply-pinned-outer-learning-authority}
 
-      (not= :shadow (:mode outer-learning))
+      (not (contains? #{:shadow :live} mode))
       {:schema :wm/outer-learning-certificate-v1
        :status :refused :reason :outer-learning-mode-not-admitted
-       :mode (:mode outer-learning)
+       :mode mode
        :re-arm-condition (:re-arm-condition controller)}
 
       (not= :produced (:status belief))
       {:schema :wm/outer-learning-certificate-v1
        :status :refused :reason :outer-learning-state-unavailable
-       :mode :shadow :belief-refusal belief
+       :mode mode :belief-refusal belief
        :re-arm-condition (:re-arm-condition controller)}
 
-      (or (not all-scored?) (not= :selected (:status shadow-selection)))
+      (or (not all-scored?) (not= :selected (:status learned-selection)))
       {:schema :wm/outer-learning-certificate-v1
        :status :refused :reason :outer-learning-shadow-not-consumed
-       :mode :shadow :score-statuses (frequencies (map :status scores))
-       :selection shadow-selection
+       :mode mode :score-statuses (frequencies (map :status scores))
+       :selection learned-selection
        :re-arm-condition (:re-arm-condition controller)}
 
       :else
       {:schema :wm/outer-learning-certificate-v1
-       :status :shadow-consumed :mode :shadow
+       :status (if (= :live mode) :live-consumed :shadow-consumed) :mode mode
        :prior-revision (field/digest (:prior belief))
        :observation-source (:dataset-source-pin belief)
        :update-verdict (:counts belief)
        :posterior-revision (:source-pin belief)
        :consumption-path [:outer-task-selection :outer-learning :scores]
        :candidate-count (count scores)
-       :live-selection (:selected live-selection)
-       :shadow-selection (:selected shadow-selection)
-       :changed? (not= (:selected live-selection) (:selected shadow-selection))
+       :baseline-selection (:selected baseline-selection)
+       :shadow-selection (:selected learned-selection)
+       :live-selection (if (= :live mode)
+                         (:selected learned-selection)
+                         (:selected baseline-selection))
+       :changed? (not= (:selected baseline-selection) (:selected learned-selection))
+       :repeat-authorized? (boolean repeat-authorized?)
        :re-arm-condition (:re-arm-condition controller)})))
 
 (defn- repair-observation
@@ -550,7 +560,7 @@
         candidates (candidate-fn on-map snapshot)
         selection (meta/select {:snapshot snapshot :candidates candidates})
         learning-scores
-        (when (= :shadow (:mode outer-learning))
+        (when (contains? #{:shadow :live} (:mode outer-learning))
           (mapv (fn [candidate]
                   (outer-score/score
                    {:belief (:belief outer-learning)
@@ -575,11 +585,17 @@
                         :comparison :complete-union
                         :missing-channel-cost
                         (get-in outer-learning [:controller :missing-channel-cost])}))
+        effective-selection
+        (if (= :live (:mode outer-learning))
+          (or shadow-selection
+              {:schema meta/schema :status :refused
+               :reason :outer-learning-state-unavailable})
+          selection)
         receipt (canonical-receipt
                  on-map
                  (into repair-excluded
                        (concat standing-excluded ownership-excluded off-map))
-                 selection)
+                 effective-selection)
         certificate (learning-certificate outer-learning learning-scores
                                           shadow-selection selection)
         receipt (assoc receipt :outer-learning

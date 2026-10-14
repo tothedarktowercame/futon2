@@ -5,6 +5,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
@@ -86,6 +87,8 @@
                              (:cascade-feedback-path opts))))
         opts (update opts :pattern-graph-path #(or % default-pattern-graph-path))
         opts (update opts :pattern-graph-diff-dir #(or % default-pattern-graph-diff-dir))
+        opts (update opts :outer-learning-manifest-path
+                     #(or % outer-learning-manifest/default-path))
         ;; The production judge closes over OPTS before the runner adds its
         ;; other ledgers. Mint this collector here and pass the same identity
         ;; through, rather than timing into a disconnected atom.

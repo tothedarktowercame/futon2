@@ -109,6 +109,37 @@
     (is (= "restore manifest"
            (get-in receipt [:outer-learning :re-arm-condition])))))
 
+(deftest admitted-live-mode-uses-the-learned-selection
+  (let [prior (outer-belief/prior 1 :operator)
+        belief (outer-belief/build
+                {:prior prior
+                 :dataset {:status :produced :source-pin (pin "runs" "6")
+                           :rows [{:run/id "r" :click/id "c" :task {:id "M-a"}
+                                   :terminal-outcome {:class :grounded-progress}
+                                   :selected-want-effects
+                                   {:status :present
+                                    :counts {:reached 0 :progressed 0
+                                             :blocked 0 :untouched 1}}
+                                   :collateral-progress {:status :present}
+                                   :blocker {:status :absent}}]}})
+        receipt
+        (live/select-live
+         {:tasks tasks :fetch-snapshot (constantly snapshot)
+          :outer-learning
+          {:mode :live :belief belief :preference-authority :operator
+           :preference-costs
+           {:closure 0.0 :selected-want-progress 0.2
+            :grounded-collateral-progress 0.5 :typed-blocker 0.9
+            :abstention-or-failure 1.0}
+           :controller {:missing-channel-cost 1.0
+                        :recent-selection-cost 0.5
+                        :continuation-credit 0.7}}})]
+    (is (= :live-consumed (get-in receipt [:outer-learning :status])))
+    (is (= (get-in receipt [:outer-learning :shadow-selection])
+           (get-in receipt [:action :target])))
+    (is (= "M-a" (get-in receipt [:outer-learning :baseline-selection])))
+    (is (false? (get-in receipt [:outer-learning :repeat-authorized?])))))
+
 (deftest continuation-evidence-can-justify-reselecting-a-recent-target
   (let [belief (outer-belief/build
                 {:prior (outer-belief/prior 1 :operator-provisional)
