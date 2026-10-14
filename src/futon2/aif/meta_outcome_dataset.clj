@@ -152,6 +152,18 @@
       :else
       {:status :absent :reason :no-typed-blocker-recorded})))
 
+(defn- pattern-reinforcement [record]
+  (let [feedback (:cascade-feedback record)
+        applications (get-in feedback [:patterns :applications])]
+    (if (= :verified (:status feedback))
+      {:status :present
+       :source [:cascade-feedback :patterns]
+       :selected (count (get-in feedback [:patterns :selected] []))
+       :positive (count (get-in feedback [:patterns :positive-reinforcement] []))
+       :no-want-effect (count (filter #(= :no-want-effect (:status %))
+                                      applications))}
+      {:status :absent :reason :verified-pattern-feedback-not-recorded})))
+
 (defn- collateral-progress [outcome want-effects artifact]
   (let [counts (:counts want-effects)
         no-selected-effect? (and (= :present (:status want-effects))
@@ -243,6 +255,7 @@
                                :collateral-progress
                                (collateral-progress outcome want-effects artifact)
                                :blocker (blocker record)
+                               :pattern-reinforcement (pattern-reinforcement record)
                                :quality (quality record selection)
                                :projection-evidence
                                {:target-source (if (= :canonical-outer (:source selection))

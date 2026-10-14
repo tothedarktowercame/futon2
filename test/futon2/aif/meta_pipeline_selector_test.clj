@@ -59,6 +59,25 @@
              (:reason (selector/select {:snapshot partial
                                         :candidates [(candidate "M-a" 0.2)]})))))))
 
+(deftest complete-union-comparison-makes-missingness-explicit
+  (let [a (candidate "M-a" 0.2)
+        b (assoc (candidate "M-b" 0.3) :channels
+                 {:learned-cost {:value 0.1 :freshness :current
+                                 :source (pin "belief.edn" "e")}})
+        missing-cost
+        (selector/select {:snapshot snapshot :candidates [a b]
+                          :comparison :complete-union
+                          :missing-channel-cost 1.0})
+        pair (first (:pairwise missing-cost))]
+    (is (= :selected (:status missing-cost)))
+    (is (= "M-b" (:selected missing-cost)))
+    (is (= :complete-union (:comparison pair)))
+    (is (= [:current-priority-cost] (:missing-right pair)))
+    (is (= [:learned-cost] (:missing-left pair)))
+    (is (= :missing-channel-cost-required
+           (:reason (selector/select {:snapshot snapshot :candidates [a b]
+                                      :comparison :complete-union}))))))
+
 (deftest feasibility-is-support-and-map-membership-is-required
   (let [infeasible (assoc-in (candidate "M-a" 0.0)
                              [:support :automated-feasibility] :infeasible)

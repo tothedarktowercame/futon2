@@ -79,6 +79,9 @@
                   :outer-learning
                   {:mode :shadow :belief belief
                    :preference-authority :operator-provisional
+                   :controller {:missing-channel-cost 1.0
+                                :recent-selection-cost 0.25
+                                :continuation-credit 0.35}
                    :preference-costs
                    {:closure 0.0 :selected-want-progress 0.2
                     :grounded-collateral-progress 0.5 :typed-blocker 0.9
@@ -86,7 +89,72 @@
     (is (= "M-a" (get-in receipt [:action :target])))
     (is (= :shadow (get-in receipt [:outer-learning :mode])))
     (is (= 2 (count (get-in receipt [:outer-learning :scores]))))
+    (is (= :complete-union
+           (get-in receipt [:outer-learning :selection :pairwise 0 :comparison])))
+    (is (= :shadow-consumed (get-in receipt [:outer-learning :status])))
+    (is (map? (get-in receipt [:outer-learning :posterior-revision])))
     (is (boolean? (get-in receipt [:outer-learning :changed?])))))
+
+(deftest unavailable-learning-state-is-a-typed-certificate-refusal
+  (let [receipt (live/select-live
+                 {:tasks tasks :fetch-snapshot (constantly snapshot)
+                  :outer-learning
+                  {:mode :shadow
+                   :belief {:status :refused :reason :manifest-unavailable}
+                   :controller {:missing-channel-cost 1.0
+                                :re-arm-condition "restore manifest"}}})]
+    (is (= :refused (get-in receipt [:outer-learning :status])))
+    (is (= :outer-learning-state-unavailable
+           (get-in receipt [:outer-learning :reason])))
+    (is (= "restore manifest"
+           (get-in receipt [:outer-learning :re-arm-condition])))))
+
+(deftest continuation-evidence-can-justify-reselecting-a-recent-target
+  (let [belief (outer-belief/build
+                {:prior (outer-belief/prior 1 :operator-provisional)
+                 :dataset {:status :produced :source-pin (pin "runs" "8")
+                           :rows [{:run/id "r1" :click/id "c1" :task {:id "M-a"}
+                                   :terminal-outcome {:class :grounded-progress}
+                                   :selected-want-effects
+                                   {:status :present
+                                    :counts {:reached 0 :progressed 0
+                                             :blocked 0 :untouched 1}}
+                                   :collateral-progress {:status :present}
+                                   :blocker {:status :absent}}]}})
+        base {:mode :shadow :belief belief
+              :preference-authority :operator
+              :preference-costs
+              {:closure 0.0 :selected-want-progress 0.2
+               :grounded-collateral-progress 0.5 :typed-blocker 0.9
+               :abstention-or-failure 1.0}
+              :controller {:missing-channel-cost 1.0
+                           :recent-selection-cost 0.5
+                           :continuation-credit 0.7}}
+        equal-candidates
+        (fn [task-rows _]
+          (mapv (fn [{:keys [id kind]}]
+                  {:id id :kind kind
+                   :support {:automated-feasibility :supported}
+                   :channels {:equal-cost {:value 0.5 :freshness :current
+                                           :source (pin "equal" "7")}}})
+                task-rows))
+        without (live/select-live {:tasks tasks :fetch-snapshot (constantly snapshot)
+                                   :candidate-fn equal-candidates
+                                   :outer-learning base})
+        continuation {:status :present :next-step "Complete the next criterion"
+                      :acceptance-condition "Pinned criterion becomes observed"
+                      :evidence {:path "M-a.md" :sha256 (apply str (repeat 64 "a"))}}
+        with (live/select-live
+              {:tasks tasks :fetch-snapshot (constantly snapshot)
+               :candidate-fn equal-candidates
+               :outer-learning (assoc-in base [:controller :continuations "M-a"]
+                                         continuation)})]
+    (is (= "M-b" (get-in without [:outer-learning :shadow-selection])))
+    (is (= "M-a" (get-in with [:outer-learning :shadow-selection])))
+    (is (= continuation
+           (->> (get-in with [:outer-learning :scores])
+                (filter #(= "M-a" (:target %))) first
+                :terms :continuation-evidence)))))
 
 (deftest missing-or-equal-evidence-refuses-with-complete-support
   (testing "missing is absence"

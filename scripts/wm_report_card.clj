@@ -337,7 +337,9 @@
 
 (defn- outcome-section [record]
   (let [falsifier (or (get-in record [:failure :detail :reviewer-falsifier])
-                      (get-in record [:terminal :reviewer-falsifier]))]
+                      (get-in record [:terminal :reviewer-falsifier]))
+        execution (get-in record [:cascade-feedback :mission-state
+                                  :execution-outcomes])]
     {:commits (let [xs (distinct (keep identity
                             [(:grounded-commit record)
                              (get-in record [:failure :detail :commit])
@@ -351,6 +353,30 @@
                     (get-in record [:failure :detail :artifact-binding])
                     (absent "grounding absent"))
      :run-output (or (:run-output record) (absent "run-output feature card absent"))
+     :selected-want-effects
+     (if (= :verified (:status execution))
+       {:status :present
+        :counts (into (sorted-map)
+                      (map (fn [class]
+                             [class (count (get-in execution [:by-class class] []))]))
+                      [:reached :progressed :blocked :untouched])
+        :source [:cascade-feedback :mission-state :execution-outcomes]}
+       (absent "verified selected-want accounting absent"))
+     :collateral-progress
+     (let [artifact (get-in record [:cascade-feedback :artifact])
+           outcome (or (get-in record [:terminal-receipt :outcome])
+                       (get-in record [:run-output :outcome]))]
+       (if (and (= :grounded-progress outcome) (true? (:grounded? artifact)))
+         {:status :present :artifact artifact
+          :selected-want-effect
+          (if (= :verified (:status execution))
+            (+ (count (get-in execution [:by-class :reached] []))
+               (count (get-in execution [:by-class :progressed] [])))
+            (absent "verified selected-want accounting absent"))}
+         (absent "grounded collateral progress absent")))
+     :outer-learning
+     (or (get-in record [:outer-task-selection :outer-learning])
+         (absent "outer-learning certificate absent"))
      :delivery-qa (first-key record :delivery-qa "Field Desk delivery-QA note absent")
      :morning-brief-addendum-id
          (or (some-> (first (find-paths record

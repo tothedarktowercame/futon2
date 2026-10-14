@@ -15,4 +15,9 @@
                                    :wall-clock-ms])))
     (is (= 4223565 (get-in learned [:targets target :resource-use :tokens])))
     (is (= :grounded-collateral-progress
-           (get-in learned [:events 0 :observation :class])))))
+           (get-in learned [:events 0 :observation :class])))
+    (let [event (first (:events learned))]
+      (is (= :applied (:update event)))
+      (is (= {:selected 4 :positive 0 :no-want-effect 4}
+             (select-keys (get-in event [:row-evidence :pattern-reinforcement])
+                          [:selected :positive :no-want-effect]))))))

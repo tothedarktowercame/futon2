@@ -8,6 +8,18 @@
           :grounded-collateral-progress 0.5
           :typed-blocker 0.9
           :abstention-or-failure 1.0}}
+ :controller
+ {:comparison :complete-union
+  :missing-channel-cost 1.0
+  :recent-selection-cost 0.25
+  :continuation-credit 0.35
+  :wall-clock-budget-ms 900000
+  :token-budget 5000000
+  :unobserved-resource-cost 0.5
+  :resource-weight 0.1
+  :continuations {}
+  :exempt-targets []
+  :re-arm-condition "Promote shadow to live only after pinned counterfactual selection tests and a supervised consumption certificate pass."}
  :run-records
  [{:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-14-6a64c83f-4732-4af1-b286-561f22109667.edn"
    :sha256 "c4570dbceee19f9fad0865f8ab724d32aa504804a27d435521e59c1ad21414a8"}]}

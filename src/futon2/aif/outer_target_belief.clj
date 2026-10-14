@@ -116,14 +116,26 @@
                                      :last-observation identity})
                     :events (conj events
                                   {:identity identity :target target
-                                   :observation obs :update :applied})
+                                   :observation obs :update :applied
+                                   :row-evidence
+                                   (select-keys row [:selected-want-effects
+                                                     :grounded-artifact
+                                                     :collateral-progress
+                                                     :pattern-reinforcement
+                                                     :elapsed :token-use :blocker])})
                     :seen (conj seen identity)})
 
                  :else
                  {:targets targets
                   :events (conj events
                                 {:identity identity :target target
-                                 :observation obs :update :not-applied})
+                                 :observation obs :update :not-applied
+                                 :row-evidence
+                                 (select-keys row [:selected-want-effects
+                                                   :grounded-artifact
+                                                   :collateral-progress
+                                                   :pattern-reinforcement
+                                                   :elapsed :token-use :blocker])})
                   :seen (conj seen identity)})))
            {:targets {} :events [] :seen #{}}
            (:rows dataset))]

@@ -38,6 +38,19 @@
 (defn- terminal-selection-condition [judgement]
   (runner/selection-terminal-condition :selection judgement))
 
+(deftest refused-outer-learning-becomes-a-debugger-condition
+  (let [condition
+        (runner/selection-terminal-condition
+         :selection
+         (assoc selected-judgement :outer-task-selection
+                {:outer-learning {:schema :wm/outer-learning-certificate-v1
+                                  :status :refused
+                                  :reason :outer-learning-state-unavailable}}))]
+    (is (instance? clojure.lang.ExceptionInfo condition))
+    (is (= :wm/outer-learning-not-consumed (:kind (ex-data condition))))
+    (is (= :outer-learning-state-unavailable
+           (get-in (ex-data condition) [:outer-learning :reason])))))
+
 (defn- wait-for-stop
   ([run-id] (wait-for-stop run-id nil))
   ([run-id running]

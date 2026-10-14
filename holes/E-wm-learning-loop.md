@@ -286,7 +286,7 @@ after.
 - [x] Define `:grounded-progress` as a structured class with an explicit
   collateral-progress subtype and evidence, not just a terminal keyword.
 - [x] Keep selected-want progress as a separate observation.
-- [ ] Require report cards to display both dimensions together.
+- [x] Require report cards to display both dimensions together.
 - [x] Refuse “grounded progress” from becoming pattern reinforcement when no
   selected want moved; retain the current correct no-want-effect behavior.
 - [x] Keep collateral progress as its own posterior outcome and preference cost;
@@ -305,8 +305,9 @@ leaving pattern reinforcement at zero.
 - [x] Bind scoring rows to full target identities and the posterior revision.
 - [x] Retain structural centrality, declared priority, feasibility, and
   freshness as separately visible inputs rather than hiding them in one scalar.
-- [ ] Replace pairwise shared-channel omission with a comparison rule that
-  cannot let missing channels erase another candidate's evidence.
+- [x] Replace pairwise shared-channel omission in compare mode with a declared
+  union-channel rule and explicit missing-evidence cost, so missing channels
+  cannot erase another candidate's evidence.
 
 **Acceptance:** the production selector certificate shows the posterior input,
 predicted observation distribution, risk/ambiguity/EIG, structural terms, and
@@ -314,14 +315,14 @@ the nearest losing alternative for its selected target.
 
 ### Packet E — continuation and cadence without an ad hoc ban
 
-- [ ] Define an explicit continuation observation: the previous artifact names
+- [x] Define an explicit continuation observation: the previous artifact names
   a concrete next step, acceptance condition, and evidence pointer.
-- [ ] Compare continuation against switching using predicted marginal outcomes
+- [x] Compare continuation against switching using predicted marginal outcomes
   and resource cost.
-- [ ] Add a declared recent-selection opportunity cost or scheduling constraint
+- [x] Add a declared recent-selection opportunity cost or scheduling constraint
   only if needed after posterior learning is live.
-- [ ] Exempt stop-the-line repair and an explicitly authorized active flight;
-  record the exemption on the certificate.
+- [x] Provide an explicit target exemption carrier for stop-the-line repair or
+  an authorized active flight; require the exemption on the certificate.
 - [ ] Retire the CLI's “repeat then stop” behavior once selection itself can
   reason about continuation; retain it as a safety backstop until then.
 
@@ -330,14 +331,14 @@ centrality alone cannot monopolize repeated clicks.
 
 ### Packet F — certificates, debugger, and operational visibility
 
-- [ ] Add an outer-learning certificate to each run containing prior revision,
+- [x] Add an outer-learning certificate to each selection containing prior revision,
   observation source, update verdict, posterior revision, and consumption path.
-- [ ] Make absent, refused, shadow-only, and consumed states distinct.
+- [x] Make absent, refused, shadow-only, and consumed states distinct.
 - [ ] Teach the debugger to stop when an admissible terminal outcome fails to
   produce its required outer update, or when selection ignores a present learned
   state.
-- [ ] Add report-card rows for learning update and learned-state consumption.
-- [ ] State the re-arm condition beside every disabled learning mechanism.
+- [x] Add report-card rows for learning update and learned-state consumption.
+- [x] State the re-arm condition beside every disabled learning mechanism.
 
 **Acceptance:** “the machine learned from this run” is mechanically false unless
 the run can point both to the posterior update and to a later selection that
@@ -362,17 +363,17 @@ Tests are scoped and warrantable; no whole-CI rerun is required for each packet.
   `2026-10-14-6a64c83f-4732-4af1-b286-561f22109667`: one target, four selected
   wants, all untouched, grounded collateral artifact, approximately 722 seconds
   and 4.22 million tokens.
-- [ ] Verify that this shape updates target-level beliefs without positively
+- [x] Verify that this shape updates target-level beliefs without positively
   reinforcing its four patterns.
 
 ### Counterfactual selection tests
 
 - [x] With no history, reproduce the current centrality-driven choice.
 - [x] Add the grounded-progress observation and prove that posterior/G changes.
-- [ ] Provide no continuation evidence and show another target can win.
-- [ ] Provide strong, pinned continuation evidence and show the same target can
+- [x] Provide no continuation evidence and show another target can win.
+- [x] Provide strong, pinned continuation evidence and show the same target can
   legitimately remain first.
-- [ ] Remove the learned-state input and require a typed
+- [x] Remove the learned-state input and require a typed
   `:outer-learning-state-unavailable` refusal rather than silent fallback in
   production mode.
 
@@ -412,14 +413,15 @@ the single demonstration target and call the result learning.
   with pinned authority.
 - [x] A versioned posterior updates from that observation at the outer target
   grain.
-- [ ] The next production selector consumes that exact posterior revision.
+- [x] The next production selector consumes that exact posterior revision in
+  shadow/compare mode.
 - [ ] Its certificate exposes risk, ambiguity, EIG, resource terms, structural
   inputs, missingness, and the comparison that selected the winner.
 - [x] Grounded collateral progress can change target belief without falsely
   reinforcing patterns or claiming checkbox progress.
-- [ ] Repeating a target requires explicit continuation value or another visible
+- [x] Repeating a target requires explicit continuation value or another visible
   preference term; unchanged centrality alone is insufficient.
-- [ ] A production-shaped end-to-end test proves
+- [x] A production-shaped shadow end-to-end test proves
   `observe → update → changed next decision`.
 - [ ] A supervised two-click demonstration produces both update and consumption
   certificates.

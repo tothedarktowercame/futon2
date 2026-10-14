@@ -136,16 +136,29 @@
           frequencies
           (into (sorted-map)))}))
 
-(defn- pairwise [a b]
-  (let [shared (set/intersection (set (keys (:channels a)))
-                                 (set (keys (:channels b))))]
-    (if (empty? shared)
+(defn- pairwise [a b comparison missing-channel-cost]
+  (let [a-channels (set (keys (:channels a)))
+        b-channels (set (keys (:channels b)))
+        channels (if (= :complete-union comparison)
+                   (set/union a-channels b-channels)
+                   (set/intersection a-channels b-channels))]
+    (if (empty? channels)
       {:status :unrankable :reason :no-shared-current-channel
        :left (:id a) :right (:id b) :shared-channels []}
-      (let [ga (reduce + (map #(get-in a [:channels % :value]) shared))
-            gb (reduce + (map #(get-in b [:channels % :value]) shared))]
+      (let [value (fn [candidate channel]
+                    (if-let [observation (get-in candidate [:channels channel])]
+                      (:value observation)
+                      missing-channel-cost))
+            ga (reduce + (map #(value a %) channels))
+            gb (reduce + (map #(value b %) channels))]
         {:status :ranked :left (:id a) :right (:id b)
-         :shared-channels (vec (sort shared))
+         :comparison comparison
+         :compared-channels (vec (sort channels))
+         :shared-channels (vec (sort (set/intersection a-channels b-channels)))
+         :missing-channel-cost (when (= :complete-union comparison)
+                                 missing-channel-cost)
+         :missing-left (vec (sort (set/difference channels a-channels)))
+         :missing-right (vec (sort (set/difference channels b-channels)))
          :g-left ga :g-right gb
          :winner (cond (< ga gb) (:id a) (> ga gb) (:id b) :else :tie)
          :epistemic-value-nats 0.0}))))
@@ -157,7 +170,8 @@
   are excluded; `:unknown` feasibility is retained as unknown support rather
   than converted to failure.  Selection requires one candidate to beat every
   alternative on shared current channels."
-  [{:keys [snapshot candidates]}]
+  [{:keys [snapshot candidates comparison missing-channel-cost]
+    :or {comparison :shared-only}}]
   (let [snapshot-errors* (snapshot-errors snapshot)]
     (cond
       (seq snapshot-errors*)
@@ -165,6 +179,12 @@
 
       (not (vector? candidates))
       (refusal :candidate-field-invalid {:expected :vector})
+
+      (and (= :complete-union comparison)
+           (not (and (number? missing-channel-cost)
+                     (<= 0.0 (double missing-channel-cost) 1.0))))
+      (refusal :missing-channel-cost-required
+               {:comparison comparison :value missing-channel-cost})
 
       :else
       (let [analysis (pipeline-identity-analysis (:graph snapshot))
@@ -202,7 +222,8 @@
           :else
           (let [pairs (vec (for [i (range (count admitted))
                                  j (range (inc i) (count admitted))]
-                             (pairwise (nth admitted i) (nth admitted j))))
+                             (pairwise (nth admitted i) (nth admitted j)
+                                       comparison missing-channel-cost)))
                 unrankable (filterv #(= :unrankable (:status %)) pairs)
                 losses (frequencies (keep (fn [{:keys [winner left right]}]
                                             (when (and winner (not= :tie winner))

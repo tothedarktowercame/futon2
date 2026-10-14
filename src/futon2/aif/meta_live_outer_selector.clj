@@ -189,6 +189,49 @@
 (defn- exactly-one [xs]
   (when (= 1 (count xs)) (first xs)))
 
+(defn- learning-certificate [outer-learning scores shadow-selection live-selection]
+  (let [belief (:belief outer-learning)
+        controller (:controller outer-learning)
+        all-scored? (and (seq scores) (every? #(= :scored (:status %)) scores))]
+    (cond
+      (nil? outer-learning)
+      {:schema :wm/outer-learning-certificate-v1
+       :status :absent :reason :outer-learning-not-configured
+       :re-arm-condition :supply-pinned-outer-learning-authority}
+
+      (not= :shadow (:mode outer-learning))
+      {:schema :wm/outer-learning-certificate-v1
+       :status :refused :reason :outer-learning-mode-not-admitted
+       :mode (:mode outer-learning)
+       :re-arm-condition (:re-arm-condition controller)}
+
+      (not= :produced (:status belief))
+      {:schema :wm/outer-learning-certificate-v1
+       :status :refused :reason :outer-learning-state-unavailable
+       :mode :shadow :belief-refusal belief
+       :re-arm-condition (:re-arm-condition controller)}
+
+      (or (not all-scored?) (not= :selected (:status shadow-selection)))
+      {:schema :wm/outer-learning-certificate-v1
+       :status :refused :reason :outer-learning-shadow-not-consumed
+       :mode :shadow :score-statuses (frequencies (map :status scores))
+       :selection shadow-selection
+       :re-arm-condition (:re-arm-condition controller)}
+
+      :else
+      {:schema :wm/outer-learning-certificate-v1
+       :status :shadow-consumed :mode :shadow
+       :prior-revision (field/digest (:prior belief))
+       :observation-source (:dataset-source-pin belief)
+       :update-verdict (:counts belief)
+       :posterior-revision (:source-pin belief)
+       :consumption-path [:outer-task-selection :outer-learning :scores]
+       :candidate-count (count scores)
+       :live-selection (:selected live-selection)
+       :shadow-selection (:selected shadow-selection)
+       :changed? (not= (:selected live-selection) (:selected shadow-selection))
+       :re-arm-condition (:re-arm-condition controller)})))
+
 (defn- repair-observation
   "Read the canonical finding pinned by a repair ticket. Returns either an
   exact root observation or a typed unresolved record; neither is rankable."
@@ -513,7 +556,8 @@
                    {:belief (:belief outer-learning)
                     :target (:id candidate)
                     :preference-costs (:preference-costs outer-learning)
-                    :preference-authority (:preference-authority outer-learning)}))
+                    :preference-authority (:preference-authority outer-learning)
+                    :controller (:controller outer-learning)}))
                 candidates))
         shadow-candidates
         (when learning-scores
@@ -527,23 +571,21 @@
                 candidates learning-scores))
         shadow-selection
         (when shadow-candidates
-          (meta/select {:snapshot snapshot :candidates shadow-candidates}))
+          (meta/select {:snapshot snapshot :candidates shadow-candidates
+                        :comparison :complete-union
+                        :missing-channel-cost
+                        (get-in outer-learning [:controller :missing-channel-cost])}))
         receipt (canonical-receipt
                  on-map
                  (into repair-excluded
                        (concat standing-excluded ownership-excluded off-map))
                  selection)
-        receipt (cond-> receipt
-                  learning-scores
-                  (assoc :outer-learning
-                         {:schema :wm/outer-learning-shadow-v1
-                          :mode :shadow
-                          :live-selection (:selected selection)
-                          :shadow-selection (:selected shadow-selection)
-                          :changed? (not= (:selected selection)
-                                         (:selected shadow-selection))
-                          :scores learning-scores
-                          :selection shadow-selection}))]
+        certificate (learning-certificate outer-learning learning-scores
+                                          shadow-selection selection)
+        receipt (assoc receipt :outer-learning
+                       (cond-> certificate
+                         learning-scores (assoc :scores learning-scores
+                                                :selection shadow-selection)))]
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot

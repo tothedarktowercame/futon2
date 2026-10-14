@@ -39,7 +39,8 @@
           :preference-authority
           {:kind (get-in authority [:preferences :authority])
            :source {:path path :sha256 (field/sha256 bytes)}}
-          :preference-costs (get-in authority [:preferences :costs])}))
+          :preference-costs (get-in authority [:preferences :costs])
+          :controller (:controller authority)}))
      (catch Throwable t
        {:mode :shadow
         :belief {:status :refused :reason :learning-authority-unavailable

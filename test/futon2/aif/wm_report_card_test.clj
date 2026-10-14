@@ -66,6 +66,31 @@
     (is (= :absent (get-in result [:sections 3 :data :run-output :status])))
     (is (re-find #"absent: chosen target absent" (card/markdown result)))))
 
+(deftest card-displays-selected-want-collateral-and-learning-dimensions
+  (let [record
+        (-> full-record
+            (assoc-in [:terminal-receipt :outcome] :grounded-progress)
+            (assoc :cascade-feedback
+                   {:mission-state
+                    {:execution-outcomes
+                     {:status :verified
+                      :by-class {:reached [] :progressed [] :blocked []
+                                 :untouched [["M-x" :want/a]]}}}
+                    :artifact {:repo "repo" :commit "abc" :grounded? true}})
+            (assoc :outer-task-selection
+                   {:outer-learning {:schema :wm/outer-learning-certificate-v1
+                                     :status :shadow-consumed
+                                     :posterior-revision {:sha256 "posterior"}}}))
+        result (card/build-card record "fixture.edn" snap)
+        outcome (get-in result [:sections 3 :data])
+        md (card/markdown result)]
+    (is (= {:blocked 0 :progressed 0 :reached 0 :untouched 1}
+           (get-in outcome [:selected-want-effects :counts])))
+    (is (= 0 (get-in outcome [:collateral-progress :selected-want-effect])))
+    (is (= :shadow-consumed (get-in outcome [:outer-learning :status])))
+    (is (re-find #"selected-want-effects" md))
+    (is (re-find #"outer-learning" md))))
+
 (deftest public-html-removes-host-paths-and-secret-url-components
   (let [r (-> full-record
               (assoc :run/id "public")

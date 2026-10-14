@@ -38,6 +38,11 @@
        :by-class {:reached [] :progressed [] :blocked []
                   :untouched [["M-one" :want/a]]}}}
      :artifact {:repo "/repos/work" :commit "abc123" :grounded? true}
+     :patterns {:selected [:pattern/a]
+                :applications [{:pattern :pattern/a :status :no-want-effect
+                                :reinforcement :none}]
+                :positive-reinforcement []}
+     :status :verified
      :blocker {:status :absent :reason :verified-grounded-work}}
     :registered-run/timing {:status :typed-missing}
     :registered-run/model-usage {:status :partial
@@ -85,6 +90,9 @@
            (:grounded-artifact two)))
     (is (= :selected-want-accounting-not-recorded
            (get-in one [:selected-want-effects :reason])))
+    (is (= {:status :present :source [:cascade-feedback :patterns]
+            :selected 1 :positive 0 :no-want-effect 1}
+           (:pattern-reinforcement two)))
     (is (= ["run-2" "run-1"] (mapv :run/id (:rows result))))
     (is (= {:prior-occurrences 0 :position 1} (:repetition two)))
     (is (= {:prior-occurrences 1 :position 2} (:repetition one)))

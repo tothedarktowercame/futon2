@@ -29,3 +29,28 @@
            (get-in unseen [:prediction :grounded-collateral-progress])))
     (is (= costs costs))
     (is (= 0.0 (get-in a [:terms :expected-information-gain])))))
+
+(deftest cadence-cost-requires-pinned-continuation-to-be-waived
+  (let [learned (belief/build
+                 {:prior (belief/prior 1)
+                  :dataset {:status :produced :source-pin {:path "runs" :sha256 "abc"}
+                            :rows [{:run/id "r" :click/id "c" :task {:id "M-a"}
+                                    :terminal-outcome {:class :closure}
+                                    :selected-want-effects {:status :absent}
+                                    :collateral-progress {:status :absent}
+                                    :blocker {:status :absent}}]}})
+        base {:belief learned :target "M-a" :preference-costs costs
+              :preference-authority :operator
+              :controller {:recent-selection-cost 0.25
+                           :continuation-credit 0.35}}
+        without (score/score base)
+        with (score/score
+              (assoc-in base [:controller :continuations "M-a"]
+                        {:status :present :next-step "Measure uptake"
+                         :acceptance-condition "A pinned report exists"
+                         :evidence {:path "mission.md"
+                                    :sha256 (apply str (repeat 64 "a"))}}))]
+    (is (= 0.25 (get-in without [:terms :recent-selection-opportunity-cost])))
+    (is (= 0.0 (get-in with [:terms :recent-selection-opportunity-cost])))
+    (is (= 0.35 (get-in with [:terms :continuation-credit])))
+    (is (< (:g with) (:g without)))))
