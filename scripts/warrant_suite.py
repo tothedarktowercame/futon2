@@ -30,13 +30,15 @@ import sys
 import tempfile
 import urllib.request
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-REPO = Path("/home/joe/code/futon2")
+REPO = Path(__file__).resolve().parents[1]
 FUTON3C = Path("/home/joe/code/futon3c")
-INDEX = REPO / "data/test-warrants/index.json"
 ARTIFACTS = Path("/home/joe/code/storage/test-registry/futon2-suite")
+INDEX = Path(os.environ.get("WARRANT_INDEX", str(ARTIFACTS / "index.json")))
+SEED_INDEX = REPO / "data/test-warrants/index.json"
 AGENCY = os.environ.get("AGENCY_URL", "http://localhost:7070")
 # These write the same on-disk artifact (wm08 Route-A re-expression under
 # holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/), so running
@@ -54,12 +56,12 @@ def namespaces():
     return out
 
 
-def code_paths(test_path):
+def code_paths(test_path, root=REPO):
     # The declared code scope is exact-match checked, so keep it to the
     # namespace's own source file; everything else it loads is covered by
     # the recorded load closure.
     src = "src/" + test_path[len("test/"):].replace("_test.clj", ".clj")
-    return [src] if (REPO / src).is_file() else [test_path]
+    return [src] if (Path(root) / src).is_file() else [test_path]
 
 
 def edn_str(s):
@@ -108,14 +110,14 @@ def check(entry):
     return {"warrant?": c.get("warrant?"), "reason": c.get("reason")}
 
 
-def run(ns, test_path):
+def run(ns, test_path, run_root, head, author):
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    root = Path(run_root)
     spec = ("{:repo-root %s :code-paths %s :test-paths %s :command %s "
             ":author %s :subject-id %s :artifact-dir %s :output :json}"
-            % (edn_str(str(REPO)), edn_vec(code_paths(test_path)), edn_vec([test_path]),
-               edn_vec(["clojure", "-M:test", "-n", ns]), edn_str(AUTHOR),
+            % (edn_str(str(root)), edn_vec(code_paths(test_path, root)), edn_vec([test_path]),
+               edn_vec(["clojure", "-M:test", "-n", ns]), edn_str(author),
                edn_str("futon2-suite/" + ns), edn_str(str(ARTIFACTS / ns / stamp))))
-    head = git("rev-parse", "HEAD")
     result = registry("run", spec)
     entry_id = result.get("evidence/id") or result.get("id")
     payload = result.get("payload") or {}
@@ -128,12 +130,30 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("-j", type=int, default=3)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--pinned", metavar="REV",
+                    help="run stale namespaces in one clean detached worktree")
+    ap.add_argument("--summary-json", action="store_true",
+                    help="print only the final machine-readable summary")
+    ap.add_argument("--author", default=AUTHOR,
+                    help="identity recorded on newly minted warrants")
     ap.add_argument("ns", nargs="*")
     a = ap.parse_args()
     nss = namespaces()
     if a.ns:
         nss = {k: v for k, v in nss.items() if k in a.ns}
-    index = json.loads(INDEX.read_text()) if INDEX.exists() else {}
+    seed = INDEX if INDEX.exists() else SEED_INDEX
+    index = json.loads(seed.read_text()) if seed.exists() else {}
+    head = git("rev-parse", a.pinned or "HEAD")
+    run_root = REPO
+    worktree = None
+    if a.pinned and not a.dry_run:
+        worktree = REPO.parent / ("wt-warrant-suite-" + head[:8] + "-" + uuid.uuid4().hex[:8])
+        p = subprocess.run(["git", "worktree", "add", "--detach", str(worktree), head],
+                           cwd=REPO, text=True, capture_output=True)
+        if p.returncode:
+            print(p.stderr, file=sys.stderr)
+            return 2
+        run_root = worktree
 
     def one(ns):
         entry = index.get(ns)
@@ -145,7 +165,7 @@ def main():
                 return ns, "stale:" + str(c.get("reason")), entry
         elif a.dry_run:
             return ns, "stale:no-warrant", entry
-        new = run(ns, nss[ns])
+        new = run(ns, nss[ns], run_root, head, a.author)
         return ns, ("minted" if new["warrant?"] else "failed"), new
 
     tally = {}
@@ -156,18 +176,25 @@ def main():
         for ns in sorted(n for n in nss if n in SERIAL):
             yield one(ns)
 
-    for ns, status, entry in results():
-        if True:
+    try:
+        for ns, status, entry in results():
             tally[status.split(":")[0]] = tally.get(status.split(":")[0], 0) + 1
             if status in ("minted", "failed"):
                 index[ns] = entry
                 INDEX.parent.mkdir(parents=True, exist_ok=True)
                 INDEX.write_text(json.dumps(index, indent=1, sort_keys=True))
-            print(status, ns, entry.get("entry-id") if entry else "",
-                  entry.get("results") if entry and status == "failed" else "",
-                  flush=True)
-    print(json.dumps(tally), flush=True)
-    return 1 if tally.get("failed") else 0
+            if not a.summary_json:
+                print(status, ns, entry.get("entry-id") if entry else "",
+                      entry.get("results") if entry and status == "failed" else "",
+                      flush=True)
+    finally:
+        if worktree is not None:
+            subprocess.run(["git", "worktree", "remove", "--force", str(worktree)],
+                           cwd=REPO, capture_output=True)
+    summary = {"total": len(nss), **tally,
+               "complete": tally.get("fresh", 0) + tally.get("minted", 0) == len(nss)}
+    print(json.dumps(summary, sort_keys=True), flush=True)
+    return 0 if summary["complete"] else 1
 
 
 if __name__ == "__main__":

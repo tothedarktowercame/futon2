@@ -13,6 +13,7 @@ BG = FUTON3C + "/scripts/bg.py"
 RELOAD_COMMAND = (
     "cd /home/joe/code/futon3c && clojure -M:dev-admin load-file " + SOURCE
 )
+WARRANT_SUITE = ROOT + "/scripts/warrant_suite.py"
 
 
 def run(argv, cwd=ROOT):
@@ -48,6 +49,25 @@ def latest_clean_receipt(head):
     return None, "no-clean-bounded-receipt-for-current-commit"
 
 
+def current_warrant_coverage():
+    """Return complete, currently revalidated namespace-warrant coverage."""
+    checked = run(["python3", WARRANT_SUITE, "--dry-run", "--summary-json",
+                   "-j", "16"])
+    lines = [line for line in checked.stdout.splitlines() if line.startswith("{")]
+    try:
+        summary = json.loads(lines[-1]) if lines else None
+    except json.JSONDecodeError:
+        summary = None
+    complete = (checked.returncode == 0 and isinstance(summary, dict) and
+                summary.get("complete") is True and
+                summary.get("fresh") == summary.get("total"))
+    return summary if complete else None, {
+        "exit": checked.returncode,
+        "summary": summary,
+        "stderr": checked.stderr.strip().splitlines()[-3:],
+    }
+
+
 def main():
     checks = []
     canonical = os.path.realpath(SOURCE)
@@ -70,8 +90,13 @@ def main():
                         exit=probe.returncode,
                         summary=(probe.stderr or probe.stdout).strip().splitlines()[-1:]))
     receipt, receipt_reason = latest_clean_receipt(head)
-    checks.append(check("tested-commit", receipt is not None,
-                        head=head, receipt=(receipt or {}).get("id"), reason=receipt_reason))
+    warrant_coverage, warrant_evidence = current_warrant_coverage()
+    checks.append(check("tested-commit-or-warrant-coverage",
+                        receipt is not None or warrant_coverage is not None,
+                        head=head, receipt=(receipt or {}).get("id"),
+                        receipt_reason=receipt_reason,
+                        warrant_coverage=warrant_coverage,
+                        warrant_check=warrant_evidence))
     ready = all(item["pass"] for item in checks)
     report = {"reload-preflight": "READY" if ready else "REFUSED",
               "checks": checks,
