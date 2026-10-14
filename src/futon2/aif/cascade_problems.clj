@@ -167,6 +167,7 @@
         interp (get-in sources [:interpretations target])
         patterns (:patterns interp)
         slice (get-in sources [:query-time-slices target])
+        construction-slices (get-in sources [:query-time-construction-slices target])
         want (get-in sources [:wants target])
         scales (or (get-in sources [:preference-scales target])
                    (live-c/preference-scales {}))
@@ -204,7 +205,9 @@
       ;; arrived.  Dropping it here made the eventual selection certificate
       ;; unable to state which pinned library result bounded construction.
       (map? slice)
-      (assoc :query-time-slice slice))))
+      (assoc :query-time-slice slice)
+      (seq construction-slices)
+      (assoc :query-time-construction-slices (vec construction-slices)))))
 
 (defn base-problem
   "Assemble the candidate-independent problem, or its first typed refusal:
@@ -351,7 +354,10 @@
         (map? slice)
         (assoc :query-time-slice slice
                :slice-size (:slice-size slice)
-               :library-size (:library-size slice))))))
+               :library-size (:library-size slice))
+        (seq (:query-time-construction-slices base))
+        (assoc :query-time-construction-slices
+               (:query-time-construction-slices base))))))
 
 (defn assemble
   "Assemble one `:cascade-problem` per fully supplied target, plus one typed

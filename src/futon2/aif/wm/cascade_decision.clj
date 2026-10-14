@@ -1573,25 +1573,43 @@
          (keep (fn [candidate]
                  (or (:target candidate) (get-in candidate [:id :target])))
                certificate-candidates))
-        missing (vec (keep (fn [{:keys [target query-time-slice]}]
-                             (when-not (= :wm/query-time-library-slice-v1
-                                          (:schema query-time-slice))
-                               target))
+        slices-for (fn [{:keys [query-time-slice query-time-construction-slices]}]
+                     (let [slices (or (seq query-time-construction-slices)
+                                      (when query-time-slice [query-time-slice]))]
+                       (when (and (seq slices)
+                                  (every? #(= :wm/query-time-library-slice-v1 (:schema %))
+                                          slices))
+                         (vec slices))))
+        coherent-library? (fn [slices]
+                            (= 1 (count (set (map (fn [slice]
+                                                   [(:library-size slice)
+                                                    (set (map #(select-keys % [:id :sha256 :revision])
+                                                              (:library-pins slice)))])
+                                                 slices)))))
+        missing (vec (keep (fn [{:keys [target] :as problem}]
+                             (let [slices (slices-for problem)]
+                               (when-not (and slices (coherent-library? slices)) target)))
                            problems))]
     (if (and (seq problems) (empty? missing))
       (mapv
-       (fn [{:keys [target query-time-slice cascade-problem]}]
-         (let [pins (:library-pins query-time-slice)]
+       (fn [{:keys [target cascade-problem] :as problem}]
+         (let [slices (slices-for problem)
+               query-time-slice (first slices)
+               pins (:library-pins query-time-slice)]
            {:target target
-            :slice (mapv :pattern (:candidates query-time-slice))
+            :slice (vec (distinct (mapcat #(map :pattern (:candidates %)) slices)))
+            :construction-slice-count (count slices)
             ;; These are the operators actually admitted to construction. A
             ;; mismatch with the retrieval slice is evidence, not something
             ;; to conceal by copying the slice into this field.
             :pool (vec (keys (:interpretations cascade-problem)))
             :slice-from-whole-library
-            (and (pos-int? (:library-size query-time-slice))
-                 (= (:library-size query-time-slice) (count pins))
-                 (every? #(and (:id %) (:sha256 %) (:revision %)) pins))
+            (every? (fn [slice]
+                      (let [slice-pins (:library-pins slice)]
+                        (and (pos-int? (:library-size slice))
+                             (= (:library-size slice) (count slice-pins))
+                             (every? #(and (:id %) (:sha256 %) (:revision %)) slice-pins))))
+                    slices)
             :library-size (:library-size query-time-slice)
             :policy-count (get policy-counts target 0)}))
        problems)

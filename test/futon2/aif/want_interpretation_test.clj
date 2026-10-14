@@ -317,6 +317,24 @@
     (is (= [[:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis]]
            (get-in (first problems) [:cascade-problem :precedences])))))
 
+(deftest published-interpretation-restores-its-query-time-slice
+  (let [store (temp-store)
+        slice {:schema :wm/query-time-library-slice-v1
+               :target "M-futon-seams" :query "document the seam"
+               :candidates [{:pattern "writing-coherence/meet-the-reader-where-they-are"
+                             :slice-rank 1}]
+               :slice-size 1 :library-size 1
+               :library-pins [{:id "library-pin"}]}
+        request (assoc-in (req document) [:retrieval :retrieval :slice] slice)
+        resp (response :writing-coherence/meet-the-reader-where-they-are)
+        validated (validate document resp (seams-sources))
+        _ (wi/publish! store (wi/issue! store request) resp validated)
+        assembled (construction-inputs/assemble-cascade-problems-with-published
+                   store {:targets ["M-futon-seams"] :sources (seams-sources)})]
+    (is (= slice (get-in assembled [:problems 0 :query-time-slice])))
+    (is (= [slice] (get-in assembled [:problems 0 :query-time-construction-slices])))
+    (is (= slice (get-in assembled [:problems 0 :cascade-problem :query-time-slice])))))
+
 (deftest only-validated-responses-publish
   (let [store (temp-store)
         bad (assoc (response :writing-coherence/plain-language-thesis) :produces #{document})

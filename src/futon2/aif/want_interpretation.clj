@@ -521,7 +521,7 @@
   the store under :machine-interpretations."
   [sources store targets]
   (reduce (fn [srcs target]
-            (if-let [{:keys [patterns receipts]} (read-published store target)]
+            (if-let [{:keys [patterns receipts records]} (read-published store target)]
               (let [declared-map (get-in srcs [:interpretations target :patterns])
                     declared (set (keys declared-map))
                     current-wants (set (get-in srcs [:wants target]))
@@ -531,6 +531,25 @@
                     fresh (remove (some-fn (comp declared key)
                                            (complement current?))
                                   patterns)
+                    fresh-ids (mapv key fresh)
+                    ;; A published interpretation's issued request retains the
+                    ;; exact retrieval slice that bounded its construction.
+                    ;; Reattach that evidence on replay only when all fresh
+                    ;; readings name one identical, valid slice.  Multiple
+                    ;; slices are evidence of distinct query-time pools, not a
+                    ;; licence to manufacture a union after the fact.
+                    fresh-slices
+                    (mapv (fn [id]
+                            (let [request-id (get-in receipts [id :request-id])
+                                  request (get records request-id)
+                                  slice (get-in request [:retrieval :retrieval :slice])]
+                              (when (and (= target (:target request))
+                                         (= :wm/query-time-library-slice-v1 (:schema slice))
+                                         (= target (:target slice)))
+                                slice)))
+                          fresh-ids)
+                    complete-slices? (and (seq fresh-slices) (every? some? fresh-slices))
+                    published-slices (vec (distinct (remove nil? fresh-slices)))
                     reading-sha #(evidence/sha256 (.getBytes (pr-str (select-keys % [:guard :produces])) "UTF-8"))
                     ;; hand wins, but a published reading it overrode stays
                     ;; visible on the merged sources (AR-39)
@@ -557,6 +576,13 @@
                                                            (legacy-square/square
                                                             "/home/joe/code" target id receipt))))]))
                                      (select-keys receipts (map key fresh))))
+                    (cond-> (and complete-slices?
+                                 (nil? (get-in srcs [:query-time-slices target]))
+                                 (= 1 (count published-slices)))
+                      (assoc-in [:query-time-slices target] (first published-slices)))
+                    (cond-> complete-slices?
+                      (assoc-in [:query-time-construction-slices target]
+                                published-slices))
                     (assoc-in [:machine-interpretations target] (vec (sort-by str (map key fresh))))))
               srcs))
           sources

@@ -39,3 +39,15 @@
            absent))
     (is (= :absent
            (:status (decision/target-construction-census [] []))))))
+
+(deftest census-unions-recorded-construction-slices-over-one-pinned-library
+  (let [pins (mapv pin [:p1 :p2 :p3])
+        slices [{:schema :wm/query-time-library-slice-v1
+                 :candidates [{:pattern :p1}] :library-size 3 :library-pins pins}
+                {:schema :wm/query-time-library-slice-v1
+                 :candidates [{:pattern :p2}] :library-size 3 :library-pins pins}]
+        row (first (decision/target-construction-census
+                    [(assoc (problem nil) :query-time-construction-slices slices)] []))]
+    (is (= [:p1 :p2] (:slice row)))
+    (is (= 2 (:construction-slice-count row)))
+    (is (true? (:slice-from-whole-library row)))))
