@@ -9,6 +9,7 @@
 
 (require '[futon2.aif.fold-realized :as fr]
          '[futon2.aif.fold-escrow :as escrow]
+         '[clojure.test :refer [deftest is]]
          '[clojure.java.shell :as shell]
          '[cheshire.core :as json])
 
@@ -100,3 +101,9 @@
 
 ;; ===== SUMMARY =====
 (println "\n" (if (zero? @fails) "ALL TESTS PASS" (str @fails " TESTS FAILED")))
+
+(deftest legacy-script-checks-pass
+  ;; The historical checks execute while this namespace loads. Expose their
+  ;; aggregate through clojure.test so the registry can issue a warrant rather
+  ;; than treating a successful zero-test process as unverifiable.
+  (is (zero? @fails) (str @fails " legacy checks failed")))
