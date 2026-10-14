@@ -3601,7 +3601,9 @@
         idle {:zai-5 {:status "idle" :invoke-ready? true}
               :codex-7 {:status "idle" :invoke-ready? true}}
         abstaining (runner/run-opportunity!
-                    (dissoc (readiness-run-opts phases (constantly idle)) :author :reviewer))
+                    (assoc (dissoc (readiness-run-opts phases (constantly idle))
+                                   :author :reviewer)
+                           :substrate-preflight-fn (fn [_] {:route :test})))
         selecting (runner/run-opportunity!
                    (merge (dissoc (isolated-runner-opts) :author :reviewer :repair-reviewer)
                           {:repair-open-fn (constantly [])}))]
