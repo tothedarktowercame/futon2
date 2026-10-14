@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -46,6 +47,23 @@ AGENCY = os.environ.get("AGENCY_URL", "http://localhost:7070")
 SERIAL = {"futon2.aif.wm08-route-a-test", "futon2.aif.wm08-f4-designation-wiring-test"}
 AUTHOR = os.environ.get("WARRANT_AUTHOR", "claude-3")
 
+# Operational-replay namespaces deliberately read gitignored evidence.  Make
+# that evidence an explicit, hashed part of their warrant and copy it into the
+# detached worktree; otherwise a clean run either fails or passes vacuously.
+EXTERNAL_INPUTS = {
+    "futon2.aif.construction-receipt-lean-adapter-test": [
+        "data/wm-runs/tick-run-record-2026-10-01-9cc46d2e-184e-4a97-aa25-aedb383ec426.edn",
+        "data/wm-runs/tick-run-record-2026-10-01-949d08f1-3eb0-4bf7-8215-f811d7352ed6.edn",
+        "data/wm-runs/tick-run-record-2026-10-01-5a07d49b-4074-4372-958a-828c160513d3.edn"],
+    "futon2.aif.enacted-step-dispatch-test": [
+        "data/wm-full-loop-machinery-73/wm-contract-machinery-73-v1/attempt-001/002-selection.edn",
+        "data/wm-full-loop-machinery-72/wm-contract-machinery-72-v1/attempt-001/002-selection.edn"],
+    "futon2.aif.publication-unreachable-live-test": ["data/wm-repair-obligations"],
+    "futon2.aif.self-documenting-stack-redecision-replay-test": [
+        "data/wm-interpretations/M-self-documenting-stack.edn"],
+    "futon2.aif.theta-consumption-test": ["data/wm-learning-trials"],
+}
+
 
 def namespaces():
     out = {}
@@ -56,12 +74,25 @@ def namespaces():
     return out
 
 
-def code_paths(test_path, root=REPO):
+def code_paths(ns, test_path, root=REPO):
     # The declared code scope is exact-match checked, so keep it to the
     # namespace's own source file; everything else it loads is covered by
     # the recorded load closure.
     src = "src/" + test_path[len("test/"):].replace("_test.clj", ".clj")
-    return [src] if (Path(root) / src).is_file() else [test_path]
+    code = [src] if (Path(root) / src).is_file() else [test_path]
+    return code + EXTERNAL_INPUTS.get(ns, [])
+
+
+def materialize_external_inputs(root):
+    for relative in sorted({p for paths in EXTERNAL_INPUTS.values() for p in paths}):
+        source, target = REPO / relative, Path(root) / relative
+        if not source.exists():
+            raise FileNotFoundError("declared warrant input is absent: " + str(source))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir():
+            shutil.copytree(source, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(source, target)
 
 
 def edn_str(s):
@@ -115,7 +146,7 @@ def run(ns, test_path, run_root, head, author):
     root = Path(run_root)
     spec = ("{:repo-root %s :code-paths %s :test-paths %s :command %s "
             ":author %s :subject-id %s :artifact-dir %s :output :json}"
-            % (edn_str(str(root)), edn_vec(code_paths(test_path, root)), edn_vec([test_path]),
+            % (edn_str(str(root)), edn_vec(code_paths(ns, test_path, root)), edn_vec([test_path]),
                edn_vec(["clojure", "-M:test", "-n", ns]), edn_str(author),
                edn_str("futon2-suite/" + ns), edn_str(str(ARTIFACTS / ns / stamp))))
     result = registry("run", spec)
@@ -154,6 +185,7 @@ def main():
             print(p.stderr, file=sys.stderr)
             return 2
         run_root = worktree
+        materialize_external_inputs(run_root)
 
     def one(ns):
         entry = index.get(ns)

@@ -68,7 +68,10 @@
         (when-not (= (witness-schemas label) (:schema/version record))
           (refuse! :e2b/witness-schema-mismatch "Witness schema is wrong"
                    {:label label :actual (:schema/version record)}))
-        {:label label :path (str path) :sha256 actual
+        ;; Do not leak the checkout's absolute directory into the canonical
+        ;; witness record: it would make the same pinned bytes hash differently
+        ;; in a clean warrant worktree.
+        {:label label :path (str (io/file root relative-path)) :sha256 actual
          :bytes-count (alength bytes) :record record}))))
 
 (defn- exact-binding? [binding]

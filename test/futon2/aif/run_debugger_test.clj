@@ -257,7 +257,10 @@
               (wait-for-condition run-id :wm/selection-terminal-abstention)
               _ (is (= :abstained (get-in abstention-stop [:ex-data :outcome])))
               _ (debugger/continue! run-id :abort)
-              result (deref running 5000 ::timeout)
+              ;; This includes terminal-receipt persistence, not merely the
+              ;; debugger resume.  Six warrant JVMs can legitimately make the
+              ;; old five-second wall-clock guess expire on a healthy run.
+              result (deref running 15000 ::timeout)
               record (when-not (= ::timeout result)
                        (edn/read-string (slurp (:run-record result))))]
           (is (not= ::timeout result))

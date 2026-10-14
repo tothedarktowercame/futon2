@@ -94,7 +94,10 @@
         (refuse! :r6-r11/source-pin-mismatch "Authority source bytes changed"
                  {:source-label label :path (str path)
                   :expected-sha256 expected-sha :actual-sha256 actual-sha}))
-      {:label label :path (str path) :relative-path relative-path
+      ;; The verified absolute path is a local read detail, not evidence.  A
+      ;; worktree-independent locator keeps otherwise identical authority
+      ;; records byte-for-byte reproducible.
+      {:label label :path (str (io/file root relative-path)) :relative-path relative-path
        :sha256 actual-sha :bytes-count (alength bytes)
        :record (one-form! (decode-utf8! bytes path) path)})))
 
