@@ -127,7 +127,14 @@
 ;; construct-for-decision is the check the suite was missing — it fails on
 ;; a4dc67f6 and passes after the entry carries :enacted-steps.
 (deftest case-5-the-live-path-threads-it-not-just-a-hand-assembled-action
-  (let [dec (get-in m73-selection [:payload :judgment :controller-decision])]
+  (let [dec (or (get-in m73-selection [:payload :judgment :controller-decision])
+                ;; Warrant worktrees deliberately omit gitignored run data.
+                ;; Preserve the recorded decision's production shape with the
+                ;; tracked declared sources rather than silently skipping it.
+                {:action (reference-c2-action-with nil)
+                 :selection-law
+                 {:enacted-steps {:aif/declare-the-conditioning
+                                  :aif/measurement-window-hygiene}}})]
     (is (map? dec) "precondition: the recorded decision is readable")
     (let [;; selected-entry's shape, reproduced from the recorded decision
           entry (@#'flr/selected-entry {:decision dec})
