@@ -52,7 +52,8 @@
   "Check current namespace warrants and run only namespaces whose evidence is stale."
   [opts]
   (let [result (b/process {:command-args ["python3" "scripts/warrant_suite.py"
-                                          "--pinned" "HEAD" "--author" "futon2-ci"]
+                                          "--pinned" "HEAD" "--author" "futon2-ci"
+                                          "-j" "6"]
                            :out :inherit :err :inherit})]
     (when-not (zero? (:exit result))
       (throw (ex-info "Warranted tests failed" {:exit (:exit result)}))))
