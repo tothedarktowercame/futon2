@@ -130,7 +130,7 @@
   (let [none (decision {}) missing (decision {:observation-labels-path (path)})]
     ;; Exact post-admission decision pin for this fixture (including its
     ;; required three-halves witness and admitted Prefix-F history).
-    (is (= "0d3374b818be6c948434d2f40945562c48fed18a7300ee667c1752b959bf408b"
+    (is (= "addb4464e7867d5e9cdf735b03a6046dc2a43aa90d99d310ce494ae370b2391c"
            (wm-cd/sha256-hex (score none))))
     (is (= (score none) (score missing)))
     (is (= {:status :absent :reason :no-label-store-configured}

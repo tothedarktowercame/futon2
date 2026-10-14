@@ -1753,6 +1753,7 @@
             :substrate-preflight :substrate-preflight
             :preference-refresh :preference-refresh
             :stop-line-memory :stop-line-memory :selection :selection
+            :selection-world :selection-world
             :construction :construction :author-dispatch :author-dispatch
             :author-wait :author-wait :build-resolution :build-resolution
             :reviewer-dispatch :reviewer-dispatch :reviewer-wait :reviewer-wait

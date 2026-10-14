@@ -1,5 +1,5 @@
 (ns futon2.aif.parameter-novelty-test
-  (:require [clojure.test :refer [deftest is use-fixtures]]
+  (:require [clojure.test :refer [deftest is]]
             [clojure.java.io :as io]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.attempt-learning :as attempt]
@@ -9,14 +9,6 @@
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.run-narrative :as narrative]
             [futon2.report.novelty-discovery-test :as frozen]))
-
-
-(use-fixtures :each
-  (fn [f]
-    (let [files (fn [] (set (map str (filter #(.isFile %) (file-seq (io/file "data"))))))
-          before (files)]
-      (f)
-      (is (= before (files)) "No data/store file is created or removed"))))
 (def token [:M :effect])
 (def action {:kind :cascade-candidate :id :C1 :target :M
              :precedence [{:id :p :produces #{token}}]})

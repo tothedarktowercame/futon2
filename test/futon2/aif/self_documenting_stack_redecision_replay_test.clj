@@ -99,10 +99,9 @@
         candidate (first (:constructed-candidates row))]
     (is (zero? (:exit futon2-pin-check)))
     (is (= (:sha256 interpretations) (sha256-file (:path interpretations))))
-    (is (= (:commit mission)
-           (str/trim (:out (sh/sh "git" "-C" (:repo mission) "rev-parse" "HEAD")))))
-    (is (= (:sha256 mission)
-           (sha256-file (io/file (:repo mission) (:path mission)))))
+    ;; The replay is pinned to a historical mission blob.  The repository may
+    ;; legitimately advance while this suite runs; requiring its current HEAD
+    ;; and worktree to equal the historical pin made unrelated commits fail CI.
     (is (= (:sha256 mission)
            (identity/sha256 (.getBytes mission-bytes "UTF-8"))))
     (is (empty? (:refusals assembled)))
