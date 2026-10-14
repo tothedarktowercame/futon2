@@ -286,8 +286,15 @@
         established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
         retained (focus/discover inputs "2026-09-30T00:00:00Z"
                                   {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
+        findings (.toFile (java.nio.file.Files/createTempDirectory
+                           "shared-relation-findings"
+                           (make-array java.nio.file.attribute.FileAttribute 0)))
         ctx {:ticket-dir "holes/tickets"
-             :findings-dir "data/wm-repair-obligations/findings"}]
+             :findings-dir (.getPath findings)}]
+    (spit (io/file findings (str (subs t 2) ".edn"))
+          (pr-str {:repair/status :open :repair/id (subs t 2)
+                   :machine-repo "/controlled/repo"
+                   :target "M-aif-policy-conditioned-eig"}))
     ;; The canonical finding is still :open, so the explicit relation-source
     ;; law chooses the operative repair obligation before the DONE ticket's
     ;; historical Parent in BOTH focus contexts.
