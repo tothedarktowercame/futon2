@@ -20,12 +20,15 @@
       :sha256 "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"}
      :ukrns/reader-run-path
      {:path "futon3/library/ukrns/reader-run-path.flexiarg"
+      :revision "31f78e4b34a4bfde53cd92e331f041d145d46c5b"
       :sha256 "d86ea60823aa9647ff460f510bf5b394490b224e8a911b6ad3677ffc50dcd06b"}
      :war-machine/state-capture
      {:path "futon3/library/war-machine/state-capture.flexiarg"
+      :revision "31f78e4b34a4bfde53cd92e331f041d145d46c5b"
       :sha256 "b45598fb80725dfb4b7deadf520355feaca633dc9d1238c037c7fad654b6d363"}
      :measurement/warrant-travels-with-the-number
      {:path "futon3/library/measurement/warrant-travels-with-the-number.flexiarg"
+      :revision "31f78e4b34a4bfde53cd92e331f041d145d46c5b"
       :sha256 "415a41bc2fc385ebc02e7cae2dc20d0b484790afa9b14a7958fc66853652e7e3"}}}})
 
 (defn- revision-bytes [code-root {:keys [path revision]}]
