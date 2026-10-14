@@ -38,9 +38,25 @@
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
-  (let [opts (-> opts
+  (let [outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
+        ;; A click may invoke the report judge twice when an interpretation ask
+        ;; publishes missing construction input.  Outer state can change while
+        ;; that ask runs (including the graph and learning manifest), but the
+        ;; second pass is a re-decision for the same chosen outer action, not a
+        ;; new outer opportunity.  Retain the exact first receipt so query-time
+        ;; evidence is requested for, and consumed by, one stable target.
+        outer-receipt (atom ::unselected)
+        pinned-outer-selector
+        (fn [input]
+          (let [retained @outer-receipt]
+            (if (not= ::unselected retained)
+              retained
+              (let [selected (outer-selector input)]
+                (reset! outer-receipt selected)
+                selected))))
+        opts (-> opts
                  (update :outer-task-policy #(or % :meta))
-                 (update :outer-task-selection-fn #(or % meta-live/selector)))
+                 (assoc :outer-task-selection-fn pinned-outer-selector))
         selected-judgment (atom nil)]
     {:judge-fn (fn [days]
                  (try

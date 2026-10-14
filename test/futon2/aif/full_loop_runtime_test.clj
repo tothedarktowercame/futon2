@@ -5,7 +5,6 @@
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
-            [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.report.war-machine :as wm]))
 
 (deftest flight-runner-does-not-load-the-report
@@ -35,11 +34,36 @@
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
               :outer-task-policy :meta
-              :outer-task-selection-fn meta-live/selector
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}
-             (second @seen))))))
+             (dissoc (second @seen) :outer-task-selection-fn)))
+      (is (ifn? (:outer-task-selection-fn (second @seen)))))))
+
+(deftest production-pins-one-outer-selection-across-redecision
+  (let [calls (atom [])
+        invocations (atom 0)
+        selector (fn [input]
+                   (swap! calls conj input)
+                   {:chosen {:id (str "M-choice-" (count @calls))}})
+        defaults
+        (with-redefs [wm/accumulation-config (constantly {})
+                      wm/generate-war-machine
+                      (fn [_ opts]
+                        (let [n (swap! invocations inc)
+                              receipt ((:outer-task-selection-fn opts)
+                                       {:tasks [(str "population-" n)]})]
+                          {:judgement {:outer-task-selection receipt}}))]
+          (let [defaults (runtime/production-defaults
+                          {:run-id "same-click"
+                           :outer-task-selection-fn selector})]
+            ((:judge-fn defaults) 1)
+            ((:judge-fn defaults) 1)
+            defaults))]
+    (is (= 1 (count @calls)))
+    (is (= {:tasks ["population-1"]} (first @calls)))
+    (is (= 2 @invocations))
+    (is (fn? (:judge-fn defaults)))))
 
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]
