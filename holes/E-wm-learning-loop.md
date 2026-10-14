@@ -1,7 +1,8 @@
 # E-wm-learning-loop — close outcome learning around outer target selection
 
 **Date:** 2026-10-14  
-**Status:** DERIVE — investigation complete; implementation packets open.  
+**Status:** SHADOW — observation fold, posterior, and production shadow wired;
+live authority and continuation policy remain open.
 **Driver:** War Machine. **Operator:** Joe. **Repository:** `futon2`.  
 **Relates:** [[E-outer-loop-improvement]] · [[E-close-the-loop]] ·
 `src/futon2/aif/meta_live_outer_selector.clj` ·
@@ -251,14 +252,14 @@ Joe separately authorizes an outer habit prior.
 
 ### Packet A — establish the authoritative outer observation fold
 
-- [ ] Promote the useful projection in `meta-outcome-dataset` into a strict
+- [x] Promote the useful projection in `meta-outcome-dataset` into a strict
   production reader over an explicitly pinned run-record manifest.
-- [ ] Add selected-want counts, grounded artifact evidence, typed failure, and
+- [x] Add selected-want counts, grounded artifact evidence, typed failure, and
   collateral-progress evidence to each row.
-- [ ] Refuse duplicate run/click identities, source drift, missing selected
+- [x] Refuse duplicate run/click identities, source drift, missing selected
   identity, and outcome claims lacking their required evidence.
-- [ ] Define deterministic chronology and target-local sufficient statistics.
-- [ ] Record exclusions rather than silently dropping legacy or incomplete runs.
+- [x] Define deterministic chronology and target-local sufficient statistics.
+- [x] Record exclusions rather than silently dropping legacy or incomplete runs.
 
 **Acceptance:** replaying the manifest containing the 2026-10-14 run yields one
 row for `M-interim-director-proxy-metric-inventory` with terminal class
@@ -267,13 +268,14 @@ and measured time/token use.
 
 ### Packet B — define the outer target posterior
 
-- [ ] Introduce a versioned `:wm/outer-target-belief-v1` state.
-- [ ] Start with an explicit operator-authorized prior over the observation
+- [x] Introduce a versioned `:wm/outer-target-belief-v1` state.
+- [x] Start with an explicit operator-authorized prior over the observation
   vocabulary; never derive preferences from frequencies.
-- [ ] Update the selected target from each admissible observation row.
-- [ ] Preserve counts, posterior parameters, last observation, accumulated
+- [x] Update the selected target from each admissible observation row.
+- [x] Preserve counts, posterior parameters, last observation, accumulated
   resource use, and source pins.
-- [ ] Make duplicate replay idempotent and conflicting replay a refusal.
+- [x] Make deterministic rebuild idempotent and conflicting duplicate identity
+  a refusal.
 
 **Acceptance:** a controlled observation changes the chosen target's posterior;
 an identical replay does not; an unchosen target is byte-identical before and
@@ -281,26 +283,27 @@ after.
 
 ### Packet C — repair the success/learning vocabulary seam
 
-- [ ] Define `:grounded-progress` as a structured class with an explicit
+- [x] Define `:grounded-progress` as a structured class with an explicit
   collateral-progress subtype and evidence, not just a terminal keyword.
-- [ ] Keep selected-want progress as a separate observation.
+- [x] Keep selected-want progress as a separate observation.
 - [ ] Require report cards to display both dimensions together.
-- [ ] Refuse “grounded progress” from becoming pattern reinforcement when no
+- [x] Refuse “grounded progress” from becoming pattern reinforcement when no
   selected want moved; retain the current correct no-want-effect behavior.
-- [ ] Decide how collateral progress predicts future selected-want progress and
-  encode that as a model assumption with an authority, not as a success alias.
+- [x] Keep collateral progress as its own posterior outcome and preference cost;
+  do not alias it to future selected-want success. Any transition model beyond
+  this categorical assumption still requires separate authority.
 
 **Acceptance:** the demonstration run updates the target-level posterior while
 leaving pattern reinforcement at zero.
 
 ### Packet D — connect learned state to live outer selection
 
-- [ ] Load and pin the outer target posterior before `task-state-candidates`.
-- [ ] Give every supported candidate a comparable learned-outcome model input;
+- [x] Load and pin the outer target posterior before shadow scoring.
+- [x] Give every supported candidate a comparable learned-outcome model input;
   absence uses the same declared prior, not a missing channel.
-- [ ] Compute per-candidate predicted outcomes and G terms at the outer grain.
-- [ ] Bind scoring rows to full target identities and the posterior revision.
-- [ ] Retain structural centrality, declared priority, feasibility, and
+- [x] Compute per-candidate predicted outcomes and G terms at the outer grain.
+- [x] Bind scoring rows to full target identities and the posterior revision.
+- [x] Retain structural centrality, declared priority, feasibility, and
   freshness as separately visible inputs rather than hiding them in one scalar.
 - [ ] Replace pairwise shared-channel omission with a comparison rule that
   cannot let missing channels erase another candidate's evidence.
@@ -346,16 +349,16 @@ Tests are scoped and warrantable; no whole-CI rerun is required for each packet.
 
 ### Unit properties
 
-- [ ] Observation projection preserves terminal, want-effect, collateral
+- [x] Observation projection preserves terminal, want-effect, collateral
   progress, failure, and resource dimensions independently.
-- [ ] Posterior update is deterministic, idempotent, and chosen-target-local.
-- [ ] Missing evidence refuses or remains typed absent; it never becomes zero.
-- [ ] Preferences remain unchanged under outcome updates.
-- [ ] Every scoring row consumes the posterior revision it certifies.
+- [x] Posterior update is deterministic, idempotent, and chosen-target-local.
+- [x] Missing evidence refuses or remains typed absent; it never becomes zero.
+- [x] Preferences remain unchanged under outcome updates.
+- [x] Every scoring row consumes the posterior revision it certifies.
 
 ### Production-shaped fixture
 
-- [ ] Use the shape of run
+- [x] Use the shape of run
   `2026-10-14-6a64c83f-4732-4af1-b286-561f22109667`: one target, four selected
   wants, all untouched, grounded collateral artifact, approximately 722 seconds
   and 4.22 million tokens.
@@ -364,8 +367,8 @@ Tests are scoped and warrantable; no whole-CI rerun is required for each packet.
 
 ### Counterfactual selection tests
 
-- [ ] With no history, reproduce the current centrality-driven choice.
-- [ ] Add the grounded-progress observation and prove that posterior/G changes.
+- [x] With no history, reproduce the current centrality-driven choice.
+- [x] Add the grounded-progress observation and prove that posterior/G changes.
 - [ ] Provide no continuation evidence and show another target can win.
 - [ ] Provide strong, pinned continuation evidence and show the same target can
   legitimately remain first.
@@ -405,14 +408,14 @@ the single demonstration target and call the result learning.
 
 ## 7. Exit conditions
 
-- [ ] The selected run's outcome becomes a replayable target-level observation
+- [x] The selected run's outcome becomes a replayable target-level observation
   with pinned authority.
-- [ ] A versioned posterior updates from that observation at the outer target
+- [x] A versioned posterior updates from that observation at the outer target
   grain.
 - [ ] The next production selector consumes that exact posterior revision.
 - [ ] Its certificate exposes risk, ambiguity, EIG, resource terms, structural
   inputs, missingness, and the comparison that selected the winner.
-- [ ] Grounded collateral progress can change target belief without falsely
+- [x] Grounded collateral progress can change target belief without falsely
   reinforcing patterns or claiming checkbox progress.
 - [ ] Repeating a target requires explicit continuation value or another visible
   preference term; unchanged centrality alone is insufficient.

@@ -11,6 +11,8 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.outer-task-selection :as outer]
+            [futon2.aif.outer-target-score :as outer-score]
+            [futon2.aif.outer-learning-runtime :as outer-learning-runtime]
             [futon2.aif.pattern-registry :as pattern-registry]))
 
 (load-identity/register! *ns* *file*)
@@ -438,7 +440,7 @@
 
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
-  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest?]
+  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates}}]
   (let [{ordinary-tasks :tasks repair-excluded :excluded}
@@ -504,11 +506,44 @@
                                     :graph-source (:graph-source snapshot)})))
         candidates (candidate-fn on-map snapshot)
         selection (meta/select {:snapshot snapshot :candidates candidates})
+        learning-scores
+        (when (= :shadow (:mode outer-learning))
+          (mapv (fn [candidate]
+                  (outer-score/score
+                   {:belief (:belief outer-learning)
+                    :target (:id candidate)
+                    :preference-costs (:preference-costs outer-learning)
+                    :preference-authority (:preference-authority outer-learning)}))
+                candidates))
+        shadow-candidates
+        (when learning-scores
+          (mapv (fn [candidate score]
+                  (if (= :scored (:status score))
+                    (assoc-in candidate [:channels :outer-target-outcome-cost]
+                              {:value (:g score) :freshness :current
+                               :source (:belief-source-pin score)
+                               :observation score})
+                    candidate))
+                candidates learning-scores))
+        shadow-selection
+        (when shadow-candidates
+          (meta/select {:snapshot snapshot :candidates shadow-candidates}))
         receipt (canonical-receipt
                  on-map
                  (into repair-excluded
                        (concat standing-excluded ownership-excluded off-map))
-                 selection)]
+                 selection)
+        receipt (cond-> receipt
+                  learning-scores
+                  (assoc :outer-learning
+                         {:schema :wm/outer-learning-shadow-v1
+                          :mode :shadow
+                          :live-selection (:selected selection)
+                          :shadow-selection (:selected shadow-selection)
+                          :changed? (not= (:selected selection)
+                                         (:selected shadow-selection))
+                          :scores learning-scores
+                          :selection shadow-selection}))]
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot
@@ -518,7 +553,8 @@
       receipt)))
 
 (defn selector [{:keys [tasks]}]
-  (select-live {:tasks tasks :retain-manifest? true}))
+  (select-live {:tasks tasks :retain-manifest? true
+                :outer-learning (outer-learning-runtime/load-shadow)}))
 
 (defn browser-receipt
   "Return the bounded UI projection of a canonical outer-selection receipt.
@@ -560,7 +596,8 @@
   "Read the authoritative registries once and produce the same receipt used by
   the production selector. This is the read-only Arxana/API projection."
   []
-  (select-live {:tasks (live-registry-tasks) :retain-manifest? true}))
+  (select-live {:tasks (live-registry-tasks) :retain-manifest? true
+                :outer-learning (outer-learning-runtime/load-shadow)}))
 
 (defn preview-live-browser
   "Compute the canonical live selection and return its bounded UI projection."

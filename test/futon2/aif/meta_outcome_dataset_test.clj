@@ -30,6 +30,15 @@
                            :status :refused :reason :identity-inconsistent}
     :decision {:selection-law {:per-policy-argmax {:action {:target "M-one"}}}}
     :terminal-receipt {:outcome :grounded-progress}
+    :cascade-feedback
+    {:mission-state
+     {:execution-outcomes
+      {:status :verified :receipt/id "want-receipt-2"
+       :selected-wants [["M-one" :want/a]]
+       :by-class {:reached [] :progressed [] :blocked []
+                  :untouched [["M-one" :want/a]]}}}
+     :artifact {:repo "/repos/work" :commit "abc123" :grounded? true}
+     :blocker {:status :absent :reason :verified-grounded-work}}
     :registered-run/timing {:status :typed-missing}
     :registered-run/model-usage {:status :partial
                                  :jobs [{:input-tokens 2 :output-tokens 3
@@ -66,6 +75,16 @@
            (:token-use one)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:elapsed two)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:token-use two)))
+    (is (= {:reached 0 :progressed 0 :blocked 0 :untouched 1}
+           (get-in two [:selected-want-effects :counts])))
+    (is (= :grounded-collateral-progress
+           (get-in two [:collateral-progress :kind])))
+    (is (= {:status :present
+            :source [:cascade-feedback :artifact]
+            :repo "/repos/work" :commit "abc123"}
+           (:grounded-artifact two)))
+    (is (= :selected-want-accounting-not-recorded
+           (get-in one [:selected-want-effects :reason])))
     (is (= ["run-2" "run-1"] (mapv :run/id (:rows result))))
     (is (= {:prior-occurrences 0 :position 1} (:repetition two)))
     (is (= {:prior-occurrences 1 :position 2} (:repetition one)))

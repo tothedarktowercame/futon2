@@ -104,6 +104,74 @@
    :terminal-output-retained (contains? record :run-output)
    :trace-written (true? (:traceWritten record))})
 
+(defn- selected-want-effects [record]
+  (let [accounting (get-in record [:cascade-feedback :mission-state
+                                   :execution-outcomes])
+        by-class (:by-class accounting)]
+    (if (= :verified (:status accounting))
+      {:status :present
+       :source [:cascade-feedback :mission-state :execution-outcomes]
+       :receipt/id (:receipt/id accounting)
+       :counts (into (sorted-map)
+                     (map (fn [class]
+                            [class (count (get by-class class []))]))
+                     [:reached :progressed :blocked :untouched])
+       :selected-wants (vec (:selected-wants accounting))}
+      {:status :absent
+       :reason (if (map? accounting)
+                 :selected-want-accounting-not-verified
+                 :selected-want-accounting-not-recorded)
+       :source [:cascade-feedback :mission-state :execution-outcomes]})))
+
+(defn- grounded-artifact [record]
+  (let [artifact (get-in record [:cascade-feedback :artifact])]
+    (if (and (map? artifact) (string? (:repo artifact))
+             (string? (:commit artifact)) (true? (:grounded? artifact)))
+      {:status :present
+       :source [:cascade-feedback :artifact]
+       :repo (:repo artifact) :commit (:commit artifact)}
+      {:status :absent
+       :reason (if (map? artifact)
+                 :grounded-artifact-not-established
+                 :artifact-not-recorded)
+       :source [:cascade-feedback :artifact]})))
+
+(defn- blocker [record]
+  (let [failure (:failure record)
+        cascade-blocker (get-in record [:cascade-feedback :blocker])]
+    (cond
+      (and (map? failure) (some? (:kind failure)))
+      {:status :present :kind (:kind failure) :stage (:stage failure)
+       :source [:failure]}
+
+      (= :present (:status cascade-blocker))
+      {:status :present :kind (:kind cascade-blocker)
+       :stage (:stage cascade-blocker)
+       :source [:cascade-feedback :blocker]}
+
+      :else
+      {:status :absent :reason :no-typed-blocker-recorded})))
+
+(defn- collateral-progress [outcome want-effects artifact]
+  (let [counts (:counts want-effects)
+        no-selected-effect? (and (= :present (:status want-effects))
+                                 (zero? (+ (get counts :reached 0)
+                                           (get counts :progressed 0))))]
+    (if (and (= :grounded-progress outcome)
+             no-selected-effect?
+             (= :present (:status artifact)))
+      {:status :present
+       :kind :grounded-collateral-progress
+       :source [[:terminal-receipt :outcome]
+                [:cascade-feedback :mission-state :execution-outcomes]
+                [:cascade-feedback :artifact]]}
+      {:status :absent
+       :reason (cond
+                 (not= :grounded-progress outcome) :terminal-class-not-grounded-progress
+                 (not= :present (:status want-effects)) :selected-want-effects-unknown
+                 (not no-selected-effect?) :selected-want-effect-recorded
+                 :else :grounded-artifact-not-established)})))
+
 (defn produce
   "Read each manifest entry once and partition it into a usable row or typed
   exclusion. Repetition chronology is derived from canonical start instants."
@@ -154,6 +222,8 @@
                                     :evidence {:run/id run-id :click/id click-id
                                                :startedAt (:startedAt record)}}))
                       (let [outcome (raw-outcome record)
+                            want-effects (selected-want-effects record)
+                            artifact (grounded-artifact record)
                             row {:source source :run/id run-id :click/id click-id
                                :task {:id target :kind kind}
                                :started-at {:status :present
@@ -168,6 +238,11 @@
                                                             (get-in record [:terminal :outcome]) [:terminal :outcome]
                                                             :else {:absent :not-recorded})}
                                :elapsed (timing record) :token-use (token-use record)
+                               :selected-want-effects want-effects
+                               :grounded-artifact artifact
+                               :collateral-progress
+                               (collateral-progress outcome want-effects artifact)
+                               :blocker (blocker record)
                                :quality (quality record selection)
                                :projection-evidence
                                {:target-source (if (= :canonical-outer (:source selection))

@@ -7,6 +7,7 @@
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.meta-pipeline-selector :as selector]
+            [futon2.aif.outer-target-belief :as outer-belief]
             [futon2.aif.mission-registry :as registry]))
 
 (defn pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
@@ -58,6 +59,34 @@
                    :pipeline-freshness-cost))
     (is (= ["M-a" "M-b"]
            (mapv :id (get-in receipt [:policy :meta-selection :ranking]))))))
+
+(deftest learned-outcomes-run-in-shadow-without-changing-live-action
+  (let [belief (outer-belief/build
+                {:prior (outer-belief/prior 1 :operator-provisional)
+                 :dataset {:status :produced
+                           :source-pin (pin "run-manifest" "9")
+                           :rows [{:run/id "r1" :click/id "c1"
+                                   :task {:id "M-a"}
+                                   :terminal-outcome {:class :grounded-progress}
+                                   :selected-want-effects
+                                   {:status :present
+                                    :counts {:reached 0 :progressed 0
+                                             :blocked 0 :untouched 1}}
+                                   :collateral-progress {:status :present}
+                                   :blocker {:status :absent}}]}})
+        receipt (live/select-live
+                 {:tasks tasks :fetch-snapshot (constantly snapshot)
+                  :outer-learning
+                  {:mode :shadow :belief belief
+                   :preference-authority :operator-provisional
+                   :preference-costs
+                   {:closure 0.0 :selected-want-progress 0.2
+                    :grounded-collateral-progress 0.5 :typed-blocker 0.9
+                    :abstention-or-failure 1.0}}})]
+    (is (= "M-a" (get-in receipt [:action :target])))
+    (is (= :shadow (get-in receipt [:outer-learning :mode])))
+    (is (= 2 (count (get-in receipt [:outer-learning :scores]))))
+    (is (boolean? (get-in receipt [:outer-learning :changed?])))))
 
 (deftest missing-or-equal-evidence-refuses-with-complete-support
   (testing "missing is absence"

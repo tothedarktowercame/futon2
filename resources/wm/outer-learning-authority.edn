@@ -1,0 +1,13 @@
+{:schema :wm/outer-learning-authority-v1
+ :mode :shadow
+ :prior {:concentration 1 :authority :operator-provisional}
+ :preferences
+ {:authority :operator-provisional
+  :costs {:closure 0.0
+          :selected-want-progress 0.2
+          :grounded-collateral-progress 0.5
+          :typed-blocker 0.9
+          :abstention-or-failure 1.0}}
+ :run-records
+ [{:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-14-6a64c83f-4732-4af1-b286-561f22109667.edn"
+   :sha256 "c4570dbceee19f9fad0865f8ab724d32aa504804a27d435521e59c1ad21414a8"}]}
