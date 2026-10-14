@@ -415,7 +415,7 @@ the single demonstration target and call the result learning.
   grain.
 - [x] The next production selector consumes that exact posterior revision in
   shadow/compare mode.
-- [ ] Its certificate exposes risk, ambiguity, EIG, resource terms, structural
+- [x] Its certificate exposes risk, ambiguity, EIG, resource terms, structural
   inputs, missingness, and the comparison that selected the winner.
 - [x] Grounded collateral progress can change target belief without falsely
   reinforcing patterns or claiming checkbox progress.
