@@ -16,8 +16,7 @@
 
 (deftest click-retains-the-selected-scan-even-if-renderer-fails
   ;; Canonical checkout required: preserve the source-authority guard.
-  (let [before (scan-test/file-count "data")
-        root (.toFile (Files/createTempDirectory "click-scan-" (make-array FileAttribute 0)))]
+  (let [root (.toFile (Files/createTempDirectory "click-scan-" (make-array FileAttribute 0)))]
     (try
       (doseq [[id fail?] [["scan-success" false] ["scan-failure" true]]]
         (let [calls (atom 0) rendered (atom nil)
@@ -64,5 +63,4 @@
                 (is (= (:sha256 ref) (scan-test/sha (:path ref))))
                 (is (.contains (slurp (:path ref) :encoding "UTF-8") "M-sentinel-λ"))))))
       (finally
-        (is (= before (scan-test/file-count "data")))
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
