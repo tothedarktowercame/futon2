@@ -585,6 +585,11 @@
     {:schema :wm/observation-model-v1
      :backend :exact-enumeration
      :kind :class-emission
+     ;; The schedule above assigns the calibrated class weights only at the
+     ;; common horizon; earlier emissions are the neutral not-yet-evaluated
+     ;; class.  Carry the semantics on the scored model so Q4 can recompute
+     ;; the declaration instead of reverse-engineering it from the weights.
+     :preference-semantics :terminal-only
      :universe universe
      :horizon horizon
      :class-universe [:focused :related :unrelated :stop-the-line not-yet]
