@@ -13,8 +13,10 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.full-loop-runtime]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.interpretation-request :as ireq]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy :as policy]
             [futon2.aif.want-interpretation :as wi]
             [futon2.aif.wm.click-ask :as click-ask]
@@ -80,6 +82,24 @@
                     :text document-criterion-text}]})
 
 (def tick-sources {:beta-by-context {:WM {:beta 1}}})
+
+(def ^:private critical-source-namespaces
+  ['futon2.aif.full-loop-runtime
+   'futon2.report.war-machine
+   'futon2.aif.meta-live-outer-selector
+   'futon2.aif.meta-pipeline-selector])
+
+(deftest production-composition-sources-are-loaded-canonically
+  ;; This test exercises the real runner-source gate. Requiring the production
+  ;; composition root above makes that dependency explicit and keeps this
+  ;; namespace independent of which other tests happened to run first.
+  (doseq [n critical-source-namespaces]
+    (let [entry (get @load-identity/registry n)
+          canonical (get load-identity/required-sources n)]
+      (is (= :captured (:status entry)) (str n " is registered by its producer"))
+      (is (= (load-identity/sha256 (load-identity/read-bytes canonical))
+             (:sha256 entry))
+          (str n " is bound to the canonical bytes")))))
 
 (deftest ticket-source-supplies-click-ask-criterion
   (let [token :ticket-closure/hfixture
