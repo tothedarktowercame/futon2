@@ -447,6 +447,15 @@
                                  :debugger/dwell debugger-dwell})
                    (throw throwable)))))))))))
 
+(defn capture-selection-world!
+  "Capture the post-selection census inside a restartable debugger phase.
+  A stale serving Var or signature mismatch must stop for live repair instead
+  of escaping to the outer catch and closing the click as :incomplete."
+  [opts context decision roster interpretation-ask outer-selection]
+  (run-phase! opts context :selection-world
+              #(selection-world/capture decision roster interpretation-ask
+                                        outer-selection opts)))
+
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
                        (.getBytes (pr-str x) "UTF-8"))]
@@ -6012,11 +6021,11 @@
                 (catch Throwable e
                   (retain-redecision-failure! e interpretation-ask-record)))
               judgement0-base)
-            world-at-selection (selection-world/capture
+            world-at-selection (capture-selection-world!
+                                opts @phase-context
                                 (:decision judgement0) roster
                                 interpretation-ask-record
-                                (:outer-task-selection judgement0)
-                                opts)
+                                (:outer-task-selection judgement0))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             entry ordinary-entry

@@ -5,6 +5,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.registered-run-telemetry :as telemetry]
+            [futon2.aif.selection-world :as selection-world]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.test-support.runner-fixture :as fixture]))
@@ -227,6 +228,28 @@
           (is (= {:agent-readiness 1 :selection 2 :terminal-receipt 1} @calls))))
       (finally
         (alter-var-root #'repairable-callee (constantly original))))))
+
+(deftest post-selection-census-failure-stops-and-retries-in-place
+  (debugger/attach!)
+  (let [calls (atom 0)
+        run-id "debug-selection-world-retry"
+        expected {:schema :wm/world-at-selection-v1 :failure-count 0}
+        capture (fn [& _]
+                  (if (= 1 (swap! calls inc))
+                    (throw (clojure.lang.ArityException. 5 "selection-world/capture"))
+                    expected))
+        running (future
+                  (with-redefs [selection-world/capture capture]
+                    (runner/capture-selection-world!
+                     (phase-opts run-id (atom []))
+                     {:opportunity-id "op" :attempt-id "attempt"}
+                     {:status :selected} {} nil nil)))]
+    (let [stop (wait-for-stop run-id running)]
+      (is (= :selection-world (:phase stop)))
+      (is (= :wm/phase-failure (get-in stop [:condition :kind])))
+      (debugger/continue! run-id :retry)
+      (is (= expected (deref running 2000 ::timeout)))
+      (is (= 2 @calls)))))
 
 (deftest retry-continues-the-real-run-with-one-attempt-and-one-terminal-receipt
   (let [original @#'repairable-judge
