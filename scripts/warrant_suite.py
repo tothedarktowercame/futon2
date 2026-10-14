@@ -80,7 +80,7 @@ def code_paths(ns, test_path, root=REPO):
     # the recorded load closure.
     src = "src/" + test_path[len("test/"):].replace("_test.clj", ".clj")
     code = [src] if (Path(root) / src).is_file() else [test_path]
-    return code + EXTERNAL_INPUTS.get(ns, [])
+    return code
 
 
 def materialize_external_inputs(root):
@@ -144,10 +144,10 @@ def check(entry):
 def run(ns, test_path, run_root, head, author):
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     root = Path(run_root)
-    spec = ("{:repo-root %s :code-paths %s :test-paths %s :command %s "
+    spec = ("{:repo-root %s :code-paths %s :test-paths %s :input-paths %s :command %s "
             ":author %s :subject-id %s :artifact-dir %s :output :json}"
             % (edn_str(str(root)), edn_vec(code_paths(ns, test_path, root)), edn_vec([test_path]),
-               edn_vec(["clojure", "-M:test", "-n", ns]), edn_str(author),
+               edn_vec(EXTERNAL_INPUTS.get(ns, [])), edn_vec(["clojure", "-M:test", "-n", ns]), edn_str(author),
                edn_str("futon2-suite/" + ns), edn_str(str(ARTIFACTS / ns / stamp))))
     result = registry("run", spec)
     entry_id = result.get("evidence/id") or result.get("id")
