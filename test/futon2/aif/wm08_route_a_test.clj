@@ -64,9 +64,16 @@
                ;; :sources paths must be absolute (evidence schema
                ;; :path-not-absolute). The library paths already are; the two
                ;; in-repo captures are repo-relative, so absolutise here.
-               (let [path (.getAbsolutePath (io/file path*))
+               (let [read-path (.getAbsolutePath (io/file path*))
+                     checkout (.getAbsolutePath (io/file "."))
+                     ;; The retained evidence names the repository, not the
+                     ;; disposable clean-worktree directory used to verify it.
+                     path (if (.startsWith read-path (str checkout "/"))
+                            (str "/home/joe/code/futon2"
+                                 (subs read-path (count checkout)))
+                            read-path)
                      id path
-                     live-bytes (Files/readAllBytes (.toPath (io/file path)))
+                     live-bytes (Files/readAllBytes (.toPath (io/file read-path)))
                      file (str (evidence/sha256 (bytes-of path)) ".source")
                      retained-source (get retained-sources-by-path path)
                      expected-sha (or expected-sha (:sha256 retained-source))
