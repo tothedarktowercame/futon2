@@ -1,5 +1,5 @@
 {:schema :wm/outer-learning-authority-v1
- :mode :shadow
+ :mode :live
  :prior {:concentration 1 :authority :operator-provisional}
  :preferences
  {:authority :operator-provisional
