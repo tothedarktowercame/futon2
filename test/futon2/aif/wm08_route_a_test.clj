@@ -65,7 +65,7 @@
                ;; :path-not-absolute). The library paths already are; the two
                ;; in-repo captures are repo-relative, so absolutise here.
                (let [read-path (.getAbsolutePath (io/file path*))
-                     checkout (.getAbsolutePath (io/file "."))
+                     checkout (.getCanonicalPath (io/file "."))
                      ;; The retained evidence names the repository, not the
                      ;; disposable clean-worktree directory used to verify it.
                      path (if (.startsWith read-path (str checkout "/"))

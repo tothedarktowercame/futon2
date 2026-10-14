@@ -62,6 +62,8 @@ EXTERNAL_INPUTS = {
     "futon2.aif.self-documenting-stack-redecision-replay-test": [
         "data/wm-interpretations/M-self-documenting-stack.edn"],
     "futon2.aif.theta-consumption-test": ["data/wm-learning-trials"],
+    "futon2.aif.wm-run-facts-test": [
+        "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn"],
 }
 
 
