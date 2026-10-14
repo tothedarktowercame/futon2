@@ -231,7 +231,8 @@
                                       :citations [mission-cite]})
                              (filter #(= :missing-pattern-interpretation (:kind %)) (:findings old)))
                 :genesis (mapv (fn [g] {:pattern (:id g) :source (get-in g [:source :path])
-                                        :index-source frozen-index
+                                        :index-source (str "/home/joe/code/futon2/" redo
+                                                           "retrieval-index.tsv")
                                         :commit "cc231bf6f479c0dd87629edeca87b7c7dd973909"
                                         :gap (:gap g)}) (:new-patterns old))
                 :failure nil}]
