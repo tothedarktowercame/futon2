@@ -340,6 +340,9 @@ centrality alone cannot monopolize repeated clicks.
   produce its required outer update, or when selection ignores a present learned
   state.
 - [x] Add report-card rows for learning update and learned-state consumption.
+- [x] Add a source-pinned Lean runtime certificate for the temporal loop join:
+  incoming posterior consumption, exact selected identity, and publication of
+  the current run as evidence available to a future click.
 - [x] State the re-arm condition beside every disabled learning mechanism.
 
 **Acceptance:** “the machine learned from this run” is mechanically false unless

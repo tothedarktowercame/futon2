@@ -1,5 +1,6 @@
 (ns futon2.aif.construction-receipt-lean-adapter-test
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.construction-receipt-lean-adapter :as adapter]))
 
@@ -251,6 +252,103 @@
                         (assoc-in record
                                   [:decision :selection-certificate :scoring]
                                   {}))))))))
+
+(def outer-learning-record
+  {:run/id "run-learning-2"
+   :click/id "click-learning-2"
+   :outer-task-selection
+   {:schema :wm/outer-task-selection-v1
+    :chosen {:id "M-learned"}
+    :action {:target "M-learned"}
+    :outer-learning
+    {:schema :wm/outer-learning-certificate-v1
+     :status :live-consumed
+     :mode :live
+     :prior-revision "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     :observation-source
+     {:path "wm://meta-outcome-dataset-v1"
+      :sha256 "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+     :posterior-revision
+     {:path "wm://outer-target-belief-v1"
+      :sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+     :consumption-path [:outer-task-selection :outer-learning :scores]
+     :candidate-count 2
+     :baseline-selection "M-baseline"
+     :live-selection "M-learned"
+     :changed? true
+     :scores
+     [{:status :scored :target "M-baseline"
+       :belief-source-pin
+       {:path "wm://outer-target-belief-v1"
+        :sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}
+      {:status :scored :target "M-learned"
+       :belief-source-pin
+       {:path "wm://outer-target-belief-v1"
+        :sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}]}}})
+
+(deftest outer-learning-certificate-joins-consumption-selection-and-publication
+  (let [run-bytes (.getBytes (pr-str outer-learning-record) "UTF-8")
+        run-sha (adapter/sha256 run-bytes)
+        manifest {:schema :wm/outer-learning-run-manifest-v1
+                  :entries [{:path "/runs/run-learning-2.edn"
+                             :sha256 run-sha}]}
+        manifest-bytes (.getBytes (pr-str manifest) "UTF-8")
+        manifest-sha (adapter/sha256 manifest-bytes)
+        adapted (adapter/adapt-run-record-outer-learning-bytes
+                 run-bytes run-sha manifest-bytes manifest-sha)]
+    (is (= "M-learned" (get-in adapted [:projection :selected-target])))
+    (is (= 2 (get-in adapted [:projection :candidate-count])))
+    (is (= run-sha (get-in adapted [:projection :publication :sha256])))
+    (is (.contains (:lean adapted) "learned_posterior_was_consumed"))
+    (is (.contains (:lean adapted) "exact_run_published_for_future_learning"))))
+
+(deftest ^:slow emitted-outer-learning-certificate-elaborates-in-lean
+  (let [run-bytes (.getBytes (pr-str outer-learning-record) "UTF-8")
+        run-sha (adapter/sha256 run-bytes)
+        manifest {:schema :wm/outer-learning-run-manifest-v1
+                  :entries [{:path "/runs/run-learning-2.edn"
+                             :sha256 run-sha}]}
+        manifest-bytes (.getBytes (pr-str manifest) "UTF-8")
+        manifest-sha (adapter/sha256 manifest-bytes)
+        lean (:lean (adapter/adapt-run-record-outer-learning-bytes
+                     run-bytes run-sha manifest-bytes manifest-sha))
+        file (java.io.File/createTempFile "runtime-outer-learning-" ".lean")]
+    (try
+      (spit file lean)
+      (let [result (shell/sh "lake" "env" "lean" (.getAbsolutePath file)
+                             :dir "../mathlib4")]
+        (is (zero? (:exit result)) (pr-str result))
+        (is (not (.contains (:out result) "sorryAx")) (:out result)))
+      (finally (.delete file)))))
+
+(deftest outer-learning-certificate-refuses-broken-temporal-joins
+  (let [run-bytes (.getBytes (pr-str outer-learning-record) "UTF-8")
+        run-sha (adapter/sha256 run-bytes)
+        manifest {:schema :wm/outer-learning-run-manifest-v1
+                  :entries [{:path "/runs/run-learning-2.edn"
+                             :sha256 run-sha}]}]
+    (testing "shadow observation is not certified as live consumption"
+      (is (= :adapter/outer-learning-not-live-consumed
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (-> outer-learning-record
+                            (assoc-in [:outer-task-selection :outer-learning :status]
+                                      :shadow-consumed)
+                            (assoc-in [:outer-task-selection :outer-learning :mode]
+                                      :shadow))
+                        run-sha manifest)))))
+    (testing "every scored candidate must bind the consumed posterior"
+      (is (= :adapter/outer-learning-consumption-join-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (assoc-in outer-learning-record
+                                  [:outer-task-selection :outer-learning :scores 0
+                                   :belief-source-pin :sha256]
+                                  "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+                        run-sha manifest)))))
+    (testing "the exact run must be present in the outbound manifest"
+      (is (= :adapter/outer-learning-publication-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        outer-learning-record run-sha
+                        (assoc manifest :entries []))))))))
 
 (deftest controlled-record-renders-p0-admission-certificate
   (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file selection-record)))

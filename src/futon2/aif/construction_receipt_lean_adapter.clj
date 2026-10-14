@@ -530,6 +530,124 @@
       {:source-sha256 actual :projection projection
        :lean (render-selection projection actual)})))
 
+(defn outer-learning-input-from-run-record
+  "Project the two temporal edges of one outer-learning click: the posterior
+  consumed while selecting this run, and this exact run record's later
+  publication for a future click.  The certificate deliberately does not
+  claim that a run can influence its own selection."
+  [run-record run-record-sha manifest]
+  (let [outer (:outer-task-selection run-record)
+        learning (:outer-learning outer)
+        chosen (get-in outer [:chosen :id])
+        action (get-in outer [:action :target])
+        posterior (:posterior-revision learning)
+        scores (:scores learning)
+        publication (one! :adapter/outer-learning-publication-mismatch
+                          (filter #(= run-record-sha (:sha256 %))
+                                  (:entries manifest))
+                          {:run-record-sha256 run-record-sha})
+        selected-score (one! :adapter/outer-learning-selected-score-mismatch
+                             (filter #(= chosen (:target %)) scores)
+                             {:selected chosen})]
+    (when-not (= :wm/outer-learning-run-manifest-v1 (:schema manifest))
+      (refuse! :adapter/outer-learning-manifest-schema-mismatch
+               {:schema (:schema manifest)}))
+    (when-not (and (= :wm/outer-task-selection-v1 (:schema outer))
+                   (= :wm/outer-learning-certificate-v1 (:schema learning))
+                   (= :live-consumed (:status learning))
+                   (= :live (:mode learning)))
+      (refuse! :adapter/outer-learning-not-live-consumed
+               {:outer-schema (:schema outer)
+                :learning-schema (:schema learning)
+                :status (:status learning) :mode (:mode learning)}))
+    (when-not (and (string? chosen) (= chosen action (:live-selection learning))
+                   (= (not= (:baseline-selection learning) chosen)
+                      (:changed? learning)))
+      (refuse! :adapter/outer-learning-selection-identity-mismatch
+               {:chosen chosen :action action
+                :live-selection (:live-selection learning)
+                :baseline-selection (:baseline-selection learning)
+                :changed? (:changed? learning)}))
+    (when-not (and (= [:outer-task-selection :outer-learning :scores]
+                      (:consumption-path learning))
+                   (map? posterior) (string? (:path posterior))
+                   (boolean (re-matches #"[0-9a-f]{64}" (:sha256 posterior)))
+                   (not= (:prior-revision learning) (:sha256 posterior))
+                   (= (:candidate-count learning) (count scores))
+                   (pos? (count scores))
+                   (every? #(and (= :scored (:status %))
+                                 (= posterior (:belief-source-pin %)))
+                           scores)
+                   (= :scored (:status selected-score)))
+      (refuse! :adapter/outer-learning-consumption-join-mismatch
+               {:posterior posterior
+                :prior-revision (:prior-revision learning)
+                :candidate-count (:candidate-count learning)
+                :score-count (count scores)}))
+    (when-not (and (string? (:path publication))
+                   (= run-record-sha (:sha256 publication)))
+      (refuse! :adapter/outer-learning-publication-mismatch
+               {:publication publication :run-record-sha256 run-record-sha}))
+    {:runtime-source {:run-id (:run/id run-record)
+                      :click-id (:click/id run-record)}
+     :selected-target chosen
+     :baseline-target (:baseline-selection learning)
+     :changed? (:changed? learning)
+     :prior-revision (:prior-revision learning)
+     :observation-source (:observation-source learning)
+     :posterior-revision posterior
+     :candidate-count (count scores)
+     :run-record-sha256 run-record-sha
+     :publication publication}))
+
+(defn render-outer-learning [input run-record-sha manifest-sha]
+  (str "import Mathlib\n\n"
+       "/-! GENERATED FILE — DO NOT EDIT.\nRun-record SHA-256: " run-record-sha
+       "\nPublication-manifest SHA-256: " manifest-sha
+       "\nRuntime source: " (pr-str (:runtime-source input))
+       "\nScope: temporal join from an incoming learned posterior through this selection to publication of this exact run for a future selection.\n-/\n\n"
+       "namespace DarkTower.WarMachine.RuntimeOuterLearning\n\n"
+       "def selectedTarget : String := " (pr-str (:selected-target input)) "\n"
+       "def liveSelection : String := " (pr-str (:selected-target input)) "\n"
+       "def priorRevision : String := " (pr-str (:prior-revision input)) "\n"
+       "def consumedPosteriorRevision : String := "
+       (pr-str (get-in input [:posterior-revision :sha256])) "\n"
+       "def selectedScorePosteriorRevision : String := consumedPosteriorRevision\n"
+       "def publishedRunRevision : String := " (pr-str run-record-sha) "\n"
+       "def manifestRunRevision : String := "
+       (pr-str (get-in input [:publication :sha256])) "\n"
+       "def candidateCount : Nat := " (:candidate-count input) "\n\n"
+       "theorem learned_posterior_was_consumed :\n"
+       "    selectedScorePosteriorRevision = consumedPosteriorRevision := rfl\n"
+       "theorem learned_selection_identity_retained :\n"
+       "    liveSelection = selectedTarget := rfl\n"
+       "theorem exact_run_published_for_future_learning :\n"
+       "    manifestRunRevision = publishedRunRevision := rfl\n"
+       "theorem temporal_direction_is_nonempty : candidateCount > 0 := by decide\n\n"
+       "#print axioms learned_posterior_was_consumed\n"
+       "#print axioms learned_selection_identity_retained\n"
+       "#print axioms exact_run_published_for_future_learning\n"
+       "#print axioms temporal_direction_is_nonempty\n"
+       "end DarkTower.WarMachine.RuntimeOuterLearning\n"))
+
+(defn adapt-run-record-outer-learning-bytes
+  [run-bytes expected-run-sha manifest-bytes expected-manifest-sha]
+  (let [run-sha (sha256 run-bytes)
+        manifest-sha (sha256 manifest-bytes)]
+    (when-not (= expected-run-sha run-sha)
+      (refuse! :adapter/source-pin-mismatch
+               {:expected expected-run-sha :actual run-sha}))
+    (when-not (= expected-manifest-sha manifest-sha)
+      (refuse! :adapter/manifest-source-pin-mismatch
+               {:expected expected-manifest-sha :actual manifest-sha}))
+    (let [projection (outer-learning-input-from-run-record
+                      (strict-edn run-bytes) run-sha
+                      (strict-edn manifest-bytes))]
+      {:source-sha256 run-sha
+       :manifest-sha256 manifest-sha
+       :projection projection
+       :lean (render-outer-learning projection run-sha manifest-sha)})))
+
 (defn admission-input-from-run-record
   "Project the selected candidate's recorded P0 provenance admission. Missing
   P0 evidence stays excluded; only the canonical forbidden-provenance check

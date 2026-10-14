@@ -8,11 +8,18 @@
 (load-identity/register! *ns* *file*)
 
 (def schema :wm/registered-run-series-v1)
+(def learning-schema :wm/registered-run-series-v2)
 (def opportunity-schema :wm/registered-run-opportunity-v1)
 (def entity-kinds #{:mission :excursion :ticket})
 (def certificate-kinds
   #{:construction :admission :selection :g :target-local-aqc
     :enactment-grounding})
+(def learning-certificate-kinds (conj certificate-kinds :outer-learning))
+
+(defn required-certificate-kinds [registration]
+  (if (= learning-schema (:schema registration))
+    learning-certificate-kinds
+    certificate-kinds))
 
 (defn- refuse [kind data]
   {:status :refused :kind kind :data data})
@@ -20,9 +27,10 @@
 (defn validate-registration [registration]
   (let [sampling (:sampling registration)
         required (set (get-in registration [:running-example-eligibility :requires]))
-        measurement-certs (set (get-in registration [:measurements :conformance]))]
+        measurement-certs (set (get-in registration [:measurements :conformance]))
+        required-certs (required-certificate-kinds registration)]
     (cond
-      (not= schema (:schema registration))
+      (not (contains? #{schema learning-schema} (:schema registration)))
       (refuse :registration-schema-mismatch {:schema (:schema registration)})
 
       (not (keyword? (:series/id registration)))
@@ -62,9 +70,9 @@
                            [:preflight :failed-preflight-does-not-consume-click])))
       (refuse :preflight-must-not-consume-click {})
 
-      (not= certificate-kinds measurement-certs)
+      (not= required-certs measurement-certs)
       (refuse :certificate-family-mismatch
-              {:expected certificate-kinds :actual measurement-certs})
+              {:expected required-certs :actual measurement-certs})
 
       (not (set/subset?
             #{:complete-timing :complete-token-usage
@@ -93,6 +101,7 @@
    stricter than successful termination."
   [registration row]
   (let [registration-check (validate-registration registration)
+        required-certs (required-certificate-kinds registration)
         timing (:timing row)
         usage (:model-usage row)
         certs (:certificates row)
@@ -112,7 +121,7 @@
                             :when (= :compiled (:status receipt))]
                         kind))
         mutations? (every? #(= :caught (get-in certs [% :mutation]))
-                           certificate-kinds)
+                           required-certs)
         observed (cond-> #{}
                    (:selection-reached? row) (conj :selection-reached)
                    (seq (:verified-applied-patterns row)) (conj :verified-applied-pattern)
@@ -122,7 +131,7 @@
                    (conj :independent-review)
                    complete-timing? (conj :complete-timing)
                    complete-usage? (conj :complete-token-usage)
-                   (= certificate-kinds compiled)
+                   (= required-certs compiled)
                    (conj :all-applicable-lean-certificates-compiled)
                    mutations? (conj :certificate-mutation-caught)
                    (seq (:plain-language-achievement row))
@@ -159,5 +168,5 @@
        {:timing (if complete-timing? :complete :typed-missing)
         :model-usage (if complete-usage? :complete :typed-missing)
         :certificates {:compiled compiled
-                       :required certificate-kinds
+                       :required required-certs
                        :mutations (if mutations? :caught :incomplete)}}})))

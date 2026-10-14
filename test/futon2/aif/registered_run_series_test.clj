@@ -35,6 +35,16 @@
     (is (= :valid (:status loaded)))
     (is (= 64 (count (:sha256 loaded))))))
 
+(deftest learning-certified-series-requires-the-outer-learning-family
+  (let [v2 (-> registration
+               (assoc :schema series/learning-schema)
+               (update-in [:measurements :conformance] conj :outer-learning))]
+    (is (= :valid (:status (series/validate-registration v2))))
+    (is (= :certificate-family-mismatch
+           (:kind (series/validate-registration
+                   (update-in v2 [:measurements :conformance]
+                              (fn [xs] (vec (remove #{:outer-learning} xs))))))))))
+
 (deftest complete-grounded-row-is-running-example-eligible
   (let [result (series/evaluate-opportunity registration complete-row)]
     (is (:counts-in-denominator? result))
