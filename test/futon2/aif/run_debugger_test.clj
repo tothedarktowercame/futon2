@@ -448,6 +448,31 @@
                             [:roster :wm-author :status])))
     (is (= 2 @calls) "retry performs one fresh roster observation")))
 
+(deftest exhausted-ration-stops-and-retry-reuses-the-same-run
+  (debugger/attach!)
+  (let [run-id "ration-renewal"
+        authorized? (atom false)
+        calls (atom 0)
+        running
+        (future
+          (runner/run-phase!
+           (phase-opts run-id (atom []))
+           {:opportunity-id "op" :attempt-id "attempt"}
+           :ration-admission
+           #(do (swap! calls inc)
+                (when-not @authorized?
+                  (throw (ex-info "Ordinary click budget exhausted"
+                                  {:error :ordinary-click-budget-exhausted
+                                   :allocated 61 :consumed 61})))
+                :admitted)))]
+    (let [stop (wait-for-condition run-id :ordinary-click-budget-exhausted)]
+      (is (= :ration-admission (:phase stop)))
+      (is (= 61 (get-in stop [:ex-data :consumed]))))
+    (reset! authorized? true)
+    (debugger/continue! run-id :retry)
+    (is (= :admitted (deref running 2000 ::timeout)))
+    (is (= 2 @calls) "retry reruns admission without restarting the run")))
+
 (deftest recorded-terminal-abstention-stops-with-decision-context
   (debugger/attach!)
   (let [running

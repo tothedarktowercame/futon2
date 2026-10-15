@@ -101,7 +101,7 @@
 
 (defn- condition-kind [throwable]
   (let [data (ex-data throwable)]
-    (or (:kind data) (:failure-kind data) (:reason data)
+    (or (:kind data) (:failure-kind data) (:error data) (:reason data)
         (get-in data [:judge-refusal :kind])
         :wm/phase-failure)))
 
