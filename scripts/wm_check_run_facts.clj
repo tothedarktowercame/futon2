@@ -31,11 +31,19 @@
                                (fs (x "targets")) (fs (x "slice")) (fs (x "pool"))
                                (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")))) "]"))
 (defn entry-term [entry]
-  (format "{task := %d, observation := %d, evidence := %d, rankingLaw := %d, rankingVersion := %d, dependencies := %s, comparisonKey := %d, freshnessEpoch := %d}"
+  (format "{task := %d, observation := %d, evidence := %d, rankingLaw := %d, rankingVersion := %d, dependencies := %s, comparisonKey := %s, freshnessEpoch := %d}"
           (id (field entry :task)) (id (field entry :observation))
           (id (field entry :evidence)) (id (field entry :ranking-law))
           (field entry :ranking-version) (fs (field entry :dependencies))
-          (field entry :comparison-key) (field entry :freshness-epoch)))
+          (str (biginteger (field entry :comparison-key))) (field entry :freshness-epoch)))
+(defn census-term
+  "An exclusion with no recorded reason renders reason 0, which Lean refuses."
+  [census]
+  (format "{eligible := %s, excluded := [%s]}"
+          (fs (field census :eligible))
+          (str/join ", " (for [x (field census :excluded)]
+                           (format "{task := %d, reason := %d}" (id (field x :task))
+                                   (if-let [r (field x :reason)] (max 1 (id r)) 0))))))
 (defn entry-list [entries]
   (str "[" (str/join ", " (map entry-term entries)) "]"))
 (defn refresh-term [refresh]
@@ -50,10 +58,11 @@
   (format "{selected := %s, currentEpoch := %d}"
           (entry-term (field selection :selected)) (field selection :current-epoch)))
 (defn cascade-term [cascade]
-  (format "{selectedTask := %d, availableAdmissible := %s, constructed := %s, admitted := %s, scored := %s, posterior := %s}"
+  (format "{selectedTask := %d, availableAdmissible := %s, constructed := %s, admitted := %s, scored := %s, requirementExcluded := %s, posterior := %s}"
           (id (field cascade :selected-task))
           (fs (field cascade :available-admissible)) (fs (field cascade :constructed))
           (fs (field cascade :admitted)) (fs (field cascade :scored))
+          (fs (field cascade :requirement-excluded))
           (fs (field cascade :posterior))))
 (def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
                "question" ".question" "refused" ".refused" "invalid" ".invalid"
@@ -72,7 +81,7 @@
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
    :q7 ["pathAbsenceCount"]
-   :q8 ["openMissions" "openExcursions" "openTickets"
+   :q8 ["openMissions" "openExcursions" "openTickets" "frontierCensus"
         "frontierRefresh" "frontierSelection" "selectedCascade"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
         "factorizationAuthorizations"]
@@ -110,12 +119,25 @@
                               (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
                               (id (facts "currentInputDigest"))))
         :q7 (ev-known (str "pathAbsenceCount := " (facts "pathAbsenceCount")))
-        :q8 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, frontierRefresh := %s, frontierSelection := %s, selectedCascade := %s"
-                              (fs (facts "openMissions")) (fs (facts "openExcursions"))
-                              (fs (facts "openTickets"))
-                              (refresh-term (facts "frontierRefresh"))
-                              (selection-term (facts "frontierSelection"))
-                              (cascade-term (facts "selectedCascade"))))
+        ;; Q8 reads the Q6 facts only to justify a requirement exclusion:
+        ;; with none, previousOutcome .invalid makes the justification empty
+        :q8 (let [q6? (known? facts (deps :q6))
+                  excluded? (seq (field (facts "selectedCascade") :requirement-excluded))]
+              (if (and excluded? (not q6?))
+                (ev-nr facts (into (deps :q8) (deps :q6)))
+                (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, frontierCensus := %s, frontierRefresh := %s, frontierSelection := %s, selectedCascade := %s, %s"
+                                  (fs (facts "openMissions")) (fs (facts "openExcursions"))
+                                  (fs (facts "openTickets"))
+                                  (census-term (facts "frontierCensus"))
+                                  (refresh-term (facts "frontierRefresh"))
+                                  (selection-term (facts "frontierSelection"))
+                                  (cascade-term (facts "selectedCascade"))
+                                  (if q6?
+                                    (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
+                                            (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                                            (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
+                                            (id (facts "currentInputDigest")))
+                                    "previousOutcome := .invalid")))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (calibration-term calibration)

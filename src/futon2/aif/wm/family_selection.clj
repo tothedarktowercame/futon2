@@ -62,6 +62,18 @@
                :transition-kernel kernel-version
                :certificate certificate))))
 
+(defn- constructed-key
+  "The structural key of a family policy as constructed: the scored
+  candidate's, else the key of its arranged candidate; a policy whose
+  arrangement cannot be compiled is named by target and policy id."
+  [policy score]
+  (or (some-> (:candidate score) prefix-admission/reading-policy-key)
+      (try (prefix-admission/reading-policy-key
+            (shape-g/arranged->candidate (:target policy) (:policy-id policy)
+                                         (:cascade policy)))
+           (catch Exception _ nil))
+      [:wm/reading-policy-unkeyed (str (:target policy)) (:policy-id policy)]))
+
 (defn- policy-summary [policy score]
   {:policy-id (:policy-id policy)
    ;; recorded apart from the action, so enactment can check the action's
@@ -225,6 +237,7 @@
                                 score-failures)]
              {:target-id target
               :distinct-count (:distinct-count family)
+              :constructed-keys (mapv (fn [[p score]] (constructed-key p score)) attempted)
               :scored scored
               :policies (mapv (fn [[p score]] (policy-summary p score)) scored)
               :failures failures
@@ -241,7 +254,23 @@
                    (exclude ranked opts certified))
         menu (if excluded (:ranked excluded) ranked)
         failures (vec (mapcat :failures rows))
-        summaries (mapv #(dissoc % :scored) rows)]
+        ;; Requirements Q8: every family policy's structural key at each
+        ;; stage, by target; admitted only when certification passed
+        stages (into {}
+                     (map (fn [row]
+                            [(:target-id row)
+                             (cond-> {:constructed (vec (:constructed-keys row))
+                                      :scored (mapv (fn [[_ score]]
+                                                      (prefix-admission/reading-policy-key
+                                                       (:candidate score)))
+                                                    (:scored row))}
+                               (= :certified (:status certified))
+                               (assoc :admitted
+                                      (vec (keep #(when (= (:target-id row) (:target-id %))
+                                                    (get-in % [:action :policy-key]))
+                                                 ranked))))]))
+                     rows)
+        summaries (mapv #(dissoc % :scored :constructed-keys) rows)]
     (cond
       (:refusal excluded)
       {:status :repeat-refused
@@ -264,6 +293,7 @@
       {:status :selected
        :certification certified
        :q6 (:carrier excluded)
+       :policy-stages stages
        :decision (policy/select-action-cascades menu opts)
        :ranked menu
        :target-policy-families summaries

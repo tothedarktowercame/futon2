@@ -12,7 +12,8 @@
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
-            [futon2.aif.previous-run :as previous-run]))
+            [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q8-frontier :as q8]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -27,37 +28,51 @@
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
    "factorizationAuthorizations"
-   "frontierRefresh" "frontierSelection" "selectedCascade"
+   "frontierCensus" "frontierRefresh" "frontierSelection" "selectedCascade"
    "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
 
 (defn not-recomputable [s] {"not-recomputable" s})
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
 
-(defn- q8-frontier-facts [record]
-  (let [carrier (or (get-in record [:certificates :q8])
-                    (get-in record [:controlled-sut :certificates :q8])
-                    (get-in record [:terminal-receipt :certificates :q8]))
-        refresh (:frontier-refresh carrier)
-        selection (:frontier-selection carrier)
-        cascade (:selected-cascade carrier)
-        entries (concat (:prior refresh) (:current refresh) (:retained refresh)
-                        (:invalidated refresh) (:recomputed refresh)
-                        [(:selected selection)])
-        has-keys? (fn [m ks] (and (map? m) (every? #(contains? m %) ks)))
-        entry? #(has-keys? % [:task :observation :evidence :ranking-law
-                              :ranking-version :dependencies :comparison-key
-                              :freshness-epoch])]
-    (when (and (= :wm/q8-frontier-certificate-v1 (:schema carrier))
-               (has-keys? refresh [:prior :current :retained :invalidated
-                                   :recomputed :removed :delta :current-open-tasks])
-               (has-keys? (:delta refresh) [:changed-observations :added-tasks
-                                            :removed-tasks])
-               (has-keys? selection [:selected :current-epoch])
-               (has-keys? cascade [:selected-task :available-admissible
-                                   :constructed :admitted :scored :posterior])
-               (every? entry? entries))
-      carrier)))
+(defn- lean-entry [e]
+  (into {} (map (fn [[k v]] [(name k) (if (keyword? v) (str v) v)])) e))
+
+(defn q8-facts
+  "Requirements Q8 from the run's own :q8 carrier only, and only when it is
+  intact and equal to the carrier recomputed from this record
+  (q8-frontier/verify-record). Anything else is not recomputable."
+  [record]
+  (let [v (q8/verify-record record)]
+    (if-not (= :verified (:status v))
+      (let [why (not-recomputable (str "Q8 carrier " (name (:reason v))))]
+        {"frontierCensus" why "frontierRefresh" why
+         "frontierSelection" why "selectedCascade" why})
+      (let [{:keys [census] r :refresh s :selection c :cascade} (:carrier v)
+            ids (fn [xs] (vec (sort (map pr-str xs))))]
+        {"frontierCensus" {"eligible" (vec (:eligible census))
+                           "excluded" (mapv (fn [x] {"task" (:task x)
+                                                     "reason" (some-> (:reason x) str)})
+                                            (:excluded census))}
+         "frontierRefresh" {"prior" (mapv lean-entry (:prior r))
+                            "current" (mapv lean-entry (:current r))
+                            "retained" (mapv lean-entry (:retained r))
+                            "invalidated" (mapv lean-entry (:invalidated r))
+                            "recomputed" (mapv lean-entry (:recomputed r))
+                            "removed" (vec (:removed r))
+                            "delta" {"changed-observations" (get-in r [:delta :changed-observations])
+                                     "added-tasks" (get-in r [:delta :added-tasks])
+                                     "removed-tasks" (get-in r [:delta :removed-tasks])}
+                            "current-open-tasks" (vec (:current-open-tasks r))}
+         "frontierSelection" {"selected" (lean-entry (:selected s))
+                              "current-epoch" (:current-epoch s)}
+         "selectedCascade" {"selected-task" (:selected-task c)
+                            "available-admissible" (ids (:available-admissible c))
+                            "constructed" (ids (:constructed c))
+                            "admitted" (ids (:admitted c))
+                            "scored" (ids (:scored c))
+                            "requirement-excluded" (ids (:requirement-excluded c))
+                            "posterior" (ids (:posterior c))}}))))
 
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
@@ -499,7 +514,7 @@
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
         factorized (factorized-preference-facts record)
-        q8-frontier (q8-frontier-facts record)
+        q8 (q8-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -583,15 +598,10 @@
                "factorizationAuthorizations"
                (if factorized (:factorization-registry factorized)
                    (nr "factorized preference law registry absent or invalid"))
-               "frontierRefresh"
-               (if q8-frontier (:frontier-refresh q8-frontier)
-                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
-               "frontierSelection"
-               (if q8-frontier (:frontier-selection q8-frontier)
-                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
-               "selectedCascade"
-               (if q8-frontier (:selected-cascade q8-frontier)
-                   (nr "complete :wm/q8-frontier-certificate-v1 carrier absent"))
+               "frontierCensus" (q8 "frontierCensus")
+               "frontierRefresh" (q8 "frontierRefresh")
+               "frontierSelection" (q8 "frontierSelection")
+               "selectedCascade" (q8 "selectedCascade")
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         sources (into {}

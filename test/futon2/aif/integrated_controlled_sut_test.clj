@@ -184,12 +184,11 @@
                             (get-in persisted [:hydrated :run-record])
                             "controlled-run-record" snap))
           source (checker/lean-source {"facts" exported} "integratedQ8")]
-      (is (= (:q8 certs)
-             {:schema :wm/q8-frontier-certificate-v1
-              :frontier-refresh (exported "frontierRefresh")
-              :frontier-selection (exported "frontierSelection")
-              :selected-cascade (exported "selectedCascade")}))
-      (is (.contains source "q8 := .known")))
+      ;; the controlled projection is helper evidence: the exporter accepts
+      ;; only a record-bound :q8 carrier from the production runner
+      ;; (codex-68 rulings, 2026-10-15; wm.q8-frontier-route-test)
+      (is (contains? (exported "selectedCascade") "not-recomputable"))
+      (is (.contains source "q8 := .nr")))
     (is (= "integrated-controlled-sut"
            (get-in persisted [:hydrated :morning-brief :attempt-id])))
     (is (= :verified (get-in persisted [:report-card :status])))

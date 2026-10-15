@@ -1,5 +1,5 @@
 (ns futon2.aif.wm-run-facts-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [wm-run-facts :as facts]
             [wm-check-run-facts :as checker]
             [futon2.aif.policy :as policy]
@@ -69,25 +69,20 @@
       (is (.contains (checker/lean-source {"facts" export} "q8Absent")
                      "q8 := .nr")))))
 
-(deftest q8-exact-frontier-and-target-local-cascade-join-emits-current-lean-carrier
-  (let [export (q8-export q8-carrier)
-        source (checker/lean-source {"facts" export} "q8Joined")]
-    (is (= (:frontier-refresh q8-carrier) (export "frontierRefresh")))
-    (is (= (:frontier-selection q8-carrier) (export "frontierSelection")))
-    (is (= (:selected-cascade q8-carrier) (export "selectedCascade")))
-    (is (.contains source "frontierRefresh := {prior :="))
-    (is (.contains source "selectedCascade := {selectedTask :="))
-    (is (not (.contains source "targetsReachingScoring :=")))))
-
-(deftest q8-stale-omitted-and-population-mismatches-remain-known-for-lean-refusal
-  (let [stale (-> q8-carrier
-                  (assoc-in [:frontier-refresh :delta :changed-observations] #{"obs-x"}))
-        omitted (assoc-in q8-carrier [:frontier-refresh :current] [])
-        mismatch (assoc-in q8-carrier [:selected-cascade :posterior] #{"other-cascade"})]
-    (doseq [carrier [stale omitted mismatch]]
-      (let [source (checker/lean-source {"facts" (q8-export carrier)} "q8Adversarial")]
-        (is (.contains source "q8 := .known"))
-        (is (not (.contains source "q8 := .nr")))))))
+(deftest q8-unbound-carriers-are-not-accepted
+  ;; Rulings 1a/2b/3 (codex-68, 2026-10-15): the exporter accepts only the
+  ;; run's own :q8 carrier, intact and equal to the carrier recomputed from
+  ;; the record. A well-shaped carrier anywhere else, or one not bound to
+  ;; the record, is not recomputable (positive cases:
+  ;; wm.q8-frontier-route-test).
+  (doseq [[label r] {:certificates (assoc-in record [:certificates :q8] q8-carrier)
+                     :controlled-sut (assoc-in record [:controlled-sut :certificates :q8] q8-carrier)
+                     :unbound-q8 (assoc record :q8 q8-carrier)}]
+    (testing (name label)
+      (let [export (:facts (facts/facts-for-record r "r" snap))]
+        (doseq [field ["frontierCensus" "frontierRefresh" "frontierSelection" "selectedCascade"]]
+          (is (contains? (export field) "not-recomputable") field))
+        (is (.contains (checker/lean-source {"facts" export} "q8Unbound") "q8 := .nr"))))))
 
 (defn q9-export [r]
   (:facts (facts/facts-for-record r "r" snap)))

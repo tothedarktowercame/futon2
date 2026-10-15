@@ -71,6 +71,7 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q8-frontier :as q8-frontier]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.run-participants :as participants]
@@ -986,6 +987,12 @@
             ;; written; its decision and the judge's dropped candidates
             ;; travel on the :no-selection sorry cell instead.
             selection-sorry (get-in result [:checkpoints :selection :sorry])
+            ;; a completed selection refused downstream (Q5: reading-policy
+            ;; execution semantics owed) closes on the :no-selection cell;
+            ;; the record keeps the decision it selected with, not nothing
+            retained-decision (or decision
+                                  (when (map? (get-in selection-sorry [:decision :action]))
+                                    (:decision selection-sorry)))
             abstention (abstention-carrier (or decision (:decision selection-sorry))
                                            (:dropped-candidates selection-sorry)
                                            (:judge-refusal selection-sorry))
@@ -1006,6 +1013,15 @@
                           :decision (or decision (:decision selection-sorry))
                           :outcome (:outcome result)
                           :downstream (:downstream-refusal selection-sorry)})
+            ;; Requirements Q8: certified from the outer receipt this run
+            ;; retained, its predecessor and its decision; recomputable from
+            ;; the record alone (q8-frontier/verify-record)
+            q8-carrier (q8-frontier/certificate
+                        {:outer (:q8-frontier outer-task-selection)
+                         :predecessor (:q6/predecessor raw-opts)
+                         :decision (or decision (:decision selection-sorry))
+                         :chosen-target (get-in retained-decision [:action :target])
+                         :run-id run-id})
             world-at-selection (or (get-in result
                                             [:checkpoints :selection :judgment
                                              :world-at-selection])
@@ -1067,7 +1083,7 @@
                     :traceWritten (boolean (:trace-path result))
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
-                    :decision (assoc (select-keys decision
+                    :decision (assoc (select-keys retained-decision
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
                                                    :accumulation-bmr])
@@ -1075,7 +1091,7 @@
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
                                      ;; what it left unreached from the record
-                                     :chosen (chosen-summary decision))
+                                     :chosen (chosen-summary retained-decision))
                     ;; PROOF-2b: the click's interpretation ask.  Once a tick
                     ;; has selected an admitted action, an ask is not missing:
                     ;; it is inapplicable.  Keep that distinct from the typed
@@ -1085,6 +1101,7 @@
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
                          :terminal q6-terminal}
+                    :q8 q8-carrier
                     :route route
                     :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
@@ -1144,7 +1161,7 @@
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]
         ;; this run's close in the Q6 run stream, beside the record it names
-        (previous-run/close! dir q6-terminal written)
+        (previous-run/close! dir q6-terminal written (:frontier q8-carrier))
         {:run-record-status :present
          :run-record written})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard

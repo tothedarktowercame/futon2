@@ -13,7 +13,8 @@
             [futon2.aif.outer-task-selection :as outer]
             [futon2.aif.outer-target-score :as outer-score]
             [futon2.aif.outer-learning-runtime :as outer-learning-runtime]
-            [futon2.aif.pattern-registry :as pattern-registry]))
+            [futon2.aif.pattern-registry :as pattern-registry]
+            [futon2.aif.q8-frontier :as q8]))
 
 (load-identity/register! *ns* *file*)
 
@@ -592,11 +593,21 @@
               {:schema meta/schema :status :refused
                :reason :outer-learning-state-unavailable})
           selection)
-        receipt (canonical-receipt
-                 on-map
-                 (into repair-excluded
-                       (concat standing-excluded ownership-excluded off-map))
-                 effective-selection)
+        all-excluded (into repair-excluded
+                           (concat standing-excluded ownership-excluded off-map))
+        receipt (canonical-receipt on-map all-excluded effective-selection)
+        ;; Requirements Q8: the open population, its typed exclusions and
+        ;; the exact candidates and pairwise result the effective selection
+        ;; used, certified here where they are in hand
+        live? (= :live (:mode outer-learning))
+        receipt (assoc receipt :q8-frontier
+                       (q8/outer-frontier
+                        {:tasks tasks :excluded all-excluded
+                         :candidates (if live? shadow-candidates candidates)
+                         :selection effective-selection
+                         :comparison (if live? :complete-union :shared-only)
+                         :missing-channel-cost
+                         (when live? (get-in outer-learning [:controller :missing-channel-cost]))}))
         certificate (learning-certificate outer-learning learning-scores
                                           shadow-selection selection)
         receipt (assoc receipt :outer-learning

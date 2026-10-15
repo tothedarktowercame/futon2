@@ -1273,6 +1273,8 @@
                              (update :selection-certificate merge
                                      (get-in result [:certification :receipt]))
                              (assoc-in [:selection-certificate :q6] (:q6 result))
+                             (assoc-in [:selection-certificate :policy-stages]
+                                       (:policy-stages result))
                              (assoc-in [:selection-certificate :preference]
                                        {:c :cascade-shape-g/progress-preference
                                         :certified-by pref/receipt-schema

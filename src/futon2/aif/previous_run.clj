@@ -135,7 +135,11 @@
                          [(:run/id terminal) (:startedAt terminal)])
                    {:status :not-recomputable :reason :previous-terminal-carrier-foreign}
                    :else
-                   {:status :present :previous terminal}))))))]
+                   (cond-> {:status :present :previous terminal}
+                     ;; Requirements Q8: the frontier this run persisted,
+                     ;; the prior of the next run's refresh audit
+                     (:q8-frontier (first closed))
+                     (assoc :frontier (:q8-frontier (first closed))))))))))]
     (seal (merge base found))))
 
 (defn start!
@@ -148,10 +152,13 @@
 
 (defn close!
   "When the run record is written: TERMINAL (this run's sealed terminal
-  carrier) appended to DIR's stream with the record file it was written to."
-  [dir terminal record-file]
-  (append! dir {:event :closed :run/id (:run/id terminal)
-                :record-file (str record-file) :q6 terminal}))
+  carrier) appended to DIR's stream with the record file it was written to,
+  and FRONTIER (its sealed Q8 frontier) when it has one."
+  ([dir terminal record-file] (close! dir terminal record-file nil))
+  ([dir terminal record-file frontier]
+   (append! dir (cond-> {:event :closed :run/id (:run/id terminal)
+                         :record-file (str record-file) :q6 terminal}
+                  frontier (assoc :q8-frontier frontier)))))
 
 ;; -- what the selector consumes -----------------------------------------------
 
