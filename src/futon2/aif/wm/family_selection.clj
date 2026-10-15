@@ -9,6 +9,7 @@
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.reading-interpretation-debt :as debt]
             [futon2.aif.target-policy-family :as target-family]
             [futon2.aif.target-reading-registry :as reading-registry]))
 
@@ -21,6 +22,15 @@
 
 (defn- annotate-failure [target failure]
   (assoc failure :target-id (or (:target-id failure) target)))
+
+(defn- reading-action
+  "The scored policy's action, carrying its history key and the exact
+  interpretation it owes, both bound to its identity."
+  [policy score]
+  (let [action (:candidate score)
+        action (assoc action :policy-key (prefix-admission/reading-policy-key action))]
+    (assoc action :interpretation-debt
+           (debt/debt action (:fit score) (:analysis-digest policy)))))
 
 (defn- scored->ranked [policy score rank]
   (let [entry (first (:scorer-result score))
@@ -35,10 +45,7 @@
                         (assoc :g-terms (merge (get-in entry [:certificate :g-terms])
                                               g-terms)))]
     (-> entry
-        (assoc :action (let [action (:candidate score)]
-                         ;; the policy's history identity travels on its action
-                         (assoc action :policy-key
-                                (prefix-admission/reading-policy-key action)))
+        (assoc :action (reading-action policy score)
                :cascade-id (:policy-id policy)
                :policy-id (:policy-id policy)
                :policy-kind (:kind policy)
@@ -57,6 +64,10 @@
 
 (defn- policy-summary [policy score]
   {:policy-id (:policy-id policy)
+   ;; recorded apart from the action, so enactment can check the action's
+   ;; debt carrier against what the decision saw
+   :interpretation-owed (get-in score [:fit :interpretation-owed])
+   :interpretation-debt-digest (:digest (:interpretation-debt (reading-action policy score)))
    :kind (:kind policy)
    :F (:f score)
    :G (:g score)
@@ -184,8 +195,11 @@
          (fn [family]
            (let [target (:target-id family)
                  ready? (= :computed (:status family))
+                 analysis-digest (get-in family [:provenance :analysis-digest])
                  attempted (if ready?
-                             (mapv (fn [p] [p (shape-g/score-policy p)]) (:policies family))
+                             (mapv (fn [p] [(assoc p :analysis-digest analysis-digest)
+                                            (shape-g/score-policy p)])
+                                   (:policies family))
                              [])
                  scored (filterv #(= :computed (:status (second %))) attempted)
                  score-failures

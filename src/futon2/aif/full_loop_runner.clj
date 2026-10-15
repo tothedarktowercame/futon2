@@ -70,6 +70,7 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
+            [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -1863,6 +1864,23 @@
   [candidate pin]
   (policy-prefix-evidence/consumed-canonical-f? candidate pin))
 
+(defn reading-interpretation-status
+  "For a decision whose chosen action is a reading policy: whether its
+  interpretation debt is discharged (reading-interpretation-debt/enactment-
+  status), checked against the debt digest the decision recorded for that
+  policy in its family summaries and the post-selection receipts under
+  :selection-certificate :interpretation-discharge. nil for any other action."
+  [decision]
+  (let [action (:action decision)]
+    (when (map? (get-in action [:precedence :co-apply]))
+      (let [cert (:selection-certificate decision)
+            recorded (some (fn [policy]
+                             (when (= (:id action) (:policy-id policy))
+                               (:interpretation-debt-digest policy)))
+                           (mapcat :policies (:target-policy-families cert)))]
+        (reading-debt/enactment-status
+         action recorded (get-in cert [:interpretation-discharge :receipts]))))))
+
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
    flat-removal H4, 2026-09-17). A cascade decision yields the chosen
@@ -1877,10 +1895,14 @@
             candidates (get-in decision [:selection-certificate :candidates])
             candidate (when (sequential? candidates)
                         (first (filter #(= action (:id %)) candidates)))]
-        (when (canonical-f-consumed?
-               candidate
-               ;; the decision's own ledger pin, not anything the candidate carries
-               (get-in decision [:selection-certificate :policy-history-pin]))
+        (when (and (canonical-f-consumed?
+                    candidate
+                    ;; the decision's own ledger pin, not anything the candidate carries
+                    (get-in decision [:selection-certificate :policy-history-pin]))
+                   ;; Q5: a selected reading policy enacts only once the
+                   ;; interpretation it owes is discharged for this identity
+                   (let [debt (reading-interpretation-status decision)]
+                     (or (nil? debt) (= :discharged (:status debt)))))
           {:action action
            :rank (or (:rank decision) 1)
            :G-efe (:controller-score decision)

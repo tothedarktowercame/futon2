@@ -40,6 +40,7 @@
   (:require [futon2.aif.cascade-selection :as selection]
             [futon2.aif.observation-checks :as observations]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def ^:private allowed-refusal-kinds
@@ -143,7 +144,13 @@
   (let [key (prefix-admission/reading-policy-key candidate)]
     (when-not (and (some? key) (= key (:policy-key candidate)))
       (refuse! :reading-policy-identity-invalid
-               {:candidate-id (:id candidate) :target (:target candidate)}))))
+               {:candidate-id (:id candidate) :target (:target candidate)}))
+    ;; the debt it owes must be bound to that identity; an open debt is
+    ;; admissible here and refused at enactment
+    (let [{:keys [status reason]} (reading-debt/check candidate)]
+      (when-not (= :valid status)
+        (refuse! :reading-policy-debt-invalid
+                 {:candidate-id (:id candidate) :reason reason})))))
 
 (defn- check-interpreted-candidate!
   [candidate]

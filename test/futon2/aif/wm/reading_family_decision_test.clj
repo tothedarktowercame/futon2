@@ -11,12 +11,13 @@
             [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.enactment-habit :as enactment-habit]
-            [futon2.aif.full-loop-runner]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as admission]
+            [futon2.aif.reading-interpretation-debt :as debt]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.wm.cascade-decision :as wm-cd])
@@ -58,10 +59,11 @@
     file))
 
 (defn- fixture
-  "M-current has a current reading naming p/a and p/b; M-unread has a source
-  and no reading; T-no-path has no source. The flight ledger is the real
-  explicit-absence record, so it is complete and records no policy."
-  []
+  "M-current has a current reading naming READ (default p/a and p/b);
+  M-unread has a source and no reading; T-no-path has no source. The flight
+  ledger is the real explicit-absence record, so it is complete and records
+  no policy."
+  [& [read]]
   (let [root (temp-dir "reading-decision-root-")
         current (io/file root "M-current.md")
         unread (io/file root "M-unread.md")
@@ -74,7 +76,7 @@
        root {:target-id "M-current" :source-path (.getPath current)
              :excerpt-digest digest
              :request {:task {:target_id "M-current" :excerpt_sha256 digest}}
-             :analysis (analysis ["p/a" "p/b"]) :validator-version 1}))
+             :analysis (analysis (or read ["p/a" "p/b"])) :validator-version 1}))
     {:root root :flights flights :graph (pinned-graph)
      :rows {:current {:target-id "M-current" :source-kind :head
                       :source-path (.getPath current) :source-absent nil}
@@ -114,8 +116,13 @@
 (defn- selected-entry [decision]
   ((ns-resolve 'futon2.aif.full-loop-runner 'selected-entry) {:decision decision}))
 
+(defn- debt-status [decision]
+  (runner/reading-interpretation-status decision))
+
 (deftest one-g-selection-over-the-reading-family
-  (let [fx (fixture)
+  ;; The reading names p/a and p/c; the graph connects them through p/b, so a
+  ;; retraction policy owes the interpretation of p/b.
+  (let [fx (fixture ["p/a" "p/c"])
         result (decide fx [(get-in fx [:rows :current])] {"M-current" 1})
         decision (:decision result)
         cert (:selection-certificate decision)
@@ -138,12 +145,86 @@
       (is (every? #(= :not-applicable (:f-status %)) (:candidates cert)))
       (is (= (get-in cert [:policy-history-pin :digest])
              (get-in (first (:candidates cert)) [:f-prefix :ledger :digest]))))
-    (testing "no interpretation preceded selection, and the selection enacts"
-      (is (every? #(nil? (:interpretation-receipts (:id %))) (:candidates cert)))
-      (is (= action (:action (selected-entry decision)))))
+    (testing "selection happened with the debt open, and is recorded"
+      (is (= ["p/b"] (get-in action [:interpretation-debt :owed])))
+      (is (= :cascade-selection-posterior (get-in decision [:selection-law :applied])))
+      (is (every? #(nil? (:interpretation-receipts (:id %))) (:candidates cert))))
+    (testing "enactment waits for the owed interpretation"
+      (is (nil? (selected-entry decision)))
+      (let [status (debt-status decision)]
+        (is (= :interpretation-owed-after-selection (:status status)))
+        (is (= ["p/b"] (:remaining status)))
+        (is (= (:id action) (:policy-id status)))
+        (is (= :all-owed-nodes-validated-for-this-identity
+               (get-in status [:rearm :condition])))))
     (testing "retired diagnostics are recorded unavailable, not consumed"
       (is (= :unavailable (get-in cert [:retired-diagnostics :token-rate-lanes :status])))
       (is (= :observation-only (get-in cert [:preference :live-c]))))))
+
+(deftest zero-debt-policy-enacts-without-receipts
+  (let [fx (fixture)
+        result (decide fx [(get-in fx [:rows :current])] {"M-current" 1})
+        decision (:decision result)]
+    (is (= 1 (::selector-calls result)))
+    (is (= [] (get-in decision [:action :interpretation-debt :owed])))
+    (is (= :discharged (:status (debt-status decision))))
+    (is (= (:action decision) (:action (selected-entry decision))))))
+
+(defn- with-action
+  "DECISION with its chosen action replaced by (F action) everywhere the
+  enactment boundary reads it: the decision's :action and its candidate row."
+  [decision f]
+  (let [action (:action decision)
+        forged (f action)]
+    (-> decision
+        (assoc :action forged)
+        (update-in [:selection-certificate :candidates]
+                   (fn [rows] (mapv #(if (= action (:id %)) (assoc % :id forged) %) rows))))))
+
+(defn- receipts [decision rs]
+  (assoc-in decision [:selection-certificate :interpretation-discharge :receipts] rs))
+
+(deftest debt-binding-is-immutable
+  (let [fx (fixture ["p/a" "p/c"])
+        decision (:decision (decide fx [(get-in fx [:rows :current])] {"M-current" 1}))
+        action (:action decision)
+        carrier (:interpretation-debt action)
+        id (:id action)
+        good-receipt {:policy-id id :debt-digest (:digest carrier) :pattern "p/b" :status :validated}
+        refused? (fn [d] (nil? (selected-entry d)))]
+    (testing "the full discharge for this exact identity is what re-arms enactment"
+      (is (= action (:action (selected-entry (receipts decision [good-receipt]))))))
+    (testing "partial or misdirected discharge leaves the debt open"
+      (is (refused? (receipts decision [(assoc good-receipt :pattern "p/a")])))
+      (is (refused? (receipts decision [(assoc good-receipt :status :refused)]))))
+    (testing "a receipt for another policy or another debt is refused"
+      (let [foreign (assoc good-receipt :policy-id "M-current/policy-0000000000000000ffff")
+            stale (assoc good-receipt :debt-digest (apply str (repeat 64 "0")))]
+        (is (= :foreign-interpretation-receipt
+               (:reason (debt-status (receipts decision [foreign])))))
+        (is (refused? (receipts decision [foreign])))
+        (is (refused? (receipts decision [stale])))))
+    (testing "forged or detached carriers refuse"
+      (doseq [[label f]
+              {:forged-empty-debt (fn [a] (assoc-in a [:interpretation-debt :owed] []))
+               :forged-empty-debt-redigested
+               (fn [a] (assoc a :interpretation-debt
+                              (debt/debt a {:nodes (mapv (fn [p] {:pattern p :status :accepted})
+                                                         (map first (:node-status carrier)))}
+                                         (:analysis-digest carrier))))
+               :missing-carrier (fn [a] (dissoc a :interpretation-debt))
+               :order-mismatch (fn [a] (update-in a [:interpretation-debt :order] (comp vec reverse)))
+               :arrangement-mismatch
+               (fn [a] (assoc-in a [:interpretation-debt :arrangement-digest] (apply str (repeat 64 "1"))))
+               :foreign-policy-carrier (fn [a] (assoc-in a [:interpretation-debt :policy-id]
+                                                         "M-current/policy-0000000000000000ffff"))}]
+        (testing (name label)
+          ;; checked on the debt itself, with and without the receipt, so
+          ;; the Prefix-F guard (which also sees the edited action) is not
+          ;; what refuses it
+          (is (not= :discharged (:status (debt-status (with-action decision f)))))
+          (is (not= :discharged (:status (debt-status (receipts (with-action decision f) [good-receipt])))))
+          (is (refused? (receipts (with-action decision f) [good-receipt]))))))))
 
 (deftest unread-targets-are-counted-and-never-chosen
   (let [fx (fixture)
