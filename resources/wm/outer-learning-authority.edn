@@ -3,6 +3,8 @@
  :prior {:concentration 1 :authority :operator-provisional}
  :preferences
  {:authority :operator-provisional
+  :transform {:kind :softmax-negative-cost
+              :inverse-temperature 1.0}
   :costs {:closure 0.0
           :selected-want-progress 0.2
           :grounded-collateral-progress 0.5

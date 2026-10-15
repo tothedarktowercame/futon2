@@ -566,6 +566,7 @@
                    {:belief (:belief outer-learning)
                     :target (:id candidate)
                     :preference-costs (:preference-costs outer-learning)
+                    :preference-transform (:preference-transform outer-learning)
                     :preference-authority (:preference-authority outer-learning)
                     :controller (:controller outer-learning)}))
                 candidates))

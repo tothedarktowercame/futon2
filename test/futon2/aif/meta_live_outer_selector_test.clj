@@ -79,6 +79,8 @@
                   :outer-learning
                   {:mode :shadow :belief belief
                    :preference-authority :operator-provisional
+                   :preference-transform
+                   {:kind :softmax-negative-cost :inverse-temperature 1.0}
                    :controller {:missing-channel-cost 1.0
                                 :recent-selection-cost 0.25
                                 :continuation-credit 0.35}
@@ -127,6 +129,8 @@
          {:tasks tasks :fetch-snapshot (constantly snapshot)
           :outer-learning
           {:mode :live :belief belief :preference-authority :operator
+           :preference-transform
+           {:kind :softmax-negative-cost :inverse-temperature 1.0}
            :preference-costs
            {:closure 0.0 :selected-want-progress 0.2
             :grounded-collateral-progress 0.5 :typed-blocker 0.9
@@ -154,6 +158,8 @@
                                    :blocker {:status :absent}}]}})
         base {:mode :shadow :belief belief
               :preference-authority :operator
+              :preference-transform
+              {:kind :softmax-negative-cost :inverse-temperature 1.0}
               :preference-costs
               {:closure 0.0 :selected-want-progress 0.2
                :grounded-collateral-progress 0.5 :typed-blocker 0.9

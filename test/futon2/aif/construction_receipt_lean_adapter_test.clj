@@ -278,10 +278,47 @@
      :changed? true
      :scores
      [{:status :scored :target "M-baseline"
+       :prediction
+       {:closure 0.2 :selected-want-progress 0.2
+        :grounded-collateral-progress 0.2 :typed-blocker 0.2
+        :abstention-or-failure 0.2}
+       :preference-distribution
+       {:closure 0.2 :selected-want-progress 0.2
+        :grounded-collateral-progress 0.2 :typed-blocker 0.2
+        :abstention-or-failure 0.2}
+       :terms {:risk 0.0 :ambiguity 1.0 :expected-information-gain 0.0
+               :canonical-g 1.0
+               :risk-kind :categorical-kl-q-predicted-outcomes-to-c
+               :ambiguity-kind :categorical-likelihood-entropy
+               :model-assumption :observed-target-one-step-outcome-likelihood
+               :r8-consumer :outer-target-score-diagnostic
+               :r8-present-fit {:schema :wm/outer-present-fit-v1
+                                :status :absent :reason :target-unobserved}}
        :belief-source-pin
        {:path "wm://outer-target-belief-v1"
         :sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}
       {:status :scored :target "M-learned"
+       :prediction
+       {:closure 0.2 :selected-want-progress 0.2
+        :grounded-collateral-progress 0.2 :typed-blocker 0.2
+        :abstention-or-failure 0.2}
+       :preference-distribution
+       {:closure 0.2 :selected-want-progress 0.2
+        :grounded-collateral-progress 0.2 :typed-blocker 0.2
+        :abstention-or-failure 0.2}
+       :terms {:risk 0.0 :ambiguity 1.0 :expected-information-gain 0.0
+               :canonical-g 1.0
+               :risk-kind :categorical-kl-q-predicted-outcomes-to-c
+               :ambiguity-kind :categorical-likelihood-entropy
+               :model-assumption :observed-target-one-step-outcome-likelihood
+               :r8-consumer :outer-target-score-diagnostic
+               :r8-present-fit {:schema :wm/outer-present-fit-v1
+                                :status :present
+                                :kind :categorical-negative-log-evidence
+                                :computed :before-parameter-update
+                                :aif-correspondence :minimum-variational-free-energy
+                                :predictive-probability 0.2
+                                :value 1.6094379124341003}}
        :belief-source-pin
        {:path "wm://outer-target-belief-v1"
         :sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}]}}})
@@ -300,6 +337,8 @@
     (is (= 2 (get-in adapted [:projection :candidate-count])))
     (is (= run-sha (get-in adapted [:projection :publication :sha256])))
     (is (.contains (:lean adapted) "learned_posterior_was_consumed"))
+    (is (.contains (:lean adapted) "r5_risk_is_categorical_kl"))
+    (is (.contains (:lean adapted) "r8_has_a_runtime_consumer"))
     (is (.contains (:lean adapted) "exact_run_published_for_future_learning"))))
 
 (deftest ^:slow emitted-outer-learning-certificate-elaborates-in-lean
@@ -348,7 +387,42 @@
       (is (= :adapter/outer-learning-publication-mismatch
              (refusal #(adapter/outer-learning-input-from-run-record
                         outer-learning-record run-sha
-                        (assoc manifest :entries []))))))))
+                        (assoc manifest :entries []))))))
+    (testing "expected cost cannot be relabelled as canonical KL risk"
+      (is (= :adapter/outer-learning-r5-correspondence-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (assoc-in outer-learning-record
+                                  [:outer-task-selection :outer-learning :scores 1
+                                   :terms :risk-kind]
+                                  :expected-authorized-cost)
+                        run-sha manifest)))))
+    (testing "declared KL risk must equal the independently recomputed value"
+      (is (= :adapter/outer-learning-r5-correspondence-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (-> outer-learning-record
+                            (assoc-in [:outer-task-selection :outer-learning :scores 1
+                                       :terms :risk]
+                                      0.25)
+                            (assoc-in [:outer-task-selection :outer-learning :scores 1
+                                       :terms :canonical-g]
+                                      1.25))
+                        run-sha manifest)))))
+    (testing "R8 must name its retained producer and runtime consumer"
+      (is (= :adapter/outer-learning-r8-correspondence-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (assoc-in outer-learning-record
+                                  [:outer-task-selection :outer-learning :scores 1
+                                  :terms :r8-consumer]
+                                  nil)
+                        run-sha manifest)))))
+    (testing "declared R8 surprise must equal negative log evidence"
+      (is (= :adapter/outer-learning-r8-correspondence-mismatch
+             (refusal #(adapter/outer-learning-input-from-run-record
+                        (assoc-in outer-learning-record
+                                  [:outer-task-selection :outer-learning :scores 1
+                                   :terms :r8-present-fit :value]
+                                  1.0)
+                        run-sha manifest)))))))
 
 (deftest controlled-record-renders-p0-admission-certificate
   (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file selection-record)))

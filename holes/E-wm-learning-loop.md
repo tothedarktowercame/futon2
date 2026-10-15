@@ -434,6 +434,34 @@ can consume the updated posterior, but the last exit condition remains open
 until a future authorized click consumes revision `b895dd4c…` in its own
 runtime certificate.
 
+### 2026-10-15 R5/R8 semantic repair for future runs
+
+Review of the working loop found two theory-to-runtime gaps which are now
+repaired in code, without rewriting either supervised run above.
+
+- R5 risk is categorical `KL(Q(o|π) || C(o))`, not expected authorized cost
+  presented under a risk label.  The pinned authority still declares bounded
+  outcome costs, and now also declares the conversion
+  `C = softmax(-β cost)`, with `β = 1`.  Expected cost remains visible as a
+  separate diagnostic.  Ambiguity is normalized entropy of the target's
+  categorical one-step outcome law, under the explicit modelling assumption
+  that the selected target state is observed and this outcome law is the
+  likelihood `A(.|s)`.
+- R8 is no longer a disconnected definition.  Each admitted observation stores
+  its pre-update categorical surprise `-log P(o)`, and the outer target scorer
+  consumes it as a named model-fit diagnostic.  It is deliberately not added
+  to the future-policy expected-free-energy score: that would double-count
+  present evidence as future policy value.
+- The runtime Lean adapter now imports the existing outcome-risk and policy-EFE
+  theory modules.  Before emitting a certificate it independently recomputes
+  KL risk, entropy, canonical `G`, and (when present) R8 surprise from the
+  recorded distributions.  Correct-looking labels with false numbers, or an
+  R8 producer without its declared consumer, are typed refusals.
+
+These changes govern future clicks only.  A later supervised run is needed to
+produce empirical evidence bearing the new R5/R8 runtime certificate; the
+October records remain evidence for the semantics they actually executed.
+
 ## 6. Migration and safety
 
 The upgrade should be introduced in four modes:

@@ -10,6 +10,29 @@
              (map (fn [p] (if (pos? p) (* p (Math/log p)) 0.0))
                   probabilities))))
 
+(defn- finite-number? [x]
+  (and (number? x) (Double/isFinite (double x))))
+
+(defn- preference-distribution [costs transform]
+  (when (and (= :softmax-negative-cost (:kind transform))
+             (finite-number? (:inverse-temperature transform))
+             (pos? (double (:inverse-temperature transform))))
+    (let [beta (double (:inverse-temperature transform))
+          weights (into {} (map (fn [[outcome cost]]
+                                  [outcome (Math/exp (- (* beta (double cost))))]))
+                        costs)
+          z (reduce + (vals weights))]
+      (when (and (finite-number? z) (pos? z))
+        (into (sorted-map) (map (fn [[outcome weight]]
+                                  [outcome (/ weight z)])) weights)))))
+
+(defn- categorical-kl [q c]
+  (reduce + 0.0
+          (map (fn [[outcome p]]
+                 (if (zero? p) 0.0
+                     (* p (Math/log (/ p (get c outcome))))))
+               q)))
+
 (defn- pinned-continuation? [continuation]
   (and (= :present (:status continuation))
        (string? (:next-step continuation))
@@ -19,9 +42,12 @@
                             (or (get-in continuation [:evidence :sha256]) "")))))
 
 (defn score
-  [{:keys [belief target preference-costs preference-authority controller]}]
+  [{:keys [belief target preference-costs preference-transform
+           preference-authority controller]}]
   (let [cost-keys (set (keys preference-costs))
-        vocabulary (set belief/outcome-vocabulary)]
+        vocabulary (set belief/outcome-vocabulary)
+        preference-distribution (preference-distribution preference-costs
+                                                         preference-transform)]
     (cond
       (not= :produced (:status belief))
       {:schema schema :status :refused :reason :belief-not-produced}
@@ -34,6 +60,12 @@
                       (vals preference-costs)))
       {:schema schema :status :refused :reason :preference-authority-invalid}
 
+      (or (nil? preference-distribution)
+          (not= vocabulary (set (keys preference-distribution)))
+          (not-every? #(and (finite-number? %) (pos? (double %)))
+                      (vals preference-distribution)))
+      {:schema schema :status :refused :reason :preference-transform-invalid}
+
       :else
       (let [alpha (or (get-in belief [:targets target :alpha])
                       (get-in belief [:prior :alpha]))
@@ -42,9 +74,11 @@
                              (map (fn [outcome]
                                     [outcome (/ (get alpha outcome) total)]))
                              belief/outcome-vocabulary)
-            risk (reduce + (map (fn [[outcome p]]
-                                  (* p (get preference-costs outcome)))
-                                prediction))
+            expected-authorized-cost
+            (reduce + (map (fn [[outcome p]]
+                             (* p (get preference-costs outcome)))
+                           prediction))
+            risk (categorical-kl prediction preference-distribution)
             ambiguity (/ (entropy (vals prediction))
                          (Math/log (double (count prediction))))
             ;; No likelihood-parameter posterior beyond the categorical
@@ -78,17 +112,31 @@
                             (double (or (:unobserved-resource-cost controller) 0.5)))
             weighted-resource-cost (* resource-cost
                                       (double (or (:resource-weight controller) 0.0)))
-            normalized-g (-> (/ (+ risk ambiguity (- eig)) 2.0)
+            canonical-g (+ risk ambiguity (- eig))
+            normalized-g (-> (/ canonical-g 2.0)
                              (+ weighted-resource-cost)
                              (+ cadence-cost)
                              (- continuation-credit)
                              (max 0.0) (min 1.0))]
         {:schema schema :status :scored :target target
          :prediction prediction
-         :terms {:risk risk :ambiguity ambiguity
+         :preference-distribution preference-distribution
+         :preference-transform preference-transform
+         :terms {:risk risk
+                 :risk-kind :categorical-kl-q-predicted-outcomes-to-c
+                 :ambiguity ambiguity
+                 :ambiguity-kind :categorical-likelihood-entropy
+                 :model-assumption :observed-target-one-step-outcome-likelihood
+                 :expected-authorized-cost expected-authorized-cost
                  :expected-information-gain eig
                  :combination :risk-plus-ambiguity-minus-information-gain
+                 :canonical-g canonical-g
                  :normalization :divide-by-two
+                 :r8-present-fit
+                 (or (get-in belief [:targets target :model-fit :last])
+                     {:schema :wm/outer-present-fit-v1 :status :absent
+                      :reason :target-unobserved})
+                 :r8-consumer :outer-target-score-diagnostic
                  :recent-selection-opportunity-cost cadence-cost
                  :continuation-credit continuation-credit
                  :continuation-evidence (if continuation?

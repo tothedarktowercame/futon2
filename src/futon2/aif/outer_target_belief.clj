@@ -94,6 +94,17 @@
 
                  (= :present (:status obs))
                  (let [before (or (get-in targets [target :alpha]) (:alpha prior))
+                       before-predictive (predictive before)
+                       observed-probability (double (get before-predictive (:class obs)))
+                       present-fit {:schema :wm/outer-present-fit-v1
+                                    :status :present
+                                    :kind :categorical-negative-log-evidence
+                                    :outcome (:class obs)
+                                    :predictive-probability observed-probability
+                                    :value (- (Math/log observed-probability))
+                                    :computed :before-parameter-update
+                                    :aif-correspondence
+                                    :minimum-variational-free-energy}
                        after (update before (:class obs) inc)
                        prior-resources (get-in targets [target :resource-use]
                                                {:wall-clock-ms 0 :tokens 0
@@ -112,11 +123,23 @@
                                      :posterior-predictive (predictive after)
                                      :observations (inc (get-in targets
                                                                 [target :observations] 0))
+                                     :model-fit
+                                     {:last present-fit
+                                      :cumulative
+                                      (+ (double (get-in targets
+                                                         [target :model-fit :cumulative]
+                                                         0.0))
+                                         (:value present-fit))
+                                      :observations
+                                      (inc (get-in targets
+                                                   [target :model-fit :observations]
+                                                   0))}
                                      :resource-use resources
                                      :last-observation identity})
                     :events (conj events
                                   {:identity identity :target target
-                                   :observation obs :update :applied
+                                   :observation obs :present-fit present-fit
+                                   :update :applied
                                    :row-evidence
                                    (select-keys row [:selected-want-effects
                                                      :grounded-artifact

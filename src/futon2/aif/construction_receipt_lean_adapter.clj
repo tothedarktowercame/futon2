@@ -34,6 +34,25 @@
     (first values)
     (refuse! kind (assoc data :matches (count values)))))
 
+(defn- close-double? [x y]
+  (and (number? x) (number? y)
+       (< (Math/abs (- (double x) (double y))) 1.0e-12)))
+
+(defn- categorical-kl [q c]
+  (reduce + 0.0
+          (map (fn [[outcome p]]
+                 (if (zero? p) 0.0
+                     (* (double p)
+                        (Math/log (/ (double p) (double (get c outcome)))))))
+               q)))
+
+(defn- normalised-entropy [q]
+  (/ (- (reduce + 0.0
+                 (map (fn [p]
+                        (if (pos? p) (* (double p) (Math/log (double p))) 0.0))
+                      (vals q))))
+     (Math/log (double (count q)))))
+
 (defn- runtime-token
   "Undo only the target qualification added to tokens in the recorded
    selection candidate. Relation witnesses are recorded in the constructor's
@@ -548,7 +567,11 @@
                           {:run-record-sha256 run-record-sha})
         selected-score (one! :adapter/outer-learning-selected-score-mismatch
                              (filter #(= chosen (:target %)) scores)
-                             {:selected chosen})]
+                             {:selected chosen})
+        terms (:terms selected-score)
+        prediction (:prediction selected-score)
+        preferences (:preference-distribution selected-score)
+        r8 (:r8-present-fit terms)]
     (when-not (= :wm/outer-learning-run-manifest-v1 (:schema manifest))
       (refuse! :adapter/outer-learning-manifest-schema-mismatch
                {:schema (:schema manifest)}))
@@ -588,6 +611,53 @@
                    (= run-record-sha (:sha256 publication)))
       (refuse! :adapter/outer-learning-publication-mismatch
                {:publication publication :run-record-sha256 run-record-sha}))
+    (when-not (and (= :categorical-kl-q-predicted-outcomes-to-c
+                       (:risk-kind terms))
+                   (= :categorical-likelihood-entropy (:ambiguity-kind terms))
+                   (= :observed-target-one-step-outcome-likelihood
+                      (:model-assumption terms))
+                   (number? (:risk terms)) (number? (:ambiguity terms))
+                   (number? (:canonical-g terms))
+                   (map? prediction)
+                   (= (set (keys prediction)) (set (keys preferences)))
+                   (every? #(and (number? %) (not (neg? (double %))))
+                           (vals prediction))
+                   (close-double? 1.0 (reduce + (map double (vals prediction))))
+                   (map? preferences)
+                   (= (set (keys preferences))
+                      #{:closure :selected-want-progress
+                        :grounded-collateral-progress :typed-blocker
+                        :abstention-or-failure})
+                   (every? #(and (number? %) (pos? (double %)))
+                           (vals preferences))
+                   (< (Math/abs (- 1.0 (reduce + (map double (vals preferences)))))
+                      1.0e-12)
+                   (close-double? (:risk terms)
+                                  (categorical-kl prediction preferences))
+                   (close-double? (:ambiguity terms)
+                                  (normalised-entropy prediction))
+                   (close-double? (:canonical-g terms)
+                                  (+ (:risk terms) (:ambiguity terms)
+                                     (- (:expected-information-gain terms)))))
+      (refuse! :adapter/outer-learning-r5-correspondence-mismatch
+               {:terms terms :preference-distribution preferences}))
+    (when-not (and (= :outer-target-score-diagnostic (:r8-consumer terms))
+                   (= :wm/outer-present-fit-v1 (:schema r8))
+                   (or (and (= :present (:status r8))
+                            (= :categorical-negative-log-evidence (:kind r8))
+                            (= :before-parameter-update (:computed r8))
+                            (= :minimum-variational-free-energy
+                               (:aif-correspondence r8))
+                            (number? (:predictive-probability r8))
+                            (pos? (double (:predictive-probability r8)))
+                            (<= (double (:predictive-probability r8)) 1.0)
+                            (close-double? (:value r8)
+                                           (- (Math/log
+                                               (double (:predictive-probability r8))))))
+                       (and (= :absent (:status r8))
+                            (= :target-unobserved (:reason r8)))))
+      (refuse! :adapter/outer-learning-r8-correspondence-mismatch
+               {:r8 r8 :consumer (:r8-consumer terms)}))
     {:runtime-source {:run-id (:run/id run-record)
                       :click-id (:click/id run-record)}
      :selected-target chosen
@@ -596,17 +666,30 @@
      :prior-revision (:prior-revision learning)
      :observation-source (:observation-source learning)
      :posterior-revision posterior
+     :risk-kind (:risk-kind terms)
+     :ambiguity-kind (:ambiguity-kind terms)
+     :r8-status (:status r8)
+     :r8-connected? true
      :candidate-count (count scores)
      :run-record-sha256 run-record-sha
      :publication publication}))
 
 (defn render-outer-learning [input run-record-sha manifest-sha]
-  (str "import Mathlib\n\n"
+  (str "import DarkTower.WarMachine.OutcomeRiskKL\n"
+       "import DarkTower.WarMachine.PolicyVariationalFreeEnergy\n\n"
        "/-! GENERATED FILE — DO NOT EDIT.\nRun-record SHA-256: " run-record-sha
        "\nPublication-manifest SHA-256: " manifest-sha
        "\nRuntime source: " (pr-str (:runtime-source input))
        "\nScope: temporal join from an incoming learned posterior through this selection to publication of this exact run for a future selection.\n-/\n\n"
        "namespace DarkTower.WarMachine.RuntimeOuterLearning\n\n"
+       "inductive RiskFormulation | categoricalKL deriving DecidableEq\n"
+       "inductive AmbiguityFormulation | categoricalLikelihoodEntropy deriving DecidableEq\n"
+       "inductive PresentFitStatus | present | absent deriving DecidableEq\n\n"
+       "def riskFormulation : RiskFormulation := .categoricalKL\n"
+       "def ambiguityFormulation : AmbiguityFormulation := .categoricalLikelihoodEntropy\n"
+       "def presentFitStatus : PresentFitStatus := ."
+       (if (= :present (:r8-status input)) "present" "absent") "\n"
+       "def presentFitConsumerConnected : Bool := true\n\n"
        "def selectedTarget : String := " (pr-str (:selected-target input)) "\n"
        "def liveSelection : String := " (pr-str (:selected-target input)) "\n"
        "def priorRevision : String := " (pr-str (:prior-revision input)) "\n"
@@ -624,10 +707,19 @@
        "theorem exact_run_published_for_future_learning :\n"
        "    manifestRunRevision = publishedRunRevision := rfl\n"
        "theorem temporal_direction_is_nonempty : candidateCount > 0 := by decide\n\n"
+       "theorem r5_risk_is_categorical_kl :\n"
+       "    riskFormulation = .categoricalKL := rfl\n"
+       "theorem r5_ambiguity_is_likelihood_entropy :\n"
+       "    ambiguityFormulation = .categoricalLikelihoodEntropy := rfl\n"
+       "theorem r8_has_a_runtime_consumer :\n"
+       "    presentFitConsumerConnected = true := rfl\n\n"
        "#print axioms learned_posterior_was_consumed\n"
        "#print axioms learned_selection_identity_retained\n"
        "#print axioms exact_run_published_for_future_learning\n"
        "#print axioms temporal_direction_is_nonempty\n"
+       "#print axioms r5_risk_is_categorical_kl\n"
+       "#print axioms r5_ambiguity_is_likelihood_entropy\n"
+       "#print axioms r8_has_a_runtime_consumer\n"
        "end DarkTower.WarMachine.RuntimeOuterLearning\n"))
 
 (defn adapt-run-record-outer-learning-bytes

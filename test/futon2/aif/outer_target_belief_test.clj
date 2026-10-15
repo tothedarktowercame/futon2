@@ -30,6 +30,15 @@
                              :grounded-collateral-progress])))
     (is (= 1 (get-in result [:targets "M-a" :alpha :closure])))
     (is (= 2 (get-in result [:targets "M-b" :alpha :closure])))
+    (is (= :categorical-negative-log-evidence
+           (get-in result [:events 0 :present-fit :kind])))
+    (is (= :before-parameter-update
+           (get-in result [:events 0 :present-fit :computed])))
+    (is (= 0.2 (get-in result [:events 0 :present-fit
+                               :predictive-probability])))
+    (is (< (Math/abs (- (Math/log 5.0)
+                        (get-in result [:events 0 :present-fit :value])))
+           1.0e-12))
     (is (= :outcome-evidence-insufficient
            (get-in result [:events 2 :observation :reason])))))
 
