@@ -35,11 +35,14 @@
   (and (number? x) (Double/isFinite (double x))))
 
 (defn normalized-distribution?
-  "True when DIST (a map outcome -> weight) sums to 1 within tolerance and
-  every weight is a finite number."
+  "True when DIST (a map outcome -> weight) sums to 1 within tolerance,
+  every weight is a finite number, and no weight is negative (a negative
+  weight paired with one above 1 still sums to 1 but is not a
+  distribution)."
   [dist]
   (and (map? dist) (seq dist)
        (every? (comp double-finite? val) dist)
+       (every? (comp #(>= % 0.0) val) dist)
        (let [sum (reduce + 0.0 (map double (vals dist)))]
          (<= (Math/abs (- sum 1.0)) 1e-9))))
 
@@ -118,15 +121,20 @@
   (let [stated (preference-distributions record)
         ;; A second, distinct schedule among the declared-c slots is §7.5.5's
         ;; two-competing-Cs bad case; identical restatements are one C.
-        distinct-cs (dedupe (map :distribution stated))]
+        ;; Set-based, so A,B,A is still exactly two distinct schedules, and
+        ;; the diagnostic names where each distinct schedule was stated.
+        distinct-at (into (sorted-set-by (fn [a b] (compare (pr-str a) (pr-str b))))
+                          (map :distribution) stated)]
     (cond
       (not (seq stated))
       (refuse record :preference-schedule-absent
               :reason "no :preference-at-each-step and no model authority on the scored record")
 
-      (seq (rest distinct-cs))
+      (> (count distinct-at) 1)
       (refuse record :competing-preferences
               :found (mapv :at stated)
+              :stated-at (mapv (fn [d] {:at (mapv :at (filter #(= (:distribution %) d) stated))})
+                               distinct-at)
               :reason "two different preference schedules both stated as C (§7.3/§7.5.5)")
 
       :else
@@ -194,6 +202,23 @@
           (not (double-finite? g))
           (refuse record :g-not-finite :g g)
 
+          ;; The package purpose is to bind the one C to its declared
+          ;; authority; a record whose model authority was lost (JSON
+          ;; round-trip strips the scorer-result metadata) certifies
+          ;; nothing.  Typed absence, not a degraded certificate.
+          (nil? authority)
+          (refuse record :preference-authority-absent
+                  :reason "scoring model authority absent (metadata lost or never recorded); the schedule cannot be bound to its declared authority"
+                  :architectural-gap :model-provenance-not-retained-in-record)
+
+          ;; An authority whose model kind is not the shape scorer's
+          ;; progress-count cannot have its schedule recomputed by this
+          ;; validator; claiming recomputation would be fabrication.
+          (not shape-scorer-c?)
+          (refuse record :preference-kind-not-recomputable
+                  :model-kind (or (:kind authority) :none)
+                  :reason "no recomputation rule for this model kind; refusing rather than certifying an unrecomputed schedule")
+
           :else
           (cond-> {:schema receipt-schema :status :certified
                    :policy-id (:policy-id record) :target (:target record)
@@ -206,7 +231,7 @@
                    :checks {:one-declared-c true
                             :normalized true :finite true
                             :steps-cover-horizon true
-                            :schedule-recomputed (not shape-scorer-c?)
+                            :schedule-recomputed true
                             :g-terms-finite-and-agreeing true}}
             authority (assoc :authority (assoc authority
                                                ;; the shape scorer pins no
@@ -223,12 +248,14 @@
 
 (def architectural-gaps
   "Gaps in the existing scorer evidence this validator had to type rather
-  than bridge (reported, not worked around):
+  than bridge (reported, not worked around).  Both are now typed refusals
+  (:preference-authority-absent) rather than silently degraded
+  certificates:
   - cascade_shape_g/score-arranged does not copy the scoring model or its
     provenance into the returned record; the authority survives only as
-    metadata on :scorer-result, so any JSON round-trip loses it and the
-    receipt degrades to :authority-absent.
+    metadata on :scorer-result, so any JSON round-trip loses it.
   - The synthetic progress C carries no version or library pins, so
-    'bound to its declared authority/version and pins' can only bind to the
-    model's :provenance source string; pin absence is typed, not guessed."
+    'bound to its declared authority/version and pins' can only bind to
+    the model's :provenance source string; pin absence is typed, not
+    guessed."
   [:model-provenance-not-retained-in-record :no-pins-in-synthetic-c])

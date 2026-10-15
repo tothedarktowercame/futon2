@@ -43,7 +43,9 @@
     (testing "the authority binds to the shape scorer's declared model"
       (is (= "cascade_shape_g arrangement model" (get-in receipt [:authority :source])))
       (is (= :synthetic (get-in receipt [:authority :provenance-status])))
-      (is (= :absent (get-in receipt [:authority :pins :status]))))
+      (is (= :absent (get-in receipt [:authority :pins :status])))
+      (is (true? (get-in receipt [:checks :schedule-recomputed])))
+      (is (contains? receipt :authority)))
     (testing "old live-C is typed diagnostic-only, never a selector"
       (is (= :diagnostic-only (get-in receipt [:live-c :role])))
       (is (false? (get-in receipt [:live-c :selected]))))))
@@ -134,11 +136,60 @@
       (is (contains? (set (:differing receipt)) :risk)))))
 
 (deftest authority-absence-after-metadata-loss
-  (testing "a JSON-shaped record (no metadata) still certifies the recorded
-            schedule but reports the authority gap honestly"
+  (testing "a JSON-shaped record (no metadata) refuses with a typed
+            authority absence, never certifies unbound"
     (let [record (without-model-authority (scored))
           receipt (rpp/validate record)]
-    (is (= :certified (:status receipt)))
-    (is (nil? (:authority receipt)))
-    (is (some #{:model-provenance-not-retained-in-record}
-              rpp/architectural-gaps)))))
+      (is (= :refused (:status receipt)))
+      (is (= :preference-authority-absent (:kind receipt)))
+      (is (= :model-provenance-not-retained-in-record (:architectural-gap receipt)))
+      (is (some #{:model-provenance-not-retained-in-record}
+                rpp/architectural-gaps)))))
+
+(deftest refuses-unknown-model-kind
+  (testing "an authority whose model kind has no recomputation rule refuses"
+    (let [record (scored)
+          m0 (meta (:scorer-result record))
+          tampered (update record :scorer-result with-meta
+                           (assoc-in m0 [:cascade-scoring :model :kind] :mystery-model))
+          receipt (rpp/validate tampered)]
+      (is (= :refused (:status receipt)))
+      (is (= :preference-kind-not-recomputable (:kind receipt)))
+      (is (= :mystery-model (:model-kind receipt))))))
+
+(deftest refuses-negative-mass
+  (testing "a negative weight paired with one above 1 sums to 1 but is not
+            a distribution; it refuses as non-normalized"
+    (let [record (without-model-authority (scored))
+          bad {[0 false] -0.25, [1 true] 1.25}
+          broken (assoc record :preference-at-each-step
+                        (update (:preference-at-each-step record) 1 (constantly bad)))
+          receipt (rpp/validate broken)]
+      (is (= :refused (:status receipt)))
+      (is (= :preference-not-normalized (:kind receipt)))
+      (is (= [1] (:steps receipt)))))
+  (testing "the helper itself rejects negative mass"
+    (is (false? (rpp/normalized-distribution? {[0 false] -0.25 [1 true] 1.25})))
+    (is (true? (rpp/normalized-distribution? {[0 false] 0.25 [1 true] 0.75})))))
+
+(deftest competing-detection-is-set-based
+  (testing "A,B,A stated in three slots is still exactly two distinct Cs,
+            with a deterministic stated-at diagnostic"
+    (let [record (scored)
+          m0 (meta (:scorer-result record))
+          model (get-in m0 [:cascade-scoring :model])
+          sched-a (:preference-at-each-step record)
+          sched-b (rpp/recompute-progress-preference 9 (:horizon record))
+          ;; three stated slots: record=A, model-progress=B, and a second
+          ;; restatement of A on the record level is impossible, so state
+          ;; A,B,A via record + model-progress + a class-preference copy of A
+          model3 (-> model
+                     (assoc :progress-preference sched-b)
+                     (assoc :class-preference sched-a))
+          tampered (-> record
+                       (update :scorer-result with-meta
+                               (assoc-in m0 [:cascade-scoring :model] model3)))
+          receipt (rpp/validate tampered)]
+      (is (= :refused (:status receipt)))
+      (is (= :competing-preferences (:kind receipt)))
+      (is (= 2 (count (:stated-at receipt)))))))
