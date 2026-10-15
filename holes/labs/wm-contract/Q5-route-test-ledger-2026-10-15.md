@@ -151,3 +151,30 @@ pre-existing at 45933b93d: scoring-input-receipts `actual-scoring-snapshots-and-
 (validator seam, earlier packet), habit-store-retired `the-close-does-not-write-the-legacy-store`
 (runner fixture without canonical F) and selection-reads-fold `real-checker-verdict-into-increment`
 (missing `../futon3c/holes/labs/M-futon-seams/exemplar/click-001.edn`).
+
+## Q5 disposition (codex-68 review, 2026-10-15)
+
+Q5 is **satisfied on the production runner seam**.  The runtime makes exactly
+one G selection over the reading-policy family, records the completion instant,
+then asks only for the selected policy's occurrence-indexed interpretation
+debt.  The request, receipts, debt and policy key bind the same immutable
+identity; validation failure cannot select a runner-up.  The exporter compares
+the recorded instants (as `Instant`s, not strings), and an owed but unissued
+request is not recomputable rather than a vacuous pass.  The focused Lean
+fixtures check both the issued/pass and unissued/unverifiable cases against
+`Requirements.Q5`.
+
+Independent review gates:
+
+- prefix/precision migration: 26 tests, 121 assertions, 0 failures/errors;
+- report/decision migration: 37 tests, 198 assertions, 0 failures/errors;
+- proposal/refusal migration: 31 tests, 193 assertions, 0 failures/errors;
+- habit-E migration and directly affected controls: 48 tests, 229 assertions,
+  0 failures/errors.
+
+The following remain explicit downstream obligations, not alternate evidence
+for Q5: reading-policy execution semantics and resulting run-record
+classification; token-belief/zeta/measured-A reconnection; reading-route
+scoring-input validation; C-source/Q/G-term decomposition mappings; and the Q2
+construction census.  None is treated as permission to reorder selection and
+interpretation or to weaken immutable selected identity.
