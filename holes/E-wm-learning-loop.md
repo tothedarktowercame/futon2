@@ -1,9 +1,11 @@
 # E-wm-learning-loop — close outcome learning around outer target selection
 
 **Date:** 2026-10-14  
-**Status:** COMPARE — durable outcome publication, posterior consumption, and
-live-capable selection are wired; tracked authority remains shadow pending the
-supervised promotion demonstration.
+**Status:** LIVE — durable outcome publication, posterior consumption, and
+live selection are wired.  The 2026-10-15 supervised demonstration validated
+the runtime Lean certificate and a corrected production preview consumed three
+applied observations; one later supervised click must still consume that exact
+post-demonstration revision to close the final temporal-loop exit condition.
 **Driver:** War Machine. **Operator:** Joe. **Repository:** `futon2`.  
 **Relates:** [[E-outer-loop-improvement]] · [[E-close-the-loop]] ·
 `src/futon2/aif/meta_live_outer_selector.clj` ·
@@ -392,6 +394,45 @@ Tests are scoped and warrantable; no whole-CI rerun is required for each packet.
    that continuation wins from explicit predicted marginal value.
 6. Run the next supervised click and verify that it consumes the certified
    posterior revision.
+
+### 2026-10-15 supervised evidence
+
+Two authorized clicks were observed under the debugger.
+
+- Click `wm-click-05a95278-0524-4241-9aa4-fe50224313b9`, run
+  `2026-10-14-d8fcde03-a588-4fc7-8658-06e56a4dbde8`, completed
+  `:grounded-progress` while the learner was in shadow mode.
+- Click `wm-click-fdaba692-8108-4536-8fbd-237054a981b4`, run
+  `2026-10-14-0b92b122-0c1c-4fde-ac1c-4e632242648c`, completed
+  `:grounded-progress` with a `:live-consumed` certificate.  It selected
+  `M-categorical-code` instead of the structural baseline
+  `M-interim-director-proxy-metric-inventory`.
+- The exact second run record has SHA-256
+  `31752324d65a4b19a48c8f65c9d980c4ab43d5c9709b3eb6b269538e7698edc4`;
+  the publication manifest used for validation has SHA-256
+  `aaf19eb9ead51db7324c623c1a16789915cdd70a7f8016b1a0c8cddadf65f47d`.
+  The generated Lean runtime certificate compiled with exit 0, and its four
+  theorems reported no axiom dependencies.
+- The debugger exposed two integration defects during the run: redecision
+  could change the outer target after buying target-specific evidence, and the
+  serving JVM retained an old outcome projector.  The former is repaired by
+  pinning one outer receipt across in-click redecision.  Reloading the current
+  projector repaired the latter without rewriting any run record.
+- Replay after that reload produced three rows, three applied updates, and zero
+  unresolved rows.  All three were classified as grounded collateral progress,
+  producing posterior revision
+  `b895dd4c602f302d550ffa574a3c2c1aecd26dd9920629e24ed1080ac66e9552`.
+- A read-only production preview then issued a `:live-consumed` receipt over
+  that exact revision: 104 candidates, baseline
+  `M-interim-director-proxy-metric-inventory`, live selection
+  `M-futonzero-mvp`, and `:changed? true`.
+
+The second click's immutable certificate correctly records the older serving
+projector's `2 rows / 0 applied / 2 unresolved` view.  It must not be rewritten
+after the fact.  Therefore the preview proves that the repaired live selector
+can consume the updated posterior, but the last exit condition remains open
+until a future authorized click consumes revision `b895dd4c…` in its own
+runtime certificate.
 
 ## 6. Migration and safety
 
