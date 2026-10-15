@@ -270,7 +270,14 @@
              (reason (with-receipt (reseal (assoc receipt :source-sha256 (sha lib "p/a")
                                                   :library-pin (sha lib "p/a")))))))
       (is (= :receipt-for-another-request
+             (reason (with-receipt (reseal (assoc-in receipt [:reading :request-id]
+                                                     (apply str (repeat 64 "c"))))))))
+      (is (= :receipt-source-identity-malformed
              (reason (with-receipt (reseal (assoc-in receipt [:reading :request-id] "another"))))))
+      (is (= :receipt-source-identity-malformed
+             (reason (with-receipt (reseal (update receipt :reading dissoc :response-digest))))))
+      (is (= :receipt-source-identity-malformed
+             (reason (with-receipt (reseal (assoc-in receipt [:reading :response-digest] 7))))))
       (is (= :receipt-reading-mismatch
              (reason (with-receipt (reseal (assoc-in receipt [:reading :analysis-digest] "other"))))))
       (is (= :receipt-without-source-identity
@@ -306,9 +313,16 @@
             asked (atom 0)
             after (phase decision lib (fn [request] (swap! asked inc) (answer-with-pins request)))]
         (is (= 0 @asked))
-        (is (= :library-source-missing-at-request (get-in (validation after) [:reasons 0 :reason])))
-        (is (= ["p/b"] (get-in (validation after) [:reasons 0 :patterns])))
-        (is (= :interpretation-owed-after-selection (status after)))))
+        (is (= :selected-reading-source-unpinned (get-in (validation after) [:reasons 0 :reason])))
+        (is (= (get-in decision [:action :interpretation-debt :owed])
+               (get-in (validation after) [:reasons 0 :missing])))
+        (is (= :interpretation-owed-after-selection (status after)))
+        (testing "no request with an unpinned library source is ever issued"
+          (let [issued (selected-reading/request decision {:library-root (str lib)})]
+            (is (= :refused (:status issued)))
+            (is (= :selected-reading-source-unpinned (:kind issued)))
+            (is (not (contains? issued :library-pins)))
+            (is (not (contains? issued :request-id)))))))
     (testing "an answer without a named source refuses"
       (let [after (phase decision lib #(assoc (answer % lib "accepted") :by " "))]
         (is (= :missing-source-identity (get-in (validation after) [:reasons 0 :reason])))

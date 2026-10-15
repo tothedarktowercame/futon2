@@ -37,13 +37,26 @@
 (defn request
   "The selected-only reading request for DECISION's chosen reading policy,
   or nil when it owes nothing (or is not a reading policy). Each owed
-  pattern's library file is pinned at issuance (:library-pins, nil when the
-  file is absent), inside the sealed request id: the responder never
-  supplies the only pin."
+  pattern's library file is pinned at issuance (:library-pins), inside the
+  sealed request id: the responder never supplies the only pin. When any
+  owed pattern has no library file, no request is issued: the result is the
+  typed refusal {:status :refused :kind :selected-reading-source-unpinned
+  :missing [{:occurrence-id :pattern} …]}, which must not be asked."
   [decision {:keys [library-root] :or {library-root default-library-root}}]
   (let [action (:action decision)
-        carrier (:interpretation-debt action)]
-    (when (and (map? carrier) (seq (:owed carrier)))
+        carrier (:interpretation-debt action)
+        pins (when (map? carrier)
+               (into (sorted-map)
+                     (map (fn [p] [p (library-sha256 library-root p)]))
+                     (distinct (map :pattern (:owed carrier)))))
+        missing (vec (filter #(nil? (get pins (:pattern %))) (:owed carrier)))]
+    (cond
+      (not (and (map? carrier) (seq (:owed carrier)))) nil
+      (seq missing)
+      {:status :refused :kind :selected-reading-source-unpinned
+       :policy-id (:id action) :debt-digest (:digest carrier)
+       :missing missing :library-root (str library-root)}
+      :else
       (let [body {:schema request-schema
                   :target (:target action)
                   :policy-id (:id action)
@@ -54,9 +67,7 @@
                   :excerpt-digest (:excerpt-digest carrier)
                   :analysis-digest (:analysis-digest carrier)
                   :owed (:owed carrier)
-                  :library-pins (into (sorted-map)
-                                      (map (fn [p] [p (library-sha256 library-root p)]))
-                                      (distinct (map :pattern (:owed carrier))))
+                  :library-pins pins
                   :asks {:what (str "For each owed occurrence only: does its pattern "
                                     "apply to this target's excerpt? Answer accepted "
                                     "or rejected, with a reason and the sha256 of the "
@@ -69,12 +80,6 @@
                                                     :source_sha256 "sha256 of the library file"}]
                                         :by "answering agent id"}}}]
         (assoc body :request-id (digest request-schema body))))))
-
-(defn unpinned-patterns
-  "Owed patterns REQUEST could not pin at issuance (no library file). Such a
-  request is refused, never asked."
-  [request]
-  (vec (keep (fn [[p sha]] (when (nil? sha) p)) (:library-pins request))))
 
 (defn- verdict-problem
   "Why one VERDICT does not stand for REQUEST, or nil."

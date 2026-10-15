@@ -140,6 +140,10 @@
       (not (contains? (set (:owed carrier)) (select-keys receipt [:occurrence-id :pattern])))
       :receipt-for-unowed-occurrence
       (not (request-intact? request)) :receipt-request-missing-or-broken
+      (not (and (string? (:request-id reading)) (re-matches #"[0-9a-f]{64}" (:request-id reading))
+                (string? (:response-digest reading))
+                (re-matches #"[0-9a-f]{64}" (:response-digest reading))))
+      :receipt-source-identity-malformed
       (not (and (= (:request-id request) (:request-id reading))
                 (= (:id action) (:policy-id request))
                 (= (:digest carrier) (:debt-digest request))))
