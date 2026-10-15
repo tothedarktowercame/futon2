@@ -105,7 +105,6 @@
 
 (defn -main [& args]
   (let [negative? (some #{"--negative"} args)
-        base (result)
         control (trace/trace-field-evidence
                  {:wm-version {:trace-schema-version trace/trace-schema-version}}
                  :observation-envelope)
@@ -116,7 +115,7 @@
             (System/exit 0))
         (do (println "trace-schema-compatibility: FAIL mutation slipped exit-convention=0-pass/1-fail/2-mutation-slipped")
             (System/exit 2)))
-      (do
+      (let [base (result)]
         (println (pr-str base))
         (println (str "trace-schema-compatibility: " (if (:pass? base) "PASS" "FAIL")
                       " exit-convention=0-pass/1-fail/2-mutation-slipped"))

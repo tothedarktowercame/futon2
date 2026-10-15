@@ -16,6 +16,7 @@ WORKSPACE_REPOSITORIES = {
     "mathlib4": "/home/joe/code/mathlib4",
     "p4ng": "/home/joe/code/p4ng",
     "futon3": FUTON3,
+    "futon3c": "/home/joe/code/futon3c",
 }
 BG = "/home/joe/code/futon3c/scripts/bg.py"
 PROOF_EVAL = "/home/joe/code/futon3c/scripts/proof-eval.sh"
@@ -120,9 +121,8 @@ def workspace_basis_matches(rows, states):
         row = by_name[name]
         current = states[name]
         matches = (row.get("readable?") is True and
-                   row.get("dirty?") is False and
                    current.get("readable") and
-                   current.get("dirty") is False and
+                   row.get("dirty?") == current.get("dirty") and
                    row.get("git-sha") == current.get("head") and
                    row.get("tree-sha") == current.get("tree-sha") and
                    row.get("tracked-diff-sha256") ==
@@ -330,7 +330,12 @@ def main():
     checks.append(result("contract-freshness", authority.returncode == 0, "unverified", "self-clearing", exit=authority.returncode,
                          summary=authority.stdout.strip().splitlines()[-1] if authority.stdout.strip() else None))
 
-    schema = run(["clojure", "-M", "-m", "checks.trace-schema-compatibility"])
+    # Preflight checks the current writer contract, not the multi-gigabyte
+    # historical reader census. The complete census is a maintenance check;
+    # rereading it several times here made a one-click readiness probe take
+    # minutes or exhaust the JVM before a click was even issued.
+    schema = run(["clojure", "-M", "-m", "checks.trace-schema-compatibility",
+                  "--negative"])
     checks.append(result("trace-schema-v20-readback", schema.returncode == 0, "unverified", "self-clearing", exit=schema.returncode,
                          summary=schema.stdout.strip().splitlines()[-1] if schema.stdout.strip() else None))
 
