@@ -423,6 +423,31 @@
     (is (identical? refusal caught))
     (is (empty? (debugger/stopped)))))
 
+(deftest busy-author-stops-and-retry-rereads-only-readiness
+  (debugger/attach!)
+  (let [run-id "busy-author-readiness"
+        calls (atom 0)
+        opts (assoc (phase-opts run-id (atom []))
+                    :agency-base "http://test"
+                    :roster-fn
+                    (fn [_]
+                      (if (= 1 (swap! calls inc))
+                        {:wm-author {:status "invoking" :invoke-ready? true}}
+                        {:wm-author {:status "idle" :invoke-ready? true}})))
+        running (future
+                  (runner/run-phase!
+                   opts {:opportunity-id "op" :attempt-id "attempt"}
+                   :agent-readiness
+                   #(runner/agent-readiness-for-author! opts "wm-author")))]
+    (let [stop (wait-for-condition run-id :agent-unavailable)]
+      (is (= :agent-readiness (:phase stop)))
+      (is (= :busy (get-in stop [:ex-data :failure-detail])))
+      (is (= "wm-author" (get-in stop [:ex-data :author]))))
+    (debugger/continue! run-id :retry)
+    (is (= "idle" (get-in (deref running 2000 ::timeout)
+                            [:roster :wm-author :status])))
+    (is (= 2 @calls) "retry performs one fresh roster observation")))
+
 (deftest recorded-terminal-abstention-stops-with-decision-context
   (debugger/attach!)
   (let [running

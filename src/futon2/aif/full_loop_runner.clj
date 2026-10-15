@@ -401,10 +401,15 @@
                         (debugger/stoppable-failure? throwable))
              (do
                (emit-phase! opts context
-                            {:phase phase :transition :end :outcome :error
-                             :duration-ms (quot (- (nano-time) started) 1000000)
-                             :error-class (.getName (class throwable))
-                             :error (.getMessage throwable)})
+                            (merge
+                             {:phase phase :transition :end :outcome :error
+                              :duration-ms (quot (- (nano-time) started) 1000000)
+                              :error-class (.getName (class throwable))
+                              :error (.getMessage throwable)}
+                             (select-keys (ex-data throwable)
+                                          [:readiness/wake-attempted
+                                           :readiness/wake-result
+                                           :readiness/substrate-transient])))
                (throw throwable))
              (let [{:keys [action value debugger-dwell]}
                    (debugger/await-restart!
@@ -421,12 +426,17 @@
                  :retry
                  (do
                    (emit-phase! opts context
-                                {:phase phase :transition :end :outcome :error
-                                 :duration-ms (quot (- (nano-time) started) 1000000)
-                                 :error-class (.getName (class throwable))
-                                 :error (.getMessage throwable)
-                                 :debugger/restart :retry
-                                 :debugger/dwell debugger-dwell})
+                                (merge
+                                 {:phase phase :transition :end :outcome :error
+                                  :duration-ms (quot (- (nano-time) started) 1000000)
+                                  :error-class (.getName (class throwable))
+                                  :error (.getMessage throwable)
+                                  :debugger/restart :retry
+                                  :debugger/dwell debugger-dwell}
+                                 (select-keys (ex-data throwable)
+                                              [:readiness/wake-attempted
+                                               :readiness/wake-result
+                                               :readiness/substrate-transient])))
                    (recur))
                  (:continue :use-value)
                  (let [detail (if result->event (or (result->event value) {}) {})]
@@ -440,12 +450,17 @@
                  :abort
                  (do
                    (emit-phase! opts context
-                                {:phase phase :transition :end :outcome :error
-                                 :duration-ms (quot (- (nano-time) started) 1000000)
-                                 :error-class (.getName (class throwable))
-                                 :error (.getMessage throwable)
-                                 :debugger/restart :abort
-                                 :debugger/dwell debugger-dwell})
+                                (merge
+                                 {:phase phase :transition :end :outcome :error
+                                  :duration-ms (quot (- (nano-time) started) 1000000)
+                                  :error-class (.getName (class throwable))
+                                  :error (.getMessage throwable)
+                                  :debugger/restart :abort
+                                  :debugger/dwell debugger-dwell}
+                                 (select-keys (ex-data throwable)
+                                              [:readiness/wake-attempted
+                                               :readiness/wake-result
+                                               :readiness/substrate-transient])))
                    (throw throwable)))))))))))
 
 (defn capture-selection-world!
@@ -1256,6 +1271,27 @@
   [opts agent]
   (let [roster ((or (:roster-fn opts) agent-roster) (:agency-base opts))]
     (wake-restored-agent! opts roster agent)))
+
+(defn agent-readiness-for-author!
+  "Observe AUTHOR and refuse inside the restartable readiness phase when its
+  seat is not dispatchable.  Keeping this check beside the roster read lets an
+  attached debugger repair or wait, then retry only readiness instead of
+  sealing an :agent-unavailable terminal receipt."
+  [opts author]
+  (let [{:keys [roster] :as result} (agent-readiness! opts author)]
+    (when (and author (not (available? roster author)))
+      (throw (ex-info "Configured author is unavailable"
+                      (merge
+                       {:outcome :agent-unavailable
+                        :failure-kind :agent-unavailable
+                        :failure-stage :agent-readiness
+                        :failure-detail (agent-failure-detail roster author)
+                        :author author}
+                       (select-keys result
+                                    [:readiness/wake-attempted
+                                     :readiness/wake-result
+                                     :readiness/substrate-transient])))))
+    result))
 
 (defn- readiness-event [result]
   (select-keys result [:readiness/wake-attempted :readiness/wake-result
@@ -4818,7 +4854,7 @@
         roster-result (try
                         {:value
                          (run-phase! opts @phase-context :agent-readiness
-                                     #(agent-readiness! opts author)
+                                     #(agent-readiness-for-author! opts author)
                                      readiness-event)}
                         (catch Throwable e {:error e}))
         roster (get-in roster-result [:value :roster])
@@ -5785,27 +5821,20 @@
                         :closed-event closed-event}))))]
     (try
       (when-let [e (:error roster-result)]
-        (throw (ex-info "Agent readiness observation failed"
-                        {:outcome :agent-unavailable
-                         :failure-kind :agent-readiness-failed
-                         :failure-stage :agent-readiness
-                         :failure-detail :unreachable}
-                        e)))
+        (if (= :agent-unavailable (:failure-kind (ex-data e)))
+          (throw e)
+          (throw (ex-info "Agent readiness observation failed"
+                          {:outcome :agent-unavailable
+                           :failure-kind :agent-readiness-failed
+                           :failure-stage :agent-readiness
+                           :failure-detail :unreachable}
+                          e))))
       (when-let [e (:error code-state-result)]
         (throw (ex-info "Stack code-state observation failed"
                         {:outcome :incomplete
                          :failure-kind :code-state-failed
                          :failure-stage :code-state}
                         e)))
-      ;; only a cast that was given is checked here; none given is recorded
-      ;; after selection, where a seat would be dispatched
-      (when (and author (not (available? roster author)))
-        (throw (ex-info "Configured author is unavailable"
-                        {:outcome :agent-unavailable
-                         :failure-kind :agent-unavailable
-                         :failure-stage :agent-readiness
-                         :failure-detail (agent-failure-detail roster author)
-                         :author author})))
       ;; The ordinary-click ration is admitted by the component that owns the
       ;; authoritative readiness observation.  Endpoint preflight is useful
       ;; diagnostics, but cannot spend against a seat that became busy before
