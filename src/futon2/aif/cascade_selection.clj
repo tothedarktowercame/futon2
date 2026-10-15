@@ -87,7 +87,7 @@
   ;; was not a corner case but the ordinary one). Refuse instead.
   (doseq [c candidates]
     (let [f (:f c)]
-      (when-not (if (#{:not-supplied :zero-support} (:f-status c))
+      (when-not (if (#{:not-supplied :zero-support :not-applicable} (:f-status c))
                   (nil? f)
                   (and (number? f) (Double/isFinite (double f))))
         (refuse! :invalid-free-energy {:id (:id c) :f f}))))
@@ -120,7 +120,11 @@
                 :n-infinite (count infinite)}))
     (let [scores (mapv (fn [c]
                          (+ (math/log (double (:habit c)))
-                            (- (double (:f c)))
+                            ;; certified zero history: the historical-prefix
+                            ;; term is outside its domain and contributes none
+                            (if (= :not-applicable (:f-status c))
+                              0.0
+                              (- (double (:f c))))
                             (- (/ (double (:g c)) (double beta)))))
                        finite)
           lse (log-sum-exp scores)
@@ -190,9 +194,15 @@
    typed absence. A missing prefix contributes NO term — that is not a
    measured F = 0, and the record must not say one was consumed."
   [c]
-  (if (or (= :not-supplied (:f-status c)) (nil? (:f c)))
+  (cond
+    (= :not-applicable (:f-status c))
+    {:status :not-applicable :reason :certified-zero-history
+     :term :historical-prefix-f :consumed :no-term}
+
+    (or (= :not-supplied (:f-status c)) (nil? (:f c)))
     {:status :absent :reason :not-supplied}
-    (double (:f c))))
+
+    :else (double (:f c))))
 
 (defn law-receipt
   "Per-decision receipt naming the selection law that actually ran, under the
@@ -204,29 +214,50 @@
    - every candidate's F absent → the reduced law σ(log E − γG) with the F
      term omitted, listing the candidates;
    - a mixed field is its own case — named with BOTH per-candidate lists,
-     never collapsed to either pure law.
+     never collapsed to either pure law;
+   - a candidate whose F is :not-applicable (certified zero history) has the
+     historical-prefix term omitted for that proven domain reason, listed
+     under :candidates-f-not-applicable; it is never counted as missing F.
 
    Evidence only: same input, same scores; nothing refuses."
   [candidates]
-  (let [absent? (fn [c] (or (= :not-supplied (:f-status c)) (nil? (:f c))))
+  (let [not-applicable? #(= :not-applicable (:f-status %))
+        absent? (fn [c] (and (not (not-applicable? c))
+                             (or (= :not-supplied (:f-status c)) (nil? (:f c)))))
         without (mapv :id (filter absent? candidates))
-        with (mapv :id (remove absent? candidates))]
-    (cond
-      (empty? without)
-      {:law :sigma-log-E-minus-F-minus-gamma-G}
+        outside-domain (mapv :id (filter not-applicable? candidates))
+        with (mapv :id (remove #(or (absent? %) (not-applicable? %)) candidates))
+        receipt
+        (cond
+          (and (empty? without) (seq outside-domain))
+          {:law (if (seq with)
+                  :sigma-log-E-minus-gamma-G-with-F-where-applicable
+                  :sigma-log-E-minus-gamma-G)
+           :omitted-terms [:F]
+           :reason :f-not-applicable-certified-zero-history
+           :candidates-with-f with}
 
-      (empty? with)
-      {:law :sigma-log-E-minus-gamma-G
-       :omitted-terms [:F]
-       :reason :f-not-supplied
-       :candidates-without-f without}
+          (empty? without)
+          {:law :sigma-log-E-minus-F-minus-gamma-G}
 
-      :else
-      {:law :sigma-log-E-minus-gamma-G-with-F-where-supplied
-       :omitted-terms [:F]
-       :reason :f-partially-supplied
-       :candidates-with-f with
-       :candidates-without-f without})))
+          (empty? with)
+          {:law :sigma-log-E-minus-gamma-G
+           :omitted-terms [:F]
+           :reason :f-not-supplied
+           :candidates-without-f without}
+
+          :else
+          {:law :sigma-log-E-minus-gamma-G-with-F-where-supplied
+           :omitted-terms [:F]
+           :reason :f-partially-supplied
+           :candidates-with-f with
+           :candidates-without-f without})]
+    ;; the proven-empty-history domain reason is named per candidate,
+    ;; separately from any missing F
+    (cond-> receipt
+      (seq outside-domain)
+      (assoc :candidates-f-not-applicable outside-domain
+             :f-not-applicable-reason :certified-zero-history))))
 
 (defn- ordered-masses [m]
   (sort-by (fn [[id p]] [(- p) (pr-str id)]) (filter (comp pos? val) m)))
@@ -234,7 +265,7 @@
 (defn- consumed-f [c]
   ;; Exactly selection-posterior's absent-prefix semantics. Legacy unattached
   ;; F already carries its neutral consumed value; retain its status below.
-  (if (= :not-supplied (:f-status c)) 0.0 (double (:f c))))
+  (if (#{:not-supplied :not-applicable} (:f-status c)) 0.0 (double (:f c))))
 
 (defn- threshold-record [declaration total]
   (let [v (:value declaration)

@@ -111,6 +111,44 @@
              :posterior (:q (peek steps))
              :prefix-conditioning-status (:conditioning-status prefix)))))
 
+(defn certified-zero-history
+  "The applicability carrier for a policy the pinned flight ledger proves has
+  never run: CENSUS (policy-prefix-admission/history-census) is complete,
+  its digest matches its content, and no recorded step names ENTRY's policy
+  key. The historical-prefix term is then outside its domain, which is a
+  positive finding, distinct from :not-supplied (history unknown or
+  unreadable) and from a numeric F (there is no empty-sum 0 here). Returns
+  nil whenever the census cannot prove zero history."
+  [entry census]
+  (let [k (admission/candidate-key (:action entry))]
+    (when (= 0 (admission/census-history-count census k))
+      {:schema :wm/policy-prefix-evidence-v1 :policy (:action entry)
+       :status :not-applicable :reason :certified-zero-history
+       :presence :applicability-certificate :z-semantics :per-step-redraw
+       :policy-key k :history-count 0
+       :ledger {:digest (:digest census) :dir (:dir census)
+                :records (count (:records census))}
+       :census census})))
+
+(defn certified-zero-history?
+  "True iff PREFIX is a valid certified-zero-history carrier for POLICY: the
+  carrier's own census still recomputes to its digest, the digest is the one
+  the carrier pins, the policy key is POLICY's, and that census has no step
+  for it. A forged or edited census, an incomplete one, or one naming this
+  policy fails."
+  [prefix policy]
+  (let [k (admission/candidate-key policy)
+        census (:census prefix)]
+    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+         (= :not-applicable (:status prefix))
+         (= :certified-zero-history (:reason prefix))
+         (= :applicability-certificate (:presence prefix))
+         (= policy (:policy prefix))
+         (some? k) (= k (:policy-key prefix))
+         (= 0 (:history-count prefix))
+         (= (:digest census) (get-in prefix [:ledger :digest]))
+         (= 0 (admission/census-history-count census k)))))
+
 (defn production-ranked
   "Attach each ranked entry's :f-prefix. Without PREFIXES (the 2-arity, and
    any caller that has no admitted prefixes) every entry is :not-supplied with
@@ -118,23 +156,66 @@
    authorize nonempty history. With PREFIXES ({candidate-id prefix}, the
    tick's policy-prefix-admission/prefixes), keyed by the complete policy key,
    each entry's F comes from its own
-   admitted prefix (prefix-f). :f is removed either way: F reaches the
-   selection only through :f-prefix."
-  ([ranked conditioning] (production-ranked ranked conditioning nil))
-  ([ranked conditioning prefixes]
+   admitted prefix (prefix-f). With CENSUS (the pinned ledger census those
+   prefixes were read from), an entry left :not-supplied whose policy the
+   census proves has no recorded step gets the certified-zero-history
+   carrier instead; a policy with any recorded step keeps its own outcome.
+   :f is removed either way: F reaches the selection only through :f-prefix."
+  ([ranked conditioning] (production-ranked ranked conditioning nil nil))
+  ([ranked conditioning prefixes] (production-ranked ranked conditioning prefixes nil))
+  ([ranked conditioning prefixes census]
    (with-meta
      (mapv (fn [entry]
-             (let [ranked-entry (dissoc entry :f)]
-               (assoc ranked-entry :f-prefix
-                      (if-let [prefix (and prefixes
-                                          (get prefixes
-                                               (admission/candidate-key (:action entry))))]
+             (let [ranked-entry (dissoc entry :f)
+                   fp (if-let [prefix (and prefixes
+                                           (get prefixes
+                                                (admission/candidate-key (:action entry))))]
                         (let [fp (prefix-f entry prefix conditioning)]
                           ;; an invalid prefix is refused as data, never
                           ;; scored: the selection sees it :not-supplied
                           (if (= :invalid (:status fp))
                             (assoc (not-supplied entry conditioning :invalid-policy-prefix) :refused fp)
                             fp))
-                        (not-supplied entry conditioning :no-admitted-policy-prefix)))))
+                        (not-supplied entry conditioning :no-admitted-policy-prefix))]
+               (assoc ranked-entry :f-prefix
+                      (or (when (and census (= :not-supplied (:status fp))
+                                     (not (:refused fp)))
+                            (certified-zero-history entry census))
+                          fp))))
            ranked)
      (meta ranked))))
+
+(defn consumed-canonical-f?
+  "True iff selection CANDIDATE (a selection-certificate :candidates row)
+  consumed one of the two F carriers that may cross into enactment: a
+  computed finite Prefix-F of its own policy, or the certified-zero-history
+  carrier with the F term recorded as omitted for that reason. :not-supplied,
+  zero-support, an edited carrier, or an F value that does not match the
+  carrier all fail."
+  [candidate]
+  (let [prefix (:f-prefix candidate)
+        input (get-in candidate [:inputs :f])
+        f (:f prefix)]
+    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+         (= (:id candidate) (:policy prefix))
+         (case (:status prefix)
+           :computed
+           (and (number? f) (Double/isFinite (double f))
+                (= f (:f candidate))
+                (= :computed (:f-status candidate))
+                (= f (:f-consumed candidate))
+                (= {:status :computed :value f :presence :prefix-receipt :reason nil}
+                   (select-keys input [:status :value :presence :reason])))
+
+           :not-applicable
+           (and (certified-zero-history? prefix (:id candidate))
+                (nil? (:f candidate))
+                (= :not-applicable (:f-status candidate))
+                (= {:status :not-applicable :reason :certified-zero-history}
+                   (select-keys (:f-consumed candidate) [:status :reason]))
+                (= {:status :not-applicable :value nil
+                    :presence :applicability-certificate
+                    :reason :certified-zero-history}
+                   (select-keys input [:status :value :presence :reason])))
+
+           false))))

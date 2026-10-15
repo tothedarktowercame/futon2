@@ -15,7 +15,8 @@
       (:chain-broken; the first step's sPrev is its boundary belief).
   Pure. The result is recorded; nothing is refused and nothing scores it yet
   (F1c-I consumes it)."
-  (:require [futon2.aif.cascade-prior :as prior]))
+  (:require [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.cascade-prior :as prior]))
 
 (defn candidate-key
   "The candidate's cascade-prior policy key, the scheme
@@ -89,3 +90,72 @@
                none? (cond-> {:policy-key k :conditioning-status :no-flight-records}
                        (:dir-status flight-steps) (assoc :dir-status (:dir-status flight-steps)))
                :else (admit k steps))]))))
+
+(defn- census-digest [census]
+  (action-identity/sha256
+   (action-identity/printed
+    false [:wm/policy-history-census-v1
+           (action-identity/canonical
+            (select-keys census [:dir :dir-status :records :unread
+                                 :unattributed-steps]))])))
+
+(defn history-census
+  "A pinned census of the flight ledger the prefix F reads (conditioning-steps'
+  result): per record its path, sha256, enactment count, step count per
+  policy key and unattributed enactments, with a digest over all of it.
+
+  :status :complete only when the directory was read, no record was unread,
+  and every enactment is either an explicit absence or a step naming its
+  policy. Only a complete census can certify that a policy has no history:
+  an unread file or an unattributed enactment could be that policy's."
+  [flight-steps]
+  (let [steps-by-path (group-by :path (:steps flight-steps))
+        records (->> (:read flight-steps)
+                     (mapv (fn [{:keys [path sha256 enactments unattributed-enactments]}]
+                             {:path path :sha256 sha256
+                              :enactments (or enactments :not-counted)
+                              :unattributed-enactments (or unattributed-enactments :not-counted)
+                              :policy-steps (->> (get steps-by-path path)
+                                                 (keep #(get-in % [:step :policy-key]))
+                                                 frequencies
+                                                 (sort-by (comp pr-str key))
+                                                 (mapv vec))}))
+                     (sort-by :path)
+                     vec)
+        unattributed-steps (count (remove #(get-in % [:step :policy-key])
+                                          (:steps flight-steps)))
+        unread (vec (sort-by :path (:unread flight-steps)))
+        reasons (cond-> []
+                  (:dir-status flight-steps) (conj :ledger-unread)
+                  (nil? (:dir flight-steps)) (conj :ledger-unpinned)
+                  (seq unread) (conj :unread-records)
+                  (some #(not (integer? (:unattributed-enactments %))) records)
+                  (conj :enactments-not-counted)
+                  (some #(and (integer? (:unattributed-enactments %))
+                              (pos? (:unattributed-enactments %))) records)
+                  (conj :unattributed-enactments)
+                  (pos? unattributed-steps) (conj :unattributed-steps))
+        census (cond-> {:schema :wm/policy-history-census-v1
+                        :dir (:dir flight-steps)
+                        :records records
+                        :unread unread
+                        :unattributed-steps unattributed-steps
+                        :status (if (seq reasons) :incomplete :complete)}
+                 (:dir-status flight-steps) (assoc :dir-status (:dir-status flight-steps))
+                 (seq reasons) (assoc :reasons reasons))]
+    (assoc census :digest (census-digest census))))
+
+(defn census-history-count
+  "How many recorded steps in CENSUS name POLICY-KEY, or nil when the census
+  is not complete or its digest does not match its content (then the history
+  is unknown, not zero)."
+  [census policy-key]
+  (when (and (= :wm/policy-history-census-v1 (:schema census))
+             (= :complete (:status census))
+             (some? policy-key)
+             (string? (:dir census))
+             (= (:digest census) (census-digest census)))
+    (reduce + 0 (for [r (:records census)
+                      [k n] (:policy-steps r)
+                      :when (= k policy-key)]
+                  n))))

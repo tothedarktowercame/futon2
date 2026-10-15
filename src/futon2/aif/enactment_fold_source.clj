@@ -91,18 +91,28 @@
               record (try (edn/read-string {:default tagged-literal} (String. bytes "UTF-8"))
                           (catch Exception e {::unparseable (ex-message e)}))]
           (cond
-            (contains? record ::unparseable)
+            (and (map? record) (contains? record ::unparseable))
             (update acc :unread conj {:path path :reason :unparseable :message (::unparseable record)})
             (not (map? record))
             (update acc :unread conj {:path path :reason :not-a-flight-record})
             :else
-            (let [steps (vec (keep (fn [enactment-entry]
+            (let [entries (get-in record [:flight :enactments])
+                  steps (vec (keep (fn [enactment-entry]
                                      (let [s (:step enactment-entry)]
                                        (when (map? s) {:step s :path path :sha256 h})))
-                                   (get-in record [:flight :enactments])))]
+                                   entries))
+                  ;; An entry whose enactment is the flight's explicit absence
+                  ;; ({:enactment {:absent …}}) enacted nothing. Any other
+                  ;; entry without a step map enacted something no policy can
+                  ;; be credited with, so it is counted rather than dropped.
+                  unattributed (count (remove #(or (map? (:step %))
+                                                   (= #{:absent} (set (keys (:enactment %)))))
+                                              entries))]
               (-> acc
                   (update :steps into steps)
-                  (update :read conj {:path path :sha256 h :steps (count steps)}))))))
+                  (update :read conj {:path path :sha256 h :steps (count steps)
+                                      :enactments (count entries)
+                                      :unattributed-enactments unattributed}))))))
       {:steps [] :read [] :unread []}
       (flight-files dir))
      :dir (str dir))))

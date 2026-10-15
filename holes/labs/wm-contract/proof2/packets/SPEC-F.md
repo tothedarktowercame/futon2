@@ -310,6 +310,23 @@ as `:diagnostic-intervention`, with baseline certificate content ref, definition
 `F := 0`, frozen-input hashes, both score/posterior/action-marginal vectors and
 choices. It is never attached as an admitted candidate F or returned to learning.
 
+**Proven-empty history (amendment, codex-68 ruling 2026-10-15).** Missing
+history and proven-empty history are different findings. When the pinned
+flight-ledger census (`policy-prefix-admission/history-census`: every record
+read, every enactment either an explicit absence or a step naming its policy,
+a digest over the whole census) records no step for the policy's exact key,
+the prefix carrier is `{:status :not-applicable :reason
+:certified-zero-history :presence :applicability-certificate :history-count 0}`
+with the ledger digest and the census itself. It is not a numeric F, not the
+empty sum 0, not circumstance-fit F and not `:not-supplied`: the historical
+prefix term is outside its domain before the policy's first enactment, so the
+law omits it for that reason (`law-receipt` lists the policy under
+`:candidates-f-not-applicable`), and enactment accepts the carrier only when
+the census recomputes to the pinned digest and still records no step for the
+policy. An incomplete or unpinned census leaves `:not-supplied`, which still
+refuses. A policy with any recorded step, admitted or not, gets no
+not-applicable carrier and needs its own computed Prefix-F.
+
 ## 5. Exact falsifiers, downstream use, and remaining amendments
 
 **Strategy-row falsifier 1, concrete:** use S = Unit, O = Bool, both B rows = 1,

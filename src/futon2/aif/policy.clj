@@ -264,10 +264,19 @@
         prefix (:f-prefix entry)
         _ (when (and prefix
                      (or (not= (:action entry) (:policy prefix))
-                         (not (#{:computed :not-supplied :zero-support} (:status prefix)))))
+                         (not (#{:computed :not-supplied :zero-support :not-applicable}
+                               (:status prefix)))
+                         (and (= :not-applicable (:status prefix))
+                              ;; resolved at call time: the prefix namespaces
+                              ;; reach cascade-prior, which requires this one
+                              (not ((requiring-resolve
+                                     'futon2.aif.policy-prefix-evidence/certified-zero-history?)
+                                    prefix (:action entry))))))
             (throw (ex-info "Invalid policy prefix" {:kind :invalid-policy-prefix :prefix prefix})))
         f (if prefix {:status (:status prefix) :value (:f prefix)
-                          :presence :prefix-receipt :reason (:reason prefix)} f)
+                          :presence (if (= :not-applicable (:status prefix))
+                                      :applicability-certificate :prefix-receipt)
+                          :reason (:reason prefix)} f)
         f-status (if prefix (:status prefix)
                      (if unattached? :computed-not-attached (:status f)))]
     {:id (:action entry)

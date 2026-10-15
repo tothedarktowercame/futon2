@@ -63,7 +63,10 @@
                    ranked
                    (select-keys token-belief-input
                                 [:conditioning-status :reason :observation-updates])
-                   (:policy-prefixes token-belief-input))]
+                   (:policy-prefixes token-belief-input)
+                   ;; the same flight ledger, pinned: a policy it proves has
+                   ;; never run gets the certified zero-history carrier
+                   (prefix-admission/history-census conditioning-steps))]
     (if-let [{:keys [bootstrap-priors scorer-authority context] :as commissioning}
              (:prefix-f-commissioning opts)]
       (let [result (prefix-f-sut/compose-menu!

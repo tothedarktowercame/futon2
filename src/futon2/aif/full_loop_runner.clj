@@ -69,6 +69,7 @@
             [futon2.aif.revision-pattern-use :as revision-pattern-use]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
+            [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -1850,24 +1851,16 @@
           :else (recur more (conj skipped (:target r))))))))
 
 (defn- canonical-f-consumed?
-  "Only a canonical Prefix-F receipt may cross selection into enactment.
+  "Only a canonical Prefix-F receipt may cross selection into enactment: a
+  computed Prefix-F of the candidate's own policy, or the certified
+  zero-history carrier for a policy the pinned flight ledger proves has never
+  run (policy-prefix-evidence/consumed-canonical-f?).
 
   The selector rejects a missing prefix today, but this boundary also covers
   replayed/legacy judgements: a historical reduced-law decision must not be
   allowed to enact merely because it names a cascade action."
   [candidate]
-  (let [prefix (:f-prefix candidate)
-        input (get-in candidate [:inputs :f])
-        f (:f prefix)]
-    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
-         (= (:id candidate) (:policy prefix))
-         (= :computed (:status prefix))
-         (number? f) (Double/isFinite (double f))
-         (= f (:f candidate))
-         (= :computed (:f-status candidate))
-         (= f (get-in candidate [:f-consumed]))
-         (= {:status :computed :value f :presence :prefix-receipt :reason nil}
-            (select-keys input [:status :value :presence :reason])))))
+  (policy-prefix-evidence/consumed-canonical-f? candidate))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC

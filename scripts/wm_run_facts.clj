@@ -11,6 +11,7 @@
             [clojure.string :as str]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.mission-registry :as registry]
+            [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]))
 
 (def run-fact-fields
@@ -153,18 +154,35 @@
                  (or (nil? precedence) (= precedence candidate-precedence)))))
         candidates)))))
 
-(defn- consumed-prefix-f? [candidate]
+(defn- consumed-prefix-f?
+  "The enacted candidate consumed a canonical F carrier: its own computed
+  Prefix-F, or the certified zero-history carrier (checked exactly as
+  enactment checks it)."
+  [candidate]
   (let [prefix (:f-prefix candidate)
         input (get-in candidate [:inputs :f])
         f (:f prefix)]
-    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
-         (= (:id candidate) (:policy prefix))
-         (= :computed (:status prefix))
-         (number? f) (Double/isFinite (double f))
-         (= f (:f candidate))
-         (= :computed (:f-status candidate))
-         (= {:status :computed :value f :presence :prefix-receipt :reason nil}
-            (select-keys input [:status :value :presence :reason])))))
+    (if (= :not-applicable (:status prefix))
+      (policy-prefix-evidence/consumed-canonical-f? candidate)
+      (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+           (= (:id candidate) (:policy prefix))
+           (= :computed (:status prefix))
+           (number? f) (Double/isFinite (double f))
+           (= f (:f candidate))
+           (= :computed (:f-status candidate))
+           (= {:status :computed :value f :presence :prefix-receipt :reason nil}
+              (select-keys input [:status :value :presence :reason]))))))
+
+(defn- q7-candidate
+  "The selected candidate as Q7 walks it. A consumed canonical F supersedes
+  the scorer's own :computed-f. A :not-applicable carrier that does not
+  validate is not an applicability certificate, so it counts as refused."
+  [candidate]
+  (cond
+    (consumed-prefix-f? candidate) (dissoc candidate :computed-f)
+    (= :not-applicable (get-in candidate [:f-prefix :status]))
+    (assoc-in candidate [:f-prefix :status] :refused)
+    :else candidate))
 
 (defn absence-paths
   "Count typed absences/refusals on the enacted selection-to-receipt path.
@@ -184,9 +202,7 @@
                        [[:failure] (:failure record)]]
                 (map? chosen) (conj [[:decision :chosen] chosen])
                 candidate (conj [[:decision :selected-candidate]
-                                 (if (consumed-prefix-f? candidate)
-                                   (dissoc candidate :computed-f)
-                                   candidate)])
+                                 (q7-candidate candidate)])
                 (and (not (map? chosen)) abstention)
                 (conj [[:decision :abstention] abstention]))]
     (vec
@@ -218,9 +234,7 @@
                        [[:failure] (:failure record)]]
                 (map? chosen) (conj [[:decision :chosen] chosen])
                 candidate (conj [[:decision :selected-candidate]
-                                 (if (consumed-prefix-f? candidate)
-                                   (dissoc candidate :computed-f)
-                                   candidate)])
+                                 (q7-candidate candidate)])
                 (and (not (map? chosen)) abstention)
                 (conj [[:decision :abstention] abstention]))]
     (vec
