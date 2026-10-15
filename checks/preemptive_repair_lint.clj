@@ -51,12 +51,15 @@
 (def path-token #"`((?:checks|holes|src|test|vetting|empirics)/[^` :]+\.[A-Za-z0-9]+)`")
 (def generated-not-committed-token
   #"generated-not-committed:\s*`((?:checks|holes|src|test|vetting|empirics)/[^` :]+\.[A-Za-z0-9]+)`")
-(defn- tracked? [root rel]
-  (zero? (:exit (shell {:out :string :err :string :continue true}
-                       "git" "-C" root "ls-files" "--error-unmatch" rel))))
 (defn artefact-findings [rows]
-  (vec
-   (concat
+  ;; Resolve tracked membership from one snapshot per repository. Calling
+  ;; `git ls-files --error-unmatch` for every citation created thousands of
+  ;; process stream-pump threads and could exhaust the bounded CI cgroup even
+  ;; though the scanner itself is sequential.
+  (let [tracked-by-root (into {} (for [root (set (map :root rows))]
+                                    [root (set (tracked root))]))]
+    (vec
+     (concat
     (mapcat
      (fn [{:keys [repo root path text]}]
        (let [generated (set (map (comp first :groups)
@@ -64,7 +67,7 @@
          (for [{:keys [start groups]} (matcher-results path-token text)
              :let [rel (first groups)]
              :when (and (fs/exists? (fs/path root rel))
-                        (not (tracked? root rel))
+                        (not (contains? (get tracked-by-root root #{}) rel))
                         (not (contains? generated rel)))]
            {:repo repo :path path :line (line-no text start)
             :finding :citation-to-untracked-path :target rel}))) rows)
@@ -83,7 +86,7 @@
                 sm (fs/file-time->millis (fs/last-modified-time (fs/path root svg)))
                 pm (fs/file-time->millis (fs/last-modified-time (fs/path root pdf)))]
           :when (> sm pm)]
-      {:repo :p4ng :path pdf :finding :derived-older-than-source :source svg :pair stem}))))
+      {:repo :p4ng :path pdf :finding :derived-older-than-source :source svg :pair stem})))))
 
 (defn stale-baseline-findings [rows]
   (vec
