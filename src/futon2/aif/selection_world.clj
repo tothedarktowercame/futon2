@@ -192,7 +192,9 @@
      :pattern-library library
      :seat-roster seat-carrier
      :selection-input-digest (sha256 (pr-str inputs))
-     :selection-ended-at (str (now-fn))
+     ;; the instant the runner's one selection completed, when it supplies
+     ;; it; never the later census time
+     :selection-ended-at (or (:selection-completed-at opts) (str (now-fn)))
      :interpretation-issued-at (when (and interpretation-ask
                                            (not= :absent (:status interpretation-ask)))
                                   (or (:issued-at interpretation-ask)

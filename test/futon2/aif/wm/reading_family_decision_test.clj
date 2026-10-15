@@ -146,14 +146,14 @@
       (is (= (get-in cert [:policy-history-pin :digest])
              (get-in (first (:candidates cert)) [:f-prefix :ledger :digest]))))
     (testing "selection happened with the debt open, and is recorded"
-      (is (= ["p/b"] (get-in action [:interpretation-debt :owed])))
+      (is (= ["p/b"] (mapv :pattern (get-in action [:interpretation-debt :owed]))))
       (is (= :cascade-selection-posterior (get-in decision [:selection-law :applied])))
       (is (every? #(nil? (:interpretation-receipts (:id %))) (:candidates cert))))
     (testing "enactment waits for the owed interpretation"
       (is (nil? (selected-entry decision)))
       (let [status (debt-status decision)]
         (is (= :interpretation-owed-after-selection (:status status)))
-        (is (= ["p/b"] (:remaining status)))
+        (is (= ["p/b"] (mapv :pattern (:remaining status))))
         (is (= (:id action) (:policy-id status)))
         (is (= :all-owed-nodes-validated-for-this-identity
                (get-in status [:rearm :condition])))))
@@ -190,7 +190,8 @@
         action (:action decision)
         carrier (:interpretation-debt action)
         id (:id action)
-        good-receipt {:policy-id id :debt-digest (:digest carrier) :pattern "p/b" :status :validated}
+        good-receipt (merge (first (:owed carrier))
+                            {:policy-id id :debt-digest (:digest carrier) :status :validated})
         refused? (fn [d] (nil? (selected-entry d)))]
     (testing "the full discharge for this exact identity is what re-arms enactment"
       (is (= action (:action (selected-entry (receipts decision [good-receipt]))))))

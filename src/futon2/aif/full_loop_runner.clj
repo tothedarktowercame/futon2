@@ -71,6 +71,7 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
+            [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -1880,6 +1881,81 @@
                            (mapcat :policies (:target-policy-families cert)))]
         (reading-debt/enactment-status
          action recorded (get-in cert [:interpretation-discharge :receipts]))))))
+
+(defn- monotonic-clock
+  "One clock for a selection phase's events: wall-clock Instants, nudged a
+  nanosecond forward when the wall clock has not advanced, so successive
+  events are strictly ordered."
+  []
+  (let [last (atom nil)]
+    (fn []
+      (swap! last (fn [prev]
+                    (let [t (Instant/now)]
+                      (if (and prev (not (.isAfter t prev))) (.plusNanos ^Instant prev 1) t)))))))
+
+(defn selected-reading-phase
+  "Q5 step 3a: after the one G selection, ask for the reading the selected
+  reading policy still owes, for exactly its owed occurrences, validate the
+  answer, and append the receipts at [:selection-certificate
+  :interpretation-discharge]. Nothing else on the decision changes: no
+  rescoring, no reselection, no runner-up. A decision that owes nothing, or
+  is not a reading policy, passes through unchanged.
+
+  CLOCK is the selection phase's event clock and SELECTED-AT the instant the
+  selection completed, read from it before this phase. Returns {:judgement
+  :record}; RECORD is the phase's ask record (nil when nothing was owed)."
+  [opts judgement clock selected-at]
+  (let [decision (:decision judgement)
+        status (reading-interpretation-status decision)]
+    (if (not= :interpretation-owed-after-selection (:status status))
+      {:judgement judgement :record nil}
+      (let [request (selected-reading/request decision)
+            ask (:selected-reading-ask-fn opts)
+            requested-at (clock)
+            response (when ask
+                       (try (ask request)
+                            (catch Throwable e {::ask-threw (ex-message e)})))
+            received-at (clock)
+            result (cond
+                     (nil? ask)
+                     {:status :interpretation-validation-refused
+                      :reasons [{:reason :selected-reading-ask-not-configured}]}
+                     (::ask-threw response)
+                     {:status :interpretation-validation-refused
+                      :reasons [{:reason :selected-reading-ask-threw
+                                 :message (::ask-threw response)}]}
+                     :else
+                     (selected-reading/validate
+                      request response
+                      {:library-root (or (:pattern-library-root opts)
+                                         selected-reading/default-library-root)}))
+            validated-at (clock)
+            section (fn [prior]
+                      {:schema :wm/interpretation-discharge-v1
+                       :request request
+                       :validation (dissoc result :receipts)
+                       :receipts (into (vec (:receipts prior)) (:receipts result))})
+            decision' (update-in decision [:selection-certificate :interpretation-discharge]
+                                 section)
+            after (reading-interpretation-status decision')
+            eligible-at (clock)
+            events [{:event :selection-completed :seq 1 :at (str selected-at)}
+                    {:event :interpretation-requested :seq 2 :at (str requested-at)}
+                    {:event :interpretation-received :seq 3 :at (str received-at)}
+                    {:event :interpretation-validated :seq 4 :at (str validated-at)
+                     :status (:status result)}
+                    {:event :enactment-eligibility-checked :seq 5 :at (str eligible-at)
+                     :status (:status after)}]
+            decision' (assoc-in decision' [:selection-certificate :interpretation-discharge :events]
+                                events)]
+        {:judgement (assoc judgement :decision decision')
+         :record {:kind :selected-reading
+                  :status (:status result)
+                  :issued-at (str requested-at)
+                  :request-id (:request-id request)
+                  :owed (:owed request)
+                  :discharge (:status after)
+                  :events events}}))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
@@ -6100,14 +6176,30 @@
                 (catch Throwable e
                   (retain-redecision-failure! e interpretation-ask-record)))
               judgement0-base)
+            ;; Q5: the one G selection is complete here. Its instant opens
+            ;; the event clock the selected-only reading phase shares.
+            selection-clock (monotonic-clock)
+            selection-completed-at (selection-clock)
+            {judgement0 :judgement selected-reading-record :record}
+            (selected-reading-phase opts judgement0 selection-clock selection-completed-at)
             world-at-selection (capture-selection-world!
-                                opts @phase-context
+                                (assoc opts :selection-completed-at
+                                       (str selection-completed-at))
+                                @phase-context
                                 (:decision judgement0) roster
-                                interpretation-ask-record
+                                (or selected-reading-record interpretation-ask-record)
                                 (:outer-task-selection judgement0))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
-            entry ordinary-entry
+            ;; Q5 stops at eligibility: what enacting a reading policy does is
+            ;; not yet defined, and the flight would read its :precedence as
+            ;; an interpreted vector. It is refused typed, not enacted.
+            reading-execution-owed
+            (when (map? (get-in ordinary-entry [:action :precedence :co-apply]))
+              {:kind :reading-policy-execution-semantics-owed
+               :policy-id (get-in ordinary-entry [:action :id])
+               :rearm {:condition :reading-policy-execution-semantics-ruled}})
+            entry (when-not reading-execution-owed ordinary-entry)
             historical-action? (= :revalidate-historical-repair
                                   (get-in entry [:action :type]))
             repair-action? (contains? #{:repair-machine-failure
@@ -6216,10 +6308,12 @@
                              ;; own :dropped-candidates travel on the sorry
                              ;; cell, unchanged, for persist-run-record!.
                              (sorry :no-selection
-                                    {:decision (:decision judgement)
-                                     :dropped-candidates
-                                     (get-in judgement
-                                             [:cascade-problems :dropped-candidates])}))]
+                                    (cond-> {:decision (:decision judgement)
+                                             :dropped-candidates
+                                             (get-in judgement
+                                                     [:cascade-problems :dropped-candidates])}
+                                      reading-execution-owed
+                                      (assoc :downstream-refusal reading-execution-owed))))]
         (let [selection-cell (cond-> (-> selection-cell
                                          (assoc-in [:judgment :effective-run-configuration]
                                                    @effective-configuration)

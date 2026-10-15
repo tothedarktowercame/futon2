@@ -30,7 +30,7 @@
   (let [action (:candidate score)
         action (assoc action :policy-key (prefix-admission/reading-policy-key action))]
     (assoc action :interpretation-debt
-           (debt/debt action (:fit score) (:analysis-digest policy)))))
+           (debt/debt action (:fit score) (:reading-pin policy)))))
 
 (defn- scored->ranked [policy score rank]
   (let [entry (first (:scorer-result score))
@@ -195,9 +195,9 @@
          (fn [family]
            (let [target (:target-id family)
                  ready? (= :computed (:status family))
-                 analysis-digest (get-in family [:provenance :analysis-digest])
+                 reading-pin (select-keys (:provenance family) [:analysis-digest :excerpt-digest])
                  attempted (if ready?
-                             (mapv (fn [p] [(assoc p :analysis-digest analysis-digest)
+                             (mapv (fn [p] [(assoc p :reading-pin reading-pin)
                                             (shape-g/score-policy p)])
                                    (:policies family))
                              [])
