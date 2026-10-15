@@ -278,7 +278,9 @@
       (is (= :receipt-policy-key-mismatch
              (reason (with-receipt (reseal (assoc receipt :policy-key-digest "other"))))))
       (is (= :receipt-not-validated
-             (reason (with-receipt (reseal (assoc receipt :validation {:validator :other :result :valid})))))))
+             (reason (with-receipt (reseal (assoc receipt :validation {:validator :other :result :valid}))))))
+      (is (= :receipt-not-validated
+             (reason (with-receipt (reseal (dissoc receipt :validation)))))))
     (testing "the issued request cannot be edited under its id"
       (is (= :receipt-request-missing-or-broken
              (reason (assoc-in after (conj section :request :library-pins "p/b") (sha lib "p/a")))))
@@ -298,14 +300,15 @@
                                      [:verdicts 0 :source_sha256] (sha lib "p/b"))))]
         (is (= :library-source-changed (get-in (validation after) [:reasons 0 :reason])))
         (is (= :interpretation-owed-after-selection (status after)))))
-    (testing "a library file absent at issuance refuses"
+    (testing "a library file absent at issuance refuses, and the debt is never asked about"
       (let [lib (library)
             _ (io/delete-file (io/file lib "p/b.flexiarg"))
-            after (phase decision lib
-                         (fn [request]
-                           (assoc-in (answer-with-pins request) [:verdicts 0 :source_sha256]
-                                     (apply str (repeat 64 "a")))))]
-        (is (= :library-source-missing (get-in (validation after) [:reasons 0 :reason])))))
+            asked (atom 0)
+            after (phase decision lib (fn [request] (swap! asked inc) (answer-with-pins request)))]
+        (is (= 0 @asked))
+        (is (= :library-source-missing-at-request (get-in (validation after) [:reasons 0 :reason])))
+        (is (= ["p/b"] (get-in (validation after) [:reasons 0 :patterns])))
+        (is (= :interpretation-owed-after-selection (status after)))))
     (testing "an answer without a named source refuses"
       (let [after (phase decision lib #(assoc (answer % lib "accepted") :by " "))]
         (is (= :missing-source-identity (get-in (validation after) [:reasons 0 :reason])))

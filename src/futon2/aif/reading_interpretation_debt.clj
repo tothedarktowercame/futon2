@@ -12,7 +12,7 @@
   and against the digest the decision recorded for that policy apart from
   the action. Pure."
   (:require [clojure.string :as str]
-            [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy-prefix-admission :as prefix-admission]))
 
@@ -24,11 +24,12 @@
 (def validator-id :wm/selected-reading-validator-v1)
 
 (defn seal
-  "The canonical digest of VALUE under TAG; the seal of debts, selected-reading
-  requests and receipts."
+  "The digest of VALUE under TAG by the repository's evidence discipline
+  (interpretation-evidence/value-digest, the precision-carry seal's): the
+  seal of debts, selected-reading requests and receipts. Recomputable by
+  anyone holding the value; it detects edits, not authorship."
   [tag value]
-  (action-identity/sha256
-   (action-identity/printed false [tag (action-identity/canonical value)])))
+  (evidence/value-digest [tag value]))
 
 (def ^:private digest seal)
 

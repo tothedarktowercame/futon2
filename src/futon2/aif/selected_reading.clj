@@ -70,6 +70,12 @@
                                         :by "answering agent id"}}}]
         (assoc body :request-id (digest request-schema body))))))
 
+(defn unpinned-patterns
+  "Owed patterns REQUEST could not pin at issuance (no library file). Such a
+  request is refused, never asked."
+  [request]
+  (vec (keep (fn [[p sha]] (when (nil? sha) p)) (:library-pins request))))
+
 (defn- verdict-problem
   "Why one VERDICT does not stand for REQUEST, or nil."
   [request library-root verdict]

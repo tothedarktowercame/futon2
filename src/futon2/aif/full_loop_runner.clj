@@ -1915,12 +1915,19 @@
                              selected-reading/default-library-root)
             request (selected-reading/request decision {:library-root library-root})
             ask (:selected-reading-ask-fn opts)
+            unpinned (selected-reading/unpinned-patterns request)
             requested-at (clock)
-            response (when ask
+            response (when (and ask (empty? unpinned))
                        (try (ask request)
                             (catch Throwable e {::ask-threw (ex-message e)})))
             received-at (clock)
             result (cond
+                     ;; an owed pattern with no library file cannot be pinned:
+                     ;; the debt is not asked about at all
+                     (seq unpinned)
+                     {:status :interpretation-validation-refused
+                      :reasons [{:reason :library-source-missing-at-request
+                                 :patterns unpinned}]}
                      (nil? ask)
                      {:status :interpretation-validation-refused
                       :reasons [{:reason :selected-reading-ask-not-configured}]}
