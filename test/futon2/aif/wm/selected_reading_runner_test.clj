@@ -343,3 +343,25 @@
       (let [after (phase decision lib #(assoc (answer % lib "accepted") :by " "))]
         (is (= :missing-source-identity (get-in (validation after) [:reasons 0 :reason])))
         (is (= :interpretation-owed-after-selection (status after)))))))
+
+(deftest unpinned-debt-through-the-runner-records-no-contact
+  (let [selector-calls (atom 0)
+        lib (library)
+        _ (io/delete-file (io/file lib "p/b.flexiarg"))
+        decision (selected-decision selector-calls)
+        asked (atom 0)
+        {:keys [record result]} (run-click decision lib
+                                           (fn [_] (swap! asked inc) {})
+                                           selector-calls)
+        recorded (get-in result [:checkpoints :selection :sorry :decision])
+        events (get-in recorded [:selection-certificate :interpretation-discharge :events])]
+    (is (= 0 @asked))
+    (is (= 1 @selector-calls))
+    (is (= [:selection-completed :interpretation-not-requested :enactment-eligibility-checked]
+           (mapv :event events)))
+    (is (not-any? #{:interpretation-requested :interpretation-received :interpretation-validated}
+                  (map :event events)))
+    (is (nil? (get-in record [:world-at-selection :interpretation-issued-at])))
+    (is (= (:at (first events)) (get-in record [:world-at-selection :selection-ended-at])))
+    (is (= :interpretation-owed-after-selection
+           (:status (runner/reading-interpretation-status recorded))))))
