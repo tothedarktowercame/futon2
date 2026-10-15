@@ -1,198 +1,309 @@
 (ns futon2.aif.previous-run
-  "Q6 carry and enforcement support.
+  "Requirements Q6 at the production runner: when the previous run's typed
+  terminal outcome was a refusal and its selection-input digest equals this
+  run's, this run must not choose the previous choice again.
 
-  A tick's run record carries what the PREVIOUS run record in the same
-  run-record directory holds for Requirements Q6: the previous choice
-  (target + precedence), the previous typed terminal outcome, and the
-  previous selection-input digest. The lookup is explicit and typed: no
-  previous record, an unreadable record, or a previous record that chose
-  nothing each become their own typed absence, never nil and never a
-  guessed value.
+  The record stream. Every run appends two events to run-stream.edn in its
+  run-record directory: :started (its id and recorded start instant) before
+  selection, and :closed (its sealed terminal carrier) when its run record is
+  persisted. The previous run is the :started event with the latest recorded
+  start instant strictly before this run's, compared as Instants: not the
+  filename, not the run id. Its :closed event supplies the previous choice,
+  outcome and input digest; a run that started and never closed is a typed
+  absence. Run records themselves are not parsed (they reach 270 MB).
 
-  Ordering: run ids are <date>-<random uuid>, so filenames of same-day
-  clicks sort arbitrarily. The previous run is the one whose RECORDED start
-  time (:startedAt — the instant persist-run-record! stamps on the record
-  and the PROOF-2b terminal receipt cites as the run's own :at) is latest
-  among the records before this run; runs that never started (no record,
-  or a record without :startedAt) are excluded.
+  The choice is the structural reading-policy key
+  (policy-prefix-admission/reading-policy-key), the identity Prefix-F, habit
+  E, the flight writer and the decision gate use. A choice that is not a
+  reading policy, or whose key does not match its action, is typed foreign
+  or malformed and never compared.
 
-  Enforcement: when the previous run's typed outcome was a refusal and its
-  selection-input digest matches this run's, the previous (target, cascade)
-  pair is EXCLUDED from the admissible candidates and selection re-decides
-  among the rest (binding *excluded-pair* around the judge); only when no
-  admissible alternative remains does the click refuse, typed
-  :repeat-choice-after-refusal."
+  Enforcement happens before the one G selector: the decision computes the
+  selection-input digest over what the selector consumes (the scored
+  family, its F carriers, beta, the precision identity and the selector's
+  other inputs), and when Q6 applies removes exactly the previous policy key
+  from the menu. With nothing left the decision abstains typed
+  :repeat-choice-after-refusal, and that refusal is carried forward until
+  the selection inputs change.
+
+  Every carrier is sealed (value-digest under :sha256). A tampered carrier
+  is not-recomputable, never a pass."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.policy-prefix-admission :as prefix-admission])
+  (:import [java.time Instant]))
 
-(def record-name-re #"tick-run-record-(\d{4}-\d{2}-\d{2})-([^.\s]+)\.edn$")
+(def stream-name "run-stream.edn")
+(def predecessor-schema :wm/q6-predecessor-v1)
+(def terminal-schema :wm/q6-terminal-v1)
+(def exclusion-schema :wm/q6-exclusion-v1)
+(def inputs-schema :wm/q6-selection-inputs-v1)
 
-(defn read-record [^java.io.File file]
-  (try
-    {:status :present
-     :record (edn/read-string {:default tagged-literal} (slurp file))}
-    (catch Exception e
-      {:status :unreadable :error (ex-message e)})))
+(defn seal [value] (assoc value :sha256 (evidence/value-digest value)))
 
-(defn- record-name [^java.io.File file] (.getName file))
+(defn intact? [value]
+  (and (map? value) (string? (:sha256 value))
+       (= (:sha256 value) (evidence/value-digest (dissoc value :sha256)))))
 
-(defn- candidate-files
-  "Every run record in DIR whose name sorts strictly before the current
-  run's own record name (tick-run-record-<run-id>.edn), newest date first."
-  [dir current-run-id]
-  (let [current-name (str "tick-run-record-" current-run-id ".edn")]
-    (->> (io/file dir)
-         file-seq
-         (filter #(.isFile ^java.io.File %))
-         (filter #(re-matches record-name-re (record-name %)))
-         (filter #(neg? (compare (record-name %) current-name)))
-         (sort-by record-name)
-         reverse)))
+(defn stream-file [dir] (io/file dir stream-name))
 
-(defn previous-record-file
-  "The File of the run before CURRENT-RUN-ID: among the candidate records,
-  the one with the latest recorded :startedAt, searching date groups from
-  newest backwards so at most one day's records are parsed. A record with
-  no :startedAt never started and is excluded. nil when none."
-  [dir current-run-id]
-  (loop [groups (group-by #(second (re-matches record-name-re (record-name %)))
-                          (candidate-files dir current-run-id))
-         dates (sort (keys groups))]
-    (when (seq dates)
-      (let [group (groups (last dates))
-            started (keep (fn [^java.io.File f]
-                            (let [read (read-record f)]
-                              (when (= :present (:status read))
-                                (let [at (:startedAt (:record read))]
-                                  (when (and at (not (map? at)))
-                                    [(str at) (record-name f) f])))))
-                          group)]
-        (if (seq started)
-          (let [[_ _ file] (last (sort-by (juxt first second) started))]
-            file)
-          (recur groups (butlast dates)))))))
+(defn- instant [s]
+  (when (string? s)
+    (try (Instant/parse s) (catch Exception _ nil))))
 
-(defn- previous-choice [record]
-  (let [chosen (get-in record [:decision :chosen])]
-    (if (and (map? chosen) (:target chosen) (not (:status chosen)))
-      {:status :present
-       :target (:target chosen)
-       :precedence (vec (:precedence chosen))}
-      {:status :absent :reason :previous-run-chose-nothing})))
+;; -- the record stream --------------------------------------------------------
 
-(defn- previous-outcome [record]
-  (let [receipt (:terminal-receipt record)
-        outcome (when (map? receipt)
-                  (or (when (contains? receipt :outcome) (:outcome receipt))
-                      (:failure-kind receipt)))]
-    (if (some? outcome)
-      {:status :present :outcome outcome}
-      {:status :absent :reason :previous-run-terminal-outcome-absent})))
+(defn read-stream
+  "The run stream's events, or a typed unreadable stream naming the lines
+  that did not parse as event maps. A missing stream is empty."
+  [dir]
+  (let [f (stream-file dir)]
+    (if-not (.exists f)
+      {:status :present :events []}
+      (let [parsed (keep-indexed
+                    (fn [i line]
+                      (when-not (str/blank? line)
+                        (let [e (try (edn/read-string line) (catch Exception _ ::bad))]
+                          (if (and (map? e) (#{:started :closed} (:event e)))
+                            {:event e}
+                            {:line (inc i)}))))
+                    (str/split-lines (slurp f)))
+            bad (keep :line parsed)]
+        (if (seq bad)
+          {:status :unreadable :lines (vec bad)}
+          {:status :present :events (mapv :event parsed)})))))
 
-(defn- previous-digest [record]
-  (let [d (get-in record [:world-at-selection :selection-input-digest])]
-    (if (and d (not (map? d)))
-      {:status :present :digest d}
-      {:status :absent :reason :previous-run-selection-input-digest-absent})))
+(defn- append! [dir event]
+  (let [f (stream-file dir)]
+    (io/make-parents f)
+    (spit f (str (pr-str event) "\n") :append true)))
 
-(defn carrier
-  "The typed Q6 carrier for the run record found at FILE, or the typed
-  absence when READ (from read-record) failed or FILE is nil."
-  [file read]
+(defn predecessor
+  "The sealed Q6 predecessor carrier for run RUN-ID started at STARTED-AT in
+  DIR's run stream: {:status :present :previous <its sealed terminal
+  carrier>} or a typed absence / not-recomputable naming why."
+  [dir run-id started-at]
+  (let [now (instant started-at)
+        stream (read-stream dir)
+        base {:schema predecessor-schema :run/id run-id :startedAt started-at
+              :stream stream-name}
+        found
+        (cond
+          (nil? now) {:status :not-recomputable :reason :current-start-unreadable}
+          (not= :present (:status stream))
+          {:status :not-recomputable :reason :run-stream-unreadable :lines (:lines stream)}
+          :else
+          (let [starts (filter #(= :started (:event %)) (:events stream))
+                unreadable (remove #(instant (:startedAt %)) starts)
+                earlier (filter #(and (not= run-id (:run/id %))
+                                      (.isBefore ^Instant (instant (:startedAt %)) now))
+                                (remove (set unreadable) starts))]
+            (cond
+              (seq unreadable)
+              {:status :not-recomputable :reason :run-stream-start-unreadable
+               :runs (mapv :run/id unreadable)}
+              (empty? earlier)
+              {:status :absent :reason :no-earlier-started-run}
+              :else
+              (let [latest (reduce (fn [a b] (if (.isAfter ^Instant (instant (:startedAt b))
+                                                           (instant (:startedAt a)))
+                                               b a))
+                                   earlier)
+                    at (instant (:startedAt latest))
+                    tied (filter #(= at (instant (:startedAt %))) earlier)
+                    closed (filter #(and (= :closed (:event %))
+                                         (= (:run/id latest) (:run/id %)))
+                                   (:events stream))
+                    terminal (:q6 (first closed))
+                    who {:previous-run/id (:run/id latest)
+                         :previous-startedAt (:startedAt latest)}]
+                (merge
+                 who
+                 (cond
+                   (< 1 (count (set (map :run/id tied))))
+                   {:status :not-recomputable :reason :previous-run-ambiguous
+                    :runs (vec (sort (map :run/id tied)))}
+                   (empty? closed)
+                   {:status :absent :reason :previous-run-not-closed}
+                   (< 1 (count closed))
+                   {:status :not-recomputable :reason :previous-run-closed-twice}
+                   (not (and (= terminal-schema (:schema terminal)) (intact? terminal)))
+                   {:status :not-recomputable :reason :previous-terminal-carrier-tampered}
+                   (not= [(:run/id latest) (:startedAt latest)]
+                         [(:run/id terminal) (:startedAt terminal)])
+                   {:status :not-recomputable :reason :previous-terminal-carrier-foreign}
+                   :else
+                   {:status :present :previous terminal}))))))]
+    (seal (merge base found))))
+
+(defn start!
+  "Before selection: the Q6 predecessor of this run, then this run's
+  :started event appended to DIR's stream. Returns the predecessor."
+  [dir run-id started-at]
+  (let [p (predecessor dir run-id started-at)]
+    (append! dir {:event :started :run/id run-id :startedAt started-at})
+    p))
+
+(defn close!
+  "When the run record is written: TERMINAL (this run's sealed terminal
+  carrier) appended to DIR's stream with the record file it was written to."
+  [dir terminal record-file]
+  (append! dir {:event :closed :run/id (:run/id terminal)
+                :record-file (str record-file) :q6 terminal}))
+
+;; -- what the selector consumes -----------------------------------------------
+
+(defn reading-key? [k]
+  (and (vector? k) (= :wm/reading-policy-v1 (first k))))
+
+(defn selection-inputs-digest
+  "The digest of every input the one selector call consumes, taken over the
+  whole scored family before any exclusion: each policy's structural key,
+  G, G terms and F carrier; beta; the reading-precision identity (scorer,
+  kernel, graph, readings, arrangements, preference authority); and the
+  selector's other inputs (history pin, enactment fold, feedback, queue,
+  novelty)."
+  [ranked selector-opts beta precision-identity]
+  (evidence/value-digest
+   {:schema inputs-schema
+    :policies (vec (sort-by pr-str
+                            (map (fn [e] {:policy-key (get-in e [:action :policy-key])
+                                          :g (:G-cascade e)
+                                          :g-terms (get-in e [:certificate :g-terms])
+                                          :f-prefix (:f-prefix e)})
+                                 ranked)))
+    :beta beta
+    :precision-identity precision-identity
+    :selector-opts (select-keys selector-opts
+                                [:policy-history-pin :enactment-fold :pattern-feedback
+                                 :ticket-queue :ticket-queue-refusals :novelty-inputs])}))
+
+(defn- decide-exclusion [predecessor digest]
+  (let [prev (:previous predecessor)
+        {:keys [choice outcome input-digest q6-refusal]} prev]
+    (cond
+      (nil? predecessor)
+      {:status :not-recomputable :reason :predecessor-carrier-not-supplied}
+      (not (and (= predecessor-schema (:schema predecessor)) (intact? predecessor)))
+      {:status :not-recomputable :reason :predecessor-carrier-tampered}
+      (not= :present (:status predecessor))
+      {:status :not-recomputable :reason (:reason predecessor)}
+      ;; the previous run itself refused to repeat: that refusal holds
+      ;; until the selection inputs change
+      (and q6-refusal (= digest (:input-digest q6-refusal)))
+      {:status :excluded :reason :repeat-refusal-rearm-not-met
+       :excluded-keys [(:excluded-key q6-refusal)]}
+      (not= :present (:status outcome))
+      {:status :not-recomputable :reason :previous-outcome-absent}
+      (not= :refused (:outcome outcome))
+      {:status :not-triggered :reason :previous-outcome-not-refused}
+      (not= :present (:status choice))
+      {:status :not-recomputable
+       :reason (case (:status choice)
+                 :foreign :previous-choice-foreign
+                 :malformed :previous-choice-malformed
+                 :previous-choice-absent)}
+      (not (string? input-digest))
+      {:status :not-recomputable :reason :previous-input-digest-absent}
+      (not= input-digest digest)
+      {:status :not-triggered :reason :selection-inputs-changed}
+      :else
+      {:status :excluded :reason :previous-choice-refused-on-same-inputs
+       :excluded-keys [(:policy-key choice)]})))
+
+(defn exclusion
+  "Q6 before the one selector: PREDECESSOR (the run's sealed predecessor
+  carrier, or nil) against RANKED (the certified scored family). Returns
+  {:carrier <sealed exclusion carrier> :ranked <the menu the selector sees>}
+  with :refusal set when exclusion leaves nothing to select."
+  [predecessor ranked selector-opts beta precision-identity]
+  (let [digest (selection-inputs-digest ranked selector-opts beta precision-identity)
+        decided (decide-exclusion predecessor digest)
+        excluded (set (:excluded-keys decided))
+        kept (vec (remove #(contains? excluded (get-in % [:action :policy-key])) ranked))
+        removed (- (count ranked) (count kept))
+        refused? (and (= :excluded (:status decided)) (empty? kept))
+        carrier (seal (cond-> (merge {:schema exclusion-schema
+                                      :input-digest digest
+                                      :predecessor (select-keys predecessor
+                                                                [:status :reason :sha256
+                                                                 :previous-run/id])
+                                      :menu (count ranked)
+                                      :removed removed}
+                                     decided)
+                        refused?
+                        (assoc :status :refused
+                               :kind :repeat-choice-after-refusal
+                               :rearm {:condition :selection-inputs-change
+                                       :input-digest digest
+                                       :excluded-key (first (:excluded-keys decided))})))]
+    (cond-> {:carrier carrier :ranked kept}
+      refused? (assoc :refusal carrier))))
+
+;; -- this run's terminal carrier ----------------------------------------------
+
+(defn choice
+  "This run's choice: the selected reading policy's structural key, or a
+  typed absence, foreign or malformed identity."
+  [decision]
+  (let [action (:action decision)
+        k (when (map? action) (:policy-key action))]
+    (cond
+      (not (map? action)) {:status :absent :reason :chose-nothing}
+      (not (reading-key? k)) {:status :foreign :reason :not-a-reading-policy-identity
+                              :target (:target action)}
+      (not= k (prefix-admission/reading-policy-key action))
+      {:status :malformed :reason :policy-key-does-not-match-action}
+      :else {:status :present :policy-key k :target (str (:target action))
+             :policy-id (:id action)})))
+
+(def ^:private lean-outcomes
+  "Close outcomes that are a Requirements.RunOutcome."
+  {:grounded-change :changed :changed :changed
+   :grounded-no-change :already-satisfied :already-satisfied :already-satisfied
+   :question :question
+   :guardrail-refusal :refused :refused :refused
+   :timed-out :timed-out :timeout :timed-out})
+
+(defn typed-outcome
+  "The run's terminal outcome. A typed refusal after selection (DOWNSTREAM,
+  e.g. :reading-policy-execution-semantics-owed) or the decision's own Q6
+  refusal is :refused; a decision that chose nothing is :abstained; a close
+  outcome is mapped to the RunOutcome vocabulary, else :invalid."
+  [outcome downstream decision]
   (cond
-    (nil? file) {:schema :wm/previous-run-v1
-                 :status :absent :reason :previous-run-record-absent}
-    (not= :present (:status read))
-    {:schema :wm/previous-run-v1
-     :status :absent :reason :previous-run-record-unreadable
-     :error (:error read)}
-    :else (let [record (:record read)]
-            {:schema :wm/previous-run-v1
-             :status :present
-             :run/id (:run/id record)
-             :record-file (record-name file)
-             :startedAt (:startedAt record)
-             :choice (previous-choice record)
-             :outcome (previous-outcome record)
-             :input-digest (previous-digest record)})))
+    (map? downstream)
+    {:status :present :outcome :refused :kind (:kind downstream)}
+    (= :refused (get-in decision [:selection-certificate :q6 :status]))
+    {:status :present :outcome :refused :kind :repeat-choice-after-refusal}
+    (and (not (map? (:action decision))) (= :abstained (:status decision)))
+    {:status :present :outcome :abstained :raw outcome}
+    (contains? lean-outcomes outcome)
+    {:status :present :outcome (lean-outcomes outcome) :raw outcome}
+    (some? outcome) {:status :present :outcome :invalid :raw outcome}
+    :else {:status :absent :reason :terminal-outcome-absent}))
 
-(defn lookup
-  "Default carrier lookup for the runner: the run before CURRENT-RUN-ID in
-  DIR, ordered by recorded start time. DIR is the runner's run-record dir;
-  hermetic tests rebind the data root or inject :previous-run-fn."
-  [dir current-run-id]
-  (let [file (previous-record-file dir current-run-id)]
-    (carrier file (when file (read-record file)))))
+(defn terminal
+  "This run's sealed terminal carrier: choice, typed outcome, the
+  selection-input digest its decision computed before selecting, and its own
+  Q6 refusal when it refused to repeat."
+  [{:keys [run-id started-at decision outcome downstream]}]
+  (let [q6 (get-in decision [:selection-certificate :q6])
+        digest (when (intact? q6) (:input-digest q6))]
+    (seal (cond-> {:schema terminal-schema
+                   :run/id run-id
+                   :startedAt started-at
+                   :choice (choice decision)
+                   :outcome (typed-outcome outcome downstream decision)
+                   :input-digest digest}
+            (and digest (= :refused (:status q6)))
+            (assoc :q6-refusal {:input-digest digest
+                                :excluded-key (get-in q6 [:rearm :excluded-key])})))))
 
-(def ^:private refused-outcomes
-  "Outcome vocabulary the exporter maps to `refused` (Requirements Q6)."
-  #{:guardrail-refusal :refused :abstained})
-
-(defn refused? [outcome-carrier]
-  (and (= :present (:status outcome-carrier))
-       (contains? refused-outcomes (:outcome outcome-carrier))))
-
-(defn same-choice?
-  "True when CHOICE-SUMMARY (full-loop-runner/chosen-summary shape) names
-  the same (target, cascade) as the carrier's :choice."
-  [carrier choice-summary]
-  (and (= :present (get-in carrier [:choice :status]))
-       (map? choice-summary)
-       (= (str (:target choice-summary)) (str (get-in carrier [:choice :target])))
-       (= (mapv #(or (:id %) %) (:precedence choice-summary))
-          (mapv #(if (map? %) (:id %) %)
-                (get-in carrier [:choice :precedence])))))
-
-(defn exclusion-decision
-  "Requirements Q6, decided at selection: when the previous run's typed
-  terminal outcome was a refusal, the previous selection-input digest is
-  present and equals CURRENT-DIGEST, and CHOICE-SUMMARY (the choice this
-  tick is about to bank) names the same (target, cascade), return the
-  exclusion evidence {:excluded-by :q6-repeat-after-refusal :pair ...
-  :previous-run/id ... :selection-input-digest ...} — the runner re-decides
-  with that pair excluded. nil when Q6 does not trigger."
-  [carrier choice-summary current-digest]
-  (when (and (map? carrier)
-             (= :present (:status carrier))
-             (refused? (:outcome carrier))
-             (= :present (get-in carrier [:input-digest :status]))
-             current-digest
-             (= (get-in carrier [:input-digest :digest]) current-digest)
-             (same-choice? carrier choice-summary))
-    {:excluded-by :q6-repeat-after-refusal
-     :pair {:target (get-in carrier [:choice :target])
-            :precedence (get-in carrier [:choice :precedence])}
-     :previous-run/id (:run/id carrier)
-     :selection-input-digest current-digest}))
-
-(def ^:dynamic *excluded-pair*
-  "Bound by the full-loop runner around a Q6 re-decision: the judge must
-  not admit the (target, cascade) pair it names. nil on ordinary clicks."
+(def ^:dynamic *predecessor*
+  "Bound by full-loop-runner/run-opportunity! to the run's sealed
+  predecessor carrier, read once before selection. The cascade decision
+  reads it; unbound (nil) is :predecessor-carrier-not-supplied."
   nil)
-
-(defn action-pair
-  "The comparable (target, precedence-ids) pair of a ranked entry's action."
-  [entry]
-  (let [action (:action entry)]
-    (when (map? action)
-      {:target (:target action)
-       :precedence (mapv #(if (map? %) (:id %) %) (:precedence action))})))
-
-(defn excluded-ranked
-  "Split RANKED (the judge's ranked candidate entries) around a bound
-  *excluded-pair*: the entries whose action names that (target, cascade)
-  are excluded, the rest are kept. {:kept [...] :excluded [...] :pair ...}
-  with :excluded empty and :pair nil when nothing is bound or no entry
-  matches."
-  [ranked]
-  (if-let [pair *excluded-pair*]
-    (let [{kept false excluded true}
-          (group-by (fn [entry]
-                      (let [p (action-pair entry)]
-                        (boolean (and p
-                                      (= (str (:target pair)) (str (:target p)))
-                                      (= (mapv str (:precedence pair))
-                                         (mapv str (:precedence p)))))))
-                    ranked)]
-      {:kept (vec kept) :excluded (vec excluded) :pair pair})
-    {:kept (vec ranked) :excluded [] :pair nil}))

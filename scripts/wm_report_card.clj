@@ -409,13 +409,11 @@
         (absent "record contains no fields from which to compose example text"))))
 
 (defn build-card
-  ([record record-path snap] (build-card record record-path snap nil nil {}))
-  ([record record-path snap previous previous-path]
-   (build-card record record-path snap previous previous-path {}))
-  ([record record-path snap previous previous-path
+  ([record record-path snap] (build-card record record-path snap {}))
+  ([record record-path snap
     {:keys [preregistrations preregistration-options]
      :or {preregistrations [] preregistration-options {}}}]
-   (let [export (run-facts/facts-for-record record record-path snap previous previous-path)
+   (let [export (run-facts/facts-for-record record record-path snap)
          cascade (cascade-section record)
          outcome (outcome-section record)
          verdicts (verdict-rows export)
@@ -628,7 +626,6 @@
    (let [record-path (data-paths/resolve-repo-path record-path)
          output-dir (some-> output-dir data-paths/resolve-repo-path)
          record (run-facts/read-edn record-path)
-         [previous previous-path] (run-facts/lookup-previous record-path record)
          snap (or snap (run-facts/snapshot))
          run-id (:run/id record)
          out (io/file (or output-dir
@@ -646,7 +643,7 @@
          prior-cards (->> cards-by-run
                           (filter (fn [[rid _]] (neg? (compare (str rid) (str run-id)))))
                           (map (fn [[_ path]] (prereg/read-edn path))) vec)
-         card (build-card record record-path snap previous previous-path
+         card (build-card record record-path snap
                           {:preregistrations preregs
                            :preregistration-options
                            (cond-> {:prior-cards prior-cards}

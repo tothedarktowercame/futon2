@@ -64,7 +64,10 @@
     :incommensurable-family
     ;; the reading family's precision or preference certification refused
     ;; before selection (reading-policy-precision / -preference)
-    :model-contract-refused})
+    :model-contract-refused
+    ;; Requirements Q6: every admissible policy is the previous run's
+    ;; refused choice on the same selection inputs (previous-run)
+    :repeat-choice-after-refusal})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this

@@ -62,17 +62,6 @@
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
 
-(defn lookup-previous
-  "Return the persisted record immediately preceding RECORD-PATH, when one
-  can be read. This supports legacy report cards; current records carry their
-  own typed :previous-run evidence and do not depend on this fallback."
-  [record-path record]
-  (when-let [file (previous-run/previous-record-file
-                   (.getParentFile (io/file record-path)) (:run/id record))]
-    (let [read (previous-run/read-record file)]
-      (when (= :present (:status read))
-        [(:record read) (.getPath ^java.io.File file)]))))
-
 (defn- files-under [root suffix]
   (->> (file-seq (io/file root))
        (filter #(.isFile ^java.io.File %))
@@ -301,17 +290,6 @@
              "policyCount" policy-count})
           (:target-construction certificate))))
 
-(defn- outcome [record]
-  (let [x (or (get-in record [:terminal-receipt :outcome])
-              (:failure-outcome record) (get-in record [:failure :outcome]))]
-    (case x
-      (:grounded-change :changed) "changed"
-      (:grounded-no-change :already-satisfied) "alreadySatisfied"
-      :question "question"
-      (:guardrail-refusal :refused :abstained) "refused"
-      (:timed-out :timeout) "timedOut"
-      (if x "invalid" (not-recomputable "terminal outcome absent")))))
-
 (defn- factorized-preference-facts [record]
   (let [carrier (get-in record [:decision :factorized-preference])
         certificate (:certificate carrier)
@@ -379,10 +357,52 @@
                (name (or (:reason ask) :unknown))))
       :else "selectionBeforeInterpretation")))
 
+(def ^:private q6-outcomes
+  {:changed "changed" :already-satisfied "alreadySatisfied" :question "question"
+   :refused "refused" :timed-out "timedOut" :invalid "invalid"})
+
+(defn- q6-choice [c]
+  {"target" (:target c) "cascade" (pr-str (:policy-key c))})
+
+(defn q6-facts
+  "Requirements Q6 from the run's own :q6 carrier only: the predecessor the
+  runtime read before selecting and this run's terminal carrier, both
+  sealed. Nothing is searched for or inferred from other records; a missing,
+  tampered or typed-absent part is not recomputable."
+  [record]
+  (let [{:keys [predecessor terminal]} (:q6 record)
+        nr not-recomputable
+        pred-ok? (and (= previous-run/predecessor-schema (:schema predecessor))
+                      (previous-run/intact? predecessor))
+        term-ok? (and (= previous-run/terminal-schema (:schema terminal))
+                      (previous-run/intact? terminal)
+                      (= (:run/id record) (:run/id terminal)))
+        prev (when (and pred-ok? (= :present (:status predecessor))) (:previous predecessor))
+        why (cond (nil? predecessor) "Q6 predecessor carrier absent"
+                  (not pred-ok?) "Q6 predecessor carrier tampered"
+                  (not prev) (str "previous run " (name (or (:reason predecessor) :absent))))
+        {pc :choice po :outcome pd :input-digest} prev
+        {cc :choice cd :input-digest} (when term-ok? terminal)]
+    {"previousChoice" (cond why (nr why)
+                            (= :present (:status pc)) (q6-choice pc)
+                            :else (nr (str "previous choice " (name (or (:reason pc) :absent)))))
+     "previousOutcome" (cond why (nr why)
+                             (q6-outcomes (:outcome po)) (q6-outcomes (:outcome po))
+                             :else (nr (str "previous outcome is not a RunOutcome: "
+                                            (name (or (:outcome po) (:reason po) :absent)))))
+     "previousInputDigest" (cond why (nr why)
+                                 (string? pd) pd
+                                 :else (nr "previous selection-input digest absent"))
+     "currentChoice" (cond (not term-ok?) (nr "Q6 terminal carrier absent or tampered")
+                           (= :present (:status cc)) (q6-choice cc)
+                           :else (nr (str "current choice " (name (or (:reason cc) :absent)))))
+     "currentInputDigest" (cond (not term-ok?) (nr "Q6 terminal carrier absent or tampered")
+                                (string? cd) cd
+                                :else (nr "selection-input digest absent: decision computed none"))}))
+
 (defn facts-for-record
-  "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}.
-  PREVIOUS is the previous parsed record, if available."
-  [record record-path snap previous previous-path]
+  "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}."
+  [record record-path snap]
   (let [cert (get-in record [:decision :selection-certificate])
         candidates (:candidates cert)
         gpolicies (or (get-in cert [:g-term-decomposition :policies])
@@ -473,8 +493,7 @@
                                  (every? map? g-term-rows))
         apaths (absence-paths record)
         absence-groups (absence-diagnostics record)
-        chosen (get-in record [:decision :chosen])
-        previous-chosen (get-in previous [:decision :chosen])
+        q6 (q6-facts record)
         used (set (keep identity [(get-in record [:participants :author])
                                   (get-in record [:participants :reviewer])
                                   (get-in record [:interpretation-ask :seat])]))
@@ -542,20 +561,11 @@
                  (nr "coherent per-policy expected-information terms absent"))
                "interpretationOrder" (interpretation-order world)
                "pathAbsenceCount" (count apaths)
-               "previousChoice" (if previous-chosen
-                                    {"target" (str (:target previous-chosen))
-                                     "cascade" (pr-str (:precedence previous-chosen))}
-                                    (nr "previous run or previous chosen action absent"))
-               "previousOutcome" (if previous (outcome previous)
-                                      (nr "previous run absent"))
-               "previousInputDigest" (or (get-in previous [:world-at-selection :selection-input-digest])
-                                           (nr "previous selection-input digest absent"))
-               "currentChoice" (if (and (map? chosen) (not (:status chosen)))
-                                   {"target" (str (:target chosen))
-                                    "cascade" (pr-str (:precedence chosen))}
-                                   (nr "chosen target/cascade absent"))
-               "currentInputDigest" (or (:selection-input-digest world)
-                                          (nr "selection-input digest absent"))
+               "previousChoice" (q6 "previousChoice")
+               "previousOutcome" (q6 "previousOutcome")
+               "previousInputDigest" (q6 "previousInputDigest")
+               "currentChoice" (q6 "currentChoice")
+               "currentInputDigest" (q6 "currentInputDigest")
                "seatsAvailable" (if (map? (:seat-roster world))
                                   (sorted-ids (mapcat :ids (vals (:seat-roster world))))
                                   (if (:seats snap) (sorted-ids (:seats snap))
@@ -589,7 +599,9 @@
                         [field (cond
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
-                                 (str/starts-with? field "previous") previous-path
+                                 (#{"previousChoice" "previousOutcome" "previousInputDigest"
+                                    "currentChoice" "currentInputDigest"} field)
+                                 (str record-path " [:q6]")
                                  :else record-path)]))]
     {:facts facts :sources sources
      :diagnostics {:absencePaths (mapv pr-str apaths)
@@ -599,12 +611,8 @@
                                            k))}}))
 
 (defn history-rows [paths snap]
-  (loop [remaining paths previous nil previous-path nil out []]
-    (if-let [path (first remaining)]
-      (let [record (read-edn path)
-            export (facts-for-record record path snap previous previous-path)]
-        (recur (next remaining) record path (conj out (assoc export :path path))))
-      out)))
+  (mapv (fn [path] (assoc (facts-for-record (read-edn path) path snap) :path path))
+        paths))
 
 (defn- count-or-na [x] (if (sequential? x) (count x) "NR"))
 (defn- value-or-na [x] (if (present? x) x "NR"))
@@ -650,7 +658,7 @@
     (let [path (second args)
           snap (snapshot)]
       (println (json/generate-string
-                (facts-for-record (read-edn path) path snap nil nil)
+                (facts-for-record (read-edn path) path snap)
                 {:pretty true})))
     (let [[run-dir output] args
           dir (or run-dir "data/wm-runs")

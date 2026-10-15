@@ -7,7 +7,7 @@
 (defn emit [label lib ask]
   (let [d (selected-decision (atom 0))
         {:keys [record]} (run-click d lib ask (atom 0))
-        export (json/parse-string (json/generate-string (facts/facts-for-record record "r" snap nil nil)))
+        export (json/parse-string (json/generate-string (facts/facts-for-record record "r" snap)))
         out (str (System/getProperty "user.home") "/notes/q5/lean/Q5" label ".lean")]
     (spit out (wm-check-run-facts/lean-source export (str "q5" label)))
     (println label (get-in export ["facts" "interpretationOrder"]) out)))

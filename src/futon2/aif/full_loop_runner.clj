@@ -70,6 +70,7 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.run-participants :as participants]
@@ -998,6 +999,13 @@
             declaration-reads (cascade-sources/provenance
                                (some-> (:declaration-reads/state raw-opts) deref))
             participants-record (participants/record-value raw-opts)
+            ;; Requirements Q6: what this run read as its predecessor, and
+            ;; its own terminal carrier, which closes it in the run stream
+            q6-terminal (previous-run/terminal
+                         {:run-id run-id :started-at started-at
+                          :decision (or decision (:decision selection-sorry))
+                          :outcome (:outcome result)
+                          :downstream (:downstream-refusal selection-sorry)})
             world-at-selection (or (get-in result
                                             [:checkpoints :selection :judgment
                                              :world-at-selection])
@@ -1075,6 +1083,8 @@
                     :interpretation-ask (retained-interpretation-ask result)
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
+                    :q6 {:predecessor (:q6/predecessor raw-opts)
+                         :terminal q6-terminal}
                     :route route
                     :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
@@ -1131,9 +1141,12 @@
                      grounded-commit
                      (assoc :grounded-commit grounded-commit)
                      true
-                     (terminal-receipt/attach (:outcome result)))]
+                     (terminal-receipt/attach (:outcome result)))
+            written (run-record-io/write-run-record-stream! dir run-id record)]
+        ;; this run's close in the Q6 run stream, beside the record it names
+        (previous-run/close! dir q6-terminal written)
         {:run-record-status :present
-         :run-record (run-record-io/write-run-record-stream! dir run-id record)})
+         :run-record written})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard
       ;; as a fail-closed invariant rather than silently publishing no record.
       (throw (ex-info "Terminal result has no recordable route"
@@ -7381,6 +7394,12 @@
   (let [run-id (or (:run-id raw-opts)
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
+        ;; Requirements Q6: the previous started run in this run-record
+        ;; stream, read before this run's own start is appended and before
+        ;; anything is selected
+        q6-predecessor (previous-run/start!
+                        (or (:run-record-dir raw-opts) default-run-record-dir)
+                        run-id started-at)
         nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
         phase-events (atom [])
         chronology-start (registered-telemetry/chronology-start raw-opts)
@@ -7397,6 +7416,7 @@
                                     (selection-timing/new-state))
                                 :debugger-dwell/state (debugger/new-dwell-ledger run-id)
                                 :run-timing/start-nanos (nano-time)
+                                :q6/predecessor q6-predecessor
                                 :registered-run/chronology-start chronology-start)
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
@@ -7408,7 +7428,8 @@
         result
         (try
       (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)
-                input-receipts/*habit-reads* (:habit-reads/state raw-opts)]
+                input-receipts/*habit-reads* (:habit-reads/state raw-opts)
+                previous-run/*predecessor* q6-predecessor]
         (run-opportunity-core! (assoc raw-opts :run-id run-id
                                      :loaded-code-identity source-check)))
     (catch Throwable e

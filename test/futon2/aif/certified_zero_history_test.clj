@@ -92,7 +92,7 @@
            :patterns #{"p1"} :seats #{"author"} :library-pattern-count 1})
 
 (defn- absences [decision]
-  (get-in (facts/facts-for-record (export-record decision) "r" snap nil nil)
+  (get-in (facts/facts-for-record (export-record decision) "r" snap)
           [:facts "pathAbsenceCount"]))
 
 (deftest certified-zero-history-enacts
@@ -124,7 +124,7 @@
                                         :candidates-f-not-applicable]))))
     (testing "enactment accepts it and the exporter counts no absence"
       (is (= action (:action (selected-entry decision))))
-      (let [export (facts/facts-for-record (export-record decision) "r" snap nil nil)]
+      (let [export (facts/facts-for-record (export-record decision) "r" snap)]
         (is (= 0 (get-in export [:facts "pathAbsenceCount"])))
         (is (empty? (get-in export [:diagnostics :absenceGroups])))))))
 

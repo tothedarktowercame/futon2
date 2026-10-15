@@ -182,7 +182,7 @@
                 :patterns #{} :seats #{} :pins {:controlled true}}
           exported (:facts (run-facts/facts-for-record
                             (get-in persisted [:hydrated :run-record])
-                            "controlled-run-record" snap nil nil))
+                            "controlled-run-record" snap))
           source (checker/lean-source {"facts" exported} "integratedQ8")]
       (is (= (:q8 certs)
              {:schema :wm/q8-frontier-certificate-v1

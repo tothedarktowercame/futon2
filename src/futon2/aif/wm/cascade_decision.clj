@@ -16,6 +16,7 @@
             [futon2.aif.observation-labels :as observation-labels]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.parameter-novelty :as novelty]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -1220,6 +1221,14 @@
                     #(family-selection/select-over-families
                     families
                     {:certify (certify-reading-family field families beta opts)
+                     ;; Q6 before the one selector: the previous run's
+                     ;; refused choice, on the same selection inputs, is
+                     ;; removed from the menu
+                     :exclude (fn [ranked selector-opts certified]
+                                (previous-run/exclusion
+                                 previous-run/*predecessor* ranked selector-opts
+                                 (:beta certified)
+                                 (get-in certified [:receipt :reading-precision-identity])))
                      :attach-f attach-f
                      :policy-history-pin pin
                      :enactment-fold (:enactment-fold opts)
@@ -1228,6 +1237,16 @@
                      :ticket-queue-refusals (family-refusals families)
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
         (case (:status result)
+          :repeat-refused
+          ;; Q6: every admissible policy is the previous run's refused
+          ;; choice on the same inputs; nothing is selected or interpreted
+          {:decision (-> (abstain [{:target nil :stage :q6
+                                    :kind :repeat-choice-after-refusal
+                                    :excluded-key (get-in result [:refusal :rearm :excluded-key])
+                                    :rearm (get-in result [:refusal :rearm])}])
+                         (update :selection-certificate merge
+                                 (get-in result [:certification :receipt]))
+                         (assoc-in [:selection-certificate :q6] (:refusal result)))}
           :refused
           {:decision (cond-> (abstain [(merge (select-keys (:refusal result)
                                                            [:reason :refusals :carry :versions :kernels])
@@ -1253,6 +1272,7 @@
                                        (:failures result))
                              (update :selection-certificate merge
                                      (get-in result [:certification :receipt]))
+                             (assoc-in [:selection-certificate :q6] (:q6 result))
                              (assoc-in [:selection-certificate :preference]
                                        {:c :cascade-shape-g/progress-preference
                                         :certified-by pref/receipt-schema

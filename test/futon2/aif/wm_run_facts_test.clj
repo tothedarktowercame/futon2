@@ -58,7 +58,7 @@
 (defn q8-export [carrier]
   (:facts (facts/facts-for-record
            (cond-> record carrier (assoc-in [:certificates :q8] carrier))
-           "r" snap nil nil)))
+           "r" snap)))
 
 (deftest q8-absent-carrier-is-not-recomputable
   (doseq [carrier [nil (update-in q8-carrier [:frontier-selection :selected]
@@ -90,7 +90,7 @@
         (is (not (.contains source "q8 := .nr")))))))
 
 (defn q9-export [r]
-  (:facts (facts/facts-for-record r "r" snap nil nil)))
+  (:facts (facts/facts-for-record r "r" snap)))
 
 (deftest q9-absent-and-flat-preference-carriers-remain-not-recomputable
   (doseq [r [record
@@ -146,15 +146,15 @@
       (is (contains? (export "factorizedPreference") "not-recomputable")))))
 
 (deftest typed-not-supplied-increments-absence-count
-  (let [base (facts/facts-for-record record "r" snap nil nil)
+  (let [base (facts/facts-for-record record "r" snap)
         planted (assoc-in record [:terminal-receipt :f]
                           {:status :not-supplied :reason :plant})
-        changed (facts/facts-for-record planted "r" snap nil nil)]
+        changed (facts/facts-for-record planted "r" snap)]
     (is (= (inc (get-in base [:facts "pathAbsenceCount"]))
            (get-in changed [:facts "pathAbsenceCount"])))))
 
 (deftest missing-slice-is-not-recomputable-not-zero-or-conforming
-  (let [export (facts/facts-for-record record "r" snap nil nil)
+  (let [export (facts/facts-for-record record "r" snap)
         construction (get-in export [:facts "targetConstruction"])]
     (is (contains? construction "not-recomputable"))
     (is (not= 0 construction))
@@ -165,7 +165,7 @@
                           [{:target "M-x" :slice [:p1 :p2] :pool [:p1 :p2]
                             :slice-from-whole-library true :library-size 1436
                             :policy-count 2}])
-        exported (:facts (facts/facts-for-record carried "r" snap nil nil))]
+        exported (:facts (facts/facts-for-record carried "r" snap))]
     (is (= [{"targets" ["M-x"] "slice" [":p1" ":p2"]
              "pool" [":p1" ":p2"] "sliceFromWholeLibrary" true
              "policyCount" 2}]
@@ -176,12 +176,12 @@
   (let [carried (assoc-in record [:decision :selection-certificate :target-construction]
                           {:status :absent
                            :reason :query-time-construction-slice-not-recorded})
-        exported (:facts (facts/facts-for-record carried "r" snap nil nil))]
+        exported (:facts (facts/facts-for-record carried "r" snap))]
     (is (contains? (exported "targetConstruction") "not-recomputable"))
     (is (contains? (exported "constructorPatternCount") "not-recomputable"))))
 
 (deftest runfacts-field-set-is-exact
-  (let [exported (:facts (facts/facts-for-record record "r" snap nil nil))]
+  (let [exported (:facts (facts/facts-for-record record "r" snap))]
     (is (= (set facts/run-fact-fields) (set (keys exported))))))
 
 (deftest new-world-carrier-removes-record-nr-fields
@@ -195,9 +195,12 @@
                :failures []}
         exported (:facts (facts/facts-for-record
                           (assoc record :world-at-selection world)
-                          "r" snap nil nil))]
+                          "r" snap))]
     (is (= ["M-x"] (exported "enumeratedTasks")))
-    (is (= "digest" (exported "currentInputDigest")))
+    ;; Q6 reads its digest from the run's :q6 carrier, computed before the
+    ;; one selector; the census digest is taken after selection and is not
+    ;; a substitute for it
+    (is (contains? (exported "currentInputDigest") "not-recomputable"))
     (is (= ["author"] (exported "seatsAvailable")))
     (is (= "selectionBeforeInterpretation" (exported "interpretationOrder")))))
 
@@ -222,7 +225,7 @@
                          :scoring {0 scored}})
               (assoc-in [:decision :selection-law :posterior]
                         {action 1.0}))
-        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+        f (:facts (facts/facts-for-record r "r" snap))]
     (is (= 4 (f "horizonLength")))
     (is (= [0 1 2 3] (f "preferenceSteps")))
     (is (= [1 2] (f "gradedPreferenceSteps")))
@@ -247,7 +250,7 @@
                          :policies [{:id :pi1}] :scoring {0 scored}})
               (assoc-in [:decision :selection-law :posterior]
                         {action 1.0}))
-        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+        f (:facts (facts/facts-for-record r "r" snap))]
     (is (= [0 1] (f "preferenceSteps")))
     (is (= "terminal-only" (f "preferenceSemantics")))
     (is (= {"risk" true "ambiguity" true "informationGain" true} (f "gTerms")))))
@@ -266,7 +269,7 @@
                          :policies [{:id :pi1}] :scoring {0 scored}})
               (assoc-in [:decision :selection-law :posterior]
                         {action 1.0}))
-        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+        f (:facts (facts/facts-for-record r "r" snap))]
     (is (= "progressive" (f "preferenceSemantics")))
     (is (= [] (f "gradedPreferenceSteps")))))
 
@@ -284,7 +287,7 @@
                          :scoring {0 (scored model-a) 1 (scored model-b)}})
               (assoc-in [:decision :selection-law :posterior]
                         {action-a 0.5 action-b 0.5}))]
-    (:facts (facts/facts-for-record r "r" snap nil nil))))
+    (:facts (facts/facts-for-record r "r" snap))))
 
 (deftest q4-requires-explicit-authorized-preference-semantics
   (let [schedule {1 {:ending/not-yet-evaluated 1.0}}
@@ -328,7 +331,7 @@
                                             :policies (mapv (fn [x] {:id x}) (keys posterior))
                                             :scoring scoring})
                                  (assoc-in [:decision :selection-law :posterior] posterior))
-                             "r" snap nil nil)))
+                             "r" snap)))
         disjoint (facts-for [{:id a} {:id b}] {0 score 1 score} {c 0.5 d 0.5})
         duplicate (facts-for [{:id a} {:id a}] {0 score 1 score} {a 0.5 b 0.5})
         outside (facts-for [{:id a} {:id b}] {0 score 2 score} {a 0.5 b 0.5})
@@ -352,7 +355,7 @@
                          :g-term-decomposition {:policies [{:id b
                                                             :terms {:A {:value model}}}]}})
               (assoc-in [:decision :selection-law :posterior] {a 1.0}))
-        export (:facts (facts/facts-for-record r "r" snap nil nil))]
+        export (:facts (facts/facts-for-record r "r" snap))]
     (is (contains? (export "preferenceSemantics") "not-recomputable"))))
 
 (deftest q4-refuses-to-mix-scoring-occurrences-with-reused-policy-labels
@@ -369,7 +372,7 @@
                          :scoring {0 scored 1 scored}})
               (assoc-in [:decision :selection-law :posterior]
                         {{:id :c1 :target "M-a"} 1.0}))
-        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+        f (:facts (facts/facts-for-record r "r" snap))]
     (doseq [field ["gTerms" "policiesWithRiskTerm"
                    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"]]
       (is (contains? (f field) "not-recomputable") field))))
@@ -438,7 +441,7 @@
                   {:beta 1})
         candidate (first (get-in decision [:selection-certificate :candidates]))
         r (assoc record :decision (assoc decision :chosen (:action decision)))
-        export (facts/facts-for-record r "r" snap nil nil)
+        export (facts/facts-for-record r "r" snap)
         entry ((ns-resolve 'futon2.aif.full-loop-runner 'selected-entry)
                {:decision decision})]
     (is (= 1.25 (:f-consumed candidate)))
@@ -472,7 +475,7 @@
                                       :presence :prefix-receipt
                                       :reason :no-flight-records}})
         r (q7-prefix-record candidate)
-        export (facts/facts-for-record r "r" snap nil nil)
+        export (facts/facts-for-record r "r" snap)
         groups (get-in export [:diagnostics :absenceGroups])
         selected-entry (ns-resolve 'futon2.aif.full-loop-runner 'selected-entry)
         legacy-decision {:action (:id candidate)
@@ -537,7 +540,7 @@
                         [{:id a :g 1.0} {:id b :g 2.0}])
               (assoc-in [:decision :selection-law :posterior]
                         {a 0.25 b 0.75}))
-        f (:facts (facts/facts-for-record r "r" snap nil nil))]
+        f (:facts (facts/facts-for-record r "r" snap))]
     (is (= 2 (count (f "constructedCascades"))))
     (is (= 2 (count (f "comparedPolicies"))))
     (is (= #{"M-a" "M-b"} (set (f "targetsWithG"))))))

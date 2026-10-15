@@ -124,7 +124,7 @@
            :applies-when {:path [:headline :pass] :expect 'present}}
         r (assoc full-record :registered-run/chronology
                  {:source-revisions-before {"futon2" "head"}})
-        result (card/build-card r "fixture.edn" snap nil nil
+        result (card/build-card r "fixture.edn" snap
                  {:preregistrations [p]
                   :preregistration-options {:ancestor? (constantly true)}})]
     (is (= 1 (get-in result [:preregistrations :counts :confirmed])))

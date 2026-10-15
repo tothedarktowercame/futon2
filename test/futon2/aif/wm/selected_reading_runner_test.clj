@@ -147,7 +147,7 @@
                     (partition 2 1 events)))
         (is (= (:at (first events)) (get-in record [:world-at-selection :selection-ended-at])))
         (is (= (:at (second events)) (get-in record [:world-at-selection :interpretation-issued-at])))
-        (let [export (facts/facts-for-record record "r" snap nil nil)]
+        (let [export (facts/facts-for-record record "r" snap)]
           (is (= "selectionBeforeInterpretation" (get-in export [:facts "interpretationOrder"])))
           (is (not= :not-recomputable
                     (:status (first (filter #(= :Q5 (:requirement %))
@@ -373,7 +373,7 @@
     (is (nil? (get-in record [:world-at-selection :interpretation-issued-at])))
     (is (= (:at (first events)) (get-in record [:world-at-selection :selection-ended-at])))
     (testing "Q5 is not certified by an interpretation that never happened"
-      (let [export (facts/facts-for-record record "r" snap nil nil)
+      (let [export (facts/facts-for-record record "r" snap)
             order (get-in export [:facts "interpretationOrder"])]
         (is (contains? order "not-recomputable"))
         (is (= :not-recomputable

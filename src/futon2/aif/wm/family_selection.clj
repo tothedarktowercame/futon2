@@ -194,8 +194,13 @@
   [policy score] pairs after F is attached and before the selector. It
   returns {:status :certified :beta b :receipt r} (the beta the selector
   uses, and what to record) or a typed refusal {:status :refused …}; a
-  refusal returns {:status :refused} without calling the selector."
-  [families {:keys [attach-f certify] :as opts}]
+  refusal returns {:status :refused} without calling the selector.
+  OPTS :exclude, when given, receives the certified ranked union, the
+  selector's options and the certification, after certification and before
+  the selector. It returns {:carrier c :ranked kept} (the menu the selector
+  sees, recorded with C) or adds :refusal when nothing is left, which
+  returns {:status :repeat-refused} without calling the selector."
+  [families {:keys [attach-f certify exclude] :as opts}]
   (let [rows
         (mapv
          (fn [family]
@@ -230,11 +235,23 @@
                      (range 1 (inc (count scored))) scored)
         ranked (if attach-f (attach-f ranked) ranked)
         certified (when (and certify (seq ranked)) (certify ranked scored))
-        opts (cond-> (dissoc opts :attach-f :certify)
+        opts (cond-> (dissoc opts :attach-f :certify :exclude)
                (= :certified (:status certified)) (assoc :beta (:beta certified)))
+        excluded (when (and exclude (= :certified (:status certified)))
+                   (exclude ranked opts certified))
+        menu (if excluded (:ranked excluded) ranked)
         failures (vec (mapcat :failures rows))
         summaries (mapv #(dissoc % :scored) rows)]
     (cond
+      (:refusal excluded)
+      {:status :repeat-refused
+       :refusal (:refusal excluded)
+       :certification certified
+       :ranked ranked
+       :target-policy-families summaries
+       :failures failures
+       :failure-count (count failures)}
+
       (= :refused (:status certified))
       {:status :refused
        :refusal certified
@@ -246,8 +263,9 @@
       (seq ranked)
       {:status :selected
        :certification certified
-       :decision (policy/select-action-cascades ranked opts)
-       :ranked ranked
+       :q6 (:carrier excluded)
+       :decision (policy/select-action-cascades menu opts)
+       :ranked menu
        :target-policy-families summaries
        :failures failures
        :failure-count (count failures)}

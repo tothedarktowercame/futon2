@@ -27,12 +27,12 @@
     (catch Exception _ nil)))
 
 (defn produce
-  [hydrated-record {:keys [checker executor snapshot record-path previous previous-path]}]
+  [hydrated-record {:keys [checker executor snapshot record-path]}]
   (if-not (and (descriptor-valid? checker) (ifn? executor) (map? snapshot))
     {:status :absent :reason :controlled-checker-authority-unconfigured}
     (let [export (run-facts/facts-for-record hydrated-record
                                              (or record-path "controlled-run-record")
-                                             snapshot previous previous-path)
+                                             snapshot)
           facts (:facts export)
           source (checker/lean-source {"facts" facts} "controlledReportCard")
           request {:schema checker-request-schema
