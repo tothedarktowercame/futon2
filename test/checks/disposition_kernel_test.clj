@@ -1,7 +1,7 @@
 (ns checks.disposition-kernel-test
   (:require [checks.disposition-kernel :as kernel]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.full-loop-cohort :as cohort]))
+            [futon2.aif.ruled-outcome-c :as ruled]))
 
 (def pinned-ledger
   "One live pin for this test, captured from the closed cohort ledger. A ledger
@@ -17,8 +17,8 @@
           state (first (:states fitted))
           expected-trajectory
           [:time-step :selection :construction :dispatch :build :adjudication :closed]]
-      (is (= cohort/outcome-kinds (set (:support fitted))))
-      (is (= (count cohort/outcome-kinds) (count (:support fitted))))
+      (is (= ruled/disposition-outcomes (set (:support fitted))))
+      (is (= (count ruled/disposition-outcomes) (count (:support fitted))))
       (is (= 3 (:sample-size fitted)))
       (is (= 1 (count (:states fitted))))
       (is (= {:checkpoint-trajectory expected-trajectory}
@@ -26,7 +26,7 @@
       (is (= 3 (:sample-size state)))
       (is (= 3 (get-in state [:counts :grounded-change])))
       (is (= 1 (get-in state [:probability :grounded-change])))
-      (is (= (dec (count cohort/outcome-kinds))
+      (is (= (dec (count ruled/disposition-outcomes))
              (count (:unsupported-outcomes fitted))))
       (is (every? zero? (map (:counts state) (:unsupported-outcomes fitted))))
       (is (every? zero? (map (:probability state) (:unsupported-outcomes fitted)))))))

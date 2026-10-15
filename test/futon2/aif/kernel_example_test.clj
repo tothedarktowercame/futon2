@@ -141,8 +141,10 @@
 
 (deftest existing-canonical-fit-has-an-explicit-lossless-join
   (let [kernel (fit/read-kernel fit/default-ledger)
-        joined (example/join-counts (example/declaration) (:outcome-counts kernel))]
-    (is (= (count cohort/outcome-kinds) (count (:support kernel))))
+        complete-counts (merge (zipmap ruled/non-disposition-outcomes (repeat 0))
+                               (:outcome-counts kernel))
+        joined (example/join-counts (example/declaration) complete-counts)]
+    (is (= (count ruled/disposition-outcomes) (count (:support kernel))))
     (is (= (:sample-size kernel) (:total joined)))
     (is (= (:total joined) (+ (:disposition-total joined) (:administrative-total joined))))
     (is (= (:support ruled/seeded-c) (set (keys (:dispositions joined)))))))
