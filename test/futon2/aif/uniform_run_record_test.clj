@@ -10,13 +10,14 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy :as policy]
-            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.report.cascade-decision-test :as tick]
-            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.report.war-machine :as wm] [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (defn- temp-dir []
   (.toFile (Files/createTempDirectory "uniform-record-" (make-array FileAttribute 0))))
@@ -34,50 +35,6 @@
                :value {:missions [{:mission "M-a" :class :alive :L 5 :T 1 :H 5}]}}
    :missions [{:path "/fixture/m" :sha256 "m" :mission "M-a" :text "**Status:** OPEN."}]
    :stars {:path "/fixture/s" :sha256 "s" :value {:capabilities {}}}})
-
-(def ^:private three-halves-square
-  (edn/read-string
-   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
-
-(defn- attach-three-halves-squares [assembled]
-  (let [attach (fn [receipts]
-                 (into {} (map (fn [[id receipt]]
-                                 [id (assoc receipt :blend-square three-halves-square)]))
-                       receipts))]
-    (update assembled :problems
-            (fn [problems]
-              (mapv (fn [problem]
-                      (-> problem
-                          (update :interpretation-receipts attach)
-                          (update :constructed-candidates
-                                  (fn [candidates]
-                                    (mapv (fn [candidate]
-                                            (-> candidate
-                                                (update :interpretation-receipts attach)
-                                                (update :construction-receipt assoc
-                                                        :blend-squares
-                                                        (zipmap (:precedence candidate)
-                                                                (repeat three-halves-square)))))
-                                          candidates)))))
-                    problems)))))
-
-(defn- admitted-prefix-steps [assembled]
-  (mapv (fn [i {:keys [target candidate-id precedence]}]
-          (let [policy-key (prefix-admission/candidate-key
-                            {:id candidate-id :target target
-                             :precedence precedence})]
-            {:step {:status :present :policy-key policy-key
-                    :occurrence {:flight "uniform-record-fixture"
-                                 :click (str "candidate-" i)}
-                    :s-prev {:value {#{} 1}}
-                    :q {#{} 1}
-                    :f 0.0}
-             :path "uniform-run-record-test"
-             :sha256 "controlled-fixture"}))
-        (range)
-        (mapcat (fn [{:keys [target constructed-candidates]}]
-                  (map #(assoc % :target target) constructed-candidates))
-                (:problems assembled))))
 
 (deftest missing-three-halves-square-still-refuses-admission
   (let [assembled (cp/assemble {:targets [tick/tick-1-target]
@@ -125,23 +82,21 @@
   ;; pinned inside a discovery window: at a window's first instant no commit
   ;; is credited yet, so no focus is established and every target classifies
   ;; :unknown however its relation row reads.
+  ;; Migrated 2026-10-15 (Q5 route ledger): the replayed tick is now the
+  ;; production reading-family decision over the shared route fixture, every
+  ;; compared policy holding one admitted Prefix-F observation of 0.0.
   (let [dir (temp-dir)
         before (counts)
         mission (io/file dir "corpus/repo/holes/missions/M-present.md")]
     (try
       (io/make-parents mission)
       (spit mission "# M-present\n\nStatus: ACTIVE\n")
-      (let [assembled (attach-three-halves-squares
-                       (cp/assemble {:targets [tick/tick-1-target]
-                                     :sources (locfix/locate-all tick/tick-1-sources)}))
+      (let [fx (route/fixture)
+            keys (vals (route/policy-keys (:decision (route/decide fx))))
             result (wm-cd/cascade-decision
-                    assembled
-                    {:live-c {:sources live-sources :sources-now live-sources}
-                     :focus-inputs (:focus-inputs tick/live-c-opts)
-                     :focus-as-of "2026-09-21T12:00:00Z"
-                     :conditioning-steps
-                     {:steps (admitted-prefix-steps assembled)
-                      :read [] :unread []}})
+                    (route/assembled fx 1)
+                    (route/opts fx {:conditioning-steps
+                                    (route/with-prefixes fx (zipmap keys (repeat 0.0)))}))
             ;; Use the same U37 producer/carry as judge, against an isolated
             ;; corpus. It must preserve its membership diff, not invent a
             ;; complete verdict to make a validity check green.
@@ -177,7 +132,7 @@
         ;; no default or synthesized future-rollout F is permitted.
         (let [policies (get-in carried [:selection-certificate :policies])
               census (:g-term-decomposition carried)]
-          (is (= 3 (count policies)))
+          (is (= (count keys) (count policies)))
           (doseq [p policies]
             (is (= :computed (:f-status p)))
             (is (= 0.0 (:f p)))

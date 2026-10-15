@@ -5,17 +5,17 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
-            [futon2.report.cascade-habit-read-test :as stores]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.d-predecessor-task-authority-test :as task-fixture]
             [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace]
             [futon2.aif.policy-precision-carry :as carry]
-            [futon2.report.cascade-decision-test :as tick]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.reading-policy-precision :as precision]
+            [futon2.test-support.reading-route :as route]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (def token ["target" :artifact])
 (def rates {token {:false-neg 0 :false-pos 0}})
@@ -125,36 +125,41 @@
        (is (not= :admitted (:status (task/verify (task/claim (assoc inputs :dispatch dispatch)) expected jobs)))
            "Original job prompts cannot authenticate a retrospectively added family")))))
 
+;; Migrated 2026-10-15 (Q5 route ledger). The production tick now consumes
+;; reading-policy-precision's carry: the old q0/class precision family
+;; (rates, q0, precision-carry/advance) is retired from selection, and its
+;; module tests above stay as the module's own controls.
+
 (deftest default-joint-tick-freezes-and-consumes-initialized-carry
-  (stores/with-store
-   (fn [path]
-     (with-redefs [task/default-root (str path "-missing-task-store")]
-       (let [assembled (#'tick/assemble* {:targets [tick/tick-1-target]
-                                         :sources tick/tick-1-sources})
-             decision (:decision (#'tick/decision assembled
-                                  (assoc tick/live-c-opts :cascade-habit-path path)))
-             state (get-in decision [:selection-certificate :policy-precision-state])
-             frozen (get-in decision [:selection-certificate :precision-family])]
-         (is (= :precision-no-admitted-predecessor (:reason state)))
-         (is (= :declared (get-in decision [:beta :status])))
-         (is (= (:beta state) (get-in decision [:selection-law :beta])))
-         (is (= :carry-beta (get-in decision [:selection-law :tau-source])))
-         (is (carry/intact? frozen))
-         (is (map? (get-in frozen [:model :rates])))
-         (is (map? (get-in frozen [:model :q0])))
-         (is (= (:model-id state) (:model-id frozen)))
-         (is (= (:action decision) (:selected-action frozen))))))))
+  (let [fx (route/fixture)
+        result (route/decide fx)
+        decision (:decision result)
+        carry (get-in decision [:selection-certificate :reading-precision-carry])]
+    (is (= 1 (:selector-calls result)))
+    (is (= :initialized (:status carry)))
+    (is (precision/intact? carry) "the consumed receipt is sealed")
+    (is (= :declared (get-in decision [:beta :status])))
+    (is (= (:beta carry) (get-in decision [:selection-law :beta]))
+        "the selector's beta is the receipt's")
+    (is (= (:identity carry) (get-in decision [:selection-certificate :reading-precision-identity])))
+    (is (nil? (get-in decision [:selection-certificate :policy-precision-state]))
+        "the retired q0/class carry is not consumed")))
 
 (deftest abstention-does-not-drop-a-learned-rate
-  (let [state (advance nil admission family)
-        result (wm-cd/cascade-decision {:problems [] :refusals [{:target "target" :kind :no-constructed-candidate}]}
-                 {:token-belief-predecessor-trace
-                  {:decision {:selection-certificate {:policy-precision-state state}}}})
-        retained (get-in result [:decision :selection-certificate :policy-precision-state])]
-    (is (= (:beta state) (:beta retained)))
-    (is (= (:consumed state) (:consumed retained)))
-    (is (= :held (:status retained)))
-    (is (= :learned (:beta-status retained)))))
+  ;; tick 1 carries a beta; tick 2 abstains before any precision receipt of
+  ;; its own (no declared beta); tick 3 must still find tick 1's receipt
+  (let [fx (route/fixture)
+        tick-1 (:decision (route/decide fx))
+        tick-2 (route/decide fx nil {:token-belief-predecessor-trace {:decision tick-1}})
+        tick-3 (route/decide fx 1 {:token-belief-predecessor-trace {:decision (:decision tick-2)}})
+        kept (get-in tick-2 [:decision :selection-certificate :reading-precision-carry])]
+    (is (= :abstained (get-in tick-2 [:decision :status])))
+    (is (= 0 (:selector-calls tick-2)))
+    (is (= (get-in tick-1 [:selection-certificate :reading-precision-carry]) kept)
+        "the abstention keeps the predecessor's receipt verbatim")
+    (is (= :carried (get-in tick-3 [:decision :selection-certificate :reading-precision-carry :status])))
+    (is (= (:beta kept)
+           (get-in tick-3 [:decision :selection-certificate :reading-precision-carry :beta])))))
 
 (deftest evidence-boundaries-never-invent-a-successful-update
   (let [state (advance nil admission family)

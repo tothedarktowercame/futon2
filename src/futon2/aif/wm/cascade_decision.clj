@@ -1264,6 +1264,17 @@
                            :reason :shape-policy-c-is-decision-c}))
       (= :abstained (get-in result [:decision :status]))
       (assoc-in [:decision :reason] :no-acting-cascade-candidate)
+      ;; an abstention that consumed no precision receipt of its own keeps the
+      ;; predecessor's verbatim (sealed, unchanged), so the next tick's
+      ;; previous receipt is still the last carried or refused one: an
+      ;; abstention never drops a carried beta, and never re-arms a refusal
+      (and (= :abstained (get-in result [:decision :status]))
+           (nil? (get-in result [:decision :selection-certificate :reading-precision-carry]))
+           (get-in opts [:token-belief-predecessor-trace :decision :selection-certificate
+                         :reading-precision-carry]))
+      (assoc-in [:decision :selection-certificate :reading-precision-carry]
+                (get-in opts [:token-belief-predecessor-trace :decision :selection-certificate
+                              :reading-precision-carry]))
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply]
                 (:proposal-supply assembled)))))

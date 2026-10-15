@@ -6,9 +6,11 @@
   reader and through the tick's cascade decision; SPEC-F's bad cases assigned
   to this packet."
   (:require [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.enactment-fold-source :as src]
-            [futon2.aif.policy-prefix-admission :as adm])
+            [futon2.aif.policy-prefix-admission :as adm]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -21,6 +23,9 @@
          extra))
 
 (defn- wrap [s] {:step s :path "p" :sha256 "h"})
+
+(use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (deftest two-chained-steps-are-admitted-in-occurrence-order
   (let [s1 (step ka "run-1" {#{} 1} {#{:t} 1})
@@ -94,7 +99,21 @@
       (is (= :admitted (:conditioning-status r)))
       (is (= 2 (count (:observation-updates r)))))))
 
-;; the-tick-records-the-prefix asserted the interpreted-construction route's
-;; per-candidate :token-belief-input :policy-prefixes. That route is retired
-;; (Q5 step 2); the decision's prefix and history behaviour over reading
-;; policies is pinned in futon2.aif.wm.reading-family-decision-test.
+;; the-tick-records-the-prefix (migrated 2026-10-15, Q5 route ledger): the
+;; interpreted route recorded prefixes under :token-belief-input
+;; :policy-prefixes; the reading-family route records each candidate's own
+;; prefix on its certificate row, keyed by its reading-policy history key.
+(deftest the-tick-records-the-prefix
+  (let [fx (route/fixture)
+        [k1 k2] (vals (route/policy-keys (:decision (route/decide fx))))
+        decision (:decision (route/decide fx 1 {:conditioning-steps
+                                                (route/with-prefixes fx {k1 0.25})}))
+        rows (into {} (map (fn [c] [(adm/candidate-key (:id c)) c])
+                           (get-in decision [:selection-certificate :candidates])))]
+    (is (= #{k1 k2} (set (keys rows))))
+    (is (= :computed (get-in rows [k1 :f-prefix :status])))
+    (is (= 0.25 (get-in rows [k1 :f-prefix :f])))
+    (is (= k1 (adm/candidate-key (get-in rows [k1 :f-prefix :policy]))))
+    (is (= :not-applicable (get-in rows [k2 :f-prefix :status]))
+        "the other policy has no recorded step: certified zero history")
+    (is (= k2 (get-in rows [k2 :f-prefix :policy-key])))))

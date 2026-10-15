@@ -5,12 +5,15 @@
   Second layer (<2>3b, the first for F): the selection posterior moves by
   exactly exp(-dF), through cascade-selection/selection-posterior and through
   wm/cascade-decision on the tick-1 fixture."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.policy-prefix-admission :as adm]
+            [futon2.aif.hermetic-repair-fixture]
             [futon2.aif.policy-prefix-evidence :as ppe]
-            [futon2.report.cascade-decision-test :as cdt]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.test-support.reading-route :as route]))
+
+(use-fixtures :once (fn [run] (futon2.aif.hermetic-repair-fixture/with-hermetic-stores run)))
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (def cand {:id :c1 :target "M-a" :precedence [{:id :p/a}]})
 (def k (adm/candidate-key cand))
@@ -87,37 +90,31 @@
                                                                 {:id :b :habit 1 :f 1.5 :g 1}]})]
       (is (< (Math/abs (- (/ (get p :a) (get p :b)) (Math/exp 1.0))) 1e-12)))))
 
-(defn- tick-decision [opts]
-  (let [assembled (@#'cdt/assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})]
-    (:decision (wm-cd/cascade-decision assembled (merge cdt/live-c-opts opts)))))
-
-(defn- steps-for [candidate f]
-  {:step {:status :present :policy-key (adm/candidate-key candidate)
-          :occurrence {:flight "fl" :click (str "run-" (name (:id candidate)))}
-          :s-prev {:value {#{} 1}} :q {#{} 1} :f f}
-   :path "p" :sha256 "h"})
+;; Migrated 2026-10-15 (Q5 route ledger): the tick-level control now runs
+;; on the reading-family route. The two reading policies have different G,
+;; so F's effect is isolated by comparing the posterior ratio with and
+;; without a difference in admitted Prefix-F.
 
 (deftest the-tick-selects-with-its-f-term
-  (let [missing (try (tick-decision {}) nil
-                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
-        cands (sort-by :id (get-in missing [:refusal :detail :candidate-ids]))
-        [c1 c2 c3] cands
-        with (tick-decision {:conditioning-steps
-                             {:steps [(steps-for c1 1.0)
-                                      (steps-for c2 0.5)
-                                      (steps-for c3 0.0)]
-                              :read [] :unread []}})
-        pw (into {} (map (fn [[c v]] [(:id c) v])
-                         (get-in with [:selection-law :posterior])))]
-    (is (= 3 (count cands)))
+  (let [fx (route/fixture)
+        keys (vals (route/policy-keys (:decision (route/decide fx))))
+        [k1 k2] keys
+        unread {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
+        missing (route/refusal-of #(route/decide fx 1 {:conditioning-steps unread}))
+        posterior (fn [f1 f2]
+                    (let [d (:decision (route/decide fx 1 {:conditioning-steps
+                                                           (route/with-prefixes fx {k1 f1 k2 f2})}))]
+                      [d (into {} (map (fn [[c v]] [(adm/candidate-key c) v])
+                                       (get-in d [:selection-law :posterior])))]))
+        [_ equal] (posterior 0.0 0.0)
+        [with p] (posterior 1.0 0.5)]
+    (is (= 2 (count keys)))
     (is (= :free-energy-not-supplied (get-in missing [:refusal :kind])))
     (testing "the posterior moves, in the direction F dictates, by exactly exp(-dF)"
-      (is (< (get pw (:id c1)) (get pw (:id c2)) (get pw (:id c3)))
-          "higher F, lower weight")
-      (is (< (Math/abs (- (/ (get pw (:id c2)) (get pw (:id c1))) (Math/exp 0.5))) 1e-12))
-      (is (< (Math/abs (- (/ (get pw (:id c3)) (get pw (:id c2))) (Math/exp 0.5))) 1e-12)))
+      (is (< (Math/abs (- (/ (/ (get p k2) (get p k1)) (/ (get equal k2) (get equal k1)))
+                          (Math/exp 0.5)))
+             1e-9)
+          "k1's F is 0.5 higher: its weight falls by exp(0.5) relative to k2"))
     (testing "the certificate says which candidates' F was computed"
-      (let [fs (into {} (map (fn [c] [(let [i (:id c)] (if (map? i) (:id i) i)) (:f-status c)]) (get-in with [:selection-certificate :candidates])))]
-        (is (= :computed (get fs (:id c1))))
-        (is (= :computed (get fs (:id c2))))
-        (is (= :computed (get fs (:id c3))))))))
+      (is (= #{:computed} (set (map :f-status (get-in with [:selection-certificate :candidates])))))
+      (is (= #{1.0 0.5} (set (map :f-consumed (get-in with [:selection-certificate :candidates]))))))))
