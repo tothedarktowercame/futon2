@@ -212,4 +212,28 @@ Not run: full CI, live click.
   inputs.
 - **Two digests remain.** `:world-at-selection :selection-input-digest` (the
   census) still exists. Q6 no longer reads it.
-- **Concurrency.** Writes to the stream rely on the run lock (one runner).
+- **Concurrency scope.** The production HTTP entrypoint is serialized by
+  `futon3c.wm.runner-service`'s single-flight compare-and-set boundary, so its
+  stream has one writer.  `full-loop-runtime/run-opportunity!` and
+  `full-loop-runner/run-opportunity!` do not themselves acquire that lock;
+  concurrent direct callers sharing a run-record directory are therefore
+  outside this certificate.  The stream append is not, by itself, a
+  multi-writer transaction.
+
+## Independent review
+
+Codex-68 reviewed `038a94c0a` against the production route rather than the
+helper in isolation.  The review confirmed the causal chain
+
+`sealed predecessor read before selection -> pre-selector input digest ->
+exact structural-key exclusion -> one G selector -> retained terminal ->
+carrier-only export`.
+
+The focused rerun covered Q6, selected-only interpretation, the reading-family
+decision, and the exporter: 56 tests, 419 assertions, 0 failures, with the one
+known missing Q9 historical-record fixture error.  Both generated Lean files
+compiled in canonical mathlib4: the first-run fixture reports Q6
+`unverifiable`; the repeat fixture has no Q6 alert.  This accepts Q6 for the
+single-flight serving route.  It does not upgrade the other learning claims:
+each still needs its own demonstrated durable-write, authoritative-read, and
+decision-effect chain.
