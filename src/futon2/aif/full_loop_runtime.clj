@@ -31,7 +31,10 @@
                              :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir
                              :outer-task-policy :outer-task-selection-fn
-                             :selection-timing/state :nano-time-fn])
+                             :selection-timing/state :nano-time-fn
+                             ;; the decision forms every target's policy
+                             ;; family against this pinned graph
+                             :pattern-graph-path :target-reading-root])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 

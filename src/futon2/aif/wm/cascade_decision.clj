@@ -32,6 +32,8 @@
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.three-halves-policy :as three-halves-policy]
+            [futon2.aif.target-reading-registry :as reading-registry]
+            [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
@@ -1631,11 +1633,35 @@
        :reason :query-time-construction-slice-not-recorded
        :targets (if (seq problems) missing [])})))
 
+(defn- target-policy-field
+  "NOTE-wiring-reading-to-decision §7.5 step 2: every enumerated target's
+  policy family, from the one source declaration the assembly carries, with
+  the pinned graph loaded once for the whole field. Not scored and not
+  selected here; a target without a family keeps its typed failure.
+  Without a source declaration the field itself is a typed absence."
+  [assembled opts]
+  (if-not (contains? assembled :target-sources)
+    {:status :absent :reason :target-sources-not-supplied}
+    (let [reading-root (or (:target-reading-root opts) reading-registry/default-root)
+          field (family-selection/families-for-field
+                 {:target-sources (:target-sources assembled)
+                  :reading-root reading-root
+                  :graph-path (:pattern-graph-path opts)
+                  :retraction (:target-policy-retraction opts)})]
+      (assoc field
+             :status :formed
+             :reading-root reading-root
+             :graph-path (some-> (:pattern-graph-path opts) str)))))
+
 (defn cascade-decision
   "Admit explicitly paired nonempty constructions, record every decline, then
-  score/select only admitted candidates. An all-declined family abstains."
+  score/select only admitted candidates. An all-declined family abstains.
+  Every target's reading policy family is also formed once (graph loaded
+  once) and returned under :target-policy-field, with its census on the
+  certificate; it does not take part in this selection."
   [assembled opts]
-  (let [view (observation-label-view opts)
+  (let [policy-field (target-policy-field assembled opts)
+        view (observation-label-view opts)
         opts (assoc opts :observation-labels-view view)
         _ (when (seq (:problems assembled))
             (cascade-family-parameters (:problems assembled)))
@@ -1694,6 +1720,16 @@
       true
       (assoc-in [:decision :selection-certificate :target-construction]
                 construction-census)
+      true
+      (assoc :target-policy-field policy-field)
+      true
+      (assoc-in [:decision :selection-certificate :target-policy-field]
+                (if (= :formed (:status policy-field))
+                  (assoc (family-selection/field-census policy-field)
+                         :status :formed
+                         :reading-root (:reading-root policy-field)
+                         :graph-path (:graph-path policy-field))
+                  policy-field))
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))

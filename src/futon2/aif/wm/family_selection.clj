@@ -72,6 +72,7 @@
 (defn- family-coverage-kind [family]
   (let [kinds (set (map :kind (:failures family)))]
     (cond
+      (kinds :graph-path-not-supplied) :graph-refused
       (kinds :graph-pin-mismatch) :graph-refused
       (kinds :graph-pin-missing) :graph-refused
       (kinds :graph-unreadable) :graph-refused
@@ -101,9 +102,12 @@
 
 (defn families-for-field
   "Form one policy-family result per target source row, in field order.
-  The pinned graph is loaded once before any source or reading lookup."
+  The pinned graph is loaded once before any source or reading lookup; with
+  no graph path every target fails :graph-path-not-supplied."
   [{:keys [target-sources reading-root graph-path retraction]}]
-  (let [loaded (graph-pin/load-pinned graph-path)
+  (let [loaded (if (some? graph-path)
+                 (graph-pin/load-pinned graph-path)
+                 {:status :refused :kind :graph-path-not-supplied})
         graph-ok? (= :loaded (:status loaded))
         graph-summary (if graph-ok?
                         (select-keys loaded [:status :pin])
@@ -142,6 +146,25 @@
     {:graph graph-summary
      :families families
      :coverage (field-coverage families)}))
+
+(defn field-census
+  "The recordable census of FIELD (families-for-field's result): the graph pin
+  or its refusal, the coverage counts, and per target its status, counts,
+  stable policy ids and kinds, every failure and the family provenance.
+  Policy bodies stay in FIELD; nothing here is scored or selected."
+  [field]
+  {:schema :wm/target-policy-field-census-v1
+   :graph (:graph field)
+   :coverage (:coverage field)
+   :families (mapv (fn [family]
+                     (cond-> (select-keys family [:target-id :status :reported-count
+                                                  :distinct-count :failures
+                                                  :failure-count])
+                       true (assoc :policies (mapv #(select-keys % [:policy-id :kind])
+                                                   (:policies family)))
+                       (:provenance family)
+                       (assoc :provenance (:provenance family))))
+                   (:families field))})
 
 (defn select-over-families
   "Score every policy in each computed family, then call
