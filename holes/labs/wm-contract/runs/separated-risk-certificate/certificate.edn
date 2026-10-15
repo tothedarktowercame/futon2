@@ -2,51 +2,53 @@
  :prediction
  {:abstained 0,
   :agent-unavailable 0,
+  :already-satisfied 0,
   :artifact-only 0,
   :build-failed 0,
   :cancelled 0,
   :dispatch-failed 0,
   :grounded-change 1,
   :grounded-no-change 0,
+  :grounded-progress 0,
   :guardrail-refusal 0,
   :incomplete 0,
   :no-selection 0,
   :substrate-unavailable 0},
  :binding-proof-sha256
- "305222dea73f92c92bf89166be7423e12d1eae04eb3b40e5067b338911fc6659",
+ "73458bc5fea956a33451c0ae6e6c3313afbef889d2a35f07003d99ffcb5c95a1",
  :basis
  {"../mathlib4/DarkTower/WarMachine/F10RuledCarrier.lean"
-  "f43c36fa3b1fc03efde981c118f5688af836700c050cf3fd948a949d9662ff34",
+  "8b9699aada0d15bab69ac81d9c10e304006936f10fcf821d881296d41aa1ae54",
   "../mathlib4/DarkTower/WarMachine/Holes.lean#Outcome"
-  "f58ab3a48801ea1f0c37c39b738f11212cc7f34d158bb28c075d5c9ce20a5a42",
+  "ccc5fba16b7acb149715d6459e175f614a9fcaa4532aeb7cda90db29866f3cbe",
   "../mathlib4/DarkTower/WarMachine/Holes.lean#PreferenceDistribution"
   "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b",
   "../mathlib4/DarkTower/WarMachine/Holes.lean#ProbabilityKernel"
-  "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
+  "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
   "../mathlib4/DarkTower/WarMachine/Holes.lean#Vertex"
   "6cd2aebee2b49c5a0569ef56375d137ab6e9bf52c53104c62639028ebed2aefb",
   "../mathlib4/DarkTower/WarMachine/PreferenceRiskBoundary.lean"
   "29c10485d3365030000658a96359d1c994b20b1789c47156f10f9486bc12cfaa",
   "../mathlib4/DarkTower/WarMachine/PreferenceRiskSeparation.lean"
-  "b7317a54292bca223d912f771a9821865068a99060b0e338f81b6e0e261b05c0",
+  "869c69fd258ed4b4e585a0ab7f7c83fee11c6f50afd390a83b4c680507fba640",
   "../mathlib4/DarkTower/WarMachine/PreferenceRiskWitness.lean"
-  "f50d20c507b58a4d7f3d95e2f2a1816cde0fb1ca773e8b047ebcb788f3934cbf",
+  "a88759e926f7ed81ea517fa4ab9bdb4c3eb180d3114a6a4fdf6819d6ed23c381",
   "../mathlib4/lake-manifest.json"
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b",
   "../mathlib4/lean-toolchain"
   "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
   "checks/disposition_kernel.clj"
-  "66bdef7b458c3777a60804f3db97bf413dc1428de5c4e4533ffa26bf503d5aee",
+  "46edf84ba9fb71bbc73574e58eb63924baff156dee5921c185dadfec1a520f79",
   "checks/preference_risk_receipt.clj"
-  "2a4c3c25537a0f181b3bc44c194d233d2da280a89ebe3521d127a35631932a5d",
+  "eb6bfcee393ef297a28666f24e09d3d545adf3914ae375a9d73d387acd0ec565",
   "src/futon2/aif/disposition_risk.clj"
   "b2b70f228939a511baa610d921b3c3431ee4618dcd8dc39fdd66bebc9807afe0",
   "src/futon2/aif/efe.clj"
-  "032551f63d810509a14e45780b87d33cfb54ea0726e9df7c53338141aa220f02",
+  "c6d4148865c19a7dafbbbac78c922a03fcfdd7ee09de337a7a2d9780bbc030bb",
   "src/futon2/aif/full_loop_cohort.clj"
-  "b4ca4e4f101f2735ebf5ce93640ed452859a9f9b05af71713c297efc84b600ea",
+  "5e266810249e67294be5d36a3f8576aaa6a8d17410ddb46dae3347d739d48f4d",
   "src/futon2/aif/ruled_outcome_c.clj"
-  "f68cea57d83d242ffdcb99309d2d451c813a938c371d06909bec6dc174fab257"},
+  "f15125f5983f42d62041287672d66ad4c11d9200569ead46c19ee1fe569d5311"},
  :source-cohort
  {:ledger "holes/labs/M-aif-full-loop-46/ledger.edn",
   :sha256
@@ -60,12 +62,14 @@
  :preference
  {:abstained 0,
   :agent-unavailable 1/8,
+  :already-satisfied 0,
   :artifact-only 0,
   :build-failed 1/8,
   :cancelled 0,
   :dispatch-failed 0,
   :grounded-change 1/2,
   :grounded-no-change 0,
+  :grounded-progress 0,
   :guardrail-refusal 0,
   :incomplete 1/8,
   :no-selection 1/8,

@@ -14,6 +14,20 @@
   (let [d (java.security.MessageDigest/getInstance "SHA-256")]
     (format "%064x" (java.math.BigInteger. 1 (.digest d (.getBytes s "UTF-8"))))))
 
+(defn sha256-files [files]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")
+        buffer (byte-array 65536)]
+    (doseq [f files]
+      (.update digest (.getBytes (str (fs/file-name f) "\n") "UTF-8"))
+      (with-open [in (java.io.BufferedInputStream. (io/input-stream (str f)))]
+        (loop []
+          (let [n (.read in buffer)]
+            (when (pos? n)
+              (.update digest buffer 0 n)
+              (recur)))))
+      (.update digest (.getBytes "\n" "UTF-8")))
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
+
 (defn trace-files []
   (->> (fs/list-dir trace-dir)
        (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn"
@@ -97,14 +111,12 @@
         belief-records (filter #(and (map? (:prediction-errors %))
                                      (seq (:prediction-errors %))) current)
         sorry (mapv sorry-measure sorry-records)
-        belief (mapv belief-measure belief-records)
-        pin-input (apply str (for [f files]
-                               (str (fs/file-name f) "\n" (slurp (str f)) "\n")))]
+        belief (mapv belief-measure belief-records)]
     {:measurement :c130-immediate-option-effects
      :boundary :immediate-only
      :downstream-ranking-effects :unmeasured-requires-sequential-replay
      :corpus {:dir trace-dir :files (count files) :records (count records)
-              :content-sha256 (sha256 pin-input)
+              :content-sha256 (sha256-files files)
               :current-schema-records (count current)}
      :sorry-pressure
      {:records-with-unknown-pressure (count sorry)

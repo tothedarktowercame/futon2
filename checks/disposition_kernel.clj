@@ -5,7 +5,8 @@
     clojure -M -m checks.disposition-kernel [ledger.edn]"
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pp]
-            [futon2.aif.full-loop-cohort :as cohort])
+            [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.ruled-outcome-c :as ruled])
   (:import [java.security MessageDigest]))
 
 (def default-ledger
@@ -27,7 +28,11 @@
   {:checkpoint-trajectory (:checkpoints attempt)})
 
 (defn- support-vector []
-  (vec (sort cohort/outcome-kinds)))
+  ;; Historical-verification outcomes are administrative attempt-close states,
+  ;; not predicted terminal dispositions. Keep the fitted kernel on the same
+  ;; ruled carrier as C instead of widening it whenever cohort bookkeeping adds
+  ;; a non-disposition close state.
+  (vec (sort ruled/disposition-outcomes)))
 
 (defn- complete-counts [attempts]
   (let [observed (frequencies (map :outcome attempts))]

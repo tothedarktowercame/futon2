@@ -13,9 +13,11 @@
 
 (def disposition-names
   (sorted-map :abstained "abstained" :agent-unavailable "agentUnavailable"
+              :already-satisfied "alreadySatisfied"
               :artifact-only "artifactOnly" :build-failed "buildFailed"
               :cancelled "cancelled" :dispatch-failed "dispatchFailed"
               :grounded-change "groundedChange" :grounded-no-change "groundedNoChange"
+              :grounded-progress "groundedProgress"
               :guardrail-refusal "guardrailRefusal" :incomplete "incomplete"
               :no-selection "noSelection" :substrate-unavailable "substrateUnavailable"))
 
@@ -135,4 +137,4 @@
     (.mkdirs (java.io.File. output-dir))
     (spit (str output-dir "/runtime-mass-binding.lean") source)
     (spit (str output-dir "/certificate.edn") (with-out-str (pp/pprint result)))
-    (println "separated-risk-certificate PASS: 24 mass equalities; changed-seed rejected; runtime checks" (count (:checks runtime)))))
+    (println "separated-risk-certificate PASS: 28 mass equalities; changed-seed rejected; runtime checks" (count (:checks runtime)))))

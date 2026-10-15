@@ -65,6 +65,7 @@
     (if-not (and (string? click-id) (not (str/blank? click-id)))
       {:schema schema :observation-scope shared-scope
        :resource-status "unavailable" :reason "click-not-accepted"
+       :click-response accepted
        :started-at observed-start :finished-at (clock)}
       (let [peak (atom (long (or (:pids-current before) 0)))
             terminal

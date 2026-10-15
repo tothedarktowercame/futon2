@@ -8,6 +8,10 @@ example : seed.mass () (organisationOutcome .agentUnavailable) = (1 / 8 : ℝ) :
 
 example : groundedPrediction.mass () (organisationOutcome .agentUnavailable) = (0 : ℝ) := by norm_num [groundedPrediction, organisationOutcome]
 
+example : seed.mass () (organisationOutcome .alreadySatisfied) = (0 : ℝ) := by norm_num [seed, organisationOutcome]
+
+example : groundedPrediction.mass () (organisationOutcome .alreadySatisfied) = (0 : ℝ) := by norm_num [groundedPrediction, organisationOutcome]
+
 example : seed.mass () (organisationOutcome .artifactOnly) = (0 : ℝ) := by norm_num [seed, organisationOutcome]
 
 example : groundedPrediction.mass () (organisationOutcome .artifactOnly) = (0 : ℝ) := by norm_num [groundedPrediction, organisationOutcome]
@@ -31,6 +35,10 @@ example : groundedPrediction.mass () (organisationOutcome .groundedChange) = (1 
 example : seed.mass () (organisationOutcome .groundedNoChange) = (0 : ℝ) := by norm_num [seed, organisationOutcome]
 
 example : groundedPrediction.mass () (organisationOutcome .groundedNoChange) = (0 : ℝ) := by norm_num [groundedPrediction, organisationOutcome]
+
+example : seed.mass () (organisationOutcome .groundedProgress) = (0 : ℝ) := by norm_num [seed, organisationOutcome]
+
+example : groundedPrediction.mass () (organisationOutcome .groundedProgress) = (0 : ℝ) := by norm_num [groundedPrediction, organisationOutcome]
 
 example : seed.mass () (organisationOutcome .guardrailRefusal) = (0 : ℝ) := by norm_num [seed, organisationOutcome]
 

@@ -239,12 +239,12 @@
 (defn mutate [source mode]
   (case mode
     "--negative-unlabelled"
-    (str/replace-first source "DELIBERATE IMPLEMENTATION REFUSAL" "UNLABELLED HOLE")
+    (str/replace-first source "PERMANENT EXTERNAL ATTESTATION" "UNLABELLED HOLE")
 
     "--negative-double"
     (str/replace-first source
-                       "DELIBERATE IMPLEMENTATION REFUSAL · contract kind HOLE intentionally"
-                       "DELIBERATE IMPLEMENTATION REFUSAL + PERMANENT EXTERNAL ATTESTATION · contract kind HOLE intentionally")
+                       "PERMANENT EXTERNAL ATTESTATION · Lean cannot prove an event"
+                       "PERMANENT EXTERNAL ATTESTATION + DELIBERATE IMPLEMENTATION REFUSAL · Lean cannot prove an event")
 
     "--negative-proved-label"
     (str/replace-first source
