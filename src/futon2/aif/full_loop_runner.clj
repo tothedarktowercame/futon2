@@ -1849,6 +1849,26 @@
           {:refusal r :skipped-unknown-class skipped}
           :else (recur more (conj skipped (:target r))))))))
 
+(defn- canonical-f-consumed?
+  "Only a canonical Prefix-F receipt may cross selection into enactment.
+
+  The selector rejects a missing prefix today, but this boundary also covers
+  replayed/legacy judgements: a historical reduced-law decision must not be
+  allowed to enact merely because it names a cascade action."
+  [candidate]
+  (let [prefix (:f-prefix candidate)
+        input (get-in candidate [:inputs :f])
+        f (:f prefix)]
+    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+         (= (:id candidate) (:policy prefix))
+         (= :computed (:status prefix))
+         (number? f) (Double/isFinite (double f))
+         (= f (:f candidate))
+         (= :computed (:f-status candidate))
+         (= f (get-in candidate [:f-consumed]))
+         (= {:status :computed :value f :presence :prefix-receipt :reason nil}
+            (select-keys input [:status :value :presence :reason])))))
+
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
    flat-removal H4, 2026-09-17). A cascade decision yields the chosen
@@ -1859,18 +1879,22 @@
     (cond
       (and (map? decision) (= :abstained (:status decision))) nil
       (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
-      (let [action (:action decision)]
-        {:action action
-         :rank (or (:rank decision) 1)
-         :G-efe (:controller-score decision)
-         :controller-score (:controller-score decision)
-         ;; ⟨1⟩6: carry the decision's recorded enacted steps onto the entry
-         ;; so construct-selected-action can thread them onto the action.
-         ;; Only this map, not the whole decision: the entry travels into
-         ;; stop-lines and mission lookup, and the action itself must NOT
-         ;; grow a key (its value is digested into the occurrence identity,
-         ;; the trial configuration and the dedup key).
-         :enacted-steps (get-in decision [:selection-law :enacted-steps])})
+      (let [action (:action decision)
+            candidates (get-in decision [:selection-certificate :candidates])
+            candidate (when (sequential? candidates)
+                        (first (filter #(= action (:id %)) candidates)))]
+        (when (or (nil? candidates) (canonical-f-consumed? candidate))
+          {:action action
+           :rank (or (:rank decision) 1)
+           :G-efe (:controller-score decision)
+           :controller-score (:controller-score decision)
+           ;; ⟨1⟩6: carry the decision's recorded enacted steps onto the entry
+           ;; so construct-selected-action can thread them onto the action.
+           ;; Only this map, not the whole decision: the entry travels into
+           ;; stop-lines and mission lookup, and the action itself must NOT
+           ;; grow a key (its value is digested into the occurrence identity,
+           ;; the trial configuration and the dedup key).
+           :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
       :else nil)))
 
 (defn no-selection-reason

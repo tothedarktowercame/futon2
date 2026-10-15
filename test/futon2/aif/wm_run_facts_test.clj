@@ -1,7 +1,9 @@
 (ns futon2.aif.wm-run-facts-test
   (:require [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]
-            [wm-check-run-facts :as checker]))
+            [wm-check-run-facts :as checker]
+            [futon2.aif.policy :as policy]
+            [futon2.aif.full-loop-runner]))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
@@ -425,6 +427,65 @@
                      (assoc-in candidate [:inputs :f :value] 9.0)]]
       (is (some #{[:decision :selected-candidate :computed-f :f]}
                 (facts/absence-paths (q7-prefix-record changed)))))))
+
+(deftest q7-positive-real-selector-and-export-carry-canonical-prefix-f
+  (let [action {:kind :cascade-candidate :id :C1 :target "M-selected"
+                :precedence [:pattern/selected]}
+        decision (policy/select-action-cascades
+                  [{:action action :controller-score 0
+                    :f-prefix {:schema :wm/policy-prefix-evidence-v1
+                               :policy action :status :computed :f 1.25}}]
+                  {:beta 1})
+        candidate (first (get-in decision [:selection-certificate :candidates]))
+        r (assoc record :decision (assoc decision :chosen (:action decision)))
+        export (facts/facts-for-record r "r" snap nil nil)
+        entry ((ns-resolve 'futon2.aif.full-loop-runner 'selected-entry)
+               {:decision decision})]
+    (is (= 1.25 (:f-consumed candidate)))
+    (is (= (:action decision) (:action entry)))
+    (is (= 0 (get-in export [:facts "pathAbsenceCount"])))
+    (is (empty? (get-in export [:diagnostics :absenceGroups])))))
+
+(deftest q7-adversarial-no-flight-carry-refusal-is-not-enacted
+  (let [action {:kind :cascade-candidate :id :C1 :target "M-selected"
+                :precedence [:pattern/selected]}
+        refusal (try
+                  (policy/select-action-cascades
+                   [{:action action :controller-score 0
+                     :f-prefix {:schema :wm/policy-prefix-evidence-v1
+                                :policy action :status :not-supplied
+                                :reason :no-flight-records
+                                :conditioning {:conditioning-status :not-run
+                                               :reason :carry-admission-refused}}}]
+                   {:beta 1})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (ex-data e)))
+        candidate (assoc (prefix-selected-candidate :not-supplied)
+                         :f nil :f-status :not-supplied
+                         :f-consumed {:status :absent :reason :not-supplied}
+                         :f-prefix {:schema :wm/policy-prefix-evidence-v1
+                                    :policy (:id (prefix-selected-candidate :not-supplied))
+                                    :status :not-supplied :reason :no-flight-records
+                                    :conditioning {:conditioning-status :not-run
+                                                   :reason :carry-admission-refused}}
+                         :inputs {:f {:status :not-supplied :value nil
+                                      :presence :prefix-receipt
+                                      :reason :no-flight-records}})
+        r (q7-prefix-record candidate)
+        export (facts/facts-for-record r "r" snap nil nil)
+        groups (get-in export [:diagnostics :absenceGroups])
+        selected-entry (ns-resolve 'futon2.aif.full-loop-runner 'selected-entry)
+        legacy-decision {:action (:id candidate)
+                         :selection-law {:applied :cascade-selection-posterior}
+                         :selection-certificate {:candidates [candidate]}}]
+    (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind])))
+    (is (nil? (selected-entry {:decision legacy-decision})))
+    (is (= 5 (get-in export [:facts "pathAbsenceCount"])))
+    (is (= 1 (count groups)))
+    (is (= :selected-policy-prefix-f/no-flight-records (:root-cause (first groups))))
+    (is (= :carry-admission-refused (:conditioning-reason (first groups))))
+    (is (= (set (facts/absence-paths r))
+           (set (mapcat :paths groups))))))
 
 (deftest q7-counts-the-abstention-path-when-nothing-was-chosen
   (let [r {:decision {:chosen nil

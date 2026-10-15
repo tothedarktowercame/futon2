@@ -201,6 +201,68 @@
             (vec (concat root p)))))
       roots))))
 
+(defn- absence-records
+  "Return the exact absence paths together with the map that caused each one.
+
+  The paths remain the measurement surface for Q7.  This separate projection
+  is diagnostic only: several fields in a selected policy can repeat one
+  missing Prefix-F carrier, and readers need that cause without losing the
+  individual paths."
+  [record]
+  (let [chosen (get-in record [:decision :chosen])
+        candidate (selected-candidate record)
+        abstention (get-in record [:decision :abstention])
+        roots (cond-> [[[:selection-event] (:selection-event record)]
+                       [[:interpretation-ask] (:interpretation-ask record)]
+                       [[:terminal-receipt] (:terminal-receipt record)]
+                       [[:failure] (:failure record)]]
+                (map? chosen) (conj [[:decision :chosen] chosen])
+                candidate (conj [[:decision :selected-candidate]
+                                 (if (consumed-prefix-f? candidate)
+                                   (dissoc candidate :computed-f)
+                                   candidate)])
+                (and (not (map? chosen)) abstention)
+                (conj [[:decision :abstention] abstention]))]
+    (vec
+     (mapcat
+      (fn [[root x]]
+        (when (some? x)
+          (for [[p value] (paths-with x
+                              #(and (map? %)
+                                    (or (contains? absence-statuses (:status %))
+                                        (contains? absence-statuses (:outcome %))
+                                        (= :typed-refusal (:kind %)))))]
+            {:path (vec (concat root p)) :value value})))
+      roots))))
+
+(defn- absence-group
+  "Classify one exact absence path by its actual carrier root."
+  [candidate {:keys [path value]}]
+  (let [selected? (= [:decision :selected-candidate]
+                     (subvec path 0 (min 2 (count path))))
+        prefix (when selected? (:f-prefix candidate))]
+    (if (and selected? (= :no-flight-records (:reason prefix)))
+      {:root-cause :selected-policy-prefix-f/no-flight-records
+       :reason :no-flight-records
+       :conditioning-status (get-in prefix [:conditioning :conditioning-status])
+       :conditioning-reason (get-in prefix [:conditioning :reason])}
+      {:root-cause (if selected? :selected-path :record-carrier)
+       :status (:status value)
+       :reason (:reason value)})))
+
+(defn absence-diagnostics
+  "Group diagnostic records while retaining every exact path and value."
+  [record]
+  (let [candidate (selected-candidate record)]
+    (->> (absence-records record)
+       (group-by #(absence-group candidate %))
+       (mapv (fn [[cause entries]]
+               (assoc cause :paths (mapv :path entries)
+                            :statuses (mapv #(select-keys (:value %) [:status :outcome :kind :reason])
+                                            entries))))
+       (sort-by (comp pr-str :root-cause))
+       vec)))
+
 (defn- candidate-target [candidate]
   (or (get-in candidate [:id :target]) (:target candidate)))
 
@@ -363,6 +425,7 @@
         q4-counts-coherent? (and q4-identity-coherent?
                                  (every? map? g-term-rows))
         apaths (absence-paths record)
+        absence-groups (absence-diagnostics record)
         chosen (get-in record [:decision :chosen])
         previous-chosen (get-in previous [:decision :chosen])
         used (set (keep identity [(get-in record [:participants :author])
@@ -489,6 +552,7 @@
                                  :else record-path)]))]
     {:facts facts :sources sources
      :diagnostics {:absencePaths (mapv pr-str apaths)
+                   :absenceGroups absence-groups
                    :notRecomputable (vec (for [[k v] facts
                                                :when (and (map? v) (contains? v "not-recomputable"))]
                                            k))}}))
