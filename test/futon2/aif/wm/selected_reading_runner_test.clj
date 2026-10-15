@@ -5,6 +5,7 @@
   at a typed refusal: reading-policy execution semantics are not ruled."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime]
@@ -114,8 +115,12 @@
         recorded (:decision cell)
         discharge (get-in recorded [:selection-certificate :interpretation-discharge])
         request (first @requests)
-        losing (remove #(= (:id (:action decision)) (:id (:id %)))
-                       (get-in decision [:selection-certificate :candidates]))]
+        chosen-id (get-in decision [:action :id])
+        ;; a certificate row's :id is the candidate's action map; the
+        ;; policy id is that action's :id
+        losing-ids (vec (remove #{chosen-id}
+                                (map (comp :id :id)
+                                     (get-in decision [:selection-certificate :candidates]))))]
     (testing "one G selection in all, and the runner asked once"
       (is (= 1 @selector-calls))
       (is (= 1 (count @requests))))
@@ -124,8 +129,10 @@
       (is (= (get-in decision [:action :interpretation-debt :owed]) (:owed request)))
       (is (= ["p/b"] (mapv :pattern (:owed request))))
       (is (empty? (select-keys request [:retrieval :want :wants :candidates :policies])))
-      (is (seq losing))
-      (is (not-any? (set (map :policy-id losing)) [(:policy-id request)])))
+      (is (seq losing-ids))
+      (is (every? #(and (string? %) (str/starts-with? % "M-current/policy-")) losing-ids))
+      (is (= chosen-id (:policy-id request)))
+      (is (not-any? #{(:policy-id request)} losing-ids)))
     (testing "events are strictly ordered: selection, request, validation, eligibility"
       (let [events (:events discharge)]
         (is (= [:selection-completed :interpretation-requested :interpretation-received
