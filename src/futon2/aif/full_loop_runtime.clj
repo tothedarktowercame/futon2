@@ -34,7 +34,9 @@
                              :selection-timing/state :nano-time-fn
                              ;; the decision forms every target's policy
                              ;; family against this pinned graph
-                             :pattern-graph-path :target-reading-root])
+                             :pattern-graph-path :target-reading-root
+                             ;; an operator's identity-bound beta declaration
+                             :reading-precision-declaration])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 

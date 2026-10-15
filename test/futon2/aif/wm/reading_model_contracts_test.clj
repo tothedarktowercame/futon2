@@ -132,3 +132,51 @@
         (is (= 0 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))
         (is (= :g-composition-mismatch
                (get-in r [:decision :refusals 0 :refusals 0 :kind])))))))
+
+(deftest identity-change-stays-refused-until-an-explicit-declaration
+  ;; codex-68 ruling (b): a changed identity re-arms only on a sealed beta
+  ;; declaration for exactly the new identity; an abstained tick does not
+  ;; let the next one reinitialize from beta-by-context.
+  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+        first-run (:decision (run-decision fx))
+        changed (fn [predecessor & [declaration]]
+                  (with-redefs [shape-g/scorer-version :wm/cascade-shape-g-score-policy-v2]
+                    (#'rfd/decide fx [(get-in fx [:rows :current])] {"M-current" 1}
+                                  (cond-> {:token-belief-predecessor-trace {:decision predecessor}}
+                                    declaration (assoc :reading-precision-declaration declaration)))))
+        calls :futon2.aif.wm.reading-family-decision-test/selector-calls
+        tick-1 (changed first-run)
+        refused-carry (:reading-precision-carry (cert tick-1))
+        new-identity (get-in refused-carry [:rearm :identity])
+        authority {:status :declared :version "operator declaration v1"}]
+    (testing "tick 1 refuses and records what re-arms it"
+      (is (= 0 (calls tick-1)))
+      (is (= :refused (:status refused-carry)))
+      (is (precision/intact? refused-carry))
+      (is (= :beta-declaration-for-identity (get-in refused-carry [:rearm :condition])))
+      (is (string? new-identity)))
+    (testing "tick 2 without a declaration still refuses"
+      (let [tick-2 (changed (:decision tick-1))]
+        (is (= 0 (calls tick-2)))
+        (is (= :abstained (get-in tick-2 [:decision :status])))
+        (is (= :refused (get-in (cert tick-2) [:reading-precision-carry :status])))))
+    (testing "declarations that do not fit refuse"
+      (doseq [[label d] {:another-identity (precision/declare-beta (apply str (repeat 64 "e")) 1 authority)
+                         :tampered (assoc (precision/declare-beta new-identity 1 authority) :beta 7)}]
+        (testing (name label)
+          (let [t (changed (:decision tick-1) d)]
+            (is (= 0 (calls t)))
+            (is (= :refused (get-in (cert t) [:reading-precision-carry :status])))))))
+    (testing "a sealed declaration for the new identity re-arms selection"
+      (let [declaration (precision/declare-beta new-identity 2 authority)
+            tick-2 (changed (:decision tick-1) declaration)
+            carry (:reading-precision-carry (cert tick-2))]
+        (is (= 1 (calls tick-2)))
+        (is (= :redeclared (:status carry)))
+        (is (= 2 (:beta carry)))
+        (is (= (:sha256 declaration) (:declaration-sha256 carry)))
+        (is (= 2 (get-in tick-2 [:decision :beta :value])))
+        (testing "and the tick after carries it"
+          (let [tick-3 (changed (:decision tick-2))]
+            (is (= 1 (calls tick-3)))
+            (is (= :carried (:status (:reading-precision-carry (cert tick-3)))))))))))

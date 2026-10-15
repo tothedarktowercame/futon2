@@ -1096,7 +1096,11 @@
           carry (when config
                   (try (precision/carry-beta {:previous (previous-precision opts)
                                               :initialized-beta declared
-                                              :config config})
+                                              :config config
+                                              ;; an explicit identity-bound beta
+                                              ;; declaration, the only re-arm
+                                              ;; after a refusal (ruling (b))
+                                              :declaration (:reading-precision-declaration opts)})
                        (catch clojure.lang.ExceptionInfo e
                          {:status :refused :reason (:kind (ex-data e))})))]
       (cond
@@ -1181,11 +1185,17 @@
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))})]
         (case (:status result)
           :refused
-          {:decision (abstain [(merge (select-keys (:refusal result)
-                                                   [:reason :refusals :carry :versions :kernels])
-                                      {:target nil :stage :certification
-                                       :kind :model-contract-refused
-                                       :certification-kind (:kind (:refusal result))})])}
+          {:decision (cond-> (abstain [(merge (select-keys (:refusal result)
+                                                           [:reason :refusals :carry :versions :kernels])
+                                              {:target nil :stage :certification
+                                               :kind :model-contract-refused
+                                               :certification-kind (:kind (:refusal result))})])
+                       ;; the refused carry is the next tick's previous
+                       ;; receipt: it stays refused until a declaration for
+                       ;; this identity is consumed, never silently reset
+                       (get-in result [:refusal :carry])
+                       (assoc-in [:selection-certificate :reading-precision-carry]
+                                 (get-in result [:refusal :carry])))}
           :abstained
           {:decision (abstain (family-refusals (:target-policy-families result)))}
           (let [decision (-> (:decision result)

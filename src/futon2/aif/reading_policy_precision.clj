@@ -22,6 +22,7 @@
 
 (def schema :wm/reading-precision-identity-v1)
 (def carry-schema :wm/reading-precision-carry-v1)
+(def declaration-schema :wm/reading-precision-beta-declaration-v1)
 
 (defn- require! [p kind]
   (when-not p (throw (ex-info (name kind) {:kind kind :status :invalid}))))
@@ -185,6 +186,37 @@
        (string? (:identity previous))
        (= carry-schema (:schema previous))))
 
+(defn declare-beta
+  "An explicit beta declaration bound to reading-precision IDENTITY (the
+  digest a refused carry names under :rearm :identity) and AUTHORITY
+  ({:status :declared :version ...}), sealed. The only way to re-arm
+  selection after the identity changed (codex-68 ruling (b), 2026-10-15): a
+  beta-by-context value is a source only when it is issued through this,
+  never as an ambient fallback."
+  [identity beta authority]
+  (require! (and (number? beta) (pos? beta) (Double/isFinite (double beta)))
+            :invalid-declared-beta)
+  (require! (= :declared (:status authority)) :invalid-declaration-authority)
+  (require! (string? (:version authority)) :invalid-declaration-authority)
+  (require! (and (string? identity) (re-matches #"[0-9a-f]{64}" identity))
+            :invalid-declaration-identity)
+  (seal {:schema declaration-schema :identity identity
+         :beta beta :authority (select-keys authority [:status :version])}))
+
+(defn- declaration-problem
+  "Why DECLARATION does not re-arm beta for identity ID, or nil."
+  [declaration id]
+  (cond
+    (nil? declaration) :no-declaration
+    (not (intact? declaration)) :declaration-tampered
+    (not= declaration-schema (:schema declaration)) :declaration-schema-mismatch
+    (not= id (:identity declaration)) :declaration-for-another-identity
+    (not (and (number? (:beta declaration)) (pos? (:beta declaration))
+              (Double/isFinite (double (:beta declaration)))))
+    :declaration-beta-invalid
+    (not= :declared (get-in declaration [:authority :status])) :declaration-authority-invalid
+    :else nil))
+
 (defn carry-beta
   "Pure, self-consumable beta-continuity decision.  Every returned
   receipt/refusal is sealed by this module, so the result of call N feeds
@@ -192,15 +224,31 @@
   carry schema, with a finite positive beta and exactly the identity of
   `config`.  An old class/q0 model identity is a typed refusal, never a
   silent reset or preservation.  Returns a receipt map; selects nothing."
-  [{:keys [previous initialized-beta config]}]
+  [{:keys [previous initialized-beta config declaration]}]
   (require! (and (number? initialized-beta) (pos? initialized-beta)
                 (Double/isFinite (double initialized-beta)))
             :invalid-initialized-beta)
   (let [id (identity-of config)
-        emit (fn [m] (rpp-seal (merge {:schema carry-schema :identity id} m)))]
+        carried? (and previous (intact? previous) (valid-previous-beta? previous)
+                      (= id (:identity previous)))
+        undeclared (declaration-problem declaration id)
+        ;; every refusal names what re-arms it, so the next tick can see the
+        ;; open condition on the recorded receipt
+        emit (fn [m] (rpp-seal (cond-> (merge {:schema carry-schema :identity id} m)
+                                 (= :refused (:status m))
+                                 (assoc :rearm {:condition :beta-declaration-for-identity
+                                                :identity id
+                                                :declaration-problem undeclared}))))]
     (cond
       (nil? previous)
       (emit {:status :initialized :beta initialized-beta :reason :no-previous-receipt})
+
+      ;; ruling (b): what cannot carry re-arms only on an explicit, intact
+      ;; declaration for exactly this identity
+      (and (not carried?) (nil? undeclared))
+      (emit {:status :redeclared :beta (:beta declaration)
+             :declaration-sha256 (:sha256 declaration)
+             :previous-status (:status previous) :previous-reason (:reason previous)})
 
       (not (intact? previous))
       (emit {:status :refused
