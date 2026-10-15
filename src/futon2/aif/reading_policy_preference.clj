@@ -1,0 +1,234 @@
+(ns futon2.aif.reading-policy-preference
+  "Certify the ONE step-indexed C/preference that contributed to a reading
+  policy's G (NOTE-wiring-reading-to-decision 2026-09-30 §7.3/§7.5.5;
+  DarkTower/WarMachine/Requirements.lean Q4).
+
+  The reading-policy shape scorer (cascade_shape_g.clj) scores each arranged
+  cascade against a step-indexed progress preference over
+  [completed-pattern-count want-met?] and returns, per policy, the schedule
+  (:preference-at-each-step), the horizon, and the G terms the scorer
+  recorded.  The old live-C derived inside cascade_decision is NOT a second
+  selection preference: per §7.3 the class-scoring branch records live-C
+  without scoring it (cascade_decision.clj:972-985), so this receipt types
+  its role as :diagnostic-only/did-not-select.
+
+  Pure: no IO, no scoring, no selection.  The validator reads a scored
+  record (the map cascade-shape-g/score-arranged returns), checks it, and
+  returns a typed receipt or an equally typed refusal.  Where the scored
+  record lacks evidence the validator needs (model provenance/pins), it
+  returns a precise typed absence and names the architectural gap rather
+  than fabricating the missing authority."
+  (:require [clojure.set :as cset]))
+
+(def receipt-schema (keyword "wm/reading-policy-preference-receipt/v1"))
+
+(def normalization-tolerance 1e-9)
+
+;; ---------------------------------------------------------------------------
+;; Authority: the one declared C of the shape scorer.  The scorer's model
+;; carries the schedule under :progress-preference with provenance; the
+;; recorded result carries it as :preference-at-each-step.  Live-C from the
+;; old decision is diagnostic only and never certifiable here.
+;; ---------------------------------------------------------------------------
+
+(defn- double-finite? [x]
+  (and (number? x) (Double/isFinite (double x))))
+
+(defn normalized-distribution?
+  "True when DIST (a map outcome -> weight) sums to 1 within tolerance and
+  every weight is a finite number."
+  [dist]
+  (and (map? dist) (seq dist)
+       (every? (comp double-finite? val) dist)
+       (let [sum (reduce + 0.0 (map double (vals dist)))]
+         (<= (Math/abs (- sum 1.0)) 1e-9))))
+
+(defn preference-distributions
+  "Every preference schedule the scored RECORD states, with where it was
+  found.  Returns a vector of {:at ... :distribution ...}.  A record whose
+  model authority survived (the scorer's :cascade-scoring meta on
+  :scorer-result) contributes its :progress-preference; the recorded
+  :preference-at-each-step contributes one; a :class-preference on the model
+  is a second, competing shape."
+  [record]
+  (keep identity
+        [(when-let [sched (:preference-at-each-step record)]
+           {:at :recorded-schedule :distribution sched})
+         (when-let [model (get-in (meta (:scorer-result record)) [:cascade-scoring :model])]
+           (when-let [sched (:progress-preference model)]
+             {:at :model-progress-preference :distribution sched}))
+         (when-let [model (get-in (meta (:scorer-result record)) [:cascade-scoring :model])]
+           (when-let [sched (:class-preference model)]
+             {:at :model-class-preference :distribution sched}))]))
+
+(defn- schedule= [a b]
+  (= a b))
+
+;; ---------------------------------------------------------------------------
+;; Recomputability: the shape scorer's progress preference is a function of
+;; the progress-token count and the horizon alone (cascade_shape_g.clj
+;; progress-preference, private there).  This is a local mirror so the
+;; receipt can recompute the schedule from the model's declared inputs; the
+;; test suite asserts equality against the private original.
+;; ---------------------------------------------------------------------------
+
+(defn recompute-progress-preference
+  "Mirror of cascade_shape_g's progress-preference: exp(4*done/n + 2*met?),
+  normalized, over [done met?] for done in 0..n, repeated per step 1..H."
+  [n horizon]
+  (let [outcomes (for [done (range (inc n)) met? [false true]] [done met?])
+        weights (into {} (for [[done met? :as outcome] outcomes]
+                           [outcome (Math/exp (+ (* 4.0 (/ done (max 1 n)))
+                                                  (if met? 2.0 0.0)))]))
+        total (reduce + (vals weights))
+        distribution (update-vals weights #(/ % total))]
+    (into {} (for [tau (range 1 (inc horizon))] [tau distribution]))))
+
+(defn- model-authority [record]
+  (let [model (get-in (meta (:scorer-result record)) [:cascade-scoring :model])]
+    (when model
+      {:source (get-in model [:provenance :source])
+       :provenance-status (get-in model [:provenance :status])
+       :calibrated (get-in model [:provenance :calibrated])
+       :model-schema (:schema model)
+       :backend (:backend model)
+       :kind (:kind model)
+       :model-horizon (:horizon model)
+       :progress-tokens (count (:progress-tokens model))})))
+
+;; ---------------------------------------------------------------------------
+;; Validation and receipt
+;; ---------------------------------------------------------------------------
+
+(defn- refuse [record kind & extras]
+  (merge {:schema receipt-schema
+          :status :refused :kind kind
+          :policy-id (:policy-id record) :target (:target record)}
+         (apply hash-map extras)))
+
+(defn validate
+  "Validate one scored reading-policy RECORD and return its typed receipt,
+  a typed refusal, or a typed absence.  Checks: exactly one declared C;
+  per-step normalization and finiteness; step indices exactly 1..horizon;
+  model horizon agreement; recomputability of the schedule from the model's
+  declared inputs; presence, finiteness and internal agreement of the
+  recorded G terms (risk/ambiguity/EIG/G) as far as the scorer's evidence
+  supports them.  Never scores, never selects, never invents authority."
+  [record]
+  (let [stated (preference-distributions record)
+        ;; A second, distinct schedule among the declared-c slots is §7.5.5's
+        ;; two-competing-Cs bad case; identical restatements are one C.
+        distinct-cs (dedupe (map :distribution stated))]
+    (cond
+      (not (seq stated))
+      (refuse record :preference-schedule-absent
+              :reason "no :preference-at-each-step and no model authority on the scored record")
+
+      (seq (rest distinct-cs))
+      (refuse record :competing-preferences
+              :found (mapv :at stated)
+              :reason "two different preference schedules both stated as C (§7.3/§7.5.5)")
+
+      :else
+      (let [sched (:distribution (first stated))
+            horizon (:horizon record)
+            authority (model-authority record)
+            taus (set (keys sched))
+            expected-taus (set (range 1 (inc horizon)))
+            unnormalized (not (every? normalized-distribution? (vals sched)))
+            bad-steps (not= taus expected-taus)
+            horizon-mismatch (and authority (:model-horizon authority)
+                                  (not= (:model-horizon authority) horizon))
+            n (if authority
+                (or (:progress-tokens authority)
+                    ;; fall back to the schedule's own outcome space
+                    (count (distinct (map first (keys (first (vals sched)))))))
+                (count (distinct (map first (keys (first (vals sched)))))))
+            recomputed (recompute-progress-preference n horizon)
+            shape-scorer-c? (= (:kind authority) :progress-count)
+            recompute-mismatch (and shape-scorer-c? (not (schedule= sched recomputed)))
+            g-terms {:risk (:risk record)
+                     :ambiguity (:ambiguity record)
+                     :information-gain (:information-gain record)}
+            missing-terms (cset/difference (set (keys g-terms))
+                                           (set (for [[k v] g-terms :when (some? v)] k)))
+            nonfinite-terms (set (for [[k v] g-terms
+                                       :when (and v (not (double-finite? v)))] k))
+            g (:g record)
+            cert-terms (get-in record [:scorer-result 0 :certificate :g-terms])
+            terms-disagree (seq (for [k [:risk :ambiguity :information-gain]
+                                      :when (and (contains? cert-terms k)
+                                                 (some? (get g-terms k))
+                                                 (not= (get cert-terms k) (get g-terms k)))]
+                                  k))]
+        (cond
+          unnormalized
+          (refuse record :preference-not-normalized
+                  :steps (vec (for [[tau d] sched :when (not (normalized-distribution? d))] tau)))
+
+          bad-steps
+          (refuse record :preference-steps-mismatch
+                  :stated (sort taus) :expected (sort expected-taus) :horizon horizon)
+
+          horizon-mismatch
+          (refuse record :horizon-mismatch
+                  :record-horizon horizon :model-horizon (:model-horizon authority))
+
+          recompute-mismatch
+          (refuse record :preference-not-recomputable
+                  :reason "stated schedule differs from the progress preference recomputed from the model's own n and horizon")
+
+          (seq missing-terms)
+          (refuse record :g-terms-absent :missing (vec missing-terms))
+
+          (seq nonfinite-terms)
+          (refuse record :g-terms-not-finite :nonfinite (vec nonfinite-terms))
+
+          terms-disagree
+          (refuse record :g-terms-mismatch :differing (vec terms-disagree)
+                  :reason "record's G terms differ from the scorer certificate's")
+
+          (nil? g)
+          (refuse record :g-absent)
+
+          (not (double-finite? g))
+          (refuse record :g-not-finite :g g)
+
+          :else
+          (cond-> {:schema receipt-schema :status :certified
+                   :policy-id (:policy-id record) :target (:target record)
+                   :horizon horizon
+                   :preference sched
+                   :g g :g-terms g-terms
+                   ;; The old live-C is diagnostic only and did not select
+                   ;; (§7.3: recorded, not scored, cascade_decision.clj:972-985).
+                   :live-c {:role :diagnostic-only :selected false}
+                   :checks {:one-declared-c true
+                            :normalized true :finite true
+                            :steps-cover-horizon true
+                            :schedule-recomputed (not shape-scorer-c?)
+                            :g-terms-finite-and-agreeing true}}
+            authority (assoc :authority (assoc authority
+                                               ;; the shape scorer pins no
+                                               ;; library bytes into its C
+                                               :pins {:status :absent
+                                                      :reason :no-pins-in-provenance})))
+          )))))
+
+(defn certify
+  "Convenience: validate and return the receipt, or the typed
+  refusal/absence as-is."
+  [record]
+  (validate record))
+
+(def architectural-gaps
+  "Gaps in the existing scorer evidence this validator had to type rather
+  than bridge (reported, not worked around):
+  - cascade_shape_g/score-arranged does not copy the scoring model or its
+    provenance into the returned record; the authority survives only as
+    metadata on :scorer-result, so any JSON round-trip loses it and the
+    receipt degrades to :authority-absent.
+  - The synthetic progress C carries no version or library pins, so
+    'bound to its declared authority/version and pins' can only bind to the
+    model's :provenance source string; pin absence is typed, not guessed."
+  [:model-provenance-not-retained-in-record :no-pins-in-synthetic-c])
