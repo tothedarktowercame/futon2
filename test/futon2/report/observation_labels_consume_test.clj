@@ -11,7 +11,8 @@
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-reader-test :as population]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -61,8 +62,6 @@
 (defn- scoring [lane] (:cascade-scoring (meta (:ranked lane))))
 (defn- scored-lane? [lane]
   (seq (get-in (scoring lane) [:precision-model :rates])))
-(defn- score [r]
-  (pr-str (select-keys (:decision r) [:action :softmax-weights :selection-law])))
 (defn- captured [opts after-lane]
   (let [lanes (atom []) real wm-cd/cascade-lane
         result (with-redefs [wm-cd/cascade-lane
@@ -127,17 +126,24 @@
       (is (= 5 (get-in ma [:measurement [fixture/tick-1-target token] :false-neg :denominator]))))))
 
 (deftest absent-and-uninitialized-stores-keep-the-baseline-score
-  (let [none (decision {}) missing (decision {:observation-labels-path (path)})]
-    ;; Exact post-admission decision pin for this fixture (including its
-    ;; required three-halves witness and admitted Prefix-F history).
-    (is (= "addb4464e7867d5e9cdf735b03a6046dc2a43aa90d99d310ce494ae370b2391c"
-           (wm-cd/sha256-hex (score none))))
-    (is (= (score none) (score missing)))
-    (is (= {:status :absent :reason :no-label-store-configured}
-           (select-keys (get-in none [:decision :selection-certificate :observation-labels]) [:status :reason])))
-    (is (= :store-uninitialized (get-in missing [:decision :selection-certificate :observation-labels :status])))
-    (is (= {:status :absent :reason :no-measured-rates} (get-in missing [:decision :measured-a])))
-    (is (not (.exists (io/file (path)))))))
+  ;; Migrated 2026-10-15 (Q5 route ledger) to the reading-family decision.
+  ;; The old fixture's score pin and measured-A absence belonged to the
+  ;; retired lanes; the store accounting and score invariance remain.
+  (route/with-empty-learning-ledger
+   (fn []
+     (let [fx (route/fixture)
+           none (route/decide fx)
+           missing (route/decide fx 1 {:observation-labels-path (path)})
+           score* #(pr-str (select-keys (:decision %) [:action :softmax-weights :selection-law]))]
+       (is (= (score* none) (score* missing)))
+       (is (= {:status :absent :reason :no-label-store-configured}
+              (select-keys (get-in none [:decision :selection-certificate :observation-labels])
+                           [:status :reason])))
+       (is (= :store-uninitialized
+              (get-in missing [:decision :selection-certificate :observation-labels :status])))
+       (is (= :unavailable (get-in missing [:decision :selection-certificate :retired-diagnostics
+                                            :measured-a :status])))
+       (is (not (.exists (io/file (path)))))))))
 
 (deftest below-minimum-remains-unmeasured-at-the-lane
   (fill! 4)

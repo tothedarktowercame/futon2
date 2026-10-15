@@ -35,13 +35,17 @@
      applicability, and this test pins that machine-model's specialized
      vocabulary is absent from the occurrence's actual decision data."
   (:require [clojure.set :as set]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [clojure.walk :as walk]
-            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.test-support.reading-route :as route]))
+
+(use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (def target :wm-tick-001-observation-crash)
 
@@ -196,28 +200,14 @@
     (is (not (contains-any-keyword? lane machine-model-vocabulary))
         "machine-model's specialized vocabulary is absent from the lane data")))
 
+;; Migrated 2026-10-15 (Q5 route ledger): the occurrence's decision is now
+;; the production reading-family decision. The bindings it must carry are
+;; unchanged: the applied law, the declared beta, the recorded tie-break, and
+;; no machine-model admission vocabulary.
 (deftest decision-law-and-revision-bindings
-  (let [r (wm-cd/cascade-decision
-           (assembled*)
-           ;; WIRE-3: inject a derived live C whose want token is in this
-           ;; fixture's joint domain (the derivation itself is covered in
-           ;; futon2.aif.live-c-test); a bare live-C token outside the
-           ;; domain is the reachable restriction's typed refusal.
-           {:live-c {:derived {:want #{[target :test-covers-missing-total-repos]}
-                               :weights {[target :test-covers-missing-total-repos] 1}
-                               :lam 1 :entries [] :gaps [] :refusals nil
-                               :signature "wm01-bindings-live-c"}}
-            ;; Proof 1.3 (84f81cb42): the synthetic target has no corpus
-            ;; relation, and an unresolved relation gets no scalar G
-            ;; (:class-unknown-no-scalar-g) -- so the fixture injects a
-            ;; relation row for its own target, as cascade_decision_test does.
-           :focus-inputs (assoc (focus-receipt/read-inputs)
-                                 :relations [{:target target :facet "WM"
-                                              :relation "focus"
-                                              :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
-                                              :effective-from "2026-01-01T00:00:00Z"}])
-            :conditioning-steps (admitted-history (assembled*))})
+  (let [r (route/decide (route/fixture))
         decision (:decision r)]
+    (is (= 1 (:selector-calls r)))
     (is (map? decision))
     (is (not= :abstained (:status decision)) "the occurrence yields a decision")
     (is (= :cascade-selection-posterior

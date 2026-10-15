@@ -99,6 +99,7 @@
       (kinds :graph-without-pattern-ids) :graph-refused
       (kinds :graph-endpoint-outside-pattern-ids) :graph-refused
       (kinds :target-source-path-absent) :source-path-absent
+      (kinds :target-source-row-absent) :source-path-absent
       (kinds :target-item-line-absent) :source-path-absent
       (kinds :target-source-conflict) :source-path-absent
       (kinds :target-source-kind-unsupported) :source-kind-unsupported

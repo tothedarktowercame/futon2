@@ -8,7 +8,9 @@
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.reading-policy-preference :as pref]
+            [futon2.test-support.reading-route :as route]))
 
 (defn- assembled [declaration]
   (let [target (or (:target declaration) fixture/tick-1-target)
@@ -65,11 +67,6 @@
   (wm-cd/cascade-lane
    (problem assembled)
    {:conditioning-steps (admitted-history assembled)}))
-
-(defn- decision [assembled]
-  (wm-cd/cascade-decision
-   assembled
-   (assoc fixture/live-c-opts :conditioning-steps (admitted-history assembled))))
 
 (defn- placement-matches-consumption?
   "Compare the record's claimed family with real preference-member at every tau.
@@ -137,15 +134,20 @@
            ((juxt :lam :mu) (get-in lane [:decision :preference-schedule]))))))
 
 (deftest joint-record-carries-class-and-retains-lane-token-receipt
-  (let [result (decision (assembled nil))
-        record (get-in result [:decision :preference-schedule])]
-    (is (= :class (:family record)))
-    (is (= :terminal (:placement record)))
-    (is (= wm-cd/class-preference-weights (:weights record)))
-    (is (= "scripts/futon2/report/war_machine.clj:class-preference-weights" (:site record)))
-    (is (= [:token :every-step :defaulted]
-           ((juxt :family :placement :source)
-            (get-in result [:lanes 0 :decision :preference-schedule]))))))
+  ;; Migrated 2026-10-15 (Q5 route ledger). Retired: the class preference
+  ;; schedule on the joint decision and the lane's token schedule (codex-68
+  ;; ruling: shape-policy C is the decision C). The joint record now
+  ;; carries the certified C of every compared policy and live C's role.
+  (route/with-empty-learning-ledger
+   (fn []
+     (let [r (route/decide (route/fixture))
+           cert (get-in r [:decision :selection-certificate])]
+       (is (= (count (:candidates cert)) (count (:preference-receipts cert))))
+       (is (every? #(= :certified (:status %)) (:preference-receipts cert)))
+       (is (= pref/receipt-schema (get-in cert [:preference :certified-by])))
+       (is (= :observation-only (get-in cert [:preference :live-c])))
+       (is (nil? (get-in r [:decision :preference-schedule]))
+           "no class schedule is recorded as the decision's C")))))
 
 (deftest writes-do-not-change-scores
   (doseq [declaration [(declared-source) nil]]
@@ -160,16 +162,20 @@
       (is (= (pr-str (:ranked with-write)) (pr-str (:ranked without-write))))
       (is (= (pr-str (dissoc (:decision with-write) :preference-schedule))
              (pr-str (dissoc (:decision without-write) :preference-schedule))))))
-  (let [a (assembled nil)
-        opts (assoc fixture/live-c-opts :conditioning-steps (admitted-history a))
-        with-write (:decision (wm-cd/cascade-decision a opts))
-        without-write (with-redefs [wm-cd/token-preference-schedule (constantly nil)
-                                   wm-cd/class-preference-schedule (constantly nil)]
-                        (:decision (wm-cd/cascade-decision a opts)))
-        score #(pr-str (select-keys % [:action :softmax-weights :selection-law]))]
-    (is (some? (:preference-schedule with-write)))
-    (is (nil? (:preference-schedule without-write)))
-    (is (= (score with-write) (score without-write)))))
+  ;; Migrated 2026-10-15 (Q5 route ledger): on the reading-family decision
+  ;; the recorded preference (the certified receipts) is a record, not an
+  ;; input: replacing what is recorded leaves the score unchanged.
+  (route/with-empty-learning-ledger
+   (fn []
+     (let [fx (route/fixture)
+           with-record (:decision (route/decide fx))
+           certify pref/certify
+           without-record (with-redefs [pref/certify (fn [r] (select-keys (certify r) [:status]))]
+                            (:decision (route/decide fx)))
+           score #(pr-str (select-keys % [:action :softmax-weights :selection-law]))]
+       (is (seq (get-in with-record [:selection-certificate :preference-receipts 0 :preference])))
+       (is (nil? (get-in without-record [:selection-certificate :preference-receipts 0 :preference])))
+       (is (= (score with-record) (score without-record)))))))
 
 (deftest missing-policy-history-refuses-at-r14
   (let [lane (wm-cd/cascade-lane (problem (assembled nil)))]

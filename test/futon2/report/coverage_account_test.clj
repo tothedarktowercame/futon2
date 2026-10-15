@@ -87,8 +87,12 @@
     (is (= {:work-marker 1} (:not-projected-by-kind coverage)))
     (is (= 2 (:targets-added coverage)))
     (is (= ["M-a"] (:declared-targets-refreshed coverage)))
-    (is (= {:status :absent :reason :no-admitted-cascade-problems} live)
-        "a stale declaration cannot score against the current mission wants")
+    ;; Q5 migration: live C is observation only on the reading-family route
+    ;; (codex-68 ruling), so the decision records that role, not a projection
+    (is (= {:status :observation-only :reason :shape-policy-c-is-decision-c} live))
+    (is (= #{"M-a" "M-b"} (set (map :target (get-in record [:decision :refusals]))))
+        "every target the assembly accounted for lands in the field and is refused typed")
+    (is (every? #(= :no-policy-family (:kind %)) (get-in record [:decision :refusals])))
     (is (some #(and (= "M-a" (:target %)) (= :universe-not-admitted (:kind %)))
               (get-in record [:cascade-problems :refusals])))
     ;; Exercise the serializer and durable trace path only under the temp dir.
@@ -135,7 +139,7 @@
         record (trace/trace-record {:decision (:decision result)})]
     (is (= :abstained (get-in record [:decision :status])))
     (is (= (:mission-hole-coverage sources) (:mission-hole-coverage record)))
-    (is (= {:status :absent :reason :no-admitted-cascade-problems} (:live-c-coverage record)))))
+    (is (= {:status :observation-only :reason :shape-policy-c-is-decision-c} (:live-c-coverage record)))))
 
 (deftest changed-candidate-admission-explains-a-fresh-coverage-drop
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
@@ -175,8 +179,8 @@
         new (get-in after [:decision :live-c-coverage])]
     (is (= (get-in before [:decision :mission-hole-coverage])
            (get-in after [:decision :mission-hole-coverage])))
-    (is (= 1 (get-in old [:source-tokens :reached])))
-    (is (= 1 (get-in old [:in-domain-outcome-tokens :count])))
-    (is (= {:status :absent :reason :no-admitted-cascade-problems} new))
+    ;; retired: live C's projected coverage moved with candidate admission;
+    ;; on the reading-family route live C is observation only either way
+    (is (= {:status :observation-only :reason :shape-policy-c-is-decision-c} old new))
     (is (some #(and (= "M-b" (:target %)) (= :no-constructed-candidate (:kind %)))
               (get-in after [:cascade-problems :refusals])))))

@@ -1,9 +1,14 @@
 (ns futon2.report.new-wanted-token-admission-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.scoring-input-receipts :as receipts]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.test-support.reading-route :as route]))
+
+(use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
 
 (def blend-square
   (edn/read-string
@@ -70,19 +75,25 @@
     (is (= :candidate-prediction-refused (:reason drop)))
     (is (= :missing-common-horizon (get-in drop [:evidence :refusal :kind])))))
 
+;; Migrated 2026-10-15 (Q5 route ledger). The interpreted admission above
+;; (admit-cascade-problem, still used by the flight ask) keeps its own
+;; controls. The decision no longer admits interpreted problems: on the
+;; reading-family route the claims below are re-proved over policy families.
+
 (deftest all-refused-uses-existing-abstention
-  (let [f2 (last (:problems (fixture)))
-        r (wm-cd/cascade-decision {:problems [f2] :refusals []} {})]
+  ;; a field in which no target yields a scored policy uses the existing
+  ;; gated abstention, with the selector never called
+  (let [r (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})]
     (is (= :abstained (get-in r [:decision :status])))
     (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])))
-    (is (= :no-constructed-candidate (get-in r [:decision :refusals 0 :kind])))
+    (is (= :no-policy-family (get-in r [:decision :refusals 0 :kind])))
     (is (empty? (:lanes r)))
-    (is (= :no-new-wanted-token (:reason (first (:dropped-candidates r)))))
-    (is (= (:dropped-candidates r) (get-in r [:cascade-problems :dropped-candidates])))))
+    (is (= 0 (:selector-calls r)))))
 
 (deftest rejection-cannot-hide-an-incommensurable-family
-  (let [ps (:problems (fixture))
-        mixed (assoc-in ps [2 :cascade-problem :horizon-steps] 3)]
-    (is (= :incommensurable-family
-           (try (wm-cd/cascade-decision {:problems mixed :refusals []} {})
-                (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
+  ;; a target whose family fails cannot mask differing temperatures between
+  ;; the targets that do have families
+  (let [fld (route/field {"M-a" ["p/a" "p/b"] "M-b" ["p/b" "p/c"] "M-none" nil})
+        r (route/decide-field fld {"M-a" 1 "M-b" 3 "M-none" 1} {})]
+    (is (= :incommensurable-family (get-in r [:decision :refusals 0 :kind])))
+    (is (= 0 (:selector-calls r)))))

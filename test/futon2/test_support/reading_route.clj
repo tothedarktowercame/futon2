@@ -151,3 +151,42 @@
   [refused-carry beta]
   (precision/declare-beta (get-in refused-carry [:rearm :identity]) beta
                           {:status :declared :version "operator declaration v1"}))
+
+(defn field
+  "Several targets in one field: TARGET->READ maps each target id to the
+  patterns its current reading names, or nil for a target whose mission
+  file has no reading. One pinned graph and one complete ledger serve all."
+  [target->read]
+  (let [root (temp-dir "reading-route-field-")
+        flights (temp-dir "reading-route-field-flights-")]
+    (io/copy (io/file real-flight) (io/file flights "flight-278b6988.edn"))
+    {:root root :flights flights :graph (pinned-graph)
+     :rows (vec (for [[t read] target->read]
+                  (let [f (io/file root (str t ".md"))]
+                    (spit f (str "# " t "\n\n## HEAD\nWork on " t ".\n"))
+                    (when read
+                      (let [digest (reading-registry/excerpt-digest f)]
+                        (reading-registry/publish!
+                         root {:target-id t :source-path (.getPath f)
+                               :excerpt-digest digest
+                               :request {:task {:target_id t :excerpt_sha256 digest}}
+                               :analysis (analysis read) :validator-version 1})))
+                    {:target-id t :source-kind :head :source-path (.getPath f)
+                     :source-absent nil})))}))
+
+(defn decide-field
+  "The production decision over FIELD's targets with TARGET->BETA declared
+  betas and EXTRA options; :selector-calls counted."
+  [fld target->beta extra]
+  (let [calls (atom 0)
+        select policy/select-action-cascades]
+    (with-redefs [policy/select-action-cascades
+                  (fn [& args] (swap! calls inc) (apply select args))]
+      (assoc (wm-cd/cascade-decision
+              {:problems []
+               :refusals (mapv #(hash-map :target (:target-id %) :kind :no-admitted-interpretation)
+                               (:rows fld))
+               :target-sources (:rows fld)
+               :declared-betas target->beta}
+              (opts fld extra))
+             :selector-calls @calls))))

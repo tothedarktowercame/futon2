@@ -9,7 +9,8 @@
   problems it is the gated abstention. Different T or β across problems
   refuses :incommensurable-family."
   (:require [clojure.edn :as edn]
-            [clojure.test :refer [deftest is]]
+            [clojure.string]
+            [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.cascade-problems :as cp]
@@ -17,9 +18,15 @@
             [futon2.aif.live-c :as lc]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.test-support.reading-route :as route]))
 
-(defn- assemble*
+(use-fixtures :once hermetic/with-hermetic-stores)
+(use-fixtures :each route/with-empty-learning-ledger)
+
+(defn assemble*
   "cp/assemble with every token given a fixture C3 locator (P5 locator
   requirement); tests about locators call cp/assemble directly."
   [m]
@@ -115,7 +122,7 @@
                                      :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
                                      :effective-from "2026-01-01T00:00:00Z"}])})
 
-(defn- decision
+(defn decision
   "Run the joint decision with one explicit admitted-history step for every
   constructed fixture policy. These tests exercise stages after prefix-F;
   the prefix-specific suites test missing, broken, and contradictory history."
@@ -212,296 +219,165 @@
    :beta-by-context {:tick-1 {:beta 1}}
    :context-of (fn [_] :tick-1)})
 
+;; ===== Q5 reading-family route (migrated 2026-10-15, Q5 route ledger) =====
+;;
+;; The joint decision now selects once, by G, over every target's reading
+;; policy family (test-support/reading-route). The tests below keep their
+;; names and re-prove each preserved claim on that route. Retired with the
+;; interpreted route, and noted at each test: construction/interpretation
+;; receipts on candidates, diagnostic lanes and their null comparisons,
+;; target-token qualification, the class scorer's unknown-class decline and
+;; live C as a scored preference (live C is observation only; its
+;; projection laws above still hold for the live-C module itself).
+
+(def ^:private p-ab ["p/a" "p/b"])
+
+(defn- refusal-kinds [r]
+  (mapv (juxt :kind :failure-kind) (get-in r [:decision :refusals])))
+
+(defn- posterior-of [r] (get-in r [:decision :selection-law :posterior]))
+
+(defn- refusing-policies
+  "score-policy, except that policies whose id satisfies REFUSE? are refused
+  typed, as the scorer refuses a policy it cannot score."
+  [refuse?]
+  (let [score shape-g/score-policy]
+    (fn [p] (if (refuse? (:policy-id p))
+              {:status :refused :reason :fixture-unscorable :policy-id (:policy-id p)}
+              (score p)))))
+
 (deftest h5a-no-problems-is-a-gated-abstention
-  ;; empty per-target sources (the horizon is the tick's declared input, so
-  ;; the per-target refusal kinds are exercised, not the refuse-all rule)
-  (let [assembled (assemble* {:targets [:A :B]
-                                :sources {:horizon-steps 3}})
-        r (wm-cd/cascade-decision assembled live-c-opts)]
-    (is (= :abstained (get-in r [:decision :status]))
-        "no assembled problem ⇒ the abstention")
-    (is (= 2 (count (get-in r [:decision :refusals])))
-        "the abstention lists both targets' refusals")
-    (is (= [:universe-not-admitted :universe-not-admitted]
-           (mapv :kind (get-in r [:decision :refusals])))
-        "each refusal is typed; the decision has passed emit! by construction")))
+  ;; no target has a current reading: no family, the gated abstention
+  (let [fld (route/field {"M-a" nil "M-b" nil})
+        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})]
+    (is (= :abstained (get-in r [:decision :status])))
+    (is (= 0 (:selector-calls r)))
+    (is (= [[:no-policy-family :no-current-target-reading]
+            [:no-policy-family :no-current-target-reading]]
+           (refusal-kinds r))
+        "each target's refusal is typed; the decision passed emit! by construction")))
 
 (deftest missing-slice-is-counted-while-another-target-proceeds
-  (let [missing :M-no-slice
-        sources (assoc tick-1-sources
-                       :universes (assoc (:universes tick-1-sources)
-                                         missing {:open true}))
-        assembled (assemble* {:targets [missing tick-1-target] :sources sources})
-        result (decision assembled live-c-opts)]
-    (is (= :no-query-time-slice
-           (:kind (first (:refusals assembled))))
-        "the absent slice remains a typed assembly failure")
-    (is (= tick-1-target (get-in result [:decision :action :target]))
-        "the other target is still selected")
-    (is (= 1 (count (filter #(and (= missing (:target %))
-                                  (= :no-query-time-slice (:reason %)))
-                            (:dropped-candidates result))))
-        "the failure is counted once and reaches the decision result")))
+  ;; the reading-route counterpart of a missing slice is a missing reading
+  (let [fld (route/field {"M-a" p-ab "M-unread" nil})
+        r (route/decide-field fld {"M-a" 1 "M-unread" 1} {})
+        cert (get-in r [:decision :selection-certificate])]
+    (is (= 1 (:selector-calls r)))
+    (is (= "M-a" (get-in r [:decision :action :target])) "the other target is still selected")
+    (is (= 1 (count (filter #(and (= "M-unread" (:target-id %))
+                                  (= :no-current-target-reading (:kind %)))
+                            (:family-failures cert))))
+        "the failure is counted once and reaches the decision")))
 
 (deftest h5a-tick-1-decision
-  (let [assembled (assemble* {:targets [tick-1-target]
-                                :sources tick-1-sources})
-        r (decision assembled live-c-opts)
-        decision (:decision r)]
-    (is (= (into {} (map (fn [[token locator]] [[tick-1-target token] locator]))
-                         (get-in (first (:problems assembled)) [:cascade-problem :locators]))
-           (get-in decision [:action :observation-locators]))
-        "selected candidates retain the declared checkers with target-qualified tokens")
-    ;; A single mission token divides its mass evenly over that mission's
-    ;; three declared wants, so within this one-target family it introduces
-    ;; no relative preference.
-    (is (= :aif/placeholder-is-load-bearing
-           (-> decision :action :precedence first :id))
-        "the projected mission mass leaves the one-target argmax unchanged")
-    (is (= {:value 1 :status :declared} (:beta decision))
-        "β = 1 is recorded :declared")
-    (let [posterior (get-in decision [:selection-law :posterior])]
-      (is (every? #(some? (:construction-receipt %)) (keys posterior))
-          "every posterior candidate carries a construction receipt")
-      (is (every? #(seq (:interpretation-receipts %)) (keys posterior))
-          "every posterior candidate carries non-empty interpretation receipts")
-      (is (< 0.999999999 (reduce + (vals posterior)) 1.000000001)
-          "the posterior is normalised"))
-    (is (= [[:R1 :R6 :R13 :R4 :R5 :R14]]
-           (mapv #(mapv :node (:route %)) (:lanes r)))
-        "the diagnostic lane records its honest no-prefix R14 boundary")))
+  ;; retired: locators on the action, interpretation receipts on candidates,
+  ;; the diagnostic lane route
+  (let [r (route/decide (route/fixture))
+        decision (:decision r)
+        posterior (posterior-of r)]
+    (is (= 1 (:selector-calls r)))
+    (is (= {:value 1 :status :declared} (:beta decision)) "β = 1 is recorded :declared")
+    (is (every? #(= (:policy-key %) (prefix-admission/candidate-key %)) (keys posterior))
+        "every posterior candidate carries its own reading-policy identity")
+    (is (< 0.999999999 (reduce + (vals posterior)) 1.000000001) "the posterior is normalised")
+    (is (= [] (:lanes r)) "no diagnostic lane runs")
+    (is (= :unavailable (get-in decision [:selection-certificate :retired-diagnostics
+                                          :token-rate-lanes :status])))))
 
 (deftest h5a-joint-selection-across-targets
-  ;; target B's single cascade establishes its want (lower G); target A's
-  ;; only constructed cascade is guard-blocked, so it stalls like A's empty
-  ;; cascade. Joint selection must pick B's first pattern from ONE
-  ;; posterior spanning both targets' candidates.
-  (let [b-target :B
-        sources
-        (merge tick-1-sources
-               {:universes (assoc (:universes tick-1-sources)
-                                  b-target {:b-open true :b-clean false})
-                :interpretations (assoc (:interpretations tick-1-sources)
-                                        b-target
-                                        {:patterns
-                                         {:b-fix {:guard {:needs #{:b-open}
-                                                          :forbids #{:b-clean}}
-                                                  :produces #{:b-clean}}}
-                                         :receipts {:b-fix {:receipt "B-fix"
-                                                            :source "fixture"}}})
-                :wants (assoc (:wants tick-1-sources) b-target [:b-clean])
-                :candidates (assoc (:candidates tick-1-sources)
-                                   b-target
-                                   [{:precedence [:b-fix]
-                                     :construction-receipt receipt}])})
-        ;; target A keeps its tick-1 family minus the want-establishing
-        ;; candidates: only a guard-blocked cascade remains, so B wins.
-        sources (update-in sources
-                           [:candidates tick-1-target]
-                           (fn [cands]
-                             [(assoc-in (nth cands 2)
-                                        [:precedence]
-                                         [:test-step-covering-missing-total-repos])]))
-        assembled (assemble* {:targets [tick-1-target b-target]
-                                :sources sources})
-        without-projection
-        (decision
-         assembled
-         {:focus-inputs (:focus-inputs live-c-opts)
-          :live-c {:derived {:want #{:star/no-target}
-                             :weights {:star/no-target 1}
-                             :lam 1 :entries [] :gaps [] :refusals nil
-                             :signature "no-projectable-live-c"}}})
-        r (decision assembled live-c-opts)
-        decision (:decision r)
-        posterior (get-in decision [:selection-law :posterior])]
-    ;; PROOF-wm-works 1.3 build 2/3 (2026-09-22): the joint decision now
-    ;; scores prospective outcomes against Joe's CLASS C (55/35/5/5; the
-    ;; class observation model), so live-c's token projection no longer
-    ;; moves the argmax — it is derived, freshness-checked and recorded,
-    ;; never scored. The old WIRE-3 assertions (live-c weight flips the
-    ;; winner; :c :status :derived / :derived-no-overlap on every scored
-    ;; candidate) tested the replaced substitution and are retired here.
-    ;; Both fixture targets facet :unrelated with no acceptance-class
-    ;; difference, so selection falls to the class-equal G and B's short
-    ;; cascade wins in both arms.
-    (is (= :b-fix
-           (-> decision :action :precedence first :id))
-        "with class scoring the joint selection records a real winner")
-    (is (= :b-fix
-           (-> without-projection :decision :action :precedence first :id))
-        "the live-c projection no longer moves the argmax (recorded, not scored)")
-
-    (is (= #{tick-1-target b-target}
-           (set (map :target (keys posterior))))
-        "one posterior spans both targets' candidates")
+  (let [fld (route/field {"M-a" p-ab "M-b" ["p/b" "p/c"]})
+        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})
+        posterior (posterior-of r)]
+    (is (= 1 (:selector-calls r)) "ONE selector call for both targets")
+    (is (= #{"M-a" "M-b"} (set (map :target (keys posterior))))
+        "one posterior spans both targets' policies")
     (is (< 0.999999999 (reduce + (vals posterior)) 1.000000001)
         "the joint posterior's masses sum to 1")))
 
 (deftest h5a-unmatched-receipt-drops-the-candidate
-  (let [assembled (assemble* {:targets [tick-1-target]
-                                :sources tick-1-sources})
-        ;; strip the last construction receipt: that precedence can no
-        ;; longer be matched, so its candidate must be dropped, recorded,
-        ;; and never passed through unreceipted.
-        stripped (update-in assembled
-                            [:problems 0 :constructed-candidates 2]
-                            dissoc :construction-receipt)
-        r (decision stripped live-c-opts)
-        decision (:decision r)
-        posterior (get-in decision [:selection-law :posterior])]
-    (is (= [{:target tick-1-target
-             :candidate :C3
-             :stage :candidate-admission
-             :reason :construction-receipt-unmatched
-             :missing-evidence [:construction-receipt]}]
-           (:dropped-candidates r))
-        "the unmatched candidate is dropped with a recorded reason")
-    (is (every? #(some? (:construction-receipt %)) (keys posterior))
-        "no unreceipted candidate reached the posterior")
-    (is (not (some #(= :C3 (:id %)) (keys posterior)))
-        "the dropped candidate is absent from the posterior")
-    (is (= :aif/placeholder-is-load-bearing
-           (-> decision :action :precedence first :id))
-        "the remaining family still selects through the gate")))
+  ;; retired: construction-receipt matching. Preserved: a policy that cannot
+  ;; be admitted to the posterior is dropped with a recorded reason, never
+  ;; passed through, and the rest of the family still selects.
+  (let [fx (route/fixture)
+        ids (keys (route/policy-keys (:decision (route/decide fx))))
+        dropped (first ids)
+        r (with-redefs [shape-g/score-policy (refusing-policies #{dropped})]
+            (route/decide fx))
+        cert (get-in r [:decision :selection-certificate])]
+    (is (= 2 (count ids)))
+    (is (some #(and (= dropped (:policy-id %)) (= :fixture-unscorable (:reason %)))
+              (:family-failures cert))
+        "the unscorable policy is recorded with its reason")
+    (is (not-any? #(= dropped (:id %)) (keys (posterior-of r)))
+        "it never reaches the posterior")
+    (is (= 1 (:selector-calls r)))
+    (is (some? (get-in r [:decision :action])) "the remaining family still selects")))
 
 (deftest h5a-incommensurable-family-refuses
-  (let [assembled (assemble* {:targets [tick-1-target]
-                                :sources tick-1-sources})
-        ;; one assemble call declares one T; a different-T problem can only
-        ;; arrive as a second assembled problem, so build it directly.
-        other (assemble* {:targets [:B]
-                            :sources (assoc tick-1-sources
-                                            :universes {:B {:b-open true}}
-                                            :interpretations
-                                            {:B {:patterns
-                                                 {:b-fix {:guard {:needs #{:b-open}}
-                                                          :produces #{:b-open}}}
-                                                 :receipts {:b-fix {:receipt "B"}}}}
-                                            :wants {:B [:b-open]}
-                                            :candidates
-                                            {:B [{:precedence [:b-fix]
-                                                  :construction-receipt receipt}]}
-                                            :horizon-steps 2)})
-        merged (update assembled :problems into (:problems other))]
-    (is (thrown-with-msg?
-         clojure.lang.ExceptionInfo
-         #"cascade decision refused"
-         (wm-cd/cascade-decision merged live-c-opts)))
-    (is (= :incommensurable-family
-           (try (wm-cd/cascade-decision merged live-c-opts)
-                (catch clojure.lang.ExceptionInfo e
-                  (:kind (ex-data e)))))
-        "different T across problems refuses, typed, with the values")))
+  ;; differing declared temperatures refuse, typed, with the values, and
+  ;; the selector is not called (the reading route abstains rather than throws)
+  (let [fld (route/field {"M-a" p-ab "M-b" ["p/b" "p/c"]})
+        r (route/decide-field fld {"M-a" 1 "M-b" 2} {})
+        refusal (first (get-in r [:decision :refusals]))]
+    (is (= 0 (:selector-calls r)))
+    (is (= :abstained (get-in r [:decision :status])))
+    (is (= :incommensurable-family (:kind refusal)))
+    (is (= #{1 2} (set (:beta refusal))))))
 
 (deftest h5a-targets-stay-apart
-  ;; (f) Two targets using the SAME pattern id and the SAME token names.
-  ;; A's fact is true, B's is false: B's guard must not be satisfied by
-  ;; A's fact, the marginal is per (target, pattern) — never summed across
-  ;; targets — and the decision's action carries its :target.
-  (let [pattern {:p {:guard {:needs #{:open} :forbids #{:done}}
-                     :produces #{:done}}}
-        interp {:patterns pattern :receipts {:p {:receipt "p" :source "f"}}}
-        assembled (assemble*
-                   {:targets [:A :B]
-                    :sources {:universes {:A {:open true :done false}
-                                          :B {:open false :done false}}
-                              :interpretations {:A interp :B interp}
-                              :wants {:A [:done] :B [:done]}
-                              :candidates {:A [{:precedence [:p]
-                                                :construction-receipt receipt}]
-                                           :B [{:precedence [:p]
-                                                :construction-receipt receipt}]}
-                              :horizon-steps 3
-                              :beta-by-context {:x {:beta 1}}
-                              :context-of (fn [_] :x)}})
-        ;; This test's C must be in this family's domain.
-        opts {:focus-inputs (:focus-inputs live-c-opts)
-              :live-c {:derived (assoc live-c-fixture
-                                      :want #{[:A :done]}
-                                      :weights {[:A :done] 1})}}
-        r (decision assembled opts)
-        both (decision
-              (assoc-in assembled [:problems 1 :cascade-problem :facts :open] true) opts)
-        decision (:decision r)
-        posterior (get-in decision [:selection-law :posterior])
-        by (fn [t id]
-             (some (fn [[c p]] (when (and (= t (:target c)) (= id (:id c))) [c p]))
-                   posterior))
-        [_ a-p] (by :A :C1)
-        [_ b-p] (by :B :C1)]
-    (is (some? a-p))
-    (is (nil? b-p))
-    (is (= 1 (count posterior))
-        "B cannot borrow A's true fact: its blocked candidate is declined before scoring")
-    (is (= [:B :no-new-wanted-token]
-           ((juxt :target :reason) (first (:dropped-candidates r)))))
-    (is (= {#{} 1} (get-in r [:dropped-candidates 0 :evidence :terminal-wanted-belief])))
-    (is (= #{:A :B} (set (map :target (keys (get-in both [:decision :selection-law :posterior])))))
-        "when each target's OWN fact enables its candidate, both are admitted")
-    (is (= 2 (count (get-in both [:decision :selection-law :action-marginal])))
-        "same pattern id on distinct targets must remain distinct actions")
-    (is (= :A (get-in decision [:action :target]))
+  ;; two targets reading the SAME patterns: their policies stay distinct
+  ;; (identity is target-scoped), the marginal is per policy, and the action
+  ;; carries its target. Retired: target-token qualification of the old
+  ;; operator tokens.
+  (let [fld (route/field {"M-a" p-ab "M-b" p-ab})
+        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})
+        posterior (posterior-of r)
+        keys* (map prefix-admission/candidate-key (keys posterior))
+        per-target (group-by :target (keys posterior))]
+    (is (= 1 (:selector-calls r)))
+    (is (= #{"M-a" "M-b"} (set (keys per-target))))
+    (is (= (count (get per-target "M-a")) (count (get per-target "M-b"))))
+    (is (= (count posterior) (count (distinct keys*)))
+        "same patterns on distinct targets remain distinct policies")
+    (is (every? (fn [[t cs]] (every? #(clojure.string/starts-with? (:id %) (str t "/policy-")) cs))
+                per-target))
+    (is (contains? #{"M-a" "M-b"} (get-in r [:decision :action :target]))
         "the decision's action carries its :target")
-    (is (= :p (-> decision :action :precedence first :id)))
-    (is (= :A (-> decision :action :precedence first :target))
-        "the first acting pattern map carries its :target")
-    (let [chosen-pattern (get-in decision [:action :precedence 0])
-          marginal (transduce (comp (filter (fn [[c _]]
-                                              (= chosen-pattern
-                                                 (first (:precedence c)))))
-                                    (map val))
-                              + 0.0 posterior)]
-      (is (< (Math/abs (- (double (:chosen-action-mass decision))
-                          (double marginal)))
-             1e-9)
-          "the chosen mass equals the posterior mass of THIS target's candidates starting with that pattern (A's :p alone), not the sum over both targets")
-      (is (< (Math/abs (- (double marginal) (double a-p))) 1e-9)
-          "the marginal is A's :p candidate's mass exactly — B's same-id pattern contributed nothing"))
-    (is (= :target-token-pair
-           (get-in decision [:token-qualification :scheme]))
-        "the token qualification scheme is recorded on the decision")))
-
-;; ===== WIRE-3: the derived live C into the joint preference spec =====
+    (is (< (Math/abs (- (double (get-in r [:decision :chosen-action-mass]))
+                        (double (get posterior (get-in r [:decision :action])))))
+           1e-9)
+        "the chosen mass is that one policy's posterior mass, not a sum across targets")))
 
 (deftest wire-3-stale-live-c-refuses-the-decision-typed
-  ;; Requirement 2: a stale C is never scored and never silently uniform.
-  ;; The injected :derived C's signature cannot match a fresh read of the
-  ;; real corpus, so the freshness guard fires.
-  (let [assembled (assemble* {:targets [tick-1-target]
-                              :sources tick-1-sources})
-        call (fn [] (wm-cd/cascade-decision
-                     assembled
-                     {:live-c {:derived live-c-fixture
-                               :sources-now (lc/read-sources)}}))]
-    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"cascade decision refused"
-                          (call)))
-    (let [e (try (call) (catch clojure.lang.ExceptionInfo e e))
-          d (ex-data e)]
-      (is (= :live-c-stale (:kind d)) "the refusal is typed :live-c-stale")
-      (is (= (:signature live-c-fixture) (:signature-derived d))
-          "both signatures are recorded — derived and now"))))
+  ;; retired: live C is no longer a scored preference (codex-68 ruling:
+  ;; shape-policy C is the decision C, live C observation only), so there is
+  ;; nothing for a stale live C to corrupt. Preserved: a stale live C cannot
+  ;; change the selection.
+  (let [fx (route/fixture)
+        plain (route/decide fx)
+        stale (route/decide fx 1 {:live-c {:derived live-c-fixture
+                                           :sources-now (lc/read-sources)}})]
+    (is (= (get-in plain [:decision :selection-law :posterior])
+           (get-in stale [:decision :selection-law :posterior])))
+    (is (= :observation-only (get-in stale [:decision :selection-certificate
+                                            :preference :live-c])))))
 
 (deftest wire-3-refused-derivation-propagates-typed
-  ;; Requirement 3: a missing source refuses the whole derivation, and the
-  ;; decision refuses with it — no silent uniform fallback.
-  (let [assembled (assemble* {:targets [tick-1-target]
-                              :sources tick-1-sources})
-        e (try (wm-cd/cascade-decision
-                assembled
-                {:live-c {:sources {:wholeness {:refusal {:kind :source-missing
-                                                          :path "/nonexistent"}}
-                                    :missions []
-                                    :stars {:value {:capabilities {}}}}}})
-               (catch clojure.lang.ExceptionInfo e e))
-        d (ex-data e)]
-    (is (= :live-c-refused (:kind d)))
-    (is (= [:source-missing] (mapv :kind (:refusals d))))))
+  ;; retired with live C as a scored preference; preserved: a refused live-C
+  ;; derivation is not silently substituted into the decision's C
+  (let [fx (route/fixture)
+        r (route/decide fx 1 {:live-c {:sources {:wholeness {:refusal {:kind :source-missing
+                                                                       :path "/nonexistent"}}
+                                                 :missions []
+                                                 :stars {:value {:capabilities {}}}}}})]
+    (is (= (get-in (route/decide fx) [:decision :selection-law :posterior])
+           (get-in r [:decision :selection-law :posterior])))
+    (is (every? #(= :certified (:status %))
+                (get-in r [:decision :selection-certificate :preference-receipts]))
+        "the decision's C is the certified shape preference, whatever live C did")))
 
 (deftest wire-live-c-projects-real-mission-tokens
-  (let [assembled (assemble* {:targets [tick-1-target]
-                              :sources tick-1-sources})
-        d (lc/derive-live-c (lc/read-sources))]
+  (let [d (lc/derive-live-c (lc/read-sources))]
     (is (seq (:want d)) "the real corpus derives a non-empty live C")
     (is (every? keyword? (:want d))
         "live-C tokens are (namespaced) keywords, never [target token] pairs")
@@ -510,158 +386,90 @@
                           :want #{(keyword "alive" (name tick-1-target))}
                           :weights {(keyword "alive" (name tick-1-target)) 1})]
       (is (= #{pair} (:want (lc/cascade-spec matching #{pair} #{pair})))
-          "mission token projects through that mission's own declared want"))
-    (let [decision (decision assembled {:focus-inputs (:focus-inputs live-c-opts)})]
-      (is (map? decision)
-          "a grain mismatch does not halt the decision")
-      (is (some? (get-in decision [:decision :action]))
-          "the comparison still produces a choice")
-      (let [c (->> (get-in decision [:decision :selection-law :posterior])
-                   keys first)]
-        (is (some? c) "candidates were scored")))
-    ;; and the grain mismatch is RECORDED, not silent: uniform-because-no-overlap
-    ;; must never be mistaken for C-was-derived-and-agreed.
-    (let [spec-c (-> (decision assembled {:focus-inputs (:focus-inputs live-c-opts)})
-                     (get-in [:decision :token-qualification]))]
-      (is (= :target-token-pair (:scheme spec-c))
-          "the decision states the qualification scheme its outcomes use"))))
-
+          "mission token projects through that mission's own declared want")))
+  ;; retired: the decision's target-token qualification scheme; preserved:
+  ;; the decision still produces a choice whatever live C derives
+  (let [r (route/decide (route/fixture))]
+    (is (some? (get-in r [:decision :action])))
+    (is (seq (posterior-of r)) "candidates were scored")))
 
 (deftest real-candidates-have-no-empty-sibling-and-keep-their-own-receipts
-  (let [assembled (assemble* {:targets [tick-1-target] :sources tick-1-sources})
-        pairs (get-in assembled [:problems 0 :constructed-candidates])
-        marked (mapv (fn [i p] (assoc-in p [:construction-receipt :test-marker] i))
-                     (range) pairs)
-        reordered (assoc-in assembled [:problems 0 :constructed-candidates] (vec (reverse marked)))
-        r (decision reordered live-c-opts)
-        candidates (keys (get-in r [:decision :selection-law :posterior]))]
-    (is (= (count pairs) (count candidates)))
-    (is (every? #(seq (:precedence %)) candidates))
-    (is (every? #(= tick-1-want (:want %)) candidates)
-        "the selected action must retain the exact wants later feedback describes")
-    (is (empty? (:dropped-candidates r)))
-    (is (every? #(seq (:precedence %)) (mapcat :candidates (:lanes r))))
-    (is (every? #(false? (get-in % [:null-comparison :used-for-joint-selection?])) (:lanes r)))
-    (is (every? #(empty? (:precedence %))
-                (mapcat #(get-in % [:null-comparison :candidates]) (:lanes r))))
-    (doseq [c candidates]
-      (let [pair (some #(when (= (:candidate-id %) (:id c)) %) marked)]
-        (is (= (:construction-receipt pair) (:construction-receipt c)))
-        (is (= (:precedence pair) (mapv :id (:precedence c))))))))
+  ;; retired: construction receipts and lane null comparisons. Preserved:
+  ;; every compared policy is a real, non-empty arrangement carrying its
+  ;; own identity and debt, and nothing is dropped from a scorable family.
+  (let [r (route/decide (route/fixture))
+        candidates (keys (posterior-of r))]
+    (is (seq candidates))
+    (is (every? #(seq (get-in % [:precedence :co-apply :units])) candidates))
+    (is (every? #(= (:policy-key %) (prefix-admission/candidate-key %)) candidates))
+    (is (every? #(= (:id %) (get-in % [:interpretation-debt :policy-id])) candidates))
+    (is (empty? (get-in r [:decision :selection-certificate :family-failures])))))
 
 (deftest all-declined-family-is-a-recorded-abstention
-  (let [assembled (assemble* {:targets [tick-1-target] :sources tick-1-sources})]
-    (doseq [[label broken]
-            [[:no-receipts (assoc-in assembled [:problems 0 :interpretation-receipts] {})]
-             [:partial-receipts (assoc-in assembled [:problems 0 :interpretation-receipts]
-                                         {:not-used {:source "irrelevant"}})]
-             [:empty-orders (update-in assembled [:problems 0 :constructed-candidates]
-                                       #(mapv (fn [p] (assoc p :precedence [])) %))]
-             [:no-pairs (assoc-in assembled [:problems 0 :constructed-candidates] [])]]]
-      (let [r (wm-cd/cascade-decision broken live-c-opts)
-            declines (:dropped-candidates r)]
-        (is (= :abstained (get-in r [:decision :status])) (str label))
-        (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])))
-        (is (empty? (get-in r [:decision :selection-law :posterior])))
-        (is (empty? (:lanes r)))
-        (is (= 1 (count (filter #(= :target-admission (:stage %)) declines))))
-        (is (every? #(and (= tick-1-target (:target %)) (:reason %) (seq (:missing-evidence %))) declines))))))
+  (let [fx (route/fixture)]
+    (doseq [[label r]
+            [[:no-reading (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})]
+             [:every-policy-unscorable
+              (with-redefs [shape-g/score-policy (refusing-policies (constantly true))]
+                (route/decide fx))]]]
+      (is (= :abstained (get-in r [:decision :status])) (str label))
+      (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])) (str label))
+      (is (empty? (posterior-of r)) (str label))
+      (is (= 0 (:selector-calls r)) (str label))
+      (is (every? #(and (:target %) (= :no-policy-family (:kind %)) (seq (:failures %)))
+                  (get-in r [:decision :refusals]))
+          (str label)))))
 
 (deftest class-unknown-target-is-declined-not-a-decision-refusal
-  ;; codex-20 handoff B ruling (M-a-wmc-scaling repair): a candidate whose
-  ;; target-class is :unknown gets NO scalar G. The joint decision DECLINES
-  ;; it (a typed entry in :dropped-candidates carrying :possible-costs) and
-  ;; selection continues over the candidates that have a scalar. Only when
-  ;; NO candidate has a scalar does the decision refuse.
-  (let [u-target :U
-        sources
-        (merge tick-1-sources
-               {:universes (assoc (:universes tick-1-sources)
-                                  u-target {:u-open true :u-clean false})
-                :interpretations (assoc (:interpretations tick-1-sources)
-                                        u-target
-                                        {:patterns
-                                         {:u-fix {:guard {:needs #{:u-open}
-                                                          :forbids #{:u-clean}}
-                                                  :produces #{:u-clean}}}
-                                         :receipts {:u-fix {:receipt "U-fix"
-                                                            :source "fixture"}}})
-                :wants (assoc (:wants tick-1-sources) u-target [:u-clean])
-                :candidates (assoc (:candidates tick-1-sources)
-                                   u-target
-                                   [{:precedence [:u-fix]
-                                     :construction-receipt receipt}])})
-        ;; :U has no row in the injected :focus-inputs relations, so the
-        ;; shared relation producer (focus-receipt/classify-target)
-        ;; classifies it :unknown and its candidate's scoring refuses
-        ;; :class-unknown-no-scalar-g.
-        both (assemble* {:targets [tick-1-target u-target] :sources sources})
-        r (decision both live-c-opts)
-        decision (:decision r)
-        declines (vec (filter #(= :class-unknown-no-scalar-g (:reason %))
-                              (:dropped-candidates r)))]
-    (is (= tick-1-target (get-in decision [:action :target]))
-        "(a) selection proceeds over the scorable target's candidates")
-    (is (= 1 (count declines))
-        "(a) the unknown target's candidate is a typed decline, not a decision refusal")
-    (is (= {:target u-target :stage :scoring :candidate :C1
-            :reason :class-unknown-no-scalar-g}
-           (dissoc (first declines) :possible-costs))
-        "(a) the decline names the target, stage, candidate and reason")
-    (is (= #{:focused :related :unrelated}
-           (set (keys (:possible-costs (first declines)))))
-        "(a) the decline carries the possible terminal costs under Joe's C")
-    (is (= #{tick-1-target}
-           (set (map :target (keys (get-in decision [:selection-law :posterior])))))
-        "(a) the declined candidate never reached the posterior")
-    (let [only-unknown (assemble* {:targets [u-target] :sources sources})]
-      (is (thrown-with-msg?
-           clojure.lang.ExceptionInfo
-           #"cascade decision refused"
-           (wm-cd/cascade-decision only-unknown live-c-opts))
-          "(b) with only the unknown target the decision still refuses")
-      (is (= :class-unknown-no-scalar-g
-             (try (wm-cd/cascade-decision only-unknown live-c-opts)
-                  (catch clojure.lang.ExceptionInfo e
-                    (:kind (ex-data e)))))
-          "(b) the refusal keeps the scoring refusal's kind"))))
+  ;; retired: the class scorer's :class-unknown-no-scalar-g. Preserved: a
+  ;; target none of whose policies can be scored is declined and counted
+  ;; while selection proceeds over the scorable target; alone, it abstains.
+  (let [fld (route/field {"M-a" p-ab "M-u" ["p/b" "p/c"]})
+        unscorable #(clojure.string/starts-with? (str %) "M-u/")
+        r (with-redefs [shape-g/score-policy (refusing-policies unscorable)]
+            (route/decide-field fld {"M-a" 1 "M-u" 1} {}))
+        alone (with-redefs [shape-g/score-policy (refusing-policies unscorable)]
+                (route/decide-field (route/field {"M-u" ["p/b" "p/c"]}) {"M-u" 1} {}))]
+    (is (= "M-a" (get-in r [:decision :action :target])))
+    (is (= 1 (:selector-calls r)))
+    (is (= #{"M-a"} (set (map :target (keys (posterior-of r))))))
+    (is (some #(and (= "M-u" (:target-id %)) (= :fixture-unscorable (:reason %)))
+              (get-in r [:decision :selection-certificate :family-failures])))
+    (is (= :abstained (get-in alone [:decision :status])))
+    (is (= 0 (:selector-calls alone)))))
 
 (deftest all-declined-family-with-admission-refusals-abstains
-  ;; M-a-wmc-scaling (click 16): the only admitted family is class :unknown;
-  ;; every other target was refused at admission :no-admitted-interpretation.
-  ;; The decision must ABSTAIN with all refusals -- never throw -- so the
-  ;; runner's first-no-admitted-interpretation-refusal ask can fire. The
-  ;; scoring declines stay on :dropped-candidates.
-  (let [u-target :U
-        a-target :A
-        sources
-        (assoc tick-1-sources
-               :universes {u-target {:u-open true :u-clean false}
-                           ;; A has a fact universe but NO interpretations:
-                           ;; assembly refuses it :no-admitted-interpretation.
-                           a-target {:a-open true :a-clean false}}
-               :interpretations {u-target {:patterns
-                                           {:u-fix {:guard {:needs #{:u-open}
-                                                            :forbids #{:u-clean}}
-                                                    :produces #{:u-clean}}}
-                                           :receipts {:u-fix {:receipt "U-fix"
-                                                              :source "fixture"}}}}
-               :wants {u-target [:u-clean]}
-               :candidates {u-target [{:precedence [:u-fix]
-                                       :construction-receipt receipt}]})
-        assembled (assemble* {:targets [a-target u-target] :sources sources})
-        r (wm-cd/cascade-decision assembled live-c-opts)
-        decision (:decision r)]
-    (is (= :abstained (:status decision))
-        "nothing thrown: the all-declined family abstains")
-    (is (= [a-target u-target] (mapv :target (:refusals decision))))
-    (is (= [:no-query-time-slice :class-unknown-no-scalar-g]
-           (mapv :kind (:refusals decision)))
-        "A's missing-slice refusal in its existing place, then U's class-unknown refusal")
-    (is (= :target-relation (:missing (second (:refusals decision))))
-        "the class-unknown refusal names the missing input")
-    (is (some #(and (= :class-unknown-no-scalar-g (:reason %))
-                    (= u-target (:target %))
-                    (= :scoring (:stage %)))
-              (:dropped-candidates r))
-        "the scoring decline is kept on :dropped-candidates")))
+  ;; one target has no reading, the other no scorable policy: abstain with
+  ;; both refusals in field order, never throw
+  (let [fld (route/field {"M-a" nil "M-u" ["p/b" "p/c"]})
+        r (with-redefs [shape-g/score-policy (refusing-policies (constantly true))]
+            (route/decide-field fld {"M-a" 1 "M-u" 1} {}))]
+    (is (= :abstained (get-in r [:decision :status])))
+    (is (= ["M-a" "M-u"] (mapv :target (get-in r [:decision :refusals]))))
+    (is (= [[:no-policy-family :no-current-target-reading]
+            [:no-policy-family :policy-scoring-refused]]
+           (refusal-kinds r)))
+    (is (= :fixture-unscorable (get-in r [:decision :refusals 1 :failures 0 :reason])))))
+
+(deftest every-accounted-target-lands-in-the-field
+  ;; production repair (Q5 report packet): a target the assembly accounted
+  ;; for but with no source row is a counted failure, not silently absent;
+  ;; a field with no target at all abstains typed (keeping a field-level
+  ;; outer refusal) instead of failing the gate on an empty refusal list
+  (let [fx (route/fixture)
+        base (route/assembled fx 1)
+        with-rowless (update base :refusals conj {:target "M-rowless" :kind :no-admitted-interpretation})
+        r (wm-cd/cascade-decision with-rowless (route/opts fx {}))
+        outer {:target {:absent :outer-task-not-selected} :kind :outer-task-selection-refused}
+        empty-field (wm-cd/cascade-decision {:problems [] :refusals [outer] :target-sources []}
+                                            (route/opts fx {}))
+        bare (wm-cd/cascade-decision {:problems [] :refusals [] :target-sources []}
+                                     (route/opts fx {}))]
+    (is (= "M-current" (get-in r [:decision :action :target])) "the target with a row still selects")
+    (is (some #(and (= "M-rowless" (:target-id %)) (= :target-source-row-absent (:kind %)))
+              (get-in r [:decision :selection-certificate :family-failures])))
+    (is (= 1 (get-in r [:decision :selection-certificate :target-policy-field
+                        :coverage :source-path-absent])))
+    (is (= [outer] (mapv #(select-keys % [:target :kind]) (get-in empty-field [:decision :refusals])))
+        "the outer selector's refusal is the empty field's abstention")
+    (is (= [[:no-policy-family :no-enumerated-target]] (refusal-kinds bare)))))

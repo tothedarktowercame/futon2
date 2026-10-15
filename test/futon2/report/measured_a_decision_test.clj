@@ -14,7 +14,8 @@
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.token-a-bmr :as token-a-bmr]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.aif.wm.cascade-decision :as wm-cd]))
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route]))
 
 (def ^:dynamic ^:private c3-labels nil)
 (def ^:private c3-subjects {:C3 10})
@@ -163,17 +164,21 @@
          fails: an absence reads as a value")))
 
 (deftest the-write-does-not-touch-the-score
-  ;; The decision's score — the selected action and the selection
-  ;; posterior — is byte-identical with and without the write's inputs.
-  (let [with-write (decision labels-opt)
-        without-write (decision {})
-        score (fn [d] (pr-str (select-keys d [:action :softmax-weights
-                                              :selection-law])))]
-    (is (= :wm/measured-a-v1 (get-in with-write [:measured-a :schema])))
-    (is (= :absent (get-in without-write [:measured-a :status])))
-    (is (= (score without-write) (score with-write))
-        "the existing decision score is byte-identical with and without
-         the write")))
+  ;; Migrated 2026-10-15 (Q5 route ledger): the reading-family decision's
+  ;; score is byte-identical with and without a label store. Measured A is
+  ;; no longer written by the decision (retired with the token-rate lanes; a
+  ;; reconnection obligation) and is recorded as unavailable.
+  (route/with-empty-learning-ledger
+   (fn []
+     (let [fx (route/fixture)
+           with-write (:decision (route/decide fx 1 labels-opt))
+           without-write (:decision (route/decide fx))
+           score (fn [d] (pr-str (select-keys d [:action :softmax-weights
+                                                 :selection-law])))]
+       (is (= :unavailable (get-in with-write [:selection-certificate :retired-diagnostics
+                                               :measured-a :status])))
+       (is (= (score without-write) (score with-write))
+           "the decision score is byte-identical with and without the store")))))
 
 (def ^:private token-a-label-view
   {:labels (vec (concat

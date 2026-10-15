@@ -998,8 +998,21 @@
   (if-not (contains? assembled :target-sources)
     {:status :absent :reason :target-sources-not-supplied}
     (let [reading-root (or (:target-reading-root opts) reading-registry/default-root)
+          declared (:target-sources assembled)
+          ;; every target the assembly accounted for lands in the field: one
+          ;; with no source row is a counted failure, never silently absent
+          rowless (remove (set (map :target-id declared))
+                          ;; a field-level refusal (the outer selector's) names
+                          ;; no target; it is not a target without a row
+                          (distinct (filter #(or (string? %) (keyword? %))
+                                            (map :target (concat (:problems assembled)
+                                                                 (:refusals assembled))))))
+          rows (into (vec declared)
+                     (map (fn [t] {:target-id t :source-path nil
+                                   :source-absent :target-source-row-absent}))
+                     rowless)
           field (family-selection/families-for-field
-                 {:target-sources (:target-sources assembled)
+                 {:target-sources rows
                   :reading-root reading-root
                   :graph-path (:pattern-graph-path opts)
                   :retraction (:target-policy-retraction opts)})]
@@ -1157,14 +1170,19 @@
                     ranked {:conditioning-status (if (:dir-status steps) :not-run :admitted)}
                     (prefix-admission/prefixes (mapv :action ranked) steps)
                     census))
-        family-failures (vec (mapcat (fn [f] (map #(assoc % :target-id (:target-id f))
-                                                  (:failures f)))
-                                     families))
         computed? (some #(= :computed (:status %)) families)]
     (cond
       (not= :formed (:status field))
       {:decision (abstain [{:target nil :stage :policy-family :kind :no-policy-family
                              :failure-kind (:reason field)}])}
+
+      (empty? families)
+      ;; no target to form a family for: the field-level refusal that
+      ;; emptied it (the outer selector's), else a typed empty field
+      {:decision (abstain (or (seq (filter #(= :outer-task-selection-refused (:kind %))
+                                           (:refusals assembled)))
+                              [{:target nil :stage :policy-family :kind :no-policy-family
+                                :failure-kind :no-enumerated-target}]))}
 
       (not computed?)
       {:decision (abstain (family-refusals families))}
@@ -1203,8 +1221,10 @@
                                        :wm/reading-policy-family-v1)
                              (assoc-in [:selection-certificate :target-policy-families]
                                        (:target-policy-families result))
+                             ;; every counted failure, the field's and each
+                             ;; policy the scorer refused
                              (assoc-in [:selection-certificate :family-failures]
-                                       family-failures)
+                                       (:failures result))
                              (update :selection-certificate merge
                                      (get-in result [:certification :receipt]))
                              (assoc-in [:selection-certificate :preference]
