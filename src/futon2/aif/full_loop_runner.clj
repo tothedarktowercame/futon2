@@ -1880,7 +1880,9 @@
                                (:interpretation-debt-digest policy)))
                            (mapcat :policies (:target-policy-families cert)))]
         (reading-debt/enactment-status
-         action recorded (get-in cert [:interpretation-discharge :receipts]))))))
+         action recorded
+         (get-in cert [:interpretation-discharge :receipts])
+         (get-in cert [:interpretation-discharge :request]))))))
 
 (defn- monotonic-clock
   "One clock for a selection phase's events: wall-clock Instants, nudged a
@@ -1909,7 +1911,9 @@
         status (reading-interpretation-status decision)]
     (if (not= :interpretation-owed-after-selection (:status status))
       {:judgement judgement :record nil}
-      (let [request (selected-reading/request decision)
+      (let [library-root (or (:pattern-library-root opts)
+                             selected-reading/default-library-root)
+            request (selected-reading/request decision {:library-root library-root})
             ask (:selected-reading-ask-fn opts)
             requested-at (clock)
             response (when ask
@@ -1925,10 +1929,8 @@
                       :reasons [{:reason :selected-reading-ask-threw
                                  :message (::ask-threw response)}]}
                      :else
-                     (selected-reading/validate
-                      request response
-                      {:library-root (or (:pattern-library-root opts)
-                                         selected-reading/default-library-root)}))
+                     (selected-reading/validate request response
+                                                {:library-root library-root}))
             validated-at (clock)
             section (fn [prior]
                       {:schema :wm/interpretation-discharge-v1

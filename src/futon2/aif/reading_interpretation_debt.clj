@@ -11,17 +11,26 @@
   :not-read patterns of its node statuses, and its digest must recompute),
   and against the digest the decision recorded for that policy apart from
   the action. Pure."
-  (:require [futon2.aif.action-identity :as action-identity]
+  (:require [clojure.string :as str]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy-prefix-admission :as prefix-admission]))
 
 (load-identity/register! *ns* *file*)
 
 (def schema :wm/reading-interpretation-debt-v1)
+(def request-schema :wm/selected-reading-request-v1)
+(def receipt-schema :wm/selected-reading-receipt-v1)
+(def validator-id :wm/selected-reading-validator-v1)
 
-(defn- digest [tag value]
+(defn seal
+  "The canonical digest of VALUE under TAG; the seal of debts, selected-reading
+  requests and receipts."
+  [tag value]
   (action-identity/sha256
    (action-identity/printed false [tag (action-identity/canonical value)])))
+
+(def ^:private digest seal)
 
 (defn arrangement-digest
   "Digest of the action's arrangement: occurrence nodes, edges and order."
@@ -97,11 +106,59 @@
       (not= (:digest carrier) (carrier-digest carrier)) (invalid :debt-digest-mismatch)
       :else {:status :valid :owed (:owed carrier) :digest (:digest carrier)})))
 
+(defn request-intact?
+  "True iff REQUEST's :request-id is the seal of the rest of it."
+  [request]
+  (and (map? request) (= request-schema (:schema request))
+       (= (:request-id request) (seal request-schema (dissoc request :request-id)))))
+
+(defn receipt-problem
+  "Why RECEIPT does not discharge an occurrence of ACTION's debt under the
+  issued REQUEST, or nil. A receipt stands only as the selected-reading
+  validator sealed it: schema, validator and result, intact seal, this
+  policy's id, key digest and debt digest, an owed occurrence, the intact
+  request it answers (same policy and debt), the debt's excerpt and analysis
+  digests, a named source, and the library pin the request issued."
+  [action request receipt]
+  (let [carrier (:interpretation-debt action)
+        pattern (:pattern receipt)
+        reading (:reading receipt)]
+    (cond
+      (not (map? receipt)) :receipt-malformed
+      (not= receipt-schema (:schema receipt)) :receipt-unsealed
+      (not= {:validator validator-id :result :valid} (:validation receipt))
+      :receipt-not-validated
+      (not= (:digest receipt) (seal receipt-schema (dissoc receipt :digest)))
+      :receipt-seal-broken
+      (not= :validated (:status receipt)) :receipt-not-validated
+      (not (and (= (:id action) (:policy-id receipt))
+                (= (:digest carrier) (:debt-digest receipt))))
+      :foreign-interpretation-receipt
+      (not= (seal :wm/reading-policy-key (:policy-key action)) (:policy-key-digest receipt))
+      :receipt-policy-key-mismatch
+      (not (contains? (set (:owed carrier)) (select-keys receipt [:occurrence-id :pattern])))
+      :receipt-for-unowed-occurrence
+      (not (request-intact? request)) :receipt-request-missing-or-broken
+      (not (and (= (:request-id request) (:request-id reading))
+                (= (:id action) (:policy-id request))
+                (= (:digest carrier) (:debt-digest request))))
+      :receipt-for-another-request
+      (not (and (= (:excerpt-digest carrier) (:excerpt-digest reading))
+                (= (:analysis-digest carrier) (:analysis-digest reading))))
+      :receipt-reading-mismatch
+      (not (and (string? (:by reading)) (seq (str/trim (:by reading)))))
+      :receipt-without-source-identity
+      (not (and (some? (get-in request [:library-pins pattern]))
+                (= (get-in request [:library-pins pattern]) (:library-pin receipt))
+                (= (:library-pin receipt) (:source-sha256 receipt))))
+      :receipt-library-pin-mismatch
+      :else nil)))
+
 (defn enactment-status
   "Whether reading policy ACTION may be enacted. RECORDED-DIGEST is the debt
   digest the decision recorded for this policy apart from the action;
-  RECEIPTS are post-selection interpretation receipts
-  ({:policy-id :debt-digest :occurrence-id :pattern :status :validated}).
+  RECEIPTS are the sealed selected-reading receipts and REQUEST the issued
+  request they answer (receipt-problem says what each must be).
 
   :discharged only when the carrier is valid, matches the recorded digest,
   and every owed occurrence has a validated receipt for this exact policy,
@@ -109,16 +166,13 @@
   stands). A receipt for another policy or debt, or for an occurrence the
   debt does not owe, is :invalid; any owed occurrence without one is
   :interpretation-owed-after-selection, carrying the re-arm condition."
-  [action recorded-digest receipts]
+  [action recorded-digest receipts request]
   (let [{:keys [status owed digest reason]} (check action)]
     (cond
       (not= :valid status) {:status :invalid :reason reason}
       (not= recorded-digest digest) {:status :invalid :reason :debt-not-recorded-by-decision}
-      (some #(not (and (= (:id action) (:policy-id %)) (= digest (:debt-digest %))))
-            receipts)
-      {:status :invalid :reason :foreign-interpretation-receipt}
-      (some #(not (contains? (set owed) (select-keys % [:occurrence-id :pattern]))) receipts)
-      {:status :invalid :reason :receipt-for-unowed-occurrence}
+      (some #(receipt-problem action request %) receipts)
+      {:status :invalid :reason (some #(receipt-problem action request %) receipts)}
       :else
       (let [validated (set (keep #(when (= :validated (:status %))
                                     (select-keys % [:occurrence-id :pattern]))

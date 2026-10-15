@@ -16,26 +16,31 @@
   rewritten: these receipts are a separate record."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.reading-interpretation-debt :as debt])
   (:import [java.nio.file Files]))
 
 (load-identity/register! *ns* *file*)
 
-(def request-schema :wm/selected-reading-request-v1)
-(def receipt-schema :wm/selected-reading-receipt-v1)
-(def validator-id :wm/selected-reading-validator-v1)
+(def request-schema debt/request-schema)
+(def receipt-schema debt/receipt-schema)
+(def validator-id debt/validator-id)
 (def default-library-root "/home/joe/code/futon3/library")
 
-(defn- digest [tag value]
-  (action-identity/sha256
-   (action-identity/printed false [tag (action-identity/canonical value)])))
+(def ^:private digest debt/seal)
+
+(defn- library-sha256 [library-root pattern]
+  (let [f (io/file library-root (str pattern ".flexiarg"))]
+    (when (.isFile f)
+      (load-identity/sha256 (Files/readAllBytes (.toPath f))))))
 
 (defn request
   "The selected-only reading request for DECISION's chosen reading policy,
-  or nil when it owes nothing (or is not a reading policy)."
-  [decision]
+  or nil when it owes nothing (or is not a reading policy). Each owed
+  pattern's library file is pinned at issuance (:library-pins, nil when the
+  file is absent), inside the sealed request id: the responder never
+  supplies the only pin."
+  [decision {:keys [library-root] :or {library-root default-library-root}}]
   (let [action (:action decision)
         carrier (:interpretation-debt action)]
     (when (and (map? carrier) (seq (:owed carrier)))
@@ -49,6 +54,9 @@
                   :excerpt-digest (:excerpt-digest carrier)
                   :analysis-digest (:analysis-digest carrier)
                   :owed (:owed carrier)
+                  :library-pins (into (sorted-map)
+                                      (map (fn [p] [p (library-sha256 library-root p)]))
+                                      (distinct (map :pattern (:owed carrier))))
                   :asks {:what (str "For each owed occurrence only: does its pattern "
                                     "apply to this target's excerpt? Answer accepted "
                                     "or rejected, with a reason and the sha256 of the "
@@ -61,11 +69,6 @@
                                                     :source_sha256 "sha256 of the library file"}]
                                         :by "answering agent id"}}}]
         (assoc body :request-id (digest request-schema body))))))
-
-(defn- library-sha256 [library-root pattern]
-  (let [f (io/file library-root (str pattern ".flexiarg"))]
-    (when (.isFile f)
-      (load-identity/sha256 (Files/readAllBytes (.toPath f))))))
 
 (defn- verdict-problem
   "Why one VERDICT does not stand for REQUEST, or nil."
@@ -81,7 +84,11 @@
       (not (and (string? (:source_sha256 verdict))
                 (re-matches #"[0-9a-f]{64}" (:source_sha256 verdict))))
       :malformed-library-pin
-      (not= (library-sha256 library-root (:pattern verdict)) (:source_sha256 verdict))
+      (nil? (get-in request [:library-pins (:pattern verdict)])) :library-source-missing
+      (not= (get-in request [:library-pins (:pattern verdict)])
+            (library-sha256 library-root (:pattern verdict)))
+      :library-source-changed
+      (not= (get-in request [:library-pins (:pattern verdict)]) (:source_sha256 verdict))
       :library-pin-mismatch
       :else nil)))
 
@@ -101,6 +108,9 @@
                                       :debt-digest (:debt-digest request)}})]
     (cond
       (not (map? response)) (refuse [{:reason :malformed-response}])
+      (not (debt/request-intact? request)) (refuse [{:reason :request-seal-broken}])
+      (not (and (string? (:by response)) (not (str/blank? (:by response)))))
+      (refuse [{:reason :missing-source-identity}])
       (not= (:request-id request) (:request-id response))
       (refuse [{:reason :response-for-another-request}])
       (not (and (sequential? verdicts) (seq verdicts))) (refuse [{:reason :no-verdicts}])
@@ -114,7 +124,9 @@
         (if (seq problems)
           (refuse problems)
           (let [response-digest (digest :wm/selected-reading-response-v1 response)
+                seal (fn [r] (assoc r :digest (digest receipt-schema r)))
                 receipts (mapv (fn [v]
+                                 (seal
                                  {:schema receipt-schema
                                   :status :validated
                                   :policy-id (:policy-id request)
@@ -125,12 +137,13 @@
                                   :verdict (keyword (:verdict v))
                                   :reason (:reason v)
                                   :source-sha256 (:source_sha256 v)
+                                  :library-pin (get-in request [:library-pins (:pattern v)])
                                   :reading {:request-id (:request-id request)
                                             :response-digest response-digest
                                             :excerpt-digest (:excerpt-digest request)
                                             :analysis-digest (:analysis-digest request)
                                             :by (:by response)}
-                                  :validation {:validator validator-id :result :valid}})
+                                  :validation {:validator validator-id :result :valid}}))
                                verdicts)
                 answered (set (map #(select-keys % [:occurrence-id :pattern]) verdicts))]
             {:status :validated :request-id (:request-id request)
@@ -139,9 +152,9 @@
 
 (defn discharge-status
   "reading-interpretation-debt/enactment-status for DECISION's action with
-  the receipts already appended at [:selection-certificate
-  :interpretation-discharge :receipts] and the decision's recorded digest."
+  the receipts and request appended at [:selection-certificate
+  :interpretation-discharge] and the decision's recorded digest."
   [decision recorded-digest]
-  (debt/enactment-status (:action decision) recorded-digest
-                         (get-in decision [:selection-certificate
-                                           :interpretation-discharge :receipts])))
+  (let [section (get-in decision [:selection-certificate :interpretation-discharge])]
+    (debt/enactment-status (:action decision) recorded-digest
+                           (:receipts section) (:request section))))

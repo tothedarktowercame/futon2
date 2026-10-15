@@ -12,6 +12,7 @@
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy :as policy]
+            [futon2.aif.reading-interpretation-debt :as debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.wm.reading-family-decision-test :as rfd]
             [futon2.test-support.runner-fixture :as fixture]
@@ -62,6 +63,15 @@
                      {:occurrence-id occurrence-id :pattern pattern
                       :verdict verdict :reason (str pattern " " verdict " for this excerpt")
                       :source_sha256 (sha lib pattern)})
+                   (:owed request))})
+
+(defn- answer-with-pins
+  "An accepted answer citing the pins the request issued."
+  [request]
+  {:request-id (:request-id request) :by "stub-reader"
+   :verdicts (mapv (fn [{:keys [occurrence-id pattern]}]
+                     {:occurrence-id occurrence-id :pattern pattern :verdict "accepted"
+                      :reason "fits" :source_sha256 (get-in request [:library-pins pattern])})
                    (:owed request))})
 
 (defn- judgement-for [decision]
@@ -169,6 +179,10 @@
                             {:selected-reading-ask-fn ask :pattern-library-root (str lib)}
                             {:decision decision} clock at)))))
 
+(defn- reseal [r]
+  (let [r (dissoc r :digest)]
+    (assoc r :digest (debt/seal debt/receipt-schema r))))
+
 (deftest verdicts-and-adversarial-responses
   (let [lib (library)
         decision (selected-decision (atom 0))
@@ -210,7 +224,7 @@
     (testing "a receipt cannot stand for a different occurrence of the same pattern"
       (let [after (phase decision lib #(answer % lib "accepted"))
             moved (update-in after [:selection-certificate :interpretation-discharge :receipts 0]
-                             assoc :occurrence-id "p/b#other")]
+                             #(reseal (assoc % :occurrence-id "p/b#other")))]
         (is (= :discharged (status after)))
         (is (= :receipt-for-unowed-occurrence
                (:reason (runner/reading-interpretation-status moved))))))
@@ -221,7 +235,71 @@
             after (phase zero lib (fn [r] (swap! asked inc) (answer r lib "accepted")))]
         (is (= 0 @asked))
         (is (= zero after))))
-    (testing "the request is for the selected debt only"
-      (let [request (selected-reading/request decision)]
+    (testing "the request is for the selected debt only, with the library pinned at issuance"
+      (let [request (selected-reading/request decision {:library-root (str lib)})]
         (is (= (get-in decision [:action :interpretation-debt :digest]) (:debt-digest request)))
-        (is (= (get-in decision [:action :policy-key]) (:policy-key request)))))))
+        (is (= (get-in decision [:action :policy-key]) (:policy-key request)))
+        (is (= {"p/b" (sha lib "p/b")} (:library-pins request)))))))
+
+(deftest receipts-stand-only-as-sealed-by-the-validator
+  (let [lib (library)
+        decision (selected-decision (atom 0))
+        after (phase decision lib #(answer % lib "accepted"))
+        section [:selection-certificate :interpretation-discharge]
+        receipt (get-in after (conj section :receipts 0))
+        with-receipt (fn [r] (assoc-in after (conj section :receipts) [r]))
+        reason #(:reason (runner/reading-interpretation-status %))]
+    (is (= :discharged (:status (runner/reading-interpretation-status after))))
+    (testing "a forged minimal receipt"
+      (is (= :receipt-unsealed
+             (reason (with-receipt (merge (first (get-in decision [:action :interpretation-debt :owed]))
+                                          {:policy-id (get-in decision [:action :id])
+                                           :debt-digest (get-in decision [:action :interpretation-debt :digest])
+                                           :status :validated}))))))
+    (testing "a tampered receipt"
+      (is (= :receipt-seal-broken (reason (with-receipt (assoc receipt :verdict :rejected))))))
+    (testing "tampered and resealed against another pin, request, reading or source"
+      (is (= :receipt-library-pin-mismatch
+             (reason (with-receipt (reseal (assoc receipt :source-sha256 (sha lib "p/a")
+                                                  :library-pin (sha lib "p/a")))))))
+      (is (= :receipt-for-another-request
+             (reason (with-receipt (reseal (assoc-in receipt [:reading :request-id] "another"))))))
+      (is (= :receipt-reading-mismatch
+             (reason (with-receipt (reseal (assoc-in receipt [:reading :analysis-digest] "other"))))))
+      (is (= :receipt-without-source-identity
+             (reason (with-receipt (reseal (assoc-in receipt [:reading :by] " "))))))
+      (is (= :receipt-policy-key-mismatch
+             (reason (with-receipt (reseal (assoc receipt :policy-key-digest "other"))))))
+      (is (= :receipt-not-validated
+             (reason (with-receipt (reseal (assoc receipt :validation {:validator :other :result :valid})))))))
+    (testing "the issued request cannot be edited under its id"
+      (is (= :receipt-request-missing-or-broken
+             (reason (assoc-in after (conj section :request :library-pins "p/b") (sha lib "p/a")))))
+      (is (= :receipt-request-missing-or-broken
+             (reason (update-in after section dissoc :request)))))))
+
+(deftest library-pinned-at-issuance-and-source-named
+  (let [lib (library)
+        decision (selected-decision (atom 0))
+        validation #(get-in % [:selection-certificate :interpretation-discharge :validation])
+        status #(:status (runner/reading-interpretation-status %))]
+    (testing "the library changing between request and response refuses"
+      (let [after (phase decision lib
+                         (fn [request]
+                           (spit (io/file lib "p/b.flexiarg") "@flexiarg p/b\n! edited after the request\n")
+                           (assoc-in (answer request lib "accepted")
+                                     [:verdicts 0 :source_sha256] (sha lib "p/b"))))]
+        (is (= :library-source-changed (get-in (validation after) [:reasons 0 :reason])))
+        (is (= :interpretation-owed-after-selection (status after)))))
+    (testing "a library file absent at issuance refuses"
+      (let [lib (library)
+            _ (io/delete-file (io/file lib "p/b.flexiarg"))
+            after (phase decision lib
+                         (fn [request]
+                           (assoc-in (answer-with-pins request) [:verdicts 0 :source_sha256]
+                                     (apply str (repeat 64 "a")))))]
+        (is (= :library-source-missing (get-in (validation after) [:reasons 0 :reason])))))
+    (testing "an answer without a named source refuses"
+      (let [after (phase decision lib #(assoc (answer % lib "accepted") :by " "))]
+        (is (= :missing-source-identity (get-in (validation after) [:reasons 0 :reason])))
+        (is (= :interpretation-owed-after-selection (status after)))))))

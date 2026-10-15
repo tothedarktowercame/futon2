@@ -18,6 +18,7 @@
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as admission]
             [futon2.aif.reading-interpretation-debt :as debt]
+            [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.wm.cascade-decision :as wm-cd])
@@ -181,30 +182,59 @@
         (update-in [:selection-certificate :candidates]
                    (fn [rows] (mapv #(if (= action (:id %)) (assoc % :id forged) %) rows))))))
 
-(defn- receipts [decision rs]
-  (assoc-in decision [:selection-certificate :interpretation-discharge :receipts] rs))
+(defn- receipts
+  "DECISION with RS as its discharge receipts, answering REQUEST."
+  ([decision rs] (receipts decision rs nil))
+  ([decision rs request]
+   (update-in decision [:selection-certificate :interpretation-discharge]
+              assoc :receipts rs :request request)))
+
+(defn- reseal [r]
+  (let [r (dissoc r :digest)]
+    (assoc r :digest (debt/seal debt/receipt-schema r))))
+
+(defn- library []
+  (let [root (temp-dir "reading-decision-library-")]
+    (doseq [p ["p/a" "p/b" "p/c"]]
+      (let [f (io/file root (str p ".flexiarg"))]
+        (.mkdirs (.getParentFile f))
+        (spit f (str "@flexiarg " p "\n"))))
+    root))
+
+(defn- validated
+  "The issued request for DECISION's debt and the sealed receipts the
+  selected-reading validator writes for an accepted answer."
+  [decision lib]
+  (let [request (selected-reading/request decision {:library-root (str lib)})
+        response {:request-id (:request-id request) :by "stub-reader"
+                  :verdicts (mapv (fn [{:keys [occurrence-id pattern]}]
+                                    {:occurrence-id occurrence-id :pattern pattern
+                                     :verdict "accepted" :reason "fits this excerpt"
+                                     :source_sha256 (get-in request [:library-pins pattern])})
+                                  (:owed request))}]
+    {:request request
+     :receipts (:receipts (selected-reading/validate request response {:library-root (str lib)}))}))
 
 (deftest debt-binding-is-immutable
   (let [fx (fixture ["p/a" "p/c"])
         decision (:decision (decide fx [(get-in fx [:rows :current])] {"M-current" 1}))
         action (:action decision)
         carrier (:interpretation-debt action)
-        id (:id action)
-        good-receipt (merge (first (:owed carrier))
-                            {:policy-id id :debt-digest (:digest carrier) :status :validated})
+        {:keys [request] [good-receipt] :receipts} (validated decision (library))
         refused? (fn [d] (nil? (selected-entry d)))]
     (testing "the full discharge for this exact identity is what re-arms enactment"
-      (is (= action (:action (selected-entry (receipts decision [good-receipt]))))))
-    (testing "partial or misdirected discharge leaves the debt open"
-      (is (refused? (receipts decision [(assoc good-receipt :pattern "p/a")])))
-      (is (refused? (receipts decision [(assoc good-receipt :status :refused)]))))
+      (is (= action (:action (selected-entry (receipts decision [good-receipt] request))))))
+    (testing "no receipt, or an edited one, leaves the debt open"
+      (is (refused? (receipts decision [] request)))
+      (is (refused? (receipts decision [(assoc good-receipt :pattern "p/a")] request)))
+      (is (refused? (receipts decision [(assoc good-receipt :status :refused)] request))))
     (testing "a receipt for another policy or another debt is refused"
-      (let [foreign (assoc good-receipt :policy-id "M-current/policy-0000000000000000ffff")
-            stale (assoc good-receipt :debt-digest (apply str (repeat 64 "0")))]
+      (let [foreign (reseal (assoc good-receipt :policy-id "M-current/policy-0000000000000000ffff"))
+            stale (reseal (assoc good-receipt :debt-digest (apply str (repeat 64 "0"))))]
         (is (= :foreign-interpretation-receipt
-               (:reason (debt-status (receipts decision [foreign])))))
-        (is (refused? (receipts decision [foreign])))
-        (is (refused? (receipts decision [stale])))))
+               (:reason (debt-status (receipts decision [foreign] request)))))
+        (is (refused? (receipts decision [foreign] request)))
+        (is (refused? (receipts decision [stale] request)))))
     (testing "forged or detached carriers refuse"
       (doseq [[label f]
               {:forged-empty-debt (fn [a] (assoc-in a [:interpretation-debt :owed] []))
@@ -212,7 +242,7 @@
                (fn [a] (assoc a :interpretation-debt
                               (debt/debt a {:nodes (mapv (fn [p] {:pattern p :status :accepted})
                                                          (map first (:node-status carrier)))}
-                                         (:analysis-digest carrier))))
+                                         (select-keys carrier [:analysis-digest :excerpt-digest]))))
                :missing-carrier (fn [a] (dissoc a :interpretation-debt))
                :order-mismatch (fn [a] (update-in a [:interpretation-debt :order] (comp vec reverse)))
                :arrangement-mismatch
@@ -224,8 +254,9 @@
           ;; the Prefix-F guard (which also sees the edited action) is not
           ;; what refuses it
           (is (not= :discharged (:status (debt-status (with-action decision f)))))
-          (is (not= :discharged (:status (debt-status (receipts (with-action decision f) [good-receipt])))))
-          (is (refused? (receipts (with-action decision f) [good-receipt]))))))))
+          (is (not= :discharged (:status (debt-status (receipts (with-action decision f)
+                                                                [good-receipt] request)))))
+          (is (refused? (receipts (with-action decision f) [good-receipt] request))))))))
 
 (deftest unread-targets-are-counted-and-never-chosen
   (let [fx (fixture)
