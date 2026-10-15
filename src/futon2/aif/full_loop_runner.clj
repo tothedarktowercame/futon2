@@ -1916,14 +1916,17 @@
             request (selected-reading/request decision {:library-root library-root})
             ask (:selected-reading-ask-fn opts)
             refused-issue (when (= :refused (:status request)) request)
-            requested-at (clock)
-            response (when (and ask (nil? refused-issue))
+            ;; contact happens only for an issued request with an ask to send
+            ;; it to; otherwise there is no interpretation request at all
+            contact? (and ask (nil? refused-issue))
+            requested-at (when contact? (clock))
+            response (when contact?
                        (try (ask request)
                             (catch Throwable e {::ask-threw (ex-message e)})))
-            received-at (clock)
+            received-at (when contact? (clock))
             result (cond
                      ;; an owed pattern with no library file cannot be pinned:
-                     ;; the debt is not asked about at all
+                     ;; no request is issued and the debt is not asked about
                      refused-issue
                      {:status :interpretation-validation-refused
                       :reasons [{:reason (:kind refused-issue)
@@ -1941,30 +1944,45 @@
             validated-at (clock)
             section (fn [prior]
                       {:schema :wm/interpretation-discharge-v1
-                       :request request
+                       :request (when-not refused-issue request)
+                       :issuance (or refused-issue
+                                     {:status :issued :request-id (:request-id request)})
                        :validation (dissoc result :receipts)
                        :receipts (into (vec (:receipts prior)) (:receipts result))})
             decision' (update-in decision [:selection-certificate :interpretation-discharge]
                                  section)
             after (reading-interpretation-status decision')
             eligible-at (clock)
-            events [{:event :selection-completed :seq 1 :at (str selected-at)}
-                    {:event :interpretation-requested :seq 2 :at (str requested-at)}
-                    {:event :interpretation-received :seq 3 :at (str received-at)}
-                    {:event :interpretation-validated :seq 4 :at (str validated-at)
-                     :status (:status result)}
-                    {:event :enactment-eligibility-checked :seq 5 :at (str eligible-at)
-                     :status (:status after)}]
+            events (vec (concat
+                         [{:event :selection-completed :seq 1 :at (str selected-at)}]
+                         (if contact?
+                           [{:event :interpretation-requested :at (str requested-at)}
+                            {:event :interpretation-received :at (str received-at)}
+                            {:event :interpretation-validated :at (str validated-at)
+                             :status (:status result)}]
+                           [{:event :interpretation-not-requested :at (str validated-at)
+                             :reason (get-in result [:reasons 0 :reason])}])
+                         [{:event :enactment-eligibility-checked :at (str eligible-at)
+                           :status (:status after)}]))
+            events (vec (map-indexed (fn [i e] (if (:seq e) e (assoc e :seq (inc i)))) events))
             decision' (assoc-in decision' [:selection-certificate :interpretation-discharge :events]
                                 events)]
         {:judgement (assoc judgement :decision decision')
-         :record {:kind :selected-reading
-                  :status (:status result)
-                  :issued-at (str requested-at)
-                  :request-id (:request-id request)
-                  :owed (:owed request)
-                  :discharge (:status after)
-                  :events events}}))))
+         :record (if contact?
+                   {:kind :selected-reading
+                    :status (:status result)
+                    :issued-at (str requested-at)
+                    :request-id (:request-id request)
+                    :owed (:owed request)
+                    :discharge (:status after)
+                    :events events}
+                   ;; nothing was asked: the selection-world records no
+                   ;; interpretation instant
+                   {:kind :selected-reading
+                    :status :absent
+                    :reason (get-in result [:reasons 0 :reason])
+                    :discharge (:status after)
+                    :events events})}))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC

@@ -132,7 +132,10 @@
       (is (seq losing-ids))
       (is (every? #(and (string? %) (str/starts-with? % "M-current/policy-")) losing-ids))
       (is (= chosen-id (:policy-id request)))
-      (is (not-any? #{(:policy-id request)} losing-ids)))
+      (is (not-any? #{(:policy-id request)} losing-ids))
+      (let [in-scope? (fn [id] (and (= chosen-id id) (not-any? #{id} losing-ids)))]
+        (is (in-scope? (:policy-id request)))
+        (is (not (in-scope? (first losing-ids))) "a losing id fails the scope predicate")))
     (testing "events are strictly ordered: selection, request, validation, eligibility"
       (let [events (:events discharge)]
         (is (= [:selection-completed :interpretation-requested :interpretation-received
@@ -317,6 +320,19 @@
         (is (= (get-in decision [:action :interpretation-debt :owed])
                (get-in (validation after) [:reasons 0 :missing])))
         (is (= :interpretation-owed-after-selection (status after)))
+        (testing "no contact is recorded: no request event, no issued instant"
+          (let [events (get-in after [:selection-certificate :interpretation-discharge :events])]
+            (is (= [:selection-completed :interpretation-not-requested :enactment-eligibility-checked]
+                   (mapv :event events)))
+            (is (nil? (get-in after [:selection-certificate :interpretation-discharge :request])))
+            (let [clock (#'runner/monotonic-clock)
+                  record (:record (runner/selected-reading-phase
+                                   {:selected-reading-ask-fn (fn [_] (swap! asked inc))
+                                    :pattern-library-root (str lib)}
+                                   {:decision decision} clock (clock)))]
+              (is (= :absent (:status record)))
+              (is (not (contains? record :issued-at)))
+              (is (= 0 @asked)))))
         (testing "no request with an unpinned library source is ever issued"
           (let [issued (selected-reading/request decision {:library-root (str lib)})]
             (is (= :refused (:status issued)))
