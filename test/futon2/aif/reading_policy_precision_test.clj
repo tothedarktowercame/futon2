@@ -1,7 +1,7 @@
 (ns futon2.aif.reading-policy-precision-test
   "Identity invariance/refusal tests for reading-policy-precision: order and
   theta invariance, each structural/model pin change, old-model refusal."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is]]
             [futon2.aif.reading-policy-precision :as rpp]))
 
 (def base-config
