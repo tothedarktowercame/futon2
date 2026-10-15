@@ -9,7 +9,6 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
-            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runtime]
             [futon2.aif.full-loop-runner :as runner]
@@ -17,16 +16,16 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.locator-fixtures :as loc]
-            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.trace :as trace]
-            [futon2.report.cascade-decision-test :as cfix]
-            [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.aif.reading-interpretation-debt :as debt]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
-(use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false] (f))))
+(use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false]
+                              (route/with-empty-learning-ledger f))))
 
 (def live (edn/read-string
            (slurp (io/resource "fixtures/gate-refusal/fifth-flight-failure-data.edn"))))
@@ -134,54 +133,30 @@
             :record (edn/read-string (slurp (:run-record result)))})))))
 
 (deftest the-real-gate-refusal-is-the-ticks-typed-abstention
-  ;; WIRE-23-C2 (PROOF-2a <2>3 lane C2): the judge-fn drives the REAL
-  ;; writer, war-machine/cascade-decision, whose decision gate refuses: the
-  ;; fixture family is admitted through the current three-halves and Prefix-F
-  ;; boundaries with one guard token's locator present but invalid for its
-  ;; class (C4 without :decl), so
-  ;; cascade-decision-admitted throws ex-info "Inadmissible decision"
-  ;; {:error :inadmissible-decision :reason :missing-observation-locators}.
-  (let [admitted (@#'cfix/assemble* {:targets [cfix/tick-1-target]
-                                     :sources cfix/tick-1-sources})
-        candidates (get-in admitted [:problems 0 :constructed-candidates])
-        steps (mapv (fn [i candidate]
-                      {:step {:status :present
-                              :policy-key
-                              (prefix-admission/candidate-key
-                               {:id (:candidate-id candidate)
-                                :target cfix/tick-1-target
-                                :precedence (:precedence candidate)})
-                              :occurrence {:flight "gate-refusal-control"
-                                           :click (str "candidate-" i)}
-                              :s-prev {:value {#{} 1}}
-                              :q {#{} 1}
-                              :f 0.0}
-                       :path "gate-refusal-abstention-test"
-                       :sha256 "fixture"})
-                    (range) candidates)
-        opts (assoc cfix/live-c-opts :conditioning-steps
-                    {:steps steps :read [] :unread []})
-        assembled (assoc-in admitted
-                            [:problems 0 :cascade-problem :locators
-                             :summary-without-total-repos-throws]
-                            {:class :C4 :repo "futon2" :sha "fixture"
-                             :path "fixture/p"})
-        generic (wm-cd/cascade-decision
-                 (cp/assemble {:targets [cfix/tick-1-target]
-                               :sources (loc/locate-all cfix/tick-1-sources)})
-                 cfix/live-c-opts)
-        selected (wm-cd/cascade-decision admitted opts)
+  ;; Migrated 2026-10-15 (Q5 route ledger). The judge-fn drives the REAL
+  ;; reading-family decision, whose one gate refuses: every policy carries
+  ;; an interpretation-debt carrier that no longer checks, so decision-gate
+  ;; emit! throws {:error :inadmissible-decision :reason
+  ;; :reading-policy-debt-invalid}. (Retired: the interpreted route's
+  ;; missing-observation-locators refusal; reading policies have no
+  ;; interpreted guard locators.)
+  (let [fx (route/fixture)
+        unreadable (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})
+        selected (route/decide fx)
+        debt debt/debt
+        broken (fn [action fit pin] (assoc (debt action fit pin) :owed [{:occurrence-id "x" :pattern "p/x"}]))
         {:keys [result record]}
-        (run-judge (fn [_] (wm-cd/cascade-decision assembled opts))
+        (run-judge (fn [_] (with-redefs [debt/debt broken]
+                             (wm-cd/cascade-decision (route/assembled fx 1) (route/opts fx {}))))
                    {:target "M-autoclock-in"})
         [t] (get-in record [:decision :abstention :targets])]
-    (is (= :no-acting-cascade-candidate (get-in generic [:decision :reason]))
+    (is (= :no-acting-cascade-candidate (get-in unreadable [:decision :reason]))
         "missing earlier evidence remains generic no-selection, not a gate refusal")
     (is (some? (get-in selected [:decision :action]))
-        "the same admitted evidence with valid locators selects an action")
-    (is (= :missing-observation-locators (:kind t)))
+        "the same evidence with intact debt carriers selects an action")
+    (is (= :reading-policy-debt-invalid (:kind t)))
     (is (= :abstained (get-in record [:decision :abstention :status])))
-    (is (= :missing-observation-locators
+    (is (= :reading-policy-debt-invalid
            (get-in result [:checkpoints :construction :sorry :judge-refusal-kind])))))
 
 (deftest an-unrelated-exception-stays-untyped

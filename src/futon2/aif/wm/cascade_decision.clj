@@ -1146,6 +1146,30 @@
                  :beta (vec (distinct betas))}}
       :else {:beta (first betas)})))
 
+(defn- selector-refusal->judge-refusal
+  "Run the one selector call F. A typed refusal from the selection law
+  (cascade-selection refuse!: ex-data {:refusal {:kind ...}}, e.g.
+  :free-energy-not-supplied when a policy's history is unknown) is the
+  decision's typed refusal: rethrown as \"cascade decision refused\" with
+  its :kind, the input it is missing, the field's one target when there is
+  exactly one, and the selection refusal itself, so the runner closes the
+  tick as a typed abstention rather than an untyped failure."
+  [families f]
+  (try (f)
+       (catch clojure.lang.ExceptionInfo e
+         (let [r (:refusal (ex-data e))
+               targets (distinct (keep :target-id (filter #(= :computed (:status %)) families)))]
+           (if (and (= "Cascade selection refused" (ex-message e)) (keyword? (:kind r)))
+             (throw (ex-info "cascade decision refused"
+                             (cond-> {:kind (:kind r)
+                                      :missing (case (:kind r)
+                                                 :free-energy-not-supplied :historical-prefix-f
+                                                 {:absent :kind-names-no-missing-input})
+                                      :refusal r}
+                               (= 1 (count targets)) (assoc :target (first targets)))
+                             e))
+             (throw e))))))
+
 (defn- abstain [refusals]
   (decision-gate/emit! {:status :abstained :refusals refusals}))
 
@@ -1191,7 +1215,9 @@
       {:decision (abstain (into [refusal] (family-refusals families)))}
 
       :else
-      (let [result (family-selection/select-over-families
+      (let [result (selector-refusal->judge-refusal
+                    families
+                    #(family-selection/select-over-families
                     families
                     {:certify (certify-reading-family field families beta opts)
                      :attach-f attach-f
@@ -1200,7 +1226,7 @@
                      :pattern-feedback (:pattern-feedback opts)
                      :ticket-queue queue
                      :ticket-queue-refusals (family-refusals families)
-                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))})]
+                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
         (case (:status result)
           :refused
           {:decision (cond-> (abstain [(merge (select-keys (:refusal result)
@@ -1266,10 +1292,15 @@
                        :target-policy-field policy-field
                        ;; the interpreted assembly's refusals are evidence
                        ;; about the retired route, not about this decision
+                       ;; proposal and repair accounting the assembly
+                       ;; recorded (record-supply) is kept as recorded; the
+                       ;; interpreted assembly's own refusals are evidence
+                       ;; about the retired route, not about this decision
                        :dropped-candidates
-                       (vec (map (fn [r] {:target (:target r) :stage :retired-assembly
-                                          :reason (:kind r)})
-                                 (:refusals assembled))))
+                       (into (vec (:dropped-candidates assembled))
+                             (map (fn [r] {:target (:target r) :stage :retired-assembly
+                                           :reason (:kind r)}))
+                             (:refusals assembled)))
                 (assoc-in [:decision :selection-certificate :observation-labels]
                           (observation-label-certificate view opts))
                 (assoc-in [:decision :selection-certificate :target-policy-field] census)
@@ -1284,6 +1315,15 @@
                            :reason :shape-policy-c-is-decision-c}))
       (= :abstained (get-in result [:decision :status]))
       (assoc-in [:decision :reason] :no-acting-cascade-candidate)
+      ;; an abstained field still retains the queue's entries and why each
+      ;; was not admitted (no selection: no choice, no stratum posterior)
+      (and (= :abstained (get-in result [:decision :status])) (seq (:entries queue)))
+      (assoc-in [:decision :selection-certificate :ticket-queue]
+                (assoc (ticket-queue/plan queue []
+                                          (vec (concat (:refusals assembled)
+                                                       (get-in result [:decision :refusals]))))
+                       :unrestricted-choice nil :choice nil :stratum-posterior nil
+                       :decided-by :abstention))
       ;; an abstention that consumed no precision receipt of its own keeps the
       ;; predecessor's verbatim (sealed, unchanged), so the next tick's
       ;; previous receipt is still the last carried or refused one: an

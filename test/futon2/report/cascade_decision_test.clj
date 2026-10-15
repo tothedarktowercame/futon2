@@ -20,6 +20,8 @@
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.wm.cascade-decision :as wm-cd]
             [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.policy :as policy]
+            [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.test-support.reading-route :as route]))
 
@@ -473,3 +475,31 @@
     (is (= [outer] (mapv #(select-keys % [:target :kind]) (get-in empty-field [:decision :refusals])))
         "the outer selector's refusal is the empty field's abstention")
     (is (= [[:no-policy-family :no-enumerated-target]] (refusal-kinds bare)))))
+
+(deftest selection-refusal-is-the-decisions-typed-refusal
+  ;; production repair (Q5 proposal/refusal packet): the selection law's
+  ;; typed refusal leaves the decision as "cascade decision refused", which
+  ;; the runner reads as the tick's typed abstention; anything else thrown
+  ;; passes through unchanged
+  (let [fx (route/fixture)
+        unread {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
+        calls (atom 0)
+        select policy/select-action-cascades
+        e (with-redefs [policy/select-action-cascades
+                        (fn [& args] (swap! calls inc) (apply select args))]
+            (try (wm-cd/cascade-decision (route/assembled fx 1)
+                                         (route/opts fx {:conditioning-steps unread}))
+                 nil
+                 (catch clojure.lang.ExceptionInfo e e)))
+        other (try (with-redefs [family-selection/select-over-families
+                                 (fn [& _] (throw (ex-info "something else" {:kind :x})))]
+                     (wm-cd/cascade-decision (route/assembled fx 1) (route/opts fx {})))
+                   nil
+                   (catch clojure.lang.ExceptionInfo e e))]
+    (is (= 1 @calls) "the one selector call ran and refused")
+    (is (= "cascade decision refused" (ex-message e)))
+    (is (= :free-energy-not-supplied (:kind (ex-data e))))
+    (is (= :historical-prefix-f (:missing (ex-data e))))
+    (is (= route/target (:target (ex-data e))))
+    (is (= :free-energy-not-supplied (get-in (ex-data e) [:refusal :kind])))
+    (is (= "something else" (ex-message other)) "an unrelated failure is not dressed as a refusal")))

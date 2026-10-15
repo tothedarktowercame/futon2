@@ -8,7 +8,6 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
-            [futon2.aif.cascade-problems :as cp]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runtime]
             [futon2.aif.full-loop-runner :as runner]
@@ -16,15 +15,15 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.locator-fixtures :as loc]
             [futon2.aif.trace :as trace]
-            [futon2.report.cascade-decision-test :as cfix]
-            [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
-(use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false] (f))))
+(use-fixtures :each (fn [f] (binding [runner/*wm-status-reporting?* false]
+                              (route/with-empty-learning-ledger f))))
 
 (def live (edn/read-string
            (slurp (io/resource "fixtures/judge-refusal/fourth-flight-failure-data.edn"))))
@@ -131,33 +130,31 @@
             :record (edn/read-string (slurp (:run-record result)))})))))
 
 (deftest the-real-judge-refusal-is-the-ticks-typed-abstention
-  ;; WIRE-23-C2 (PROOF-2a <2>3 lane C2): the judge-fn IS the real writer,
-  ;; war-machine/cascade-decision, refusing: the injected live-C derivation
-  ;; carries a refusal, so the :live-c guard in cascade-decision-admitted
-  ;; (war_machine.clj) throws ex-info "cascade decision refused"
-  ;; {:kind :live-c-refused} before any scoring.
-  (let [generic (wm-cd/cascade-decision
-                 (cp/assemble {:targets [cfix/tick-1-target]
-                               :sources (loc/locate-all cfix/tick-1-sources)})
-                 cfix/live-c-opts)
-        admitted (@#'cfix/assemble* {:targets [cfix/tick-1-target]
-                                     :sources cfix/tick-1-sources})
-        selected (@#'cfix/decision admitted cfix/live-c-opts)
+  ;; Migrated 2026-10-15 (Q5 route ledger). The judge-fn IS the real
+  ;; reading-family decision, refusing: the flight ledger is unread, so no
+  ;; policy's history is known, the selection law refuses
+  ;; :free-energy-not-supplied, and the decision rethrows that as "cascade
+  ;; decision refused" (the production repair in this packet). (Retired:
+  ;; the live-C refusal guard; live C is observation only.)
+  (let [fx (route/fixture)
+        unreadable (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})
+        selected (route/decide fx)
+        unread-ledger {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
         {:keys [result record]}
-        (run-judge (fn [_]
-                     (wm-cd/cascade-decision
-                      admitted
-                      (assoc cfix/live-c-opts
-                             :live-c {:derived {:refusals [{:kind :source-not-available}]}})))
+        (run-judge (fn [_] (wm-cd/cascade-decision
+                            (route/assembled fx 1)
+                            (route/opts fx {:conditioning-steps unread-ledger})))
                    {:target "M-autoclock-in"})
         carrier (get-in record [:decision :abstention])]
-    (is (= :no-acting-cascade-candidate (get-in generic [:decision :reason]))
+    (is (= :no-acting-cascade-candidate (get-in unreadable [:decision :reason]))
         "missing construction evidence remains generic no-selection")
     (is (some? (get-in selected [:decision :action]))
-        "the admitted construction and Prefix-F evidence select successfully")
-    (is (= :live-c-refused (get-in carrier [:targets 0 :kind])))
+        "the same field with a readable ledger selects")
+    (is (= :free-energy-not-supplied (get-in carrier [:targets 0 :kind])))
+    (is (= route/target (get-in carrier [:targets 0 :target]))
+        "the refusal names the field's one target")
     (is (= :abstained (:status carrier)))
-    (is (= :live-c-refused
+    (is (= :free-energy-not-supplied
            (get-in result [:checkpoints :selection :sorry :judge-refusal :kind])))))
 
 (deftest an-untyped-judge-failure-stays-untyped

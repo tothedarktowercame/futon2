@@ -91,3 +91,24 @@ Production repairs (cascade-decision):
 
 New-route controls after the packet (reading-family-decision, reading-model-contracts,
 selected-reading-runner, h4-production-stage, policy-precision-carry, decision-gate): 50/810/0/0.
+
+## Packet: proposal and refusal controls (claude-10, 2026-10-15)
+
+Each namespace run alone through `run_redirected.clj`, before and after.
+
+| Namespace | Before | After | Disposition |
+|---|---|---|---|
+| `cascade-proposals-test` | 6/35/1/0 | 6/36/0/0 | Unchanged test; the failure was a production regression: the reading-family decision dropped the assembly's recorded proposal/repair declines (`:proposal-awaiting-agent-admission`). Repaired (1 below). Preserved invariant: proposal accounting reaches the decision. |
+| `repair-proposals-test` | 5/30/1/0 | 5/31/0/0 | Unchanged test; same regression (`:repair-closure-observation-unavailable` withhold lost). Repaired (1). |
+| `ticket-queue-test` | 8/42/1/0 | 8/43/0/0 | Unchanged test; an abstained field no longer retained the queue's entries and why each was not admitted. Repaired (2). |
+| `judge-refusal-abstention-test` | 6/36/4/0 | 6/41/0/0 | Migrated `the-real-judge-refusal-is-the-ticks-typed-abstention`: the real reading-family decision refuses `:free-energy-not-supplied` on an unread ledger and the tick closes as a typed abstention naming the field's target. Needed repair 3. Retired: the live-C refusal guard (live C is observation only). |
+| `gate-refusal-abstention-test` | 6/38/4/0 | 6/42/0/0 | Migrated `the-real-gate-refusal-is-the-ticks-typed-abstention`: the one gate refuses `:reading-policy-debt-invalid` inside the real judge and the tick closes as a typed abstention. Retired: `:missing-observation-locators` (reading policies carry no interpreted guard locators). |
+
+Production repairs (cascade-decision):
+1. The decision result's `:dropped-candidates` keeps the assembly's recorded declines (proposal and repair accounting from `record-supply`) ahead of the retired-assembly refusals.
+2. An abstained field with a non-empty ticket queue records the queue plan (entries, statuses, refusals; no choice, no stratum posterior, `:decided-by :abstention`).
+3. A typed refusal from the selection law (`"Cascade selection refused"`, e.g. `:free-energy-not-supplied`) leaves the decision as `"cascade decision refused"` with `:kind`, `:missing` (`:historical-prefix-f`), the field's one target and the original refusal, so the runner's judge-refusal path makes it the tick's typed abstention; any other throw passes through unchanged. Direct control: `report.cascade-decision-test/selection-refusal-is-the-decisions-typed-refusal` (one selector call, then the typed refusal).
+
+New-route controls after the packet (report.cascade-decision, reading-family-decision,
+reading-model-contracts, selected-reading-runner, h4-production-stage, policy-prefix-f,
+decision-gate): 66/864/0/0.
