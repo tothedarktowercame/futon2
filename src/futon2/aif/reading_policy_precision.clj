@@ -35,24 +35,60 @@
 
 ;; -- canonical structural form ------------------------------------------------
 
+(def ^:private numeric-learning-fields
+  "Learning-value fields excluded wherever they appear (top level, nodes,
+  edge maps): they are theta, not structure.  Every other field is kept."
+  #{:theta :thetas :g :f :habit :computed-f :controller-score
+    :G-efe :G-cascade :rank :habit-provenance-value})
+
+(def ^:private structural-numeric-fields
+  "Numeric fields that are legitimate structure, never theta."
+  #{:fragment-index :precedence :stack-size})
+
 (defn- strip-theta
-  "Remove every numeric learning value (thetas, g, habit, f) from a policy;
-  identity is structural, so equal numbers neither bind nor divide."
-  [policy]
-  (let [without-numbers (into {} (remove (fn [[_k v]] (number? v))) policy)]
-    (-> without-numbers
-        (dissoc :theta :thetas :g :f :habit :computed-f :controller-score
-                :G-efe :G-cascade :rank))))
+  "Recursively remove numeric learning values and the named learning fields.
+  A numeric value is dropped only when its key is neither in
+  `numeric-learning-fields` (the learning vocabulary) nor in
+  `structural-numeric-fields` (legitimate structural ids); named learning
+  fields go even when their value is not numeric."
+  [x]
+  (cond
+    (map? x) (into {}
+                   (remove (fn [[k v]]
+                             (boolean
+                              (or (numeric-learning-fields k)
+                                  (and (number? v)
+                                       (not (structural-numeric-fields k)))))))
+                   x)
+    (sequential? x) (mapv strip-theta x)
+    :else x))
+
+(defn- canonical-arrangement
+  "The explicit structural projection of an arrangement: per node, its
+  occurrence id, pattern, sorted roles and structural indices; per edge, its
+  endpoints and kind.  Nodes and edges each in canonical sorted order."
+  [arrangement]
+  (let [node (fn [n]
+               (let [n (strip-theta n)]
+                 {:occurrence-id (:occurrence-id n)
+                  :pattern (:pattern n)
+                  :roles (vec (sort (map str (:roles n))))
+                  :fragment-indices (:fragment-indices n)
+                  :fragment-index (:fragment-index n)}))
+        edge (fn [e]
+               (let [e (strip-theta e)]
+                 (cond-> {:from (:from e) :to (:to e)}
+                   (:kind e) (assoc :kind (:kind e)))))]
+    (when arrangement
+      {:nodes (vec (sort-by pr-str (map node (:nodes arrangement))))
+       :edges (vec (sort-by pr-str (map edge (:edges arrangement))))})))
 
 (defn- canonical-policy
-  "A policy's structural identity: stable id/key, kind, arrangement (nodes
-  and edges in canonical order), roles, occurrence ids -- never numbers."
+  "A policy's structural identity: stable id/key, kind, target, kernel, and
+  the canonical arrangement.  Numeric learning fields never enter."
   [policy]
-  (let [arrangement (when (:arrangement policy)
-                      (-> policy
-                          :arrangement
-                          (update :nodes (fn [ns] (vec (sort-by pr-str (map #(into {} (sort-by key %)) ns)))))
-                          (update :edges (fn [es] (vec (sort-by pr-str (map #(into {} (sort-by key %)) es)))))))]
+  (require! (and (:policy-id policy) (:kind policy)) :invalid-policy-shape)
+  (let [arrangement (canonical-arrangement (:arrangement policy))]
     (cond-> {:policy-id (:policy-id policy)
              :kind (:kind policy)
              :target-id (:target-id policy)
@@ -111,14 +147,18 @@
 
 (defn identity-map
   "The pure identity map (unsealed).  Every argument is canonicalized first,
-  so numeric theta values and field enumeration order cannot change it."
+  so numeric theta values and field enumeration order cannot change it.
+  :scorer-version and :kernel-version are bound independently and both are
+  required in production: no alias or default may make a missing scorer
+  look like a kernel or vice versa."
   [{:keys [scorer-version kernel-version graph-digest readings policies
-           progress-model preference beta-authority]
-    :or {kernel-version scorer-version}}]
-  (require! (keyword? (or kernel-version scorer-version)) :invalid-scorer-version)
+           progress-model preference beta-authority]}]
+  (require! (keyword? scorer-version) :invalid-scorer-version)
+  (require! (keyword? kernel-version) :invalid-kernel-version)
   (require! (string? graph-digest) :invalid-graph-digest)
   {:schema schema
-   :scorer-version (or kernel-version scorer-version)
+   :scorer-version scorer-version
+   :kernel-version kernel-version
    :graph-digest graph-digest
    :readings (canonical-reading-digests readings)
    :policies (canonical-policies policies)
@@ -133,46 +173,65 @@
 
 ;; -- beta continuity -----------------------------------------------------------
 
+(defn- rpp-seal [value] (seal value))
+
 (defn- old-model? [previous]
   (contains? #{:wm/precision-carry-v1 :wm/precision-family-v1} (:schema previous)))
 
+(defn- valid-previous-beta? [previous]
+  (and (number? (:beta previous))
+       (pos? (:beta previous))
+       (Double/isFinite (double (:beta previous)))
+       (string? (:identity previous))
+       (= carry-schema (:schema previous))))
+
 (defn carry-beta
-  "Pure beta-continuity decision.  Carries only when `previous` is an intact
-  reading-precision carry receipt with exactly the identity of `config`.
-  An old class/q0 model identity is a typed refusal, never a silent reset
-  or preservation.  Returns a receipt map; selects nothing."
+  "Pure, self-consumable beta-continuity decision.  Every returned
+  receipt/refusal is sealed by this module, so the result of call N feeds
+  call N+1 directly.  Carries only when `previous` is intact, of this
+  carry schema, with a finite positive beta and exactly the identity of
+  `config`.  An old class/q0 model identity is a typed refusal, never a
+  silent reset or preservation.  Returns a receipt map; selects nothing."
   [{:keys [previous initialized-beta config]}]
-  (require! (and (number? initialized-beta) (pos? initialized-beta)) :invalid-initialized-beta)
-  (let [id (identity-of config)]
+  (require! (and (number? initialized-beta) (pos? initialized-beta)
+                (Double/isFinite (double initialized-beta)))
+            :invalid-initialized-beta)
+  (let [id (identity-of config)
+        emit (fn [m] (rpp-seal (merge {:schema carry-schema :identity id} m)))]
     (cond
       (nil? previous)
-      {:status :initialized :schema carry-schema :identity id
-       :beta initialized-beta :reason :no-previous-receipt}
+      (emit {:status :initialized :beta initialized-beta :reason :no-previous-receipt})
 
       (not (intact? previous))
-      {:status :refused :schema carry-schema :identity id
-       :reason :previous-receipt-tampered}
+      (emit {:status :refused
+             :reason :previous-receipt-tampered})
 
       (old-model? previous)
-      {:status :refused :schema carry-schema :identity id
-       :reason :old-class-q0-model-identity
-       :previous-schema (:schema previous)
-       :note "old-model identity cannot carry into the reading-family model;
-              re-declare beta over the reading-precision identity"}
+      (emit {:status :refused
+             :reason :old-class-q0-model-identity
+             :previous-schema (:schema previous)
+             :note "old-model identity cannot carry into the reading-family model;
+              re-declare beta over the reading-precision identity"})
 
       (not= carry-schema (:schema previous))
-      {:status :refused :schema carry-schema :identity id
-       :reason :previous-receipt-schema-mismatch
-       :previous-schema (:schema previous)}
+      (emit {:status :refused
+             :reason :previous-receipt-schema-mismatch
+             :previous-schema (:schema previous)})
+
+      ;; intact, right schema: the beta itself must be carryable
+      (not (valid-previous-beta? previous))
+      (emit {:status :refused
+             :reason :previous-beta-not-carryable
+             :previous-beta (:beta previous)})
 
       (not= id (:identity previous))
-      {:status :refused :schema carry-schema :identity id
-       :reason :reading-precision-identity-changed
-       :previous-identity (:identity previous)
-       ;; explicit re-declaration required; nothing is silently preserved
-       :reinitialization {:policy :redeclare-beta}}
+      (emit {:status :refused
+             :reason :reading-precision-identity-changed
+             :previous-identity (:identity previous)
+             ;; explicit re-declaration required; nothing is silently preserved
+             :reinitialization {:policy :redeclare-beta}})
 
       :else
-      {:status :carried :schema carry-schema :identity id
-       :beta (:beta previous)
-       :previous-sha256 (:sha256 previous)})))
+      (emit {:status :carried
+             :beta (:beta previous)
+             :previous-sha256 (:sha256 previous)}))))

@@ -5,7 +5,8 @@
             [futon2.aif.reading-policy-precision :as rpp]))
 
 (def base-config
-  {:scorer-version :co-application-frontier-theta-v1
+  {:scorer-version :cascade-observation-scorer-v1
+   :kernel-version :co-application-frontier-theta-v1
    :graph-digest "sha256:graph-abc"
    :readings {"T1" {:analysis-digest "sha256:a1" :excerpt-digest "sha256:e1"}
               "T2" {:analysis-digest "sha256:a2" :excerpt-digest "sha256:e2"}}
@@ -42,6 +43,32 @@
     (is (= (rpp/identity-of base-config) (rpp/identity-of aliased))
         "map enumeration order and digest key aliases must not change identity")))
 
+(deftest nested-theta-in-arrangement-excluded
+  (let [thetas-inside (assoc-in base-config [:policies 0 :arrangement :nodes 0 :theta] 0.99)]
+    (is (= (rpp/identity-of base-config) (rpp/identity-of thetas-inside))
+        "numeric learning fields inside arrangement nodes must not affect identity"))
+  (let [g-inside (update-in base-config [:policies 0 :arrangement :nodes 1]
+                            assoc :g 12.5 :f 0.3)]
+    (is (= (rpp/identity-of base-config) (rpp/identity-of g-inside))
+        "numeric learning fields nested in node maps must not affect identity")))
+
+(deftest structural-values-in-arrangement-bind
+  (is (not= (rpp/identity-of base-config)
+            (rpp/identity-of
+             (update-in base-config [:policies 0 :arrangement :nodes 0]
+                        assoc :fragment-index 7)))
+      "a structural numeric index is legitimate structure and must bind")
+  (is (not= (rpp/identity-of base-config)
+            (rpp/identity-of
+             (update-in base-config [:policies 0 :arrangement :nodes 1]
+                        assoc :pattern :zz)))
+      "pattern identity inside an arrangement binds")
+  (is (not= (rpp/identity-of base-config)
+            (rpp/identity-of
+             (update-in base-config [:policies 0 :arrangement :edges 0]
+                        assoc :kind :overlap)))
+      "edge kind binds"))
+
 (deftest arrangement-node-order-invariance
   (let [swapped (update-in base-config [:policies 0 :arrangement :nodes] (comp vec rseq))]
     (is (= (rpp/identity-of base-config) (rpp/identity-of swapped))
@@ -62,11 +89,21 @@
   (is (not= (rpp/identity-of base-config)
             (rpp/identity-of (assoc base-config :graph-digest "sha256:graph-xyz")))))
 
-(deftest scorer-kernel-version-change-changes-identity
+(deftest scorer-and-kernel-bind-independently
   (is (not= (rpp/identity-of base-config)
-            (rpp/identity-of (assoc base-config :scorer-version :co-application-frontier-theta-v2))))
+            (rpp/identity-of (assoc base-config :scorer-version :cascade-observation-scorer-v2)))
+      "changing only the scorer version changes identity")
   (is (not= (rpp/identity-of base-config)
-            (rpp/identity-of (assoc base-config :kernel-version :some-other-kernel-v1)))))
+            (rpp/identity-of (assoc base-config :kernel-version :co-application-frontier-theta-v2)))
+      "changing only the kernel version changes identity")
+  (is (= (rpp/identity-of (assoc base-config :scorer-version :s1 :kernel-version :k1))
+         (rpp/identity-of (assoc base-config :scorer-version :s1 :kernel-version :k1)))))
+
+(deftest missing-scorer-or-kernel-refuses
+  (is (thrown? clojure.lang.ExceptionInfo
+               (rpp/identity-of (dissoc base-config :scorer-version))))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (rpp/identity-of (dissoc base-config :kernel-version)))))
 
 (deftest reading-digest-change-changes-identity
   (is (not= (rpp/identity-of base-config)
@@ -104,6 +141,39 @@
   (rpp/seal {:schema rpp/carry-schema
              :identity (rpp/identity-of config)
              :beta beta}))
+
+(deftest two-call-self-consumable-initialized-then-carried
+  (let [first (rpp/carry-beta {:previous nil :initialized-beta 3.5 :config base-config})]
+    (is (= :initialized (:status first)))
+    (is (rpp/intact? first) "the initialized receipt is sealed and directly consumable")
+    (let [second (rpp/carry-beta {:previous first :initialized-beta 3.5 :config base-config})]
+      (is (= :carried (:status second)) "call N's output feeds call N+1 without external sealing")
+      (is (= 3.5 (:beta second)))
+      (is (rpp/intact? second))
+      (let [third (rpp/carry-beta {:previous second :initialized-beta 3.5 :config base-config})]
+        (is (= :carried (:status third)))
+        (is (= (:sha256 second) (:previous-sha256 third)))))))
+
+(deftest tampered-sealed-receipt-still-refuses
+  (let [first (rpp/carry-beta {:previous nil :initialized-beta 3.5 :config base-config})
+        tampered (assoc first :beta 99.0)]
+    (is (= :refused (:status (rpp/carry-beta {:previous tampered :initialized-beta 3.5
+                                              :config base-config}))))))
+
+(deftest intact-receipt-with-noncarryable-beta-refuses
+  (doseq [bad [nil -1.0 0.0 ##NaN ##Inf]]
+    (let [prev (rpp/seal {:schema rpp/carry-schema
+                          :identity (rpp/identity-of base-config)
+                          :beta bad})
+          r (rpp/carry-beta {:previous prev :initialized-beta 3.5 :config base-config})]
+      (is (= :refused (:status r)) (str "beta " bad))
+      (is (= :previous-beta-not-carryable (:reason r))))))
+
+(deftest refused-receipt-is-also-sealed
+  (let [r (rpp/carry-beta {:previous nil :initialized-beta 3.5
+                           :config (assoc base-config :graph-digest "sha256:x")})]
+    ;; any output shape must be intact, not just successes
+    (is (rpp/intact? r))))
 
 (deftest carry-when-identical-identity
   (let [r (rpp/carry-beta {:previous (previous-receipt base-config 4.0)
