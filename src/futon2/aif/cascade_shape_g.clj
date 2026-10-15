@@ -345,6 +345,13 @@
      :f (+ node-f coverage-f) :fit-ambiguity fit-ambiguity
      :interpretation-owed (mapv :pattern (filter #(= :not-read (:status %)) nodes))}))
 
+(def scorer-version
+  "The version of the reading-policy scorer: score-arranged's arranged
+  progress model plus score-policy's circumstance fit. Recorded on every
+  scored record so the decision's precision identity binds the scorer it
+  actually ran; change it whenever either scoring rule changes."
+  :wm/cascade-shape-g-score-policy-v1)
+
 (defn score-policy
   "Score one materialized policy, attaching circumstance fit as F and adding
   its stated uncertainty to the scorer's ambiguity term."
@@ -361,6 +368,7 @@
         carrier {:id (:policy-id policy) :habit 1.0 :g g :f (:f fit)
                  :f-status :computed :computed-f computed-f}]
     (assoc base :g g :controller-score g :ambiguity ambiguity
+           :scorer-version scorer-version
            :scorer-g (:g base) :scorer-ambiguity (:ambiguity base)
            :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
            :selection-candidate carrier

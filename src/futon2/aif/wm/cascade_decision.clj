@@ -18,7 +18,6 @@
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
-            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.prefix-free-energy-sut :as prefix-f-sut]
@@ -28,6 +27,8 @@
             [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.wm.family-selection :as family-selection]
+            [futon2.aif.reading-policy-precision :as precision]
+            [futon2.aif.reading-policy-preference :as pref]
             [futon2.aif.token-a-bmr :as token-a-bmr])
   (:import (java.time Instant)))
 (defn- observation-contract []
@@ -1026,16 +1027,91 @@
           :failure-kind (or (:kind (first failures)) :empty-policy-family)
           :failures (vec failures)})))
 
-(defn- reading-model-identity
-  "The precision model the reading-family scorer is: scorer, kernel, graph
-  pin and the compared policy identities. Beta carries across it only when
-  it is unchanged (precision-carry/advance)."
-  [field families]
-  (interpretation-evidence/value-digest
-   {:scorer :wm/cascade-shape-g-score-policy-v1
-    :kernel :co-application-frontier-theta-v1
-    :graph-pin (get-in field [:graph :pin :sha256])
-    :policies (set (mapcat #(map :policy-id (:policies %)) families))}))
+(def ^:private progress-authority
+  {:authority :cascade-shape-g/arranged-progress-model
+   :version "cascade_shape_g arrangement model v1"})
+
+(def ^:private preference-authority
+  {:authority :cascade-shape-g/progress-preference
+   :version "cascade_shape_g progress-preference v1"})
+
+(def ^:private beta-authority
+  {:status :declared :version "cascade-problems beta-by-context v1"})
+
+(defn- precision-config
+  "The reading-policy-precision identity inputs, read from what was actually
+  scored: the scorer version every record carries, the kernel every ranked
+  entry carries, the graph pin, each computed family's reading digests, the
+  ranked policies' structural arrangements, the progress tokens and horizons
+  of the scorer's own models, and the declared beta authority."
+  [field families ranked scored]
+  (let [scorer-versions (set (map (comp :scorer-version second) scored))
+        kernels (set (map :transition-kernel ranked))
+        models (map #(get-in (meta (:scorer-result (second %))) [:cascade-scoring :model])
+                    scored)]
+    (cond
+      (not= 1 (count scorer-versions))
+      {:refusal {:kind :scorer-version-not-unique :versions (vec scorer-versions)}}
+      (not= 1 (count kernels))
+      {:refusal {:kind :kernel-version-not-unique :kernels (vec kernels)}}
+      :else
+      {:config
+       {:scorer-version (first scorer-versions)
+        :kernel-version (first kernels)
+        :graph-digest (get-in field [:graph :pin :sha256])
+        :readings (into {} (for [f families :when (= :computed (:status f))]
+                             [(:target-id f) (select-keys (:provenance f)
+                                                          [:analysis-digest :excerpt-digest])]))
+        :policies (mapv (fn [e] {:policy-id (:policy-id e) :kind (:policy-kind e)
+                                 :target-id (:target-id e)
+                                 :transition-kernel (:transition-kernel e)
+                                 :arrangement (get-in e [:action :arrangement])})
+                        ranked)
+        :progress-model (assoc progress-authority
+                               :progress-tokens (sort-by pr-str (distinct (mapcat :progress-tokens models))))
+        :preference (assoc preference-authority
+                           :horizon (reduce max 1 (keep :horizon models)))
+        :beta-authority beta-authority}})))
+
+(defn- previous-precision
+  "The predecessor's precision receipt: its reading-precision carry, else the
+  old q0/class precision state (which the module refuses, never resets)."
+  [opts]
+  (let [cert (get-in opts [:token-belief-predecessor-trace :decision :selection-certificate])]
+    (or (:reading-precision-carry cert) (:policy-precision-state cert))))
+
+(defn- certify-reading-family
+  "Before the one selector call: certify every scored record's one C
+  (reading-policy-preference) and decide beta continuity over the
+  reading-precision identity of what was scored (reading-policy-precision).
+  Either refuses typed, and the selector is not called."
+  [field families declared opts]
+  (fn [ranked scored]
+    (let [preference (mapv (fn [[p score]]
+                             (pref/certify (assoc score :policy-id (:policy-id p)
+                                                  :target (:target p))))
+                           scored)
+          uncertified (remove #(= :certified (:status %)) preference)
+          {:keys [config refusal]} (precision-config field families ranked scored)
+          carry (when config
+                  (try (precision/carry-beta {:previous (previous-precision opts)
+                                              :initialized-beta declared
+                                              :config config})
+                       (catch clojure.lang.ExceptionInfo e
+                         {:status :refused :reason (:kind (ex-data e))})))]
+      (cond
+        (seq uncertified)
+        {:status :refused :kind :preference-not-certified
+         :refusals (vec uncertified)}
+        refusal
+        (merge {:status :refused} refusal)
+        (= :refused (:status carry))
+        {:status :refused :kind :reading-precision-refused :carry carry}
+        :else
+        {:status :certified :beta (:beta carry)
+         :receipt {:reading-precision-carry carry
+                   :reading-precision-identity (precision/identity-of config)
+                   :preference-receipts preference}}))))
 
 (defn- declared-beta
   "The one declared β over the targets with computed families, or a typed
@@ -1072,12 +1148,6 @@
         census (prefix-admission/history-census steps)
         pin (prefix-admission/census-pin census)
         {:keys [beta refusal]} (declared-beta assembled families)
-        model-id (reading-model-identity field families)
-        beta-state (when beta
-                     (precision-carry/advance
-                      {:previous (get-in opts [:token-belief-predecessor-trace :decision
-                                               :selection-certificate :policy-precision-state])
-                       :initialized-beta beta :model-id model-id}))
         attach-f (fn [ranked]
                    (policy-prefix/production-ranked
                     ranked {:conditioning-status (if (:dir-status steps) :not-run :admitted)}
@@ -1101,7 +1171,7 @@
       :else
       (let [result (family-selection/select-over-families
                     families
-                    {:beta (:beta beta-state) :beta-state beta-state
+                    {:certify (certify-reading-family field families beta opts)
                      :attach-f attach-f
                      :policy-history-pin pin
                      :enactment-fold (:enactment-fold opts)
@@ -1109,7 +1179,14 @@
                      :ticket-queue queue
                      :ticket-queue-refusals (family-refusals families)
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))})]
-        (if (not= :selected (:status result))
+        (case (:status result)
+          :refused
+          {:decision (abstain [(merge (select-keys (:refusal result)
+                                                   [:reason :refusals :carry :versions :kernels])
+                                      {:target nil :stage :certification
+                                       :kind :model-contract-refused
+                                       :certification-kind (:kind (:refusal result))})])}
+          :abstained
           {:decision (abstain (family-refusals (:target-policy-families result)))}
           (let [decision (-> (:decision result)
                              (assoc-in [:selection-certificate :selection-route]
@@ -1118,10 +1195,11 @@
                                        (:target-policy-families result))
                              (assoc-in [:selection-certificate :family-failures]
                                        family-failures)
-                             (assoc-in [:selection-certificate :precision-model-id] model-id)
+                             (update :selection-certificate merge
+                                     (get-in result [:certification :receipt]))
                              (assoc-in [:selection-certificate :preference]
                                        {:c :cascade-shape-g/progress-preference
-                                        :authority "codex-68 ruling 2026-10-15: shape-policy C is decision C"
+                                        :certified-by pref/receipt-schema
                                         :live-c :observation-only})
                              (assoc-in [:selection-certificate :retired-diagnostics]
                                        retired-diagnostics)

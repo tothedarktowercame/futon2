@@ -61,7 +61,10 @@
     ;; scored policy (its typed failures ride on the refusal), and a field
     ;; whose declared temperatures differ
     :no-policy-family
-    :incommensurable-family})
+    :incommensurable-family
+    ;; the reading family's precision or preference certification refused
+    ;; before selection (reading-policy-precision / -preference)
+    :model-contract-refused})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this

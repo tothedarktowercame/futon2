@@ -164,11 +164,36 @@
                                        :when (and v (not (double-finite? v)))] k))
             g (:g record)
             cert-terms (get-in record [:scorer-result 0 :certificate :g-terms])
+            ;; score-policy (cascade_shape_g) adds the reading fit's stated
+            ;; uncertainty to the arranged scorer's ambiguity and recomputes
+            ;; G, keeping the scorer's own value as :scorer-ambiguity. The
+            ;; certificate holds the scorer's terms, so compare the
+            ;; scorer's ambiguity with it, and require the record's
+            ;; ambiguity and G to be exactly that composition.
+            fit-adjusted? (contains? record :scorer-ambiguity)
+            scorer-terms (cond-> g-terms
+                           fit-adjusted? (assoc :ambiguity (:scorer-ambiguity record)))
             terms-disagree (seq (for [k [:risk :ambiguity :information-gain]
                                       :when (and (contains? cert-terms k)
-                                                 (some? (get g-terms k))
-                                                 (not= (get cert-terms k) (get g-terms k)))]
-                                  k))]
+                                                 (some? (get scorer-terms k))
+                                                 (not= (get cert-terms k) (get scorer-terms k)))]
+                                  k))
+            fit-ambiguity (get-in record [:fit :fit-ambiguity])
+            composition-wrong
+            (and fit-adjusted?
+                 (or (not (and (double-finite? (:scorer-ambiguity record))
+                               (double-finite? fit-ambiguity)))
+                     (> (Math/abs (- (double (:ambiguity record))
+                                     (+ (double (:scorer-ambiguity record))
+                                        (double fit-ambiguity))))
+                        normalization-tolerance)
+                     (and (double-finite? g)
+                          (every? double-finite? (vals g-terms))
+                          (> (Math/abs (- (double g)
+                                          (- (+ (double (:risk record))
+                                                (double (:ambiguity record)))
+                                             (double (:information-gain record)))))
+                             normalization-tolerance))))]
         (cond
           unnormalized
           (refuse record :preference-not-normalized
@@ -195,6 +220,10 @@
           terms-disagree
           (refuse record :g-terms-mismatch :differing (vec terms-disagree)
                   :reason "record's G terms differ from the scorer certificate's")
+
+          composition-wrong
+          (refuse record :g-composition-mismatch
+                  :reason "record's ambiguity or G is not the scorer's term plus the stated fit ambiguity")
 
           (nil? g)
           (refuse record :g-absent)

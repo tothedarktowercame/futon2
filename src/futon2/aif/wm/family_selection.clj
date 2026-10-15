@@ -20,6 +20,11 @@
    :reason :missing-policy-identity
    :scope :whole-menu})
 
+(def kernel-version
+  "The co-application transition kernel the ranked reading policies carry,
+  and the kernel the decision's precision identity binds."
+  :co-application-frontier-theta-v1)
+
 (defn- annotate-failure [target failure]
   (assoc failure :target-id (or (:target-id failure) target)))
 
@@ -59,7 +64,7 @@
                :computed-f computed-f
                :habit 1
                :habit-provenance neutral-co-apply-habit
-               :transition-kernel :co-application-frontier-theta-v1
+               :transition-kernel kernel-version
                :certificate certificate))))
 
 (defn- policy-summary [policy score]
@@ -75,7 +80,7 @@
              :ambiguity (:ambiguity score)
              :information-gain (:information-gain score)
              :combination :risk-plus-ambiguity-minus-information-gain}
-   :kernel :co-application-frontier-theta-v1
+   :kernel kernel-version
    :habit {:value 1 :status :declared-neutral
            :provenance neutral-co-apply-habit}})
 
@@ -188,8 +193,13 @@
   a typed abstention and the selector is not called on an empty action set.
   OPTS :attach-f, when given, receives the ranked union and returns it with
   each entry's F carrier (:f-prefix) attached, before the one selector call;
-  it is removed from the options the selector sees."
-  [families {:keys [attach-f] :as opts}]
+  it is removed from the options the selector sees.
+  OPTS :certify, when given, receives the ranked union and the scored
+  [policy score] pairs after F is attached and before the selector. It
+  returns {:status :certified :beta b :receipt r} (the beta the selector
+  uses, and what to record) or a typed refusal {:status :refused …}; a
+  refusal returns {:status :refused} without calling the selector."
+  [families {:keys [attach-f certify] :as opts}]
   (let [rows
         (mapv
          (fn [family]
@@ -223,16 +233,30 @@
         ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
                      (range 1 (inc (count scored))) scored)
         ranked (if attach-f (attach-f ranked) ranked)
-        opts (dissoc opts :attach-f)
+        certified (when (and certify (seq ranked)) (certify ranked scored))
+        opts (cond-> (dissoc opts :attach-f :certify)
+               (= :certified (:status certified)) (assoc :beta (:beta certified)))
         failures (vec (mapcat :failures rows))
         summaries (mapv #(dissoc % :scored) rows)]
-    (if (seq ranked)
+    (cond
+      (= :refused (:status certified))
+      {:status :refused
+       :refusal certified
+       :ranked ranked
+       :target-policy-families summaries
+       :failures failures
+       :failure-count (count failures)}
+
+      (seq ranked)
       {:status :selected
+       :certification certified
        :decision (policy/select-action-cascades ranked opts)
        :ranked ranked
        :target-policy-families summaries
        :failures failures
        :failure-count (count failures)}
+
+      :else
       {:status :abstained
        :decision {:status :abstained :kind :no-computed-policy-family}
        :ranked []
