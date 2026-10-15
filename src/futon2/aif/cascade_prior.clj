@@ -51,7 +51,8 @@
    Empty vectors are valid; IDs are homogeneous strings or keywords, with
    types and namespaces preserved. Mixed conventions refuse typed."
   [cascade]
-  (let [mission (:mission cascade)
+  (let [reading-key (:reading-policy-key cascade)
+        mission (:mission cascade)
         shown (:shown cascade)
         semilattice (:semilattice cascade)
         _ (when (and (vector? shown)
@@ -59,6 +60,12 @@
             (throw (ex-info "mixed cascade pattern ID conventions"
                             {:refusal {:kind :mixed-pattern-id-types
                                        :shown shown}})))]
+    (if (contains? cascade :reading-policy-key)
+      ;; a reading policy's identity is its structural history key, already
+      ;; validated where the view was made (policy-prefix-admission); E and
+      ;; Prefix-F count history under exactly the same key
+      (when (and (vector? reading-key) (= :wm/reading-policy-v1 (first reading-key)))
+        reading-key)
     (when (and (map? cascade)
                (some? mission)
                (vector? shown)
@@ -67,7 +74,7 @@
       [:pattern-cascade
        (str mission)
        shown
-       (canonical-semilattice semilattice)])))
+       (canonical-semilattice semilattice)]))))
 
 (defn initial-state
   ([] (initial-state {}))
@@ -95,7 +102,8 @@
          (pos? (double (:alpha state)))
          (map? (:counts state))
          (every? (fn [[k n]]
-                   (and (vector? k) (= :pattern-cascade (first k))
+                   ;; interpreted cascade keys and reading-policy keys
+                   (and (vector? k) (#{:pattern-cascade :wm/reading-policy-v1} (first k))
                         (integer? n) (not (neg? n))))
                  (:counts state))
          (integer? (:samples state))

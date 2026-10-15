@@ -112,3 +112,42 @@ Production repairs (cascade-decision):
 New-route controls after the packet (report.cascade-decision, reading-family-decision,
 reading-model-contracts, selected-reading-runner, h4-production-stage, policy-prefix-f,
 decision-gate): 66/864/0/0.
+
+## Packet: habit E (claude-10, 2026-10-15)
+
+Diagnosis: reading policies took neutral E because the habit path could not
+name them. `cascade-habit-store/policy-view` required an interpreted
+`:precedence` vector and a construction receipt, so every reading candidate
+had no view, `log-priors` refused `:missing-policy-identity`, and the selector
+fell back to whole-menu neutral E. On the fold side, `enactment-habit/key->view`
+read a reading key as `{:mission target :shown policy-id :semilattice structure}`,
+which `cascade-prior/policy-key` rejects, and `increment` read the policy id's
+characters as the policy's patterns, so every reading enactment refused
+`:attempt-outside-candidate`.
+
+Repair: the habit path uses the structural reading-policy key itself. A
+reading candidate's view is `{:reading-policy-key k}` (k from
+`policy-prefix-admission/reading-policy-key`, nil if it does not check);
+`cascade-prior/policy-key` returns k for such a view; `key->view` maps a reading
+key back to that view; `increment` takes a reading key's patterns from its
+arrangement nodes; persisted state accepts reading keys. Zero history stays
+neutral (uniform masses); no execution outcome is invented: E counts only
+W_c-verified increment receipts, which reading policies cannot yet produce in
+production (execution semantics owed), so live E stays neutral until they do.
+family-selection no longer labels its entries neutral; the selector attaches E.
+
+| Namespace | Before | After | Disposition |
+|---|---|---|---|
+| `report.cascade-habit-accumulation-test` | 5/32/0/0 | 5/32/0/0 | Unchanged; passes (store/accumulation mechanics, route-independent). |
+| `report.cascade-habit-selection-test` | 1/2/1/0 | 1/6/0/0 | Migrated: the production reading-family decision (one selector call) leaves the habit store byte-identical and unlocked. |
+| `report.habit-fold-call-test` | 5/2/15/0 | 5/23/0/0 | Migrated: judge's fold reaches the one selector over the reading-family decision; receipts are written under a real policy's structural key, and the selector's E for that policy carries the fold's count while the other policy's is 0. Pre-fix-judge, unread-file, duplicate and refused cases kept. |
+| `wm.reading-policy-habit-test` (new) | - | 5/23/0/0 | Same key accumulates E and moves the posterior odds by exactly the E ratio; zero history neutral; theta-only change keeps the key; another arrangement/target/policy counts nothing for this policy; refused, unattributed and outside-the-policy history count nothing. |
+
+Affected controls after the packet (reading-policy-habit, cascade-prior, enactment-habit,
+habit-store-retired, selection-reads-fold, cascade-habit-read, family-selection,
+reading-family-decision, reading-model-contracts, selected-reading-runner,
+report.cascade-decision, decision-gate, scoring-input-receipts): 109/1070/17/2, all failures
+pre-existing at 45933b93d: scoring-input-receipts `actual-scoring-snapshots-and-initial-origin`
+(validator seam, earlier packet), habit-store-retired `the-close-does-not-write-the-legacy-store`
+(runner fixture without canonical F) and selection-reads-fold `real-checker-verdict-into-increment`
+(missing `../futon3c/holes/labs/M-futon-seams/exemplar/click-001.edn`).

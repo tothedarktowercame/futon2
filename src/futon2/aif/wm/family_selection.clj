@@ -1,9 +1,9 @@
 (ns futon2.aif.wm.family-selection
   "Score target policy families jointly through the existing cascade scorer
   and selector. Failed families remain counted evidence and never contribute a
-  placeholder policy. Co-application cascades currently have no stable habit
-  identity, so each ranked entry records the selector's existing whole-menu
-  neutral fallback explicitly."
+  placeholder policy. Habit E is attached by the selector from the enactment
+  fold under each policy's structural reading-policy key (cascade-habit-store
+  policy-view); a ranked entry carries no E of its own before that."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
@@ -14,11 +14,6 @@
             [futon2.aif.target-reading-registry :as reading-registry]))
 
 (identity/register! *ns* *file*)
-
-(def neutral-co-apply-habit
-  {:source :neutral-fallback
-   :reason :missing-policy-identity
-   :scope :whole-menu})
 
 (def kernel-version
   "The co-application transition kernel the ranked reading policies carry,
@@ -63,7 +58,7 @@
                :f-status (:f-status score)
                :computed-f computed-f
                :habit 1
-               :habit-provenance neutral-co-apply-habit
+               :habit-provenance {:source :pending-selector-attachment}
                :transition-kernel kernel-version
                :certificate certificate))))
 
@@ -81,8 +76,8 @@
              :information-gain (:information-gain score)
              :combination :risk-plus-ambiguity-minus-information-gain}
    :kernel kernel-version
-   :habit {:value 1 :status :declared-neutral
-           :provenance neutral-co-apply-habit}})
+   :habit {:status :attached-by-selector
+           :key (get-in score [:candidate :id])}})
 
 (defn- failed-field-family [target failure]
   {:status :failed :target-id target :policies []

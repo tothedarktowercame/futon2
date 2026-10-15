@@ -68,8 +68,21 @@
                              :semilattice {}})
           (refused :no-policy-identity {:candidate candidate})))))
 
-(defn- key->view [[_ mission shown semilattice]]
-  {:mission mission :shown shown :semilattice semilattice})
+(defn- reading-key? [key]
+  (and (vector? key) (= :wm/reading-policy-v1 (first key))))
+
+(defn- key->view [[_ mission shown semilattice :as key]]
+  (if (reading-key? key)
+    {:reading-policy-key key}
+    {:mission mission :shown shown :semilattice semilattice}))
+
+(defn- key-patterns
+  "The patterns a policy KEY names: a reading key's arrangement nodes, an
+  interpreted key's shown precedence."
+  [key]
+  (if (reading-key? key)
+    (set (map second (get-in key [3 :nodes])))
+    (set (nth key 2))))
 
 (defn increment
   "One enactment record -> one increment receipt (H-E-D §3 table).
@@ -81,7 +94,7 @@
   [enactment identity wc-verdict]
   (let [record-id [(:click enactment) (:candidate enactment)]
         attempts (:attempts enactment)
-        in-candidate (when (vector? identity) (set (nth identity 2)))
+        in-candidate (when (vector? identity) (key-patterns identity))
         outside (when in-candidate
                   (vec (distinct (remove in-candidate (map :pattern attempts)))))]
     (cond

@@ -173,8 +173,9 @@
         ranked (:ranked result)
         scores (mapv (fn [entry]
                        {:entry entry
-                        ;; beta=1 and the recorded unseen-policy habit is 1,
-                        ;; hence ln(E)-F-G = -F-G.
+                        ;; beta=1 and E is uniform over the menu with no
+                        ;; history, so ln(E) is the same constant for every
+                        ;; policy and the argmax is that of -F-G.
                         :selection-score (- (+ (:f entry) (:controller-score entry)))})
                      ranked)
         best (apply max (map :selection-score scores))
@@ -190,7 +191,11 @@
       (is (Double/isFinite (double (:f entry))))
       (is (Double/isFinite (double (:controller-score entry))))
       (is (= :co-application-frontier-theta-v1 (:transition-kernel entry)))
-      (is (= sut/neutral-co-apply-habit (:habit-provenance entry))))
+      (is (= {:source :pending-selector-attachment} (:habit-provenance entry))))
+    ;; the selector attached E under each policy's structural key (no
+    ;; history here, so the masses are uniform over the five keys)
+    (is (every? #(= :enactment-fold (get-in % [:habit-provenance :source]))
+                (get-in result [:decision :selection-certificate :candidates])))
     (is (= expected (get-in result [:decision :action]))
         "the chosen policy is the argmax computed from the recorded F/G posterior")))
 

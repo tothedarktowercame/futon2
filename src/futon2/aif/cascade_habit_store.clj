@@ -5,6 +5,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.cascade-prior :as prior]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.scoring-input-receipts :as receipts])
   (:import [java.io RandomAccessFile]
            [java.nio.file Files StandardCopyOption]
@@ -23,9 +24,16 @@
    precedence is a policy; absent precedence is not. Real topology, if present,
    is retained. A flat precedence contributes no invented topology."
   [candidate]
-  (when (and (= :cascade-candidate (:kind candidate))
-             (map? (:construction-receipt candidate))
-             (vector? (:precedence candidate)))
+  (cond
+    ;; a reading policy: its structural history key, the one Prefix-F, the
+    ;; history census and the flight writer use (nil when it does not check)
+    (and (= :cascade-candidate (:kind candidate))
+         (map? (get-in candidate [:precedence :co-apply])))
+    {:reading-policy-key (prefix-admission/reading-policy-key candidate)}
+
+    (and (= :cascade-candidate (:kind candidate))
+         (map? (:construction-receipt candidate))
+         (vector? (:precedence candidate)))
     {:mission (:target candidate)
      :shown (mapv :id (:precedence candidate))
      :semilattice (get candidate :semilattice {})}))
