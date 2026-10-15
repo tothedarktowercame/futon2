@@ -1883,7 +1883,7 @@
             candidates (get-in decision [:selection-certificate :candidates])
             candidate (when (sequential? candidates)
                         (first (filter #(= action (:id %)) candidates)))]
-        (when (or (nil? candidates) (canonical-f-consumed? candidate))
+        (when (canonical-f-consumed? candidate)
           {:action action
            :rank (or (:rank decision) 1)
            :G-efe (:controller-score decision)

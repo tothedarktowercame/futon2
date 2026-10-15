@@ -487,6 +487,18 @@
     (is (= (set (facts/absence-paths r))
            (set (mapcat :paths groups))))))
 
+(deftest q7-cascade-decision-without-candidate-certificate-is-not-enacted
+  (let [action {:kind :cascade-candidate :id :C1 :target "M-selected"
+                :precedence [:pattern/selected]}
+        selected-entry (ns-resolve 'futon2.aif.full-loop-runner 'selected-entry)]
+    (is (nil? (selected-entry
+               {:decision {:action action
+                           :selection-law {:applied :cascade-selection-posterior}}})))
+    (is (nil? (selected-entry
+               {:decision {:action action
+                           :selection-law {:applied :cascade-selection-posterior}
+                           :selection-certificate {:candidates []}}})))))
+
 (deftest q7-counts-the-abstention-path-when-nothing-was-chosen
   (let [r {:decision {:chosen nil
                       :abstention {:kind :typed-refusal
