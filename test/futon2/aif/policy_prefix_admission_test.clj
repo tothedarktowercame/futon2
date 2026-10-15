@@ -6,11 +6,9 @@
   reader and through the tick's cascade decision; SPEC-F's bad cases assigned
   to this packet."
   (:require [clojure.java.io :as io]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.enactment-fold-source :as src]
-            [futon2.aif.policy-prefix-admission :as adm]
-            [futon2.report.cascade-decision-test :as cdt]
-            [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.policy-prefix-admission :as adm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -96,28 +94,7 @@
       (is (= :admitted (:conditioning-status r)))
       (is (= 2 (count (:observation-updates r)))))))
 
-(deftest the-tick-records-the-prefix
-  (let [assemble* @#'cdt/assemble*
-        assembled (assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})
-        candidates (for [{:keys [target constructed-candidates]} (:problems assembled)
-                         {:keys [candidate-id precedence]} constructed-candidates]
-                     {:id candidate-id :target target :precedence precedence})
-        policy-keys (mapv adm/candidate-key candidates)
-        steps (mapv (fn [i k]
-                      (wrap (step k (str "run-" i) {#{} 1} {#{:t} 1})))
-                    (range) policy-keys)
-        missing (try (wm-cd/cascade-decision assembled cdt/live-c-opts) nil
-                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
-        with (:decision (wm-cd/cascade-decision assembled
-                                             (assoc cdt/live-c-opts :conditioning-steps
-                                                    {:steps steps :read [] :unread []})))
-        chosen-key (adm/candidate-key (:action with))]
-    (testing "the prefix is recorded per candidate"
-      (is (= :free-energy-not-supplied (get-in missing [:refusal :kind])))
-      (is (= (set policy-keys)
-             (set (clojure.core/keys
-                   (get-in with [:selection-certificate :token-belief-input
-                                 :policy-prefixes])))))
-      (is (= :admitted
-             (get-in with [:selection-certificate :token-belief-input
-                           :policy-prefixes chosen-key :conditioning-status]))))))
+;; the-tick-records-the-prefix asserted the interpreted-construction route's
+;; per-candidate :token-belief-input :policy-prefixes. That route is retired
+;; (Q5 step 2); the decision's prefix and history behaviour over reading
+;; policies is pinned in futon2.aif.wm.reading-family-decision-test.

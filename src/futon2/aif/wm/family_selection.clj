@@ -8,6 +8,7 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.target-policy-family :as target-family]
             [futon2.aif.target-reading-registry :as reading-registry]))
 
@@ -34,7 +35,10 @@
                         (assoc :g-terms (merge (get-in entry [:certificate :g-terms])
                                               g-terms)))]
     (-> entry
-        (assoc :action (:candidate score)
+        (assoc :action (let [action (:candidate score)]
+                         ;; the policy's history identity travels on its action
+                         (assoc action :policy-key
+                                (prefix-admission/reading-policy-key action)))
                :cascade-id (:policy-id policy)
                :policy-id (:policy-id policy)
                :policy-kind (:kind policy)
@@ -170,8 +174,11 @@
   "Score every policy in each computed family, then call
   policy/select-action-cascades once over their union. Failed families add
   counted failures and no candidates. With no computed policies the result is
-  a typed abstention and the selector is not called on an empty action set."
-  [families opts]
+  a typed abstention and the selector is not called on an empty action set.
+  OPTS :attach-f, when given, receives the ranked union and returns it with
+  each entry's F carrier (:f-prefix) attached, before the one selector call;
+  it is removed from the options the selector sees."
+  [families {:keys [attach-f] :as opts}]
   (let [rows
         (mapv
          (fn [family]
@@ -201,6 +208,8 @@
         scored (vec (mapcat :scored rows))
         ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
                      (range 1 (inc (count scored))) scored)
+        ranked (if attach-f (attach-f ranked) ranked)
+        opts (dissoc opts :attach-f)
         failures (vec (mapcat :failures rows))
         summaries (mapv #(dissoc % :scored) rows)]
     (if (seq ranked)

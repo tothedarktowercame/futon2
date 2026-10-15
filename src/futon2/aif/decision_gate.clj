@@ -39,6 +39,7 @@
    admitting."
   (:require [futon2.aif.cascade-selection :as selection]
             [futon2.aif.observation-checks :as observations]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def ^:private allowed-refusal-kinds
@@ -54,7 +55,12 @@
     :no-query-time-slice
     :no-constructed-candidate
     :outer-task-selection-refused
-    :class-unknown-no-scalar-g})
+    :class-unknown-no-scalar-g
+    ;; Q5 reading-policy route: a target whose policy family produced no
+    ;; scored policy (its typed failures ride on the refusal), and a field
+    ;; whose declared temperatures differ
+    :no-policy-family
+    :incommensurable-family})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
@@ -126,23 +132,42 @@
                {:beta (:beta decision)
                 :required {:value "positive number" :status "#{:declared :learned}"}}))))
 
+(defn- reading-policy? [candidate]
+  (map? (get-in candidate [:precedence :co-apply])))
+
+(defn- check-reading-policy!
+  "A reading policy is admitted by its structural identity, not by
+  interpretation receipts: interpreting its owed nodes is post-selection debt
+  (Q5). Its carried history key must be the one its structure determines."
+  [candidate]
+  (let [key (prefix-admission/reading-policy-key candidate)]
+    (when-not (and (some? key) (= key (:policy-key candidate)))
+      (refuse! :reading-policy-identity-invalid
+               {:candidate-id (:id candidate) :target (:target candidate)}))))
+
+(defn- check-interpreted-candidate!
+  [candidate]
+  (when-not (some? (:construction-receipt candidate))
+    (refuse! :missing-construction-receipt
+             {:candidate candidate}))
+  (when-not (some? (:interpretation-receipts candidate))
+    (refuse! :missing-interpretation-receipts
+             {:candidate candidate}))
+  (when (and (seq (:precedence candidate))
+             (empty? (:interpretation-receipts candidate)))
+    (refuse! :empty-interpretation-receipts
+             {:candidate candidate
+              :precedence-count (count (:precedence candidate))}))
+  (check-guard-locators! candidate))
+
 (defn- check-candidate-receipts!
   [posterior]
   (doseq [candidate (keys posterior)]
     (when-not (and (map? candidate) (= :cascade-candidate (:kind candidate)))
       (refuse! :posterior-over-non-cascade {:candidate candidate}))
-    (when-not (some? (:construction-receipt candidate))
-      (refuse! :missing-construction-receipt
-               {:candidate candidate}))
-    (when-not (some? (:interpretation-receipts candidate))
-      (refuse! :missing-interpretation-receipts
-               {:candidate candidate}))
-    (when (and (seq (:precedence candidate))
-               (empty? (:interpretation-receipts candidate)))
-      (refuse! :empty-interpretation-receipts
-               {:candidate candidate
-                :precedence-count (count (:precedence candidate))}))
-    (check-guard-locators! candidate)))
+    (if (reading-policy? candidate)
+      (check-reading-policy! candidate)
+      (check-interpreted-candidate! candidate))))
 
 (defn- marginal-mass
   "Sum the recorded posterior over candidates whose first acting pattern is

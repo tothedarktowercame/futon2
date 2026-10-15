@@ -4,19 +4,14 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.application-order-certificate :as application-order]
-            [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.controller-authority :as controller-authority]
             [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.efe :as efe]
-            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.forward-model :as fm]
-            [futon2.aif.learning-trial-ledger :as learning-ledger]
-            [futon2.aif.live-c :as live-c]
-            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.observation-label-reader :as label-reader]
             [futon2.aif.observation-labels :as observation-labels]
             [futon2.aif.observation-rates :as observation-rates]
@@ -28,16 +23,12 @@
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.prefix-free-energy-sut :as prefix-f-sut]
             [futon2.aif.receipt-construction :as receipt-construction]
-            [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.wm.family-selection :as family-selection]
-            [futon2.aif.token-a-bmr :as token-a-bmr]
-            [futon2.aif.token-belief-carry :as token-carry]
-            [futon2.aif.token-belief-predecessor :as token-predecessor]
-            [futon2.aif.zeta-posterior :as zeta-posterior])
+            [futon2.aif.token-a-bmr :as token-a-bmr])
   (:import (java.time Instant)))
 (defn- observation-contract []
   (clojure.edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -460,33 +451,6 @@
 (defn- observation-label-inputs [view]
   (when-not (:status view) (select-keys view [:labels :subjects :prior])))
 
-(def ^:private token-a-bmr-prototype-prior
-  {:alpha 1
-   :beta 1
-   :authority "claude-1 2026-09-28: uniform parent prior for the item 6 (c) prototype score; Joe: build (c) as a prototype"})
-
-(defn- token-a-bmr-receipt
-  "Write-only item 6(c) prototype score from the decision's label snapshot.
-   Every failure is data: this receipt can neither refuse nor change selection."
-  [view]
-  (if (or (nil? view) (:status view))
-    {:status :absent :reason :no-observation-labels}
-    (try
-      (let [{:keys [labels subjects]} (observation-label-inputs view)
-            view-prior (:prior view)
-            from-view? (authorised-prior? view-prior)
-            prior (if from-view? view-prior token-a-bmr-prototype-prior)
-            rates (observation-rates/rates-by-class (vec labels) (or subjects {}) prior)]
-        (if (:status rates)
-          {:status :absent :reason :rates-refused :refusal rates}
-          (assoc (token-a-bmr/score rates prior)
-                 :prior-source (if from-view? :view :prototype-default))))
-      (catch Throwable t
-        {:status :absent
-         :reason :token-a-bmr-unavailable
-         :error {:class (.getName (class t))
-                 :message (ex-message t)}}))))
-
 (defn- observation-label-certificate [view opts]
   (merge (select-keys view [:snapshot-sha256 :identities :subjects :excluded
                             :minimum :prior :reason])
@@ -573,55 +537,6 @@
    :placement :terminal
    :weights (get-in model [:class-preference (:horizon model)])
    :site "scripts/futon2/report/war_machine.clj:class-preference-weights"})
-
-(defn- class-observation-model
-  "PROOF-wm-works 1.3 build 2/3: the class observation model for the joint
-   family. Emission is deterministic: before the common horizon every state
-   emits :ending/not-yet-evaluated (preference 1, risk exactly 0); AT the
-   horizon each state emits its run-ending class -- an acceptance token
-   reached on a target whose facet is the current focus is :focused, a
-   same-focus-edge facet :related, another facet :unrelated, and a state
-   reaching nothing is :stop-the-line (Joe 2026-09-22: an unmeasured or
-   unreached outcome belongs to stop-the-line). Class C at the horizon is
-   Joe's fixed {focused .55, related .35, unrelated .05, stop-the-line .05};
-   the token preference path (preference-member, live-c weights) is NOT
-   replaced -- this is an additional observation model the bounded scorer
-   consumes, and live-c is still derived and recorded."
-  [{:keys [universe acceptance target-class horizon]}]
-  (let [not-yet :ending/not-yet-evaluated
-        joe-c class-preference-weights
-        class-pref (into {} (for [tau (range 1 (inc horizon))]
-                              [tau (if (= tau horizon) joe-c {not-yet 1})]))]
-    {:schema :wm/observation-model-v1
-     :backend :exact-enumeration
-     :kind :class-emission
-     ;; The schedule above assigns the calibrated class weights only at the
-     ;; common horizon; earlier emissions are the neutral not-yet-evaluated
-     ;; class.  Carry the semantics on the scored model so Q4 can recompute
-     ;; the declaration instead of reverse-engineering it from the weights.
-     :preference-semantics :terminal-only
-     :universe universe
-     :horizon horizon
-     :class-universe [:focused :related :unrelated :stop-the-line not-yet]
-     :acceptance acceptance
-     :target-class target-class
-     :class-preference class-pref
-     :provenance {:status :synthetic :calibrated false
-                  :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
-
-(defn- cascade-family-parameters
-  "Validate the declared comparison BEFORE admission can remove a target.
-   A declined candidate cannot hide incompatible horizons or temperatures."
-  [problems]
-  (let [Ts (distinct (map #(get-in % [:cascade-problem :horizon-steps]) problems))
-        betas (distinct (map #(get-in % [:cascade-problem :beta]) problems))]
-    (when (not= 1 (count Ts))
-      (throw (ex-info "cascade decision refused"
-                      {:kind :incommensurable-family :horizon-steps (vec Ts)})))
-    (when (not= 1 (count betas))
-      (throw (ex-info "cascade decision refused"
-                      {:kind :incommensurable-family :beta (vec betas)})))
-    {:horizon-steps (first Ts) :beta (first betas)}))
 
 (defn canonical-pr
   "A deterministic printed serialisation for digesting: map entries sorted
@@ -717,567 +632,6 @@
                    :source (:source (first (vals sourced)))
                    :classes (vec (sort-by pr-str (distinct (vals class-of))))}
             (seq refusals) (assoc :refusals refusals)))))))
-
-(defn- cascade-decision-admitted
-  "Joint cascade decision over ASSEMBLED, the output of
-  futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today),
-  except :cascade-sources (B4 2c): the declared sources map, read by the
-  candidate-derivations carrier for :source-content-sha256 and :acceptance.
-
-  Returns {:decision … :lanes [… ] :cascade-problems assembled}, where
-  :decision has passed futon2.aif.decision-gate/emit! and :lanes records
-  every problem's cascade-lane route plus any candidate dropped for
-  unmatched receipts (a candidate is NEVER passed through unreceipted).
-
-  - No problems ⇒ the abstention {:status :abstained :refusals …} through
-    emit! (an empty refusal list throws there — a tick with no targets and
-    no refusals is a configuration error).
-  - Targets are kept APART in the joint family: before scoring, every
-    token of every problem is qualified by its target (the deterministic
-    scheme [target token], recorded on the decision under
-    :token-qualification) — facts, want, guard present/absent sets and
-    :produces — and every pattern map in a candidate's precedence carries
-    its :target, so identical pattern ids on different targets remain
-    distinct first acting patterns. The enacted step's marginal is then
-    per (target, pattern); one target's fact can never satisfy another
-    target's guard or want.
-  - Each problem's R1/R6/R13/R4/R5 run inside cascade-lane (no maths is
-    copied, no lane output is used for the joint score); G is computed by
-    ONE efe/rank-actions call over the union family at the common
-    declared T, whose universe is the union of every problem's QUALIFIED
-    tokens.
-  - ONE policy/select-action-cascades over the union family at the
-    declared β; candidates keep :target; selection is never
-    per-target-then-ranked.
-  - Problems declaring different T or β refuse, typed
-    :incommensurable-family with the values."
-  [assembled opts]
-  (let [problems (:problems assembled)]
-    (if (empty? problems)
-      {:decision (decision-gate/emit!
-                  {:status :abstained :refusals (:refusals assembled)})
-       :lanes []
-       :cascade-problems assembled}
-      (let [{T :horizon-steps beta :beta} (cascade-family-parameters problems)
-              ;; WIRE-3: the derived live C enters the joint preference
-              ;; spec. Derived from Joe's three named sources at decision
-              ;; time; a STALE C (the corpus changed after the derivation)
-              ;; or a refused derivation refuses the decision typed —
-              ;; never scored against a stale C, never silently uniform.
-              ;; opts :live-c {:sources :sources-now :derived} is the test
-              ;; injection seam for the source reads and the derived map
-              ;; (the derivation itself is covered in
-              ;; futon2.aif.live-c-test); production passes nothing and
-              ;; reads the real corpus twice (derive, then the freshness
-              ;; re-read).
-              live-c-opts (:live-c opts)
-              live-sources (or (:sources live-c-opts) (live-c/read-sources))
-              live-derived (or (:derived live-c-opts)
-                               (live-c/derive-live-c live-sources))
-              _ (when (seq (:refusals live-derived))
-                  (throw (ex-info "cascade decision refused"
-                                  {:kind :live-c-refused
-                                   :refusals (:refusals live-derived)
-                                   :limitation (:limitation live-derived)})))
-              ;; Freshness: compare the derived C's signature against a fresh
-              ;; source read. Production always derives from a real read, so
-              ;; the guard always runs. The :derived test seam bypasses
-              ;; DERIVATION, not the guard: a test that injects :derived AND
-              ;; a source read gets the real comparison (that is how the
-              ;; stale test below refuses); only a bare :derived with no
-              ;; source read at all records the seam instead of inventing a
-              ;; comparison.
-              live-freshness
-              (if (and (:derived live-c-opts)
-                       (not (or (:sources live-c-opts)
-                                (:sources-now live-c-opts))))
-                {:stale? false :signature-derived (:signature live-derived)
-                 :signature-now :injected-test-seam}
-                (live-c/stale?
-                 live-derived
-                 (or (:sources-now live-c-opts) live-sources)))
-              _ (when (:stale? live-freshness)
-                  (throw (ex-info "cascade decision refused"
-                                  {:kind :live-c-stale
-                                   :signature-derived (:signature-derived live-freshness)
-                                   :signature-now (:signature-now live-freshness)
-                                   :limitation "the corpus changed after C was derived: re-derive before scoring"})))
-              preference-scales (live-c/family-scales problems)
-              preference-schedule (live-c/family-schedule problems)
-              ;; Admission has already paired each order with its own receipt.
-              qualification (fn [target token] [target token])
-              joint-candidates
-              (vec
-               (mapcat
-                (fn [problem]
-                  (let [t (:target problem)
-                        cp (:cascade-problem problem)
-                        qual (partial qualification t)
-                        patterns
-                        (into {}
-                              (map (fn [[id {:keys [guard produces]}]]
-                                     [id (-> (cascade-policy/token-interpretation
-                                              id {:guard {:needs (set (map qual (:needs guard)))
-                                                          :forbids (set (map qual (:forbids guard)))}
-                                                  :produces (set (map qual produces))})
-                                             (assoc :target t))]))
-                              (:interpretations cp))]
-                    (mapv (fn [{:keys [candidate-id precedence construction-receipt]}]
-                            {:kind :cascade-candidate :id candidate-id :target t
-                             :want (vec (:want cp))
-                             :precedence (mapv patterns precedence)
-                             :observation-locators
-                             (into {} (map (fn [[token locator]] [(qual token) locator]))
-                                   (:locators cp))
-                             :construction-receipt construction-receipt
-                             :interpretation-receipts (:interpretation-receipts problem)})
-                          (:constructed-candidates problem))))
-                problems))
-              dropped (:dropped-candidates assembled)
-              ;; Joint belief and want over the target-qualified tokens.
-              initial-belief-receipt (input-receipts/initial-belief problems)
-              ;; Retain prospective carry without granting it enactment authority.
-              token-belief-stage (token-carry/stage
-                                  initial-belief-receipt
-                                  (token-carry/domain-inputs problems)
-                                  (:prospective-token-carry opts)
-                                  (let [contexts (into {} (keep (fn [p]
-                                                   (when-let [c (get-in p [:cascade-problem :token-initialization])]
-                                                     [(:target p) c]))) problems)]
-                                    (cond-> (:token-belief-context opts)
-                                      (seq contexts) (assoc :observation-initialization contexts))))
-              token-belief-input (token-predecessor/input-receipt
-                                  token-belief-stage
-                                  (token-predecessor/inspect-trace
-                                   (:token-belief-predecessor-trace opts) opts))
-              joint-q0 (:continuation-belief token-belief-input)
-              lanes
-              (mapv (fn [problem]
-                      (let [lane (cascade-lane (assoc (:cascade-problem problem)
-                                                      :target (:target problem))
-                                               (merge (zeta-posterior/lane-options token-belief-input)
-                                                      (select-keys opts [:conditioning-steps])
-                                                      {:observation-labels (observation-label-inputs
-                                                                            (:observation-labels-view opts))}))]
-                        {:target (:target problem)
-                         :route (:route lane)
-                         :token-rate-scoring (:cascade-scoring (meta (:ranked lane)))
-                         :decision (select-keys (:decision lane) [:preference-schedule])
-                         :refusal (when (:stopped-at lane) (:refusal lane))
-                         :candidates (filterv #(seq (:precedence %)) (:candidates lane))
-                         :null-comparison
-                         {:role :per-target-diagnostic-baseline
-                          :used-for-joint-selection? false
-                          :candidates (filterv #(empty? (:precedence %)) (:candidates lane))}}))
-                    problems)
-              joint-want (reduce (fn [acc p]
-                                   (let [t (:target p)]
-                                     (into acc (map (fn [w] [t w]))
-                                           (get-in p [:cascade-problem :want]))))
-                                 #{} problems)
-              ;; WIRE-3: the joint comparison's REACHABLE token domain —
-              ;; every token the family's states, patterns or declared
-              ;; wants can name — is what live-c/cascade-spec restricts
-              ;; the live want to (the producer's own law: an unreachable
-              ;; want token dilutes the uniform share and distorts the
-              ;; comparison, so it is refused as :no-reachable-want, not
-              ;; kept). The spec that reaches scoring is the joint want
-              ;; plus the in-domain live want, with the live weights.
-              joint-reachable
-              (reduce
-               (fn [acc candidate]
-                 (reduce (fn [a pattern]
-                           (reduce conj a
-                                   (concat (:produces pattern)
-                                           (mapcat (fn [cl]
-                                                     (concat (:present cl)
-                                                             (:absent cl)))
-                                                   (get-in pattern [:guard :clauses])))))
-                         acc (:precedence candidate)))
-               (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
-               joint-candidates)
-              live-spec (live-c/cascade-spec live-derived joint-reachable joint-want
-                                              preference-scales preference-schedule)
-              live-refusal (:refusal live-spec)
-              ;; :no-reachable-want is NOT the same class of refusal as
-              ;; :live-c-stale or a source failure. Those two mean "C cannot be
-              ;; trusted, do not score". This one means "no live-C want token
-              ;; lies in this comparison's outcome domain" -- and today that is
-              ;; true only when no mission token can project through that
-              ;; mission's own declared wants. Capability-grain :star tokens
-              ;; intentionally remain outside the target-qualified domain.
-              ;;
-              ;; live-c is right to refuse when ASKED for a spec it cannot
-              ;; honestly give -- that law is not touched here. What the CALLER
-              ;; does with the refusal is this decision: a grain mismatch is C
-              ;; having no opinion about these outcomes, not C being broken, so
-              ;; the comparison proceeds on the uniform spec it used before this
-              ;; slice and records that it did. Halting every production
-              ;; decision would make this wiring responsible for a gap it only
-              ;; revealed. The record is on the certificate, so "C had no
-              ;; opinion at this grain" cannot be mistaken for "C was derived
-              ;; and agreed".
-              grain-mismatch? (= :no-reachable-want (:kind live-refusal))
-              _ (when (and live-refusal (not grain-mismatch?))
-                  (throw (ex-info "cascade decision refused" live-refusal)))
-              ;; PROOF-wm-works 1.3 build 2/3: score the joint family with
-              ;; the CLASS observation model (Joe's 55/35/5/5 at the horizon,
-              ;; zero risk before it) ALONGSIDE the untouched token
-              ;; machinery: the class model is the :observation-model the
-              ;; bounded scorer consumes; live-c is still derived, freshness-
-              ;; checked and recorded above -- it no longer enters the score.
-              ;; PROOF-wm-works 1.3 handoff B(1): evaluate the focus at the
-              ;; decision's ACTUAL time. The corpus is retrospective-pinned
-              ;; history, so the established focus is first discovered at the
-              ;; corpus's latest valid-through and then RETAINED at now by
-              ;; focus_receipt's persistence semantics; with no established
-              ;; focus the status is :unknown and every target's class is
-              ;; recorded :unknown -- never :unrelated, and the decision says
-              ;; so under :focus-status rather than refusing to fire.
-              ;; injectable like :live-c (tests supply synthetic corpora);
-              ;; production reads the canonical resource.
-              focus-inputs (or (:focus-inputs opts) (focus-receipt/read-inputs))
-              ;; codex-20 correction 3: ONE decision time, captured once and
-              ;; used by BOTH consumers (scoring's focus context and the
-              ;; receipt attachment). :focus-as-of pins it for replay; no
-              ;; consumer computes its own now.
-              decision-as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
-              ;; codex-20 correction 2 (revised): FIRST use the discovery
-              ;; that is VALID AT the decision time (the window covering it --
-              ;; a window's valid-through is its validity endpoint, not the
-              ;; moment its evidence becomes available; a decision inside a
-              ;; window discovers from that window). Only when NO window
-              ;; covers the decision time is a prior focus retained -- from
-              ;; the latest window that ENDED before the decision, never
-              ;; from evidence dated after it.
-              ;; codex-20 corrections 2 and 3 -- the covering window's
-              ;; discovery, else the retained prior focus, else :unknown;
-              ;; shared with the WM ask's classifier
-              {focus-info :info focus-established :established
-               established-as-of :established-as-of}
-              (focus-receipt/decision-focus focus-inputs decision-as-of)
-              class-universe (reduce clojure.set/union
-                                     (set joint-reachable)
-                                     [(set joint-want)
-                                      (set (mapcat identity (keys joint-q0)))
-                                      (set (mapcat identity (keys (:value initial-belief-receipt))))])
-              ;; THE shared relation producer (codex-20 ruling): the SAME
-              ;; classify-target the close receipt uses, same focus context
-              ;; (discovered or retained), ticket parents derived through the
-              ;; recorded Parent line.
-              ;; codex-20 correction 1: anchor the evidence directories to
-              ;; the canonical futon2 repository root (the registry's own
-              ;; default-code-root convention: <home>/code + the futon2
-              ;; checkout the machinery runs from), never the JVM's working
-              ;; directory -- the serving JVM runs from futon3c.
-              f2-root (str mission-registry/default-code-root "/futon2")
-              relation-context {:code-root mission-registry/default-code-root
-                                ;; WM-RELATION-I: M- targets' stated Relations are read here
-                                :ticket-dir (str f2-root "/holes/tickets")
-                                :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}
-              target-classifications
-              (into {}
-                    (for [p problems
-                          :let [t (:target p)]]
-                      [t (focus-receipt/classify-target
-                          focus-inputs focus-info (:as-of focus-info) t relation-context)]))
-              ;; relation vocabulary -> scorer classes (the close side maps
-              ;; the same keywords through the facet-map)
-              scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated}
-              ;; ⟨1⟩8 second half: the scorer CONSUMES the recorded theta.
-              ;; Where the model is assembled for scoring (not inside the
-              ;; kernel): each candidate's pattern whose family has recorded
-              ;; trials takes its theta from the ledger, with provenance on
-              ;; the pattern; a family with no trials keeps the documented
-              ;; default; an unreadable ledger leaves the default with a
-              ;; typed reason. Nothing is a gate. The kernel keeps reading
-              ;; theta off the pattern — only the pattern's theta source
-              ;; changes.
-              ledger-root-for-theta (or (:learning-trial-ledger-root opts)
-                                         learning-ledger/default-root)
-              theta-consumption
-              (into {}
-                    (for [c joint-candidates
-                          p (:precedence c)
-                          :let [family (:id p)]]
-                      [family (try
-                                (learning-ledger/pattern-theta family ledger-root-for-theta)
-                                (catch Exception _e
-                                  {:status :defaulted :reason :ledger-read-failed}))] ))
-              joint-candidates
-              (mapv (fn [c]
-                      (update c :precedence
-                              (fn [ps]
-                                (mapv (fn [p]
-                                        (let [ft (get theta-consumption (:id p))]
-                                          (cond
-                                            ;; recorded trials: theta from the ledger
-                                            (= :recorded-trials (:status ft))
-                                            (assoc p :theta (:theta ft)
-                                                     :theta-source :recorded-trials
-                                                     ;; :targets and :unattributed-rows are
-                                                     ;; provenance the decision record must
-                                                     ;; carry, not just the reader's return:
-                                                     ;; a 1/8 from three attempts on ONE
-                                                     ;; target reads differently from three
-                                                     ;; targets, and unattributed rows are
-                                                     ;; how a join mismatch becomes visible
-                                                     ;; (claude-2's review, 2026-09-23)
-                                                     :theta-provenance (select-keys ft [:trials-count :successes :identities
-                                                                                        :targets :unattributed-rows]))
-                                            ;; unreadable: documented default, typed reason kept
-                                            (= :defaulted (:status ft))
-                                            (assoc p :theta 1
-                                                     :theta-source :documented-default
-                                                     :theta-default-reason (:reason ft))
-                                            ;; no trials: the kernel's own default, unchanged
-                                            :else p)))
-                                      ps))))
-                    joint-candidates)
-              class-model (class-observation-model
-                           {:universe class-universe
-                            :acceptance joint-want
-                            :target-class (into {}
-                                                (for [[t c] target-classifications]
-                                                  [t (get scorer-class (:class c) :unknown)]))
-                            :horizon T})
-              rank-opts {:f-prefix-production? true
-                                        :horizon-steps T
-                                        :observation-model class-model
-                                        :upstream-initialization-conditioning
-                                        {:observation-updates (:observation-updates token-belief-input)
-                                         :conditioning-status (:conditioning-status token-belief-input)
-                                         :reason (:reason token-belief-input)
-                                         :applied-to (get-in token-belief-stage [:initialization :value])}
-                                        :prediction-context {:occurrence-id (str "class-score-" (java.time.Instant/now))
-                                                             :tau T}
-                                        :cascade-spec
-                                        (if (= :class-emission (:kind class-model))
-                                          ;; PROOF-wm-works 1.3 build 2/3: with
-                                          ;; the class observation model, the
-                                          ;; scoring preference is the class C
-                                          ;; (on the model, Joe's ruling), and
-                                          ;; live-c is RECORD-ONLY -- derived
-                                          ;; and freshness-checked above, never
-                                          ;; in the score.
-                                          {:want joint-want
-                                           :evidence #{}
-                                           :zeroed #{}
-                                           :c {:status :class-observation
-                                               :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"
-                                               :live-c-recorded (select-keys live-derived [:signature :sources-read])}}
-                                          (if grain-mismatch?
-                                          {:want joint-want
-                                           :c-schedule preference-schedule
-                                           :lam (:lam preference-scales)
-                                           :mu (:mu preference-scales)
-                                           :preference-scales preference-scales
-                                           :c {:status :derived-no-overlap
-                                               :source :futon2.aif.live-c/cascade-spec
-                                               :reason :no-live-c-mission-want-in-cascade-outcome-domain
-                                               :live-want (:live-want live-refusal)
-                                               :reachable (:reachable live-refusal)
-                                               :unreached-in-domain (:unreached-in-domain live-refusal)}}
-                                          (merge-live-cascade-spec
-                                           joint-want live-spec)))}
-              ;; codex-20 ruling, handoff B (live repair, M-a-wmc-scaling):
-              ;; a candidate whose scoring refuses :class-unknown-no-scalar-g
-              ;; gets NO scalar G. It is DECLINED -- a typed entry in the
-              ;; decision's dropped candidates carrying :possible-costs --
-              ;; and selection continues over the candidates that have a
-              ;; scalar. Only when NO candidate has a scalar does the
-              ;; decision refuse as before. No G is invented for the unknown
-              ;; target (no worst case, no average, no default class).
-              [ranked class-declines class-unknown-refusals]
-              (loop [candidates joint-candidates declines [] refused []]
-                (let [r (efe/rank-actions {:cascade-belief joint-q0}
-                                          candidates rank-opts)]
-                  (if (and (map? r) (contains? r :status)
-                           (= :class-unknown-no-scalar-g (:kind r))
-                           (some #(= (:target r) (:target %)) candidates))
-                    (let [t (:target r)
-                          remaining (filterv #(not= t (:target %)) candidates)
-                          target-declines (map (fn [c]
-                                                 {:target t
-                                                  :stage :scoring
-                                                  :candidate (:id c)
-                                                  :reason :class-unknown-no-scalar-g
-                                                  :possible-costs (:possible-costs r)})
-                                               (filter #(= t (:target %)) candidates))
-                          refusal {:target t
-                                   :kind :class-unknown-no-scalar-g
-                                   :missing :target-relation
-                                   :possible-costs (:possible-costs r)}]
-                      (if (empty? remaining)
-                        ;; Every scored candidate declined: nil ranked; the
-                        ;; body below abstains with all refusals when other
-                        ;; targets carry admission refusals, else throws.
-                        [nil (into declines target-declines)
-                         (conj refused refusal)]
-                        (recur remaining
-                               (into declines target-declines)
-                               (conj refused refusal))))
-                    [r declines refused])))
-              dropped (vec (concat dropped class-declines))]
-          (when (and (map? ranked) (contains? ranked :status))
-            (throw (ex-info "cascade decision refused"
-                            (merge {:kind (or (:kind ranked) :rank-refused)}
-                                   ranked))))
-          ;; M-a-wmc-scaling (click 16): when EVERY scored candidate was
-          ;; declined :class-unknown-no-scalar-g and other targets carry
-          ;; admission refusals, the decision ABSTAINS -- the same typed
-          ;; abstention as the no-admitted-problems path, :refusals in their
-          ;; existing order plus one :class-unknown-no-scalar-g refusal per
-          ;; declined target -- so the runner's
-          ;; first-no-admitted-interpretation-refusal ask can fire. When the
-          ;; declined family was the whole field the decision still refuses.
-          (or (when (nil? ranked)
-                (if (seq (:refusals assembled))
-                  {:decision (decision-gate/emit!
-                              {:status :abstained
-                               :refusals (into (vec (:refusals assembled))
-                                               class-unknown-refusals)})
-                   :lanes (mapv (fn [lane]
-                                  (cond-> lane
-                                    (seq dropped)
-                                    (assoc :dropped-candidates dropped)))
-                                lanes)
-                   :dropped-candidates dropped
-                   :cascade-problems assembled}
-                  (throw (ex-info "cascade decision refused"
-                                  (merge {:kind :class-unknown-no-scalar-g}
-                                         (last class-unknown-refusals))))))
-              (let [precision-model (get-in (meta ranked) [:cascade-scoring :precision-model])
-                schedules (into {} (map (fn [p] [(:target p) (get-in p [:cascade-problem :observation-schedule])]) problems))
-                model-id (precision-carry/model-identity precision-model
-                           (mapv (fn [e] {:id (:action e)}) ranked) schedules)
-                admission (get-in token-belief-input [:carry-admission :authority])
-                beta-state (precision-carry/advance
-                            {:previous (get-in opts [:token-belief-predecessor-trace :decision
-                                                    :selection-certificate :policy-precision-state])
-                             :initialized-beta beta :model-id model-id :admission admission
-                             :family (:precision-family admission)})
-                ;; F1b-admit-I / F1c-I: each candidate's admitted observed
-                ;; prefix from the flights' conditioning steps, recorded per
-                ;; candidate under :policy-prefixes BEFORE selection (the
-                ;; top-level :observation-updates stay D's initialization
-                ;; updates), and production-ranked supplies F from the
-                ;; recorded value (a candidate with no admitted steps stays
-                ;; :not-supplied). Without the flights' steps in opts every
-                ;; candidate is {:conditioning-status :no-flight-records}.
-                token-belief-input (assoc token-belief-input :policy-prefixes
-                                          (prefix-admission/prefixes
-                                           joint-candidates
-                                           (or (:conditioning-steps opts)
-                                               {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})))
-                prefix-f-input (prefix-f-posterior-input
-                                ranked joint-candidates token-belief-input opts)
-                decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
-                                  (policy/select-action-cascades
-                                    (:ranked prefix-f-input)
-                                    {:beta (:beta beta-state) :beta-state beta-state
-                                     :cascade-habit-path (:cascade-habit-path opts)
-                                     :pattern-feedback (:pattern-feedback opts)
-                                     ;; WM-HABIT-FOLD-CALL-I: judge's fold
-                                     :enactment-fold (:enactment-fold opts)
-                                     :ticket-queue (:ticket-queue opts)
-                                     :ticket-queue-refusals (:ticket-queue-refusals opts)
-                                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))
-                                     :policy-history-pin (:policy-history-pin prefix-f-input)}))
-                                :horizon-steps T
-                                :initial-belief-receipt initial-belief-receipt)
-                decision (cond-> decision
-                           (:receipt prefix-f-input)
-                           (assoc-in [:selection-certificate :prefix-f-routing]
-                                     (:receipt prefix-f-input)))
-                decision (assoc-in decision [:selection-certificate :precision-family]
-                                   (precision-carry/family decision precision-model schedules))
-                decision (assoc-in decision [:selection-certificate :token-rate-lanes]
-                                   (into {} (map (juxt :target :token-rate-scoring)) lanes))
-                decision (assoc-in decision [:selection-certificate :token-belief-stage]
-                                   token-belief-stage)
-                decision (assoc-in decision [:selection-certificate :token-belief-input]
-                                   token-belief-input)
-                ;; B4 slice 2b (PROOF-2 P₀ carrier): one derivation entry per
-                ;; scored candidate, truthful for today's declared files
-                ;; (:construction :kind :hand-admitted from the candidate's
-                ;; own receipt, so P₀ fails on provenance, not absence).
-                decision (assoc-in decision [:selection-certificate :candidate-derivations]
-                                   (candidate-derivations/derivations
-                                     (get-in decision [:selection-certificate :candidates])
-                                     (candidate-derivations/s0-of token-belief-stage)
-                                     {:actions (when-let [a (get-in decision
-                                                       [:selection-law :per-policy-argmax :action])]
-                                                 [a])
-                                      :sources (:cascade-sources opts)}))
-                ;; CERT-S v1 §0/§5: the certificate declares its schema.
-                decision (assoc-in decision [:selection-certificate :certificate-schema]
-                                   :wm/proof2-certificate-v1)
-                decision (assoc (input-receipts/with-preference-audit decision)
-                                :theta-consumption
-                                (into {}
-                                      (for [[fam ft] theta-consumption]
-                                        [fam (if (= :recorded-trials (:status ft))
-                                               {:theta (:theta ft) :status :recorded-trials
-                                                :trials-count (:trials-count ft)
-                                                :identities (:identities ft)}
-                                               {:status (:status ft)
-                                                :reason (:reason ft)})]))
-                                :focus-status
-                                {:status (:status focus-info)
-                                 :focus (:focus focus-info)
-                                 :as-of (:as-of focus-info)
-                                 :target-class target-classifications})
-                ;; :focus-as-of pins the receipt's clock for replay comparisons.
-                ;; the SAME retained-focus context the scorer used reaches
-                ;; the receipt attachment (handoff B: one focus context, two
-                ;; consumers)
-                decision (focus-receipt/attach
-                          decision focus-inputs
-                          {:as-of decision-as-of
-                           :previous-focus (when (:focus focus-established)
-                                             {:focus (:focus focus-established)
-                                              :as-of established-as-of})
-                           :relation-context relation-context
-                           :classifications target-classifications})
-                authorized (controller-authority/authorize decision ranked)
-                emitted (decision-gate/emit! authorized)
-                ;; F1a-2-I: the measured-A version, computed the lane's way
-                ;; (sourced-rates over each problem's :locators), written
-                ;; beside :selection-certificate. Write only: the scoring
-                ;; above is unchanged and nothing here is a gate.
-                measured-a (measured-a-version problems
-                              (zipmap (map :target problems)
-                                      (repeat (observation-label-inputs
-                                                (:observation-labels-view opts)))))
-                adopted-cells (->> lanes
-                                   (mapcat #(get-in % [:token-rate-scoring
-                                                       :rates-provenance :adoption :cells]))
-                                   distinct
-                                   (sort-by pr-str)
-                                   vec)
-                token-a-bmr-score (token-a-bmr-receipt
-                                   (:observation-labels-view opts))
-                token-a-bmr (cond-> token-a-bmr-score
-                              (= :wm/token-a-bmr-v1 (:schema token-a-bmr-score))
-                              (assoc :applied (boolean (seq adopted-cells))
-                                     :adopted-cells adopted-cells))]
-            {:decision (assoc emitted
-                              :measured-a measured-a
-                              :token-a-bmr token-a-bmr
-                              :preference-schedule (class-preference-schedule class-model)
-                              :live-c-coverage (:live-c-coverage live-spec)
-                              :token-qualification
-                              {:scheme :target-token-pair
-                               :form "[target token]"
-                               :pattern-maps-carry :target})
-             :lanes (mapv (fn [lane]
-                            (cond-> lane
-                              (seq dropped)
-                              (assoc :dropped-candidates dropped)))
-                          lanes)
-             :dropped-candidates dropped
-             :cascade-problems assembled}))))))
 
 (defn- candidate-want-progress
   "Use the scorer/constructor's rollout, on this target's fresh true facts.
@@ -1653,87 +1007,178 @@
              :reading-root reading-root
              :graph-path (some-> (:pattern-graph-path opts) str)))))
 
+(def ^:private retired-diagnostics
+  "The interpreted-construction route's per-decision products. The reading
+  policy route neither computes nor consumes them (NOTE-wiring-reading-to-
+  decision §7.1); they are recorded as unavailable, never as inputs."
+  (into {} (map (fn [k] [k {:status :unavailable :reason :retired-with-interpreted-route}]))
+        [:token-rate-lanes :token-belief-stage :token-belief-input :joint-q0
+         :class-observation-model :theta-consumption :candidate-derivations
+         :measured-a :token-a-bmr :live-c-scored :retry-declines]))
+
+(defn- family-refusals
+  "One typed refusal per target whose family produced no scored policy, with
+  every failure that target carried."
+  [rows]
+  (vec (for [{:keys [target-id failures policies]} rows
+             :when (empty? policies)]
+         {:target target-id :stage :policy-family :kind :no-policy-family
+          :failure-kind (or (:kind (first failures)) :empty-policy-family)
+          :failures (vec failures)})))
+
+(defn- reading-model-identity
+  "The precision model the reading-family scorer is: scorer, kernel, graph
+  pin and the compared policy identities. Beta carries across it only when
+  it is unchanged (precision-carry/advance)."
+  [field families]
+  (interpretation-evidence/value-digest
+   {:scorer :wm/cascade-shape-g-score-policy-v1
+    :kernel :co-application-frontier-theta-v1
+    :graph-pin (get-in field [:graph :pin :sha256])
+    :policies (set (mapcat #(map :policy-id (:policies %)) families))}))
+
+(defn- declared-beta
+  "The one declared β over the targets with computed families, or a typed
+  refusal. No default is supplied."
+  [assembled families]
+  (let [targets (map :target-id (filter #(= :computed (:status %)) families))
+        betas (map #(get-in assembled [:declared-betas %]) targets)]
+    (cond
+      (some nil? betas)
+      {:refusal {:kind :beta-not-declared :stage :selection
+                 :target (first (keep (fn [[t b]] (when (nil? b) t)) (map vector targets betas)))
+                 :targets (vec (keep (fn [[t b]] (when (nil? b) t)) (map vector targets betas)))}}
+      (not= 1 (count (distinct betas)))
+      {:refusal {:kind :incommensurable-family :stage :selection :target nil
+                 :beta (vec (distinct betas))}}
+      :else {:beta (first betas)})))
+
+(defn- abstain [refusals]
+  (decision-gate/emit! {:status :abstained :refusals refusals}))
+
+(defn- reading-family-decision
+  "Q5: the one G selection over the reading policy families of the field
+  (NOTE-wiring-reading-to-decision §6 item 6, §7.1). Every computed family's
+  policies are scored by cascade-shape-g/score-policy and selected by ONE
+  policy/select-action-cascades call inside family-selection/select-over-
+  families. F is each policy's canonical carrier: its computed Prefix-F, or
+  the certified zero-history carrier bound to this decision's ledger pin.
+  C is the shape scorer's progress C (codex-68 ruling); live C is recorded as
+  observation only. No interpretation is required before scoring."
+  [assembled field opts queue]
+  (let [families (vec (:families field))
+        steps (or (:conditioning-steps opts)
+                  {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})
+        census (prefix-admission/history-census steps)
+        pin (prefix-admission/census-pin census)
+        {:keys [beta refusal]} (declared-beta assembled families)
+        model-id (reading-model-identity field families)
+        beta-state (when beta
+                     (precision-carry/advance
+                      {:previous (get-in opts [:token-belief-predecessor-trace :decision
+                                               :selection-certificate :policy-precision-state])
+                       :initialized-beta beta :model-id model-id}))
+        attach-f (fn [ranked]
+                   (policy-prefix/production-ranked
+                    ranked {:conditioning-status (if (:dir-status steps) :not-run :admitted)}
+                    (prefix-admission/prefixes (mapv :action ranked) steps)
+                    census))
+        family-failures (vec (mapcat (fn [f] (map #(assoc % :target-id (:target-id f))
+                                                  (:failures f)))
+                                     families))
+        computed? (some #(= :computed (:status %)) families)]
+    (cond
+      (not= :formed (:status field))
+      {:decision (abstain [{:target nil :stage :policy-family :kind :no-policy-family
+                             :failure-kind (:reason field)}])}
+
+      (not computed?)
+      {:decision (abstain (family-refusals families))}
+
+      refusal
+      {:decision (abstain (into [refusal] (family-refusals families)))}
+
+      :else
+      (let [result (family-selection/select-over-families
+                    families
+                    {:beta (:beta beta-state) :beta-state beta-state
+                     :attach-f attach-f
+                     :policy-history-pin pin
+                     :enactment-fold (:enactment-fold opts)
+                     :pattern-feedback (:pattern-feedback opts)
+                     :ticket-queue queue
+                     :ticket-queue-refusals (family-refusals families)
+                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))})]
+        (if (not= :selected (:status result))
+          {:decision (abstain (family-refusals (:target-policy-families result)))}
+          (let [decision (-> (:decision result)
+                             (assoc-in [:selection-certificate :selection-route]
+                                       :wm/reading-policy-family-v1)
+                             (assoc-in [:selection-certificate :target-policy-families]
+                                       (:target-policy-families result))
+                             (assoc-in [:selection-certificate :family-failures]
+                                       family-failures)
+                             (assoc-in [:selection-certificate :precision-model-id] model-id)
+                             (assoc-in [:selection-certificate :preference]
+                                       {:c :cascade-shape-g/progress-preference
+                                        :authority "codex-68 ruling 2026-10-15: shape-policy C is decision C"
+                                        :live-c :observation-only})
+                             (assoc-in [:selection-certificate :retired-diagnostics]
+                                       retired-diagnostics)
+                             (assoc-in [:selection-certificate :certificate-schema]
+                                       :wm/proof2-certificate-v1))
+                authorized (controller-authority/authorize decision (:ranked result))]
+            {:decision (decision-gate/emit! authorized)
+             :ranked (:ranked result)}))))))
+
 (defn cascade-decision
-  "Admit explicitly paired nonempty constructions, record every decline, then
-  score/select only admitted candidates. An all-declined family abstains.
-  Every target's reading policy family is also formed once (graph loaded
-  once) and returned under :target-policy-field, with its census on the
-  certificate; it does not take part in this selection."
+  "Q5: one G selection over every target's reading policy family. The field
+  is formed once (graph loaded once) from the assembly's source declaration;
+  the selector runs once over its scored union; one authority check and one
+  gate follow. The interpreted-construction route (admission, joint-q0/class
+  rank-actions, retry declines, diagnostic lanes) no longer runs; its
+  products are recorded as retired. A field with no scored policy abstains
+  with every family failure."
   [assembled opts]
   (let [policy-field (target-policy-field assembled opts)
         view (observation-label-view opts)
         opts (assoc opts :observation-labels-view view)
-        _ (when (seq (:problems assembled))
-            (cascade-family-parameters (:problems assembled)))
-        admissions (mapv admit-cascade-problem (:problems assembled))
-        dropped (vec (concat (:dropped-candidates assembled)
-                             (map (fn [r] {:target (:target r) :stage :assembly
-                                           :reason (:kind r) :missing-evidence [(:missing r)]})
-                                  (:refusals assembled))
-                             (mapcat :declines admissions)))
-        admitted (assoc assembled
-                        :problems (vec (keep :problem admissions))
-                        :refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
-                        :dropped-candidates dropped)
         queue (ticket-queue/validate! (if (contains? opts :ticket-queue)
                                        (:ticket-queue opts) (ticket-queue/read-declaration)))
-        result (cascade-decision-admitted admitted
-                 (assoc opts :ticket-queue queue
-                        :ticket-queue-refusals (vec (concat (:refusals admitted) dropped))))
-        ;; An all-refused family still retains the queue's inadmissible entries.
-        result (if (and (empty? (:problems admitted)) (seq (:entries queue)))
-                 (assoc-in result [:decision :selection-certificate :ticket-queue]
-                           (assoc (ticket-queue/plan queue [] (:refusals admitted))
-                                  :unrestricted-choice nil :choice nil :stratum-posterior nil
-                                  :decided-by :abstention))
-                 result)
-        previous-beta (get-in opts [:token-belief-predecessor-trace :decision
-                                    :selection-certificate :policy-precision-state])
-        result (if (and (empty? (:problems admitted)) previous-beta)
-                 (assoc-in result [:decision :selection-certificate :policy-precision-state]
-                           (precision-carry/advance {:previous previous-beta
-                             :initialized-beta (:initialized-beta previous-beta)
-                             :model-id (:model-id previous-beta)}))
-                 result)
-        construction-census
-        (target-construction-census
-         ;; Census every assembled construction, including one later declined
-         ;; by admission. Its policy-count then remains honestly zero and Q2
-         ;; can detect the missing action instead of losing the target row.
-         (:problems assembled)
-         (get-in result [:decision :selection-certificate :candidates]))]
+        result (reading-family-decision assembled policy-field opts queue)
+        census (if (= :formed (:status policy-field))
+                 (assoc (family-selection/field-census policy-field)
+                        :status :formed
+                        :reading-root (:reading-root policy-field)
+                        :graph-path (:graph-path policy-field))
+                 policy-field)]
     (cond-> (-> result
-                ;; cascade-decision-admitted's own :dropped-candidates (when
-                ;; it ran a scored family) already carries this wrapper's
-                ;; assembly/admission declines PLUS any scoring-stage
-                ;; declines (e.g. :class-unknown-no-scalar-g); the
-                ;; early-return abstention path carries none.
-                (assoc :dropped-candidates (vec (or (:dropped-candidates result) dropped)))
+                (assoc :lanes []
+                       :cascade-problems assembled
+                       :target-policy-field policy-field
+                       ;; the interpreted assembly's refusals are evidence
+                       ;; about the retired route, not about this decision
+                       :dropped-candidates
+                       (vec (map (fn [r] {:target (:target r) :stage :retired-assembly
+                                          :reason (:kind r)})
+                                 (:refusals assembled))))
                 (assoc-in [:decision :selection-certificate :observation-labels]
                           (observation-label-certificate view opts))
+                (assoc-in [:decision :selection-certificate :target-policy-field] census)
+                (assoc-in [:decision :selection-certificate :target-construction]
+                          {:status :absent
+                           :reason :reading-policy-construction-census-owed})
                 (assoc-in [:decision :mission-hole-coverage]
                           (or (:mission-hole-coverage assembled)
                               {:status :absent :reason :source-coverage-not-supplied}))
-                (update :decision #(assoc % :live-c-coverage
-                                           (or (:live-c-coverage %)
-                                               {:status :absent :reason :no-admitted-cascade-problems}))))
-      true
-      (assoc-in [:decision :selection-certificate :target-construction]
-                construction-census)
-      true
-      (assoc :target-policy-field policy-field)
-      true
-      (assoc-in [:decision :selection-certificate :target-policy-field]
-                (if (= :formed (:status policy-field))
-                  (assoc (family-selection/field-census policy-field)
-                         :status :formed
-                         :reading-root (:reading-root policy-field)
-                         :graph-path (:graph-path policy-field))
-                  policy-field))
+                (assoc-in [:decision :live-c-coverage]
+                          {:status :observation-only
+                           :reason :shape-policy-c-is-decision-c}))
+      (= :abstained (get-in result [:decision :status]))
+      (assoc-in [:decision :reason] :no-acting-cascade-candidate)
       (:proposal-supply assembled)
-      (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
-      (empty? (:problems admitted))
-      (assoc-in [:decision :reason] :no-acting-cascade-candidate))))
+      (assoc-in [:decision :selection-certificate :proposal-supply]
+                (:proposal-supply assembled)))))
 
 (defn select-and-record-cascade!
   "Select using the existing habit snapshot, without reinforcing the selection.

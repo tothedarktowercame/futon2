@@ -14,7 +14,8 @@
 
    Pure: no file, store or data/ access."
   (:require [futon2.aif.cascade-prior :as prior]
-            [futon2.aif.load-identity :as load-identity]))
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]))
 
 (load-identity/register! *ns* *file*)
 
@@ -46,9 +47,16 @@
   (let [candidate (:candidate enactment)
         derivation (get-in click [:decision :selection-certificate
                                   :candidate-derivations candidate])
-        precedences (replay-precedences replay candidate)]
+        precedences (replay-precedences replay candidate)
+        action (get-in click [:decision :action])
+        reading? (and (map? (:precedence action)) (= candidate (:id action)))]
     (cond
       (nil? candidate) (refused :enactment-names-no-candidate {})
+      ;; A reading policy's history identity is its own structural key, the
+      ;; one prefix admission, the history census and selection read.
+      reading?
+      (or (prefix-admission/reading-policy-key action)
+          (refused :reading-policy-key-refused {:candidate candidate}))
       (nil? derivation) (refused :candidate-not-in-click {:candidate candidate})
       (nil? (:target derivation)) (refused :target-absent {:candidate candidate})
       (not= 1 (count precedences))

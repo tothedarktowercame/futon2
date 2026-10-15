@@ -15,15 +15,50 @@
       (:chain-broken; the first step's sPrev is its boundary belief).
   Pure. The result is recorded; nothing is refused and nothing scores it yet
   (F1c-I consumes it)."
-  (:require [futon2.aif.action-identity :as action-identity]
+  (:require [clojure.string :as str]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-prior :as prior]))
 
+(defn reading-policy-key
+  "The history identity of a reading policy (cascade-shape-g/arranged->candidate:
+  :precedence {:co-apply …} plus :arrangement): [:wm/reading-policy-v1 target
+  policy-id {:nodes [[occurrence pattern] …] :edges [[from to kind] …] :order
+  [occurrence …]}]. Built from structure only, so theta and learning updates
+  leave it unchanged; it names the stable policy id, so the key and the id
+  travel together. nil (refused) when the action is not a reading policy, its
+  id is not a policy id of its target, its co-apply units, patterns or nodes
+  disagree with its arrangement, or it carries a :policy-key other than this."
+  [{:keys [target id precedence arrangement] :as action}]
+  (let [co (when (map? precedence) (:co-apply precedence))]
+    (when (and (map? co) (map? arrangement) (some? target) (string? id)
+               (str/starts-with? id (str target "/policy-")))
+      (let [nodes (mapv (juxt :occurrence-id :pattern) (:nodes arrangement))
+            order (vec (:precedence arrangement))
+            key [:wm/reading-policy-v1 (str target) id
+                 {:nodes nodes
+                  :edges (vec (sort-by pr-str (map (juxt :from :to :kind)
+                                                   (:edges arrangement))))
+                  :order order}]]
+        (when (and (seq nodes)
+                   (= order (vec (:units co)))
+                   (= (set (map first nodes)) (set (keys (:patterns co))))
+                   (every? (fn [[occurrence pattern]]
+                             (= pattern (get-in co [:patterns occurrence :pattern-id])))
+                           nodes)
+                   (or (not (contains? action :policy-key))
+                       (= key (:policy-key action))))
+          key)))))
+
 (defn candidate-key
-  "The candidate's cascade-prior policy key, the scheme
+  "The candidate's policy history key. A reading policy's is its
+  reading-policy-key; an interpreted cascade's is the cascade-prior key
   enactment-habit/policy-key-for uses for an enacted candidate:
-  [:pattern-cascade target ordered-pattern-ids {}]; nil when malformed."
-  [{:keys [target precedence]}]
-  (prior/policy-key {:mission target :shown (mapv #(if (map? %) (:id %) %) precedence) :semilattice {}}))
+  [:pattern-cascade target ordered-pattern-ids {}]. nil when malformed."
+  [{:keys [target precedence] :as action}]
+  (if (map? precedence)
+    (reading-policy-key action)
+    (prior/policy-key {:mission target :shown (mapv #(if (map? %) (:id %) %) precedence)
+                       :semilattice {}})))
 
 (defn- occurrence-order [s]
   (let [{:keys [click flight]} (get-in s [:step :occurrence])]

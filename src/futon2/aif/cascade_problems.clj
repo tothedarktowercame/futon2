@@ -396,6 +396,9 @@
                            (or targets []))]
         {:problems (vec (remove :kind assembled))
          :refusals (vec (filter :kind assembled))
+         ;; every target's declared β (nil when its context declares none),
+         ;; whether or not its interpreted construction assembled
+         :declared-betas (into {} (map (fn [t] [t (beta-for sources t)])) (or targets []))
          :dropped-candidates
          (vec (for [target targets
                     [i candidate] (map-indexed vector (get-in sources [:candidates target]))
