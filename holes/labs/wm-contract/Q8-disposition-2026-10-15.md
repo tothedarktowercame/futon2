@@ -238,3 +238,20 @@ Not run: full CI, live click, hot load.
 - **The retained-decision change** makes reading-route records carry their
   selection-law and certificate. Other exporter facts for those runs (Q1, Q3)
   now compute instead of being NR.
+
+## Independent review
+
+Codex-68 reviewed futon2 `69f323b6b` and mathlib4 `9805823462` against the
+three rulings and the production runner seam. The exporter accepts only a
+carrier recomputed from the retained record; the selected-task cascade keeps
+the truthful constructed/admitted/scored population and subtracts only an
+intact, predecessor-bound Q6 exclusion; excluded outer tasks carry reasons
+without invented comparison keys. The persisted prior frontier is used only
+for the refresh audit, not represented as a learning input.
+
+The independent focused rerun of `wm.q8-frontier-route-test` produced 7 tests,
+71 assertions, 0 failures and 0 errors. `Q8First.lean`, `Q8Repeat.lean`, and
+`Q8Changed.lean` all compiled in canonical mathlib4: the first is Q8
+unverifiable, while repeat and changed-frontier fixtures have no Q8 alert.
+Direct checks of `IncrementalTaskFrontier.lean` and `Requirements.lean` also
+completed successfully; their linter warnings are non-blocking.
