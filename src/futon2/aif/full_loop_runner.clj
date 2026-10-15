@@ -1854,13 +1854,14 @@
   "Only a canonical Prefix-F receipt may cross selection into enactment: a
   computed Prefix-F of the candidate's own policy, or the certified
   zero-history carrier for a policy the pinned flight ledger proves has never
-  run (policy-prefix-evidence/consumed-canonical-f?).
+  run (policy-prefix-evidence/consumed-canonical-f?), bound to the
+  decision's authoritative census pin.
 
   The selector rejects a missing prefix today, but this boundary also covers
   replayed/legacy judgements: a historical reduced-law decision must not be
   allowed to enact merely because it names a cascade action."
-  [candidate]
-  (policy-prefix-evidence/consumed-canonical-f? candidate))
+  [candidate pin]
+  (policy-prefix-evidence/consumed-canonical-f? candidate pin))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
@@ -1876,7 +1877,10 @@
             candidates (get-in decision [:selection-certificate :candidates])
             candidate (when (sequential? candidates)
                         (first (filter #(= action (:id %)) candidates)))]
-        (when (canonical-f-consumed? candidate)
+        (when (canonical-f-consumed?
+               candidate
+               ;; the decision's own ledger pin, not anything the candidate carries
+               (get-in decision [:selection-certificate :policy-history-pin]))
           {:action action
            :rank (or (:rank decision) 1)
            :G-efe (:controller-score decision)

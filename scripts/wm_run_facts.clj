@@ -156,14 +156,14 @@
 
 (defn- consumed-prefix-f?
   "The enacted candidate consumed a canonical F carrier: its own computed
-  Prefix-F, or the certified zero-history carrier (checked exactly as
-  enactment checks it)."
-  [candidate]
+  Prefix-F, or the certified zero-history carrier valid under the record's
+  own authoritative census PIN (checked exactly as enactment checks it)."
+  [candidate pin]
   (let [prefix (:f-prefix candidate)
         input (get-in candidate [:inputs :f])
         f (:f prefix)]
     (if (= :not-applicable (:status prefix))
-      (policy-prefix-evidence/consumed-canonical-f? candidate)
+      (policy-prefix-evidence/consumed-canonical-f? candidate pin)
       (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
            (= (:id candidate) (:policy prefix))
            (= :computed (:status prefix))
@@ -176,10 +176,11 @@
 (defn- q7-candidate
   "The selected candidate as Q7 walks it. A consumed canonical F supersedes
   the scorer's own :computed-f. A :not-applicable carrier that does not
-  validate is not an applicability certificate, so it counts as refused."
-  [candidate]
+  validate against the record's authoritative census PIN is not an
+  applicability certificate, so it counts as refused."
+  [candidate pin]
   (cond
-    (consumed-prefix-f? candidate) (dissoc candidate :computed-f)
+    (consumed-prefix-f? candidate pin) (dissoc candidate :computed-f)
     (= :not-applicable (get-in candidate [:f-prefix :status]))
     (assoc-in candidate [:f-prefix :status] :refused)
     :else candidate))
@@ -202,7 +203,10 @@
                        [[:failure] (:failure record)]]
                 (map? chosen) (conj [[:decision :chosen] chosen])
                 candidate (conj [[:decision :selected-candidate]
-                                 (q7-candidate candidate)])
+                                 (q7-candidate
+                                  candidate
+                                  (get-in record [:decision :selection-certificate
+                                                  :policy-history-pin]))])
                 (and (not (map? chosen)) abstention)
                 (conj [[:decision :abstention] abstention]))]
     (vec
@@ -234,7 +238,10 @@
                        [[:failure] (:failure record)]]
                 (map? chosen) (conj [[:decision :chosen] chosen])
                 candidate (conj [[:decision :selected-candidate]
-                                 (q7-candidate candidate)])
+                                 (q7-candidate
+                                  candidate
+                                  (get-in record [:decision :selection-certificate
+                                                  :policy-history-pin]))])
                 (and (not (map? chosen)) abstention)
                 (conj [[:decision :abstention] abstention]))]
     (vec

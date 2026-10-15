@@ -57,15 +57,28 @@
            [{:record-path "/runs/c9.edn" :click-id "c9"
              :step (step other-action {:click "c9" :flight "f-other"})}])])
 
-(defn- ranked-for [act dir]
+(defn- ranked-for
+  "Rank ACT against the ledger in DIR exactly as cascade-decision does: the
+  prefixes and the census come from one conditioning snapshot, and :pin is
+  that census's authoritative pin."
+  [act dir]
   (let [steps (fold-source/conditioning-steps (str dir))
-        prefixes (admission/prefixes [act] steps)]
+        prefixes (admission/prefixes [act] steps)
+        census (admission/history-census steps)]
     {:steps steps
+     :pin (admission/census-pin census)
      :ranked (evidence/production-ranked
               [{:action act :controller-score 0.0}]
               {:conditioning-status :admitted}
               prefixes
-              (admission/history-census steps))}))
+              census)}))
+
+(defn- select [ranked pin]
+  (policy/select-action-cascades ranked {:beta 1 :policy-history-pin pin}))
+
+(defn- refusal-kind [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo e
+                 (or (:kind (ex-data e)) (get-in (ex-data e) [:refusal :kind])))))
 
 (defn- selected-entry [decision]
   ((ns-resolve 'futon2.aif.full-loop-runner 'selected-entry) {:decision decision}))
@@ -78,11 +91,15 @@
 (def snap {:open-missions #{"M-selected"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1"} :seats #{"author"} :library-pattern-count 1})
 
+(defn- absences [decision]
+  (get-in (facts/facts-for-record (export-record decision) "r" snap nil nil)
+          [:facts "pathAbsenceCount"]))
+
 (deftest certified-zero-history-enacts
   (let [dir (ledger! [other-policy-flight])
-        {:keys [ranked steps]} (ranked-for action dir)
+        {:keys [ranked steps pin]} (ranked-for action dir)
         prefix (:f-prefix (first ranked))
-        decision (policy/select-action-cascades ranked {:beta 1})
+        decision (select ranked pin)
         candidate (first (get-in decision [:selection-certificate :candidates]))]
     (testing "the census is complete over the real record and the written one"
       (is (= :complete (:status (admission/history-census steps))))
@@ -92,7 +109,9 @@
       (is (= :certified-zero-history (:reason prefix)))
       (is (= 0 (:history-count prefix)))
       (is (nil? (:f prefix)))
-      (is (evidence/certified-zero-history? prefix action)))
+      (is (evidence/certified-zero-history? prefix action pin)))
+    (testing "the decision records the pin apart from the candidates"
+      (is (= pin (get-in decision [:selection-certificate :policy-history-pin]))))
     (testing "the selection consumes it and the law names the omission"
       (is (= action (:action decision)))
       (is (= :not-applicable (:f-status candidate)))
@@ -108,6 +127,31 @@
       (let [export (facts/facts-for-record (export-record decision) "r" snap nil nil)]
         (is (= 0 (get-in export [:facts "pathAbsenceCount"])))
         (is (empty? (get-in export [:diagnostics :absenceGroups])))))))
+
+(deftest carrier-from-another-ledger-refuses
+  ;; Ledgers A and B are both complete and both record no step of ACTION,
+  ;; so each yields a coherent carrier. Only the decision's own pin counts.
+  (let [a (ranked-for action (ledger! [other-policy-flight]))
+        b (ranked-for action (ledger! []))
+        carrier-a (get-in a [:ranked 0 :f-prefix])]
+    (is (not= (:pin a) (:pin b)))
+    (is (evidence/certified-zero-history? carrier-a action (:pin a)))
+    (is (not (evidence/certified-zero-history? carrier-a action (:pin b))))
+    (testing "the selector refuses A's carrier under pin B"
+      (is (= :invalid-policy-prefix (refusal-kind #(select (:ranked a) (:pin b))))))
+    (testing "enactment refuses A's carrier when the decision's pin is B"
+      (let [decision (select (:ranked a) (:pin a))
+            swapped (assoc-in decision [:selection-certificate :policy-history-pin] (:pin b))
+            unpinned (update decision :selection-certificate dissoc :policy-history-pin)]
+        (is (= action (:action (selected-entry decision))))
+        (is (= 0 (absences decision)))
+        (is (nil? (selected-entry swapped)))
+        (is (pos? (absences swapped)))
+        (is (nil? (selected-entry unpinned)))
+        (is (pos? (absences unpinned)))))
+    (testing "an incomplete authoritative pin certifies nothing"
+      (is (not (evidence/certified-zero-history?
+                carrier-a action (assoc (:pin a) :status :incomplete)))))))
 
 (deftest unknown-history-refuses
   (doseq [[label dir]
@@ -127,16 +171,14 @@
                                  :step (dissoc (step action {:click "c2" :flight "f-y"})
                                                :policy-key)}])]])]]]
     (testing (name label)
-      (let [{:keys [ranked steps]} (ranked-for action dir)
-            refusal (try (policy/select-action-cascades ranked {:beta 1}) nil
-                         (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (let [{:keys [ranked steps pin]} (ranked-for action dir)]
         (is (= :incomplete (:status (admission/history-census steps))))
         (is (= :not-supplied (get-in ranked [0 :f-prefix :status])))
-        (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind])))))))
+        (is (= :free-energy-not-supplied (refusal-kind #(select ranked pin))))))))
 
 (deftest forged-or-unpinned-census-refuses
   (let [dir (ledger! [other-policy-flight])
-        {:keys [ranked]} (ranked-for action dir)
+        {:keys [ranked pin]} (ranked-for action dir)
         carrier (:f-prefix (first ranked))
         history-dir (ledger! [["flight-mine.edn"
                                (flight "f-mine" "M-selected"
@@ -149,7 +191,7 @@
         forgeries
         {;; content edited after pinning: the digest no longer matches
          :edited-census (update-in carrier [:census :records] pop)
-         ;; the census pinned somewhere else
+         ;; the carrier's own pin rewritten
          :repinned (assoc-in carrier [:ledger :digest] (apply str (repeat 64 "0")))
          ;; no directory: not a pinned ledger
          :unpinned (let [c (assoc (:census carrier) :dir nil)]
@@ -162,27 +204,21 @@
                                           :records (count (:records history-census))})
          ;; the certificate of another policy
          :foreign-policy (assoc carrier :policy other-action)}]
-    (is (evidence/certified-zero-history? carrier action))
+    (is (evidence/certified-zero-history? carrier action pin))
     (doseq [[label forged] forgeries]
       (testing (name label)
-        (is (not (evidence/certified-zero-history? forged action)))
+        (is (not (evidence/certified-zero-history? forged action pin)))
         (is (= :invalid-policy-prefix
-               (try (policy/select-action-cascades
-                     [{:action action :controller-score 0.0 :f-prefix forged}]
-                     {:beta 1})
-                    nil
-                    (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))
-        (let [decision (policy/select-action-cascades
-                        [{:action action :controller-score 0.0 :f-prefix carrier}]
-                        {:beta 1})
+               (refusal-kind #(select [{:action action :controller-score 0.0
+                                        :f-prefix forged}]
+                                      pin))))
+        (let [decision (select [{:action action :controller-score 0.0 :f-prefix carrier}] pin)
               row (first (get-in decision [:selection-certificate :candidates]))]
           (is (some? (selected-entry decision)))
           (let [forged-decision (assoc-in decision [:selection-certificate :candidates]
                                           [(assoc row :f-prefix forged)])]
             (is (nil? (selected-entry forged-decision)))
-            (is (pos? (get-in (facts/facts-for-record (export-record forged-decision)
-                                                      "r" snap nil nil)
-                              [:facts "pathAbsenceCount"])))))))))
+            (is (pos? (absences forged-decision)))))))))
 
 (deftest nonzero-history-gets-no-escape
   (testing "a recorded but unadmitted step keeps the policy :not-supplied"
@@ -192,25 +228,26 @@
                                    :step (step action {:click "c3" :flight "f-mine"}
                                                :status :refused
                                                :reason :unmeasured-class)}])]])
-          {:keys [ranked steps]} (ranked-for action dir)
+          {:keys [ranked steps pin]} (ranked-for action dir)
           census (admission/history-census steps)]
       (is (= :complete (:status census)))
       (is (= 1 (admission/census-history-count census (admission/candidate-key action))))
       (is (= :not-supplied (get-in ranked [0 :f-prefix :status])))
-      (is (nil? (evidence/certified-zero-history {:action action} census)))))
+      (is (nil? (evidence/certified-zero-history {:action action} census)))
+      (is (= :free-energy-not-supplied (refusal-kind #(select ranked pin))))))
   (testing "an admitted step yields the computed Prefix-F, which enacts"
     (let [dir (ledger! [["flight-mine.edn"
                          (flight "f-mine" "M-selected"
                                  [{:record-path "/runs/c4.edn" :click-id "c4"
                                    :step (step action {:click "c4" :flight "f-mine"})}])]])
-          {:keys [ranked]} (ranked-for action dir)
-          decision (policy/select-action-cascades ranked {:beta 1})
+          {:keys [ranked pin]} (ranked-for action dir)
+          decision (select ranked pin)
           candidate (first (get-in decision [:selection-certificate :candidates]))]
       (is (= :computed (get-in ranked [0 :f-prefix :status])))
       (is (= 0.5 (:f-consumed candidate)))
       (is (= action (:action (selected-entry decision))))
-      (testing "the same ledger cannot certify this policy as never run"
-        (is (nil? (evidence/certified-zero-history
-                   {:action action}
-                   (admission/history-census
-                    (fold-source/conditioning-steps (str dir))))))))))
+      (is (= 0 (absences decision)))
+      (testing "computed F does not depend on the pin"
+        (is (= action (:action (selected-entry
+                                (update decision :selection-certificate
+                                        dissoc :policy-history-pin)))))))))

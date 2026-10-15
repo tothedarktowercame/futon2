@@ -131,15 +131,20 @@
        :census census})))
 
 (defn certified-zero-history?
-  "True iff PREFIX is a valid certified-zero-history carrier for POLICY: the
-  carrier's own census still recomputes to its digest, the digest is the one
-  the carrier pins, the policy key is POLICY's, and that census has no step
-  for it. A forged or edited census, an incomplete one, or one naming this
-  policy fails."
-  [prefix policy]
+  "True iff PREFIX is a valid certified-zero-history carrier for POLICY under
+  the decision's authoritative census PIN (policy-prefix-admission/census-pin
+  of the ledger snapshot the decision read): the carrier's census still
+  recomputes to its digest, its pin equals PIN exactly, the policy key is
+  POLICY's, and that census has no step for it. A missing PIN, a carrier from
+  another ledger, a forged or edited census, an incomplete one, or one naming
+  this policy fails."
+  [prefix policy pin]
   (let [k (admission/candidate-key policy)
         census (:census prefix)]
-    (and (= :wm/policy-prefix-evidence-v1 (:schema prefix))
+    (and (map? pin)
+         (= :complete (:status pin))
+         (= pin (admission/census-pin census))
+         (= :wm/policy-prefix-evidence-v1 (:schema prefix))
          (= :not-applicable (:status prefix))
          (= :certified-zero-history (:reason prefix))
          (= :applicability-certificate (:presence prefix))
@@ -189,10 +194,11 @@
   "True iff selection CANDIDATE (a selection-certificate :candidates row)
   consumed one of the two F carriers that may cross into enactment: a
   computed finite Prefix-F of its own policy, or the certified-zero-history
-  carrier with the F term recorded as omitted for that reason. :not-supplied,
-  zero-support, an edited carrier, or an F value that does not match the
-  carrier all fail."
-  [candidate]
+  carrier with the F term recorded as omitted for that reason, valid under the
+  decision's authoritative census PIN. :not-supplied, zero-support, a carrier
+  from another ledger, an edited carrier, or an F value that does not match
+  the carrier all fail. PIN plays no part in a computed Prefix-F."
+  [candidate pin]
   (let [prefix (:f-prefix candidate)
         input (get-in candidate [:inputs :f])
         f (:f prefix)]
@@ -208,7 +214,7 @@
                    (select-keys input [:status :value :presence :reason])))
 
            :not-applicable
-           (and (certified-zero-history? prefix (:id candidate))
+           (and (certified-zero-history? prefix (:id candidate) pin)
                 (nil? (:f candidate))
                 (= :not-applicable (:f-status candidate))
                 (= {:status :not-applicable :reason :certified-zero-history}

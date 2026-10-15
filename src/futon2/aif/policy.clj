@@ -252,7 +252,7 @@
      :reason (when-not (= :present presence) presence)}))
 
 (defn- selection-candidate
-  [entry]
+  [history-pin entry]
   (let [habit (cond-> (selection-input entry :habit 1)
                 (= :neutral-fallback (get-in entry [:habit-provenance :source]))
                 (assoc :status :declared-neutral
@@ -271,7 +271,7 @@
                               ;; reach cascade-prior, which requires this one
                               (not ((requiring-resolve
                                      'futon2.aif.policy-prefix-evidence/certified-zero-history?)
-                                    prefix (:action entry))))))
+                                    prefix (:action entry) history-pin)))))
             (throw (ex-info "Invalid policy prefix" {:kind :invalid-policy-prefix :prefix prefix})))
         f (if prefix {:status (:status prefix) :value (:f prefix)
                           :presence (if (= :not-applicable (:status prefix))
@@ -410,7 +410,7 @@
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
   [ranked-actions {:keys [beta beta-state enactment-fold habit-state near-tie-threshold novelty-inputs
-                                 pattern-feedback
+                                 pattern-feedback policy-history-pin
                                  ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
@@ -453,7 +453,7 @@
                          (cascade-feedback/attach-pattern-evidence-menu
                           pattern-feedback ranked-actions)
                          ranked-actions)
-        candidates (mapv selection-candidate ranked-actions)
+        candidates (mapv (partial selection-candidate policy-history-pin) ranked-actions)
         _ (when (and beta-state
                      (not (and ((requiring-resolve 'futon2.aif.policy-precision-carry/intact?) beta-state)
                                (= beta (:beta beta-state))
@@ -586,7 +586,10 @@
      :selection-certificate (cond-> (assoc-in (selection-certificate beta candidates ranked-actions novelty-inputs)
                                                 [:beta :status] beta-status)
                               beta-state (assoc :policy-precision-state beta-state)
-                              queue-receipt (assoc :ticket-queue queue-receipt))
+                              queue-receipt (assoc :ticket-queue queue-receipt)
+                              ;; the ledger snapshot every zero-history carrier
+                              ;; is bound to, recorded apart from the candidates
+                              policy-history-pin (assoc :policy-history-pin policy-history-pin))
      :selection-law
      ;; M-wm-wiring row 9 (claude-10, 2026-09-25): :candidate is the CHOSEN
      ;; entry's :cascade-id (efe's ranked entries carry it), the id Clause C's

@@ -59,14 +59,16 @@
   (let [conditioning-steps (or (:conditioning-steps opts)
                                {:steps []
                                 :dir-status {:absent :no-flight-steps-in-opts}})
+        ;; the same flight ledger, pinned: a policy it proves has never run
+        ;; gets the certified zero-history carrier, bound to this pin
+        census (prefix-admission/history-census conditioning-steps)
+        pin (prefix-admission/census-pin census)
         empirical (policy-prefix/production-ranked
                    ranked
                    (select-keys token-belief-input
                                 [:conditioning-status :reason :observation-updates])
                    (:policy-prefixes token-belief-input)
-                   ;; the same flight ledger, pinned: a policy it proves has
-                   ;; never run gets the certified zero-history carrier
-                   (prefix-admission/history-census conditioning-steps))]
+                   census)]
     (if-let [{:keys [bootstrap-priors scorer-authority context] :as commissioning}
              (:prefix-f-commissioning opts)]
       (let [result (prefix-f-sut/compose-menu!
@@ -78,13 +80,14 @@
                     context)]
         (if (= :ready-for-posterior (:status result))
           {:ranked (:posterior-input result)
-           :receipt result}
+           :receipt result
+           :policy-history-pin pin}
           (throw (ex-info "commissioned Prefix-F preparation refused"
                           {:kind :prefix-f-commissioning-refused
                            :reason (:reason result)
                            :details (:details result)
                            :commissioning-keys (set (keys commissioning))}))))
-      {:ranked empirical})))
+      {:ranked empirical :policy-history-pin pin})))
 
 (defn- lane-step
   "Run one cascade-lane node call. A typed refusal — an ex-info thrown by the
@@ -337,8 +340,10 @@
                                 {:steps [] :dir-status {:absent :no-flight-steps-in-opts}}))
                   prefix-f-input (prefix-f-posterior-input
                                   ranked candidates {:policy-prefixes prefixes} lane-opts)
-                  decision (policy/select-action-cascades (:ranked prefix-f-input)
-                                                          {:beta beta})
+                  decision (policy/select-action-cascades
+                            (:ranked prefix-f-input)
+                            {:beta beta
+                             :policy-history-pin (:policy-history-pin prefix-f-input)})
                   decision (cond-> decision
                              (:receipt prefix-f-input)
                              (assoc-in [:selection-certificate :prefix-f-routing]
@@ -1175,7 +1180,8 @@
                                      :enactment-fold (:enactment-fold opts)
                                      :ticket-queue (:ticket-queue opts)
                                      :ticket-queue-refusals (:ticket-queue-refusals opts)
-                                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))
+                                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))
+                                     :policy-history-pin (:policy-history-pin prefix-f-input)}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
                 decision (cond-> decision

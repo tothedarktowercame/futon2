@@ -322,8 +322,14 @@ empty sum 0, not circumstance-fit F and not `:not-supplied`: the historical
 prefix term is outside its domain before the policy's first enactment, so the
 law omits it for that reason (`law-receipt` lists the policy under
 `:candidates-f-not-applicable`), and enactment accepts the carrier only when
-the census recomputes to the pinned digest and still records no step for the
-policy. An incomplete or unpinned census leaves `:not-supplied`, which still
+the census recomputes to its digest, still records no step for the policy,
+and its pin (`census-pin`: schema, dir, digest, status) equals the decision's
+own `:selection-certificate :policy-history-pin`, which the decision records
+from the same conditioning snapshot it read, apart from any candidate. A
+coherent carrier from another complete ledger therefore refuses. The Lean
+model is `PrefixFreeEnergyPosterior.lean` §Applicability (mathlib4
+`0259c9e264`): `CertifiedZeroHistory`, `prefixApplicability`,
+`machineWeightsAtApplicability`. An incomplete or unpinned census leaves `:not-supplied`, which still
 refuses. A policy with any recorded step, admitted or not, gets no
 not-applicable carrier and needs its own computed Prefix-F.
 

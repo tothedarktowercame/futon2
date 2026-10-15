@@ -159,3 +159,9 @@
                       [k n] (:policy-steps r)
                       :when (= k policy-key)]
                   n))))
+
+(defn census-pin
+  "The authoritative pin of CENSUS: what a decision records independently of
+  any candidate, and what every zero-history carrier must match exactly."
+  [census]
+  (select-keys census [:schema :dir :digest :status]))
