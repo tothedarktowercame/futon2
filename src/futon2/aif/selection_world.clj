@@ -201,5 +201,10 @@
                                       (:requested-at interpretation-ask)
                                       (:at interpretation-ask)
                                       (str (now-fn))))
+     ;; Q5 needs to tell "nothing to interpret" from "interpretation owed
+     ;; and never issued": the selected-reading phase's outcome, as recorded
+     :interpretation-ask-status
+     (when (= :selected-reading (:kind interpretation-ask))
+       (select-keys interpretation-ask [:kind :status :reason :discharge :request-id]))
      :failure-count (count @failures)
      :failures @failures})))

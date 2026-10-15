@@ -353,6 +353,32 @@
        :calibration-registry calibration-registry
        :factorization-registry factorization-registry})))
 
+(defn interpretation-order
+  "Q5 from the recorded selection-world instants. Instants are compared as
+  instants, not as strings (an ISO string drops trailing zeros, so a later
+  instant can sort earlier as text). A selected reading policy that still
+  owes interpretation which was never issued certifies nothing: it is not
+  recomputable, never a vacuous pass. With nothing owed and nothing asked,
+  no interpretation preceded the selection."
+  [world]
+  (let [selected-at (:selection-ended-at world)
+        asked-at (:interpretation-issued-at world)
+        ask (:interpretation-ask-status world)
+        instant (fn [x] (try (java.time.Instant/parse (str x)) (catch Exception _ nil)))]
+    (cond
+      (nil? selected-at) (not-recomputable "selection completion instant absent")
+      (nil? (instant selected-at)) (not-recomputable "selection completion instant unreadable")
+      asked-at
+      (if-let [a (instant asked-at)]
+        (if (.isBefore ^java.time.Instant (instant selected-at) a)
+          "selectionBeforeInterpretation" "interpretationBeforeSelection")
+        (not-recomputable "interpretation issue instant unreadable"))
+      (and (= :selected-reading (:kind ask))
+           (not= :discharged (:discharge ask)))
+      (not-recomputable (str "selected policy's interpretation owed and never issued: "
+               (name (or (:reason ask) :unknown))))
+      :else "selectionBeforeInterpretation")))
+
 (defn facts-for-record
   "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}.
   PREVIOUS is the previous parsed record, if available."
@@ -514,13 +540,7 @@
                  (count (filter #(recorded-term? :expected-information-gain %)
                                 g-term-rows))
                  (nr "coherent per-policy expected-information terms absent"))
-               "interpretationOrder"
-               (if-let [selected-at (:selection-ended-at world)]
-                 (if-let [asked-at (:interpretation-issued-at world)]
-                   (if (neg? (compare (str selected-at) (str asked-at)))
-                     "selectionBeforeInterpretation" "interpretationBeforeSelection")
-                   "selectionBeforeInterpretation")
-                 (nr "selection completion instant absent"))
+               "interpretationOrder" (interpretation-order world)
                "pathAbsenceCount" (count apaths)
                "previousChoice" (if previous-chosen
                                     {"target" (str (:target previous-chosen))

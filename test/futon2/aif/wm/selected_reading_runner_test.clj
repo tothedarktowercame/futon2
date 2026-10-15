@@ -17,6 +17,7 @@
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.wm.reading-family-decision-test :as rfd]
             [futon2.test-support.runner-fixture :as fixture]
+            [wm-report-card :as card]
             [wm-run-facts :as facts])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -146,9 +147,17 @@
                     (partition 2 1 events)))
         (is (= (:at (first events)) (get-in record [:world-at-selection :selection-ended-at])))
         (is (= (:at (second events)) (get-in record [:world-at-selection :interpretation-issued-at])))
-        (is (= "selectionBeforeInterpretation"
-               (get-in (facts/facts-for-record record "r" snap nil nil)
-                       [:facts "interpretationOrder"])))))
+        (let [export (facts/facts-for-record record "r" snap nil nil)]
+          (is (= "selectionBeforeInterpretation" (get-in export [:facts "interpretationOrder"])))
+          (is (not= :not-recomputable
+                    (:status (first (filter #(= :Q5 (:requirement %))
+                                            (card/verdict-rows export)))))))
+        (testing "the export is recomputed from the recorded instants"
+          (is (= "interpretationBeforeSelection"
+                 (facts/interpretation-order
+                  (assoc (:world-at-selection record)
+                         :interpretation-issued-at (:at (first events))
+                         :selection-ended-at (:at (second events)))))))))
     (testing "the policy and its selection certificate are unchanged but for the discharge"
       (is (= (without-discharge decision) (without-discharge recorded))))
     (testing "the discharged policy is eligible, and enactment stops at its typed refusal"
@@ -363,5 +372,33 @@
                   (map :event events)))
     (is (nil? (get-in record [:world-at-selection :interpretation-issued-at])))
     (is (= (:at (first events)) (get-in record [:world-at-selection :selection-ended-at])))
+    (testing "Q5 is not certified by an interpretation that never happened"
+      (let [export (facts/facts-for-record record "r" snap nil nil)
+            order (get-in export [:facts "interpretationOrder"])]
+        (is (contains? order "not-recomputable"))
+        (is (= :not-recomputable
+               (:status (first (filter #(= :Q5 (:requirement %))
+                                       (card/verdict-rows export))))))))
     (is (= :interpretation-owed-after-selection
            (:status (runner/reading-interpretation-status recorded))))))
+
+(deftest q5-compares-instants-not-strings
+  ;; Instant/toString drops trailing zeros: 12.5Z sorts after 12.500000001Z
+  ;; as text, though it is the earlier instant.
+  (is (= "selectionBeforeInterpretation"
+         (facts/interpretation-order
+          {:selection-ended-at "2026-10-15T20:00:12.5Z"
+           :interpretation-issued-at "2026-10-15T20:00:12.500000001Z"})))
+  (is (= "interpretationBeforeSelection"
+         (facts/interpretation-order
+          {:selection-ended-at "2026-10-15T20:00:12.500000001Z"
+           :interpretation-issued-at "2026-10-15T20:00:12.5Z"})))
+  (is (contains? (facts/interpretation-order
+                  {:selection-ended-at "2026-10-15T20:00:12Z"
+                   :interpretation-ask-status {:kind :selected-reading :status :absent
+                                               :discharge :interpretation-owed-after-selection
+                                               :reason :selected-reading-source-unpinned}})
+                 "not-recomputable"))
+  (is (= "selectionBeforeInterpretation"
+         (facts/interpretation-order {:selection-ended-at "2026-10-15T20:00:12Z"}))
+      "nothing owed and nothing asked"))
