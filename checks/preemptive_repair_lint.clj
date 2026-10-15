@@ -56,7 +56,9 @@
   ;; `git ls-files --error-unmatch` for every citation created thousands of
   ;; process stream-pump threads and could exhaust the bounded CI cgroup even
   ;; though the scanner itself is sequential.
-  (let [tracked-by-root (into {} (for [root (set (map :root rows))]
+  (let [repository-roots (set (vals repos))
+        tracked-by-root (into {} (for [root (filter repository-roots
+                                                    (set (map :root rows)))]
                                     [root (set (tracked root))]))]
     (vec
      (concat
