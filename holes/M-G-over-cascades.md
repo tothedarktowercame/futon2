@@ -15,7 +15,21 @@
   `holes/labs/M-memes-arrows/`), futon3/library (the pattern language), futon6 (`holes/closure-folds.edn` — ground truth).
 **Cross-ref:** M-wm-policies (the parent; this *operationalises* its "over policies = distributions over CASCADES"),
   E-fold-engine (futon3a/holes/missions — the excursion that surfaced this), F-wm-piloted-2026-06-12 §362 (the ratified
-  definition), the wm-flight anatomy (futon6/holes/anatomy-of-a-wm-flight.md).
+  definition), the wm-flight anatomy (futon6/holes/anatomy-of-a-wm-flight.md), and
+  [[E-implementing-G-over-cascades]] (the production plan joining the selected
+  structural cascade to durable validation and evidence-checked enactment).
+
+**Current implementation excursion (2026-10-16).** A live click proved that
+the reading-family constructor and G selector can choose a structural
+arrangement, but the runner then stopped at
+`:reading-policy-execution-semantics-owed`.  That stop protects the older
+selected-cascade flight path from treating a co-application map as a flat
+precedence vector; it does not close this mission's production seam.  The
+required save → validate → compile → enact → witness path, including open
+design holes and held-phase live repair, is specified in
+[[E-implementing-G-over-cascades]].  Do not describe that gap as an absence of
+a cascade definition: the definition is in effect; the missing work is the
+verified production join.
 
 ---
 
