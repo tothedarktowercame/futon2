@@ -223,3 +223,12 @@ directed codex-68: "OK, please run 1 more click with debugger attached".
 This authorizes exactly one further ordinary click with the debugger attached
 before issue. Under this document's standing mechanism, `allocated` rises
 from 71 to **72**. No prior charge is reclaimed.
+
+## Joe's consolidated-handoff debugger grant, 2026-10-16 — one click
+
+After the live agent handoffs were moved onto the shared transport boundary
+and its focused gate passed, Joe directed codex-68: "OK I authorize one more
+click. Please run it with the debugger attached." This authorizes exactly one
+further ordinary click with the debugger attached before issue. Under this
+document's standing mechanism, `allocated` rises from 72 to **73**. No prior
+charge is reclaimed.
