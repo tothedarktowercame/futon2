@@ -197,3 +197,11 @@ and hot-loaded the predicate. Joe then directed: "OK please run 1 click,
 debugger attached this time". This authorizes exactly one further ordinary
 click, with the debugger attached before issue. Under this document's standing
 mechanism, `allocated` rises from 68 to **69**. No prior charge is reclaimed.
+
+## Joe's post-closure-fix verification grant, 2026-10-16 — one click
+
+After the early-closure defect was reproduced, repaired, tested and hot-loaded,
+Joe directed: "OK let's run one more click then". This authorizes exactly one
+further ordinary click for the live author-contact verification. The debugger
+will remain attached. Under this document's standing mechanism, `allocated`
+rises from 69 to **70**. No prior charge is reclaimed.
