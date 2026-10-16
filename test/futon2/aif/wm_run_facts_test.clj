@@ -98,13 +98,45 @@
                      "factorizationAuthorizations"]]
         (is (contains? (export field) "not-recomputable") field)))))
 
+(def historical-q9-record
+  "The 2026-10-05 click record (5.3 MB, not committed: data/* is
+  gitignored)."
+  "wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn")
+
+(defn historical-data-roots
+  "Where a run record is looked for, in order: the declared data root
+  ($FUTON2_DATA_ROOT), this checkout's data/, the shared canonical
+  checkout's."
+  []
+  (vec (distinct (keep identity [(System/getenv "FUTON2_DATA_ROOT")
+                                 "data"
+                                 "/home/joe/code/futon2/data"]))))
+
+(defn resolve-historical
+  "The record at REL under the first data root holding it, or a typed skip
+  naming every root searched."
+  [rel]
+  (let [roots (historical-data-roots)]
+    (if-let [f (first (filter #(.isFile ^java.io.File %)
+                              (map #(java.io.File. ^String % ^String rel) roots)))]
+      {:status :found :path (.getPath ^java.io.File f)}
+      {:status :skipped :reason :historical-record-absent :record rel :searched roots})))
+
 (deftest q9-historical-click-record-has-no-authorized-factorization
-  (let [historical (facts/read-edn
-                    "data/wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn")
-        export (q9-export historical)]
-    (is (contains? (export "factorizedPreference") "not-recomputable"))
-    (is (contains? (export "calibrationAuthorizations") "not-recomputable"))
-    (is (contains? (export "factorizationAuthorizations") "not-recomputable"))))
+  (let [r (resolve-historical historical-q9-record)]
+    (if (= :skipped (:status r))
+      (do (println "SKIP q9-historical-click-record:" (pr-str r))
+          (is (= :historical-record-absent (:reason r)))
+          (is (seq (:searched r))))
+      (let [export (q9-export (facts/read-edn (:path r)))]
+        (doseq [field ["factorizedPreference" "calibrationAuthorizations"
+                       "factorizationAuthorizations"]]
+          (is (contains? (export field) "not-recomputable") field))))))
+
+(deftest a-missing-historical-record-is-a-typed-skip
+  (is (= {:status :skipped :reason :historical-record-absent
+          :record "wm-runs/no-such-record.edn" :searched (historical-data-roots)}
+         (resolve-historical "wm-runs/no-such-record.edn"))))
 
 (deftest q9-complete-joined-carrier-exports-a-lean-pass-shape
   (let [export (q9-export (assoc-in record [:decision :factorized-preference]
