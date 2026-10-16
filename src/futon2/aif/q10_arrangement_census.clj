@@ -177,8 +177,10 @@
         c (q8/cascade decision (get-in record [:q6 :predecessor]) task)
         posterior-map (get-in decision [:selection-law :posterior])
         compared (set (map prefix-admission/candidate-key (keys posterior-map)))
-        selected (some-> (get-in decision [:selection-law :per-policy-argmax :action])
-                         prefix-admission/candidate-key)
+        selected (let [a (q2/chosen-action decision)]
+                   (cond (nil? a) nil
+                         (= :not-compared (:status a)) a
+                         :else (prefix-admission/candidate-key a)))
         constructed (:constructed raw-stages)
         failures (into {} (for [f (:family-failures cert) :when (:policy-id f)]
                             [(:policy-id f) (:kind f)]))

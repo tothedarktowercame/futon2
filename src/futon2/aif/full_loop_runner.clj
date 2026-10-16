@@ -1059,7 +1059,10 @@
                     :registered-run/critical-parameters
                     (selection-world/critical-task-counts world-at-selection raw-opts)
                     :selectorSeam "live:validated-selection"
-                    :selection-event (habit-reinforcement/selection-event decision)
+                    ;; the decision it selected with, also when refused
+                    ;; downstream (Q5 debt): selection was reached, and a
+                    ;; :selection-not-reached absence here was counted by Q7
+                    :selection-event (habit-reinforcement/selection-event retained-decision)
                     :habit-reinforcement (or (:habit-reinforcement result)
                                              (habit-reinforcement/evaluate decision (:outcome result) nil))
                     :cascade-feedback (or (:cascade-feedback result)

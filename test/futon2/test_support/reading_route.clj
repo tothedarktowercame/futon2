@@ -7,6 +7,7 @@
   defaults a gate: every input is the one the production decision reads."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.load-identity :as identity]
@@ -54,18 +55,23 @@
   [root pattern]
   (identity/sha256 (Files/readAllBytes (.toPath (io/file root (str pattern ".flexiarg"))))))
 
-(defn- analysis [library patterns]
+(defn- analysis
+  "One sentence, one fragment per element of PATTERNS: a pattern id, or a
+  vector of the ids one fragment cites over the same span."
+  [library patterns]
   {:status "analyzed"
    :sentences
    [{:id "s1"
      :fragments (vec (map-indexed
-                      (fn [i pattern]
-                        {:start i :end (inc i) :text pattern :intent "act" :target "target"
-                         :rationale "fixture fit" :relations ["action"]
-                         :pattern_refs [{:id pattern :status "candidate"
-                                         :rationale "fixture fit"
-                                         ;; the library bytes the reading cited
-                                         :source_sha256 (library-sha256 library pattern)}]})
+                      (fn [i cited]
+                        (let [cited (if (string? cited) [cited] cited)]
+                          {:start i :end (inc i) :text (str/join " " cited) :intent "act"
+                           :target "target" :rationale "fixture fit" :relations ["action"]
+                           :pattern_refs (vec (for [pattern cited]
+                                                {:id pattern :status "candidate"
+                                                 :rationale "fixture fit"
+                                                 ;; the library bytes the reading cited
+                                                 :source_sha256 (library-sha256 library pattern)}))}))
                       patterns))}]})
 
 (defn- pinned-graph []

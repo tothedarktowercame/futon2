@@ -39,6 +39,7 @@
   The runner seals the carrier into the record; `verify-record` recomputes
   it from the record alone and the exporter reads only a verified carrier."
   (:require [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.q2-construction :as q2]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.reading-policy-preference :as pref]))
@@ -154,8 +155,10 @@
   (let [cert (:selection-certificate decision)
         compared (vec (sort-by pr-str (map prefix-admission/candidate-key
                                            (keys (get-in decision [:selection-law :posterior])))))
-        selected (some-> (get-in decision [:selection-law :per-policy-argmax :action])
-                         prefix-admission/candidate-key)
+        selected (let [a (q2/chosen-action decision)]
+                   (cond (nil? a) nil
+                         (= :not-compared (:status a)) a
+                         :else (prefix-admission/candidate-key a)))
         rows (into {} (map (fn [r] [(prefix-admission/candidate-key (:id r)) r])) (:candidates cert))
         receipts (group-by :policy-id (:preference-receipts cert))
         per (mapv (fn [k]

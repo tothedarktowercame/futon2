@@ -172,6 +172,62 @@
     (is (= [0 0] (counts one)))
     (is (= :fail (verdict one)))))
 
+;; -- a reading whose arrangements share a root: controls survive Q6 -----------------
+
+(defn- verdict-of [q record]
+  (:status (first (filter #(= q (:requirement %))
+                          (card/verdict-rows (facts/facts-for-record record "r" {}))))))
+
+(deftest a-shared-root-reading-keeps-a-control-through-q6
+  ;; p/a, then p/a and p/b over one span: three arrangements of {p/a, p/b}
+  ;; (the reading's chain, its overlap reading, the retraction's overlap)
+  ;; and a chain over {p/a}. Their co-apply roots coincide, so the gate must
+  ;; pool them as the selector does, or the click is refused.
+  (let [fx (route/fixture [["p/a"] ["p/a" "p/b"]])
+        dir (route/temp-dir "q10-shared-root-")
+        clicks (vec (repeatedly 3 #(click! fx dir)))
+        [one two three] (mapv :record clicks)
+        excluded (fn [r] (filter #(= :requirement-excluded (:status %)) (get-in r [:q10 :population])))]
+    (testing "every click selects once, through the gate, and records the selection"
+      (is (= [1 1 1] (mapv :calls clicks)))
+      (doseq [r [one two three]]
+        (is (map? (get-in r [:decision :chosen])))
+        (is (= :cascade-selected (get-in r [:selection-event :event])))
+        (is (= (get-in r [:decision :chosen :target]) (get-in r [:selection-event :target])))
+        (is (= :pass (verdict-of :Q7 r)) "no :selection-not-reached absence for a reached selection")
+        (is (= {:status :verified :carrier (:q10 r)} (q10/verify-record r)))))
+    (testing "run 1: four policies compared, three controls over {p/a, p/b}"
+      (is (= [["p/a"] ["p/a" "p/b"] ["p/a" "p/b"] ["p/a" "p/b"]]
+             (sort (map :patterns (get-in one [:q10 :population])))))
+      (is (= [3 3] (counts one)))
+      (is (= :pass (verdict one))))
+    (testing "the census's selected policy is the chosen one, not the posterior's mode"
+      ;; three {p/a, p/b} policies share p/a's root with the {p/a} chain, so
+      ;; the pooled marginal chooses the chain while the mode is an overlap
+      (let [chosen (fn [r] (nth (get-in r [:q10 :selected]) 2))]
+        (is (= (get-in one [:decision :chosen :id]) (chosen one)))
+        (is (not= (chosen one)
+                  (get-in one [:decision :selection-law :per-policy-argmax :action :id]))
+            "the fixture really separates the chosen policy from the mode")
+        (doseq [r [one two three]]
+          (is (= (get-in r [:decision :chosen :id]) (chosen r)))
+          (is (= (chosen r) (nth (get-in r [:q9 :selected]) 2))))))
+    (testing "run 2: Q6 removed run 1's choice; the three controls remain, beside Q8"
+      (is (= [(get-in one [:q10 :selected])] (map :key (excluded two))))
+      (is (= :verified (:status (q8/verify-record two))))
+      (is (= [3 3] (counts two)))
+      (is (= :pass (verdict two))))
+    (testing "run 3: Q6 removed a control member; its pairs are refused, one control holds"
+      (let [[gone] (excluded three)
+            pairs (get-in three [:q10 :pairs])]
+        (is (= (get-in two [:q10 :selected]) (:key gone)))
+        (is (= ["p/a" "p/b"] (:patterns gone)))
+        (is (= {:refused 2 :control 1} (frequencies (map :status pairs))))
+        (is (every? #(= :member-not-compared (:reason %)) (filter #(= :refused (:status %)) pairs)))
+        (is (= :verified (:status (q8/verify-record three))))
+        (is (= [1 1] (counts three)))
+        (is (= :pass (verdict three)))))))
+
 ;; -- what the census refuses to count ----------------------------------------------
 
 (deftest refusals-are-typed-and-not-counted
@@ -266,10 +322,12 @@
               (reseal two #(assoc-in % [:decision :selection-certificate :q6 :reason] :because))
               :q6-carrier-absent-or-tampered]
              [:selected-not-compared
-              ;; run two's argmax set to run one's choice, which Q6 excluded
-              (reseal two #(assoc-in % [:decision :selection-law :per-policy-argmax :action]
-                                     (get-in one [:decision :selection-law :per-policy-argmax :action])))
-              :selected-policy-not-compared]
+              ;; run two's choice set to run one's, which Q6 excluded; Q2
+              ;; reads the choice, refuses it, and Q10 carries Q2's reason
+              (reseal two (fn [r]
+                            (let [r (assoc-in r [:decision :chosen] (get-in one [:decision :chosen]))]
+                              (assoc r :q2 (q2/certificate (q2/record-inputs r))))))
+              :chosen-action-not-compared]
              [:other-route
               (reseal one #(update-in % [:decision :selection-certificate] dissoc :selection-route))
               :not-the-reading-family-route]]]

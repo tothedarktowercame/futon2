@@ -163,10 +163,21 @@
              :when reason]
          reason)))))
 
-(defn- chosen-action
-  "The action the decision chose, as its selection law retains it."
+(defn chosen-action
+  "The action the decision chose: the compared (posterior) entry whose id and
+  target the record's :chosen names. Not the posterior's mode
+  (:per-policy-argmax): the selector picks by the action marginal, which
+  pools cascades sharing a co-apply root and can overrule the mode. nil
+  when nothing was chosen; {:status :not-compared ...} when :chosen names
+  no compared entry."
   [decision]
-  (get-in decision [:selection-law :per-policy-argmax :action]))
+  (let [{:keys [id target]} (:chosen decision)]
+    (when (some? id)
+      (or (some #(when (and (= id (:id %)) (= target (:target %))) %)
+                (keys (get-in decision [:selection-law :posterior])))
+          {:status :not-compared :id id :target target}))))
+
+(defn- not-compared? [action] (= :not-compared (:status action)))
 
 (defn- chosen-reading
   "The excerpt and analysis digests the chosen action's interpretation debt
@@ -198,6 +209,8 @@
                   (and receipt-action (chosen-action decision)
                        (not= (str chosen-target) (str (:target (chosen-action decision)))))
                   (conj :decision-target-not-the-outer-action's)
+                  (not-compared? (chosen-action decision))
+                  (conj :chosen-action-not-compared)
                   (and recorded? entry-of (chosen-reading decision)
                        (not= (chosen-reading decision) (:reading entry-of)))
                   (conj :construction-reading-not-the-chosen-action's))]

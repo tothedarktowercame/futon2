@@ -248,7 +248,7 @@
               (fn [r] (update-in r receipts (partial mapv #(assoc-in % [:authority :kind] :class-preference))))
               :preference-kind-not-recomputable]
              [:selected-not-compared
-              (fn [r] (assoc-in r [:decision :selection-law :per-policy-argmax :action] {:target "M-x"}))
+              (fn [r] (assoc-in r [:decision :chosen] {:id "M-x/policy-x" :target "M-x"}))
               :selected-policy-not-compared]
              [:other-route
               (fn [r] (update-in r [:decision :selection-certificate] dissoc :selection-route))

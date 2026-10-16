@@ -264,9 +264,19 @@
              [:stale-reading (reseal-census rec #(assoc-in % [:entries 0 :reading :excerpt-digest] stale))
               :construction-reading-not-the-field's]
              [:reading-not-the-chosen-action's
-              (reseal-q2 rec #(assoc-in % [:decision :selection-law :per-policy-argmax :action
-                                            :interpretation-debt :analysis-digest] stale))
+              (reseal-q2 rec (fn [r]
+                               (let [id (get-in r [:decision :chosen :id])]
+                                 (update-in r [:decision :selection-law :posterior]
+                                            #(into {} (map (fn [[a p]]
+                                                             [(if (= id (:id a))
+                                                                (assoc-in a [:interpretation-debt :analysis-digest] stale)
+                                                                a)
+                                                              p]))
+                                                   %)))))
               :construction-reading-not-the-chosen-action's]
+             [:chosen-not-compared
+              (reseal-q2 rec #(assoc-in % [:decision :chosen :id] "M-current/policy-x"))
+              :chosen-action-not-compared]
              [:stale-graph-pin (reseal-census rec #(assoc-in % [:graph :pin :sha256] stale))
               :construction-graph-pin-not-the-field's]
              [:stale-graph-digest (reseal-census rec #(assoc-in % [:entries 0 :graph-digest] stale))
