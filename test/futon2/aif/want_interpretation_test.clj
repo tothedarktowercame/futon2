@@ -441,7 +441,10 @@
         text (wi/prompt issued {:library-root library-root})]
     (is (str/includes? text "agent-search"))
     (is (str/includes? text library-root))
-    (is (str/includes? text "outside futon3/library/"))))
+    (is (str/includes? text "outside futon3/library/"))
+    (is (= :wm/handoff-contract-v1
+           (get-in issued [:acceptance-contract :schema])))
+    (is (str/includes? text ":wm/cascade-admission"))))
 
 ;; the bytes are a pinned copy of futon3/library/gauntlet/placenta-transfer
 ;; .flexiarg; the sha256 is of the live file's bytes at capture time

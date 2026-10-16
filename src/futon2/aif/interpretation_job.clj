@@ -77,10 +77,10 @@
 
 (defn prompt [dir]
   (str "INTERPRETATION ONLY. Read " (io/file dir "interpretation-request.source")
-       " and interpretation-job.source in the same directory. Wait for the job file if dispatch publication is still completing. "
+       ", interpretation-contract.source, and interpretation-job.source in the same directory. Wait for the job file if dispatch publication is still completing. "
        "Use its exact identity including interpreter-job. Read the pinned .source bytes, not mutable mission/library files. "
        "Write one EDN :wm/interpreted-pattern-set-v1 receipt to " (io/file dir "interpretation-receipt.edn") ". "
-       "Read src/futon2/aif/interpretation_evidence.clj for the strict schemas. No prose-only completion. "
+       "The immutable contract companion is authoritative; mutable source code is not the request. No prose-only completion. "
        "Copy the exact target fields id/kind/action/source/citations/pinned-at; tension-rule is retained in the request source. "
        "Judge EVERY original normalized candidate, in order, relevant or not, with a reason and mission/pattern citations. "
        "A citation is {:source source-id :lines [first last] :quote exact-captured-lines}; keep whitespace. "
@@ -133,6 +133,7 @@
                        action @identity {:on-capture capture!}))
       (doseq [s (:sources @prepared)] (capture! s))
       (save! "interpretation-request.source" @prepared)
+      (save! "interpretation-contract.source" (evidence/acceptance-contract))
       (reset! stage :readiness)
       (ready! actor)
       (reset! stage :dispatch)

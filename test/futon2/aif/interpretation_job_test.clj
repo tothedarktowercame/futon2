@@ -186,6 +186,17 @@
     (is (= "interpretation-one" (get-in result [:data :repair-obligation :failure-data :job-id])))
     (is (= 1 (get-in close [:payload :judgment :resource-use :agent-turns])))))
 
+(deftest interpretation-contract-is-immutable-issued-evidence
+  (let [contract (evidence/acceptance-contract)]
+    (is (= :wm/handoff-contract-v1 (:schema contract)))
+    (is (= :wm/interpretation-evidence (get-in contract [:validator :id])))
+    (is (= evidence/schemas
+           (set (get-in contract [:response :schemas]))))
+    (is (some #(= :wm/interpretation-source-bytes (:id %))
+              (get-in contract [:response :semantic-gates])))
+    (is (.contains (job/prompt "/tmp/interpretation")
+                   "interpretation-contract.source"))))
+
 (deftest failure-schema-is-closed-and-success-stays-strict
   (let [{:keys [record]} @receipt-fixture/fixture
         identity (:identity record)

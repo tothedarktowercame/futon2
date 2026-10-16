@@ -208,3 +208,26 @@ reviews them, and has many adversarial tests. The immediate unsafe area is the
 front half of the click, where readings and interpretations are commissioned.
 The correct next work is packets 1–3 above, in that order. More live clicks
 before those are repaired would mostly pay to rediscover contract omissions.
+
+## Repair update — validator-owned contracts
+
+Commits `bf2cf7ee2` (futon2) and `fbef8ca40` (futon3c) close H1--H4:
+selected-target outcomes survive terminal persistence; both reading responders
+are production-wired to the designated author; selected-target and standing
+decision prompts render the validator-owned contract instead of copying it.
+
+The follow-up interpretation packet closes H5 and H6. Legacy interpretation
+jobs now issue `interpretation-contract.source` before dispatch. It is captured
+and hashed like every other request companion, and the returned receipt must
+cite it. Want-interpretation requests now carry their request-specific semantic
+gate list (source pin, token constraints, three-halves square, construction and
+admission) inside the content-addressed issued request; the prompt renders that
+same value.
+
+H7 is not an agent handoff that can guarantee remote service availability.
+Its acceptable guarantee is fail-closed separation: the local controlled report
+card is valid only with a sealed checker terminal, and `wm_click.sh` treats a
+missing run record, failed checker, or missing verdict as terminal failure. An
+HTTP 403 therefore cannot be represented as a checked report. Publication and
+checking remain separate facts; availability remains an operational dependency,
+not evidence that the requirement check occurred.

@@ -24,6 +24,7 @@
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.legacy-three-halves-registry :as legacy-square]
             [futon2.aif.interpretation-request :as ireq])
   (:import [java.nio.file Files StandardCopyOption]
@@ -389,12 +390,15 @@
     (Files/move (.toPath tmp) (.toPath f)
                 (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE StandardCopyOption/REPLACE_EXISTING]))))
 
+(declare acceptance-contract)
+
 (defn issue!
   "Record REQUEST in STORE as issued by the machine; returns it with its
   :request-id. Only an issued request can have its answer published: the
   issued record is what binds a response to something the machine asked."
   [store request]
-  (let [id (content-id :request (dissoc request :retrieval))
+  (let [request (assoc request :acceptance-contract (acceptance-contract request))
+        id (content-id :request (dissoc request :retrieval))
         f (io/file store "requests" (str id ".edn"))
         issued (assoc request :request-id id)]
     (when-not (.isFile f) (write-atomic! f issued))
@@ -410,6 +414,23 @@
   (delay {:ns "futon2.aif.want-interpretation"
           :source-sha256 (some-> (io/resource "futon2/aif/want_interpretation.clj")
                                  slurp (.getBytes "UTF-8") evidence/sha256)}))
+
+(defn acceptance-contract [request]
+  (handoff/contract
+   {:id :wm/want-interpretation
+    :version 1
+    :response {:schema :wm/want-interpretation-response-v1
+               :want (get-in request [:want :token])
+               :semantic-gates
+               [{:id :wm/library-source-pin :version 1}
+                {:id :wm/guard-token-constraints :version 1}
+                {:id :wm/three-halves-square :version 1}
+                {:id :wm/cascade-construction :version 1}
+                {:id :wm/cascade-admission :version 1}]
+               :inputs {:source-pins :issued-retrieval
+                        :facts :issued-context
+                        :criterion :issued-want}}
+    :validator {:id :wm/want-interpretation-validator :version 1}}))
 
 ;; ---------------------------------------------------------------------------
 ;; Part 4 support: the prompt and the reply grammar
@@ -436,7 +457,8 @@
         "[{:pattern \"family/name\" :source {:path \"futon3/library/<family>/<name>.flexiarg\" "
         ":sha256 \"of its bytes\"}}]}. A run with any other retriever name, or a candidate "
         "path outside futon3/library/, refuses with a typed reason. "
-        "\n\nREPLY GRAMMAR: your reply must contain exactly one fenced ```edn block holding "
+        "\n\n" (handoff/prompt-block (:acceptance-contract issued))
+        "\nREPLY GRAMMAR: your reply must contain exactly one fenced ```edn block holding "
         "{:schema " response-schema " :pattern … :guard {:needs #{…} :forbids #{…}} :produces #{…} "
         ":receipt {:source {:path … :sha256 …} :reading … :scope-limit … :by …}} "
         "(:retrieval {:runs [...]} optional, for agent-search runs as above) or "

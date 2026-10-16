@@ -4,6 +4,7 @@
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
             [futon2.aif.close-retention :as retention]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as load-identity])
   (:import [java.security MessageDigest]
            [java.time Instant]
@@ -25,6 +26,21 @@
     :interpretation/attempt-identity-mismatch :interpretation/attempt-path-invalid
     :interpretation/action-mismatch :interpretation/retriever-set-invalid
     :interpretation/job-already-dispatched})
+
+(defn acceptance-contract []
+  (handoff/contract
+   {:id :wm/legacy-action-interpretation
+    :version 1
+    :response {:schemas (vec (sort schemas))
+               :required-source-binding :every-issued-source-companion
+               :identity-binding :exact-issued-identity
+               :semantic-gates
+               [{:id :wm/interpretation-record-shape :version 1}
+                {:id :wm/interpretation-source-bytes :version 1}
+                {:id :wm/interpretation-admission :version 1}
+                {:id :wm/fact-measurement-plan :version 1}]
+               :failure-kinds (vec (sort failure-kinds))}
+    :validator {:id :wm/interpretation-evidence :version 1}}))
 
 (defn- refuse! [reason path]
   (throw (ex-info "Interpretation evidence refused"
