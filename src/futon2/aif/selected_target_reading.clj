@@ -21,6 +21,55 @@
 (defn- file-digest [path]
   (digest (java.nio.file.Files/readAllBytes (.toPath (io/file path)))))
 
+(defn- codepoint-slice
+  "Python's validator interprets offsets as Unicode codepoints, while Java
+  substring indexes UTF-16 code units. Translate explicitly so correction
+  diagnostics quote the same immutable source slice as the validator."
+  [^String source start end]
+  (when (and (integer? start) (integer? end) (<= 0 start) (< start end)
+             (<= end (.codePointCount source 0 (.length source))))
+    (let [a (.offsetByCodePoints source 0 start)
+          b (.offsetByCodePoints source 0 end)]
+      (.substring source a b))))
+
+(defn offset-diagnostics
+  "Name fragment/cue offset mismatches in ANALYSIS against REQUEST. These are
+  feedback for the author; the Python validator remains publication authority."
+  [request analysis]
+  (let [source (:source_text request)
+        sentences (into {} (map (juxt :id identity) (:sentences request)))]
+    (vec
+     (mapcat
+      (fn [{:keys [id fragments]}]
+        (let [sentence (get sentences id)]
+          (mapcat
+           (fn [{:keys [start end text display_cues]}]
+             (let [expected (when (string? source) (codepoint-slice source start end))
+                   fragment-error
+                   (when (or (nil? sentence)
+                             (not (and (integer? start) (integer? end)
+                                       (<= (:start sentence) start)
+                                       (< start end)
+                                       (<= end (:end sentence))))
+                             (not= expected text))
+                     [{:sentence id :field :fragment :start start :end end
+                       :submitted text :expected expected}])]
+               (into (or fragment-error [])
+                     (keep (fn [{a :start b :end cue-text :text}]
+                             (let [cue-expected (when (string? source)
+                                                  (codepoint-slice source a b))]
+                               (when (or (not (and (integer? a) (integer? b)
+                                                   (integer? start) (integer? end)
+                                                   (<= start a) (< a b) (<= b end)))
+                                         (not= cue-expected cue-text))
+                                 {:sentence id :field :display-cue
+                                  :fragment-start start :fragment-end end
+                                  :start a :end b :submitted cue-text
+                                  :expected cue-expected})))
+                           display_cues))))
+           fragments)))
+      (:sentences analysis)))))
+
 (defn selected-need
   "Return the exact outer-selected target/source/current-digest need, or nil.
   A failure belonging to another target is never eligible."
@@ -194,7 +243,11 @@
                         correction (when-not (zero? (:exit validated0))
                                      (contact (assoc issued
                                                      :kind :selected-target-reading-correction
-                                                     :validation-feedback (:err validated0)
+                                                     :validation-feedback
+                                                     (str (:err validated0)
+                                                          "Exact offset diagnostics: "
+                                                          (json/generate-string
+                                                           (offset-diagnostics request analysis)))
                                                      :prior-analysis analysis)))
                         corrected-analysis (when (= :validated (:status correction))
                                              (:value correction))

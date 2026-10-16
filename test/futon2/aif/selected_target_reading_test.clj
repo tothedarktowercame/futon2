@@ -208,6 +208,23 @@
     (is (.contains text "display cue offsets/text do not match"))
     (is (.contains text "Exact text."))))
 
+(deftest offset-diagnostics-use-unicode-codepoints-and-exact-source-slices
+  (let [request {:source_text "α the WM's setpoints, steady"
+                 :sentences [{:id "s1" :start 0 :end 28
+                              :text "α the WM's setpoints, steady"}]}
+        analysis {:sentences
+                  [{:id "s1"
+                    :fragments
+                    [{:start 2 :end 28 :text "the WM's setpoints, steady"
+                      :display_cues [{:start 6 :end 24
+                                      :text "the WM's setpoints"}]}]}]}
+        errors (sut/offset-diagnostics request analysis)]
+    (is (= [{:sentence "s1" :field :display-cue
+             :fragment-start 2 :fragment-end 28
+             :start 6 :end 24 :submitted "the WM's setpoints"
+             :expected "WM's setpoints, st"}]
+           errors))))
+
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []
                  :sentences []}
