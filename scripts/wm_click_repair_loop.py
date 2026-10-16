@@ -8,7 +8,9 @@ fires each click, waits for it, judges it from files, and sends repair work as
 an Agency job whose job id it waits on. No step waits on a bellback or a park.
 
   wm_click_repair_loop.py status
-  wm_click_repair_loop.py run --clicks 18 [--ticks 20] [--repair-seat wmfix-1]
+  wm_click_repair_loop.py run --clicks 18 [--ticks 20] \
+    --owner OWNER --issuing-caller CALLER \
+    --author AUTHOR --reviewer REVIEWER --repair-reviewer REPAIR-REVIEWER
 
 Per click:
 1. Reload into the serving JVM every click-path namespace (futon2/src,
@@ -515,8 +517,8 @@ def notify(args, reason: str) -> None:
     rows = LEDGER.read_text().splitlines()[-12:] if LEDGER.exists() else []
     body = "\n".join([f"From wm_click_repair_loop.py, {now()}. STOPPED: {reason}", "",
                       "Last ledger rows (futon2/data/wm-click-loop/ledger.jsonl):", *rows, "",
-                      "Restart: systemd-run --user --unit=wm-click-loop --collect "
-                      "python3 /home/joe/code/futon2/scripts/wm_click_repair_loop.py run --clicks N"])
+                      "Restart only with the same explicit cast recorded in the start row; "
+                      "no cast identity has a default."])
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", args.owner, "--kind", "bell",
            input=body, timeout=120)
     log(f"notified {args.owner}: {r.stdout.strip()[-200:]}")
@@ -622,7 +624,7 @@ def status() -> int:
     return 0
 
 
-def main() -> int:
+def parse_args(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("status")
@@ -631,15 +633,22 @@ def main() -> int:
     r.add_argument("--ticks", type=int, default=10**6, help="stop after this many carrying clicks")
     r.add_argument("--stall", type=int, default=3)
     r.add_argument("--max-repairs", type=int, default=3)
-    r.add_argument("--repair-seat", default="wmfix-1")
+    r.add_argument("--repair-seat", help="repair worker; defaults to the explicit repair reviewer")
     r.add_argument("--seat-model", default="gpt-5.6-sol")
     r.add_argument("--repair-timeout", type=int, default=5400)
-    r.add_argument("--owner", default="claude-1")
-    r.add_argument("--issuing-caller", default="claude-1")
-    r.add_argument("--author", default="codex-proof2d")
-    r.add_argument("--reviewer", default="codex-proof2e")
-    r.add_argument("--repair-reviewer", default="codex-2")
-    args = ap.parse_args()
+    r.add_argument("--owner", required=True)
+    r.add_argument("--issuing-caller", required=True)
+    r.add_argument("--author", required=True)
+    r.add_argument("--reviewer", required=True)
+    r.add_argument("--repair-reviewer", required=True)
+    args = ap.parse_args(argv)
+    if args.cmd == "run" and not args.repair_seat:
+        args.repair_seat = args.repair_reviewer
+    return args
+
+
+def main() -> int:
+    args = parse_args()
     STATE.mkdir(parents=True, exist_ok=True)
     if args.cmd == "status":
         return status()

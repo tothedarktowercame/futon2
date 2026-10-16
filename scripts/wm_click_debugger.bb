@@ -9,7 +9,18 @@
 (let [[path] *command-line-args*
       r (edn/read-string {:default (fn [_ v] v)} (slurp path))
       targets (get-in r [:decision :abstention :targets])
-      kind-of (fn [t] (str (name (or (:kind t) :unknown)) "/" (name (or (:missing t) :unknown))))]
+      selected-reading (:selected-target-reading r)
+      reading-refusal? (and (= :refused (:status selected-reading))
+                            (:kind selected-reading))
+      kind-of (fn [t]
+                (if (and reading-refusal?
+                         (= (:target t) (:target selected-reading)))
+                  (str (name (:kind selected-reading)) "/before-cascade-construction")
+                  (str (name (or (:kind t) :unknown)) "/" (name (or (:missing t) :unknown)))))
+      detail-of (fn [t]
+                  (when (and reading-refusal?
+                             (= (:target t) (:target selected-reading)))
+                    (select-keys selected-reading [:schema :status :kind :published :detail])))]
   (println
    (json/generate-string
     {:run-id (:run/id r)
@@ -17,7 +28,11 @@
      :abstention-status (get-in r [:decision :abstention :status])
      :chosen (get-in r [:decision :chosen])
      :open-stop-lines (:open-stop-lines r)
+     :selected-target-reading (when reading-refusal?
+                                (select-keys selected-reading [:schema :status :kind :published :target :detail]))
      :counts (frequencies (map kind-of targets))
      :targets (for [t targets]
                 {:target (:target t) :refusal (kind-of t)
+                 :phase (if (detail-of t) :before-cascade-construction :cascade-construction)
+                 :detail (detail-of t)
                  :declines (pr-str (:declines t))})})))
