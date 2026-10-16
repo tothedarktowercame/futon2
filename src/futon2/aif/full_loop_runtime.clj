@@ -151,6 +151,7 @@
         ;; depend on a dynamic binding surviving namespace reload or an
         ;; execution boundary before it decides whether selection is
         ;; terminal.
-        runner-opts (merge opts defaults)]
+        runner-opts (assoc opts :selected-target-reading-fn
+                           (:selected-target-reading-fn defaults))]
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
