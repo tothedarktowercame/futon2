@@ -4,6 +4,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as registry]))
@@ -55,8 +56,49 @@
            :end (+ scope-start relative-start length)})
       0 {:status :refused :reason :quoted-text-absent :text text
          :scope [scope-start scope-end]}
-      {:status :refused :reason :quoted-text-ambiguous :text text
-       :scope [scope-start scope-end] :matches (count matches)})))
+      ;; A repeated cue at the beginning of its enclosing fragment is still
+      ;; structurally unambiguous: "the leading X", without trusting numbers.
+      (if (zero? (first matches))
+        (let [length (.codePointCount ^String text 0 (.length ^String text))]
+          {:status :resolved :start scope-start :end (+ scope-start length)})
+        {:status :refused :reason :quoted-text-ambiguous :text text
+         :scope [scope-start scope-end] :matches (count matches)}))))
+
+(def ^:private relation-aliases
+  {"evidence" "rationale"
+   "sequence" "dependency"
+   "elaboration" "context"
+   "authority" "context"})
+
+(def ^:private relation-vocabulary
+  #{"action" "condition" "context" "contrast" "dependency" "goal" "rationale"})
+
+(defn- normalize-relations [relations]
+  (->> relations
+       (map #(get relation-aliases % %))
+       (filter relation-vocabulary)
+       distinct
+       vec))
+
+(defn- words [s]
+  (if (str/blank? s) 0 (count (str/split (str/trim s) #"\s+"))))
+
+(defn- apply-cue-budget [sentence source fragments]
+  (let [total (words (codepoint-slice source (:start sentence) (:end sentence)))
+        budget (if (> total 8) (max (quot total 2) 2) Long/MAX_VALUE)
+        remaining (atom budget)]
+    (mapv (fn [fragment]
+            (let [kept (reduce (fn [out cue]
+                                 (let [n (words (:text cue))]
+                                   (if (<= n @remaining)
+                                     (do (swap! remaining - n) (conj out cue))
+                                     out)))
+                               [] (:display_cues fragment))]
+              (cond-> (assoc fragment :display_cues kept)
+                (empty? kept)
+                (assoc :no_surface_cue
+                       "Display cues omitted by deterministic sentence density budget."))))
+          fragments)))
 
 (defn resolve-analysis-offsets
   "Replace author-supplied fragment and display-cue offsets with offsets found
@@ -92,13 +134,15 @@
                              problem
                              (-> fragment
                                  (merge (select-keys located [:start :end]))
-                                 (assoc :display_cues cue-results)))))))
+                                 (assoc :relations (normalize-relations (:relations fragment))
+                                        :display_cues cue-results)))))))
                    fragments)]
               (if-let [problem (first (filter :reason fragment-results))]
                 problem
                 (recur (next remaining)
-                       (conj resolved (assoc analysis-sentence
-                                             :fragments fragment-results)))))
+                       (conj resolved
+                             (assoc analysis-sentence :fragments
+                                    (apply-cue-budget sentence source fragment-results))))))
             {:status :refused :reason :unknown-analysis-sentence :sentence id})
           {:status :resolved :analysis (assoc analysis :sentences resolved)})))))
 

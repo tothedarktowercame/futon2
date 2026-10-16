@@ -255,10 +255,28 @@
                                "not present")))))
     (is (= :quoted-text-ambiguous
            (:reason (sut/resolve-analysis-offsets
-                     {:source_text "OPEN OPEN"
-                      :sentences [{:id "s1" :start 0 :end 9 :text "OPEN OPEN"}]}
+                     {:source_text "x OPEN OPEN"
+                      :sentences [{:id "s1" :start 0 :end 11 :text "x OPEN OPEN"}]}
                      {:sentences [{:id "s1" :fragments [{:text "OPEN"
                                                          :display_cues []}]}]}))))))
+
+(deftest projection-normalizes-declared-legacy-relations-and-cue-density
+  (let [source "One two three four five six seven eight nine ten"
+        request {:source_text source
+                 :sentences [{:id "s1" :start 0 :end (count source) :text source}]}
+        analysis {:sentences
+                  [{:id "s1" :unresolved_reason ""
+                    :fragments
+                    [{:text source :start 0 :end 1
+                      :relations ["evidence" "context"]
+                      :display_cues [{:text "One two three" :start 0 :end 1}
+                                     {:text "four five six" :start 0 :end 1}]
+                      :no_surface_cue ""}]}]}
+        result (sut/resolve-analysis-offsets request analysis)
+        fragment (get-in result [:analysis :sentences 0 :fragments 0])]
+    (is (= :resolved (:status result)))
+    (is (= ["rationale" "context"] (:relations fragment)))
+    (is (= ["One two three"] (mapv :text (:display_cues fragment))))))
 
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []

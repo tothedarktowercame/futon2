@@ -87,20 +87,21 @@
        "Name facts with true/false/:unknown, meaning, scope, observed-at, method, citations. Lack of evidence means unknown. "
        "Never add facts merely to enable a guard. Interpret relevant patterns with :fact/:not/:and/:or guard vectors over "
        "declared facts and Boolean effects over those same facts; quote IF/HOWEVER/THEN, cite captured index membership, "
-       "authority :documented-interpretation, your author identity, and value-digest of each interpretation excluding :sha256. "
+       "authority :documented-interpretation and your author identity. Do not calculate source or interpretation digests; "
+       "the machine derives those fields from the issued bytes and returned values. "
        "These are intended effects, not guaranteed success probabilities. Record holes instead of defaults. "
        "Whole-section retrieval can be weak: you may search the captured library and append conformant runs named agent-search; "
        "judge those candidates too. Preserve each original run's retriever/version/index-source/parameters, stripping intermediate "
        "row-failures/raw/retriever-rank/unjudged fields when forming schema fields; their raw evidence stays in the request. "
        "At most ONE new pattern: only for a named missing move, author library .flexiarg plus index row and commit explicit paths, "
        "then capture the new pattern/index bytes as additional .source companions and cite them. Never overwrite original snapshots. "
-       "Include every existing .source companion in receipt :sources (id/path/file/sha256/revision), including request, intent and job files. "
+       "Include every existing .source companion in receipt :sources (id/path/file/revision), including request, intent and job files. "
        "In this SAME job write interpretation-reader-plan.edn: a vector with at most one entry per declared fact, "
        "each {:fact id :reader kind :parameters map :citations [exact-span-citations]}. Read fact_measurement.clj "
        "for the strict parameter maps and literal predicates. Plan only justified independent measurements; omit unmeasurable facts. "
        "Use [] when none can be measured. Include the plan as a hashed receipt source. Do not use outcomes, grounded?, priors, "
        "controller scores or predicted effects as evidence. Freeze this plan before construction/build; never revise it after the result. "
-       "Use evidence/value-digest for hashes. Do not include additional top-level fields. "
+       "Do not include additional top-level fields. "
        "If blocked, write :wm/interpretation-failure-v1 with the exact identity, stage, sources, typed absent sections and failure map; "
        "use interpretation/no-relevant-pattern, genesis-required or unmeasurable-fact as appropriate. No build, reload, click, push, "
        "or claimed goal discharge. A pending request is not a successful interpretation."))
@@ -153,16 +154,19 @@
           (reset! stage :validation)
           (reset! validation-started (System/currentTimeMillis))
           (let [validation-start (System/currentTimeMillis)
-                record (read-record receipt)
-                _ (evidence/validate-record record)
+                returned (read-record receipt)
                 reader (fn [file]
                          (need! (and (string? file) (= file (.getName (io/file file)))
                                      (not (#{"." ".."} file))) :interpretation/invalid-receipt {:file file})
                          (bytes (io/file dir file)))
+                record (evidence/supply-machine-digests returned reader)
+                canonical-receipt (io/file dir "interpretation-receipt.canonical.edn")
+                _ (evidence/validate-record record)
                 _ (evidence/validate-sources! record reader)
                 _ (need! (= @identity (:identity record)) :interpretation/invalid-receipt {:reason :identity-mismatch})
                 _ (doseq [s (vals @captured)]
                     (need! (some #{s} (:sources record)) :interpretation/source-changed {:source (:id s)}))]
+            (write-new! canonical-receipt record)
             (reset! returned-record record)
             (doseq [s (:sources record)] (capture! s))
             (swap! timing assoc :validation-ms (- (System/currentTimeMillis) validation-start))
@@ -190,7 +194,8 @@
                                    (try (construct! record reader)
                                         (finally (swap! timing assoc :construction-ms
                                                         (- (System/currentTimeMillis) began))))))]
-              (cond-> {:receipt {:file (.getName receipt) :sha256 (evidence/sha256 (bytes receipt))}
+              (cond-> {:receipt {:file (.getName canonical-receipt)
+                                 :sha256 (evidence/sha256 (bytes canonical-receipt))}
                        :timing (assoc @timing :elapsed-ms (- (System/currentTimeMillis) started))}
                 construct! (assoc :construction construction))))))
       (catch Exception e

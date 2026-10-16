@@ -22,6 +22,10 @@
               (get-in contract [:response :semantic-gates])))
     (is (.contains (job/prompt "/tmp/interpretation")
                    "interpretation-contract.source"))
+    (is (.contains (job/prompt "/tmp/interpretation")
+                   "Do not calculate source or interpretation digests"))
+    (is (not (.contains (job/prompt "/tmp/interpretation")
+                        "value-digest of each interpretation")))
     (is (not (.contains (job/prompt "/tmp/interpretation")
                         "Read src/futon2/aif/interpretation_evidence.clj")))))
 

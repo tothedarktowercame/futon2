@@ -110,6 +110,17 @@
 
 (def fixture (delay (zaif-fixture)))
 
+(deftest machine-supplies-source-and-interpretation-digests
+  (let [{:keys [record captured]} @fixture
+        untrusted (-> record
+                      (update :sources #(mapv (fn [s] (dissoc s :sha256)) %))
+                      (update :interpretations
+                              #(mapv (fn [i] (assoc i :sha256 "agent-placeholder")) %)))
+        projected (evidence/supply-machine-digests untrusted captured)]
+    (is (= record projected))
+    (is (= projected (evidence/validate-record projected)))
+    (is (= projected (evidence/validate-sources! projected captured)))))
+
 (deftest zaif-shape-and-source-controls
   (let [{:keys [record captured]} @fixture]
     (is (= 9 (count (:facts record)))) (is (= 7 (count (:interpretations record))))

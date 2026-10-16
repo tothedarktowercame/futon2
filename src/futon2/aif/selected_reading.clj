@@ -9,8 +9,8 @@
   digests. It carries no retrieval query, no unmet want and no candidate
   menu: the responder judges the occurrences it is given and nothing else.
 
-  A response gives, per owed occurrence, \"accepted\" or \"rejected\", a
-  reason, and the sha256 of the pattern's library file. It is validated here,
+  A response gives, per owed occurrence, \"accepted\" or \"rejected\" and a
+  reason. The machine supplies the already-issued library pin. It is validated here,
   against the request and the library bytes only; no constructor, admission,
   scorer or selector runs. A published whole-excerpt reading is never
   rewritten: these receipts are a separate record."
@@ -39,8 +39,7 @@
                :request-id (:request-id request)
                :verdicts {:exactly (:owed request)
                           :verdict-values ["accepted" "rejected"]
-                          :reason :non-blank-string
-                          :source_sha256 :lowercase-sha256}
+                          :reason :non-blank-string}
                :by :answering-agent-id}
     :validator {:id validator-id :version 1}}))
 
@@ -91,14 +90,13 @@
                   :library-pins pins
                   :asks {:what (str "For each owed occurrence only: does its pattern "
                                     "apply to this target's excerpt? Answer accepted "
-                                    "or rejected, with a reason and the sha256 of the "
-                                    "pattern's library file.")
+                                    "or rejected, with a reason. The machine retains "
+                                    "the issued library pin; do not reproduce it.")
                          :answer-shape {:request-id "this request's :request-id"
                                         :verdicts [{:occurrence-id "as given"
                                                     :pattern "as given"
                                                     :verdict "accepted | rejected"
-                                                    :reason "why, for this excerpt"
-                                                    :source_sha256 "sha256 of the library file"}]
+                                                    :reason "why, for this excerpt"}]
                                         :by "answering agent id"}}}]
         (assoc body :request-id (digest request-schema body))))))
 
@@ -113,15 +111,10 @@
       (not (#{"accepted" "rejected"} (:verdict verdict))) :verdict-not-accepted-or-rejected
       (not (and (string? (:reason verdict)) (not (str/blank? (:reason verdict)))))
       :verdict-without-reason
-      (not (and (string? (:source_sha256 verdict))
-                (re-matches #"[0-9a-f]{64}" (:source_sha256 verdict))))
-      :malformed-library-pin
       (nil? (get-in request [:library-pins (:pattern verdict)])) :library-source-missing
       (not= (get-in request [:library-pins (:pattern verdict)])
             (library-sha256 library-root (:pattern verdict)))
       :library-source-changed
-      (not= (get-in request [:library-pins (:pattern verdict)]) (:source_sha256 verdict))
-      :library-pin-mismatch
       :else nil)))
 
 (defn validate
@@ -168,7 +161,7 @@
                                   :pattern (:pattern v)
                                   :verdict (keyword (:verdict v))
                                   :reason (:reason v)
-                                  :source-sha256 (:source_sha256 v)
+                                  :source-sha256 (get-in request [:library-pins (:pattern v)])
                                   :library-pin (get-in request [:library-pins (:pattern v)])
                                   :reading {:request-id (:request-id request)
                                             :response-digest response-digest

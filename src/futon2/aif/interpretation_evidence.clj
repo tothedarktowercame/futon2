@@ -70,6 +70,24 @@
         :else x))
 (defn value-digest [x] (sha256 (.getBytes (pr-str (stable x)) "UTF-8")))
 
+(defn supply-machine-digests
+  "Fill byte/value digests that the validator can compute itself. READER returns
+  the issued companion bytes for a basename. The agent remains responsible for
+  naming sources and interpretation content, never for transcribing hashes."
+  [record reader]
+  (cond-> (update record :sources
+                  (fn [sources]
+                    (mapv (fn [source]
+                            (assoc source :sha256 (sha256 (reader (:file source)))))
+                          sources)))
+    (vector? (:interpretations record))
+    (update :interpretations
+            (fn [interpretations]
+              (mapv (fn [interpretation]
+                      (assoc interpretation :sha256
+                             (value-digest (dissoc interpretation :sha256))))
+                    interpretations)))))
+
 (defn join-key
   "Full occurrence plus epoch/source context. Never join cohort/attempt names alone."
   [identity]

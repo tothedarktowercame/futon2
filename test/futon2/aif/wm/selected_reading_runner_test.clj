@@ -58,13 +58,12 @@
                   (fn [& args] (swap! selector-calls inc) (apply select args))]
       (:decision (#'rfd/decide fx [(get-in fx [:rows :current])] {"M-current" 1})))))
 
-(defn- answer [request lib verdict]
+(defn- answer [request _lib verdict]
   {:request-id (:request-id request)
    :by "stub-reader"
    :verdicts (mapv (fn [{:keys [occurrence-id pattern]}]
                      {:occurrence-id occurrence-id :pattern pattern
-                      :verdict verdict :reason (str pattern " " verdict " for this excerpt")
-                      :source_sha256 (sha lib pattern)})
+                      :verdict verdict :reason (str pattern " " verdict " for this excerpt")})
                    (:owed request))})
 
 (defn- answer-with-pins
@@ -73,7 +72,7 @@
   {:request-id (:request-id request) :by "stub-reader"
    :verdicts (mapv (fn [{:keys [occurrence-id pattern]}]
                      {:occurrence-id occurrence-id :pattern pattern :verdict "accepted"
-                      :reason "fits" :source_sha256 (get-in request [:library-pins pattern])})
+                      :reason "fits"})
                    (:owed request))})
 
 (defn- judgement-for [decision]
@@ -174,14 +173,13 @@
         {:keys [result]} (run-click decision lib
                                     (fn [request]
                                       (assoc-in (answer request lib "accepted")
-                                                [:verdicts 0 :source_sha256]
-                                                (apply str (repeat 64 "0"))))
+                                                [:verdicts 0 :verdict] "maybe"))
                                     selector-calls)
         recorded (get-in result [:checkpoints :selection :sorry :decision])]
     (is (= 1 @selector-calls))
     (is (= :interpretation-validation-refused
            (get-in recorded [:selection-certificate :interpretation-discharge :validation :status])))
-    (is (= :library-pin-mismatch
+    (is (= :verdict-not-accepted-or-rejected
            (get-in recorded [:selection-certificate :interpretation-discharge
                              :validation :reasons 0 :reason])))
     (is (= :interpretation-owed-after-selection
@@ -221,11 +219,8 @@
               :verdict-for-unowed-occurrence]
              [:another-pattern (fn [r] (update (answer r lib "accepted") :verdicts conj
                                                {:occurrence-id "x" :pattern "p/a" :verdict "accepted"
-                                                :reason "not asked" :source_sha256 (sha lib "p/a")}))
+                                                :reason "not asked"}))
               :verdict-for-unowed-occurrence]
-             [:wrong-library-pin (fn [r] (assoc-in (answer r lib "accepted")
-                                                   [:verdicts 0 :source_sha256] (sha lib "p/a")))
-              :library-pin-mismatch]
              [:malformed-verdict (fn [r] (assoc-in (answer r lib "accepted") [:verdicts 0 :verdict] "maybe"))
               :verdict-not-accepted-or-rejected]
              [:no-reason (fn [r] (assoc-in (answer r lib "accepted") [:verdicts 0 :reason] " "))
@@ -315,8 +310,7 @@
       (let [after (phase decision lib
                          (fn [request]
                            (spit (io/file lib "p/b.flexiarg") "@flexiarg p/b\n! edited after the request\n")
-                           (assoc-in (answer request lib "accepted")
-                                     [:verdicts 0 :source_sha256] (sha lib "p/b"))))]
+                           (answer request lib "accepted")))]
         (is (= :library-source-changed (get-in (validation after) [:reasons 0 :reason])))
         (is (= :interpretation-owed-after-selection (status after)))))
     (testing "a library file absent at issuance refuses, and the debt is never asked about"

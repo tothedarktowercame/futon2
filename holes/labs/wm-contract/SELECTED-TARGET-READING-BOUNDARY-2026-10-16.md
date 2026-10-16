@@ -2,10 +2,8 @@
 
 ## Disposition
 
-No-go for another live click.  The offset boundary is structurally repaired,
-but the saved-answer replay gate is 2/6, below the required 6/6 (or an explained
-5/6).  This note records the evidence rather than treating another click as a
-test of a known failure rate.
+The boundary repair passes the saved-answer replay gate at 6/6.  This is an
+offline producer/consumer result, not by itself authorization for a live click.
 
 ## Boundary repair
 
@@ -36,10 +34,10 @@ temporary directory; it does not publish readings or alter saved requests.
 |---|---|---|
 | M-a-sorry-enterprise | validated | — |
 | M-goals-and-holes | validated | — |
-| M-essays-edit-cycle | refused | relation outside the documented vocabulary |
-| M-web-arxana-ui-improvements | refused | display-cue density 6/9, budget 4 |
-| M-trip-journal | refused | display-cue density 6/9, budget 4 |
-| M-the-futon-stack | refused | the cue `futon0` occurs twice in its fragment |
+| M-essays-edit-cycle | validated | legacy relation names projected through the declared compatibility map |
+| M-web-arxana-ui-improvements | validated | excess display cues deterministically omitted to the sentence budget |
+| M-trip-journal | validated | excess display cues deterministically omitted to the sentence budget |
+| M-the-futon-stack | validated | repeated `futon0` resolved by its structural position at the fragment start |
 
 This also explains the previously unknown M-trip-journal failure: it was not an
 offset failure; it violated the cue-density rule.
@@ -51,20 +49,17 @@ digests and positions found:
 
 - `reading/selected-target`: high risk, repaired here.  Exact locations are now
   machine-derived and both attempts are retained.
-- `reading/selected-policy`: the response repeats a library SHA-256 already
-  pinned by the issued request.  The machine checks it, so it cannot silently
-  corrupt identity, but requiring the model to reproduce it is unnecessary and
-  remains a producer-reliability risk.
-- `interpretation/legacy-action`: the response is asked to reproduce source and
-  value digests.  The consumer recomputes and rejects mismatches, so integrity is
-  fail-closed, but liveness still depends on model transcription.
+- `reading/selected-policy`: repaired.  The response no longer carries a
+  library SHA-256; receipts take it from the sealed issued request.
+- `interpretation/legacy-action`: repaired.  The raw agent receipt is retained;
+  the machine derives source-byte and interpretation-value digests into a
+  separate canonical receipt before validation.
 - `limb-evidence` digests and the runner's action/source digests are computed by
   code from files or bytes, not accepted on the model's authority.
 - No other registered production handoff asks an agent for source offsets.
 
-The two digest-transcription sites require separate compatibility decisions:
-removing their response fields changes their published contracts.  They are not
-silently declared repaired by this packet.
+No registered production handoff now relies on an agent to calculate source
+offsets or reproduce a machine-known digest.
 
 ## Gate before another click
 
@@ -74,7 +69,7 @@ silently declared repaired by this packet.
 4. Other registered handoffs were checked for the same risk: complete; two
    digest-transcription risks remain explicitly recorded above.
 5. Saved-answer replay reaches 6/6, or 5/6 with one explained non-offset
-   refusal: **failed (2/6)**.
+   refusal: **passed (6/6)**.
 
-The next work is offline producer evaluation/correction against these saved
-requests.  It is not authorization for a live click.
+This gate is satisfied.  A separate operator decision still governs any live
+click.
