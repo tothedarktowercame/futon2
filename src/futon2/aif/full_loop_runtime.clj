@@ -144,6 +144,13 @@
         ;; other ledgers. Mint this collector here and pass the same identity
         ;; through, rather than timing into a disconnected atom.
         opts (update opts :selection-timing/state
-                     #(or % (selection-timing/new-state)))]
-    (binding [runner/*runtime-defaults* (production-defaults opts)]
-      (runner/run-opportunity! opts))))
+                     #(or % (selection-timing/new-state)))
+        defaults (production-defaults opts)
+        ;; Pass production ports on the actual runner option map as well as
+        ;; binding the compatibility lookup.  The serving runner must not
+        ;; depend on a dynamic binding surviving namespace reload or an
+        ;; execution boundary before it decides whether selection is
+        ;; terminal.
+        runner-opts (merge opts defaults)]
+    (binding [runner/*runtime-defaults* defaults]
+      (runner/run-opportunity! runner-opts))))

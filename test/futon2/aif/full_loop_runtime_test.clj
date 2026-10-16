@@ -85,6 +85,37 @@
             :author "wm-author"}
            @captured))))
 
+(deftest production-runner-receives-and-exercises-selected-target-reading-port
+  (let [runner-opts (atom nil)
+        contacted (atom [])
+        repair-result {:schema :wm/selected-target-reading-request-v1
+                       :status :refused :published false
+                       :kind :probe-complete}]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! runner-opts opts)
+                    ((:selected-target-reading-fn opts)
+                     {}
+                     {:outer-task-selection {:chosen {:id "M-production"}}})
+                    :ran)
+                  selected-target-reading/repair!
+                  (fn [opts _]
+                    ((:answer-fn opts) {:target "M-production"})
+                    repair-result)]
+      (is (= :ran
+             (runtime/run-opportunity!
+              {:run-id "production-selected-reading"
+               :author "wm-author"
+               :reviewer "wm-reviewer"
+               :repair-reviewer "wm-repair-reviewer"
+               :selected-target-reading-answer-fn
+               (fn [issued]
+                 (swap! contacted conj [(:target issued) "wm-author"])
+                 {:state :not-contacted :reason :test-probe})}))))
+    (is (fn? (:selected-target-reading-fn @runner-opts))
+        "the real production wrapper must pass the port on runner opts")
+    (is (= [["M-production" "wm-author"]] @contacted))))
+
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]
     (let [failure (try
