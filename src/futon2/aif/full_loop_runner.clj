@@ -71,6 +71,7 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q8-frontier :as q8-frontier]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
@@ -1083,15 +1084,26 @@
                     :traceWritten (boolean (:trace-path result))
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
-                    :decision (assoc (select-keys retained-decision
-                                                  [:selection-law :selection-certificate
-                                                   :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
-                                                   :accumulation-bmr])
-                                     :g-term-decomposition (decomposition/from-result result)
-                                     :abstention abstention
-                                     ;; the chosen plan, so a flight can read
-                                     ;; what it left unreached from the record
-                                     :chosen (chosen-summary retained-decision))
+                    :decision (cond->
+                               (assoc (select-keys retained-decision
+                                                   [:selection-law :selection-certificate
+                                                    :initial-belief-receipt :enumeration-completeness :measured-a :accumulation
+                                                    :accumulation-bmr])
+                                      :g-term-decomposition (decomposition/from-result result)
+                                      :abstention abstention
+                                      ;; the chosen plan, so a flight can read
+                                      ;; what it left unreached from the record
+                                      :chosen (chosen-summary retained-decision))
+                               ;; Requirements Q2: an abstention selected
+                               ;; nothing, but the selected task's
+                               ;; construction (a zero-policy family and its
+                               ;; failures) still happened and is kept
+                               (and (nil? retained-decision)
+                                    (get-in selection-sorry [:decision :selection-certificate
+                                                             :q2-construction]))
+                               (assoc :selection-certificate
+                                      (select-keys (get-in selection-sorry [:decision :selection-certificate])
+                                                   [:q2-construction :target-policy-field])))
                     ;; PROOF-2b: the click's interpretation ask.  Once a tick
                     ;; has selected an admitted action, an ask is not missing:
                     ;; it is inapplicable.  Keep that distinct from the typed
@@ -1157,6 +1169,12 @@
                      ;; and throws on a record that is both or neither.
                      grounded-commit
                      (assoc :grounded-commit grounded-commit)
+                     ;; Requirements Q2: outer actions and the selected task's
+                     ;; construction, computed from this record exactly as
+                     ;; q2-construction/verify-record recomputes them
+                     true
+                     (as-> r (assoc r :q2 (q2-construction/certificate
+                                           (q2-construction/record-inputs r))))
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]

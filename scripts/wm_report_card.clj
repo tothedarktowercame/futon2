@@ -46,8 +46,9 @@
   ;; than the current exporter. A missing exporter carrier therefore yields
   ;; not-recomputable, never a guessed verdict.
   {:Q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
-   :Q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
-        "libraryPatternCount" "constructorPatternCount"]
+   :Q2 ["outerActions" "targetConstruction" "libraryPatternCount"
+        "constructorPatternCount" "frontierCensus" "frontierSelection"
+        "selectedCascade" "comparedPolicies"]
    :Q3 ["cascadesWithoutG"]
    :Q4 ["gTerms" "policyPreferences"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
@@ -74,13 +75,30 @@
 (defn- requirement-value [q f]
   (case q
     :Q1 (= (set (f "enumeratedTasks")) (open-tasks f))
-    :Q2 (let [rows (f "targetConstruction") ot (open-tasks f)]
-          (and (every? #(and (set/subset? (tc-targets %) ot)
+    ;; as in Lean (ruling (c)): one outer action per Q8-eligible task, and
+    ;; one construction, for the selected task and its action
+    :Q2 (let [rows (f "targetConstruction") acts (f "outerActions")
+              eligible (set (get (f "frontierCensus") "eligible"))
+              selected (get-in (f "frontierSelection") ["selected" "task"])
+              cascade (f "selectedCascade")]
+          (and (= (count acts) (count eligible))
+               (= (set (map #(% "task") acts)) eligible)
+               (= (count acts) (count (set (map #(% "action") acts))))
+               (contains? eligible selected)
+               (= selected (cascade "selected-task"))
+               (= 1 (count rows))
+               (every? #(and (= #{selected} (tc-targets %))
+                             (some (fn [a] (and (= selected (a "task"))
+                                                (= (a "action") (% "action")))) acts)
+                             (every? some? (map % ["reading" "library" "graph" "kernel"]))
                              (= (set (% "pool")) (set (% "slice")))
                              (true? (% "sliceFromWholeLibrary"))
                              (<= (count (% "slice")) (f "libraryPatternCount"))
-                             (pos? (% "policyCount"))) rows)
-               (= (tc-union rows "targets") ot)
+                             (pos? (% "policyCount"))
+                             (= (count (set (% "policies"))) (% "policyCount"))
+                             (= (set (% "policies")) (set (cascade "constructed")))
+                             (set/subset? (set (f "comparedPolicies")) (set (% "policies"))))
+                       rows)
                (= (f "constructorPatternCount")
                   (count (tc-union rows "pool")))))
     :Q3 (empty? (f "cascadesWithoutG"))

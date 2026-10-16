@@ -9,6 +9,7 @@
             [clojure.java.io :as io]
             [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as admission]
@@ -32,7 +33,28 @@
   (with-redefs [ledger/default-root (.getPath (temp-dir "reading-route-ledger-"))]
     (run)))
 
-(defn- analysis [patterns]
+(def library-patterns
+  "The graph's three patterns, and p/d, a library pattern outside the graph
+  (a reading that names it records :seed-not-in-graph)."
+  ["p/a" "p/b" "p/c" "p/d"])
+
+(defn- pattern-library
+  "A pattern library of LIBRARY-PATTERNS, one <root>/<pattern>.flexiarg
+  file each, as the production library is laid out."
+  []
+  (let [root (temp-dir "reading-route-library-")]
+    (doseq [p library-patterns]
+      (let [f (io/file root (str p ".flexiarg"))]
+        (.mkdirs (.getParentFile f))
+        (spit f (str "@flexiarg " p "\n! conclusion: fixture pattern " p "\n"))))
+    root))
+
+(defn library-sha256
+  "The sha256 of PATTERN's file in the library at ROOT."
+  [root pattern]
+  (identity/sha256 (Files/readAllBytes (.toPath (io/file root (str pattern ".flexiarg"))))))
+
+(defn- analysis [library patterns]
   {:status "analyzed"
    :sentences
    [{:id "s1"
@@ -42,7 +64,8 @@
                          :rationale "fixture fit" :relations ["action"]
                          :pattern_refs [{:id pattern :status "candidate"
                                          :rationale "fixture fit"
-                                         :source_sha256 (apply str (repeat 64 "a"))}]})
+                                         ;; the library bytes the reading cited
+                                         :source_sha256 (library-sha256 library pattern)}]})
                       patterns))}]})
 
 (defn- pinned-graph []
@@ -63,7 +86,8 @@
   ([read]
    (let [root (temp-dir "reading-route-root-")
          current (io/file root (str target ".md"))
-         flights (temp-dir "reading-route-flights-")]
+         flights (temp-dir "reading-route-flights-")
+         library (pattern-library)]
      (spit current "# Current\n\n## HEAD\nCurrent work.\n")
      (io/copy (io/file real-flight) (io/file flights "flight-278b6988.edn"))
      (let [digest (reading-registry/excerpt-digest current)]
@@ -71,8 +95,8 @@
         root {:target-id target :source-path (.getPath current)
               :excerpt-digest digest
               :request {:task {:target_id target :excerpt_sha256 digest}}
-              :analysis (analysis read) :validator-version 1}))
-     {:root root :flights flights :graph (pinned-graph)
+              :analysis (analysis library read) :validator-version 1}))
+     {:root root :flights flights :graph (pinned-graph) :library library
       :row {:target-id target :source-kind :head
             :source-path (.getPath current) :source-absent nil}})))
 
@@ -94,6 +118,7 @@
   "The production decision options for FX, merged with EXTRA."
   [fx extra]
   (merge {:pattern-graph-path (str (:graph fx))
+          :pattern-library-root (str (:library fx))
           :target-reading-root (str (:root fx))
           :conditioning-steps (ledger-steps fx)
           :ticket-queue ticket-queue/empty-declaration
@@ -158,9 +183,10 @@
   file has no reading. One pinned graph and one complete ledger serve all."
   [target->read]
   (let [root (temp-dir "reading-route-field-")
-        flights (temp-dir "reading-route-field-flights-")]
+        flights (temp-dir "reading-route-field-flights-")
+        library (pattern-library)]
     (io/copy (io/file real-flight) (io/file flights "flight-278b6988.edn"))
-    {:root root :flights flights :graph (pinned-graph)
+    {:root root :flights flights :graph (pinned-graph) :library library
      :rows (vec (for [[t read] target->read]
                   (let [f (io/file root (str t ".md"))]
                     (spit f (str "# " t "\n\n## HEAD\nWork on " t ".\n"))
@@ -170,7 +196,7 @@
                          root {:target-id t :source-path (.getPath f)
                                :excerpt-digest digest
                                :request {:task {:target_id t :excerpt_sha256 digest}}
-                               :analysis (analysis read) :validator-version 1})))
+                               :analysis (analysis library read) :validator-version 1})))
                     {:target-id t :source-kind :head :source-path (.getPath f)
                      :source-absent nil})))}))
 

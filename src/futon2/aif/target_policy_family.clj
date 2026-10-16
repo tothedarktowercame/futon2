@@ -26,6 +26,18 @@
                     :when (= "candidate" (:status ref))]
                 (:id ref))))))
 
+(defn- reading-slice
+  "The reading's query-time slice: each candidate pattern ref with the
+  library-file sha256 the reading cited for it (Requirements Q2)."
+  [analysis-map]
+  (vec (sort-by (juxt :pattern :source-sha256)
+                (distinct
+                 (for [sentence (:sentences analysis-map)
+                       fragment (:fragments sentence)
+                       ref (:pattern_refs fragment)
+                       :when (= "candidate" (:status ref))]
+                   {:pattern (:id ref) :source-sha256 (:source_sha256 ref)})))))
+
 (defn- reading-policies [target analysis-map]
   (vec (for [[mode kind] [[:alternatives :reading-alternatives]
                           [:overlap :reading-overlap]]
@@ -94,5 +106,6 @@
          :provenance {:excerpt-digest (:excerpt-digest reading)
                       :analysis-digest (:analysis-digest reading)
                       :graph-digest (identity/sha256 (.getBytes (pr-str graph) "UTF-8"))
+                      :slice (reading-slice analysis-map)
                       :retraction (assoc params :seeds usable
                                          :all-reading-seeds (vec (sort seeds)))}}))))

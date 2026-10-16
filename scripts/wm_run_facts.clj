@@ -13,13 +13,14 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q2-construction :as q2]
             [futon2.aif.q4-preference :as q4]
             [futon2.aif.q8-frontier :as q8]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
-   "targetConstruction" "constructorPatternCount" "constructedCascades"
+   "outerActions" "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "policyPreferences"
    ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
    ;; per compared policy), kept for the history table and alert text
@@ -85,6 +86,42 @@
             "policiesWithRiskTerm" (get-in c [:counts :risk])
             "policiesWithAmbiguityTerm" (get-in c [:counts :ambiguity])
             "policiesWithInformationTerm" (get-in c [:counts :information-gain])}))))))
+
+(defn q2-facts
+  "Requirements Q2 for a reading-family record, from the run's own :q2
+  carrier only, and only when it is intact and equal to the carrier
+  recomputed from this record (q2-construction/verify-record): the outer
+  actions, the selected task's construction, its pool count and the size of
+  the library pinned at construction. nil for a record of another route,
+  which keeps the historical reader."
+  [record]
+  (when (= :wm/reading-policy-family-v1
+           (get-in record [:decision :selection-certificate :selection-route]))
+    (let [v (q2/verify-record record)]
+      (if-not (= :verified (:status v))
+        (zipmap ["outerActions" "targetConstruction" "constructorPatternCount"
+                 "libraryPatternCount"]
+                (repeat (not-recomputable (str "Q2 carrier " (name (:reason v))))))
+        (let [c (:carrier v)]
+          {"outerActions" (mapv (fn [a] {"task" (:task a) "action" (:action-id a)})
+                                (:outer-actions c))
+           "targetConstruction"
+           (mapv (fn [e]
+                   {"targets" [(:task e)]
+                    "action" (:action-id e)
+                    "reading" (:reading-id e)
+                    "library" (:library-id e)
+                    "graph" (:graph-id e)
+                    "kernel" (:kernel-id e)
+                    "slice" (:slice e)
+                    "pool" (:pool e)
+                    "sliceFromWholeLibrary" (:slice-from-whole-library e)
+                    "policyCount" (:policy-count e)
+                    ;; the Q8 and Q4 exporters' identity of a policy key
+                    "policies" (vec (sort (map pr-str (:policies e))))})
+                 (:entries c))
+           "constructorPatternCount" (count (set (mapcat :pool (:entries c))))
+           "libraryPatternCount" (get-in c [:library :count])})))))
 
 (defn- lean-entry [e]
   (into {} (map (fn [[k v]] [(name k) (if (keyword? v) (str v) v)])) e))
@@ -567,6 +604,7 @@
         factorized (factorized-preference-facts record)
         q8 (q8-facts record)
         q4 (q4-facts record)
+        q2 (q2-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -580,6 +618,7 @@
                "targetsWithG" (if (some? with-g) (sorted-ids with-g)
                                   (nr "selection certificate candidates absent"))
                "libraryPatternCount" (count (:patterns snap))
+               "outerActions" (nr "outer action coverage is certified on the reading-family route only")
                "targetConstruction" (or construction
                                           (nr "selection certificate target construction absent"))
                "constructorPatternCount" (if (some? constructor-pool)
@@ -658,10 +697,11 @@
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         ;; a reading-family record's Q4 comes from its carrier alone
-        facts (merge facts q4)
+        facts (merge facts q4 q2)
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
+                                 (contains? q2 field) (str record-path " [:q2]")
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"

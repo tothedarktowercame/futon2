@@ -62,10 +62,10 @@
                :transition-kernel kernel-version
                :certificate certificate))))
 
-(defn- constructed-key
+(defn constructed-key
   "The structural key of a family policy as constructed: the scored
-  candidate's, else the key of its arranged candidate; a policy whose
-  arrangement cannot be compiled is named by target and policy id."
+  candidate's, else (SCORE nil) the key of its arranged candidate; a policy
+  whose arrangement cannot be compiled is named by target and policy id."
   [policy score]
   (or (some-> (:candidate score) prefix-admission/reading-policy-key)
       (try (prefix-admission/reading-policy-key

@@ -17,7 +17,9 @@
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q4-preference :as q4-preference]
+            [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -1332,9 +1334,14 @@
                 (assoc-in [:decision :selection-certificate :observation-labels]
                           (observation-label-certificate view opts))
                 (assoc-in [:decision :selection-certificate :target-policy-field] census)
-                (assoc-in [:decision :selection-certificate :target-construction]
-                          {:status :absent
-                           :reason :reading-policy-construction-census-owed})
+                ;; Requirements Q2: the selected task's construction, with
+                ;; the whole pattern library pinned by bytes as it stands now
+                (assoc-in [:decision :selection-certificate :q2-construction]
+                          (q2-construction/construction-census
+                           policy-field
+                           (q2-construction/library-manifest
+                            (or (:pattern-library-root opts)
+                                selected-reading/default-library-root))))
                 (assoc-in [:decision :mission-hole-coverage]
                           (or (:mission-hole-coverage assembled)
                               {:status :absent :reason :source-coverage-not-supplied}))

@@ -14,6 +14,7 @@
             [futon2.aif.outer-target-score :as outer-score]
             [futon2.aif.outer-learning-runtime :as outer-learning-runtime]
             [futon2.aif.pattern-registry :as pattern-registry]
+            [futon2.aif.q2-construction :as q2]
             [futon2.aif.q8-frontier :as q8]))
 
 (load-identity/register! *ns* *file*)
@@ -608,6 +609,14 @@
                          :comparison (if live? :complete-union :shared-only)
                          :missing-channel-cost
                          (when live? (get-in outer-learning [:controller :missing-channel-cost]))}))
+        ;; Requirements Q2: one task-level action for each candidate the
+        ;; effective selection could choose, formed as the chosen :action is
+        receipt (assoc receipt :q2-outer-actions
+                       (q2/outer-actions
+                        {:candidates (if live? shadow-candidates candidates)
+                         :selection effective-selection
+                         :action-of (fn [c] {:type (get action-type (:kind c))
+                                             :target (:id c)})}))
         certificate (learning-certificate outer-learning learning-scores
                                           shadow-selection selection)
         receipt (assoc receipt :outer-learning

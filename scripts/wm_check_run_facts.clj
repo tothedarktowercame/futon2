@@ -24,12 +24,20 @@
     (str ".nr \"not recomputable: " (str/join "," missing) "\"")))
 (defn ev-known [body] (str ".known { Requirements.click20 with " body " }"))
 (defn choice [x] (format "⟨%d, %d⟩" (id (x "target")) (id (x "cascade"))))
-(defn target-construction [xs]
+(defn target-construction
+  "An absent pin or digest renders 0 (id of the empty string), which Q2
+  refuses."
+  [xs]
   (str "[" (str/join ", "
                      (for [x xs]
-                       (format "{ targets := %s, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d }"
-                               (fs (x "targets")) (fs (x "slice")) (fs (x "pool"))
-                               (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")))) "]"))
+                       (format "{ targets := %s, action := %d, reading := %d, library := %d, graph := %d, kernel := %d, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d, policies := %s }"
+                               (fs (x "targets")) (id (x "action")) (id (x "reading"))
+                               (id (x "library")) (id (x "graph")) (id (x "kernel"))
+                               (fs (x "slice")) (fs (x "pool"))
+                               (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")
+                               (fs (x "policies"))))) "]"))
+(defn outer-actions [xs]
+  (str "[" (str/join ", " (for [x xs] (format "⟨%d, %d⟩" (id (x "task")) (id (x "action"))))) "]"))
 (def semantics {"terminal-only" "terminalOnly" "constant" "constant"
                 "progressive" "progressive"})
 (defn policy-preferences
@@ -86,8 +94,9 @@
 
 (def deps
   {:q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
-   :q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
-        "libraryPatternCount" "constructorPatternCount"]
+   :q2 ["outerActions" "targetConstruction" "libraryPatternCount"
+        "constructorPatternCount" "frontierCensus" "frontierSelection"
+        "selectedCascade" "comparedPolicies"]
    :q3 ["cascadesWithoutG"]
    :q4 ["policyPreferences" "gTerms"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
@@ -120,10 +129,14 @@
                                 (facts "policiesWithAmbiguityTerm")
                                 (facts "policiesWithInformationTerm")
                                 (fs (facts "comparedPolicies")))))
-        :q2 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, targetConstruction := %s, libraryPatternCount := %d, constructorPatternCount := %d"
-                              (fs (facts "openMissions")) (fs (facts "openExcursions"))
-                              (fs (facts "openTickets")) (target-construction (facts "targetConstruction"))
-                              (facts "libraryPatternCount") (facts "constructorPatternCount")))
+        :q2 (ev-known (format "outerActions := %s, targetConstruction := %s, libraryPatternCount := %d, constructorPatternCount := %d, frontierCensus := %s, frontierSelection := %s, selectedCascade := %s, comparedPolicies := %s"
+                              (outer-actions (facts "outerActions"))
+                              (target-construction (facts "targetConstruction"))
+                              (facts "libraryPatternCount") (facts "constructorPatternCount")
+                              (census-term (facts "frontierCensus"))
+                              (selection-term (facts "frontierSelection"))
+                              (cascade-term (facts "selectedCascade"))
+                              (fs (facts "comparedPolicies"))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
         :q6 (ev-known (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
                               (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
