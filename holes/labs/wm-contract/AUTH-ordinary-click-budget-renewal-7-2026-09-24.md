@@ -179,3 +179,12 @@ not acceptable preparation. The live sequence therefore uses the dedicated
 separate fresh role session, and checks the durable budget receipt and the
 same invoke-readiness predicate used by the runner before firing. Failed runs
 remain charged; no historical charge is reclaimed.
+
+## Joe's selected-target contact proof grant, 2026-10-16 — one click
+
+Joe directly authorized one further live click after the selected-target
+reading contact path was repaired and hot-loaded. Under this document's
+standing mechanism, `allocated` rises from 67 to **68**. The click is solely
+for the live production proof of the designated `wm-author` contact and its
+durable success-or-typed-refusal receipt. Existing issue-time accounting and
+the no-refund rule are unchanged.
