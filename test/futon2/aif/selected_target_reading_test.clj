@@ -59,11 +59,10 @@
                  (let [analysis (analysis-for request)]
                    {:analysis
                     (if (= 1 (count @contacted))
-                      ;; The response contract accepts this shape, but the real
-                      ;; validator rejects the cue outside its fragment.  The
-                      ;; same immutable request must then receive one correction.
-                      (assoc-in analysis [:sentences 2 :fragments 0 :display_cues 0 :start]
-                                0)
+                      ;; Offset arithmetic is projected deterministically now;
+                      ;; use a genuine semantic rejection to exercise correction.
+                      (assoc-in analysis [:sentences 1 :fragments 0 :relations]
+                                ["not-a-relation"])
                       analysis)}))
         opts {:run-id "run-one" :author "wm-author"
               :answer-fn answer :request-root (str work)
@@ -95,6 +94,14 @@
     (is (= (:request-sha256 result)
            (registry/source-file-digest (:request-file result)))
         "the recorded issued request stays byte-identical after validation")
+    (let [dir (.getParentFile (io/file (:request-file result)))]
+      (is (.isFile (io/file dir "analysis-input-attempt-1.json")))
+      (is (.isFile (io/file dir "analysis-input-attempt-2.json")))
+      (is (= ["not-a-relation"]
+             (get-in (json/parse-string
+                      (slurp (io/file dir "analysis-input-attempt-1.json")) true)
+                     [:sentences 1 :fragments 0 :relations]))
+          "the rejected first answer is retained byte-for-meaning, not overwritten"))
     (is (= :current-candidate (:status @consumed))
         "the resumed inner decision sees the publication in the same step")
     (is (= :current-candidate
@@ -167,17 +174,16 @@
                    ":relation_vocabulary"))
     (is (.contains text "\"dependency\""))))
 
-(deftest author-prompt-states-the-display-cue-span-contract
+(deftest author-prompt-states-machine-derived-offset-contract
   (let [text (sut/prompt
               {:request {:sentences []}
                :acceptance-contract
                {:id :wm/selected-target-reading-analysis :version 1
                 :response {:relation_vocabulary ["context"]}
                 :validator {:id :wm/session-turn-analysis :version 2}}})]
-    (is (.contains text
-                   "Every display cue must be wholly inside its enclosing fragment's start/end span"))
-    (is (.contains text
-                   "text must exactly equal the source text at those offsets"))))
+    (is (.contains text "The machine derives Unicode-codepoint offsets"))
+    (is (.contains text "your numeric start/end values are not trusted"))
+    (is (.contains text "absent or occurs more than once"))))
 
 (deftest author-prompt-states-the-fragment-source-slice-contract
   (let [text (sut/prompt
@@ -189,11 +195,9 @@
                 :response {:relation_vocabulary ["context"]}
                 :validator {:id :wm/session-turn-analysis :version 2}}})]
     (is (.contains text
-                   "Every fragment must be wholly inside its source sentence's start/end span"))
-    (is (.contains text
-                   "fragment text must exactly equal source_text[start:end]"))
-    (is (.contains text
-                   "never add or omit punctuation or whitespace"))))
+                   "Quote every fragment and display cue exactly"))
+    (is (.contains text "including punctuation and whitespace"))
+    (is (.contains text "relations must come from its documented vocabulary"))))
 
 (deftest correction-prompt-retains-the-request-and-validator-failure
   (let [text (sut/prompt
@@ -224,6 +228,37 @@
              :start 6 :end 24 :submitted "the WM's setpoints"
              :expected "WM's setpoints, st"}]
            errors))))
+
+(deftest quoted-text-is-the-authority-for-machine-derived-offsets
+  (let [request {:source_text "α OPEN work; OPEN elsewhere."
+                 :sentences [{:id "s1" :start 0 :end 11
+                              :text "α OPEN work"}
+                             {:id "s2" :start 11 :end 28
+                              :text "; OPEN elsewhere."}]}
+        analysis {:sentences
+                  [{:id "s1" :unresolved_reason ""
+                    :fragments [{:start 999 :end 1000 :text "OPEN work"
+                                 :display_cues [{:start -1 :end 50 :text "OPEN"}]}]}
+                   {:id "s2" :unresolved_reason "" :fragments []}]}
+        resolved (sut/resolve-analysis-offsets request analysis)]
+    (is (= :resolved (:status resolved)))
+    (is (= [2 11]
+           ((juxt :start :end)
+            (get-in resolved [:analysis :sentences 0 :fragments 0]))))
+    (is (= [2 6]
+           ((juxt :start :end)
+            (get-in resolved [:analysis :sentences 0 :fragments 0 :display_cues 0]))))
+    (is (= :quoted-text-absent
+           (:reason (sut/resolve-analysis-offsets
+                     request
+                     (assoc-in analysis [:sentences 0 :fragments 0 :text]
+                               "not present")))))
+    (is (= :quoted-text-ambiguous
+           (:reason (sut/resolve-analysis-offsets
+                     {:source_text "OPEN OPEN"
+                      :sentences [{:id "s1" :start 0 :end 9 :text "OPEN OPEN"}]}
+                     {:sentences [{:id "s1" :fragments [{:text "OPEN"
+                                                         :display_cues []}]}]}))))))
 
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []

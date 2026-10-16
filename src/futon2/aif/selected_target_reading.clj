@@ -32,6 +32,76 @@
           b (.offsetByCodePoints source 0 end)]
       (.substring source a b))))
 
+(defn- occurrences
+  "Return all UTF-16 start indexes of needle in haystack."
+  [^String haystack ^String needle]
+  (when (and (seq needle) (string? haystack))
+    (loop [from 0 found []]
+      (let [at (.indexOf haystack needle from)]
+        (if (neg? at)
+          found
+          (recur (inc at) (conj found at)))))))
+
+(defn- resolve-quote
+  [^String source scope-start scope-end text]
+  (let [scope (codepoint-slice source scope-start scope-end)
+        matches (occurrences scope text)]
+    (case (count matches)
+      1 (let [char-at (first matches)
+              relative-start (.codePointCount ^String scope 0 char-at)
+              length (.codePointCount ^String text 0 (.length ^String text))]
+          {:status :resolved
+           :start (+ scope-start relative-start)
+           :end (+ scope-start relative-start length)})
+      0 {:status :refused :reason :quoted-text-absent :text text
+         :scope [scope-start scope-end]}
+      {:status :refused :reason :quoted-text-ambiguous :text text
+       :scope [scope-start scope-end] :matches (count matches)})))
+
+(defn resolve-analysis-offsets
+  "Replace author-supplied fragment and display-cue offsets with offsets found
+  deterministically from their quoted text. Quotes must occur exactly once in
+  their enclosing sentence/fragment. The Python validator remains authoritative
+  for every semantic and structural rule after this projection."
+  [request analysis]
+  (let [source (:source_text request)
+        sentences (into {} (map (juxt :id identity) (:sentences request)))]
+    (if-not (and (string? source) (map? analysis))
+      {:status :refused :reason :malformed-offset-resolution-input}
+      (loop [remaining (:sentences analysis) resolved []]
+        (if-let [{:keys [id fragments] :as analysis-sentence} (first remaining)]
+          (if-let [sentence (get sentences id)]
+            (let [fragment-results
+                  (mapv
+                   (fn [fragment]
+                     (let [located (resolve-quote source (:start sentence)
+                                                  (:end sentence) (:text fragment))]
+                       (if-not (= :resolved (:status located))
+                         (assoc located :sentence id :field :fragment)
+                         (let [cue-results
+                               (mapv (fn [cue]
+                                       (let [cue-location
+                                             (resolve-quote source (:start located)
+                                                            (:end located) (:text cue))]
+                                         (if (= :resolved (:status cue-location))
+                                           (merge cue (select-keys cue-location [:start :end]))
+                                           (assoc cue-location :sentence id
+                                                  :field :display-cue))))
+                                     (:display_cues fragment))]
+                           (if-let [problem (first (filter :reason cue-results))]
+                             problem
+                             (-> fragment
+                                 (merge (select-keys located [:start :end]))
+                                 (assoc :display_cues cue-results)))))))
+                   fragments)]
+              (if-let [problem (first (filter :reason fragment-results))]
+                problem
+                (recur (next remaining)
+                       (conj resolved (assoc analysis-sentence
+                                             :fragments fragment-results)))))
+            {:status :refused :reason :unknown-analysis-sentence :sentence id})
+          {:status :resolved :analysis (assoc analysis :sentences resolved)})))))
+
 (defn offset-diagnostics
   "Name fragment/cue offset mismatches in ANALYSIS against REQUEST. These are
   feedback for the author; the Python validator remains publication authority."
@@ -111,12 +181,13 @@
   machine, not the seat, validates and publishes it."
   [{:keys [request acceptance-contract validation-feedback prior-analysis]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
-       "Use exact Unicode-codepoint offsets. Every fragment must be wholly inside "
-       "its source sentence's start/end span, and fragment text must exactly equal "
-       "source_text[start:end]; never add or omit punctuation or whitespace. "
-       "Every display cue must be wholly "
-       "inside its enclosing fragment's start/end span, and its text must exactly "
-       "equal the source text at those offsets. Use only actual patterns under "
+       "Quote every fragment and display cue exactly, including punctuation and "
+       "whitespace. The machine derives Unicode-codepoint offsets from each quote "
+       "inside its enclosing sentence or fragment; your numeric start/end values "
+       "are not trusted. A quote that is absent or occurs more than once in its "
+       "scope is refused, so choose enough exact context to identify one occurrence. "
+       "Display cues must also obey the acceptance contract's density limit, and "
+       "relations must come from its documented vocabulary. Use only actual patterns under "
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
        "Reply with exactly one JSON object in the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
@@ -232,13 +303,34 @@
                                                 "analysis-input.json")
                         validation-request (io/file (.getParentFile request-file)
                                                     "validation-request.json")
+                        attempt (atom 0)
                         validate (fn [candidate]
-                                   (spit analysis-input
-                                         (json/generate-string candidate {:pretty true}))
-                                   (io/copy request-file validation-request)
-                                   (shell/sh "python3" analysis-validator "complete"
-                                             (.getPath validation-request)
-                                             (.getPath analysis-input)))
+                                   (let [n (swap! attempt inc)
+                                         resolution (resolve-analysis-offsets request candidate)
+                                         attempt-file (io/file (.getParentFile request-file)
+                                                               (str "analysis-input-attempt-" n ".json"))
+                                         resolved-file (io/file (.getParentFile request-file)
+                                                                (str "analysis-resolved-attempt-" n ".json"))]
+                                     ;; Keep the answer exactly as received; later attempts never
+                                     ;; overwrite the evidence needed to assess correction quality.
+                                     (spit attempt-file
+                                           (json/generate-string candidate {:pretty true}))
+                                     (if-not (= :resolved (:status resolution))
+                                       {:exit 1 :err (str "Offset resolution refused: "
+                                                         (pr-str (dissoc resolution :analysis)))}
+                                       (do
+                                         (spit resolved-file
+                                               (json/generate-string (:analysis resolution)
+                                                                     {:pretty true}))
+                                         ;; Compatibility copy for existing tooling; it is always
+                                         ;; the deterministic projection, never the raw answer.
+                                         (spit analysis-input
+                                               (json/generate-string (:analysis resolution)
+                                                                     {:pretty true}))
+                                         (io/copy request-file validation-request)
+                                         (shell/sh "python3" analysis-validator "complete"
+                                                   (.getPath validation-request)
+                                                   (.getPath resolved-file))))))
                         validated0 (validate analysis)
                         correction (when-not (zero? (:exit validated0))
                                      (contact (assoc issued
