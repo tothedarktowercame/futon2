@@ -74,6 +74,12 @@
     (is (= #{"action" "condition" "context" "contrast" "dependency" "goal" "rationale"}
            (set (get-in @contacted [0 2 :response :relation_vocabulary])))
         "the prompt contract comes from the validator's template output")
+    (is (= "exact-source-slice-at-start-end"
+           (get-in @contacted [0 2 :response :fragments :text]))
+        "the live handoff carries the validator's exact fragment rule")
+    (is (= "dropped-and-counted"
+           (get-in @contacted [0 2 :response :rnode_cues :invalid_entries]))
+        "non-fatal normalization rules are disclosed too")
     (is (= "M-selected" (:target result)))
     (is (= excerpt (:excerpt-digest result)))
     (is (= (:request-sha256 result)
