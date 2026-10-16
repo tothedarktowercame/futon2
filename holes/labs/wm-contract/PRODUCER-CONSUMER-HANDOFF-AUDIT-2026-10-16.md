@@ -231,3 +231,19 @@ missing run record, failed checker, or missing verdict as terminal failure. An
 HTTP 403 therefore cannot be represented as a checked report. Publication and
 checking remain separate facts; availability remains an operational dependency,
 not evidence that the requirement check occurred.
+
+### Legacy interpretation test disposition
+
+`interpretation-job-test` formerly sent an interpreted-action fixture through
+the whole runner. That selector route has been retired; the fixture now stops
+before interpretation because it supplies neither a reading family nor its
+Prefix-F evidence. Its 236 failures and 5 errors were therefore repetitions of
+one unreachable setup, not 241 interpretation regressions.
+
+The namespace now retains only contracts owned by `interpretation-job`: the
+immutable acceptance manifest, mandatory transport classifier, closed failure
+schema, and failure disposition. The still-live laws formerly mixed into the
+fixture remain independently covered by `interpretation-pin-stress-test`
+(captured-source identity) and `fact-measurement-test` (pre/end measurement and
+frozen files). The selected-only production seam remains covered by
+`wm.selected-reading-runner-test`.
