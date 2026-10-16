@@ -117,11 +117,26 @@
 (defn- first-acting-pattern
   "The enacted step of a cascade candidate: its first acting pattern (the
   per-state projection ActionMarginal uses; same rule as policy.clj's
-  cascade-first-action)."
+  cascade-first-action). For co-application precedence it is the ordered
+  vector of root pattern maps, the units nothing descends into, so two
+  co-apply cascades with the same roots share one key. Taking the first
+  entry of the {:co-apply ...} map instead keyed each cascade by its whole
+  arrangement, split the mass the selector pooled, and refused the
+  selector's Bayes action on a reading whose policies share a root
+  (chosen 0.166 vs best 0.417, 2026-10-16)."
   [action]
-  (if (and (map? action) (seq (:precedence action)))
-    (first (:precedence action))
-    (if (map? action) (:type action) action)))
+  (if (map? action)
+    (let [precedence (:precedence action)
+          co-apply (when (map? precedence) (:co-apply precedence))]
+      (cond
+        (and (vector? precedence) (seq precedence)) (first precedence)
+        (map? co-apply)
+        (let [{:keys [units descent patterns]} co-apply
+              below (set (map second descent))
+              roots (mapv patterns (remove below units))]
+          (when (seq roots) roots))
+        :else (:type action)))
+    action))
 
 (defn- cascade-decision?
   [decision]

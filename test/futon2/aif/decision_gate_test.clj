@@ -192,17 +192,33 @@
   ;; private rules still classify the same things as actions.
   (let [selector-rule @#'policy/cascade-first-action
         gate-rule @#'gate/first-acting-pattern
+        co (fn [units descent]
+             {:kind :cascade-candidate
+              :precedence {:co-apply {:units units :descent descent
+                                      :patterns (into {} (map (fn [u] [u {:id u}])) units)}}})
         cases [(cascade-action :empty [])
                (cascade-action :one [:pattern-sov])
                (cascade-action :many [:pattern-ph :pattern-test])
-               {:kind :no-op :type :abstain/stand-down}]]
+               {:kind :no-op :type :abstain/stand-down}
+               ;; co-application: the root frontier, not the {:co-apply ..}
+               ;; container (the drift that refused a reading decision on
+               ;; 2026-10-16)
+               (co [:a :b :c] [[:a :b] [:b :c]])
+               (co [:a :b :c] [])
+               (co [:a :b :c] [[:a :c]])
+               (co [] [])]]
     (doseq [a cases]
       (is (= (selector-rule a) (gate-rule a))
           (str "selector and gate must agree on the first acting action of " (pr-str a))))
     (is (nil? (selector-rule (cascade-action :empty [])))
         "an empty cascade has no acting action, under both rules")
     (is (some? (selector-rule {:kind :no-op :type :abstain/stand-down}))
-        "a TYPED no-op does have one, so it keeps its own key")))
+        "a TYPED no-op does have one, so it keeps its own key")
+    (testing "co-application cascades with the same roots share one key"
+      (let [chain (co [:a :b] [[:a :b]])
+            other (co [:a :c] [[:a :c]])]
+        (is (= [{:id :a}] (gate-rule chain) (gate-rule other)))
+        (is (nil? (gate-rule (co [] []))))))))
 
 (deftest gate-refuses-a-chosen-empty-cascade
   ;; The exact bad case: a decision naming an empty cascade as its action.
