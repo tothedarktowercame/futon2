@@ -30,6 +30,35 @@ The current reading-family value contains useful structural material
 input to construction, not a second definition of cascade and not by itself an
 enactment instruction.
 
+### Compatibility ruling: 象 / Minus40°DB (reviewed 2026-10-16)
+
+Claude-16 reviewed this excursion against the live 象 occurrence records,
+Minus40°DB, `CASCADE-SPEC-v3`, `ThreeHalvesBlend.lean`, and the current War
+Machine constructors.  Verdict: **compatible with the amendments recorded
+below, not compatible as originally written**.
+
+The smallest shared definition is:
+
+- a pinned pattern citation resolves either to an **occurrence** with exact
+  reading provenance and its four 象 maps, represented by
+  `:wm/three-halves-square-v1`, or to a typed void/unread result which is kept
+  in the construction census but is not an occurrence;
+- a **structural cascade** is occurrences plus their witnessed gluing diagram
+  and construction order;
+- an **executable cascade** is a refinement of that structural cascade which
+  adds evidenced application-order edges, operational clauses, an executable
+  frontier, open holes, and an execution journal;
+- a checked projection from executable cascade back to the structural cascade
+  and its construction census must preserve every occurrence, square, gluing,
+  void/unread result, and construction-order fact.  The executable layer may
+  add operational evidence; it may not invent missing 象 readings or
+  reinterpret descriptive order as application order.
+
+Minus40°DB is not itself a cascade carrier.  It contributes stable entity
+identity useful for gluing and its valid-time/recorded-time model for the
+journal.  These are compatible enrichments, not reasons to collapse the two
+carriers into one.
+
 ## 2. Required result for the next live click
 
 For the selected target, one click must perform this uninterrupted path:
@@ -83,6 +112,8 @@ The record must contain at least:
 
 - schema and content digest;
 - run, click, selected target, selected policy and construction occurrence;
+- the 象 reading record id, exact fragment span, source-text digest, analysis
+  digest, and the cited pattern's `source_sha256` for every occurrence;
 - pinned reading, excerpt, analysis, pattern-library, graph and kernel
   identities;
 - the exact scorer and normalization declarations under which its G was
@@ -92,15 +123,26 @@ The record must contain at least:
 
 ### Cascade structure
 
-- occurrence-level nodes, each binding a pattern id to pinned pattern bytes;
+- occurrence-level nodes, each binding a distinct citation occurrence—not
+  merely a pattern id—to exact fragment/span provenance, pinned pattern bytes,
+  and the four maps of its `:wm/three-halves-square-v1` reading, including
+  situation sources and auxiliary flags;
 - authored/organised additions, distinguished from originally selected nodes;
-- typed directed edges, including descent, co-application/overlap, guards and
-  any other admitted edge type;
-- precedence as a property of the composition, not as a replacement for the
-  graph;
-- alternatives or branches when the selected composition contains them;
+- four relations kept separate, each with evidence: descriptive reading order
+  and its role labels; undirected gluing at a shared object with an isomorphism
+  or consistency witness; operational application order with transition
+  evidence; and guards;
+- precedence/construction order as a property of the reading, not as a
+  replacement for the graph and never by itself application order;
+- alternatives as unchosen readings or other witnessed colimits, not presumed
+  executable branches;
 - an explicit account of the seed-graph edges used and any newly authored
   edge, with its authority.
+
+The occurrence key must distinguish two citations of the same pattern.  In
+particular, `:blend-squares` must be keyed by occurrence identity rather than
+pattern id; otherwise repeated citations collapse and the carrier cannot
+represent the live-turn data.
 
 ### Operational meaning
 
@@ -112,6 +154,18 @@ The record must contain at least:
 - evidence required before a step can be counted as enacted;
 - policy holes and design holes, each with an owner/question, dependencies,
   and a re-entry condition.
+
+Keep three absences distinct:
+
+1. a **void citation**, where one of the four parts matches nothing and no
+   occurrence exists;
+2. an **unread citation**, where the four maps have not been authored and no
+   occurrence may yet be claimed;
+3. an **open operational hole**, where a valid structural occurrence exists
+   but its enactment clause remains unresolved.
+
+Only the third is a node in an executable cascade.  Neither of the first two
+may be smuggled into a policy as a permissive open hole.
 
 ### State without mutation of identity
 
@@ -136,9 +190,11 @@ It must establish:
    no omitted, duplicate, or foreign nodes.
 3. **Graph well-formedness:** every edge endpoint is a node; every edge kind is
    admitted and has its required evidence; authored additions are attributed.
-4. **Cascade law:** the directed descent relation is acyclic; precedence names
-   every required occurrence exactly once and respects directed constraints;
-   co-application is retained as composition rather than flattened away.
+4. **Cascade law:** application-order edges are acyclic; gluing remains typed
+   and undirected and is excluded from that cycle check; construction order
+   names every required occurrence exactly once; co-application is retained
+   as composition rather than flattened away.  A shared name without a gluing
+   isomorphism/consistency witness is only a typed `shared-name-candidate`.
 5. **Admissibility:** guards, consumes/produces declarations, conflicts, and
    enabled-frontier claims agree with the pinned interpretations and current
    state.
@@ -150,6 +206,10 @@ It must establish:
    absence must never be converted to an invented default.
 8. **Journal binding:** every attempt and effect names this cascade digest, an
    admitted enabled node/group, and the evidence that verifies the transition.
+9. **象 projection:** forgetting executable additions produces the exact
+   `ThreeHalvesBlend.Policy`-shaped structural diagram and construction census
+   supplied by 象: the same occurrence identities, squares, gluings,
+   void/unread results, and construction order.
 
 The validator returns either a sealed certificate or an error report containing
 the exact failed clause and repair inputs.  It does not return an abstention or
@@ -179,7 +239,11 @@ selected identity
 ```
 
 It must also show that the executable frontier is drawn from the validated
-cascade and respects its guards and ordering.  Negative witnesses must reject
+cascade and respects its guards and application ordering.  Beside this
+identity chain, a projection witness must show that the executable carrier
+forgets back to the exact `ThreeHalvesBlend.Policy`-shaped structural diagram;
+the 象 producer's output must lie in that projection's image.  Negative
+witnesses must reject
 at least: changed edges after scoring, flattened co-application, foreign or
 missing nodes, cyclic descent, a precedence that violates an edge, an
 unattributed authored edge, an unbound journal entry, and a claimed enactment
@@ -206,6 +270,8 @@ Rules:
 
 - preserve graph identity and receipts; compilation may not silently choose a
   different order or discard edges;
+- never infer application order from fragment order, reading order, scope
+  nesting, construction order, or an unwitnessed shared name;
 - enact a single node only when the cascade says it is sequentially enabled;
 - enact a co-application group as a group, with a group completion condition,
   rather than serialising it by accident;
@@ -213,6 +279,10 @@ Rules:
   mechanism, never through an ambient or stale roster name;
 - require evidence of the advertised effect before advancing the journal and
   habit count;
+- derive guards and completion checks from the occurrence square when this is
+  warranted (I1/I2 elements observed and CHECK on the B element); responsible
+  capability and intended operation are attributed authored additions or open
+  holes, never defaults;
 - when a design hole is reached, save it in place and invoke the live repair
   loop against the same cascade and phase.  A repair may append an authorised
   design decision or revised cascade version; it may not mutate the selected
@@ -252,8 +322,10 @@ substitute for an implementation error at this seam.
 
 ### Packet A — canonical record and validator
 
-1. Freeze a real reading-family selection fixture, including nodes, edges,
-   co-application, precedence, receipts, pins and G terms.
+1. Freeze a real reading-family selection fixture, including repeated pattern
+   citations, exact spans, four-map squares, typed void/unread/open states,
+   gluings, reading order, co-application, application-order evidence,
+   receipts, pins and G terms.
 2. Define the versioned artifact and content identity.
 3. Implement the single validator and its negative controls.
 4. Persist the artifact independently of whether enactment later succeeds.
@@ -273,7 +345,8 @@ the saved digest is the selected digest.
 
 ### Packet C — enactment compiler and open holes
 
-1. Define node/group operational clauses and the execution journal.
+1. Define node/group operational clauses, the structural-to-executable
+   refinement, its forgetful projection, and the execution journal.
 2. Compile the enabled frontier without flattening composition.
 3. Represent unresolved design choices as explicit open holes.
 4. Connect compiled steps to the existing selected-cascade/flight boundary.
@@ -309,6 +382,14 @@ formal checker agrees.  Only then remove
 At minimum:
 
 - a production-shaped cascade with sequential and co-application structure;
+- two occurrences of the same pattern remain distinct through square lookup,
+  scoring, persistence, validation and projection;
+- void, unread and open are mutually exclusive and only open enters the
+  executable node set;
+- descriptive reading order cannot satisfy an application-order obligation;
+- an undirected gluing does not create a false directed cycle, while an
+  unwitnessed shared name cannot become a gluing;
+- projection back to the 象 structural diagram is exact;
 - save/reload byte and identity stability;
 - all validator negative cases named in §5;
 - the exact selected object, not a reconstruction, reaches persistence;
@@ -326,9 +407,12 @@ At minimum:
 - the Lean positive witness and every negative witness elaborate.
 
 Plant the old behaviour as controls: vector-coerce the co-application map,
-reconstruct after selection, drop an edge, accept a cycle, skip the completion
-receipt, classify a compiler failure as refusal, rerun selection during retry,
-and lose an open hole.  Each plant must be caught before authorising a click.
+key squares by pattern id, treat an unread citation as an open node, infer
+application order from reading order, promote a shared name to an unwitnessed
+gluing, reconstruct after selection, drop an edge, accept a cycle, skip the
+completion receipt, classify a compiler failure as refusal, rerun selection
+during retry, and lose an open hole.  Each plant must be caught before
+authorising a click.
 
 ## 10. Definition of done
 
