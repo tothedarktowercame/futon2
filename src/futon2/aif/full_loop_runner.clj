@@ -77,6 +77,7 @@
             [futon2.aif.q10-arrangement-census :as q10-arrangement-census]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
+            [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -1272,7 +1273,10 @@
         f2 (first (filter #(= "/home/joe/code/futon2" (:repo %)) states))]
     (assoc f2 :repo-heads (into {} (map (juxt :repo :git-sha) states)))))
 
-(defn- agent-roster [agency-base]
+(defn agent-roster
+  "Read the Agency roster. Public because the production composition root
+  uses the same observation to refuse a selected-target reading contact."
+  [agency-base]
   (let [r (http/get (str agency-base "/api/alpha/agents")
                     {:timeout 10000 :throw false})]
     (when-not (= 200 (:status r))
@@ -2047,6 +2051,27 @@
                     :reason (get-in result [:reasons 0 :reason])
                     :discharge (:status after)
                     :events events})}))))
+
+(defn selected-target-reading-step
+  "Repair a missing reading for JUDGEMENT's retained outer choice, then call
+  REDECIDE exactly once when publication succeeded.  REPAIR-FN owns request,
+  contact, validation, and publication.  This seam never selects a fallback
+  target and never calls the outer selector itself."
+  [opts judgement repair-fn redecide]
+  (if-not (and repair-fn (selected-target-reading/selected-need judgement))
+    {:judgement judgement :record nil}
+    (let [record (try (repair-fn opts judgement)
+                      (catch Throwable e
+                        {:schema :wm/selected-target-reading-request-v1
+                         :status :refused
+                         :kind :selected-target-reading-repair-threw
+                         :published false :message (ex-message e)}))]
+      (if (:published record)
+        {:judgement (assoc (redecide record)
+                           :selected-target-reading-request record)
+         :record record}
+        {:judgement (assoc judgement :selected-target-reading-request record)
+         :record record}))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
@@ -6150,6 +6175,8 @@
                                 e))))
             interpretation-ask-fn (or (:interpretation-ask-fn opts)
                                       (get *runtime-defaults* :interpretation-ask-fn))
+            target-reading-fn (or (:selected-target-reading-fn opts)
+                                  (get *runtime-defaults* :selected-target-reading-fn))
             judgement0-base
             (try
             (run-phase!
@@ -6177,9 +6204,11 @@
                ;; kinds into a selection in this click, so they are not yet
                ;; terminal. Every other no-entry result is the selection
                ;; phase's final answer and must be restartable when attached.
-               (when-not (and interpretation-ask-fn (nil? (:flight opts))
-                              (seq (interpretation-needed-refusals
-                                    (:decision judgement))))
+               (when-not (or (and target-reading-fn (nil? (:flight opts))
+                                  (selected-target-reading/selected-need judgement))
+                             (and interpretation-ask-fn (nil? (:flight opts))
+                                  (seq (interpretation-needed-refusals
+                                        (:decision judgement)))))
                  (selection-terminal-condition :selection judgement))))
               (catch clojure.lang.ExceptionInfo e
                 ;; WM-CLICK-REFUSAL-I: a typed refusal of the cascade decision
@@ -6188,6 +6217,39 @@
                 ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
                 ;; else goes on, typed by its thrower's :kind when it has one
                 (selection-refusal! e nil)))
+            ;; The outer selector has already chosen.  If that exact target's
+            ;; current excerpt has no validated reading, issue one immutable
+            ;; request to the designated author, validate and publish it, then
+            ;; re-run only the inner construction against the retained outer
+            ;; receipt installed by full-loop-runtime.
+            {judgement0-reading :judgement}
+            (selected-target-reading-step
+             opts judgement0-base
+             (when (nil? (:flight opts)) target-reading-fn)
+             (fn [record]
+               (try
+                 (run-phase!
+                  opts @phase-context :selected-target-reading-redecision
+                  #(let [generated (selection-judge window-days)
+                         j ((or (:judgement-transform-fn opts) identity)
+                            (:judgement generated))]
+                     (reset! effective-configuration
+                             (or (:effective-run-configuration j)
+                                 (assoc @effective-configuration :evaluation :not-retained)))
+                     j)
+                  nil
+                  #(selection-terminal-condition
+                    :selected-target-reading-redecision %
+                    {:selected-target-reading record}))
+                 (catch Throwable e
+                   (throw
+                    (ex-info "Selected-target reading was published but inner construction failed"
+                             {:outcome :incomplete
+                              :failure-kind :selected-target-reading-redecision-failed
+                              :failure-stage :selected-target-reading-redecision
+                              :target (:target record)
+                              :selected-target-reading record}
+                             e))))))
             ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
             ;; step inside the tick). Only when the decision abstained
             ;; refusing at least one target :no-admitted-interpretation, at
@@ -6200,9 +6262,9 @@
             ;; there is a refusal to ask about, not on every click
             (when (and interpretation-ask-fn (nil? (:flight opts))
                        (seq (interpretation-needed-refusals
-                             (:decision judgement0-base))))
+                             (:decision judgement0-reading))))
               (interpretable-refusal
-               (:decision judgement0-base)
+               (:decision judgement0-reading)
                (or (:interpretation-ask-classify-fn opts)
                    (interpretation-ask-classifier))))
             interpretation-ask-record
@@ -6266,7 +6328,7 @@
                       (retain-redecision-failure! e interpretation-ask-record))))
                 (catch Throwable e
                   (retain-redecision-failure! e interpretation-ask-record)))
-              judgement0-base)
+              judgement0-reading)
             ;; Q5: the one G selection is complete here. Its instant opens
             ;; the event clock the selected-only reading phase shares.
             selection-clock (monotonic-clock)

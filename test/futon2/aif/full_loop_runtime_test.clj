@@ -5,6 +5,7 @@
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.report.war-machine :as wm]))
 
 (deftest flight-runner-does-not-load-the-report
@@ -64,6 +65,25 @@
     (is (= {:tasks ["population-1"]} (first @calls)))
     (is (= 2 @invocations))
     (is (fn? (:judge-fn defaults)))))
+
+(deftest selected-target-reading-contacts-only-the-designated-author
+  (let [captured (atom nil)]
+    (with-redefs [runner/agent-roster
+                  (constantly {"random-idle-seat"
+                               {:status :idle :invoke-ready? true}})
+                  selected-target-reading/repair!
+                  (fn [opts _]
+                    (reset! captured ((:answer-fn opts) {:target "M-selected"}))
+                    @captured)]
+      (let [defaults (runtime/production-defaults
+                      {:run-id "designated-author" :author "wm-author"
+                       :reviewer "wm-reviewer"
+                       :repair-reviewer "wm-repair-reviewer"})]
+        ((:selected-target-reading-fn defaults) {} {})))
+    (is (= {:state :not-contacted
+            :reason :designated-author-unavailable
+            :author "wm-author"}
+           @captured))))
 
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]

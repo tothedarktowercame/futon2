@@ -3,12 +3,14 @@
   (:require [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
+            [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
@@ -20,6 +22,27 @@
   "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
 (def default-pattern-graph-diff-dir
   "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
+
+(defn- designated-author-answer-fn
+  "Agency answer port for selected-target readings.  It contacts exactly the
+  configured author and returns a typed no-contact when that seat is not
+  currently invoke-ready; it never consults a fallback roster seat."
+  [opts]
+  (let [author (:author opts)
+        answer (flight-runner/agency-answer-fn
+                {:seat author :caller "wm-full-loop" :opts opts
+                 :prompt-fn selected-target-reading/prompt})]
+    (fn [issued]
+      (let [roster (try (runner/agent-roster (:agency-base opts))
+                        (catch Throwable _ {}))
+            record (or (get roster author) (get roster (keyword (str author))))
+            status (some-> (:status record) name)]
+        (if (and (string? author)
+                 (true? (:invoke-ready? record))
+                 (contains? #{"idle" "restored"} status))
+          (answer issued)
+          {:state :not-contacted :reason :designated-author-unavailable
+           :author author})))))
 
 (defn- selection-judge
   [opts days]
@@ -62,7 +85,9 @@
         opts (-> opts
                  (update :outer-task-policy #(or % :meta))
                  (assoc :outer-task-selection-fn pinned-outer-selector))
-        selected-judgment (atom nil)]
+        selected-judgment (atom nil)
+        target-reading-answer (or (:selected-target-reading-answer-fn opts)
+                                  (designated-author-answer-fn opts))]
     {:judge-fn (fn [days]
                  (try
                    (let [generated (selection-judge opts days)]
@@ -86,6 +111,11 @@
                      (cv/maybe-refresh!)
                      {:freshness mission-freshness}))
      :interpretation-ask-fn (click-ask/click-ask-fn opts)
+     :selected-target-reading-fn
+     (fn [runner-opts judgement]
+       (selected-target-reading/repair!
+        (assoc (merge opts runner-opts) :answer-fn target-reading-answer)
+        judgement))
      :scan-render-fn wm/render-war-machine
      :effective-run-configuration-fn wm/effective-run-configuration
      :mode-flags-fn wm/arena-mode-flags}))
