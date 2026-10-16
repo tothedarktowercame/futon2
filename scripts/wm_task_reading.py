@@ -128,7 +128,14 @@ def build_mission_request(path, target=None):
     if not source:
         raise ValueError("mission reading source is empty")
     if source_kind == "head-section" and head_is_template_only(source):
-        raise ValueError("head-is-template-only")
+        opening = text[:start].rstrip()
+        opening_lines = [line.strip() for line in opening.splitlines()
+                         if line.strip()
+                         and not line.lstrip().startswith("#")
+                         and not re.match(r"^\*\*[^*]+:\*\*", line.strip())]
+        if not opening_lines:
+            raise ValueError("head-is-template-only")
+        start, source, source_kind = 0, opening, "opening-before-template-head"
     request = request_base(path, source, start, target)
     request["task"]["source_kind"] = source_kind
     return request

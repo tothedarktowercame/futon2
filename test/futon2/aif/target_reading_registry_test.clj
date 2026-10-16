@@ -116,6 +116,21 @@
       (is (not (.exists out))))
     (is (= :target-head-template-only (:kind (sut/excerpt-digest file))))))
 
+(deftest actionable-opening-precedes-template-head
+  (let [dir (temp-root) file (io/file dir "opening-before-template.md")
+        out (io/file dir "request.json")
+        text (str "# Mission\n\n**Status:** OPEN\n\n"
+                  "## Acceptance checklist\n\n- [ ] Ship the live graph.\n\n"
+                  template-head "\n\n## IDENTIFY\nLater.\n")]
+    (spit file text)
+    (let [run (shell/sh "python3" "scripts/wm_task_reading.py" (.getPath file)
+                        "--mission-head" "--out" (.getPath out))
+          request (json/parse-string (slurp out) true)]
+      (is (zero? (:exit run)) (:err run))
+      (is (= "opening-before-template-head" (get-in request [:task :source_kind])))
+      (is (= (get-in request [:task :excerpt_sha256])
+             (sut/excerpt-digest file))))))
+
 (deftest template-line-with-real-head-content-remains-readable
   (let [dir (temp-root) file (io/file dir "substantive.md") out (io/file dir "request.json")
         text (str "# Mission\n\n" template-head "\nJoe wants the actual system repaired.\n")]

@@ -65,7 +65,16 @@
         end (or (some (fn [h] (when (and (> (:start h) start)
                                          (<= (:level h) 2)) (:start h))) headings)
                 (count text))]
-    (str/replace (subs text start end) #"(?s)\s+$" "")))
+    (let [source (str/replace (subs text start end) #"(?s)\s+$" "")
+          opening (str/replace (subs text 0 start) #"(?s)\s+$" "")
+          opening-content
+          (remove #(or (str/blank? %)
+                       (str/starts-with? (str/trim %) "#")
+                       (re-find #"^\*\*[^*]+:\*\*" (str/trim %)))
+                  (str/split-lines opening))]
+      (if (and head (source-text-template-only? source) (seq opening-content))
+        opening
+        source))))
 
 (defn excerpt-digest
   "SHA-256 of the UTF-8 bytes of the mission text handed to 象, or a typed
