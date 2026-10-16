@@ -70,18 +70,6 @@
        "\n"
        (json/generate-string request {:pretty true})))
 
-(defn- answer-analysis [answer]
-  (cond
-    (map? (:analysis answer)) (:analysis answer)
-    (map? answer) (when (and (contains? answer :sentences)
-                             (contains? answer :labeller)) answer)
-    :else nil))
-
-(defn- answer-text [answer]
-  (when (and (= "done" (:state answer)) (string? (:text answer)))
-    (try (json/parse-string (:text answer) true)
-         (catch Exception _ nil))))
-
 (defn- request-file [root run-id target excerpt]
   (io/file root (digest (.getBytes (str run-id "\u0000" target "\u0000" excerpt)
                                     "UTF-8"))
@@ -163,7 +151,7 @@
                                 (catch Throwable e
                                   {:state :failed :reason :answer-threw
                                    :message (ex-message e)}))
-                    analysis (or (answer-analysis answer) (answer-text answer))]
+                    analysis (handoff/response-map answer)]
                 (if-not analysis
                   (refused need
                            (if (= :designated-author-unavailable (:reason answer))

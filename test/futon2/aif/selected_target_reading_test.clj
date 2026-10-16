@@ -1,8 +1,10 @@
 (ns futon2.aif.selected-target-reading-test
-  (:require [clojure.java.io :as io]
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.selected-target-reading :as sut]
             [futon2.aif.target-reading-registry :as registry])
   (:import [java.nio.file Files]
@@ -148,6 +150,13 @@
     (is (.contains text
                    ":relation_vocabulary"))
     (is (.contains text "\"dependency\""))))
+
+(deftest durable-agency-result-is-the-validated-answer
+  (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []
+                 :sentences []}
+        answer {:state "done" :job-id "job-1"
+                :result (json/generate-string payload)}]
+    (is (= payload (handoff/response-map answer)))))
 
 (deftest runner-resumes-inner-construction-once-for-the-same-outer-choice
   (let [target "M-selected"

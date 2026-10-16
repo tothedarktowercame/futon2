@@ -2001,7 +2001,8 @@
             contact? (and ask (nil? refused-issue))
             requested-at (when contact? (clock))
             response (when contact?
-                       (try (ask request)
+                       (try (let [answer (ask request)]
+                              (or (handoff/response-map answer) answer))
                             (catch Throwable e {::ask-threw (ex-message e)})))
             received-at (when contact? (clock))
             result (cond

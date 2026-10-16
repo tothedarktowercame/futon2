@@ -1,6 +1,7 @@
 (ns futon2.aif.handoff-contract
   "One representation of an external producer/consumer contract."
-  (:require [clojure.pprint :as pp]))
+  (:require [cheshire.core :as json]
+            [clojure.pprint :as pp]))
 
 (def schema :wm/handoff-contract-v1)
 
@@ -16,6 +17,24 @@
   (str "ACCEPTANCE CONTRACT (authoritative; follow exactly):\n```edn\n"
        (with-out-str (pp/pprint (contract value)))
        "```\n"))
+
+(defn response-map
+  "Normalize the Agency job envelope or a directly injected response to the
+  map a handoff validator consumes.  Agency's durable terminal payload is
+  `:result`; older adapters used `:text`.  Keeping that transport choice here
+  prevents each handoff from drifting onto a different envelope field."
+  [answer]
+  (cond
+    (map? (:analysis answer)) (:analysis answer)
+    (and (map? answer) (nil? (:state answer))) answer
+    (= "done" (:state answer))
+    (some (fn [value]
+            (when (string? value)
+              (try (let [parsed (json/parse-string value true)]
+                     (when (map? parsed) parsed))
+                   (catch Exception _ nil))))
+          [(:result answer) (:text answer)])
+    :else nil))
 
 (defn outcome [contract-value request-id state detail]
   (when-not (contains? #{:not-contacted :contacted :answered :refused
