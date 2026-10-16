@@ -205,3 +205,12 @@ Joe directed: "OK let's run one more click then". This authorizes exactly one
 further ordinary click for the live author-contact verification. The debugger
 will remain attached. Under this document's standing mechanism, `allocated`
 rises from 69 to **70**. No prior charge is reclaimed.
+
+## Joe's handoff-repair verification grant, 2026-10-16 — one click
+
+After the producer/consumer handoffs and their legacy tests were repaired,
+Joe directed codex-68: "OK please do another click with the debugger on to
+catch any errors so that you can make repairs live". This authorizes exactly
+one further ordinary click with the debugger attached before issue. Under this
+document's standing mechanism, `allocated` rises from 70 to **71**. The failed
+preflight immediately before this entry issued no click and consumed nothing.
