@@ -199,3 +199,19 @@
     (is (= refusal (:selected-target-reading record)))
     (is (= :selected-target-reading-validation-refused
            (get-in record [:selected-target-reading :kind])))))
+
+(deftest retained-reading-refusal-is-not-reported-as-not-required
+  (let [refusal {:schema :wm/selected-target-reading-request-v1
+                 :status :refused :published false
+                 :kind :selected-target-reading-validation-refused
+                 :target "M-selected"
+                 :detail {:stderr "display cues exceed the sentence budget"}}
+        cell (cond-> {:sorry {:decision {:status :abstained}}}
+               refusal
+               (assoc-in [:judgment :selected-target-reading-request] refusal))]
+    (is (= refusal
+           (#'runner/retained-selected-target-reading
+            {:checkpoints {:selection cell}})))
+    (is (not= :selected-target-reading-not-required
+              (:reason (#'runner/retained-selected-target-reading
+                        {:checkpoints {:selection cell}}))))))

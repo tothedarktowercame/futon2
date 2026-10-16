@@ -6235,7 +6235,8 @@
             ;; request to the designated author, validate and publish it, then
             ;; re-run only the inner construction against the retained outer
             ;; receipt installed by full-loop-runtime.
-            {judgement0-reading :judgement}
+            {judgement0-reading :judgement
+             selected-target-reading-record :record}
             (selected-target-reading-step
              opts judgement0-base
              (when (nil? (:flight opts)) target-reading-fn)
@@ -6494,6 +6495,16 @@
                                interpretation-ask-record
                                (assoc-in [:judgment :interpretation-ask]
                                          interpretation-ask-record)
+                               ;; The selected-target phase runs after the
+                               ;; initial selection checkpoint.  Keep its
+                               ;; validated publication or typed refusal on
+                               ;; the checkpoint that persist-run-record!
+                               ;; actually serializes; retaining it only in
+                               ;; the transient judgement made a real author
+                               ;; contact look like "not required".
+                               selected-target-reading-record
+                               (assoc-in [:judgment :selected-target-reading-request]
+                                         selected-target-reading-record)
                                true
                                (assoc-in [:judgment :world-at-selection]
                                          world-at-selection)
