@@ -16,7 +16,8 @@
             [futon2.aif.q2-construction :as q2]
             [futon2.aif.q4-preference :as q4]
             [futon2.aif.q8-frontier :as q8]
-            [futon2.aif.q9-factorization :as q9]))
+            [futon2.aif.q9-factorization :as q9]
+            [futon2.aif.q10-arrangement-census :as q10]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -421,6 +422,29 @@
       :else
       (nr-all "authorized factorized preference absent: no sealed Q9 carrier on this route"))))
 
+;; Requirements Q10's fields, in the order Lean reads them
+(def ^:private q10-fields ["differentArrangementPairs" "arrangementPairsDistinguishedByG"])
+
+(defn q10-facts
+  "Requirements Q10 for a record. On the reading-family route, from the
+  run's own :q10 census only, and only when it is intact and equal to the
+  census recomputed from this record (q10-arrangement-census/verify-record):
+  the number of compared same-pattern pairs in different arrangements, and
+  of those each with its own numeric G. On any other route Q10 is not
+  recomputable."
+  [record]
+  (let [nr-all #(zipmap q10-fields (repeat (not-recomputable %)))]
+    (if (= :wm/reading-policy-family-v1
+           (get-in record [:decision :selection-certificate :selection-route]))
+      (let [v (q10/verify-record record)]
+        (if (= :verified (:status v))
+          (let [{:keys [different-arrangement-pairs distinguished-by-g]}
+                (get-in v [:carrier :counts])]
+            {"differentArrangementPairs" different-arrangement-pairs
+             "arrangementPairsDistinguishedByG" distinguished-by-g})
+          (nr-all (str "Q10 carrier " (name (:reason v))))))
+      (nr-all "same-pattern arrangement census: no sealed Q10 carrier on this route"))))
+
 (defn interpretation-order
   "Q5 from the recorded selection-world instants. Instants are compared as
   instants, not as strings (an ISO string drops trailing zeros, so a later
@@ -589,6 +613,7 @@
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
         q9 (q9-facts record)
+        q10 (q10-facts record)
         q8 (q8-facts record)
         q4 (q4-facts record)
         q2 (q2-facts record)
@@ -671,16 +696,15 @@
                "frontierCensus" (q8 "frontierCensus")
                "frontierRefresh" (q8 "frontierRefresh")
                "frontierSelection" (q8 "frontierSelection")
-               "selectedCascade" (q8 "selectedCascade")
-               "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
-               "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
+               "selectedCascade" (q8 "selectedCascade")}
         ;; a reading-family record's Q4 comes from its carrier alone
-        facts (merge facts q4 q2 q9)
+        facts (merge facts q4 q2 q9 q10)
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
                                  (contains? q2 field) (str record-path " [:q2]")
                                  (contains? q9 field) (str record-path " [:q9]")
+                                 (contains? q10 field) (str record-path " [:q10]")
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"

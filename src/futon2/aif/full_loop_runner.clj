@@ -74,6 +74,7 @@
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q8-frontier :as q8-frontier]
             [futon2.aif.q9-factorization :as q9-factorization]
+            [futon2.aif.q10-arrangement-census :as q10-arrangement-census]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.run-participants :as participants]
@@ -1182,6 +1183,11 @@
                      true
                      (as-> r (assoc r :q9 (q9-factorization/certificate
                                            (q9-factorization/record-inputs r))))
+                     ;; Requirements Q10: the census of same-pattern
+                     ;; arrangement controls over Q2's construction, from
+                     ;; this record (q10-arrangement-census/verify-record)
+                     true
+                     (as-> r (assoc r :q10 (q10-arrangement-census/certificate r)))
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]
