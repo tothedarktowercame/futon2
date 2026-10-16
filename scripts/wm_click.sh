@@ -34,7 +34,7 @@ F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
 BASE="http://localhost:7070"
 # codex-22 was the charter's reviewer and is no longer on the roster, so the
 # default casting failed preflight on every invocation (claude-4, 2026-09-19).
-AUTHOR="codex-23"; REVIEWER="codex-2"; REPAIR="codex-24"
+AUTHOR="wm-author"; REVIEWER="wm-reviewer"; REPAIR="wm-repair-reviewer"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
 RUN=0; PROBE=0
 
@@ -64,6 +64,23 @@ echo "wm_click preflight"
 # 1. Agency reachable. The one condition that stops everything.
 code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
 [ "$code" = "200" ] && say "agency" "up" || { cannot "agency" "HTTP $code -- Agency unreachable, nothing else can be checked"; echo; exit 1; }
+
+# The durable ration is knowable before a worker or readiness wake exists.
+# Treat absence/exhaustion as a terminal launch account, not as a live run.
+budget=$(curl -s -m 10 "$BASE/api/alpha/wm/click" | python3 -c '
+import json,sys
+d=json.load(sys.stdin).get("ordinary-click-budget") or {}
+print(d.get("available", "unknown"))
+' 2>/dev/null)
+if [ "$budget" = "unknown" ]; then
+  cannot "click budget" "serving process did not expose a durable availability receipt"
+  echo; echo "cannot launch (exit 3)"; exit 3
+elif [ "$budget" -le 0 ] 2>/dev/null; then
+  cannot "click budget" "ordinary-click allocation exhausted before cast wake"
+  echo; echo "cannot launch (exit 3)"; exit 3
+else
+  say "click budget" "$budget available"
+fi
 
 # 2. Casting: three distinct seats, all on the roster AND idle.
 # Misconfiguration (non-distinct seats) cannot be waited out: terminal now.

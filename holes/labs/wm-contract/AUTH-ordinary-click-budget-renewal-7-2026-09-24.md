@@ -163,3 +163,19 @@ would like to evaluate the results." This authorizes exactly one further
 ordinary click and its post-hoc evaluation, including the R20 certificate.
 Per this document's standing rule, `allocated` rises from 46 to **47**.
 Issue-time accounting and the existing refund rules are unchanged.
+
+## Joe's live Q7--Q10 grant to codex-68, 2026-10-16 — five clicks, allocated
+
+Joe, heard directly by codex-68 in the operator buffer after the repaired
+Q7→Q5→Q6→Q8→Q4→Q2→Q9→Q10 stack was promoted, authorized renewal and directed
+that it be exercised live, with real data and repairs between runs. This draws
+five further ordinary clicks under this document's standing mechanism:
+`allocated` rises from 62 to **67** in
+`futon3c.wm.ordinary-click-budget`.
+
+Joe also ruled that late `:agent-unavailable` and exhausted-renewal runs are
+not acceptable preparation. The live sequence therefore uses the dedicated
+`wm-author`, `wm-reviewer`, and `wm-repair-reviewer` identities, each with a
+separate fresh role session, and checks the durable budget receipt and the
+same invoke-readiness predicate used by the runner before firing. Failed runs
+remain charged; no historical charge is reclaimed.
