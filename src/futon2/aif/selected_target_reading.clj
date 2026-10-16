@@ -62,7 +62,10 @@
   machine, not the seat, validates and publishes it."
   [{:keys [request acceptance-contract]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
-       "Use exact Unicode-codepoint offsets. Every display cue must be wholly "
+       "Use exact Unicode-codepoint offsets. Every fragment must be wholly inside "
+       "its source sentence's start/end span, and fragment text must exactly equal "
+       "source_text[start:end]; never add or omit punctuation or whitespace. "
+       "Every display cue must be wholly "
        "inside its enclosing fragment's start/end span, and its text must exactly "
        "equal the source text at those offsets. Use only actual patterns under "
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "

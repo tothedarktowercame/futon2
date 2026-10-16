@@ -163,6 +163,22 @@
     (is (.contains text
                    "text must exactly equal the source text at those offsets"))))
 
+(deftest author-prompt-states-the-fragment-source-slice-contract
+  (let [text (sut/prompt
+              {:request {:source_text "A sentence."
+                         :sentences [{:id "s1" :start 0 :end 11
+                                      :text "A sentence."}]}
+               :acceptance-contract
+               {:id :wm/selected-target-reading-analysis :version 1
+                :response {:relation_vocabulary ["context"]}
+                :validator {:id :wm/session-turn-analysis :version 2}}})]
+    (is (.contains text
+                   "Every fragment must be wholly inside its source sentence's start/end span"))
+    (is (.contains text
+                   "fragment text must exactly equal source_text[start:end]"))
+    (is (.contains text
+                   "never add or omit punctuation or whitespace"))))
+
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []
                  :sentences []}
