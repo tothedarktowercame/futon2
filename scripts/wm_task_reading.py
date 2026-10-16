@@ -122,7 +122,7 @@ def build_mission_request(path, target=None):
     else:
         start = 0
         end = next((h.start() for h in HEADING.finditer(text)
-                    if len(h.group(1)) == 2), len(text))
+                    if h.start() > start and len(h.group(1)) <= 2), len(text))
         source_kind = "opening-before-first-section"
     source = text[start:end].rstrip()
     if not source:

@@ -92,6 +92,9 @@
   (let [dir (temp-root)
         cases {"head.md" "# M\nBefore.\n\n## HEAD\nJoe says this.\n"
                "opening.md" "# M\nJoe opens this mission.\n\n## MAP\nLater.\n"
+               "metadata-before-title.md" (str "**Status:** OPEN\n"
+                                                "**Home-repo:** futon0\n\n"
+                                                "# M-title\n\n## IDENTIFY\nLater.\n")
                "head-sections.md" "# M\n\n## HEAD\nFirst.\nSecond.\n\n## MAP\nChanged elsewhere.\n"}]
     (doseq [[name text] cases]
       (let [file (io/file dir name) out (io/file dir (str name ".request.json"))
