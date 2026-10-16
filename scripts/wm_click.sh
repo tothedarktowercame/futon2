@@ -269,7 +269,7 @@ esac
 # 5. Seat quota (opt-in: costs one agent turn each).
 if [ "$PROBE" = "1" ]; then
   for a in "$AUTHOR" "$REVIEWER" "$REPAIR"; do
-    r=$(cd "$F3C" && timeout 200 python3 scripts/agency_send.py --from claude-4 --to "$a" \
+    r=$(cd "$F3C" && timeout 200 python3 scripts/agency_send.py --from "$ISSUING_CALLER" --to "$a" \
           --kind whistle --timeout-ms 170000 <<'EOF' 2>&1 | tail -1
 Quota probe only -- do not start any task, do not edit any file.
 Reply with exactly one line: your model id, and whether you currently have
