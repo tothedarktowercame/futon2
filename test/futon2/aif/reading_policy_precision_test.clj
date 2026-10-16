@@ -186,6 +186,20 @@
     (is (= :initialized (:status r)))
     (is (= 3.0 (:beta r)))))
 
+(deftest explicit-declaration-registry-is-identity-bound
+  (let [identity (rpp/identity-of base-config)
+        authority {:status :declared :version "operator-test-v1"}
+        declaration (rpp/declare-beta identity 2.0 authority)]
+    (is (= {:status :registered
+            :schema :wm/reading-precision-beta-declaration-v1
+            :identity identity
+            :sha256 (:sha256 declaration)}
+           (rpp/register-declaration! declaration)))
+    (is (= declaration (rpp/declaration-for identity)))
+    (is (nil? (rpp/declaration-for (apply str (repeat 64 "f")))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (rpp/register-declaration! (assoc declaration :beta 7.0))))))
+
 (deftest refuse-when-identity-changed
   (let [changed (assoc base-config :graph-digest "sha256:graph-new")
         r (rpp/carry-beta {:previous (previous-receipt base-config 4.0)

@@ -1110,6 +1110,7 @@
                            scored)
           uncertified (remove #(= :certified (:status %)) preference)
           {:keys [config refusal]} (precision-config field families ranked scored)
+          identity (when config (precision/identity-of config))
           carry (when config
                   (try (precision/carry-beta {:previous (previous-precision opts)
                                               :initialized-beta declared
@@ -1117,7 +1118,9 @@
                                               ;; an explicit identity-bound beta
                                               ;; declaration, the only re-arm
                                               ;; after a refusal (ruling (b))
-                                              :declaration (:reading-precision-declaration opts)})
+                                              :declaration
+                                              (or (:reading-precision-declaration opts)
+                                                  (precision/declaration-for identity))})
                        (catch clojure.lang.ExceptionInfo e
                          {:status :refused :reason (:kind (ex-data e))})))]
       (cond
@@ -1131,7 +1134,7 @@
         :else
         {:status :certified :beta (:beta carry)
          :receipt {:reading-precision-carry carry
-                   :reading-precision-identity (precision/identity-of config)
+                   :reading-precision-identity identity
                    :preference-receipts preference}}))))
 
 (defn- declared-beta

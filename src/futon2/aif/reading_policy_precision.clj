@@ -24,6 +24,13 @@
 (def carry-schema :wm/reading-precision-carry-v1)
 (def declaration-schema :wm/reading-precision-beta-declaration-v1)
 
+;; Explicit operator declarations may arrive after a production run has
+;; stopped in the debugger.  Keep them by the identity they seal so a retry of
+;; that same phase can consume the declaration without rebuilding the runner's
+;; closed-over option map.  This is not a beta fallback: lookup is exact by
+;; reading-precision identity and registration accepts only intact declarations.
+(defonce ^:private !declarations (atom {}))
+
 (defn- require! [p kind]
   (when-not p (throw (ex-info (name kind) {:kind kind :status :invalid}))))
 
@@ -202,6 +209,27 @@
             :invalid-declaration-identity)
   (seal {:schema declaration-schema :identity identity
          :beta beta :authority (select-keys authority [:status :version])}))
+
+(defn register-declaration!
+  "Register one already sealed, identity-bound beta declaration for live
+  debugger retry. Returns a small receipt; never accepts or invents a beta."
+  [declaration]
+  (require! (= declaration-schema (:schema declaration))
+            :declaration-schema-mismatch)
+  (require! (intact? declaration) :declaration-tampered)
+  (let [identity (:identity declaration)]
+    (require! (and (string? identity) (re-matches #"[0-9a-f]{64}" identity))
+              :invalid-declaration-identity)
+    (swap! !declarations assoc identity declaration)
+    {:status :registered
+     :schema declaration-schema
+     :identity identity
+     :sha256 (:sha256 declaration)}))
+
+(defn declaration-for
+  "Return the explicitly registered declaration for IDENTITY, or nil."
+  [identity]
+  (get @!declarations identity))
 
 (defn- declaration-problem
   "Why DECLARATION does not re-arm beta for identity ID, or nil."
