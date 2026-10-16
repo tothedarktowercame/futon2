@@ -17,6 +17,7 @@
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q4-preference :as q4-preference]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -1282,7 +1283,12 @@
                              (assoc-in [:selection-certificate :retired-diagnostics]
                                        retired-diagnostics)
                              (assoc-in [:selection-certificate :certificate-schema]
-                                       :wm/proof2-certificate-v1))
+                                       :wm/proof2-certificate-v1)
+                             ;; Requirements Q4: horizon, steps, grading and
+                             ;; G terms of the compared policies, from their
+                             ;; certified preference receipts
+                             (as-> d (assoc-in d [:selection-certificate :q4]
+                                               (q4-preference/carrier d))))
                 authorized (controller-authority/authorize decision (:ranked result))]
             {:decision (decision-gate/emit! authorized)
              :ranked (:ranked result)}))))))

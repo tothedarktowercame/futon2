@@ -13,6 +13,7 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.q4-preference :as q4]
             [futon2.aif.q8-frontier :as q8]))
 
 (def run-fact-fields
@@ -34,6 +35,35 @@
 (defn not-recomputable [s] {"not-recomputable" s})
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
+
+(defn q4-facts
+  "Requirements Q4 for a reading-family record, from the persisted
+  decision's Q4 carrier only (q4-preference/verify-record): the compared
+  policies, their horizon, steps, grading and terms. nil for a record of
+  another route, which keeps the historical reader."
+  [record]
+  (when (= :wm/reading-policy-family-v1
+           (get-in record [:decision :selection-certificate :selection-route]))
+    (let [v (q4/verify-record record)]
+      (if-not (= :verified (:status v))
+        (let [why (not-recomputable (str "Q4 carrier " (name (:reason v))))]
+          (zipmap ["comparedPolicies" "horizonLength" "preferenceSteps"
+                   "gradedPreferenceSteps" "preferenceSemantics" "gTerms"
+                   "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
+                   "policiesWithInformationTerm"]
+                  (repeat why)))
+        (let [c (:carrier v)]
+          {"comparedPolicies" (vec (sort (map pr-str (:compared c))))
+           "horizonLength" (:horizon c)
+           "preferenceSteps" (:preference-steps c)
+           "gradedPreferenceSteps" (:graded-steps c)
+           "preferenceSemantics" (name (:semantics c))
+           "gTerms" {"risk" (get-in c [:g-terms :risk])
+                     "ambiguity" (get-in c [:g-terms :ambiguity])
+                     "informationGain" (get-in c [:g-terms :information-gain])}
+           "policiesWithRiskTerm" (get-in c [:counts :risk])
+           "policiesWithAmbiguityTerm" (get-in c [:counts :ambiguity])
+           "policiesWithInformationTerm" (get-in c [:counts :information-gain])})))))
 
 (defn- lean-entry [e]
   (into {} (map (fn [[k v]] [(name k) (if (keyword? v) (str v) v)])) e))
@@ -515,6 +545,7 @@
         nr (fn [s] (not-recomputable s))
         factorized (factorized-preference-facts record)
         q8 (q8-facts record)
+        q4 (q4-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -604,6 +635,8 @@
                "selectedCascade" (q8 "selectedCascade")
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
+        ;; a reading-family record's Q4 comes from its carrier alone
+        facts (merge facts q4)
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond

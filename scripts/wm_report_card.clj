@@ -90,7 +90,9 @@
           (and (true? (g "risk")) (true? (g "ambiguity"))
                (true? (g "informationGain")) (pos? n)
                (= expected (set (f "preferenceSteps")))
-               (= expected (set (f "gradedPreferenceSteps")))
+               ;; as in Lean: grading is required only of progressive C
+               (or (not= "progressive" (f "preferenceSemantics"))
+                   (= expected (set (f "gradedPreferenceSteps"))))
                (= pc (f "policiesWithRiskTerm")
                      (f "policiesWithAmbiguityTerm")
                      (f "policiesWithInformationTerm"))))
