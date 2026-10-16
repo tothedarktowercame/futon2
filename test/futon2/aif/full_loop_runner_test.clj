@@ -6503,11 +6503,11 @@
     (is (str/includes? author "REQUIRED FOR THIS MEASURED ATTEMPT"))
     (is (str/includes? author "DECLARED MEASURED-ACQUISITION ATTEMPT"))
     (is (str/includes? reviewer "REQUIRED FOR THIS MEASURED ATTEMPT"))
-    (is (= (str "Deposit the standing decision for \"target\" in "
-                "/tmp/attempt/evidence. Decision content is yours; this request "
-                "neither repeats implementation nor suggests a decision.")
-           (#'runner/standing-completion-prompt
-            "target" "/tmp/attempt/evidence")))))
+    (let [completion (#'runner/standing-completion-prompt
+                      "target" "/tmp/attempt/evidence" "reviewer-1" "author-1")]
+      (is (str/includes? completion ":wm/handoff-contract-v1"))
+      (is (str/includes? completion ":explanation-min-characters 80"))
+      (is (str/includes? completion ":decision-values [:still-live :resolved]")))))
 
 (deftest effective-configuration-survives-success-and-containment
   ;; The close's mechanical reviewer falsifiers require the ordinary selected
@@ -7172,27 +7172,20 @@
     (is (= :reviewer-wait (get-in result [:data :failure-stage])))
     (is (= :complete (:status (loop-node-exercise/receipt d))))))
 
-(deftest reviewer-standing-template-passes-the-close-validator
+(deftest reviewer-standing-contract-is-the-close-validator-contract
   ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
   ;; prompt listed keys but not the shape the close validates. Pin the prompt
   ;; to the validator: fill the template's placeholders and validate it.
   (let [target "M-aif-policy-conditioned-eig"
         text (#'runner/evidence-deposit-instruction
               :reviewer "/tmp/evidence" "wm-author" "wm-reviewer" false target)
-        template (subs text (str/index-of text "{:schema :wm/target-standing-decision-v1")
-                       (inc (str/index-of text "}" (str/index-of text ":explanation"))))
-        filled (-> template
-                   (str/replace #";[^\n]*" "")
-                   (str/replace "\"<ISO-8601 instant, e.g. 2026-09-21T23:43:25Z>\""
-                                "\"2026-09-21T23:43:25Z\"")
-                   (str/replace "[\"<commit sha>\" \"<other evidence id>\"]"
-                                "[\"aeb352f87368fb3280b3fb92ddd8e7f7c5fccc08\"]")
-                   (str/replace "\"<review-grade prose, at least 80 characters>\""
-                                (pr-str (apply str (repeat 90 "x")))))
-        record (edn/read-string filled)]
-    (is (= target (:entity/id record)))
-    (is (= record (limb-evidence/validate-standing-decision record)))
-    (is (not (str/includes? filled "<")))))
+        contract (limb-evidence/standing-decision-contract
+                  target "wm-reviewer" "wm-author")]
+    (is (str/includes? text (pr-str (:validator contract))))
+    (doseq [required (:required (:response contract))]
+      (is (str/includes? text (str required))))
+    (is (= 80 (get-in contract [:response :constraints
+                                :explanation-min-characters])))))
 
 (deftest dispatch-carries-current-run-harness
   (doseq [id ["run-one" nil " "]]

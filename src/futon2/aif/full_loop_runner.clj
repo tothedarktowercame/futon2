@@ -53,6 +53,7 @@
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.g-term-decomposition :as decomposition]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.job-text-retention :as job-texts]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
@@ -943,6 +944,14 @@
       {:status :not-applicable
        :reason :selection-complete-no-ask-required}))
 
+(defn- retained-selected-target-reading [result]
+  (or (get-in result [:checkpoints :selection :judgment
+                      :selected-target-reading-request])
+      (get-in result [:checkpoints :selection :sorry
+                      :selected-target-reading-request])
+      {:status :not-applicable
+       :reason :selected-target-reading-not-required}))
+
 (defn persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -1115,6 +1124,7 @@
                     ;; it is inapplicable.  Keep that distinct from the typed
                     ;; absence/refusal produced when an ask was required.
                     :interpretation-ask (retained-interpretation-ask result)
+                    :selected-target-reading (retained-selected-target-reading result)
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
@@ -1982,7 +1992,9 @@
       (let [library-root (or (:pattern-library-root opts)
                              selected-reading/default-library-root)
             request (selected-reading/request decision {:library-root library-root})
-            ask (:selected-reading-ask-fn opts)
+            ask (or (:selected-reading-ask-fn opts)
+                    (when-let [builder (:selected-reading-ask-builder opts)]
+                      (builder opts)))
             refused-issue (when (= :refused (:status request)) request)
             ;; contact happens only for an issued request with an ask to send
             ;; it to; otherwise there is no interpretation request at all
@@ -2987,16 +2999,10 @@
            ;; :approve, nested :explanation under a map-valued :evidence and
            ;; used its own :entity/id, and the close refused a grounded change
            ;; as :explanation-invalid. Give the exact shape.
-           (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision, exactly this shape (one flat map, these eight keys, no others):\n"
-                "{:schema :wm/target-standing-decision-v1\n"
-                " :entity/id " (if target (pr-str target) "\"<the selected target, exactly>\"") "\n"
-                " :decision :resolved   ; or :still-live -- :resolved = this target's stated work is now done; :still-live = it remains open. Not your review verdict.\n"
-                " :decided-by " (pr-str reviewer) "\n"
-                " :implementation-author " (pr-str author) "\n"
-                " :decided-at \"<ISO-8601 instant, e.g. 2026-09-21T23:43:25Z>\"\n"
-                " :evidence [\"<commit sha>\" \"<other evidence id>\"]   ; a non-empty VECTOR of strings\n"
-                " :explanation \"<review-grade prose, at least 80 characters>\"}   ; top level, not inside :evidence\n"
-                ":entity/id must be the target exactly; :decided-by must differ from :implementation-author (a self-decided record refuses).\n"))
+           (str "REVIEWER " reviewer " (not author " author
+                ") deposits the same-target standing decision.\n"
+                (handoff/prompt-block
+                 (limb-evidence/standing-decision-contract target reviewer author))))
          "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"
          "EVERY non-EDN file must be referenced by exactly one record's :file/:stdout-file/:stderr-file field; an unreferenced byproduct (cohort-55 attempt-003: a stray derived.stderr) is parsed as EDN, fails, and refuses the whole close.\n"))))
 
@@ -4395,10 +4401,12 @@
                      :filename filename})))
   record)
 
-(defn- standing-completion-prompt [target evidence-dir]
+(defn- standing-completion-prompt [target evidence-dir reviewer author]
   (str "Deposit the standing decision for " (pr-str target) " in "
        evidence-dir ". Decision content is yours; this request neither repeats "
-       "implementation nor suggests a decision."))
+       "implementation nor suggests a decision.\n"
+       (handoff/prompt-block
+        (limb-evidence/standing-decision-contract target reviewer author))))
 
 (defn- ensure-standing-decision!
   [evidence-dir target reviewer author discharge-contract resolution-read-fn
@@ -4406,7 +4414,7 @@
   (when-not (valid-standing-decision? evidence-dir target reviewer author
                                       discharge-contract resolution-read-fn)
     (let [response (dispatch-completion!
-                    (standing-completion-prompt target evidence-dir))]
+                    (standing-completion-prompt target evidence-dir reviewer author))]
       (try (wait-completion! response) (catch Throwable _ nil)))
     (when-not (valid-standing-decision? evidence-dir target reviewer author
                                         discharge-contract resolution-read-fn)

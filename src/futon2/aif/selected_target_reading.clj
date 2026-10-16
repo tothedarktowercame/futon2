@@ -4,6 +4,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as registry]))
 
@@ -59,16 +60,14 @@
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
   machine, not the seat, validates and publishes it."
-  [{:keys [request]}]
+  [{:keys [request acceptance-contract]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
        "Use exact Unicode-codepoint offsets and only actual patterns under "
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
-       "Every fragment's relations must use one or more of exactly these documented "
-       "structural roles: context, condition, contrast, action, rationale, goal, dependency. "
-       "Do not substitute ordinary-language labels such as evidence, sequence, elaboration, "
-       "or authority. "
        "Reply with exactly one JSON object in the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
+       (handoff/prompt-block acceptance-contract)
+       "\n"
        (json/generate-string request {:pretty true})))
 
 (defn- answer-analysis [answer]
@@ -127,6 +126,18 @@
           (refused need :selected-target-reading-request-refused
                    {:exit (:exit built) :stderr (:err built)})
           (let [request (json/parse-string (slurp request-file) true)
+                template-result (shell/sh "python3" analysis-validator "template"
+                                          (.getPath request-file))
+                acceptance-contract
+                (when (zero? (:exit template-result))
+                  (some-> (:out template-result)
+                          (json/parse-string true)
+                          :acceptance_contract
+                          (update :schema keyword)
+                          (update :id keyword)
+                          (update-in [:validator :id] keyword)
+                          (update-in [:response :required] #(mapv keyword %))
+                          handoff/contract))
                 pinned? (and (= (:target need) (get-in request [:task :target_id]))
                              (= (.getCanonicalPath (io/file (:source-path need)))
                                 (get-in request [:task :file_path]))
@@ -135,11 +146,19 @@
                              (= (file-digest (:source-path need))
                                 (get-in request [:task :content_sha256])))
                 request-sha (file-digest request-file)]
-            (if-not pinned?
+            (cond
+              (nil? acceptance-contract)
+              (refused need :selected-target-reading-contract-unavailable
+                       {:exit (:exit template-result) :stderr (:err template-result)})
+
+              (not pinned?)
               (refused need :selected-target-reading-pin-mismatch
                        {:request-file (.getPath request-file)})
+
+              :else
               (let [issued {:target (:target need) :kind :selected-target-reading
-                            :request-id request-sha :request request :author author}
+                            :request-id request-sha :request request :author author
+                            :acceptance-contract acceptance-contract}
                     answer (try (answer-fn issued)
                                 (catch Throwable e
                                   {:state :failed :reason :answer-threw

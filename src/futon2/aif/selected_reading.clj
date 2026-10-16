@@ -15,7 +15,9 @@
   scorer or selector runs. A published whole-excerpt reading is never
   rewritten: these receipts are a separate record."
   (:require [clojure.java.io :as io]
+            [cheshire.core :as json]
             [clojure.string :as str]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.reading-interpretation-debt :as debt])
   (:import [java.nio.file Files]))
@@ -28,6 +30,25 @@
 (def default-library-root "/home/joe/code/futon3/library")
 
 (def ^:private digest debt/seal)
+
+(defn acceptance-contract [request]
+  (handoff/contract
+   {:id :wm/selected-policy-reading
+    :version 1
+    :response {:required [:request-id :verdicts :by]
+               :request-id (:request-id request)
+               :verdicts {:exactly (:owed request)
+                          :verdict-values ["accepted" "rejected"]
+                          :reason :non-blank-string
+                          :source_sha256 :lowercase-sha256}
+               :by :answering-agent-id}
+    :validator {:id validator-id :version 1}}))
+
+(defn prompt [request]
+  (str "Judge only the owed occurrences in this already-selected policy. "
+       "Do not choose another policy. Reply with exactly one JSON object.\n\n"
+       (handoff/prompt-block (acceptance-contract request))
+       "\nREQUEST:\n" (json/generate-string request {:pretty true})))
 
 (defn- library-sha256 [library-root pattern]
   (let [f (io/file library-root (str pattern ".flexiarg"))]

@@ -11,6 +11,28 @@
 (def standing-decision-schema :wm/target-standing-decision-v1)
 (def revision-pair-schema :wm/entity-revision-pair-v1)
 
+(defn standing-decision-contract
+  "The prompt and validator share this value; changing the accepted record
+  shape therefore changes both sides of the handoff in one place."
+  ([] (standing-decision-contract nil nil nil))
+  ([target reviewer author]
+   {:schema :wm/handoff-contract-v1
+    :id :wm/target-standing-decision
+    :version 1
+    :response {:schema standing-decision-schema
+               :required [:schema :entity/id :decision :decided-by
+                          :implementation-author :decided-at :evidence
+                          :explanation]
+               :decision-values [:still-live :resolved]
+               :entity/id (or target :selected-target)
+               :decided-by (or reviewer :independent-reviewer)
+               :implementation-author (or author :implementation-author)
+               :constraints {:decider-differs-from-author true
+                             :decided-at :iso-8601-instant
+                             :evidence :non-empty-vector-of-strings
+                             :explanation-min-characters 80}}
+    :validator {:id :wm/limb-evidence-standing-decision :version 1}}))
+
 (defn- refuse! [code path & [data]]
   (throw (ex-info "Limb evidence refused"
                   (merge {:limb-evidence/refusal code :path path} data))))
@@ -106,18 +128,18 @@
   receipt)
 
 (defn validate-standing-decision [record]
+  (let [contract (standing-decision-contract)
+        response (:response contract)
+        required (set (:required response))]
   (when-not (map? record)
     (refuse! :shape-invalid [:standing-decision]))
   (when-not (contains? record :explanation)
     (refuse! :explanation-invalid [:standing-decision :explanation]))
-  (exact-map! record
-              #{:schema :entity/id :decision :decided-by
-                :implementation-author :decided-at :evidence :explanation}
-              [:standing-decision])
-  (when-not (= standing-decision-schema (:schema record))
+  (exact-map! record required [:standing-decision])
+  (when-not (= (:schema response) (:schema record))
     (refuse! :schema-mismatch [:standing-decision :schema]))
   (text! (:entity/id record) [:standing-decision :entity/id])
-  (when-not (contains? #{:still-live :resolved} (:decision record))
+  (when-not (contains? (set (:decision-values response)) (:decision record))
     (refuse! :standing-decision-invalid [:standing-decision :decision]))
   (text! (:decided-by record) [:standing-decision :decided-by])
   (text! (:implementation-author record)
@@ -127,14 +149,15 @@
              [:standing-decision :decided-by]))
   (instant! (:decided-at record) [:standing-decision :decided-at])
   (when-not (and (string? (:explanation record))
-                 (>= (count (:explanation record)) 80)
+                 (>= (count (:explanation record))
+                     (get-in response [:constraints :explanation-min-characters]))
                  (not (str/blank? (:explanation record))))
     (refuse! :explanation-invalid [:standing-decision :explanation]))
   (when-not (and (vector? (:evidence record)) (seq (:evidence record)))
     (refuse! :standing-evidence-invalid [:standing-decision :evidence]))
   (doseq [[i evidence-id] (map-indexed vector (:evidence record))]
     (text! evidence-id [:standing-decision :evidence i]))
-  record)
+  record))
 
 (defn- validate-capture [capture path]
   (cond

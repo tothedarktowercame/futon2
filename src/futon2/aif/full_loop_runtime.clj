@@ -11,6 +11,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
@@ -24,15 +25,15 @@
   "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
 
 (defn- designated-author-answer-fn
-  "Agency answer port for selected-target readings.  It contacts exactly the
+  "Agency answer port for machine requests.  It contacts exactly the
   configured author and returns a typed no-contact when that seat is not
   currently invoke-ready; it never consults a fallback roster seat."
-  [opts]
+  [opts prompt-fn]
   (let [author (:author opts)
         agency-base (or (:agency-base opts) runner/default-agency-base)
         answer (flight-runner/agency-answer-fn
                 {:seat author :caller "wm-full-loop" :opts opts
-                 :prompt-fn selected-target-reading/prompt})]
+                 :prompt-fn prompt-fn})]
     (fn [issued]
       (let [roster (try (runner/agent-roster agency-base)
                         (catch Throwable _ {}))
@@ -117,10 +118,19 @@
        ;; options, or dispatch! refuses before it can create the author job.
        (let [live-opts (merge opts runner-opts)
              answer-fn (or (:selected-target-reading-answer-fn live-opts)
-                           (designated-author-answer-fn live-opts))]
+                           (designated-author-answer-fn
+                            live-opts selected-target-reading/prompt))]
          (selected-target-reading/repair!
           (assoc live-opts :answer-fn answer-fn)
           judgement)))
+     ;; Unlike the target-reading phase, this phase receives only REQUEST.
+     ;; Delay construction of its contact port until the runner has added its
+     ;; run-local ledgers, and make that late binding explicit.
+     :selected-reading-ask-builder
+     (fn [runner-opts]
+       (let [live-opts (merge opts runner-opts)]
+         (or (:selected-reading-answer-fn live-opts)
+             (designated-author-answer-fn live-opts selected-reading/prompt))))
      :scan-render-fn wm/render-war-machine
      :effective-run-configuration-fn wm/effective-run-configuration
      :mode-flags-fn wm/arena-mode-flags}))
@@ -156,7 +166,10 @@
         ;; depend on a dynamic binding surviving namespace reload or an
         ;; execution boundary before it decides whether selection is
         ;; terminal.
-        runner-opts (assoc opts :selected-target-reading-fn
-                           (:selected-target-reading-fn defaults))]
+        runner-opts (assoc opts
+                           :selected-target-reading-fn
+                           (:selected-target-reading-fn defaults)
+                           :selected-reading-ask-builder
+                           (:selected-reading-ask-builder defaults))]
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))

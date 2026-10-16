@@ -121,6 +121,16 @@
          (refusal #(limb/validate-standing-decision
                     (assoc standing :explanation "still live"))))))
 
+(deftest standing-contract-and-validator-have-one-authority
+  (let [contract (limb/standing-decision-contract
+                  "entity-1" "reviewer" "author")]
+    (is (= (set (:required (:response contract))) (set (keys standing))))
+    (is (= #{:still-live :resolved}
+           (set (get-in contract [:response :decision-values]))))
+    (is (= 80 (get-in contract [:response :constraints
+                                :explanation-min-characters])))
+    (is (= standing (limb/validate-standing-decision standing)))))
+
 (deftest revision-pair-companion-bytes-are-pinned
   (let [before (.getBytes "before bytes" "UTF-8")
         after (.getBytes "after bytes changed" "UTF-8")

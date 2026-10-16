@@ -6,6 +6,7 @@
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.report.war-machine :as wm]))
 
@@ -138,6 +139,28 @@
          {})))
     (is (identical? ledger (:registered-run/job-ledger @answer-opts)))
     (is (= "wm-click-probe" (:click-id @answer-opts)))))
+
+(deftest selected-policy-reading-is-wired-late-to-the-designated-author
+  (let [ledger (atom {:order [] :jobs {}})
+        answer-opts (atom nil)
+        prompt-fn (atom nil)]
+    (with-redefs [runner/agent-roster
+                  (constantly {"wm-author" {:status :idle :invoke-ready? true}})
+                  flight-runner/agency-answer-fn
+                  (fn [{:keys [opts] :as configuration}]
+                    (reset! answer-opts opts)
+                    (reset! prompt-fn (:prompt-fn configuration))
+                    (fn [_] {:request-id "r" :verdicts [] :by "wm-author"}))]
+      (let [defaults (runtime/production-defaults
+                      {:run-id "production-policy-reading"
+                       :author "wm-author"})
+            ask ((:selected-reading-ask-builder defaults)
+                 {:click-id "wm-click-policy-reading"
+                  :registered-run/job-ledger ledger})]
+        (is (map? (ask {:request-id "r"}))))
+      (is (identical? ledger (:registered-run/job-ledger @answer-opts)))
+      (is (= "wm-click-policy-reading" (:click-id @answer-opts)))
+      (is (identical? selected-reading/prompt @prompt-fn)))))
 
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]

@@ -1,5 +1,6 @@
 (ns futon2.aif.selected-target-reading-test
   (:require [clojure.java.io :as io]
+            [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.selected-target-reading :as sut]
@@ -51,8 +52,8 @@
         excerpt (registry/excerpt-digest source)
         contacted (atom [])
         consumed (atom nil)
-        answer (fn [{:keys [target author request]}]
-                 (swap! contacted conj [target author])
+        answer (fn [{:keys [target author request] :as issued}]
+                 (swap! contacted conj [target author (:acceptance-contract issued)])
                  {:analysis (analysis-for request)})
         opts {:run-id "run-one" :author "wm-author"
               :answer-fn answer :request-root (str work)
@@ -67,7 +68,10 @@
                  :decision {:status :selected :action {:target "M-selected"}}}))
         result (:record step)]
     (is (= :published (:status result)))
-    (is (= [["M-selected" "wm-author"]] @contacted))
+    (is (= ["M-selected" "wm-author"] (subvec (first @contacted) 0 2)))
+    (is (= #{"action" "condition" "context" "contrast" "dependency" "goal" "rationale"}
+           (set (get-in @contacted [0 2 :response :relation_vocabulary])))
+        "the prompt contract comes from the validator's template output")
     (is (= "M-selected" (:target result)))
     (is (= excerpt (:excerpt-digest result)))
     (is (= (:request-sha256 result)
@@ -133,11 +137,17 @@
     (is (zero? @contacts))))
 
 (deftest author-prompt-names-the-validators-complete-relation-vocabulary
-  (let [text (sut/prompt {:request {:sentences []}})]
+  (let [text (sut/prompt
+              {:request {:sentences []}
+               :acceptance-contract
+               {:id :wm/selected-target-reading-analysis :version 1
+                :response {:relation_vocabulary
+                           ["action" "condition" "context" "contrast"
+                            "dependency" "goal" "rationale"]}
+                :validator {:id :wm/session-turn-analysis :version 2}}})]
     (is (.contains text
-                   "context, condition, contrast, action, rationale, goal, dependency"))
-    (is (.contains text
-                   "Do not substitute ordinary-language labels such as evidence, sequence, elaboration, or authority"))))
+                   ":relation_vocabulary"))
+    (is (.contains text "\"dependency\""))))
 
 (deftest runner-resumes-inner-construction-once-for-the-same-outer-choice
   (let [target "M-selected"
@@ -165,3 +175,27 @@
     (is (= (get-in result [:judgement :selected-target-reading-request])
            (get-in result [:judgement :decision :selection-certificate
                            :selected-target-reading-request])))))
+
+(deftest refused-reading-contact-survives-the-terminal-run-record
+  (let [dir (temp-dir "selected-reading-record-")
+        refusal {:schema :wm/selected-target-reading-request-v1
+                 :status :refused :published false
+                 :kind :selected-target-reading-validation-refused
+                 :target "M-selected"
+                 :detail {:stderr "relations must name a documented role"}}
+        written (#'runner/persist-run-record!
+                 {:run-record-dir (.getPath dir)
+                  :scan-render-fn (fn [& _] nil)}
+                 "selected-reading-refusal" "2026-10-16T00:00:00Z"
+                 {:outcome :abstained
+                  :wm/route [{:fromNode "RUNNER" :toNode "FULL_LOOP_CLOSE"
+                              :via :abstained}]
+                  :checkpoints
+                  {:selection
+                   {:sorry {:decision {:status :abstained
+                                       :reason :no-acting-cascade-candidate}
+                            :selected-target-reading-request refusal}}}})
+        record (edn/read-string (slurp (:run-record written)))]
+    (is (= refusal (:selected-target-reading record)))
+    (is (= :selected-target-reading-validation-refused
+           (get-in record [:selected-target-reading :kind])))))
