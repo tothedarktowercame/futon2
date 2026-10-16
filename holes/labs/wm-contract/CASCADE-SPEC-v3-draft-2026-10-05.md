@@ -118,7 +118,35 @@ supplies; B = the conference version served at that address with the living
 version still findable (the pattern's conclusion). No record holds the four
 maps.
 
-A reading that cannot name G, I_1, I_2 and B for the problem: two positions,
+**Settled (Joe, 2026-10-16, superseding the two positions below):**
+
+1. A pattern's square is its four written parts, under the chosen assignment
+   (§4: IF is I_1, HOWEVER is I_2, BECAUSE is G, THEN is B). The texts of
+   G, I_1, I_2, B are the pattern's parts, pinned to the pattern file.
+2. An occurrence is the four maps: for each part, the situation element it
+   names, with a source. Nothing else is written per occurrence.
+3. If any of the four parts cannot be matched to the situation, the citation
+   is void. The void is recorded on the citation (象's turn log, or the
+   decision step's candidate list) with the failed part named.
+4. The policy holds occurrences only. There is no absent-square unit.
+5. A square whose texts are not drawn from the cited pattern's parts is a
+   defaulted square and is refused at the producer.
+
+The test for whether a situation element qualifies as B is the pattern's own
+CHECK block under THEN ("Engaged when: …", "Failing when: …"); a pattern
+without a CHECK block falls back to its `! conclusion` line. A pattern whose
+HOWEVER names only one force is a pattern with a defect, not a square with
+identity maps; the one-input degenerate square of the earlier (c10) position
+is dropped. Both templates on the 2026-10-14 trace
+(`data/wm-trace/wm-trace-2026-10-14.edn`) fail rule 5: the per-target
+migration square (`legacy_three_halves_registry.clj`: "The target's
+unresolved criterion" / "The admitted library-pattern interpretation" / …,
+identical for every pattern) matches the target and never the pattern; the
+interpretation-registry square (`data/wm-interpretations/*.edn`) carries
+authored text pinned to the pattern file but not drawn from its parts. Under
+rule 3 those citations are void.
+
+*Superseded record.* A reading that cannot name G, I_1, I_2 and B for the problem: two positions,
 for Joe. (c17) It is a unit of the policy whose square is **typed absent**: it
 supports nothing, meets nothing and is glued to nothing; a policy made only
 of such units is a bag by §3.1, and the reason is on the record rather than
@@ -237,11 +265,25 @@ Consequences, each a requirement:
   the blend and its held tension the emergent structure, BECAUSE is why
   the square commutes — and the order question is revisited once A5 has
   read a dozen R-units that way.
+  **Superseded (Joe, 2026-10-16):** the assignment is IF = I_1, HOWEVER =
+  I_2, BECAUSE = G, THEN = B. The two conflicting forces are the two inputs
+  only when HOWEVER states both; in the library's axis form (109 patterns)
+  IF states the axis (the first input) and HOWEVER the costs on it (the
+  second), and BECAUSE gives the ground both are read against. Checked on
+  `ukrns/publication-cadence` (both readings are readable there; this one
+  is adopted): IF "living ↔ frozen" = I_1; HOWEVER "living costs durability,
+  frozen costs currency" = I_2; BECAUSE "citation integrity, currency
+  integrity, reader-need" = G; THEN the three compositions = B. The producer
+  writes BECAUSE into G and the gate checks IF and HOWEVER for commutation.
+  The §2a table of NOTE-outer-cascade stands as a record of the 10-06
+  default, not as the rule.
 
 ## 5. Construction receipt (adds to v2's list)
 
-- per occurrence: G, I_1, I_2, B as text with sources; the four maps as
-  element identifications; per triangle, commutes / auxiliary;
+- per occurrence: the pattern id and file digest (which fixes G, I_1, I_2,
+  B as the pattern's parts under §2); the four maps as element
+  identifications, each with its situation source; per triangle, commutes /
+  auxiliary; or the void mark with the failed part (§2 rule 3);
 - per glued pair: the shared object (text or id) and the consistency witness
   d, or the typed defect;
 - the verdict bag / cascade, with the components;
@@ -279,8 +321,9 @@ decisions K1′–K3 and the departures from the text are in
 
 ## 7. Not settled by this draft
 
-- Which parts of a library pattern are its inputs and ground, outside the
-  axis form (§2 sample).
+- Settled (Joe, 2026-10-16, §2 and §4): the parts are IF, HOWEVER, BECAUSE,
+  THEN, for every pattern; the sample's variation in where the poles sit is
+  variation in how the maps are read, not in which part is which object.
 - Settled (c10): a blend diagram specifies policy structure; the kernel of
   `CoApplicationKernel.lean` specifies transition semantics on token states;
   they are different typed layers. Open: the adequacy (compiler) theorem
