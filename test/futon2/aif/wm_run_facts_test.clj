@@ -138,15 +138,39 @@
           :record "wm-runs/no-such-record.edn" :searched (historical-data-roots)}
          (resolve-historical "wm-runs/no-such-record.edn"))))
 
-(deftest q9-complete-joined-carrier-exports-a-lean-pass-shape
-  (let [export (q9-export (assoc-in record [:decision :factorized-preference]
-                                    factorized-carrier))
-        source (checker/lean-source {"facts" export} "q9Joined")]
-    (is (= (:certificate factorized-carrier) (export "factorizedPreference")))
-    (is (= (:calibration-authorizations factorized-carrier)
-           (export "calibrationAuthorizations")))
+(deftest q9-unsealed-factorized-carriers-are-refused
+  ;; Nothing persists a :wm/factorized-preference-v1 carrier in a record
+  ;; (the controlled SUT returns one and writes none), so one found in a
+  ;; record is self-asserted, however well joined.
+  (doseq [carrier [factorized-carrier
+                   (assoc-in factorized-carrier [:certificate :factorization-identity] 999)
+                   (assoc-in factorized-carrier [:certificate :factorization-version] 2)
+                   (assoc factorized-carrier :factorization-authorizations [])]]
+    (let [export (q9-export (assoc-in record [:decision :factorized-preference] carrier))]
+      (doseq [field ["factorizedPreference" "calibrationAuthorizations"
+                     "factorizationAuthorizations"]]
+        (is (contains? (export field) "not-recomputable") field))
+      (is (.contains (checker/lean-source {"facts" export} "q9Unsealed") "q9 := .nr")))))
+
+(defn- positive-facts
+  "Q9 facts as an exporter would state a joined certificate, for the Lean
+  term emitter alone."
+  [carrier]
+  {"factorizedPreference" (:certificate carrier)
+   "calibrationAuthorizations" (:calibration-authorizations carrier)
+   "factorizationAuthorizations" (:factorization-authorizations carrier)})
+
+(deftest q9-lean-emitter-states-a-joined-certificate
+  (let [source (checker/lean-source {"facts" (positive-facts factorized-carrier)} "q9Joined")]
     (is (.contains source "factorizedPreference := some"))
     (is (.contains source "factorizationIdentity := 106"))))
+
+(deftest q9-lean-emitter-states-none
+  (let [source (checker/lean-source {"facts" {"factorizedPreference" nil
+                                              "calibrationAuthorizations" []
+                                              "factorizationAuthorizations" []}}
+                                    "q9None")]
+    (is (.contains source "q9 := .known { Requirements.click20 with factorizedPreference := none, calibrationAuthorizations := [], factorizationAuthorizations := [] }"))))
 
 (deftest q9-lean-emitter-preserves-each-calibration-registry-entry
   (let [second-calibration {:identity 201 :version 2 :authority 202
@@ -156,21 +180,11 @@
                               :authorized-by 202}
         carrier (update factorized-carrier :calibration-authorizations
                         conj second-authorization)
-        export (q9-export (assoc-in record [:decision :factorized-preference] carrier))
-        source (checker/lean-source {"facts" export} "q9TwoCalibrations")]
+        source (checker/lean-source {"facts" (positive-facts carrier)} "q9TwoCalibrations")]
     (is (.contains source
                    "identity := 101, version := 1, authority := 102, registrationToken := 103, focusedCost := 0, relatedCost := 1, unrelatedCost := 2"))
     (is (.contains source
                    "receipt := 204, calibration := {identity := 201, version := 2, authority := 202, registrationToken := 203, focusedCost := 3, relatedCost := 4, unrelatedCost := 5}, authorizedBy := 202"))))
-
-(deftest q9-substituted-factorization-or-missing-registry-is-not-recomputable
-  (doseq [carrier [(assoc-in factorized-carrier
-                             [:certificate :factorization-identity] 999)
-                   (assoc-in factorized-carrier
-                             [:certificate :factorization-version] 2)
-                   (assoc factorized-carrier :factorization-authorizations [])]]
-    (let [export (q9-export (assoc-in record [:decision :factorized-preference] carrier))]
-      (is (contains? (export "factorizedPreference") "not-recomputable")))))
 
 (deftest typed-not-supplied-increments-absence-count
   (let [base (facts/facts-for-record record "r" snap)

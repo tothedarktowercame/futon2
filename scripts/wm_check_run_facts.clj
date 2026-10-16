@@ -164,7 +164,7 @@
                                     "previousOutcome := .invalid")))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
-                  selected-calibration-term (calibration-term calibration)
+                  selected-calibration-term (when calibration (calibration-term calibration))
                   calibration-registry
                   (str "[" (str/join ", "
                                   (for [entry (facts "calibrationAuthorizations")]
@@ -179,14 +179,19 @@
                                             (field entry :receipt) (field entry :identity)
                                             (field entry :version) (field entry :authority)))) "]")]
               (ev-known
-               (format "factorizedPreference := some {calibration := %s, selectorAuthority := %d, factorizationIdentity := %d, factorizationVersion := %d, factorizationAuthority := %d, calibrationAuthorization := %d, factorizationAuthorization := %d}, calibrationAuthorizations := %s, factorizationAuthorizations := %s"
-                       selected-calibration-term (field certificate :selector-authority)
-                       (field certificate :factorization-identity)
-                       (field certificate :factorization-version)
-                       (field certificate :factorization-authority)
-                       (field certificate :calibration-authorization)
-                       (field certificate :factorization-authorization)
-                       calibration-registry factorization-registry)))
+               (if (nil? certificate)
+                 ;; a verified negative carrier: the C that selected is not a
+                 ;; factorized preference, which Q9 reads as false
+                 (format "factorizedPreference := none, calibrationAuthorizations := %s, factorizationAuthorizations := %s"
+                         calibration-registry factorization-registry)
+                 (format "factorizedPreference := some {calibration := %s, selectorAuthority := %d, factorizationIdentity := %d, factorizationVersion := %d, factorizationAuthority := %d, calibrationAuthorization := %d, factorizationAuthorization := %d}, calibrationAuthorizations := %s, factorizationAuthorizations := %s"
+                         selected-calibration-term (field certificate :selector-authority)
+                         (field certificate :factorization-identity)
+                         (field certificate :factorization-version)
+                         (field certificate :factorization-authority)
+                         (field certificate :calibration-authorization)
+                         (field certificate :factorization-authorization)
+                         calibration-registry factorization-registry))))
         :q10 (ev-known (format "differentArrangementPairs := %d, arrangementPairsDistinguishedByG := %d"
                                (facts "differentArrangementPairs") (facts "arrangementPairsDistinguishedByG")))))))
 

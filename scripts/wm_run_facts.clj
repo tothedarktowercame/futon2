@@ -15,7 +15,8 @@
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q2-construction :as q2]
             [futon2.aif.q4-preference :as q4]
-            [futon2.aif.q8-frontier :as q8]))
+            [futon2.aif.q8-frontier :as q8]
+            [futon2.aif.q9-factorization :as q9]))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -393,46 +394,32 @@
              "policyCount" policy-count})
           (:target-construction certificate))))
 
-(defn- factorized-preference-facts [record]
-  (let [carrier (get-in record [:decision :factorized-preference])
-        certificate (:certificate carrier)
-        calibration (:calibration certificate)
-        calibration-registry (:calibration-authorizations carrier)
-        factorization-registry (:factorization-authorizations carrier)
-        calibration-receipt (:calibration-authorization certificate)
-        factorization-receipt (:factorization-authorization certificate)
-        calibration-entry (first (filter #(= calibration-receipt (:receipt %))
-                                         calibration-registry))
-        factorization-entry (first (filter #(= factorization-receipt (:receipt %))
-                                           factorization-registry))
-        positive? #(and (integer? %) (pos? %))
-        valid? (and (= :wm/factorized-preference-v1 (:schema carrier))
-                    (map? certificate) (map? calibration)
-                    (vector? calibration-registry) (vector? factorization-registry)
-                    (every? positive? [(:identity calibration) (:version calibration)
-                                       (:authority calibration) (:registration-token calibration)
-                                       (:selector-authority certificate)
-                                       (:factorization-identity certificate)
-                                       (:factorization-version certificate)
-                                       (:factorization-authority certificate)
-                                       calibration-receipt factorization-receipt])
-                    (not= (:authority calibration) (:selector-authority certificate))
-                    (not= (:factorization-authority certificate)
-                          (:selector-authority certificate))
-                    (every? integer? [(:focused-cost calibration) (:related-cost calibration)
-                                      (:unrelated-cost calibration)])
-                    (< (:focused-cost calibration) (:related-cost calibration)
-                       (:unrelated-cost calibration))
-                    (= calibration (:calibration calibration-entry))
-                    (= (:authority calibration) (:authorized-by calibration-entry))
-                    (= (:factorization-identity certificate) (:identity factorization-entry))
-                    (= (:factorization-version certificate) (:version factorization-entry))
-                    (= (:factorization-authority certificate) (:authority factorization-entry))
-                    (= :completion-then-conditional-relevance (:law factorization-entry)))]
-    (when valid?
-      {:certificate certificate
-       :calibration-registry calibration-registry
-       :factorization-registry factorization-registry})))
+(defn q9-facts
+  "Requirements Q9 for a record. On the reading-family route, from the
+  run's own :q9 carrier only, and only when it is intact and equal to the
+  carrier recomputed from this record (q9-factorization/verify-record): the
+  carrier is negative, so a verified one exports factorizedPreference :=
+  none with the empty registries production loads. On any other route Q9 is
+  not recomputable. A record's unsealed :wm/factorized-preference-v1
+  carrier is refused: nothing writes one (the controlled SUT returns its
+  carrier and persists none), so in a record it can only be self-asserted."
+  [record]
+  (let [fields ["factorizedPreference" "calibrationAuthorizations"
+                "factorizationAuthorizations"]
+        nr-all #(zipmap fields (repeat (not-recomputable %)))]
+    (cond
+      (= :wm/reading-policy-family-v1
+         (get-in record [:decision :selection-certificate :selection-route]))
+      (let [v (q9/verify-record record)]
+        (if (= :verified (:status v))
+          {"factorizedPreference" nil
+           "calibrationAuthorizations" []
+           "factorizationAuthorizations" []}
+          (nr-all (str "Q9 carrier " (name (:reason v))))))
+      (some? (get-in record [:decision :factorized-preference]))
+      (nr-all "unsealed factorized preference carrier refused: no producer persists one")
+      :else
+      (nr-all "authorized factorized preference absent: no sealed Q9 carrier on this route"))))
 
 (defn interpretation-order
   "Q5 from the recorded selection-world instants. Instants are compared as
@@ -601,7 +588,7 @@
                                   (get-in record [:participants :reviewer])
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
-        factorized (factorized-preference-facts record)
+        q9 (q9-facts record)
         q8 (q8-facts record)
         q4 (q4-facts record)
         q2 (q2-facts record)
@@ -681,15 +668,6 @@
                                (nr "participant seat ids absent"))
                "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
                "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
-               "factorizedPreference"
-               (if factorized (:certificate factorized)
-                   (nr "authorized :wm/factorized-preference-v1 carrier absent or invalid"))
-               "calibrationAuthorizations"
-               (if factorized (:calibration-registry factorized)
-                   (nr "factorized preference calibration registry absent or invalid"))
-               "factorizationAuthorizations"
-               (if factorized (:factorization-registry factorized)
-                   (nr "factorized preference law registry absent or invalid"))
                "frontierCensus" (q8 "frontierCensus")
                "frontierRefresh" (q8 "frontierRefresh")
                "frontierSelection" (q8 "frontierSelection")
@@ -697,11 +675,12 @@
                "differentArrangementPairs" (nr "same-pattern different-arrangement pair census absent")
                "arrangementPairsDistinguishedByG" (nr "arrangement-pair distinct-policy/G census absent")}
         ;; a reading-family record's Q4 comes from its carrier alone
-        facts (merge facts q4 q2)
+        facts (merge facts q4 q2 q9)
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
                                  (contains? q2 field) (str record-path " [:q2]")
+                                 (contains? q9 field) (str record-path " [:q9]")
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"

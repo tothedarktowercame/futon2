@@ -73,6 +73,7 @@
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q8-frontier :as q8-frontier]
+            [futon2.aif.q9-factorization :as q9-factorization]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.run-participants :as participants]
@@ -1175,6 +1176,12 @@
                      true
                      (as-> r (assoc r :q2 (q2-construction/certificate
                                            (q2-construction/record-inputs r))))
+                     ;; Requirements Q9, negative only: the C the selector
+                     ;; compared, recomputed, and what it lacks for a
+                     ;; factorized preference (q9-factorization/verify-record)
+                     true
+                     (as-> r (assoc r :q9 (q9-factorization/certificate
+                                           (q9-factorization/record-inputs r))))
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]

@@ -143,10 +143,10 @@
                (<= 2 (count (f "comparedPolicies")))
                (<= (* 2 (count ot)) (total-policies rows))
                (or (< (count avail) 10) (<= (count avail) (* 10 (count used))))))
-    :Q9 (and (pos? (f "completionPreferencePairs"))
-             (= (f "completionPairsStrictlyPreferred") (f "completionPreferencePairs"))
-             (pos? (f "earlierProgressPairs"))
-             (= (f "earlierProgressNoGreaterRisk") (f "earlierProgressPairs")))
+    ;; reached only for factorizedPreference = none (a verified negative
+    ;; carrier), which Requirements.Q9 reads as false; a certificate goes
+    ;; to the generated Lean checker
+    :Q9 (some? (f "factorizedPreference"))
     :Q10 (and (pos? (f "differentArrangementPairs"))
               (= (f "arrangementPairsDistinguishedByG")
                  (f "differentArrangementPairs")))))
@@ -185,7 +185,8 @@
                 ;; the human report a second, weaker authority. Their supplied
                 ;; carriers are displayed, while the generated Lean checker is
                 ;; the deciding authority.
-                (contains? #{:Q8 :Q9} q)
+                (or (= :Q8 q)
+                    (and (= :Q9 q) (some? (get facts "factorizedPreference"))))
                 {:requirement q :status :not-recomputable
                  :deciding-facts deciding
                  :reason "Nested certificate validity requires the generated Lean checker"}
