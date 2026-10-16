@@ -214,3 +214,12 @@ catch any errors so that you can make repairs live". This authorizes exactly
 one further ordinary click with the debugger attached before issue. Under this
 document's standing mechanism, `allocated` rises from 70 to **71**. The failed
 preflight immediately before this entry issued no click and consumed nothing.
+
+## Joe's post-contract-audit debugger grant, 2026-10-16 — one click
+
+After the selected-target reading contract was re-audited, its hidden cue
+limits were exposed, and issued-request immutability was restored, Joe
+directed codex-68: "OK, please run 1 more click with debugger attached".
+This authorizes exactly one further ordinary click with the debugger attached
+before issue. Under this document's standing mechanism, `allocated` rises
+from 71 to **72**. No prior charge is reclaimed.
