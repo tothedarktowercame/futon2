@@ -151,6 +151,18 @@
                    ":relation_vocabulary"))
     (is (.contains text "\"dependency\""))))
 
+(deftest author-prompt-states-the-display-cue-span-contract
+  (let [text (sut/prompt
+              {:request {:sentences []}
+               :acceptance-contract
+               {:id :wm/selected-target-reading-analysis :version 1
+                :response {:relation_vocabulary ["context"]}
+                :validator {:id :wm/session-turn-analysis :version 2}}})]
+    (is (.contains text
+                   "Every display cue must be wholly inside its enclosing fragment's start/end span"))
+    (is (.contains text
+                   "text must exactly equal the source text at those offsets"))))
+
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []
                  :sentences []}

@@ -62,7 +62,9 @@
   machine, not the seat, validates and publishes it."
   [{:keys [request acceptance-contract]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
-       "Use exact Unicode-codepoint offsets and only actual patterns under "
+       "Use exact Unicode-codepoint offsets. Every display cue must be wholly "
+       "inside its enclosing fragment's start/end span, and its text must exactly "
+       "equal the source text at those offsets. Use only actual patterns under "
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
        "Reply with exactly one JSON object in the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
