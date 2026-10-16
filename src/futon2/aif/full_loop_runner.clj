@@ -2000,10 +2000,17 @@
             ;; it to; otherwise there is no interpretation request at all
             contact? (and ask (nil? refused-issue))
             requested-at (when contact? (clock))
-            response (when contact?
-                       (try (let [answer (ask request)]
-                              (or (handoff/response-map answer) answer))
-                            (catch Throwable e {::ask-threw (ex-message e)})))
+            exchange (when contact?
+                       (handoff/exchange
+                        {:contact ask :request request
+                         :decode (fn [raw]
+                                   (cond
+                                     (map? raw) raw
+                                     (string? raw)
+                                     (try (json/parse-string raw true)
+                                          (catch Exception _ nil))))
+                         :validate #(selected-reading/validate
+                                     request % {:library-root library-root})}))
             received-at (when contact? (clock))
             result (cond
                      ;; an owed pattern with no library file cannot be pinned:
@@ -2015,13 +2022,15 @@
                      (nil? ask)
                      {:status :interpretation-validation-refused
                       :reasons [{:reason :selected-reading-ask-not-configured}]}
-                     (::ask-threw response)
+                     (and exchange (not= :validated (:status exchange)))
                      {:status :interpretation-validation-refused
-                      :reasons [{:reason :selected-reading-ask-threw
-                                 :message (::ask-threw response)}]}
+                      :reasons [{:reason (case (:reason exchange)
+                                           :contact-threw :selected-reading-ask-threw
+                                           :response-invalid :malformed-response
+                                           (:reason exchange))
+                                 :message (:message exchange)}]}
                      :else
-                     (selected-reading/validate request response
-                                                {:library-root library-root}))
+                     (:value exchange))
             validated-at (clock)
             section (fn [prior]
                       {:schema :wm/interpretation-discharge-v1

@@ -147,18 +147,25 @@
               (let [issued {:target (:target need) :kind :selected-target-reading
                             :request-id request-sha :request request :author author
                             :acceptance-contract acceptance-contract}
-                    answer (try (answer-fn issued)
-                                (catch Throwable e
-                                  {:state :failed :reason :answer-threw
-                                   :message (ex-message e)}))
-                    analysis (handoff/response-map answer)]
-                (if-not analysis
+                    exchange (handoff/exchange
+                              {:contact answer-fn :request issued
+                               :decode (fn [raw]
+                                         (cond
+                                           (map? (:analysis raw)) (:analysis raw)
+                                           (map? raw) raw
+                                           (string? raw)
+                                           (try (let [v (json/parse-string raw true)]
+                                                  (when (map? v) v))
+                                                (catch Exception _ nil))))})
+                    analysis (:value exchange)]
+                (if-not (= :validated (:status exchange))
                   (refused need
-                           (if (= :designated-author-unavailable (:reason answer))
+                           (if (= :designated-author-unavailable (:reason exchange))
                              :designated-author-unavailable
                              :selected-target-reading-answer-invalid)
-                           {:author author :contacted? (not= :not-contacted (:state answer))
-                            :answer (select-keys answer [:state :reason :job-id :message])})
+                           {:author author :contacted? (:contacted? exchange)
+                            :answer (select-keys exchange
+                                                 [:status :reason :job-id :message])})
                   (let [analysis-input (io/file (.getParentFile request-file)
                                                 "analysis-input.json")
                         validation-request (io/file (.getParentFile request-file)
@@ -197,5 +204,5 @@
                            :request-file (.getPath request-file)
                            :request-sha256 request-sha
                            :analysis-digest (:analysis-digest publication)
-                           :job-id (:job-id answer)
+                           :job-id (:job-id exchange)
                            :validation (:validation publication)})))))))))))))

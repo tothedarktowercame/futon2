@@ -13,6 +13,7 @@
             [clojure.pprint]
             [clojure.string :as str]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.grain-gate :as gate]
             [futon2.aif.enactment-habit :as enactment-habit]
             [futon2.aif.cascade-prior :as cascade-prior]
@@ -114,10 +115,7 @@
   cannot take: the spike's single-block replies arrived as two copies and
   were discarded as {:forms 2} (WM-SPIKE-FIX-I B)."
   [job]
-  (let [result (:result job)]
-    (if (and (string? result) (not (str/blank? result)))
-      result
-      (str/join "\n" (keep :text (filter #(= "text" (:type %)) (:events job)))))))
+  (or (handoff/response-payload job) ""))
 
 (defn agency-answer-fn
   "An answer function that asks SEAT through Agency: a bell (mode brief —
@@ -141,7 +139,12 @@
     :or {caller "wm-flight" dispatch! runner/dispatch! poll! runner/poll-job!
          job-text reply-text}}]
   (fn [issued]
-    (let [prompt-fn (or prompt-fn
+    (let [issued (if (or (:acceptance-contract issued)
+                         (reading-kinds (:kind issued)))
+                   issued
+                   (assoc issued :acceptance-contract
+                          (wi/acceptance-contract issued)))
+          prompt-fn (or prompt-fn
                         (cond (reading-kinds (:kind issued)) reading/prompt
                               library-root #(wi/prompt % {:library-root library-root})
                               :else wi/prompt))
@@ -303,7 +306,8 @@
   (let [who (select-keys answer [:seat :job-id])
         base (merge base {:request-id (:request-id issued)} who
                     (select-keys answer [:library-root]))
-        parsed (when (= "done" (:state answer)) (wi/parse-reply (:text answer)))]
+        parsed (when (= "done" (:state answer))
+                 (wi/parse-reply (handoff/response-payload answer)))]
     (cond
       ;; an answer still in flight when the step settles (the job exists and
       ;; is not terminal) is pending, not unanswered: the click cannot see it
@@ -638,7 +642,8 @@
     (let [answer (answer-fn issued)
         who (answered answer)
         base (merge {:kind (:kind issued) :want (get-in issued [:want :token]) :request-id (:request-id issued)} who)
-        parsed (when (= "done" (:state answer)) (wi/parse-reply schema (:text answer)))]
+        parsed (when (= "done" (:state answer))
+                 (wi/parse-reply schema (handoff/response-payload answer)))]
     (cond
       (nil? parsed) (assoc base :outcome :not-answered :state (:state answer))
       (:unparseable-response parsed) (assoc base :outcome :unparseable-response :detail (:unparseable-response parsed))
