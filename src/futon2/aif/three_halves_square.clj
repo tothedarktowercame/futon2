@@ -6,6 +6,47 @@
 (def schema :wm/three-halves-square-v1)
 (def roles [:G :I1 :I2 :B])
 (def map-ends {:a1 [:G :I1] :a2 [:G :I2] :b1 [:I1 :B] :b2 [:I2 :B]})
+(def ^:private part-for-role {:I1 "IF" :I2 "HOWEVER" :G "BECAUSE" :B "THEN"})
+
+(defn- normalise-space [s]
+  (str/join " " (str/split (str/trim (str s)) #"\s+")))
+
+(defn- pattern-parts [pattern-text]
+  (let [part-header #"^(\s*)\+\s+(IF|HOWEVER|THEN|BECAUSE):(?:\s*(.*))?$"
+        any-header #"^(\s*)\+\s+[^:]+:.*$"]
+    (:parts
+     (reduce (fn [{:keys [active indent] :as state} line]
+               (if-let [[_ spaces part first-line] (re-matches part-header line)]
+                 (assoc state :active part :indent (count spaces)
+                        :parts (assoc (:parts state) part [(or first-line "")]))
+                 (let [[_ spaces] (re-matches any-header line)]
+                   (if (and active spaces (<= (count spaces) indent))
+                     (assoc state :active nil :indent nil)
+                     (cond-> state active (update-in [:parts active] conj line))))))
+             {:parts {} :active nil :indent nil}
+             (str/split-lines (str pattern-text))))))
+
+(defn parts-check
+  "Check that each square object's text is drawn from its assigned flexiarg
+   part. PATTERN-TEXT is supplied by the caller; this function performs no IO."
+  [receipt pattern-text]
+  (let [square (or (:blend-square receipt) receipt)
+        parts (pattern-parts pattern-text)
+        missing (vec (for [part ["IF" "HOWEVER" "BECAUSE" "THEN"]
+                           :when (str/blank? (normalise-space (get parts part)))]
+                       (keyword part)))]
+    (if (seq missing)
+      {:status :refused :kind :pattern-part-missing :parts missing}
+      (let [mismatched
+            (vec (for [role roles
+                       :let [object-text (normalise-space (get-in square [:objects role :text]))
+                             part-text (normalise-space (get parts (part-for-role role)))]
+                       :when (or (str/blank? object-text)
+                                 (not (str/includes? part-text object-text)))]
+                   role))]
+        (if (seq mismatched)
+          {:status :refused :kind :square-text-not-from-pattern :roles mismatched}
+          {:status :valid})))))
 
 (defn- theory-valid? [{:keys [elems names axioms]}]
   (and (set? elems) (seq elems) (set? axioms)

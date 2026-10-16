@@ -26,7 +26,8 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.legacy-three-halves-registry :as legacy-square]
-            [futon2.aif.interpretation-request :as ireq])
+            [futon2.aif.interpretation-request :as ireq]
+            [futon2.aif.three-halves-square :as three-halves])
   (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
 
@@ -143,7 +144,11 @@
   [code-root id {:keys [source] :as receipt}]
   (let [path (:path source)
         expected (str "futon3/library/" (namespace id) "/" (name id) ".flexiarg")
-        f (when (string? path) (library-file code-root path))]
+        f (when (string? path) (library-file code-root path))
+        pattern-bytes (when (and f (.isFile f)) (Files/readAllBytes (.toPath f)))
+        parts-result (when (and pattern-bytes (:blend-square receipt))
+                       (three-halves/parts-check (:blend-square receipt)
+                                                 (String. pattern-bytes "UTF-8")))]
     (cond-> []
       (some #(str/blank? (str (get receipt %))) receipt-keys)
       (conj {:reason :receipt-incomplete :missing (vec (filter #(str/blank? (str (get receipt %))) receipt-keys))})
@@ -151,8 +156,11 @@
       (conj {:reason :source-not-the-pattern-file :expected expected :path path})
       (and f (not (.isFile f)))
       (conj {:reason :source-missing :path path})
-      (and f (.isFile f) (not= (:sha256 source) (evidence/sha256 (Files/readAllBytes (.toPath f)))))
-      (conj {:reason :source-sha-mismatch :path path :declared (:sha256 source)}))))
+      (and pattern-bytes (not= (:sha256 source) (evidence/sha256 pattern-bytes)))
+      (conj {:reason :source-sha-mismatch :path path :declared (:sha256 source)})
+      (= :refused (:status parts-result))
+      (conj (merge {:reason (:kind parts-result)}
+                   (select-keys parts-result [:roles :parts]))))))
 
 (def agent-search-retriever "agent-search")
 

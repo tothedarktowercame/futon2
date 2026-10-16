@@ -1,11 +1,61 @@
 (ns futon2.aif.three-halves-square-test
   (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.legacy-three-halves-registry :as legacy]
             [futon2.aif.token-observation-initialization-test :as initialization]
             [futon2.aif.three-halves-square :as sut]))
 
 (def fixture (edn/read-string
               (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+
+(def library-root "/home/joe/code/futon3/library")
+(def publication-text
+  (slurp (str library-root "/ukrns/publication-cadence.flexiarg")))
+(def publication-object-texts
+  {:I1 "The pattern operates on the axis: living document (continuously-updated canonical version) ↔ frozen snapshots (versioned fixed publications with citable identifiers)."
+   :I2 "Real costs: living costs archival durability — a snapshot citable today may differ from the same URL tomorrow; frozen costs currency — citable versions drift further from the current evidence state over time."
+   :G "Citation integrity: an academic artefact that readers cite must be citable as a specific object."
+   :B "(3) Both: living current version + periodic frozen snapshots, each snapshot declaring its evidence-file revision and compute-date."})
+
+(defn- with-object-texts [square texts]
+  (reduce-kv #(assoc-in %1 [:objects %2 :text] %3) square texts))
+
+(def good-parts-square (with-object-texts fixture publication-object-texts))
+
+(deftest square-object-texts-come-from-their-assigned-pattern-parts
+  (is (= {:status :valid} (sut/parts-check good-parts-square publication-text)))
+  (testing "the legacy per-target template is defaulted for every role"
+    (let [legacy-square (#'legacy/square
+                         "/home/joe/code"
+                         "M-interim-director-proxy-metric-inventory"
+                         :orchestration/recorded-handoff
+                         {:source {:path "futon3/library/orchestration/recorded-handoff.flexiarg"
+                                   :sha256 "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"}})]
+      (is (= {:status :refused :kind :square-text-not-from-pattern
+              :roles [:G :I1 :I2 :B]}
+             (sut/parts-check legacy-square
+                              (slurp (str library-root "/orchestration/recorded-handoff.flexiarg")))))))
+  (testing "the authored interpretation-registry square is also defaulted"
+    (let [registry (edn/read-string
+                    (slurp "/home/joe/code/futon2/data/wm-interpretations/M-futonzero-mvp.edn"))
+          square (get-in registry [:receipts :contracts/declare-the-reductions :blend-square])
+          result (sut/parts-check
+                  square (slurp (str library-root "/contracts/declare-the-reductions.flexiarg")))]
+      (is (= :refused (:status result)))
+      (is (= :square-text-not-from-pattern (:kind result)))
+      (is (seq (:roles result)))))
+  (testing "matching is per assigned part, not anywhere in the file"
+    (let [swapped (-> good-parts-square
+                      (assoc-in [:objects :I1 :text] (:I2 publication-object-texts))
+                      (assoc-in [:objects :I2 :text] (:I1 publication-object-texts)))]
+      (is (= {:status :refused :kind :square-text-not-from-pattern
+              :roles [:I1 :I2]}
+             (sut/parts-check swapped publication-text)))))
+  (testing "a missing written part is named"
+    (is (= {:status :refused :kind :pattern-part-missing :parts [:BECAUSE]}
+           (sut/parts-check good-parts-square
+                            (str/replace publication-text #"(?s)\n  \+ BECAUSE:.*?(?=\n  \+ NEXT-STEPS:)" ""))))))
 
 (deftest real-library-reading-validates
   (is (= :valid (:status (sut/validate fixture)))))

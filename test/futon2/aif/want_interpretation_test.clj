@@ -9,8 +9,10 @@
             [futon2.aif.wm.cascade-decision :as wm-cd]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as ireq]
             [futon2.aif.mission-criteria :as mc]
+            [futon2.aif.three-halves-square :as three-halves]
             [futon2.aif.want-interpretation :as wi])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -174,12 +176,15 @@
 (defn- req [want] {:target "M-futon-seams" :want {:token want}})
 
 (defn- validate [want resp sources]
-  (wi/validate-response (req want) (with-square resp)
-                        {:sources sources :constraints [owner-constraint]
-                         :admit #'wm-cd/admit-cascade-problem
-                         ;; the two library files' bytes, pinned: the receipt
-                         ;; sha check must not depend on live futon3
-                         :code-root library-root}))
+  ;; These pre-rule-5 fixtures exercise the rest of response validation with
+  ;; their historical generic square. The rule-5 cases below use live bytes.
+  (with-redefs [three-halves/parts-check (constantly {:status :valid})]
+    (wi/validate-response (req want) (with-square resp)
+                          {:sources sources :constraints [owner-constraint]
+                           :admit #'wm-cd/admit-cascade-problem
+                           ;; the two library files' bytes, pinned: the receipt
+                           ;; sha check must not depend on live futon3
+                           :code-root library-root})))
 
 (defn- admit-into [sources {:keys [interpretation receipt]}]
   (let [[id interp] (first interpretation)]
@@ -218,6 +223,38 @@
     (is (contains? (reasons (assoc good :pattern "no-namespace") argue) :invalid-pattern-id))
     (is (contains? (reasons (update good :receipt dissoc :scope-limit) argue) :receipt-incomplete))))
 
+(deftest blend-square-texts-must-come-from-the-cited-pattern-parts
+  (let [path "futon3/library/ukrns/publication-cadence.flexiarg"
+        pattern-text (slurp (str "/home/joe/code/" path))
+        sha (evidence/sha256 (.getBytes pattern-text "UTF-8"))
+        texts {:I1 "The pattern operates on the axis: living document (continuously-updated canonical version) ↔ frozen snapshots (versioned fixed publications with citable identifiers)."
+               :I2 "Real costs: living costs archival durability — a snapshot citable today may differ from the same URL tomorrow; frozen costs currency — citable versions drift further from the current evidence state over time."
+               :G "Citation integrity: an academic artefact that readers cite must be citable as a specific object."
+               :B "(3) Both: living current version + periodic frozen snapshots, each snapshot declaring its evidence-file revision and compute-date."}
+        square (reduce-kv #(assoc-in %1 [:objects %2 :text] %3) square-fixture texts)
+        reply (-> (response :writing-coherence/meet-the-reader-where-they-are)
+                  (assoc :pattern :ukrns/publication-cadence)
+                  (assoc-in [:receipt :source] {:path path :sha256 sha})
+                  (assoc-in [:receipt :blend-square] square))
+        validate-reply #(wi/validate-response
+                         (req document) %
+                         {:sources (seams-sources) :constraints [owner-constraint]
+                          :admit #'wm-cd/admit-cascade-problem
+                          :code-root "/home/joe/code"})
+        good (validate-reply reply)
+        legacy-texts {:G "The target's unresolved criterion"
+                      :I1 "The admitted library-pattern interpretation"
+                      :I2 "The pinned target criterion"
+                      :B "The interpreted pattern applied to the target criterion"}
+        bad (validate-reply
+             (update-in reply [:receipt :blend-square]
+                        #(reduce-kv (fn [s role text] (assoc-in s [:objects role :text] text))
+                                    % legacy-texts)))]
+    (is (not-any? #(= :square-text-not-from-pattern (:reason %)) (:reasons good)))
+    (is (= [:G :I1 :I2 :B]
+           (:roles (first (filter #(= :square-text-not-from-pattern (:reason %))
+                                  (:reasons bad))))))))
+
 (deftest a-decline-is-recorded-not-rejected
   (is (= :declined (:status (validate argue {:decline {:reason :no-library-pattern}} (seams-sources))))))
 
@@ -253,10 +290,11 @@
                   :evaluate-g wm-cd/constructed-candidate-g}})
 
 (defn- validate-hand [resp]
-  (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} (with-square resp)
-                        {:sources (hand-sources) :constraints []
-                         :admit #'wm-cd/admit-cascade-problem
-                         :code-root library-root}))
+  (with-redefs [three-halves/parts-check (constantly {:status :valid})]
+    (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} (with-square resp)
+                          {:sources (hand-sources) :constraints []
+                           :admit #'wm-cd/admit-cascade-problem
+                           :code-root library-root})))
 
 (deftest a-hand-unit-validates-with-its-keys-normalised
   (let [v (validate-hand (assoc placenta-unit :pattern :gauntlet/placenta-transfer))]
