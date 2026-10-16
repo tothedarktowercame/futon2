@@ -37,6 +37,49 @@
       (when (every? map? values) values))
     :else nil))
 
+(defn candidate-pattern-count
+  "Distinct patterns in CANDIDATE's precedence, at least 1: the information
+  gain divisor of the per-step normalization."
+  [candidate]
+  (max 1 (count (set (map #(or (:pattern-id %) (:id %))
+                          (precedence-patterns (:precedence candidate)))))))
+
+(def g-normalization-laws
+  "The recognized declarations of how a candidate's G terms were normalized.
+  Under :per-step-capacity-and-pattern, risk is divided by H times the log
+  of the outcome count, ambiguity by H, and information gain by the
+  candidate's distinct-pattern count: G is a controller objective over
+  per-step rates, so policies with different horizons are comparable.
+  :raw-cumulative is the unnormalized horizon sum, comparable only at equal
+  horizons."
+  {:per-step-capacity-and-pattern 1
+   :raw-cumulative 1})
+
+(defn g-normalization-declaration
+  "The declaration the scorer records for LAW over its inputs."
+  [law horizon-steps outcome-count pattern-count]
+  (cond-> {:law law :version (g-normalization-laws law)}
+    (= law :per-step-capacity-and-pattern)
+    (assoc :horizon-steps horizon-steps :outcome-count outcome-count
+           :pattern-count pattern-count)))
+
+(defn normalize-g-terms
+  "RAW terms {:risk :ambiguity :information-gain} under DECLARATION, or nil
+  when the declaration is not recognized. The scorer computes its terms
+  with this function, so recomputation from a record is exact."
+  [declaration raw]
+  (when (and (contains? g-normalization-laws (:law declaration))
+             (= (g-normalization-laws (:law declaration)) (:version declaration)))
+    (case (:law declaration)
+      :raw-cumulative raw
+      :per-step-capacity-and-pattern
+      (let [{:keys [horizon-steps outcome-count pattern-count]} declaration]
+        (when (and (pos-int? horizon-steps) (integer? outcome-count) (<= 2 outcome-count)
+                   (pos-int? pattern-count))
+          {:risk (/ (:risk raw) horizon-steps (Math/log (double outcome-count)))
+           :ambiguity (/ (:ambiguity raw) horizon-steps)
+           :information-gain (/ (:information-gain raw) pattern-count)})))))
+
 (defn- candidate-tokens [candidates]
   (into #{} (mapcat (fn [p]
                      (concat (:produces p) (get-in p [:guard :needs])
@@ -158,13 +201,14 @@
         raw-information (if (= :beta-pattern (:parameter-information-mode opts))
                           (candidate-information-gain candidate) 0.0)
         normalize? (= :per-step-capacity-and-pattern (:g-normalization opts))
-        pattern-count (max 1 (count (set (map #(or (:pattern-id %) (:id %))
-                                                (precedence-patterns (:precedence candidate))))))
-        outcome-count (max 2 (count (get-in preference [1 :probabilities])))
-        observation-capacity (Math/log (double outcome-count))
-        risk (if normalize? (/ raw-risk horizon-steps observation-capacity) raw-risk)
-        ambiguity (if normalize? (/ raw-ambiguity horizon-steps) raw-ambiguity)
-        information-gain (if normalize? (/ raw-information pattern-count) raw-information)
+        declaration (g-normalization-declaration
+                     (if normalize? :per-step-capacity-and-pattern :raw-cumulative)
+                     horizon-steps
+                     (max 2 (count (get-in preference [1 :probabilities])))
+                     (candidate-pattern-count candidate))
+        {:keys [risk ambiguity information-gain]}
+        (normalize-g-terms declaration {:risk raw-risk :ambiguity raw-ambiguity
+                                        :information-gain raw-information})
         g (- (+ risk ambiguity) information-gain)
         entry {:action candidate :cascade true :cascade-id (:id candidate)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
@@ -202,6 +246,7 @@
                              :g-terms {:risk risk :ambiguity ambiguity
                                        :expected-information-gain information-gain
                                        :combination :risk-plus-ambiguity-minus-information-gain
+                                       :normalization-declaration declaration
                                        :normalization (if normalize?
                                                         {:risk :per-horizon-step-and-log-outcome-support
                                                          :ambiguity :per-horizon-step

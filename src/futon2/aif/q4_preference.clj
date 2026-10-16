@@ -21,18 +21,26 @@
   - semantics are :progressive when the authority's declared kind is
     :progress-count, the shape scorer's step-indexed progress C;
   - live C must be diagnostic-only.
-  A term is evaluated when recorded and finite; zero counts. Lean states
-  one horizon per run, so compared policies with different horizons are not
-  recomputable (:mixed-horizons) rather than reported under one of them.
+  - the G normalization the receipt declares must be recognized and must
+    reproduce, from the recorded raw sums, the terms whose sum is the G the
+    selector compared.
+  A term is evaluated when recorded and finite; zero counts.
+
+  Each compared policy keeps its own horizon. Policies with different
+  horizons are comparable only as per-step normalized rates
+  (:per-step-capacity-and-pattern), which Requirements.Q4 states over the
+  per-policy records; absent, unrecognized or unbound normalization is not
+  recomputable, and differing recognized laws are recorded for Q4 to fail.
 
   The carrier is computed by the decision and recomputed by the exporter
   from the persisted decision alone."
-  (:require [futon2.aif.interpretation-evidence :as evidence]
+  (:require [futon2.aif.cascade-observation-scoring :as scoring]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.reading-policy-preference :as pref]))
 
-(def schema :wm/q4-preference-v1)
+(def schema :wm/q4-preference-v2)
 (def seal previous-run/seal)
 (def intact? previous-run/intact?)
 
@@ -49,14 +57,44 @@
                      (and (< 1 (count ws)) (apply < ws))))
                  by-met))))
 
+(defn- normalization-refusal
+  "nil when the receipt's normalization NORM is recognized, its inputs are
+  the receipt's horizon H and schedule SCHED, and it reproduces the terms
+  whose sum is the compared G; else the refusal kind."
+  [norm h sched g terms]
+  (let [{:keys [declaration raw fit-ambiguity]} norm
+        bound (:terms norm)
+        recomputed (scoring/normalize-g-terms declaration raw)
+        expected {:risk (:risk bound)
+                  :ambiguity (when (and (number? (:ambiguity bound)) (number? fit-ambiguity))
+                               (+ (double (:ambiguity bound)) fit-ambiguity))
+                  :information-gain (:information-gain bound)}]
+    (cond
+      (or (nil? declaration) (= :absent (:status norm))) :normalization-absent
+      (nil? recomputed) :normalization-unrecognized
+      (and (= :per-step-capacity-and-pattern (:law declaration))
+           (not (and (= h (:horizon-steps declaration))
+                     (= (max 2 (count (get sched 1))) (:outcome-count declaration)))))
+      :normalization-inputs-not-the-receipt's
+      (not= recomputed bound) :normalization-not-bound-to-g-terms
+      (not (and (finite? g) (every? finite? (vals expected))
+                (<= (Math/abs (- (double g) (- (+ (:risk expected) (:ambiguity expected))
+                                               (:information-gain expected))))
+                    pref/normalization-tolerance)))
+      :normalization-not-bound-to-g-terms
+      ;; a recorded finite term must be the normalized one
+      (some (fn [[t v]] (and (finite? v) (not= v (get expected t)))) terms)
+      :normalization-not-bound-to-g-terms)))
+
 (defn- policy-facts
-  "One compared policy's Q4 facts from its RECEIPT and certificate ROW, or
+  "One compared policy's Q4 record from its RECEIPT and certificate ROW, or
   {:refusal kind}."
   [k receipt row]
   (let [authority (:authority receipt)
         h (:horizon receipt)
         sched (:preference receipt)
-        terms (:g-terms receipt)]
+        terms (:g-terms receipt)
+        norm (:normalization receipt)]
     (cond
       (nil? receipt) {:refusal :compared-policy-without-receipt}
       (not= :certified (:status receipt)) {:refusal :receipt-not-certified}
@@ -71,16 +109,19 @@
       (not= sched (pref/recompute-progress-preference (:progress-tokens authority) h))
       {:refusal :preference-not-recomputable}
       :else
-      (let [term-ok (into {} (for [t [:risk :ambiguity :information-gain]]
-                               [t (finite? (get terms t))]))]
+      (if-let [refusal (normalization-refusal norm h sched (:g receipt) terms)]
+        {:refusal refusal}
         {:policy-key k
          :policy-id (:policy-id receipt)
          :receipt (evidence/value-digest receipt)
          :horizon h
-         :steps (vec (sort (keys sched)))
-         :graded-steps (vec (sort (for [[tau d] sched :when (graded-step? d)] tau)))
+         ;; Lean indexes steps from 0; C-tau is stated for tau = 1..H
+         :preference-steps (vec (sort (map dec (keys sched))))
+         :graded-steps (vec (sort (for [[tau d] sched :when (graded-step? d)] (dec tau))))
          :semantics :progressive
-         :terms term-ok}))))
+         :normalization (select-keys (:declaration norm) [:law :version])
+         :terms (into {} (for [t [:risk :ambiguity :information-gain]]
+                           [t (finite? (get terms t))]))}))))
 
 (defn carrier
   "The sealed Q4 carrier for DECISION (a reading-family selection)."
@@ -97,7 +138,6 @@
                         (policy-facts k (first rs) (get rows k)))))
                   compared)
         refusal (some :refusal per)
-        horizons (set (map :horizon per))
         base {:schema schema :compared compared}]
     (seal
      (cond
@@ -107,21 +147,10 @@
        (some #(not (prefix-admission/reading-policy-key (:id %))) (vals rows))
        (assoc base :status :not-recomputable :reason :compared-identity-not-structural)
        refusal (assoc base :status :not-recomputable :reason refusal)
-       (< 1 (count horizons))
-       (assoc base :status :not-recomputable :reason :mixed-horizons
-              :horizons (vec (sort horizons)))
        :else
-       (let [h (first horizons)
-             count-of (fn [t] (count (filter #(get-in % [:terms t]) per)))]
+       (let [count-of (fn [t] (count (filter #(get-in % [:terms t]) per)))]
          (assoc base :status :certified
                 :policies per
-                :horizon h
-                ;; Lean indexes steps from 0; C-tau is stated for tau = 1..H
-                :preference-steps (vec (sort (set (map dec (mapcat :steps per)))))
-                :graded-steps (vec (sort (map dec (reduce (fn [a s] (filter (set s) a))
-                                                          (:graded-steps (first per))
-                                                          (map :graded-steps per)))))
-                :semantics :progressive
                 :g-terms {:risk (every? #(get-in % [:terms :risk]) per)
                           :ambiguity (every? #(get-in % [:terms :ambiguity]) per)
                           :information-gain (every? #(get-in % [:terms :information-gain]) per)}
@@ -146,10 +175,23 @@
 (defn lean-q4
   "Requirements.Q4, mirrored over a verified carrier, for tests."
   [q4]
-  (let [h (:horizon q4) n (count (:compared q4)) rng (vec (range h))]
+  (let [ps (:policies q4)
+        n (count (:compared q4))
+        laws (set (map :normalization ps))]
     (and (every? true? (vals (:g-terms q4)))
-          (pos? h)
-          (= (:preference-steps q4) rng)
-          (or (not= :progressive (:semantics q4)) (= (:graded-steps q4) rng))
-          (= n (get-in q4 [:counts :risk]) (get-in q4 [:counts :ambiguity])
-             (get-in q4 [:counts :information-gain])))))
+         (= n (get-in q4 [:counts :risk]) (get-in q4 [:counts :ambiguity])
+            (get-in q4 [:counts :information-gain]))
+         ;; the per-policy records are exactly the compared policies
+         (= (count ps) (count (set (map :policy-key ps))))
+         (= (set (map :policy-key ps)) (set (:compared q4)))
+         (every? (fn [p]
+                   (let [rng (vec (range (:horizon p)))]
+                     (and (every? true? (vals (:terms p)))
+                          (pos? (:horizon p))
+                          (= (:preference-steps p) rng)
+                          (or (not= :progressive (:semantics p)) (= (:graded-steps p) rng)))))
+                 ps)
+         ;; one common law; only per-step rates compare different horizons
+         (= 1 (count laws))
+         (or (= :per-step-capacity-and-pattern (:law (first laws)))
+             (= 1 (count (set (map :horizon ps))))))))

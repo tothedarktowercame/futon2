@@ -18,7 +18,8 @@
   record lacks evidence the validator needs (model provenance/pins), it
   returns a precise typed absence and names the architectural gap rather
   than fabricating the missing authority."
-  (:require [clojure.set :as cset]))
+  (:require [clojure.set :as cset]
+            [futon2.aif.cascade-observation-scoring :as scoring]))
 
 (def receipt-schema (keyword "wm/reading-policy-preference-receipt/v1"))
 
@@ -103,6 +104,35 @@
 ;; Validation and receipt
 ;; ---------------------------------------------------------------------------
 
+(defn normalization-binding
+  "The G normalization the scored RECORD declares, bound to the terms the
+  scorer produced, against a SCHEDULE of horizon H; or {:refusal kind}.
+  The scorer's terms (before the reading fit's ambiguity is added) must be
+  exactly the declared normalization of the recorded raw sums, and the
+  declaration's horizon, outcome count and pattern count must be the
+  record's own. A record with no declaration yields {:status :absent}."
+  [record sched h]
+  (let [decl (:g-normalization record)
+        raw (:raw-g-terms record)
+        terms {:risk (:risk record)
+               :ambiguity (if (contains? record :scorer-ambiguity)
+                            (:scorer-ambiguity record) (:ambiguity record))
+               :information-gain (:information-gain record)}
+        per-step? (= :per-step-capacity-and-pattern (:law decl))]
+    (cond
+      (nil? decl) {:status :absent :reason :no-normalization-declaration-in-scored-record}
+      (nil? (scoring/normalize-g-terms decl raw)) {:refusal :g-normalization-unrecognized}
+      (and per-step?
+           (not (and (= h (:horizon-steps decl))
+                     (= (max 2 (count (get sched 1))) (:outcome-count decl))
+                     (= (scoring/candidate-pattern-count (:candidate record))
+                        (:pattern-count decl)))))
+      {:refusal :g-normalization-inputs-not-the-record's}
+      (not= terms (scoring/normalize-g-terms decl raw))
+      {:refusal :g-normalization-not-bound-to-terms}
+      :else {:declaration decl :raw raw :terms terms
+             :fit-ambiguity (get-in record [:fit :fit-ambiguity] 0.0)})))
+
 (defn- refuse [record kind & extras]
   (merge {:schema receipt-schema
           :status :refused :kind kind
@@ -178,6 +208,7 @@
                                                  (some? (get scorer-terms k))
                                                  (not= (get cert-terms k) (get scorer-terms k)))]
                                   k))
+            normalization (normalization-binding record sched horizon)
             fit-ambiguity (get-in record [:fit :fit-ambiguity])
             composition-wrong
             (and fit-adjusted?
@@ -225,6 +256,10 @@
           (refuse record :g-composition-mismatch
                   :reason "record's ambiguity or G is not the scorer's term plus the stated fit ambiguity")
 
+          (:refusal normalization)
+          (refuse record (:refusal normalization)
+                  :reason "the declared G normalization does not reproduce the scorer's terms from the recorded raw sums")
+
           (nil? g)
           (refuse record :g-absent)
 
@@ -254,6 +289,7 @@
                    :horizon horizon
                    :preference sched
                    :g g :g-terms g-terms
+                   :normalization normalization
                    ;; The old live-C is diagnostic only and did not select
                    ;; (§7.3: recorded, not scored, cascade_decision.clj:972-985).
                    :live-c {:role :diagnostic-only :selected false}

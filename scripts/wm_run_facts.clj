@@ -20,7 +20,10 @@
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
-   "comparedPolicies" "cascadesWithoutG" "horizonLength" "preferenceSteps"
+   "comparedPolicies" "cascadesWithoutG" "policyPreferences"
+   ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
+   ;; per compared policy), kept for the history table and alert text
+   "horizonLength" "preferenceSteps"
    "gradedPreferenceSteps" "preferenceSemantics" "gTerms" "policiesWithRiskTerm"
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
@@ -36,34 +39,52 @@
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
 
+(def ^:private law-names
+  {:per-step-capacity-and-pattern "perStepCapacityAndPattern"
+   :raw-cumulative "rawCumulative"})
+
 (defn q4-facts
   "Requirements Q4 for a reading-family record, from the persisted
   decision's Q4 carrier only (q4-preference/verify-record): the compared
-  policies, their horizon, steps, grading and terms. nil for a record of
-  another route, which keeps the historical reader."
+  policies, one record per compared policy (its own horizon, steps,
+  grading, semantics, G normalization and evaluated terms), and the term
+  counts. nil for a record of another route, which keeps the historical
+  reader."
   [record]
   (when (= :wm/reading-policy-family-v1
            (get-in record [:decision :selection-certificate :selection-route]))
-    (let [v (q4/verify-record record)]
+    (let [v (q4/verify-record record)
+          single (not-recomputable "per-policy horizons: see policyPreferences")
+          singles {"horizonLength" single "preferenceSteps" single
+                   "gradedPreferenceSteps" single "preferenceSemantics" single}]
       (if-not (= :verified (:status v))
         (let [why (not-recomputable (str "Q4 carrier " (name (:reason v))))]
-          (zipmap ["comparedPolicies" "horizonLength" "preferenceSteps"
-                   "gradedPreferenceSteps" "preferenceSemantics" "gTerms"
-                   "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
-                   "policiesWithInformationTerm"]
-                  (repeat why)))
+          (merge singles
+                 (zipmap ["comparedPolicies" "policyPreferences" "gTerms"
+                          "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
+                          "policiesWithInformationTerm"]
+                         (repeat why))))
         (let [c (:carrier v)]
-          {"comparedPolicies" (vec (sort (map pr-str (:compared c))))
-           "horizonLength" (:horizon c)
-           "preferenceSteps" (:preference-steps c)
-           "gradedPreferenceSteps" (:graded-steps c)
-           "preferenceSemantics" (name (:semantics c))
-           "gTerms" {"risk" (get-in c [:g-terms :risk])
-                     "ambiguity" (get-in c [:g-terms :ambiguity])
-                     "informationGain" (get-in c [:g-terms :information-gain])}
-           "policiesWithRiskTerm" (get-in c [:counts :risk])
-           "policiesWithAmbiguityTerm" (get-in c [:counts :ambiguity])
-           "policiesWithInformationTerm" (get-in c [:counts :information-gain])})))))
+          (merge
+           singles
+           {"comparedPolicies" (vec (sort (map pr-str (:compared c))))
+            "policyPreferences"
+            (vec (for [p (:policies c)]
+                   {"policy" (pr-str (:policy-key p))
+                    "horizon" (:horizon p)
+                    "preferenceSteps" (:preference-steps p)
+                    "gradedPreferenceSteps" (:graded-steps p)
+                    "semantics" (name (:semantics p))
+                    "normalization" (law-names (get-in p [:normalization :law]))
+                    "terms" {"risk" (get-in p [:terms :risk])
+                             "ambiguity" (get-in p [:terms :ambiguity])
+                             "informationGain" (get-in p [:terms :information-gain])}}))
+            "gTerms" {"risk" (get-in c [:g-terms :risk])
+                      "ambiguity" (get-in c [:g-terms :ambiguity])
+                      "informationGain" (get-in c [:g-terms :information-gain])}
+            "policiesWithRiskTerm" (get-in c [:counts :risk])
+            "policiesWithAmbiguityTerm" (get-in c [:counts :ambiguity])
+            "policiesWithInformationTerm" (get-in c [:counts :information-gain])}))))))
 
 (defn- lean-entry [e]
   (into {} (map (fn [[k v]] [(name k) (if (keyword? v) (str v) v)])) e))
@@ -575,6 +596,7 @@
                                         (set (for [c candidates :when (numeric-g? c)]
                                                (action-identity/digest (:id c))))))
                                       (nr "constructed cascades or per-candidate numeric G absent"))
+               "policyPreferences" (nr "no per-policy G normalization declaration on this route")
                "horizonLength" (or horizon (nr "common declared per-policy observation model unavailable"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
                                      (nr "common declared per-policy preference schedule unavailable"))

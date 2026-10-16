@@ -30,6 +30,22 @@
                        (format "{ targets := %s, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d }"
                                (fs (x "targets")) (fs (x "slice")) (fs (x "pool"))
                                (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")))) "]"))
+(def semantics {"terminal-only" "terminalOnly" "constant" "constant"
+                "progressive" "progressive"})
+(defn policy-preferences
+  "Each compared policy's own horizon, steps, grading, semantics, G
+  normalization and terms. An unknown semantics or normalization name
+  renders as no constructor, which Lean refuses to elaborate."
+  [ps]
+  (str "[" (str/join ", "
+                     (for [p ps
+                           :let [t (p "terms")]]
+                       (format "{ policy := %d, horizon := %d, preferenceSteps := %s, gradedPreferenceSteps := %s, semantics := .%s, normalization := .%s, terms := ⟨%s, %s, %s⟩ }"
+                               (id (p "policy")) (p "horizon")
+                               (nat-fs (p "preferenceSteps")) (nat-fs (p "gradedPreferenceSteps"))
+                               (semantics (p "semantics")) (p "normalization")
+                               (bool-lit (t "risk")) (bool-lit (t "ambiguity"))
+                               (bool-lit (t "informationGain"))))) "]"))
 (defn entry-term [entry]
   (format "{task := %d, observation := %d, evidence := %d, rankingLaw := %d, rankingVersion := %d, dependencies := %s, comparisonKey := %s, freshnessEpoch := %d}"
           (id (field entry :task)) (id (field entry :observation))
@@ -73,8 +89,7 @@
    :q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
         "libraryPatternCount" "constructorPatternCount"]
    :q3 ["cascadesWithoutG"]
-   :q4 ["horizonLength" "preferenceSteps" "gradedPreferenceSteps"
-        "preferenceSemantics" "gTerms"
+   :q4 ["policyPreferences" "gTerms"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
         "policiesWithInformationTerm" "comparedPolicies"]
    :q5 ["interpretationOrder"]
@@ -97,12 +112,8 @@
                               (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))))
         :q3 (ev-known (str "cascadesWithoutG := " (fs (facts "cascadesWithoutG"))))
         :q4 (let [g (facts "gTerms")]
-              (ev-known (format "horizonLength := %d, preferenceSteps := %s, gradedPreferenceSteps := %s, preferenceSemantics := .%s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
-                                (facts "horizonLength") (nat-fs (facts "preferenceSteps"))
-                                (nat-fs (facts "gradedPreferenceSteps"))
-                                ({"terminal-only" "terminalOnly" "constant" "constant"
-                                  "progressive" "progressive"}
-                                 (facts "preferenceSemantics"))
+              (ev-known (format "policyPreferences := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
+                                (policy-preferences (facts "policyPreferences"))
                                 (bool-lit (g "risk")) (bool-lit (g "ambiguity"))
                                 (bool-lit (g "informationGain"))
                                 (facts "policiesWithRiskTerm")

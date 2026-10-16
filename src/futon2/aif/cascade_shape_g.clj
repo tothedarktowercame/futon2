@@ -277,6 +277,13 @@
                  :risk (get-in entry [:certificate :g-terms :risk])
                  :ambiguity (get-in entry [:certificate :g-terms :ambiguity])
                  :information-gain information
+                 ;; Q4: G is compared across horizons only as the declared
+                 ;; normalized rates; the declaration and the raw sums it
+                 ;; normalized travel with the scored record
+                 :g-normalization (get-in entry [:certificate :g-terms :normalization-declaration])
+                 :raw-g-terms (let [raw (get-in entry [:certificate :g-terms :raw])]
+                                {:risk (:risk raw) :ambiguity (:ambiguity raw)
+                                 :information-gain (:expected-information-gain raw)})
                  :g (:controller-score entry)
                  :scorer-result ranked}]
      (if (and entry (Double/isFinite (double (:g result))))

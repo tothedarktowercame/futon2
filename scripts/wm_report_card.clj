@@ -49,8 +49,7 @@
    :Q2 ["openMissions" "openExcursions" "openTickets" "targetConstruction"
         "libraryPatternCount" "constructorPatternCount"]
    :Q3 ["cascadesWithoutG"]
-   :Q4 ["gTerms" "horizonLength" "preferenceSteps" "gradedPreferenceSteps"
-        "preferenceSemantics"
+   :Q4 ["gTerms" "policyPreferences"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
         "policiesWithInformationTerm" "comparedPolicies"]
    :Q5 ["interpretationOrder"]
@@ -85,17 +84,30 @@
                (= (f "constructorPatternCount")
                   (count (tc-union rows "pool")))))
     :Q3 (empty? (f "cascadesWithoutG"))
-    :Q4 (let [g (f "gTerms") n (f "horizonLength") expected (set (range n))
-              pc (count (f "comparedPolicies"))]
+    :Q4 (let [g (f "gTerms") ps (f "policyPreferences")
+              compared (f "comparedPolicies") pc (count compared)
+              laws (set (map #(% "normalization") ps))]
           (and (true? (g "risk")) (true? (g "ambiguity"))
-               (true? (g "informationGain")) (pos? n)
-               (= expected (set (f "preferenceSteps")))
-               ;; as in Lean: grading is required only of progressive C
-               (or (not= "progressive" (f "preferenceSemantics"))
-                   (= expected (set (f "gradedPreferenceSteps"))))
+               (true? (g "informationGain"))
                (= pc (f "policiesWithRiskTerm")
                      (f "policiesWithAmbiguityTerm")
-                     (f "policiesWithInformationTerm"))))
+                     (f "policiesWithInformationTerm"))
+               ;; as in Lean: one record per compared policy, each over its
+               ;; own horizon; grading is required only of progressive C
+               (= (count ps) (count (set (map #(% "policy") ps))))
+               (= (set compared) (set (map #(% "policy") ps)))
+               (every? (fn [p]
+                         (let [expected (set (range (p "horizon")))]
+                           (and (every? true? (vals (p "terms")))
+                                (pos? (p "horizon"))
+                                (= expected (set (p "preferenceSteps")))
+                                (or (not= "progressive" (p "semantics"))
+                                    (= expected (set (p "gradedPreferenceSteps")))))))
+                       ps)
+               ;; one common law; only per-step rates compare horizons
+               (= 1 (count laws))
+               (or (= #{"perStepCapacityAndPattern"} laws)
+                   (= 1 (count (set (map #(% "horizon") ps)))))))
     :Q5 (= "selectionBeforeInterpretation" (f "interpretationOrder"))
     :Q6 (not (and (= "refused" (f "previousOutcome"))
                   (= (f "previousInputDigest") (f "currentInputDigest"))

@@ -142,12 +142,181 @@ Not run: full CI, live click, hot load.
 
 ## Open (proposed minimal amendment)
 
-- **Mixed horizons.** Live reading families with policies of different
-  pattern counts will usually make Q4 NR with `:mixed-horizons`. A minimal
-  truthful amendment would let Q4 range over per-policy records
-  `{horizon, preferenceSteps, gradedPreferenceSteps, semantics, terms}`, each
-  with its own H. That also raises a question for theory: is G comparable
-  across policies whose horizons differ? The selector compares them today.
-  This amendment is not made here.
-- **Historical records.** Records from routes other than the reading family
-  keep the old exporter reader.
+Superseded by the amendment below.
+
+## Amendment: per-policy horizons under certified normalization
+
+Requested by codex-68 (invoke-1792109255347-14874-109ac40e). futon2 branch
+`claude-10-q5-family` from `9cd91ee65`; mathlib4 `darktower` from
+`9805823462`.
+
+**Ruling (codex-68).** Each compared policy keeps its own horizon. Mixed
+horizons are comparable only because the scorer normalizes every policy's
+G terms the same declared way, `:per-step-capacity-and-pattern`:
+risk/(H·log outcome-count), ambiguity/H, information gain/pattern count.
+G is then a controller objective over per-step rates, not raw cumulative
+EFE. Per-policy horizons are not accepted when the normalization is absent,
+differs between policies, is unrecognized, or is not bound to the G terms
+that were compared.
+
+### Lean (`DarkTower/WarMachine/Requirements.lean`)
+
+- `RunFacts.horizonLength`, `preferenceSteps`, `gradedPreferenceSteps` and
+  `preferenceSemantics` are removed. They are replaced by
+  `policyPreferences : List PolicyPreference`, one record per compared
+  policy: policy id, its own horizon, steps, graded steps, semantics,
+  `normalization : GNormalization`, and its evaluated `terms`.
+- `GNormalization` has two constructors: `perStepCapacityAndPattern` and
+  `rawCumulative` (the unnormalized horizon sum). An absent or unrecognized
+  declaration has no constructor, so it is NR at export.
+- `Q4` now requires:
+  - the run-level terms and counts, as before;
+  - every record's policy is compared, every compared policy has a record,
+    and there are as many records as compared policies (no omission, extra
+    or duplicate);
+  - each record is `Valid`: all three terms evaluated, a positive horizon,
+    a preference at every step `0..H-1`, and grading at every step under
+    progressive semantics;
+  - one common normalization across the records, and equal horizons unless
+    that law is `perStepCapacityAndPattern`.
+- New theorems, all `by decide`:
+  - holds: `good_Q4_mixed_horizons` (H = 4 and 2, per-step) and
+    `equal_horizons_raw_Q4`;
+  - fails: `mixed_horizons_raw_not_Q4`, `mixed_normalization_not_Q4`,
+    `omitted_policy_record_not_Q4`, `foreign_policy_record_not_Q4`,
+    `duplicate_policy_record_not_Q4`, `policy_term_missing_not_Q4`.
+
+  `good` now compares 2 policies rather than 1911. No other requirement
+  reads `comparedPolicies`, and `decide` over 1911 records would not
+  finish. The `deterministicTerminal` and `progressiveRowsMissing`
+  witnesses are restated per policy.
+
+### Runtime
+
+- **Scorer** (`cascade_observation_scoring`): `g-normalization-laws` names
+  the recognized laws with their versions. `normalize-g-terms` computes the
+  terms from a declaration and the raw sums; the scorer itself uses it, so
+  recomputation is exact. Each scored entry records
+  `:normalization-declaration` (law, version, H, outcome count, pattern
+  count). `cascade_shape_g/score-arranged` copies the declaration and the
+  raw sums into the scored record (`:g-normalization`, `:raw-g-terms`).
+- **Receipt** (`reading-policy-preference/certify`): the receipt carries
+  `:normalization {:declaration :raw :terms :fit-ambiguity}`. Certify
+  refuses a declaration that is unrecognized, whose H, outcome count or
+  pattern count are not the record's, or that does not reproduce the
+  scorer's terms. A record with no declaration is certified with
+  `{:status :absent}`, and the Q4 carrier refuses it.
+- **Carrier** (`q4-preference`, schema `:wm/q4-preference-v2`): one entry
+  per post-Q6 compared policy: structural key, H, steps (τ−1), graded
+  steps, semantics, `{:law :version}`, and term booleans. Run-level term
+  conjunction and counts are kept. There is no longer a mixed-horizon
+  refusal. A policy's normalization refuses as follows:
+  - `:normalization-absent`;
+  - `:normalization-unrecognized` (unknown law or version);
+  - `:normalization-inputs-not-the-receipt's` (H or outcome count);
+  - `:normalization-not-bound-to-g-terms`, when any of these fails:
+    - the declared normalization of the raw sums equals the bound terms;
+    - risk + (ambiguity + fit ambiguity) − information gain equals the
+      compared G within 1e-9;
+    - every recorded finite term equals its normalized value.
+
+  Two recognized laws in one comparison are recorded, and Q4 fails on
+  them.
+- **Exporter**: `policyPreferences` comes from the verified carrier only.
+  On the reading route, the four run-wide fields are NR ("per-policy
+  horizons: see policyPreferences"); they stay exported for the history
+  table and alert text. Other routes export `policyPreferences` as NR,
+  because they carry no normalization declaration.
+- **Report card**: the Q4 verdict mirrors the amended Lean Q4.
+- **Lean term generator** (`wm_check_run_facts`): renders
+  `policyPreferences`.
+
+### Evidence
+
+**`wm.q4-preference-route-test`: 4 tests, 90 assertions, 0 failures,** on
+the production runner seam (`run-opportunity!`, one selector call per
+run). The tests ran with `load-identity/required-sources` pointed at the
+worktree, as `generate.clj` does; otherwise the runner refuses on source
+drift from the canonical checkout.
+
+- **Positive** (H = 2, 2 policies): one record per compared policy, with
+  steps and grading `[0 1]`, progressive, and
+  `{:law :per-step-capacity-and-pattern :version 1}`. Every receipt
+  carries the scorer's declaration. The exporter's `policyPreferences`
+  matches `comparedPolicies`, `horizonLength` is NR, and the report card
+  gives `:pass`.
+- **Q6:** 2 certified, 1 compared, 1 record; Q4 holds.
+- **Mixed horizons** (`p/a` + `p/c`, H = 2 and 3): certified, steps
+  `range H` per policy. Q4 holds and the report card gives `:pass`.
+  - Both receipts re-declared raw cumulative (consistently): certified,
+    Q4 fails, the report card gives `:fail`.
+  - One receipt re-declared: Q4 fails.
+- **Forgeries,** each with the carrier recomputed:
+  - missing or non-finite term: certified, Q4 fails;
+  - normalization absent (removed, or the scorer's `{:status :absent}`):
+    `:normalization-absent`;
+  - unknown law or version: `:normalization-unrecognized`;
+  - declared H not the receipt's: `:normalization-inputs-not-the-receipt's`;
+  - raw sums edited, normalized terms not those of the compared G, or a
+    recorded term not the normalized one: `:normalization-not-bound-to-g-terms`;
+  - the previous round's forgeries keep their reasons.
+- **Zero term:** a zero information gain, forged consistently (raw sum,
+  term, receipt G and certificate row G), still certifies, and Q4 holds.
+- **Carrier forgeries** (omitted, extra and foreign policy records):
+  the mirrored Q4 fails, and the exporter refuses them with
+  `:q4-carrier-not-bound-to-record`.
+
+**Planted controls** (`~/notes/q4n/plants/`), each applied alone, run
+against the route test, then reverted:
+
+| plant | failures |
+|---|---|
+| N1 scored record does not retain the declaration | 41 failures, 5 errors |
+| N2 carrier skips the normalization checks | 12 |
+| N3 unknown law dispatched as per-step | 0 (the guard in front of the dispatch already rejects it) |
+| N3b the recognition guard removed | 2 |
+| N4 raw-to-terms binding skipped | 2 |
+| N5 Q4 mirror drops the common-law clause | 2 |
+| N6 Q4 mirror drops compared-identity equality | 2 |
+| N7 report card accepts any law | 1 |
+| P2 zero term treated as absent | 2 |
+
+**Lean.** `Requirements.lean` and `RequirementsReader.lean` build with no
+errors (`lake build DarkTower.WarMachine.RequirementsReader`). The
+fixtures are generated from runner exports by
+`test/fixtures/q4-lean/generate.clj` and checked with `lake env lean`:
+
+| fixture | Q4 |
+|---|---|
+| `Q4Single` | holds |
+| `Q4Excluded` | holds |
+| `Q4MixedHorizons` | holds |
+| `Q4TermMissing` | violated |
+| `Q4MixedHorizonsRaw` | violated |
+| `Q4MixedNormalization` | violated |
+| `Q4NormalizationUnknown` | unverifiable |
+| `Q4NormalizationAbsent` | unverifiable |
+| `Q4OmittedPolicyRecord` (export edited) | violated |
+| `Q4ForeignPolicyRecord` (export edited) | violated |
+
+The existing Q5, Q6 and Q8 fixtures (7 files) elaborate unchanged, with Q4
+NR as before. Their NR reason strings still name the retired fields; they
+are strings, not fields, and were not regenerated.
+
+**Affected controls,** 62 namespaces, branch against base `9cd91ee65`,
+same harness:
+
+| | tests | assertions | failures | errors |
+|---|---|---|---|---|
+| branch | 807 | 8253 | 355 | 30 |
+| base | 807 | 8215 | 355 | 30 |
+
+The failing tests are identical by test name and file. They are the
+pre-existing failures, mostly in `full-loop-runner-test`.
+
+**Static gates.**
+- clj-kondo: 0 errors. It reports 5 warnings, the same 5 as base.
+- check-parens: OK.
+- `git diff --check`: clean in both repos.
+
+Not run: full CI, live click, hot load.
