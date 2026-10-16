@@ -140,6 +140,21 @@ Q6 and Q5 namespaces, the exporter, the report card and
 
 Not run: full CI, live click, hot load.
 
+## Independent review
+
+Codex-68 independently verified that the carrier recomputes normalized terms
+from retained raw sums and parameters, then binds their composition to the
+exact G in the post-Q6 selector menu.  The production Q4 namespace reran as 4
+tests, 90 assertions, 0 failures and 0 errors.
+
+Review found one vacuity defect in the first Lean amendment: after removal of
+the global positive horizon, an empty compared-policy set and empty preference
+list could satisfy Q4.  `Requirements.Q4` now requires
+`comparedPolicies.Nonempty`, with `no_compared_policies_not_Q4` as an
+adversarial witness.  This agrees with the runtime carrier's existing
+`:no-compared-policy` refusal.  The direct `Requirements.lean` check passes
+after the repair.
+
 ## Open (proposed minimal amendment)
 
 Superseded by the amendment below.
