@@ -232,3 +232,13 @@ click. Please run it with the debugger attached." This authorizes exactly one
 further ordinary click with the debugger attached before issue. Under this
 document's standing mechanism, `allocated` rises from 72 to **73**. No prior
 charge is reclaimed.
+
+## Joe's explicit repair-loop grant, 2026-10-16 — one click
+
+After confirming that recent clicks had been invoked individually instead of
+through the existing run/repair loop, Joe directed codex-68: "OK, please run
+one click with the explicit repair loop you mentioned". This authorizes
+exactly one ordinary click through `scripts/wm_click_repair_loop.py`, including
+its hot-load, debugger record and repair adjudication. Under this document's
+standing mechanism, `allocated` rises from 73 to **74**. No prior charge is
+reclaimed.
