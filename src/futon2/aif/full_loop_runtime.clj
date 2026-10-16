@@ -86,9 +86,7 @@
         opts (-> opts
                  (update :outer-task-policy #(or % :meta))
                  (assoc :outer-task-selection-fn pinned-outer-selector))
-        selected-judgment (atom nil)
-        target-reading-answer (or (:selected-target-reading-answer-fn opts)
-                                  (designated-author-answer-fn opts))]
+        selected-judgment (atom nil)]
     {:judge-fn (fn [days]
                  (try
                    (let [generated (selection-judge opts days)]
@@ -114,9 +112,15 @@
      :interpretation-ask-fn (click-ask/click-ask-fn opts)
      :selected-target-reading-fn
      (fn [runner-opts judgement]
-       (selected-target-reading/repair!
-        (assoc (merge opts runner-opts) :answer-fn target-reading-answer)
-        judgement))
+       ;; The runner mints :registered-run/job-ledger after production-defaults
+       ;; is built. Construct the Agency answer port here, from the merged live
+       ;; options, or dispatch! refuses before it can create the author job.
+       (let [live-opts (merge opts runner-opts)
+             answer-fn (or (:selected-target-reading-answer-fn live-opts)
+                           (designated-author-answer-fn live-opts))]
+         (selected-target-reading/repair!
+          (assoc live-opts :answer-fn answer-fn)
+          judgement)))
      :scan-render-fn wm/render-war-machine
      :effective-run-configuration-fn wm/effective-run-configuration
      :mode-flags-fn wm/arena-mode-flags}))

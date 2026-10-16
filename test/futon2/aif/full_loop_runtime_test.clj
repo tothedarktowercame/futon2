@@ -3,6 +3,7 @@
             [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.selected-target-reading :as selected-target-reading]
@@ -115,6 +116,28 @@
     (is (fn? (:selected-target-reading-fn @runner-opts))
         "the real production wrapper must pass the port on runner opts")
     (is (= [["M-production" "wm-author"]] @contacted))))
+
+(deftest selected-target-answer-is-built-with-the-run-local-job-ledger
+  (let [ledger (atom {:order [] :jobs {}})
+        answer-opts (atom nil)]
+    (with-redefs [runner/agent-roster
+                  (constantly {"wm-author" {:status :idle :invoke-ready? true}})
+                  flight-runner/agency-answer-fn
+                  (fn [{:keys [opts]}]
+                    (reset! answer-opts opts)
+                    (fn [_] {:state :not-contacted :reason :test-probe}))
+                  selected-target-reading/repair!
+                  (fn [opts _]
+                    ((:answer-fn opts) {:target "M-production"}))]
+      (let [defaults (runtime/production-defaults
+                      {:run-id "production-selected-reading"
+                       :author "wm-author"})]
+        ((:selected-target-reading-fn defaults)
+         {:click-id "wm-click-probe"
+          :registered-run/job-ledger ledger}
+         {})))
+    (is (identical? ledger (:registered-run/job-ledger @answer-opts)))
+    (is (= "wm-click-probe" (:click-id @answer-opts)))))
 
 (deftest runner-refuses-an-absent-runtime-default
   (binding [runner/*runtime-defaults* nil]
