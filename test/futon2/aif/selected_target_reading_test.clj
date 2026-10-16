@@ -85,6 +85,19 @@
         j (judgement "M-selected" (.getPath source) excerpt)]
     (testing "the selected target alone supplies the need"
       (is (= "M-selected" (:target (sut/selected-need j))))
+      (is (= "M-selected"
+             (:target (sut/selected-need (dissoc j :outer-task-selection))))
+          "the sole target-local family remains usable before checkpoint retention")
+      (is (nil? (sut/selected-need
+                 (-> j
+                     (dissoc :outer-task-selection)
+                     (update-in [:decision :selection-certificate
+                                 :target-policy-field :families]
+                                conj
+                                {:target-id "M-other"
+                                 :failures [{:kind :no-current-target-reading
+                                             :expected-digest excerpt}]}))))
+          "several families never permit a first-target fallback")
       (is (nil? (sut/selected-need
                  (assoc-in j [:decision :selection-certificate
                               :target-policy-field :families 0 :target-id]

@@ -24,9 +24,17 @@
   "Return the exact outer-selected target/source/current-digest need, or nil.
   A failure belonging to another target is never eligible."
   [judgement]
-  (let [target (get-in judgement [:outer-task-selection :chosen :id])
+  (let [outer-target (get-in judgement [:outer-task-selection :chosen :id])
         families (get-in judgement [:decision :selection-certificate
                                     :target-policy-field :families])
+        ;; The live judge can expose the target-local family before its outer
+        ;; receipt is retained on the runner checkpoint.  In that interval a
+        ;; single family is still an immutable target identity: production
+        ;; constructs the inner field for exactly one outer-selected target.
+        ;; Never infer from the first of several families.
+        sole-family-target (when (= 1 (count families))
+                             (:target-id (first families)))
+        target (or outer-target sole-family-target)
         family (first (filter #(= target (:target-id %)) families))
         failure (first (filter #(contains? #{:no-current-target-reading
                                              :stale-target-reading}
