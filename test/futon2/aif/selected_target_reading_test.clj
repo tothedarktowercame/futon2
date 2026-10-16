@@ -132,6 +132,13 @@
     (is (= :selected-target-reading-unpinned (:kind result)))
     (is (zero? @contacts))))
 
+(deftest author-prompt-names-the-validators-complete-relation-vocabulary
+  (let [text (sut/prompt {:request {:sentences []}})]
+    (is (.contains text
+                   "context, condition, contrast, action, rationale, goal, dependency"))
+    (is (.contains text
+                   "Do not substitute ordinary-language labels such as evidence, sequence, elaboration, or authority"))))
+
 (deftest runner-resumes-inner-construction-once-for-the-same-outer-choice
   (let [target "M-selected"
         j (judgement target "/source.md" (apply str (repeat 64 "a")))
