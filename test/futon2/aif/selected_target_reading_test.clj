@@ -141,4 +141,7 @@
     (is (= target (get-in result [:judgement :outer-task-selection :chosen :id])))
     (is (= target (get-in result [:judgement :decision :action :target])))
     (is (= "wm-author"
-           (get-in result [:judgement :selected-target-reading-request :author])))))
+           (get-in result [:judgement :selected-target-reading-request :author])))
+    (is (= (get-in result [:judgement :selected-target-reading-request])
+           (get-in result [:judgement :decision :selection-certificate
+                           :selected-target-reading-request])))))

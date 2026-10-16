@@ -29,11 +29,12 @@
   currently invoke-ready; it never consults a fallback roster seat."
   [opts]
   (let [author (:author opts)
+        agency-base (or (:agency-base opts) runner/default-agency-base)
         answer (flight-runner/agency-answer-fn
                 {:seat author :caller "wm-full-loop" :opts opts
                  :prompt-fn selected-target-reading/prompt})]
     (fn [issued]
-      (let [roster (try (runner/agent-roster (:agency-base opts))
+      (let [roster (try (runner/agent-roster agency-base)
                         (catch Throwable _ {}))
             record (or (get roster author) (get roster (keyword (str author))))
             status (some-> (:status record) name)]

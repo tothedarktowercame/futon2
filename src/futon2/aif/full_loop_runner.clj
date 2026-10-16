@@ -2067,10 +2067,15 @@
                          :kind :selected-target-reading-repair-threw
                          :published false :message (ex-message e)}))]
       (if (:published record)
-        {:judgement (assoc (redecide record)
-                           :selected-target-reading-request record)
+        {:judgement (-> (redecide record)
+                        (assoc :selected-target-reading-request record)
+                        (assoc-in [:decision :selection-certificate
+                                   :selected-target-reading-request] record))
          :record record}
-        {:judgement (assoc judgement :selected-target-reading-request record)
+        {:judgement (-> judgement
+                        (assoc :selected-target-reading-request record)
+                        (assoc-in [:decision :selection-certificate
+                                   :selected-target-reading-request] record))
          :record record}))))
 
 (defn- selected-entry
