@@ -56,7 +56,15 @@
         consumed (atom nil)
         answer (fn [{:keys [target author request] :as issued}]
                  (swap! contacted conj [target author (:acceptance-contract issued)])
-                 {:analysis (analysis-for request)})
+                 (let [analysis (analysis-for request)]
+                   {:analysis
+                    (if (= 1 (count @contacted))
+                      ;; The response contract accepts this shape, but the real
+                      ;; validator rejects the cue outside its fragment.  The
+                      ;; same immutable request must then receive one correction.
+                      (assoc-in analysis [:sentences 2 :fragments 0 :display_cues 0 :start]
+                                0)
+                      analysis)}))
         opts {:run-id "run-one" :author "wm-author"
               :answer-fn answer :request-root (str work)
               :target-reading-root (str readings)}
@@ -70,6 +78,8 @@
                  :decision {:status :selected :action {:target "M-selected"}}}))
         result (:record step)]
     (is (= :published (:status result)))
+    (is (= 2 (count @contacted))
+        "a validator-rejected first answer receives one bounded correction")
     (is (= ["M-selected" "wm-author"] (subvec (first @contacted) 0 2)))
     (is (= #{"action" "condition" "context" "contrast" "dependency" "goal" "rationale"}
            (set (get-in @contacted [0 2 :response :relation_vocabulary])))
@@ -184,6 +194,19 @@
                    "fragment text must exactly equal source_text[start:end]"))
     (is (.contains text
                    "never add or omit punctuation or whitespace"))))
+
+(deftest correction-prompt-retains-the-request-and-validator-failure
+  (let [text (sut/prompt
+              {:request {:source_text "Exact text." :sentences []}
+               :validation-feedback "display cue offsets/text do not match"
+               :prior-analysis {:sentences [{:id "s1" :fragments []}]}
+               :acceptance-contract
+               {:id :wm/selected-target-reading-analysis :version 1
+                :response {:relation_vocabulary ["context"]}
+                :validator {:id :wm/session-turn-analysis :version 2}}})]
+    (is (.contains text "Your preceding answer was rejected"))
+    (is (.contains text "display cue offsets/text do not match"))
+    (is (.contains text "Exact text."))))
 
 (deftest durable-agency-result-is-the-validated-answer
   (let [payload {:labeller "wm-author" :reusable_cues [] :rnode_cues []

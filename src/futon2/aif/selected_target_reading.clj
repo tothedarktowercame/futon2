@@ -60,7 +60,7 @@
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
   machine, not the seat, validates and publishes it."
-  [{:keys [request acceptance-contract]}]
+  [{:keys [request acceptance-contract validation-feedback prior-analysis]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
        "Use exact Unicode-codepoint offsets. Every fragment must be wholly inside "
        "its source sentence's start/end span, and fragment text must exactly equal "
@@ -71,6 +71,12 @@
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
        "Reply with exactly one JSON object in the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
+       (when validation-feedback
+         (str "Your preceding answer was rejected by that validator: "
+              validation-feedback
+              " Correct the analysis against the unchanged request. The rejected "
+              "answer is included only so you can repair it:\n"
+              (json/generate-string prior-analysis {:pretty true}) "\n\n"))
        (handoff/prompt-block acceptance-contract)
        "\n"
        (json/generate-string request {:pretty true})))
@@ -152,16 +158,18 @@
               (let [issued {:target (:target need) :kind :selected-target-reading
                             :request-id request-sha :request request :author author
                             :acceptance-contract acceptance-contract}
-                    exchange (handoff/exchange
-                              {:contact answer-fn :request issued
-                               :decode (fn [raw]
-                                         (cond
-                                           (map? (:analysis raw)) (:analysis raw)
-                                           (map? raw) raw
-                                           (string? raw)
-                                           (try (let [v (json/parse-string raw true)]
-                                                  (when (map? v) v))
-                                                (catch Exception _ nil))))})
+                    decode (fn [raw]
+                             (cond
+                               (map? (:analysis raw)) (:analysis raw)
+                               (map? raw) raw
+                               (string? raw)
+                               (try (let [v (json/parse-string raw true)]
+                                      (when (map? v) v))
+                                    (catch Exception _ nil))))
+                    contact (fn [issued]
+                              (handoff/exchange {:contact answer-fn :request issued
+                                                 :decode decode}))
+                    exchange (contact issued)
                     analysis (:value exchange)]
                 (if-not (= :validated (:status exchange))
                   (refused need
@@ -175,13 +183,25 @@
                                                 "analysis-input.json")
                         validation-request (io/file (.getParentFile request-file)
                                                     "validation-request.json")
-                        validated (do
-                                    (spit analysis-input
-                                          (json/generate-string analysis {:pretty true}))
-                                    (io/copy request-file validation-request)
-                                    (shell/sh "python3" analysis-validator "complete"
-                                              (.getPath validation-request)
-                                              (.getPath analysis-input)))
+                        validate (fn [candidate]
+                                   (spit analysis-input
+                                         (json/generate-string candidate {:pretty true}))
+                                   (io/copy request-file validation-request)
+                                   (shell/sh "python3" analysis-validator "complete"
+                                             (.getPath validation-request)
+                                             (.getPath analysis-input)))
+                        validated0 (validate analysis)
+                        correction (when-not (zero? (:exit validated0))
+                                     (contact (assoc issued
+                                                     :kind :selected-target-reading-correction
+                                                     :validation-feedback (:err validated0)
+                                                     :prior-analysis analysis)))
+                        corrected-analysis (when (= :validated (:status correction))
+                                             (:value correction))
+                        validated (if corrected-analysis
+                                    (validate corrected-analysis)
+                                    validated0)
+                        exchange (if corrected-analysis correction exchange)
                         output (io/file (str (.getPath validation-request)
                                              ".analysis.json"))]
                     (if-not (and (zero? (:exit validated)) (.isFile output))
