@@ -2160,6 +2160,18 @@
        :selection-law (get-in decision [:selection-law :applied])
        :target (:target action)})))
 
+(defn- no-entry-failure-data
+  "Classify the terminal exception when selection produced no enactable entry.
+  A selected reading policy stopped at the explicit execution-semantics
+  boundary is a typed refusal, not an absence of selection."
+  [judgement downstream-refusal]
+  (if downstream-refusal
+    {:outcome :refused
+     :failure-kind (:kind downstream-refusal)}
+    {:outcome (if (= :abstained (get-in judgement [:decision :status]))
+                :abstained
+                :no-selection)}))
+
 (defn selection-terminal-condition
   "Return the debugger condition for a completed selection result that chose
   no addressable action.  This is only called by run-phase! while the restart
@@ -6526,9 +6538,8 @@
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
-                          {:outcome (if (= :abstained
-                                           (get-in judgement [:decision :status]))
-                                      :abstained :no-selection)})))
+                          (no-entry-failure-data judgement
+                                                 reading-execution-owed))))
         (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
                                      :when (nil? seat)] role))]
           (throw (ex-info "Selected an action, but no cast was given for it"
