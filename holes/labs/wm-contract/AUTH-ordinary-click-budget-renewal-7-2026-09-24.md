@@ -188,3 +188,12 @@ standing mechanism, `allocated` rises from 67 to **68**. The click is solely
 for the live production proof of the designated `wm-author` contact and its
 durable success-or-typed-refusal receipt. Existing issue-time accounting and
 the no-refund rule are unchanged.
+
+## Joe's debugger-attached contact proof grant, 2026-10-16 — one click
+
+After the first contact-proof click exposed a mismatch between the live
+judgement shape and the selected-target reading predicate, codex-68 repaired
+and hot-loaded the predicate. Joe then directed: "OK please run 1 click,
+debugger attached this time". This authorizes exactly one further ordinary
+click, with the debugger attached before issue. Under this document's standing
+mechanism, `allocated` rises from 68 to **69**. No prior charge is reclaimed.
