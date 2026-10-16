@@ -242,3 +242,12 @@ exactly one ordinary click through `scripts/wm_click_repair_loop.py`, including
 its hot-load, debugger record and repair adjudication. Under this document's
 standing mechanism, `allocated` rises from 73 to **74**. No prior charge is
 reclaimed.
+
+## Joe's post-loop-repair debugger grant, 2026-10-16 — one click
+
+After the explicit repair loop exposed and repaired the selected-reading cue
+span contract, Joe directed codex-68 to run one further click with the
+debugger engaged and ready to repair live errors. This authorizes exactly one
+ordinary click through `scripts/wm_click_repair_loop.py`. Under this document's
+standing mechanism, `allocated` rises from 74 to **75**. No prior charge is
+reclaimed.
