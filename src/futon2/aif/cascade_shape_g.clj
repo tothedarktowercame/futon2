@@ -65,12 +65,13 @@
                     :sentence-id (or (:sentence-id node)
                                      {:status :absent
                                       :reason :sentence-id-not-recorded})
-                    ;; The reading route has no authored four-map square yet:
-                    ;; every occurrence carries the SAME typed unread, so a
-                    ;; later Packet A join can distinguish occurrence-keyed
-                    ;; void/unread/open without re-reading the arrangement.
-                    :blend-square {:status :unread
-                                   :reason :four-maps-not-authored}}
+                    ;; Preserve an occurrence-resolved square when the reading
+                    ;; producer supplies one.  Until then, record unread; do
+                    ;; not make a later Packet A join re-read the arrangement,
+                    ;; and never overwrite an authored square with the seam.
+                    :blend-square (or (:blend-square node)
+                                      {:status :unread
+                                       :reason :four-maps-not-authored})}
                     (map? node)
                     (assoc :pattern-rationale
                            (or (:pattern-rationale node)
@@ -357,8 +358,8 @@
         nodes (mapv (fn [node]
                       (let [pattern (or (:pattern node) (:id node) node)
                             occurrence (node-occurrence-id node)
-                            occurrence? (vector? occurrence)
                             fragment-index (when (map? node) (:fragment-index node))
+                            occurrence? (some? fragment-index)
                             ;; Occurrence-bearing nodes read ONLY the refs at
                             ;; their own fragment: two citations of one
                             ;; pattern never share or substitute fit
@@ -460,9 +461,9 @@
   same pattern at different fragments keep distinct identities and are never
   deduplicated into one another."
   [policy]
-  (let [c (:cascade policy)]
+  (let [c (occurrence-arrangement (:cascade policy))]
     {:mission (or (:mission policy) (:target policy))
-     :node-sequence (mapv node-occurrence-id (:nodes c))
+     :node-sequence (mapv :occurrence-id (:nodes c))
      :edges (mapv #(select-keys (normalize-edge %) [:from :to :kind]) (:edges c))}))
 
 (defn materialize-policies

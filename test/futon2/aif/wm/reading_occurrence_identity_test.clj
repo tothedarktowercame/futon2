@@ -138,6 +138,46 @@
     (is (= 2 (count (distinct (map shape-g/structural-identity [pa pb]))))
         "occurrence-grain structural identity keeps both")))
 
+(deftest structural-identity-keeps-occurrence-grain-edge-endpoints
+  ;; The occurrence population is identical.  Only WHICH p/dup occurrence
+  ;; precedes p/other differs.  Pattern-grain endpoints see the same
+  ;; p/dup->p/other edge and collapse the policies; occurrence-grain endpoints
+  ;; must keep both compositions.
+  (let [nodes [{:pattern dup :fragment-index 0 :roles []}
+               {:pattern dup :fragment-index 1 :roles []}
+               {:pattern other :fragment-index 2 :roles []}]
+        edge (fn [from-fragment]
+               {:from dup :from-fragment from-fragment
+                :to other :to-fragment 2 :kind :precedes})
+        pa (policy 1 {:nodes nodes :edges [(edge 0)]
+                      :precedence [dup dup other]}
+                   occurrence-reading)
+        pb (policy 2 {:nodes nodes :edges [(edge 1)]
+                      :precedence [dup dup other]}
+                   occurrence-reading)
+        old-identity (fn [p]
+                       {:nodes (mapv #(or (:pattern %) (:id %) %)
+                                     (get-in p [:cascade :nodes]))
+                        :edges (mapv #(select-keys % [:from :to :kind])
+                                     (get-in p [:cascade :edges]))})]
+    (is (= (old-identity pa) (old-identity pb))
+        "the planted pattern-grain identity cannot see the changed endpoint")
+    (is (not= (shape-g/structural-identity pa)
+              (shape-g/structural-identity pb))
+        "edge endpoints name occurrences, so the compositions remain distinct")))
+
+(deftest occurrence-arrangement-preserves-an-authored-square
+  (let [authored {:schema :wm/three-halves-square-v1 :status :authored}
+        reading {:status "analyzed"
+                 :sentences [{:id "s1"
+                              :fragments [(fragment 0 "first" [(pref dup "a")])]}]}
+        cascade (update (overlap-cascade reading) :nodes
+                        #(mapv (fn [node] (assoc node :blend-square authored)) %))
+        candidate (shape-g/arranged->candidate "T-occ" "T-occ/policy-square"
+                                               cascade)]
+    (is (= authored (get-in candidate [:arrangement :nodes 0 :blend-square]))
+        "the unread seam must not replace a square supplied by the producer")))
+
 (deftest fit-evidence-is-per-occurrence
   ;; The reading accepts p/dup at fragments 0 and 1 only.  The cascade
   ;; carries two p/dup occurrences, one at fragment 0 and one at fragment 5

@@ -105,3 +105,21 @@ boundary). 6 tests, 40 assertions, all passing, including negative controls.
   fragment-variant policies (structural-identity input changed). No stored
   artifact on this branch depends on the old ids; downstream (habit store
   keys) are derived per-run.
+
+## 6. Integrator review correction
+
+Independent review found that the first packet made the node sequence
+occurrence-grain but left `structural-identity`'s edge endpoints pattern-grain.
+Two policies with the same repeated occurrences and a different occurrence as
+the source of `p/dup -> p/other` could therefore still collapse.  The
+integrator now computes structural identity from `occurrence-arrangement`, so
+both nodes and edge endpoints use occurrence ids.  A planted pattern-grain
+identity is caught by
+`structural-identity-keeps-occurrence-grain-edge-endpoints`.
+
+The review also changed the unread square seam to preserve an authored
+occurrence square when supplied, and made fit evidence recognize an
+occurrence by its recorded fragment rather than by assuming occurrence ids are
+vectors.  The affected focused gate after these corrections is 21 tests / 92
+assertions, zero failures and errors; clj-kondo reports zero errors/warnings and
+`git diff --check` is clean.
