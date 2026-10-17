@@ -58,11 +58,33 @@
          :attempts []
          :requisitions []
          :answers []
-         :retries []}))
+         :retries []
+         :events []}))
 
 (defn- record! [ledger k v]
-  (swap! ledger update k conj v)
+  (swap! ledger
+         (fn [state]
+           (let [prior (some-> state :events last :event-digest)
+                 event {:sequence (count (:events state))
+                        :previous prior :kind k :value v}
+                 event (assoc event :event-digest
+                              (evidence/value-digest event))]
+             (-> state (update k conj v) (update :events conj event)))))
   v)
+
+(defn validate-ledger
+  "Verify the append chain over every recorded protocol event."
+  [ledger]
+  (loop [events (:events @ledger) n 0 prior nil]
+    (if-let [event (first events)]
+      (let [expected (evidence/value-digest (dissoc event :event-digest))]
+        (if (and (= n (:sequence event))
+                 (= prior (:previous event))
+                 (= expected (:event-digest event)))
+          (recur (next events) (inc n) (:event-digest event))
+          {:status :error :kind :resume-ledger-chain-broken
+           :sequence n}))
+      {:status :verified :event-count n :head prior})))
 
 ;; ---------------------------------------------------------------------------
 ;; Recognition
@@ -200,8 +222,12 @@
            {:requisitioned (vec (sort (map :hole-id (:holes requisition))))
             :answered (vec (sort (map str (keys (:decisions answer)))))})
 
-      (not (ifn? (:patch answer)))
-      (bad :answer-patch-missing {:hint "a loadable patch fn is required"})
+      (not (and (map? (:patch answer))
+                (string? (get-in answer [:patch :namespace]))
+                (string? (get-in answer [:patch :var]))
+                (hex64? (get-in answer [:patch :source-digest]))))
+      (bad :answer-patch-missing
+           {:hint "a sealed namespace/var/source-digest descriptor is required"})
 
       :else
       {:status :accepted
@@ -233,14 +259,19 @@
   requisition's binding (same cascade digest, same phase).  A patch that
   throws is a typed error with the attempt preserved; it never surfaces as
   abstention or refusal."
-  [ledger requisition accepted]
+  [ledger requisition accepted patch-loader]
   (let [attempt {:requisition-id (:requisition-id accepted)
                  :cascade-digest (:cascade-digest accepted)
                  :phase (:phase requisition)
                  :at (str (java.time.Instant/now))}]
     (try
-      (let [product ((:patch accepted) {:cascade-digest (:cascade-digest accepted)
-                                        :phase (:phase requisition)})]
+      (when-not (ifn? patch-loader)
+        (throw (ex-info "trusted patch loader absent" {})))
+      (let [patch (patch-loader (:patch accepted))
+            _ (when-not (ifn? patch)
+                (throw (ex-info "patch descriptor did not resolve" {})))
+            product (patch {:cascade-digest (:cascade-digest accepted)
+                            :phase (:phase requisition)})]
         (record! ledger :attempts (assoc attempt :outcome :loaded :product product)))
       (catch Throwable t
         (record! ledger :attempts
@@ -269,7 +300,9 @@
          (record! ledger :retries (assoc attempt :outcome :retried))
          ;; the runner boundary must prove the click and selection counts
          ;; are untouched by the retry
-         (if (and (or (nil? click-budget)
+         (if (and (map? result)
+                  (= (:cascade-digest ctx) (:cascade-digest result))
+                  (or (nil? click-budget)
                       (= (:clicks before) @click-budget))
                   (or (nil? selection-counter)
                       (= (:selections before) @selection-counter)))
@@ -281,14 +314,17 @@
             :selections-run 0}
            (do (record! ledger :retries
                         (assoc attempt :outcome :protocol-violation
-                               :clicks [(:clicks before) @click-budget]
+                               :returned-digest (:cascade-digest result)
+                               :clicks [(:clicks before)
+                                        (some-> click-budget deref)]
                                :selections [(:selections before)
-                                            @selection-counter]))
+                                            (some-> selection-counter deref)]))
                {:status :error
                 :kind :resume-protocol-violation
-                :repair {:clicks [(:clicks before) @click-budget]
+                :repair {:clicks [(:clicks before)
+                                  (some-> click-budget deref)]
                          :selections [(:selections before)
-                                      @selection-counter]}})))
+                                      (some-> selection-counter deref)]}})))
        (catch Throwable t
          (record! ledger :retries
                   (assoc attempt :outcome :failed :error (ex-message t)))
@@ -307,7 +343,8 @@
   preserving everything; the caller (debugger/runner boundary) retries or
   surfaces it — nothing here ever abstains or refuses."
   [ledger error author reviewer answer & [{:keys [click-budget
-                                                 selection-counter]}]]
+                                                 selection-counter
+                                                 patch-loader]}]]
   (let [recognized (recognize error)]
     (if (not= :held (:status recognized))
       recognized
@@ -318,7 +355,8 @@
               (let [accepted (submit-answer! ledger requisition answer)]
                 (if (not= :accepted (:status accepted))
                   accepted
-                  (let [loaded (hot-load! ledger requisition accepted)]
+                  (let [loaded (hot-load! ledger requisition accepted
+                                          patch-loader)]
                     (if (= :error (:status loaded))
                       loaded
                       (resume! ledger recognized

@@ -12,16 +12,27 @@
              :owner "claude-2"
              :question "which situation source backs the guard?"}])
 
+(def patch-descriptor
+  {:namespace "futon2.aif.repairs.open-cascade"
+   :var "apply-repair!"
+   :source-digest (evidence/value-digest [:packet-d4 :patch-source])})
+
+(defn- patch-loader [_]
+  (fn [_] :loaded))
+
 (defn- held-error
   "D3's typed open-cascade execution error against the documented port.
   The ONE adapter field D3 supplies is :resume-port {:retry fn}."
-  [& [{:keys [retry] :or {retry (constantly :phase-redone)}}]]
+  [& [{:keys [retry]
+       :or {retry (fn [_] {:cascade-digest cascade-digest
+                           :outcome :phase-redone})}}]]
   {:kind :wm/open-cascade-execution-error
    :cascade-digest cascade-digest
    :holes holes
    :phase :enact
    :attempts [{:attempt 1 :error "first try"}]
-   :resume-port {:retry (or retry (constantly :phase-redone))}})
+   :resume-port {:retry (or retry (fn [_] {:cascade-digest cascade-digest
+                                           :outcome :phase-redone}))}})
 
 (defn- answer-for
   [requisition & [overrides]]
@@ -31,7 +42,7 @@
           :accepted-by (:reviewer requisition)
           :decisions {:hole/guard-source {:decision "use I1 observation"
                                           :authority "authoring"}}
-          :patch (constantly :loaded)}
+          :patch patch-descriptor}
          overrides))
 
 (deftest recognition-is-typed
@@ -96,8 +107,7 @@
         req (r/authoring-requisition ctx "claude-2" "codex-68")
         _ (r/dispatch-requisition! ledger req)
         bad (r/submit-answer! ledger req {:nonsense true})
-        good (r/submit-answer! ledger req (assoc (answer-for req)
-                                                 :patch (constantly :loaded)))]
+        good (r/submit-answer! ledger req (answer-for req))]
     (is (= :answer-requisition-mismatch (:kind bad)))
     (is (= :accepted (:status good)))
     ;; BOTH the failed and the successful answer are preserved, raw
@@ -110,19 +120,20 @@
         selection-counter (atom 1)
         retry-ctx (atom nil)
         error (held-error {:retry (fn [ctx] (reset! retry-ctx ctx)
-                                    :phase-redone)})
+                                    {:cascade-digest cascade-digest
+                                     :outcome :phase-redone})})
         ctx (r/recognize error)
         req (r/authoring-requisition ctx "claude-2" "codex-68")
         _ (r/dispatch-requisition! ledger req)
-        answer (assoc (answer-for req) :patch (constantly :loaded))
+        answer (answer-for req)
         accepted (r/submit-answer! ledger req answer)
         _ (is (= :accepted (:status accepted)))
-        loaded (r/hot-load! ledger req accepted)
+        loaded (r/hot-load! ledger req accepted patch-loader)
         _ (is (not= :error (:status loaded)))
         resumed (r/resume! ledger ctx {:click-budget click-budget
                                        :selection-counter selection-counter})]
     (is (= :resumed (:status resumed)))
-    (is (= :phase-redone (:result resumed)))
+    (is (= :phase-redone (get-in resumed [:result :outcome])))
     ;; NO new click, NO selection
     (is (= 0 (:clicks-spent resumed)))
     (is (= 0 (:selections-run resumed)))
@@ -138,7 +149,8 @@
         click-budget (atom 1)
         selection-counter (atom 1)
         error (held-error {:retry (fn [_] (swap! selection-counter inc)
-                                    :done)})
+                                    {:cascade-digest cascade-digest
+                                     :outcome :done})})
         ctx (r/recognize error)]
     (is (= :resume-protocol-violation
            (:kind (r/resume! ledger ctx {:click-budget click-budget
@@ -158,10 +170,11 @@
   (let [ledger (r/new-ledger "click-1")
         ctx (r/recognize (held-error))
         req (r/authoring-requisition ctx "claude-2" "codex-68")
-        answer (assoc (answer-for req)
-                      :patch (fn [_] (throw (ex-info "patch boom" {}))))
+        answer (answer-for req)
         accepted (r/validate-answer req answer)
-        loaded (r/hot-load! ledger req accepted)]
+        loaded (r/hot-load! ledger req accepted
+                            (fn [_]
+                              (fn [_] (throw (ex-info "patch boom" {})))))]
     (is (= :hot-load-failed (:kind loaded)))
     (is (= :error (:status loaded)))
     (is (= :failed (:outcome (first (:attempts @ledger))))))
@@ -197,11 +210,12 @@
         error (held-error)
         ctx (r/recognize error)
         req (r/authoring-requisition ctx "claude-2" "codex-68")
-        answer (assoc (answer-for req) :patch (constantly :loaded))
+        answer (answer-for req)
         result (r/handle-error! ledger error "claude-2" "codex-68"
                                 answer
                                 {:click-budget click-budget
-                                 :selection-counter selection-counter})]
+                                 :selection-counter selection-counter
+                                 :patch-loader patch-loader})]
     (is (= :resumed (:status result)))
     (is (= 0 (:clicks-spent result)))
     (is (= 0 (:selections-run result)))
@@ -212,4 +226,25 @@
     (is (= 1 (count (:requisitions @ledger))))
     (is (= 1 (count (:answers @ledger))))
     (is (= 1 (count (:attempts @ledger))))
-    (is (= 1 (count (:retries @ledger))))))
+    (is (= 1 (count (:retries @ledger))))
+    (is (= :verified (:status (r/validate-ledger ledger))))))
+
+(deftest retry-result-must-be-bound-to-the-held-cascade
+  (let [ledger (r/new-ledger "click-1")
+        unbound (r/recognize (held-error {:retry (constantly {:outcome :done})}))
+        foreign (r/recognize
+                 (held-error {:retry (constantly
+                                      {:cascade-digest
+                                       (evidence/value-digest [:foreign])})}))]
+    (is (= :resume-protocol-violation (:kind (r/resume! ledger unbound))))
+    (is (= :resume-protocol-violation (:kind (r/resume! ledger foreign))))))
+
+(deftest ledger-chain-detects-mutation
+  (let [ledger (r/new-ledger "click-1")
+        ctx (r/recognize (held-error))
+        req (r/authoring-requisition ctx "claude-2" "codex-68")]
+    (r/dispatch-requisition! ledger req)
+    (is (= :verified (:status (r/validate-ledger ledger))))
+    (swap! ledger assoc-in [:events 0 :value :phase] :changed)
+    (is (= :resume-ledger-chain-broken
+           (:kind (r/validate-ledger ledger))))))

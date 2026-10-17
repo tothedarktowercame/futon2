@@ -87,6 +87,17 @@ calls), which the protocol asserts unchanged across every retry.
 
 ## Honest gaps
 
+## Independent integration review
+
+The root review rejected executable functions inside agent answers and
+unbound retry results. Answers now carry a serializable namespace/var/source
+digest descriptor resolved only by a trusted local loader; the held-phase
+retry must return the exact cascade digest. Every protocol event is also
+linked in a digest chain, with mutation detection. Reviewed gate: **11
+tests, 61 assertions, 0 failures/errors**; clj-kondo 0/0 and clean
+diff-check. Durable storage of that event chain remains production wiring,
+not a claim of this in-memory protocol.
+
 - No production wiring: the protocol is not yet invoked by the live
   debugger (`futon2.aif.wm.debugger`) or any runner service; D3 must supply
   `:resume-port {:retry fn}` and the runner boundary must pass its click
