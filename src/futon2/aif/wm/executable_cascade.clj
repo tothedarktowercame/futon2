@@ -266,7 +266,7 @@
   "A declared co-application group's own binding digest, over its identity
   and exact membership."
   [group]
-  (evidence/value-digest (select-keys group [:id :members])))
+  (evidence/value-digest (select-keys group [:id :members :authority])))
 
 (defn- group-defects
   "Every way a set of declared co-application groups fails the carrier:
@@ -277,6 +277,10 @@
         member-lists (mapv :members groups)]
     (vec (concat
           (keep #(when-not (some? (:id %)) [:group-id-absent %]) groups)
+          (keep #(when-not (and (map? (:authority %))
+                                (seq (:authority %)))
+                   [:group-authority-absent %])
+                groups)
           (for [[id n] (frequencies ids) :when (> n 1)]
             [:group-id-duplicate id])
           (for [id ids :when (contains? occurrence-ids id)]

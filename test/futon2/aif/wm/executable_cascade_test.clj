@@ -477,6 +477,14 @@
          (get-in (built-with-groups
                   [(assoc good-group :members [[pattern 0]])])
                  [:refusal :kind])))
+  ;; a membership declaration without an attributed authority is invalid
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups [(dissoc good-group :authority)])
+                 [:refusal :kind])))
+  ;; authority participates in the group's own identity
+  (is (not= (xc/group-digest good-group)
+            (xc/group-digest (assoc good-group :authority
+                                    {:origin :authored :by "someone-else"}))))
   ;; tampered membership in a hand-sealed record: the group digest clause
   (let [record (built-with-groups [good-group])
         tampered (reseal (update-in record

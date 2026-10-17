@@ -1,7 +1,8 @@
 (ns futon2.aif.wm.execution-journal-test
   "Packet C focused tests: the append-only execution journal.  Every
   planted control names the defect it must catch."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.executable-cascade :as xc]
@@ -14,19 +15,44 @@
 
 (defn- hex? [s] (boolean (and s (re-matches #"[0-9a-f]{64}" s))))
 
-(def cascade-digest (evidence/value-digest [:packet-c :test-cascade]))
 (def other-cascade-digest (evidence/value-digest [:packet-c :other-cascade]))
+
+(def square-fixture
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+
+(defn- provenance [oid]
+  {:reading-record-id (str "journal-" (pr-str oid))
+   :span {:start 0 :end 2 :text "ok"}
+   :source-text-digest (evidence/value-digest [:source oid])
+   :analysis-digest (evidence/value-digest [:analysis oid])
+   :source-sha256 (apply str (repeat 64 "a"))
+   :square-digest (evidence/value-digest square-fixture)})
 
 (defn- record
   "A minimal Packet A carrier for index derivation: the journal derives
   its admitted groups ONLY from the certified group carrier."
   []
-  (let [groups [{:id :group-1 :members [[:p/a 0] :p/b]}]]
-    {:schema :wm/executable-cascade-v1
-     :digest cascade-digest
-     :executable-nodes [{:occurrence-id [:p/a 0]} {:occurrence-id :p/b}]
-     :co-application-groups
-     (mapv #(assoc % :group-digest (xc/group-digest %)) groups)}))
+  (let [candidate {:id "journal-policy" :target "journal-target"
+                   :arrangement
+                   {:nodes [{:pattern :p/a :fragment-index 0}
+                            {:pattern :pattern/b :occurrence-id :p/b}]
+                    :edges [] :precedence [[:p/a 0] :p/b]}}
+        readings {[:p/a 0] {:square square-fixture
+                             :provenance (provenance [:p/a 0])}
+                  :p/b {:square square-fixture
+                        :provenance (provenance :p/b)}}
+        structural (xc/build-structural candidate readings {})
+        holes (into {} (map (fn [n] [(:occurrence-id n)
+                                      {:owner :test :question :open}]))
+                    (:nodes structural))]
+    (xc/build structural
+              {:application-order [] :operational-clauses {} :holes holes
+               :co-application-groups
+               [{:id :group-1 :members [[:p/a 0] :p/b]
+                 :authority {:origin :test :by "journal-test"}}]})))
+
+(def cascade-digest (:digest (record)))
 
 (def idx (j/cascade-index (record)))
 
@@ -266,6 +292,20 @@
                             (constantly [[:p/a 0] :p/b :extra]))]
     (is (thrown-with-msg? Exception #"not digest-bound"
                           (j/cascade-index tampered))))
+  ;; Valid-looking local groups cannot authorize a broken outer carrier.
+  (is (= :journal-index-cascade-not-certified
+         (:kind (ex-data
+                 (try (j/cascade-index (assoc (record) :digest
+                                              other-cascade-digest))
+                      (catch Exception e e))))))
+  ;; Authority is part of group identity, not mutable annotation.
+  (let [tampered (assoc-in (record)
+                           [:co-application-groups 0 :authority]
+                           {:origin :forged :by "someone-else"})]
+    (is (= :journal-index-groups-unbound
+           (:kind (ex-data
+                   (try (j/cascade-index tampered)
+                        (catch Exception e e)))))))
   ;; an invented group id never declared by the carrier is foreign
   (let [invented (assoc (e :group-9 :enacted 1 1) :entry-id nil)
         invented (assoc invented :entry-id (j/entry-digest invented))]

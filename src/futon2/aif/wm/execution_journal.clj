@@ -225,6 +225,11 @@
       (throw (ex-info "cascade-index groups not digest-bound"
                       {:kind :journal-index-groups-unbound
                        :groups broken})))
+    (let [validation (xc/validate-cascade record)]
+      (when-not (xc/certified? validation)
+        (throw (ex-info "cascade-index requires a certified cascade"
+                        {:kind :journal-index-cascade-not-certified
+                         :validation validation}))))
     {:digest (:digest record)
      :nodes (set (map :occurrence-id (:executable-nodes record)))
      :groups (set (map :id groups))}))

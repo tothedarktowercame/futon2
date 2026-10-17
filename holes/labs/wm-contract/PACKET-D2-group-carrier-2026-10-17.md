@@ -58,6 +58,15 @@
 
 ## Honest gaps
 
+## Independent integration review
+
+The root review made the declaring authority part of each group's own
+digest and requires `cascade-index` to validate the complete canonical
+cascade, not merely its local group list. Controls now cover authority
+tampering and a locally plausible group carrier inside a broken outer
+record. Reviewed gate: **29 tests, 119 assertions, 0 failures/errors**;
+clj-kondo 0/0 and clean diff-check.
+
 - The carrier declares groups; the compiler/enactment rules that a group
   enacts as a group with a group completion condition (Packet C §6 rules)
   are not implemented here — runner/compiler out of scope by requisition.
