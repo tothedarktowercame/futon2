@@ -343,6 +343,19 @@
 
       (seq ranked)
       (let [decision (policy/select-action-cascades menu opts)
+            selected-bound-entry
+            (when bound
+              (let [d (get-in decision [:action :cascade-digest])]
+                (first (filter #(= d (:cascade-digest %)) menu))))
+            ;; The post-selection seam must consume the exact canonical
+            ;; record that was compared.  Rebuilding it later from a reduced
+            ;; action/receipt map creates a different (correctly rejected)
+            ;; identity even when the policy itself is unchanged.
+            decision (cond-> decision
+                       selected-bound-entry
+                       (assoc-in [:selection-certificate
+                                  :selected-canonical-cascade]
+                                 (:canonical-cascade selected-bound-entry)))
             identity-check (when bound
                              (cascade-identity/verify-selected-identity
                               decision menu))]

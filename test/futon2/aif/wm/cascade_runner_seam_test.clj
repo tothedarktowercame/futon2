@@ -228,6 +228,10 @@
         entry (#'runner/selected-entry (judgement-for decision))]
     (is (= (get-in decision [:selection-certificate :selected-reading-pin])
            (:reading-pin entry)))
+    (is (= (get-in decision [:selection-certificate :selected-canonical-cascade])
+           (:canonical-cascade entry)))
+    (is (= (get-in decision [:action :cascade-digest])
+           (get-in entry [:canonical-cascade :digest])))
     (is (every? string? (vals (:reading-pin entry))))
     (is (= (:action decision) (:action entry)))))
 
@@ -251,9 +255,10 @@
       (is (= resume-error (get-in cell [:downstream-refusal])))
       (is (nil? (get-in cell [:held-phase]))))))
 
-(deftest identity-mismatch-is-a-typed-machine-error
-  ;; a pre-bound action whose digest does not match the rebuilt chain is a
-  ;; :cascade-materialisation-error, never a policy refusal
+(deftest selected-canonical-record-is-not-rebuilt-after-selection
+  ;; The exact record compared by G is retained. A later reading source is
+  ;; not allowed to replace it (which previously caused the live false
+  ;; :identity-forged result merely because the receipt set differed).
   (let [{:keys [result]}
         (click! [px py]
                 {:cascade-reading-pins
@@ -267,9 +272,9 @@
                 {:bind-cascade-identity
                  {:readings (fn [_] square-readings)}})
         cell (get-in result [:checkpoints :selection :sorry])
-        refusal (get-in cell [:downstream-refusal])]
-    (is (map? refusal))
-    (is (= :cascade-materialisation-error (:status refusal)))
-    (is (= :identity-forged (:kind refusal)))
-    (is (true? (:repairable refusal)))
-    (is (not= :reading-policy-execution-semantics-owed (:kind refusal)))))
+        held (get-in cell [:held-phase])]
+    (is (= :wm/open-cascade-execution-error (:kind held)))
+    (is (= :cascade-enactment-open (:reason held)))
+    (is (string? (:selected-cascade-digest held)))
+    (is (= :wm/open-cascade-execution-error
+           (get-in cell [:downstream-refusal :kind])))))

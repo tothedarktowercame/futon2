@@ -2170,6 +2170,12 @@
            ;; were already validated before G.
            :reading-pin (get-in decision
                                 [:selection-certificate :selected-reading-pin])
+           ;; Packet B's exact pre-selector record.  Keep it outside the
+           ;; action (the action is part of selection identity), but carry it
+           ;; through to the post-selection execution seam.
+           :canonical-cascade
+           (get-in decision
+                   [:selection-certificate :selected-canonical-cascade])
            :rank (or (:rank decision) 1)
            :G-efe (:controller-score decision)
            :controller-score (:controller-score decision)

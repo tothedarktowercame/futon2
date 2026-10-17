@@ -1529,10 +1529,48 @@
                     :inputs {:unread-citations
                              (mapv :citation (get-in preview [:census :unread]))}}
          :journal-append []}
-        (let [bound (selection-cascade-identity/bind-entry
-                     {:action action :policy-id (:id action) :target-id target}
-                     readings-fn
-                     (:cascade-operational-authoring opts))]
+        (let [retained (:canonical-cascade entry)
+              retained-digest (:digest retained)
+              selected-digest (:cascade-digest action)
+              retained-validation (when retained
+                                    (executable-cascade/validate-cascade retained))
+              bound (if retained
+                      (cond
+                        (not= selected-digest retained-digest)
+                        {:refusal {:kind :identity-forged
+                                   :policy-id (:id action)
+                                   :carried selected-digest
+                                   :retained retained-digest
+                                   :stage :post-selector-retained-identity}}
+
+                        (not= retained-digest
+                              (executable-cascade/digest retained))
+                        {:refusal {:kind :identity-forged
+                                   :policy-id (:id action)
+                                   :carried retained-digest
+                                   :rebuilt (executable-cascade/digest retained)
+                                   :stage :post-selector-record-redigest}}
+
+                        (not (executable-cascade/certified?
+                              retained-validation))
+                        {:refusal {:kind :cascade-validation-error
+                                   :policy-id (:id action)
+                                   :clause (:clause retained-validation)
+                                   :stage :post-selector-retained-validation}}
+
+                        :else
+                        {:cascade retained
+                         :digest retained-digest
+                         :validation retained-validation
+                         :entry (assoc entry
+                                       :cascade-digest retained-digest)})
+                      ;; Compatibility for direct callers that have not
+                      ;; passed through Packet B. Production selection always
+                      ;; supplies the retained canonical record.
+                      (selection-cascade-identity/bind-entry
+                       {:action action :policy-id (:id action) :target-id target}
+                       readings-fn
+                       (:cascade-operational-authoring opts)))]
           (if (:refusal bound)
         (fail :cascade-materialisation-error (:kind (:refusal bound))
               {:refusal (:refusal bound)})
