@@ -2078,9 +2078,11 @@
 
 (defn selected-target-reading-step
   "Repair a missing reading for JUDGEMENT's retained outer choice, then call
-  REDECIDE exactly once when publication succeeded.  REPAIR-FN owns request,
-  contact, validation, and publication.  This seam never selects a fallback
-  target and never calls the outer selector itself."
+  REDECIDE exactly once when publication succeeded.  Here REDECIDE is the
+  legacy name for inner cascade reconstruction: it may rebuild and score the
+  field for the retained target, but must not choose an outer target. REPAIR-FN
+  owns request, contact, validation, and publication. This seam never selects
+  a fallback target and never calls the outer selector itself."
   [opts judgement repair-fn redecide]
   (if-not (and repair-fn (selected-target-reading/selected-need judgement))
     {:judgement judgement :record nil}
@@ -2103,7 +2105,9 @@
          :record record}))))
 
 (defn occurrence-square-authoring-step
-  "Publish occurrence squares, then rerun only inner construction once."
+  "Publish occurrence squares, then rerun only inner cascade construction
+  once. The REDECIDE argument is historical terminology; outer target choice
+  is outside this seam and must remain pinned."
   [opts judgement repair-fn redecide]
   (if-not (and repair-fn (square-authoring/selected-need judgement))
     {:judgement judgement :record nil}

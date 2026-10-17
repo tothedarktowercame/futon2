@@ -163,6 +163,18 @@ and removed before policy construction; it is never padded with invented
 content.  A failed authoring exchange is an execution error at this phase, not
 an abstention or refusal by G.
 
+#### Terminology: "redecision" means inner reconstruction, not target choice
+
+Some runtime phase keys retain the historical word `redecision`.  In this
+excursion that word has one narrow meaning: after missing reading or square
+evidence is published, reconstruct and score the candidate cascade field for
+the **already selected outer target**.  The outer selection receipt is pinned
+for the whole click.  This phase must not choose a target again, spend another
+click, or reconstruct a different policy after one has already been selected.
+Human-facing traces should call it **inner cascade reconstruction**; the old
+keyword is retained only so stored records and debugger breakpoints remain
+readable.
+
 ### Operational meaning
 
 - for each node or executable group: antecedent/guard, required state or

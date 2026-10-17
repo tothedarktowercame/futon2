@@ -145,8 +145,8 @@
         ;; A click may invoke the report judge twice when an interpretation ask
         ;; publishes missing construction input.  Outer state can change while
         ;; that ask runs (including the graph and learning manifest), but the
-        ;; second pass is a re-decision for the same chosen outer action, not a
-        ;; new outer opportunity.  Retain the exact first receipt so query-time
+        ;; second pass is inner cascade reconstruction for the same chosen
+        ;; outer action, not a new outer opportunity. Retain the exact first receipt so query-time
         ;; evidence is requested for, and consumed by, one stable target.
         outer-receipt (atom ::unselected)
         pinned-outer-selector
