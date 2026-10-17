@@ -227,10 +227,8 @@
   (let [path "futon3/library/ukrns/publication-cadence.flexiarg"
         pattern-text (slurp (str "/home/joe/code/" path))
         sha (evidence/sha256 (.getBytes pattern-text "UTF-8"))
-        texts {:I1 "The pattern operates on the axis: living document (continuously-updated canonical version) ↔ frozen snapshots (versioned fixed publications with citable identifiers)."
-               :I2 "Real costs: living costs archival durability — a snapshot citable today may differ from the same URL tomorrow; frozen costs currency — citable versions drift further from the current evidence state over time."
-               :G "Citation integrity: an academic artefact that readers cite must be citable as a specific object."
-               :B "(3) Both: living current version + periodic frozen snapshots, each snapshot declaring its evidence-file revision and compute-date."}
+        texts (:texts (clojure.edn/read-string
+                       (slurp "test/fixtures/three-halves-square/publication-cadence-parts.edn")))
         square (reduce-kv #(assoc-in %1 [:objects %2 :text] %3) square-fixture texts)
         reply (-> (response :writing-coherence/meet-the-reader-where-they-are)
                   (assoc :pattern :ukrns/publication-cadence)

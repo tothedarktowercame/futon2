@@ -11,24 +11,52 @@
 (defn- normalise-space [s]
   (str/join " " (str/split (str/trim (str s)) #"\s+")))
 
-(defn- pattern-parts [pattern-text]
+(defn- pattern-parts
+  "Parse PATTERN-TEXT into its written parts, keyed by header name. A part runs
+   from its `+ NAME:` header line (text after the colon included) to the next
+   header at the same or a lesser indent, or to the first non-blank line at the
+   same or a lesser indent (a top-level tag or conclusion); nested sub-blocks
+   such as `+ CHECK:` under `+ THEN:` stay inside their part. Lines are joined
+   with newlines. Agrees with the 象 emitter's read_pattern in
+   futon3c/scripts/occurrence_square.py."
+  [pattern-text]
   (let [part-header #"^(\s*)\+\s+(IF|HOWEVER|THEN|BECAUSE):(?:\s*(.*))?$"
-        any-header #"^(\s*)\+\s+[^:]+:.*$"]
+        any-header #"^(\s*)\+\s+[^:]+:.*$"
+        indent-of (fn [line] (count (re-find #"^\s*" line)))
+        finish (fn [{:keys [active lines] :as state}]
+                 (if active
+                   (-> state
+                       (assoc-in [:parts active] (str/join "\n" lines))
+                       (assoc :active nil :indent nil :lines []))
+                   state))]
     (:parts
-     (reduce (fn [{:keys [active indent] :as state} line]
-               (if-let [[_ spaces part first-line] (re-matches part-header line)]
-                 (assoc state :active part :indent (count spaces)
-                        :parts (assoc (:parts state) part [(or first-line "")]))
-                 (let [[_ spaces] (re-matches any-header line)]
-                   (if (and active spaces (<= (count spaces) indent))
-                     (assoc state :active nil :indent nil)
-                     (cond-> state active (update-in [:parts active] conj line))))))
-             {:parts {} :active nil :indent nil}
-             (str/split-lines (str pattern-text))))))
+     (finish
+      (reduce (fn [{:keys [active indent] :as state} line]
+                (let [[_ spaces part first-line] (re-matches part-header line)
+                      header-indent (some-> (re-matches any-header line) second count)
+                      closes? (and active
+                                   (or (and header-indent (<= header-indent indent))
+                                       (and (not (str/blank? line))
+                                            (<= (indent-of line) indent))))
+                      state (if closes? (finish state) state)]
+                  (cond
+                    (and part (nil? (:active state)))
+                    (assoc state :active part :indent (count spaces)
+                           :lines (if (str/blank? first-line) [] [first-line]))
+                    (:active state) (update state :lines conj line)
+                    :else state)))
+              {:parts {} :active nil :indent nil :lines []}
+              (str/split-lines (str pattern-text)))))))
 
 (defn parts-check
-  "Check that each square object's text is drawn from its assigned flexiarg
-   part. PATTERN-TEXT is supplied by the caller; this function performs no IO."
+  "Check that each square object's text IS its assigned flexiarg part.
+   The object is named by pattern and role (IF = I1, HOWEVER = I2, BECAUSE = G,
+   THEN = B); the part is located by its header line and bounded by the next
+   same-level header; the observation is equality of object text and part
+   after whitespace normalisation. A text that is only a substring of its part
+   (one word, the first sentence of a multi-line part) or a paraphrase is
+   refused with the roles named. PATTERN-TEXT is supplied by the caller; this
+   function performs no IO."
   [receipt pattern-text]
   (let [square (or (:blend-square receipt) receipt)
         parts (pattern-parts pattern-text)
@@ -42,7 +70,7 @@
                        :let [object-text (normalise-space (get-in square [:objects role :text]))
                              part-text (normalise-space (get parts (part-for-role role)))]
                        :when (or (str/blank? object-text)
-                                 (not (str/includes? part-text object-text)))]
+                                 (not= part-text object-text))]
                    role))]
         (if (seq mismatched)
           {:status :refused :kind :square-text-not-from-pattern :roles mismatched}

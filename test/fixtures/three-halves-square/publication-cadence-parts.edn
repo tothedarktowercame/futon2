@@ -1,0 +1,42 @@
+;; Whole parts of futon3/library/ukrns/publication-cadence.flexiarg under
+;; IF = I1, HOWEVER = I2, BECAUSE = G, THEN = B, as the 象 emitter
+;; (futon3c/scripts/occurrence_square.py read_pattern) parses them.
+;; Each text is one part from the header's first line to the next
+;; same-level header, line-joined; nested sub-blocks stay inside their part.
+;; :source pins the file bytes the parts were read from.
+{:source {:path "futon3/library/ukrns/publication-cadence.flexiarg" :sha256 "24a8a429148b1c6e2b41e482ee539c00285154957022f18b3dab181bbdf4fe12"}
+ :texts
+ {:I1 "    The pattern operates on the axis: living document (continuously-updated canonical version) ↔ frozen snapshots (versioned fixed publications with citable identifiers).
+    Irreducible: a single publication cannot be simultaneously maximally current AND maximally citable as a fixed object."
+  :I2 "    Real costs: living costs archival durability — a snapshot citable today may differ from the same URL tomorrow; frozen costs currency — citable versions drift further from the current evidence state over time.
+    Active dynamic: early drafts favour living (claims are forming); as claims stabilise, snapshots become appropriate; archival norms for academic work favour snapshots.
+
+    + FAILURE-MODES:
+      - Ambiguous citation: \"the paper\" cited by URL changes silently; citing reader sees different content than intended
+      - Living-without-history: current version has no revision history; prior states irrecoverable
+      - Snapshots-without-revisions: snapshots exist but do not declare their evidence-revision; cannot be reproduced
+      - Stale-snapshot-only: the most recent snapshot is years old; the self-application claim is unverifiable
+      - Citation-ambiguity-unowned: the project has not decided what readers should cite; different citations proliferate"
+  :B "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.
+    + COMPOSITIONS:
+      (1) Living-only: current HTML (or notebook) with visible revision history; no frozen snapshots.  Gives up archival citability.
+      (2) Snapshot-only: versioned PDFs or archived HTML with DOIs at each publication event; intermediate states not published.  Gives up currency.
+      (3) Both: living current version + periodic frozen snapshots, each snapshot declaring its evidence-file revision and compute-date.  Gives up simplicity; serves both readerships.
+      Working papers typically need (3); the paper-draft-16-april is an instance of an intermediate snapshot (marked by date in filename).
+
+    + CHECK:
+      Engaged when: readers can find both the current state and the most recent citable snapshot; each snapshot declares its evidence-file revision and compute-date; the composition is declared.
+      Failing when: \"the paper\" is ambiguous — readers citing different URLs think they are citing the same document; snapshots exist but do not declare their evidence-revision; the living document drifts without visible history."
+  :G "    Citation integrity: an academic artefact that readers cite must be citable as a specific object.  Snapshots give citation integrity; living documents do not.  A paper that is both a living document AND cited in grant applications requires snapshots for the citation paths.
+
+    Currency integrity: a paper that argues for design-as-function-of-evidence and is five years out of date undercuts its own argument.  The living document is what demonstrates the self-application claim.
+
+    Reader-need differentiation: different readers want different things.  A funder reviewing a proposal wants the current state; a peer reviewer citing the work in a rebuttal wants a fixed target.  Composition (3) serves both.
+
+    Cross-pattern: publication-cadence is downstream of ukrns/design-state-lineage (snapshots are checkpoints in the lineage) and a sibling of ukrns/cycle-position-publication (both publish design states at chosen intervals).
+
+    Mechanic, in short:
+    Mechanic: how the artefact is published (living, snapshot, both).
+    Serves: self-application's artefact-instantiation claim.
+    Axis: living document ↔ frozen snapshots.
+    Without this pattern: \"which paper\" is ambiguous; self-application cannot be demonstrated."}}

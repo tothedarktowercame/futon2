@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.legacy-three-halves-registry :as legacy]
             [futon2.aif.token-observation-initialization-test :as initialization]
             [futon2.aif.three-halves-square :as sut]))
@@ -12,7 +13,14 @@
 (def library-root "/home/joe/code/futon3/library")
 (def publication-text
   (slurp (str library-root "/ukrns/publication-cadence.flexiarg")))
-(def publication-object-texts
+(def publication-parts
+  "Whole parts of publication-cadence, as the 象 emitter reads them, with the
+   source pin of the bytes they were read from."
+  (edn/read-string
+   (slurp "test/fixtures/three-halves-square/publication-cadence-parts.edn")))
+(def publication-object-texts (:texts publication-parts))
+(def publication-first-sentences
+  "The first sentence of each part: a substring, not the part."
   {:I1 "The pattern operates on the axis: living document (continuously-updated canonical version) ↔ frozen snapshots (versioned fixed publications with citable identifiers)."
    :I2 "Real costs: living costs archival durability — a snapshot citable today may differ from the same URL tomorrow; frozen costs currency — citable versions drift further from the current evidence state over time."
    :G "Citation integrity: an academic artefact that readers cite must be citable as a specific object."
@@ -24,7 +32,21 @@
 (def good-parts-square (with-object-texts fixture publication-object-texts))
 
 (deftest square-object-texts-come-from-their-assigned-pattern-parts
+  (testing "the fixture's parts were read from the live file's bytes"
+    (is (= (get-in publication-parts [:source :sha256])
+           (evidence/sha256 (.getBytes ^String publication-text "UTF-8")))))
+  (testing "every whole part spans a line break, so the check joins lines"
+    (is (every? #(str/includes? % "\n") (vals publication-object-texts))))
   (is (= {:status :valid} (sut/parts-check good-parts-square publication-text)))
+  (testing "the first sentence of a part is a substring, not the part"
+    (is (= {:status :refused :kind :square-text-not-from-pattern
+            :roles [:G :I1 :I2 :B]}
+           (sut/parts-check (with-object-texts fixture publication-first-sentences)
+                            publication-text))))
+  (testing "one role citing one word of its part is refused by name"
+    (is (= {:status :refused :kind :square-text-not-from-pattern :roles [:B]}
+           (sut/parts-check (assoc-in good-parts-square [:objects :B :text] "snapshots")
+                            publication-text))))
   (testing "the legacy per-target template is defaulted for every role"
     (let [legacy-square (#'legacy/square
                          "/home/joe/code"
