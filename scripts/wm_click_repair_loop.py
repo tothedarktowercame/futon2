@@ -193,10 +193,11 @@ def click_running() -> bool:
         return True
 
 
-def reload_changed(since_epoch: int) -> tuple[bool, str, int]:
+def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bool, str, int]:
     """Reload every click-path namespace committed since since_epoch. Returns
-    (ok, failure-text, new-since). Never reloads while a click is in flight."""
-    while click_running():
+    (ok, failure-text, new-since). Reload only between clicks, or while the
+    named run is demonstrably stopped at the restart debugger."""
+    while click_running() and not (held_run_id and debugger_stop(held_run_id)):
         log("reload: a click is in flight; waiting")
         time.sleep(60)
     started = int(time.time())
@@ -238,15 +239,87 @@ def carried(run_id: str | None) -> bool:
     return False
 
 
-def fire(n: int, args) -> dict:
+def debugger_stop(run_id: str | None = None) -> dict | None:
+    """Read the serving debugger, not the click's coarse public phase.
+
+    The value is deliberately reduced to identifiers safe for the loop.  The
+    full stop remains in the JVM and is copied into the live repair packet.
+    """
+    r = jvm_eval("(futon2.aif.wm.debugger/stopped)", timeout=30)
+    if r["rc"] != 0:
+        return None
+    ids = re.findall(r':run-id\s+"([^"]+)"', r["out"])
+    phases = re.findall(r':phase\s+:([\w.-]+)', r["out"])
+    kinds = re.findall(r':condition\s+\{:kind\s+:([\w./-]+)', r["out"])
+    for i, rid in enumerate(ids):
+        if run_id is None or rid == run_id:
+            return {"run-id": rid,
+                    "phase": phases[i] if i < len(phases) else "unknown",
+                    "condition-kind": kinds[i] if i < len(kinds) else "unknown",
+                    "raw": r["out"]}
+    return None
+
+
+def retry_held_run(run_id: str) -> dict:
+    safe = run_id.replace("\\", "\\\\").replace('"', '\\"')
+    return jvm_eval(f'(futon2.aif.wm.debugger/continue! "{safe}" :retry)', timeout=30)
+
+
+def abort_held_run(run_id: str) -> dict:
+    safe = run_id.replace("\\", "\\\\").replace('"', '\\"')
+    return jvm_eval(f'(futon2.aif.wm.debugger/continue! "{safe}" :abort)', timeout=30)
+
+
+def fire(n: int, args, since_epoch: int) -> dict:
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
            "--author", args.author, "--reviewer", args.reviewer, "--repair-reviewer", args.repair_reviewer]
     log(f"click {n}: firing ({out.name})")
+    in_flight_repairs = []
+    handled_stops = set()
     with out.open("w") as fh:
-        rc = subprocess.run(list(map(str, cmd)), cwd=F2, stdout=fh, stderr=subprocess.STDOUT,
-                            timeout=3 * 3600).returncode
+        proc = subprocess.Popen(list(map(str, cmd)), cwd=F2, stdout=fh,
+                                stderr=subprocess.STDOUT)
+        deadline = time.time() + 3 * 3600
+        while proc.poll() is None:
+            if time.time() >= deadline:
+                proc.kill()
+                raise subprocess.TimeoutExpired(cmd, 3 * 3600)
+            stop = debugger_stop()
+            if stop:
+                signature = (stop["run-id"], stop["phase"], stop["condition-kind"])
+                if signature not in handled_stops:
+                    handled_stops.add(signature)
+                    record({"event": "debugger-held", **{k: stop[k] for k in
+                            ("run-id", "phase", "condition-kind")}})
+                    log(f"click {n}: debugger held {stop['run-id']} at {stop['phase']} "
+                        f"({stop['condition-kind']}); dispatching repair now")
+                    live_page = DEBUGGER / f"held-{stop['run-id']}.md"
+                    DEBUGGER.mkdir(parents=True, exist_ok=True)
+                    live_page.write_text("# Live held phase\n\n" + stop["raw"] + "\n")
+                    reason = (f"held run {stop['run-id']} stopped at {stop['phase']} "
+                              f"({stop['condition-kind']})")
+                    verdict, detail = repair(args, reason, None,
+                                             in_flight_repairs, live_page)
+                    in_flight_repairs.append(detail)
+                    if verdict == "repaired":
+                        ok, reload_text, since_epoch = reload_changed(
+                            since_epoch, held_run_id=stop["run-id"])
+                        if ok:
+                            resumed = retry_held_run(stop["run-id"])
+                            record({"event": "debugger-resumed", "run-id": stop["run-id"],
+                                    "phase": stop["phase"], "choice": "retry",
+                                    "result": resumed["out"][-500:]})
+                            log(f"click {n}: repaired, hot-loaded and retried the held phase")
+                        else:
+                            abort_held_run(stop["run-id"])
+                            log(f"click {n}: reload failed while held: {reload_text[:300]}")
+                    else:
+                        abort_held_run(stop["run-id"])
+                        log(f"click {n}: held repair ended {verdict}; aborting the held phase")
+            time.sleep(10)
+        rc = proc.returncode
     text = out.read_text(errors="replace")
     m = re.search(r"tracking our click: (\S+)", text)
     click_id = m.group(1) if m else None
@@ -260,7 +333,8 @@ def fire(n: int, args) -> dict:
         lr = {"outcome": "unknown", "note": f"last-result is for {lr.get('click-id')}, not {click_id}"}
     run_id = (lr.get("run-id-observation") or {}).get("value")
     return {"n": n, "rc": rc, "click-id": click_id, "spent": spent, "outcome": lr.get("outcome", "unknown"),
-            "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out)}
+            "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
+            "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs}
 
 
 # ---------------------------------------------------------------- debugger
@@ -561,7 +635,8 @@ def run(args) -> int:
     while spent < args.clicks and ticks < args.ticks:
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
-        c = fire(spent + 1, args)
+        c = fire(spent + 1, args, since)
+        since = c.pop("since-epoch")
         spent += 1 if c["spent"] else 0
         if c["carried"]:
             ticks += 1

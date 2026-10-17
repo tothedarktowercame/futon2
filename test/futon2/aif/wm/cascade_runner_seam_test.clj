@@ -218,6 +218,19 @@
     (testing "and it is still not the legacy refusal"
       (is (not= :reading-policy-execution-semantics-owed (:kind held))))))
 
+(deftest selected-entry-retains-the-ranked-reading-pin
+  (let [fx (@#'rfd/fixture [px py])
+        decision (:decision (#'rfd/decide
+                             fx [(get-in fx [:rows :current])]
+                             {"M-current" 1}
+                             {:bind-cascade-identity
+                              {:readings (fn [_] square-readings)}}))
+        entry (#'runner/selected-entry (judgement-for decision))]
+    (is (= (get-in decision [:selection-certificate :selected-reading-pin])
+           (:reading-pin entry)))
+    (is (every? string? (vals (:reading-pin entry))))
+    (is (= (:action decision) (:action entry)))))
+
 (deftest failed-open-cascade-resume-surfaces-the-handler-error
   (let [resume-error {:status :error
                       :kind :open-cascade-review-answer-invalid

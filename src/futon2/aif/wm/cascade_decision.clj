@@ -1286,7 +1286,10 @@
                                  (get-in result [:refusal :carry])))}
           :abstained
           {:decision (abstain (family-refusals (:target-policy-families result)))}
-          (let [decision (-> (:decision result)
+          (let [selected-ranked (first (filter #(= (:action (:decision result))
+                                                   (:action %))
+                                               (:ranked result)))
+                decision (-> (:decision result)
                              (assoc-in [:selection-certificate :selection-route]
                                        :wm/reading-policy-family-v1)
                              (assoc-in [:selection-certificate :target-policy-families]
@@ -1308,6 +1311,8 @@
                                        retired-diagnostics)
                              (assoc-in [:selection-certificate :certificate-schema]
                                        :wm/proof2-certificate-v1)
+                             (assoc-in [:selection-certificate :selected-reading-pin]
+                                       (:reading-pin selected-ranked))
                              ;; Requirements Q4: horizon, steps, grading and
                              ;; G terms of the compared policies, from their
                              ;; certified preference receipts
@@ -1458,7 +1463,9 @@
                          :source-text-digest excerpt-digest
                          :analysis-digest analysis-digest
                          :source-sha256 (:source-sha256 node)}
-                 (:blend-square node) (assoc :square (:blend-square node)))])))
+                 (= :wm/three-halves-square-v1
+                    (get-in node [:blend-square :schema]))
+                 (assoc :square (:blend-square node)))])))
 
 (defn- seam-authoring
   "The attributed operational authoring genuinely available for ENTRY: the
@@ -1487,7 +1494,8 @@
   [entry opts]
   (let [action (:action entry)
         target (:target entry)
-        pins (get-in opts [:cascade-reading-pins target])
+        pins (or (:reading-pin entry)
+                 (get-in opts [:cascade-reading-pins target]))
         seam-attribution {:author :wm/production-seam :authority :wm/runner}
         readings-fn (or (:cascade-occurrence-readings opts)
                         (fn [_]

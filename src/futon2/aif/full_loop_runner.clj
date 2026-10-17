@@ -976,7 +976,12 @@
                        :selection-subphases
                        (selection-timing/receipt
                         (:selection-timing/state raw-opts)
-                        (get-in phase-timing [:phase-timings-ms :selection]))})
+                        (reduce + 0
+                                (map #(get-in phase-timing
+                                              [:phase-timings-ms %] 0)
+                                     [:selection
+                                      :selected-target-reading-redecision
+                                      :occurrence-square-redecision])))})
         usage (registered-telemetry/model-usage
                (:registered-run/job-ledger raw-opts)
                {:run-id run-id :click-id (:click-id raw-opts)})
@@ -2160,6 +2165,11 @@
                    (let [debt (reading-interpretation-status decision)]
                      (or (nil? debt) (= :discharged (:status debt)))))
           {:action action
+           ;; Preserve the exact construction pin used by this ranked policy.
+           ;; Packet D3 needs it to bind the occurrence-resolved squares that
+           ;; were already validated before G.
+           :reading-pin (get-in decision
+                                [:selection-certificate :selected-reading-pin])
            :rank (or (:rank decision) 1)
            :G-efe (:controller-score decision)
            :controller-score (:controller-score decision)
