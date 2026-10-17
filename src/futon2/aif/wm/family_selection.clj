@@ -10,6 +10,7 @@
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.reading-interpretation-debt :as debt]
+            [futon2.aif.wm.selection-cascade-identity :as cascade-identity]
             [futon2.aif.target-policy-family :as target-family]
             [futon2.aif.target-reading-registry :as reading-registry]))
 
@@ -246,14 +247,28 @@
         scored (vec (mapcat :scored rows))
         ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
                      (range 1 (inc (count scored))) scored)
+        ;; Packet B pre-selector join: bind each ranked entry to the
+        ;; canonical :wm/executable-cascade-v1 identity.  Entries whose
+        ;; canonical construction or validation refuses are removed with a
+        ;; typed refusal; the selector never sees an unbound or substituted
+        ;; chain.  Absent the option, selection is unchanged.
+        bound (when-let [join (:bind-cascade-identity opts)]
+                (cascade-identity/bind-ranked ranked
+                                               (or (:readings join)
+                                                   (constantly {}))
+                                               (:authored join)))
+        ranked (if bound (:ranked bound) ranked)
         ranked (if attach-f (attach-f ranked) ranked)
         certified (when (and certify (seq ranked)) (certify ranked scored))
-        opts (cond-> (dissoc opts :attach-f :certify :exclude)
+        opts (cond-> (dissoc opts :attach-f :certify :exclude
+                             :bind-cascade-identity)
                (= :certified (:status certified)) (assoc :beta (:beta certified)))
         excluded (when (and exclude (= :certified (:status certified)))
                    (exclude ranked opts certified))
         menu (if excluded (:ranked excluded) ranked)
-        failures (vec (mapcat :failures rows))
+        failures (vec (concat (mapcat :failures rows)
+                              (map #(assoc % :stage (:stage % :pre-selector))
+                                   (:refusals bound))))
         ;; Requirements Q8: every family policy's structural key at each
         ;; stage, by target; admitted only when certification passed
         stages (into {}
@@ -270,7 +285,23 @@
                                                     (get-in % [:action :policy-key]))
                                                  ranked))))]))
                      rows)
-        summaries (mapv #(dissoc % :scored :constructed-keys) rows)]
+        summaries (mapv (fn [row]
+                          (let [row (dissoc row :scored :constructed-keys)]
+                            (if bound
+                              (update row :policies
+                                      (fn [ps]
+                                        (mapv (fn [s]
+                                                (cond-> s
+                                                  (get (:digests bound) (:policy-id s))
+                                                  (assoc :cascade-digest
+                                                         (get (:digests bound)
+                                                              (:policy-id s)))
+                                                  (some #(= (:policy-id %) (:policy-id s))
+                                                        (:refusals bound))
+                                                  (assoc :cascade-refused true)))
+                                              ps)))
+                              row)))
+                        rows)]
     (cond
       (:refusal excluded)
       {:status :repeat-refused
