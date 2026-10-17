@@ -47,3 +47,21 @@ family builder in a temporary root.  Results:
 The injected response proves the machine boundary, not the semantic quality
 of a future author response.  Production uses the designated author through
 the shared Agency handoff and applies the same validator.
+
+## Production handoff probe
+
+The actual production contact port then dispatched the same saved reading to
+the designated `wm-author` as Agency job
+`invoke-1792201481673-16042-8cd0c0b4`.  The unchanged response passed the real
+constructor and validator and was published under digest
+`ee7d4694fcab95fe3854cd65386cd4c29b068343b16c9c1c8b481bb0b4136ecd`:
+
+- registry validation: `:valid`, 19 occurrences and 3 voids;
+- subsequent family construction: `:computed`, four policies;
+- executable reading policies: every node carries a validated square.
+
+The serving JVM was reloaded in dependency order and reported both the
+production authoring function and mandatory-square flag installed.  The
+explicit cast (`wm-author`, `wm-reviewer`, `wm-repair-reviewer`) was checked in
+the Agency roster and all three identities were idle and invoke-ready.  This
+probe spent no click.
