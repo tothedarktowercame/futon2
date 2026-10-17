@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """Fail-closed post-run Requirements checker for one persisted WM run."""
-import argparse, datetime, hashlib, json, os, re, subprocess, sys, tempfile, urllib.request
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.request
 from pathlib import Path
 
 def run(cmd, cwd):
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=True)
+
+def lake_executable():
+    """Resolve Lean independently of an interactive shell's PATH."""
+    found=shutil.which("lake")
+    if found: return found
+    elan=Path.home()/".elan"/"bin"/"lake"
+    if elan.is_file() and os.access(elan, os.X_OK): return str(elan)
+    raise RuntimeError("lake unavailable (checked PATH and ~/.elan/bin/lake)")
 
 def sha(repo, path=None):
     cmd = ["git", "-C", str(repo), "rev-parse", "HEAD"] if path is None else ["git", "-C", str(repo), "hash-object", str(path)]
@@ -58,7 +66,7 @@ def main(argv=None):
         else:
           exported.write_text(run(["clojure","-M","-m","wm-run-facts","--run",str(record)], f2).stdout)
         run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),"exported"], f2)
-        checked=run(["lake","env","lean",str(lean)], ml).stdout
+        checked=run([lake_executable(),"env","lean",str(lean)], ml).stdout
         export=json.loads(exported.read_text()); facts=export["facts"]
       found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+), [^)\n]*Outcome\.(\w+)", checked)}
       outcomes={q: found.get(q,"holds") for q in range(1,11)}
