@@ -1440,13 +1440,14 @@
                          (string? (:source-sha256 node))
                          (hex64? excerpt-digest)
                          (hex64? analysis-digest))]
-          [oid {:reading-record-id (str (or (:target entry) "?") "/"
-                                        (get-in entry [:action :id]) "/"
-                                        (pr-str oid))
-                :span (:fragment-span node)
-                :source-text-digest excerpt-digest
-                :analysis-digest analysis-digest
-                :source-sha256 (:source-sha256 node)}])))
+          [oid (cond-> {:reading-record-id (str (or (:target entry) "?") "/"
+                                                 (get-in entry [:action :id]) "/"
+                                                 (pr-str oid))
+                         :span (:fragment-span node)
+                         :source-text-digest excerpt-digest
+                         :analysis-digest analysis-digest
+                         :source-sha256 (:source-sha256 node)}
+                 (:blend-square node) (assoc :square (:blend-square node)))])))
 
 (defn- seam-authoring
   "The attributed operational authoring genuinely available for ENTRY: the

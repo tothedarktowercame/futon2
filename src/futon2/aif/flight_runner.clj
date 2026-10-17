@@ -152,7 +152,8 @@
           requisition (requisition-line (:target issued)
                                         (str (name (or (:kind issued) :interpretation)) " request "
                                              (:request-id issued)))
-          sent (dispatch! (assoc opts :invoke-mode "brief")
+          sent (dispatch! (assoc opts :invoke-mode
+                                 (or (:invoke-mode opts) "brief"))
                           seat caller (:target issued)
                           (str requisition (prompt-fn issued)))
           job-id (:job-id sent)]

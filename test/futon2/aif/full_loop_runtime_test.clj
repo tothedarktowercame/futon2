@@ -8,7 +8,73 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.wm.cascade-decision :as cascade-decision]
+            [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.report.war-machine :as wm]))
+
+(defn- digest [x] (evidence/value-digest x))
+
+(deftest occurrence-source-carries-the-actions-validated-square
+  (let [square {:schema :wm/three-halves-square-v1 :fixture true}
+        entry {:target "M-square"
+               :action {:id "policy-square"
+                        :arrangement
+                        {:nodes [{:occurrence-id ["p/x" 0]
+                                  :fragment-span {:start 1 :end 2}
+                                  :source-sha256 (apply str (repeat 64 "a"))
+                                  :blend-square square}]}}}
+        readings (cascade-decision/occurrence-readings
+                  entry {:excerpt-digest (digest :excerpt)
+                         :analysis-digest (digest :analysis)})]
+    (is (= square (get-in readings [["p/x" 0] :square])))
+    (is (= ["p/x" 0] (first (keys readings))))))
+
+(deftest production-composition-installs-the-reviewed-same-click-handler
+  (let [seen (atom nil)
+        d (digest :cascade)
+        holes [{:hole-id :h :owner :wm :question :operation}]
+        patch {:namespace "futon2.aif.full-loop-runtime-test"
+               :var "identity"
+               :source-digest (digest :source)}
+        error {:kind :wm/open-cascade-execution-error
+               :cascade-digest d :holes holes :phase :compile :attempts []
+               :resume-port {:retry (fn [_] {:cascade-digest d :outcome :redone})}}
+        author-answer (fn [req]
+                        {:requisition-id (:requisition-id req)
+                         :cascade-digest d :by "wm-author"
+                         :decisions {:h {:decision :implement}}
+                         :patch patch})
+        reviewer-answer
+        (fn [{:keys [requisition author-answer]}]
+          (assoc author-answer :requisition-id (:requisition-id requisition)
+                 :accepted-by "wm-reviewer"))]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! seen opts)
+                    ((:open-cascade-resume-fn opts) error))]
+      (is (= :resumed
+             (:status
+              (runtime/run-opportunity!
+               {:run-id "resume-production"
+                :author "wm-author" :reviewer "wm-reviewer"
+                :open-cascade-author-answer-fn author-answer
+                :open-cascade-reviewer-answer-fn reviewer-answer
+                :open-cascade-patch-loader (constantly identity)})))))
+    (is (fn? (:open-cascade-resume-fn @seen)))
+    (is (= :held (:status (open-resume/recognize error))))))
+
+(deftest production-resume-contacts-the-explicit-cast-in-work-mode
+  (let [configurations (atom [])]
+    (with-redefs [flight-runner/agency-answer-fn
+                  (fn [configuration]
+                    (swap! configurations conj configuration)
+                    (constantly {:state :not-contacted}))]
+      (is (fn? (runtime/open-cascade-resume-handler
+                {:author "wm-author" :reviewer "wm-reviewer"}))))
+    (is (= ["wm-author" "wm-reviewer"] (mapv :seat @configurations)))
+    (is (= ["work" "work"]
+           (mapv #(get-in % [:opts :invoke-mode]) @configurations)))))
 
 (deftest flight-runner-does-not-load-the-report
   (let [{:keys [exit out err]}

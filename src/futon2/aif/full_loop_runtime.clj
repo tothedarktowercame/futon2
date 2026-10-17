@@ -12,7 +12,9 @@
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.selected-reading :as selected-reading]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.wm.click-ask :as click-ask]
+            [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
            [java.util UUID]))
@@ -24,15 +26,16 @@
 (def default-pattern-graph-diff-dir
   "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
 
-(defn- designated-author-answer-fn
+(defn- designated-agent-answer-fn
   "Agency answer port for machine requests.  It contacts exactly the
   configured author and returns a typed no-contact when that seat is not
   currently invoke-ready; it never consults a fallback roster seat."
-  [opts prompt-fn]
-  (let [author (:author opts)
+  [opts seat prompt-fn invoke-mode]
+  (let [author seat
         agency-base (or (:agency-base opts) runner/default-agency-base)
         answer (flight-runner/agency-answer-fn
-                {:seat author :caller "wm-full-loop" :opts opts
+                {:seat author :caller "wm-full-loop"
+                 :opts (assoc opts :invoke-mode (or invoke-mode "brief"))
                  :prompt-fn prompt-fn})]
     (fn [issued]
       (let [roster (try (runner/agent-roster agency-base)
@@ -45,6 +48,73 @@
           (answer issued)
           {:state :not-contacted :reason :designated-author-unavailable
            :author author})))))
+
+(defn- designated-author-answer-fn [opts prompt-fn]
+  (designated-agent-answer-fn opts (:author opts) prompt-fn "brief"))
+
+(defn- open-cascade-author-prompt [req]
+  (str "Repair the held executable cascade phase without selecting again. "
+       "Implement resolutions for exactly the listed holes, commit the source, "
+       "and reply with one JSON object containing requisition-id, cascade-digest, "
+       "by, decisions, and patch {namespace,var,source-digest}.\n\n"
+       (pr-str req)))
+
+(defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
+  (str "Independently review this held-cascade repair. Verify the committed "
+       "source and every hole decision. Reply with one JSON object containing "
+       "the author's requisition-id, cascade-digest, by, decisions and patch, "
+       "plus accepted-by set to your own seat id.\n\nREQUISITION:\n"
+       (pr-str requisition) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
+
+(defn- patch-loader
+  "Resolve a reviewed patch only after reloading its named namespace and
+  checking the loaded source digest against the reviewed descriptor."
+  [{:keys [namespace var source-digest]}]
+  (let [n (symbol namespace)
+        v (symbol var)]
+    (require n :reload)
+    (let [loaded (get @load-identity/registry n)
+          resolved (ns-resolve n v)]
+      (when-not (= source-digest (:sha256 loaded))
+        (throw (ex-info "reviewed patch source digest does not match loaded source"
+                        {:kind :patch-source-digest-mismatch
+                         :expected source-digest :loaded (:sha256 loaded)})))
+      (when-not (and resolved (ifn? @resolved))
+        (throw (ex-info "reviewed patch var is not callable"
+                        {:kind :patch-var-unavailable :namespace n :var v})))
+      @resolved)))
+
+(defn open-cascade-resume-handler
+  "Production D4 composition. Contact the designated author and distinct
+  reviewer through Agency, validate the reviewed answer, hot-load the exact
+  reviewed source, and retry D3's held phase in the same click."
+  [opts]
+  (let [author (:author opts)
+        reviewer (:reviewer opts)
+        author-contact (or (:open-cascade-author-answer-fn opts)
+                           (designated-agent-answer-fn
+                            opts author open-cascade-author-prompt "work"))
+        reviewer-contact (or (:open-cascade-reviewer-answer-fn opts)
+                             (designated-agent-answer-fn
+                              opts reviewer open-cascade-review-prompt "work"))]
+    (fn [error]
+      (let [ctx (open-resume/recognize error)
+            req (when (= :held (:status ctx))
+                  (open-resume/authoring-requisition ctx author reviewer))]
+        (if-not (= :dispatched (:status req))
+          (or req ctx)
+          (let [author-answer (handoff/response-map (author-contact req))
+                reviewed (when author-answer
+                           (handoff/response-map
+                            (reviewer-contact {:requisition req
+                                               :author-answer author-answer})))
+                ledger (open-resume/new-ledger (or (:run-id opts) "held-click"))]
+            (if-not reviewed
+              {:status :error :kind :open-cascade-review-answer-invalid}
+              (open-resume/handle-error!
+               ledger error author reviewer reviewed
+               {:patch-loader (or (:open-cascade-patch-loader opts)
+                                  patch-loader)}))))))))
 
 (defn- selection-judge
   [opts days]
@@ -166,10 +236,16 @@
         ;; depend on a dynamic binding surviving namespace reload or an
         ;; execution boundary before it decides whether selection is
         ;; terminal.
-        runner-opts (assoc opts
+        runner-opts0 (assoc opts
                            :selected-target-reading-fn
                            (:selected-target-reading-fn defaults)
                            :selected-reading-ask-builder
-                           (:selected-reading-ask-builder defaults))]
+                           (:selected-reading-ask-builder defaults))
+        ;; Construct D4 only now: RUNNER-OPTS carries the live job ledger and
+        ;; exact cast.  Closing over the earlier OPTS recreated the stale
+        ;; handoff bug this composition root exists to prevent.
+        runner-opts (assoc runner-opts0 :open-cascade-resume-fn
+                           (or (:open-cascade-resume-fn runner-opts0)
+                               (open-cascade-resume-handler runner-opts0)))]
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
