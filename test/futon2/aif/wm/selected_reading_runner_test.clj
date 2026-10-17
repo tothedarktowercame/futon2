@@ -3,7 +3,8 @@
   asked for only the selected policy's owed occurrences, validated, and the
   same immutable policy made eligible for enactment. Enactment itself stops
   at a typed refusal: reading-policy execution semantics are not ruled."
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
@@ -267,6 +268,20 @@
         (is (= (get-in decision [:action :interpretation-debt :digest]) (:debt-digest request)))
         (is (= (get-in decision [:action :policy-key]) (:policy-key request)))
         (is (= {"p/b" (sha lib "p/b")} (:library-pins request)))))))
+
+(deftest selected-policy-reading-uses-the-shared-json-representation
+  (let [lib (library)
+        decision (selected-decision (atom 0))
+        after (phase decision lib
+                     (fn [request]
+                       (str "Here is the requested machine response.\n```json\n"
+                            (json/generate-string (answer request lib "accepted"))
+                            "\n```\nValidated; no repository changes.")))]
+    (is (= :discharged
+           (:status (runner/reading-interpretation-status after))))
+    (is (= :validated
+           (get-in after [:selection-certificate :interpretation-discharge
+                          :validation :status])))))
 
 (deftest receipts-stand-only-as-sealed-by-the-validator
   (let [lib (library)

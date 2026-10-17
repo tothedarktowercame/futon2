@@ -2009,13 +2009,8 @@
             requested-at (when contact? (clock))
             exchange (when contact?
                        (handoff/exchange
-                        {:contact ask :request request
-                         :decode (fn [raw]
-                                   (cond
-                                     (map? raw) raw
-                                     (string? raw)
-                                     (try (json/parse-string raw true)
-                                          (catch Exception _ nil))))
+                         {:contact ask :request request
+                         :decode handoff/response-json-object
                          :validate #(selected-reading/validate
                                      request % {:library-root library-root})}))
             received-at (when contact? (clock))

@@ -12,74 +12,107 @@
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor ":strategic-selection-invoke-fn"
    :contract :wm/strategic-selection-request
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :service-map
+   :decoder :strategic-selection-attempt :status :verified-adapter}
   {:id :reading/selected-target
    :producer :retained-outer-choice :consumer :wm-author
    :kind :agent-reply :source "src/futon2/aif/selected_target_reading.clj"
    :anchor "(handoff/exchange {:contact answer-fn"
    :contract :wm/selected-target-reading-request-v1
-   :transport :handoff/exchange :status :verified-shared}
+   :transport :handoff/exchange :representation :json-object
+   :decoder :handoff/response-json-object :status :verified-shared}
+  {:id :reading/occurrence-squares
+   :producer :selected-target-reading :consumer :wm-author
+   :kind :agent-reply :source "src/futon2/aif/occurrence_square_authoring.clj"
+   :anchor "(handoff/exchange {:contact answer-fn"
+   :contract :wm/occurrence-square-authoring-request-v1
+   :transport :handoff/exchange :representation :json-object
+   :decoder :handoff/response-json-object :status :verified-shared}
   {:id :reading/selected-policy
    :producer :selected-reading-policy :consumer :wm-author
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
-   :anchor "(handoff/exchange\n                        {:contact ask"
+   :anchor ":decode handoff/response-json-object"
    :contract :wm/selected-reading-request-v1
-   :transport :handoff/exchange :status :verified-shared}
+   :transport :handoff/exchange :representation :json-object
+   :decoder :handoff/response-json-object :status :verified-shared}
   {:id :interpretation/want
    :producer :mission-want :consumer :interpretation-seat
    :kind :agent-reply :source "src/futon2/aif/flight_runner.clj"
    :anchor "(defn ask-fn"
    :contract :wm/want-interpretation-request-v1
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :single-fenced-edn
+   :decoder :want-interpretation/parse-reply :status :verified-adapter}
   {:id :interpretation/legacy-action
    :producer :selected-legacy-action :consumer :interpreter
    :kind :agent-reply :source "src/futon2/aif/interpretation_job.clj"
    :anchor "(defn run!"
    :contract :wm/interpretation-contract-manifest-v1
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :durable-edn-artifact
+   :decoder :interpretation-evidence/validate-record :status :verified-adapter}
   {:id :execution/author
    :producer :selected-action :consumer :author
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor "(defn- author-prompt"
    :contract :wm/author-artifact-contract
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :line-markers
+   :decoder :task-execution-evidence/job-text :status :verified-adapter}
   {:id :execution/build-cure
    :producer :mechanical-build-failure :consumer :author
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor "build-cure-prompt"
    :contract :wm/build-cure-contract
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :line-markers
+   :decoder :task-execution-evidence/job-text :status :verified-adapter}
   {:id :review/initial
    :producer :authored-commit :consumer :reviewer
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor "(defn- reviewer-prompt"
    :contract :wm/review-verdict-contract
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :line-markers
+   :decoder :task-execution-evidence/review-verdict :status :verified-adapter}
   {:id :review/revision
    :producer :negative-review :consumer :author-and-reviewer
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor "revision-reviewer-prompt"
    :contract :wm/revision-review-contract
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :line-markers
+   :decoder :task-execution-evidence/review-verdict :status :verified-adapter}
   {:id :review/standing-decision
    :producer :missing-standing-decision :consumer :reviewer
    :kind :agent-reply :source "src/futon2/aif/full_loop_runner.clj"
    :anchor "(defn- standing-completion-prompt"
    :contract :wm/limb-evidence-standing-decision-v1
-   :transport :handoff/response-payload :status :verified-adapter}
+   :transport :handoff/response-payload :representation :durable-edn-artifact
+   :decoder :limb-evidence/validate-standing-decision :status :verified-adapter}
+  {:id :execution/open-cascade-author
+   :producer :held-open-cascade :consumer :author
+   :kind :agent-reply :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor "author-answer (handoff/response-map"
+   :contract :wm/open-cascade-authoring-requisition-v1
+   :transport :handoff/response-map :representation :json-object
+   :decoder :handoff/response-json-object :status :verified-shared}
+  {:id :execution/open-cascade-reviewer
+   :producer :open-cascade-author-answer :consumer :reviewer
+   :kind :agent-reply :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor "reviewed (when author-answer"
+   :contract :wm/open-cascade-reviewed-answer-v1
+   :transport :handoff/response-map :representation :json-object
+   :decoder :handoff/response-json-object :status :verified-shared}
   {:id :repair/loop-worker
    :producer :wm-click-repair-loop :consumer :repair-reviewer
    :kind :agent-reply :source "scripts/wm_click_repair_loop.py"
    :anchor "def repair(args, reason"
    :contract :wm/click-repair-verdict-v1
-   :transport :agency-send-script :status :registered-exception
+   :transport :agency-send-script :representation :terminal-result-text
+   :decoder :wm-click-loop/repair-result :status :registered-exception
    :exception "Python supervisor; explicit cast and terminal verdict are locally gated."}
   {:id :preflight/quota-probe
    :producer :issuing-caller :consumer :cast-member
    :kind :agent-reply :source "scripts/wm_click.sh"
    :anchor "--from \"$ISSUING_CALLER\" --to \"$a\""
    :contract :wm/quota-probe-v1
-   :transport :agency-send-script :status :registered-exception
+   :transport :agency-send-script :representation :terminal-state
+   :decoder :wm-click/quota-probe :status :registered-exception
    :exception "Optional shell preflight; sender is the explicit issuing caller and the reply cannot enter selection."}
   {:id :repair/loop-owner-notification
    :producer :wm-click-repair-loop :consumer :owner

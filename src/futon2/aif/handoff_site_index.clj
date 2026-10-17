@@ -22,7 +22,8 @@
          (when-not (= (count ids) (count (distinct ids)))
            [{:reason :duplicate-site-id}])
          (mapcat
-          (fn [{:keys [id source anchor kind contract transport status exception]}]
+          (fn [{:keys [id source anchor kind contract transport status exception
+                       representation decoder]}]
             (let [file (io/file repo source)
                   text (when (.isFile file) (slurp file))]
               (cond-> []
@@ -32,6 +33,9 @@
                 (conj {:site id :reason :anchor-missing :source source :anchor anchor})
                 (not (and kind contract transport status))
                 (conj {:site id :reason :classification-incomplete})
+                (and (= :agent-reply kind)
+                     (not (and representation decoder)))
+                (conj {:site id :reason :representation-contract-missing})
                 (and (= :registered-exception status) (str/blank? exception))
                 (conj {:site id :reason :exception-unexplained}))))
           sites))]
