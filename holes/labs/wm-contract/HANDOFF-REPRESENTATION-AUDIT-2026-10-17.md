@@ -82,3 +82,19 @@ transport call can never be introduced. New `handoff/exchange` and
 `handoff/response-map` callers are detected automatically; other new Agency
 call paths still require adding an index entry as part of review. This is the
 remaining governance boundary, stated rather than hidden.
+
+## Verification
+
+- implementation and audit commit: `532b5e8a6`
+- combined gate: 57 tests, 351 assertions, zero failures/errors
+- changed-file lint: zero errors; one pre-existing warning in the large runner
+  at an untouched line
+- `git diff --check`: clean
+- index warrant:
+  `test-registry-f646cd9a65e6028b53d87adfb80d75e92d60c39179dfb7b544fcd17616cbdde2`
+- selected-policy production seam warrant:
+  `test-registry-f9212a4181a14a02fc9c705f9625a9ea1faeab40951fc9dbfec55a64da533b88`
+- serving JVM: `handoff-site-index` and `full-loop-runner` reloaded; the live
+  index audit returned `:verified`, 19 sites, zero problems
+
+No click was run during this audit.
