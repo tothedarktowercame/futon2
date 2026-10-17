@@ -251,3 +251,15 @@ debugger engaged and ready to repair live errors. This authorizes exactly one
 ordinary click through `scripts/wm_click_repair_loop.py`. Under this document's
 standing mechanism, `allocated` rises from 74 to **75**. No prior charge is
 reclaimed.
+
+## Joe's five-click readiness campaign, 2026-10-17 — five clicks
+
+Joe directed codex-68 to use Zai-2, Zai-6 and Zai-7 for a five-click readiness
+campaign, then clarified that the clicks are to be run one at a time so the
+evidence and repairs can be considered and logged between them. Beta = 1 is
+separately authorized only as the neutral starting precision for this campaign.
+
+This authorizes five further ordinary clicks through the debugger repair loop.
+Under this document's standing mechanism, `allocated` rises from 81 to **86**.
+Each click remains charged at issue time; an unsuccessful launch that issues no
+click consumes nothing. No historical charge is reclaimed.
