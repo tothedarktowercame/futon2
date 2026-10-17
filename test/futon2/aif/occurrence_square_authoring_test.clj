@@ -97,3 +97,16 @@
     (is (= 1 @calls))
     (is (= :selected (get-in result [:judgement :decision :status])))
     (is (= :published (get-in result [:record :status])))))
+
+(deftest debugger-does-not-stop-between-reading-and-square-authoring
+  (let [reading (reading! (temp-root))
+        missing-squares (judgement reading)
+        authoring-port (fn [& _] nil)]
+    (is (false? (runner/selected-target-redecision-terminal?
+                 {} authoring-port missing-squares)))
+    (is (true? (runner/selected-target-redecision-terminal?
+                {} nil missing-squares)))
+    (is (true? (runner/selected-target-redecision-terminal?
+                {:flight {}} authoring-port missing-squares)))
+    (is (true? (runner/selected-target-redecision-terminal?
+                {} authoring-port {:decision {:status :selected}})))))

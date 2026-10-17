@@ -2124,6 +2124,15 @@
                                    :occurrence-square-authoring] record))
          :record record}))))
 
+(defn selected-target-redecision-terminal?
+  "False when the selected-target reading redecision reached the typed missing-
+  square state that the immediately following authoring phase owns.  A debugger
+  must not stop between those two same-click phases."
+  [opts square-authoring-fn judgement]
+  (not (and square-authoring-fn
+            (nil? (:flight opts))
+            (square-authoring/selected-need judgement))))
+
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
    flat-removal H4, 2026-09-17). A cascade decision yields the chosen
@@ -6310,9 +6319,11 @@
                                  (assoc @effective-configuration :evaluation :not-retained)))
                      j)
                   nil
-                  #(selection-terminal-condition
-                    :selected-target-reading-redecision %
-                    {:selected-target-reading record}))
+                  #(when (selected-target-redecision-terminal?
+                           opts square-authoring-fn %)
+                     (selection-terminal-condition
+                      :selected-target-reading-redecision %
+                      {:selected-target-reading record})))
                  (catch Throwable e
                    (throw
                     (ex-info "Selected-target reading was published but inner construction failed"
