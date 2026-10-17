@@ -252,3 +252,41 @@ The serving JVM hot-loaded `family-selection`, `cascade-decision`, and
 specific click-2 `:identity-forged` blocker. It does not authorize or spend
 click 3; the ordinary readiness scan and remaining campaign authority still
 govern that launch.
+
+### Click 3 — valid fenced author answer rejected, decoder repaired
+
+The bounded readiness scan first found three self-clearing stale warrants;
+only those namespaces were rerun and reminted. Zai-2 was then reset after its
+prior job completed, and the scan returned READY. A cast-admission race caused
+one launch attempt to be refused before allocation (`click-id` absent, zero
+budget spent); the loop waited and retried without treating it as click 3.
+
+The accepted click was:
+
+- click: `wm-click-5497b0af-dd89-4347-b9e7-7db8f55f4f86`
+- run: `2026-10-17-a9af4bb8-12c3-4fa5-a74b-7d0dc861da40`
+- target reaching the reading boundary: `M-pattern-retrieval-calibration`
+- outcome: `abstained`; one click spent, no tick carried
+- beta campaign: no new reading-model identity issued; three remain
+
+The sole non-universe refusal was
+`:selected-target-reading-answer-invalid/before-cascade-construction`.
+Zai-2's completed Agency job had returned exactly one valid JSON analysis
+object wrapped in a single Markdown `json` fence. The requisition did not
+forbid that wrapper, but the decoder passed the backticks directly to the JSON
+parser, caught the parse exception and mislabeled the correct answer invalid.
+
+Zai-7 repaired this in commit `0a45789b8`: the selected-target-reading decoder
+accepts exactly one fenced JSON object. It still rejects prose outside the
+fence, multiple fences, non-JSON and missing answers. The regression reproduces
+the live answer: the old decoder returns nil and the new decoder returns the
+analysis map. Focused validation passed 15 tests and 62 assertions, with zero
+failures; changed-file lint had zero errors, check-parens passed, and the
+namespace was hot-loaded without restart. Focused warrant:
+`test-registry-295b34c4729173a7a971c7c350a89d97808cdfa0d78fa3b426e0698d92c9dc1f`.
+The repair finding was published in commit `c91d0d624`.
+
+Click 3 is therefore accounted for but did not advance enactment. Click 4 must
+not be described as a continuation of this run: the run ended. Its readiness
+scan should include the new selected-target-reading warrant and confirm the
+same explicit Zai cast before a separately authorized launch.
