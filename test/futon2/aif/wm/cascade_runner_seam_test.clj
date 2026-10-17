@@ -210,6 +210,26 @@
     (testing "and it is still not the legacy refusal"
       (is (not= :reading-policy-execution-semantics-owed (:kind held))))))
 
+(deftest failed-open-cascade-resume-surfaces-the-handler-error
+  (let [resume-error {:status :error
+                      :kind :open-cascade-review-answer-invalid
+                      :phase :cascade-execution
+                      :repairable true
+                      :review-answer {:status :invalid}}
+        {:keys [result]}
+        (click! [px py]
+                {:cascade-reading-pins
+                 {"M-current" {:excerpt-digest (hex [:excerpt])
+                               :analysis-digest (hex [:analysis])}}
+                 :cascade-occurrence-readings (fn [_] square-readings)
+                 :open-cascade-resume-fn (constantly resume-error)}
+                {:bind-cascade-identity
+                 {:readings (fn [_] square-readings)}})
+        cell (get-in result [:checkpoints :selection :sorry])]
+    (testing "the resume handler's typed failure replaces the stale open carrier"
+      (is (= resume-error (get-in cell [:downstream-refusal])))
+      (is (nil? (get-in cell [:held-phase]))))))
+
 (deftest identity-mismatch-is-a-typed-machine-error
   ;; a pre-bound action whose digest does not match the rebuilt chain is a
   ;; :cascade-materialisation-error, never a policy refusal

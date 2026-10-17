@@ -21,3 +21,18 @@
          (#'runner/no-entry-failure-data
           {:decision {:status :selected}}
           nil))))
+
+(deftest cascade-resume-errors-retain-their-typed-evidence
+  (let [resume-error {:status :error
+                      :kind :open-cascade-review-answer-invalid
+                      :phase :cascade-execution
+                      :repairable true
+                      :review-answer {:status :invalid}}
+        failure (#'runner/no-entry-failure-data
+                 {:decision {:status :selected}}
+                 resume-error)]
+    (testing "a failed same-click resume is incomplete, not a policy refusal"
+      (is (= :incomplete (:outcome failure)))
+      (is (= :open-cascade-review-answer-invalid (:failure-kind failure)))
+      (is (= :cascade-execution (:held-phase failure)))
+      (is (= resume-error (:failure-detail failure))))))

@@ -2204,6 +2204,12 @@
      :failure-kind (:kind downstream-refusal)
      :held-phase (:phase downstream-refusal)
      :repairable true}
+    (= :error (:status downstream-refusal))
+    {:outcome :incomplete
+     :failure-kind (:kind downstream-refusal)
+     :held-phase (:phase downstream-refusal)
+     :repairable (not= false (:repairable downstream-refusal))
+     :failure-detail downstream-refusal}
     downstream-refusal
     {:outcome :refused
      :failure-kind (:kind downstream-refusal)}
@@ -6487,8 +6493,9 @@
                      (:open-cascade-resume-fn opts))
               (let [handled ((:open-cascade-resume-fn opts)
                              cascade-execution0)]
-                (if (= :resumed (:status handled))
-                  (:result handled)
+                (case (:status handled)
+                  :resumed (:result handled)
+                  :error handled
                   cascade-execution0))
               cascade-execution0)
             persisted-cascade-execution
