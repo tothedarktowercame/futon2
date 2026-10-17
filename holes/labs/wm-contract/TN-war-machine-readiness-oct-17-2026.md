@@ -2,11 +2,21 @@
 
 ## Campaign status
 
-Prepared, not started. Five live clicks are proposed, but the first click is
-held pending an authorized reading-precision beta declaration for identity
-`f9c5cf02df9f933d2b554efbcb7b70ceb2ce1dddf595d35c0bd88245ae4186b2`.
-The debugger may repair code and data-boundary defects; it must not invent this
-epistemic parameter.
+Prepared, not started. Joe authorized beta = 1 on 2026-10-17 as the neutral
+starting precision for this five-click readiness campaign, whose purpose is to
+make the system ready to tune. It is not claimed to be learned or calibrated.
+The sealed declaration is
+`resources/wm/reading-precision-beta/wm-readiness-2026-10-17-v1.edn`, bound to
+reading-model identity
+`f9c5cf02df9f933d2b554efbcb7b70ceb2ce1dddf595d35c0bd88245ae4186b2`, with
+declaration digest
+`72526b4b8b64dd084c67deb9903703b3290da0b494141c2e308a7dfb4ca898c0`.
+
+Before click 1, the serving JVM must load and register that exact declaration,
+then read it back by identity and verify the seal. Later clicks may carry beta
+only while the reading-model identity is unchanged. An identity change pauses
+the campaign for a new explicit declaration; neither the debugger nor the
+runner may invent or silently migrate the value.
 
 ## Fixed Zai cast
 

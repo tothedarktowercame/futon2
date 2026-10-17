@@ -1,0 +1,10 @@
+;; Joe's 2026-10-17 authorization for the bounded five-click readiness
+;; campaign.  This is a neutral starting precision, not a learned or
+;; empirically calibrated value.  It is valid only for the exact reading
+;; model identity below; an identity change requires a new declaration.
+{:schema :wm/reading-precision-beta-declaration-v1
+ :identity "f9c5cf02df9f933d2b554efbcb7b70ceb2ce1dddf595d35c0bd88245ae4186b2"
+ :beta 1
+ :authority {:status :declared
+             :version "wm-readiness-2026-10-17/v1"}
+ :sha256 "72526b4b8b64dd084c67deb9903703b3290da0b494141c2e308a7dfb4ca898c0"}
