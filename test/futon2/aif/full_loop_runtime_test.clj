@@ -8,6 +8,7 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
@@ -183,6 +184,22 @@
     (is (fn? (:selected-target-reading-fn @runner-opts))
         "the real production wrapper must pass the port on runner opts")
     (is (= [["M-production" "wm-author"]] @contacted))))
+
+(deftest production-runner-receives-occurrence-square-authoring-port
+  (let [seen (atom nil)]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! seen opts)
+                    ((:occurrence-square-authoring-fn opts) {} {})
+                    :ran)
+                  square-authoring/repair! (fn [opts _]
+                                             (is (fn? (:answer-fn opts)))
+                                             {:status :probe})]
+      (is (= :ran (runtime/run-opportunity!
+                   {:run-id "production-square-authoring"
+                    :author "wm-author" :reviewer "wm-reviewer"}))))
+    (is (true? (:require-occurrence-squares? @seen)))
+    (is (fn? (:occurrence-square-authoring-fn @seen)))))
 
 (deftest selected-target-answer-is-built-with-the-run-local-job-ledger
   (let [ledger (atom {:order [] :jobs {}})

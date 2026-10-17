@@ -80,6 +80,7 @@
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -2099,6 +2100,28 @@
                         (assoc :selected-target-reading-request record)
                         (assoc-in [:decision :selection-certificate
                                    :selected-target-reading-request] record))
+         :record record}))))
+
+(defn occurrence-square-authoring-step
+  "Publish occurrence squares, then rerun only inner construction once."
+  [opts judgement repair-fn redecide]
+  (if-not (and repair-fn (square-authoring/selected-need judgement))
+    {:judgement judgement :record nil}
+    (let [record (try (repair-fn opts judgement)
+                      (catch Throwable e
+                        {:schema square-authoring/schema :status :error
+                         :kind :occurrence-square-authoring-threw
+                         :message (ex-message e)}))]
+      (if (:published record)
+        {:judgement (-> (redecide record)
+                        (assoc :occurrence-square-authoring record)
+                        (assoc-in [:decision :selection-certificate
+                                   :occurrence-square-authoring] record))
+         :record record}
+        {:judgement (-> judgement
+                        (assoc :occurrence-square-authoring record)
+                        (assoc-in [:decision :selection-certificate
+                                   :occurrence-square-authoring] record))
          :record record}))))
 
 (defn- selected-entry
@@ -6220,6 +6243,9 @@
                                       (get *runtime-defaults* :interpretation-ask-fn))
             target-reading-fn (or (:selected-target-reading-fn opts)
                                   (get *runtime-defaults* :selected-target-reading-fn))
+            square-authoring-fn (or (:occurrence-square-authoring-fn opts)
+                                    (get *runtime-defaults*
+                                         :occurrence-square-authoring-fn))
             judgement0-base
             (try
             (run-phase!
@@ -6249,6 +6275,8 @@
                ;; phase's final answer and must be restartable when attached.
                (when-not (or (and target-reading-fn (nil? (:flight opts))
                                   (selected-target-reading/selected-need judgement))
+                             (and square-authoring-fn (nil? (:flight opts))
+                                  (square-authoring/selected-need judgement))
                              (and interpretation-ask-fn (nil? (:flight opts))
                                   (seq (interpretation-needed-refusals
                                         (:decision judgement)))))
@@ -6294,6 +6322,44 @@
                               :target (:target record)
                               :selected-target-reading record}
                              e))))))
+            {judgement0-squares :judgement
+             occurrence-square-authoring-record :record}
+            (occurrence-square-authoring-step
+             opts judgement0-reading
+             (when (nil? (:flight opts)) square-authoring-fn)
+             (fn [record]
+               (try
+                 (run-phase!
+                  opts @phase-context :occurrence-square-redecision
+                  #(let [generated (selection-judge window-days)
+                         j ((or (:judgement-transform-fn opts) identity)
+                            (:judgement generated))]
+                     (reset! effective-configuration
+                             (or (:effective-run-configuration j)
+                                 (assoc @effective-configuration :evaluation :not-retained)))
+                     j)
+                  nil
+                  #(selection-terminal-condition
+                    :occurrence-square-redecision %
+                    {:occurrence-square-authoring record}))
+                 (catch Throwable e
+                   (throw
+                    (ex-info "Occurrence squares were published but inner construction failed"
+                             {:outcome :incomplete
+                              :failure-kind :occurrence-square-redecision-failed
+                              :failure-stage :occurrence-square-redecision
+                              :occurrence-square-authoring record}
+                             e))))))
+            _occurrence-square-authoring-complete
+            (when (and occurrence-square-authoring-record
+                       (not (:published occurrence-square-authoring-record)))
+              (throw
+               (ex-info "Occurrence-square authoring failed before G"
+                        {:outcome :incomplete
+                         :failure-kind (:kind occurrence-square-authoring-record)
+                         :failure-stage :occurrence-square-authoring
+                         :occurrence-square-authoring
+                         occurrence-square-authoring-record})))
             ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
             ;; step inside the tick). Only when the decision abstained
             ;; refusing at least one target :no-admitted-interpretation, at
@@ -6306,9 +6372,9 @@
             ;; there is a refusal to ask about, not on every click
             (when (and interpretation-ask-fn (nil? (:flight opts))
                        (seq (interpretation-needed-refusals
-                             (:decision judgement0-reading))))
+                             (:decision judgement0-squares))))
               (interpretable-refusal
-               (:decision judgement0-reading)
+               (:decision judgement0-squares)
                (or (:interpretation-ask-classify-fn opts)
                    (interpretation-ask-classifier))))
             interpretation-ask-record
@@ -6372,7 +6438,7 @@
                       (retain-redecision-failure! e interpretation-ask-record))))
                 (catch Throwable e
                   (retain-redecision-failure! e interpretation-ask-record)))
-              judgement0-reading)
+              judgement0-squares)
             ;; Q5: the one G selection is complete here. Its instant opens
             ;; the event clock the selected-only reading phase shares.
             selection-clock (monotonic-clock)
@@ -6561,6 +6627,9 @@
                                selected-target-reading-record
                                (assoc-in [:judgment :selected-target-reading-request]
                                          selected-target-reading-record)
+                               occurrence-square-authoring-record
+                               (assoc-in [:judgment :occurrence-square-authoring]
+                                         occurrence-square-authoring-record)
                                true
                                (assoc-in [:judgment :world-at-selection]
                                          world-at-selection)

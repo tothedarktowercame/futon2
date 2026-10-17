@@ -60,3 +60,15 @@
                                   (:analysis-digest (record))
                                   {pattern pattern-text}))))
   (is (= pattern-text ((registry/library-resolver) pattern))))
+
+(deftest void-citations-are-censused-and-never-projected-as-squares
+  (let [dir (root) void-id [pattern 9]
+        value (assoc (record)
+                     :voids {void-id {:occurrence-id void-id :pattern pattern
+                                      :missing-parts [:BECAUSE]
+                                      :reason :pattern-part-missing}})
+        published (registry/publish! dir value {pattern pattern-text})]
+    (is (= :valid (:status (registry/validate-record published
+                                                     {pattern pattern-text}))))
+    (is (= #{void-id} (registry/void-occurrences published)))
+    (is (not (contains? (registry/squares published) void-id)))))

@@ -48,6 +48,7 @@
                                               g-terms)))]
     (-> entry
         (assoc :action (reading-action policy score)
+               :reading-pin (:reading-pin policy)
                :cascade-id (:policy-id policy)
                :policy-id (:policy-id policy)
                :policy-kind (:kind policy)
@@ -135,7 +136,8 @@
   The pinned graph is loaded once before any source or reading lookup; with
   no graph path every target fails :graph-path-not-supplied."
   [{:keys [target-sources reading-root graph-path retraction
-           occurrence-square-root pattern-texts pattern-library-root]}]
+           occurrence-square-root pattern-texts pattern-library-root
+           require-occurrence-squares?]}]
   (let [loaded (if (some? graph-path)
                  (graph-pin/load-pinned graph-path)
                  {:status :refused :kind :graph-path-not-supplied})
@@ -165,16 +167,24 @@
                    (failed-field-family target-id (dissoc digest :status))
                    (let [reading (reading-registry/current-reading
                                   reading-root target-id digest)
-                         squares (square-registry/current
-                                  occurrence-square-root target-id
-                                  (:analysis-digest reading)
-                                  (or pattern-texts
-                                      (square-registry/library-resolver
-                                       (or pattern-library-root
-                                           square-registry/default-library-root))))]
-                     (target-family/policy-family
-                      {:reading reading :graph (:graph loaded)
-                       :occurrence-squares squares :retraction retraction}))))
+                         squares (when-not (= :absent (:status reading))
+                                   (square-registry/current
+                                    occurrence-square-root target-id
+                                    (:analysis-digest reading)
+                                    (or pattern-texts
+                                        (square-registry/library-resolver
+                                         (or pattern-library-root
+                                             square-registry/default-library-root)))))]
+                     (if (and require-occurrence-squares?
+                              (= :absent (:status squares)))
+                       (failed-field-family
+                        target-id (merge (dissoc squares :status)
+                                         {:excerpt-digest (:excerpt-digest reading)
+                                          :analysis-digest (:analysis-digest reading)}))
+                       (target-family/policy-family
+                        {:reading reading :graph (:graph loaded)
+                         :occurrence-squares (or squares {:entries {}})
+                         :retraction retraction})))))
                (catch Exception e
                  (failed-field-family
                   target-id {:kind :target-source-unreadable

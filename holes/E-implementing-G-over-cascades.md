@@ -153,6 +153,16 @@ It is forbidden to derive maps from role labels, or to recover them from the
 runner's later `:action` envelope after selection.  That envelope retains the
 selected cascade policy; it is not the grain at which G is evaluated.
 
+The production construction phase is `occurrence-square-authoring`.  It asks
+the designated author only for the four situation elements and their evidence
+sources.  Code constructs the theories and commuting maps, checks the pinned
+pattern bytes and exact written parts, publishes the occurrence-keyed record,
+and reruns inner construction under the retained outer choice.  A citation to
+a pattern lacking any of IF/HOWEVER/BECAUSE/THEN is recorded as a typed void
+and removed before policy construction; it is never padded with invented
+content.  A failed authoring exchange is an execution error at this phase, not
+an abstention or refusal by G.
+
 ### Operational meaning
 
 - for each node or executable group: antecedent/guard, required state or

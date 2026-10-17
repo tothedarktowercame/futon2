@@ -50,6 +50,23 @@
                       node))
                   nodes))))
 
+(defn- without-void-citations [analysis-map voids]
+  (let [index (atom -1)]
+    (update analysis-map :sentences
+            (fn [sentences]
+              (mapv (fn [sentence]
+                      (update sentence :fragments
+                              (fn [fragments]
+                                (mapv (fn [fragment]
+                                        (let [i (swap! index inc)]
+                                          (update fragment :pattern_refs
+                                                  (fn [refs]
+                                                    (vec (remove #(contains? voids
+                                                                            [(:id %) i])
+                                                                 refs))))))
+                                      fragments))))
+                    sentences)))))
+
 (defn- reading-policies [target analysis-map squares]
   (vec (for [[mode kind] [[:alternatives :reading-alternatives]
                           [:overlap :reading-overlap]]
@@ -84,7 +101,8 @@
        :failures [(select-keys reading [:kind :target-id :expected-digest :found-digests])]
        :failure-count 1
        :provenance {:excerpt-digest (:expected-digest reading)}}
-      (let [analysis-map (:analysis reading)
+      (let [voids (square-registry/void-occurrences occurrence-squares)
+            analysis-map (without-void-citations (:analysis reading) voids)
             params (merge default-retraction retraction)
             seeds (reading-patterns analysis-map)
             ;; A reading pattern with no graph edges (or outside the library)
@@ -108,7 +126,9 @@
                                                     (square-registry/squares occurrence-squares))
                                   (retraction-policies target analysis-map retract)))
             policies (deduplicate reported)
-            failures (into seed-failures (:failures retract))
+            failures (vec (concat (for [oid (sort-by pr-str voids)]
+                                    {:kind :void-pattern-citation :occurrence-id oid})
+                                  seed-failures (:failures retract)))
             failures (cond-> failures
                        (empty? policies) (conj {:kind :empty-policy-family
                                                 :target-id target}))]

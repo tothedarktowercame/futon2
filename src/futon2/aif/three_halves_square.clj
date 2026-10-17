@@ -11,7 +11,7 @@
 (defn- normalise-space [s]
   (str/join " " (str/split (str/trim (str s)) #"\s+")))
 
-(defn- pattern-parts
+(defn pattern-parts
   "Parse PATTERN-TEXT into its written parts, keyed by header name. A part runs
    from its `+ NAME:` header line (text after the colon included) to the next
    header at the same or a lesser indent, or to the first non-blank line at the
@@ -47,6 +47,37 @@
                     :else state)))
               {:parts {} :active nil :indent nil :lines []}
               (str/split-lines (str pattern-text)))))))
+
+(defn build-from-situation-maps
+  "Construct one validator-shaped square deterministically. AUTHOR-MAPS names
+  one non-blank situation element and its evidence source for each of I1, I2,
+  G and B. The author supplies semantics; this function supplies representation,
+  pins and the commuting singleton maps."
+  [pattern pattern-text pattern-source author-maps]
+  (let [parts (pattern-parts pattern-text)
+        ids {:G :g :I1 :i1 :I2 :i2 :B :b}
+        missing (vec (for [role roles
+                           :let [{:keys [element source]} (get author-maps role)]
+                           :when (or (str/blank? (str element))
+                                     (str/blank? (str source))
+                                     (str/blank? (get parts (part-for-role role))))]
+                       role))]
+    (if (seq missing)
+      {:status :refused :kind :situation-maps-incomplete :roles missing}
+      {:schema schema
+       :pattern pattern
+       :objects
+       (into {}
+             (for [role roles
+                   :let [id (ids role)
+                         {:keys [element source]} (get author-maps role)]]
+               [role {:text (get parts (part-for-role role))
+                      :source pattern-source
+                      :situation-source source
+                      :theory {:elems #{id} :names {id element} :axioms #{}}}]))
+       :maps {:a1 #{[:g :i1]} :a2 #{[:g :i2]}
+              :b1 #{[:i1 :b]} :b2 #{[:i2 :b]}}
+       :auxiliary {:b1 false :b2 false}})))
 
 (defn parts-check
   "Check that each square object's text IS its assigned flexiarg part.

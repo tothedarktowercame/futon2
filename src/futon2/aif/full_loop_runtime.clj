@@ -11,6 +11,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.wm.click-ask :as click-ask]
@@ -130,6 +131,8 @@
                              ;; the decision forms every target's policy
                              ;; family against this pinned graph
                              :pattern-graph-path :target-reading-root
+                             :occurrence-square-root :pattern-library-root
+                             :require-occurrence-squares?
                              ;; an operator's identity-bound beta declaration
                              :reading-precision-declaration])
           ;; Construction publishes below. Do not publish twice.
@@ -193,6 +196,16 @@
          (selected-target-reading/repair!
           (assoc live-opts :answer-fn answer-fn)
           judgement)))
+     :occurrence-square-authoring-fn
+     (fn [runner-opts judgement]
+       (let [live-opts (merge opts runner-opts)
+             answer-fn (or (:occurrence-square-answer-fn live-opts)
+                           (designated-agent-answer-fn
+                            live-opts (:author live-opts)
+                            square-authoring/prompt "brief"))]
+         (square-authoring/repair!
+          (assoc live-opts :answer-fn answer-fn)
+          judgement)))
      ;; Unlike the target-reading phase, this phase receives only REQUEST.
      ;; Delay construction of its contact port until the runner has added its
      ;; run-local ledgers, and make that late binding explicit.
@@ -223,6 +236,7 @@
                              (:cascade-feedback-path opts))))
         opts (update opts :pattern-graph-path #(or % default-pattern-graph-path))
         opts (update opts :pattern-graph-diff-dir #(or % default-pattern-graph-diff-dir))
+        opts (assoc opts :require-occurrence-squares? true)
         opts (update opts :outer-learning-manifest-path
                      #(or % outer-learning-manifest/default-path))
         ;; The production judge closes over OPTS before the runner adds its
@@ -239,6 +253,8 @@
         runner-opts0 (assoc opts
                            :selected-target-reading-fn
                            (:selected-target-reading-fn defaults)
+                           :occurrence-square-authoring-fn
+                           (:occurrence-square-authoring-fn defaults)
                            :selected-reading-ask-builder
                            (:selected-reading-ask-builder defaults))
         ;; Construct D4 only now: RUNNER-OPTS carries the live job ledger and

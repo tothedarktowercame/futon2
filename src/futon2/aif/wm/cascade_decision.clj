@@ -1026,6 +1026,7 @@
                   :occurrence-square-root (:occurrence-square-root opts)
                   :pattern-texts (:occurrence-square-pattern-texts opts)
                   :pattern-library-root (:pattern-library-root opts)
+                  :require-occurrence-squares? (:require-occurrence-squares? opts)
                   :retraction (:target-policy-retraction opts)})]
       (assoc field
              :status :formed
@@ -1054,6 +1055,8 @@
 (def ^:private progress-authority
   {:authority :cascade-shape-g/arranged-progress-model
    :version "cascade_shape_g arrangement model v1"})
+
+(declare occurrence-readings)
 
 (def ^:private preference-authority
   {:authority :cascade-shape-g/progress-preference
@@ -1251,7 +1254,12 @@
                      ;; Packet D3: the reading route opts into the canonical
                      ;; cascade identity binding before the one selector
                      ;; (nil when the caller did not supply one)
-                     :bind-cascade-identity (:bind-cascade-identity opts)
+                     :bind-cascade-identity
+                     (or (:bind-cascade-identity opts)
+                         (when (:require-occurrence-squares? opts)
+                           {:readings
+                            (fn [entry]
+                              (occurrence-readings entry (:reading-pin entry)))}))
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
         (case (:status result)
           :repeat-refused
@@ -1423,7 +1431,7 @@
 (defn- hex64? [s] (and (string? s) (re-matches #"[0-9a-f]{64}" s)))
 (defn- concrete-span? [span]
   (and (map? span) (integer? (:start span)) (integer? (:end span))
-       (< 0 (:start span) (:end span))))
+       (<= 0 (:start span)) (< (:start span) (:end span))))
 
 (defn occurrence-readings
   "The ACTUAL occurrence-keyed readings a selected reading-family action
@@ -1443,7 +1451,7 @@
                          (string? (:source-sha256 node))
                          (hex64? excerpt-digest)
                          (hex64? analysis-digest))]
-          [oid (cond-> {:reading-record-id (str (or (:target entry) "?") "/"
+          [oid (cond-> {:reading-record-id (str (or (:target entry) (:target-id entry) "?") "/"
                                                  (get-in entry [:action :id]) "/"
                                                  (pr-str oid))
                          :span (:fragment-span node)

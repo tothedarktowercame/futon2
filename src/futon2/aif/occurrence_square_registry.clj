@@ -35,17 +35,27 @@
   "Validate identity, every square, its pattern pin and its written parts."
   [record pattern-texts]
   (let [entries (:entries record)
+        voids (or (:voids record) {})
         pattern-text (fn [pattern]
                        (if (fn? pattern-texts)
                          (pattern-texts pattern)
                          (get pattern-texts pattern)))
+        void-defects (vec (for [[oid value] voids
+                                :when (or (not (and (vector? oid) (= 2 (count oid))))
+                                          (not= oid (:occurrence-id value))
+                                          (empty? (:missing-parts value))
+                                          (contains? entries oid))]
+                            {:kind :void-citation-invalid :occurrence-id oid}))
         defects
         (if-not (map? entries)
           []
           (vec
          (mapcat
           (fn [[oid {:keys [pattern pattern-sha256 square] :as entry}]]
-            (let [occurrence-id? (and (vector? oid) (= 2 (count oid)))]
+            (let [occurrence-id? (and (vector? oid) (= 2 (count oid)))
+                  text (pattern-text pattern)
+                  actual-sha (when (string? text)
+                               (evidence/sha256 (.getBytes text "UTF-8")))]
               (cond-> []
               (not occurrence-id?)
               (conj {:kind :occurrence-id-invalid :occurrence-id oid})
@@ -53,13 +63,15 @@
               (conj {:kind :occurrence-id-unbound :occurrence-id oid})
               (and occurrence-id? (not= pattern (first oid)))
               (conj {:kind :occurrence-pattern-mismatch :occurrence-id oid})
+              (not= pattern-sha256 actual-sha)
+              (conj {:kind :pattern-bytes-pin-mismatch :occurrence-id oid})
               (not= :valid (:status (square/validate square)))
               (conj {:kind :square-invalid :occurrence-id oid})
               (not (every? #(= pattern-sha256 (get-in % [:source :sha256]))
                            (vals (:objects square))))
               (conj {:kind :square-pattern-pin-mismatch :occurrence-id oid})
               (not= :valid (:status (square/parts-check square
-                                                        (pattern-text pattern))))
+                                                        text)))
               (conj {:kind :square-parts-mismatch :occurrence-id oid}))))
           entries)))]
     (cond
@@ -67,9 +79,10 @@
       (not (map? entries)) {:status :refused :kind :registry-entries-invalid}
       (not= (:digest record) (evidence/value-digest (dissoc record :digest)))
       {:status :refused :kind :registry-seal-broken}
-      (seq defects) {:status :refused :kind :occurrence-squares-invalid
-                     :defects defects}
-      :else {:status :valid :count (count entries)})))
+      (seq (concat defects void-defects))
+      {:status :refused :kind :occurrence-squares-invalid
+       :defects (vec (concat defects void-defects))}
+      :else {:status :valid :count (count entries) :void-count (count voids)})))
 
 (defn publish!
   [root record pattern-texts]
@@ -101,3 +114,6 @@
 
 (defn squares [record]
   (into {} (map (fn [[oid entry]] [oid (:square entry)])) (:entries record)))
+
+(defn void-occurrences [record]
+  (set (keys (:voids record))))
