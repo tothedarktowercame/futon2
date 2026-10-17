@@ -321,3 +321,18 @@ subprocesses: those are not agent textual handoffs and accepting Markdown
 there would weaken their protocols. Existing EDN handoffs also retain their
 separately specified fenced-EDN grammar. Thus the repair centralizes the
 agent JSON boundary without turning every JSON parser into a permissive one.
+
+Implementation commit: `c70495fc9`. Focused warrants:
+
+- shared handoff contract:
+  `test-registry-31ad9e60ef96c7df718738e78ddc5d619021372ef91167c4f185abbd7b63c749`
+- occurrence-square authoring:
+  `test-registry-3d50d05d07b6770414711724e8537d0791569a9e0888894166d5cd1b5615fdc7`
+- selected-target reading:
+  `test-registry-11974e9f67fe259a58ef333b7e45e9bb801a297a3cf14ca2031355512f99b7d1`
+- production runtime/D4 composition:
+  `test-registry-412fdce44ad49a877c118ef71183e7047deb56e1af97269e1d17460d5fed0875`
+
+The serving JVM reloaded the shared contract and all three consumers in
+dependency order. A serving-process probe decoded a fenced object as
+`{:live true}`. No click was run.
