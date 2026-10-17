@@ -6493,7 +6493,8 @@
             ;; now, without another click or selection.  Checkpoints below
             ;; retain only the serializable carrier.
             cascade-execution
-            (if (and (:open-cascade cascade-execution0)
+            (if (and (= :wm/open-cascade-execution-error
+                        (:kind cascade-execution0))
                      (:open-cascade-resume-fn opts))
               (let [handled ((:open-cascade-resume-fn opts)
                              cascade-execution0)]

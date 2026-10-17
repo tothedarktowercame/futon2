@@ -192,8 +192,14 @@
       (is (= (get-in decision [:action :id]) (:cascade-id held))))))
 
 (deftest production-default-without-squares-holds-open-honestly
-  (let [{:keys [result journal]}
-        (click! [px py] {} {})
+  (let [resume-called? (atom false)
+        {:keys [result journal]}
+        (click! [px py]
+                {:open-cascade-resume-fn
+                 (fn [_]
+                   (reset! resume-called? true)
+                   (throw (ex-info "D4 called for an unrecognized carrier" {})))}
+                {})
         cell (get-in result [:checkpoints :selection :sorry])
         held (get-in cell [:held-phase])]
     (testing "no 象 squares on this route yet: citations are typed unread"
@@ -207,6 +213,8 @@
       (is (nil? (:cascade-digest held)))
       (is (empty? (:journal-append held)))
       (is (empty? (execution-journal/load-journal journal))))
+    (testing "the pre-materialisation carrier does not enter D4 resume"
+      (is (false? @resume-called?)))
     (testing "and it is still not the legacy refusal"
       (is (not= :reading-policy-execution-semantics-owed (:kind held))))))
 
