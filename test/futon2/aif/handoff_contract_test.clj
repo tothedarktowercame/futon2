@@ -40,8 +40,13 @@
     (is (= payload (sut/response-json-object "{\"answer\":\"yes\"}")))
     (is (= payload (sut/response-json-object fenced)))
     (is (= payload (sut/response-map {:state "done" :result fenced})))
-    (is (nil? (sut/response-json-object (str "prose\n" fenced))))
+    ;; occ-c6325db5: prose before or after the one fence is accepted; the
+    ;; fenced object is still unique.
+    (is (= payload (sut/response-json-object (str "prose\n" fenced))))
+    (is (= payload (sut/response-json-object
+                    (str fenced "\nValidated; not published."))))
     (is (nil? (sut/response-json-object (str fenced "\n" fenced))))
+    (is (nil? (sut/response-json-object "prose only, no fence")))
     (is (nil? (sut/response-json-object "[1,2]")))
     (is (nil? (sut/response-json-object nil)))))
 

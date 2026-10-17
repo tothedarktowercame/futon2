@@ -368,11 +368,15 @@
         "one code fence wrapping exactly one JSON object is the author's answer")
     (is (= {:ok true} (sut/analysis-string "{\"ok\": true}"))
         "an unfenced JSON object still decodes")
-    (is (nil? (sut/analysis-string (str "Here is the analysis.\n" fenced)))
-        "prose outside the fence is still refused")
+    ;; occ-c6325db5: exactly one fence anywhere in the reply is accepted,
+    ;; including with a short completion note before or after it.
+    (is (= {:labeller "zai-2" :reusable_cues [] :rnode_cues [] :sentences []}
+           (sut/analysis-string
+            (str fenced "\nValidated against the authoritative validator; "
+                 "not published; no repositories changed."))))
     (is (nil? (sut/analysis-string (str fenced "\n" fenced)))
         "more than one fence is ambiguous and still refused")
-    (is (nil? (sut/analysis-string "not json at all"))
-        "garbage is still refused")
+    (is (nil? (sut/analysis-string "prose with no fence at all"))
+        "unfenced prose is still refused")
     (is (nil? (sut/analysis-string nil))
         "absence stays refused")))

@@ -9,8 +9,12 @@
 (defn response-json-object
   "Decode one JSON object from an external handoff response. A response may
   be the map itself, an unfenced JSON object, or exactly one Markdown fence
-  containing exactly one JSON object. Prose outside the object, multiple
-  fences, arrays/scalars and malformed JSON are refused as nil.
+  containing exactly one JSON object; brief prose before or after that one
+  fence is accepted (occ-c6325db5, 2026-10-17: the author returned the
+  validated analysis fenced, followed by a one-line completion note, and the
+  whole-response-fence requirement refused it and abstained the click). The
+  fenced object is then still unique. Unfenced prose, more than one fence,
+  arrays/scalars and malformed JSON are refused as nil.
 
   This is a representation rule, not a semantic validator: callers still
   validate request binding, schema and fields after decoding."
@@ -21,14 +25,9 @@
     (or (try (let [v (json/parse-string raw true)]
                (when (map? v) v))
              (catch Exception _ nil))
-        (let [trimmed (str/trim raw)]
-          (when (and (str/starts-with? trimmed "```")
-                     (str/ends-with? trimmed "```")
-                     (= 2 (count (re-seq #"```" trimmed))))
-            (try (let [body (-> trimmed
-                                (str/replace #"\A```[^\n]*\n" "")
-                                (str/replace #"\n?```\z" ""))
-                       v (json/parse-string body true)]
+        (let [fences (re-seq #"(?s)```[^\n]*\n(.*?)```" raw)]
+          (when (= 1 (count fences))
+            (try (let [v (json/parse-string (second (first fences)) true)]
                    (when (map? v) v))
                  (catch Exception _ nil)))))))
 
