@@ -38,19 +38,32 @@ lake env lean DarkTower/WarMachine/ExecutableCascadeRefinement.lean
 exit 0
 ```
 
-## Live-click disposition: NO-GO
+## Production ports installed (amendment)
 
-The fixture path is certified, but production composition does not yet supply
-either of these ports:
+Commit `0353002dc` installs both composition ports:
 
-1. occurrence-keyed four-map square readings (`:cascade-occurrence-readings`
-   or `:cascade-square-readings`);
-2. the D4 handler (`:open-cascade-resume-fn`) that dispatches, validates,
-   hot-loads and retries a held phase.
+1. `occurrence-readings` now carries the selected action node's
+   occurrence-resolved `:blend-square` into the canonical occurrence source;
+2. `full-loop-runtime/run-opportunity!` installs a late-bound D4 handler using
+   the live job ledger and explicit author/reviewer cast.  It contacts both in
+   work mode, validates the reviewed response, reloads only the named
+   namespace, checks its loaded source digest and retries the held phase.
 
-Without (1), the runner honestly records unread citations and has no
-executable cascade to enact.  Without (2), it can retain the held phase but
-cannot repair and resume it during the same click.  Therefore another live
-click would exercise a known incomplete composition rather than the complete
-D3/D4 path.  Live readiness requires both ports to be installed in production
-defaults and a bounded production-composition test proving they are present.
+Focused production-composition gate:
+
+```text
+Ran 87 tests containing 522 assertions.
+0 failures, 0 errors.
+```
+
+## Live-click disposition after installation: CONDITIONAL NO-GO
+
+Both ports now exist.  The remaining condition is upstream evidence, not an
+unwired port: the latest real reading-family selection record
+`2026-10-16-d845555a-88f3-442b-aef5-f6d17379cae9` contains no
+`:blend-square`, although older interpreted-route records do.  The runtime
+must not invent one.  Therefore a click is ready only after a current
+reading-family construction is shown offline to place validated squares on
+its occurrence nodes.  Otherwise the honest result remains unread citations
+before an executable cascade identity exists.  No click was spent in this
+installation or check.
