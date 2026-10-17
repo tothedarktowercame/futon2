@@ -126,3 +126,27 @@ This changes the reading scorer from
 declaration recorded above is not silently migrated: click 2 remains blocked
 until an offline production-family replay yields the new exact reading-model
 identity and a new sealed beta=1 campaign declaration is registered for it.
+
+Offline repair evidence, commit `48e8ae2d0`:
+
+- the scorer/preference/family/selector/CTAU focused gate passed 51 tests and
+  268 assertions with no failures or errors;
+- the readiness negative control rejected a class-shaped receipt whose cost
+  was not consumed by G;
+- changed-file lint had no new warnings (the sole warning in
+  `full_loop_runner_test.clj:7109` is also present at the untouched base),
+  Python compilation and `git diff --check` passed;
+- the serving JVM was hot-loaded and its production scorer probe returned
+  `:ready`, scorer v2, model kind `:class-emission`, `consumed-in-g? true`,
+  with recorded G exactly equal to the independently recomposed G;
+- the old all-of-`full-loop-runner-test` comparison was stopped after it
+  reproduced the same ambient `:no-selection` failures at untouched base. It
+  is intentionally not a readiness gate: it is slow, state-sensitive, and
+  did not discriminate this repair. The bounded cross-layer gate above does.
+
+The upgraded scanner therefore clears the former predictable
+`cannot-repair` condition in the serving JVM. It still reports NOT-READY for
+independent reasons: the latest recorded workspace/CI receipts do not name
+this commit, the runner code receipt names an older tested commit, and the
+reviewer seat was unavailable at the instant of the scan. These are launch
+preconditions, not reasons to spend click 2.
