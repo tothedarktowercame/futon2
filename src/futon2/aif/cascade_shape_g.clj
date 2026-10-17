@@ -47,9 +47,35 @@
   (let [occurrences
         (mapv (fn [node]
                 (let [pattern (or (:pattern node) (:id node) node)]
-                  {:occurrence-id (node-occurrence-id node) :pattern pattern
-                   :roles (vec (distinct (:roles node)))
-                   :fragment-indices (vec (keep identity [(:fragment-index node)]))}))
+                  (cond->
+                   {:occurrence-id (node-occurrence-id node) :pattern pattern
+                    :roles (vec (distinct (:roles node)))
+                    :fragment-indices (vec (keep identity [(:fragment-index node)]))
+                    ;; 象 provenance Packet A needs, kept per occurrence.
+                    ;; Typed absences when the source node cannot supply a
+                    ;; field; never fabricated, never defaulted.
+                    :source-sha256 (or (:source-sha256 node)
+                                       {:status :absent
+                                        :reason :source-sha256-not-recorded})
+                    :fragment-span (if (:fragment node)
+                                     {:start (:start (:fragment node))
+                                      :end (:end (:fragment node))}
+                                     {:status :absent
+                                      :reason :fragment-span-not-recorded})
+                    :sentence-id (or (:sentence-id node)
+                                     {:status :absent
+                                      :reason :sentence-id-not-recorded})
+                    ;; The reading route has no authored four-map square yet:
+                    ;; every occurrence carries the SAME typed unread, so a
+                    ;; later Packet A join can distinguish occurrence-keyed
+                    ;; void/unread/open without re-reading the arrangement.
+                    :blend-square {:status :unread
+                                   :reason :four-maps-not-authored}}
+                    (map? node)
+                    (assoc :pattern-rationale
+                           (or (:pattern-rationale node)
+                               {:status :absent
+                                :reason :pattern-rationale-not-recorded})))))
               nodes)
         by-pattern-fragment
         (into {} (for [node nodes :when (and (map? node)
@@ -310,24 +336,53 @@
   rationales but no numeric relevance score."
   [cascade analysis-map]
   (let [fragments (vec (mapcat :fragments (:sentences analysis-map)))
-        accepted (reduce (fn [m [i f]]
-                           (reduce (fn [m r] (update m (:id r) (fnil conj [])
-                                                    {:fragment-index i :rationale (:rationale r)}))
-                                   m (:pattern_refs f)))
-                         {} (map-indexed vector fragments))
-        rejected (set (map :id (mapcat :pattern_rejections fragments)))
-        patterns (vec (distinct (map #(or (:pattern %) (:id %) %) (:nodes cascade))))
-        nodes (mapv (fn [pattern]
-                      (let [evidence (get accepted pattern)
+        accepted-by-occurrence
+        (reduce (fn [m [i f]]
+                  (reduce (fn [m r]
+                            (update m [(:id r) i] (fnil conj [])
+                                    {:fragment-index i :rationale (:rationale r)}))
+                          m (:pattern_refs f)))
+                {} (map-indexed vector fragments))
+        accepted-by-pattern
+        (reduce (fn [m [i f]]
+                  (reduce (fn [m r] (update m (:id r) (fnil conj [])
+                                            {:fragment-index i :rationale (:rationale r)}))
+                          m (:pattern_refs f)))
+                {} (map-indexed vector fragments))
+        rejected-by-occurrence
+        (set (for [[i f] (map-indexed vector fragments)
+                   r (:pattern_rejections f)]
+               [(:id r) i]))
+        rejected-by-pattern (set (map :id (mapcat :pattern_rejections fragments)))
+        nodes (mapv (fn [node]
+                      (let [pattern (or (:pattern node) (:id node) node)
+                            occurrence (node-occurrence-id node)
+                            occurrence? (vector? occurrence)
+                            fragment-index (when (map? node) (:fragment-index node))
+                            ;; Occurrence-bearing nodes read ONLY the refs at
+                            ;; their own fragment: two citations of one
+                            ;; pattern never share or substitute fit
+                            ;; evidence.  Nodes without a fragment index
+                            ;; (bare pattern fixtures) keep the pattern-grain
+                            ;; join.
+                            evidence (if occurrence?
+                                       (or (get accepted-by-occurrence
+                                                [pattern fragment-index])
+                                           [])
+                                       (get accepted-by-pattern pattern))
                             status (cond (seq evidence) :accepted
-                                         (rejected pattern) :rejected
+                                         (if occurrence?
+                                           (contains? rejected-by-occurrence
+                                                      [pattern fragment-index])
+                                           (rejected-by-pattern pattern)) :rejected
                                          :else :not-read)
                             p ({:accepted 9/10 :rejected 1/10 :not-read 1/2} status)]
-                        {:pattern pattern :status status :probability p
-                         :reading-evidence evidence
-                         :retriever-relevance {:status :absent
-                                               :reason :numeric-score-not-recorded}}))
-                    patterns)
+                        (cond-> {:pattern pattern :status status :probability p
+                                 :reading-evidence evidence
+                                 :retriever-relevance {:status :absent
+                                                       :reason :numeric-score-not-recorded}}
+                          occurrence? (assoc :occurrence-id occurrence))))
+                    (:nodes cascade))
         covered (set (mapcat #(map :fragment-index (:reading-evidence %)) nodes))
         total (count fragments)
         coverage-p (/ (+ (count covered) 1/2) (+ total 1))
@@ -350,7 +405,8 @@
                 :unexplained (vec (remove covered (range total)))}
      :retriever-relevance {:status :absent :reason :numeric-scores-not-in-analysis-artifact}
      :f (+ node-f coverage-f) :fit-ambiguity fit-ambiguity
-     :interpretation-owed (mapv :pattern (filter #(= :not-read (:status %)) nodes))}))
+     :interpretation-owed (mapv #(if (:occurrence-id %) (:occurrence-id %) (:pattern %))
+                                (filter #(= :not-read (:status %)) nodes))}))
 
 (def scorer-version
   "The version of the reading-policy scorer: score-arranged's arranged
@@ -398,11 +454,15 @@
 
 (defn structural-identity
   "The shared policy identity: target/mission scope, node sequence, and
-  normalized directed/overlap edges. Annotation text is deliberately absent."
+  normalized directed/overlap edges. Annotation text is deliberately absent.
+  The node sequence is OCCURRENCE-grain: a node is keyed by its occurrence id
+  (pattern + fragment index when 象 supplied one), so two policies citing the
+  same pattern at different fragments keep distinct identities and are never
+  deduplicated into one another."
   [policy]
   (let [c (:cascade policy)]
     {:mission (or (:mission policy) (:target policy))
-     :node-sequence (mapv #(or (:pattern %) (:id %) %) (:nodes c))
+     :node-sequence (mapv node-occurrence-id (:nodes c))
      :edges (mapv #(select-keys (normalize-edge %) [:from :to :kind]) (:edges c))}))
 
 (defn materialize-policies
