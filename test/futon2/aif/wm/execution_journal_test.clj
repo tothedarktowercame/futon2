@@ -108,6 +108,17 @@
         a2 (e :p/b :enacted 2 2)]
     (is (= :journal-valid-time-inversion
            (:clause (j/validate-journal [a1 a2] idx)))))
+  ;; An intervening node must not hide a same-node inversion.
+  (let [a1 (e :p/b :attempted 3 1)
+        other (e [:p/a 0] :attempted 1 2)
+        a2 (e :p/b :enacted 2 3)]
+    (is (= :journal-valid-time-inversion
+           (:clause (j/validate-journal [a1 other a2] idx)))))
+  ;; Equal recorded times cannot reconstruct a unique append order.
+  (let [a1 (e :p/b :attempted 1 1)
+        a2 (e [:p/a 0] :enacted 1 1)]
+    (is (= :journal-recorded-time-duplicate
+           (:clause (j/validate-journal [a1 a2] idx)))))
   ;; valid-time across DIFFERENT nodes may interleave freely
   (let [a1 (e :p/b :attempted 3 1)
         a2 (e [:p/a 0] :enacted 1 2)]
@@ -183,9 +194,9 @@
       (is (j/certified? (j/validate-journal [hole resolved] idx)))
       (is (contains? (:enacted (j/replay [hole resolved])) [:p/a 0])))))
 
-(deftest enacted-requires-verified-evidence
-  ;; an :enacted phase with only witnessed-attempt evidence does not infer
-  ;; enactment in replay — the evidence kind is checked, not the label
+(deftest phase-and-evidence-must-agree
+  ;; An enacted label with attempt evidence is contradictory input, not a
+  ;; valid no-op that replay may silently ignore.
   (let [weak (j/entry {:journal-id cascade-digest
                        :node-or-group :p/b
                        :phase :enacted
@@ -193,8 +204,26 @@
                                   :digest (evidence/value-digest [:weak])}
                        :valid-time "2026-10-17T00:01:00Z"
                        :recorded-time "2026-10-17T00:02:00Z"})]
-    (is (j/certified? (j/validate-journal [weak] idx)))
-    (is (empty? (:enacted (j/replay [weak]))))))
+    (is (= :journal-entry-invalid (get-in weak [:refusal :kind])))
+    (is (contains? (set (get-in weak [:refusal :defects]))
+                   :phase-evidence-mismatch))))
+
+(deftest append-order-does-not-depend-on-filesystem-mtime
+  (let [store (temp-dir "journal-order-")
+        a1 (e :p/b :attempted 1 1)
+        a2 (e :p/b :enacted 2 2)]
+    (j/append! store a1)
+    (j/append! store a2)
+    ;; Reverse the filesystem times. Loading still reconstructs the only
+    ;; permitted append order from strictly increasing recorded-time.
+    (.setLastModified (io/file store (str (:entry-id a1) ".edn")) 2000)
+    (.setLastModified (io/file store (str (:entry-id a2) ".edn")) 1000)
+    (is (= [(:entry-id a1) (:entry-id a2)]
+           (mapv :entry-id (j/load-journal store))))
+    ;; Backward and equal times are refused before a new file is written.
+    (is (thrown-with-msg?
+         Exception #"recorded time must increase"
+         (j/append! store (e [:p/a 0] :enacted 1 1))))))
 
 (deftest store-lifecycle-through-load-and-replay
   (let [store (temp-dir "journal-lifecycle-")

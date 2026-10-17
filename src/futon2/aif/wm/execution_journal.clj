@@ -37,6 +37,12 @@
 (def phases #{:attempted :enacted :open-hole :closed :sorry})
 (def evidence-kinds #{:verified-effect :witnessed-attempt :hole-witness
                       :sorry-witness})
+(def phase-evidence
+  {:attempted :witnessed-attempt
+   :enacted :verified-effect
+   :open-hole :hole-witness
+   :closed :verified-effect
+   :sorry :sorry-witness})
 
 ;; ---------------------------------------------------------------------------
 ;; Sealing
@@ -71,6 +77,13 @@
     (and (:supersedes entry) (not (hex64? (:supersedes entry))))
     (conj :supersedes-invalid)
     (and (:sorry entry) (not (map? (:sorry entry)))) (conj :sorry-invalid)
+    (not= (get phase-evidence (:phase entry))
+          (get-in entry [:evidence :kind]))
+    (conj :phase-evidence-mismatch)
+    (and (= :sorry (:phase entry)) (not (map? (:sorry entry))))
+    (conj :sorry-absent)
+    (and (not= :sorry (:phase entry)) (contains? entry :sorry))
+    (conj :sorry-on-non-sorry)
     ;; a sorry is the only phase that may carry :sorry; it must not also
     ;; supersede silently
     (and (= :sorry (:phase entry)) (:supersedes entry))
@@ -105,6 +118,8 @@
 (defn- entry-path [store entry-id]
   (io/file store (str entry-id ".edn")))
 
+(declare load-journal)
+
 (defn append!
   "Append one sealed entry to the store directory.  Append-only:
   - an existing IDENTICAL entry at the entry-id path is an idempotent
@@ -129,8 +144,21 @@
                           {:kind :journal-entry-id-collision
                            :path (.getPath f)
                            :entry-id (:entry-id entry)})))
-        (do (spit f (pr-str entry))
-            {:appended true :path (.getPath f)})))))
+        (let [loaded (load-journal store)
+              _ (when (map? loaded)
+                  (throw (ex-info "existing journal is invalid"
+                                  {:kind :journal-store-invalid
+                                   :validation loaded})))
+              latest (last loaded)
+              _ (when (and latest
+                           (not (neg? (compare (:recorded-time latest)
+                                               (:recorded-time entry)))))
+                  (throw (ex-info "journal recorded time must increase"
+                                  {:kind :journal-recorded-time-not-increasing
+                                   :latest (:recorded-time latest)
+                                   :offered (:recorded-time entry)})))]
+          (spit f (pr-str entry))
+          {:appended true :path (.getPath f)})))))
 
 (defn load-journal
   "Read every entry from the store directory in recorded-time order,
@@ -143,28 +171,27 @@
                                         (slurp f)))
         files (->> (filter #(.isFile ^java.io.File %)
                            (file-seq (io/file store)))
-                   ;; append order: file mtime; ties (same write batch at
-                   ;; millisecond granularity) ordered by recorded-time
-                   ;; within the batch — the ledger's own clock
-                   (map (fn [f] {:mtime (.lastModified ^java.io.File f)
-                                 :rt (:recorded-time (entries-from f))
+                   ;; append! requires strictly increasing recorded time,
+                   ;; making append order reconstructable without mutable
+                   ;; manifests or filesystem mtimes.
+                   (map (fn [f] {:rt (:recorded-time (entries-from f))
                                  :file f}))
-                   (sort-by (juxt :mtime :rt))
+                   (sort-by :rt)
                    (mapv :file))
         entries (mapv entries-from files)]
     (reduce
      (fn [acc e]
        (let [defects (entry-defects e)]
          (cond
-           (seq defects)
-           (reduced {:status :journal-validation-error
-                     :clause :journal-entry-invalid
-                     :entry (dissoc e :square) :defects defects})
            (not= (:entry-id e) (entry-digest e))
            (reduced {:status :journal-validation-error
                      :clause :journal-entry-seal-broken
                      :entry-id (:entry-id e)
                      :recomputed (entry-digest e)})
+           (seq defects)
+           (reduced {:status :journal-validation-error
+                     :clause :journal-entry-invalid
+                     :entry (dissoc e :square) :defects defects})
            :else (conj acc e))))
      []
      entries)))
@@ -208,12 +235,19 @@
                     :when (pos? (compare (:recorded-time a)
                                          (:recorded-time b)))]
                 [(:entry-id a) (:entry-id b)]))
+         duplicate-recorded-times
+         (vec (keys (filter #(> (val %) 1)
+                            (frequencies (map (juxt :journal-id
+                                                    :recorded-time)
+                                              ordered)))))
          valid-inversions
-         (vec (for [[a b] (partition 2 1 ordered)
-                    :when (and (= (:journal-id a) (:journal-id b))
-                               (= (:node-or-group a) (:node-or-group b)))
-                    :when (pos? (compare (:valid-time a) (:valid-time b)))]
-                [(:entry-id a) (:entry-id b)]))
+         (vec (mapcat
+               (fn [[_ history]]
+                 (for [[a b] (partition 2 1 history)
+                       :when (pos? (compare (:valid-time a)
+                                            (:valid-time b)))]
+                   [(:entry-id a) (:entry-id b)]))
+               (group-by (juxt :journal-id :node-or-group) ordered)))
          supersede-unknown
          (vec (remove #(contains? by-id %) (keep :supersedes entries)))
          supersede-foreign
@@ -223,6 +257,12 @@
                          (when-not (= (:journal-id e) (:journal-id t))
                            (:supersedes e))))
                      entries)))
+         supersede-node-mismatch
+         (vec (keep (fn [e]
+                      (when-let [t (by-id (:supersedes e))]
+                        (when-not (= (:node-or-group e) (:node-or-group t))
+                          (:supersedes e))))
+                    entries))
          supersede-dupes
          (vec (keys (filter #(> (val %) 1)
                             (frequencies (keep :supersedes entries)))))]
@@ -250,6 +290,10 @@
        (seq recorded-inversions)
        (fail :journal-recorded-time-inversion {:pairs recorded-inversions})
 
+       (seq duplicate-recorded-times)
+       (fail :journal-recorded-time-duplicate
+             {:times duplicate-recorded-times})
+
        ;; per node/group, valid-time must not run backwards either
        (seq valid-inversions)
        (fail :journal-valid-time-inversion {:pairs valid-inversions})
@@ -261,6 +305,10 @@
 
        (seq supersede-foreign)
        (fail :journal-supersede-foreign {:supersedes supersede-foreign})
+
+       (seq supersede-node-mismatch)
+       (fail :journal-supersede-node-mismatch
+             {:supersedes supersede-node-mismatch})
 
        (seq supersede-dupes)
        (fail :journal-supersede-conflict {:supersedes supersede-dupes})

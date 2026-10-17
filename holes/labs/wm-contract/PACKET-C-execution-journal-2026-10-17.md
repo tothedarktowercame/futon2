@@ -23,8 +23,8 @@ Namespace `futon2.aif.wm.execution-journal`:
   (`:appended false`); differing content at an entry-id → typed collision
   refusal; never overwrites or removes.  Malformed or unsealed entries are
   refused before any IO.
-- **Load**: `load-journal` reads entries in append order (file mtime,
-  equal-mtime batches ordered by recorded-time), verifying each entry's
+- **Load**: `load-journal` reconstructs append order from the strictly
+  increasing recorded time required by `append!`, verifying each entry's
   shape and seal.  A tampered file is a typed
   `:journal-validation-error` (`:journal-entry-seal-broken` /
   `:journal-entry-invalid`), never silently dropped or repaired.
@@ -51,7 +51,7 @@ Namespace `futon2.aif.wm.execution-journal`:
 ## Gates run
 
 - `clojure -M:test -m cognitect.test-runner -n futon2.aif.wm.execution-journal-test`
-  — **8 tests, 40 assertions, 0 failures, 0 errors.**
+  — **9 tests, 44 assertions, 0 failures, 0 errors.**
 - `clj-kondo --lint` on both files — 0 errors, 0 warnings.
 - Reader-level paren balance plus successful compile.
 
@@ -66,13 +66,14 @@ Namespace `futon2.aif.wm.execution-journal`:
 | entry naming another cascade | `:journal-foreign-cascade` |
 | entry naming an unknown node / undeclared group | `:journal-foreign-node-or-group` (declared group `:group-1` admitted) |
 | recorded-time running backwards | `:journal-recorded-time-inversion` (validated in append order) |
-| valid-time running backwards for the SAME node | `:journal-valid-time-inversion` (interleaving across nodes is free) |
+| valid-time running backwards for the SAME node, including with another node interleaved | `:journal-valid-time-inversion` (interleaving across nodes is free) |
+| reversed filesystem modification times | load order remains recorded-time order; equal/backward append time is refused |
 | supersede of an unknown entry | `:journal-supersede-unknown` |
 | supersede across journals | `:journal-supersede-foreign` |
 | double supersede of one entry | `:journal-supersede-conflict` |
 | supersession mutating history | original entry unchanged on disk; replay drops only the superseded entry |
 | enactment inferred from an open hole | replay: `:open-holes` carried, `:enacted` empty; continuation entry later joins the same journal |
-| enactment inferred from an `:enacted` label without `:verified-effect` evidence | replay checks the evidence kind, not the label |
+| `:enacted` label paired with non-effect evidence | construction refuses `:phase-evidence-mismatch` |
 | sorry mutating either side | sorry is a phase-`:sorry` entry with `:sorry` contradiction map; both sides stay; `:sorries` in replay |
 
 ## Honest gaps
@@ -81,11 +82,15 @@ Namespace `futon2.aif.wm.execution-journal`:
   Packet A's saved record does not yet carry declared group identities, so
   no code path derives them from the record.  Wiring the declaration into
   the Packet A carrier (a carrier edit, out of scope here) closes this.
-- `load-journal` orders equal-mtime write batches by recorded-time; a
-  tamperer who rewrites a whole batch in one instant with inverted
-  recorded-times within the batch would read in the rewritten order and
-  pass the recorded-time clause.  The seal clauses still catch any content
-  change to an existing entry-id; this is a timestamp-granularity limit,
-  recorded here rather than hidden.
 - No runner/enactment integration, no debugger/click-loop error classes
   (Packet D), no Lean witness (Packet E), by requisition.
+
+## Independent integration review
+
+The root review rejected filesystem modification time as an append-order
+authority and found that adjacent-pair validation missed same-node
+valid-time inversions separated by another node. It also rejected certifying
+an enacted label carrying only attempt evidence. Recorded time is now a
+strict, unique append sequence; each complete node/group history is checked;
+phase/evidence pairs are contractual; and supersession stays on one
+node/group. The reviewed gates above are the post-repair results.
