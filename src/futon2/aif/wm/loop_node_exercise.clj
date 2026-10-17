@@ -31,10 +31,12 @@
         policy-of (fn [candidate]
                     (or (:policy candidate) (:id candidate)
                         (get-in candidate [:f-prefix :policy])))
-        class-scoring (filter #(= :class-emission
-                                  (get-in % [:computed-f :model :kind]))
+        class-scoring (filter #(and (= :class-emission
+                                       (get-in % [:class-emission :model :kind]))
+                                    (true? (get-in % [:class-emission :consumed-in-g?]))
+                                    (number? (get-in % [:class-emission :risk])))
                               candidates)
-        horizons (keep #(get-in % [:computed-f :model :horizon]) candidates)
+        horizons (keep #(get-in % [:class-emission :model :horizon]) candidates)
         precedences (mapv #(mapv (fn [entry]
                                    (if (map? entry) (:id entry) entry))
                                  (:precedence (policy-of %)))
@@ -92,14 +94,16 @@
                   (refused :R14 :selection-posterior-not-retained)))
          :CTAU-CLASS
          (if (and (seq class-scoring)
-                  (every? #(map? (get-in % [:computed-f :model :class-preference]))
+                  (= (count class-scoring) (count candidates))
+                  (every? #(map? (get-in % [:class-emission :model :class-preference]))
                           class-scoring))
            (present :CTAU-CLASS
                     {:scored-candidate-count (count class-scoring)
                      :comparison-status (:status comparison)
-                     :horizons (mapv #(get-in % [:computed-f :model :horizon])
+                     :horizons (mapv #(get-in % [:class-emission :model :horizon])
                                      class-scoring)
-                     :preference-kind :class-emission})
+                     :preference-kind :class-emission
+                     :consumption :terminal-class-cost-added-to-G})
            (refused :CTAU-CLASS :class-preference-evidence-not-retained))})
         counts (frequencies (map :status (vals by-node)))]
     {:schema schema
@@ -129,7 +133,10 @@
               :policy (select-keys (or (:policy candidate) (:id candidate)
                                        (get-in candidate [:f-prefix :policy]))
                                    [:kind :id :target :precedence :enacted-steps])
-              :model (get-in candidate [:computed-f :model])})
+              :model (get-in candidate [:class-emission :model])
+              :class-emission (select-keys (:class-emission candidate)
+                                           [:status :consumed-in-g? :risk
+                                            :ambiguity :composition])})
            candidates)}))
 
 (defn require-complete!

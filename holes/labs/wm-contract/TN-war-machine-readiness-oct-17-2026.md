@@ -92,3 +92,37 @@ from the registry, Lean contract and live gate. Independently, the scorer's
 observation-model evidence is currently lost when `family-selection` replaces
 the scorer certificate's `:f`; retaining that evidence is a real repair but is
 not by itself sufficient to settle CTAU-CLASS.
+
+### Click 1 repair disposition — CTAU-CLASS implemented, not waived
+
+Joe chose option (b): the reading-policy route must carry a genuine
+class-emission model. The repair makes the two observation channels explicit:
+
+- the progress model supplies progress risk, ambiguity and transition
+  information gain;
+- the class-emission model emits `ending/not-yet-evaluated` before the horizon
+  and, at the horizon, emits `focused` when the already-selected outer target's
+  acceptance tokens were reached or `stop-the-line` otherwise;
+- its terminal class risk and ambiguity are added to G. Transition information
+  is consumed once from the shared rollout rather than counted twice;
+- the model, its score certificate, and `consumed-in-g?` receipt survive the
+  scorer → family selector → policy selector boundary as `:class-emission`.
+  Xiang reading fit remains the distinct `:computed-f` carrier.
+
+The launch gate now accepts CTAU-CLASS only when every compared candidate has
+that explicit model, a numeric class risk, and `consumed-in-g? true`. Merely
+placing a class-shaped map in a fit or certificate field does not pass.
+
+The pre-click scanner now invokes the loaded production scorer's bounded
+`class-emission-readiness` probe. A missing function, malformed class model,
+or class receipt that does not contribute to G is reported as the predictable
+`cannot-repair` blocker `reading-policy-class-emission`; it therefore stops
+before a click or agent dispatch. Its negative control for an unconsumed class
+receipt is part of the focused gates.
+
+This changes the reading scorer from
+`:wm/cascade-shape-g-score-policy-v1` to
+`:wm/cascade-shape-g-score-policy-v2-class-emission`. Consequently the beta
+declaration recorded above is not silently migrated: click 2 remains blocked
+until an offline production-family replay yields the new exact reading-model
+identity and a new sealed beta=1 campaign declaration is registered for it.

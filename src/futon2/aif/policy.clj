@@ -289,6 +289,10 @@
      :g (:controller-score entry)
      :inputs {:habit habit :f f}
      :computed-f computed-f
+     ;; CTAU-CLASS is an independent observation channel. Preserve the
+     ;; scorer's explicit model and consumption receipt across the selector;
+     ;; never disguise it as circumstance fit (:computed-f).
+     :class-emission (:class-emission entry)
      :f-prefix (:f-prefix entry)}))
 
 (defn- selection-certificate

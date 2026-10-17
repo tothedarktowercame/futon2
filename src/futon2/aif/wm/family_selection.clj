@@ -44,6 +44,7 @@
                  :units :nats}
         certificate (-> (:certificate entry)
                         (assoc :f computed-f)
+                        (assoc :class-emission (:class-emission score))
                         (assoc :g-terms (merge (get-in entry [:certificate :g-terms])
                                               g-terms)))]
     (-> entry
@@ -60,6 +61,7 @@
                :f (:f score)
                :f-status (:f-status score)
                :computed-f computed-f
+               :class-emission (:class-emission score)
                :habit 1
                :habit-provenance {:source :pending-selector-attachment}
                :transition-kernel kernel-version

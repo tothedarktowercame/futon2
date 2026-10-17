@@ -25,6 +25,38 @@
             [futon2.aif.matched-observation-evidence :as matched]
             [futon2.aif.retraction-cascade :as retraction-cascade]))
 
+(def class-universe
+  [:focused :related :unrelated :stop-the-line :ending/not-yet-evaluated])
+
+(def terminal-class-preference
+  "The declared terminal preference for the selected outer target. Reading
+  policies are alternatives for that already-selected target, so their target
+  class is :focused. This is an explicit model input, not an inference from
+  the policy's score."
+  {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
+
+(defn class-emission-model
+  "Build the genuine class observation channel for a reading policy."
+  [target universe acceptance horizon]
+  {:schema :wm/observation-model-v1
+   :backend :exact-enumeration
+   :kind :class-emission
+   :universe universe
+   :horizon horizon
+   :class-universe class-universe
+   :acceptance acceptance
+   :target-class {target :focused}
+   :class-preference
+   (into {} (for [tau (range 1 (inc horizon))]
+              [tau (if (= tau horizon)
+                     terminal-class-preference
+                     {:ending/not-yet-evaluated 1})]))
+   :provenance
+   {:status :synthetic
+    :calibrated false
+    :source (str "reading-policy terminal class emission; selected outer target "
+                 "is focused; Joe 2026-09-22 preference 55/35/5/5")}})
+
 (defn- pattern-key [s]
   (keyword (str/replace (str s) #"^:" "")))
 
@@ -296,13 +328,38 @@
                                  :c {:source :terminal-and-progress-preference}
                                  :c-schedule (vec (range 1 (inc horizon)))}})
          entry (when (vector? ranked) (first ranked))
+         class-model (class-emission-model target universe acceptance horizon)
+         class-ranked (scorer/rank-cascade-actions
+                       {:cascade-belief {#{} 1}} [candidate]
+                       {:horizon-steps horizon
+                        :observation-model class-model
+                        :parameter-information-mode :none
+                        :g-normalization :per-step-capacity-and-pattern
+                        :prediction-context {:occurrence-id (str id) :tau horizon}
+                        :observation observation
+                        :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
+                                       :c {:source :terminal-class-preference}
+                                       :c-schedule (vec (range 1 (inc horizon)))}})
+         class-entry (when (vector? class-ranked) (first class-ranked))
          information (get-in entry [:certificate :g-terms :expected-information-gain])
+         class-risk (get-in class-entry [:certificate :g-terms :risk])
+         class-ambiguity (get-in class-entry [:certificate :g-terms :ambiguity])
+         ;; Both channels observe the same rollout. Their pragmatic costs add;
+         ;; transition information is consumed once from the progress channel.
+         combined-g (when (and entry class-entry)
+                      (+ (double (:controller-score entry))
+                         (double class-risk)
+                         (double class-ambiguity)))
          result {:status (if entry :computed :refused)
                  :policy-id id :target target :candidate candidate
                  :horizon horizon :terminals terminals
                  :preference-at-each-step preference
-                 :risk (get-in entry [:certificate :g-terms :risk])
-                 :ambiguity (get-in entry [:certificate :g-terms :ambiguity])
+                 :progress-risk (get-in entry [:certificate :g-terms :risk])
+                 :progress-ambiguity (get-in entry [:certificate :g-terms :ambiguity])
+                 :risk (+ (double (get-in entry [:certificate :g-terms :risk]))
+                          (double class-risk))
+                 :ambiguity (+ (double (get-in entry [:certificate :g-terms :ambiguity]))
+                               (double class-ambiguity))
                  :information-gain information
                  ;; Q4: G is compared across horizons only as the declared
                  ;; normalized rates; the declaration and the raw sums it
@@ -311,11 +368,53 @@
                  :raw-g-terms (let [raw (get-in entry [:certificate :g-terms :raw])]
                                 {:risk (:risk raw) :ambiguity (:ambiguity raw)
                                  :information-gain (:expected-information-gain raw)})
-                 :g (:controller-score entry)
+                 :progress-g (:controller-score entry)
+                 :class-emission {:status (if class-entry :computed :refused)
+                                  :consumed-in-g? (boolean class-entry)
+                                  :composition :add-class-risk-and-ambiguity-once
+                                  :model class-model
+                                  :risk class-risk
+                                  :ambiguity class-ambiguity
+                                  :certificate (:certificate class-entry)}
+                 :g combined-g
                  :scorer-result ranked}]
-     (if (and entry (Double/isFinite (double (:g result))))
+     (if (and entry class-entry (Double/isFinite (double (:g result))))
        result
-       (assoc result :status :refused :reason (or (:kind ranked) :non-finite-g))))))))
+       (assoc result :status :refused
+              :reason (or (:kind ranked) (:kind class-ranked)
+                          (when-not class-entry :class-emission-not-scored)
+                          :non-finite-g))))))))
+
+(declare scorer-version)
+
+(defn class-emission-readiness
+  "Fast production-route probe for pre-click readiness. This succeeds only
+  when score-arranged constructs, validates, consumes, and retains a genuine
+  class-emission model whose terminal cost contributes to G."
+  []
+  (try
+    (let [score (score-arranged
+                 "readiness-target" "class-emission-readiness"
+                 {:nodes [{:pattern "readiness/pattern" :fragment-index 0}]
+                  :edges []})
+          class (:class-emission score)
+          expected (+ (double (:progress-g score))
+                      (double (:risk class))
+                      (double (:ambiguity class)))
+          ready? (and (= :computed (:status score))
+                      (= :computed (:status class))
+                      (= :class-emission (get-in class [:model :kind]))
+                      (true? (:consumed-in-g? class))
+                      (< (Math/abs (- (double (:g score)) expected)) 1.0e-12))]
+      {:status (if ready? :ready :not-ready)
+       :kind :reading-policy-class-emission
+       :scorer-version scorer-version
+       :model-kind (get-in class [:model :kind])
+       :consumed-in-g? (:consumed-in-g? class)
+       :g (:g score) :expected-g expected})
+    (catch Throwable error
+      {:status :not-ready :kind :reading-policy-class-emission
+       :reason :probe-failed :error (.getMessage error)})))
 
 (defn read-json [path]
   (json/parse-string (slurp path) true))
@@ -414,7 +513,7 @@
   progress model plus score-policy's circumstance fit. Recorded on every
   scored record so the decision's precision identity binds the scorer it
   actually ran; change it whenever either scoring rule changes."
-  :wm/cascade-shape-g-score-policy-v1)
+  :wm/cascade-shape-g-score-policy-v2-class-emission)
 
 (defn score-policy
   "Score one materialized policy, attaching circumstance fit as F and adding
@@ -425,15 +524,16 @@
       base
       (let [fit (fit-evidence (:cascade policy) (:analysis policy))
         ambiguity (+ (double (:ambiguity base)) (:fit-ambiguity fit))
-        g (- (+ (double (:risk base)) ambiguity)
-             (double (:information-gain base)))
+        g (+ (double (:g base)) (:fit-ambiguity fit))
         computed-f {:status :computed :value (:f fit) :source :xiang-reading-fit
                     :evidence fit}
         carrier {:id (:policy-id policy) :habit 1.0 :g g :f (:f fit)
                  :f-status :computed :computed-f computed-f}]
     (assoc base :g g :controller-score g :ambiguity ambiguity
            :scorer-version scorer-version
-           :scorer-g (:g base) :scorer-ambiguity (:ambiguity base)
+           :scorer-g (:progress-g base)
+           :scorer-risk (:progress-risk base)
+           :scorer-ambiguity (:progress-ambiguity base)
            :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
            :selection-candidate carrier
            :selection-law (selection/law-receipt [carrier]))))))

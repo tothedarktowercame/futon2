@@ -209,6 +209,42 @@ def serving_code_result(tested_tree, observed=None):
                   reason=reason, loaded=observed, tested_commit=tested_head)
 
 
+def class_emission_observation():
+    """Exercise the loaded reading-policy scorer, not a fixture/parser."""
+    form = """(let [v (resolve 'futon2.aif.cascade-shape-g/class-emission-readiness)
+  r (when v (v))]
+  (str "WMCLASS|" (if v (name (:status r)) "unavailable")
+       "|" (or (some-> r :model-kind name) "")
+       "|" (boolean (:consumed-in-g? r))
+       "|" (or (some-> r :scorer-version name) "")
+       "|" (or (some-> r :reason name) "function-not-loaded")))"""
+    observed = run(["bash", PROOF_EVAL, form], "/home/joe/code/futon3c")
+    match = re.search(r':value "WMCLASS\|([^\"]*)"', observed.stdout)
+    if observed.returncode != 0 or not match:
+        return {"status": "unavailable", "reason": "serving-query-failed",
+                "query-exit": observed.returncode}
+    fields = match.group(1).split("|")
+    if len(fields) != 5:
+        return {"status": "unavailable", "reason": "serving-response-malformed"}
+    status, model_kind, consumed, scorer_version, reason = fields
+    return {"status": status, "model-kind": model_kind or None,
+            "consumed-in-g": consumed == "true",
+            "scorer-version": scorer_version or None,
+            "reason": reason or None}
+
+
+def class_emission_result(observed=None):
+    observed = observed or class_emission_observation()
+    passed = (observed.get("status") == "ready" and
+              observed.get("model-kind") == "class-emission" and
+              observed.get("consumed-in-g") is True)
+    return result("reading-policy-class-emission", passed,
+                  "predictable-cannot-repair", "self-clearing",
+                  reason=None if passed else observed.get("reason") or
+                  "class-emission-not-consumed-by-loaded-scorer",
+                  loaded=observed)
+
+
 def tree_control():
     empty = hashlib.sha256(b"").hexdigest()
     state = {"readable": True, "dirty": False, "tree-sha": "tree-current",
@@ -288,6 +324,20 @@ def serving_code_control():
     return 0 if passed else 2
 
 
+def class_emission_control():
+    check = class_emission_result(
+        {"status": "ready", "model-kind": "class-emission",
+         "consumed-in-g": False, "scorer-version": "forged"})
+    passed = (not check["pass"] and
+              check["evidence"]["reason"] ==
+              "class-emission-not-consumed-by-loaded-scorer")
+    print(json.dumps(check, indent=2, sort_keys=True))
+    print("run-readiness-class-emission-control:",
+          "PASS" if passed else "FAIL",
+          "unconsumed class receipt rejected exit-convention=0-pass/2-control-slipped")
+    return 0 if passed else 2
+
+
 def roster_readiness(negative=False):
     try:
         with urllib.request.urlopen(ROSTER, timeout=3) as response:
@@ -318,6 +368,8 @@ def main():
         return resolution_control()
     if "--serving-code-control" in sys.argv[1:]:
         return serving_code_control()
+    if "--class-emission-control" in sys.argv[1:]:
+        return class_emission_control()
     if "--workspace-gate-receipt-control" in sys.argv[1:]:
         return workspace_gate_receipt_control()
     negative = "--negative-reviewer" in sys.argv[1:]
@@ -349,6 +401,7 @@ def main():
     checks.append(futon2_suite)
     checks.append(latest_suite(records, "clojure -X:test", "futon3"))
     checks.append(serving_code_result(futon2_suite.get("evidence", {}).get("tested_tree")))
+    checks.append(class_emission_result())
 
     health_result = run(["python3", BG, "test-health"])
     try:

@@ -152,6 +152,19 @@
         "dropping the information subtraction makes this fail")
     (is (> (:information-gain unexplored) (:information-gain explored)))))
 
+(deftest reading-policy-g-consumes-genuine-class-emission
+  (let [score (shape-g/score-arranged
+               "t" "class-channel"
+               {:nodes [{:pattern "p/a" :fragment-index 0}] :edges []})
+        class (:class-emission score)]
+    (is (= :computed (:status class)))
+    (is (= :class-emission (get-in class [:model :kind])))
+    (is (= {"t" :focused} (get-in class [:model :target-class])))
+    (is (true? (:consumed-in-g? class)))
+    (is (= (:g score)
+           (+ (:progress-g score) (:risk class) (:ambiguity class))))
+    (is (= :ready (:status (shape-g/class-emission-readiness))))))
+
 (defn- progress-fixture [id first-produces]
   {:kind :cascade-candidate :id id :target "t"
    :precedence [{:id :first :pattern-id :first :target "t"

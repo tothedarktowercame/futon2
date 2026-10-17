@@ -8,12 +8,14 @@
    :selection-certificate
    {:candidates [{:policy {:target "M-x" :precedence [:p1 :p2]
                            :enacted-steps {:p1 :p1 :p2 :p2}}
-                  :computed-f {:model {:kind :class-emission :horizon 4
-                                       :class-preference {4 {:focused 1}}}}}
+                  :class-emission {:status :computed :consumed-in-g? true :risk 1.0
+                                   :model {:kind :class-emission :horizon 4
+                                           :class-preference {4 {:focused 1}}}}}
                  {:policy {:target "M-y" :precedence [:p3 :p4]
                            :enacted-steps {:p3 :p3 :p4 :p4}}
-                  :computed-f {:model {:kind :class-emission :horizon 4
-                                       :class-preference {4 {:focused 1}}}}}]
+                  :class-emission {:status :computed :consumed-in-g? true :risk 1.0
+                                   :model {:kind :class-emission :horizon 4
+                                           :class-preference {4 {:focused 1}}}}}]
     :policies [{:id :C1} {:id :C2}]
     :policy-precision-state {:temperature 0.75
                              :probabilities {:C1 0.6 :C2 0.4}}}})
@@ -28,7 +30,11 @@
   (let [decision {:abstention {:status :not-abstained}
                   :selection-certificate
                   {:candidates [{:policy {:target "M-x" :precedence [:p]}
-                                 :computed-f {:model {:kind :class-emission :horizon 4}}}]
+                                 :class-emission {:status :computed
+                                                  :consumed-in-g? false
+                                                  :risk 1.0
+                                                  :model {:kind :class-emission
+                                                          :horizon 4}}}]
                    :policies [{:id :C1}]}}
         r (exercise/receipt decision)]
     (is (= :bypassed (get-in r [:by-node :R6 :status])))

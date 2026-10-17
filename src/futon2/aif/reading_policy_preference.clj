@@ -114,9 +114,9 @@
   [record sched h]
   (let [decl (:g-normalization record)
         raw (:raw-g-terms record)
-        terms {:risk (:risk record)
-               :ambiguity (if (contains? record :scorer-ambiguity)
-                            (:scorer-ambiguity record) (:ambiguity record))
+        terms {:risk (or (:progress-risk record) (:scorer-risk record) (:risk record))
+               :ambiguity (or (:progress-ambiguity record)
+                              (:scorer-ambiguity record) (:ambiguity record))
                :information-gain (:information-gain record)}
         per-step? (= :per-step-capacity-and-pattern (:law decl))]
     (cond
@@ -200,22 +200,45 @@
             ;; certificate holds the scorer's terms, so compare the
             ;; scorer's ambiguity with it, and require the record's
             ;; ambiguity and G to be exactly that composition.
-            fit-adjusted? (contains? record :scorer-ambiguity)
+            composed? (or (contains? record :progress-risk)
+                          (contains? record :scorer-ambiguity))
             scorer-terms (cond-> g-terms
-                           fit-adjusted? (assoc :ambiguity (:scorer-ambiguity record)))
+                           composed?
+                           (assoc :risk (or (:progress-risk record)
+                                            (:scorer-risk record)
+                                            (:risk record))
+                                  :ambiguity (or (:progress-ambiguity record)
+                                                 (:scorer-ambiguity record)
+                                                 (:ambiguity record))))
             terms-disagree (seq (for [k [:risk :ambiguity :information-gain]
                                       :when (and (contains? cert-terms k)
                                                  (some? (get scorer-terms k))
                                                  (not= (get cert-terms k) (get scorer-terms k)))]
                                   k))
             normalization (normalization-binding record sched horizon)
-            fit-ambiguity (get-in record [:fit :fit-ambiguity])
+            fit-ambiguity (get-in record [:fit :fit-ambiguity] 0.0)
+            scorer-risk (or (:progress-risk record) (:scorer-risk record)
+                            (:risk record))
+            scorer-ambiguity (or (:progress-ambiguity record)
+                                 (:scorer-ambiguity record) (:ambiguity record))
+            class-risk (get-in record [:class-emission :risk] 0.0)
+            class-ambiguity (get-in record [:class-emission :ambiguity] 0.0)
             composition-wrong
-            (and fit-adjusted?
-                 (or (not (and (double-finite? (:scorer-ambiguity record))
+            (and composed?
+                 (or (not (and (double-finite? scorer-risk)
+                               (double-finite? (:risk record))
+                               (double-finite? class-risk)
+                               (double-finite? class-ambiguity)
+                               (double-finite? scorer-ambiguity)
+                               (double-finite? (:ambiguity record))
                                (double-finite? fit-ambiguity)))
+                     (> (Math/abs (- (double (:risk record))
+                                     (+ (double scorer-risk)
+                                        (double class-risk))))
+                        normalization-tolerance)
                      (> (Math/abs (- (double (:ambiguity record))
-                                     (+ (double (:scorer-ambiguity record))
+                                     (+ (double scorer-ambiguity)
+                                        (double class-ambiguity)
                                         (double fit-ambiguity))))
                         normalization-tolerance)
                      (and (double-finite? g)

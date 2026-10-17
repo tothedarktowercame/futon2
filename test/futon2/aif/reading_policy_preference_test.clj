@@ -132,8 +132,8 @@
           broken (assoc record :risk (+ 1e9 (or (:risk record) 0.0)))
           receipt (rpp/validate broken)]
       (is (= :refused (:status receipt)))
-      (is (= :g-terms-mismatch (:kind receipt)))
-      (is (contains? (set (:differing receipt)) :risk)))))
+      (is (= :g-composition-mismatch (:kind receipt))
+          "the scorer's progress term is intact; the forged composed risk is caught at composition"))))
 
 (deftest authority-absence-after-metadata-loss
   (testing "a JSON-shaped record (no metadata) refuses with a typed

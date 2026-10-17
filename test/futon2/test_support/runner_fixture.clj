@@ -76,6 +76,15 @@
   {:action action
    :controller-score controller-score
    :rank rank
+   :class-emission
+   {:status :computed
+    :consumed-in-g? true
+    :risk 0.5978370007556204
+    :ambiguity 0.0
+    :composition :add-class-risk-and-ambiguity-once
+    :model {:kind :class-emission
+            :horizon 2
+            :class-preference {2 {:focused 1.0}}}}
    :certificate
    {:f {:model {:kind :class-emission
                 :horizon 2
@@ -100,10 +109,15 @@
     (-> ranked-entry
       (assoc-in [:action :want] wants)
       (update-in [:action :precedence] conj followup)
-      (assoc-in [:certificate :f :model]
-                {:kind :class-emission
-                 :horizon 2
-                 :class-preference {2 {:focused 1.0}}}))))
+      (assoc :class-emission
+             {:status :computed
+              :consumed-in-g? true
+              :risk 0.5978370007556204
+              :ambiguity 0.0
+              :composition :add-class-risk-and-ambiguity-once
+              :model {:kind :class-emission
+                      :horizon 2
+                      :class-preference {2 {:focused 1.0}}}}))))
 
 (def ^:private judgement
   {:decision (assoc-in

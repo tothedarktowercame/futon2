@@ -6982,7 +6982,7 @@
                   (token-loop-exercised-decision)
                   [:selection-certificate :candidates]
                   (fn [candidates]
-                    (mapv #(assoc-in % [:computed-f :model :horizon] 1)
+                    (mapv #(assoc-in % [:class-emission :model :horizon] 1)
                           candidates)))
         {:keys [result]} (run-token-feature-card-attempt cohort decision)
         retained (io/file root "test-cohort-exhaustion" "attempt-001" "retained")]
