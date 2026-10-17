@@ -4,39 +4,30 @@
 
   Two layers, per the 象 / Minus40°DB compatibility ruling (2026-10-16):
 
-  * structural layer (:structural, :wm/structural-cascade-v1) — occurrence
-    nodes plus the 象 census (void/unread results kept, never executable
-    nodes), descriptive reading order, witnessed gluings, typed shared-name
-    candidates, guards, construction order, authored additions, alternatives,
-    and the pins/receipts binding provenance.  This is the
-    ThreeHalvesBlend.Policy-shaped diagram; project-structural returns it
-    exactly, and refinement may not lose or reinterpret it.
+  * structural layer (:structural, :wm/structural-cascade-v1) — OCCURRENCES
+    only in :nodes, each with genuine occurrence identity (never the bare
+    pattern id), the four maps of its 象 square, full 象 provenance, and its
+    position in descriptive reading order.  Void and unread citation results
+    live ONLY in the construction census, never in :nodes.  Gluings are
+    undirected and carry a witness that satisfies a recognised witness
+    schema; anything less stays a typed :shared-name-candidate.
 
-  * executable refinement (the rest, :wm/executable-cascade-v1) — evidenced
-    application-order edges, operational clauses, the executable frontier
-    (only :open occurrences), and open holes.  It may add operational
-    evidence; it may not invent missing 象 readings, reinterpret descriptive
-    order as application order, or flatten a co-application group.
+  * executable refinement (:wm/executable-cascade-v1) — evidenced
+    application-order edges (independent evidence only: arrangement
+    :precedes edges are descriptive reading order and never operational),
+    operational clauses, the executable frontier, and open holes.
 
   Identity: the content digest — the repository evidence digest
   (interpretation-evidence/value-digest) over the record minus its :digest
-  field — is the cascade identity used throughout scoring, selection,
-  persistence, validation, and the journal.  Records are append-never; a
-  changed record is a new record with a new digest.
+  field — is the cascade identity.  The structural layer and its census are
+  additionally bound by their own census digest, so a substitution cannot
+  certify merely by remaining internally consistent after re-digesting the
+  outer record.
 
-  Three absences stay distinct and only :open enters the executable set:
-  :void   a square part matched nothing; a census result, not an occurrence;
-  :unread the four maps are unauthored; a census result, not an occurrence;
-  :open   a valid structural occurrence whose enactment may remain holed.
-
-  Four relations stay separate: :reading-order (descriptive), :gluing
-  (undirected, witness-required), :application-order (directed,
-  evidence-required), :guards.  An unwitnessed shared name stays a typed
-  :shared-name-candidate — excluded from cycle checks, unusable for
-  enactment.  The journal is NOT implemented here;
-  journal-reference-shape fixes the binding every future entry must carry."
+  Records are append-never; save! never overwrites an existing file."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as cset]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.three-halves-square :as square]))
@@ -49,6 +40,7 @@
 (def census-statuses #{:void :unread :open})
 (def edge-kinds #{:reading-order :gluing :application-order :guard
                   :shared-name-candidate})
+(def witness-kinds #{:isomorphism :consistency})
 
 (def journal-reference-shape
   "Every journal entry (its own namespace, later) must carry these bindings;
@@ -64,52 +56,125 @@
 
 (defn digest
   "Content digest of a record: the repository value-digest over the record
-  minus its :digest field.  The validator recomputes this to seal."
+  minus its :digest field."
   [record]
   (evidence/value-digest (dissoc record :digest)))
+
+(def ^:private hex64? #(and (string? %) (re-matches #"[0-9a-f]{64}" %)))
+
+(defn census-digest
+  "The census's own binding digest: over the occurrence identities of the
+  :open occurrences, the void citations, and the unread citations.  Any
+  substitution in one of the three populations changes it."
+  [census]
+  (evidence/value-digest (select-keys census [:open :void :unread])))
+
+;; ---------------------------------------------------------------------------
+;; 象 provenance
+;; ---------------------------------------------------------------------------
+
+(def provenance-fields
+  "The 象 provenance every occurrence must carry: the reading record id, the
+  exact cited span, the source-text digest, the analysis digest, the cited
+  pattern's source_sha256, and the identity (digest) of the square."
+  [:reading-record-id :span :source-text-digest :analysis-digest
+   :source-sha256 :square-digest])
+
+(defn- provenance-valid?
+  "A complete 象 provenance: all fields present, digests well-formed, and a
+  concrete span.  Returns nil when valid, else the missing/invalid fields."
+  [p]
+  (vec (concat
+        (keep #(when-not (some? (get p %)) %) provenance-fields)
+        (keep #(when (and (get p %) (not (hex64? (get p %))))
+                 [:malformed %])
+              [:source-text-digest :analysis-digest :source-sha256
+               :square-digest])
+        (when (and (:span p) (not (map? (:span p)))) [:malformed :span]))))
+
+(defn occurrence-provenance
+  "Build the 象 provenance for one occurrence from its reading record entry."
+  [{:keys [reading-record-id span source-text-digest analysis-digest
+           source-sha256 square]}]
+  {:reading-record-id reading-record-id
+   :span span
+   :source-text-digest source-text-digest
+   :analysis-digest analysis-digest
+   :source-sha256 source-sha256
+   :square-digest (evidence/value-digest square)})
 
 ;; ---------------------------------------------------------------------------
 ;; Structural layer
 ;; ---------------------------------------------------------------------------
 
-(defn- occurrence-id [node]
+(defn- node-occurrence-id
+  "Occurrence identity, never a bare pattern fallback: the node's explicit
+  :occurrence-id, else [pattern fragment-index] when a fragment index
+  exists.  nil when the node has neither — the builder refuses such a node."
+  [node]
   (or (:occurrence-id node)
       (when (and (map? node) (contains? node :fragment-index))
-        [(or (:pattern node) (:id node)) (:fragment-index node)])
-      (:pattern node)
-      (:id node)
-      node))
+        [(or (:pattern node) (:id node)) (:fragment-index node)])))
 
-(defn structural-nodes
-  "Occurrence-keyed structural nodes from the scored arrangement plus the 象
-  squares census.  Pattern identity is retained per node, distinct from
-  occurrence identity: two citations of one pattern stay two occurrences."
-  [arrangement squares]
-  (mapv (fn [node]
-          (let [oid (occurrence-id node)
-                square (get squares oid)
-                status (cond
-                         (= :void (:lookup square)) :void
-                         (nil? square) :unread
-                         (square/valid? square) :open
-                         :else :void)]
-            (cond-> {:occurrence-id oid
-                     :pattern (or (:pattern node) (:id node))
-                     :roles (vec (distinct (:roles node)))
-                     :fragment-indices (vec (keep identity [(:fragment-index node)]))
-                     :status status
-                     :origin (or (:origin node) :selected)}
-              (and square (not= :void (:lookup square)))
-              (assoc :square square))))
-        (:nodes arrangement)))
+(defn- census-entry
+  "A void or unread citation result: census-only, never a node.  Carries the
+  citation identity and what was observed."
+  [oid node kind extra]
+  {:citation oid :pattern (or (:pattern node) (:id node))
+   :kind kind :observation extra})
+
+(defn- occurrence-node
+  "An occurrence with genuine identity, a validated square, and complete 象
+  provenance.  Returns the node, or a typed defect."
+  [node reading]
+  (let [oid (node-occurrence-id node)]
+    (cond
+      (nil? oid)
+      {:defect [:occurrence-identity-absent node]}
+      (nil? reading)
+      {:census (census-entry oid node :unread
+                             {:reason :no-reading-supplied})}
+      (= :void (:lookup reading))
+      {:census (census-entry oid node :void (:observation reading))}
+      (nil? (:square reading))
+      {:census (census-entry oid node :unread (:observation reading))}
+      (not (square/valid? (:square reading)))
+      {:census (census-entry oid node :void
+                             {:kind :square-invalid})}
+      :else
+      (let [prov (or (:provenance reading)
+                     (when (contains? reading :reading-record-id)
+                       (occurrence-provenance reading)))]
+        (if (seq (provenance-valid? prov))
+          {:defect [:provenance-invalid oid
+                    (provenance-valid? prov)]}
+          {:node {:occurrence-id oid
+                  :pattern (or (:pattern node) (:id node))
+                  :roles (vec (distinct (:roles node)))
+                  :fragment-indices (vec (keep identity [(:fragment-index node)]))
+                  :origin (or (:origin node) :selected)
+                  :provenance prov
+                  :square (:square reading)}})))))
+
+(defn- witness-conforming?
+  "A gluing witness must satisfy a recognised schema: kind :isomorphism or
+  :consistency, a 64-hex evidence digest, and the two glued objects as its
+  endpoints.  Anything else — including a truthy but unsupported map — is
+  NOT a gluing witness."
+  [witness from to]
+  (and (map? witness)
+       (contains? witness-kinds (:kind witness))
+       (hex64? (:digest witness))
+       (or (nil? (:objects witness))
+           (= (set (vec (:objects witness))) (set [(str from) (str to)])))))
 
 (defn- classify-edges
-  "Split arrangement edges into the separate relations.  An :overlap edge is
-  an undirected gluing candidate — a :gluing only with an
-  isomorphism/consistency witness, else a typed :shared-name-candidate.  A
-  directed :precedes edge is application-order only with transition
-  evidence; descriptive reading order is carried separately and never stands
-  in for it.  Unknown kinds and evidence-less precedes edges are refused."
+  "Split arrangement edges into the separate relations.  :precedes edges are
+  DESCRIPTIVE reading order (role-labelled, non-operational): retained as
+  :reading-order-edges, never as application order, and no transition
+  evidence is demanded of them.  An :overlap edge is an undirected gluing
+  candidate — a :gluing only when its witness conforms to the witness
+  schema, else a typed :shared-name-candidate."
   [edges]
   (reduce
    (fn [acc edge]
@@ -118,49 +183,66 @@
            kind (or (:kind edge) (:kind-used edge) :precedes)]
        (case kind
          :overlap
-         (if (:witness edge)
+         (if (witness-conforming? (:witness edge) (:from base) (:to base))
            (update acc :gluing conj (assoc base :kind :gluing
                                            :witness (:witness edge)))
            (update acc :shared-name-candidates
-                   conj (assoc base :kind :shared-name-candidate)))
+                   conj (assoc base :kind :shared-name-candidate
+                               :offered-witness (:witness edge))))
          :precedes
-         (if (:evidence edge)
-           (update acc :application-order
-                   conj (assoc base :kind :application-order
-                               :evidence (:evidence edge)))
-           (update acc :owed conj (assoc base :kind
-                                         :application-order-evidence-owed)))
+         (update acc :reading-order-edges
+                 conj (assoc base :kind :reading-order
+                             :role (:role edge)))
          (update acc :refused conj (assoc base :kind kind)))))
-   {:gluing [] :shared-name-candidates [] :application-order []
-    :owed [] :refused []}
+   {:gluing [] :shared-name-candidates [] :reading-order-edges []
+    :refused []}
    edges))
 
 (defn build-structural
-  "The structural layer of a selected policy's scored candidate.  squares is
-  occurrence-id -> validated three-halves square receipt, or {:lookup :void}
-  for a refused lookup; an absent entry is :unread.  Pure; no defaults."
-  [candidate squares receipts & [{:keys [authored-additions alternatives]}]]
+  "The structural layer of a selected policy's scored candidate.  readings
+  is occurrence-id -> {:square <validated receipt> :reading-record-id …
+  full 象 provenance inputs} for an occurrence, {:lookup :void …} for a void
+  citation; an absent entry is an unread citation.  Void/unread results go
+  to the census; ONLY occurrences become nodes.  Pure; no defaults."
+  [candidate readings receipts & [{:keys [authored-additions alternatives]}]]
   (let [arrangement (:arrangement candidate)
-        nodes (structural-nodes arrangement squares)
         classified (classify-edges (:edges arrangement))
-        {gluings :gluing shared :shared-name-candidates
-         owed :owed refused :refused} classified]
-    (if (or (seq owed) (seq refused))
-      {:refusal {:kind (if (seq refused)
-                         :edge-kind-not-admitted
-                         :application-order-evidence-owed)
-                 :edges (vec (concat refused owed))}}
-      {:schema structural-schema
-       :target (:target candidate)
-       :policy-id (:id candidate)
-       :nodes nodes
-       :reading-order (vec (:precedence arrangement))
-       :gluing gluings
-       :shared-name-candidates shared
-       :construction-order (mapv occurrence-id (:nodes arrangement))
-       :authored-additions (vec authored-additions)
-       :alternatives (vec alternatives)
-       :receipts receipts})))
+        {refused :refused} classified
+        results (mapv #(occurrence-node % (get readings
+                                               (node-occurrence-id %)))
+                      (:nodes arrangement))
+        defects (vec (keep :defect results))
+        nodes (vec (keep :node results))
+        census-entries (vec (keep :census results))
+        census {:open (mapv :occurrence-id nodes)
+                :void (vec (filter #(= :void (:kind %)) census-entries))
+                :unread (vec (filter #(= :unread (:kind %)) census-entries))}]
+    (cond
+      (seq refused)
+      {:refusal {:kind :edge-kind-not-admitted :edges refused}}
+      (seq defects)
+      {:refusal {:kind (if (some #(= :occurrence-identity-absent (first %))
+                                 defects)
+                         :occurrence-identity-absent
+                         (if (some #(= :reading-absent (first %)) defects)
+                           :reading-absent :provenance-invalid))
+                 :defects defects}}
+      :else
+      (let [layer {:schema structural-schema
+                   :target (:target candidate)
+                   :policy-id (:id candidate)
+                   :nodes nodes
+                   :reading-order (vec (:precedence arrangement))
+                   :reading-order-edges (:reading-order-edges classified)
+                   :gluing (:gluing classified)
+                   :shared-name-candidates (:shared-name-candidates classified)
+                   :construction-order (mapv :occurrence-id nodes)
+                   :census (assoc census :census-digest
+                                  (census-digest census))
+                   :authored-additions (vec authored-additions)
+                   :alternatives (vec alternatives)
+                   :receipts receipts}]
+        (assoc layer :digest (digest layer))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Executable refinement
@@ -169,25 +251,24 @@
 (defn build
   "Refine a structural layer into the canonical :wm/executable-cascade-v1
   record.  executable-inputs supplies ONLY witnessed additions:
-    :application-order [{:from :to :evidence}]
+    :application-order [{:from :to :evidence}] — independent operational
+      evidence; descriptive :precedes/reading order NEVER satisfies this;
     :operational-clauses {occurrence-id {:operation :completion-check
                                          :capability :consumes :produces}}
     :guards
     :holes {occurrence-id {:owner :question :dependencies :re-entry}}
-  Refuses typed (returns {:refusal ...}) when a clause names a non-:open
-  occurrence or an application-order edge lacks evidence.  No capability,
-  operation, order, or gluing is invented here."
+  Every executable node IS an occurrence of the structural layer (there are
+  no void/unread executable nodes by construction)."
   [structural executable-inputs]
   (let [{:keys [application-order operational-clauses guards holes]}
         executable-inputs
-        open-ids (set (map :occurrence-id
-                           (filter #(= :open (:status %)) (:nodes structural))))
-        bad-clauses (keep (fn [[oid]] (when-not (open-ids oid) oid))
+        occurrence-ids (set (map :occurrence-id (:nodes structural)))
+        bad-clauses (keep (fn [[oid]] (when-not (occurrence-ids oid) oid))
                           operational-clauses)
         bad-edges (vec (remove :evidence application-order))]
     (cond
       (seq bad-clauses)
-      {:refusal {:kind :clause-for-non-open-occurrence
+      {:refusal {:kind :clause-for-non-occurrence
                  :occurrence-ids (vec bad-clauses)}}
       (seq bad-edges)
       {:refusal {:kind :application-order-evidence-owed :edges bad-edges}}
@@ -196,9 +277,9 @@
             (mapv (fn [{:keys [occurrence-id] :as node}]
                     (let [clause (get operational-clauses occurrence-id)
                           hole (get holes occurrence-id)
-                          base (select-keys node [:occurrence-id :pattern :roles
-                                                  :fragment-indices :origin
-                                                  :status :square])]
+                          base (select-keys node [:occurrence-id :pattern
+                                                  :roles :fragment-indices
+                                                  :origin :provenance])]
                       (cond-> (assoc base :enactment-status
                                      (if (and clause (:operation clause)
                                               (:completion-check clause)
@@ -206,7 +287,7 @@
                                        :enactable :open-hole))
                         clause (assoc :clause clause)
                         hole (assoc :hole hole))))
-                  (filter #(= :open (:status %)) (:nodes structural)))
+                  (:nodes structural))
             record {:schema schema
                     :structural structural
                     :executable-nodes executable-nodes
@@ -218,8 +299,14 @@
                                     (filter #(= :enactable
                                                 (:enactment-status %))
                                             executable-nodes)))
-                    :journal-reference journal-reference-shape
-                    :census (frequencies (map :status (:nodes structural)))}]
+                    :journal-reference journal-reference-shape}
+            ;; the census is bound inside the structural layer by its own
+            ;; digest; the executable record cites both identities
+            record (assoc record
+                          :structural-digest (:digest structural)
+                          :census (dissoc (:census structural) :census-digest)
+                          :census-digest
+                          (get-in structural [:census :census-digest]))]
         (assoc record :digest (digest record))))))
 
 ;; ---------------------------------------------------------------------------
@@ -232,12 +319,21 @@
   [record] (:structural record))
 
 (defn save!
-  "Persist the immutable record as EDN beside its digest.  Content-addressed:
-  the file name is the digest."
+  "Append-only persistence: write the record as EDN under its digest.  If a
+  file already exists at that path, it must contain the identical record —
+  then the existing path is returned — otherwise the collision/mismatch is
+  refused.  Never overwrites."
   [record dir]
   (let [f (io/file dir (str (:digest record) ".edn"))]
-    (spit f (pr-str record))
-    (.getPath f)))
+    (if (.exists f)
+      (let [existing (slurp f)]
+        (if (= existing (pr-str record))
+          (.getPath f)
+          (throw (ex-info "cascade digest collision: existing file differs"
+                          {:path (.getPath f)
+                           :digest (:digest record)}))))
+      (do (spit f (pr-str record))
+          (.getPath f)))))
 
 (defn load-record
   "Reload a saved record, re-digesting it: identity survives save/reload or
@@ -276,8 +372,7 @@
   "The single pure validator for :wm/executable-cascade-v1.  Returns
   {:status :certified :certificate ...} (a sealed certificate) or
   {:status :cascade-validation-error :clause <key> :repair <inputs>}.  Never
-  an abstention or policy refusal: it checks whether the machine faithfully
-  represented the policy it already selected."
+  an abstention or policy refusal."
   [record]
   (let [fail (fn [clause repair]
                {:status :cascade-validation-error :clause clause :repair repair})
@@ -290,22 +385,55 @@
         shared (get structural :shared-name-candidates)
         exec-nodes (:executable-nodes record)
         exec-ids (set (map :occurrence-id exec-nodes))
-        open-ids (set (map :occurrence-id
-                           (filter #(= :open (:status %)) nodes)))
+        census (:census structural)
         foreign (vec (keep #(when-not (and (id-set (:from %)) (id-set (:to %))) %)
                            (concat app-order gluings shared)))
-        unwitnessed (vec (remove :witness gluings))
-        witnessed-shared (vec (keep :witness shared))
+        unconforming
+        (vec (remove #(witness-conforming? (:witness %) (:from %) (:to %))
+                     gluings))
+        bad-shared
+        (vec (filter #(witness-conforming? (:offered-witness %)
+                                           (:from %) (:to %))
+                     shared))
+        provenance-bad (vec (keep #(let [bad (provenance-valid?
+                                              (:provenance %))]
+                                     (when (seq bad)
+                                       {:occurrence-id (:occurrence-id %)
+                                        :defects bad}))
+                                  nodes))
+        identity-collapse (vec (filter #(= (:occurrence-id %) (:pattern %))
+                                       nodes))
+        census-ok? (and (map? census)
+                        (hex64? (:census-digest census))
+                        (= (:census-digest census)
+                           (census-digest census))
+                        ;; nodes ARE the :open census population
+                        (= (set (:open census)) (set node-ids))
+                        ;; void/unread entries never appear as nodes
+                        (empty? (cset/intersection
+                                 (set (map :citation (concat (:void census)
+                                                             (:unread census))))
+                                 id-set)))
+        structural-ok? (and (map? structural)
+                             (= structural-schema (:schema structural))
+                             (hex64? (:digest structural))
+                             (= (:digest structural) (digest structural))
+                             (vector? nodes)
+                             (vector? (:construction-order structural)))
+        binding-ok? (and (= (:structural-digest record) (:digest structural))
+                         (= (:census-digest record)
+                            (:census-digest census))
+                         (= (:census record)
+                            (dissoc census :census-digest)))
+        bad-square-ids
+        (vec (keep #(when-not (and (square/valid? (:square %))
+                                   (= (get-in % [:provenance :square-digest])
+                                      (evidence/value-digest (:square %))))
+                      (:occurrence-id %))
+                   nodes))
         cycle (application-cycle app-order node-ids)
         order-ok? (= (frequencies (map pr-str (:construction-order structural)))
                      (frequencies (map pr-str node-ids)))
-        collapsed (vec (keep #(when (and (seq (:fragment-indices %))
-                                         (= (:occurrence-id %) (:pattern %))) %)
-                             nodes))
-        invalid-squares (vec (keep #(when (and (:square %)
-                                               (not (square/valid? (:square %))))
-                                      (:occurrence-id %))
-                                   nodes))
         coverage-bad (vec (concat
                            (keep #(when (and (= :enactable (:enactment-status %))
                                              (not (and (get-in % [:clause :operation])
@@ -314,13 +442,7 @@
                                  exec-nodes)
                            (keep #(when (and (= :open-hole (:enactment-status %))
                                              (not (:hole %))) %)
-                                 exec-nodes)))
-        projection-ok? (and (map? structural)
-                             (= structural-schema (:schema structural))
-                             (vector? (:nodes structural))
-                             (vector? (:construction-order structural))
-                             (= (:census record)
-                                (frequencies (map :status (:nodes structural)))))]
+                                 exec-nodes)))]
     (cond
       (not= schema (:schema record))
       (fail :identity-schema {:schema (:schema record) :expected schema})
@@ -329,40 +451,54 @@
       (fail :identity-digest {:digest (:digest record)
                               :recomputed (digest record)})
 
-      (not projection-ok?)
-      (fail :projection-structural-lost {:structural (:schema structural)})
+      (not structural-ok?)
+      (fail :projection-structural-lost
+            {:present (map? structural)
+             :schema (:schema structural)})
+
+      (not binding-ok?)
+      (fail :projection-census-unbound
+            {:structural-digest (:structural-digest record)
+             :census-digest (:census-digest record)})
+
+      (not census-ok?)
+      (fail :census-population {:census census})
 
       (not= node-ids (distinct node-ids))
       (fail :population-duplicate-occurrence
             {:duplicates (vec (keys (filter #(> (val %) 1)
                                             (frequencies (map pr-str node-ids)))))})
 
-      (some #(when-not (census-statuses (:status %)) (:occurrence-id %)) nodes)
-      (fail :population-unknown-status
-            {:nodes (vec (keep #(when-not (census-statuses (:status %)) %) nodes))})
+      (seq identity-collapse)
+      (fail :population-occurrence-collapsed-to-pattern
+            {:nodes identity-collapse})
 
-      (seq collapsed)
-      (fail :population-occurrence-collapsed-to-pattern {:nodes collapsed})
-
-      (not= exec-ids open-ids)
+      (not= exec-ids id-set)
       (fail :population-executable-set
             {:executable (vec (sort-by pr-str exec-ids))
-             :open (vec (sort-by pr-str open-ids))})
+             :occurrences (vec (sort-by pr-str id-set))})
+
+      (seq provenance-bad)
+      (fail :provenance-missing {:occurrences provenance-bad})
 
       (seq foreign)
       (fail :graph-endpoint-foreign {:edges foreign})
 
-      (seq invalid-squares)
-      (fail :pins-square-invalid {:occurrence-ids invalid-squares})
+      ;; every carried square is itself valid and its digest matches
+      (seq bad-square-ids)
+      (fail :pins-square-invalid {:occurrence-ids bad-square-ids})
 
-      (seq unwitnessed)
-      (fail :graph-gluing-unwitnessed {:edges unwitnessed})
+      (seq unconforming)
+      (fail :graph-gluing-witness-invalid {:edges unconforming})
 
-      (seq witnessed-shared)
-      (fail :cascade-law-shared-name-not-gluing {:edges witnessed-shared})
+      ;; a hand-built gluing with no witness at all
+      (seq (remove :witness gluings))
+      (fail :graph-gluing-unwitnessed
+            {:edges (vec (remove :witness gluings))})
 
-      ;; application order without transition evidence is descriptive order
-      ;; smuggled in; reading order may never satisfy this obligation
+      (seq bad-shared)
+      (fail :cascade-law-shared-name-not-gluing {:edges bad-shared})
+
       (seq (remove :evidence app-order))
       (fail :cascade-law-application-order-without-evidence
             {:edges (vec (remove :evidence app-order))})
@@ -381,12 +517,17 @@
       {:status :certified
        :certificate {:schema schema
                      :digest (:digest record)
+                     :structural-digest (:digest structural)
+                     :census-digest (:census-digest census)
                      :node-count (count nodes)
                      :executable-count (count exec-nodes)
-                     :census (:census record)
+                     :census {:open (count (:open census))
+                              :void (count (:void census))
+                              :unread (count (:unread census))}
                      :clauses [:identity-schema :identity-digest
-                               :projection-structural :population
-                               :graph-well-formedness :pins
+                               :projection-structural :projection-census
+                               :census-population :population
+                               :provenance :graph-well-formedness :pins
                                :cascade-law :operational-coverage]}})))
 
 (defn certified? [result] (= :certified (:status result)))
