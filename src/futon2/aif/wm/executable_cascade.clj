@@ -41,6 +41,11 @@
 (def edge-kinds #{:reading-order :gluing :application-order :guard
                   :shared-name-candidate})
 (def witness-kinds #{:isomorphism :consistency})
+(def descriptive-edge-kinds
+  "Relations emitted by analysis-cascade.  They describe the reading and
+  remain non-operational in the structural layer."
+  #{:precedes :context-enables :condition-enables :dependency-enables
+    :goal-precedes :justified-by :contrasts-with})
 
 (def journal-reference-shape
   "Every journal entry (its own namespace, later) must carry these bindings;
@@ -90,7 +95,14 @@
                  [:malformed %])
               [:source-text-digest :analysis-digest :source-sha256
                :square-digest])
-        (when (and (:span p) (not (map? (:span p)))) [:malformed :span]))))
+        (when (and (:span p)
+                   (not (and (map? (:span p))
+                             (integer? (get-in p [:span :start]))
+                             (integer? (get-in p [:span :end]))
+                             (<= 0 (get-in p [:span :start]))
+                             (< (get-in p [:span :start])
+                                (get-in p [:span :end])))))
+          [:malformed :span]))))
 
 (defn occurrence-provenance
   "Build the 象 provenance for one occurrence from its reading record entry."
@@ -165,8 +177,9 @@
   (and (map? witness)
        (contains? witness-kinds (:kind witness))
        (hex64? (:digest witness))
-       (or (nil? (:objects witness))
-           (= (set (vec (:objects witness))) (set [(str from) (str to)])))))
+       (sequential? (:objects witness))
+       (= 2 (count (:objects witness)))
+       (= (set (:objects witness)) (set [(str from) (str to)]))))
 
 (defn- classify-edges
   "Split arrangement edges into the separate relations.  :precedes edges are
@@ -189,11 +202,12 @@
            (update acc :shared-name-candidates
                    conj (assoc base :kind :shared-name-candidate
                                :offered-witness (:witness edge))))
-         :precedes
-         (update acc :reading-order-edges
-                 conj (assoc base :kind :reading-order
-                             :role (:role edge)))
-         (update acc :refused conj (assoc base :kind kind)))))
+         (if (contains? descriptive-edge-kinds kind)
+           (update acc :reading-order-edges
+                   conj (assoc base :kind :reading-order
+                               :relation kind
+                               :role (:role edge)))
+           (update acc :refused conj (assoc base :kind kind))))))
    {:gluing [] :shared-name-candidates [] :reading-order-edges []
     :refused []}
    edges))
@@ -387,7 +401,8 @@
         exec-ids (set (map :occurrence-id exec-nodes))
         census (:census structural)
         foreign (vec (keep #(when-not (and (id-set (:from %)) (id-set (:to %))) %)
-                           (concat app-order gluings shared)))
+                           (concat app-order gluings shared
+                                   (:reading-order-edges structural))))
         unconforming
         (vec (remove #(witness-conforming? (:witness %) (:from %) (:to %))
                      gluings))
@@ -403,6 +418,7 @@
                                   nodes))
         identity-collapse (vec (filter #(= (:occurrence-id %) (:pattern %))
                                        nodes))
+        census-citations (map :citation (concat (:void census) (:unread census)))
         census-ok? (and (map? census)
                         (hex64? (:census-digest census))
                         (= (:census-digest census)
@@ -411,9 +427,9 @@
                         (= (set (:open census)) (set node-ids))
                         ;; void/unread entries never appear as nodes
                         (empty? (cset/intersection
-                                 (set (map :citation (concat (:void census)
-                                                             (:unread census))))
-                                 id-set)))
+                                 (set census-citations) id-set))
+                        (= (count census-citations)
+                           (count (distinct census-citations))))
         structural-ok? (and (map? structural)
                              (= structural-schema (:schema structural))
                              (hex64? (:digest structural))

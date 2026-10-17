@@ -111,6 +111,19 @@ scored-candidate shape, synthetic arrangement and provenance).
 - Paren balance verified by reader-level check plus successful compile
   (check-parens.el's file helper is not defined in this environment).
 
+## Independent integration review
+
+The root review found and repaired four fixture-blind boundary defects:
+production's role-qualified descriptive relations were rejected; a gluing
+witness could omit its endpoint objects; a provenance span could be a map
+without integer bounds; and descriptive-edge endpoints were omitted from
+the graph endpoint check. The production relation vocabulary is now retained
+as descriptive reading order (never application order), witness objects and
+non-empty code-point spans are mandatory, and every relation is endpoint
+checked. The added controls bring the focused gate to **17 tests, 55
+assertions, 0 failures, 0 errors**; clj-kondo remains 0/0 and diff-check is
+clean.
+
 ## Adversarial controls planted and the assertions that catch them
 
 | planted defect | caught by |
@@ -142,4 +155,3 @@ scored-candidate shape, synthetic arrangement and provenance).
 - A real-target fixture (live reading registry occurrence data) should
   replace the synthetic arrangement/provenance before Packet A's exit gate
   is claimed complete.
-

@@ -283,6 +283,38 @@
     (is (= :pins-square-invalid
            (:clause (xc/validate-cascade swapped))))))
 
+(deftest production-reading-relations-remain-descriptive
+  (let [candidate (assoc-in (scored-candidate)
+                            [:arrangement :edges 0 :kind]
+                            :condition-enables)
+        st (xc/build-structural candidate (readings) {})]
+    (is (= :condition-enables
+           (get-in st [:reading-order-edges 0 :relation])))
+    (is (nil? (:refusal st)))))
+
+(deftest malformed-boundary-evidence-does-not-certify
+  ;; A digest alone is not a gluing witness: its two objects are mandatory.
+  (let [candidate (update-in (scored-candidate)
+                             [:arrangement :edges 2 :witness]
+                             dissoc :objects)
+        st (xc/build-structural candidate (readings) {})]
+    (is (empty? (:gluing st)))
+    (is (= 1 (count (:shared-name-candidates st)))))
+  ;; Exact source provenance needs a proper non-empty code-point interval.
+  (let [bad (assoc-in (readings) [[pattern 0] :span]
+                      {:start nil :end nil})]
+    (is (= :provenance-invalid
+           (get-in (xc/build-structural (scored-candidate) bad {})
+                   [:refusal :kind]))))
+  ;; Descriptive relations are still graph relations and cannot name a
+  ;; foreign occurrence.
+  (let [forged (reseal-structural
+                (assoc-in (built)
+                          [:structural :reading-order-edges 0 :to]
+                          :foreign-occurrence))]
+    (is (= :graph-endpoint-foreign
+           (:clause (xc/validate-cascade forged))))))
+
 (deftest occurrence-identity-is-independent-of-pattern
   ;; [R2-2] a node with neither an explicit occurrence id nor a fragment
   ;; index has no occurrence identity and the builder refuses it (no bare
