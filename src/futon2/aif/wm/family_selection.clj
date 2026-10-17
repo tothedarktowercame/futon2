@@ -321,15 +321,33 @@
        :failure-count (count failures)}
 
       (seq ranked)
-      {:status :selected
-       :certification certified
-       :q6 (:carrier excluded)
-       :policy-stages stages
-       :decision (policy/select-action-cascades menu opts)
-       :ranked menu
-       :target-policy-families summaries
-       :failures failures
-       :failure-count (count failures)}
+      (let [decision (policy/select-action-cascades menu opts)
+            identity-check (when bound
+                             (cascade-identity/verify-selected-identity
+                              decision menu))]
+        (if (and bound (not= :verified (:status identity-check)))
+          {:status :refused
+           :refusal {:kind :cascade-identity-mismatch
+                     :stage :post-selector-identity-check
+                     :identity-check identity-check}
+           :certification certified
+           :q6 (:carrier excluded)
+           :policy-stages stages
+           :decision decision
+           :ranked menu
+           :target-policy-families summaries
+           :failures failures
+           :failure-count (count failures)}
+          {:status :selected
+           :certification certified
+           :q6 (:carrier excluded)
+           :policy-stages stages
+           :cascade-identity identity-check
+           :decision decision
+           :ranked menu
+           :target-policy-families summaries
+           :failures failures
+           :failure-count (count failures)}))
 
       :else
       {:status :abstained

@@ -38,8 +38,9 @@ validator internals, journal code, Lean: untouched.
 
 ## Gates (focused runs, futon2 `clojure -M:test`)
 
-- `selection-cascade-identity-test` (NEW): 5 tests / 43 assertions, 0 failures
-- `family-selection-test` + `executable-cascade-test`: 28 / 121, 0 failures
+- Reviewed combined gate: **34 tests / 168 assertions, 0 failures**, covering
+  `selection-cascade-identity-test`, `family-selection-test`, and
+  `executable-cascade-test`.
 - `reading-family-decision-test` + `target-policy-field-decision-test`: 0 failures
 - `q6-repeat-after-refusal-test`: 8 failures — PRE-EXISTING at base
   92295c522 (verified by stashing this packet's changes and rerunning:
@@ -66,6 +67,9 @@ validator internals, journal code, Lean: untouched.
    `:reading-order-edges`/`:gluing`; `:application-order` stays empty
    without independent evidence; the frontier is honestly empty without
    authored clauses and opens only under authored clauses + evidence.
+5. **Selector output substitution.** The production branch itself invokes
+   `verify-selected-identity`; a planted selector that drops the chosen
+   digest returns typed `:cascade-identity-mismatch` rather than `:selected`.
 
 ## Honest gaps
 
@@ -75,8 +79,9 @@ validator internals, journal code, Lean: untouched.
 - 象 four-map squares in production are still typed unread at the shape
   layer; tests supply validated square receipts (the Packet A fixture).
   When real squares arrive, void/unread censuses flow through unchanged.
-- `verify-selected-identity` is a post-selection check the caller invokes;
-  the run record does not yet persist it (Packet C run-record binding).
+- The post-selection check is now mandatory inside the opted-in selection
+  branch and its result is returned as `:cascade-identity`. The run record
+  does not yet persist it (later runner wiring).
 - The pre-existing q6 regression (8 failures at base) is untouched and
   reported, per the no-Q6-loosening constraint.
 - Receipts recorded in the structural layer capture scorer version/G terms

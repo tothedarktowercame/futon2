@@ -12,6 +12,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.aif.policy :as policy]
             [futon2.aif.wm.executable-cascade :as xc]
             [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.wm.selection-cascade-identity :as sut])
@@ -287,3 +288,20 @@
     (is (every? #(= :wm/enactment-compiler (get-in % [:hole :owner]))
                 (filter #(= :open-hole (:enactment-status %))
                         (:executable-nodes record))))))
+
+(deftest selector-output-is-verified-before-selected-is-returned
+  (let [real-select policy/select-action-cascades
+        result (with-redefs [policy/select-action-cascades
+                             (fn [menu opts]
+                               (update-in (real-select menu opts)
+                                          [:action]
+                                          dissoc :cascade-digest))]
+                 (family-selection/select-over-families
+                  [(family (occurrence-policy 1))]
+                  (merge {:beta 1 :enactment-fold nil :novelty-inputs {}}
+                         join-opts)))]
+    (is (= :refused (:status result)))
+    (is (= :cascade-identity-mismatch (get-in result [:refusal :kind])))
+    (is (= :post-selector-identity-check (get-in result [:refusal :stage])))
+    (is (= :chosen-action-unbound
+           (get-in result [:refusal :identity-check :clause])))))
