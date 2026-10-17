@@ -363,3 +363,43 @@ failures/errors, and the actual saved reply decodes under the repaired rule.
 The loop hot-loaded `futon2.aif.handoff-contract` without restarting the
 service. The completed run was not relabelled or replayed: click 4 remains an
 abstention, and any further click requires separate authorization.
+
+### Click 5 — validation/publication contract mismatch
+
+The fifth and final authorized campaign click was
+`wm-click-0b708330-60fa-4b40-b00d-014340ea471d`, run
+`2026-10-17-173c5a65-fed9-4bc1-8aa2-b3b4df08dba5`, with the explicit Zai
+cast (`zai-2`, `zai-6`, `zai-7`). It spent one click, carried no tick, and
+ended `abstained` at
+`:selected-target-reading-publication-refused/before-cascade-construction`
+for `M-aif-a-matrix-faithfulness`. The response representation repairs held:
+the answer decoded and passed the Python analysis validator.
+
+The newly exposed defect was disagreement between two validation layers.
+The published author contract and `session_turn_analysis.py` permitted a
+fragment with no `pattern_refs`, while registry cascade construction required
+at least one validated pattern reference on every fragment. Zai-2 therefore
+returned a contract-conforming, shape-valid answer with no references; the
+Python validator exited successfully, so the bounded correction round did not
+run, and the stricter unpublished rule rejected all nine fragments only at
+publication.
+
+Repair commit `3037b082f` brings cascade validation into the same bounded
+correction decision and reports the exact per-fragment requirement and answer
+shape to the author. It also gives every validation attempt a separate request
+and output path. This is necessary because the validator publishes by
+exclusive creation: before the repair, a corrected second attempt collided
+with the first attempt's output and could not be checked. The legacy output
+name is refreshed only after a successful attempt for compatibility.
+
+The planted regression begins with the live zero-reference answer, verifies
+that one correction is requested, and then publishes the corrected reading.
+`selected-target-reading-test` plus `handoff-contract-test` passed 23 tests and
+109 assertions with zero failures; paren checking passed and lint reported no
+errors (one pre-existing warning on an untouched line). The loop hot-loaded
+`futon2.aif.selected-target-reading` without restarting the service.
+
+Campaign result: all five authorized clicks were spent and none carried a
+tick. Click 5 is not replayed or relabelled after repair. The campaign is
+closed with no remaining click authorization; another live run requires a
+new authorization and should be treated as a new readiness campaign.
