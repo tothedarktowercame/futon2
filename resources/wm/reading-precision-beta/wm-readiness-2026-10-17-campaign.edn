@@ -1,0 +1,10 @@
+;; Joe authorized beta=1 for the five-click readiness campaign.  Click 1 was
+;; spent before this bounded authority was installed, so it may issue exact
+;; identity-bound declarations for at most the four remaining clicks.
+{:schema :wm/reading-precision-beta-campaign-v1
+ :campaign-id "wm-readiness-2026-10-17"
+ :beta 1
+ :identity-limit 4
+ :authority {:status :declared
+             :version "wm-readiness-2026-10-17/five-click-campaign"}
+ :sha256 "3387e9edab1aed9f2100c600f866e318857987d515dc4c42841644c33b3f4464"}

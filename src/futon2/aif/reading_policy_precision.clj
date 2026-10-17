@@ -23,6 +23,7 @@
 (def schema :wm/reading-precision-identity-v1)
 (def carry-schema :wm/reading-precision-carry-v1)
 (def declaration-schema :wm/reading-precision-beta-declaration-v1)
+(def campaign-schema :wm/reading-precision-beta-campaign-v1)
 
 ;; Explicit operator declarations may arrive after a production run has
 ;; stopped in the debugger.  Keep them by the identity they seal so a retry of
@@ -30,6 +31,7 @@
 ;; closed-over option map.  This is not a beta fallback: lookup is exact by
 ;; reading-precision identity and registration accepts only intact declarations.
 (defonce ^:private !declarations (atom {}))
+(defonce ^:private !campaign (atom nil))
 
 (defn- require! [p kind]
   (when-not p (throw (ex-info (name kind) {:kind kind :status :invalid}))))
@@ -226,10 +228,54 @@
      :identity identity
      :sha256 (:sha256 declaration)}))
 
+(defn register-campaign!
+  "Register a sealed, bounded operator authority that may issue exact
+  identity-bound declarations.  This is not a beta fallback: every issued
+  declaration still names one concrete reading-model identity, and the
+  campaign admits at most :identity-limit distinct identities."
+  [campaign]
+  (require! (= campaign-schema (:schema campaign)) :campaign-schema-mismatch)
+  (require! (intact? campaign) :campaign-tampered)
+  (require! (and (number? (:beta campaign)) (pos? (:beta campaign))
+                 (Double/isFinite (double (:beta campaign)))) :campaign-beta-invalid)
+  (require! (pos-int? (:identity-limit campaign)) :campaign-limit-invalid)
+  (require! (= :declared (get-in campaign [:authority :status]))
+            :campaign-authority-invalid)
+  (require! (string? (get-in campaign [:authority :version]))
+            :campaign-authority-invalid)
+  (reset! !campaign {:authorization campaign :issued {}})
+  {:status :registered :schema campaign-schema
+   :identity-limit (:identity-limit campaign) :sha256 (:sha256 campaign)})
+
+(defn campaign-status []
+  (when-let [{:keys [authorization issued]} @!campaign]
+    {:status :registered :schema campaign-schema
+     :beta (:beta authorization)
+     :identity-limit (:identity-limit authorization)
+     :issued-identities (vec (sort (keys issued)))
+     :remaining (- (:identity-limit authorization) (count issued))
+     :sha256 (:sha256 authorization)}))
+
 (defn declaration-for
   "Return the explicitly registered declaration for IDENTITY, or nil."
   [identity]
-  (get @!declarations identity))
+  (or (get @!declarations identity)
+      (when-let [{:keys [authorization]} @!campaign]
+        (let [issued (get-in @!campaign [:issued identity])]
+          (or issued
+              (when (< (count (:issued @!campaign))
+                       (:identity-limit authorization))
+                (let [declaration (declare-beta
+                                   identity (:beta authorization)
+                                   (:authority authorization))]
+                  (swap! !campaign
+                         (fn [state]
+                           (if (or (get-in state [:issued identity])
+                                   (>= (count (:issued state))
+                                       (get-in state [:authorization :identity-limit])))
+                             state
+                             (assoc-in state [:issued identity] declaration))))
+                  (get-in @!campaign [:issued identity]))))))))
 
 (defn- declaration-problem
   "Why DECLARATION does not re-arm beta for identity ID, or nil."

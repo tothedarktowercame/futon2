@@ -240,3 +240,29 @@
                (rpp/identity-of (assoc base-config :readings {"T1" {}}))))
   (is (thrown? clojure.lang.ExceptionInfo
                (rpp/carry-beta {:previous nil :initialized-beta -1 :config base-config}))))
+
+(deftest bounded-campaign-issues-only-exact-declarations
+  (let [campaign (rpp/seal
+                  {:schema rpp/campaign-schema
+                   :beta 1
+                   :identity-limit 2
+                   :authority {:status :declared
+                               :version "five-click-readiness-test"}})
+        ids [(apply str (repeat 64 "a"))
+             (apply str (repeat 64 "b"))
+             (apply str (repeat 64 "c"))]]
+    (is (= :registered (:status (rpp/register-campaign! campaign))))
+    (let [a (rpp/declaration-for (ids 0))
+          a-again (rpp/declaration-for (ids 0))
+          b (rpp/declaration-for (ids 1))]
+      (is (= (ids 0) (:identity a)))
+      (is (= (:sha256 a) (:sha256 a-again)))
+      (is (= (ids 1) (:identity b)))
+      (is (rpp/intact? a))
+      (is (rpp/intact? b))
+      (is (nil? (rpp/declaration-for (ids 2))))
+      (is (= 0 (:remaining (rpp/campaign-status))))))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (rpp/register-campaign!
+                {:schema rpp/campaign-schema :beta 1 :identity-limit 2
+                 :authority {:status :declared :version "tampered"}}))))

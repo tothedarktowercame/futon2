@@ -21,6 +21,18 @@ WORKSPACE_REPOSITORIES = {
 BG = "/home/joe/code/futon3c/scripts/bg.py"
 PROOF_EVAL = "/home/joe/code/futon3c/scripts/proof-eval.sh"
 ROSTER = "http://localhost:7070/api/alpha/agents"
+WARRANT_INDEX = "/home/joe/code/storage/test-registry/futon2-suite/index.json"
+REQUIRED_WARRANTS = [
+    "futon2.aif.cascade-shape-g-test",
+    "futon2.aif.loop-node-exercise-test",
+    "futon2.aif.reading-policy-preference-test",
+    "futon2.aif.reading-policy-precision-test",
+    "futon2.aif.full-loop-runtime-test",
+    "futon2.aif.wm.family-selection-test",
+    "futon2.aif.wm.reading-family-decision-test",
+]
+WM_CAST = {"author": "zai-2", "reviewer": "zai-6",
+           "repair-reviewer": "zai-7"}
 
 
 def run(argv, cwd=ROOT):
@@ -177,8 +189,8 @@ def serving_code_observation():
     form = """(let [v (resolve 'futon3c.wm.code-identity/status)
   s (when v (v)) i (:identity s)]
   (str "WMCI|" (if v (name (:availability s)) "unavailable")
-       "|" (or (:git-head i) "") "|" (boolean (:dirty? i))
-       "|" (boolean (:stable? i)) "|" (or (:path i) "")
+       "|" (or (:content-sha256 i) "") "|" (or (:disk-sha256 i) "")
+       "|" (or (some-> i :current-status name) "") "|" (or (:path i) "")
        "|" (or (some-> s :reason name) "namespace-not-loaded")))"""
     observed = run(["bash", PROOF_EVAL, form], "/home/joe/code/futon3c")
     match = re.search(r':value "WMCI\|([^\"]*)"', observed.stdout)
@@ -188,25 +200,24 @@ def serving_code_observation():
     fields = match.group(1).split("|")
     if len(fields) != 6:
         return {"availability": "unavailable", "reason": "serving-response-malformed"}
-    availability, head, dirty, stable, path, reason = fields
-    return {"availability": availability, "git-head": head or None,
-            "dirty": dirty == "true", "stable": stable == "true",
+    availability, loaded_sha, disk_sha, current_status, path, reason = fields
+    return {"availability": availability, "content-sha256": loaded_sha or None,
+            "disk-sha256": disk_sha or None, "current-status": current_status or None,
             "path": path or None, "reason": reason or None}
 
 
 def serving_code_result(tested_tree, observed=None):
     observed = observed or serving_code_observation()
-    tested_head = (tested_tree or {}).get("head")
     if observed.get("availability") != "available":
         return result("serving-runner-code", False, "unavailable", "operator-action",
-                      reason=observed.get("reason"), loaded=observed,
-                      tested_commit=tested_head)
-    matched = (tested_head and observed.get("git-head") == tested_head and
-               observed.get("dirty") is False and observed.get("stable") is True)
-    reason = (None if matched else "loaded-code-does-not-match-tested-commit"
-              if tested_head else "tested-commit-unavailable")
+                      reason=observed.get("reason"), loaded=observed)
+    matched = (observed.get("current-status") == "current" and
+               observed.get("content-sha256") and
+               observed.get("content-sha256") == observed.get("disk-sha256"))
+    reason = None if matched else "loaded-code-does-not-match-disk"
     return result("serving-runner-code", matched, "unverified", "operator-action",
-                  reason=reason, loaded=observed, tested_commit=tested_head)
+                  reason=reason, loaded=observed,
+                  warranted_commit=(tested_tree or {}).get("head"))
 
 
 def class_emission_observation():
@@ -243,6 +254,51 @@ def class_emission_result(observed=None):
                   reason=None if passed else observed.get("reason") or
                   "class-emission-not-consumed-by-loaded-scorer",
                   loaded=observed)
+
+
+def focused_warrant_result():
+    """Check the affected test closures without rerunning them.
+
+    The registry re-hashes the files actually loaded by each successful test
+    run.  This supersedes the old all-repository receipt for click readiness:
+    an unrelated commit or untracked lab receipt cannot invalidate tests whose
+    recorded closure is unchanged.
+    """
+    try:
+        with open(WARRANT_INDEX, encoding="utf-8") as stream:
+            index = json.load(stream)
+    except (OSError, json.JSONDecodeError) as error:
+        return result("focused-test-warrants", False, "unverified", "self-clearing",
+                      reason="warrant-index-unreadable", error=str(error))
+    checks = {}
+    for namespace in REQUIRED_WARRANTS:
+        entry = index.get(namespace) or {}
+        entry_id = entry.get("entry-id")
+        base = entry.get("git-head")
+        if not entry_id or not base:
+            checks[namespace] = {"warrant?": False, "reason": "warrant-absent"}
+            continue
+        changed = run(["git", "diff", "--name-only", base, "--"], ROOT)
+        body = json.dumps({"entry-id": entry_id, "repo-root": ROOT,
+                           "changed-paths": changed.stdout.splitlines()}).encode()
+        request = urllib.request.Request(
+            "http://localhost:7070/api/alpha/test-registry/check", data=body,
+            headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                answer = json.load(response)
+            check = answer.get("check", answer)
+            checks[namespace] = {"warrant?": check.get("warrant?") is True,
+                                 "reason": check.get("reason"),
+                                 "entry-id": entry_id}
+        except Exception as error:
+            checks[namespace] = {"warrant?": False,
+                                 "reason": "registry-check-unavailable",
+                                 "error": str(error), "entry-id": entry_id}
+    passed = all(check.get("warrant?") is True for check in checks.values())
+    return result("focused-test-warrants", passed, "unverified", "self-clearing",
+                  reason=None if passed else "one-or-more-warrants-stale",
+                  namespaces=checks)
 
 
 def tree_control():
@@ -313,11 +369,11 @@ def resolution_control():
 def serving_code_control():
     check = serving_code_result(
         {"head": "tested-commit"},
-        {"availability": "available", "git-head": "different-loaded-commit",
-         "dirty": False, "stable": True,
+        {"availability": "available", "content-sha256": "loaded",
+         "disk-sha256": "different", "current-status": "stale",
          "path": "src/futon2/aif/full_loop_runner.clj"})
     passed = (not check["pass"] and
-              check["evidence"]["reason"] == "loaded-code-does-not-match-tested-commit")
+              check["evidence"]["reason"] == "loaded-code-does-not-match-disk")
     print(json.dumps(check, indent=2, sort_keys=True))
     print("run-readiness-serving-code-control:", "PASS" if passed else "FAIL",
           "mismatched loaded commit rejected exit-convention=0-pass/2-control-slipped")
@@ -349,15 +405,14 @@ def roster_readiness(negative=False):
     def available(name):
         entry = agents.get(name) or {}
         return entry.get("status") == "idle" and entry.get("invoke-ready?") is True
-    default = "codex-7"
-    preferred = ["codex-1", "codex-8", "codex-12", "codex-20"]
-    chosen = next((name for name in preferred if available(name)), None)
+    cast = dict(WM_CAST)
+    chosen = cast["reviewer"] if all(available(name) for name in cast.values()) else None
     if negative:
         chosen = None
-    return result("reviewer-availability", chosen is not None, "unavailable", "operator-action",
-                  roster_reachable=True, default_reviewer=default,
-                  default_present=default in agents, default_available=available(default),
-                  selected=chosen, candidates={name: available(name) for name in preferred},
+    return result("wm-cast-availability", chosen is not None, "unavailable", "operator-action",
+                  roster_reachable=True, cast=cast,
+                  selected_reviewer=chosen,
+                  candidates={name: available(name) for name in cast.values()},
                   negative_control=negative), chosen
 
 
@@ -396,11 +451,11 @@ def main():
         records = json.loads(listed.stdout)
     except json.JSONDecodeError:
         records = []
-    checks.append(latest_workspace_gate(records))
-    futon2_suite = latest_suite(records, "clojure -T:build ci", "futon2")
-    checks.append(futon2_suite)
-    checks.append(latest_suite(records, "clojure -X:test", "futon3"))
-    checks.append(serving_code_result(futon2_suite.get("evidence", {}).get("tested_tree")))
+    # The all-repository receipts are maintenance evidence, not a launch
+    # prerequisite.  Click readiness consumes closure-scoped test warrants,
+    # so unrelated repository activity cannot force an all-suite rerun.
+    checks.append(focused_warrant_result())
+    checks.append(serving_code_result({"head": repository_state(ROOT).get("head")}))
     checks.append(class_emission_result())
 
     health_result = run(["python3", BG, "test-health"])
@@ -441,7 +496,7 @@ def main():
     print("run-readiness:", report["readiness"], "(" + instruction + ")",
           "exit-convention=0-ready/1-not-ready/2-negative-control-slipped")
     if negative:
-        reviewer_failed = not next(c for c in checks if c["name"] == "reviewer-availability")["pass"]
+        reviewer_failed = not next(c for c in checks if c["name"] == "wm-cast-availability")["pass"]
         if not ready and reviewer_failed:
             print("run-readiness: PASS negative reviewer mutation rejected")
             return 0

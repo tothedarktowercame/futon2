@@ -10,11 +10,20 @@
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.report.war-machine :as wm]))
 
 (defn- digest [x] (evidence/value-digest x))
+
+(deftest production-registers-the-bounded-beta-campaign
+  (runtime/production-defaults {})
+  (let [status (reading-precision/campaign-status)]
+    (is (= :registered (:status status)))
+    (is (= 1 (:beta status)))
+    (is (= 4 (:identity-limit status)))
+    (is (= 4 (:remaining status)))))
 
 (deftest occurrence-source-carries-the-actions-validated-square
   (let [square {:schema :wm/three-halves-square-v1 :fixture true}

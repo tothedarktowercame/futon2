@@ -1,12 +1,15 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
@@ -26,6 +29,19 @@
   "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
 (def default-pattern-graph-diff-dir
   "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
+(def default-reading-precision-campaign-path
+  "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn")
+
+(defn- ensure-reading-precision-campaign!
+  [opts]
+  (let [path (or (:reading-precision-campaign-path opts)
+                 default-reading-precision-campaign-path)
+        file (io/file path)]
+    (when (.isFile file)
+      (let [campaign (edn/read-string (slurp file))
+            current (reading-precision/campaign-status)]
+        (when-not (= (:sha256 campaign) (:sha256 current))
+          (reading-precision/register-campaign! campaign))))))
 
 (defn- designated-agent-answer-fn
   "Agency answer port for machine requests.  It contacts exactly the
@@ -141,6 +157,7 @@
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
+  (ensure-reading-precision-campaign! opts)
   (let [outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
         ;; A click may invoke the report judge twice when an interpretation ask
         ;; publishes missing construction input.  Outer state can change while
