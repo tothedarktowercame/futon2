@@ -144,6 +144,15 @@ particular, `:blend-squares` must be keyed by occurrence identity rather than
 pattern id; otherwise repeated citations collapse and the carrier cannot
 represent the live-turn data.
 
+The square source is upstream of G.  A validated target reading identifies
+citations and exact spans; a separate occurrence-square authoring registry
+binds each citation's four situation maps and sources to that reading digest,
+occurrence id and pattern pin.  The reading-family constructor consumes only
+validated registry records before constructing the policies compared by G.
+It is forbidden to derive maps from role labels, or to recover them from the
+runner's later `:action` envelope after selection.  That envelope retains the
+selected cascade policy; it is not the grain at which G is evaluated.
+
 ### Operational meaning
 
 - for each node or executable group: antecedent/guard, required state or

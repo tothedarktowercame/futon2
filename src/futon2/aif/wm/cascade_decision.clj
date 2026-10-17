@@ -1023,6 +1023,9 @@
                  {:target-sources rows
                   :reading-root reading-root
                   :graph-path (:pattern-graph-path opts)
+                  :occurrence-square-root (:occurrence-square-root opts)
+                  :pattern-texts (:occurrence-square-pattern-texts opts)
+                  :pattern-library-root (:pattern-library-root opts)
                   :retraction (:target-policy-retraction opts)})]
       (assoc field
              :status :formed

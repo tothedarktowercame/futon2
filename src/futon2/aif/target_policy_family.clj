@@ -8,6 +8,7 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.pattern-retraction :as retraction]
+            [futon2.aif.occurrence-square-registry :as square-registry]
             [futon2.aif.retraction-cascade :as retraction-cascade]))
 
 (identity/register! *ns* *file*)
@@ -38,11 +39,22 @@
                        :when (= "candidate" (:status ref))]
                    {:pattern (:id ref) :source-sha256 (:source_sha256 ref)})))))
 
-(defn- reading-policies [target analysis-map]
+(defn- attach-squares [cascade squares]
+  (update cascade :nodes
+          (fn [nodes]
+            (mapv (fn [node]
+                    (if-let [square (get squares
+                                         [(or (:pattern node) (:id node))
+                                          (:fragment-index node)])]
+                      (assoc node :blend-square square)
+                      node))
+                  nodes))))
+
+(defn- reading-policies [target analysis-map squares]
   (vec (for [[mode kind] [[:alternatives :reading-alternatives]
                           [:overlap :reading-overlap]]
              cascade (:cascades (analysis/analysis->cascades analysis-map {:mode mode}))]
-         {:target target :mission target :kind kind :cascade cascade
+         {:target target :mission target :kind kind :cascade (attach-squares cascade squares)
           :analysis analysis-map})))
 
 (defn- retraction-policies [target analysis-map result]
@@ -64,7 +76,7 @@
 
 (defn policy-family
   "Return reading and retraction policies, preserving every counted failure."
-  [{:keys [reading graph retraction]}]
+  [{:keys [reading graph retraction occurrence-squares]}]
   (let [target (:target-id reading)]
     (if (= :absent (:status reading))
       {:status :failed :target-id target :policies []
@@ -92,7 +104,8 @@
                       (retraction/retractions graph (assoc params :seeds usable))
                       {:retractions [] :failures [{:kind :no-usable-retraction-seed
                                                    :seeds (vec (sort seeds))}]})
-            reported (vec (concat (reading-policies target analysis-map)
+            reported (vec (concat (reading-policies target analysis-map
+                                                    (square-registry/squares occurrence-squares))
                                   (retraction-policies target analysis-map retract)))
             policies (deduplicate reported)
             failures (into seed-failures (:failures retract))

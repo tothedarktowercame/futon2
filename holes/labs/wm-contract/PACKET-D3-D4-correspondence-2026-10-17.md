@@ -42,8 +42,10 @@ exit 0
 
 Commit `0353002dc` installs both composition ports:
 
-1. `occurrence-readings` now carries the selected action node's
-   occurrence-resolved `:blend-square` into the canonical occurrence source;
+1. `occurrence-readings` carries each occurrence square belonging to the
+   selected cascade policy into the canonical occurrence source.  The runner
+   field named `:action` is only the envelope retaining that selected policy;
+   neither G nor this adapter scores an atomic action;
 2. `full-loop-runtime/run-opportunity!` installs a late-bound D4 handler using
    the live job ledger and explicit author/reviewer cast.  It contacts both in
    work mode, validates the reviewed response, reloads only the named
@@ -58,12 +60,17 @@ Ran 87 tests containing 522 assertions.
 
 ## Live-click disposition after installation: CONDITIONAL NO-GO
 
-Both ports now exist.  The remaining condition is upstream evidence, not an
-unwired port: the latest real reading-family selection record
+Both downstream ports now exist.  The remaining condition is upstream
+evidence: the latest real reading-family selection record
 `2026-10-16-d845555a-88f3-442b-aef5-f6d17379cae9` contains no
 `:blend-square`, although older interpreted-route records do.  The runtime
-must not invent one.  Therefore a click is ready only after a current
-reading-family construction is shown offline to place validated squares on
-its occurrence nodes.  Otherwise the honest result remains unread citations
-before an executable cascade identity exists.  No click was spent in this
+must not invent one from fragment roles.  The required source is a
+pre-selection, occurrence-keyed authoring registry: for every validated
+target-reading citation it binds the four situation elements and their
+sources, emits a square accepted by `three-halves-square/validate`, and binds
+that square to target-reading digest, occurrence identity and pattern pin.
+Construction consumes those records before G compares policies.  Missing or
+void records must trigger the next build packet's authoring phase and
+re-decision; that producer is not installed by D3/D4, and they are not filled
+from the eventual selected-policy envelope.  No click was spent in this
 installation or check.

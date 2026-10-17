@@ -111,6 +111,20 @@
     (is (every? :policy-id (:policies result)))
     (is (zero? (:failure-count result)))))
 
+(deftest occurrence-squares-attach-before-policy-scoring
+  (let [square {:schema :wm/three-halves-square-v1 :fixture :authored}
+        occurrence-squares
+        {:entries {["p/a" 0] {:square square}}}
+        result (sut/policy-family {:reading (reading (analysis-map))
+                                   :graph graph
+                                   :occurrence-squares occurrence-squares})
+        reading-policy (first (filter #(= :reading-alternatives (:kind %))
+                                      (:policies result)))
+        node (first (filter #(= ["p/a" 0]
+                                [(or (:pattern %) (:id %)) (:fragment-index %)])
+                            (get-in reading-policy [:cascade :nodes])))]
+    (is (= square (:blend-square node)))))
+
 (deftest rationale-annotations-do-not-change-structural-count-or-id
   (let [one (sut/policy-family {:reading (reading (analysis-map "rationale one"))
                                 :graph (assoc graph :edges [])})

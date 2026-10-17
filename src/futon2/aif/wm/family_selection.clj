@@ -9,6 +9,7 @@
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.occurrence-square-registry :as square-registry]
             [futon2.aif.reading-interpretation-debt :as debt]
             [futon2.aif.wm.selection-cascade-identity :as cascade-identity]
             [futon2.aif.target-policy-family :as target-family]
@@ -133,7 +134,8 @@
   "Form one policy-family result per target source row, in field order.
   The pinned graph is loaded once before any source or reading lookup; with
   no graph path every target fails :graph-path-not-supplied."
-  [{:keys [target-sources reading-root graph-path retraction]}]
+  [{:keys [target-sources reading-root graph-path retraction
+           occurrence-square-root pattern-texts pattern-library-root]}]
   (let [loaded (if (some? graph-path)
                  (graph-pin/load-pinned graph-path)
                  {:status :refused :kind :graph-path-not-supplied})
@@ -162,10 +164,17 @@
                  (if (map? digest)
                    (failed-field-family target-id (dissoc digest :status))
                    (let [reading (reading-registry/current-reading
-                                  reading-root target-id digest)]
+                                  reading-root target-id digest)
+                         squares (square-registry/current
+                                  occurrence-square-root target-id
+                                  (:analysis-digest reading)
+                                  (or pattern-texts
+                                      (square-registry/library-resolver
+                                       (or pattern-library-root
+                                           square-registry/default-library-root))))]
                      (target-family/policy-family
                       {:reading reading :graph (:graph loaded)
-                       :retraction retraction}))))
+                       :occurrence-squares squares :retraction retraction}))))
                (catch Exception e
                  (failed-field-family
                   target-id {:kind :target-source-unreadable
