@@ -6,6 +6,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
+            [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as registry]))
 
@@ -356,13 +357,23 @@
                         validation-request (io/file (.getParentFile request-file)
                                                     "validation-request.json")
                         attempt (atom 0)
+                        ;; The validator's `complete` publishes its output by
+                        ;; EXCLUSIVE creation (os.link): it refuses to replace
+                        ;; an earlier interpretation. A correction round re-runs
+                        ;; `complete` on the same request, so each attempt gets
+                        ;; its own request copy and its own output; the legacy
+                        ;; single-name output is refreshed after the fact.
+                        last-output (atom nil)
                         validate (fn [candidate]
                                    (let [n (swap! attempt inc)
                                          resolution (resolve-analysis-offsets request candidate)
                                          attempt-file (io/file (.getParentFile request-file)
                                                                (str "analysis-input-attempt-" n ".json"))
                                          resolved-file (io/file (.getParentFile request-file)
-                                                                (str "analysis-resolved-attempt-" n ".json"))]
+                                                                (str "analysis-resolved-attempt-" n ".json"))
+                                         attempt-request (io/file (.getParentFile request-file)
+                                                                  (str "validation-request-attempt-"
+                                                                       n ".json"))]
                                      ;; Keep the answer exactly as received; later attempts never
                                      ;; overwrite the evidence needed to assess correction quality.
                                      (spit attempt-file
@@ -379,19 +390,50 @@
                                          (spit analysis-input
                                                (json/generate-string (:analysis resolution)
                                                                      {:pretty true}))
-                                         (io/copy request-file validation-request)
-                                         (shell/sh "python3" analysis-validator "complete"
-                                                   (.getPath validation-request)
-                                                   (.getPath resolved-file))))))
+                                         (io/copy request-file attempt-request)
+                                         (let [result (shell/sh "python3" analysis-validator
+                                                                "complete"
+                                                                (.getPath attempt-request)
+                                                                (.getPath resolved-file))]
+                                           (reset! last-output
+                                                   (io/file (str (.getPath attempt-request)
+                                                                 ".analysis.json")))
+                                           result)))))
+                        ;; The python validator stamps library-verified
+                        ;; pattern_refs (author sends id+rationale; it adds
+                        ;; status/source_sha256) but does not require one per
+                        ;; fragment; the registry's cascade construction does.
+                        ;; Check that second layer BEFORE deciding on a
+                        ;; correction round (occ-a9c0c166, 2026-10-17: a
+                        ;; shape-valid answer with zero pattern_refs passed
+                        ;; the validator, was refused only at publication, and
+                        ;; the author never learned what was missing).
+                        cascade-failures
+                        (fn []
+                          (let [output @last-output]
+                            (when (.isFile output)
+                              (let [result (analysis-cascade/analysis->cascades
+                                            (json/parse-string (slurp output) true)
+                                            {:mode :overlap})]
+                                (when (= :failed (:status result))
+                                  (:failures result))))))
                         validated0 (validate analysis)
-                        correction (when-not (zero? (:exit validated0))
+                        cascade0 (cascade-failures)
+                        correction (when-not (and (zero? (:exit validated0))
+                                                  (nil? cascade0))
                                      (contact (assoc issued
                                                      :kind :selected-target-reading-correction
                                                      :validation-feedback
-                                                     (str (:err validated0)
-                                                          "Exact offset diagnostics: "
+                                                     (str (when-not (zero? (:exit validated0))
+                                                            (str (:err validated0) "\n"))
+                                                          "Pattern citation diagnostics: "
                                                           (json/generate-string
-                                                           (offset-diagnostics request analysis)))
+                                                           (or cascade0 []))
+                                                          "\nEvery fragment must cite at least one pattern in pattern_refs as {\"id\": \"<pattern id under /home/joe/code/futon3/library>\", \"rationale\": \"why it fits\"}; a fragment with no citation cannot form a cascade."
+                                                          (when (zero? (:exit validated0))
+                                                            (str "\nExact offset diagnostics: "
+                                                                 (json/generate-string
+                                                                  (offset-diagnostics request analysis)))))
                                                      :prior-analysis analysis)))
                         corrected-analysis (when (= :validated (:status correction))
                                              (:value correction))
@@ -399,12 +441,17 @@
                                     (validate corrected-analysis)
                                     validated0)
                         exchange (if corrected-analysis correction exchange)
-                        output (io/file (str (.getPath validation-request)
-                                             ".analysis.json"))]
+                        output @last-output
+                        legacy-output (io/file (str (.getPath validation-request)
+                                                    ".analysis.json"))]
                     (if-not (and (zero? (:exit validated)) (.isFile output))
                       (refused need :selected-target-reading-validation-refused
                                {:exit (:exit validated) :stderr (:err validated)})
                       (let [canonical (json/parse-string (slurp output) true)
+                            ;; Refresh the legacy single-name output for
+                            ;; existing tooling; the attempt-scoped sibling
+                            ;; above is the authoritative record.
+                            _ (spit legacy-output (slurp output))
                             publication
                             (registry/publish!
                              (or target-reading-root registry/default-root)

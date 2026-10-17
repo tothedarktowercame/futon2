@@ -380,3 +380,50 @@
         "unfenced prose is still refused")
     (is (nil? (sut/analysis-string nil))
         "absence stays refused")))
+
+(deftest pattern-ref-less-answer-gets-one-correction-round
+  ;; occ-a9c0c166 (2026-10-17): a shape-valid analysis whose fragments carry
+  ;; no pattern_refs passes the python validator (exit 0), so no correction
+  ;; round fired and the refusal surfaced only at publication, leaving the
+  ;; author unaware. The cascade layer must join the correction decision and
+  ;; name the missing citations.
+  (let [work (temp-dir "selected-reading-patref-")
+        readings (temp-dir "selected-reading-registry-patref-")
+        source (io/file work "M-selected.md")
+        _ (spit source "# M-selected\n\n## HEAD\nOPEN work.\n")
+        excerpt (registry/excerpt-digest source)
+        contacted (atom [])
+        answer (fn [{:keys [request] :as issued}]
+                 (swap! contacted conj {:kind (:kind issued)
+                                        :feedback (:validation-feedback issued)})
+                 (let [analysis (analysis-for request)]
+                   (if (= 1 (count @contacted))
+                     (update analysis :sentences
+                             (fn [sentences]
+                               (mapv (fn [s]
+                                       (update s :fragments
+                                               (fn [frags]
+                                                 (mapv #(dissoc % :pattern_refs)
+                                                       frags))))
+                                     sentences)))
+                     analysis)))
+        opts {:run-id "run-patref" :author "wm-author"
+              :answer-fn answer :request-root (str work)
+              :target-reading-root (str readings)}
+        step (runner/selected-target-reading-step
+              opts (judgement "M-selected" (.getPath source) excerpt)
+              sut/repair!
+              (fn [_] {:outer-task-selection {:chosen {:id "M-selected"}}
+                       :decision {:status :selected
+                                  :action {:target "M-selected"}}}))
+        result (:record step)]
+    (is (= :published (:status result)))
+    (is (= 2 (count @contacted))
+        "a citation-less answer receives one bounded correction")
+    (is (= :selected-target-reading (:kind (first @contacted))))
+    (is (= :selected-target-reading-correction (:kind (second @contacted))))
+    (is (re-find #"pattern_refs" (str (:feedback (second @contacted))))
+        "the correction feedback names the missing pattern citations")
+    (is (re-find #"fragment-without-validated-pattern-ref"
+                 (str (:feedback (second @contacted))))
+        "the correction feedback enumerates the failing fragments")))
