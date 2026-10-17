@@ -336,3 +336,30 @@ Implementation commit: `c70495fc9`. Focused warrants:
 The serving JVM reloaded the shared contract and all three consumers in
 dependency order. A serving-process probe decoded a fenced object as
 `{:live true}`. No click was run.
+
+### Click 4 — unique fenced object followed by a completion note
+
+Authorized click `wm-click-193999b9-58d5-4f09-9f99-9454869fa39e`, run
+`2026-10-17-9e3d4379-35ba-480d-b067-5a4c42c0329f`, used the explicit Zai
+cast (`zai-2`, `zai-6`, `zai-7`). Preflight reported 13/13 tripwires clear,
+the serving runner identity current, and no cast/single-flight conflict. The
+run traversed selection and outer-learning publication in about 200 seconds.
+It spent one click, carried no tick, and ended `abstained` at
+`:selected-target-reading-answer-invalid/before-cascade-construction` for
+`M-pattern-mining`.
+
+The debugger found that this was not malformed JSON. Zai-2 returned exactly
+one fenced, validator-compatible JSON object followed by one plain-text
+completion note. The newly centralized rule required the fence to occupy the
+whole response, so it rejected an answer whose machine payload was still
+unique. This is a representation-policy defect at the same shared boundary,
+not a target-reading semantic failure.
+
+Repair commit `03c8830af` changes the shared decoder to extract exactly one
+fenced JSON object anywhere in the response. It continues to reject multiple
+fences, unfenced prose, arrays/scalars, and malformed JSON. The regression
+uses the actual live answer shape; 22 tests and 103 assertions pass with zero
+failures/errors, and the actual saved reply decodes under the repaired rule.
+The loop hot-loaded `futon2.aif.handoff-contract` without restarting the
+service. The completed run was not relabelled or replayed: click 4 remains an
+abstention, and any further click requires separate authorization.
