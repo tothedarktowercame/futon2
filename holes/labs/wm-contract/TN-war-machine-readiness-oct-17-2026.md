@@ -290,3 +290,34 @@ Click 3 is therefore accounted for but did not advance enactment. Click 4 must
 not be described as a continuation of this run: the run ended. Its readiness
 scan should include the new selected-target-reading warrant and confirm the
 same explicit Zai cast before a separately authorized launch.
+
+### Click 3 follow-up — JSON handoff representation consolidated
+
+The fenced response was a class defect, not merely a target-reading typo.
+The shared handoff namespace already normalized Agency response envelopes,
+but it did not own the final textual JSON representation. Consequently the
+selected-target-reading and occurrence-square authoring paths each decoded
+agent text independently, while the D4 author/reviewer path used the shared
+decoder; all three could disagree about an otherwise identical response.
+
+The representation rule now lives once in `futon2.aif.handoff-contract`:
+an agent-to-machine JSON response is either a map, one bare JSON object, or
+one JSON object enclosed by exactly one whole-response Markdown fence.
+Outside prose, multiple fences, arrays/scalars, malformed JSON, and missing
+answers remain invalid. This normalization only extracts the object; every
+consumer still performs its own schema, identity, digest, and request-binding
+validation.
+
+The target-reading compatibility entry point, occurrence-square authoring,
+and D4's Agency response-map now all use that rule. Behavioural regressions
+exercise a fenced reply through occurrence-square publication and fenced
+author plus reviewer replies through the production D4 composition, in
+addition to the shared strictness controls. The focused gate covers 43 tests
+and 165 assertions with zero failures/errors; changed-file lint and
+`git diff --check` are clean.
+
+The codebase sweep deliberately excludes JSON read from files, HTTP APIs, and
+subprocesses: those are not agent textual handoffs and accepting Markdown
+there would weaken their protocols. Existing EDN handoffs also retain their
+separately specified fenced-EDN grammar. Thus the repair centralizes the
+agent JSON boundary without turning every JSON parser into a permissive one.

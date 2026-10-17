@@ -1,5 +1,6 @@
 (ns futon2.aif.occurrence-square-authoring-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [cheshire.core :as json]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.occurrence-square-authoring :as sut]
             [futon2.aif.occurrence-square-registry :as squares]
             [futon2.aif.full-loop-runner :as runner]
@@ -69,6 +70,23 @@
     (is (= :valid (:status (square/validate built))))
     (is (= :valid (:status (square/parts-check
                             built ((squares/library-resolver) pattern)))))))
+
+(deftest fenced-json-uses-the-shared-handoff-decoder
+  (let [reading-root (temp-root) square-root (temp-root)
+        reading (reading! reading-root)
+        bound-answer (assoc answer :analysis_digest (:analysis-digest reading))
+        result (sut/repair!
+                {:author "wm-author" :target-reading-root reading-root
+                 :occurrence-square-root square-root
+                 :answer-fn (fn [_]
+                              (str "```json\n"
+                                   (json/generate-string bound-answer)
+                                   "\n```"))}
+                (judgement reading))]
+    (is (= :published (:status result)))
+    (is (some? (squares/current square-root "M-live"
+                                (:analysis-digest reading)
+                                (squares/library-resolver))))))
 
 (deftest answer-must-cover-the-exact-occurrence-set
   (let [reading-root (temp-root) reading (reading! reading-root)

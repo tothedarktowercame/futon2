@@ -6,6 +6,32 @@
 
 (def schema :wm/handoff-contract-v1)
 
+(defn response-json-object
+  "Decode one JSON object from an external handoff response. A response may
+  be the map itself, an unfenced JSON object, or exactly one Markdown fence
+  containing exactly one JSON object. Prose outside the object, multiple
+  fences, arrays/scalars and malformed JSON are refused as nil.
+
+  This is a representation rule, not a semantic validator: callers still
+  validate request binding, schema and fields after decoding."
+  [raw]
+  (cond
+    (map? raw) raw
+    (string? raw)
+    (or (try (let [v (json/parse-string raw true)]
+               (when (map? v) v))
+             (catch Exception _ nil))
+        (let [trimmed (str/trim raw)]
+          (when (and (str/starts-with? trimmed "```")
+                     (str/ends-with? trimmed "```")
+                     (= 2 (count (re-seq #"```" trimmed))))
+            (try (let [body (-> trimmed
+                                (str/replace #"\A```[^\n]*\n" "")
+                                (str/replace #"\n?```\z" ""))
+                       v (json/parse-string body true)]
+                   (when (map? v) v))
+                 (catch Exception _ nil)))))))
+
 (defn contract [{:keys [id version response validator] :as value}]
   (when-not (and (keyword? id) (pos-int? version) (map? response)
                  (keyword? (:id validator)) (pos-int? (:version validator)))
@@ -50,12 +76,7 @@
     (map? (:analysis answer)) (:analysis answer)
     (and (map? answer) (nil? (:state answer))) answer
     (= "done" (:state answer))
-    (some (fn [value]
-            (when (string? value)
-              (try (let [parsed (json/parse-string value true)]
-                     (when (map? parsed) parsed))
-                   (catch Exception _ nil))))
-          [(:result answer) (:text answer)])
+    (some response-json-object [(:result answer) (:text answer)])
     :else nil))
 
 (defn exchange

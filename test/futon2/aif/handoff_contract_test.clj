@@ -33,6 +33,18 @@
     (is (= payload (sut/response-map {:state "done" :text encoded})))
     (is (nil? (sut/response-map {:state "done" :result "not json"})))))
 
+(deftest one-strict-json-representation-rule-covers-all-handoffs
+  (let [payload {:answer "yes"}
+        fenced "```json\n{\"answer\":\"yes\"}\n```"]
+    (is (= payload (sut/response-json-object payload)))
+    (is (= payload (sut/response-json-object "{\"answer\":\"yes\"}")))
+    (is (= payload (sut/response-json-object fenced)))
+    (is (= payload (sut/response-map {:state "done" :result fenced})))
+    (is (nil? (sut/response-json-object (str "prose\n" fenced))))
+    (is (nil? (sut/response-json-object (str fenced "\n" fenced))))
+    (is (nil? (sut/response-json-object "[1,2]")))
+    (is (nil? (sut/response-json-object nil)))))
+
 (deftest one-payload-rule-covers-current-legacy-event-and-direct-replies
   (is (= "full" (sut/response-payload
                    {:result "full" :result-summary "prefix" :text "legacy"})))

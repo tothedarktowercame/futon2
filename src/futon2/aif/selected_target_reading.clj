@@ -31,20 +31,7 @@
    accepted; prose around an unfenced object, multiple fences, or anything
    that still does not parse to a map is still refused."
   [raw]
-  (when (string? raw)
-    (or (try (let [v (json/parse-string raw true)]
-               (when (map? v) v))
-             (catch Exception _ nil))
-        (let [trimmed (str/trim raw)]
-          (when (and (str/starts-with? trimmed "```")
-                     (str/ends-with? trimmed "```")
-                     (= 2 (count (re-seq #"```" trimmed))))
-            (try (let [body (-> trimmed
-                                (str/replace #"\A```[^\n]*\n" "")
-                                (str/replace #"\n?```\z" ""))
-                       v (json/parse-string body true)]
-                   (when (map? v) v))
-                 (catch Exception _ nil)))))))
+  (handoff/response-json-object raw))
 
 (defn- codepoint-slice
   "Python's validator interprets offsets as Unicode codepoints, while Java

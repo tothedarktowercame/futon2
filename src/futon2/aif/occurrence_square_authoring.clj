@@ -54,10 +54,7 @@
   (into {} (map (fn [[k v]] [(keyword (name k)) v])) maps))
 
 (defn- decode [raw]
-  (cond
-    (map? raw) raw
-    (string? raw) (try (json/parse-string raw true)
-                       (catch Exception _ nil))))
+  (handoff/response-json-object raw))
 
 (defn repair!
   [{:keys [answer-fn author target-reading-root occurrence-square-root

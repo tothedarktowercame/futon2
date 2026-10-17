@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-runtime-test
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as cascade-feedback]
@@ -50,15 +51,20 @@
         error {:kind :wm/open-cascade-execution-error
                :cascade-digest d :holes holes :phase :compile :attempts []
                :resume-port {:retry (fn [_] {:cascade-digest d :outcome :redone})}}
+        fenced (fn [value]
+                 {:state "done"
+                  :result (str "```json\n" (json/generate-string value) "\n```")})
         author-answer (fn [req]
-                        {:requisition-id (:requisition-id req)
-                         :cascade-digest d :by "wm-author"
-                         :decisions {:h {:decision :implement}}
-                         :patch patch})
+                        (fenced
+                         {:requisition-id (:requisition-id req)
+                          :cascade-digest d :by "wm-author"
+                          :decisions {:h {:decision :implement}}
+                          :patch patch}))
         reviewer-answer
         (fn [{:keys [requisition author-answer]}]
-          (assoc author-answer :requisition-id (:requisition-id requisition)
-                 :accepted-by "wm-reviewer"))]
+          (fenced
+           (assoc author-answer :requisition-id (:requisition-id requisition)
+                  :accepted-by "wm-reviewer")))]
     (with-redefs [runner/run-opportunity!
                   (fn [opts]
                     (reset! seen opts)
