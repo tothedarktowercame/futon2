@@ -213,3 +213,42 @@ rediscover `:identity-forged`. First establish which digest changed between
 the pre-selector cascade receipt and downstream verification, repair that
 binding, and add it to the bounded readiness replay. The classification repair
 does not waive or solve the identity failure.
+
+### Click 2 blocker repair — retain the cascade that G compared
+
+The `:identity-forged` result was a genuine verifier finding caused by an
+incorrect seam, not a forged selection. Before selection, Packet B constructed,
+validated and digest-bound a canonical cascade. After selection, the runner
+discarded that record and called the constructor again with only the selected
+action and a smaller receipt map. The second construction therefore had a
+different identity, and the verifier correctly rejected it.
+
+Commit `6b9f02660` removes that second construction from the production path:
+
+- family selection attaches the exact chosen canonical record to the
+  decision's selection certificate, outside the action whose identity it
+  helps certify;
+- `selected-entry` carries that record to the held execution phase;
+- the execution seam requires its digest to equal the selected action's
+  digest, independently re-digests it, and re-runs the canonical validator;
+- only that verified record is persisted and refined. Direct non-production
+  callers without a retained record keep the former construction fallback.
+
+The regression deliberately supplies a different post-selection reading
+source. The seam now ignores it as a replacement for the already-selected
+object and reaches the expected open-cascade phase. Existing substitution,
+re-digest and validation controls remain in the identity suite.
+
+Focused gate: 11 tests, 102 assertions, zero failures/errors. Changed-file
+lint has zero errors and no new warnings; `git diff --check` passed. Warrants:
+
+- cascade runner seam:
+  `test-registry-05fc959fa0a93160f485d9c905a2b799898b93087d0fc527ff41c4c623254901`
+- selection/cascade identity:
+  `test-registry-9c973ae91e527b3c512e8bdf408db644846d9d4b746bc55ed9c76ab45e9a14fc`
+
+The serving JVM hot-loaded `family-selection`, `cascade-decision`, and
+`full-loop-runner` in dependency order without restart. This clears the
+specific click-2 `:identity-forged` blocker. It does not authorize or spend
+click 3; the ordinary readiness scan and remaining campaign authority still
+govern that launch.
