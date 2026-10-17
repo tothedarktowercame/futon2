@@ -203,13 +203,31 @@
 (defn cascade-index
   "The index replay validates against, built from a Packet A record: the
   cascade digest, the occurrence ids of its executable nodes, and the
-  DECLARED co-application groups (the :co-application-units groups of the
-  structural layer's arrangement receipts, if carried; callers declare
-  groups explicitly via opts :groups when the carrier names them)."
-  [record & [{:keys [groups]}]]
-  {:digest (:digest record)
-   :nodes (set (map :occurrence-id (:executable-nodes record)))
-   :groups (set groups)})
+  DECLARED co-application groups DERIVED ONLY from the record's certified
+  carrier (:co-application-groups, each digest-bound).  Caller-supplied
+  group authority is gone: a group the carrier did not declare cannot be
+  admitted here.  Refuses typed when the record is not the executable
+  cascade carrier or a group's digest does not bind its identity and
+  membership."
+  [record]
+  (when-not (and (map? record) (= xc/schema (:schema record)))
+    (throw (ex-info "cascade-index requires the executable cascade carrier"
+                    {:kind :journal-index-not-a-cascade
+                     :schema (:schema record)})))
+  (let [groups (:co-application-groups record)
+        broken (vec (keep #(when-not (and (map? %)
+                                          (some? (:group-digest %))
+                                          (= (:group-digest %)
+                                             (xc/group-digest %)))
+                             (:id %))
+                          groups))]
+    (when (seq broken)
+      (throw (ex-info "cascade-index groups not digest-bound"
+                      {:kind :journal-index-groups-unbound
+                       :groups broken})))
+    {:digest (:digest record)
+     :nodes (set (map :occurrence-id (:executable-nodes record)))
+     :groups (set (map :id groups))}))
 
 (defn- node-or-group-admitted? [idx ng]
   (or (contains? (:nodes idx) ng) (contains? (:groups idx) ng)))

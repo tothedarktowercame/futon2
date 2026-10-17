@@ -413,3 +413,85 @@
   (is (every? #(= :cascade-validation-error (:status %))
               [(xc/validate-cascade {})
                (xc/validate-cascade (assoc (built) :digest "0"))])))
+
+;; ---------------------------------------------------------------------------
+;; Packet D2: declared co-application-group carrier
+;; ---------------------------------------------------------------------------
+
+(defn- built-with-groups
+  [groups]
+  (let [st (structural)]
+    (xc/build st
+              (assoc {:application-order
+                      [{:from [pattern 0] :to [pattern 1]
+                        :evidence {:kind :witnessed-transition :id "e1"}}
+                       {:from [pattern 1] :to :other-occ
+                        :evidence {:kind :witnessed-transition :id "e2"}}]
+                      :operational-clauses (clauses-for st)}
+                     :co-application-groups groups))))
+
+(def good-group {:id :wm/co-apply-1 :members [[pattern 0] [pattern 1]]
+                 :authority {:origin :authored :by "test"}})
+
+(deftest declared-groups-are-carried-digest-bound-and-validated
+  (let [record (built-with-groups [good-group])]
+    (is (xc/certified? (xc/validate-cascade record)))
+    (let [g (first (:co-application-groups record))]
+      (is (= :wm/co-apply-1 (:id g)))
+      (is (xc/group-digest g) (:group-digest g)))
+    ;; save/reload keeps the groups and the record stays certified
+    (let [dir (System/getProperty "java.io.tmpdir")
+          path (xc/save! record dir)]
+      (try
+        (let [reloaded (xc/load-record path)]
+          (is (= (:co-application-groups record)
+                 (:co-application-groups reloaded)))
+          (is (xc/certified? (xc/validate-cascade reloaded))))
+        (finally (.delete (io/file path)))))))
+
+(deftest group-carrier-adversarial-controls
+  ;; foreign member: an occurrence the cascade does not have
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups
+                  [(assoc good-group :members [[pattern 0] :no-such-occ])])
+                 [:refusal :kind])))
+  ;; duplicate identity: two groups with the same id
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups
+                  [good-group (assoc good-group :members
+                                     [[pattern 1] :other-occ])])
+                 [:refusal :kind])))
+  ;; duplicate membership: one occurrence in two groups (overlap ambiguity)
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups
+                  [good-group {:id :wm/co-apply-2
+                               :members [[pattern 1] :other-occ]}])
+                 [:refusal :kind])))
+  ;; identity colliding with an occurrence id
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups
+                  [(assoc good-group :id :other-occ)])
+                 [:refusal :kind])))
+  ;; membership shorter than a composition (a 1-occurrence "group")
+  (is (= :co-application-group-invalid
+         (get-in (built-with-groups
+                  [(assoc good-group :members [[pattern 0]])])
+                 [:refusal :kind])))
+  ;; tampered membership in a hand-sealed record: the group digest clause
+  (let [record (built-with-groups [good-group])
+        tampered (reseal (update-in record
+                                    [:co-application-groups 0 :members]
+                                    (constantly [[pattern 0] :other-occ])))]
+    (is (= :groups-digest-broken
+           (:clause (xc/validate-cascade tampered)))))
+  ;; an INVENTED group added to a hand-sealed record (fresh digest) with a
+  ;; foreign member: the group clauses catch it even fully re-digested
+  (let [record (built-with-groups [good-group])
+        invented {:id :wm/invented :members [[pattern 0] :ghost]
+                  :group-digest (xc/group-digest
+                                 {:id :wm/invented
+                                  :members [[pattern 0] :ghost]})}
+        resealed (reseal (update record :co-application-groups
+                                 conj invented))]
+    (is (= :co-application-groups-invalid
+           (:clause (xc/validate-cascade resealed))))))

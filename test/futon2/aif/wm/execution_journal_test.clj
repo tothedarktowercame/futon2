@@ -4,6 +4,7 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.wm.executable-cascade :as xc]
             [futon2.aif.wm.execution-journal :as j])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -16,9 +17,18 @@
 (def cascade-digest (evidence/value-digest [:packet-c :test-cascade]))
 (def other-cascade-digest (evidence/value-digest [:packet-c :other-cascade]))
 
-(def idx {:digest cascade-digest
-          :nodes #{[:p/a 0] :p/b :group-1}
-          :groups #{:group-1}})
+(defn- record
+  "A minimal Packet A carrier for index derivation: the journal derives
+  its admitted groups ONLY from the certified group carrier."
+  []
+  (let [groups [{:id :group-1 :members [[:p/a 0] :p/b]}]]
+    {:schema :wm/executable-cascade-v1
+     :digest cascade-digest
+     :executable-nodes [{:occurrence-id [:p/a 0]} {:occurrence-id :p/b}]
+     :co-application-groups
+     (mapv #(assoc % :group-digest (xc/group-digest %)) groups)}))
+
+(def idx (j/cascade-index (record)))
 
 (defn- e
   ([node phase valid recorded]
@@ -245,3 +255,22 @@
         (is (= #{:p/b} (:open-holes state)))
         (is (= #{:group-1} (:attempted state))
             "a declared co-application group journals as a group")))))
+
+(deftest cascade-index-derives-groups-only-from-the-carrier
+  ;; a record that is not the executable-cascade carrier refuses typed
+  (is (thrown-with-msg? Exception #"requires the executable cascade carrier"
+                        (j/cascade-index {:schema :wm/other})))
+  ;; a group whose digest does not bind identity+membership refuses typed
+  (let [tampered (update-in (record)
+                            [:co-application-groups 0 :members]
+                            (constantly [[:p/a 0] :p/b :extra]))]
+    (is (thrown-with-msg? Exception #"not digest-bound"
+                          (j/cascade-index tampered))))
+  ;; an invented group id never declared by the carrier is foreign
+  (let [invented (assoc (e :group-9 :enacted 1 1) :entry-id nil)
+        invented (assoc invented :entry-id (j/entry-digest invented))]
+    (is (= :journal-foreign-node-or-group
+           (:clause (j/validate-journal [invented] idx)))))
+  ;; caller-supplied group authority is gone: the index carries exactly
+  ;; the carrier's declared groups
+  (is (= #{:group-1} (:groups idx))))

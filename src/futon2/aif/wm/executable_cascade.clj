@@ -262,6 +262,38 @@
 ;; Executable refinement
 ;; ---------------------------------------------------------------------------
 
+(defn group-digest
+  "A declared co-application group's own binding digest, over its identity
+  and exact membership."
+  [group]
+  (evidence/value-digest (select-keys group [:id :members])))
+
+(defn- group-defects
+  "Every way a set of declared co-application groups fails the carrier:
+  absent/duplicate/colliding identity, foreign/duplicated/short membership,
+  or an occurrence claimed by two groups (overlap ambiguity)."
+  [groups occurrence-ids]
+  (let [ids (mapv :id groups)
+        member-lists (mapv :members groups)]
+    (vec (concat
+          (keep #(when-not (some? (:id %)) [:group-id-absent %]) groups)
+          (for [[id n] (frequencies ids) :when (> n 1)]
+            [:group-id-duplicate id])
+          (for [id ids :when (contains? occurrence-ids id)]
+            [:group-id-collides-with-occurrence id])
+          (keep (fn [g]
+                  (when-not (and (vector? (:members g))
+                                 (<= 2 (count (:members g)))
+                                 (= (count (:members g))
+                                    (count (distinct (:members g)))))
+                    [:group-membership-invalid g]))
+                groups)
+          (for [g groups m (:members g)
+                :when (not (contains? occurrence-ids m))]
+            [:group-member-foreign [(:id g) m]])
+          (for [[m n] (frequencies (apply concat member-lists)) :when (> n 1)]
+            [:group-member-in-two-groups m])))))
+
 (defn build
   "Refine a structural layer into the canonical :wm/executable-cascade-v1
   record.  executable-inputs supplies ONLY witnessed additions:
@@ -271,21 +303,32 @@
                                          :capability :consumes :produces}}
     :guards
     :holes {occurrence-id {:owner :question :dependencies :re-entry}}
+    :co-application-groups [{:id stable-group-identity
+                             :members [occurrence-id …]  ;; ≥2, exact,
+                                                      ;; each occurrence in
+                                                      ;; at most one group
+                             :authority …}] — the DECLARED composition
+      groups; each is digest-bound on entry and validator-checked forever.
   Every executable node IS an occurrence of the structural layer (there are
   no void/unread executable nodes by construction)."
   [structural executable-inputs]
-  (let [{:keys [application-order operational-clauses guards holes]}
+  (let [{:keys [application-order operational-clauses guards holes
+                co-application-groups]}
         executable-inputs
         occurrence-ids (set (map :occurrence-id (:nodes structural)))
         bad-clauses (keep (fn [[oid]] (when-not (occurrence-ids oid) oid))
                           operational-clauses)
-        bad-edges (vec (remove :evidence application-order))]
+        bad-edges (vec (remove :evidence application-order))
+        groups (vec co-application-groups)
+        g-defects (group-defects groups occurrence-ids)]
     (cond
       (seq bad-clauses)
       {:refusal {:kind :clause-for-non-occurrence
                  :occurrence-ids (vec bad-clauses)}}
       (seq bad-edges)
       {:refusal {:kind :application-order-evidence-owed :edges bad-edges}}
+      (seq g-defects)
+      {:refusal {:kind :co-application-group-invalid :defects g-defects}}
       :else
       (let [executable-nodes
             (mapv (fn [{:keys [occurrence-id] :as node}]
@@ -305,6 +348,9 @@
             record {:schema schema
                     :structural structural
                     :executable-nodes executable-nodes
+                    :co-application-groups
+                    (mapv #(assoc % :group-digest (group-digest %))
+                          groups)
                     :relations {:application-order (vec application-order)
                                 :guards (vec guards)}
                     :frontier (vec (remove
@@ -418,6 +464,13 @@
                                   nodes))
         identity-collapse (vec (filter #(= (:occurrence-id %) (:pattern %))
                                        nodes))
+        groups (:co-application-groups record)
+        g-defects (group-defects groups id-set)
+        g-digest-bad
+        (vec (keep #(when-not (and (hex64? (:group-digest %))
+                                   (= (:group-digest %) (group-digest %)))
+                      (:id %))
+                   groups))
         census-citations (map :citation (concat (:void census) (:unread census)))
         census-ok? (and (map? census)
                         (hex64? (:census-digest census))
@@ -493,6 +546,14 @@
       (fail :population-executable-set
             {:executable (vec (sort-by pr-str exec-ids))
              :occurrences (vec (sort-by pr-str id-set))})
+
+      ;; declared co-application groups: stable identity, exact membership,
+      ;; no foreign/duplicated members, no overlap ambiguity, digest-bound
+      (seq g-defects)
+      (fail :co-application-groups-invalid {:defects g-defects})
+
+      (seq g-digest-bad)
+      (fail :groups-digest-broken {:groups g-digest-bad})
 
       (seq provenance-bad)
       (fail :provenance-missing {:occurrences provenance-bad})
