@@ -351,3 +351,28 @@
     (is (not= :selected-target-reading-not-required
               (:reason (#'runner/retained-selected-target-reading
                         {:checkpoints {:selection cell}}))))))
+
+(deftest fenced-json-reply-is-decoded
+  ;; occ-dc843e15 (2026-10-17): the designated author replied with exactly
+  ;; one JSON object wrapped in a ```json fence; the decode parsed the raw
+  ;; string, threw on the fence, and returned nil, so the exchange refused
+  ;; :selected-target-reading-answer-invalid and the click abstained.
+  (let [fenced (str "```json\n"
+                    (json/generate-string {:labeller "zai-2"
+                                           :reusable_cues [] :rnode_cues []
+                                           :sentences []}
+                                          {:pretty true})
+                    "\n```")]
+    (is (= {:labeller "zai-2" :reusable_cues [] :rnode_cues [] :sentences []}
+           (sut/analysis-string fenced))
+        "one code fence wrapping exactly one JSON object is the author's answer")
+    (is (= {:ok true} (sut/analysis-string "{\"ok\": true}"))
+        "an unfenced JSON object still decodes")
+    (is (nil? (sut/analysis-string (str "Here is the analysis.\n" fenced)))
+        "prose outside the fence is still refused")
+    (is (nil? (sut/analysis-string (str fenced "\n" fenced)))
+        "more than one fence is ambiguous and still refused")
+    (is (nil? (sut/analysis-string "not json at all"))
+        "garbage is still refused")
+    (is (nil? (sut/analysis-string nil))
+        "absence stays refused")))

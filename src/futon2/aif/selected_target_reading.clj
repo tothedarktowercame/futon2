@@ -22,6 +22,30 @@
 (defn- file-digest [path]
   (digest (java.nio.file.Files/readAllBytes (.toPath (io/file path)))))
 
+(defn analysis-string
+  "Decode the author's terminal reply string. The requisition asks for
+   exactly one JSON object; authors regularly return that object wrapped in
+   a single Markdown code fence (occ-dc843e15, 2026-10-17: a valid fenced
+   analysis was refused :selected-target-reading-answer-invalid and the
+   whole click abstained). One fence wrapping exactly one JSON object is
+   accepted; prose around an unfenced object, multiple fences, or anything
+   that still does not parse to a map is still refused."
+  [raw]
+  (when (string? raw)
+    (or (try (let [v (json/parse-string raw true)]
+               (when (map? v) v))
+             (catch Exception _ nil))
+        (let [trimmed (str/trim raw)]
+          (when (and (str/starts-with? trimmed "```")
+                     (str/ends-with? trimmed "```")
+                     (= 2 (count (re-seq #"```" trimmed))))
+            (try (let [body (-> trimmed
+                                (str/replace #"\A```[^\n]*\n" "")
+                                (str/replace #"\n?```\z" ""))
+                       v (json/parse-string body true)]
+                   (when (map? v) v))
+                 (catch Exception _ nil)))))))
+
 (defn- codepoint-slice
   "Python's validator interprets offsets as Unicode codepoints, while Java
   substring indexes UTF-16 code units. Translate explicitly so correction
@@ -326,10 +350,7 @@
                              (cond
                                (map? (:analysis raw)) (:analysis raw)
                                (map? raw) raw
-                               (string? raw)
-                               (try (let [v (json/parse-string raw true)]
-                                      (when (map? v) v))
-                                    (catch Exception _ nil))))
+                               :else (analysis-string raw)))
                     contact (fn [issued]
                               (handoff/exchange {:contact answer-fn :request issued
                                                  :decode decode}))
