@@ -1408,6 +1408,15 @@
 (def default-executable-cascade-root "data/wm-executable-cascades")
 (def default-execution-journal-root "data/wm-execution-journals")
 
+(declare execute-selected-cascade!)
+
+(defn persistable-cascade-execution
+  "Remove the live retry capability before a held cascade is written to an
+  EDN checkpoint.  The digest, phase, holes and prior attempts remain; code
+  is a runtime capability and must never enter the run record."
+  [execution]
+  (dissoc execution :resume-port))
+
 (defn- hex64? [s] (and (string? s) (re-matches #"[0-9a-f]{64}" s)))
 (defn- concrete-span? [span]
   (and (map? span) (integer? (:start span)) (integer? (:end span))
@@ -1477,16 +1486,16 @@
                        :repairable true :phase :cascade-execution
                        :target target :cascade-id (:id action)
                        :retry-entrypoint :execute-selected-cascade!}
-                      detail))]
-    (let [;; a reading route with NO 象 squares yet yields a structural layer
+                      detail))
+        ;; A reading route with no 象 squares yields a structural layer
         ;; whose every citation is unread (zero occurrence nodes).  No
         ;; canonical record can certify over foreign-edge endpoints then;
         ;; the seam holds the SAME phase open with the unread citations as
         ;; the re-entry inputs rather than reporting a validation defect.
-        preview (executable-cascade/build-structural action (readings-fn
-                                              {:preview true})
-                                      {:stage :pre-selector-binding})]
-      (if (and (map? preview) (empty? (:nodes preview)))
+        preview (executable-cascade/build-structural
+                 action (readings-fn {:preview true})
+                 {:stage :pre-selector-binding})]
+    (if (and (map? preview) (empty? (:nodes preview)))
         {:status :cascade-enactment-open
          :kind :cascade-enactment-open
          :open-cascade true
@@ -1519,9 +1528,8 @@
                            default-executable-cascade-root)
                   journal-root (or (:execution-journal-root opts)
                                    default-execution-journal-root)
-                  path (executable-cascade/save! record root)]
-              (let [reloaded (executable-cascade/load-record
-                              (io/file path))
+                  path (executable-cascade/save! record root)
+                  reloaded (executable-cascade/load-record (io/file path))
                     rev (executable-cascade/validate-cascade reloaded)]
                 (if-not (executable-cascade/certified? rev)
                   (fail :cascade-validation-error (:clause rev)
@@ -1582,30 +1590,58 @@
                                      :journal-append appended})
 
                               (or (seq holes) (seq unread))
-                              {:status :cascade-enactment-open
-                               :kind :cascade-enactment-open
+                              (let [resume-holes
+                                    (mapv (fn [{:keys [occurrence-id hole]}]
+                                            {:hole-id occurrence-id
+                                             :owner (:owner hole)
+                                             :question (or (:question hole)
+                                                           (:kind hole)
+                                                           :operational-clause-owed)})
+                                          holes)
+                                    retry (fn [_]
+                                            (let [result
+                                                  (execute-selected-cascade!
+                                                   entry opts)]
+                                              ;; execute-selected-cascade!
+                                              ;; already returns D4's
+                                              ;; executable digest as
+                                              ;; :cascade-digest and retains
+                                              ;; the pre-selector digest in
+                                              ;; :selected-cascade-digest.
+                                              result))]
+                                {:status :cascade-enactment-open
+                               :kind :wm/open-cascade-execution-error
+                               :reason :cascade-enactment-open
                                :open-cascade true
                                :repairable true
-                               :phase :cascade-execution
+                               :phase :compile
                                :target target
                                :cascade-id (:id action)
-                               :cascade-digest d
+                               ;; D4 resumes the executable refinement.  The
+                               ;; selected/pre-selector identity remains
+                               ;; explicit rather than being conflated with
+                               ;; the refinement identity.
+                               :selected-cascade-digest d
+                               :cascade-digest cd
                                :compiled-digest cd
                                :saved path
                                :compiled-saved (executable-cascade/save!
                                                 compiled-record root)
-                               :holes holes
+                               :holes resume-holes
+                               :open-hole-details holes
                                :unread-citations (mapv :citation unread)
                                :re-entry
                                {:condition :operational-authoring-supplied
                                 :inputs {:holes holes
                                          :unread-citations (mapv :citation unread)}
                                 :seam-attribution seam-attribution}
-                               :journal-append appended}
+                               :journal-append appended
+                               :attempts []
+                               :resume-port {:retry retry}})
 
                               :else
                               {:status :cascade-ready
                                :cascade-digest d
                                :compiled-digest cd
                                :saved path
-                               :journal-append appended})))))))))))))))))
+                               :journal-append appended})))))))))))))))

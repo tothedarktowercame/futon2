@@ -18,6 +18,7 @@
             
             [futon2.aif.wm.execution-journal :as execution-journal]
             [futon2.aif.wm.executable-cascade :as xc]
+            [futon2.aif.wm.open-cascade-resume :as resume]
             [futon2.aif.wm.reading-family-decision-test :as rfd]
             [futon2.test-support.runner-fixture :as fixture])
   (:import [java.nio.file Files]
@@ -112,31 +113,43 @@
      :cascades cascades :journal journal :click true}))
 
 (deftest selected-cascade-is-bound-saved-validated-and-held-open
-  (let [{:keys [result decision cascades journal] :as click}
+  (let [runtime-error (atom nil)
+        {:keys [result decision cascades journal] :as click}
         (click! [px py]
                 {:cascade-reading-pins
                  {"M-current" {:excerpt-digest (hex [:excerpt])
                                :analysis-digest (hex [:analysis])}}
-                 :cascade-occurrence-readings (fn [_] square-readings)}
+                 :cascade-occurrence-readings (fn [_] square-readings)
+                 :open-cascade-resume-fn
+                 (fn [error]
+                   (reset! runtime-error error)
+                   (resume/resume! (resume/new-ledger "seam-click")
+                                   (resume/recognize error)))}
                 {:bind-cascade-identity
                  {:readings (fn [_] square-readings)}})
         cell (get-in result [:checkpoints :selection :sorry])
         held (get-in cell [:held-phase])
-        d (:cascade-digest held)
-        cd (:compiled-digest held)
+        d (:selected-cascade-digest held)
+        cd (:cascade-digest held)
         saved-file (io/file cascades (str d ".edn"))
         compiled-file (io/file cascades (str cd ".edn"))]
     (testing "one G selection; the runner never reselects"
       (is (= 1 (::selector-calls click)) "the selector ran exactly once"))
     (testing "the seam held the SAME phase as a typed open-cascade condition"
       (is (map? held))
-      (is (= :cascade-enactment-open (:kind held)))
+      (is (= :wm/open-cascade-execution-error (:kind held)))
+      (is (= :cascade-enactment-open (:reason held)))
+      (is (= :compile (:phase held)))
       (is (true? (:open-cascade held)))
       (is (true? (:repairable held)))
       (is (not= :reading-policy-execution-semantics-owed (:kind held))
           "the legacy execution-semantics refusal is gone")
       (is (not (contains? #{:refused :abstained :no-selection}
                           (get-in result [:run-output :outcome])))))
+    (testing "the live carrier conforms to D4 but executable code is not persisted"
+      (is (= :held (:status (resume/recognize @runtime-error))))
+      (is (ifn? (get-in @runtime-error [:resume-port :retry])))
+      (is (not (contains? held :resume-port))))
     (testing "the selected identity and its executable refinement are both bound"
       (is (string? d))
       (is (string? cd))
@@ -159,7 +172,7 @@
         (is (xc/certified? compiled-certificate))))
     (testing "open holes retained with re-entry inputs"
       (is (seq (:holes held)))
-      (is (every? #(get-in % [:hole :owner]) (:holes held)))
+      (is (every? :owner (:holes held)))
       (is (= :operational-authoring-supplied
              (get-in held [:re-entry :condition])))
       (let [reloaded (xc/load-record saved-file)]
@@ -168,7 +181,7 @@
     (testing "the journal is opened bound to the cascade identity"
       (let [entries (execution-journal/load-journal journal)]
         (is (seq entries))
-        (is (every? #(= (:compiled-digest held) (:journal-id %)) entries)
+        (is (every? #(= cd (:journal-id %)) entries)
             "the journal binds the compiled refinement's identity")
         (is (every? #(= :open-hole (:phase %)) entries)
             "no enactment without a verified effect")))
@@ -179,7 +192,7 @@
       (is (= (get-in decision [:action :id]) (:cascade-id held))))))
 
 (deftest production-default-without-squares-holds-open-honestly
-  (let [{:keys [result cascades journal]}
+  (let [{:keys [result journal]}
         (click! [px py] {} {})
         cell (get-in result [:checkpoints :selection :sorry])
         held (get-in cell [:held-phase])]

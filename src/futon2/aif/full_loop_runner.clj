@@ -6398,9 +6398,25 @@
             ;; phase as a typed, repairable, open-cascade condition (never
             ;; abstention, refusal, or no-selection, and never a rerun of
             ;; selection); the entry stays retained on the run record.
-            cascade-execution
+            cascade-execution0
             (when (map? (get-in ordinary-entry [:action :precedence :co-apply]))
               (wm-cascade-decision/execute-selected-cascade! ordinary-entry opts))
+            ;; The live carrier includes D4's retry capability.  A configured
+            ;; debugger/resume handler may repair and retry this held phase
+            ;; now, without another click or selection.  Checkpoints below
+            ;; retain only the serializable carrier.
+            cascade-execution
+            (if (and (:open-cascade cascade-execution0)
+                     (:open-cascade-resume-fn opts))
+              (let [handled ((:open-cascade-resume-fn opts)
+                             cascade-execution0)]
+                (if (= :resumed (:status handled))
+                  (:result handled)
+                  cascade-execution0))
+              cascade-execution0)
+            persisted-cascade-execution
+            (some-> cascade-execution
+                    wm-cascade-decision/persistable-cascade-execution)
             entry (when-not (and cascade-execution
                                  (not= :cascade-ready (:status cascade-execution)))
                     ordinary-entry)
@@ -6516,11 +6532,11 @@
                                              :dropped-candidates
                                              (get-in judgement
                                                      [:cascade-problems :dropped-candidates])}
-                                      cascade-execution
-                                      (assoc :downstream-refusal cascade-execution
+                                      persisted-cascade-execution
+                                      (assoc :downstream-refusal persisted-cascade-execution
                                              :held-phase
-                                             (when (:open-cascade cascade-execution)
-                                               cascade-execution)))))]
+                                             (when (:open-cascade persisted-cascade-execution)
+                                               persisted-cascade-execution)))))]
         (let [selection-cell (cond-> (-> selection-cell
                                          (assoc-in [:judgment :effective-run-configuration]
                                                    @effective-configuration)
@@ -6557,7 +6573,7 @@
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           (no-entry-failure-data judgement
-                                                 cascade-execution))))
+                                                 persisted-cascade-execution))))
         (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
                                      :when (nil? seat)] role))]
           (throw (ex-info "Selected an action, but no cast was given for it"

@@ -30,7 +30,12 @@
                     (.getPath (.toFile (Files/createTempDirectory
                                         "selected-reading-ledger-"
                                         (make-array FileAttribute 0))))]
-        (run)))))
+        ;; This namespace is intentionally exercised from isolated packet
+        ;; worktrees.  Bypass only the canonical-checkout location guard;
+        ;; the dedicated source-drift controls live in full-loop-runner-test.
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift! (fn [] nil)}
+          run)))))
 
 (defn- temp-dir [prefix]
   (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0))))
