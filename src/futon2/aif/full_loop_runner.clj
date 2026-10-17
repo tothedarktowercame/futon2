@@ -2225,7 +2225,12 @@
      :repairable (not= false (:repairable downstream-refusal))
      :failure-detail downstream-refusal}
     downstream-refusal
-    {:outcome :refused
+    ;; A typed downstream refusal abstains from enactment; :refused is not in
+    ;; cohort/outcome-kinds, so closing on it throws invalid-close-outcome
+    ;; (occ-2613ce61, 2026-10-17: an :identity-forged cascade refusal on
+    ;; M-recommendation-bindings degraded the whole click to :build-failed).
+    ;; The refusal's own kind survives in :failure-kind.
+    {:outcome :abstained
      :failure-kind (:kind downstream-refusal)}
     :else
     {:outcome (if (= :abstained (get-in judgement [:decision :status]))
