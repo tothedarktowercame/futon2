@@ -177,6 +177,24 @@
                           :evidence {:kind :gut-feeling}}]})
                    [:refusal :kind])))))
 
+(deftest transition-evidence-must-name-an-intact-receipt
+  (let [st (structural)]
+    (is (= :transition-evidence-malformed
+           (get-in (sut/compile-executable
+                    st {:attribution attribution
+                        :application-order
+                        [{:from occ-dup0 :to occ-dup1
+                          :evidence {:kind :witnessed-transition}}]})
+                   [:refusal :kind])))
+    (is (= :transition-evidence-malformed
+           (get-in (sut/compile-executable
+                    st {:attribution attribution
+                        :application-order
+                        [{:from occ-dup0 :to occ-dup1
+                          :evidence {:kind :witnessed-transition
+                                     :digest "not-a-receipt-digest"}}]})
+                   [:refusal :kind])))))
+
 (deftest foreign-occurrence-is-refused
   (let [st (structural)]
     (is (= :foreign-occurrence

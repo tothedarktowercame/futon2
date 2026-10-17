@@ -47,7 +47,7 @@ earlier record is never mutated (asserted in tests).
 
 ## Gates
 
-- `cascade-enactment-compiler-test` (NEW): 10 tests / 43 assertions,
+- `cascade-enactment-compiler-test` (NEW): 11 tests / 45 assertions,
   0 failures
 - regression at base: `executable-cascade-test` +
   `selection-cascade-identity-test`: 23 / 102, 0 failures
@@ -60,8 +60,12 @@ refused) · missing transition evidence · unknown evidence kind · foreign
 occurrence (clause key and edge endpoint) · fabricated square derivation
 (completion claiming B elements the square does not carry) · cyclic
 application order · unattributed authoring · uncertified structural input ·
-open-cascade refinement without mutation (digest changes, structural
+malformed/missing transition receipt digest · open-cascade refinement without mutation (digest changes, structural
 identical, prior record still certifies, compilation deterministic).
+
+Independent integration review added mandatory 64-hex receipt identity to
+every operational edge. A recognized evidence-kind label alone no longer
+counts as independent transition evidence.
 
 ## Fixture
 

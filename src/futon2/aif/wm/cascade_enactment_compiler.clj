@@ -36,6 +36,9 @@
 
 (def open-hole-re-entry :packet-d1-refinement)
 
+(defn- hex64? [x]
+  (and (string? x) (boolean (re-matches #"[0-9a-f]{64}" x))))
+
 (defn- refusal [kind & [detail]]
   {:refusal (merge {:kind kind :stage :enactment-compilation} detail)})
 
@@ -98,6 +101,14 @@
         foreign (vec (keep #(when-not (and (ids (:from %)) (ids (:to %))) %)
                            application-order))
         unevidenced (vec (remove :evidence application-order))
+        malformed-evidence
+        (vec (keep #(let [ev (:evidence %)]
+                      (when (and ev
+                                 (not (and (map? ev)
+                                           (keyword? (:kind ev))
+                                           (hex64? (:digest ev)))))
+                        %))
+                   application-order))
         descriptive (vec (keep #(when (and (:evidence %)
                                            (contains? descriptive-evidence-kinds
                                                       (:kind (:evidence %))))
@@ -118,6 +129,8 @@
       (seq descriptive) (refusal :descriptive-evidence-not-operational
                                  {:edges descriptive})
       (seq unknown-kind) (refusal :evidence-kind-unknown {:edges unknown-kind})
+      (seq malformed-evidence)
+      (refusal :transition-evidence-malformed {:edges malformed-evidence})
       cycle (refusal :application-cycle {:cycle cycle})
       :else nil)))
 
