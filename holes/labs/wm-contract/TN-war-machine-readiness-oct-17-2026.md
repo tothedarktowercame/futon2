@@ -150,3 +150,30 @@ independent reasons: the latest recorded workspace/CI receipts do not name
 this commit, the runner code receipt names an older tested commit, and the
 reviewer seat was unavailable at the instant of the scan. These are launch
 preconditions, not reasons to spend click 2.
+
+### Click 2 launch cleanup
+
+The launch bookkeeping was repaired without a broad suite rerun:
+
+- readiness now consumes test-registry warrants for the seven namespaces in
+  the changed execution closure. Four warrants remained fresh and were reused;
+  only `full-loop-runtime`, `reading-policy-precision`, and
+  `reading-family-decision` reran and minted new warrants;
+- the old all-repository “everything conforms” receipts were removed from the
+  click-launch predicate. They remain maintenance evidence, but unrelated
+  repository commits and the pre-existing untracked resource receipt no
+  longer invalidate an unchanged tested closure;
+- serving-code readiness compares the loaded runner bytes with the current
+  disk bytes. The serving JVM reports them equal and current;
+- the WM campaign cast is now Zai-2 as author, Zai-6 as reviewer, and Zai-7 as
+  repair reviewer. All three sessions were reset before assignment and the
+  readiness scan requires all three to be idle and invoke-ready;
+- Joe's beta=1 authorization is installed as sealed campaign authority
+  `3387e9ed…f4464`, limited to four distinct reading-model identities—the four
+  clicks remaining after click 1. Each use still creates and records an exact
+  identity-bound declaration; there is no silent carry across model changes.
+
+Final non-clicking scan: READY. Contract and trace-schema checks, all seven
+warrants, serving runner bytes, CTAU class emission, Zai cast availability,
+bounded service capacity, and the run-certification command all passed. No
+click or agent dispatch was performed by this cleanup.
