@@ -177,3 +177,39 @@ Final non-clicking scan: READY. Contract and trace-schema checks, all seven
 warrants, serving runner bytes, CTAU class emission, Zai cast availability,
 bounded service capacity, and the run-certification command all passed. No
 click or agent dispatch was performed by this cleanup.
+
+### Click 2 — concrete cascade selected; identity binding rejected
+
+The second campaign click ran with the explicit Zai cast (Zai-2 author,
+Zai-6 reviewer, Zai-7 repair reviewer) and the debugger loop enabled.
+
+- click: `wm-click-e3a92275-d032-450b-a55a-894dc75cd3b9`
+- run: `2026-10-17-a94d597b-d0f2-4314-ac21-c13fcfde5c7a`
+- target: `M-recommendation-bindings`
+- selection: one concrete occurrence-keyed reading policy containing twelve
+  occurrence nodes
+- budget: one click spent; no tick carried
+- beta authority: one exact reading-model identity issued under campaign
+  `3387e9ed…f4464`; three authorized identities remain
+
+The reading and selection route reached a concrete cascade, so the earlier
+CTAU class-emission and beta launch blockers did not recur. The selected
+cascade was then rejected by the downstream identity check as
+`:identity-forged`. That is the substantive blocker exposed by this click.
+It remains unresolved and must be reproduced and repaired before click 3.
+
+A secondary terminal-recording defect obscured that result: the runner passed
+the typed outcome `:refused` to the cohort ledger even though that ledger does
+not admit `:refused`, causing `invalid-close-outcome` and degrading the public
+outcome to `build-failed`. Zai-7 repaired only this classification boundary in
+commit `ee7275ffc`: downstream refusals now close the cohort with its admitted
+outcome `:abstained` while preserving `:identity-forged` as the failure kind.
+The namespace was hot-loaded without restarting the service. Its focused
+regression passed 3 tests and 10 assertions and minted warrant
+`test-registry-5b709316723d2e34484d1a5425d77d6258c15c02415eb24a6ae7cce0a6b4aed4`.
+
+Disposition before click 3: NOT READY. Do not spend another click merely to
+rediscover `:identity-forged`. First establish which digest changed between
+the pre-selector cascade receipt and downstream verification, repair that
+binding, and add it to the bounded readiness replay. The classification repair
+does not waive or solve the identity failure.
