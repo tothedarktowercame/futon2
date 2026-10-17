@@ -31,6 +31,10 @@
             [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.wm.family-selection :as family-selection]
+            [futon2.aif.wm.selection-cascade-identity :as selection-cascade-identity]
+            [futon2.aif.wm.executable-cascade :as executable-cascade]
+            [futon2.aif.wm.cascade-enactment-compiler :as cascade-enactment-compiler]
+            [futon2.aif.wm.execution-journal :as execution-journal]
             [futon2.aif.reading-policy-precision :as precision]
             [futon2.aif.reading-policy-preference :as pref]
             [futon2.aif.token-a-bmr :as token-a-bmr])
@@ -1241,6 +1245,10 @@
                      :pattern-feedback (:pattern-feedback opts)
                      :ticket-queue queue
                      :ticket-queue-refusals (family-refusals families)
+                     ;; Packet D3: the reading route opts into the canonical
+                     ;; cascade identity binding before the one selector
+                     ;; (nil when the caller did not supply one)
+                     :bind-cascade-identity (:bind-cascade-identity opts)
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
         (case (:status result)
           :repeat-refused
@@ -1383,3 +1391,221 @@
    separately from the outcome-based reinforcement performed at close."
   [assembled opts]
   (cascade-decision assembled opts))
+
+;; ---------------------------------------------------------------------------
+;; Packet D3: the production runner seam for a selected reading-family
+;; cascade.  After ONE G selection this seam (1) binds and verifies the
+;; canonical :wm/executable-cascade-v1 identity (Packet B), (2) persists the
+;; canonical cascade append-only and re-validates the reloaded record,
+;; (3) compiles it with whatever ATTRIBUTED operational authoring is
+;; genuinely available (none on this route today: every unauthorised
+;; occurrence keeps an explicit open hole), and (4) opens/appends the
+;; execution journal.  Incomplete authoring holds the SAME runner phase as a
+;; typed, repairable, open-cascade condition — never abstention, refusal,
+;; or no-selection — and never reruns selection.
+;; ---------------------------------------------------------------------------
+
+(def default-executable-cascade-root "data/wm-executable-cascades")
+(def default-execution-journal-root "data/wm-execution-journals")
+
+(defn- hex64? [s] (and (string? s) (re-matches #"[0-9a-f]{64}" s)))
+(defn- concrete-span? [span]
+  (and (map? span) (integer? (:start span)) (integer? (:end span))
+       (< 0 (:start span) (:end span))))
+
+(defn occurrence-readings
+  "The ACTUAL occurrence-keyed readings a selected reading-family action
+  carries: per occurrence the reading record identity, the exact cited span,
+  the 象 source-text and analysis digests (when the caller pinned them), and
+  the cited pattern's source sha256.  The four-map square is not authored on
+  this route yet: a reading without :square is an UNREAD citation in the
+  canonical census — typed, never fabricated.  Occurrences whose provenance
+  the action cannot supply (typed absences, unpinned digests) contribute no
+  reading entry at all, which is the same honest unread."
+  [entry {:keys [excerpt-digest analysis-digest]}]
+  (into {}
+        (for [node (get-in entry [:action :arrangement :nodes])
+              :let [oid (:occurrence-id node)]
+              :when (and oid
+                         (concrete-span? (:fragment-span node))
+                         (string? (:source-sha256 node))
+                         (hex64? excerpt-digest)
+                         (hex64? analysis-digest))]
+          [oid {:reading-record-id (str (or (:target entry) "?") "/"
+                                        (get-in entry [:action :id]) "/"
+                                        (pr-str oid))
+                :span (:fragment-span node)
+                :source-text-digest excerpt-digest
+                :analysis-digest analysis-digest
+                :source-sha256 (:source-sha256 node)}])))
+
+(defn- seam-authoring
+  "The attributed operational authoring genuinely available for ENTRY: the
+  caller's fn when supplied, else an empty authoring ATTRIBUTED to the
+  production seam itself (so the compile is attributed even when it opens
+  every hole)."
+  [entry opts]
+  (or (when-let [f (:cascade-operational-authoring opts)] (f entry))
+      {:attribution {:author :wm/production-seam
+                     :authority :wm/runner}
+       :application-order []
+       :clauses {}}))
+
+(defn execute-selected-cascade!
+  "The post-selection seam for a selected reading-family ENTRY.  Returns
+  {:status :cascade-ready ...} when the compiled cascade has an enactable
+  frontier (the flight boundary may then enact it WITH evidence), or
+  {:status :cascade-enactment-open :kind :cascade-enactment-open
+   :open-cascade true :repairable true :phase :cascade-execution
+   :holes [...] :unread-citations [...] :re-entry {...}} when authoring is
+  incomplete — the selected cascade is RETAINED (saved, validated, journaled
+  under its identity) and the SAME phase is held for repair.  Typed machine
+  errors (:cascade-materialisation-error, :cascade-validation-error,
+  :cascade-compilation-error, :cascade-evidence-error) carry the cascade
+  identity, failed clause and inputs.  Selection is never rerun here."
+  [entry opts]
+  (let [action (:action entry)
+        target (:target entry)
+        pins (get-in opts [:cascade-reading-pins target])
+        seam-attribution {:author :wm/production-seam :authority :wm/runner}
+        readings-fn (or (:cascade-occurrence-readings opts)
+                        (fn [_]
+                          (merge (occurrence-readings entry pins)
+                                 (or (:cascade-square-readings opts) {}))))
+        fail (fn [status kind detail]
+               (merge {:status status :kind kind
+                       :repairable true :phase :cascade-execution
+                       :target target :cascade-id (:id action)
+                       :retry-entrypoint :execute-selected-cascade!}
+                      detail))]
+    (let [;; a reading route with NO 象 squares yet yields a structural layer
+        ;; whose every citation is unread (zero occurrence nodes).  No
+        ;; canonical record can certify over foreign-edge endpoints then;
+        ;; the seam holds the SAME phase open with the unread citations as
+        ;; the re-entry inputs rather than reporting a validation defect.
+        preview (executable-cascade/build-structural action (readings-fn
+                                              {:preview true})
+                                      {:stage :pre-selector-binding})]
+      (if (and (map? preview) (empty? (:nodes preview)))
+        {:status :cascade-enactment-open
+         :kind :cascade-enactment-open
+         :open-cascade true
+         :repairable true
+         :phase :cascade-execution
+         :target target
+         :cascade-id (:id action)
+         :holes []
+         :unread-citations (mapv :citation (get-in preview [:census :unread]))
+         :re-entry {:condition :xiang-four-maps-authored
+                    :inputs {:unread-citations
+                             (mapv :citation (get-in preview [:census :unread]))}}
+         :journal-append []}
+        (let [bound (selection-cascade-identity/bind-entry
+                     {:action action :policy-id (:id action) :target-id target}
+                     readings-fn
+                     (:cascade-operational-authoring opts))]
+          (if (:refusal bound)
+        (fail :cascade-materialisation-error (:kind (:refusal bound))
+              {:refusal (:refusal bound)})
+        (let [bound-entry (:entry bound)
+              verify (selection-cascade-identity/verify-selected-identity
+                      {:action (:action bound-entry)} [bound-entry])]
+          (if (not= :verified (:status verify))
+            (fail :cascade-materialisation-error :identity-verification-failed
+                  {:verification verify})
+            (let [record (:canonical-cascade bound-entry)
+                  d (:digest bound)
+                  root (or (:executable-cascade-root opts)
+                           default-executable-cascade-root)
+                  journal-root (or (:execution-journal-root opts)
+                                   default-execution-journal-root)
+                  path (executable-cascade/save! record root)]
+              (let [reloaded (executable-cascade/load-record
+                              (io/file path))
+                    rev (executable-cascade/validate-cascade reloaded)]
+                (if-not (executable-cascade/certified? rev)
+                  (fail :cascade-validation-error (:clause rev)
+                        {:repair rev :saved path})
+                  (let [compiled (cascade-enactment-compiler/compile-executable
+                                  (:structural reloaded)
+                                  (seam-authoring entry opts))]
+                    (if (:refusal compiled)
+                      (fail :cascade-compilation-error
+                            (:kind (:refusal compiled))
+                            {:refusal (:refusal compiled) :saved path})
+                      (let [compiled-record (:record compiled)
+                            cd (:digest compiled)
+                            _ (executable-cascade/save! compiled-record root)
+                            holes (vec (keep #(when (= :open-hole
+                                                        (:enactment-status %))
+                                                {:occurrence-id (:occurrence-id %)
+                                                 :hole (:hole %)})
+                                             (:executable-nodes compiled-record)))
+                            unread (vec (get-in compiled-record
+                                                [:structural :census :unread]))
+                            now (str (Instant/now))
+                            journal-entries
+                            (vec (map-indexed
+                                  (fn [i {:keys [occurrence-id]}]
+                                    (execution-journal/entry
+                                     {:journal-id cd
+                                      :node-or-group occurrence-id
+                                      :phase :open-hole
+                                      :evidence {:kind :hole-witness
+                                                 :digest (interpretation-evidence/value-digest
+                                                          [cd occurrence-id :hole])}
+                                      :valid-time now
+                                      ;; the store requires strictly increasing
+                                      ;; recorded times across entries
+                                      :recorded-time (str (.plusNanos
+                                                           (Instant/parse now)
+                                                           (inc i)))}))
+                                  holes))
+                            bad-entries (vec (filter :refusal journal-entries))]
+                        (if (seq bad-entries)
+                          (fail :cascade-evidence-error :journal-entry-invalid
+                                {:refusals (mapv :refusal bad-entries)})
+                          (let [appended (vec (for [e journal-entries]
+                                                (execution-journal/append!
+                                                 journal-root e)))]
+                            (cond
+                              (seq (get-in compiled-record [:frontier]))
+                              ;; an enactable frontier exists but the flight
+                              ;; boundary for cascades is not wired: hold the
+                              ;; phase rather than enact without verified
+                              ;; effect
+                              (fail :cascade-evidence-error
+                                    :flight-boundary-not-wired
+                                    {:cascade-digest cd :saved path
+                                     :frontier (mapv :occurrence-id
+                                                     (:frontier compiled-record))
+                                     :journal-append appended})
+
+                              (or (seq holes) (seq unread))
+                              {:status :cascade-enactment-open
+                               :kind :cascade-enactment-open
+                               :open-cascade true
+                               :repairable true
+                               :phase :cascade-execution
+                               :target target
+                               :cascade-id (:id action)
+                               :cascade-digest d
+                               :compiled-digest cd
+                               :saved path
+                               :compiled-saved (executable-cascade/save!
+                                                compiled-record root)
+                               :holes holes
+                               :unread-citations (mapv :citation unread)
+                               :re-entry
+                               {:condition :operational-authoring-supplied
+                                :inputs {:holes holes
+                                         :unread-citations (mapv :citation unread)}
+                                :seam-attribution seam-attribution}
+                               :journal-append appended}
+
+                              :else
+                              {:status :cascade-ready
+                               :cascade-digest d
+                               :compiled-digest cd
+                               :saved path
+                               :journal-append appended})))))))))))))))))

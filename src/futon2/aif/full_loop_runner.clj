@@ -41,6 +41,7 @@
             [futon2.aif.wm.pattern-graph-diff :as pattern-graph-diff]
             [futon2.aif.wm.pattern-graph-view :as pattern-graph-view]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
+            [futon2.aif.wm.cascade-decision :as wm-cascade-decision]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -2165,9 +2166,16 @@
   A selected reading policy stopped at the explicit execution-semantics
   boundary is a typed refusal, not an absence of selection."
   [judgement downstream-refusal]
-  (if downstream-refusal
+  (cond
+    (:open-cascade downstream-refusal)
+    {:outcome :incomplete
+     :failure-kind (:kind downstream-refusal)
+     :held-phase (:phase downstream-refusal)
+     :repairable true}
+    downstream-refusal
     {:outcome :refused
      :failure-kind (:kind downstream-refusal)}
+    :else
     {:outcome (if (= :abstained (get-in judgement [:decision :status]))
                 :abstained
                 :no-selection)}))
@@ -6380,15 +6388,22 @@
                                 (:outer-task-selection judgement0))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
-            ;; Q5 stops at eligibility: what enacting a reading policy does is
-            ;; not yet defined, and the flight would read its :precedence as
-            ;; an interpreted vector. It is refused typed, not enacted.
-            reading-execution-owed
+            ;; Packet D3: a selected reading-family policy no longer stops
+            ;; at the old execution-semantics refusal.  After the ONE G
+            ;; selection the production seam binds and verifies the
+            ;; canonical cascade identity, persists the cascade
+            ;; append-only, compiles it with whatever attributed
+            ;; operational authoring is genuinely available, validates it
+            ;; and opens its journal.  Incomplete authoring HOLDS this same
+            ;; phase as a typed, repairable, open-cascade condition (never
+            ;; abstention, refusal, or no-selection, and never a rerun of
+            ;; selection); the entry stays retained on the run record.
+            cascade-execution
             (when (map? (get-in ordinary-entry [:action :precedence :co-apply]))
-              {:kind :reading-policy-execution-semantics-owed
-               :policy-id (get-in ordinary-entry [:action :id])
-               :rearm {:condition :reading-policy-execution-semantics-ruled}})
-            entry (when-not reading-execution-owed ordinary-entry)
+              (wm-cascade-decision/execute-selected-cascade! ordinary-entry opts))
+            entry (when-not (and cascade-execution
+                                 (not= :cascade-ready (:status cascade-execution)))
+                    ordinary-entry)
             historical-action? (= :revalidate-historical-repair
                                   (get-in entry [:action :type]))
             repair-action? (contains? #{:repair-machine-failure
@@ -6501,8 +6516,11 @@
                                              :dropped-candidates
                                              (get-in judgement
                                                      [:cascade-problems :dropped-candidates])}
-                                      reading-execution-owed
-                                      (assoc :downstream-refusal reading-execution-owed))))]
+                                      cascade-execution
+                                      (assoc :downstream-refusal cascade-execution
+                                             :held-phase
+                                             (when (:open-cascade cascade-execution)
+                                               cascade-execution)))))]
         (let [selection-cell (cond-> (-> selection-cell
                                          (assoc-in [:judgment :effective-run-configuration]
                                                    @effective-configuration)
@@ -6539,7 +6557,7 @@
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           (no-entry-failure-data judgement
-                                                 reading-execution-owed))))
+                                                 cascade-execution))))
         (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
                                      :when (nil? seat)] role))]
           (throw (ex-info "Selected an action, but no cast was given for it"

@@ -88,6 +88,10 @@
                          {:judge-fn (fn [_] {:judgement (judgement-for decision)})
                           :selected-reading-ask-fn ask-fn
                           :pattern-library-root (str lib)
+                          ;; Packet D3: the cascade seam persists and journals
+                          ;; into isolated temp roots, never the repo's data/
+                          :executable-cascade-root (.getPath (temp-dir "seam-cascades-"))
+                          :execution-journal-root (.getPath (temp-dir "seam-journal-"))
                           :interpretation-ask-fn (fn [& _] (throw (ex-info "old ask reached" {})))
                           :repair-system-record-fn (fn [m] {:repair/id "repair-test"
                                                             :repair/class (:repair-class m)})
@@ -159,12 +163,16 @@
                          :selection-ended-at (:at (second events)))))))))
     (testing "the policy and its selection certificate are unchanged but for the discharge"
       (is (= (without-discharge decision) (without-discharge recorded))))
-    (testing "the discharged policy is eligible, and enactment stops at its typed refusal"
+    (testing "the discharged policy is eligible, and execution holds at the
+              Packet D3 open-cascade seam (not the retired execution-semantics
+              refusal)"
       (is (= :validated (get-in discharge [:validation :status])))
       (is (= :discharged (:status (runner/reading-interpretation-status recorded))))
       (is (= (:action decision) (:action (#'runner/selected-entry {:decision recorded}))))
-      (is (= :reading-policy-execution-semantics-owed
-             (get-in cell [:downstream-refusal :kind]))))))
+      (is (= :cascade-enactment-open (get-in cell [:downstream-refusal :kind])))
+      (is (not= :reading-policy-execution-semantics-owed
+                (get-in cell [:downstream-refusal :kind])))
+      (is (true? (get-in cell [:downstream-refusal :open-cascade]))))))
 
 (deftest invalid-reading-leaves-the-debt-open-through-the-runner
   (let [selector-calls (atom 0)

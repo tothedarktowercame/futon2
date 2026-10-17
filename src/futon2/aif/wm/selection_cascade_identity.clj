@@ -58,16 +58,18 @@
 
 (defn- receipts-for
   "The construction/scoring/selection receipts that establish this record is
-  the exact object compared and chosen: the scorer version, the G terms the
-  decision recorded, and the policy's structural key."
+  the exact object compared and chosen.  Derived ONLY from the action (plus
+  the policy id), so the digest a pre-selector bind seals is exactly the
+  digest a later seam rebuild of the SAME action re-derives — a rebuild may
+  not silently differ because the entry carried transient rank/scorer
+  fields."
   [entry]
-  {:construction {:policy-id (:policy-id entry)
-                  :policy-key (:policy-key (:action entry))}
-   :scoring {:scorer-version (:scorer-version entry)
-             :g (:G-efe entry :G-efe-not-recorded)
-             :g-terms (get-in entry [:certificate :g-terms])}
-   :selection {:stage :pre-selector-binding
-               :rank (:rank entry)}})
+  (let [action (:action entry)]
+    {:construction {:policy-id (or (:policy-id entry) (:id action))
+                    :policy-key (:policy-key action)}
+     :scoring {:scorer-version (:scorer-version action)
+               :g-terms (get-in action [:certificate :g-terms])}
+     :selection {:stage :pre-selector-binding}}))
 
 (defn bind-entry
   "Build and validate the canonical cascade for one ranked ENTRY.
