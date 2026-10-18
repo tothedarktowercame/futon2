@@ -1643,7 +1643,7 @@
                                 {:refusals (mapv :refusal bad-entries)})
                           (let [appended (vec (for [e journal-entries]
                                                 (execution-journal/append!
-                                                 journal-root e)))]
+                                                 (io/file journal-root cd) e)))]
                             (cond
                               (seq (get-in compiled-record [:frontier]))
                               (let [routing

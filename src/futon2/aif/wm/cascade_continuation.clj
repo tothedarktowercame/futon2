@@ -146,6 +146,7 @@
               (fail :continuation-routing-mismatch
                     {:expected expected :offered offered})
               :else
+              (let [journal-store (io/file execution-journal-root compiled)]
               (loop [nodes frontier receipts [] appends [] n 0]
                 (if-let [node (first nodes)]
                   (let [effect (dispatch/dispatch-node executors compiled node)]
@@ -173,9 +174,9 @@
                                  (conj receipts receipt)
                                  (conj appends
                                        (journal/append!
-                                        execution-journal-root entry))
+                                        journal-store entry))
                                  (inc n))))))
-                  (let [entries (journal/load-journal execution-journal-root)
+                  (let [entries (journal/load-journal journal-store)
                         idx (journal/cascade-index record)
                         certificate (journal/validate-journal entries idx)
                         replay (when (journal/certified? certificate)
@@ -215,4 +216,4 @@
                            :selection-ran false
                            :clicks-spent 0}
                           (fail :continuation-close-unverified
-                                {:close-result closed}))))))))))))))
+                                {:close-result closed})))))))))))))))
