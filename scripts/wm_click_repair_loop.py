@@ -499,7 +499,10 @@ hold, say). It stops the loop for a human decision.
 """
 
 
-REPAIR_PROMPT_MAX_CHARS = 20_000
+# Agency seats add their own system/context envelope. Keep the user payload
+# comfortably below the provider's effective request ceiling; a 14.6k packet
+# was rejected live with HTTP 400 / code 1261 on 2026-10-18.
+REPAIR_PROMPT_MAX_CHARS = 9_000
 REPAIR_EVIDENCE_EXCERPT_CHARS = 4_000
 
 
@@ -545,12 +548,20 @@ def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
     parts += [GUIDE.replace("{tag}", tag)]
     packet = "\n".join(parts)
     if len(packet) > REPAIR_PROMPT_MAX_CHARS:
-        # GUIDE is operationally required, so trim only the assembled evidence.
+        # Preserve addressability, not an arbitrary prefix: the repair seat
+        # shares the filesystem and can read the complete artifacts there.
         guide = GUIDE.replace("{tag}", tag)
-        allowance = REPAIR_PROMPT_MAX_CHARS - len(guide) - 120
-        packet = (packet[:allowance] +
-                  "\n\n... [dispatch evidence truncated; use the artifact paths above] ...\n\n" +
-                  guide)
+        anchors = [f"REPAIR REQUEST {tag}", "", f"FAILURE: {reason}", ""]
+        if page:
+            anchors += [f"debugger-page: {page}"]
+        if click:
+            last_result = click.get("last-result") or {}
+            anchors += [f"run-record: {last_result.get('run-record')}",
+                        f"click-log: {click.get('log')}"]
+        anchors += ["phase-log: futon2/data/wm-full-loop-phases.edn.log", "",
+                    "Evidence was omitted to keep Agency dispatch bounded; read the paths above.",
+                    "", guide]
+        packet = "\n".join(anchors)
     return packet
 
 
