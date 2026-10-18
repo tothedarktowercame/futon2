@@ -178,3 +178,55 @@ post-selection, stubbed-port, isolated-store evidence as proof of the live
 outer shell. Future readiness claims must name both layers separately:
 `recorded-flight downstream conformance` and `live serving-boundary
 conformance`. Neither implies the other.
+
+### Click 3 — selected cascade retained; same-click continuation incomplete
+
+- Authorization: campaign click 3 of 5.
+- Start: `2026-10-18T13:42:27Z`; terminal at `13:53:49Z`.
+- Click: `wm-click-ff5c61e8-6398-4a36-9555-003a7960b7cb`.
+- Run: `2026-10-18-ccaa1478-2c3b-4c84-9593-f11eb5a31e90`;
+  attempt `attempt-001`.
+- Selected target: `M-formal-war-machine`; its reading policy contains four
+  occurrence-distinct patterns: `agent/intent-handshake-is-binding`,
+  `agency/self-attribution`, `agent/scope-before-action`, and
+  `agent/eat-your-own-tail`.
+- The run reached `cascade-resume`, but the same-click retry did not complete
+  the production enactment/build-review-close route. Outcome: `incomplete`;
+  no tick carried.
+- Terminal repair dispatch `invoke-1792331630056-16544-6874dde8` failed
+  without a verdict. The serving process did hot-load authored namespace
+  `futon2.aif.wm.authored.req-5ca29b22`; the remaining fault was in the
+  continuation protocol and repair-review transport, not absent authoring.
+- Run record:
+  `data/wm-runs/tick-run-record-2026-10-18-ccaa1478-2c3b-4c84-9593-f11eb5a31e90.edn`.
+- Click log: `data/wm-click-loop/click-001-1792330949.log`.
+
+#### Between-click production replay and repairs
+
+Click 3 was replayed through the production continuation boundary without
+re-running selection or spending a click. The repair sequence preserved
+selected identity across resume, initialized the continuation Agency ledger,
+passed the resolved Agency endpoint, normalized reviewed JSON status, added a
+reviewed effect executor and durable close adapter, and partitioned execution
+journals by cascade digest. Each selected occurrence received a separately
+reviewed, digest-bound effect receipt.
+
+Final replay `on-prod-live-m-formal-e2e-20261018-f` used Click 3's exact run
+and attempt with `selection-ran false` and `clicks-spent 0`. It certified
+canonical cascade digest
+`7c9601fd5fa56f7f7774d41cbc58a9b5b3bcc1d977115ab55a11c5c45986ceec`,
+executable digest
+`7f7250db365669fa7c64c4d26b811c5e645a7b5db6fd73f481accee347fc9cf1`,
+four verified effects, a four-entry certified journal, and durable close
+receipt
+`7a4af8ece478ab9561bf37d2977a8a87598b9607a94107cd74470351e9512fd8`.
+The close artifact is
+`data/wm-cascade-continuation-closes/7a4af8ece478ab9561bf37d2977a8a87598b9607a94107cd74470351e9512fd8.edn`;
+the journal is under
+`data/wm-execution-journals/7f7250db365669fa7c64c4d26b811c5e645a7b5db6fd73f481accee347fc9cf1/`.
+
+This proves the selected production cascade can proceed through grounded
+enactment, certified journalling, and durable build-review-close when resumed
+from the recorded production frontier. It does not itself prove that the
+ordinary click shell traverses the same route or carries a tick. Click 4 tests
+that remaining live composition claim. Two campaign authorizations remain.
