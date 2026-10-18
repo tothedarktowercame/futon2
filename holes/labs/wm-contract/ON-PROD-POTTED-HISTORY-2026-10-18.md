@@ -119,6 +119,23 @@ does not call selection, spend a click, or certify a tick. Phase telemetry,
 debugger handling, canonical stores, validation, and journal behavior remain
 those of the serving production composition.
 
+### Serving observations, 2026-10-18
+
+- `on-prod-serving-retained-20261018` exposed two stale loaded store
+  implementations. The attached debugger held the same phase; reloading the
+  canonical-cascade and journal namespaces and choosing `:retry` created the
+  stores and advanced to the typed open-cascade carrier.
+- The retained canonical record was initially downgraded by an action-only
+  unread preview. Commit `1b1447a70` makes the certified retained carrier
+  authoritative at resume.
+- Commit `fb9a85d9f` makes a missing production journal directory a creatable
+  store, matching canonical-cascade persistence.
+- `on-prod-serving-authored-20261018` then reached `:cascade-ready` in the
+  serving JVM with two frontier occurrences routed to
+  `:full-loop-build-review-close`, with `:selection-ran false` and
+  `:clicks-spent 0`. This proves the production cascade boundary, not yet a
+  completed tick; the next potted-history boundary is downstream enactment.
+
 Each replay generation records:
 
 - stack tag, repository commits/trees, tracked-dirty state and serving identity;
