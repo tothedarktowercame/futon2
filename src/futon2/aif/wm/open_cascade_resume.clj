@@ -125,6 +125,10 @@
       :else
       {:status :held
        :cascade-digest (:cascade-digest error)
+       ;; The selected cascade is immutable across a retry. The executable
+       ;; refinement is expected to get a new digest when reviewed hole
+       ;; authoring is applied, so keep the two identities distinct.
+       :selected-cascade-digest (:selected-cascade-digest error)
        :holes (vec (:holes error))
        :phase (:phase error)
        :prior-attempts (vec (:attempts error))
@@ -319,12 +323,22 @@
                   :phase (:phase ctx)
                   :at (str (java.time.Instant/now))}]
      (try
-       (let [result ((:retry ctx) ctx)]
+       (let [result ((:retry ctx) ctx)
+             selected (:selected-cascade-digest ctx)
+             returned-selected (or (:selected-cascade-digest result)
+                                   ;; Current :cascade-ready records expose
+                                   ;; the selected identity in this field.
+                                   (:cascade-digest result))]
          (record! ledger :retries (assoc attempt :outcome :retried))
          ;; the runner boundary must prove the click and selection counts
          ;; are untouched by the retry
          (if (and (map? result)
-                  (= (:cascade-digest ctx) (:cascade-digest result))
+                  (if selected
+                    (= selected returned-selected)
+                    ;; Compatibility for older single-identity carriers.
+                    (= (:cascade-digest ctx) (:cascade-digest result)))
+                  (or (nil? selected)
+                      (hex64? (:compiled-digest result)))
                   (or (nil? click-budget)
                       (= (:clicks before) @click-budget))
                   (or (nil? selection-counter)

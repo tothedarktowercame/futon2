@@ -254,6 +254,26 @@
     (is (= :resume-protocol-violation (:kind (r/resume! ledger unbound))))
     (is (= :resume-protocol-violation (:kind (r/resume! ledger foreign))))))
 
+(deftest reviewed-refinement-preserves-selection-while-changing-executable-digest
+  (let [selected (evidence/value-digest [:selected])
+        before (evidence/value-digest [:compiled :before])
+        after (evidence/value-digest [:compiled :after])
+        error (assoc (held-error
+                      {:retry (constantly
+                               {:status :cascade-ready
+                                :cascade-digest selected
+                                :selected-cascade-digest selected
+                                :compiled-digest after})})
+                     :cascade-digest before
+                     :compiled-digest before
+                     :selected-cascade-digest selected)
+        ctx (r/recognize error)
+        result (r/resume! (r/new-ledger "refinement") ctx)]
+    (is (= selected (:selected-cascade-digest ctx)))
+    (is (= :resumed (:status result)))
+    (is (= selected (get-in result [:result :cascade-digest])))
+    (is (= after (get-in result [:result :compiled-digest])))))
+
 (deftest ledger-chain-detects-mutation
   (let [ledger (r/new-ledger "click-1")
         ctx (r/recognize (held-error))
