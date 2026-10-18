@@ -263,3 +263,16 @@ This authorizes five further ordinary clicks through the debugger repair loop.
 Under this document's standing mechanism, `allocated` rises from 81 to **86**.
 Each click remains charged at issue time; an unsuccessful launch that issues no
 click consumes nothing. No historical charge is reclaimed.
+
+## Joe's sequel readiness campaign, 2026-10-18 — five clicks
+
+Joe directly authorized a new five-click series as the basis of
+`TN-war-machine-readiness-oct-18-2026.md`, using the same one-at-a-time,
+debugger-attached run/repair method and an independent Claude review after the
+fifth click. This is a new allocation, not a continuation or relabelling of an
+October 17 run.
+
+This authorizes five further ordinary clicks through the debugger repair loop.
+Under this document's standing mechanism, `allocated` rises from 86 to **91**.
+Each click remains charged at issue time; a preflight rejection with no issued
+click consumes nothing. No historical charge is reclaimed.
