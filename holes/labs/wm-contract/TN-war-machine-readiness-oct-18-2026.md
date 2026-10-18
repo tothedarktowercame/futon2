@@ -245,11 +245,14 @@ that remaining live composition claim. Two campaign authorizations remain.
   compiled successfully in 55 ms with digest
   `94c73bd78c2087bca94da66414a7eb2492c2ffb8dd18a05bc5ef7da304c71aa7`.
   Cascade resume then ran for 81,123 ms.
-- Frontier: resume ended `:resume-protocol-violation`. Its control evidence
-  was `{:clicks [nil nil], :selections [nil nil]}`: the standard click did
-  not supply the counter controls required to prove that retry spent no click
-  and performed no new selection. This is an adapter/wiring defect, not a
-  failed cascade effect.
+- Frontier: resume ended `:resume-protocol-violation`. Its diagnostic exposed
+  only `{:clicks [nil nil], :selections [nil nil]}`. The nil controls show that
+  the standard click did not supply evidence that retry spent no click or ran
+  no selection, but the current predicate permits absent controls; therefore
+  this diagnostic does not identify which additional invariant failed. The
+  likely remaining alternatives are selected-versus-compiled identity or a
+  malformed retry result. This is an adapter/observability defect, not evidence
+  that a cascade effect failed.
 - Outcome: `incomplete`; no tick carried. Finding:
   `data/wm-repair-obligations/findings/repair-occ-fa1ef846963fd8242c0f511cd18c27ff77e3d0c7193b0f8da4b62edb1a8a24f2.edn`.
 - Run record:
@@ -265,6 +268,7 @@ made the packet too large. This is a second apparatus blocker to repair before
 Click 5.
 
 Disposition: one authorized campaign click remains. Do not launch it until
-the production runner supplies real click/selection counters to the D4 resume
-protocol and the terminal repair request fits the actually accepted Agency
-prompt envelope.
+the D4 protocol reports every invariant separately (and the production runner
+supplies real click/selection controls), the failing invariant is repaired,
+and the terminal repair request fits the actually accepted Agency prompt
+envelope.
