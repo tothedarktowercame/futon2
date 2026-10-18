@@ -361,7 +361,16 @@
   :cascade-close-fn. Their absence is a typed frontier, never synthetic
   success."
   [{:keys [cascade-capability-executors cascade-close-fn] :as opts}]
-  (let [resumed (resume-on-prod-cascade! opts)
+  (let [;; Ordinary run-opportunity! installs this context before any Agency
+        ;; contact. A selection-free production continuation must do the same,
+        ;; otherwise the first capability dispatch fails outside the ledger.
+        opts (cond-> opts
+               (nil? (:registered-run/job-ledger opts))
+               (assoc :registered-run/job-ledger
+                      (atom {:order [] :jobs {}}))
+               (nil? (:job-liveness/state opts))
+               (assoc :job-liveness/state (atom [])))
+        resumed (resume-on-prod-cascade! opts)
         ready (:result resumed)]
     (if-not (= :cascade-ready (:status ready))
       (assoc resumed :continuation
