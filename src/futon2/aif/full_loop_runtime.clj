@@ -20,6 +20,7 @@
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.aif.wm.on-prod-history :as on-prod-history]
+            [futon2.aif.wm.cascade-continuation :as cascade-continuation]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
@@ -318,3 +319,30 @@
      :selection-ran false
      :clicks-spent 0
      :result (cascade-decision/persistable-cascade-execution result)}))
+
+(defn continue-on-prod-cascade!
+  "Resume a sealed production selection through cascade compilation and then
+  consume its certified frontier through the verified continuation bridge.
+  This runs in the serving JVM, never selects, and never spends a click.
+
+  Production callers must supply :cascade-capability-executors and
+  :cascade-close-fn. Their absence is a typed frontier, never synthetic
+  success."
+  [{:keys [cascade-capability-executors cascade-close-fn] :as opts}]
+  (let [resumed (resume-on-prod-cascade! opts)
+        ready (:result resumed)]
+    (if-not (= :cascade-ready (:status ready))
+      (assoc resumed :continuation
+             {:status :error :kind :continuation-cascade-not-ready
+              :repair {:result ready}})
+      (assoc resumed :continuation
+             (cascade-continuation/continue-certified-cascade!
+              {:ready ready
+               :executable-cascade-root
+               (or (:executable-cascade-root opts)
+                   cascade-decision/default-executable-cascade-root)
+               :execution-journal-root
+               (or (:execution-journal-root opts)
+                   cascade-decision/default-execution-journal-root)
+               :executors cascade-capability-executors
+               :close-fn cascade-close-fn})))))
