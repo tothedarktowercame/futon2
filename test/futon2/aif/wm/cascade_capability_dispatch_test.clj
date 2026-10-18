@@ -23,6 +23,15 @@
   (is (= :capability-executor-missing
          (:kind (sut/dispatch-frontier {} cascade)))))
 
+(deftest production-routing-does-not-claim-an-effect
+  (is (= :capability-route-missing
+         (:kind (sut/route-frontier {} cascade))))
+  (let [r (sut/route-frontier
+           {:wm/pattern-apply :full-loop-build-review-close} cascade)]
+    (is (= :routed (:status r)))
+    (is (= :full-loop-build-review-close (get-in r [:steps 0 :route])))
+    (is (not (contains? r :receipts)))))
+
 (deftest receipt-must-bind-the-exact-cascade-and-occurrence
   (is (= :enacted
          (:status (sut/dispatch-frontier {:wm/pattern-apply receipt} cascade))))

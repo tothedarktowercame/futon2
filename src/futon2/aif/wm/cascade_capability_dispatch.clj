@@ -67,6 +67,23 @@
           (assoc result :enacted enacted)))
       {:status :enacted :receipts enacted})))
 
+(defn route-frontier
+  "Bind each frontier node to a declared production route without claiming an
+  effect. REGISTRY maps capabilities to route identifiers. The full-loop
+  build/review/close path later supplies the verified effect evidence."
+  [registry cascade]
+  (let [steps (mapv (fn [node]
+                      (let [capability (get-in node [:clause :capability])]
+                        {:occurrence-id (:occurrence-id node)
+                         :operation (get-in node [:clause :operation])
+                         :capability capability
+                         :route (get registry capability)}))
+                    (:frontier cascade))
+        missing (filterv #(nil? (:route %)) steps)]
+    (if (seq missing)
+      {:status :error :kind :capability-route-missing :missing missing}
+      {:status :routed :cascade-digest (:digest cascade) :steps steps})))
+
 (defn recording-pattern-executor
   "Return a :wm/pattern-apply executor whose real, bounded effect is an
   append-only application record under ROOT. This is suitable for an offline

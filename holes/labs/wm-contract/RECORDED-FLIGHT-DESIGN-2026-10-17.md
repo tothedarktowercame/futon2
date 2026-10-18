@@ -197,3 +197,13 @@ the source history contains no author/reviewer/full-close continuation.  Live
 readiness requires wiring the capability dispatcher into the production
 runner with a real `:wm/pattern-apply` executor, then exercising the existing
 full close/trace path.
+
+That production prerequisite is now installed.  `:wm/pattern-apply` routes to
+`:full-loop-build-review-close`.  Route admission is deliberately not an
+effect receipt: the selected cascade remains the ordinary selected entry and
+continues through the existing construction, author, reviewer, warrant and
+trace-close phases.  Only that close path may establish a production effect
+and carried tick.  Unknown capabilities stop typed as
+`:capability-route-missing`.  The production-path gate proves an authored
+cascade reaches construction and the fixture's deliberate author-dispatch
+stop instead of the retired `:flight-boundary-not-wired` condition.

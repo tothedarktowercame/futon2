@@ -218,6 +218,29 @@
     (testing "and it is still not the legacy refusal"
       (is (not= :reading-policy-execution-semantics-owed (:kind held))))))
 
+(deftest authored-frontier-routes-into-the-existing-full-loop
+  (let [authoring {:attribution {:author :operator :authority :wm/operator}
+                   :clauses {occ-x0 {:operation :apply-pattern
+                                     :capability :wm/pattern-apply}
+                             occ-y1 {:operation :apply-pattern
+                                     :capability :wm/pattern-apply}}}
+        {:keys [result]}
+        (click! [px py]
+                {:cascade-reading-pins
+                 {"M-current" {:excerpt-digest (hex [:excerpt])
+                               :analysis-digest (hex [:analysis])}}
+                 :cascade-occurrence-readings (fn [_] square-readings)
+                 :cascade-operational-authoring (constantly authoring)}
+                {:bind-cascade-identity {:readings (fn [_] square-readings)}})
+        cell (get-in result [:checkpoints :selection])]
+    (is (map? (get-in cell [:judgment :selected-action]))
+        "a routed cascade remains the selected entry for normal execution")
+    (is (nil? (:sorry cell)))
+    (is (= :author-dispatch (get-in result [:data :failure-stage]))
+        "the fixture's deliberate dispatch stop is downstream of routing")
+    (is (not= :flight-boundary-not-wired
+              (get-in result [:data :failure-kind])))))
+
 (deftest selected-entry-retains-the-ranked-reading-pin
   (let [fx (@#'rfd/fixture [px py])
         decision (:decision (#'rfd/decide

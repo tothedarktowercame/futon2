@@ -34,6 +34,7 @@
             [futon2.aif.wm.selection-cascade-identity :as selection-cascade-identity]
             [futon2.aif.wm.executable-cascade :as executable-cascade]
             [futon2.aif.wm.cascade-enactment-compiler :as cascade-enactment-compiler]
+            [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
             [futon2.aif.wm.execution-journal :as execution-journal]
             [futon2.aif.reading-policy-precision :as precision]
             [futon2.aif.reading-policy-preference :as pref]
@@ -1636,16 +1637,26 @@
                                                  journal-root e)))]
                             (cond
                               (seq (get-in compiled-record [:frontier]))
-                              ;; an enactable frontier exists but the flight
-                              ;; boundary for cascades is not wired: hold the
-                              ;; phase rather than enact without verified
-                              ;; effect
-                              (fail :cascade-evidence-error
-                                    :flight-boundary-not-wired
-                                    {:cascade-digest cd :saved path
-                                     :frontier (mapv :occurrence-id
-                                                     (:frontier compiled-record))
-                                     :journal-append appended})
+                              (let [routing
+                                    (capability-dispatch/route-frontier
+                                     (or (:cascade-capability-routes opts)
+                                         {:wm/pattern-apply
+                                          :full-loop-build-review-close})
+                                     compiled-record)]
+                                (if (= :routed (:status routing))
+                                  {:status :cascade-ready
+                                   :cascade-digest d
+                                   :compiled-digest cd
+                                   :saved path
+                                   :frontier (mapv :occurrence-id
+                                                   (:frontier compiled-record))
+                                   :capability-routing routing
+                                   :journal-append appended}
+                                  (fail :cascade-evidence-error
+                                        (:kind routing)
+                                        {:cascade-digest cd :saved path
+                                         :routing routing
+                                         :journal-append appended})))
 
                               (or (seq holes) (seq unread))
                               (let [resume-holes
