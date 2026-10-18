@@ -136,7 +136,12 @@
                                              (when (not= (:entry-id entry)
                                                          (entry-digest entry))
                                                [:entry-id-unsealed])))})))
-    (let [f (entry-path store (:entry-id entry))]
+    (let [root (io/file store)
+          _ (when-not (or (.isDirectory root) (.mkdirs root))
+              (throw (ex-info "journal store directory unavailable"
+                              {:kind :journal-store-unavailable
+                               :path (.getAbsolutePath root)})))
+          f (entry-path root (:entry-id entry))]
       (if (.exists f)
         (if (= (slurp f) (pr-str entry))
           {:appended false :path (.getPath f)}
