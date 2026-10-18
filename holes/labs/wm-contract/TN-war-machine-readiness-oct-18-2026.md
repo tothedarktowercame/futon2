@@ -101,6 +101,15 @@ members `M-digital-nomad-patterns` and `M-formal-war-machine` and outer learning
 `:live-consumed`. The replay issued no click. The automatically published
 repair ticket `T-repair-occ-216c…` is closed with this evidence.
 
+Joe clarified before Click 2 that choosing an equal-G representative keeps the
+run moving but does not satisfy the Lean discrimination contract. The selection
+receipt therefore also carries `:selection-discrimination {:verdict :fail,
+:reason :chosen-by-tiebreak, :tie-count 2, ...}` and cites
+`DarkTower.WarMachine.Holes.selectionDiscriminates`, whose rule is that no
+recorded choice may have `chosenByTiebreak` (`tieCount > 1`). The canonical
+representative is operational continuation, not a green certificate and not a
+claim that G discriminated.
+
 Disposition: both actual Click 1 blockers are repaired and gated. Click 2 may
 be launched after commit/hot-load; the remaining four campaign authorizations
 are intact.

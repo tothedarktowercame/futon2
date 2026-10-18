@@ -216,7 +216,10 @@
              (get-in receipt [:policy :meta-selection :reason])))
       (is (= "M-a" (get-in receipt [:action :target])))
       (is (= ["M-a" "M-b"]
-             (get-in receipt [:policy :meta-selection :equal-minimum :members]))))))
+             (get-in receipt [:policy :meta-selection :equal-minimum :members])))
+      (is (= :fail
+             (get-in receipt [:policy :meta-selection
+                              :selection-discrimination :verdict]))))))
 
 (deftest current-pipeline-centrality-discriminates-with-pinned-reasons
   (let [central (-> snapshot

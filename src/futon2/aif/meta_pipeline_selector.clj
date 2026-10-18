@@ -246,6 +246,13 @@
                  :equal-minimum {:members tied
                                  :rule :canonical-identity
                                  :g-equivalent? true}
+                 :selection-discrimination
+                 {:verdict :fail
+                  :reason :chosen-by-tiebreak
+                  :tie-count (count tied)
+                  :contract {:module "DarkTower.WarMachine.Holes"
+                             :definition "selectionDiscriminates"
+                             :lean-rule "chosenByTiebreak iff 1 < tieCount"}}
                  :channel-coverage coverage
                  :ranking (->> admitted
                                (sort-by (juxt #(get losses (:id %) 0) :id))

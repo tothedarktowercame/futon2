@@ -165,5 +165,12 @@
             :rule :canonical-identity
             :g-equivalent? true}
            (:equal-minimum forward)))
+    (is (= {:verdict :fail
+            :reason :chosen-by-tiebreak
+            :tie-count 2
+            :contract {:module "DarkTower.WarMachine.Holes"
+                       :definition "selectionDiscriminates"
+                       :lean-rule "chosenByTiebreak iff 1 < tieCount"}}
+           (:selection-discrimination forward)))
     (is (= :tie (get-in forward [:pairwise 0 :winner]))
         "the receipt preserves the equal-G comparison")))
