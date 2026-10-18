@@ -43,6 +43,30 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertFalse(loop.parse_args(base).observe_only)
         self.assertTrue(loop.parse_args(base + ["--observe-only"]).observe_only)
 
+    def test_observation_only_debugger_stop_never_dispatches_repair(self):
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "3", "--observe-only", "--owner", "codex-68",
+            "--issuing-caller", "codex-68", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        stop = {"run-id": "run-observed", "phase": "selection",
+                "condition-kind": "wm/selection-terminal-abstention"}
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "abort_held_run",
+                               return_value={"out": "{:delivered true}"}) as abort, \
+             mock.patch.object(loop, "repair") as repair, \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            since = loop.handle_held_stop(
+                args, stop, [], Path(td) / "held.md", 123)
+        self.assertEqual(123, since)
+        abort.assert_called_once_with("run-observed")
+        repair.assert_not_called()
+        events = [call.args[0]["event"] for call in record.call_args_list]
+        self.assertEqual(["external-repair-skipped", "debugger-resumed"], events)
+
     def test_each_click_resets_the_explicit_role_cast(self):
         loop = load_loop()
         args = loop.parse_args([

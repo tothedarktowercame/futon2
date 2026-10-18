@@ -304,6 +304,47 @@ def abort_held_run(run_id: str) -> dict:
     return jvm_eval(f'(futon2.aif.wm.debugger/continue! "{safe}" :abort)', timeout=30)
 
 
+def handle_held_stop(args, stop: dict, in_flight_repairs: list,
+                     live_page: Path, since_epoch: int) -> int:
+    """Dispose one debugger stop according to the campaign's repair policy.
+
+    Observation-only means no repair agent may be invoked, including from the
+    debugger-held path.  Abort releases the single-flight boundary while
+    preserving the stop as the run's observed terminal evidence.
+    """
+    reason = (f"held run {stop['run-id']} stopped at {stop['phase']} "
+              f"({stop['condition-kind']})")
+    if args.observe_only:
+        result = abort_held_run(stop["run-id"])
+        record({"event": "external-repair-skipped", "run-id": stop["run-id"],
+                "phase": stop["phase"], "condition-kind": stop["condition-kind"],
+                "reason": "META self-heal observation trial"})
+        record({"event": "debugger-resumed", "run-id": stop["run-id"],
+                "phase": stop["phase"], "choice": "abort-observation-only",
+                "result": result["out"][-500:]})
+        log(f"observation-only: {reason}; external repair skipped and held phase aborted")
+        return since_epoch
+
+    verdict, detail = repair(args, reason, None, in_flight_repairs, live_page)
+    in_flight_repairs.append(detail)
+    if verdict == "repaired":
+        ok, reload_text, since_epoch = reload_changed(
+            since_epoch, held_run_id=stop["run-id"])
+        if ok:
+            resumed = retry_held_run(stop["run-id"])
+            record({"event": "debugger-resumed", "run-id": stop["run-id"],
+                    "phase": stop["phase"], "choice": "retry",
+                    "result": resumed["out"][-500:]})
+            log("repaired, hot-loaded and retried the held phase")
+        else:
+            abort_held_run(stop["run-id"])
+            log(f"reload failed while held: {reload_text[:300]}")
+    else:
+        abort_held_run(stop["run-id"])
+        log(f"held repair ended {verdict}; aborting the held phase")
+    return since_epoch
+
+
 def fire(n: int, args, since_epoch: int) -> dict:
     reset_cast_sessions(args)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
@@ -329,30 +370,12 @@ def fire(n: int, args, since_epoch: int) -> dict:
                     record({"event": "debugger-held", **{k: stop[k] for k in
                             ("run-id", "phase", "condition-kind")}})
                     log(f"click {n}: debugger held {stop['run-id']} at {stop['phase']} "
-                        f"({stop['condition-kind']}); dispatching repair now")
+                        f"({stop['condition-kind']})")
                     live_page = DEBUGGER / f"held-{stop['run-id']}.md"
                     DEBUGGER.mkdir(parents=True, exist_ok=True)
                     live_page.write_text("# Live held phase\n\n" + stop["raw"] + "\n")
-                    reason = (f"held run {stop['run-id']} stopped at {stop['phase']} "
-                              f"({stop['condition-kind']})")
-                    verdict, detail = repair(args, reason, None,
-                                             in_flight_repairs, live_page)
-                    in_flight_repairs.append(detail)
-                    if verdict == "repaired":
-                        ok, reload_text, since_epoch = reload_changed(
-                            since_epoch, held_run_id=stop["run-id"])
-                        if ok:
-                            resumed = retry_held_run(stop["run-id"])
-                            record({"event": "debugger-resumed", "run-id": stop["run-id"],
-                                    "phase": stop["phase"], "choice": "retry",
-                                    "result": resumed["out"][-500:]})
-                            log(f"click {n}: repaired, hot-loaded and retried the held phase")
-                        else:
-                            abort_held_run(stop["run-id"])
-                            log(f"click {n}: reload failed while held: {reload_text[:300]}")
-                    else:
-                        abort_held_run(stop["run-id"])
-                        log(f"click {n}: held repair ended {verdict}; aborting the held phase")
+                    since_epoch = handle_held_stop(
+                        args, stop, in_flight_repairs, live_page, since_epoch)
             time.sleep(10)
         rc = proc.returncode
     text = out.read_text(errors="replace")
