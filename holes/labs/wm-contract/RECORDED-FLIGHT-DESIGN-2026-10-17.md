@@ -91,3 +91,26 @@ and continues through cascade construction until the next typed error.
   sequence up to the first newly executed nondeterministic boundary;
 - the replay outcome is never reported as a click outcome or tick.
 
+## Initial implementation and observed replay (2026-10-18)
+
+`futon2.aif.wm.recorded-flight` implements the first boundary above.  A sealed
+manifest pins the source selection checkpoint and agent answer by SHA-256.  The
+runner restores the durable judgment/sorry cell, uses isolated request and
+reading roots, supplies only the pinned first answer, and records the attempted
+correction as the frontier.  There is no selector port in the API.  An optional
+click-budget atom is compared before and after execution.
+
+The CLI is `scripts/wm_recorded_flight.clj`:
+
+`clojure -M -m wm-recorded-flight MANIFEST.edn OUTPUT_ROOT`
+
+The actual click-5 replay produced the append-only ledger:
+
+`data/wm-recorded-flights/click5/ledger/518d952f7de7c801be25d909b691599634249b282d9bbc7b07f694fdc47338b6.edn`
+
+It records zero selector calls, zero clicks spent, zero ticks carried, two
+agent-boundary calls (the restored initial answer and the missing correction),
+and frontier `:corrected-answer-missing`.  The boundary result reproduces all
+nine `:fragment-without-validated-pattern-ref` failures.  Thus the first replay
+did not merely predict the frontier; it reached it through current production
+validation using the retained live artifacts.
