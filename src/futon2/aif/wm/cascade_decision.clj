@@ -1520,7 +1520,12 @@
         preview (executable-cascade/build-structural
                  action (readings-fn {:preview true})
                  {:stage :pre-selector-binding})]
-    (if (and (map? preview) (empty? (:nodes preview)))
+    ;; A production checkpoint may carry the already certified canonical
+    ;; cascade even when rebuilding from the lighter action would require
+    ;; external square-reading inputs.  Never downgrade that retained carrier
+    ;; to an unread preview; validate it in the bound path below.
+    (if (and (nil? (:canonical-cascade entry))
+             (map? preview) (empty? (:nodes preview)))
         {:status :cascade-enactment-open
          :kind :cascade-enactment-open
          :open-cascade true
