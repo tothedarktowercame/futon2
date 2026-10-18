@@ -90,7 +90,7 @@ the machine only through someone who did not come up with it.
    clicks, or touch run data, unless Joe assigns it a named task. Codex
    builds; the Codex owner of the current campaign decides whether a Claude
    proposal gets built.
-2. **The specification is fixed.** `Requirements.lean` and the wm-contract
+2. **The specification is fixed.** `mathlib4/DarkTower/WarMachine/Requirements.lean` and `holes/labs/wm-contract/`
    are the specification. A proposal that would change it says so in its
    first line and goes to Joe; it is never implemented on the way to
    something else.
