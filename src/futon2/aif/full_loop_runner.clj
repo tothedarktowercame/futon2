@@ -42,6 +42,7 @@
             [futon2.aif.wm.pattern-graph-view :as pattern-graph-view]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.wm.cascade-decision :as wm-cascade-decision]
+            [futon2.aif.wm.on-prod-history :as on-prod-history]
             [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -6506,6 +6507,18 @@
                                 (:outer-task-selection judgement0))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
+            ;; Capture the exact production value before cascade execution can
+            ;; throw.  A failed run must remain resumable without selection;
+            ;; the terminal record historically retained only the exception.
+            on-prod-history-checkpoint
+            (when (map? (get-in ordinary-entry [:action :precedence :co-apply]))
+              (on-prod-history/checkpoint!
+               (or (:on-prod-history-root opts) on-prod-history/default-root)
+               {:run-id (:run-id opts)
+                :attempt-id attempt-id
+                :selected-entry ordinary-entry
+                :selection-receipt (:outer-task-selection judgement0)
+                :world-at-selection world-at-selection}))
             ;; Packet D3: a selected reading-family policy no longer stops
             ;; at the old execution-semantics refusal.  After the ONE G
             ;; selection the production seam binds and verifies the

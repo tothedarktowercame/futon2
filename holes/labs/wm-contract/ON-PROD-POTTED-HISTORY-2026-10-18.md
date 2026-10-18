@@ -70,22 +70,27 @@ production retry port, and exercise the repaired canonical store. It then runs
 until the next production condition or ordinary close. It does not reconstruct
 the cascade in a separate namespace and copy the result into the runner.
 
-## Clean, pinned stack gate
+## Rollback pin, not a development gate
 
-No replay starts until all of the following are true:
+The Git pin is a rollback marker. It is not a prerequisite attestation for
+each repair iteration: this instrument intentionally changes and hot-loads
+production code while advancing. Each ledger generation records the code it
+actually ran, and a repair opens a new linked generation.
+
+The following remain required:
 
 1. Futon2, Futon3c and every loaded code dependency have pinned commit and tree
    identities.
 2. Their tracked worktrees are clean and stable before and after reload.
-3. The serving JVM reports the same Futon2 commit through the recorded
-   `load-file-recorded!` identity; current checkout HEAD is not accepted as a
-   proxy for loaded code.
+3. The serving JVM records each targeted reload and the replay ledger names
+   that loaded identity; a mismatch is evidence, not a reason to postpone the
+   first repair run.
 4. The transcript manifest binds the source run record, every restored
    artifact, the production configuration and the stack pin by digest.
 5. Pre-existing untracked artifacts are preserved and censused. They are not
    silently deleted, committed, or admitted as code/config authority.
-6. A stack or serving-identity change invalidates the replay and requires a new
-   pin. Hot repair creates a new explicitly linked stack generation.
+6. Hot repair creates a new explicitly linked stack generation without
+   pretending that it was the initial pin.
 
 The Futon2 pin for this project is the annotated Git tag
 `wm-on-prod-replay-base-20261018`, applied to the commit containing this design.
