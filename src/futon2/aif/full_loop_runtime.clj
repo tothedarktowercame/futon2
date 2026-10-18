@@ -365,6 +365,10 @@
         ;; contact. A selection-free production continuation must do the same,
         ;; otherwise the first capability dispatch fails outside the ledger.
         opts (cond-> opts
+               (nil? (:click-id opts))
+               (assoc :click-id
+                      (str "potted-history:" (:source-run-id opts) "/"
+                           (:source-attempt-id opts)))
                (nil? (:registered-run/job-ledger opts))
                (assoc :registered-run/job-ledger
                       (atom {:order [] :jobs {}}))
