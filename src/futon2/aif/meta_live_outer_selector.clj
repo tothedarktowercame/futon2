@@ -560,8 +560,7 @@
                                    {:summary-source (:summary-source snapshot)
                                     :graph-source (:graph-source snapshot)})))
         candidates (candidate-fn on-map snapshot)
-        selection (meta/select {:snapshot snapshot :candidates candidates
-                                :tie-breaker :canonical-identity})
+        selection (meta/select {:snapshot snapshot :candidates candidates})
         learning-scores
         (when (contains? #{:shadow :live} (:mode outer-learning))
           (mapv (fn [candidate]
@@ -587,7 +586,6 @@
         (when shadow-candidates
           (meta/select {:snapshot snapshot :candidates shadow-candidates
                         :comparison :complete-union
-                        :tie-breaker :canonical-identity
                         :missing-channel-cost
                         (get-in outer-learning [:controller :missing-channel-cost])}))
         effective-selection

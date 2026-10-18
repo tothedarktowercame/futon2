@@ -1679,29 +1679,26 @@
                                           holes)
                                     retry (fn [resume-context]
                                             (let [accepted (:authoring resume-context)
-                                                  decisions (or (:authoring-product
-                                                                 resume-context)
-                                                                (:decisions accepted))
-                                                  authoring
-                                                  {:attribution
-                                                   {:author (:by accepted)
-                                                    :reviewer (:accepted-by accepted)
-                                                    :authority :wm/reviewed-resume}
-                                                   :application-order []
-                                                   :clauses decisions}
-                                                  result
+                                                  decisions (:authoring-product
+                                                             resume-context)]
+                                              (if-not (map? decisions)
+                                                (fail :cascade-evidence-error
+                                                      :verified-authoring-product-missing
+                                                      {:cascade-digest d
+                                                       :requisition-id
+                                                       (:requisition-id accepted)})
+                                                (let [authoring
+                                                      {:attribution
+                                                       {:author (:by accepted)
+                                                        :reviewer (:accepted-by accepted)
+                                                        :authority :wm/reviewed-resume}
+                                                       :application-order []
+                                                       :clauses decisions}]
                                                   (execute-selected-cascade!
                                                    entry
                                                    (assoc opts
                                                           :cascade-operational-authoring
-                                                          (constantly authoring)))]
-                                              ;; execute-selected-cascade!
-                                              ;; already returns D4's
-                                              ;; executable digest as
-                                              ;; :cascade-digest and retains
-                                              ;; the pre-selector digest in
-                                              ;; :selected-cascade-digest.
-                                              result))]
+                                                          (constantly authoring)))))))]
                                 {:status :cascade-enactment-open
                                :kind :wm/open-cascade-execution-error
                                :reason :cascade-enactment-open

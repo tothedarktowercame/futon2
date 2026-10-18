@@ -386,3 +386,24 @@ sessions immediately before each click and records a `cast-reset` ledger row.
 It fails closed if a role is missing, busy, not invoke-ready, or cannot be
 reset, so stale conversational context cannot silently enter a click. This
 separates durable role/provenance identity from disposable model context.
+
+### Post-review repairs: discrimination, authoring authority, and cast backends
+
+Equal-G outer selection no longer chooses the lexically first policy. It
+returns `:no-unique-task-state-minimum`, records the Lean
+`selectionDiscriminates` failure, and carries the unsupported comparison
+terms. The live caller no longer requests `:canonical-identity`; improving
+ingestion is now the route to a selection rather than disguising absent
+evidence as a deterministic decision.
+
+The held cascade retry now consumes only the occurrence-keyed product returned
+by the reviewed, hot-loaded patch. The JSON answer's `:decisions` remains a
+handoff description but is no longer executable authority. A missing
+`:authoring-product` produces `:verified-authoring-product-missing`.
+
+The cast registry now accepts an EDN configuration through
+`FUTON3C_WM_CAST_CONFIG`. Each stable role independently selects `:codex`,
+`:claude`, `:zai`, or `:kimi`, allowing homogeneous or mixed casts without
+changing role/provenance identity. Every backend receives a real reset hook;
+the click-loop preflight from `017a673a1` invokes it before every click and
+fails closed when freshness cannot be established.

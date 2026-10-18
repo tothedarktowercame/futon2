@@ -245,7 +245,7 @@
     (is (not= :flight-boundary-not-wired
               (get-in result [:data :failure-kind])))))
 
-(deftest reviewed-resume-decisions-become-operational-authoring
+(deftest verified-resume-product-becomes-operational-authoring
   (let [resume-count (atom 0)
         decisions {occ-x0 {:operation :apply-pattern
                            :capability :wm/pattern-apply}
@@ -270,7 +270,9 @@
                                         :patch {:namespace "fixture"
                                                 :var "repair"
                                                 :source-digest (hex [:patch])}})
-                         retried ((:retry ctx) (assoc ctx :authoring accepted))]
+                         retried ((:retry ctx) (assoc ctx
+                                                     :authoring accepted
+                                                     :authoring-product decisions))]
                      {:status :resumed :result retried}))}
                 {:bind-cascade-identity {:readings (fn [_] square-readings)}})
         cell (get-in result [:checkpoints :selection])]

@@ -208,17 +208,17 @@
              (get-in receipt [:policy :meta-selection :reason])))
       (is (= 2 (count (:support receipt))))
       (is (nil? (:action receipt)))))
-  (testing "live ties use an explicit order-independent equal-minimum rule"
+  (testing "live equal-G minima fail rather than selecting by identity"
     (let [equal-snapshot (assoc-in snapshot [:graph :tickets :items 1 :mtime-ms] 200)
           receipt (live/select-live {:tasks (mapv #(assoc % :priority 1) tasks)
                                      :fetch-snapshot (constantly equal-snapshot)})]
-      (is (= :equal-minimum-canonical-representative
+      (is (= :no-unique-task-state-minimum
              (get-in receipt [:policy :meta-selection :reason])))
-      (is (= "M-a" (get-in receipt [:action :target])))
+      (is (nil? (:action receipt)))
       (is (= ["M-a" "M-b"]
-             (get-in receipt [:policy :meta-selection :equal-minimum :members])))
+             (get-in receipt [:policy :meta-selection :details :undefeated])))
       (is (= :fail
-             (get-in receipt [:policy :meta-selection
+             (get-in receipt [:policy :meta-selection :details
                               :selection-discrimination :verdict]))))))
 
 (deftest current-pipeline-centrality-discriminates-with-pinned-reasons

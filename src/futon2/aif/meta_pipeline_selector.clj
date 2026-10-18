@@ -169,9 +169,9 @@
   Lower task-state cost is preferred.  Candidates with explicit infeasibility
   are excluded; `:unknown` feasibility is retained as unknown support rather
   than converted to failure. By default selection requires one candidate to
-  beat every alternative on shared current channels. The explicit
-  `:canonical-identity` tie breaker may choose a stable representative of an
-  equal-G minimum; its receipt retains the whole tied set and rule."
+  beat every alternative on current G channels. Equal minima are a
+  discrimination failure: identity order is not evidence and may not select
+  a policy."
   [{:keys [snapshot candidates comparison missing-channel-cost tie-breaker]
     :or {comparison :shared-only}}]
   (let [snapshot-errors* (snapshot-errors snapshot)]
@@ -237,39 +237,19 @@
                        {:unrankable-pairs unrankable :pairwise pairs
                         :channel-coverage coverage})
 
-              (and (< 1 (count winners)) (= :canonical-identity tie-breaker))
-              (let [tied (vec (sort (map :id winners)))
-                    chosen (first tied)]
-                {:schema schema :status :selected :selected chosen
-                 :reason :equal-minimum-canonical-representative
-                 :epistemic-value-nats 0.0 :pairwise pairs
-                 :equal-minimum {:members tied
-                                 :rule :canonical-identity
-                                 :g-equivalent? true}
-                 :selection-discrimination
-                 {:verdict :fail
-                  :reason :chosen-by-tiebreak
-                  :tie-count (count tied)
-                  :contract {:module "DarkTower.WarMachine.Holes"
-                             :definition "selectionDiscriminates"
-                             :lean-rule "chosenByTiebreak iff 1 < tieCount"}}
-                 :channel-coverage coverage
-                 :ranking (->> admitted
-                               (sort-by (juxt #(get losses (:id %) 0) :id))
-                               (map-indexed (fn [i candidate]
-                                              {:rank (inc i) :id (:id candidate)
-                                               :kind (:kind candidate)
-                                               :pairwise-losses (get losses (:id candidate) 0)
-                                               :channels (:channels candidate)
-                                               :unsupported-channels
-                                               (:unsupported-channels candidate)}))
-                               vec)
-                 :snapshot-sources (select-keys snapshot [:summary-source :graph-source])
-                 :typed-exclusions (mapv :id infeasible)})
-
               (not= 1 (count winners))
               (refusal :no-unique-task-state-minimum
-                       {:undefeated (mapv :id winners) :pairwise pairs
+                       {:undefeated (mapv :id winners)
+                        :pairwise pairs
+                        :requested-tie-breaker tie-breaker
+                        :selection-discrimination
+                        {:verdict :fail
+                         :reason :equal-G
+                         :tie-count (count winners)
+                         :contract {:module "DarkTower.WarMachine.Holes"
+                                    :definition "selectionDiscriminates"
+                                    :lean-rule "chosenByTiebreak iff 1 < tieCount"}}
+                        :absent-terms (:unsupported-by-kind coverage)
                         :channel-coverage coverage})
 
               :else
