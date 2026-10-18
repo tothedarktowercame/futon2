@@ -78,6 +78,8 @@
                 :open-cascade-reviewer-answer-fn reviewer-answer
                 :open-cascade-patch-loader (constantly identity)})))))
     (is (fn? (:open-cascade-resume-fn @seen)))
+    (is (some? (:click-budget @seen)))
+    (is (some? (:selection-counter @seen)))
     (is (= :held (:status (open-resume/recognize error))))))
 
 (deftest production-resume-contacts-the-explicit-cast-in-work-mode

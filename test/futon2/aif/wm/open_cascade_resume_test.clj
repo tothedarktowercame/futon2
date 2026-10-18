@@ -251,8 +251,14 @@
                  (held-error {:retry (constantly
                                       {:cascade-digest
                                        (evidence/value-digest [:foreign])})}))]
-    (is (= :resume-protocol-violation (:kind (r/resume! ledger unbound))))
-    (is (= :resume-protocol-violation (:kind (r/resume! ledger foreign))))))
+    (let [unbound-result (r/resume! ledger unbound)
+          foreign-result (r/resume! ledger foreign)]
+      (is (= :resume-protocol-violation (:kind unbound-result)))
+      (is (false? (get-in unbound-result
+                          [:checks :selected-identity-preserved?])))
+      (is (= :resume-protocol-violation (:kind foreign-result)))
+      (is (false? (get-in foreign-result
+                          [:checks :selected-identity-preserved?]))))))
 
 (deftest reviewed-refinement-preserves-selection-while-changing-executable-digest
   (let [selected (evidence/value-digest [:selected])

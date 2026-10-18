@@ -328,21 +328,27 @@
              returned-selected (or (:selected-cascade-digest result)
                                    ;; Current :cascade-ready records expose
                                    ;; the selected identity in this field.
-                                   (:cascade-digest result))]
+                                   (:cascade-digest result))
+             checks {:result-map? (map? result)
+                     :selected-identity-preserved?
+                     (if selected
+                       (= selected returned-selected)
+                       (= (:cascade-digest ctx) (:cascade-digest result)))
+                     :compiled-digest-present?
+                     (or (nil? selected)
+                         (boolean (hex64? (:compiled-digest result))))
+                     :click-count-unchanged?
+                     (or (nil? click-budget)
+                         (= (:clicks before) @click-budget))
+                     :selection-count-unchanged?
+                     (or (nil? selection-counter)
+                         (= (:selections before) @selection-counter))}
+             controls {:click-budget-present? (some? click-budget)
+                       :selection-counter-present? (some? selection-counter)}]
          (record! ledger :retries (assoc attempt :outcome :retried))
          ;; the runner boundary must prove the click and selection counts
          ;; are untouched by the retry
-         (if (and (map? result)
-                  (if selected
-                    (= selected returned-selected)
-                    ;; Compatibility for older single-identity carriers.
-                    (= (:cascade-digest ctx) (:cascade-digest result)))
-                  (or (nil? selected)
-                      (hex64? (:compiled-digest result)))
-                  (or (nil? click-budget)
-                      (= (:clicks before) @click-budget))
-                  (or (nil? selection-counter)
-                      (= (:selections before) @selection-counter)))
+         (if (every? true? (vals checks))
            {:status :resumed
             :cascade-digest (:cascade-digest ctx)
             :phase (:phase ctx)
@@ -352,12 +358,14 @@
            (do (record! ledger :retries
                         (assoc attempt :outcome :protocol-violation
                                :returned-digest (:cascade-digest result)
+                               :checks checks :controls controls
                                :clicks [(:clicks before)
                                         (some-> click-budget deref)]
                                :selections [(:selections before)
                                             (some-> selection-counter deref)]))
                {:status :error
                 :kind :resume-protocol-violation
+                :checks checks :controls controls
                 :repair {:clicks [(:clicks before)
                                   (some-> click-budget deref)]
                          :selections [(:selections before)

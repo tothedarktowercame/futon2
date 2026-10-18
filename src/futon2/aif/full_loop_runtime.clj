@@ -169,7 +169,9 @@
               {:status :error :kind :open-cascade-review-answer-invalid}
               (open-resume/handle-error!
                ledger error author reviewer reviewed
-               {:patch-loader (or (:open-cascade-patch-loader opts)
+               {:click-budget (:click-budget opts)
+                :selection-counter (:selection-counter opts)
+                :patch-loader (or (:open-cascade-patch-loader opts)
                                   patch-loader)}))))))))
 
 (defn- selection-judge
@@ -307,6 +309,9 @@
         ;; execution boundary before it decides whether selection is
         ;; terminal.
         runner-opts0 (assoc opts
+                           :click-budget (or (:click-budget opts) (atom 0))
+                           :selection-counter (or (:selection-counter opts)
+                                                  (atom 0))
                            :selected-target-reading-fn
                            (:selected-target-reading-fn defaults)
                            :occurrence-square-authoring-fn

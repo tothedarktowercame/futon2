@@ -79,7 +79,7 @@ class RepairLoopCastTest(unittest.TestCase):
                 "wm-click-loop-repair-test", "selection stopped", click,
                 ["prior " + "p" * 200_000], page)
         self.assertLessEqual(len(packet), loop.REPAIR_PROMPT_MAX_CHARS)
-        self.assertLessEqual(len(packet), 9_000)
+        self.assertLessEqual(len(packet), 1_800)
         self.assertIn(str(page), packet)
         self.assertIn("/shared/full-run-record.edn", packet)
         self.assertNotIn("enormous-field", packet)

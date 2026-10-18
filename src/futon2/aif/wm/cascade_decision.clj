@@ -1655,6 +1655,7 @@
                                 (if (= :routed (:status routing))
                                   {:status :cascade-ready
                                    :cascade-digest d
+                                   :selected-cascade-digest d
                                    :compiled-digest cd
                                    :saved path
                                    :frontier (mapv :occurrence-id
@@ -1732,6 +1733,7 @@
                               :else
                               {:status :cascade-ready
                                :cascade-digest d
+                               :selected-cascade-digest d
                                :compiled-digest cd
                                :saved path
                                :journal-append appended})))))))))))))))

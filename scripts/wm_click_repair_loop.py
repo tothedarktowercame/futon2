@@ -502,7 +502,7 @@ hold, say). It stops the loop for a human decision.
 # Agency seats add their own system/context envelope. Keep the user payload
 # comfortably below the provider's effective request ceiling; a 14.6k packet
 # was rejected live with HTTP 400 / code 1261 on 2026-10-18.
-REPAIR_PROMPT_MAX_CHARS = 9_000
+REPAIR_PROMPT_MAX_CHARS = 1_800
 REPAIR_EVIDENCE_EXCERPT_CHARS = 4_000
 
 
@@ -550,7 +550,11 @@ def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
     if len(packet) > REPAIR_PROMPT_MAX_CHARS:
         # Preserve addressability, not an arbitrary prefix: the repair seat
         # shares the filesystem and can read the complete artifacts there.
-        guide = GUIDE.replace("{tag}", tag)
+        guide = ("Read the addressed artifacts, diagnose the smallest apparatus defect, "
+                 "add a planted regression test, run focused gates, and commit explicit "
+                 f"paths with tag {tag} in the commit message. Do not click or reload. "
+                 "End with exactly VERDICT: repaired, VERDICT: no-defect, or "
+                 "VERDICT: cannot-repair.")
         anchors = [f"REPAIR REQUEST {tag}", "", f"FAILURE: {reason}", ""]
         if page:
             anchors += [f"debugger-page: {page}"]
