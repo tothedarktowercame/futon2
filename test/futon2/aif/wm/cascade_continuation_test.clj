@@ -138,3 +138,20 @@
       (is (= :reviewed-effect-invalid
              (:kind (executor {:cascade-digest (evidence/value-digest [:c])
                                :node {:occurrence-id :n}})))))))
+
+(deftest production-close-is-content-addressed-and-idempotent
+  (let [root (temp-dir "continuation-close-")
+        close! (sut/production-close-adapter
+                {:root root :source-run-id "run-1"
+                 :source-attempt-id "attempt-1"})
+        packet {:selected-cascade-digest (evidence/value-digest [:selected])
+                :cascade-digest (evidence/value-digest [:compiled])
+                :frontier [[:p 0]]
+                :effect-receipts [{:digest (evidence/value-digest [:effect])}]
+                :journal-certificate {:status :certified :head "h"}}
+        a (close! packet)
+        b (close! packet)]
+    (is (= :closed (:status a)))
+    (is (= a b))
+    (is (.isFile (java.io.File. (get-in a [:close-receipt :path]))))
+    (is (= "run-1" (get-in a [:close-receipt :source-run-id])))))

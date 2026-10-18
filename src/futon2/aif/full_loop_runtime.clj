@@ -34,6 +34,8 @@
   "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
 (def default-reading-precision-campaign-path
   "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn")
+(def default-cascade-continuation-close-root
+  "/home/joe/code/futon2/data/wm-cascade-continuation-closes")
 
 (defn- ensure-reading-precision-campaign!
   [opts]
@@ -376,4 +378,10 @@
                    cascade-decision/default-execution-journal-root)
                :executors (or cascade-capability-executors
                               (production-cascade-executors opts))
-               :close-fn cascade-close-fn})))))
+               :close-fn
+               (or cascade-close-fn
+                   (cascade-continuation/production-close-adapter
+                    {:root (or (:cascade-continuation-close-root opts)
+                               default-cascade-continuation-close-root)
+                     :source-run-id (:source-run-id opts)
+                     :source-attempt-id (:source-attempt-id opts)}))})))))

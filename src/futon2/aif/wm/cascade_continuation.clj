@@ -3,7 +3,8 @@
   effects to the existing close port.  This function never selects and never
   spends a click; every effect must be supplied by a registered capability
   executor and survive journal validation before close is callable."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
             [futon2.aif.wm.executable-cascade :as cascade]
@@ -11,6 +12,7 @@
   (:import [java.time Instant]))
 
 (def schema :wm/cascade-continuation-v1)
+(def close-schema :wm/cascade-continuation-close-v1)
 
 (defn- hex64? [x]
   (and (string? x) (re-matches #"[0-9a-f]{64}" x)))
@@ -62,6 +64,40 @@
 (defn- load-compiled [root digest]
   (let [path (io/file root (str digest ".edn"))]
     (when (.isFile path) (cascade/load-record path))))
+
+(defn production-close-adapter
+  "Return an append-only close port. The durable close record is bound to the
+  source run/attempt and the complete certified continuation packet. It closes
+  this cascade execution only; callers must not reinterpret it as a spent or
+  carried click."
+  [{:keys [root source-run-id source-attempt-id]}]
+  (fn [packet]
+    (let [record {:schema close-schema
+                  :source-run-id source-run-id
+                  :source-attempt-id source-attempt-id
+                  :selected-cascade-digest (:selected-cascade-digest packet)
+                  :cascade-digest (:cascade-digest packet)
+                  :frontier (:frontier packet)
+                  :effect-receipt-digests (mapv :digest
+                                                (:effect-receipts packet))
+                  :journal-certificate (:journal-certificate packet)}
+          digest (evidence/value-digest record)
+          sealed (assoc record :digest digest)
+          file (io/file root (str digest ".edn"))]
+      (io/make-parents file)
+      (if (.exists file)
+        (when-not (= sealed (edn/read-string (slurp file)))
+          (throw (ex-info "cascade continuation close collision"
+                          {:kind :continuation-close-collision
+                           :path (.getPath file)})))
+        (spit file (pr-str sealed)))
+      {:status :closed
+       :cascade-digest (:cascade-digest packet)
+       :close-receipt {:evidence-kind :verified-effect
+                       :digest digest
+                       :path (.getPath file)
+                       :source-run-id source-run-id
+                       :source-attempt-id source-attempt-id}})))
 
 (defn continue-certified-cascade!
   "Consume one certified :cascade-ready carrier.
