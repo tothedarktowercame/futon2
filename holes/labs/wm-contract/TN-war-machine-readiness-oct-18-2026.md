@@ -79,7 +79,7 @@ the selection abstention.
 
 Between-click repair: `wm_click_repair_loop.py` now sends bounded evidence
 excerpts plus the durable local artifact paths, omits unbounded last-result
-fields, and enforces a 60,000-character dispatch ceiling while retaining the
+fields, and initially enforced a 60,000-character dispatch ceiling while retaining the
 mandatory repair guide. The regression test plants 200 KB page, log,
 last-result, and prior-attempt payloads and checks that the repair packet stays
 within the ceiling and retains its evidence addresses. Gate: 3 Python tests
@@ -113,3 +113,32 @@ claim that G discriminated.
 Disposition: both actual Click 1 blockers are repaired and gated. Click 2 may
 be launched after commit/hot-load; the remaining four campaign authorizations
 are intact.
+
+### Click 2 — reached cascade execution; store root and repair transport failed
+
+- Authorization: campaign click 2 of 5.
+- Start: `2026-10-18T04:23:32Z`; issued at `04:24:31Z`; terminal at
+  `04:33:36Z`.
+- Click: `wm-click-ea4e52f7-ee16-4409-b7f4-8f52faa35ebe`.
+- Run: `2026-10-18-9c3a318d-a329-4dca-a19b-17976a0acfde`;
+  terminal attempt `attempt-002`.
+- The run passed the former selection breakpoint, selected
+  `M-digital-nomad-patterns`, completed selected-target-reading plus its
+  bounded redecision, completed occurrence-square authoring plus its
+  redecision, and reached `cascade-execution`.
+- The debugger held at `04:31:55Z` on `:wm/phase-failure`:
+  `FileNotFoundException` for
+  `data/wm-executable-cascades/4372a892…a976.edn`. The production default was
+  process-relative and the append-only saver did not create its store root.
+- Live repair `invoke-1792297915129-16457-920268db` and terminal repair
+  `invoke-1792298016125-16458-f548c34a` were rejected by Agency as oversized.
+  The first dispatch ceiling repair was therefore directionally right but its
+  60,000-character bound exceeded Agency's actual accepted envelope.
+- Outcome: `incomplete`; no tick carried.
+
+Between-click repairs: production cascade and journal roots are now absolute
+under `~/code/futon2/data`; append-only cascade persistence creates a missing
+store directory or fails typed before writing. A planted absent nested store
+checks save/reload identity. Repair dispatches are capped at 20,000 characters
+with 4,000-character evidence excerpts; full evidence remains available at the
+named local paths.

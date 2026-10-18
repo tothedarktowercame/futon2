@@ -409,6 +409,23 @@
       (finally
         (.delete (io/file path))))))
 
+(deftest save-creates-an-absent-cascade-store
+  (let [parent (.toFile (java.nio.file.Files/createTempDirectory
+                         "wm-cascade-parent-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        middle (io/file parent "not-created-yet")
+        dir (io/file middle "cascades")
+        record (built)
+        path (xc/save! record dir)]
+    (try
+      (is (.isDirectory dir))
+      (is (.isFile (io/file path)))
+      (is (= record (xc/load-record path)))
+      (finally
+        (.delete (io/file path))
+        (.delete dir)
+        (.delete middle)
+        (.delete parent)))))
+
 (deftest validator-never-abstains
   (is (every? #(= :cascade-validation-error (:status %))
               [(xc/validate-cascade {})

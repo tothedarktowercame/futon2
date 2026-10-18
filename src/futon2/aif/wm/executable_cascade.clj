@@ -388,7 +388,11 @@
   then the existing path is returned — otherwise the collision/mismatch is
   refused.  Never overwrites."
   [record dir]
-  (let [f (io/file dir (str (:digest record) ".edn"))]
+  (let [root (io/file dir)
+        _ (when-not (or (.isDirectory root) (.mkdirs root))
+            (throw (ex-info "cascade store directory unavailable"
+                            {:path (.getAbsolutePath root)})))
+        f (io/file root (str (:digest record) ".edn"))]
     (if (.exists f)
       (let [existing (slurp f)]
         (if (= existing (pr-str record))

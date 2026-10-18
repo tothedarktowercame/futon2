@@ -1422,8 +1422,12 @@
 ;; or no-selection — and never reruns selection.
 ;; ---------------------------------------------------------------------------
 
-(def default-executable-cascade-root "data/wm-executable-cascades")
-(def default-execution-journal-root "data/wm-execution-journals")
+(def default-executable-cascade-root
+  (str (System/getProperty "user.home")
+       "/code/futon2/data/wm-executable-cascades"))
+(def default-execution-journal-root
+  (str (System/getProperty "user.home")
+       "/code/futon2/data/wm-execution-journals"))
 
 (declare execute-selected-cascade!)
 

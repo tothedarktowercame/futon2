@@ -499,8 +499,8 @@ hold, say). It stops the loop for a human decision.
 """
 
 
-REPAIR_PROMPT_MAX_CHARS = 60_000
-REPAIR_EVIDENCE_EXCERPT_CHARS = 12_000
+REPAIR_PROMPT_MAX_CHARS = 20_000
+REPAIR_EVIDENCE_EXCERPT_CHARS = 4_000
 
 
 def evidence_excerpt(text: str, limit: int = REPAIR_EVIDENCE_EXCERPT_CHARS) -> str:
