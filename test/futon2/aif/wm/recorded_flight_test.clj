@@ -1,6 +1,7 @@
 (ns futon2.aif.wm.recorded-flight-test
   (:require [clojure.test :refer [deftest is]]
             [clojure.java.io :as io]
+            [futon2.aif.selected-target-reading :as target-reading]
             [futon2.aif.wm.recorded-flight :as sut]))
 
 (def checkpoint
@@ -56,3 +57,26 @@
                :output-root root})
              nil
              (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
+
+(deftest recorded-correction-continues-without-a-selector
+  (let [m (sut/manifest
+           {:source-run-id "run" :source-click-id "click" :author "zai-2"
+            :selection-checkpoint checkpoint
+            :recorded-answers [answer answer]})
+        contacted (atom [])
+        result
+        (with-redefs-fn
+          {#'target-reading/repair!
+           (fn [opts _]
+             (swap! contacted conj ((:answer-fn opts) {:kind :selected-target-reading}))
+             (swap! contacted conj ((:answer-fn opts)
+                                    {:kind :selected-target-reading-correction}))
+             {:status :published :published true :analysis-digest "analysis"})
+           #'sut/continue-inner-construction!
+           (fn [& _] {:frontier :canonical-cascade-not-retained
+                      :outer-receipt-restorations 1})}
+          #(sut/run-recorded! {:manifest m :output-root (.getPath (temp-dir))}))]
+    (is (= 2 (count @contacted)))
+    (is (= 0 (:selector-calls result)))
+    (is (= 0 (:clicks-spent result)))
+    (is (= :canonical-cascade-not-retained (:frontier result)))))

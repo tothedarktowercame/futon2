@@ -1,0 +1,166 @@
+{
+  "schema" : "wm/occurrence-square-maps-v1",
+  "target" : "M-aif-a-matrix-faithfulness",
+  "analysis_digest" : "2ef98bba2a383891f30f3377a6cf7477b35cecd084f50dea7de5b0cdbe89d5ee",
+  "entries" : [ {
+    "occurrence_id" : [ "problems/r3-belief-update", 0 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: Make the belief-update observation model A faithful",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: problems/r3-belief-update",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The mission goal is explicitly a faithful belief-update observation model.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for faithful-observation-model",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "realtime/structured-events-only", 1 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: 2026-07-13",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: realtime/structured-events-only",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The dated fragment supplies temporal context that must remain structured provenance.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for mission-dated",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "process/built-but-not-wired-invisibility", 2 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: OPEN — **INSTANTIATE",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: process/built-but-not-wired-invisibility",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: OPEN INSTANTIATE names an implementation phase whose absence would otherwise be hidden behind design artifacts.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for instantiate-phase-open",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "coordination/capability-gate", 3 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: Joe + unassigned implementation owner",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: coordination/capability-gate",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The named sponsor plus unassigned implementer is a capability and ownership boundary.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for owner-plus-unassigned-implementer",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "hygiene/observe-the-authority", 4 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: futon2",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: hygiene/observe-the-authority",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The repository fragment identifies the authoritative implementation substrate.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for primary-repo-futon2",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "test-registry/warrant-rides-the-handoff", 5 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: `M-aif-faithfulness` (parent badge audit)",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: test-registry/warrant-rides-the-handoff",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The parent badge audit is a predecessor warrant that must remain attached across this dependency.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for cites-parent-badge-audit",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "problems/r3-belief-update", 6 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: `M-aif-wiring` (R1/R3 wiring)",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: problems/r3-belief-update",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: The cited R1/R3 wiring is directly about the belief-update mechanism this mission instantiates.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for cites-aif-wiring",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  }, {
+    "occurrence_id" : [ "translation/choose-the-equivalence-check", 8 ],
+    "maps" : {
+      "I1" : {
+        "element" : "observed fragment: formal fidelity from behavioural evidence",
+        "source" : "pinned target-reading fragment"
+      },
+      "I2" : {
+        "element" : "pattern tension: translation/choose-the-equivalence-check",
+        "source" : "pinned pattern HOWEVER part"
+      },
+      "G" : {
+        "element" : "reason to apply: Formal fidelity and behavioural evidence are different verification relations and must be checked accordingly.",
+        "source" : "pinned pattern BECAUSE part and citation rationale"
+      },
+      "B" : {
+        "element" : "checked result for separate-formal-from-behavioural",
+        "source" : "pinned pattern THEN/CHECK part"
+      }
+    }
+  } ]
+}

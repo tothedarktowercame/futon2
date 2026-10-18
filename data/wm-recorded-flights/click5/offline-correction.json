@@ -1,0 +1,197 @@
+{
+  "labeller" : "zai-2",
+  "reusable_cues" : [ {
+    "start" : 467,
+    "end" : 482,
+    "text" : "formal fidelity",
+    "intent" : "formal-fidelity-split",
+    "rationale" : "Recurring split between formal fidelity and behavioural evidence."
+  } ],
+  "rnode_cues" : [ ],
+  "sentences" : [ {
+    "id" : "s1",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "problems/r3-belief-update",
+        "rationale" : "The mission goal is explicitly a faithful belief-update observation model."
+      } ],
+      "relations" : [ "goal" ],
+      "display_cues" : [ {
+        "start" : 20,
+        "end" : 53,
+        "text" : "belief-update observation model A"
+      } ],
+      "start" : 11,
+      "rationale" : "The title states the goal: make observation model A faithful.",
+      "intent" : "faithful-observation-model",
+      "target" : "belief-update observation model A",
+      "end" : 62,
+      "text" : "Make the belief-update observation model A faithful"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s2",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "realtime/structured-events-only",
+        "rationale" : "The dated fragment supplies temporal context that must remain structured provenance."
+      } ],
+      "relations" : [ "context" ],
+      "display_cues" : [ {
+        "start" : 104,
+        "end" : 114,
+        "text" : "2026-07-13"
+      } ],
+      "start" : 104,
+      "rationale" : "The mission record is dated 2026-07-13.",
+      "intent" : "mission-dated",
+      "target" : "mission record",
+      "end" : 114,
+      "text" : "2026-07-13"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s3",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "process/built-but-not-wired-invisibility",
+        "rationale" : "OPEN INSTANTIATE names an implementation phase whose absence would otherwise be hidden behind design artifacts."
+      } ],
+      "relations" : [ "context" ],
+      "display_cues" : [ {
+        "start" : 129,
+        "end" : 149,
+        "text" : "OPEN — **INSTANTIATE"
+      } ],
+      "start" : 129,
+      "rationale" : "The mission is open and in the INSTANTIATE phase.",
+      "intent" : "instantiate-phase-open",
+      "target" : "mission state",
+      "end" : 149,
+      "text" : "OPEN — **INSTANTIATE"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s4",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "coordination/capability-gate",
+        "rationale" : "The named sponsor plus unassigned implementer is a capability and ownership boundary."
+      } ],
+      "relations" : [ "context" ],
+      "display_cues" : [ {
+        "start" : 262,
+        "end" : 293,
+        "text" : "unassigned implementation owner"
+      } ],
+      "start" : 256,
+      "rationale" : "Joe owns it with an implementation owner still unassigned.",
+      "intent" : "owner-plus-unassigned-implementer",
+      "target" : "ownership",
+      "end" : 293,
+      "text" : "Joe + unassigned implementation owner"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s5",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "hygiene/observe-the-authority",
+        "rationale" : "The repository fragment identifies the authoritative implementation substrate."
+      } ],
+      "relations" : [ "context" ],
+      "display_cues" : [ {
+        "start" : 314,
+        "end" : 320,
+        "text" : "futon2"
+      } ],
+      "start" : 314,
+      "rationale" : "futon2 is the primary repository for this work.",
+      "intent" : "primary-repo-futon2",
+      "target" : "futon2",
+      "end" : 320,
+      "text" : "futon2"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s6",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "test-registry/warrant-rides-the-handoff",
+        "rationale" : "The parent badge audit is a predecessor warrant that must remain attached across this dependency."
+      } ],
+      "relations" : [ "dependency" ],
+      "display_cues" : [ {
+        "start" : 367,
+        "end" : 385,
+        "text" : "parent badge audit"
+      } ],
+      "start" : 345,
+      "rationale" : "Related parent mission performing the badge audit.",
+      "intent" : "cites-parent-badge-audit",
+      "target" : "M-aif-faithfulness",
+      "end" : 386,
+      "text" : "`M-aif-faithfulness` (parent badge audit)"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s7",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "problems/r3-belief-update",
+        "rationale" : "The cited R1/R3 wiring is directly about the belief-update mechanism this mission instantiates."
+      } ],
+      "relations" : [ "dependency" ],
+      "display_cues" : [ {
+        "start" : 388,
+        "end" : 417,
+        "text" : "`M-aif-wiring` (R1/R3 wiring)"
+      } ],
+      "start" : 388,
+      "rationale" : "Related mission wiring R1/R3.",
+      "intent" : "cites-aif-wiring",
+      "target" : "M-aif-wiring",
+      "end" : 417,
+      "text" : "`M-aif-wiring` (R1/R3 wiring)"
+    }, {
+      "pattern_refs" : [ {
+        "id" : "math-strategy/isolate-computational-kernel-before-transport",
+        "rationale" : "The cited precedent supports separating the operative kernel before transporting formal claims."
+      } ],
+      "relations" : [ "rationale" ],
+      "display_cues" : [ {
+        "start" : 442,
+        "end" : 451,
+        "text" : "precedent"
+      } ],
+      "start" : 442,
+      "rationale" : "M-evaluate-policies is cited as precedent.",
+      "intent" : "cites-evaluate-policies-precedent",
+      "target" : "M-evaluate-policies",
+      "end" : 466,
+      "text" : "precedent for separating"
+    } ],
+    "unresolved_reason" : ""
+  }, {
+    "id" : "s8",
+    "fragments" : [ {
+      "pattern_refs" : [ {
+        "id" : "translation/choose-the-equivalence-check",
+        "rationale" : "Formal fidelity and behavioural evidence are different verification relations and must be checked accordingly."
+      } ],
+      "relations" : [ "rationale" ],
+      "display_cues" : [ {
+        "start" : 467,
+        "end" : 482,
+        "text" : "formal fidelity"
+      } ],
+      "start" : 467,
+      "rationale" : "The precedent separates formal fidelity from behavioural evidence.",
+      "intent" : "separate-formal-from-behavioural",
+      "target" : "evidence split",
+      "end" : 508,
+      "text" : "formal fidelity from behavioural evidence"
+    } ],
+    "unresolved_reason" : ""
+  } ]
+}

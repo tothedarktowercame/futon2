@@ -114,3 +114,28 @@ and frontier `:corrected-answer-missing`.  The boundary result reproduces all
 nine `:fragment-without-validated-pattern-ref` failures.  Thus the first replay
 did not merely predict the frontier; it reached it through current production
 validation using the retained live artifacts.
+
+### Continued repair flight
+
+An offline correction adds one grounded library citation to each of the nine
+fragments.  This is explicitly attributed to `codex-68-offline-repair`, not to
+click 5.  Current validation accepts it and publishes one cascade into the
+isolated replay store.
+
+Occurrence-square authoring then classifies eight citations as complete
+occurrences and one as a typed void: the fragment-7 citation's library pattern
+lacks the complete IF/HOWEVER/BECAUSE/THEN carrier, so supplying a ninth square
+was correctly rejected.  The corrected eight-entry square artifact publishes,
+and inner construction selects policy
+`M-aif-a-matrix-faithfulness/policy-4b34f579f00abd4fa758` using the restored
+outer receipt exactly once.  It spends zero clicks and invokes no live outer
+selector.
+
+The next frontier is `:canonical-cascade-not-retained`.  The selected action
+carries a canonical cascade digest, but the returned judgment does not retain
+the canonical record named by that digest.  Consequently the replay cannot
+hand the selected structural carrier to the enactment compiler without
+reconstructing it from less authoritative pieces.  The correct next repair is
+to retain or content-addressably persist the certified canonical record at the
+selection boundary, bound to the already-carried digest; the replay must not
+guess or silently rebuild it.
