@@ -230,3 +230,41 @@ enactment, certified journalling, and durable build-review-close when resumed
 from the recorded production frontier. It does not itself prove that the
 ordinary click shell traverses the same route or carries a tick. Click 4 tests
 that remaining live composition claim. Two campaign authorizations remain.
+
+### Click 4 — cascade compiled; resume controls were not wired
+
+- Authorization: campaign click 4 of 5.
+- Start: `2026-10-18T21:09:22Z`; click accepted at `21:10:18Z`;
+  terminal at `21:14:54Z`.
+- Click: `wm-click-e783dcda-3ee0-4a21-940e-51d2847287b6`.
+- Run: `2026-10-18-78e3527a-052f-4fef-b33e-abd5c67b1f85`;
+  terminal attempt `attempt-002`.
+- Timing: selection completed in 96,275 ms. The selected-target-reading,
+  occurrence-square-authoring, and selected-reading phases reused their
+  retained products in 3 ms, 2 ms, and 3 ms respectively. Cascade execution
+  compiled successfully in 55 ms with digest
+  `94c73bd78c2087bca94da66414a7eb2492c2ffb8dd18a05bc5ef7da304c71aa7`.
+  Cascade resume then ran for 81,123 ms.
+- Frontier: resume ended `:resume-protocol-violation`. Its control evidence
+  was `{:clicks [nil nil], :selections [nil nil]}`: the standard click did
+  not supply the counter controls required to prove that retry spent no click
+  and performed no new selection. This is an adapter/wiring defect, not a
+  failed cascade effect.
+- Outcome: `incomplete`; no tick carried. Finding:
+  `data/wm-repair-obligations/findings/repair-occ-fa1ef846963fd8242c0f511cd18c27ff77e3d0c7193b0f8da4b62edb1a8a24f2.edn`.
+- Run record:
+  `data/wm-runs/tick-run-record-2026-10-18-78e3527a-052f-4fef-b33e-abd5c67b1f85.edn`.
+- Click log: `data/wm-click-loop/click-001-1792357763.log`.
+- Report card:
+  `https://zone.hyperreal.enterprises/wip/wm-runs/2026-10-18-78e3527a-052f-4fef-b33e-abd5c67b1f85.html`.
+
+Terminal repair dispatch `invoke-1792358094080-16640-2fd2c15e` again failed
+Agency validation with code 1261, `Prompt exceeds max length`. The durable
+evidence paths were bounded, but the shared repair-guide suffix itself still
+made the packet too large. This is a second apparatus blocker to repair before
+Click 5.
+
+Disposition: one authorized campaign click remains. Do not launch it until
+the production runner supplies real click/selection counters to the D4 resume
+protocol and the terminal repair request fits the actually accepted Agency
+prompt envelope.
