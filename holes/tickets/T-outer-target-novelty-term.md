@@ -45,6 +45,21 @@ Out of scope: the resource/cadence/continuation terms and the [0, 1] clamp
 - The outer selector's `:absent-terms` diagnostic still reports what is
   missing.
 
+## Specification note (added 2026-10-18, before any work)
+
+The Lean specification does not currently require this. In
+`mathlib4/DarkTower/WarMachine/OuterTaskObjective.lean` (e02dd206d3) the outer
+objective "is not cascade-policy G": its channels and aggregation are
+caller-declared, and `selected_is_minimum` makes a valid selection "the
+deterministic minimum under declared objective value, with stable task
+identity as the tie law". Q8's `SelectionCertificate.Valid` accepts a tied
+minimum, and `selectionDiscriminates` (Holes.lean) is a verdict outside
+`Requirements.conforms`. So this ticket asks for a change the specification
+does not demand and partly contradicts (the tie law). Joe's guidance of
+2026-10-18 (ties signal incomplete ingest; any tie-breaker must be G-based)
+and the revision policy (the code should be an accurate model of AIF) point
+the other way. Which governs is Joe's decision; do not start until it is made.
+
 ## Provenance
 
 Found by claude-4 while annotating R5 (Expected Free Energy Inside an
