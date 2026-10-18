@@ -272,3 +272,64 @@ the D4 protocol reports every invariant separately (and the production runner
 supplies real click/selection controls), the failing invariant is repaired,
 and the terminal repair request fits the actually accepted Agency prompt
 envelope.
+
+#### Repairs before Click 5
+
+Commit `706a4da4f` made the held retry contract observable and explicit. Both
+`:cascade-ready` returns now retain `:selected-cascade-digest` separately from
+the refined executable digest. The production runtime supplies concrete
+click-budget and selection-counter atoms, and a protocol violation records five
+individual predicates plus whether both controls were present. The terminal
+repair packet was reduced from a 9,000-character ceiling to 1,800 characters,
+with full evidence left at addressed artifact paths.
+
+Focused gates passed: 36 Clojure tests / 190 assertions across the resume
+protocol, production runtime, and cascade runner seam; 3 Python repair-loop
+tests also passed. Static lint reported no errors and two existing style
+warnings. No click was spent by these gates.
+
+### Click 5 — live route reached resume again; identity/refinement return still malformed
+
+- Authorization: campaign click 5 of 5. No campaign authorization remains.
+- Start: `2026-10-18T21:21:45Z`; click accepted at `21:22:48Z`; terminal at
+  `21:29:57Z`.
+- Click: `wm-click-9b1310c2-5aca-4f56-8feb-0f1db9ee16ed`.
+- Run: `2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc`; attempt
+  `attempt-001`; target `M-self-improvement-loop`.
+- Timing: substrate preflight 9,251 ms; preference refresh 3,235 ms;
+  stop-line memory 4,117 ms; selection 76,341 ms; selected-target-reading
+  105,175 ms including a 64,549 ms redecision; occurrence-square authoring
+  103,949 ms including a 71,500 ms redecision; selection-world 77 ms;
+  cascade execution 64 ms; cascade resume 73,428 ms.
+- Cascade execution produced selected/executable digest
+  `c935271947ceb7cb220bd7d132a89b938df8e98bb1b31ece1a5743d870ea6a9b`
+  and entered the held resume path. Authored namespace
+  `futon2.aif.wm.authored.req-790c9db1` was ingested while the phase was held.
+- The new diagnostics worked. Click and selection controls were both present
+  and unchanged (`[0 0]` for each). The retry returned a map, but
+  `:selected-identity-preserved?` and `:compiled-digest-present?` were both
+  false. Thus the remaining defect is now localized: the production retry
+  adapter does not return the selected identity and refined executable digest
+  required by D4. It is not a hidden reselection or extra click.
+- Outcome: `incomplete`; no tick carried. Finding:
+  `data/wm-repair-obligations/findings/repair-occ-950b5e58640d272150d96d6e2ad8827f89c4cac4dc4097c1cbe9c74d1cd09205.edn`.
+- Run record:
+  `data/wm-runs/tick-run-record-2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc.edn`.
+- Click log: `data/wm-click-loop/click-001-1792358507.log`.
+- Report card:
+  `https://zone.hyperreal.enterprises/wip/wm-runs/2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc.html`.
+
+The compact terminal repair request was accepted and created job
+`invoke-1792358997877-16653-858bb78c`, proving the prompt-size repair crossed
+the former dispatch boundary. The Zai-7 job nevertheless failed after 60
+seconds without a verdict or commit; that is now a repair-seat execution
+failure, not an oversized prompt.
+
+The ordinary build/review/close machinery still ran after the terminal
+failure and persisted checkpoints through `007-closed.edn`; this is collateral
+apparatus completion, not a carried tick and not proof that the selected
+cascade was enacted. Campaign result: five clicks, zero ticks carried. The
+next repair must make the held retry return a D4-conforming result containing
+the unchanged selected-cascade digest and a valid refined compiled digest,
+then prove that exact production continuation by replay before any further
+click is authorized.
