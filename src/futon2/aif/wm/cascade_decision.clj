@@ -1679,7 +1679,9 @@
                                           holes)
                                     retry (fn [resume-context]
                                             (let [accepted (:authoring resume-context)
-                                                  decisions (:decisions accepted)
+                                                  decisions (or (:authoring-product
+                                                                 resume-context)
+                                                                (:decisions accepted))
                                                   authoring
                                                   {:attribution
                                                    {:author (:by accepted)

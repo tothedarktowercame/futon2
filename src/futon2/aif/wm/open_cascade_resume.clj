@@ -404,6 +404,13 @@
                                           patch-loader)]
                     (if (= :error (:status loaded))
                       loaded
-                      (resume! ledger (assoc recognized :authoring accepted)
+                      (resume! ledger (assoc recognized
+                                             :authoring accepted
+                                             ;; The reviewed JSON describes and
+                                             ;; authorizes the patch.  The
+                                             ;; hot-loaded function is the
+                                             ;; authoritative occurrence-keyed
+                                             ;; product the held phase consumes.
+                                             :authoring-product (:product loaded))
                                {:click-budget click-budget
                                 :selection-counter selection-counter})))))))))))

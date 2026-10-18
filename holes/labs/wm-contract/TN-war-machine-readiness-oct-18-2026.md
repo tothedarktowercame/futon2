@@ -333,3 +333,39 @@ next repair must make the held retry return a D4-conforming result containing
 the unchanged selected-cascade digest and a valid refined compiled digest,
 then prove that exact production continuation by replay before any further
 click is authorized.
+
+## Addendum — Click 5 retry-product repair
+
+The Click 5 failure was not a bad authored patch. It was a D4 transport-layer
+substitution. `hot-load!` executed the reviewed patch function and returned its
+verified, occurrence-keyed clause map as `:product`; `handle-error!` then
+discarded that product. The held retry consequently consumed the JSON handoff's
+`:decisions` carrier instead of the loaded code product. That explains why the
+same patch compiled when invoked directly but the live retry returned neither
+the selected identity nor a refined compiled digest.
+
+The repair carries `(:product loaded)` into the resume context as
+`:authoring-product`. The cascade retry consumes that value preferentially,
+retaining the JSON decisions only as a compatibility fallback. A planted test
+uses deliberately distinct transport decisions and loaded product, then proves
+that the retry receives the loaded product. Focused gates after the change:
+36 tests / 191 assertions / zero failures or errors across D4, the production
+runtime, and the runner seam.
+
+A zero-click replay used the exact Click 5 checkpoint
+`data/wm-on-prod-history/checkpoints/2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc/attempt-001.edn`
+and hot-loaded namespace `futon2.aif.wm.authored.req-790c9db1`. It returned:
+
+- D4 status `:resumed`, `:clicks-spent 0`, `:selections-run 0`;
+- unchanged selected digest
+  `f79e6e5b560469f5f1a5edb69cda2e990a8f33fd6aa6228c13913e06fb031b4f`;
+- `:cascade-ready` with refined executable digest
+  `d005b2f842e2922e6fc530320e22f32362a2a41cc5fc3165dcd1b316f547ff7a`;
+- an eight-occurrence `:wm/pattern-apply` frontier for the selected
+  `M-self-improvement-loop` cascade.
+
+This discharges the specific Click 5 `resume-protocol-violation` by replaying
+the saved production selection through the repaired held phase. It does not
+retroactively turn Click 5 into a carried tick, and it authorizes no additional
+click. The next live run, if separately authorized, must still demonstrate
+frontier enactment and tick carriage in the ordinary shell.

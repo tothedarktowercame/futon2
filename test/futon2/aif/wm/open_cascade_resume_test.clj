@@ -222,7 +222,12 @@
   (let [ledger (r/new-ledger "click-1")
         click-budget (atom 3)
         selection-counter (atom 2)
-        error (held-error)
+        retry-ctx (atom nil)
+        loaded-product {:occurrence/verified {:operation :apply}}
+        error (held-error {:retry (fn [ctx]
+                                    (reset! retry-ctx ctx)
+                                    {:cascade-digest cascade-digest
+                                     :outcome :phase-redone})})
         ctx (r/recognize error)
         req (r/authoring-requisition ctx "claude-2" "codex-68")
         answer (answer-for req)
@@ -230,12 +235,15 @@
                                 answer
                                 {:click-budget click-budget
                                  :selection-counter selection-counter
-                                 :patch-loader patch-loader})]
+                                 :patch-loader
+                                 (constantly (constantly loaded-product))})]
     (is (= :resumed (:status result)))
     (is (= 0 (:clicks-spent result)))
     (is (= 0 (:selections-run result)))
     (is (= 3 @click-budget))
     (is (= 2 @selection-counter))
+    (is (= loaded-product (:authoring-product @retry-ctx))
+        "retry consumes the verified hot-loaded product, not JSON transport")
     ;; the whole paper trail: requisition, accepted answer, loaded
     ;; attempt, retried phase
     (is (= 1 (count (:requisitions @ledger))))
