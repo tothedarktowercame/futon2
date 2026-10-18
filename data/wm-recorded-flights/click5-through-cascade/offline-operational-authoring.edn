@@ -1,0 +1,19 @@
+{:attribution {:author :codex-68-offline-repair
+               :authority :wm/recorded-flight}
+ :application-order []
+ :clauses {["problems/r3-belief-update" 0]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["realtime/structured-events-only" 1]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["process/built-but-not-wired-invisibility" 2]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["coordination/capability-gate" 3]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["hygiene/observe-the-authority" 4]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["test-registry/warrant-rides-the-handoff" 5]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["problems/r3-belief-update" 6]
+           {:operation :apply-pattern :capability :wm/pattern-apply}
+           ["translation/choose-the-equivalence-check" 8]
+           {:operation :apply-pattern :capability :wm/pattern-apply}}}

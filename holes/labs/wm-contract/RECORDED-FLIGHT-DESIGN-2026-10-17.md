@@ -131,11 +131,29 @@ and inner construction selects policy
 outer receipt exactly once.  It spends zero clicks and invokes no live outer
 selector.
 
-The next frontier is `:canonical-cascade-not-retained`.  The selected action
-carries a canonical cascade digest, but the returned judgment does not retain
-the canonical record named by that digest.  Consequently the replay cannot
-hand the selected structural carrier to the enactment compiler without
-reconstructing it from less authoritative pieces.  The correct next repair is
-to retain or content-addressably persist the certified canonical record at the
-selection boundary, bound to the already-carried digest; the replay must not
-guess or silently rebuild it.
+The canonical carrier is retained at the documented Packet-B seam,
+`[:decision :selection-certificate :selected-canonical-cascade]`.  The first
+version of the replay incorrectly searched the entire judgment tree for a
+nested `:canonical-cascade`; it now reads only that authoritative field and
+refuses a digest mismatch.  Replay ledger
+`data/wm-recorded-flights/click5-through-cascade-5/ledger/bf7364e3a88c0c47ec38137880eb7ed45148c1ad562843aac2a0e75fdaa21507.edn`
+therefore reaches eight explicit operational holes with zero selector calls
+and zero clicks.
+
+The pinned, separately attributed offline authoring artifact
+`data/wm-recorded-flights/click5-through-cascade/offline-operational-authoring.edn`
+closes those eight holes as `:apply-pattern` operations.  It deliberately
+supplies no application-order edges: reading order is not execution order.
+The compiler derives each completion check from its validated four-map square,
+certifies the refined cascade, and exposes all eight nodes as an enactable
+frontier.  Replay ledger
+`data/wm-recorded-flights/click5-through-enactment/ledger/936b6559aee824f89c8f63305ea0f379bc5dca56a048c5e80ec1ba67e8c1befd.edn`
+records zero open holes and frontier `:flight-boundary-not-wired`.
+
+That frontier is not another format or handoff failure.  The current runner
+explicitly stops when a certified cascade has enactable nodes because no
+executor yet turns `:apply-pattern` into a verified substrate effect.  A
+further replay must not manufacture such receipts.  The next implementation
+unit is an operation dispatch table for declared cascade capabilities, with a
+real `:wm/pattern-apply` executor that emits verified-effect journal entries;
+only then may the recorded flight advance to replay/tick evaluation.

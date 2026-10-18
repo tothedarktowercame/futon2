@@ -58,6 +58,13 @@
              nil
              (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
 
+(deftest canonical-cascade-uses-the-bound-selection-certificate
+  (let [source (slurp "src/futon2/aif/wm/recorded_flight.clj")]
+    (is (re-find #":selected-canonical-cascade" source))
+    ;; A tree walk could accept an unrelated nested cascade that was never
+    ;; bound by the selector's certificate.
+    (is (not (re-find #"tree-seq coll\? seq final-judgement" source)))))
+
 (deftest recorded-correction-continues-without-a-selector
   (let [m (sut/manifest
            {:source-run-id "run" :source-click-id "click" :author "zai-2"

@@ -10,7 +10,8 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
-            [futon2.aif.selected-target-reading :as target-reading])
+            [futon2.aif.selected-target-reading :as target-reading]
+            [futon2.aif.wm.cascade-enactment-compiler :as compiler])
   (:import [java.time Instant]))
 
 (def schema :wm/recorded-flight-manifest-v1)
@@ -115,24 +116,37 @@
                           first-judgement)
         action (get-in final-judgement [:decision :action])
         cascade-digest (:cascade-digest action)
-        canonical
-        (some (fn [x]
-                ;; Some retained evidence maps use sorted comparators whose
-                ;; key domain is strings; keyword lookup on those maps throws.
-                ;; They cannot contain this keyword-keyed carrier, so skip
-                ;; them rather than weakening their comparator.
-                (when (map? x)
-                  (try
-                    (let [candidate (get x :canonical-cascade)]
-                      (when (= cascade-digest (:digest candidate)) candidate))
-                    (catch ClassCastException _ nil))))
-              (tree-seq coll? seq final-judgement))
-        open-holes (when canonical
+        ;; Packet B installs one authoritative carrier at this exact seam.
+        ;; Do not rediscover it by walking arbitrary evidence maps: that can
+        ;; miss the carrier and, worse, accept an unrelated nested record.
+        canonical (get-in final-judgement
+                          [:decision :selection-certificate
+                           :selected-canonical-cascade])
+        _ (when (and canonical (not= cascade-digest (:digest canonical)))
+            (fail! :recorded-flight-canonical-cascade-mismatch
+                   {:selected-digest cascade-digest
+                    :retained-digest (:digest canonical)}))
+        authoring-pin (:operational-authoring manifest)
+        authoring (when authoring-pin
+                    (edn/read-string
+                     (slurp (verified-file! authoring-pin
+                                            :operational-authoring))))
+        compiled (when (and canonical authoring)
+                   (compiler/compile-executable (:structural canonical)
+                                                authoring))
+        _ (when (:refusal compiled)
+            (fail! :recorded-flight-operational-authoring-invalid
+                   {:refusal (:refusal compiled)}))
+        executable (or (:record compiled) canonical)
+        open-holes (when executable
                      (filterv #(= :open-hole (:enactment-status %))
-                              (:executable-nodes canonical)))
+                              (:executable-nodes executable)))
         final-need (square-authoring/selected-need final-judgement)
         frontier (cond
-                   (seq open-holes) :operational-authoring-missing
+                   (and (seq open-holes) (nil? authoring))
+                   :operational-authoring-missing
+                   (seq open-holes) :operational-authoring-incomplete
+                   (seq (:frontier executable)) :flight-boundary-not-wired
                    (and action cascade-digest (nil? canonical))
                    :canonical-cascade-not-retained
                    action :cascade-selected
@@ -150,6 +164,8 @@
                      (get-in final-judgement [:decision :refusals]))
      :action action
      :canonical-cascade canonical
+     :compiled-cascade executable
+     :compiled-cascade-digest (:digest executable)
      :open-hole-count (count open-holes)
      :frontier frontier}))
 
@@ -244,7 +260,7 @@
   [{:keys [source-run-id source-click-id author answer-job-id
            answer-job-ids selection-checkpoint recorded-answer recorded-answers
            occurrence-square-answer occurrence-square-answer-job-id
-           offline-repair-author]}]
+           operational-authoring offline-repair-author]}]
   (seal-manifest
    {:schema schema
     :source-run-id source-run-id
@@ -266,4 +282,8 @@
     :occurrence-square-answer
     (when occurrence-square-answer
       {:path occurrence-square-answer
-       :sha256 (file-sha256 occurrence-square-answer)})}))
+       :sha256 (file-sha256 occurrence-square-answer)})
+    :operational-authoring
+    (when operational-authoring
+      {:path operational-authoring
+       :sha256 (file-sha256 operational-authoring)})}))
