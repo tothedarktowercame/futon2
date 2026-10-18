@@ -73,3 +73,41 @@ point. Everything else is re-execution in place of evidence.
   futon1b/holes/SPIKE-attribute-index-2026-07-26.md).
 - The request journal (`journalctl --user -u futon1b-server.service`) logs
   every request with elapsed-ms — diagnose from it before theorizing.
+
+## Claude sessions on the War Machine: ground rules (Joe, 2026-10-18)
+
+From 2026-10-10 to 2026-10-18 no Claude session worked on the War Machine:
+repeated Claude interventions had rewired a working machine to suit our own
+taste, invented process in place of the written one, and spent clicks under
+conditions known to fail. Joe lifted that ban on 2026-10-18 and replaced it
+with these rules. The division of labour behind them: Claude is good at
+coming up with ideas, Codex at carrying out instructions, and an idea reaches
+the machine only through someone who did not come up with it.
+
+1. **Roles.** A Claude session may read everything, analyse runs and records,
+   write proposals and notes under `holes/labs/`, and review Codex commits.
+   It does not edit WM code, hot-load into the serving JVM, spend or grant
+   clicks, or touch run data, unless Joe assigns it a named task. Codex
+   builds; the Codex owner of the current campaign decides whether a Claude
+   proposal gets built.
+2. **The specification is fixed.** `Requirements.lean` and the wm-contract
+   are the specification. A proposal that would change it says so in its
+   first line and goes to Joe; it is never implemented on the way to
+   something else.
+3. **Read the written procedure first**: `holes/labs/A-self-heal.md`,
+   `futon3c/README-pilot.md`, and the current campaign TN under
+   `holes/labs/wm-contract/`. If no procedure covers the case, say so; do not
+   invent one and present it as the way things are done.
+4. **Only the serving JVM certifies.** When a click fails, repair the held
+   phase live in the debugger and `:retry`; do not abort and re-fire. A replay
+   of recorded inputs is a way to find defects and must run through the
+   serving JVM's own code path. A copy of the machine certifies nothing: on
+   2026-10-10 one stubbed the trace writer and passed a path that then ran out
+   of memory live.
+5. **An open question that bears on whether an action is valid blocks the
+   action.** Investigate it or stop. Do not file it as a question for Joe and
+   carry on.
+6. **The Codex lab partner is a peer.** Bring it ideas and doubts as
+   questions, not task lists. It may decline, and its disagreement is a reason
+   to stop and reconsider, not something to absorb into the plan.
+7. **Small, reviewable changes.** Speed of change is not progress.
