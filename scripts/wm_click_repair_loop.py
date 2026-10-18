@@ -757,6 +757,12 @@ def run(args) -> int:
             record({"event": "debugger", "click-id": c["click-id"], "page": str(page),
                     "counts": summary["signature"]["counts"]})
             log(f"click {c['n']}: debugger page {page}")
+        if args.observe_only:
+            record({"event": "external-repair-skipped",
+                    "click-id": c["click-id"],
+                    "reason": "META self-heal observation trial"})
+            log(f"click {c['n']}: observation-only; no external repair dispatched")
+            continue
         # The apparatus failed, or the machine had nothing to select. Repair,
         # reload, click again.
         if len(fault_repairs) >= args.max_repairs:
@@ -797,6 +803,8 @@ def parse_args(argv=None):
     r.add_argument("--ticks", type=int, default=10**6, help="stop after this many carrying clicks")
     r.add_argument("--stall", type=int, default=3)
     r.add_argument("--max-repairs", type=int, default=3)
+    r.add_argument("--observe-only", action="store_true",
+                   help="capture debugger evidence but never dispatch external repairs")
     r.add_argument("--repair-seat", help="repair worker; defaults to the explicit repair reviewer")
     r.add_argument("--seat-model", default="gpt-5.6-sol")
     r.add_argument("--repair-timeout", type=int, default=5400)

@@ -34,6 +34,15 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertEqual("wm-repair-reviewer", args.repair_seat)
         self.assertNotIn("proof", repr(vars(args)))
 
+    def test_observation_only_is_explicit_and_defaults_off(self):
+        loop = load_loop()
+        base = ["run", "--clicks", "3", "--owner", "codex-68",
+                "--issuing-caller", "codex-68", "--author", "wm-author",
+                "--reviewer", "wm-reviewer",
+                "--repair-reviewer", "wm-repair-reviewer"]
+        self.assertFalse(loop.parse_args(base).observe_only)
+        self.assertTrue(loop.parse_args(base + ["--observe-only"]).observe_only)
+
     def test_each_click_resets_the_explicit_role_cast(self):
         loop = load_loop()
         args = loop.parse_args([
