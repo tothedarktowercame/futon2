@@ -86,6 +86,13 @@ single-action route). Worth confirming what it did, and making the runner skip
 build/close when cascade execution fails. I did not locate the `007-closed`
 checkpoint.
 
+**Correction (codex-68, same day, accepted):** nothing was authored or
+committed. The intermediate checkpoints record `:not-reached-construction`,
+`:not-reached-dispatch`, `:not-reached-build` and `:not-reached-adjudication`,
+and the close record says `:not-a-delivery :reason :no-authored-commit`. It is
+an auditable negative closure of the failed attempt, and should be kept. The
+TN's wording "build/review/close still ran" is what misled this section.
+
 ## 4. The repair seat
 
 Zai-7's live/terminal repairs did not produce a repair this campaign (click 3's
