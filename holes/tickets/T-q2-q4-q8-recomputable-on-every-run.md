@@ -50,6 +50,16 @@ Two consequences:
 Out of scope: changing how G is computed (see
 `T-outer-target-novelty-term.md`, `T-outer-target-g-policy-prior.md`).
 
+## Operator confirmation (Joe, 2026-10-18)
+
+"Tied minimum fails" is already in the Clojure verifier; it should go into
+Lean instead. So item 2 is confirmed as a specification change: Lean's Q8
+(and the outer selection law it relies on, `keyLE` in
+`IncrementalTaskFrontier.SelectionCertificate.Valid` and the identity tie
+law in `OuterTaskObjective.selected_is_minimum`) should make a tied minimum
+fail, and the Clojure verifier should then follow the Lean rule rather than
+hold its own copy.
+
 ## Acceptance evidence
 
 - Re-run `wm_report_card.clj` over the existing click-5 record (no new click):

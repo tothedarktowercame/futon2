@@ -53,6 +53,14 @@ does not demand and partly contradicts (the tie law). Joe's guidance of
 and the revision policy (the code should be an accurate model of AIF) point
 the other way. Which governs is Joe's decision; do not start until it is made.
 
+Joe, later on 2026-10-18: the outer loop is supposed to be G over policies,
+where policies are cascades drawn from Cascade Live and parameterised by META
+items. He was not sure about "G with novelty" as such; note that the inner
+cascade G already counts parameter novelty as its information-gain term
+(`NOTE-g-over-head-cascades-2026-09-30.md`, `EpistemicValue.lean`), which is
+the law this ticket would carry to the outer level. Ties failing is confirmed
+for Lean (see `T-q2-q4-q8-recomputable-on-every-run.md`).
+
 ## Provenance
 
 Found by claude-4 while annotating R5 for the plop2026 docbook
