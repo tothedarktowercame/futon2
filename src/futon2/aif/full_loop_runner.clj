@@ -6512,8 +6512,14 @@
             (if (and (= :wm/open-cascade-execution-error
                         (:kind cascade-execution0))
                      (:open-cascade-resume-fn opts))
-              (let [handled ((:open-cascade-resume-fn opts)
-                             cascade-execution0)]
+              (let [resume-fn (:open-cascade-resume-fn opts)
+                    handled (try
+                              (resume-fn cascade-execution0 opts)
+                              (catch clojure.lang.ArityException _
+                                ;; Compatibility for explicitly supplied test
+                                ;; and embedding handlers. Production D4 uses
+                                ;; the two-arity form so it sees live ledgers.
+                                (resume-fn cascade-execution0)))]
                 (case (:status handled)
                   :resumed (:result handled)
                   :error handled

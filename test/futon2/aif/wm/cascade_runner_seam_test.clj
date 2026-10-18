@@ -121,10 +121,11 @@
                                :analysis-digest (hex [:analysis])}}
                  :cascade-occurrence-readings (fn [_] square-readings)
                  :open-cascade-resume-fn
-                 (fn [error]
+                 (fn [error & _]
                    (reset! runtime-error error)
-                   (resume/resume! (resume/new-ledger "seam-click")
-                                   (resume/recognize error)))}
+                   ;; This test observes the D3 carrier; leave it held. The
+                   ;; reviewed-resume test below exercises the actual retry.
+                   error)}
                 {:bind-cascade-identity
                  {:readings (fn [_] square-readings)}})
         cell (get-in result [:checkpoints :selection :sorry])
@@ -240,6 +241,40 @@
         "the fixture's deliberate dispatch stop is downstream of routing")
     (is (not= :flight-boundary-not-wired
               (get-in result [:data :failure-kind])))))
+
+(deftest reviewed-resume-decisions-become-operational-authoring
+  (let [resume-count (atom 0)
+        decisions {occ-x0 {:operation :apply-pattern
+                           :capability :wm/pattern-apply}
+                   occ-y1 {:operation :apply-pattern
+                           :capability :wm/pattern-apply}}
+        {:keys [result]}
+        (click! [px py]
+                {:cascade-reading-pins
+                 {"M-current" {:excerpt-digest (hex [:excerpt])
+                               :analysis-digest (hex [:analysis])}}
+                 :cascade-occurrence-readings (fn [_] square-readings)
+                 :open-cascade-resume-fn
+                 (fn [error & _]
+                   (swap! resume-count inc)
+                   (let [ctx (resume/recognize error)
+                         req (resume/authoring-requisition ctx "zai-2" "zai-6")
+                         accepted (resume/validate-answer
+                                   req {:requisition-id (:requisition-id req)
+                                        :cascade-digest (:cascade-digest req)
+                                        :by "zai-2" :accepted-by "zai-6"
+                                        :decisions decisions
+                                        :patch {:namespace "fixture"
+                                                :var "repair"
+                                                :source-digest (hex [:patch])}})
+                         retried ((:retry ctx) (assoc ctx :authoring accepted))]
+                     {:status :resumed :result retried}))}
+                {:bind-cascade-identity {:readings (fn [_] square-readings)}})
+        cell (get-in result [:checkpoints :selection])]
+    (is (= 1 @resume-count))
+    (is (nil? (:sorry cell)) "the held cascade was closed on the same selection")
+    (is (= :author-dispatch (get-in result [:data :failure-stage]))
+        "execution advanced past cascade compilation to the fixture's dispatch stop")))
 
 (deftest selected-entry-retains-the-ranked-reading-pin
   (let [fx (@#'rfd/fixture [px py])

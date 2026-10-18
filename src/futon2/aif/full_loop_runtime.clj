@@ -105,17 +105,20 @@
   "Production D4 composition. Contact the designated author and distinct
   reviewer through Agency, validate the reviewed answer, hot-load the exact
   reviewed source, and retry D3's held phase in the same click."
-  [opts]
-  (let [author (:author opts)
-        reviewer (:reviewer opts)
-        author-contact (or (:open-cascade-author-answer-fn opts)
-                           (designated-agent-answer-fn
-                            opts author open-cascade-author-prompt "work"))
-        reviewer-contact (or (:open-cascade-reviewer-answer-fn opts)
-                             (designated-agent-answer-fn
-                              opts reviewer open-cascade-review-prompt "work"))]
-    (fn [error]
-      (let [ctx (open-resume/recognize error)
+  [base-opts]
+  (fn handler
+    ([error] (handler error {}))
+    ([error live-opts]
+      (let [opts (merge base-opts live-opts)
+            author (:author opts)
+            reviewer (:reviewer opts)
+            author-contact (or (:open-cascade-author-answer-fn opts)
+                               (designated-agent-answer-fn
+                                opts author open-cascade-author-prompt "work"))
+            reviewer-contact (or (:open-cascade-reviewer-answer-fn opts)
+                                 (designated-agent-answer-fn
+                                  opts reviewer open-cascade-review-prompt "work"))
+            ctx (open-resume/recognize error)
             req (when (= :held (:status ctx))
                   (open-resume/authoring-requisition ctx author reviewer))]
         (if-not (= :dispatched (:status req))

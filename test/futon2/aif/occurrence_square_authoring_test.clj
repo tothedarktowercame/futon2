@@ -52,7 +52,17 @@
      :maps {:I1 {:element "living rendering" :source "target reading fragment"}
             :I2 {:element "frozen snapshot" :source "target reading fragment"}
             :G {:element "publication address" :source "pattern BECAUSE"}
-            :B {:element "both discoverable" :source "pattern CHECK"}}}]})
+     :B {:element "both discoverable" :source "pattern CHECK"}}}]})
+
+(deftest prompt-uses-one-snake-case-wire-schema
+  (let [wire (sut/prompt {:target "M-live" :analysis-digest digest-a
+                          :occurrences [{:occurrence-id [pattern 0]
+                                         :pattern pattern
+                                         :pattern-sha256 pattern-sha
+                                         :fragment {:text "work"}}]})]
+    (is (re-find #"occurrence_id" wire))
+    (is (not (re-find #"occurrence-id" wire)))
+    (is (re-find #"Copy target and analysis_digest exactly" wire))))
 
 (deftest publishes-machine-built-square-before-g
   (let [reading-root (temp-root) square-root (temp-root)

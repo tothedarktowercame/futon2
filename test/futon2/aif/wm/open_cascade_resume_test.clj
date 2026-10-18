@@ -101,6 +101,21 @@
     (is (= :answer-patch-missing
            (:kind (r/validate-answer req (assoc ok :patch nil)))))))
 
+(deftest json-object-keys-round-trip-vector-hole-identities
+  (let [vector-hole ["patterns/p" 3]
+        ctx (r/recognize
+             (assoc (held-error)
+                    :holes [{:hole-id vector-hole :owner :wm
+                             :question :operation}]))
+        req (r/authoring-requisition ctx "claude-2" "codex-68")
+        answer (answer-for req {:decisions
+                                {(keyword (pr-str vector-hole))
+                                 {:operation :apply-pattern
+                                  :capability :wm/pattern-apply}}})
+        accepted (r/validate-answer req answer)]
+    (is (= :accepted (:status accepted)))
+    (is (= #{vector-hole} (set (keys (:decisions accepted)))))))
+
 (deftest malformed-answers-preserve-everything
   (let [ledger (r/new-ledger "click-1")
         ctx (r/recognize (held-error))

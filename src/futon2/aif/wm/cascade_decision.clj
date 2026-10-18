@@ -1667,10 +1667,22 @@
                                                            (:kind hole)
                                                            :operational-clause-owed)})
                                           holes)
-                                    retry (fn [_]
-                                            (let [result
+                                    retry (fn [resume-context]
+                                            (let [accepted (:authoring resume-context)
+                                                  decisions (:decisions accepted)
+                                                  authoring
+                                                  {:attribution
+                                                   {:author (:by accepted)
+                                                    :reviewer (:accepted-by accepted)
+                                                    :authority :wm/reviewed-resume}
+                                                   :application-order []
+                                                   :clauses decisions}
+                                                  result
                                                   (execute-selected-cascade!
-                                                   entry opts)]
+                                                   entry
+                                                   (assoc opts
+                                                          :cascade-operational-authoring
+                                                          (constantly authoring)))]
                                               ;; execute-selected-cascade!
                                               ;; already returns D4's
                                               ;; executable digest as

@@ -81,16 +81,25 @@
     (is (= :held (:status (open-resume/recognize error))))))
 
 (deftest production-resume-contacts-the-explicit-cast-in-work-mode
-  (let [configurations (atom [])]
+  (let [configurations (atom [])
+        live-ledger (atom {:order [] :jobs {}})]
     (with-redefs [flight-runner/agency-answer-fn
                   (fn [configuration]
                     (swap! configurations conj configuration)
                     (constantly {:state :not-contacted}))]
-      (is (fn? (runtime/open-cascade-resume-handler
-                {:author "wm-author" :reviewer "wm-reviewer"}))))
+      (let [handler (runtime/open-cascade-resume-handler
+                     {:author "wm-author" :reviewer "wm-reviewer"})]
+        (is (fn? handler))
+        ;; Contacts are constructed at invocation, after the runner has minted
+        ;; the registered ledger, rather than against stale composition opts.
+        (handler {:kind :not-a-held-cascade}
+                 {:registered-run/job-ledger live-ledger})))
     (is (= ["wm-author" "wm-reviewer"] (mapv :seat @configurations)))
     (is (= ["work" "work"]
-           (mapv #(get-in % [:opts :invoke-mode]) @configurations)))))
+           (mapv #(get-in % [:opts :invoke-mode]) @configurations)))
+    (is (every? #(identical? live-ledger
+                             (get-in % [:opts :registered-run/job-ledger]))
+                @configurations))))
 
 (deftest flight-runner-does-not-load-the-report
   (let [{:keys [exit out err]}

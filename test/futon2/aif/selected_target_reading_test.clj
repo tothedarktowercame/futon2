@@ -46,6 +46,17 @@
               :unresolved_reason "Heading only; no additional claim."}))
          (:sentences request))})
 
+(deftest first-prompt-states-the-citation-contract
+  (let [p (sut/prompt {:request {:sentences []}
+                       :acceptance-contract
+                       {:id :wm/selected-target-reading-analysis :version 1
+                        :response {:relation_vocabulary ["action"]}
+                        :validator {:id :wm/session-turn-analysis
+                                    :version 2}}})]
+    (is (re-find #"Every fragment must include a non-empty pattern_refs" p))
+    (is (re-find #"status='candidate'" p))
+    (is (re-find #"source_sha256" p))))
+
 (deftest exact-outer-target-is-published-by-the-designated-author
   (let [work (temp-dir "selected-reading-")
         readings (temp-dir "selected-reading-registry-")

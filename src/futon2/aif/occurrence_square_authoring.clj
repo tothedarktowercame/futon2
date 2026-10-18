@@ -37,7 +37,15 @@
     refusal))
 
 (defn prompt [{:keys [target analysis-digest occurrences]}]
-  (str "Author the four situation mappings for every cited pattern occurrence. "
+  (let [wire-occurrences
+        (mapv (fn [occurrence]
+                {:occurrence_id (:occurrence-id occurrence)
+                 :pattern (:pattern occurrence)
+                 :pattern_sha256 (:pattern-sha256 occurrence)
+                 :fragment (:fragment occurrence)
+                 :pattern_parts (:pattern-parts occurrence)})
+              occurrences)]
+    (str "Author the four situation mappings for every cited pattern occurrence. "
        "G evaluates complete cascade policies; these mappings are upstream "
        "construction evidence, not atomic actions. For each occurrence return "
        "exactly I1, I2, G and B, each with a concise situation element and an "
@@ -47,8 +55,10 @@
        "{schema:'wm/occurrence-square-maps-v1',target:'...',analysis_digest:'...',"
        "entries:[{occurrence_id:[pattern,fragmentIndex],maps:{I1:{element,source},"
        "I2:{element,source},G:{element,source},B:{element,source}}}]}.\n\n"
+       "Copy target and analysis_digest exactly from the request; they are binding "
+       "receipts, not values to calculate.\n\n"
        (json/generate-string {:target target :analysis_digest analysis-digest
-                              :occurrences occurrences} {:pretty true})))
+                              :occurrences wire-occurrences} {:pretty true}))))
 
 (defn- keywordize-roles [maps]
   (into {} (map (fn [[k v]] [(keyword (name k)) v])) maps))

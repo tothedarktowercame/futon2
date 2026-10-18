@@ -35,7 +35,8 @@
   abstention or refusal values.  Every attempt — failed answers, malformed
   answers, unknown senders, retries — is preserved in the ledger,
   append-only."
-  (:require [futon2.aif.interpretation-evidence :as evidence]))
+  (:require [clojure.edn :as edn]
+            [futon2.aif.interpretation-evidence :as evidence]))
 
 (def resume-schema :wm/open-cascade-resume-v1)
 
@@ -180,6 +181,26 @@
 ;; Answer validation (shared handoff contracts)
 ;; ---------------------------------------------------------------------------
 
+(defn- decoded-hole-id [k]
+  (cond
+    (vector? k) k
+    ;; JSON object keys representing vector ids arrive as keywords such as
+    ;; :["p/x" 0]. Ordinary keyword hole ids must retain their namespace.
+    (keyword? k) (let [s (subs (str k) 1)]
+                   (if (.startsWith s "[")
+                     (decoded-hole-id s)
+                     k))
+    (string? k) (try
+                  (let [v (edn/read-string k)]
+                    (if (vector? v) v k))
+                  (catch Throwable _ k))
+    :else k))
+
+(defn- normalized-decisions [answer]
+  (when (map? (:decisions answer))
+    (into {} (map (fn [[k v]] [(decoded-hole-id k) v]))
+          (:decisions answer))))
+
 (defn validate-answer
   "Validate a returned authoring answer against the shared handoff
   contracts: it names THIS requisition id, THIS cascade digest, resolves
@@ -189,7 +210,8 @@
   are typed errors with everything preserved; nothing is guessed."
   [requisition answer]
   (let [bad (fn [kind repair]
-              {:status :error :kind kind :repair repair})]
+              {:status :error :kind kind :repair repair})
+        decisions (normalized-decisions answer)]
     (cond
       (not (map? answer))
       (bad :answer-malformed {:answer-type (type answer)})
@@ -217,10 +239,11 @@
 
       ;; every requisitioned hole resolved, no foreign hole invented
       (not= (set (map :hole-id (:holes requisition)))
-            (set (keys (:decisions answer))))
+            (set (keys decisions)))
       (bad :answer-holes-unresolved
-           {:requisitioned (vec (sort (map :hole-id (:holes requisition))))
-            :answered (vec (sort (map str (keys (:decisions answer)))))})
+           {:requisitioned (vec (sort (map (comp pr-str :hole-id)
+                                           (:holes requisition))))
+            :answered (vec (sort (map pr-str (keys decisions))))})
 
       (not (and (map? (:patch answer))
                 (string? (get-in answer [:patch :namespace]))
@@ -233,7 +256,7 @@
       {:status :accepted
        :requisition-id (:requisition-id answer)
        :cascade-digest (:cascade-digest answer)
-       :decisions (:decisions answer)
+       :decisions decisions
        :patch (:patch answer)
        :by (:by answer)
        :accepted-by (:accepted-by answer)})))
@@ -359,6 +382,6 @@
                                           patch-loader)]
                     (if (= :error (:status loaded))
                       loaded
-                      (resume! ledger recognized
+                      (resume! ledger (assoc recognized :authoring accepted)
                                {:click-budget click-budget
                                 :selection-counter selection-counter})))))))))))
