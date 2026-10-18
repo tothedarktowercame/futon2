@@ -499,20 +499,59 @@ hold, say). It stops the loop for a human decision.
 """
 
 
+REPAIR_PROMPT_MAX_CHARS = 60_000
+REPAIR_EVIDENCE_EXCERPT_CHARS = 12_000
+
+
+def evidence_excerpt(text: str, limit: int = REPAIR_EVIDENCE_EXCERPT_CHARS) -> str:
+    """Keep repair dispatches bounded while leaving the full artifact addressable.
+
+    Live run records can contain the whole target field on one EDN line.  Sending
+    that line verbatim makes Agency reject the dispatch before the repair seat
+    runs.  The repair seat shares this filesystem, so the prompt needs an
+    informative excerpt and the artifact path, not a second copy of the store.
+    """
+    if len(text) <= limit:
+        return text
+    head = limit * 2 // 3
+    tail = limit - head
+    return (text[:head] +
+            f"\n\n... [{len(text) - limit} chars omitted; read the artifact path above] ...\n\n" +
+            text[-tail:])
+
+
 def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
                   page: Path | None = None) -> str:
     parts = [f"REPAIR REQUEST {tag}", "", f"FAILURE: {reason}", ""]
     if page:
-        parts += ["== debugger page " + str(page) + " ==", page.read_text(), "", DEBUG_GUIDE, ""]
+        parts += ["== debugger page " + str(page) + " ==",
+                  "Full evidence is at the path above; read it locally when the excerpt is truncated.",
+                  evidence_excerpt(page.read_text(errors="replace")), "", DEBUG_GUIDE, ""]
     if click:
-        parts += ["== last-result ==", json.dumps(click.get("last-result"), indent=1), "",
+        last_result = click.get("last-result") or {}
+        compact_result = {k: last_result.get(k) for k in
+                          ("click-id", "attempt-id", "outcome", "run-record",
+                           "run-id-observation", "binding-status", "report-card")
+                          if k in last_result}
+        parts += ["== last-result summary (full record is at :run-record) ==",
+                  evidence_excerpt(json.dumps(compact_result, indent=1)), "",
                   f"click log: {click.get('log')}", "== click log tail ==",
-                  "".join(Path(click["log"]).read_text(errors="replace").splitlines(True)[-60:]), ""]
-    parts += ["== phase log tail (futon2/data/wm-full-loop-phases.edn.log) ==", phase_tail(), ""]
+                  evidence_excerpt("".join(Path(click["log"]).read_text(errors="replace").splitlines(True)[-60:])), ""]
+    parts += ["== phase log tail (full file: futon2/data/wm-full-loop-phases.edn.log) ==",
+              evidence_excerpt(phase_tail()), ""]
     if prior:
-        parts += ["== earlier repair attempts on this fault ==", *prior, ""]
+        parts += ["== earlier repair attempts on this fault ==",
+                  evidence_excerpt("\n".join(prior)), ""]
     parts += [GUIDE.replace("{tag}", tag)]
-    return "\n".join(parts)
+    packet = "\n".join(parts)
+    if len(packet) > REPAIR_PROMPT_MAX_CHARS:
+        # GUIDE is operationally required, so trim only the assembled evidence.
+        guide = GUIDE.replace("{tag}", tag)
+        allowance = REPAIR_PROMPT_MAX_CHARS - len(guide) - 120
+        packet = (packet[:allowance] +
+                  "\n\n... [dispatch evidence truncated; use the artifact paths above] ...\n\n" +
+                  guide)
+    return packet
 
 
 def dispatch(seat: str, prompt: str) -> str:

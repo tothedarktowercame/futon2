@@ -43,7 +43,46 @@ the full series.
 
 ## Runs
 
-### Click 1 — pending
+### Click 1 — selection abstention; live repair transport failed
 
-Authorization: campaign click 1 of 5. Exact launch and result evidence will be
-appended from the durable click-loop ledger.
+- Authorization: campaign click 1 of 5.
+- Start: `2026-10-18T03:55:43Z`; issued at `03:56:44Z`; terminal at
+  `04:01:26Z` (about 282 seconds after issue).
+- Click: `wm-click-e6aae912-6192-4e62-90f8-df6abf67c01a`.
+- Run: `2026-10-18-d0537eb0-8e61-4766-8a50-ee79343e7e20`;
+  attempt `attempt-001`.
+- Preflight: five clicks available; fixed cast idle and invoke-ready; 13/13
+  tripwires clear. The 48 open obligations were recorded under the standing
+  selection-precedence ruling rather than used as a launch veto.
+- Trace: `stop-line-memory` at 20 seconds; `selection` from 40 seconds; the
+  debugger held selection at `03:59:55Z` on
+  `:wm/selection-terminal-abstention`.
+- Substantive condition: outer task selection found no unique task-state
+  minimum. Its undefeated set was `M-formal-war-machine` and
+  `M-digital-nomad-patterns`; therefore there was no addressable action.
+- Outcome: `abstained`, no tick carried. This is not counted as readiness
+  progress.
+- Run record:
+  `data/wm-runs/tick-run-record-2026-10-18-d0537eb0-8e61-4766-8a50-ee79343e7e20.edn`.
+- Full held-phase evidence:
+  `data/wm-click-loop/debugger/held-2026-10-18-d0537eb0-8e61-4766-8a50-ee79343e7e20.md`.
+- Terminal debugger page:
+  `data/wm-click-loop/debugger/wm-click-e6aae912-6192-4e62-90f8-df6abf67c01a.md`.
+- Click log: `data/wm-click-loop/click-001-1792295744.log`.
+
+The live repair dispatch `invoke-1792295995172-16440-eb338e9e` and terminal
+repair dispatch `invoke-1792296086410-16441-3f5192ef` both failed before the
+repair seat executed. Agency returned HTTP 400/code 1261, `Prompt exceeds max
+length`: the loop had embedded a 6.86 MB held-phase record (and later the large
+last-result) directly in the prompt. This is an apparatus defect independent of
+the selection abstention.
+
+Between-click repair: `wm_click_repair_loop.py` now sends bounded evidence
+excerpts plus the durable local artifact paths, omits unbounded last-result
+fields, and enforces a 60,000-character dispatch ceiling while retaining the
+mandatory repair guide. The regression test plants 200 KB page, log,
+last-result, and prior-attempt payloads and checks that the repair packet stays
+within the ceiling and retains its evidence addresses. Gate: 3 Python tests
+pass; both changed Python files compile. Click 2 must not launch until this
+repair is committed and the two-undefeated-task selection condition has been
+adjudicated or repaired offline.

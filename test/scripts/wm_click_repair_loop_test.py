@@ -58,6 +58,32 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertNotIn("no-policy-family/unknown", result.stdout)
         self.assertIn('"phase":"before-cascade-construction"', result.stdout)
 
+    def test_repair_packet_bounds_large_shared_artifacts(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            page = root / "held.md"
+            log = root / "click.log"
+            page.write_text("held evidence " + "x" * 200_000)
+            log.write_text("click evidence " + "y" * 200_000)
+            click = {
+                "log": str(log),
+                "last-result": {
+                    "click-id": "wm-click-test",
+                    "outcome": "abstained",
+                    "run-record": "/shared/full-run-record.edn",
+                    "enormous-field": "z" * 200_000,
+                },
+            }
+            packet = loop.repair_packet(
+                "wm-click-loop-repair-test", "selection stopped", click,
+                ["prior " + "p" * 200_000], page)
+        self.assertLessEqual(len(packet), loop.REPAIR_PROMPT_MAX_CHARS)
+        self.assertIn(str(page), packet)
+        self.assertIn("/shared/full-run-record.edn", packet)
+        self.assertNotIn("enormous-field", packet)
+        self.assertIn("VERDICT: repaired", packet)
+
 
 if __name__ == "__main__":
     unittest.main()
