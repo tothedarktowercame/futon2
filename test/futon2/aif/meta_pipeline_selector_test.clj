@@ -149,3 +149,21 @@
                                                (candidate "M-b" 0.5)]})]
     (is (= :no-unique-task-state-minimum (:reason receipt)))
     (is (= #{"M-a" "M-b"} (set (get-in receipt [:details :undefeated]))))))
+
+(deftest explicit-canonical-tie-rule-selects-an-equal-g-minimum
+  (let [run (fn [candidates]
+              (selector/select {:snapshot snapshot
+                                :candidates candidates
+                                :tie-breaker :canonical-identity}))
+        forward (run [(candidate "M-b" 0.5) (candidate "M-a" 0.5)])
+        reverse (run [(candidate "M-a" 0.5) (candidate "M-b" 0.5)])]
+    (is (= :selected (:status forward)))
+    (is (= :equal-minimum-canonical-representative (:reason forward)))
+    (is (= "M-a" (:selected forward)))
+    (is (= (:selected forward) (:selected reverse)) "input order is not authority")
+    (is (= {:members ["M-a" "M-b"]
+            :rule :canonical-identity
+            :g-equivalent? true}
+           (:equal-minimum forward)))
+    (is (= :tie (get-in forward [:pairwise 0 :winner]))
+        "the receipt preserves the equal-G comparison")))

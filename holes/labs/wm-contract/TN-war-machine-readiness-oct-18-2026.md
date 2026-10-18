@@ -83,6 +83,24 @@ fields, and enforces a 60,000-character dispatch ceiling while retaining the
 mandatory repair guide. The regression test plants 200 KB page, log,
 last-result, and prior-attempt payloads and checks that the repair packet stays
 within the ceiling and retains its evidence addresses. Gate: 3 Python tests
-pass; both changed Python files compile. Click 2 must not launch until this
-repair is committed and the two-undefeated-task selection condition has been
-adjudicated or repaired offline.
+pass; both changed Python files compile.
+
+The substantive selection condition was also repaired before Click 2. Both
+undefeated tasks had exactly equal complete scored vectors and their direct
+pairwise result was `:tie`; therefore each was a genuine G minimizer. The pure
+selector still refuses ambiguity by default. The production live selector now
+explicitly requests `:canonical-identity` representative selection only for
+an equal-G minimum and records `:reason
+:equal-minimum-canonical-representative`, the sorted tied members, the rule,
+and `:g-equivalent? true`; it does not rewrite the pairwise tie or invent a
+cost difference. Focused gates: 31 tests / 135 assertions / zero failures or
+errors. A read-only replay over the current production registries and pinned
+live outer-learning authority returned addressable action
+`{:type :advance-mission, :target "M-digital-nomad-patterns"}`, with tied
+members `M-digital-nomad-patterns` and `M-formal-war-machine` and outer learning
+`:live-consumed`. The replay issued no click. The automatically published
+repair ticket `T-repair-occ-216c…` is closed with this evidence.
+
+Disposition: both actual Click 1 blockers are repaired and gated. Click 2 may
+be launched after commit/hot-load; the remaining four campaign authorizations
+are intact.
