@@ -106,3 +106,35 @@
                            (constantly {:status :closed
                                         :cascade-digest (:digest record)})))]
         (is (= :continuation-close-unverified (:kind result)))))))
+
+(deftest reviewed-executor-requires-exact-independent-grounding
+  (let [ground (evidence/value-digest [:ground])
+        author-answer (atom nil)
+        executor
+        (sut/reviewed-build-review-close-executor
+         {:author "zai-2" :reviewer "zai-6"
+          :author-contact #(do (reset! author-answer %)
+                               {:request-id (:request-id %) :work :done})
+          :reviewer-contact
+          (fn [{:keys [request]}]
+            {:request-id (:request-id request)
+             :cascade-digest (:cascade-digest request)
+             :occurrence-id (:occurrence-id request)
+             :by "zai-2" :accepted-by "zai-6"
+             :effect {:status :verified
+                      :grounding {:kind :reviewed-build-review-close
+                                  :digest ground}}})})
+        record (fixture)
+        node (first (:frontier record))
+        receipt (executor {:cascade-digest (:digest record) :node node})]
+    (is (= (:occurrence-id node) (:occurrence-id @author-answer)))
+    (is (= :verified-effect (:evidence-kind receipt)))
+    (is (dispatch/valid-receipt? receipt (:digest record) node)))
+  (testing "self-review never mints an effect receipt"
+    (let [executor (sut/reviewed-build-review-close-executor
+                    {:author "zai-2" :reviewer "zai-2"
+                     :author-contact identity
+                     :reviewer-contact (constantly {})})]
+      (is (= :reviewed-effect-invalid
+             (:kind (executor {:cascade-digest (evidence/value-digest [:c])
+                               :node {:occurrence-id :n}})))))))

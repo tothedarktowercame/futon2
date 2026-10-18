@@ -86,6 +86,36 @@
        "plus accepted-by set to your own seat id.\n\nREQUISITION:\n"
        (pr-str requisition) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
 
+(defn- cascade-effect-author-prompt [request]
+  (str "Execute exactly this certified cascade occurrence through the ordinary "
+       "build/review/close work discipline. Ground any claimed effect in durable "
+       "artifacts (commit or content-addressed evidence). Reply with one JSON "
+       "object naming request-id, cascade-digest, occurrence-id, by, and effect.\n\n"
+       (pr-str request)))
+
+(defn- cascade-effect-review-prompt [{:keys [request author-answer]}]
+  (str "Independently verify this occurrence-level build/review/close result. "
+       "Inspect the durable artifacts. Reply with one JSON object containing "
+       "the exact request-id, cascade-digest, occurrence-id, author's by, your "
+       "accepted-by, and effect {status:'verified', grounding:{kind,digest}}. "
+       "Do not accept an ungrounded success label.\n\nREQUEST:\n"
+       (pr-str request) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
+
+(defn production-cascade-executors
+  "The live capability registry for certified cascade continuation."
+  [opts]
+  (let [author (:author opts)
+        reviewer (:reviewer opts)
+        author-contact (designated-agent-answer-fn
+                        opts author cascade-effect-author-prompt "work")
+        reviewer-contact (designated-agent-answer-fn
+                          opts reviewer cascade-effect-review-prompt "work")]
+    {:wm/pattern-apply
+     (cascade-continuation/reviewed-build-review-close-executor
+      {:author author :reviewer reviewer
+       :author-contact #(handoff/response-map (author-contact %))
+       :reviewer-contact #(handoff/response-map (reviewer-contact %))})}))
+
 (defn- patch-loader
   "Resolve a reviewed patch only after reloading its named namespace and
   checking the loaded source digest against the reviewed descriptor."
@@ -344,5 +374,6 @@
                :execution-journal-root
                (or (:execution-journal-root opts)
                    cascade-decision/default-execution-journal-root)
-               :executors cascade-capability-executors
+               :executors (or cascade-capability-executors
+                              (production-cascade-executors opts))
                :close-fn cascade-close-fn})))))

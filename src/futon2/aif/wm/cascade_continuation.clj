@@ -4,6 +4,7 @@
   spends a click; every effect must be supplied by a registered capability
   executor and survive journal validation before close is callable."
   (:require [clojure.java.io :as io]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
             [futon2.aif.wm.executable-cascade :as cascade]
             [futon2.aif.wm.execution-journal :as journal])
@@ -16,6 +17,47 @@
 
 (defn- fail [kind data]
   {:status :error :kind kind :repair data})
+
+(defn effect-request
+  [cascade-digest node author reviewer]
+  (let [body {:cascade-digest cascade-digest
+              :occurrence-id (:occurrence-id node)
+              :pattern (get-in node [:structural-node :pattern])
+              :clause (:clause node)
+              :author author :reviewer reviewer}]
+    (assoc body :schema :wm/cascade-effect-request-v1
+           :request-id (evidence/value-digest body))))
+
+(defn reviewed-build-review-close-executor
+  "Create the production :wm/pattern-apply executor. AUTHOR-CONTACT performs
+  the occurrence work; REVIEWER-CONTACT independently checks its grounded
+  artifacts. Only an exact, distinct-reviewer acceptance becomes a sealed
+  verified-effect receipt."
+  [{:keys [author reviewer author-contact reviewer-contact]}]
+  (fn [{:keys [cascade-digest node]}]
+    (let [request (effect-request cascade-digest node author reviewer)
+          answer (author-contact request)
+          reviewed (reviewer-contact {:request request :author-answer answer})
+          effect (:effect reviewed)]
+      (if (and (not= author reviewer)
+               (= (:request-id request) (:request-id reviewed))
+               (= cascade-digest (:cascade-digest reviewed))
+               (= (:occurrence-id node) (:occurrence-id reviewed))
+               (= author (:by reviewed))
+               (= reviewer (:accepted-by reviewed))
+               (= :verified (:status effect))
+               (map? (:grounding effect))
+               (hex64? (:digest (:grounding effect))))
+        (dispatch/seal-receipt
+         {:schema dispatch/receipt-schema
+          :cascade-digest cascade-digest
+          :occurrence-id (:occurrence-id node)
+          :operation (get-in node [:clause :operation])
+          :capability (get-in node [:clause :capability])
+          :evidence-kind :verified-effect
+          :effect effect})
+        {:status :error :kind :reviewed-effect-invalid
+         :request request :author-answer answer :review-answer reviewed}))))
 
 (defn- load-compiled [root digest]
   (let [path (io/file root (str digest ".edn"))]
