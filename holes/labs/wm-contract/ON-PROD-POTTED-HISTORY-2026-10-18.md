@@ -136,6 +136,39 @@ those of the serving production composition.
   `:clicks-spent 0`. This proves the production cascade boundary, not yet a
   completed tick; the next potted-history boundary is downstream enactment.
 
+### Real selected cascade replay, 2026-10-18
+
+Run `2026-10-18-ccaa1478-2c3b-4c84-9593-f11eb5a31e90` captured the sealed
+production checkpoint for `M-formal-war-machine`.  Its same-click resume first
+failed because D4 compared the pre-authoring executable digest with the
+selected-cascade digest returned by a successful retry.  Commit `4f82ccba3`
+keeps those identities separate: selection identity must remain fixed while a
+reviewed executable refinement is expected to receive a new digest.
+
+Serving replay `on-prod-live-m-formal-20261018-a` used that checkpoint and the
+reviewed clauses committed in `7aaafc859`.  It ran no selection and spent no
+click.  It reached `:cascade-ready` with selected digest
+`7c9601fd5fa56f7f7774d41cbc58a9b5b3bcc1d977115ab55a11c5c45986ceec`
+and executable digest
+`7f7250db365669fa7c64c4d26b811c5e645a7b5db6fd73f481accee347fc9cf1`.
+All four frontier occurrences route to `:full-loop-build-review-close`.
+
+That route is the next frontier, not a completed enactment.  Production
+currently records the route identifier in `cascade-capability-dispatch`, then
+the monolithic full-loop runner continues its ordinary whole-action path.
+There is no addressable continuation which consumes the routed occurrence
+steps and enters author/build/review/close from a sealed checkpoint.  The next
+implementation unit is therefore a production continuation port bound to the
+selected digest, executable digest, routed steps and existing run context;
+its success condition is verified effect receipts journalled for those exact
+occurrences, followed by the existing close machinery.
+
+The click's final repair-review job failed independently with Agency HTTP 400
+`Prompt exceeds max length`.  Commit `21ff02f66` replaces oversized embedded
+evidence with bounded artifact addresses; its focused Python gate proves a
+maximum 9,000-character dispatch while retaining debugger, run-record and
+click-log paths.
+
 Each replay generation records:
 
 - stack tag, repository commits/trees, tracked-dirty state and serving identity;
