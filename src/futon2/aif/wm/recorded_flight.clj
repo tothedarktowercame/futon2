@@ -13,7 +13,8 @@
             [futon2.aif.selected-target-reading :as target-reading]
             [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
             [futon2.aif.wm.cascade-enactment-compiler :as compiler]
-            [futon2.aif.wm.execution-journal :as journal])
+            [futon2.aif.wm.execution-journal :as journal]
+            [futon2.aif.wm.recorded-tick-evaluation :as tick-evaluation])
   (:import [java.time Instant]))
 
 (def schema :wm/recorded-flight-manifest-v1)
@@ -169,6 +170,13 @@
                               journal-loaded (journal/cascade-index executable)))
         journal-replay (when (journal/certified? journal-validation)
                          (journal/replay journal-loaded))
+        tick-result (when journal-replay
+                      (tick-evaluation/evaluate
+                       {:source-run-id (:source-run-id manifest)
+                        :journal-validation journal-validation
+                        :journal-replay journal-replay
+                        :production-close-record
+                        (:production-close-record manifest)}))
         open-holes (when executable
                      (filterv #(= :open-hole (:enactment-status %))
                               (:executable-nodes executable)))
@@ -181,7 +189,8 @@
                    (and (= :enacted (:status dispatch-result))
                         (not (journal/certified? journal-validation)))
                    :execution-journal-invalid
-                   (= :enacted (:status dispatch-result)) :tick-evaluation-not-wired
+                   (= :carried (:status tick-result)) :recorded-flight-complete
+                   tick-result (:kind tick-result)
                    (and action cascade-digest (nil? canonical))
                    :canonical-cascade-not-retained
                    action :cascade-selected
@@ -204,6 +213,7 @@
      :dispatch-result dispatch-result
      :journal-validation journal-validation
      :journal-replay journal-replay
+     :tick-evaluation tick-result
      :open-hole-count (count open-holes)
      :frontier frontier}))
 
@@ -272,7 +282,9 @@
                  :started-at started-at
                  :finished-at (str (Instant/now))
                  :clicks-spent 0
-                 :ticks-carried 0
+                 :ticks-carried (long (or (get-in inner
+                                                   [:tick-evaluation
+                                                    :ticks-carried]) 0))
                  :selector-calls 0
                  :agent-calls @calls
                  :restored [{:kind :selection-checkpoint

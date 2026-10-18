@@ -178,3 +178,22 @@ The remaining gap is therefore downstream of cascade enactment: the recorded
 flight has no tick evaluator that consumes the certified journal replay and
 decides whether the run carried a tick.  That evaluator must use the same
 production terminal criteria; counting eight receipts alone is insufficient.
+
+The recorded tick evaluator now applies that conservative criterion.  A
+certified journal with verified effects is necessary, but a tick is carried
+only when a production close record names the same run and attests that its
+trace was written.  Ledger
+`data/wm-recorded-flights/click5-through-tick-evaluation/ledger/f8bbef5f08810768060b9cd4ff543c84457f9d6574d9d3ecf23591917a5af7bd.edn`
+replays all eight effects and stops at
+`:production-close-evidence-missing`, as it must: the source click failed
+before close and therefore has no valid close evidence to replay.
+
+This exhausts the saved history.  It is positive readiness evidence through
+selection, reading publication, square construction, canonical cascade
+binding, compilation, offline capability dispatch, and journal validation.
+It is not yet evidence that the standard live runner can carry a tick: the
+recording pattern executor is intentionally scoped to the isolated replay and
+the source history contains no author/reviewer/full-close continuation.  Live
+readiness requires wiring the capability dispatcher into the production
+runner with a real `:wm/pattern-apply` executor, then exercising the existing
+full close/trace path.
