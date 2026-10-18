@@ -1,0 +1,53 @@
+# Give the outer target score its novelty term, so unobserved targets stop tying
+
+**Status:** OPEN
+Parent: M-aif-policy-conditioned-eig
+
+## Observed failure
+
+Two of the five 2026-10-18 readiness clicks (1 and 5) stopped or continued on
+an exact tie in task-state G between two missions
+(`TN-war-machine-readiness-oct-18-2026.md`; review
+`REVIEW-wm-readiness-2026-10-18b.md`). Joe's guidance: a tie at selection is
+first a symptom of incomplete ingest, and any tie-breaker must be G-based, not
+a coin flip.
+
+Reading `src/futon2/aif/outer_target_score.clj` at `b04e2df1c8db`:
+
+- a target with no observations of its own takes the prior `alpha`
+  (`(or (get-in belief [:targets target :alpha]) (get-in belief [:prior :alpha]))`),
+  so every unobserved target has the same prediction, risk, ambiguity and
+  canonical G; the click-5 checkpoint records about 510 `:target-unobserved`
+  entries;
+- epistemic value is fixed: `eig 0.0` ("no likelihood-parameter posterior
+  beyond the categorical Dirichlet is claimed here").
+
+## Scoped task
+
+Compute the expected information gain about each target's Dirichlet
+parameters (the novelty term of expected free energy) from its `alpha`, and
+subtract it in `canonical-g` in place of the constant `0.0`. A target with
+fewer observations then has larger novelty and lower G, so unobserved targets
+differ by how much selecting them would teach. Record the term under `:terms`
+with its kind, as risk and ambiguity are.
+
+Out of scope: the resource/cadence/continuation terms and the [0, 1] clamp
+(see `T-outer-target-g-policy-prior.md`).
+
+## Acceptance evidence
+
+- A regression with two targets that share the prior and differ only in
+  observation count: before the change their G is equal; after it the less
+  observed target has the lower G, by the computed novelty.
+- A control with two targets of identical `alpha`: G stays equal (a genuine
+  tie remains a tie and is still refused as `:no-unique-task-state-minimum`).
+- The Dirichlet novelty formula checked against a closed-form case.
+- The outer selector's `:absent-terms` diagnostic still reports what is
+  missing.
+
+## Provenance
+
+Found by claude-4 while annotating R5 (Expected Free Energy Inside an
+Auditable Controller) for the plop2026 docbook
+(`p4ng/plop-2026-code-annotations.json`), 2026-10-18. Written as a ticket at
+Joe's request so the War Machine may select it.
