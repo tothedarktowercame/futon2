@@ -142,3 +142,39 @@ store directory or fails typed before writing. A planted absent nested store
 checks save/reload identity. Repair dispatches are capped at 20,000 characters
 with 4,000-character evidence excerpts; full evidence remains available at the
 named local paths.
+
+#### Why the recorded flight did not predict these live failures
+
+The October 17 recorded flight was a deliberately narrower instrument than a
+deployment-equivalent click. Its design contract says that it resumes from an
+immutable outer-selection receipt, never invokes outer selection, rejects any
+unrecorded agent call, and writes beneath a caller-supplied isolated output
+root. The implementation preserves those distinctions: it accepts no selector
+port, injects the restored outer receipt, consumes pinned agent answers and a
+separately attributed `offline-operational-authoring.edn`, and explicitly
+creates its isolated journal directory before appending entries. See
+`RECORDED-FLIGHT-DESIGN-2026-10-17.md` and
+`src/futon2/aif/wm/recorded_flight.clj`.
+
+Consequently, the three new observations are at boundaries that the potted
+history intentionally did not exercise:
+
+- the equal-G condition belongs to live outer selection; recorded flight
+  restores an already selected receipt and structurally cannot call a selector;
+- the oversized debugger repair packet belongs to the live Agency transport;
+  recorded flight permits only manifest-pinned answers and makes no repair
+  dispatch;
+- the missing executable-cascade directory belongs to the production runner's
+  default store and first-write behaviour; recorded flight uses an explicit
+  isolated output root and creates its journal root itself.
+
+The replay evidence was still predictive inside its stated boundary. Click 2
+passed the repaired target-reading and occurrence-square stages, retained the
+canonical cascade, and reached cascade execution, which is the same downstream
+route exercised by the recorded flight. It then failed at the first production
+persistence operation outside the replay envelope. The mistake was therefore
+not that deterministic replay produced contradictory evidence; it was treating
+post-selection, stubbed-port, isolated-store evidence as proof of the live
+outer shell. Future readiness claims must name both layers separately:
+`recorded-flight downstream conformance` and `live serving-boundary
+conformance`. Neither implies the other.
