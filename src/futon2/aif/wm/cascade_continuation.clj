@@ -47,7 +47,7 @@
                (= (:occurrence-id node) (:occurrence-id reviewed))
                (= author (:by reviewed))
                (= reviewer (:accepted-by reviewed))
-               (= :verified (:status effect))
+               (contains? #{:verified "verified"} (:status effect))
                (map? (:grounding effect))
                (hex64? (:digest (:grounding effect))))
         (dispatch/seal-receipt

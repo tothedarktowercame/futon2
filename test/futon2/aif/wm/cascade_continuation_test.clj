@@ -121,7 +121,8 @@
              :cascade-digest (:cascade-digest request)
              :occurrence-id (:occurrence-id request)
              :by "zai-2" :accepted-by "zai-6"
-             :effect {:status :verified
+             ;; Agency JSON decoding preserves this enum as a string.
+             :effect {:status "verified"
                       :grounding {:kind :reviewed-build-review-close
                                   :digest ground}}})})
         record (fixture)
