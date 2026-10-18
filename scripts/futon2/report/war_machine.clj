@@ -1548,7 +1548,11 @@
   (let [policy (or (:outer-task-policy judge-opts) :seeded-baseline)
         selector (:outer-task-selection-fn judge-opts)
         receipt (cond
-                  selector (selector {:tasks tasks :seed seed})
+                  selector (selector {:tasks tasks :seed seed
+                                      :meta-field-observation
+                                      (:meta-field-observation judge-opts)
+                                      :meta-field-source-pin
+                                      (:meta-field-source-pin judge-opts)})
                   (= :seeded-baseline policy)
                   (outer-task-selection/select-task {:tasks tasks :seed seed})
                   :else

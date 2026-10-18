@@ -491,15 +491,34 @@
              :chosen (or chosen {:absent (or (:reason selection)
                                              :meta-selection-refused)})}
       chosen (assoc :action {:type (get action-type (:kind chosen))
-                             :target (:id chosen)}))))
+                             :target (:id chosen)})
+      (= :algorithm (:kind chosen))
+      (assoc :algorithm-admission
+             (select-keys (first (filter #(= selected-id (:id %)) tasks))
+                          [:repairs-capability :algorithm-admission
+                           :resource-admission])))))
+
+(defn- algorithm-candidates [tasks]
+  (mapv (fn [{:keys [id source repairs-capability algorithm-admission] :as task}]
+          {:id id :kind :algorithm
+           :support {:automated-feasibility :supported}
+           :channels {:machine-injury-repair-cost
+                      {:value 0.0 :freshness :current :source source}}
+           :repairs-capability repairs-capability
+           :algorithm-admission algorithm-admission
+           :resource-admission (:resource-admission task)
+           :unsupported-channels []})
+        tasks))
 
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
   [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates}}]
-  (let [{ordinary-tasks :tasks repair-excluded :excluded}
-        (attach-repair-observations tasks)
+  (let [algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
+        registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
+        {ordinary-tasks :tasks repair-excluded :excluded}
+        (attach-repair-observations registry-tasks)
         snapshot (fetch-snapshot)
         standing (into {} (map (fn [task]
                                  [(:id task)
@@ -559,7 +578,11 @@
                                    :ineligibility-evidence
                                    {:summary-source (:summary-source snapshot)
                                     :graph-source (:graph-source snapshot)})))
-        candidates (candidate-fn on-map snapshot)
+        ordinary-candidates (candidate-fn on-map snapshot)
+        candidates (if (seq algorithm-tasks)
+                     (into (algorithm-candidates algorithm-tasks)
+                           ordinary-candidates)
+                     ordinary-candidates)
         selection (meta/select {:snapshot snapshot :candidates candidates})
         learning-scores
         (when (contains? #{:shadow :live} (:mode outer-learning))
@@ -594,9 +617,16 @@
               {:schema meta/schema :status :refused
                :reason :outer-learning-state-unavailable})
           selection)
+        injury-excluded (when (seq algorithm-tasks)
+                          (mapv #(assoc (outer/task-view %)
+                                        :eligible false
+                                        :ineligible-reason :machine-injury-active)
+                                on-map))
         all-excluded (into repair-excluded
-                           (concat standing-excluded ownership-excluded off-map))
-        receipt (canonical-receipt on-map all-excluded effective-selection)
+                           (concat standing-excluded ownership-excluded off-map
+                                   injury-excluded))
+        receipt (canonical-receipt (into algorithm-tasks on-map)
+                                   all-excluded effective-selection)
         ;; Requirements Q8: the open population, its typed exclusions and
         ;; the exact candidates and pairwise result the effective selection
         ;; used, certified here where they are in hand
@@ -631,9 +661,23 @@
                                  :candidates candidates})
       receipt)))
 
-(defn selector [{:keys [tasks]}]
-  (select-live {:tasks tasks :retain-manifest? true
-                :outer-learning (outer-learning-runtime/load-shadow)}))
+(defn selector
+  [{:keys [tasks meta-field-observation meta-field-source-pin]}]
+  (let [verification (when meta-field-observation
+                       (field/verify meta-field-observation
+                                     {:expected-snapshot-pin
+                                      meta-field-source-pin}))
+        algorithms (if (= :verified (:status verification))
+                     (filterv #(= :algorithm (:kind %))
+                              (:rows meta-field-observation))
+                     [])]
+    (if (and meta-field-observation (not= :verified (:status verification)))
+      (canonical-receipt
+       tasks [] {:schema meta/schema :status :refused
+                 :reason :meta-field-observation-unverified
+                 :details {:verification verification}})
+      (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
+                    :outer-learning (outer-learning-runtime/load-shadow)}))))
 
 (defn browser-receipt
   "Return the bounded UI projection of a canonical outer-selection receipt.

@@ -28,6 +28,57 @@
   [{:id "M-a" :kind :mission :priority 2 :source (pin "M-a.md" "c")}
    {:id "M-b" :kind :mission :priority 8 :source (pin "M-b.md" "d")}])
 
+(def admitted-algorithm
+  {:id "A-self-heal" :kind :algorithm :source (pin "A-self-heal.md" "e")
+   :repairs-capability :wm-click-completes-with-reviewable-receipts
+   :algorithm-admission
+   {:injury-observation
+    {:status :active
+     :capability :wm-click-completes-with-reviewable-receipts
+     :injury-verification {:status :verified}}}
+   :resource-admission {:required {:ordinary-clicks 1}}})
+
+(deftest verified-injury-routes-meta-to-the-algorithm-arm
+  (let [receipt (live/select-live
+                 {:tasks (conj tasks admitted-algorithm)
+                  :fetch-snapshot (constantly snapshot)})]
+    (is (= {:type :run-algorithm :target "A-self-heal"}
+           (:action receipt)))
+    (is (= "A-self-heal" (get-in receipt [:chosen :id])))
+    (is (= :wm-click-completes-with-reviewable-receipts
+           (get-in receipt [:algorithm-admission :repairs-capability])))
+    (is (= #{"M-a" "M-b"}
+           (->> (:excluded receipt)
+                (filter #(= :machine-injury-active (:ineligible-reason %)))
+                (map :id) set)))))
+
+(deftest unverified-algorithm-admission-is-refused
+  (let [receipt (live/select-live
+                 {:tasks (conj tasks
+                               (assoc-in admitted-algorithm
+                                         [:algorithm-admission :injury-observation
+                                          :injury-verification :status]
+                                         :refused))
+                  :fetch-snapshot (constantly snapshot)})]
+    (is (= :candidate-invalid
+           (get-in receipt [:policy :meta-selection :reason])))
+    (is (= [:algorithm-injury-admission-invalid]
+           (get-in receipt [:policy :meta-selection :details
+                            :candidate-errors "A-self-heal"])))))
+
+(deftest production-adapter-refuses-a-self-signed-meta-field
+  (let [forged {:schema :wm/meta-field-observation-v1
+                :status :observed
+                :rows [admitted-algorithm]
+                :source-pin (pin "wm://meta-field-observation-v1" "f")}
+        receipt (live/selector
+                 {:tasks tasks
+                  :meta-field-observation forged
+                  :meta-field-source-pin (pin "wm://different-authority" "a")})]
+    (is (= :meta-field-observation-unverified
+           (get-in receipt [:policy :meta-selection :reason])))
+    (is (nil? (:action receipt)))))
+
 (defn- authorized-snapshot [snapshot]
   (let [agency (or (:agency snapshot) {:agents {}})
         summary-bytes (json/generate-string (:summary snapshot))

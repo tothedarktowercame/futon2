@@ -103,12 +103,23 @@
        (pin? source) (= :current freshness)))
 
 (defn- candidate-errors [nodes collisions snapshot candidate]
-  (cond-> []
+  (let [algorithm? (= :algorithm (:kind candidate))
+        admission (:algorithm-admission candidate)]
+   (cond-> []
     (not (string? (:id candidate))) (conj :identity-invalid)
     (not (contains? task-kinds (:kind candidate))) (conj :kind-invalid)
     (contains? collisions (:id candidate)) (conj :pipeline-identity-collision)
-    (and (not (contains? collisions (:id candidate)))
+    (and (not algorithm?)
+         (not (contains? collisions (:id candidate)))
          (not (contains? nodes (:id candidate)))) (conj :not-in-pipeline-cascade)
+    (and algorithm?
+         (not (and (= :active (get-in admission [:injury-observation :status]))
+                   (= (:repairs-capability candidate)
+                      (get-in admission [:injury-observation :capability]))
+                   (= :verified
+                      (get-in admission [:injury-observation
+                                         :injury-verification :status])))))
+    (conj :algorithm-injury-admission-invalid)
     (not (contains? #{:supported :infeasible :unknown}
                     (get-in candidate [:support :automated-feasibility])))
     (conj :feasibility-invalid)
@@ -119,7 +130,7 @@
                               :pipeline-freshness-cost} channel)
                  (not= source (:graph-source snapshot))))
           (:channels candidate))
-    (conj :task-state-source-mismatch)))
+    (conj :task-state-source-mismatch))))
 
 (defn- channel-coverage [candidates]
   (let [channels (->> candidates (mapcat (comp keys :channels)) set sort vec)]
@@ -198,11 +209,18 @@
                                                            snapshot c))]
                                       [(:id c) (vec errors)])))
                             candidates)
+            algorithms (filterv #(= :algorithm (:kind %)) candidates)
             infeasible (filterv #(= :infeasible
                                     (get-in % [:support :automated-feasibility]))
                                 candidates)
-            admitted (filterv #(not= :infeasible
-                                     (get-in % [:support :automated-feasibility]))
+            ;; A verified injury changes the support, rather than merely adding
+            ;; another task to an ordinary comparison.  This is the A arm of
+            ;; META: ordinary work cannot outrank repair while the machine is
+            ;; known unable to complete a reviewable click.
+            admitted (filterv #(and (not= :infeasible
+                                          (get-in % [:support :automated-feasibility]))
+                                    (or (empty? algorithms)
+                                        (= :algorithm (:kind %))))
                               candidates)
             coverage (channel-coverage admitted)]
         (cond
