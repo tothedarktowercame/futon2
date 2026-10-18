@@ -369,3 +369,20 @@ the saved production selection through the repaired held phase. It does not
 retroactively turn Click 5 into a carried tick, and it authorizes no additional
 click. The next live run, if separately authorized, must still demonstrate
 frontier enactment and tick carriage in the ordinary shell.
+
+### Peer-review clarification and future cast discipline
+
+Independent review `84a6d1f86` correctly identified the equal-G ingest gap,
+the remaining JSON compatibility fallback, and the lack of any successful
+Zai-7 live repair during this campaign. Its concern about post-failure work
+needs one clarification: Click 5's `003` through `006` checkpoints are typed
+`:not-reached-*` sorries, and `007-closed.edn` says `:not-a-delivery` because
+there was `:no-authored-commit`. The machine recorded and closed a failed
+attempt; it did not dispatch or commit unrelated selected work.
+
+Future click campaigns use the stable role identities `wm-author`,
+`wm-reviewer`, and `wm-repair-reviewer`. The click loop now resets all three
+sessions immediately before each click and records a `cast-reset` ledger row.
+It fails closed if a role is missing, busy, not invoke-ready, or cannot be
+reset, so stale conversational context cannot silently enter a click. This
+separates durable role/provenance identity from disposable model context.

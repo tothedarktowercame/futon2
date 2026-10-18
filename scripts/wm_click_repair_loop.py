@@ -116,6 +116,40 @@ def get_json(path: str, timeout: int = 30) -> dict:
         return json.load(fh)
 
 
+def post_json(path: str, timeout: int = 30) -> dict:
+    req = urllib.request.Request(f"{AGENCY}{path}", method="POST", data=b"")
+    with urllib.request.urlopen(req, timeout=timeout) as fh:
+        return json.load(fh)
+
+
+def reset_cast_sessions(args) -> None:
+    """Start every click with fresh conversations for the explicit role cast.
+
+    Stable wm-* identities preserve role/provenance while reset-session clears
+    model conversation state.  Refuse to proceed when a seat is busy or cannot
+    be reset: silently retaining an old context defeats this boundary.
+    """
+    seats = [args.author, args.reviewer, args.repair_reviewer]
+    if len(set(seats)) != 3:
+        raise RuntimeError(f"cast identities must be distinct: {seats}")
+    agents = get_json("/api/alpha/agents").get("agents", {})
+    for seat in seats:
+        row = agents.get(seat)
+        if not row:
+            raise RuntimeError(f"cast seat is not registered: {seat}")
+        if row.get("status") != "idle" or not row.get("invoke-ready?"):
+            raise RuntimeError(f"cast seat is not idle and invoke-ready: {seat}")
+    resets = {}
+    for seat in seats:
+        result = post_json(f"/api/alpha/agents/{seat}/reset-session")
+        if not result.get("ok"):
+            raise RuntimeError(f"cast session reset failed: {seat}: {result}")
+        resets[seat] = result.get("old-session-id")
+    record({"event": "cast-reset", "cast": seats,
+            "old-session-ids": resets})
+    log(f"cast reset: {' / '.join(seats)} now have fresh conversations")
+
+
 def jvm_eval(form: str, timeout: int = 600) -> dict:
     r = sh(EVAL, "-", input=form, timeout=timeout, cwd=F3C)  # it reads futon3c/.admintoken
     out = r.stdout.strip().splitlines()
@@ -271,6 +305,7 @@ def abort_held_run(run_id: str) -> dict:
 
 
 def fire(n: int, args, since_epoch: int) -> dict:
+    reset_cast_sessions(args)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,

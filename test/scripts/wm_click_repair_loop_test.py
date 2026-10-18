@@ -4,6 +4,7 @@ import io
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -32,6 +33,43 @@ class RepairLoopCastTest(unittest.TestCase):
         ])
         self.assertEqual("wm-repair-reviewer", args.repair_seat)
         self.assertNotIn("proof", repr(vars(args)))
+
+    def test_each_click_resets_the_explicit_role_cast(self):
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "1", "--owner", "codex-68",
+            "--issuing-caller", "codex-68", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        rows = {seat: {"status": "idle", "invoke-ready?": True}
+                for seat in (args.author, args.reviewer, args.repair_reviewer)}
+        with mock.patch.object(loop, "get_json", return_value={"agents": rows}), \
+             mock.patch.object(loop, "post_json",
+                               return_value={"ok": True,
+                                             "old-session-id": "old"}) as post, \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            loop.reset_cast_sessions(args)
+        self.assertEqual(3, post.call_count)
+        self.assertEqual("cast-reset", record.call_args.args[0]["event"])
+
+    def test_cast_reset_fails_closed_when_a_role_is_busy(self):
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "1", "--owner", "codex-68",
+            "--issuing-caller", "codex-68", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        rows = {seat: {"status": "idle", "invoke-ready?": True}
+                for seat in (args.author, args.reviewer, args.repair_reviewer)}
+        rows["wm-reviewer"]["status"] = "invoking"
+        with mock.patch.object(loop, "get_json", return_value={"agents": rows}), \
+             mock.patch.object(loop, "post_json") as post:
+            with self.assertRaisesRegex(RuntimeError, "wm-reviewer"):
+                loop.reset_cast_sessions(args)
+        post.assert_not_called()
 
     def test_reading_refusal_is_not_reported_as_no_policy_family(self):
         record = '''
