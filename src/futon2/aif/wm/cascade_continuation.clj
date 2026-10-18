@@ -4,7 +4,6 @@
   spends a click; every effect must be supplied by a registered capability
   executor and survive journal validation before close is callable."
   (:require [clojure.java.io :as io]
-            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
             [futon2.aif.wm.executable-cascade :as cascade]
             [futon2.aif.wm.execution-journal :as journal])
