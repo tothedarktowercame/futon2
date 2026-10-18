@@ -6330,10 +6330,13 @@
             ;; receipt installed by full-loop-runtime.
             {judgement0-reading :judgement
              selected-target-reading-record :record}
-            (selected-target-reading-step
-             opts judgement0-base
-             (when (nil? (:flight opts)) target-reading-fn)
-             (fn [record]
+            (run-phase!
+             opts @phase-context :selected-target-reading
+             (fn []
+               (selected-target-reading-step
+                opts judgement0-base
+                (when (nil? (:flight opts)) target-reading-fn)
+                (fn [record]
                (try
                  (run-phase!
                   opts @phase-context :selected-target-reading-redecision
@@ -6358,13 +6361,18 @@
                               :failure-stage :selected-target-reading-redecision
                               :target (:target record)
                               :selected-target-reading record}
-                             e))))))
+                             e)))))))
+             (fn [result]
+               {:reading-status (get-in result [:record :status])}))
             {judgement0-squares :judgement
              occurrence-square-authoring-record :record}
-            (occurrence-square-authoring-step
-             opts judgement0-reading
-             (when (nil? (:flight opts)) square-authoring-fn)
-             (fn [record]
+            (run-phase!
+             opts @phase-context :occurrence-square-authoring
+             (fn []
+               (occurrence-square-authoring-step
+                opts judgement0-reading
+                (when (nil? (:flight opts)) square-authoring-fn)
+                (fn [record]
                (try
                  (run-phase!
                   opts @phase-context :occurrence-square-redecision
@@ -6386,7 +6394,9 @@
                               :failure-kind :occurrence-square-redecision-failed
                               :failure-stage :occurrence-square-redecision
                               :occurrence-square-authoring record}
-                             e))))))
+                             e)))))))
+             (fn [result]
+               {:authoring-status (get-in result [:record :status])}))
             _occurrence-square-authoring-complete
             (when (and occurrence-square-authoring-record
                        (not (:published occurrence-square-authoring-record)))
@@ -6481,7 +6491,12 @@
             selection-clock (monotonic-clock)
             selection-completed-at (selection-clock)
             {judgement0 :judgement selected-reading-record :record}
-            (selected-reading-phase opts judgement0 selection-clock selection-completed-at)
+            (run-phase!
+             opts @phase-context :selected-reading
+             #(selected-reading-phase opts judgement0 selection-clock
+                                      selection-completed-at)
+             (fn [result]
+               {:reading-status (get-in result [:record :status])}))
             world-at-selection (capture-selection-world!
                                 (assoc opts :selection-completed-at
                                        (str selection-completed-at))
@@ -6503,7 +6518,11 @@
             ;; selection); the entry stays retained on the run record.
             cascade-execution0
             (when (map? (get-in ordinary-entry [:action :precedence :co-apply]))
-              (wm-cascade-decision/execute-selected-cascade! ordinary-entry opts))
+              (run-phase!
+               opts @phase-context :cascade-execution
+               #(wm-cascade-decision/execute-selected-cascade! ordinary-entry opts)
+               #(select-keys % [:status :kind :cascade-digest
+                                :compiled-digest])))
             ;; The live carrier includes D4's retry capability.  A configured
             ;; debugger/resume handler may repair and retry this held phase
             ;; now, without another click or selection.  Checkpoints below
@@ -6513,13 +6532,16 @@
                         (:kind cascade-execution0))
                      (:open-cascade-resume-fn opts))
               (let [resume-fn (:open-cascade-resume-fn opts)
-                    handled (try
-                              (resume-fn cascade-execution0 opts)
-                              (catch clojure.lang.ArityException _
-                                ;; Compatibility for explicitly supplied test
-                                ;; and embedding handlers. Production D4 uses
-                                ;; the two-arity form so it sees live ledgers.
-                                (resume-fn cascade-execution0)))]
+                    handled
+                    (run-phase!
+                     opts @phase-context :cascade-resume
+                     #(try
+                        (resume-fn cascade-execution0 opts)
+                        (catch clojure.lang.ArityException _
+                          ;; Compatibility for explicitly supplied test and
+                          ;; embedding handlers. Production D4 uses two args.
+                          (resume-fn cascade-execution0)))
+                     #(select-keys % [:status :kind :cascade-digest]))]
                 (case (:status handled)
                   :resumed (:result handled)
                   :error handled

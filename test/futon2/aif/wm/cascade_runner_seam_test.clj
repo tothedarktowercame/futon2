@@ -85,6 +85,7 @@
                                 {"M-current" 1} decide-opts)))
         cascades (temp-dir "seam-cascades-")
         journal (temp-dir "seam-journal-")
+        phase-events (atom [])
         ;; this suite runs from an isolated Packet worktree, not the
         ;; canonical checkout the runner's source-drift guard pins to; the
         ;; guard is redef'd away HERE ONLY, with the runner otherwise real
@@ -106,10 +107,12 @@
                         :repair-system-record-fn (fn [m] {:repair/id "repair-seam"
                                                           :repair/class (:repair-class m)})
                         :dispatch-fn (fn [& _] (throw (ex-info "no enactment" {})))
+                        :phase-log-fn #(swap! phase-events conj %)
                         :executable-cascade-root (.getPath cascades)
                         :execution-journal-root (.getPath journal)}
                        seam-opts)))]
     {:result result :decision decision ::selector-calls @selector-calls
+     :phase-events @phase-events
      :cascades cascades :journal journal :click true}))
 
 (deftest selected-cascade-is-bound-saved-validated-and-held-open
@@ -248,7 +251,7 @@
                            :capability :wm/pattern-apply}
                    occ-y1 {:operation :apply-pattern
                            :capability :wm/pattern-apply}}
-        {:keys [result]}
+        {:keys [result phase-events] :as click}
         (click! [px py]
                 {:cascade-reading-pins
                  {"M-current" {:excerpt-digest (hex [:excerpt])
@@ -272,6 +275,13 @@
                 {:bind-cascade-identity {:readings (fn [_] square-readings)}})
         cell (get-in result [:checkpoints :selection])]
     (is (= 1 @resume-count))
+    (is (= 1 (::selector-calls click))
+        "same-phase resume did not rerun G selection")
+    (doseq [phase [:selected-target-reading :occurrence-square-authoring
+                   :selected-reading :cascade-execution :cascade-resume]]
+      (is (= [:start :end]
+             (mapv :transition (filter #(= phase (:phase %)) phase-events)))
+          (str phase " is an addressable run-phase! boundary")))
     (is (nil? (:sorry cell)) "the held cascade was closed on the same selection")
     (is (= :author-dispatch (get-in result [:data :failure-stage]))
         "execution advanced past cascade compilation to the fixture's dispatch stop")))
