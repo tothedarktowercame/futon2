@@ -11,7 +11,9 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-target-reading :as target-reading]
-            [futon2.aif.wm.cascade-enactment-compiler :as compiler])
+            [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
+            [futon2.aif.wm.cascade-enactment-compiler :as compiler]
+            [futon2.aif.wm.execution-journal :as journal])
   (:import [java.time Instant]))
 
 (def schema :wm/recorded-flight-manifest-v1)
@@ -138,6 +140,35 @@
             (fail! :recorded-flight-operational-authoring-invalid
                    {:refusal (:refusal compiled)}))
         executable (or (:record compiled) canonical)
+        dispatch-result (when (and compiled (seq (:frontier executable)))
+                          (dispatch/dispatch-frontier
+                           {:wm/pattern-apply
+                            (dispatch/recording-pattern-executor
+                             (str (io/file output-root "effects")))}
+                           executable))
+        journal-root (str (io/file output-root "journal"))
+        journal-entries
+        (when (= :enacted (:status dispatch-result))
+          (let [now (Instant/now)]
+            (mapv (fn [i receipt]
+                    (journal/entry
+                     {:journal-id (:digest executable)
+                      :node-or-group (:occurrence-id receipt)
+                      :phase :enacted
+                      :evidence {:kind :verified-effect
+                                 :digest (:digest receipt)}
+                      :valid-time (str (.plusNanos now (inc i)))
+                      :recorded-time (str (.plusNanos now (inc i)))}))
+                  (range) (:receipts dispatch-result))))
+        _ (when (seq journal-entries)
+            (.mkdirs (io/file journal-root)))
+        _ (doseq [entry journal-entries] (journal/append! journal-root entry))
+        journal-loaded (when journal-entries (journal/load-journal journal-root))
+        journal-validation (when journal-entries
+                             (journal/validate-journal
+                              journal-loaded (journal/cascade-index executable)))
+        journal-replay (when (journal/certified? journal-validation)
+                         (journal/replay journal-loaded))
         open-holes (when executable
                      (filterv #(= :open-hole (:enactment-status %))
                               (:executable-nodes executable)))
@@ -146,7 +177,11 @@
                    (and (seq open-holes) (nil? authoring))
                    :operational-authoring-missing
                    (seq open-holes) :operational-authoring-incomplete
-                   (seq (:frontier executable)) :flight-boundary-not-wired
+                   (= :error (:status dispatch-result)) (:kind dispatch-result)
+                   (and (= :enacted (:status dispatch-result))
+                        (not (journal/certified? journal-validation)))
+                   :execution-journal-invalid
+                   (= :enacted (:status dispatch-result)) :tick-evaluation-not-wired
                    (and action cascade-digest (nil? canonical))
                    :canonical-cascade-not-retained
                    action :cascade-selected
@@ -166,6 +201,9 @@
      :canonical-cascade canonical
      :compiled-cascade executable
      :compiled-cascade-digest (:digest executable)
+     :dispatch-result dispatch-result
+     :journal-validation journal-validation
+     :journal-replay journal-replay
      :open-hole-count (count open-holes)
      :frontier frontier}))
 

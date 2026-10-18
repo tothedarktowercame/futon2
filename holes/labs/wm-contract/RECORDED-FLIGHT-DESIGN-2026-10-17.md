@@ -157,3 +157,24 @@ further replay must not manufacture such receipts.  The next implementation
 unit is an operation dispatch table for declared cascade capabilities, with a
 real `:wm/pattern-apply` executor that emits verified-effect journal entries;
 only then may the recorded flight advance to replay/tick evaluation.
+
+The capability boundary is now implemented as
+`futon2.aif.wm.cascade-capability-dispatch`.  It accepts only explicitly
+registered capabilities and treats a call as enacted only when the executor
+returns a sealed receipt bound to the exact cascade digest, occurrence,
+operation and capability.  Missing executors and malformed receipts are typed
+faults.  For the offline replay, `:wm/pattern-apply` writes a content-addressed,
+append-only application record under the isolated replay root; its receipt is
+explicitly scoped `:offline-replay` and makes no claim about a live mission.
+
+The replay then appends eight `:enacted`/`:verified-effect` entries to the
+canonical execution journal, validates the journal against the executable
+cascade and replays all eight occurrences as enacted.  Ledger
+`data/wm-recorded-flights/click5-through-journal-2/ledger/f75c958324ceb21ee5a3adea8c0eb193314e8f99e4d407ea1d31a5c73e06037a.edn`
+records zero clicks, zero selector calls, zero holes, a certified eight-entry
+journal, and the next frontier `:tick-evaluation-not-wired`.
+
+The remaining gap is therefore downstream of cascade enactment: the recorded
+flight has no tick evaluator that consumes the certified journal replay and
+decides whether the run carried a tick.  That evaluator must use the same
+production terminal criteria; counting eight receipts alone is insufficient.
