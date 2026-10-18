@@ -57,7 +57,8 @@
         agency-base (or (:agency-base opts) runner/default-agency-base)
         answer (flight-runner/agency-answer-fn
                 {:seat author :caller "wm-full-loop"
-                 :opts (assoc opts :invoke-mode (or invoke-mode "brief"))
+                 :opts (assoc opts :agency-base agency-base
+                                   :invoke-mode (or invoke-mode "brief"))
                  :prompt-fn prompt-fn})]
     (fn [issued]
       (let [roster (try (runner/agent-roster agency-base)
