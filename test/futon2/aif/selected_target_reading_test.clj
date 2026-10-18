@@ -342,9 +342,8 @@
                  :kind :selected-target-reading-validation-refused
                  :target "M-selected"
                  :detail {:stderr "display cues exceed the sentence budget"}}
-        cell (cond-> {:sorry {:decision {:status :abstained}}}
-               refusal
-               (assoc-in [:judgment :selected-target-reading-request] refusal))]
+        cell (assoc-in {:sorry {:decision {:status :abstained}}}
+                       [:judgment :selected-target-reading-request] refusal)]
     (is (= refusal
            (#'runner/retained-selected-target-reading
             {:checkpoints {:selection cell}})))
@@ -427,3 +426,53 @@
     (is (re-find #"fragment-without-validated-pattern-ref"
                  (str (:feedback (second @contacted))))
         "the correction feedback enumerates the failing fragments")))
+
+(deftest offset-resolution-failure-still-enters-the-correction-round
+  (let [work (temp-dir "selected-reading-offset-repair-")
+        readings (temp-dir "selected-reading-offset-registry-")
+        source (io/file work "M-selected.md")
+        _ (spit source "# M-selected\n\n## HEAD\nOPEN work.\n")
+        excerpt (registry/excerpt-digest source)
+        calls (atom 0)
+        result (sut/repair!
+                {:run-id "offset-repair" :author "wm-author"
+                 :request-root (.getPath work)
+                 :target-reading-root (.getPath readings)
+                 :answer-fn
+                 (fn [{:keys [request]}]
+                   (let [n (swap! calls inc)
+                         a (analysis-for request)]
+                     {:analysis (if (= n 1)
+                                  (assoc-in a [:sentences 1 :fragments 0 :text]
+                                            "NOT IN SOURCE")
+                                  a)}))}
+                (judgement "M-selected" (.getPath source) excerpt))]
+    (is (= 2 @calls) "nil validator output must not abort correction")
+    (is (= :published (:status result)))))
+
+(deftest corrected-answer-is-rechecked-for-cascade-failures
+  (let [work (temp-dir "selected-reading-double-patref-")
+        readings (temp-dir "selected-reading-double-patref-registry-")
+        source (io/file work "M-selected.md")
+        _ (spit source "# M-selected\n\n## HEAD\nOPEN work.\n")
+        excerpt (registry/excerpt-digest source)
+        calls (atom 0)
+        result (sut/repair!
+                {:run-id "double-patref" :author "wm-author"
+                 :request-root (.getPath work)
+                 :target-reading-root (.getPath readings)
+                 :answer-fn
+                 (fn [{:keys [request]}]
+                   (swap! calls inc)
+                   {:analysis
+                    (update (analysis-for request) :sentences
+                            (fn [sentences]
+                              (mapv #(update % :fragments
+                                             (fn [frags]
+                                               (mapv (fn [f] (dissoc f :pattern_refs))
+                                                     frags)))
+                                    sentences)))})}
+                (judgement "M-selected" (.getPath source) excerpt))]
+    (is (= 2 @calls))
+    (is (= :selected-target-reading-validation-refused (:kind result)))
+    (is (seq (get-in result [:detail :cascade-failures])))))

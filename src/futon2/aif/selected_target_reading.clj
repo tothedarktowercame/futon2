@@ -411,7 +411,7 @@
                         cascade-failures
                         (fn []
                           (let [output @last-output]
-                            (when (.isFile output)
+                            (when (and output (.isFile ^java.io.File output))
                               (let [result (analysis-cascade/analysis->cascades
                                             (json/parse-string (slurp output) true)
                                             {:mode :overlap})]
@@ -430,7 +430,7 @@
                                                           (json/generate-string
                                                            (or cascade0 []))
                                                           "\nEvery fragment must cite at least one pattern in pattern_refs as {\"id\": \"<pattern id under /home/joe/code/futon3/library>\", \"rationale\": \"why it fits\"}; a fragment with no citation cannot form a cascade."
-                                                          (when (zero? (:exit validated0))
+                                                          (when-not (zero? (:exit validated0))
                                                             (str "\nExact offset diagnostics: "
                                                                  (json/generate-string
                                                                   (offset-diagnostics request analysis)))))
@@ -440,13 +440,18 @@
                         validated (if corrected-analysis
                                     (validate corrected-analysis)
                                     validated0)
+                        cascade-final (cascade-failures)
                         exchange (if corrected-analysis correction exchange)
                         output @last-output
                         legacy-output (io/file (str (.getPath validation-request)
                                                     ".analysis.json"))]
-                    (if-not (and (zero? (:exit validated)) (.isFile output))
+                    (if-not (and (zero? (:exit validated))
+                                 (nil? cascade-final)
+                                 output (.isFile ^java.io.File output))
                       (refused need :selected-target-reading-validation-refused
-                               {:exit (:exit validated) :stderr (:err validated)})
+                               {:exit (:exit validated)
+                                :stderr (:err validated)
+                                :cascade-failures cascade-final})
                       (let [canonical (json/parse-string (slurp output) true)
                             ;; Refresh the legacy single-name output for
                             ;; existing tooling; the attempt-scoped sibling
