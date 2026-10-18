@@ -108,6 +108,17 @@ They are not yet a readiness certificate.
 
 ## Required ledger
 
+The runner-seam gate is integration-shaped rather than non-returning: its
+seven scenarios normally take about 20--23 seconds because each captures the
+live selection world. `scripts/run_wm_runner_seam_gate.sh` gives it a
+60-second hard ceiling and records elapsed time.
+
+`futon2.aif.full-loop-runtime/resume-on-prod-cascade!` loads one sealed
+production checkpoint and re-enters the real `:cascade-execution` phase. It
+does not call selection, spend a click, or certify a tick. Phase telemetry,
+debugger handling, canonical stores, validation, and journal behavior remain
+those of the serving production composition.
+
 Each replay generation records:
 
 - stack tag, repository commits/trees, tracked-dirty state and serving identity;

@@ -19,6 +19,8 @@
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
+            [futon2.aif.wm.on-prod-history :as on-prod-history]
+            [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
            [java.util UUID]))
@@ -285,3 +287,34 @@
                                (open-cascade-resume-handler runner-opts0)))]
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
+
+(defn resume-on-prod-cascade!
+  "Resume the production cascade-execution boundary from a sealed checkpoint.
+
+  This deliberately does not call selection, spend a click, or claim a tick.
+  It runs the same production execution function under run-phase! so telemetry,
+  debugger stops, stores, validation and journal behaviour remain live."
+  [{:keys [source-run-id source-attempt-id] :as opts}]
+  (let [checkpoint (on-prod-history/load-checkpoint source-run-id
+                                                    source-attempt-id)
+        entry (:selected-entry checkpoint)
+        run-id (or (:run-id opts)
+                   (str "on-prod-history-" (UUID/randomUUID)))
+        phase-opts (assoc opts :run-id run-id)
+        context {:run-id run-id
+                 :attempt-id (str "resume-" source-attempt-id)
+                 :trigger :on-prod-potted-history
+                 :source-run-id source-run-id
+                 :source-attempt-id source-attempt-id}
+        result (runner/run-phase!
+                phase-opts context :cascade-execution
+                #(cascade-decision/execute-selected-cascade! entry phase-opts)
+                #(select-keys % [:status :kind :cascade-digest
+                                 :compiled-digest]))]
+    {:schema :wm/on-prod-history-result-v1
+     :run-id run-id
+     :source-run-id source-run-id
+     :source-attempt-id source-attempt-id
+     :selection-ran false
+     :clicks-spent 0
+     :result (cascade-decision/persistable-cascade-execution result)}))
