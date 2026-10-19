@@ -19,6 +19,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.target-reading-preparation :as reading-preparation]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
@@ -202,8 +203,9 @@
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
 (defn retained-outer-selector
-  "Retain the exact first outer receipt across the selected-reading second
-  pass. In particular, the sealed selected-policy carrier is never rebuilt."
+  "Retain a chosen outer receipt across reconstruction, never an incomplete
+  reading-menu refusal. Preparation changes that menu before any choice exists;
+  a sealed selected-policy carrier, however, must never be rebuilt."
   [outer-selector policy-field-config]
   (let [retained (atom ::unselected)]
     (fn [input]
@@ -212,7 +214,12 @@
           receipt
           (let [selected (outer-selector
                           (assoc input :policy-field-config policy-field-config))]
-            (reset! retained selected)
+            (when-not (and (= :incomplete-policy-menu-coverage
+                             (get-in selected [:policy :reason]))
+                           (nil? (get-in selected [:chosen :id]))
+                           (nil? (get-in selected
+                                         [:policy :selected-outer-cascade-policy])))
+              (reset! retained selected))
             selected))))))
 
 (defn production-defaults
@@ -299,9 +306,18 @@
              answer-fn (or (:selected-target-reading-answer-fn live-opts)
                            (designated-author-answer-fn
                             live-opts selected-target-reading/prompt))]
-         (selected-target-reading/repair!
-          (assoc live-opts :answer-fn answer-fn)
-          judgement)))
+         (if-let [field (selected-target-reading/prechoice-field judgement)]
+           (let [needs (selected-target-reading/prechoice-needs field)
+                 result (reading-preparation/prepare!
+                         (assoc live-opts :answer-fn answer-fn) field
+                         {:deadline-ms (+ (System/currentTimeMillis) 1800000)
+                          :limit (max 1 (count needs))})]
+             ;; The existing runner redecides once after publication. There
+             ;; is no retained target yet: this pass builds the first menu.
+             (assoc result :published (= :prepared (:status result))))
+           (selected-target-reading/repair!
+            (assoc live-opts :answer-fn answer-fn)
+            judgement))))
      :occurrence-square-authoring-fn
      (fn [runner-opts judgement]
        (let [live-opts (merge opts runner-opts)

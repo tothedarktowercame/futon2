@@ -197,6 +197,27 @@
            fragments)))
       (:sentences analysis)))))
 
+(defn prechoice-field
+  "The unresolved pre-choice field, never a replacement for a chosen target."
+  [judgement]
+  (let [outer (:outer-task-selection judgement)]
+    (when (and (= :incomplete-policy-menu-coverage (get-in outer [:policy :reason]))
+               (nil? (get-in outer [:chosen :id]))
+               (nil? (get-in outer [:policy :selected-outer-cascade-policy])))
+      (:policy-field outer))))
+
+(defn prechoice-needs [field]
+  (let [sources (into {} (map (juxt :target-id identity) (:target-sources field)))]
+    (vec
+     (for [family (:families field)
+           failure (:failures family)
+           :when (contains? #{:no-current-target-reading :stale-target-reading}
+                            (:kind failure))]
+       {:target (:target-id family)
+        :source-path (:source-path (get sources (:target-id family)))
+        :excerpt-digest (:expected-digest failure)
+        :failure (:kind failure)}))))
+
 (defn selected-need
   "Return the exact outer-selected target/source/current-digest need, or nil.
   A failure belonging to another target is never eligible."
@@ -228,7 +249,7 @@
         outer-source (get-in judgement [:outer-task-selection :chosen :source])
         outer-path (or (:path outer-source) (:source-path outer-source))
         row-path (:source-path row)]
-    (when failure
+    (or (when failure
       {:target target
        ;; The retained outer receipt is authoritative.  The cascade source row
        ;; is a compatibility fallback for older judge fixtures, never a reason
@@ -237,7 +258,8 @@
        :source-pin-conflict? (boolean (and outer-path row-path
                                            (not= outer-path row-path)))
        :excerpt-digest (:expected-digest failure)
-       :failure (:kind failure)})))
+       :failure (:kind failure)})
+        (first (prechoice-needs (prechoice-field judgement))))))
 
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
@@ -278,17 +300,17 @@
            :excerpt-digest (:excerpt-digest need)}
     detail (assoc :detail detail)))
 
-(defn repair!
-  "Issue, validate, and publish one reading for JUDGEMENT's exact retained
-  outer choice. ANSWER-FN is the sole contact port and must address the
-  designated author supplied in OPTS. Returns a recorded request outcome."
+(defn repair-need!
+  "Issue, validate and publish an explicitly pinned reading need. This is
+  preparation, not a claim that an outer policy has already been selected.
+  ANSWER-FN remains the designated author's sole contact port."
   [{:keys [run-id author answer-fn request-root request-builder analysis-validator
            target-reading-root]
     :or {request-root default-request-root
          request-builder default-request-builder
          analysis-validator default-analysis-validator}}
-   judgement]
-  (when-let [need (selected-need judgement)]
+   need]
+  (when need
     (cond
       (or (:source-pin-conflict? need)
           (not (string? (:source-path need)))
@@ -489,3 +511,9 @@
                            :analysis-digest (:analysis-digest publication)
                            :job-id (:job-id exchange)
                            :validation (:validation publication)})))))))))))))
+
+(defn repair!
+  "Prepare the reading for an already selected target, retaining the legacy
+  selected-target contract. Pre-choice preparation uses repair-need! directly."
+  [opts judgement]
+  (repair-need! opts (selected-need judgement)))

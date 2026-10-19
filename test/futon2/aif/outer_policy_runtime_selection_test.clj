@@ -2,6 +2,8 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.target-reading-preparation :as preparation]
             [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.outer-policy-evidence-provider :as provider]
             [futon2.aif.selected-outer-cascade-policy :as selected]
@@ -59,6 +61,49 @@
      records
      {:kind :committed-production-authority
       :source-pin (pin "wm://authority" "d")})))
+
+(deftest pre-choice-reading-refusal-is-not-pinned-as-a-selection
+  (let [calls (atom 0)
+        refusal {:chosen {:absent :incomplete-policy-menu-coverage}
+                 :policy {:status :refused :reason :incomplete-policy-menu-coverage
+                          :absent-terms [:no-current-target-reading]}}
+        chosen (run-live (explicit-provider [0.0 1.0] []))
+        select (runtime/retained-outer-selector
+                (fn [_] (if (= 1 (swap! calls inc)) refusal chosen)) {})]
+    (is (= refusal (select {:tasks tasks})))
+    (is (= chosen (select {:tasks tasks})))
+    (is (identical? chosen (select {:tasks tasks})))
+    (is (= 2 @calls))))
+
+(deftest missing-reading-prepares-and-redecides-through-runner-seam
+  (let [published (atom false)
+        field {:target-sources [{:target-id "T-occ" :source-path "T-occ.md"}]
+               :families [{:target-id "T-occ" :status :refused
+                           :failures [{:kind :no-current-target-reading
+                                       :expected-digest "pinned-excerpt"}]}]}
+        refusal {:chosen {:absent :incomplete-policy-menu-coverage}
+                 :policy {:reason :incomplete-policy-menu-coverage}
+                 :policy-field field}
+        select (runtime/retained-outer-selector
+                (fn [_] (if @published
+                          (run-live (explicit-provider [0.0 1.0] [])) refusal)) {})
+        result (runner/selected-target-reading-step
+                {} {:outer-task-selection (select {:tasks tasks})}
+                (fn [opts judgement]
+                  (let [r (preparation/prepare!
+                           opts (get-in judgement [:outer-task-selection :policy-field])
+                           {:deadline-ms 100 :now-fn (constantly 0)
+                            :repair-fn (fn [_ need]
+                                         (is (= "pinned-excerpt" (:excerpt-digest need)))
+                                         (reset! published true)
+                                         {:published true})})]
+                    (assoc r :published (= :prepared (:status r)))))
+                (fn [_] {:outer-task-selection (select {:tasks tasks})}))]
+    (is @published)
+    (is (= :selected (get-in result [:judgement :outer-task-selection :policy :status])))
+    (is (nil? (selected/verify
+               (get-in result [:judgement :outer-task-selection :policy
+                               :selected-outer-cascade-policy]))))))
 
 (deftest missing-and-refused-provider-fail-closed
   (let [missing (run-live nil)

@@ -2130,12 +2130,11 @@
                     :events events})}))))
 
 (defn selected-target-reading-step
-  "Repair a missing reading for JUDGEMENT's retained outer choice, then call
-  REDECIDE exactly once when publication succeeded.  Here REDECIDE is the
-  legacy name for inner cascade reconstruction: it may rebuild and score the
-  field for the retained target, but must not choose an outer target. REPAIR-FN
-  owns request, contact, validation, and publication. This seam never selects
-  a fallback target and never calls the outer selector itself."
+  "Prepare missing readings, then call REDECIDE once after publication.
+  With a retained outer choice this only reconstructs that target's cascade.
+  With an incomplete pre-choice field, preparation supplies the missing input
+  before the first outer choice. REPAIR-FN owns contact, validation and durable
+  publication; this seam itself never invents a fallback target."
   [opts judgement repair-fn redecide]
   (if-not (and repair-fn (selected-target-reading/selected-need judgement))
     {:judgement judgement :record nil}
