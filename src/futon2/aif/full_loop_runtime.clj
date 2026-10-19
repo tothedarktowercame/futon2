@@ -214,8 +214,9 @@
           receipt
           (let [selected (outer-selector
                           (assoc input :policy-field-config policy-field-config))]
-            (when-not (and (= :incomplete-policy-menu-coverage
-                             (get-in selected [:policy :reason]))
+            (when-not (and (contains? #{:incomplete-policy-menu-coverage
+                                       :no-canonically-bound-policy}
+                                     (get-in selected [:policy :reason]))
                            (nil? (get-in selected [:chosen :id]))
                            (nil? (get-in selected
                                          [:policy :selected-outer-cascade-policy])))
@@ -311,10 +312,10 @@
                  result (reading-preparation/prepare!
                          (assoc live-opts :answer-fn answer-fn) field
                          {:deadline-ms (+ (System/currentTimeMillis) 1800000)
-                          :limit (max 1 (count needs))})]
+                          :limit (min 3 (max 1 (count needs)))})]
              ;; The existing runner redecides once after publication. There
              ;; is no retained target yet: this pass builds the first menu.
-             (assoc result :published (= :prepared (:status result))))
+             (assoc result :published (boolean (some :published (:records result)))))
            (selected-target-reading/repair!
             (assoc live-opts :answer-fn answer-fn)
             judgement))))

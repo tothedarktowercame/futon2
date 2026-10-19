@@ -297,7 +297,18 @@
                    (range 1 (inc (count scored))) scored)}))
 
 (def sealed-menu-body-keys
-  [:schema :field-source-pin :family-census :entries :refusals :failures])
+  [:schema :field-source-pin :family-census :frontier :entries :refusals :failures])
+
+(defn measured-frontier [field]
+  (let [families (:families field)
+        assessed (filterv #(= :computed (:status %)) families)
+        absent (filterv #(some (fn [f] (contains? #{:no-current-target-reading
+                                                   :stale-target-reading} (:kind f)))
+                               (:failures %)) families)]
+    {:eligible (count families) :assessed (count assessed) :reading-absent (count absent)
+     :eligible-ids (mapv :target-id families)
+     :assessed-ids (mapv :target-id assessed)
+     :reading-absent-ids (mapv :target-id absent)}))
 
 (defn sealed-menu-pin
   "Canonical seal of the exact pre-choice body. Public so every consumer
@@ -325,16 +336,9 @@
   occurrence readings and explicitly authored executable additions."
   [field join]
   (let [families (:families field)
-        incomplete (filterv #(not= :computed (:status %)) families)
         failures (vec (mapcat #(map (partial annotate-failure (:target-id %))
                                     (:failures %)) families))]
-    (if (seq incomplete)
-      {:schema :wm/sealed-outer-policy-menu-v1 :status :refused
-       :reason :incomplete-policy-menu-coverage
-       :field-source-pin (:source-pin field)
-       :missing-targets (mapv :target-id incomplete)
-       :failures failures}
-      (let [rows (score-family-field families)
+      (let [rows (score-family-field (filterv #(= :computed (:status %)) families))
             {:keys [ranked]} (construct-ranked rows)
             bound (cascade-identity/bind-ranked ranked
                                                 (or (:readings join) (constantly {}))
@@ -344,8 +348,9 @@
             body {:schema :wm/sealed-outer-policy-menu-v1
                   :field-source-pin (:source-pin field)
                   :family-census (field-census field)
+                  :frontier (measured-frontier field)
                   :entries entries :refusals refusals
-                  :failures (vec (concat (mapcat :failures rows) refusals))}]
+                  :failures (vec (concat failures (mapcat :failures rows) refusals))}]
         (cond
           (seq refusals)
           (assoc body :status :refused :reason :canonical-binding-refused
@@ -355,7 +360,7 @@
           (assoc body :status :refused :reason :no-canonically-bound-policy)
 
           :else
-          (assoc body :status :sealed :menu-pin (sealed-menu-pin body)))))))
+          (assoc body :status :sealed :menu-pin (sealed-menu-pin body))))))
 
 (defn select-over-families
   "Score every policy in each computed family, then call

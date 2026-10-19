@@ -59,15 +59,19 @@
     (is (= :outer-policy-evidence-provider-required
            (get-in receipt [:q8-frontier :reason])))))
 
-(deftest incomplete-policy-field-refuses-every-target
+(deftest incomplete-policy-field-measures-coverage-without-veto
   (let [receipt (live/select-live
                  {:tasks tasks :fetch-snapshot (constantly snapshot)
                   :policy-field-config {}
-                  :policy-field-fn (field (atom nil) :failed)})]
+                  :policy-field-fn (field (atom nil) :failed)
+                  :policy-menu-fn sealed-menu})]
     (is (= :refused (get-in receipt [:policy :status])))
-    (is (= :incomplete-policy-menu-coverage (get-in receipt [:policy :reason])))
+    (is (= :outer-policy-evidence-provider-required (get-in receipt [:policy :reason])))
+    (is (= {:eligible 2 :assessed 1 :reading-absent 1}
+           (select-keys (get-in receipt [:policy :frontier])
+                        [:eligible :assessed :reading-absent])))
     (is (= ["M-b"] (get-in receipt [:policy :missing-targets])))
-    (is (= [:no-current-target-reading] (get-in receipt [:policy :absent-terms])))
+    (is (some #{:no-current-target-reading} (get-in receipt [:policy :absent-terms])))
     (is (nil? (:action receipt)))
     (is (= [{:target-id "M-b" :status :failed :policies []
              :failures [{:kind :no-current-target-reading}]}]

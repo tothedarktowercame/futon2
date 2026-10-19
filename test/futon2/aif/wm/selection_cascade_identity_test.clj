@@ -159,20 +159,18 @@
                    (:bind-cascade-identity join-opts))]
       (is (not= (:menu-pin a) (:menu-pin mutated))))))
 
-(deftest sealed-menu-refuses-incomplete-coverage-before-scoring
-  (let [calls (atom 0)
-        incomplete {:status :failed :target-id "T-missing" :policies []
+(deftest sealed-menu-measures-incomplete-coverage-and-scores-present-targets
+  (let [incomplete {:status :failed :target-id "T-missing" :policies []
                     :failures [{:kind :no-current-target-reading}]}
-        result (with-redefs [shape-g/score-policy
-                             (fn [_] (swap! calls inc) {:status :computed})]
-                 (family-selection/sealed-pre-choice-menu
+        result (family-selection/sealed-pre-choice-menu
                   (pinned-field [(family (occurrence-policy 1)) incomplete] "3")
-                  (:bind-cascade-identity join-opts)))]
-    (is (zero? @calls))
-    (is (= :refused (:status result)))
-    (is (= :incomplete-policy-menu-coverage (:reason result)))
-    (is (= ["T-missing"] (:missing-targets result)))
-    (is (nil? (:entries result)))))
+                  (:bind-cascade-identity join-opts))]
+    (is (= :sealed (:status result)))
+    (is (= {:eligible 2 :assessed 1 :reading-absent 1}
+           (select-keys (:frontier result) [:eligible :assessed :reading-absent])))
+    (is (= ["T-missing"] (get-in result [:frontier :reading-absent-ids])))
+    (is (= 1 (count (:entries result))))
+    (is (nil? (family-selection/verify-sealed-menu result)))))
 
 (deftest sealed-menu-refuses-all-unbound-and-forged-menus-atomically
   (let [all-unbound (family-selection/sealed-pre-choice-menu

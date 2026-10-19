@@ -201,7 +201,8 @@
   "The unresolved pre-choice field, never a replacement for a chosen target."
   [judgement]
   (let [outer (:outer-task-selection judgement)]
-    (when (and (= :incomplete-policy-menu-coverage (get-in outer [:policy :reason]))
+    (when (and (contains? #{:incomplete-policy-menu-coverage :no-canonically-bound-policy}
+                         (get-in outer [:policy :reason]))
                (nil? (get-in outer [:chosen :id]))
                (nil? (get-in outer [:policy :selected-outer-cascade-policy])))
       (:policy-field outer))))

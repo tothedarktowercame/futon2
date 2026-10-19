@@ -609,7 +609,7 @@
                       {:readings (fn [entry]
                                    (cascade-decision/occurrence-readings
                                     entry (:reading-pin entry)))})
-        sealed-menu (when (and policy-field (empty? incomplete))
+        sealed-menu (when policy-field
                       (policy-menu-fn policy-field menu-join))
         provided (when (= :sealed (:status sealed-menu))
                    (evidence-provider/resolve-provider
@@ -634,8 +634,6 @@
             (not= :verified (:status snapshot-verification)) snapshot-verification
             (not (map? policy-field-config))
             {:status :refused :reason :policy-field-config-required}
-            (seq incomplete)
-            {:status :refused :reason :incomplete-policy-menu-coverage}
             (not= :sealed (:status sealed-menu))
             {:status :refused :reason (or (:reason sealed-menu) :sealed-policy-menu-invalid)}
             (not= :provided (:status provided)) provided
@@ -710,6 +708,7 @@
                                       :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
                                       :family-census (family-selection/field-census policy-field)
+                                      :frontier (family-selection/measured-frontier policy-field)
                                       :sealed-menu sealed-menu
                                       :evidence-provider-source-pin (:source-pin provided)
                                       :policy-evidence policy-evidence
