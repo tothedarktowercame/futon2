@@ -85,9 +85,15 @@
                   :body (json/generate-string
                          {:run-id id :author author :reviewer reviewer
                           :repair-reviewer repair-reviewer
+                          :idempotency-key (str "wm-on-demand/" id)
                           :trigger "duree-click-on-demand"})
                   :timeout transport-timeout-ms :throw false}
-         started (transport! :acceptance #(post! endpoint request))
+         ;; A lost acceptance response is ambiguous, not a refusal. Retry the
+         ;; identical idempotency key; the server must return the same click.
+         started (try
+                   (transport! :acceptance #(post! endpoint request))
+                   (catch clojure.lang.ExceptionInfo _
+                     (transport! :acceptance-retry #(post! endpoint request))))
          start-body (parse-json! :acceptance started)]
      (when-not (= 200 (:status started))
        (refuse! :on-demand/click-refused
@@ -103,9 +109,15 @@
                      :worker-cancelled? false}))
          (let [response (transport!
                          :status
-                         #(get! endpoint {:timeout transport-timeout-ms
-                                          :throw false}))
-               body (parse-json! :status response)]
+                         #(get! (str endpoint "?click-id=" click-id)
+                                {:timeout transport-timeout-ms :throw false}))
+               raw-body (parse-json! :status response)
+               state (:status raw-body)
+               body (if (contains? #{"queued" "running" "completed" "failed"} state)
+                      {:running? (contains? #{"queued" "running"} state)
+                       :click-id (:click-id raw-body)
+                       :last-result (:result raw-body)}
+                      raw-body)]
            (when-not (= 200 (:status response))
              (refuse! :on-demand/status-unavailable
                       {:click/id click-id :http/status (:status response)}))

@@ -44,11 +44,37 @@
     (is (= 1 (count @posts)))
     (is (= "row26-isolated-1" (:run-id payload)))
     (is (= "duree-click-on-demand" (:trigger payload)))
+    (is (= "wm-on-demand/row26-isolated-1" (:idempotency-key payload)))
     (is (= 10 (get-in @posts [0 1 :timeout])))
     (is (= "row26-isolated-1" (:run/requested-id result)))
     (is (= "observed-run" (:run/id result)))
     (is (= :incomplete (:outcome result)))
     (is (= "r9-refused" (get-in result [:terminal :failure-kind])))))
+
+(deftest lost-acceptance-response-retries-same-key-and-queries-exact-click
+  (let [posts (atom []) gets (atom [])
+        result (entry/run-on-demand!
+                valid-config
+                {:post! (fn [_ request]
+                          (swap! posts conj (json/parse-string (:body request) true))
+                          (if (= 1 (count @posts))
+                            (throw (ex-info "response lost" {}))
+                            {:status 200 :body "{\"click-id\":\"same\",\"started-at\":\"now\",\"status\":\"queued\"}"}))
+                 :get! (fn [url _]
+                         (swap! gets conj url)
+                         {:status 200
+                          :body (json/generate-string
+                                 {:schema "wm/click-state-v1" :click-id "same"
+                                  :status "completed"
+                                  :result {:click-id "same" :outcome "incomplete"
+                                           :run-id-observation {:status "absent"
+                                                                :reason "runner-did-not-return-run-id"}}})})
+                 :now-ms (constantly 0) :sleep! (fn [_])})]
+    (is (= 2 (count @posts)))
+    (is (= (mapv :idempotency-key @posts)
+           ["wm-on-demand/row26-isolated-1" "wm-on-demand/row26-isolated-1"]))
+    (is (= ["http://127.0.0.1:7070/api/alpha/wm/click?click-id=same"] @gets))
+    (is (= "same" (:click/id result)))))
 
 (deftest invalid-and-malformed-responses-refuse-before-success
   (testing "more than one opportunity is never accepted"
