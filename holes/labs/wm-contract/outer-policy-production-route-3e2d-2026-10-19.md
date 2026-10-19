@@ -1,5 +1,25 @@
 # Outer Cascade Live policy production route — Packet 3E2d
 
+## Production completion — 2026-10-19
+
+The historical configuration status below is superseded by commit
+`af0fa4729`. Production now supplies `outer-policy-provider-runtime/production-provider`
+by default. It adapts the existing outer-learning authority, pinned outcome
+manifest, prior concentration, preference transform and controller terms to
+each sealed menu. New policy digests need no observed outcomes: their posterior
+starts at the declared prior. Target-level resource and cadence estimates remain
+target-level estimates; task-outcome updates require the matching policy digest.
+Unit objective precision (`gamma = 1`) is explicitly declared as calibration in
+the authority file, not inferred from observations.
+
+At Joe's instruction, the unique-minimum requirement no longer blocks equal
+policies from obtaining their first observation. Equal objective minima use a
+uniform draw; the receipt retains the draw and candidate population, and the
+selected carrier verifier replays it. This does not change unequal objectives
+or admit malformed evidence. Empty-history selection, carrier verification and
+downstream consumption pass together; existing outcome updates are tested
+separately. A production adapter probe consumed 29 pinned historical records.
+
 Base: `9946f92c15da443de3b6002245e0808d677d5fa7`
 
 No click was launched. The shared main worktree was not edited.
