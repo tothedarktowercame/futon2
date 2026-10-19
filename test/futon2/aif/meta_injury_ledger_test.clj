@@ -106,15 +106,23 @@
 
 (deftest campaign-record-appends-cannot-erase-injury
   (let [history (opened)
+        ;; The first campaign record is the opening cause. Replaying the
+        ;; external run stream appends it again as an inert observation: cause
+        ;; attribution and append-only audit presence are distinct facts.
         result (reduce (fn [h pin]
                          (:ledger (ledger/append-observation h pin :campaign-run-record)))
-                       history (rest campaign-records))]
+                       history campaign-records)]
     (is (= #{"injury/2026-10-19/meta-route"}
            (set (keys (:injuries (ledger/active-injuries result))))))
-    (is (= (mapv :sha256 (rest campaign-records))
+    (is (= (mapv :sha256 campaign-records)
            (mapv #(get-in % [:record-pin :sha256])
                  (filter (comp #{:wm/meta-injury-observation-v1} :schema)
-                         (:entries result)))))))
+                         (:entries result)))))
+    (is (= (first campaign-records)
+           (:cause-record-pin (first (:entries result)))))
+    (is (= (first campaign-records)
+           (:record-pin (second (:entries result)))))
+    (is (= 4 (:entry-count (ledger/validate-ledger result))))))
 
 (deftest illegal-order-identity-substitution-and-session-reuse-refuse-typedly
   (let [open (opened)

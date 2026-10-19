@@ -78,7 +78,11 @@ Inert external record:
   state-machine authority. A 64-case property-style append sequence preserves
   the active injury set.
 - Production-shaped fixtures use the exact three ticketed 2026-10-19 run paths
-  and their observed content SHA-256 values.
+  and their observed content SHA-256 values. The first record is the opening
+  cause and is also appended explicitly when replaying the external campaign
+  stream: cause attribution does not implicitly substitute for an observation
+  audit entry. All three external appends remain enumerable while the active
+  injury set is unchanged.
 
 ## Remaining work — Packet 2 and later
 
