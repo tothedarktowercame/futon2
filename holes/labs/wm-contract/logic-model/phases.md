@@ -1,5 +1,11 @@
 # WM click runner: phase order (static reading)
 
+P20 phase 8.4: available structural sections feed policy-field membership while
+failed/unspecified sections remain visible. Omitted statuses have no assumed
+legacy completeness contract. Unknown membership cannot enter the field; an
+unrelated unavailable agency section need not discard known mission rows.
+Tests cover adapter and alternate selector; serving continuation unverified.
+
 P17b phase 0a: runtime now retains acceptance preparation observations on refused,
 routed, ordinary and retry results. Only available diagnosis triggers proposal
 production; retry/no-active produce not-required observations. This return-value

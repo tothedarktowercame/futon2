@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 3 prerequisite / P20: section-level observation permits useful partial
+snapshot membership without treating unknown scope as complete or zero. Explicit
+OK structural evidence is required for admission; unknown IDs/reasons remain
+separate. No new source-byte verifier or downstream provider repair is claimed.
+Hermetic tests passed; no serving snapshot/reload/click observation.
+
 Row 7 / P19: one drifted approved algorithm no longer refuses unrelated valid
 algorithms/registry tasks. Exact source defect remains excluded; catalog absence
 is distinguished from observed empty population. Valid algorithms still require

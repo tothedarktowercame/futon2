@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Consumers 19/20 / P20: snapshot section availability is measured rather than
+requiring every section OK. Only explicit OK structural sections contribute
+membership; failed/omitted scope makes absent target membership unknown rather
+than known off-map. Both select and live adapter use section-scoped membership.
+Unknown rows are not eligible; existing pin/canonical checks remain required.
+
 Consumer 16 / P19: approved algorithm source validation is row-scoped. Invalid
 pins, unreadable sources and hash drift retain exclusions; verified neighbours
 remain subject to budget/injury conditions. Catalog-local duplicate identities

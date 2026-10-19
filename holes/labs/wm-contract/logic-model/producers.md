@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P21 producer / P20 packet: section-availability/pipeline-membership report
+available, unavailable and unknown structural scopes. Verified available target
+identities can reach field formation beside missing unrelated sections. No
+available target data produces measured abstention without fabricated targets
+or field construction; this does not fix later provider/evidence refusals.
+
 P14 producer / P19 packet: catalog observation retains expected source pins and
 actual drift hashes in exclusions. Available catalog proof accounts for input
 entries across rows/exclusions. Missing/malformed catalog preserves registry
