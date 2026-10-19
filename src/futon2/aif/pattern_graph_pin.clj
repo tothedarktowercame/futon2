@@ -26,6 +26,7 @@
    "next-in-session" 3 "co-rejected" 8})
 
 (defn- pin-file [graph-path] (io/file (str graph-path ".pin.edn")))
+(defn- publication-file [graph-path] (io/file (str graph-path ".publication.edn")))
 
 (defn- file-sha256 [file]
   (identity/sha256 (Files/readAllBytes (.toPath (io/file file)))))
@@ -108,6 +109,19 @@
                              StandardCopyOption/REPLACE_EXISTING]))
     value))
 
+(defn- atomic-copy! [source destination]
+  (.mkdirs (.getParentFile destination))
+  (let [tmp (io/file (.getParentFile destination)
+                     (str "." (.getName destination) "." (System/nanoTime) ".tmp"))]
+    (Files/copy (.toPath (io/file source)) (.toPath tmp)
+                (into-array java.nio.file.StandardCopyOption
+                            [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+    (Files/move (.toPath tmp) (.toPath destination)
+                (into-array StandardCopyOption
+                            [StandardCopyOption/ATOMIC_MOVE
+                             StandardCopyOption/REPLACE_EXISTING]))
+    destination))
+
 (defn pin!
   "Pin GRAPH-PATH's current bytes and effective (co-rejected-free) topology."
   [graph-path]
@@ -121,37 +135,89 @@
       {:status :refused :kind :graph-unreadable :path (str graph-path)
        :message (ex-message e)})))
 
+(defn- load-pinned-at [graph-file pin-path reported-path]
+  (try
+    (let [raw (json/parse-string (slurp graph-file) true)
+          graph (normalized-graph raw)]
+      (if-let [refusal (graph-refusal raw graph)]
+        (assoc refusal :path reported-path)
+        (if-not (.isFile pin-path)
+          {:status :refused :kind :graph-pin-missing :path (.getPath pin-path)}
+          (let [actual (file-sha256 graph-file)
+                pin (edn/read-string (slurp pin-path))]
+            (if (not= actual (:sha256 pin))
+              {:status :refused :kind :graph-pin-mismatch
+               :path reported-path :expected (:sha256 pin) :actual actual}
+              (let [observed (pin-value graph-file raw graph)]
+                (if (= (dissoc pin :sha256) (dissoc observed :sha256))
+                  {:status :loaded :graph graph :pin pin}
+                  {:status :refused :kind :graph-pin-mismatch
+                   :path reported-path :expected pin :actual observed})))))))
+    (catch Exception e
+      {:status :refused :kind :graph-unreadable :path reported-path
+       :message (ex-message e)})))
+
+(defn publish!
+  "Publish SOURCE's validated graph/pin generation by atomically switching ROOT's
+   manifest.  Generation files are complete before the manifest moves, so an
+   interruption leaves the prior readable generation selected.  BEFORE-SWITCH
+   is test-only fault injection."
+  ([source root] (publish! source root {}))
+  ([source root {:keys [before-switch]}]
+   (try
+     (let [raw (json/parse-string (slurp source) true)
+           graph (normalized-graph raw)]
+       (if-let [refusal (graph-refusal raw graph)]
+         refusal
+         (let [sha (file-sha256 source)
+               generation (io/file (str root ".generations") sha)
+               graph-file (io/file generation "graph.json")
+               pin-path (pin-file graph-file)
+               pin (pin-value source raw graph)]
+           (atomic-copy! source graph-file)
+           (atomic-write! pin-path (assoc pin :sha256 (file-sha256 graph-file)))
+           (let [checked (load-pinned-at graph-file pin-path (str root))]
+             (if (not= :loaded (:status checked))
+               checked
+               (do
+                 (when before-switch (before-switch))
+                 (atomic-write! (publication-file root)
+                                {:schema :wm/pattern-graph-publication-v1
+                                 :graph-path (.getCanonicalPath graph-file)
+                                 :pin-path (.getCanonicalPath pin-path)
+                                 :sha256 (:sha256 (:pin checked))})
+                 {:status :published :path (str root) :pin (:pin checked)}))))))
+     (catch Exception e
+       {:status :refused :kind :graph-publication-failed :path (str root)
+        :message (ex-message e)}))))
+
 (defn load-pinned
-  "Load the effective graph only when its adjacent pin matches its bytes."
+  "Load a directly pinned graph, or the coherent generation named by ROOT's
+   atomically switched publication manifest.  This reader never pins bytes."
   [graph-path]
   (let [graph-file (io/file graph-path)
-        pin-path (pin-file graph-path)]
+        pin-path (pin-file graph-path)
+        manifest-path (publication-file graph-path)]
     (cond
+      (.isFile manifest-path)
+      (try
+        (let [{:keys [schema graph-path pin-path]} (edn/read-string (slurp manifest-path))
+              published-graph (io/file graph-path)
+              published-pin (io/file pin-path)]
+          (if (and (= :wm/pattern-graph-publication-v1 schema)
+                   (= (.getCanonicalPath (pin-file published-graph)) (.getCanonicalPath published-pin)))
+            (load-pinned-at published-graph published-pin (str graph-file))
+            {:status :refused :kind :graph-publication-invalid :path (str manifest-path)}))
+        (catch Exception e
+          {:status :refused :kind :graph-publication-invalid :path (str manifest-path)
+           :message (ex-message e)}))
+
       (not (.isFile graph-file))
       {:status :refused :kind :graph-unreadable :path (str graph-path)
        :reason :graph-file-missing}
 
       :else
-      (try
-        (let [raw (json/parse-string (slurp graph-file) true)
-              graph (normalized-graph raw)]
-          (if-let [refusal (graph-refusal raw graph)]
-            (assoc refusal :path (str graph-path))
-            (if-not (.isFile pin-path)
-              {:status :refused :kind :graph-pin-missing :path (.getPath pin-path)}
-              (let [actual (file-sha256 graph-file)
-                    pin (edn/read-string (slurp pin-path))]
-                (if (not= actual (:sha256 pin))
-                  {:status :refused :kind :graph-pin-mismatch
-                   :path (str graph-path) :expected (:sha256 pin) :actual actual}
-                  (let [observed (pin-value graph-file raw graph)]
-                    (if (= (dissoc pin :sha256) (dissoc observed :sha256))
-                      {:status :loaded :graph graph :pin pin}
-                      {:status :refused :kind :graph-pin-mismatch
-                       :path (str graph-path) :expected pin :actual observed})))))))
-        (catch Exception e
-          {:status :refused :kind :graph-unreadable :path (str graph-path)
-           :message (ex-message e)})))))
+      (load-pinned-at graph-file pin-path (str graph-path)))))
 
 (defn load-unpinned
   "Load and normalize GRAPH-PATH's current bytes without requiring a pin.

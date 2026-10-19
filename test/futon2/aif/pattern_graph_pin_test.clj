@@ -45,6 +45,26 @@
       (is (= :graph-pin-mismatch (:kind result)))
       (is (nil? (:graph result))))))
 
+(deftest publication-switch-keeps-last-coherent-generation-on-interruption
+  (let [dir (temp-dir)
+        root (io/file dir "published-graph.json")
+        old-source (write-graph! dir fixture)
+        new-source (let [file (io/file dir "new-graph.json")]
+                     (spit file (json/generate-string (assoc fixture :records 13)))
+                     file)]
+    (is (= :published (:status (sut/publish! old-source root))))
+    (is (= 12 (get-in (sut/load-pinned root) [:pin :inputs :analyses])))
+    (is (= :refused
+           (:status (sut/publish! new-source root
+                                  {:before-switch #(throw (ex-info "interrupt" {}))}))))
+    ;; The manifest never moved, so the new bytes are not exposed with an old pin.
+    (let [loaded (sut/load-pinned root)]
+      (is (= :loaded (:status loaded)))
+      (is (= 12 (get-in loaded [:pin :inputs :analyses])))
+      (is (not= (get-in (sut/publish! new-source root) [:pin :sha256])
+                (get-in loaded [:pin :sha256]))))
+    (is (= 13 (get-in (sut/load-pinned root) [:pin :inputs :analyses])))))
+
 (deftest missing-pin-is-typed
   (let [file (write-graph! (temp-dir) fixture)
         result (sut/load-pinned file)]
