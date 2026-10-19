@@ -77,17 +77,24 @@
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]
         e (evidence rows)
         absent {:status :absent :policy-id "b" :target-id "same-target"
-                :cascade-digest "digest-b" :absent-terms [:ln-e-cadence]}
+                :cascade-digest "digest-b" :absent-terms [:ln-e-cadence]
+                :score-absence {:reason :preference-transform-invalid}}
         partial (reseal-evidence (assoc e :status :partial
                                          :entries [(first rows) absent]))
         r (sut/evaluate partial (sealed rows))]
     (is (= :partial (:status r)))
     (is (= :absent (get-in r [:strict-verdict :status])))
+    (is (= :ln-e-cadence (get-in r [:strict-verdict :reason])))
+    (is (= [:ln-e-cadence] (get-in r [:strict-verdict :missing 0 :absent-terms])))
+    (is (= :preference-transform-invalid
+           (get-in r [:strict-verdict :missing 0 :score-absence :reason])))
     (is (= 1 (get-in r [:frontier :strict-assessed])))
     (is (= 1 (get-in r [:frontier :strict-absent])))
     (is (= 0 (get-in r [:frontier :ordinary-assessed])))
     (is (= :absent-no-comparable-policy-comparison
            (get-in r [:frontier :ordinary-basis])))
+    (is (= (:declaration-pin partial) (:declaration-pin r)))
+    (is (= (:dataset-pin partial) (:dataset-pin r)))
     (is (nil? (:action r)))))
 
 (deftest exact-tie-and-atomic-refusals

@@ -47,7 +47,11 @@
                         :else nil)
         rows (when-not malformed-top (mapv
               (fn [row]
-                (let [q (get-in row [:posterior-predictive :distribution])
+                (if (= :absent (:status row))
+                  (assoc (select-keys row [:policy-id :target-id :cascade-digest
+                                           :absent-terms :score-absence])
+                         :absent-terms (:absent-terms row))
+                  (let [q (get-in row [:posterior-predictive :distribution])
                       alpha (:posterior-alpha row) eig (get-in row [:eig :nats])
                       ln-e (:ln-e row) bound (get entries-by-digest (:cascade-digest row))
                       absent (cond-> []
@@ -88,7 +92,7 @@
                        :terms {:risk risk :ambiguity ambiguity :novelty eig :G g
                                :lnE ln-e :lnE-components (:ln-e-components row)
                                :gamma gamma :objective objective :logit (- objective)
-                               :units :nats}}))))
+                               :units :nats}})))))
               (:entries evidence)))
         invalid (filterv #(seq (:absent-terms %)) rows)]
     (if malformed-top
@@ -106,7 +110,9 @@
                     :strict-absent (count invalid)
                     :ordinary-assessed 0
                     :ordinary-basis :absent-no-comparable-policy-comparison}
-         :menu-pin (:menu-pin evidence)}
+         :menu-pin (:menu-pin evidence)
+         :declaration-pin (:declaration-pin evidence)
+         :dataset-pin (:dataset-pin evidence)}
       (let [logits (mapv #(get-in % [:terms :logit]) rows)
             probabilities (softmax logits)
             scored (mapv #(assoc %1 :posterior %2) rows probabilities)
