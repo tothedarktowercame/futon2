@@ -1039,3 +1039,65 @@
     (is (= 2 @diagnosis-calls))
     (is (= 2 @acceptance-calls))
     (is (= 2 @ordinary-calls))))
+
+(deftest refused-preparation-is-its-own-reason-not-a-diagnosis-mismatch
+  "Click wm-click-c78d0f27 (2026-10-19): production options carried no cast
+   sessions and no worktree, prepare refused :work-order/invalid, and route!
+   compared an :available diagnosis observation with the absent work order.
+   The record said diagnosis-transaction-mismatch although observation and
+   ledger agreed. The refusal of preparation is reported as itself, with
+   prepare's defects, and no effect runs."
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        _ (spit ledger-path "{}")
+        source-a {:path "records/a.edn" :sha256 (apply str (repeat 64 "a"))}
+        diagnosis-a {:path "diagnoses/a.edn" :sha256 (apply str (repeat 64 "c"))}
+        effects (atom 0)
+        base-opts {:meta-injury-ledger-path ledger-path
+                   :meta-repair-transaction-path (str dir "/transaction.edn")
+                   :meta-repair-ports {:author (constantly nil)}
+                   :meta-acceptance-run-fn (constantly {:status :ran})
+                   :acceptance-test (acceptance-case "P17-absent-but-shaped" :unavailable)
+                   :diagnosis-evidence-pin diagnosis-a
+                   :meta-diagnosis-observation
+                   {:status :available :injury-id "injury-a"
+                    :source-record-pin source-a :diagnosis-evidence-pin diagnosis-a}}
+        result (with-redefs [store/load-durable-ledger
+                             (constantly {:status :loaded :ledger {}})
+                             ledger/active-injuries
+                             (constantly {:status :computed
+                                          :injuries {"injury-a" {:injury-id "injury-a"}}})
+                             coordinator/prepare
+                             (constantly {:status :refused
+                                          :reason :coordinator/preparation-refused
+                                          :defects [:work-order/invalid]})
+                             coordinator/coordinate
+                             (fn [& _] (swap! effects inc) nil)]
+                 (production/route! base-opts))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/preparation-refused (:reason result)))
+    (is (= :coordinator/preparation-refused (get-in result [:prepare :reason])))
+    (is (= [:work-order/invalid] (get-in result [:prepare :defects])))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (false? (:ordinary-selection-called? result)))
+    (is (zero? @effects))))
+
+(deftest production-shaped-options-without-identities-refuse-at-preparation
+  "The exact option shape of click wm-click-c78d0f27, through the runtime:
+   a real durable ledger, real ports, diagnosis pin and acceptance test, and
+   none of the three sessions or the worktree. The real coordinator/prepare
+   refuses, and the runtime reports that refusal rather than a mismatch or an
+   exception from coordinating a nil transaction."
+  (let [env (harness/prepare-environment! (root))
+        calls (atom {})
+        ports (harness/fake-ports (:repo env) calls :success)
+        result (runtime/run-opportunity!
+                (dissoc (opts env ports)
+                        :author-session :reviewer-session
+                        :repair-reviewer-session :target-worktree))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/preparation-refused (:reason result)))
+    (is (= [:work-order/invalid] (get-in result [:prepare :defects])))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (false? (:ordinary-selection-called? result)))
+    (is (= {} @calls) "no phase port is invoked without a transaction")))

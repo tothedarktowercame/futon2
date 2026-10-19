@@ -931,10 +931,22 @@
               (refusal :meta-self-heal/production-config-required
                        {:route :dedicated-meta-self-heal :absent-terms missing
                         :ordinary-selection-called? false})
-              (let [transaction (or (load-transaction transaction-path)
-                                    (:transaction (coordinator/prepare
-                                                   durable (work-order-options opts))))
-                    diagnosis-binding (diagnosis-transaction-binding opts transaction)
+              (let [resumed (load-transaction transaction-path)
+                    prepared (when-not resumed
+                               (coordinator/prepare durable (work-order-options opts)))
+                    transaction (or resumed (:transaction prepared))
+                    ;; Click wm-click-c78d0f27 (2026-10-19): a refused prepare
+                    ;; returns no transaction, and comparing the diagnosis
+                    ;; observation with an absent work order reported
+                    ;; diagnosis-transaction-mismatch for a defect that was not
+                    ;; a mismatch. The refusal of preparation is its own reason;
+                    ;; no binding check runs without a transaction.
+                    diagnosis-binding (if (nil? transaction)
+                                        (refusal :meta-self-heal/preparation-refused
+                                                 {:prepare (select-keys prepared
+                                                                        [:status :reason
+                                                                         :defects :detail])})
+                                        (diagnosis-transaction-binding opts transaction))
                     acceptance-binding (when (= :valid (:status diagnosis-binding))
                                          (acceptance-transaction-binding opts transaction))
                     binding (or (when-not (= :valid (:status diagnosis-binding)) diagnosis-binding)
