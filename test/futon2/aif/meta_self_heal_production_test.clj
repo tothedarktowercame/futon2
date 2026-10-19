@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-self-heal-production-test
   (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -74,14 +75,16 @@
                        :state :open :cause-record-pin pin}]}
    :active {:injury-id "injury-recorded-l1" :state :open}})
 
-(defn- produced-diagnosis! [dir]
-  (let [pin (recorded-injury-source! dir)
-        {:keys [ledger active]} (durable-with-active-source pin)]
-    (production/produce-diagnosis!
-     {:meta-diagnosis-root (str dir "/diagnoses")
-      :meta-diagnosis-fn (constantly {:status :succeeded
-                                      :diagnosis (diagnosis-fixture :configuration)})}
-     {:ledger ledger} active)))
+(defn- produced-diagnosis!
+  ([dir] (produced-diagnosis! dir (diagnosis-fixture :configuration)))
+  ([dir diagnosis-map]
+   (let [pin (recorded-injury-source! dir)
+         {:keys [ledger active]} (durable-with-active-source pin)]
+     (production/produce-diagnosis!
+      {:meta-diagnosis-root (str dir "/diagnoses")
+       :meta-diagnosis-fn (constantly {:status :succeeded
+                                       :diagnosis diagnosis-map})}
+      {:ledger ledger} active))))
 
 (deftest ordinary-readiness-retains-dedicated-input-absence
   ;; Historical input pin: wm-click-07653f2a was refused after the 08:19Z
@@ -386,7 +389,10 @@
                                        {:status :failed :reason :stub})}
                 diagnosis)]
     (is (= :meta-self-heal/acceptance-unavailable (:reason result)))
-    (is (= production-functions (get-in @seen [:diagnosis :production-functions])))))
+    ;; F12 adds :resolvable?/:arglists/:doc to each verified entry.
+    (is (= production-functions
+           (map #(select-keys % [:role :var :file])
+                (get-in @seen [:diagnosis :production-functions]))))))
 
 (deftest pinned-receipt-without-production-functions-never-reaches-the-author
   ;; The shape of diagnosis-83b348..., pinned before F11.
@@ -442,6 +448,108 @@
     (is (= (:acceptance-evidence-pin result)
            {:path (get-in result [:acceptance-evidence-pin :path])
             :sha256 (load-identity/sha256 bytes)}))
+    (is (false? (:repair-claimed? result)))))
+
+(def ^:private documented-function
+  ;; An extra, well-formed entry whose var has a docstring, so :doc is exercised.
+  {:role :runtime-entrypoint
+   :var "futon2.aif.meta-self-heal-production/produce-acceptance!"
+   :file "src/futon2/aif/meta_self_heal_production.clj"})
+
+(deftest acceptance-request-binds-what-a-no-stub-test-needs
+  ;; F12: replay 2 (2026-10-19 18:40Z) and click wm-click-fca1c921.
+  (let [dir (root)
+        diagnosis (produced-diagnosis!
+                   dir {:class :configuration
+                        :production-functions (conj production-functions
+                                                    documented-function)})
+        seen (atom nil)
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-injury-ledger-path "/some/ledger.edn"
+                 :meta-acceptance-fn
+                 (fn [request]
+                   (reset! seen request)
+                   {:status :proposed
+                    :acceptance-test (acceptance-case "F12-enrichment")})}
+                diagnosis)
+        request @seen
+        functions (get-in request [:diagnosis :production-functions])
+        receipt (edn/read-string
+                 (slurp (get-in result [:acceptance-evidence-pin :path])))]
+    (is (= :proposed (:status result)))
+    (is (= 4 (count functions)))
+    (is (every? :resolvable? functions))
+    (is (every? #(string? (:arglists %)) functions))
+    (is (string? (:doc (last functions))))
+    (is (every? #(<= (count (:doc %)) 700) functions))
+    (is (= (map :var production-functions) (map :var (take 3 functions))))
+    (let [entries (get-in request [:test-harness :entrypoints])]
+      (is (= ["futon2.aif.meta-self-heal-harness/prepare-environment!"
+              "futon2.test-support.runner-fixture/isolated-runner-opts"
+              "futon2.test-support.runner-fixture/with-hermetic-traces"
+              "futon2.test-support.runner-fixture/with-loop-exercise-evidence"]
+             (mapv :var entries)))
+      (is (every? :file entries))
+      (is (string? (:arglists (first entries)))))
+    (is (= 3 (count (get-in request [:test-harness :examples]))))
+    (is (= {:source-record (:source-record-pin diagnosis)
+            :injury-ledger "/some/ledger.edn"
+            :note "read-only in the test; isolated copies via the harness"}
+           (:real-input-authority request)))
+    (is (str/includes? (get-in request [:persistence-destination :note])
+                       "canonical data/ and src/ are read-only"))
+    (is (= "/home/joe/code/futon2" (:repository request)))
+    (is (= (select-keys request [:test-harness :real-input-authority
+                                 :persistence-destination :repository])
+           (dissoc (:request-enrichment receipt) :production-functions)))
+    (is (= functions (:production-functions (:request-enrichment receipt))))))
+
+(deftest acceptance-request-records-unresolvable-harness-entries
+  (with-redefs [production/test-harness
+                (update production/test-harness :entrypoints conj
+                        {:role :x :var "no.such.ns/nothing" :file "test/x.clj"})]
+    (let [dir (root)
+          seen (atom nil)]
+      (production/produce-acceptance!
+       {:meta-acceptance-root (str dir "/acceptances")
+        :meta-repository-root repository-root
+        :meta-acceptance-fn (fn [r] (reset! seen r) {:status :failed})}
+       (produced-diagnosis! dir))
+      (let [entry (last (get-in @seen [:test-harness :entrypoints]))]
+        (is (false? (:resolvable? entry)))
+        (is (string? (:note entry))))
+      (is (= repository-root (:repository @seen))))))
+
+(deftest unresolvable-production-function-is-refused-before-the-port
+  ;; Two layers.  F11a's validation fires first when a diagnosis names an
+  ;; invented var: it is refused at diagnosis time and never pinned.  F12's own
+  ;; refusal fires only when a var that F11a verified no longer resolves when
+  ;; the request is built; the second half forces that with a redef of the
+  ;; request-time resolver.
+  (let [dir (root)
+        invented (produced-diagnosis!
+                  dir {:class :configuration
+                       :production-functions
+                       (conj production-functions
+                             {:role :x :var "no.such.ns/invented-fn" :file "src/x.clj"})})]
+    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason invented)))
+    (is (= ["no.such.ns/invented-fn"] (:unresolvable-vars invented))))
+  (let [dir (root)
+        calls (atom 0)
+        diagnosis (produced-diagnosis! dir)
+        dropped "futon2.aif.full-loop-runner/persist-run-record!"
+        result (with-redefs-fn
+                 {#'production/resolve-var
+                  (fn [v] (when-not (= v dropped) (requiring-resolve (symbol v))))}
+                 #(production/produce-acceptance!
+                   {:meta-acceptance-root (str dir "/acceptances")
+                    :meta-acceptance-fn (fn [_] (swap! calls inc) {:status :proposed})}
+                   diagnosis))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/acceptance-request-function-unresolvable (:reason result)))
+    (is (= [dropped] (:unresolvable result)))
+    (is (zero? @calls))
     (is (false? (:repair-claimed? result)))))
 
 (deftest acceptance-rejects-prose-and-unverified-diagnosis-identities

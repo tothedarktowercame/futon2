@@ -357,12 +357,152 @@
     (catch Throwable _
       (refusal :meta-self-heal/acceptance-persist-failed))))
 
+(def test-harness
+  "The isolated real-input harness an acceptance test may use, given to the
+  acceptance author seat.  Maintained by hand until a producer exists for it:
+  F12 (replay 2, 2026-10-19 18:40Z, where the author seat proposed a test
+  after refusing twice; click wm-click-fca1c921).  Each entrypoint is
+  described at request time; the test-support namespace is on the test
+  classpath, not the serving one, so it is recorded as unresolvable there."
+  {:note "Isolated real-input harness the existing acceptance-style tests use (test classpath). The test may use it; nothing else is stubbed."
+   :entrypoints
+   [{:role :isolated-environment
+     :var "futon2.aif.meta-self-heal-harness/prepare-environment!"
+     :file "src/futon2/aif/meta_self_heal_harness.clj"}
+    {:role :isolated-runner-options
+     :var "futon2.test-support.runner-fixture/isolated-runner-opts"
+     :file "test/futon2/test_support/runner_fixture.clj"}
+    {:role :hermetic-traces
+     :var "futon2.test-support.runner-fixture/with-hermetic-traces"
+     :file "test/futon2/test_support/runner_fixture.clj"}
+    {:role :loop-exercise-evidence
+     :var "futon2.test-support.runner-fixture/with-loop-exercise-evidence"
+     :file "test/futon2/test_support/runner_fixture.clj"}]
+   :examples ["test/futon2/aif/meta_self_heal_production_test.clj"
+              "test/futon2/aif/p37_reading_preparation_runtime_test.clj"
+              "test/futon2/test_support/runner_fixture_test.clj"]})
+
+(defn- resolve-var [var-name]
+  (when (and (string? var-name) (str/includes? var-name "/"))
+    (try (requiring-resolve (symbol var-name)) (catch Throwable _ nil))))
+
+(defn- describe-function
+  "Attach the resolved var's :arglists and :doc (at most 700 chars).  Returns
+  the entry with :resolvable? false when the var does not resolve here."
+  [entry]
+  (if-let [v (resolve-var (:var entry))]
+    (let [m (meta v) doc (:doc m)]
+      (assoc entry :resolvable? true
+             :arglists (pr-str (:arglists m))
+             :doc (some-> doc (subs 0 (min 700 (count doc))))))
+    (assoc entry :resolvable? false)))
+
+(defn- harness-section []
+  (update test-harness :entrypoints
+          (fn [entries]
+            (mapv (fn [e]
+                    (let [d (describe-function e)]
+                      (cond-> d
+                        (not (:resolvable? d))
+                        (assoc :note "not on the serving classpath (test-support namespace); read the file"))))
+                  entries))))
+
+(defn- request-enrichment
+  "What the acceptance seat is given beyond the diagnosis: per production
+  function its :arglists/:doc, the test harness, input authority, the
+  persistence destination and the repository.  Mechanical: nothing here is
+  asked of the seat.  Returns {:unresolvable [vars]} when a named function
+  does not resolve."
+  [opts diagnosis-map source-record-pin]
+  (let [described (mapv describe-function (:production-functions diagnosis-map))
+        missing (vec (keep #(when-not (:resolvable? %) (:var %)) described))]
+    (if (seq missing)
+      {:unresolvable missing}
+      {:production-functions described
+       :test-harness (harness-section)
+       :real-input-authority {:source-record source-record-pin
+                              :injury-ledger (or (:meta-injury-ledger-path opts)
+                                                 default-ledger-path)
+                              :note "read-only in the test; isolated copies via the harness"}
+       :persistence-destination {:note "the test writes only under the harness's temporary roots; canonical data/ and src/ are read-only"}
+       :repository (or (:meta-repository-root opts) default-repository-root)})))
+
+(defn- produce-acceptance-from-request!
+  "The port call and receipt half of produce-acceptance!, once every
+  production function the diagnosis names has resolved."
+  [opts diagnosis diagnosis-map enrichment accept]
+  (let [request (merge {:schema :wm/meta-acceptance-request-v1
+                        :injury-id (:injury-id diagnosis)
+                        :source-record-pin (:source-record-pin diagnosis)
+                        :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                        :diagnosis (cond-> diagnosis-map
+                                     (contains? diagnosis-map :production-functions)
+                                     (assoc :production-functions
+                                            (:production-functions enrichment)))
+                        :repair-claimed? false}
+                       (dissoc enrichment :production-functions))
+        response (try (accept request)
+                      (catch Throwable _
+                        {:status :failed
+                         :reason :meta-self-heal/acceptance-port-threw}))]
+    (cond
+      (nil? response)
+      (refusal :meta-self-heal/acceptance-port-returned-nil
+               {:request request :repair-claimed? false})
+      (not (map? response))
+      (refusal :meta-self-heal/acceptance-port-malformed
+               {:request request :repair-claimed? false})
+      (not= :proposed (:status response))
+      ;; F10 (click wm-click-fca1c921, 2026-10-19): the producer's own
+      ;; typed refusal (:failure with its kind, reason and :missing) and
+      ;; a transport :detail travel onto the record; the refusal said
+      ;; only :acceptance-unavailable before.
+      (refusal :meta-self-heal/acceptance-unavailable
+               {:request request :acceptance-status (:status response)
+                :acceptance-reason (:reason response)
+                :acceptance-failure (:failure response)
+                :acceptance-detail (:detail response)
+                :repair-claimed? false})
+      (source-mismatch? (:acceptance-test response))
+      (refusal :meta-self-heal/acceptance-proposal-source-mismatch
+               {:request request :repair-claimed? false})
+      (not (concrete-acceptance? (:acceptance-test response)))
+      (refusal :meta-self-heal/acceptance-prose-or-malformed
+               {:request request :repair-claimed? false})
+      :else
+      (let [receipt {:schema :wm/meta-acceptance-receipt-v1
+                     :status :proposed :review-status :unreviewed
+                     :result-status :not-run
+                     :injury-id (:injury-id diagnosis)
+                     :source-record-pin (:source-record-pin diagnosis)
+                     :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                     :request-enrichment enrichment
+                     :acceptance-test (:acceptance-test response)
+                     :repair-claimed? false}
+            written (persist-acceptance!
+                     (acceptance-path (or (:meta-acceptance-root opts)
+                                          default-acceptance-root) receipt)
+                     receipt)]
+        (if (= :persisted (:status written))
+          (merge written {:status :proposed :injury-id (:injury-id diagnosis)
+                          :source-record-pin (:source-record-pin diagnosis)
+                          :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                          :acceptance-test (:acceptance-test response)
+                          :review-status :unreviewed :result-status :not-run
+                          :repair-claimed? false})
+          (assoc written :injury-id (:injury-id diagnosis)
+                 :repair-claimed? false))))))
+
 (defn produce-acceptance!
   "Request and retain a concrete, unreviewed acceptance specification for one
   verified diagnosis.  This is proposal production only: no returned command
   is executed and no repair or passing result is claimed.  Historical inputs
   acceptance-25481c81... and acceptance-405aaeb0... were specifications
-  without code; source is now part of the content-addressed receipt."
+  without code; source is now part of the content-addressed receipt.
+  F12 (click wm-click-fca1c921; replay 2, 2026-10-19 18:40Z): the request
+  binds what a no-stub test needs, mechanically (see request-enrichment),
+  and the receipt keeps it verbatim as :request-enrichment.  A diagnosis
+  function that does not resolve in this JVM is a typed refusal."
   [opts diagnosis]
   (if-let [acceptance (:acceptance-test opts)]
     {:status :present :acceptance-test acceptance :source :supplied}
@@ -379,62 +519,16 @@
                  {:injury-id (:injury-id diagnosis) :repair-claimed? false})
 
         :else
-        (let [request {:schema :wm/meta-acceptance-request-v1
-                       :injury-id (:injury-id diagnosis)
-                       :source-record-pin (:source-record-pin diagnosis)
-                       :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
-                       :diagnosis (:diagnosis (:receipt diagnosis-read))
-                       :repair-claimed? false}
-              response (try (accept request)
-                            (catch Throwable _
-                              {:status :failed
-                               :reason :meta-self-heal/acceptance-port-threw}))]
-          (cond
-            (nil? response)
-            (refusal :meta-self-heal/acceptance-port-returned-nil
-                     {:request request :repair-claimed? false})
-            (not (map? response))
-            (refusal :meta-self-heal/acceptance-port-malformed
-                     {:request request :repair-claimed? false})
-            (not= :proposed (:status response))
-            ;; F10 (click wm-click-fca1c921, 2026-10-19): the producer's own
-            ;; typed refusal (:failure with its kind, reason and :missing) and
-            ;; a transport :detail travel onto the record; the refusal said
-            ;; only :acceptance-unavailable before.
-            (refusal :meta-self-heal/acceptance-unavailable
-                     {:request request :acceptance-status (:status response)
-                      :acceptance-reason (:reason response)
-                      :acceptance-failure (:failure response)
-                      :acceptance-detail (:detail response)
+        (let [diagnosis-map (:diagnosis (:receipt diagnosis-read))
+              enrichment (request-enrichment opts diagnosis-map
+                                             (:source-record-pin diagnosis))]
+          (if (:unresolvable enrichment)
+            (refusal :meta-self-heal/acceptance-request-function-unresolvable
+                     {:injury-id (:injury-id diagnosis)
+                      :unresolvable (:unresolvable enrichment)
                       :repair-claimed? false})
-            (source-mismatch? (:acceptance-test response))
-            (refusal :meta-self-heal/acceptance-proposal-source-mismatch
-                     {:request request :repair-claimed? false})
-            (not (concrete-acceptance? (:acceptance-test response)))
-            (refusal :meta-self-heal/acceptance-prose-or-malformed
-                     {:request request :repair-claimed? false})
-            :else
-            (let [receipt {:schema :wm/meta-acceptance-receipt-v1
-                           :status :proposed :review-status :unreviewed
-                           :result-status :not-run
-                           :injury-id (:injury-id diagnosis)
-                           :source-record-pin (:source-record-pin diagnosis)
-                           :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
-                           :acceptance-test (:acceptance-test response)
-                           :repair-claimed? false}
-                  written (persist-acceptance!
-                           (acceptance-path (or (:meta-acceptance-root opts)
-                                                default-acceptance-root) receipt)
-                           receipt)]
-              (if (= :persisted (:status written))
-                (merge written {:status :proposed :injury-id (:injury-id diagnosis)
-                                :source-record-pin (:source-record-pin diagnosis)
-                                :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
-                                :acceptance-test (:acceptance-test response)
-                                :review-status :unreviewed :result-status :not-run
-                                :repair-claimed? false})
-                (assoc written :injury-id (:injury-id diagnosis)
-                       :repair-claimed? false)))))))))
+            (produce-acceptance-from-request! opts diagnosis diagnosis-map
+                                              enrichment accept)))))))
 
 (defn- read-acceptance-proposal [proposal]
   (let [pin (:acceptance-evidence-pin proposal)]
