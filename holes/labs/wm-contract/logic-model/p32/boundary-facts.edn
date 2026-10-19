@@ -1,0 +1,69 @@
+;; P32's deliberately small, source-pinned static model.  These are claims
+;; about interfaces, not observations from a click and not a launch gate.
+[
+ {:id :c1-reading-selection
+  :kind :consumer
+  :correlation-row 1
+  :input :target-reading
+  :produces :selection-result
+  :phase 8
+  :scope :eligible-targets
+  :required? true
+  :absence-disposition :record-and-continue
+  :status :present
+  :source-pin "correlation.md row 1; phases.md 8/9; L1"}
+ {:id :p1-reading-preparation
+  :kind :producer
+  :correlation-row 1
+  :output :target-reading
+  :requires [:selection-result]
+  :phase 9
+  :scope :selected-needs
+  :absence-disposition :record-refusal
+  :status :present
+  :source-pin "producers.md P1; full_loop_runtime.clj:318"}
+
+ {:id :c2-square-selection
+  :kind :consumer
+  :correlation-row 2
+  :input :occurrence-squares
+  :produces :selection-result
+  :phase 8
+  :scope :targets-with-readings
+  :required? true
+  :absence-disposition :family-failure
+  :status :present
+  :source-pin "correlation.md row 2; consumers.md row 26"}
+ {:id :p2-square-authoring
+  :kind :producer
+  :correlation-row 2
+  :output :occurrence-squares
+  :requires [:selection-result]
+  :phase 10
+  :scope :selected-target
+  :absence-disposition :record-refusal
+  :status :present
+  :source-pin "producers.md P4; occurrence_square_authoring.clj:27/148"}
+
+ ;; L2 originally lost this carrier at close.  The retained edge is pinned to
+ ;; the landed repair; this model does not claim the other row-6 fields exist.
+ {:id :r6-selection-frontier-retained
+  :kind :retention
+  :correlation-row 6
+  :from :outer-policy-decision
+  :to :terminal-run-record
+  :carrier :reading-frontier
+  :phase 32
+  :status :present
+  :absence-disposition :retain-absence
+  :source-pin "149dc9b30; L2 f9abc990 selection/frontier loss"}
+ {:id :r6-prospective-carry-retention
+  :kind :retention
+  :correlation-row 6
+  :from :outer-policy-decision
+  :to :d-task-capture
+  :carrier :prospective-carry
+  :phase 22
+  :status :unknown
+  :absence-disposition :unknown
+  :source-pin "correlation.md row 6; consumers.md rows 47/49"}]
