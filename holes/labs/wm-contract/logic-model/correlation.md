@@ -202,7 +202,9 @@ verified assessed-population basis, replaying full original menu/evidence throug
 P07a. Both bases project the original menu entry executable action; complete
 entry equality rejects independently substituted actions. Basis scope/absences
 remain certificate evidence. Strict and legacy strict carrier controls pass.
-Worker focused 2 tests/21 assertions passed; no runtime caller activation yet.
+Worker focused 2 tests/21 assertions passed. Activation was pending at P07b;
+subsequent P07c wires the assessed carrier through the production selector and
+report-runner handoff. No serving execution is established by that source wiring.
 
 Row 6 P07a (`4a2f7da8a`, authored `12b2482f1`): separately typed, non-executable
 assessed-policy basis retains original menu/full evidence/partial objective and

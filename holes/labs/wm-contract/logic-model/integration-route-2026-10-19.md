@@ -18,10 +18,11 @@ passes its carrier to the cascade decision.  That discrepancy is not evidence
 of live execution and does not change the explicitly unverified downstream
 Q2/Q8 coverage or debugger behavior.
 
-The remaining reachable stops in this bounded route are typed validation or
-dispatch-preparation barriers, not measured absences recast as vetoes.  Their
-outcomes are retained as far as the static source permits; no successful
-terminal observation was claimed here.
+The enumerated stops include typed validation and dispatch-preparation
+barriers. This is not an exhaustive audit of runner stops or proof that every
+remaining gate complies with the frontier ruling. Their outcomes are retained
+as far as the cited source permits; no successful terminal observation was
+claimed here.
 
 ## Enumerated carrier
 
@@ -78,7 +79,7 @@ terminal observation was claimed here.
    decision/outer receipt.
 
    P11 observes a selected judgement before later validation, publishes at
-   most once by run identity, and records a failed trace publication separately
+   most once within the runner invocation's publication guard, and records a failed trace publication separately
    (`...full_loop_runner.clj:5480-5492,5515-5572`).  Thus a later failure is
    not source evidence that selection did not occur; nor is a missing trace a
    selection veto.  This is static source reasoning only.
@@ -109,7 +110,8 @@ terminal observation was claimed here.
 
 ## Reachable barriers and absence boundary
 
-The following are the only barriers found in this source-limited traversal:
+The following are the barriers enumerated in this source-limited traversal;
+the table does not establish absence of other runner or readiness gates:
 
 | boundary | static condition | representation | interpretation |
 | --- | --- | --- | --- |
@@ -146,7 +148,7 @@ does **not** claim serving execution, full Q2/Q8 certification, debugger
 behavior, or terminal success.  This is priority one because it is a concrete
 documentation producer/consumer mismatch; it requires no source rewrite.
 
-No further next packet is proposed for the enumerated execution route: its
-remaining stops are explicit contracts rather than a demonstrated broken
-handoff.  Deferred precision/embedding work and the repair-obligation queue
-were intentionally outside this review.
+No additional executable handoff defect was demonstrated in this traversal.
+That negative finding is not approval of all remaining stops; serving-route
+measurement remains outstanding. Deferred precision/embedding work and the
+repair-obligation queue were intentionally outside this review.
