@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+No-producer #3 / P16: `meta-self-heal-production/produce-diagnosis!` now
+accepts durable injury history and active entry, verifies source bytes, invokes
+injected `:meta-diagnosis-fn`, and persists successful response receipts before
+returning a pin. Source/response/write failures claim no repair or diagnosis pin.
+Existing supplied pins are passed through, not newly verified by this helper.
+Runtime caller and production port integration remain absent; this is not yet
+a serving producer. Worker commits `3e15ffbe3` / `c72d33162`.
+
 P17 / P15 (`7fc350383`, `9afa7ca0c` worker commits): terminal classification
 retains the record pin and names observation class separately from coarse outcome.
 Supported provider-absence causes identify missing-production-machinery injury;

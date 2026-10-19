@@ -1,5 +1,10 @@
 # WM click runner: phase order (static reading)
 
+P16 phase 0a increment: a standalone diagnosis producer can turn pinned injury
+source into an injected request and content-addressed persisted response.
+The serving phase does NOT invoke/thread it yet. No runtime continuation,
+acceptance-input production or repair execution is established by this change.
+
 Reviewed P14 update (worker `1077757b6` + `732b2f0c4`): phases 32→33–35
 retain independent post-record publication observations in a linked sidecar.
 The pinned run bytes remain unchanged. Without readable linkage all sinks are

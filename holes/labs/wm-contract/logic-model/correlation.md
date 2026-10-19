@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P16: diagnosis producer exists as an unwired helper, with exact source
+pin verification and content-addressed receipt paths (changed diagnosis bytes
+use different paths). Existing-byte reuse is verified. Missing port/source,
+bad response and persistence failure remain explicit without repair claims.
+Production caller/port integration and P17 acceptance remain open; no serving
+observation follows from the hermetic producer tests.
+
 Row 7 / P15: pure classification distinguishes retained configuration absence,
 evaluated no-action and partial-frontier continuation without treating every
 abstention or zero assessment as injury. Source pin retained; success and other
