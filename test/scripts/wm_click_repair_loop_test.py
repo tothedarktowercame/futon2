@@ -224,6 +224,34 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertNotIn("no-policy-family/unknown", result.stdout)
         self.assertIn('"phase":"before-cascade-construction"', result.stdout)
 
+    def test_lifecycle_formatter_qualifies_sixty_non_actionable_findings(self):
+        loop = load_loop()
+        census = {
+            "schema": "wm/repair-obligation-lifecycle-census-v1",
+            "finding-count": 60,
+            "reconciled?": True,
+            "actionable-open": {"count": 0, "ids": []},
+            "awaiting-validation": {"count": 20,
+                                    "ids": [f"awaiting-{n:02d}" for n in range(20)]},
+            "environmental-hold": {"count": 20,
+                                   "ids": [f"environment-{n:02d}" for n in range(20)]},
+            "closed": {"count": 20, "ids": [f"closed-{n:02d}" for n in range(20)]},
+        }
+        rendered = "\n".join(loop.lifecycle_display(census))
+        self.assertIn("repair lifecycle authority: wm/repair-obligation-lifecycle-census-v1",
+                      rendered)
+        self.assertIn("actionable-open: count=0 ids=[]", rendered)
+        self.assertIn("awaiting-validation: count=20", rendered)
+        self.assertIn("environmental-hold: count=20", rendered)
+        self.assertIn("closed: count=20", rendered)
+        self.assertNotIn("open stop-lines", rendered)
+
+    def test_lifecycle_formatter_marks_old_aggregate_records_unavailable(self):
+        loop = load_loop()
+        rendered = "\n".join(loop.lifecycle_display(None))
+        self.assertIn("unavailable", rendered)
+        self.assertIn("legacy", rendered)
+
     def test_repair_packet_bounds_large_shared_artifacts(self):
         loop = load_loop()
         with tempfile.TemporaryDirectory() as td:

@@ -1279,6 +1279,10 @@
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
+                     (get-in result [:checkpoints :selection :judgment :repair-lifecycle-census])
+                     (assoc :repair-lifecycle-census
+                            (get-in result [:checkpoints :selection :judgment
+                                    :repair-lifecycle-census]))
                      (:execution-cohort raw-opts)
                      (assoc :execution-cohort
                             (merge (select-keys (:execution-cohort raw-opts)
@@ -6446,9 +6450,24 @@
                            :failure-kind :decision-input-freshness-unestablished
                            :failure-stage :preference-refresh
                            :refresh r}))))
-      (let [open-stop-lines
+      (let [{:keys [open-stop-lines repair-lifecycle-census]}
             (run-phase! opts @phase-context :stop-line-memory
-                        #((or (:repair-open-fn opts) repair/open-obligations)))
+                        #(let [open-stop-lines
+                               ((or (:repair-open-fn opts) repair/open-obligations))
+                               ;; This is evidence beside the operational collection,
+                               ;; not its replacement: selection below still receives
+                               ;; the established open-obligations shape.
+                               repair-lifecycle-census
+                               (try
+                                 ((or (:repair-lifecycle-fn opts)
+                                      repair/lifecycle-census))
+                                 (catch Throwable t
+                                   {:status :unavailable
+                                    :reason :repair-lifecycle-census-unavailable
+                                    :detail (or (ex-message t)
+                                                (.getName (class t)))}))]
+                           {:open-stop-lines open-stop-lines
+                            :repair-lifecycle-census repair-lifecycle-census}))
             validation-lines
             (->> open-stop-lines
                  (filter #(or (= :awaiting-validation (:repair/status %))
@@ -6956,7 +6975,9 @@
                                                    @effective-configuration)
                                          (assoc-in [:judgment :open-stop-lines]
                                                    {:count (count open-stop-lines)
-                                                    :ids (mapv :repair/id open-stop-lines)}))
+                                                    :ids (mapv :repair/id open-stop-lines)})
+                                         (assoc-in [:judgment :repair-lifecycle-census]
+                                                   repair-lifecycle-census))
                                ;; PROOF-2b: the click's interpretation ask
                                ;; rides on the selection cell's judgment —
                                ;; selected and abstained (sorry) cells alike —

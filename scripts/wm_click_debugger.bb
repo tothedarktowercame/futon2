@@ -27,7 +27,7 @@
      :failure (select-keys (:failure r) [:kind :stage :error])
      :abstention-status (get-in r [:decision :abstention :status])
      :chosen (get-in r [:decision :chosen])
-     :open-stop-lines (:open-stop-lines r)
+     :repair-lifecycle-census (:repair-lifecycle-census r)
      :selected-target-reading (when reading-refusal?
                                 (select-keys selected-reading [:schema :status :kind :published :target :detail]))
      :counts (frequencies (map kind-of targets))

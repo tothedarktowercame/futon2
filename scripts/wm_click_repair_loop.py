@@ -525,6 +525,28 @@ def moved(before: dict, after: dict) -> bool:
     return after["counts"].get(UNIVERSES, 0) <= before["counts"].get(UNIVERSES, 0) - 5
 
 
+def lifecycle_display(census: object) -> list[str]:
+    """Render retained lifecycle evidence without treating old aggregates as actionable."""
+    if not isinstance(census, dict):
+        return ["repair lifecycle: unavailable (legacy record has no lifecycle census)"]
+    schema = census.get("schema")
+    if schema != "wm/repair-obligation-lifecycle-census-v1":
+        status = census.get("status", "unavailable")
+        reason = census.get("reason", "unknown")
+        return [f"repair lifecycle: unavailable ({status}/{reason}; authority={schema!r})"]
+    lines = [f"repair lifecycle authority: {schema}",
+             f"repair lifecycle reconciled: {json.dumps(census.get('reconciled?'))}",
+             f"repair lifecycle findings: {json.dumps(census.get('finding-count'))}"]
+    for bucket in ("actionable-open", "awaiting-validation", "environmental-hold", "closed"):
+        receipt = census.get(bucket)
+        if not isinstance(receipt, dict):
+            lines.append(f"{bucket}: unavailable (missing bucket)")
+        else:
+            lines.append(f"{bucket}: count={json.dumps(receipt.get('count'))} "
+                         f"ids={json.dumps(receipt.get('ids'))}")
+    return lines
+
+
 def debugger_page(c: dict, previous: dict | None) -> tuple[Path, dict]:
     """Write the click's debugger page; return (path, summary). The summary's
     signature is what must change for an abstention to count as moved."""
@@ -542,7 +564,7 @@ def debugger_page(c: dict, previous: dict | None) -> tuple[Path, dict]:
              f"run record: {rr}", f"click log: {c['log']}", f"run id: {c.get('run-id')}", "",
              f"failure: {json.dumps(d.get('failure'))}",
              f"chosen: {json.dumps(d.get('chosen'))}",
-             f"open stop-lines: {json.dumps(d.get('open-stop-lines'))}", "",
+             *lifecycle_display(d.get("repair-lifecycle-census")), "",
              "## Refusals by kind", *[f"- {k}: {v}" for k, v in sorted(sig["counts"].items())], "",
              "## Targets refused for something other than an unadmitted universe",
              *[f"- {x['target']}  {x['refusal']}  declines={x['declines']}"

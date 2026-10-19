@@ -7468,3 +7468,51 @@
         (do (is (= :unknown (get-in @sent [:harness :kind])))
             (is (string? (get-in @sent [:harness :reason])))
             (is (not (contains? (:harness @sent) :execution-id))))))))
+(deftest lifecycle-census-is-retained-without-replacing-operational-stop-lines
+  (let [cohort (retention-cohort "lifecycle-qualified-reporting")
+        store-opts (hermetic/runner-repair-options)
+        root (:repair-root store-opts)
+        write! (fn [bucket record]
+                 (let [file (io/file root bucket (str (:repair/id record) ".edn"))]
+                   (io/make-parents file)
+                   (spit file (pr-str record))))
+        finding (fn [id repair-class]
+                  {:repair/id id :repair/schema-version 3 :repair/status :open
+                   :repair/class repair-class :attempt-id (str "attempt-" id)
+                   :opened-at "2026-10-19T00:00:00Z"})]
+    ;; The canonical reader, not a fabricated census, must classify all 60.
+    (doseq [n (range 20)]
+      (let [id (format "closed-%02d" n)]
+        (write! "findings" (finding id :machine-failure))
+        (write! "resolutions" {:repair/id id :repair/status :resolved})))
+    (doseq [n (range 20)]
+      (let [id (format "awaiting-%02d" n)]
+        (write! "findings" (finding id :machine-failure))
+        (write! "implementations" {:repair/id id
+                                     :repair/status :awaiting-validation})))
+    (doseq [n (range 20)]
+      (let [id (format "environment-%02d" n)]
+        (write! "findings" (finding id :environmental-hold))))
+    (let [{:keys [result]}
+          (with-redefs-fn {#'runner/refuse-on-runner-source-drift!
+                            (constantly {:runner/source-check :fixture-current})}
+            #(run-token-feature-card-attempt
+              cohort (token-loop-exercised-decision)
+              {:runner-options
+               (merge store-opts
+                      {:repair-open-fn (constantly [])
+                       :repair-lifecycle-fn (partial repair/lifecycle-census root)})}))
+          census (get-in result [:checkpoints :selection :judgment
+                                 :repair-lifecycle-census])]
+      ;; The ordinary judge remains free to abstain; reporting cannot turn an
+      ;; empty operational stop-line input into a repair route.
+      (is (= :no-selection (:outcome result)))
+      (is (= {:count 0 :ids []}
+             (get-in result [:checkpoints :selection :judgment :open-stop-lines])))
+      (is (= :wm/repair-obligation-lifecycle-census-v1 (:schema census)))
+      (is (= 60 (:finding-count census)))
+      (is (= 0 (get-in census [:actionable-open :count])))
+      (is (= 20 (get-in census [:awaiting-validation :count])))
+      (is (= 20 (get-in census [:environmental-hold :count])))
+      (is (= 20 (get-in census [:closed :count])))
+      (is (:reconciled? census)))))
