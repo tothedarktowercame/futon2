@@ -2,7 +2,8 @@
   "Pure digest-keyed evidence join for sealed outer Cascade Live policies."
   (:require [futon2.aif.load-identity :as identity]
             [futon2.aif.meta-outcome-dataset :as outcomes]
-            [futon2.aif.parameter-novelty :as novelty]))
+            [futon2.aif.parameter-novelty :as novelty]
+            [futon2.aif.wm.executable-cascade :as xc]))
 
 (identity/register! *ns* *file*)
 
@@ -13,7 +14,9 @@
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
 (defn- declaration-pin [d]
   (identity/sha256 (.getBytes (pr-str (dissoc d :pin)) "UTF-8")))
-(defn- dataset-pin [rows] (identity/sha256 (.getBytes (pr-str rows) "UTF-8")))
+(defn- dataset-pin [rows]
+  {:path "wm://outer-policy-terminal-dataset-v1" :authority :durable-run-records
+   :sha256 (identity/sha256 (.getBytes (pr-str rows) "UTF-8"))})
 
 (defn join
   "Join SEALED policy entries to explicit DECLARATION and durable RECORDS.
@@ -25,12 +28,37 @@
         global (:global-prior declaration)
         declared-pin (:pin declaration)
         actual-pin (declaration-pin declaration)
+        preference (:preference declaration)
+        masses (:distribution preference)
+        mass-sum (reduce + 0.0 (filter number? masses))
+        sealed-error
+        (cond
+          (not= :wm/sealed-outer-policy-menu-v1 (:schema sealed)) :sealed-menu-schema
+          (not= :sealed (:status sealed)) :sealed-menu-status
+          (not (pin? (:menu-pin sealed))) :menu-pin
+          (not (pin? (:field-source-pin sealed))) :field-source-pin
+          (some (fn [e]
+                  (let [record (:canonical-cascade e)]
+                    (or (not (string? (:policy-id e)))
+                        (not (string? (:target-id e)))
+                        (not (string? (:cascade-digest e)))
+                        (not= (:cascade-digest e) (:digest record))
+                        (not= (:cascade-digest e) (xc/digest record))
+                        (not (xc/certified? (xc/validate-cascade record)))))) entries)
+          :sealed-entry-invalid
+          :else nil)
         malformed-declaration
         (cond
           (not= :wm/outer-policy-evidence-declaration-v1 (:schema declaration)) :declaration-schema
           (not (and (vector? vocab) (seq vocab) (= (count vocab) (count (distinct vocab))))) :outcome-vocabulary
           (not (and (finite? (:gamma declaration)) (pos? (:gamma declaration)))) :gamma
+          (not (pin? declared-pin)) :declaration-pin
           (not (pin? (:preference-authority declaration))) :preference-authority
+          (not= (:preference-authority declaration) (:authority preference)) :preference-authority-mismatch
+          (not= vocab (:vocabulary preference)) :preference-vocabulary
+          (not (and (vector? masses) (= (count vocab) (count masses))
+                    (every? #(and (finite? %) (pos? %)) masses))) :preference-mass
+          (> (abs (- mass-sum 1.0)) 1.0e-10) :preference-normalization
           (not= actual-pin (:sha256 declared-pin)) :declaration-pin
           :else nil)
         rows
@@ -59,8 +87,11 @@
               :cascade-digest digest :absent-terms (cond-> absent (seq unknown) (conj :unknown-outcome))
               :prior-alpha prior :task-counts (mapv #(get counts % 0) vocab)
               :posterior-alpha posterior
+              :posterior-predictive (when (seq posterior)
+                                      (let [n (double (reduce + posterior))]
+                                        {:vocabulary vocab :distribution (mapv #(/ (double %) n) posterior)
+                                         :units :probability}))
               :eig (when (empty? absent) (novelty/categorical-information vocab posterior))
-              :risk (:risk spec) :ambiguity (:ambiguity spec)
               :ln-e-components components
               :ln-e (when (every? #(finite? (get-in components [% :value])) component-names)
                       (reduce + (map #(get-in components [% :value]) component-names)))
@@ -68,10 +99,12 @@
                               (remove #(= :task-outcome (get-in % [::cause :class])) classified))}))
          entries)
         missing (filterv #(seq (:absent-terms %)) rows)]
-    (if (or malformed-declaration (not= :sealed (:status sealed)) (seq missing))
+    (if (or sealed-error malformed-declaration (seq missing))
       {:schema schema :status :refused
-       :reason (or malformed-declaration :policy-evidence-incomplete)
+       :reason (or sealed-error malformed-declaration :policy-evidence-incomplete)
        :missing (mapv #(select-keys % [:cascade-digest :absent-terms]) missing)}
       {:schema schema :status :computed :menu-pin (:menu-pin sealed)
        :declaration-pin declared-pin :dataset-pin (dataset-pin records)
-       :outcome-vocabulary vocab :gamma (:gamma declaration) :entries rows})))
+       :outcome-vocabulary vocab :preference preference
+       :preference-authority (:preference-authority declaration)
+       :gamma (:gamma declaration) :entries rows})))
