@@ -1,5 +1,12 @@
 # WM click runner: data stores on disk
 
+Reviewed P11 trace update (`5874be666` + `89e689716`): selected early-terminal
+trace rows may carry `:trace/terminal` and existing `:run/id`. Publication is
+deduplicated within one runner invocation, not claimed cross-process exactly-once.
+Run record retains present/failed/skipped/absent publication receipt; returned
+path-only injections are labelled unverified, production record returns separately
+identified. No serving-store observation has been made after landing.
+
 ## Reviewed update — 2026-10-19, codex-1
 
 Manifest reader update (P03, `3c4b9da4a`, reviewed worker `d1c2717c5`): reader reports declared/readable/verified/excluded counts, missing/drifted counts and exclusion reason frequencies. Here `:verified` counts usable retained learning rows, not every hash-matching file. Original manifest pins are preserved; changed bytes are not repinned. Parsed verified records travel with dataset rows so provider projection does not reread mutable paths. Constructed three-record regression passed; no live store mutation or serving observation. Original inventory below remains historical.

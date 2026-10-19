@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Consumer54 P11 (`5874be666` + `89e689716`): run record retains compact
+trace-publication state. Nil/throwing writers yield failed receipts, no path and
+false traceWritten, preserving original terminal failure. Pre-judgement absence
+and intentionally skipped repair actions are distinct; successful attempts carry
+returned-path/record evidence. Synthetic failure-isolation tests pass.
+
 Rows 36/41 P07b: `seal-assessed` adapts only a verified P07a basis. Carrier
 verification recomputes the basis and checks complete selected-entry equality
 against the original menu. `decision` projects that entry's executable action,

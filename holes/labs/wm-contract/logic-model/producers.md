@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P24 P11 (`5874be666` + `89e689716`): selected observation can produce one trace
+at normal construction or early close within the same runner invocation. An early
+row identifies actual phase/stage, without manufacturing construction completion.
+Attempt state is cached even on failure; no retry loop or retired R8 scalar added.
+
 P4 P02b: no defect in square need extraction was reproduced. With no outer
 choice, generator target-local assembly has zero targets; its inner field cannot
 nominate square work. A potential preparation request from the retained outer

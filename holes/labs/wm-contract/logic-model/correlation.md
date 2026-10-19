@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Section2 P11 (`5874be666` + `89e689716`): selected early-terminal observations
+can reach the trace even when construction fails. Trace publication failure is
+separate from the original run failure; nil/throwing writers cannot mask it.
+Worker isolated regression reports 29 assertions passed with source-drift guard
+stubbed for worktree execution. No serving-process or live persistence claim.
+
 Row 6 P07b (worker `608c9072` + `c71ef391`): executable carrier now supports
 verified assessed-population basis, replaying full original menu/evidence through
 P07a. Both bases project the original menu entry executable action; complete

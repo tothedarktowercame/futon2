@@ -1,5 +1,12 @@
 # WM click runner: phase order (static reading)
 
+Reviewed P11 update (`5874be666` + `89e689716`): observed selected judgement is
+available before validation/construction. Early close can publish it with explicit
+early-terminal phase/stage/outcome; normal construction and close share one
+per-run publication-attempt state. Failed attempts are recorded, not retried at
+close or allowed to replace original failure. This adds observation to phases
+15/20, not a claim that construction/dispatch/learning completed.
+
 futon2 commit read: `f76041cc7` (master). Date: 2026-10-19.
 Scope: order of phases only. Every file:line below was read this session. Paths are under
 `/home/joe/code/futon2/` (`R` = `src/futon2/aif/full_loop_runner.clj`, `RT` = `src/futon2/aif/full_loop_runtime.clj`,
