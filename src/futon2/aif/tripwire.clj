@@ -727,6 +727,23 @@
 (defn- coverage-path [root incident-id]
   (io/file root (str incident-id ".edn")))
 
+(defn- write-coverage-temp!
+  "Write complete receipt bytes to a sibling temporary file.  The caller
+  publishes the completed file by link while holding the store lock."
+  [root bytes]
+  (let [directory (.toPath (io/file root))
+        temp (Files/createTempFile directory ".incident-coverage-" ".tmp"
+                                   (make-array java.nio.file.attribute.FileAttribute 0))]
+    (try
+      (Files/write temp bytes
+                   (into-array StandardOpenOption
+                               [StandardOpenOption/TRUNCATE_EXISTING
+                                StandardOpenOption/WRITE]))
+      temp
+      (catch Throwable e
+        (Files/deleteIfExists temp)
+        (throw e)))))
+
 (defn write-incident-coverage!
   "Create one immutable coverage disposition per closed incident identity.
 
@@ -749,35 +766,73 @@
                  :reason :coverage-disposition-conflict}))
             (do
               (io/make-parents file)
-              (Files/write (.toPath file)
-                           (.getBytes (pr-str receipt) "UTF-8")
-                           (into-array StandardOpenOption
-                                       [StandardOpenOption/CREATE_NEW
-                                        StandardOpenOption/WRITE]))
-              {:status :persisted :path (.getPath file) :idempotent? false})))))))
+              ;; A link is an atomic, create-only publication of fully-written
+              ;; sibling bytes.  Unlike a move with replacement, it cannot
+              ;; overwrite a receipt whose pin may already have been handed out.
+              (let [temp (write-coverage-temp!
+                          root (.getBytes (pr-str receipt) "UTF-8"))]
+                (try
+                  (Files/createLink (.toPath file) temp)
+                  {:status :persisted :path (.getPath file) :idempotent? false}
+                  (finally
+                    (Files/deleteIfExists temp)))))))))))
 
-(defn- coverage-disposition [closure]
+(defn- verified-wire-reference
+  "Verify both the source bytes and a configured authoritative wire receipt.
+  The registry identifies a named wire, but deliberately is not evidence that
+  a supplied verification claim or source pin is true."
+  [opts wire]
+  (let [wire-id (:wire-id wire)
+        verification (:verification wire)
+        source-pin (:source-pin verification)
+        verifier (:tripwire/wire-verifier opts)]
+    (cond
+      (not (contains? @wire-registry wire-id))
+      {:status :unavailable :reason :wire-reference-unknown}
+
+      (not (coverage-pin? source-pin))
+      {:status :unavailable :reason :wire-reference-source-unpinned}
+
+      (not= (:sha256 source-pin) (source-sha256 (:path source-pin)))
+      {:status :unavailable :reason :wire-reference-source-drift}
+
+      (not (fn? verifier))
+      {:status :unavailable :reason :wire-reference-verification-unavailable}
+
+      :else
+      (try
+        (let [receipt (verifier wire)]
+          (if (and (map? receipt)
+                   (= :verified (:status receipt))
+                   (= wire-id (:wire-id receipt))
+                   (= source-pin (:source-pin receipt)))
+            {:status :verified :receipt receipt}
+            {:status :unavailable :reason :wire-reference-verification-unbound}))
+        (catch Throwable _
+          {:status :unavailable :reason :wire-reference-verification-failed})))))
+
+(defn- coverage-disposition [opts closure]
   (let [evidence (:closure-evidence closure)
         wire (:wire-reference closure)
-        owner (or (:coverage-owner closure) (:owner closure) :unknown)]
+        owner (or (:coverage-owner closure) (:owner closure) :unknown)
+        wire-verification (when (map? wire) (verified-wire-reference opts wire))]
     (cond
       (not (coverage-pin? evidence))
       {:status :unavailable :reason :closure-evidence-unpinned}
 
-      (and (map? wire)
-           (contains? @wire-registry (:wire-id wire))
-           (= :verified (get-in wire [:verification :status]))
-           (coverage-pin? (get-in wire [:verification :source-pin])))
-      {:status :covered :wire-reference wire}
+      (= :verified (:status wire-verification))
+      {:status :covered :wire-reference wire
+       :verification-receipt (:receipt wire-verification)}
 
       :else
       {:status :unresolved
-       :reason (if wire :wire-reference-unverified :no-wire-reference)
+       :reason (or (:reason wire-verification)
+                   (if wire :wire-reference-unverified :no-wire-reference))
        :owner owner
        :evidence evidence})))
 
-(defn- coverage-receipt [closure]
-  (let [disposition (coverage-disposition closure)]
+(defn- coverage-receipt [opts closure]
+  (let [disposition (coverage-disposition opts closure)]
     (when-not (= :unavailable (:status disposition))
       {:schema :wm/tripwire-incident-coverage-v1
        :incident/id (:incident/id closure)
@@ -810,7 +865,7 @@
            :closure closure}
 
           :else
-          (let [receipt (coverage-receipt closure)]
+          (let [receipt (coverage-receipt opts closure)]
             (if-not receipt
               {:status :closed :closure closure
                :coverage {:status :unavailable
@@ -822,7 +877,12 @@
                                   default-incident-coverage-root)
                               receipt)]
                   {:status :closed :closure closure
-                   :coverage (assoc result :receipt receipt)})
+                   :coverage (if (and (map? result)
+                                      (contains? #{:persisted :conflict} (:status result))
+                                      (string? (:path result)))
+                               (assoc result :receipt receipt)
+                               {:status :unavailable
+                                :reason :coverage-writer-result-invalid})})
                 (catch Throwable _
                   {:status :closed :closure closure
                    :coverage {:status :unavailable

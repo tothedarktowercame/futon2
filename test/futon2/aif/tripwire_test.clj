@@ -44,6 +44,12 @@
     (spit file (pr-str value))
     file))
 
+(defn- coverage-source-pin! [root name text]
+  (let [file (io/file root name)]
+    (spit file text)
+    {:path (.getPath file)
+     :sha256 (#'tripwire/source-sha256 (.getPath file))}))
+
 (deftest dismissal-directory-membership-closes-t8-sources
   (let [root (temp-dir)
         finding (fn [id] {:repair/id id :repair/status :open
@@ -419,31 +425,82 @@
     (is (= :unresolved
            (get-in (edn/read-string (slurp (first files))) [:disposition :status])))))
 
-(deftest incident-close-accepts-verified-wire-and-keeps-close-on-write-failure
-  (let [incident {:incident/id "p22-synthetic-wire-coverage"}
+(deftest incident-close-requires-bound-wire-verification-and-keeps-close-on-write-failure
+  (let [root (temp-dir)
+        source-pin (coverage-source-pin! root "T1.clj" "verified T1 bytes")
+        incident {:incident/id "p22-synthetic-wire-coverage"}
         closure {:status :closed :incident/id (:incident/id incident)
                  :closure-evidence {:path "closures/p22-wire.edn"
                                     :sha256 (apply str (repeat 64 "b"))}
                  :wire-reference
                  {:wire-id :T1
                   :verification {:status :verified
-                                 :source-pin {:path "wire/T1.clj"
-                                              :sha256 (apply str (repeat 64 "c"))}}}}
+                                 :source-pin source-pin}}}
         opts {:tripwire/incident-close-fn (fn [_ _] closure)
+              :tripwire/wire-verifier
+              (fn [{:keys [wire-id verification]}]
+                {:status :verified :wire-id wire-id
+                 :source-pin (:source-pin verification)})
               :tripwire/coverage-writer (fn [_ _]
                                           {:status :persisted :path "/tmp/p22-wire.edn"
                                            :idempotent? false})}
         covered (tripwire/close-incident! opts incident)
+        fabricated (tripwire/close-incident!
+                    (dissoc opts :tripwire/wire-verifier) incident)
+        drifted (do (spit (:path source-pin) "changed T1 bytes")
+                    (tripwire/close-incident! opts incident))
         failed (tripwire/close-incident!
                 (assoc opts :tripwire/coverage-writer
                        (fn [& _] (throw (ex-info "coverage store unavailable" {}))))
                 incident)]
     (is (= :covered (get-in covered [:coverage :receipt :disposition :status])))
     (is (= :T1 (get-in covered [:coverage :receipt :disposition :wire-reference :wire-id])))
+    (is (= :unresolved (get-in fabricated [:coverage :receipt :disposition :status])))
+    (is (= :wire-reference-verification-unavailable
+           (get-in fabricated [:coverage :receipt :disposition :reason])))
+    (is (= :unresolved (get-in drifted [:coverage :receipt :disposition :status])))
+    (is (= :wire-reference-source-drift
+           (get-in drifted [:coverage :receipt :disposition :reason])))
     (is (= :closed (:status failed)))
     (is (= closure (:closure failed)))
     (is (= {:status :unavailable :reason :coverage-persistence-failed}
            (:coverage failed)))))
+
+(deftest incident-coverage-publication-is-atomic-and-writer-results-are-typed
+  (let [root (temp-dir)
+        receipt {:schema :wm/tripwire-incident-coverage-v1
+                 :incident/id "p22-atomic-receipt"
+                 :closure-evidence {:path "closures/atomic.edn"
+                                    :sha256 (apply str (repeat 64 "e"))}
+                 :disposition {:status :unresolved :reason :no-wire-reference
+                               :owner :unknown}}
+        final-file (io/file root "p22-atomic-receipt.edn")]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (with-redefs-fn
+                   {#'tripwire/write-coverage-temp!
+                    (fn [dir _]
+                      (let [temp (io/file dir ".interrupted.tmp")]
+                        (spit temp "{")
+                        (throw (ex-info "interrupted write" {}))))}
+                   #(tripwire/write-incident-coverage! (.getPath root) receipt))))
+    (is (not (.exists final-file)))
+    (is (= :persisted (:status (tripwire/write-incident-coverage! (.getPath root) receipt))))
+    (let [original (slurp final-file)
+          conflicting (assoc-in receipt [:disposition :reason] :different-disposition)]
+      (is (= :conflict (:status (tripwire/write-incident-coverage!
+                                 (.getPath root) conflicting))))
+      (is (= original (slurp final-file))))
+    (let [incident {:incident/id "p22-invalid-writer"}
+          closure {:status :closed :incident/id (:incident/id incident)
+                   :closure-evidence {:path "closures/invalid-writer.edn"
+                                      :sha256 (apply str (repeat 64 "f"))}}
+          result (tripwire/close-incident!
+                  {:tripwire/incident-close-fn (fn [_ _] closure)
+                   :tripwire/coverage-writer (fn [& _] nil)} incident)]
+      (is (= :closed (:status result)))
+      (is (= closure (:closure result)))
+      (is (= {:status :unavailable :reason :coverage-writer-result-invalid}
+             (:coverage result))))))
 
 (deftest record-action-attempts-no-stop-line-park-or-bell-effects
   (let [record (synthetic-trip-record)
