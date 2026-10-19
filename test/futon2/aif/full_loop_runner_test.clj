@@ -286,6 +286,36 @@
         (is (nil? (get-in record [:decision :action]))
             "retaining measurements never turns an abstention into a selection")))))
 
+(deftest ordinary-self-heal-readiness-is-retained-only-when-carried
+  ;; Historical input pin: wm-click-07653f2a met the active injury ledger at
+  ;; 08:19Z. This exercises its typed absence through the real record writer.
+  (let [record-dir (.getPath
+                    (.toFile (Files/createTempDirectory
+                              "wm-f2a-self-heal-record-"
+                              (make-array FileAttribute 0))))
+        readiness {:status :absent
+                   :absent-terms [:diagnosis-port
+                                  :acceptance-proposal-port
+                                  :acceptance-review-port]}
+        result (fn [run-id]
+                 {:attempt-id (str "attempt-" run-id)
+                  :outcome :incomplete
+                  :wm/route [{:node :SELECTION :via :ordinary-selection
+                              :at "2026-10-19T00:00:00Z"}]
+                  :data {:failure-kind :abstained :failure-stage :selection}
+                  :checkpoints {:selection {:sorry {:decision {:status :abstained}}}}})
+        retain (fn [run-id opts]
+                 (let [written (runner/persist-run-record!
+                                (merge {:run-record-dir record-dir
+                                        :click-id (str "click-" run-id)} opts)
+                                run-id "2026-10-19T00:00:00Z" (result run-id))]
+                   (edn/read-string (slurp (:run-record written)))))
+        carried (retain "f2a-carried" {:meta-self-heal-readiness readiness})
+        absent (retain "f2a-absent" {})]
+    (is (= readiness (:meta-self-heal/readiness carried)))
+    (is (not (contains? absent :meta-self-heal/readiness))
+        "absence is retained as absent, never defaulted to success or exhaustion")))
+
 (deftest every-terminal-wrapper-category-persists-a-run-record
   (let [record-dir (.getPath
                     (.toFile

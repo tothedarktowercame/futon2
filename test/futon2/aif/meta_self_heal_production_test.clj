@@ -45,6 +45,26 @@
                                       :diagnosis {:class :configuration}})}
      {:ledger ledger} active)))
 
+(deftest ordinary-readiness-retains-dedicated-input-absence
+  ;; Historical input pin: wm-click-07653f2a was refused after the 08:19Z
+  ;; active-injury ledger appeared; this fixture writes only an isolated ledger.
+  (let [env (harness/prepare-environment! (root))
+        ordinary (production/production-readiness
+                  {:meta-injury-ledger-path (:ledger-path env)
+                   :meta-self-heal/readiness-route :ordinary}
+                  (production/diagnosis-context
+                   {:meta-injury-ledger-path (:ledger-path env)}))
+        dedicated (production/production-readiness
+                   {:meta-injury-ledger-path (:ledger-path env)})]
+    (is (= {:status :ready
+            :self-heal {:status :absent
+                         :absent-terms [:diagnosis-port
+                                        :acceptance-proposal-port
+                                        :acceptance-review-port]}}
+           (select-keys ordinary [:status :self-heal])))
+    (is (= :refused (:status dedicated)))
+    (is (= :meta-self-heal/production-config-required (:reason dedicated)))))
+
 (deftest active-injury-preempts-ordinary-runtime-and-persists-every-boundary
   (let [env (harness/prepare-environment! (root))
         calls (atom {})

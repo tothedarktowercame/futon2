@@ -521,10 +521,11 @@
       (produce-diagnosis! opts durable-ledger entry))))
 
 (defn production-readiness
-  "Pre-ration readiness for the dedicated repair boundary.  An absent ledger
-  is a valid empty state, but when a durable active injury exists every effect
-  authority must already be configured.  Callers can therefore refuse before
-  accepting or charging an ordinary click."
+  "Pre-ration readiness for the repair boundary.
+
+  The ordinary route retains unavailable dedicated self-heal machinery as an
+  observation, not an ordinary-selection veto. The dedicated route remains
+  fail-closed without its required inputs."
   ([opts] (production-readiness opts (diagnosis-context opts)))
   ([opts {:keys [meta-injury-ledger-path durable-ledger active-injuries]}]
   (let [ledger-path meta-injury-ledger-path
@@ -544,10 +545,21 @@
                   (conj :acceptance-proposal-port)
                   (and active? (nil? (:acceptance-test opts))
                        (not (ifn? (:meta-acceptance-review-fn opts))))
-                  (conj :acceptance-review-port))]
+                  (conj :acceptance-review-port))
+        self-heal-absence (vec (filter #{:diagnosis-port
+                                         :acceptance-proposal-port
+                                         :acceptance-review-port}
+                                       missing))]
     (cond
       (and durable (not= :loaded (:status durable)))
       (refusal :meta-self-heal/ledger-unreadable {:ledger-result durable})
+
+      (and (= :ordinary (:meta-self-heal/readiness-route opts))
+           (seq self-heal-absence))
+      {:status :ready :active-injury? true
+       :meta-injury-ledger-path ledger-path
+       :meta-repair-transaction-path transaction-path
+       :self-heal {:status :absent :absent-terms self-heal-absence}}
 
       (seq missing)
       (refusal :meta-self-heal/production-config-required

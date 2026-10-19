@@ -1312,6 +1312,13 @@
                     ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
                      :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
                                  {:absent :refresh-not-reached})}
+                     ;; F2a: service preflight observed unavailable dedicated
+                     ;; self-heal machinery on an ordinary route. Retain only
+                     ;; the caller's typed observation; no observation is not
+                     ;; a successful or exhausted self-heal state.
+                     (:meta-self-heal-readiness raw-opts)
+                     (assoc :meta-self-heal/readiness
+                            (:meta-self-heal-readiness raw-opts))
                      ;; Controlled integrated SUT certificates are already
                      ;; validated before this production-owned persistence
                      ;; boundary. Retain the exact carrier; never reconstruct
