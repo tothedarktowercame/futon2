@@ -30,8 +30,6 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
-            [futon2.aif.meta-self-heal-harness :as self-heal-harness]
-            [futon2.aif.meta-self-heal-production :as self-heal-production]
             [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-precision-carry :as precision-carry]
@@ -295,16 +293,10 @@
                     (.toFile (Files/createTempDirectory
                               "wm-f2a-self-heal-record-"
                               (make-array FileAttribute 0))))
-        env (self-heal-harness/prepare-environment!
-             (.getPath (.toFile (Files/createTempDirectory
-                                 "wm-f2a-self-heal-ledger-"
-                                 (make-array FileAttribute 0)))))
-        readiness (-> (self-heal-production/production-readiness
-                       {:meta-injury-ledger-path (:ledger-path env)
-                        :meta-self-heal/readiness-route :ordinary}
-                       (self-heal-production/diagnosis-context
-                        {:meta-injury-ledger-path (:ledger-path env)}))
-                      :self-heal)
+        readiness {:status :absent
+                   :absent-terms [:diagnosis-port
+                                  :acceptance-proposal-port
+                                  :acceptance-review-port]}
         result (fn [run-id]
                  {:attempt-id (str "attempt-" run-id)
                   :outcome :incomplete

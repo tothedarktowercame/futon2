@@ -65,46 +65,6 @@
     (is (= :refused (:status dedicated)))
     (is (= :meta-self-heal/production-config-required (:reason dedicated)))))
 
-(deftest runtime-routes-ordinary-work-with-the-real-self-heal-absence
-  ;; Historical pin: wm-click-07653f2a met the 08:19Z active-injury ledger.
-  ;; The ledger and terminal record below are isolated temporary artifacts.
-  (let [env (harness/prepare-environment! (root))
-        record-dir (str (:root env) "/run-records")
-        run-id "f2a-runtime-ordinary"
-        ordinary-opts (atom nil)
-        result (with-redefs [production/route!
-                             (fn [_] (throw (Exception. "must not route dedicated")))]
-                 (with-redefs-fn
-                   {#'runtime/run-ordinary-opportunity!
-                    (fn [opts]
-                      (reset! ordinary-opts opts)
-                      (let [terminal {:attempt-id "f2a-runtime-attempt"
-                                      :outcome :incomplete
-                                      :ordinary-selection-called? true
-                                      :wm/route [{:node :SELECTION
-                                                  :via :ordinary-selection
-                                                  :at "2026-10-19T00:00:00Z"}]
-                                      :data {:failure-kind :abstained
-                                             :failure-stage :selection}
-                                      :checkpoints {:selection
-                                                    {:sorry {:decision {:status :abstained}}}}}
-                            written (runner/persist-run-record!
-                                     opts run-id "2026-10-19T00:00:00Z" terminal)]
-                        (assoc terminal :run-record (:run-record written))))}
-                   #(runtime/run-opportunity!
-                     {:meta-injury-ledger-path (:ledger-path env)
-                      :run-record-dir record-dir
-                      :scan-render-fn (fn [& _] nil)})))]
-    (is (true? (:ordinary-selection-called? result)))
-    (is (= {:status :absent
-            :absent-terms [:diagnosis-port
-                           :acceptance-proposal-port
-                           :acceptance-review-port]}
-           (:meta-self-heal-readiness @ordinary-opts)))
-    (is (= (:meta-self-heal-readiness @ordinary-opts)
-           (:meta-self-heal/readiness
-            (edn/read-string (slurp (:run-record result))))))))
-
 (deftest active-injury-preempts-ordinary-runtime-and-persists-every-boundary
   (let [env (harness/prepare-environment! (root))
         calls (atom {})
@@ -123,6 +83,15 @@
     (is (:ordinary-work-eligible?
          (harness/arbitrate
           (store/load-durable-ledger (:ledger-path env)))))))
+
+(deftest missing-production-authority-fails-closed-before-ordinary-selection
+  (let [env (harness/prepare-environment! (root))
+        result (runtime/run-opportunity!
+                {:meta-injury-ledger-path (:ledger-path env)})]
+    (is (= :meta-self-heal/production-config-required (:reason result)))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (false? (:ordinary-selection-called? result)))
+    (is (some #{:repair-ports} (:absent-terms result)))))
 
 (deftest persisted-author-checkpoint-resumes-without-duplicate-dispatch
   (let [env (harness/prepare-environment! (root))
