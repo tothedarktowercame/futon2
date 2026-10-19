@@ -221,3 +221,14 @@ The original audit below remains a historical reading at its stated revision.
 5. Not read at all: meta_live_outer_selector.clj sources of `:repair-finding/evidence-unreadable` (:300), `:agency-evidence-unavailable` (:347), `:source-uncommitted` etc. (:412-433): these are `{:state :unknown :reason ...}` provenance values, likely attribution (not selection stops), but I did not trace whether `ownership` state `:unknown` filters a task out (:577-580 only excludes `:active`/`:ambiguous`).
 6. `outer_policy_provider_runtime.clj:15` throws "Policy outcome source drift" (`{:path path}`, no kind); I did not read its caller to see whether it is caught.
 7. policy.clj has other `throw` sites (:94-110 `ex-info (name kind)` for score input validation) that I did not map to a kind.
+
+
+## Self-heal route refusals (added 17:50Z, 2026-10-19)
+
+| site | reason | produced by | what it means | ends the click? |
+|---|---|---|---|---|
+| readiness, `meta_self_heal_production.clj:523-571` | `:meta-self-heal/ledger-unreadable` | `production-readiness` | the injury ledger exists but cannot be loaded | yes, before ration |
+| readiness, same | `:meta-self-heal/production-config-required` with `:absent-terms` | `production-readiness` | a dedicated-route input is absent (transaction path, repair ports, diagnosis, acceptance) | yes, before ration |
+| route, `meta_self_heal_production.clj:645-660` | `:meta-self-heal/production-config-required` with `:absent-terms` | `route!` | same check at the route; today `[:acceptance-test]` when the review refused | yes, click consumed |
+| admission, `admit-acceptance!` `:350-372` | `:meta-self-heal/acceptance-review-refused` with `:review-status`, `:review-reason` | reviewer seat via `meta-acceptance-review-fn` | the reviewer did not accept the proposal; the reviewer's own reason arrives under `:reason/type` and is currently read as `:reason` (nil on the record, F4) | feeds the route refusal above |
+| reviewer seat (`wm-reviewer`, local invoke, no Agency job) | `:acceptance-test-not-run` | the seat's own answer (session rollout, 17:26:37 and 17:37:37) | the request said the test was not run; the protocol never runs it (F4) | via the two rows above |

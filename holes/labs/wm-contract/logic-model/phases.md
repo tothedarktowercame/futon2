@@ -1,5 +1,25 @@
 # WM click runner: phase order (static reading)
 
+## Ruling: self-heal takes priority (Joe, 2026-10-19)
+
+When the injury ledger has an active injury, the click belongs to the self-heal route.
+Nothing on that route falls back to ordinary work: a refusal inside it (readiness, admission,
+review, enact) stops the click with the refusal and its terms on the record, and the next
+unit of work is to understand and repair the cause of that refusal from outside. Joe,
+2026-10-19 ~17:45Z: "Returning to the normal route when a self-heal was mooted is a mistake."
+This is the simple model. A later model may let the War Machine choose between healing and
+continuing to act (Joe: "more like a video game"); it is not this one. F2c (`07197e469`) and
+the F2a runtime fallback (`724d5799e`) were reverted under this ruling (`07de83e19`,
+`8148890e2`). The frontier ruling (absent inputs recorded, run proceeds) applies to the
+ordinary route's inputs, not to a mooted self-heal.
+
+Admission step (F4, decided by Joe 2026-10-19 ~17:50Z): the acceptance test proposed for an
+injury is run by the machine before the reviewer is asked to admit it, in a bounded job, and
+the reviewer sees the result (expected: it fails in the way that pins the injury). After enact
+it is run again and only a pass counts as repaired. Until F4 lands, the request carries
+`:result-status :not-run` and the reviewer seat refuses it, correctly, with
+`:reason/type :acceptance-test-not-run` (finding F4, PACKETS-2026-10-19.md `903a0e18e`).
+
 P20 phase 8.4: available structural sections feed policy-field membership while
 failed/unspecified sections remain visible. Omitted statuses have no assumed
 legacy completeness contract. Unknown membership cannot enter the field; an
@@ -150,7 +170,7 @@ So each step's input is the previous step's output; a missing earlier output yie
 
 ## Branches
 
-- Injury vs ordinary, level 1 (runtime): `meta-self-heal/production-readiness`, then `(or (meta-self-heal/route! opts) (run-ordinary-opportunity! opts))` (RT:413-420). `route!` returns nil when the injury ledger file is absent or has no active injuries (SH:133-139) so the ordinary click proceeds; a map consumes the opportunity. Decider: durable ledger at `:meta-injury-ledger-path` and `:meta-repair-retry` (RT:412, 418).
+- Injury vs ordinary, level 1 (runtime): `meta-self-heal/production-readiness`, then `(or (meta-self-heal/route! opts) (run-ordinary-opportunity! opts))` (RT:413-420). Under the 2026-10-19 ruling above, `route!` returning a refusal ends the click; the `or` fallback to ordinary work applies only when `route!` returns nil (no active injury). `route!` returns nil when the injury ledger file is absent or has no active injuries (SH:133-139) so the ordinary click proceeds; a map consumes the opportunity. Decider: durable ledger at `:meta-injury-ledger-path` and `:meta-repair-retry` (RT:412, 418).
 - Injury vs ordinary, level 2 (selection): `injury?` in `select-live` is true iff the task list contains `:kind :algorithm` rows (SEL:592), which `selector` adds from a verified `:meta-field-observation` (SEL:792). Injury branch: `meta/select` over `algorithm-candidates` (SEL:593, `meta/select` SEL:649) and no policy field is built (SEL:602 gates on `(not injury?)`). If chosen, `WM:6779-6790` takes `meta-algorithm-result` instead of `cascade-decision`, and the runner skips `:selected-reading` (R:6592) and `:cascade-execution` (R:6637 needs `:co-apply` map).
 - Unverified meta field: `selector` returns a refused receipt without calling `select-live` (SEL:798-801).
 - Debugger restarts, per `run-phase!`: attached AND `stoppable-failure?` (R:430) -> `await-restart!`; `:retry` re-runs the thunk (R:441), `:continue`/`:use-value` returns the supplied value as success (R:456), `:abort` rethrows (R:465). Detached: rethrow immediately. Also `[:after phase]` breakpoints and `result->debugger-condition` conditions (R:394-404) turn a normal result into a stop. `:selection` supplies `selection-terminal-condition` as that condition (R:6406) so a no-entry result becomes restartable when attached.
