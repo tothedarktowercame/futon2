@@ -1,0 +1,16 @@
+{:repo-root "/home/joe/worktrees/futon2-meta-self-heal-ledger"
+ :code-paths ["src/futon2/aif/meta_injury_ledger.clj"
+              "src/futon2/aif/meta_terminal_injury.clj"
+              "src/futon2/aif/meta_injury_store.clj"]
+ :test-paths ["test/futon2/aif/meta_injury_ledger_test.clj"
+              "test/futon2/aif/meta_terminal_injury_test.clj"
+              "test/futon2/aif/meta_injury_store_test.clj"]
+ :input-paths ["test/fixtures/meta-self-heal/campaign-2026-10-19.edn"]
+ :command ["clojure" "-M:test"
+           "-n" "futon2.aif.meta-injury-ledger-test"
+           "-n" "futon2.aif.meta-terminal-injury-test"
+           "-n" "futon2.aif.meta-injury-store-test"]
+ :author "codex-6"
+ :namespace "futon2.aif.meta-terminal-injury-test"
+ :origin "Dedicated META self-heal Packet 2 classification and durable append"
+ :artifact-dir "/home/joe/code/storage/test-registry/artifacts"}

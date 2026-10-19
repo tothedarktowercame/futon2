@@ -1,0 +1,35 @@
+[{:source-pin {:path "data/wm-runs/tick-run-record-2026-10-19-8227be68-d43d-467e-aa8d-4c988fcc7c15.edn"
+               :sha256 "3002956338848daf5d9a8ea91bbb0b49c26e599558669c8240dcf4fdc9913777"}
+  :record {:run/id "2026-10-19-8227be68-d43d-467e-aa8d-4c988fcc7c15"
+           :click/id "wm-click-157e3a97-2f59-49e8-a050-d1d66875d207"
+           :failure {:kind :abstained :stage :selection
+                     :detail {:outcome :abstained :target "A-self-heal"}}
+           :traceWritten false :run-output {:status :present}}}
+ {:source-pin {:path "data/wm-runs/tick-run-record-2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f.edn"
+               :sha256 "11250189cfd7ac0c36ed237086547453b6bca8f25fbc8eb2ee0430d04eb7f8b7"}
+  :record {:run/id "2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f"
+           :click/id "wm-click-1b57cff8-84ba-46e4-9456-5b67ca8a40dc"
+           :failure {:kind :fold-output-invalid :stage :construction
+                     :detail {:outcome :construction-failed :target "A-self-heal"}}
+           :traceWritten false :run-output {:status :present}}}
+ {:source-pin {:path "data/wm-runs/tick-run-record-2026-10-19-b9b2b9bb-9829-4fd0-a6d5-32e11ce0ab94.edn"
+               :sha256 "65e2d5c94e8887fb734c692e20f3d4559eadd96e48d0faa003a1cea451f28d39"}
+  :record {:run/id "2026-10-19-b9b2b9bb-9829-4fd0-a6d5-32e11ce0ab94"
+           :click/id "wm-click-87905ee0-70d1-4aac-90c0-1cd6a0c4f051"
+           :failure {:kind :abstained :stage :selection
+                     :detail {:outcome :abstained}}
+           :traceWritten false :run-output {:status :present}}}
+ {:source-pin {:path "data/wm-runs/tick-run-record-2026-10-19-be38a3a9-92bc-4084-b7a6-1c4d2fcfe84a.edn"
+               :sha256 "97b4480739c63be9814bc503953f6c4ffb02c28214250ace115253cc823f287d"}
+  :record {:run/id "2026-10-19-be38a3a9-92bc-4084-b7a6-1c4d2fcfe84a"
+           :click/id "wm-click-96278f02-e013-4cd5-9ce8-076e739c0c3d"
+           :failure {:kind :carry-identity-unavailable :stage :author-dispatch
+                     :detail {:outcome :incomplete :target "A-self-heal"}}
+           :traceWritten true :run-output {:status :present}}}
+ {:source-pin {:path "data/wm-runs/tick-run-record-2026-10-19-e86d38df-e527-4648-bdfe-cce61133330f.edn"
+               :sha256 "d85ac99e9ccd2751cc875f001e6f0e0ddf98569d547ff2489eff66764faae983"}
+  :record {:run/id "2026-10-19-e86d38df-e527-4648-bdfe-cce61133330f"
+           :click/id "wm-click-308b9dfb-71ac-417b-8ff9-452adfd8c4a0"
+           :failure {:kind :abstained :stage :selection
+                     :detail {:outcome :abstained}}
+           :traceWritten false :run-output {:status :present}}}]
