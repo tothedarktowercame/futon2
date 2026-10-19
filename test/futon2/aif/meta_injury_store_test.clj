@@ -77,3 +77,21 @@
         deposited (sut/deposit! (str tmp "/injuries") record-path)]
     (is (= :active (:status deposited)))
     (is (= injury/capability (:capability deposited)))))
+
+(deftest failed-meta-algorithm-author-dispatch-remains-an-active-injury
+  (let [tmp (.toFile (Files/createTempDirectory "wm-algorithm-dispatch-injury" (make-array java.nio.file.attribute.FileAttribute 0)))
+        record (-> (failed-record)
+                   (assoc :failure {:kind :carry-identity-unavailable :stage :author-dispatch})
+                   (assoc :terminal-receipt {:kind :failure
+                                             :failure-kind :carry-identity-unavailable
+                                             :target-kind :algorithm})
+                   (assoc :loop-node-exercise {:schema :wm/loop-node-exercise-v1
+                                               :status :complete
+                                               :counts {:present 0 :bypassed 4 :refused 0}})
+                   (assoc :run-output {:schema :wm/run-output-v1 :status :absent
+                                       :reason :run-not-grounded :outcome :incomplete}))
+        record-path (str tmp "/run.edn")
+        _ (spit record-path (str (pr-str record) "\n"))
+        deposited (sut/deposit! (str tmp "/injuries") record-path)]
+    (is (= :active (:status deposited)))
+    (is (= injury/capability (:capability deposited)))))

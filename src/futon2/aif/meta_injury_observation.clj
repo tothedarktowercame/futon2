@@ -104,7 +104,9 @@
             algorithm-route-injury?
             (and (= :algorithm (get-in evidence [:terminal-receipt :target-kind]))
                  (= :failure (get-in evidence [:terminal-receipt :kind]))
-                 (contains? #{:construction :cascade-execution :build :review :close}
+                 (contains? #{:construction :author-dispatch :author-wait
+                              :cascade-execution :build :review-dispatch
+                              :review-wait :review :close}
                             (get-in evidence [:failure :stage])))
             active?
             (and (= expected-projection record)
