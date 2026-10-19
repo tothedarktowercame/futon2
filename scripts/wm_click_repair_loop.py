@@ -409,11 +409,14 @@ def outer_policy_preflight() -> str | None:
 
     This only checks presence; selection still validates the provider's evidence.
     """
-    result = jvm_eval(
-        "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
-        "(if (or (:outer-policy-evidence-provider opts) "
-        "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts)))) "
-        ":wm/provider-configured :wm/provider-required))", timeout=30)
+    try:
+        result = jvm_eval(
+            "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
+            "(if (or (:outer-policy-evidence-provider opts) "
+            "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts)))) "
+            ":wm/provider-configured :wm/provider-required))", timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return "outer-policy-preflight-unavailable"
     if result["rc"] != 0:
         return "outer-policy-preflight-unavailable"
     if re.search(r":value\s+:wm/provider-configured(?:\s|})", result["out"]):

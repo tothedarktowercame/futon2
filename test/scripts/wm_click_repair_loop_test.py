@@ -43,6 +43,8 @@ class RepairLoopCastTest(unittest.TestCase):
         ]:
             with mock.patch.object(loop, "jvm_eval", return_value=response):
                 self.assertEqual(expected, loop.outer_policy_preflight())
+        with mock.patch.object(loop, "jvm_eval", side_effect=subprocess.TimeoutExpired("eval", 30)):
+            self.assertEqual("outer-policy-preflight-unavailable", loop.outer_policy_preflight())
 
     def test_cast_has_no_stale_or_implicit_identity(self):
         loop = load_loop()
