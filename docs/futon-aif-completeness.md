@@ -38,7 +38,7 @@ This contract covers the namespaces under `futon2.aif.*`:
 - `futon2.aif.pattern-registry` — context-retrieval substrate adapter for `:fire-pattern`; aggregates recent Evidence Landscape retrieval certificates into bounded pattern candidates, exposes `pattern-enumerator-proposer` (v0.19)
 - `futon2/data/sorrys.edn` — hand-curated open-sorry registry (v0.6 onwards); the meta-sorry (substrate-addressability question) is the first entry
 - `futon2.aif.trace` — `trace-record`, `write-trace!`, `read-trace`, `read-trace-range`; EDN-lines daily-rotated trace store at `~/code/futon2/data/wm-trace/wm-trace-YYYY-MM-DD.edn` (v0.7)
-- `futon2/scripts/wm_scheduled_run.clj` + `:wm-scheduled` deps alias — one-shot scheduled-execution entrypoint that scans, judges, persists trace, prints one-line summary, exits with 0/1 (v0.8)
+- `futon2.aif.combined-wm-entrypoint` + `:wm-scheduled` deps alias — fail-closed adapter to the authoritative combined outer+inner `full-loop-runtime/run-opportunity!`; `wm_scheduled_run.clj` remains judgement-only under `:wm-judgement-only`
 
 And the consumer: `futon2.report.war-machine/judge` which composes the AIF apparatus with structural priorities, AIF heads, and invariant inventory into a per-call snapshot.
 
@@ -263,19 +263,19 @@ The AIF loop runs on a recurring schedule without operator intervention; trace i
 
 **Operational check.** Find the schedule + the trace store.
 
-**This implementation.** **Satisfied (scheduled-execution-ready) as of v0.8 (2026-05-18).** The scheduled-run entrypoint ships at `futon2/scripts/wm_scheduled_run.clj` with the `:wm-scheduled` deps alias. One-shot invocation: `clojure -M:wm-scheduled [days]` (default 14). Resilience: top-level `try/catch`; intermittent dependency failures (e.g. futon3c down) produce a non-zero exit + stderr message but don't crash the schedule. Persistence: writes one trace record per invocation via `futon2.aif.trace/write-trace!` to the daily-rotated EDN-lines store. Output: one-line stdout summary suitable for cron logs (timestamp + mode + candidate count + decision + trace path).
+**Current implementation (2026-10-19).** `:wm-scheduled` invokes `futon2.aif.combined-wm-entrypoint`, which preflights explicit scheduling mode, trigger, casts, a pinned opportunity authority, an explicit zero ordinary-click budget, and the outer-policy evidence-provider path before delegating exactly once to `full-loop-runtime/run-opportunity!`. Missing authority is a typed nonzero refusal and never falls back to judgement-only. `wm_scheduled_run.clj` is retained only as the explicitly named `:wm-judgement-only` diagnostic. The serving on-demand route remains futon3c's runner service, which owns ordinary-click budget and run binding before calling the same runtime.
 
 **Verified end-to-end 2026-05-18:** one invocation against the live stack wrote one record to `~/code/futon2/data/wm-trace/wm-trace-2026-05-18.edn`; the record parsed back with the documented schema (timestamp, mode, 4 ranked actions, decision = `:learn-action-class`, 13 observation channels).
 
 **Cron-install (operator's call):**
 
 ```
-0 * * * * cd /home/joe/code/futon2 && clojure -M:wm-scheduled 14 >> /home/joe/code/futon2/data/wm-trace/cron.log 2>&1
+0 * * * * cd /home/joe/code/futon2 && FUTON_WM_RUN_CONFIG=/absolute/path/to/sealed-config.edn clojure -M:wm-scheduled >> /home/joe/code/futon2/data/wm-trace/cron.log 2>&1
 ```
 
 Hourly cadence is the recommended baseline — fast enough that strategic state changes get captured, slow enough that the trace remains operator-readable. systemd-timer or Drawbridge-driven scheduling are alternative substrates with equivalent semantics.
 
-**Caveat: scheduled execution is *ready* but is not *currently running on this machine* (no cron entry installed by this codebase).** R10's "without operator intervention" claim is satisfied at the apparatus level (the script is autonomous) but the install step is a deliberate operator action — installing cron entries is system-level and out-of-scope for this contract. When the operator installs cron, R10 transitions from "scheduled-execution-ready" to "scheduled-execution-running" with no code change.
+**Caveat: scheduled execution is disarmed until deployment supplies a sealed config and installs/re-arms the scheduler.** The repository intentionally contains no default cast, evidence authority, or click-spending authority. R10 therefore claims a fail-closed apparatus, not a currently running always-on loop.
 
 ### R11 — Hierarchical / multi-agent composition
 
@@ -346,7 +346,7 @@ F3 (coherent structure) and F9 (feed-readable annotation graph) are stack-level 
 | R7 — Adaptive precision | **✓ as of v0.12** | — (`futon2.aif.precision`; rolling-variance over per-channel error history; carried in trace records across calls) |
 | R8 — Per-tick trace | **✓ as of v0.7** | — (`futon2.aif.trace`; EDN-lines daily-rotated; judge writes when `:trace?` opts) |
 | R9 — Named validation properties | **✓ as of v0.7** | — (V-shrink, F-decrease, EFE-stress (pragmatic + epistemic), Abstain-fires all named with quantitative criteria) |
-| R10 — Live operation | **✓ as of v0.8** (scheduled-execution-ready; cron-install pending) | — (`futon2/scripts/wm_scheduled_run.clj` + `:wm-scheduled` alias; verified end-to-end) |
+| R10 — Live operation | **apparatus, deployment disarmed** (sealed authority config + scheduler re-arm pending) | `futon2.aif.combined-wm-entrypoint`; judgement-only is diagnostic and is not live operation |
 | R11 — Hierarchical composition | N/A | Single observer at this scope |
 | R12 — Dual-loop hyperparameter inference | **✓ as of 2026-05-21** (apparatus; awaits R10 cron-install for accumulated learning) | Narrow take-up landed via `M-the-futon-stack` Q6 — `futon2.aif.intrinsic-values` + `wm_outer_loop`; static per-channel hyperparameters in `preferences.clj` remain a separate open direction |
 | R13 — Policy adequacy (multi-step `G(π)`) | **✓ apparatus as of v0.21** (`futon2.aif.rollout`; witness: 2-step beats greedy); live-ranking integration partial, *acting* HELD for arming | Found because the degenerate single-step selector bit (cursor-#1); the standing example for the known-unknowns audit below |

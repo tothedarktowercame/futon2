@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/worktrees/futon2-combined-wm-entrypoint"
+ :code-paths ["src/futon2/aif/combined_wm_entrypoint.clj"]
+ :test-paths ["test/futon2/aif/combined_wm_entrypoint_test.clj"]
+ :command ["clojure" "-M:test" "-n"
+           "futon2.aif.combined-wm-entrypoint-test"]
+ :author "codex-6"
+ :namespace "futon2.aif.combined-wm-entrypoint-test"
+ :origin "Packet 5 fail-closed combined scheduled/on-demand entrypoint"
+ :artifact-dir "/home/joe/code/storage/test-registry/artifacts"}
