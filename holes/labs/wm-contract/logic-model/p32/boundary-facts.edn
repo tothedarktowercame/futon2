@@ -1,69 +1,76 @@
-;; P32's deliberately small, source-pinned static model.  These are claims
-;; about interfaces, not observations from a click and not a launch gate.
+;; P32's small, source-pinned static model. These are interface claims, not
+;; observations from a click and not a launch gate.
 [
- {:id :c1-reading-selection
-  :kind :consumer
-  :correlation-row 1
-  :input :target-reading
-  :produces :selection-result
-  :phase 8
-  :scope :eligible-targets
-  :required? true
-  :absence-disposition :record-and-continue
-  :status :present
-  :source-pin "correlation.md row 1; phases.md 8/9; L1"}
- {:id :p1-reading-preparation
-  :kind :producer
-  :correlation-row 1
-  :output :target-reading
-  :requires [:selection-result]
-  :phase 9
-  :scope :selected-needs
-  :absence-disposition :record-refusal
-  :status :present
-  :source-pin "producers.md P1; full_loop_runtime.clj:318"}
+ ;; Before e4180469, repair! required a chosen target. The reading needed by
+ ;; selection therefore depended on a successful selection: historical L1.
+ {:id :c1-reading-selection-historical :kind :consumer :correlation-row 1
+  :input :target-reading :produces :chosen-action :phase 8 :scope :eligible-targets
+  :required? true :absence-disposition :blocks-selection :status :present
+  :source-pin {:repository "futon2" :path "src/futon2/aif/selected_target_reading.clj"
+               :commit "699a34b6222935651d1d5b31a01a56842ad8087a"
+               :locator {:symbol "selected-need" :line 200}}}
+ {:id :p1-reading-preparation-historical :kind :producer :correlation-row 1
+  :output :target-reading :requires [:chosen-action] :selection-prerequisite :chosen-action
+  :phase 9 :scope :selected-target :absence-disposition :record-refusal :status :present
+  :source-pin {:repository "futon2" :path "src/futon2/aif/full_loop_runtime.clj"
+               :commit "699a34b6222935651d1d5b31a01a56842ad8087a"
+               :locator {:symbol "production-defaults" :line 293}}}
 
- {:id :c2-square-selection
-  :kind :consumer
-  :correlation-row 2
-  :input :occurrence-squares
-  :produces :selection-result
-  :phase 8
-  :scope :targets-with-readings
-  :required? true
-  :absence-disposition :family-failure
-  :status :present
-  :source-pin "correlation.md row 2; consumers.md row 26"}
- {:id :p2-square-authoring
-  :kind :producer
-  :correlation-row 2
-  :output :occurrence-squares
-  :requires [:selection-result]
-  :phase 10
-  :scope :selected-target
-  :absence-disposition :record-refusal
-  :status :present
-  :source-pin "producers.md P4; occurrence_square_authoring.clj:27/148"}
+ ;; Current preparation consumes the typed refused/no-choice result. It is
+ ;; measured feedback, not a successful-action prerequisite.
+ {:id :c1-reading-selection-current :kind :consumer :correlation-row 1
+  :input :target-reading :produces :refused-selection :phase 8 :scope :eligible-targets
+  :required? true :absence-disposition :record-and-continue :status :present
+  :source-pin {:repository "futon2" :path "src/futon2/aif/selected_target_reading.clj"
+               :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
+               :locator {:symbol "prechoice-field" :line 200}}}
+ {:id :p1-reading-preparation-current :kind :producer :correlation-row 1
+  :output :target-reading :requires [:refused-selection]
+  :selection-prerequisite :attempted-or-refused :phase 9 :scope :selected-needs
+  :absence-disposition :record-refusal :status :present
+  :source-pin {:repository "futon2" :path "src/futon2/aif/full_loop_runtime.clj"
+               :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
+               :locator {:symbol "retained-outer-selector" :line 205}}}
 
- ;; L2 originally lost this carrier at close.  The retained edge is pinned to
- ;; the landed repair; this model does not claim the other row-6 fields exist.
- {:id :r6-selection-frontier-retained
-  :kind :retention
-  :correlation-row 6
-  :from :outer-policy-decision
-  :to :terminal-run-record
-  :carrier :reading-frontier
-  :phase 32
+ {:id :c2-square-selection :kind :consumer :correlation-row 2
+  :input :occurrence-squares :produces :chosen-action :phase 8
+  :scope :targets-with-readings :required? true :absence-disposition :family-failure
   :status :present
-  :absence-disposition :retain-absence
-  :source-pin "149dc9b30; L2 f9abc990 selection/frontier loss"}
- {:id :r6-prospective-carry-retention
-  :kind :retention
-  :correlation-row 6
-  :from :outer-policy-decision
-  :to :d-task-capture
-  :carrier :prospective-carry
-  :phase 22
-  :status :unknown
-  :absence-disposition :unknown
-  :source-pin "correlation.md row 6; consumers.md rows 47/49"}]
+  :source-pin {:repository "futon2" :path "src/futon2/aif/wm/family_selection.clj"
+               :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
+               :locator {:symbol "families-for-field" :line 152}}}
+ {:id :p2-square-authoring :kind :producer :correlation-row 2
+  :output :occurrence-squares :requires [:chosen-action]
+  :selection-prerequisite :chosen-action :phase 10 :scope :selected-target
+  :absence-disposition :record-refusal :status :present
+  :source-pin {:repository "futon2" :path "src/futon2/aif/occurrence_square_authoring.clj"
+               :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
+               :locator {:symbol "selected-need" :line 27}}}
+
+ ;; 149dc9b30 repaired selected retention only. Before P00, an abstained
+ ;; decision still lost its frontier at terminal projection.
+ {:id :r6-selected-frontier-retained :kind :retention :correlation-row 6
+  :decision-scope :selected :from :outer-policy-decision :to :terminal-run-record
+  :carrier :reading-frontier :phase 32 :status :present :absence-disposition :retain-absence
+  :source-pin {:repository "futon2" :path "src/futon2/aif/full_loop_runner.clj"
+               :commit "149dc9b30e3d1d09422584d800b23f29dd46e29e"
+               :locator {:symbol "persist-run-record!" :line 1162}}}
+ {:id :r6-abstained-frontier-retention-historical :kind :retention :correlation-row 6
+  :decision-scope :abstained :from :outer-policy-decision :to :terminal-run-record
+  :carrier :reading-frontier :phase 32 :status :absent
+  :absence-disposition :lost-at-terminal-projection
+  :source-pin {:repository "futon2" :path "src/futon2/aif/full_loop_runner.clj"
+               :commit "149dc9b30e3d1d09422584d800b23f29dd46e29e"
+               :locator {:symbol "persist-run-record!" :line 1172}}}
+ {:id :r6-abstained-frontier-retained-current :kind :retention :correlation-row 6
+  :decision-scope :abstained :from :outer-policy-decision :to :terminal-run-record
+  :carrier :reading-frontier :phase 32 :status :present :absence-disposition :retain-absence
+  :source-pin {:repository "futon2" :path "src/futon2/aif/full_loop_runner.clj"
+               :commit "6fc4fadefb9e5772879eb5827d81bbc2a400a8d6"
+               :locator {:symbol "persist-run-record!" :line 1178}}}
+ {:id :r6-prospective-carry-retention :kind :retention :correlation-row 6
+  :decision-scope :outer-policy :from :outer-policy-decision :to :d-task-capture
+  :carrier :prospective-carry :phase 22 :status :unknown :absence-disposition :unknown
+  :source-pin {:repository "futon2" :path "src/futon2/aif/d_predecessor_task_authority.clj"
+               :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
+               :locator {:symbol "context" :line 372}}}]
