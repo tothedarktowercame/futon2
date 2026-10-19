@@ -1,12 +1,18 @@
 (ns futon2.aif.p37-reading-preparation-runtime-test
   "P37's production-shaped pre-choice preparation caller path."
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.report.war-machine :as war-machine]
             [futon2.aif.selected-outer-cascade-policy :as selected]
             [futon2.aif.target-reading-registry :as registry]
+            [futon2.aif.meta-live-outer-selector-test]
             [futon2.aif.selected-target-reading-test]
             [futon2.aif.outer-policy-runtime-selection-test])
   (:import [java.nio.file Files]
@@ -22,6 +28,16 @@
 
 (defn- analysis-for [request]
   ((var-get (ns-resolve 'futon2.aif.selected-target-reading-test 'analysis-for)) request))
+
+(defn- meta-var [sym]
+  (var-get (ns-resolve 'futon2.aif.meta-live-outer-selector-test sym)))
+
+(defn- graph-file [dir]
+  (let [file (io/file dir "graph.json")]
+    (spit file (json/generate-string
+                {:records 0 :patterns 0 :pattern_ids [] :summary [] :edges []}))
+    (graph-pin/pin! file)
+    file))
 
 (deftest bounded-prechoice-preparation-retains-frontier-and-resumes-an-assessed-choice
   ;; production-defaults supplies the actual runtime port; runner owns the
@@ -113,50 +129,52 @@
                                    :selected-outer-cascade-policy]))))))
 
 (deftest zero-assessed-frontier-retains-causes-and-no-choice-through-terminal-record
-  ;; This uses P37's production port even though it has no reading to prepare:
-  ;; the no-choice terminal must retain the producer's zero-assessed field, not
-  ;; manufacture a choice from a bounded preparation receipt.
+  ;; This enters the same outer boundary production uses: select-outer-task
+  ;; invokes META's select-live with the real full-eligible-target-field.  The
+  ;; isolated source files have no published readings, so every family is
+  ;; excluded by the producer rather than by a hand-built field or receipt.
+  ;; Its unsealed-menu refusal is :no-canonically-bound-policy. L1's distinct
+  ;; :incomplete-policy-menu-coverage came from cascade-decision's
+  ;; select-over-families route and is covered by P38b, not fabricated here.
   (let [work (temp-dir "p38-no-choice-work-")
         readings (temp-dir "p38-no-choice-readings-")
-        field {:schema :wm/pre-choice-policy-field-v1
-               :source-pin (pin "wm://prechoice-zero" "f")
-               :families [{:target-id "T-unavailable" :status :refused
-                           :failures [{:kind :target-source-unavailable
-                                       :path "/absent/T-unavailable.md"}]}
-                          {:target-id "T-retracted" :status :refused
-                           :failures [{:kind :policy-retracted
-                                       :reason :no-admissible-cascade}]}]}
-        no-choice {:outer-task-selection
-                   {:schema :wm/outer-task-selection-v1
-                    :chosen {:absent :incomplete-policy-menu-coverage}
-                    :policy {:reason :incomplete-policy-menu-coverage
-                             :policy-field field}}
-                   :decision {:status :abstained
-                              :reason :no-acting-cascade-candidate}}
-        defaults (runtime/production-defaults
-                  {:run-id "p38-zero-assessed" :author "wm-author"
-                   :request-root (.getPath work)
-                   :target-reading-root (.getPath readings)})
-        producer-result (runner/selected-target-reading-step
-                         {} no-choice (:selected-target-reading-fn defaults) identity)
+        graph (graph-file work)
+        sources (into {}
+                      (for [target ["M-a" "M-b"]
+                            :let [source (io/file work (str target ".md"))]]
+                        (do (spit source (str "# " target "\n\n## HEAD\nopen\n"))
+                            [target source])))
+        tasks (mapv (fn [[id source]]
+                      {:id id :kind :mission :priority 1
+                       :source {:path (.getPath source)
+                                :sha256 (load-identity/sha256
+                                         (.getBytes (slurp source) "UTF-8"))}})
+                    sources)
+        snapshot (meta-var 'snapshot)
+        receipt (war-machine/select-outer-task
+                 {:outer-task-policy :meta
+                  :outer-task-selection-fn
+                  (fn [input]
+                    (meta-live/select-live
+                     (assoc input
+                            :fetch-snapshot (constantly snapshot)
+                            :policy-field-config
+                            {:target-reading-root (.getPath readings)
+                             :pattern-graph-path (.getPath graph)})))}
+                 tasks 0)
         persisted (#'runner/persist-run-record!
                    {:run-record-dir (.getPath work) :scan-render-fn (fn [& _] nil)}
                    "p38-zero-assessed" "2026-10-19T00:00:00Z"
                    {:outcome :abstained
                     :wm/route [{:fromNode "RUNNER" :toNode "FULL_LOOP_CLOSE"
                                 :via :abstained}]
-                    :checkpoints {:selection {:sorry (:judgement producer-result)}}})
+                    :checkpoints {:selection {:sorry
+                                              {:outer-task-selection receipt
+                                               :decision {:status :abstained
+                                                          :reason :no-acting-cascade-candidate}}}}})
         terminal (edn/read-string (slurp (:run-record persisted)))]
-    (is (nil? (:record producer-result))
-        "the production preparation port found no reading work to turn into a choice")
     (is (= [] (get-in terminal [:reading-frontiers :selection-frontier :assessed-ids])))
-    (is (= [] (get-in terminal [:reading-frontiers :selection-frontier :reading-absent-ids])))
-    (is (= {"T-unavailable" [{:kind :target-source-unavailable
-                                :path "/absent/T-unavailable.md"}]
-            "T-retracted" [{:kind :policy-retracted
-                             :reason :no-admissible-cascade}]}
-           (get-in terminal [:reading-frontiers :selection-frontier :other-exclusions])))
-    (is (= {:absent :incomplete-policy-menu-coverage}
+    (is (= {:absent :no-canonically-bound-policy}
            (get-in terminal [:outer-task-selection :chosen])))
     (is (nil? (get-in terminal [:decision :chosen :action]))
         "zero assessed families retain abstention; they do not fabricate an action")))
