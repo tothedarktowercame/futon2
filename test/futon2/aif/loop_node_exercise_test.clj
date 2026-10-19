@@ -60,20 +60,19 @@
 (deftest complete-exercise-crosses-the-launch-gate
   (is (identical? exercised (exercise/require-complete! exercised))))
 
-(deftest meta-repair-selection-bypasses-ordinary-policy-nodes
+(deftest meta-repair-selection-is-refused-by-ordinary-policy-nodes
   (let [decision {:status :selected
                   :action {:target "A-self-heal"}
                   :selection-law {:applied :meta-algorithm-selection
                                   :source :outer-task-selection
                                   :algorithm-id "A-self-heal"}}
         r (exercise/receipt decision)]
-    (is (identical? decision (exercise/require-complete! decision)))
-    (is (= :complete (:status r)))
-    (is (= {:present 0 :bypassed 4 :refused 0} (:counts r)))
-    (is (every? #(= :verified-machine-injury-algorithm (:because %))
+    (is (= :incomplete (:status r)))
+    (is (= {:present 0 :bypassed 0 :refused 4} (:counts r)))
+    (is (every? #(= :meta-algorithm-wrong-route (:reason %))
                 (vals (:by-node r))))
-    (is (every? #(= "A-self-heal" (get-in % [:evidence :algorithm-id]))
-                (vals (:by-node r))))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (exercise/require-complete! decision)))))
 
 (deftest debugger-context-retains-abstention-rationale
   (let [decision {:status :abstained

@@ -57,12 +57,7 @@
           meta-algorithm?
           (into {}
                 (map (fn [node]
-                       [node (decision-bypass
-                              node :verified-machine-injury-algorithm
-                              {:algorithm-id (get-in decision
-                                                     [:selection-law :algorithm-id])
-                               :selection-source (get-in decision
-                                                         [:selection-law :source])})])
+                       [node (refused node :meta-algorithm-wrong-route)])
                      [:R6 :R13 :R14 :CTAU-CLASS]))
 
           typed-abstention?

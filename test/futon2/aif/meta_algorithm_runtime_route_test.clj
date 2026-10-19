@@ -15,18 +15,17 @@
                     :source :outer-task-selection
                     :algorithm-id "A-self-heal"}}})
 
-(deftest selected-meta-algorithm-is-addressable-without-cascade-reselection
+(deftest selected-meta-algorithm-is-refused-by-ordinary-construction
   (let [entry (#'runner/selected-entry algorithm-selection)
         construction (runner/construct-for-decision entry)]
     (is (= {:type :run-algorithm :target "A-self-heal"} (:action entry)))
-    (is (= :meta-algorithm-execution (:construction-kind construction)))
-    (is (= "A-self-heal" (get-in construction [:algorithm-contract :algorithm-id])))
-    (let [wiring (runner/construction-wiring-result construction)]
-      (is (= :wired (:status wiring)))
-      (is (every? #(= "A-self-heal" (:obligation/id %))
-                  (get-in wiring [:fold-output :policy-holes]))))
-    (is (some #{:ordinary-cascade-reselection}
-              (get-in construction [:algorithm-contract :forbids])))
+    (is (= :refused (:status construction)))
+    (is (= :meta-algorithm-wrong-route (:reason construction)))
+    (is (= :dedicated-meta-self-heal (:required-route construction)))
+    (is (= :refused
+           (:status (runner/construction-wiring-result
+                     {:construction-kind :meta-algorithm-execution
+                      :algorithm-contract {:algorithm-id "A-self-heal"}}))))
     (is (nil? (runner/selection-terminal-condition :selection algorithm-selection))
         "a selected algorithm is not a terminal selection abstention")))
 

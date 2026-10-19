@@ -7,6 +7,7 @@
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
@@ -125,7 +126,10 @@
         (is (fn? (:cascade-revision-proposals-fn defaults)))
         (is (= expected ((:judge-fn defaults) 17))))
       (is (= 17 (first @seen)))
-      (is (= {:accumulation :configured
+      (let [actual (dissoc (second @seen) :outer-task-selection-fn)
+            observation (:meta-field-observation actual)
+            source-pin (:meta-field-source-pin actual)]
+        (is (= (merge {:accumulation :configured
               :run-id "runtime-test"
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
@@ -133,7 +137,20 @@
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}
-             (dissoc (second @seen) :outer-task-selection-fn)))
+                      {:meta-field-observation observation
+                       :meta-field-source-pin source-pin})
+               actual))
+        (is (= :verified
+               (:status (meta-field/verify
+                         observation {:expected-snapshot-pin source-pin}))))
+        (is (= :external-snapshot-pin-mismatch
+               (:reason (meta-field/verify
+                         observation
+                         {:expected-snapshot-pin
+                          (assoc source-pin :sha256 (apply str (repeat 64 "0")))}))))
+        (is (= :external-snapshot-authority-invalid
+               (:reason (meta-field/verify observation
+                                           {:expected-snapshot-pin nil})))))
       (is (ifn? (:outer-task-selection-fn (second @seen)))))))
 
 (deftest production-pins-one-outer-selection-across-redecision

@@ -51,6 +51,23 @@ review/enact/retry call each.
 ordinary loop-node, fold, policy-selection, and D-task boundaries. Ordinary
 mission invariants were not relaxed.
 
+Historical bypass census after repair:
+
+- `97eab2ee8` loop-node bypass: **removed**. A META algorithm presented to the
+  ordinary receipt has four `:meta-algorithm-wrong-route` refusals and cannot
+  cross `require-complete!`.
+- `fa43dd757` construction-fold enrichment: **removed/unreachable**. Direct
+  algorithm construction and a replay-shaped legacy algorithm construction
+  both refuse before fold realization.
+- `42bfb4bb5` empty-universe D-task authority: **removed**. `context` returns a
+  typed wrong-route refusal and no token universe or candidate identity.
+
+The registry-derived `:meta-field-observation` and its independently carried
+`:meta-field-source-pin` are required production evidence for ordinary META
+selection when no active injury exists. The runtime exact-map test now names
+both fields, verifies the digest, and proves omitted/substituted authority is
+rejected; the assertion was not loosened.
+
 ## Gates and limitations
 
 Focused integration and the unchanged Packet-4 harness exercise active-route

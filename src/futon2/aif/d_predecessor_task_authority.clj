@@ -371,21 +371,19 @@
 
 (defn context [decision occurrence declaration-reads]
   (let [carry (get-in decision [:selection-certificate :token-belief-stage :prospective-carry])
-        algorithm? (= :algorithm (get-in decision [:action :kind]))
-        ;; META repair algorithms do not arise from the ordinary token-belief
-        ;; frontier.  Their freshly minted action occurrence is the exact
-        ;; dispatch identity; an empty token universe records that no ordinary
-        ;; D-task carry was inferred.
-        algorithm-occurrence-id (:action/id occurrence)]
-    {:occurrence occurrence :selected-action (:action decision)
-     :carry-occurrence-id (if algorithm? algorithm-occurrence-id (:occurrence-id carry))
-     :universe (if algorithm? #{} (:universe carry))
-     :precision-family (get-in decision [:selection-certificate :precision-family])
-     :candidate-id (if algorithm?
-                     algorithm-occurrence-id
-                     (or (:r6-candidate-occurrence decision) (:selected/occurrence-id decision)))
-     :candidate-to-minted-join :not-established
-     :declaration-pins (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
+        algorithm? (= :algorithm (get-in decision [:action :kind]))]
+    (if algorithm?
+      {:status :refused :reason :meta-algorithm-wrong-route
+       :required-route :dedicated-meta-self-heal}
+      {:occurrence occurrence :selected-action (:action decision)
+       :carry-occurrence-id (:occurrence-id carry)
+       :universe (:universe carry)
+       :precision-family (get-in decision [:selection-certificate :precision-family])
+       :candidate-id (or (:r6-candidate-occurrence decision)
+                         (:selected/occurrence-id decision))
+       :candidate-to-minted-join :not-established
+       :declaration-pins
+       (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))})))
 
 (defn produce! [root inputs expected read-job]
   (let [record (claim inputs)
