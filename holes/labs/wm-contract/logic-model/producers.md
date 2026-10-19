@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P4 P02b: no defect in square need extraction was reproduced. With no outer
+choice, generator target-local assembly has zero targets; its inner field cannot
+nominate square work. A potential preparation request from the retained outer
+field is a distinct producer, not evidence of a selected action or a P4 repair.
+
 P11 P04 (`96bb168cb`): provider emits per-policy score receipts and measured
 menu/scored/score-absent frontier, repinning its response after adding them.
 Declaration contains only computed rows; all-unscorable produces an explicit

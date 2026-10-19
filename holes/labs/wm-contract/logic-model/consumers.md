@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 38 P02b: no-choice fallback receives empty target sources, forms an empty
+inner field and yields no square need. This is not a chosen-action check inside
+square authoring. Original P02 repair premise is retired; an upstream preparation
+request would need its own source-bound target/excerpt/analysis identities.
+
 Row 33 P04 (`96bb168cb`): provider scores sealed entries individually and
 retains score records/frontier. Returned unscorable results do not erase computed
 neighbours; original identities and absence results remain pinned. No smaller

@@ -2,6 +2,16 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 2 P02b (reviewed worker `8f96a148` + `f447e823`): the original chosen-action
+square-authoring diagnosis is closed as not reproduced. A refused outer choice
+leaves `cascade-targets []`; the actual fallback constructs an empty inner field,
+so no square need reaches the consumer. Constructed test covers this fallback
+with real temporary graph/read ports (1 test/3 assertions reported passing).
+It does not run the full generator or live phase controller. The missing
+preparation-target carrier is earlier than square authoring; any bounded
+pre-choice preparation request is separate from selecting an executable action.
+No claim is made that the broader no-choice stall is repaired.
+
 Row 3 P04 (`96bb168cb`, reviewed worker `ca237ea35`): provider retains original
 policy identities/digests with computed or absent scores and a measured frontier.
 Partial declarations include computed rows only; response pin covers the receipts.
