@@ -22,8 +22,8 @@
           :meta-repair-ports ports}))
 
 (defn- recorded-injury-source! [dir]
-  ;; This is the recorded L1 fold-output-invalid shape, not an invented
-  ;; diagnosis fixture.  Its bytes are pinned as production receives them.
+  ;; This is the separately recorded campaign fold-output-invalid shape, not
+  ;; P16's L1 reading-coverage pin or an invented diagnosis fixture.
   (let [record (:record (second (edn/read-string
                                  (slurp "test/fixtures/meta-self-heal/campaign-2026-10-19.edn"))))
         path (str dir "/record.edn")
@@ -186,6 +186,72 @@
     (is (= :meta-self-heal/diagnosis-persist-failed (:reason result)))
     (is (nil? (:diagnosis-evidence-pin result)))
     (is (false? (:repair-claimed? result)))))
+
+(deftest distinct-diagnoses-for-one-injury-preserve-both-pinned-receipts
+  (let [dir (root)
+        pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        calls (atom 0)
+        diagnose (fn [_]
+                   {:status :succeeded
+                    :diagnosis {:class (if (= 1 (swap! calls inc))
+                                          :configuration :operator)}})
+        opts {:meta-diagnosis-root (str dir "/diagnoses")
+              :meta-diagnosis-fn diagnose}
+        first-result (production/produce-diagnosis! opts {:ledger ledger} active)
+        first-bytes (java.nio.file.Files/readAllBytes
+                     (.toPath (java.io.File.
+                               (get-in first-result [:diagnosis-evidence-pin :path]))))
+        second-result (production/produce-diagnosis! opts {:ledger ledger} active)
+        second-bytes (java.nio.file.Files/readAllBytes
+                      (.toPath (java.io.File.
+                                (get-in second-result [:diagnosis-evidence-pin :path]))))]
+    (is (= :available (:status first-result)))
+    (is (= :available (:status second-result)))
+    (is (not= (get-in first-result [:diagnosis-evidence-pin :path])
+              (get-in second-result [:diagnosis-evidence-pin :path])))
+    (is (= (get-in first-result [:diagnosis-evidence-pin :sha256])
+           (load-identity/sha256 first-bytes)))
+    (is (= (get-in second-result [:diagnosis-evidence-pin :sha256])
+           (load-identity/sha256 second-bytes)))
+    (is (= :configuration (:class (:diagnosis (edn/read-string (String. first-bytes "UTF-8"))))))
+    (is (= :operator (:class (:diagnosis (edn/read-string (String. second-bytes "UTF-8"))))))))
+
+(deftest invalid-source-and-nonresponses-are-unavailable-without-a-pin
+  (let [dir (root)
+        valid-pin (recorded-injury-source! dir)
+        missing-pin {:path (str dir "/missing.edn")
+                     :sha256 (apply str (repeat 64 "a"))}
+        malformed-path (str dir "/malformed.edn")
+        _ (spit malformed-path "{")
+        malformed-pin {:path malformed-path
+                       :sha256 (load-identity/sha256
+                                (java.nio.file.Files/readAllBytes
+                                 (.toPath (java.io.File. malformed-path))))}
+        port-calls (atom 0)
+        forbidden-port (fn [_] (swap! port-calls inc)
+                         {:status :succeeded :diagnosis {:class :wrong}})
+        missing (production/produce-diagnosis!
+                 {:meta-diagnosis-fn forbidden-port}
+                 {:ledger (:ledger (durable-with-active-source missing-pin))}
+                 {:injury-id "injury-recorded-l1"})
+        unreadable (production/produce-diagnosis!
+                    {:meta-diagnosis-fn forbidden-port}
+                    {:ledger (:ledger (durable-with-active-source malformed-pin))}
+                    {:injury-id "injury-recorded-l1"})
+        {:keys [ledger active]} (durable-with-active-source valid-pin)
+        nil-response (production/produce-diagnosis!
+                      {:meta-diagnosis-fn (constantly nil)} {:ledger ledger} active)
+        malformed-response (production/produce-diagnosis!
+                            {:meta-diagnosis-fn (constantly :not-a-map)}
+                            {:ledger ledger} active)]
+    (is (= :meta-self-heal/diagnosis-source-unreadable (:reason missing)))
+    (is (= :meta-self-heal/diagnosis-source-unreadable (:reason unreadable)))
+    (is (zero? @port-calls))
+    (is (= :meta-self-heal/diagnosis-port-returned-nil (:reason nil-response)))
+    (is (= :meta-self-heal/diagnosis-port-malformed (:reason malformed-response)))
+    (is (every? nil? (map :diagnosis-evidence-pin
+                          [missing unreadable nil-response malformed-response])))))
 
 (deftest existing-diagnosis-pin-remains-a-non-invoking-compatibility-path
   (let [pin {:path "diagnoses/existing.edn" :sha256 (apply str (repeat 64 "a"))}

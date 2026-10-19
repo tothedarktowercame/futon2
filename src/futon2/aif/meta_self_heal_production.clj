@@ -17,9 +17,14 @@
   "/home/joe/code/futon2/data/wm-meta-injuries/diagnoses")
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 
-(defn- diagnosis-path [root injury-id]
-  (str root "/diagnosis-" (load-identity/sha256 (.getBytes (str injury-id) "UTF-8"))
-       ".edn"))
+(defn- receipt-bytes [receipt]
+  (.getBytes (str (pr-str receipt) "\n") "UTF-8"))
+
+(defn- diagnosis-path [root receipt]
+  ;; Receipts are evidence handed to later repair coordination.  Their path is
+  ;; content-addressed so a later diagnosis for the same injury cannot revoke
+  ;; a previously returned pin by replacing its bytes.
+  (str root "/diagnosis-" (load-identity/sha256 (receipt-bytes receipt)) ".edn"))
 
 (defn- active-cause-pin
   "The active projection need not retain the opening record pin.  Recover it
@@ -52,18 +57,30 @@
   (try
     (let [target (.toPath (io/file path))
           parent (or (.getParent target) (.toPath (io/file ".")))
-          text (str (pr-str receipt) "\n")
-          bytes (.getBytes text "UTF-8")
+          bytes (receipt-bytes receipt)
           _ (Files/createDirectories parent (make-array FileAttribute 0))
           tmp (Files/createTempFile parent ".meta-diagnosis-" ".edn"
                                     (make-array FileAttribute 0))]
       (try
-        (Files/write tmp bytes (make-array java.nio.file.OpenOption 0))
-        (Files/move tmp target (into-array StandardCopyOption
-                                           [StandardCopyOption/ATOMIC_MOVE
-                                            StandardCopyOption/REPLACE_EXISTING]))
-        {:status :persisted :diagnosis-evidence-pin
-         {:path path :sha256 (load-identity/sha256 bytes)}}
+        (let [same-bytes? #(and (Files/isRegularFile target
+                                                       (make-array java.nio.file.LinkOption 0))
+                                (= (seq bytes) (seq (Files/readAllBytes target))))
+              persisted {:status :persisted :diagnosis-evidence-pin
+                         {:path path :sha256 (load-identity/sha256 bytes)}}]
+          (cond
+            (same-bytes?) persisted
+            (Files/exists target (make-array java.nio.file.LinkOption 0))
+            (refusal :meta-self-heal/diagnosis-path-conflict)
+            :else
+            (do
+              (Files/write tmp bytes (make-array java.nio.file.OpenOption 0))
+              (try
+                (Files/move tmp target (into-array StandardCopyOption
+                                                   [StandardCopyOption/ATOMIC_MOVE]))
+                persisted
+                (catch java.nio.file.FileAlreadyExistsException _
+                  (if (same-bytes?) persisted
+                      (refusal :meta-self-heal/diagnosis-path-conflict)))))))
         (finally (Files/deleteIfExists tmp))))
     (catch Throwable _
       (refusal :meta-self-heal/diagnosis-persist-failed))))
@@ -134,7 +151,7 @@
                       written (persist-diagnosis!
                                (diagnosis-path (or (:meta-diagnosis-root opts)
                                                    default-diagnosis-root)
-                                               injury-id)
+                                               receipt)
                                receipt)]
                   (if (= :persisted (:status written))
                     (merge written {:status :available :injury-id injury-id
