@@ -384,11 +384,15 @@
                     :meta-repair-transaction-path
                     (or (:meta-repair-transaction-path opts)
                         meta-self-heal/default-transaction-path))
-        readiness (meta-self-heal/production-readiness opts)]
-    (if (= :refused (:status readiness))
-      readiness
-      (or (meta-self-heal/route! opts)
-          (run-ordinary-opportunity! opts)))))
+        retry (:meta-repair-retry opts)
+        readiness (if retry
+                    (meta-self-heal/attributable-retry-readiness opts retry)
+                    (meta-self-heal/production-readiness opts))]
+    (cond
+      (= :refused (:status readiness)) readiness
+      retry (run-ordinary-opportunity! opts)
+      :else (or (meta-self-heal/route! opts)
+                (run-ordinary-opportunity! opts)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

@@ -179,6 +179,7 @@
     {:status :recorded :receipt existing :transaction transaction}
     (try
       (let [response (port {:work-order (:work-order transaction)
+                            :transaction transaction
                             :phase phase :predecessor-pin predecessor-pin})
             checked (verify-port-receipt
                      response (expected (:work-order transaction)

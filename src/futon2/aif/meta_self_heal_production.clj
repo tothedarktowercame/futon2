@@ -38,11 +38,14 @@
         (:value read)))))
 
 (defn agency-port [invoke seat]
-  (fn [{:keys [work-order phase predecessor-pin] :as request}]
+  (fn [{:keys [work-order phase predecessor-pin transaction] :as request}]
     (let [session-key ({"wm-author" :author-session
                         "wm-reviewer" :reviewer-session} seat)
+          ;; Enact/review adapters receive the sealed transaction too, so a
+          ;; concrete serving boundary can bind its effect to the exact prior
+          ;; author/reviewer evidence rather than reconstructing it.
           response (invoke {:seat seat :session-id (get work-order session-key)
-                            :request request})]
+                            :transaction transaction :request request})]
       (coordinator/seal-port-receipt
        {:phase phase :injury-id (:injury-id work-order)
         :repair-id (:repair-id work-order) :attempt (:attempt work-order)
@@ -104,6 +107,28 @@
       :else {:status :ready :active-injury? (boolean active?)
              :meta-injury-ledger-path ledger-path
              :meta-repair-transaction-path transaction-path})))
+
+(defn attributable-retry-readiness
+  "Authorize the one ordinary retry named by the latest enacted transition.
+   This is the only path allowed to run ordinary machinery while an injury is
+   active; arbitrary maps cannot bypass repair arbitration."
+  [opts retry]
+  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        durable (when (.isFile (io/file ledger-path))
+                  (store/load-durable-ledger ledger-path))
+        entries (get-in durable [:ledger :entries])
+        enacted (last (filter #(= :enacted (:state %)) entries))
+        authored (last (filter #(and (= :authored (:state %))
+                                     (= (:injury-id enacted) (:injury-id %))
+                                     (= (:repair-id enacted) (:repair-id %))) entries))
+        expected (select-keys enacted [:injury-id :repair-id :retry-click])
+        supplied (select-keys retry [:injury-id :repair-id :retry-click])]
+    (if (and (= :loaded (:status durable)) enacted authored
+             (= expected supplied) (= (:patch-sha authored) (:patch-sha retry)))
+      {:status :ready :attribution expected :patch-sha (:patch-sha retry)}
+      (refusal :meta-self-heal/retry-attribution-refused
+               {:expected (assoc expected :patch-sha (:patch-sha authored))
+                :supplied (assoc supplied :patch-sha (:patch-sha retry))}))))
 
 (defn route!
   "Nil means no active durable injury. A map consumes the opportunity."
