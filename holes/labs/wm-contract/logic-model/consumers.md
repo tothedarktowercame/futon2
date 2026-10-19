@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 34 P05 (`845c427dd` + `afd1d2a17`): evidence join retains computable rows
+beside typed local absences, original menu pin, and measured frontier. Malformed
+local prior shapes/types become `:prior-alpha` absence without posterior/EIG
+arithmetic. Invalid declaration/menu pins and global authority still refuse.
+P04 score reasons require the explicit fourth argument; production forwarding
+and partial-evidence objective handling remain P06 work.
+
 Row 38 P02b: no-choice fallback receives empty target sources, forms an empty
 inner field and yields no square need. This is not a chosen-action check inside
 square authoring. Original P02 repair premise is retired; an upstream preparation

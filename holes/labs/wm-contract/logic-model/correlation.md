@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 3 P05 (`845c427dd` + `afd1d2a17`, worker `4a9184509` + `3e470b455`):
+valid global authority with policy-local missing terms yields partial evidence,
+preserving original menu/digests and joined/term-absent frontier. Local malformed
+priors skip posterior/EIG construction rather than throwing. Fourth join argument
+retains P04 score-absence reasons. Worker namespace 5 tests/53 assertions passed;
+reviewer checked the correction and full-delta whitespace. Selector still calls
+the three-argument join and only evaluates computed evidence; P06/P07 remain open.
+No serving observation or end-to-end continuation is claimed.
+
 Row 2 P02b (reviewed worker `8f96a148` + `f447e823`): the original chosen-action
 square-authoring diagnosis is closed as not reproduced. A refused outer choice
 leaves `cascade-targets []`; the actual fallback constructs an empty inner field,

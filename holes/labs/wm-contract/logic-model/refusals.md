@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Evidence-join row B P05 (`845c427dd` + `afd1d2a17`): policy-local missing terms
+or malformed priors now produce typed absent rows in a partial receipt instead
+of atomic policy-evidence-incomplete refusal. Invalid global declaration/menu
+integrity remains a refusal. This does not yet remove the downstream selector's
+computed-only gate; no runtime continuation is claimed.
+
 Chain 5 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): scalar failure-detail remains lossy. Separately, `persist-run-record!` now copies existing `:reading-frontier` and `:loop-node-exercise` from the abstained sorry-cell certificate without requiring Q2 construction. It does not reconstruct omitted detail. The focused written-record test covers Q2 present/absent; no post-fix live click.
 
 The original audit below remains a historical reading at its stated revision.
