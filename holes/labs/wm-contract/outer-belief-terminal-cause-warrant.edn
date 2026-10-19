@@ -1,0 +1,8 @@
+{:schema :wm/focused-test-warrant-receipt-v1
+ :evidence/id "test-registry-111179d62494b3a154cb3aedb233547edf6b05b20969243a77d9628c37207402"
+ :run/id "11cd02ef-23d5-4210-af1e-8d87cc4fdee3"
+ :git-head "31c63c2576fd0039df0eaf50a223328f2f221761"
+ :namespace "futon2.aif.meta-outcome-dataset-test"
+ :results {:tests 6 :assertions 50 :failures 0 :errors 0 :exit 0}
+ :postcheck {:status :matched}
+ :execution-ms 2628}
