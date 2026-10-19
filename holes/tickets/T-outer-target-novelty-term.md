@@ -28,7 +28,11 @@ Compute the expected information gain about each target's Dirichlet
 parameters (the novelty term of expected free energy) from its `alpha`, and
 subtract it in `canonical-g` in place of the constant `0.0`. A target with
 fewer observations then has larger novelty and lower G, so unobserved targets
-differ by how much selecting them would teach. Record the term under `:terms`
+differ by how much selecting them would teach. The term must be the expected information gain about the Dirichlet
+parameters, not posterior spread under another name (R17′ of the PLoP
+catalogue: "reserve the words information gain for a calculation that
+actually earns them"; the model-uncertainty bonus in `efe.clj` is the
+honestly named spread heuristic and is not this term). Record the term under `:terms`
 with its kind, as risk and ambiguity are.
 
 Out of scope: the resource/cadence/continuation terms and the [0, 1] clamp
