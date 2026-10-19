@@ -5,6 +5,7 @@
             [futon2.aif.outer-policy-provider-runtime :as sut]
             [futon2.aif.outer-policy-evidence-provider :as provider]
             [futon2.aif.outer-target-belief :as belief]
+            [futon2.aif.outer-target-score :as score]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.selected-outer-cascade-policy :as selected]
@@ -50,3 +51,46 @@
     (is (= :computed (:status e)))
     (is (= [2 1 1 1 1] (:posterior-alpha (first (:entries e)))))
     (is (= [1 1 1 1 1] (:posterior-alpha (second (:entries e)))))))
+
+(deftest scored-policies-survive-unscorable-neighbours
+  (let [m (menu)
+        entries (:entries m)
+        first-entry (first entries)
+        second-entry (second entries)
+        first-digest (:cascade-digest first-entry)
+        second-digest (:cascade-digest second-entry)
+        real-score score/score
+        score-calls (atom 0)
+        unscorable {:schema :wm/outer-target-score-v1 :status :refused
+                    :reason :preference-transform-invalid}]
+    (with-redefs [score/score (fn [args]
+                                (if (= 1 (swap! score-calls inc))
+                                  (real-score args)
+                                  unscorable))]
+      (let [result (sut/provide (state) m [])]
+        (is (nil? (provider/verify result)))
+        (is (= [first-digest second-digest]
+               (get-in result [:score-frontier :menu :policy-digests])))
+        (is (= {:count 1 :policy-digests [first-digest]}
+               (get-in result [:score-frontier :scored])))
+        (is (= {:count 1
+                :policies [{:policy-id (:policy-id second-entry)
+                            :target-id (:target-id second-entry)
+                            :cascade-digest second-digest
+                            :reason :preference-transform-invalid}]}
+               (get-in result [:score-frontier :score-absent])))
+        (is (= :computed (get-in result [:score-records 0 :status])))
+        (is (= :absent (get-in result [:score-records 1 :status])))
+        (is (= [first-digest] (vec (keys (get-in result [:declaration :policies])))))))))
+
+(deftest all-unscorable-policies-produce-an-empty-assessed-frontier
+  (let [m (menu)]
+    (with-redefs [score/score (constantly {:schema :wm/outer-target-score-v1
+                                            :status :refused
+                                            :reason :belief-not-produced})]
+      (let [result (sut/provide (state) m [])]
+        (is (nil? (provider/verify result)))
+        (is (= 0 (get-in result [:score-frontier :scored :count])))
+        (is (= (count (:entries m))
+               (get-in result [:score-frontier :score-absent :count])))
+        (is (= :no-policy-scores (get-in result [:declaration :reason])))))))
