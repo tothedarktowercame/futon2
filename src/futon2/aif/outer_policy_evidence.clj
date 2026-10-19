@@ -12,7 +12,7 @@
 (def component-names [:resource :cadence :continuation])
 (def evidence-body-keys
   [:schema :status :menu-pin :declaration-pin :dataset-pin
-   :outcome-vocabulary :preference :preference-authority :gamma :entries])
+   :outcome-vocabulary :preference :preference-authority :gamma :entries :frontier])
 
 (defn- pin? [x] (and (string? (:path x)) (string? (:sha256 x))
                      (boolean (re-matches #"[0-9a-f]{64}" (:sha256 x)))))
@@ -36,7 +36,8 @@
           row-error
           (some
            (fn [row]
-             (let [alpha (:posterior-alpha row)
+             (let [absent (:absent-terms row)
+                   alpha (:posterior-alpha row)
                    q (get-in row [:posterior-predictive :distribution])
                    eig (:eig row) components (:ln-e-components row)
                    values (mapv #(get-in components [% :value]) component-names)
@@ -45,6 +46,9 @@
                (cond
                  (not (and (string? (:policy-id row)) (string? (:target-id row))
                            (string? (:cascade-digest row)))) :row-identity
+                 (= :absent (:status row))
+                 (when-not (and (vector? absent) (seq absent)) :row-absence)
+                 (not= :computed (:status row)) :row-status
                  (not (and (vector? alpha) (= (count vocab) (count alpha))
                            (every? #(and (finite? %) (pos? %)) alpha))) :posterior-alpha
                  (not= vocab (get-in row [:posterior-predictive :vocabulary])) :posterior-vocabulary
@@ -67,7 +71,7 @@
                  :else nil))) entries)]
       (cond
         (not= schema (:schema carrier)) :evidence-schema
-        (not= :computed (:status carrier)) :evidence-not-computed
+        (not (contains? #{:computed :partial} (:status carrier))) :evidence-not-computed
         (not (pin? (:menu-pin carrier))) :menu-pin
         (not (pin? (:declaration-pin carrier))) :declaration-pin
         (not (pin? (:dataset-pin carrier))) :dataset-pin
@@ -93,7 +97,8 @@
 (defn join
   "Join SEALED policy entries to explicit DECLARATION and durable RECORDS.
   This function computes evidence only; it never scores or selects."
-  [sealed declaration records]
+  ([sealed declaration records] (join sealed declaration records []))
+  ([sealed declaration records score-records]
   (let [entries (:entries sealed)
         vocab (:outcome-vocabulary declaration)
         by-digest (:policies declaration)
@@ -138,46 +143,76 @@
          (fn [entry]
            (let [digest (:cascade-digest entry)
                  spec (get by-digest digest)
+                 score-absence (some #(when (and (= digest (:cascade-digest %))
+                                                 (= :absent (:status %)))
+                                         (select-keys % [:reason :score]))
+                                     score-records)
                  prior (or (:prior-alpha spec) (:alpha global))
                  components (:ln-e spec)
                  absent (cond-> []
                           (nil? spec) (conj :policy-declaration)
                           (not= (count vocab) (count prior)) (conj :prior-alpha)
                           (not-every? #(and (finite? %) (pos? %)) prior) (conj :prior-alpha)
-                          (not-every? #(and (contains? components %)
-                                           (finite? (get-in components [% :value]))
-                                           (= :nats (get-in components [% :units]))
-                                           (pin? (get-in components [% :source-pin])))
-                                      component-names) (conj :ln-e-components))
+                          (not (and (contains? components :resource)
+                                    (finite? (get-in components [:resource :value]))
+                                    (= :nats (get-in components [:resource :units]))
+                                    (pin? (get-in components [:resource :source-pin]))))
+                          (conj :ln-e-resource)
+                          (not (and (contains? components :cadence)
+                                    (finite? (get-in components [:cadence :value]))
+                                    (= :nats (get-in components [:cadence :units]))
+                                    (pin? (get-in components [:cadence :source-pin]))))
+                          (conj :ln-e-cadence)
+                          (not (and (contains? components :continuation)
+                                    (finite? (get-in components [:continuation :value]))
+                                    (= :nats (get-in components [:continuation :units]))
+                                    (pin? (get-in components [:continuation :source-pin]))))
+                          (conj :ln-e-continuation)
+                          score-absence (conj :policy-score-absent))
                  matching (filter #(= digest (:selected-cascade-digest %)) records)
                  classified (map #(assoc % ::cause (outcomes/terminal-cause %)) matching)
                  task (filter #(= :task-outcome (get-in % [::cause :class])) classified)
                  unknown (remove (set vocab) (map :observed-outcome task))
                  counts (frequencies (map :observed-outcome task))
-                 posterior (mapv + (or prior []) (mapv #(get counts % 0) vocab))]
-             {:policy-id (:policy-id entry) :target-id (:target-id entry)
-              :cascade-digest digest :absent-terms (cond-> absent (seq unknown) (conj :unknown-outcome))
-              :prior-alpha prior :task-counts (mapv #(get counts % 0) vocab)
-              :posterior-alpha posterior
-              :posterior-predictive (when (seq posterior)
-                                      (let [n (double (reduce + posterior))]
-                                        {:vocabulary vocab :distribution (mapv #(/ (double %) n) posterior)
-                                         :units :probability}))
-              :eig (when (empty? absent) (novelty/categorical-information vocab posterior))
-              :ln-e-components components
-              :ln-e (when (every? #(finite? (get-in components [% :value])) component-names)
-                      (reduce + (map #(get-in components [% :value]) component-names)))
-              :excluded (mapv #(select-keys % [:run/id :selected-cascade-digest ::cause])
-                              (remove #(= :task-outcome (get-in % [::cause :class])) classified))}))
+                 absent (vec (distinct (cond-> absent (seq unknown) (conj :unknown-outcome))) )
+                 posterior (mapv + (or prior []) (mapv #(get counts % 0) vocab))
+                 base (cond-> {:policy-id (:policy-id entry) :target-id (:target-id entry)
+                               :cascade-digest digest :absent-terms absent
+                               :excluded (mapv #(select-keys % [:run/id :selected-cascade-digest ::cause])
+                                               (remove #(= :task-outcome (get-in % [::cause :class])) classified))}
+                        score-absence (assoc :score-absence score-absence))]
+             (if (seq absent)
+               (assoc base :status :absent)
+               (assoc base
+                      :status :computed
+                      :prior-alpha prior :task-counts (mapv #(get counts % 0) vocab)
+                      :posterior-alpha posterior
+                      :posterior-predictive
+                      (let [n (double (reduce + posterior))]
+                        {:vocabulary vocab :distribution (mapv #(/ (double %) n) posterior)
+                         :units :probability})
+                      :eig (novelty/categorical-information vocab posterior)
+                      :ln-e-components components
+                      :ln-e (reduce + (map #(get-in components [% :value]) component-names))))))
          entries)
-        missing (filterv #(seq (:absent-terms %)) rows)]
-    (if (or sealed-error malformed-declaration (seq missing))
+        missing (filterv #(= :absent (:status %)) rows)]
+    (if (or sealed-error malformed-declaration)
       {:schema schema :status :refused
-       :reason (or sealed-error malformed-declaration :policy-evidence-incomplete)
+       :reason (or sealed-error malformed-declaration)
        :missing (mapv #(select-keys % [:cascade-digest :absent-terms]) missing)}
-      (let [body {:schema schema :status :computed :menu-pin (:menu-pin sealed)
+      (let [body {:schema schema :status (if (seq missing) :partial :computed)
+                  :menu-pin (:menu-pin sealed)
                   :declaration-pin declared-pin :dataset-pin (dataset-pin records)
                   :outcome-vocabulary vocab :preference preference
                   :preference-authority (:preference-authority declaration)
-                  :gamma (:gamma declaration) :entries rows}]
-        (assoc body :evidence-pin (evidence-pin body))))))
+                  :gamma (:gamma declaration) :entries rows
+                  :frontier {:menu {:count (count entries)
+                                    :policy-digests (mapv :cascade-digest entries)}
+                             :joined {:count (- (count entries) (count missing))
+                                      :policy-digests (mapv :cascade-digest (remove #(= :absent (:status %)) rows))}
+                             :term-absent {:count (count missing)
+                                           :policies (mapv #(select-keys % [:policy-id :target-id
+                                                                            :cascade-digest :absent-terms
+                                                                            :score-absence])
+                                                           missing)}}}]
+        (assoc body :evidence-pin (evidence-pin body)))))))

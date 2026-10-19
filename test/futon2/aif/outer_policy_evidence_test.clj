@@ -73,25 +73,68 @@
     (is (= r (sut/join sealed (declaration {"d1" (spec [1.0 1.0])
                                             "d2" (spec [1.0 1.0])}) records)))))
 
-(deftest fail-closed-declarations
-  (testing "missing one digest and absent components refuse atomically"
+(deftest partial-policy-evidence-is-measured-without-resealing
+  (testing "missing one digest retains its complete neighbour"
     (let [r (sut/join sealed (declaration {"d1" (spec [1.0 1.0])}) [])]
-      (is (= :refused (:status r)))
-      (is (= ["d2"] (mapv :cascade-digest (:missing r))))))
-  (testing "explicit neutral is accepted; omission is not"
+      (is (= :partial (:status r)))
+      (is (nil? (sut/verify-evidence r)))
+      (is (= :computed (get-in r [:entries 0 :status])))
+      (is (= :absent (get-in r [:entries 1 :status])))
+      (is (= [:policy-declaration :prior-alpha :ln-e-resource :ln-e-cadence
+              :ln-e-continuation]
+             (get-in r [:entries 1 :absent-terms])))
+      (is (= {:count 2 :policy-digests ["d1" "d2"]}
+             (get-in r [:frontier :menu])))
+      (is (= {:count 1 :policy-digests ["d1"]}
+             (get-in r [:frontier :joined])))
+      (is (= {:count 1
+              :policies [{:policy-id "p2" :target-id "T" :cascade-digest "d2"
+                          :absent-terms [:policy-declaration :prior-alpha :ln-e-resource
+                                         :ln-e-cadence :ln-e-continuation]}]}
+             (get-in r [:frontier :term-absent])))))
+  (testing "a missing cadence pin is isolated to that digest"
+    (let [bad (update-in (spec [1.0 1.0]) [:ln-e :cadence :source-pin] dissoc :sha256)
+          r (sut/join sealed (declaration {"d1" (spec [1.0 1.0]) "d2" bad}) [])]
+      (is (= :partial (:status r)))
+      (is (= :computed (get-in r [:entries 0 :status])))
+      (is (= {:status :absent :policy-id "p2" :target-id "T" :cascade-digest "d2"
+              :absent-terms [:ln-e-cadence] :excluded []}
+             (get-in r [:entries 1])))))
+  (testing "all incomplete is an honest empty joined set"
+    (let [r (sut/join sealed (declaration {}) [])]
+      (is (= :partial (:status r)))
+      (is (= 0 (get-in r [:frontier :joined :count])))
+      (is (= 2 (get-in r [:frontier :term-absent :count])))))
+  (testing "explicit neutral is accepted; omission is measured"
     (is (= :computed (:status (sut/join sealed
                                         (declaration {"d1" (spec [1.0 1.0])
                                                       "d2" (spec [1.0 1.0])}) []))))
-    (is (= :refused (:status (sut/join sealed
+    (is (= :partial (:status (sut/join sealed
                                        (declaration {"d1" (update (spec [1.0 1.0]) :ln-e dissoc :resource)
                                                      "d2" (spec [1.0 1.0])}) [])))))
-  (testing "unknown outcome and declaration tamper refuse"
-    (is (= :refused (:status (sut/join sealed
+  (testing "unknown outcome is retained as partial and declaration tamper refuses"
+    (is (= :partial (:status (sut/join sealed
       (declaration {"d1" (spec [1.0 1.0]) "d2" (spec [1.0 1.0])})
       [{:selected-cascade-digest "d1" :terminal {:outcome :grounded-progress}
         :observed-outcome :unknown}]))))
     (let [d (declaration {"d1" (spec [1.0 1.0]) "d2" (spec [1.0 1.0])})]
       (is (= :declaration-pin (:reason (sut/join sealed (assoc d :gamma 2.0) [])))))))
+
+(deftest provider-score-absence-remains-attached-to-the-policy
+  (let [score-records [{:policy-id "p1" :target-id "T" :cascade-digest "d1"
+                        :status :computed}
+                       {:policy-id "p2" :target-id "T" :cascade-digest "d2"
+                        :status :absent :reason :preference-transform-invalid}]
+        r (sut/join sealed (declaration {"d1" (spec [1.0 1.0])}) [] score-records)]
+    (is (= :partial (:status r)))
+    (is (= :computed (get-in r [:entries 0 :status])))
+    (is (= [:policy-declaration :prior-alpha :ln-e-resource :ln-e-cadence
+            :ln-e-continuation :policy-score-absent]
+           (get-in r [:entries 1 :absent-terms])))
+    (is (= :preference-transform-invalid
+           (get-in r [:entries 1 :score-absence :reason])))
+    (is (= :preference-transform-invalid
+           (get-in r [:frontier :term-absent :policies 0 :score-absence :reason])))))
 
 (deftest adversarial-authority-and-sealed-carrier-validation
   (let [d (declaration {"d1" (spec [1.0 1.0]) "d2" (spec [1.0 1.0])})]
