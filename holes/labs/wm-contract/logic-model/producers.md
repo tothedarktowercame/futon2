@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P15 producer / P18 packet: runtime observe-ordinary-click-budget produces typed
+pre-admission available/exhausted/unavailable observations instead of nil on read
+failure. Known snapshot provenance is retained; observation timestamps serialize
+as ISO strings. This is measurement, never post-spend or execution authority.
+
 P17b supersedes unwired proposal status: runtime calls prepare-acceptance after
 available diagnosis, retaining typed proposal observation on returned results.
 Proposals remain unreviewed/not-run and are not copied to repair readiness's

@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P18: resource exclusion now retains exact budget observation status and
+reason instead of conflating failed reads with exhaustion. Positive snapshot is
+explicitly pre-admission and cannot bypass injury or execution authority checks.
+EDN-readable timestamp and producer/field roundtrip tests passed; no serving
+availability measurement or click is claimed.
+
 Row 7 / P17b: proposal producer is runtime-reachable through injected port with
 actual P16/P17 output-shape regression coverage. Returned observation retains
 diagnosis/source linkage and optional immutable proposal pin. Original readiness

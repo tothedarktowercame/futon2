@@ -9,6 +9,11 @@ identified. No serving-store observation has been made after landing.
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P18 budget observation does not mutate the budget ledger. Valid snapshots carry
+ledger-source pin and ISO observation time; missing/failed/malformed reader data
+has explicit absent provenance. Invalid injected time retains known provenance
+but marks time absent and observation unavailable. No allocation/refund claim.
+
 P14 adds `terminal-publication-<run-id>.edn` beside the run record, outside
 the tick-run-record scanner namespace. It pins canonical record path and exact
 byte SHA-256 without rewriting that record. Atomic sidecar write failure is

@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Consumer 15 / P18: META field accepts typed pre-admission budget observations
+while retaining legacy availability compatibility. Resource exclusions carry
+the exact observation, distinguishing exhausted from read-error/malformed.
+Positive availability clears only the resource condition; injury/admission
+checks remain independent. Hermetic producer-to-field evidence only.
+
 Rows35/36/41/42 P07c: verified assessed carriers now cross the immediate selector
 handoff; target admission and canonical integrity checks remain. Receipt's policy
 status may be selected while its evidence/objective remain partial, explicitly
