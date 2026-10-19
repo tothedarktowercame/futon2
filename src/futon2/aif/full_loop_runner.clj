@@ -4424,7 +4424,7 @@
       ;; Its exact subtype stays in failure-kind/detail and durable finding data.
       (= :pinned-selection-refused raw) :guardrail-refusal
       (#{:agent-job-stalled :construction-failed :grounding-failed
-         :policy-nondiscrimination :incomplete} raw) :incomplete
+         :policy-nondiscrimination :selection-validation-failed :incomplete} raw) :incomplete
       :else raw)))
 
 (defn- append-checkpoint-or-refusal-sorry!
@@ -5405,6 +5405,18 @@
                              checkpoint cell)))
                         (swap! checkpoints assoc checkpoint cell)
                         cell))
+        retain-selection!
+        (fn [judgement]
+          ;; Observation precedes validation: a later refusal does not undo
+          ;; the fact that the selector produced this decision and frontier.
+          (when (= :selected (get-in judgement [:decision :status]))
+            (let [cell (term {:controller-decision (:decision judgement)
+                             :selected-mission (get-in judgement [:decision :action :target])
+                             :outer-task-selection (:outer-task-selection judgement)}
+                            (decision-ground (:decision judgement)))]
+              (reset! pending-selection cell)
+              (swap! checkpoints assoc :selection cell)))
+          judgement)
         persist-selection!
         (fn [trace-path]
           (when (and @pending-selection (not @selection-persisted?))
@@ -6190,6 +6202,8 @@
                                        :error (.getMessage e)
                                        :exception-class exception-class
                                        :refusal-data failure-data
+                                       :original-failure (when (:failure-kind data) data)
+                                       :cause-chain (exception-cause-chain e)
                                        :repair-obligation finding
                                        ;; the production close contract
                                        ;; requires these; the thin fixture
@@ -6382,6 +6396,7 @@
                     ;; RULING-selection-precedence-2026-09-19.md: ordinary clicks
                     ;; always select; repair memory is evidence, never a divert.
                     judgement ((or (:judgement-transform-fn opts) identity) judgement)
+                    _ (retain-selection! judgement)
                     _ (when (or (:require-loop-node-exercise? opts)
                                 (get *runtime-defaults* :require-loop-node-exercise?))
                         (loop-node-exercise/require-complete! (:decision judgement)))]
@@ -6551,6 +6566,7 @@
                  #(let [generated (selection-judge window-days)
                         j ((or (:judgement-transform-fn opts) identity)
                            (:judgement generated))
+                        _ (retain-selection! j)
                         _ (when (or (:require-loop-node-exercise? opts)
                                     (get *runtime-defaults* :require-loop-node-exercise?))
                             (loop-node-exercise/require-complete! (:decision j)))]
@@ -7704,8 +7720,8 @@
                   (when (:failure-kind close-data)
                     (select-keys close-data [:failure-kind :failure-stage
                                              :phase :kind :refused :reason])))
-                original-failure (or (original-typed-failure e)
-                                     retained-close-failure)
+                original-failure (or retained-close-failure
+                                     (original-typed-failure e))
                 refusal-kind (or (:interpretation-evidence/refusal failure-data)
                                  (:limb-evidence/refusal failure-data)
                                  (:evidence-manifest/refusal failure-data)
