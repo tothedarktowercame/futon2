@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fail-closed post-run Requirements checker for one persisted WM run."""
-import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.request
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 
 def run(cmd, cwd):
@@ -48,6 +48,15 @@ def edn(x):
     if x is None: return "nil"
     return json.dumps(str(x), ensure_ascii=False)
 
+def publication_failure(e):
+    """A typed receipt for an evidence transport failure, never a Q verdict."""
+    receipt={":status":":failed", ":error-class":type(e).__name__, ":message":str(e)}
+    if isinstance(e, urllib.error.HTTPError):
+      receipt.update({":kind":":evidence-http-status", ":http-status":e.code})
+    else:
+      receipt[":kind"]=":evidence-publication-error"
+    return receipt
+
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
     p.add_argument("--futon2-root", default=str(Path(__file__).resolve().parents[1]))
@@ -79,6 +88,8 @@ def main(argv=None):
               ":not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[]),
               ":module-shas":{":mathlib-head":sha(ml),":requirements":sha(ml,"DarkTower/WarMachine/Requirements.lean"),":reader":sha(ml,"DarkTower/WarMachine/RequirementsReader.lean")},
               ":exporter-sha":sha(f2,"scripts/wm_run_facts.clj")}
+      result[":evidence-publication"]=( {":status":":skipped", ":reason":":no-evidence"}
+                                        if a.no_evidence else {":status":":pending"})
       verdict.write_text(edn(result)+"\n")
       log=Path(a.alerts_log or f2/"data/wm-click-loop/alerts.log"); log.parent.mkdir(parents=True,exist_ok=True)
       with log.open("a") as out: out.write(f"{started.isoformat()} {record.name}\n{block}\n\n")
@@ -89,8 +100,16 @@ def main(argv=None):
           "evidence/body":{"event":"wm-requirements","conforms":not bad,"verdict-file":str(verdict),"block":block},
           "evidence/tags":["war-machine","requirements","alert"]}
         req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"},method="POST")
-        with urllib.request.urlopen(req,timeout=10) as response:
-          if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
+        try:
+          with urllib.request.urlopen(req,timeout=10) as response:
+            if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
+          result[":evidence-publication"]={":status":":published"}
+        except Exception as e:
+          result[":evidence-publication"]=publication_failure(e)
+          verdict.write_text(edn(result)+"\n")
+          print("EVIDENCE PUBLICATION FAILED: "+str(e), flush=True)
+          return 3
+        verdict.write_text(edn(result)+"\n")
       if not verdict.is_file(): raise RuntimeError("verdict file absent after check")
       return 1 if bad else 0
     except Exception as e:
