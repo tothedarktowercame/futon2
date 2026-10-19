@@ -628,7 +628,11 @@
           (refusal :meta-self-heal/acceptance-review-refused
                    {:request request :review-status (:status response)
                     :review-reason (or (:reason response)
-                                       (:reason/type response))})
+                                       (:reason/type response))
+                    ;; F17 (chain 7, 2026-10-19 19:17Z): the adapter keeps the
+                    ;; transport's error as :detail (F9); this record dropped it,
+                    ;; so a reviewer rate-limit read only as producer-invoke-failed.
+                    :review-detail (:detail response)})
           (not= (select-keys request identity-keys)
                 (select-keys response identity-keys))
           (refusal :meta-self-heal/acceptance-review-identity-mismatch {:request request})
