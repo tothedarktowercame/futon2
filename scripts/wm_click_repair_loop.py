@@ -404,6 +404,12 @@ def fire(n: int, args, since_epoch: int) -> dict:
 
 # ---------------------------------------------------------------- debugger
 
+# configured-runner-opts runs full-loop-runner/config, which took 44 s on the
+# serving JVM on 2026-10-19 (the Drawbridge probe at 30 s timed out every
+# time, so the preflight reported "unavailable" and refused every click).
+PREFLIGHT_TIMEOUT_S = 180
+
+
 def outer_policy_preflight() -> str | None:
     """Check the serving configuration before resets, dispatch or ration spend.
 
@@ -414,7 +420,7 @@ def outer_policy_preflight() -> str | None:
             "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
             "(if (or (:outer-policy-evidence-provider opts) "
             "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts)))) "
-            ":wm/provider-configured :wm/provider-required))", timeout=30)
+            ":wm/provider-configured :wm/provider-required))", timeout=PREFLIGHT_TIMEOUT_S)
     except (OSError, subprocess.TimeoutExpired):
         return "outer-policy-preflight-unavailable"
     if result["rc"] != 0:

@@ -1393,8 +1393,15 @@
                            :reason :shape-policy-c-is-decision-c}))
       (and (= :abstained (get-in result [:decision :status]))
            (nil? (get-in result [:decision :reason])))
+      ;; An outer-selection refusal names the cause of the empty field, and
+      ;; this function builds it with the selector's reason as :failure-kind
+      ;; (the handoff refusals above); :reason is the shape a caller may hand
+      ;; in. Family/scoring refusals keep the historical reason.
       (assoc-in [:decision :reason]
                 (or (some :reason (get-in result [:decision :refusals]))
+                    (some #(when (= :outer-task-selection-refused (:kind %))
+                             (:failure-kind %))
+                          (get-in result [:decision :refusals]))
                     :no-acting-cascade-candidate))
       ;; an abstained field still retains the queue's entries and why each
       ;; was not admitted (no selection: no choice, no stratum posterior)
