@@ -2148,6 +2148,14 @@
   (let [decision (:decision judgement)]
     (cond
       (and (map? decision) (= :abstained (:status decision))) nil
+      (and (= :meta-algorithm-selection
+              (get-in decision [:selection-law :applied]))
+           (= :run-algorithm (get-in decision [:action :type]))
+           (string? (get-in decision [:action :target])))
+      {:action (:action decision)
+       :rank 1
+       :G-efe (:controller-score decision)
+       :controller-score (:controller-score decision)}
       (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
       (let [action (:action decision)
             candidates (get-in decision [:selection-certificate :candidates])
@@ -2503,6 +2511,31 @@
                    {:from :independent-review :to :successor-validation}]
      :policy-holes []}))
 
+(defmethod construct-selected-action :run-algorithm
+  [entry]
+  (let [{:keys [target] :as action} (:action entry)]
+    (when (and (string? target) (not (str/blank? target)))
+      {:mission target
+       :psi (str "execute approved META algorithm " target)
+       :construction-kind :meta-algorithm-execution
+       :selected-action action
+       :algorithm-contract
+       {:algorithm-id target
+        :selection-law :meta-algorithm-selection
+        :requires [:started :completed :independently-verified]
+        :procedure-source (str "holes/labs/" target ".md")
+        :forbids [:ordinary-cascade-reselection
+                  :selected-target-reading
+                  :unverified-completion]}
+       :shown ["p4ng/meta-reflection-loop-agent"
+               "futon-theory/stop-the-line"
+               "musn/pause-backtrace"]
+       :semilattice [{:from :retained-machine-injury :to :bounded-repair}
+                     {:from :bounded-repair :to :independent-review}
+                     {:from :independent-review :to :debugger-restart}
+                     {:from :debugger-restart :to :terminal-verification}]
+       :policy-holes []})))
+
 (defn historical-admission-failures
   "The names of the admission conditions that do not hold, in the order they
   are checked; empty when the admission matches the obligation and the casting."
@@ -2725,6 +2758,13 @@
        :required-transition
        {:from :not-addressable
         :to :proposable-and-executable}}
+
+      (= :run-algorithm (:type action))
+      {:id target
+       :type :meta-algorithm
+       :status :approved
+       :procedure-source (str "holes/labs/" target ".md")
+       :required-evidence [:started :completed :independently-verified]}
 
       (= :advance-ticket (:type action)) (missions/ticket-entry target)
       :else (mission-entry target))))
@@ -6503,13 +6543,19 @@
             ;; the event clock the selected-only reading phase shares.
             selection-clock (monotonic-clock)
             selection-completed-at (selection-clock)
+            meta-algorithm-selected?
+            (= :run-algorithm (get-in (selected-entry judgement0) [:action :type]))
             {judgement0 :judgement selected-reading-record :record}
-            (run-phase!
-             opts @phase-context :selected-reading
-             #(selected-reading-phase opts judgement0 selection-clock
-                                      selection-completed-at)
-             (fn [result]
-               {:reading-status (get-in result [:record :status])}))
+            (if meta-algorithm-selected?
+              {:judgement judgement0
+               :record {:status :not-applicable
+                        :reason :meta-algorithm-selected}}
+              (run-phase!
+               opts @phase-context :selected-reading
+               #(selected-reading-phase opts judgement0 selection-clock
+                                        selection-completed-at)
+               (fn [result]
+                 {:reading-status (get-in result [:record :status])})))
             world-at-selection (capture-selection-world!
                                 (assoc opts :selection-completed-at
                                        (str selection-completed-at))

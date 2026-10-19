@@ -1587,6 +1587,23 @@
        :missing :outer-task-selection
        :selection (select-keys selection [:schema :status :reason :details])})))
 
+(defn meta-algorithm-result
+  "Project an admitted META Algorithm choice into the report decision shape.
+  This projection deliberately contains no Cascade Live candidate: algorithms
+  repair the selector/runtime and are executed by the runner's distinct
+  construction contract."
+  [outer-selection cascade-assembled]
+  {:decision
+   {:action (:action outer-selection)
+    :controller-score
+    (get-in outer-selection [:policy :meta-selection :selected :score])
+    :selection-law
+    {:applied :meta-algorithm-selection
+     :source :outer-task-selection
+     :algorithm-id (get-in outer-selection [:chosen :id])}}
+   :cascade-problems cascade-assembled
+   :lanes []})
+
 ;; ---------------------------------------------------------------------------
 ;; U21 -- selection -> clocking, the same-tick half. `mission-action-types` and
 ;; the durable clock write live further down (`record-selection-clock!`); this
@@ -6759,9 +6776,22 @@
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
                                       :g-admission)
-        cascade-result (cd/select-and-record-cascade!
-                        cascade-assembled
-                        (assoc judge-opts
+        meta-algorithm-action? (= :run-algorithm
+                                  (get-in outer-task-selection [:action :type]))
+        cascade-result (if meta-algorithm-action?
+                         ;; META algorithms repair the machine that constructs
+                         ;; and selects Cascade Live policies.  Routing one
+                         ;; back through that broken policy boundary turned a
+                         ;; real A-self-heal choice into
+                         ;; :no-acting-cascade-candidate.  Preserve it as a
+                         ;; first-class selected action; the runner owns its
+                         ;; execution and evidence, outside the ordinary
+                         ;; target-reading/cascade path.
+                         (meta-algorithm-result outer-task-selection
+                                                cascade-assembled)
+                         (cd/select-and-record-cascade!
+                          cascade-assembled
+                          (assoc judge-opts
                                ;; A strict outer policy selection is a sealed
                                ;; executable-cascade choice, not permission to
                                ;; run the legacy inner selector again.
@@ -6808,10 +6838,10 @@
                                ;; F1b-admit-I: the flights' conditioning steps,
                                ;; from the same flight records
                                :conditioning-steps
-                               (enactment-fold-source/conditioning-steps
-                                (str (io/file (or (:machine-interpretations-dir judge-opts)
-                                                  want-interpretation/default-store)
-                                              "flights")))))
+                                   (enactment-fold-source/conditioning-steps
+                                    (str (io/file (or (:machine-interpretations-dir judge-opts)
+                                                      want-interpretation/default-store)
+                                                  "flights"))))))
         _cascade-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
