@@ -276,3 +276,18 @@ This authorizes five further ordinary clicks through the debugger repair loop.
 Under this document's standing mechanism, `allocated` rises from 86 to **91**.
 Each click remains charged at issue time; a preflight rejection with no issued
 click consumes nothing. No historical charge is reclaimed.
+
+## Joe's working-loop grant to claude-5, 2026-10-19 — five clicks
+
+Heard from Joe directly, in claude-5's operator buffer (emacs-repl), 17:23Z:
+
+> ok I authorize up to 5 clicks to proceed in the way you described, fixing each class of error that is revealed
+
+The way described: one click at a time under codex-7's working loop, the envelope and stop
+read from the click's own record and mapped to the correlation grid, then one bounded repair
+packet per class of stop (author ≠ reviewer, independent review, claude-5 lands and reloads),
+then the next click. The five clicks Joe granted to codex-1 earlier on 2026-10-19 were spent
+between 13:59Z and 14:21Z and all died at self-heal production readiness (finding F2, repaired
+by F2a `724d5799e` and F2b futon3c `d0fc30952`, live since the 15:28Z reload). None of those
+charges is reclaimed. Under this document's standing mechanism, `allocated` rises from 118 to
+**123**. Recorded by claude-5.
