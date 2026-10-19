@@ -393,6 +393,58 @@
                  (tripwire/write-trip-report!
                   (.getPath root) {:trip/id "trip-fixed" :trip/wire-id :T1})))))
 
+(deftest incident-close-records-one-coverage-disposition-without-changing-closure
+  ;; Historical context only: :attempt-006-late-author-artifact is one audited
+  ;; calibration incident.  This test uses a new synthetic identity and never
+  ;; reads or rewrites the museum's incident or blind-spot files.
+  (let [root (temp-dir)
+        incident {:incident/id "p22-synthetic-unwired-coverage"}
+        closure {:status :closed
+                 :incident/id (:incident/id incident)
+                 :closure-evidence {:path "closures/p22.edn"
+                                    :sha256 (apply str (repeat 64 "a"))}}
+        opts {:tripwire/incident-coverage-root (.getPath root)
+              :tripwire/incident-close-fn (fn [_ _] closure)}
+        first-close (tripwire/close-incident! opts incident)
+        repeated-close (tripwire/close-incident! opts incident)
+        files (seq (.listFiles root))]
+    (is (= :closed (:status first-close)))
+    (is (= closure (:closure first-close)))
+    (is (= :persisted (get-in first-close [:coverage :status])))
+    (is (= :unresolved (get-in first-close [:coverage :receipt :disposition :status])))
+    (is (= :unknown (get-in first-close [:coverage :receipt :disposition :owner])))
+    (is (= :persisted (get-in repeated-close [:coverage :status])))
+    (is (true? (get-in repeated-close [:coverage :idempotent?])))
+    (is (= 1 (count files)))
+    (is (= :unresolved
+           (get-in (edn/read-string (slurp (first files))) [:disposition :status])))))
+
+(deftest incident-close-accepts-verified-wire-and-keeps-close-on-write-failure
+  (let [incident {:incident/id "p22-synthetic-wire-coverage"}
+        closure {:status :closed :incident/id (:incident/id incident)
+                 :closure-evidence {:path "closures/p22-wire.edn"
+                                    :sha256 (apply str (repeat 64 "b"))}
+                 :wire-reference
+                 {:wire-id :T1
+                  :verification {:status :verified
+                                 :source-pin {:path "wire/T1.clj"
+                                              :sha256 (apply str (repeat 64 "c"))}}}}
+        opts {:tripwire/incident-close-fn (fn [_ _] closure)
+              :tripwire/coverage-writer (fn [_ _]
+                                          {:status :persisted :path "/tmp/p22-wire.edn"
+                                           :idempotent? false})}
+        covered (tripwire/close-incident! opts incident)
+        failed (tripwire/close-incident!
+                (assoc opts :tripwire/coverage-writer
+                       (fn [& _] (throw (ex-info "coverage store unavailable" {}))))
+                incident)]
+    (is (= :covered (get-in covered [:coverage :receipt :disposition :status])))
+    (is (= :T1 (get-in covered [:coverage :receipt :disposition :wire-reference :wire-id])))
+    (is (= :closed (:status failed)))
+    (is (= closure (:closure failed)))
+    (is (= {:status :unavailable :reason :coverage-persistence-failed}
+           (:coverage failed)))))
+
 (deftest record-action-attempts-no-stop-line-park-or-bell-effects
   (let [record (synthetic-trip-record)
         reports (atom [])

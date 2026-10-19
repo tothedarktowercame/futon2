@@ -27,6 +27,8 @@
 (load-identity/register! *ns* *file*)
 
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(def default-incident-coverage-root
+  "/home/joe/code/futon2/data/wm-tripwires/incident-coverage")
 (def default-action :record)
 (def default-agency-base "http://127.0.0.1:7070")
 (def investigation-window-ms (* 45 60 1000))
@@ -712,6 +714,122 @@
                               [StandardOpenOption/CREATE_NEW
                                StandardOpenOption/WRITE]))
        (.getPath path))))))
+
+(defn- coverage-pin? [pin]
+  (and (map? pin)
+       (string? (:path pin))
+       (string? (:sha256 pin))
+       (boolean (re-matches #"[0-9a-f]{64}" (:sha256 pin)))))
+
+(defn- safe-incident-id? [id]
+  (and (string? id) (boolean (re-matches #"[A-Za-z0-9._-]+" id))))
+
+(defn- coverage-path [root incident-id]
+  (io/file root (str incident-id ".edn")))
+
+(defn write-incident-coverage!
+  "Create one immutable coverage disposition per closed incident identity.
+
+  Existing identical bytes are an idempotent repeat; a differing disposition
+  is a conflict, never an overwrite.  This is deliberately outside the trip
+  report namespace so coverage receipts are not re-read as trip events."
+  [root receipt]
+  (let [incident-id (:incident/id receipt)]
+    (when-not (safe-incident-id? incident-id)
+      (throw (ex-info "Incident coverage requires a safe incident identity"
+                      {:incident/id incident-id})))
+    (store-lock/with-store-lock-for root
+      (fn []
+        (let [file (coverage-path root incident-id)]
+          (if (.exists file)
+            (let [existing (edn/read-string (slurp file))]
+              (if (= existing receipt)
+                {:status :persisted :path (.getPath file) :idempotent? true}
+                {:status :conflict :path (.getPath file)
+                 :reason :coverage-disposition-conflict}))
+            (do
+              (io/make-parents file)
+              (Files/write (.toPath file)
+                           (.getBytes (pr-str receipt) "UTF-8")
+                           (into-array StandardOpenOption
+                                       [StandardOpenOption/CREATE_NEW
+                                        StandardOpenOption/WRITE]))
+              {:status :persisted :path (.getPath file) :idempotent? false})))))))
+
+(defn- coverage-disposition [closure]
+  (let [evidence (:closure-evidence closure)
+        wire (:wire-reference closure)
+        owner (or (:coverage-owner closure) (:owner closure) :unknown)]
+    (cond
+      (not (coverage-pin? evidence))
+      {:status :unavailable :reason :closure-evidence-unpinned}
+
+      (and (map? wire)
+           (contains? @wire-registry (:wire-id wire))
+           (= :verified (get-in wire [:verification :status]))
+           (coverage-pin? (get-in wire [:verification :source-pin])))
+      {:status :covered :wire-reference wire}
+
+      :else
+      {:status :unresolved
+       :reason (if wire :wire-reference-unverified :no-wire-reference)
+       :owner owner
+       :evidence evidence})))
+
+(defn- coverage-receipt [closure]
+  (let [disposition (coverage-disposition closure)]
+    (when-not (= :unavailable (:status disposition))
+      {:schema :wm/tripwire-incident-coverage-v1
+       :incident/id (:incident/id closure)
+       :closure-evidence (:closure-evidence closure)
+       :disposition disposition})))
+
+(defn close-incident!
+  "Invoke the configured incident-close port, then record its coverage outcome.
+
+  There is intentionally no inferred closer: deployment must provide
+  `:tripwire/incident-close-fn`.  Coverage persistence never changes the
+  returned closure, so a store error cannot turn a completed close into a
+  failed one."
+  [opts incident]
+  (if-not (:tripwire/incident-close-fn opts)
+    {:status :unavailable :reason :incident-close-producer-unconfigured
+     :incident incident}
+    (try
+      (let [closure ((:tripwire/incident-close-fn opts) opts incident)]
+        (cond
+          (not (map? closure))
+          {:status :unavailable :reason :incident-close-result-invalid
+           :closure closure}
+
+          (not= :closed (:status closure))
+          {:status :not-closed :closure closure}
+
+          (not= (:incident/id incident) (:incident/id closure))
+          {:status :unavailable :reason :incident-close-identity-mismatch
+           :closure closure}
+
+          :else
+          (let [receipt (coverage-receipt closure)]
+            (if-not receipt
+              {:status :closed :closure closure
+               :coverage {:status :unavailable
+                          :reason :closure-evidence-unpinned}}
+              (try
+                (let [result ((or (:tripwire/coverage-writer opts)
+                                  write-incident-coverage!)
+                              (or (:tripwire/incident-coverage-root opts)
+                                  default-incident-coverage-root)
+                              receipt)]
+                  {:status :closed :closure closure
+                   :coverage (assoc result :receipt receipt)})
+                (catch Throwable _
+                  {:status :closed :closure closure
+                   :coverage {:status :unavailable
+                              :reason :coverage-persistence-failed}}))))))
+      (catch Throwable _
+        {:status :unavailable :reason :incident-close-failed
+         :incident incident}))))
 
 (defn- stderr! [message throwable]
   (binding [*out* *err*]
