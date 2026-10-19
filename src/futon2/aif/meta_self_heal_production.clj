@@ -88,6 +88,64 @@
     (catch Throwable _
       (refusal :meta-self-heal/diagnosis-persist-failed))))
 
+(def default-repository-root
+  "/home/joe/code/futon2")
+
+(def required-production-roles
+  [:selection-entrypoint :required-loop-node-evaluator
+   :terminal-routing-entrypoint])
+
+(defn- resolvable-var? [var-name]
+  (try
+    (let [sym (symbol var-name)]
+      (boolean (and (namespace sym) (requiring-resolve sym))))
+    (catch Throwable _ false)))
+
+(defn- repository-file? [root file]
+  (try
+    (let [root-file (.getCanonicalFile (io/file root))
+          target (.getCanonicalFile (io/file root-file file))]
+      (and (not (.isAbsolute (io/file file)))
+           (.startsWith (.toPath target) (.toPath root-file))
+           (.isFile target)))
+    (catch Throwable _ false)))
+
+(defn production-functions-defects
+  "F11 (click wm-click-fca1c921, 2026-10-19): the acceptance author is asked
+  for a test using only the production functions the diagnosis names, and
+  the diagnosis never named any.  The author seat refused, typed
+  `:kind :production-function-identity-absent`, \"diagnosis names production
+  namespaces and record fields but no callable production functions\",
+  `:missing {:callable-production-vars [:selection-entrypoint
+  :required-loop-node-evaluator :terminal-routing-entrypoint]}`.  A diagnosis
+  is therefore verified only when `:production-functions` names, for every
+  required role, a var that resolves in this JVM and a file under ROOT.
+  Returns nil when verified, else the typed defect lists."
+  [root diagnosis]
+  (let [entries (:production-functions diagnosis)
+        entries (if (sequential? entries) entries [])
+        well-formed? #(and (map? %) (keyword? (:role %))
+                           (string? (:var %)) (not (str/blank? (:var %)))
+                           (string? (:file %)) (not (str/blank? (:file %))))
+        malformed (vec (remove well-formed? entries))
+        entries (filter well-formed? entries)
+        unresolvable (vec (distinct (remove resolvable-var? (map :var entries))))
+        missing-files (vec (distinct (remove #(repository-file? root %)
+                                             (map :file entries))))
+        verified-roles (set (map :role (filter #(and (resolvable-var? (:var %))
+                                                     (repository-file? root (:file %)))
+                                               entries)))
+        missing-roles (vec (remove verified-roles required-production-roles))]
+    (when (or (not (sequential? (:production-functions diagnosis)))
+              (seq malformed) (seq unresolvable) (seq missing-files)
+              (seq missing-roles))
+      (cond-> {:missing-roles missing-roles}
+        (not (sequential? (:production-functions diagnosis)))
+        (assoc :production-functions-field :absent)
+        (seq malformed) (assoc :malformed-entries malformed)
+        (seq unresolvable) (assoc :unresolvable-vars unresolvable)
+        (seq missing-files) (assoc :missing-files missing-files)))))
+
 (defn produce-diagnosis!
   "Turn an active injury's exact opening-record pin into a diagnosis request.
   This is deliberately before, and separate from, repair coordination: it
@@ -148,6 +206,17 @@
                 (refusal :meta-self-heal/diagnosis-response-missing
                          {:injury-id injury-id :request request :repair-claimed? false})
 
+                (production-functions-defects
+                 (or (:meta-repository-root opts) default-repository-root)
+                 (:diagnosis response))
+                (refusal :meta-self-heal/diagnosis-production-functions-absent
+                         (merge (production-functions-defects
+                                 (or (:meta-repository-root opts)
+                                     default-repository-root)
+                                 (:diagnosis response))
+                                {:injury-id injury-id :request request
+                                 :repair-claimed? false}))
+
                 :else
                 (let [receipt {:schema :wm/meta-diagnosis-receipt-v1
                                :status :available :injury-id injury-id
@@ -173,7 +242,7 @@
   (and (map? pin) (string? (:path pin)) (seq (:path pin))
        (string? (:sha256 pin)) (boolean (re-matches #"[0-9a-f]{64}" (:sha256 pin)))))
 
-(defn- read-diagnosis-receipt [diagnosis]
+(defn- read-diagnosis-receipt [root diagnosis]
   (let [pin (:diagnosis-evidence-pin diagnosis)]
     (cond
       (not (pin? pin))
@@ -203,6 +272,11 @@
                 (refusal :meta-self-heal/acceptance-diagnosis-unavailable)
                 (not= (dissoc expected :diagnosis-evidence-pin) actual)
                 (refusal :meta-self-heal/acceptance-diagnosis-identity-mismatch)
+                ;; F11: a receipt pinned before the contract (e.g.
+                ;; diagnosis-83b348...) never reaches the author unverified.
+                (production-functions-defects root (:diagnosis receipt))
+                (refusal :meta-self-heal/diagnosis-production-functions-absent
+                         (production-functions-defects root (:diagnosis receipt)))
                 :else {:status :available :receipt receipt :pin pin}))))
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-diagnosis-unreadable))))))
@@ -292,7 +366,9 @@
   [opts diagnosis]
   (if-let [acceptance (:acceptance-test opts)]
     {:status :present :acceptance-test acceptance :source :supplied}
-    (let [diagnosis-read (read-diagnosis-receipt diagnosis)
+    (let [diagnosis-read (read-diagnosis-receipt
+                          (or (:meta-repository-root opts) default-repository-root)
+                          diagnosis)
           accept (:meta-acceptance-fn opts)]
       (cond
         (not= :available (:status diagnosis-read))

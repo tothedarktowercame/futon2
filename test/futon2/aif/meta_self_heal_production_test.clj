@@ -37,6 +37,28 @@
                :text (str "(ns " namespace "\n  (:require [clojure.test :refer [deftest is]]))\n"
                           "(deftest acceptance-control (is true))\n")}})))
 
+(def ^:private repository-root (System/getProperty "user.dir"))
+
+(def ^:private production-functions
+  ;; Real futon2 vars, one per role the click wm-click-fca1c921 author seat
+  ;; listed as missing (F11).
+  [{:role :selection-entrypoint
+    :var "futon2.aif.meta-live-outer-selector/select-live"
+    :file "src/futon2/aif/meta_live_outer_selector.clj"}
+   {:role :required-loop-node-evaluator
+    :var "futon2.aif.wm.loop-node-exercise/receipt"
+    :file "src/futon2/aif/wm/loop_node_exercise.clj"}
+   {:role :terminal-routing-entrypoint
+    :var "futon2.aif.full-loop-runner/persist-run-record!"
+    :file "src/futon2/aif/full_loop_runner.clj"}])
+
+(defn- diagnosis-fixture [class]
+  {:class class :production-functions production-functions})
+
+(defn- diagnosis-fixture-with-entry [index changes]
+  {:class :configuration
+   :production-functions (update production-functions index merge changes)})
+
 (defn- recorded-injury-source! [dir]
   ;; This is the separately recorded campaign fold-output-invalid shape, not
   ;; P16's L1 reading-coverage pin or an invented diagnosis fixture.
@@ -58,7 +80,7 @@
     (production/produce-diagnosis!
      {:meta-diagnosis-root (str dir "/diagnoses")
       :meta-diagnosis-fn (constantly {:status :succeeded
-                                      :diagnosis {:class :configuration}})}
+                                      :diagnosis (diagnosis-fixture :configuration)})}
      {:ledger ledger} active)))
 
 (deftest ordinary-readiness-retains-dedicated-input-absence
@@ -184,7 +206,7 @@
                 {:meta-diagnosis-root (str dir "/diagnoses")
                  :meta-diagnosis-fn #(do (reset! seen %)
                                           {:status :succeeded
-                                           :diagnosis {:class :configuration}})}
+                                           :diagnosis (diagnosis-fixture :configuration)})}
                 {:ledger ledger} active)
         receipt (edn/read-string (slurp (get-in result [:diagnosis-evidence-pin :path])))]
     (is (= :available (:status result)))
@@ -227,7 +249,7 @@
                                         :reason :meta-self-heal/diagnosis-persist-failed})]
                  (production/produce-diagnosis!
                   {:meta-diagnosis-fn (constantly {:status :succeeded
-                                                   :diagnosis {:class :configuration}})}
+                                                   :diagnosis (diagnosis-fixture :configuration)})}
                   {:ledger ledger} active))]
     (is (= :meta-self-heal/diagnosis-persist-failed (:reason result)))
     (is (nil? (:diagnosis-evidence-pin result)))
@@ -240,8 +262,9 @@
         calls (atom 0)
         diagnose (fn [_]
                    {:status :succeeded
-                    :diagnosis {:class (if (= 1 (swap! calls inc))
-                                          :configuration :operator)}})
+                    :diagnosis (diagnosis-fixture
+                                (if (= 1 (swap! calls inc))
+                                  :configuration :operator))})
         opts {:meta-diagnosis-root (str dir "/diagnoses")
               :meta-diagnosis-fn diagnose}
         first-result (production/produce-diagnosis! opts {:ledger ledger} active)
@@ -298,6 +321,90 @@
     (is (= :meta-self-heal/diagnosis-port-malformed (:reason malformed-response)))
     (is (every? nil? (map :diagnosis-evidence-pin
                           [missing unreadable nil-response malformed-response])))))
+
+;; F11 (click wm-click-fca1c921): the author seat refused because the
+;; diagnosis named no callable production functions.
+(defn- diagnose-with [dir diagnosis]
+  (let [pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)]
+    (production/produce-diagnosis!
+     {:meta-diagnosis-root (str dir "/diagnoses")
+      :meta-repository-root repository-root
+      :meta-diagnosis-fn (constantly {:status :succeeded :diagnosis diagnosis})}
+     {:ledger ledger} active)))
+
+(defn- persisted-diagnoses [dir]
+  (seq (.listFiles (java.io.File. (str dir "/diagnoses")))))
+
+(deftest diagnosis-naming-resolvable-production-functions-is-available
+  (let [dir (root)
+        result (diagnose-with dir (diagnosis-fixture :configuration))
+        receipt (edn/read-string (slurp (get-in result [:diagnosis-evidence-pin :path])))]
+    (is (= :available (:status result)))
+    (is (= production-functions (get-in receipt [:diagnosis :production-functions])))))
+
+(deftest diagnosis-without-verified-production-functions-is-refused-unpersisted
+  (let [ghost "futon2.aif.meta-live-outer-selector/no-such-selector"
+        absent (diagnose-with (root) {:class :configuration})
+        unresolvable-dir (root)
+        unresolvable (diagnose-with
+                      unresolvable-dir
+                      (diagnosis-fixture-with-entry 0 {:var ghost}))
+        role-dir (root)
+        missing-role (diagnose-with
+                      role-dir
+                      {:class :configuration
+                       :production-functions (vec (take 2 production-functions))})
+        escaped (diagnose-with
+                 (root)
+                 (diagnosis-fixture-with-entry
+                  2 {:file "../futon2/src/futon2/aif/full_loop_runner.clj"}))]
+    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason absent)))
+    (is (= :absent (:production-functions-field absent)))
+    (is (= production/required-production-roles (:missing-roles absent)))
+    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason unresolvable)))
+    (is (= [ghost] (:unresolvable-vars unresolvable)))
+    (is (= [:selection-entrypoint] (:missing-roles unresolvable)))
+    (is (nil? (persisted-diagnoses unresolvable-dir)))
+    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason missing-role)))
+    (is (= [:terminal-routing-entrypoint] (:missing-roles missing-role)))
+    (is (nil? (:unresolvable-vars missing-role)))
+    (is (nil? (persisted-diagnoses role-dir)))
+    (is (= ["../futon2/src/futon2/aif/full_loop_runner.clj"] (:missing-files escaped)))
+    (is (= [:terminal-routing-entrypoint] (:missing-roles escaped)))
+    (is (every? nil? (map :diagnosis-evidence-pin [absent unresolvable missing-role escaped])))
+    (is (every? false? (map :repair-claimed? [absent unresolvable missing-role escaped])))))
+
+(deftest acceptance-request-carries-the-diagnosis-production-functions
+  (let [dir (root)
+        diagnosis (diagnose-with dir (diagnosis-fixture :configuration))
+        seen (atom nil)
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-repository-root repository-root
+                 :meta-acceptance-fn (fn [request] (reset! seen request)
+                                       {:status :failed :reason :stub})}
+                diagnosis)]
+    (is (= :meta-self-heal/acceptance-unavailable (:reason result)))
+    (is (= production-functions (get-in @seen [:diagnosis :production-functions])))))
+
+(deftest pinned-receipt-without-production-functions-never-reaches-the-author
+  ;; The shape of diagnosis-83b348..., pinned before F11.
+  (let [dir (root)
+        source-pin (recorded-injury-source! dir)
+        receipt {:schema :wm/meta-diagnosis-receipt-v1 :status :available
+                 :injury-id "injury-recorded-l1" :source-record-pin source-pin
+                 :diagnosis {:class :configuration} :repair-claimed? false}
+        written (production/persist-diagnosis! (str dir "/diagnoses/old.edn") receipt)
+        calls (atom 0)
+        result (production/produce-acceptance!
+                {:meta-repository-root repository-root
+                 :meta-acceptance-fn (fn [_] (swap! calls inc) {:status :failed})}
+                {:injury-id "injury-recorded-l1" :source-record-pin source-pin
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin written)})]
+    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason result)))
+    (is (= production/required-production-roles (:missing-roles result)))
+    (is (zero? @calls))))
 
 (deftest existing-diagnosis-pin-remains-a-non-invoking-compatibility-path
   (let [pin {:path "diagnoses/existing.edn" :sha256 (apply str (repeat 64 "a"))}
@@ -588,7 +695,7 @@
           (runtime/run-opportunity!
            {:meta-diagnosis-root (str dir "/diagnoses")
             :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis {:class :configuration}})}))
+                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})}))
         failed
         (with-redefs [production/diagnosis-context (constantly context)
                       production/production-readiness readiness
@@ -643,7 +750,7 @@
         produced (production/produce-diagnosis!
                   {:meta-diagnosis-root (str dir "/diagnoses")
                    :meta-diagnosis-fn (constantly {:status :succeeded
-                                                    :diagnosis {:class :configuration}})}
+                                                    :diagnosis (diagnosis-fixture :configuration)})}
                   durable active-a)
         diagnosis-a (:diagnosis-evidence-pin produced)
         diagnosis-b {:path "diagnoses/b.edn" :sha256 (apply str (repeat 64 "d"))}
@@ -744,7 +851,7 @@
            {:meta-diagnosis-root (str dir "/diagnoses")
             :meta-acceptance-root (str dir "/acceptances")
             :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis {:class :configuration}})
+                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})
             :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
                                   {:status :proposed
                                    :acceptance-test
@@ -778,7 +885,7 @@
           (runtime/run-opportunity!
            {:meta-diagnosis-root (str dir "/diagnoses-failed")
             :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis {:class :configuration}})
+                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})
             :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
                                   {:status :failed :reason :offline})}))
         ordinary-calls (atom 0)
