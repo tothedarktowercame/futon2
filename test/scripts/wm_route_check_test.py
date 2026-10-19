@@ -91,5 +91,40 @@ class RouteCheckTest(unittest.TestCase):
     path = m.project({"runtime-disposition": {"status": "refused", "reason": "meta-self-heal/ledger-unreadable"}}, None)[0]
     self.assertEqual(path, ["ledgerUnreadable", "terminalRecord"])
 
+  # Click c78d0f27's binding, verbatim (futon3c data/wm-click-run-bindings, closed 19:43:49Z).
+  CLICK_C78 = ('{:schema :wm-click-run-binding-v1, :attempt/id nil, :click/id "wm-click-c78d0f27-deca-4390-9b30-f36418714a54", '
+               ':outcome :unknown, :binding-status :absent, :runtime-disposition {:status :refused, '
+               ':reason :meta-self-heal/diagnosis-transaction-mismatch, :route :dedicated-meta-self-heal, '
+               ':ordinary-selection-called? false}, :run-record-absence :runner-did-not-return-run-record, '
+               ':run-id-observation {:status :absent, :reason :runner-did-not-return-run-id}, :run-record-status :absent}')
+
+  def test_prepare_refusal_projects_after_readiness(self):
+    m = module()
+    path, gaps, notes, reason = m.project({"runtime-disposition": {"status": "refused", "reason": "meta-self-heal/preparation-refused"}}, None)
+    self.assertEqual((path, gaps, notes, reason), (["readinessReady", "preparationRefused", "terminalRecord"], [{"position": 0, "status": "not-recorded"}], [], None))
+
+  def test_binding_mismatch_projects_with_the_masking_caveat(self):
+    # The bad case: the pre-fix click's recorded reason is the masked form. The producer
+    # projects the record's word (bindingRefused) and says in :notes why that may be wrong;
+    # it does not rewrite the record to preparationRefused.
+    m = module()
+    for reason in ("meta-self-heal/diagnosis-transaction-mismatch", "meta-self-heal/acceptance-transaction-mismatch"):
+      path, gaps, notes, why = m.project({"runtime-disposition": {"status": "refused", "reason": reason}}, None)
+      self.assertEqual((path, why), (["readinessReady", "bindingRefused", "terminalRecord"], None))
+      self.assertEqual(len(notes), 1); self.assertIn("df2209a33", notes[0]["note"]); self.assertEqual(notes[0]["position"], 1)
+    ran, out = self.run_check(self.CLICK_C78, "VERDICT true\nEDGE 0 true\nEDGE 1 true\n")
+    self.assertIn(":path [:readinessReady :bindingRefused :terminalRecord]", out)
+    self.assertIn(":verdict :conforms-suffix", out)
+    self.assertIn("masked preparation refusal", out)
+
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
+  def test_rev3_states_live_lean(self):
+    # The two new suffixes are decided by the kernel on the actual table, not by this script.
+    for binding, state in [('{:click/id "p" :runtime-disposition {:status :refused :reason :meta-self-heal/preparation-refused}}', "preparationRefused"),
+                           (self.CLICK_C78, "bindingRefused")]:
+      ran, out = self.run_check(binding)
+      self.assertIn(f":path [:readinessReady :{state} :terminalRecord]", out)
+      self.assertIn(":verdict :conforms-suffix", out)
+
 if __name__ == "__main__":
   unittest.main()

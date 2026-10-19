@@ -12,6 +12,7 @@ from pathlib import Path
 LEAN_MODULE = "DarkTower/WarMachine/SelfHealRoute.lean"
 ROUTE_ONLY = {"acceptance-test", "diagnosis-evidence"}        # only route! emits these
 READINESS_ONLY = {"diagnosis-port", "acceptance-proposal-port", "acceptance-review-port"}
+BINDING_MISMATCH = {"meta-self-heal/diagnosis-transaction-mismatch", "meta-self-heal/acceptance-transaction-mismatch"}
 
 # Acceptance observation -> recorded prefix.  Source field:
 # record [:meta-self-heal/readiness :acceptance-observation]; reasons from
@@ -77,6 +78,16 @@ def project(binding, record):
   if d.get("ordinary-selection-called?") is True: return ["ordinarySelection", "terminalRecord"], gaps, notes, None
   if d.get("status") != "refused": return [], gaps, notes, "disposition-not-projectable"
   if d.get("reason") == "meta-self-heal/ledger-unreadable": return ["ledgerUnreadable", "terminalRecord"], gaps, notes, None
+  # route! after readiness (SelfHealRoute rev 3, mathlib4 a84278e893): a refused
+  # coordinator/prepare is its own refusal since futon2 df2209a33 (2026-10-19 20:38Z);
+  # before that commit the same refusal was recorded as a binding mismatch (click
+  # c78d0f27, jit/SelfHealPrepare.lean), so a mismatch reason is projected to
+  # bindingRefused with that caveat as a note, never silently.
+  if d.get("reason") == "meta-self-heal/preparation-refused": return ["readinessReady", "preparationRefused", "terminalRecord"], gaps, notes, None
+  if d.get("reason") in BINDING_MISMATCH:
+    notes.append({"position": 1, "source": [":runtime-disposition", ":reason"],
+                  "note": "a binding mismatch is genuine only from futon2 df2209a33 (2026-10-19 20:38Z); a record with this reason from before then may be a masked preparation refusal (click c78d0f27, SelfHealPrepare.click_c78d0f27_masked)"})
+    return ["readinessReady", "bindingRefused", "terminalRecord"], gaps, notes, None
   if d.get("reason") != "meta-self-heal/production-config-required": return [], gaps, notes, "disposition-not-projectable"
   terms = set(d.get("absent-terms") or [])
   route, ready = bool(terms & ROUTE_ONLY), bool(terms & READINESS_ONLY) or d.get("before-ration-spend?") is True

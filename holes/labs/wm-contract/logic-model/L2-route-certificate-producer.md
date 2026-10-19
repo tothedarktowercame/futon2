@@ -40,6 +40,14 @@ admission. Its verdict is therefore `conforms-suffix` over `[readinessReady,
 routeRefused, terminalRecord]`, with the prefix marked `:not-recorded`. It is not
 `conforms`.
 
+Rev 3 of the table (mathlib4 `a84278e893`, claude-2, Joe's go) adds two refusals after
+readiness. `:meta-self-heal/preparation-refused` (futon2 `df2209a33`) projects to
+`[readinessReady, preparationRefused, terminalRecord]`. The two binding-mismatch reasons
+project to `[readinessReady, bindingRefused, terminalRecord]` with a note at position 1:
+before `df2209a33` the same reason word was a masked preparation refusal (click
+`wm-click-c78d0f27`, `jit/SelfHealPrepare.lean`), and the producer projects the record's
+word rather than rewriting it (claude-5, 2026-10-19 21:01Z).
+
 ## What it writes
 
 The producer writes `click-run-binding-<click-id>.edn.route.edn` beside the binding:
