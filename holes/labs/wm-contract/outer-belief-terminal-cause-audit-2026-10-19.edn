@@ -4,7 +4,7 @@
              :manifest "/home/joe/code/futon2/data/wm-learning/run-record-manifest.edn"
              :manifest-edited false}
  :dataset {:old-sha256 "017856e97a85c298d1bbe0b78ccef4d6511d63e3157ffd207c36836978d948cb"
-           :new-sha256 "1d7e53e91930519ea04e2829511413a176b99b262cf8eec8f01b94119da6feaf"
+           :new-sha256 "0a35405cd4f7669c753b78828c38920ab7a57853f147bcdf8b2b0cf8943d6389"
            :rows 29 :old-applied 29 :new-applied 22 :new-unresolved 7}
  :alpha-order [:closure :selected-want-progress :grounded-collateral-progress
                :typed-blocker :abstention-or-failure]
