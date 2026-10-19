@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P17 / P15 (`7fc350383`, `9afa7ca0c` worker commits): terminal classification
+retains the record pin and names observation class separately from coarse outcome.
+Supported provider-absence causes identify missing-production-machinery injury;
+scored abstention, selected partial-frontier continuation and unknown ordinary
+abstention remain distinct. Success/cancellation/diagnostic classes are preserved.
+This pure classifier does not fetch overflow evidence or mutate the ledger.
+
 P14 / P13/P16/P17 (`1077757b6`, `732b2f0c4` worker commits): runner
 post-persist injury deposit, injury-ledger ingest and configured learning
 publication produce independently retained sink observations. `:returned`

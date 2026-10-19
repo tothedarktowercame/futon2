@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Chain 8 / P15: configuration injury uses explicit retained provider-absence
+cause fields, including P10 `[:failure :causes :causes]`. Arbitrary decision
+metadata is not causal evidence. Scored no-action and partial-frontier selection
+are distinct non-injury observations; absent target reading alone is not proof
+of missing machinery. No unknown overflow cause is inferred. Worker final
+classifier tests passed; this is not a live ledger reclassification.
+
 Chains 2–5/7 P10 (worker `afcd14896` + `a5d8ba5ba`, test `06f78ee44`): terminal
 failure retains projected causes from supported refusal containers, original
 failure/error-data and typed cause-chain data, with distinct cause counts and

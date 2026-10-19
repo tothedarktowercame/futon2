@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P15: pure classification distinguishes retained configuration absence,
+evaluated no-action and partial-frontier continuation without treating every
+abstention or zero assessment as injury. Source pin retained; success and other
+explicit non-injury kinds keep their own observation classes. Historical L1
+reading-coverage failure is not reattributed to provider absence. No serving or
+self-heal activation claim follows from these hermetic classifier tests.
+
 Rows 9/10 / P14: publication after record persistence now has a linked receipt
 instead of being inferred from the earlier event snapshot. Sink returned,
 returned-nil, failed and not-attempted are distinct; returned refusal is not
