@@ -3,6 +3,20 @@
 Static investigation at futon2 `1de83f63225800dd27970ce974c284206306a9d3`.
 No serving JVM, click, publication, or Agency port was used.
 
+## Coordinator review qualification
+
+The constructed test establishes omission in the **already selected** carrier
+projection only. It does not pass its outer receipt into that projection, and
+semantic carrier verification is stubbed. It therefore does not establish that
+the no-selected-policy route loses the family field or blocks preparation.
+At the inspected revision, `cascade-decision`'s `:else` branch forms its own
+target-policy field; that branch must be followed before diagnosing a no-choice
+stall. Likewise `:policy :family-census` is a census, not a second full field.
+The proposed repair below is provisional, not authorised by this test alone:
+carrying another target's missing squares into an already sealed choice could
+prepare unrelated work. Preserve selected identity and distinguish no-choice
+preparation from post-choice execution in any follow-up.
+
 ## Finding
 
 The ordinary strict-outer-selection path does **not** carry an outer

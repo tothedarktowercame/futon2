@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 38 P02a: the selected-carrier projection lacks the family carrier consumed
+by `selected-need`; the direct consumer works without an action. This constructed
+test does not cover the no-selected-policy fallback or full outer-selector route.
+Do not interpret selected-branch omission as proof that pre-choice preparation
+cannot run. See P02a evidence note and its coordinator qualification.
+
 Rows 47/49 update (P01, `ac4ca5bab` + `72352574b`): context retains a typed
 present/absent prospective-carry receipt; legacy ID/universe keys exist only when
 present. Capture accepts explicit absence, but checks receipt shape, action

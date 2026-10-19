@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 2 P02a evidence (`e935329a2` worker): actual selected-carrier projection omits
+the pre-choice family field, while direct no-action consumer input yields a square
+need. Review limits this result to the selected branch: the test stubs semantic
+verification and does not exercise outer selection or the no-choice fallback,
+which forms a separate field. This is not yet evidence of a no-choice deadlock
+or authority to prepare a different target after sealing a choice. See
+`p02a/square-carrier-path-2026-10-19.md` review qualification.
+
 Row 6 update (P01, `ac4ca5bab` + `72352574b`; worker `97eaef944` + `aad0ea61e`):
 missing prospective carry is a typed absent receipt, not a dispatch veto. Capture
 still binds selected/enacted action and pinned declaration bytes. Completion
