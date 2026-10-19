@@ -496,14 +496,23 @@
                                     :diagnosis-evidence-pin diagnosis-b}}
         transaction-a {:work-order {:injury-id "injury-a"
                                     :cause-record-pin source-a
-                                    :diagnosis-evidence-pin diagnosis-a}}
+                                    :diagnosis-evidence-pin diagnosis-a
+                                    :acceptance-test {:id "P17-absent-but-shaped"
+                                                      :command ["not-run"]
+                                                      :expected :unavailable}}}
         base-opts {:meta-injury-ledger-path ledger-path
                    :meta-repair-transaction-path (str dir "/transaction.edn")
                    :meta-repair-ports {:author (constantly nil)}
                    :acceptance-test {:id "P17-absent-but-shaped"
                                      :command ["not-run"] :expected :unavailable}
                    :diagnosis-evidence-pin diagnosis-a
-                   :meta-diagnosis-observation produced}
+                   :meta-diagnosis-observation produced
+                   :meta-acceptance-observation
+                   {:status :accepted :injury-id "injury-a"
+                    :source-record-pin source-a
+                    :diagnosis-evidence-pin diagnosis-a
+                    :acceptance-test {:id "P17-absent-but-shaped"
+                                      :command ["not-run"] :expected :unavailable}}}
         effects (atom 0)
         active-b {:status :computed :injuries {"injury-b" {:injury-id "injury-b"}}}
         run-route (fn [active transaction]

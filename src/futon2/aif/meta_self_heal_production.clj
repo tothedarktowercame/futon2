@@ -578,6 +578,32 @@
                    {:diagnosis-observation observation
                     :expected expected :actual actual}))))))
 
+(defn- acceptance-transaction-binding
+  "An admitted proposal cannot be repurposed by a later transaction.  The
+  coordinator receives only the concrete test, so bind it back to the retained
+  admission observation immediately before effect coordination."
+  [opts transaction]
+  (let [observation (:meta-acceptance-observation opts)
+        work-order (:work-order transaction)]
+    (cond
+      (= :present (:status observation)) {:status :valid :source :supplied}
+      (not= :accepted (:status observation))
+      (refusal :meta-self-heal/acceptance-transaction-unadmitted
+               {:acceptance-observation observation})
+      :else
+      (let [expected (select-keys observation [:injury-id :source-record-pin
+                                                :diagnosis-evidence-pin
+                                                :acceptance-test])
+            actual {:injury-id (:injury-id work-order)
+                    :source-record-pin (:cause-record-pin work-order)
+                    :diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
+                    :acceptance-test (:acceptance-test work-order)}]
+        (if (= expected actual)
+          {:status :valid :source :admitted-acceptance}
+          (refusal :meta-self-heal/acceptance-transaction-mismatch
+                   {:acceptance-observation observation
+                    :expected expected :actual actual}))))))
+
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
    This is the only path allowed to run ordinary machinery while an injury is
@@ -623,7 +649,11 @@
               (let [transaction (or (load-transaction transaction-path)
                                     (:transaction (coordinator/prepare
                                                    durable (work-order-options opts))))
-                    binding (diagnosis-transaction-binding opts transaction)]
+                    diagnosis-binding (diagnosis-transaction-binding opts transaction)
+                    acceptance-binding (when (= :valid (:status diagnosis-binding))
+                                         (acceptance-transaction-binding opts transaction))
+                    binding (or (when-not (= :valid (:status diagnosis-binding)) diagnosis-binding)
+                                acceptance-binding)]
                 (if-not (= :valid (:status binding))
                   (assoc binding :route :dedicated-meta-self-heal
                          :ordinary-selection-called? false)
