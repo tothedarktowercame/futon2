@@ -15,6 +15,8 @@
   "/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn")
 (def default-diagnosis-root
   "/home/joe/code/futon2/data/wm-meta-injuries/diagnoses")
+(def default-acceptance-root
+  "/home/joe/code/futon2/data/wm-meta-injuries/acceptances")
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 
 (defn- receipt-bytes [receipt]
@@ -159,6 +161,151 @@
                                     :request request :repair-claimed? false})
                     (assoc written :injury-id injury-id :request request
                            :repair-claimed? false)))))))))))
+
+(defn- acceptance-path [root receipt]
+  (str root "/acceptance-" (load-identity/sha256 (receipt-bytes receipt)) ".edn"))
+
+(defn- pin? [pin]
+  (and (map? pin) (string? (:path pin)) (seq (:path pin))
+       (string? (:sha256 pin)) (boolean (re-matches #"[0-9a-f]{64}" (:sha256 pin)))))
+
+(defn- read-diagnosis-receipt [diagnosis]
+  (let [pin (:diagnosis-evidence-pin diagnosis)]
+    (cond
+      (not (pin? pin))
+      (refusal :meta-self-heal/acceptance-diagnosis-pin-unavailable)
+
+      :else
+      (try
+        (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+          (cond
+            (not= (:sha256 pin) (load-identity/sha256 bytes))
+            (refusal :meta-self-heal/acceptance-diagnosis-pin-mismatch)
+
+            :else
+            (let [parsed (store/read-one-form (String. bytes "UTF-8"))
+                  receipt (:value parsed)
+                  expected (select-keys diagnosis [:injury-id :source-record-pin
+                                                   :diagnosis-evidence-pin])
+                  actual (select-keys receipt [:injury-id :source-record-pin])]
+              (cond
+                (not= :read (:status parsed))
+                (refusal :meta-self-heal/acceptance-diagnosis-unreadable)
+                (not= :wm/meta-diagnosis-receipt-v1 (:schema receipt))
+                (refusal :meta-self-heal/acceptance-diagnosis-unreadable)
+                (not= :available (:status receipt))
+                (refusal :meta-self-heal/acceptance-diagnosis-unavailable)
+                (not (map? (:diagnosis receipt)))
+                (refusal :meta-self-heal/acceptance-diagnosis-unavailable)
+                (not= (dissoc expected :diagnosis-evidence-pin) actual)
+                (refusal :meta-self-heal/acceptance-diagnosis-identity-mismatch)
+                :else {:status :available :receipt receipt :pin pin}))))
+        (catch Throwable _
+          (refusal :meta-self-heal/acceptance-diagnosis-unreadable))))))
+
+(defn- concrete-acceptance? [case]
+  (and (map? case) (string? (:id case)) (seq (:id case))
+       (vector? (:command case)) (seq (:command case))
+       (every? string? (:command case)) (contains? case :expected)))
+
+(defn persist-acceptance!
+  "Persist an immutable proposed specification.  It deliberately never runs
+  the command or labels the specification accepted/passing."
+  [path receipt]
+  (try
+    (let [target (.toPath (io/file path))
+          parent (or (.getParent target) (.toPath (io/file ".")))
+          bytes (receipt-bytes receipt)
+          _ (Files/createDirectories parent (make-array FileAttribute 0))
+          tmp (Files/createTempFile parent ".meta-acceptance-" ".edn"
+                                    (make-array FileAttribute 0))]
+      (try
+        (let [same? #(and (Files/isRegularFile target
+                                                 (make-array java.nio.file.LinkOption 0))
+                          (= (seq bytes) (seq (Files/readAllBytes target))))
+              persisted {:status :persisted :acceptance-evidence-pin
+                         {:path path :sha256 (load-identity/sha256 bytes)}}]
+          (cond
+            (same?) persisted
+            (Files/exists target (make-array java.nio.file.LinkOption 0))
+            (refusal :meta-self-heal/acceptance-path-conflict)
+            :else (do
+                    (Files/write tmp bytes (make-array java.nio.file.OpenOption 0))
+                    (try
+                      (Files/move tmp target (into-array StandardCopyOption
+                                                         [StandardCopyOption/ATOMIC_MOVE]))
+                      persisted
+                      (catch java.nio.file.FileAlreadyExistsException _
+                        (if (same?) persisted
+                            (refusal :meta-self-heal/acceptance-path-conflict)))))))
+        (finally (Files/deleteIfExists tmp))))
+    (catch Throwable _
+      (refusal :meta-self-heal/acceptance-persist-failed))))
+
+(defn produce-acceptance!
+  "Request and retain a concrete, unreviewed acceptance specification for one
+  verified diagnosis.  This is proposal production only: no returned command
+  is executed and no repair or passing result is claimed."
+  [opts diagnosis]
+  (if-let [acceptance (:acceptance-test opts)]
+    {:status :present :acceptance-test acceptance :source :supplied}
+    (let [diagnosis-read (read-diagnosis-receipt diagnosis)
+          accept (:meta-acceptance-fn opts)]
+      (cond
+        (not= :available (:status diagnosis-read))
+        (assoc diagnosis-read :repair-claimed? false)
+
+        (nil? accept)
+        (refusal :meta-self-heal/acceptance-port-unavailable
+                 {:injury-id (:injury-id diagnosis) :repair-claimed? false})
+
+        :else
+        (let [request {:schema :wm/meta-acceptance-request-v1
+                       :injury-id (:injury-id diagnosis)
+                       :source-record-pin (:source-record-pin diagnosis)
+                       :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                       :diagnosis (:diagnosis (:receipt diagnosis-read))
+                       :repair-claimed? false}
+              response (try (accept request)
+                            (catch Throwable _
+                              {:status :failed
+                               :reason :meta-self-heal/acceptance-port-threw}))]
+          (cond
+            (nil? response)
+            (refusal :meta-self-heal/acceptance-port-returned-nil
+                     {:request request :repair-claimed? false})
+            (not (map? response))
+            (refusal :meta-self-heal/acceptance-port-malformed
+                     {:request request :repair-claimed? false})
+            (not= :proposed (:status response))
+            (refusal :meta-self-heal/acceptance-unavailable
+                     {:request request :acceptance-status (:status response)
+                      :acceptance-reason (:reason response) :repair-claimed? false})
+            (not (concrete-acceptance? (:acceptance-test response)))
+            (refusal :meta-self-heal/acceptance-prose-or-malformed
+                     {:request request :repair-claimed? false})
+            :else
+            (let [receipt {:schema :wm/meta-acceptance-receipt-v1
+                           :status :proposed :review-status :unreviewed
+                           :result-status :not-run
+                           :injury-id (:injury-id diagnosis)
+                           :source-record-pin (:source-record-pin diagnosis)
+                           :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                           :acceptance-test (:acceptance-test response)
+                           :repair-claimed? false}
+                  written (persist-acceptance!
+                           (acceptance-path (or (:meta-acceptance-root opts)
+                                                default-acceptance-root) receipt)
+                           receipt)]
+              (if (= :persisted (:status written))
+                (merge written {:status :proposed :injury-id (:injury-id diagnosis)
+                                :source-record-pin (:source-record-pin diagnosis)
+                                :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
+                                :acceptance-test (:acceptance-test response)
+                                :review-status :unreviewed :result-status :not-run
+                                :repair-claimed? false})
+                (assoc written :injury-id (:injury-id diagnosis)
+                       :repair-claimed? false)))))))))
 (defn- persist-transaction! [path transaction]
   (try
     (if-not (= :valid (:status (coordinator/verify-transaction transaction)))

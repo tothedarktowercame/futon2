@@ -36,6 +36,15 @@
                        :state :open :cause-record-pin pin}]}
    :active {:injury-id "injury-recorded-l1" :state :open}})
 
+(defn- produced-diagnosis! [dir]
+  (let [pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)]
+    (production/produce-diagnosis!
+     {:meta-diagnosis-root (str dir "/diagnoses")
+      :meta-diagnosis-fn (constantly {:status :succeeded
+                                      :diagnosis {:class :configuration}})}
+     {:ledger ledger} active)))
+
 (deftest active-injury-preempts-ordinary-runtime-and-persists-every-boundary
   (let [env (harness/prepare-environment! (root))
         calls (atom {})
@@ -261,6 +270,112 @@
                 {} {:injury-id "injury-1"})]
     (is (= :present (:status result)))
     (is (= pin (:diagnosis-evidence-pin result)))))
+
+(deftest verified-diagnosis-produces-an-unreviewed-pinned-acceptance-specification
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        seen (atom nil)
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-acceptance-fn
+                 (fn [request]
+                   (reset! seen request)
+                   {:status :proposed
+                    :acceptance-test {:id "P17-reproduce-recorded-injury"
+                                      :command ["bb" "checks/reproduce.clj"]
+                                      :expected {:kind :configuration-injury}}})}
+                diagnosis)
+        bytes (java.nio.file.Files/readAllBytes
+               (.toPath (java.io.File. (get-in result [:acceptance-evidence-pin :path]))))
+        receipt (edn/read-string (String. bytes "UTF-8"))]
+    (is (= :proposed (:status result)))
+    (is (= (:diagnosis-evidence-pin diagnosis) (:diagnosis-evidence-pin @seen)))
+    (is (= (:source-record-pin diagnosis) (:source-record-pin @seen)))
+    (is (= :unreviewed (:review-status receipt)))
+    (is (= :not-run (:result-status receipt)))
+    (is (= (:acceptance-evidence-pin result)
+           {:path (get-in result [:acceptance-evidence-pin :path])
+            :sha256 (load-identity/sha256 bytes)}))
+    (is (false? (:repair-claimed? result)))))
+
+(deftest acceptance-rejects-prose-and-unverified-diagnosis-identities
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        calls (atom 0)
+        port (fn [_] (swap! calls inc) {:status :proposed :prose "fixed"})
+        missing (production/produce-acceptance!
+                 {:meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))} {})
+        failed (production/produce-acceptance!
+                {:meta-acceptance-fn (constantly {:status :failed :reason :offline})} diagnosis)
+        malformed (production/produce-acceptance!
+                   {:meta-acceptance-fn (constantly :not-a-map)} diagnosis)
+        prose (production/produce-acceptance! {:meta-acceptance-fn port} diagnosis)
+        changed-source (production/produce-acceptance!
+                        {:meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))}
+                        (assoc diagnosis :source-record-pin
+                               {:path "changed" :sha256 (apply str (repeat 64 "a"))}))
+        unreadable (production/produce-acceptance!
+                    {:meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))}
+                    (assoc diagnosis :diagnosis-evidence-pin
+                           {:path (str dir "/missing.edn")
+                            :sha256 (apply str (repeat 64 "a"))}))
+        drifted (production/produce-acceptance!
+                 {:meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))}
+                 (assoc diagnosis :diagnosis-evidence-pin
+                        (assoc (:diagnosis-evidence-pin diagnosis)
+                               :sha256 (apply str (repeat 64 "0")))))]
+    (is (= :meta-self-heal/acceptance-diagnosis-pin-unavailable (:reason missing)))
+    (is (= :meta-self-heal/acceptance-unavailable (:reason failed)))
+    (is (= :meta-self-heal/acceptance-port-malformed (:reason malformed)))
+    (is (= :meta-self-heal/acceptance-prose-or-malformed (:reason prose)))
+    (is (= :meta-self-heal/acceptance-diagnosis-identity-mismatch (:reason changed-source)))
+    (is (= :meta-self-heal/acceptance-diagnosis-unreadable (:reason unreadable)))
+    (is (= :meta-self-heal/acceptance-diagnosis-pin-mismatch (:reason drifted)))
+    (is (= 1 @calls))
+    (is (every? nil? (map :acceptance-evidence-pin
+                          [missing failed malformed prose changed-source unreadable drifted])))))
+
+(deftest acceptance-persistence-is-immutable-and-failure-never-claims-a-pin
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        calls (atom 0)
+        opts {:meta-acceptance-root (str dir "/acceptances")
+              :meta-acceptance-fn
+              (fn [_] {:status :proposed
+                         :acceptance-test {:id (str "P17-" (swap! calls inc))
+                                           :command ["bb" "checks/reproduce.clj"]
+                                           :expected :configuration}})}
+        first-result (production/produce-acceptance! opts diagnosis)
+        first-bytes (java.nio.file.Files/readAllBytes
+                     (.toPath (java.io.File.
+                               (get-in first-result [:acceptance-evidence-pin :path]))))
+        second-result (production/produce-acceptance! opts diagnosis)
+        failed (with-redefs [production/persist-acceptance!
+                             (fn [& _] {:status :refused
+                                        :reason :meta-self-heal/acceptance-persist-failed})]
+                 (production/produce-acceptance! opts diagnosis))]
+    (is (not= (get-in first-result [:acceptance-evidence-pin :path])
+              (get-in second-result [:acceptance-evidence-pin :path])))
+    (is (= (get-in first-result [:acceptance-evidence-pin :sha256])
+           (load-identity/sha256
+            (java.nio.file.Files/readAllBytes
+             (.toPath (java.io.File.
+                       (get-in first-result [:acceptance-evidence-pin :path])))))))
+    (is (= (seq first-bytes)
+           (seq (java.nio.file.Files/readAllBytes
+                 (.toPath (java.io.File.
+                           (get-in first-result [:acceptance-evidence-pin :path])))))))
+    (is (= :meta-self-heal/acceptance-persist-failed (:reason failed)))
+    (is (nil? (:acceptance-evidence-pin failed)))))
+
+(deftest supplied-acceptance-remains-a-non-invoking-compatibility-path
+  (let [acceptance {:id "supplied" :command ["not-run"] :expected :unknown}
+        result (production/produce-acceptance!
+                {:acceptance-test acceptance
+                 :meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))}
+                {})]
+    (is (= :present (:status result)))
+    (is (= acceptance (:acceptance-test result)))))
 
 (deftest runtime-prepares-and-threads-only-a-durable-diagnosis-pin
   (let [dir (root)
