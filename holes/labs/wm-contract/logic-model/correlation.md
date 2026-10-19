@@ -2,6 +2,27 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P32 method/rows 1/2/6 (`381c62a44` through `71c83c4e8`, reviewed worker tip
+`16a960f97`): advisory executable facts live in `p32/boundary-facts.edn` with
+structured repository/path/commit/locator pins. Queries join only within explicit
+historical/current scenarios (which may span source commits). This is not
+`correlate.py`, whole-program extraction, or a runtime/launch gate.
+
+- Row 1: historical chosen-action reading preparation is separate from current
+  refused-selection preparation feedback; the latter is not a blocking cycle.
+- Row 2 correction: at `3352dc1b`, phase 10 receives `judgement0-reading` and
+  `selected-need` extracts the first missing-square family from its decision
+  certificate without requiring a chosen action. P32 represents a family-failure
+  carrier and first-family availability, not a blocking selected-action cycle.
+  Population coverage and upstream carrier retention need separate evidence.
+- Row 6: selected retention at `149dc9b30` is distinct from historical abstained
+  loss and repaired abstained retention at worker `6fc4fadef` (main `b4359d675`).
+  Prospective-carry retention remains explicitly unknown in the static facts.
+
+Worker focused namespace: 7 tests/14 assertions passed, including actual
+`selected-need` on a constructed no-action judgement. Reviewer checked source
+pins/caller chain and diff whitespace. No live-route observation is claimed.
+
 Rows 3/9 update (P03): `3c4b9da4a` (reviewed worker `d1c2717c5`) isolates missing, unreadable, and drifted manifest records as typed exclusions. Verified usable neighbours proceed, retaining parsed records for provider projection without a second filesystem read. The constructed valid/missing/drifted case yields one learning row and two exclusions. Worker namespace: 9 tests/62 assertions passed; reviewer inspected the read/verify/projection chain and passed diff whitespace check. No serving-JVM or live-click observation is claimed; later score/objective boundaries remain separate packets.
 
 Rows 1/6/10 update (P00): `b4359d675` (reviewed worker commit `6fc4fadef`) retains existing abstained `:reading-frontier` and `:loop-node-exercise` in the terminal decision certificate, with or without Q2 construction. Selected retention remains unchanged. This supersedes row 6's pending terminal-retention repair for these carriers only; missing upstream measurements are not reconstructed. Worker focused written-record test: 1 test/11 assertions passed, synthetic counts with L1's refusal kind pinned. No post-fix click is claimed.

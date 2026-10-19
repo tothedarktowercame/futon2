@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P4 clarification from P32 (`71c83c4e8`): occurrence-square authoring at `3352dc1b`
+accepts a first missing-square family failure without a chosen action. The static
+model represents first-family availability, not all-target coverage. Whether the
+pre-choice route delivers that family carrier remains a separate interface check.
+
 P24 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): written run records emit existing abstained frontier and loop-node measurements from the sorry-cell certificate even without Q2 construction. No default counts or selected action are manufactured. Worker regression passed for both Q2 cases; absent upstream data remains absent.
 
 The original audit below remains a historical reading at its stated revision.

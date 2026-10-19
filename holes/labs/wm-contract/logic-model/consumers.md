@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 26/38 clarification from P32 (`71c83c4e8`): square authoring reads
+missing-square family failures from the decision certificate, not a chosen
+action. At `3352dc1b`, runner `occurrence-square-authoring-step:2159-2181` checks
+that need; phase 10 passes `judgement0-reading`. Upstream carrier retention must
+be traced separately; phase order and function naming do not prove a choice veto.
+
 Rows 31/32 update (P03, `3c4b9da4a`, reviewed worker `d1c2717c5`): dataset read partitions records once. Missing/unreadable/drifted records retain source pins and reason counts as exclusions rather than refusing verified neighbours. `terminal-record` projects the retained `:verified-record`; it no longer rereads manifest paths. Identity/chronology checks still apply to learning rows. No serving probe or live click is claimed.
 
 Row 54 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): terminal projection retains existing abstained `:reading-frontier` and `:loop-node-exercise` alongside Q2 carriers. Its guard no longer requires `:q2-construction`. Selected-decision projection is unchanged. Focused synthetic written-record regression passed; no live-click verification claimed.
