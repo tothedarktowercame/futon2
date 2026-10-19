@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P25 / A12-A13 / R7 (`e9ea25f79`, `p25-precision-mechanisms.md`): channel Pi
+weights errors in R3; declared fixed zeta tempers token likelihood (identity
+path explicitly fixed-vacuous); identity-bound reading beta feeds the policy
+posterior. The inspected consumers do not make channel Pi a producer of beta.
+One-registry-everywhere paper wording is refuted, not a mandate to connect
+these quantities. A12's validation status is unchanged; proposed paper prose
+is unapplied and no current live/calibration claim follows from this reading.
+
+
 P26 / A16-R4 (`0a6383ef5`, `p26-model-process.md`): direct predictive consumers
 are EFE scoring and cascade-lane R4; external author dispatch and independent
 repository artifact binding are a distinct generative process, not a common
