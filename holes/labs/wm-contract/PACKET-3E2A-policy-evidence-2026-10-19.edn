@@ -1,0 +1,10 @@
+{:schema :wm/packet-3e2a-receipt-v1
+ :output-schema :wm/outer-policy-evidence-v1
+ :equation "E_y KL(Dir(alpha+e_y)||Dir(alpha)) = sum_i p_i*(digamma(alpha_i+1)-log(p_i))-digamma(alpha_0+1)"
+ :units :nats
+ :join-key :canonical-executable-cascade-digest
+ :history-admission {:terminal-cause :task-outcome :digest :exact}
+ :next-insertion [:wm/outer-policy-evidence-v1 :entries]
+ :selection-performed false
+ :runtime-wired false
+ :live-click-launched false}

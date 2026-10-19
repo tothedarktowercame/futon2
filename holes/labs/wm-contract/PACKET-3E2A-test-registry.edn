@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/worktrees/futon2-outer-policy-g-3e2"
+ :code-paths ["src/futon2/aif/parameter_novelty.clj"
+              "src/futon2/aif/outer_policy_evidence.clj"
+              "src/futon2/aif/meta_outcome_dataset.clj"]
+ :test-paths ["test/futon2/aif/outer_policy_evidence_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.outer-policy-evidence-test"]
+ :author "codex-6" :origin "Packet 3E2a digest-keyed outer policy evidence"
+ :artifact-dir "/tmp/packet-3e2a-test-registry"
+ :agency-url "http://localhost:7070"}

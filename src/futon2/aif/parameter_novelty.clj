@@ -12,21 +12,36 @@
 (load-identity/register! *ns* *file*)
 (defn absent [reason] {:status :absent :reason reason})
 (defn- positive-finite? [x] (and (number? x) (Double/isFinite (double x)) (pos? x)))
-(defn- digamma [x]
+(defn digamma [x]
   (loop [x (double x) correction 0.0]
     (if (< x 12.0) (recur (inc x) (- correction (/ 1.0 x)))
       (let [z (/ 1.0 (* x x))]
         (+ correction (Math/log x) (- (/ 0.5 x))
            (* z (+ (- (/ 1.0 12)) (* z (+ (/ 1.0 120) (* z (- (/ 1.0 252))))))))))))
+(defn categorical-information
+  "Expected KL(Dir(alpha+e_y) || Dir(alpha)) for one categorical draw.
+  ALPHA is ordered exactly as VOCABULARY. Returns natural-log units."
+  [vocabulary alpha]
+  (if-not (and (vector? vocabulary) (seq vocabulary)
+               (= (count vocabulary) (count (distinct vocabulary)) (count alpha))
+               (every? positive-finite? alpha)
+               (Double/isFinite (double (reduce + alpha))))
+    (absent :invalid-categorical-prior)
+    (let [a0 (double (reduce + alpha))
+          nats (- (reduce + (map (fn [a]
+                                   (let [p (/ (double a) a0)]
+                                     (* p (- (digamma (inc a)) (Math/log p)))))
+                                 alpha))
+                  (digamma (inc a0)))]
+      {:status :computed :units :nats :vocabulary vocabulary
+       :nats (max 0.0 nats)})))
 (defn beta-information
   "Expected posterior/prior KL for ONE perfectly observed Bernoulli endpoint."
   [a b]
   (if-not (and (positive-finite? a) (positive-finite? b) (Double/isFinite (double (+ a b))))
     (absent :invalid-beta-prior)
-    (let [n (+ a b) p (/ (double a) n) q (/ (double b) n)]
-      {:status :computed :nats (max 0.0 (+ (* p (- (digamma (inc a)) (Math/log p)))
-                                         (* q (- (digamma (inc b)) (Math/log q)))
-                                         (- (digamma (inc n)))))})))
+    (select-keys (categorical-information [:success :failure] [a b])
+                 [:status :nats])))
 
 (defn read-ledger
   "Read one byte snapshot; no creation, locks, repair or writes. Partial EDN is held."
