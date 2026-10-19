@@ -971,6 +971,51 @@
           (sort-by :opened-at)
           vec))))
 
+(defn lifecycle-census
+  "Read-only partition of canonical repair findings by their present lifecycle.
+  Immutable finding bytes are never rewritten: a later resolution or dismissal
+  closes its finding even when that finding still records :repair/status :open.
+  Legacy :system-actuation-failure uses the same normalization as
+  `open-obligations`."
+  ([] (lifecycle-census default-root))
+  ([root]
+   (let [findings (records (io/file root "findings"))
+         implementations (indexed-records root "implementations")
+         verifications (verified-admissions root)
+         resolutions (indexed-records root "resolutions")
+         dismissals (indexed-records root "dismissals")
+         partitioned
+         (reduce (fn [buckets finding]
+                   (let [id (:repair/id finding)
+                         repair-class (if (= :system-actuation-failure
+                                             (:repair/class finding))
+                                        :machine-failure
+                                        (:repair/class finding))
+                         bucket (cond
+                                  (or (contains? resolutions id)
+                                      (contains? dismissals id)) :closed
+                                  (= :environmental-hold repair-class) :environmental-hold
+                                  (or (contains? implementations id)
+                                      (contains? verifications id)) :awaiting-validation
+                                  :else :actionable-open)]
+                     (update buckets bucket conj id)))
+                 {:actionable-open []
+                  :awaiting-validation []
+                  :environmental-hold []
+                  :closed []}
+                 findings)
+         bucket-receipts
+         (into {}
+               (map (fn [[bucket ids]]
+                      [bucket {:ids (vec (sort ids)) :count (count ids)}]))
+               partitioned)
+         finding-count (count findings)
+         bucket-count (reduce + (map :count (vals bucket-receipts)))]
+     (assoc bucket-receipts
+            :schema :wm/repair-obligation-lifecycle-census-v1
+            :finding-count finding-count
+            :reconciled? (= finding-count bucket-count)))))
+
 (defn- dismissal-refuse! [reason data]
   (throw (ex-info "Unexecuted repair finding dismissal refused"
                   (assoc data :repair-dismissal/refusal reason))))

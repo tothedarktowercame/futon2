@@ -30,6 +30,44 @@
    :queue-path (str (io/file root "ticket-publication" "resources" "wm"
                             "ticket-queue.edn"))})
 
+(deftest lifecycle-census-partitions-canonical-immutable-records
+  (let [root (temp-root)
+        finding (fn [id repair-class]
+                  {:repair/id id
+                   :repair/schema-version 3
+                   :repair/status :open
+                   :repair/class repair-class
+                   :attempt-id (str "attempt-" id)
+                   :opened-at "2026-10-19T00:00:00Z"})]
+    ;; Use the namespace's real EDN store layout/readers.  The fourth finding's
+    ;; immutable bytes deliberately remain :open; its later resolution is the
+    ;; authoritative lifecycle fact.
+    (write-record! root "findings" (finding "finding-actionable" :machine-failure))
+    (write-record! root "findings" (finding "finding-awaiting" :machine-failure))
+    (write-record! root "implementations"
+                   {:repair/id "finding-awaiting"
+                    :repair/status :awaiting-validation
+                    :implemented-at "2026-10-19T00:01:00Z"})
+    (write-record! root "findings" (finding "finding-environment" :environmental-hold))
+    (write-record! root "findings" (finding "finding-closed" :machine-failure))
+    (write-record! root "resolutions"
+                   {:repair/id "finding-closed"
+                    :repair/status :resolved
+                    :resolved-at "2026-10-19T00:02:00Z"})
+    (let [census (repair/lifecycle-census root)
+          buckets (select-keys census [:actionable-open :awaiting-validation
+                                       :environmental-hold :closed])
+          ids (mapcat :ids (vals buckets))]
+      (is (= :wm/repair-obligation-lifecycle-census-v1 (:schema census)))
+      (is (= 4 (:finding-count census)))
+      (is (= ["finding-actionable"] (get-in census [:actionable-open :ids])))
+      (is (= ["finding-awaiting"] (get-in census [:awaiting-validation :ids])))
+      (is (= ["finding-environment"] (get-in census [:environmental-hold :ids])))
+      (is (= ["finding-closed"] (get-in census [:closed :ids])))
+      (is (= (sort ids) (sort (distinct ids))))
+      (is (= (:finding-count census) (reduce + (map :count (vals buckets)))))
+      (is (:reconciled? census)))))
+
 (deftest automatic-finding-retains-known-selection-context
   (let [root (temp-root)
         ask {:target "M-self-documenting-stack" :outcome :published
