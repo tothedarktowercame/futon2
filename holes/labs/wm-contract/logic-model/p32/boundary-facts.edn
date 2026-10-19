@@ -33,15 +33,15 @@
                :locator {:symbol "retained-outer-selector" :line 205}}}
 
  {:id :c2-square-selection :scenario :current :kind :consumer :correlation-row 2
-  :input :occurrence-squares :produces :chosen-action :phase 8
+  :input :occurrence-squares :produces :family-failure-carrier :phase 8
   :scope :targets-with-readings :required? true :absence-disposition :family-failure
   :status :present
   :source-pin {:repository "futon2" :path "src/futon2/aif/wm/family_selection.clj"
                :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"
                :locator {:symbol "families-for-field" :line 152}}}
  {:id :p2-square-authoring :scenario :current :kind :producer :correlation-row 2
-  :output :occurrence-squares :requires [:chosen-action]
-  :selection-prerequisite :chosen-action :phase 10 :scope :selected-target
+  :output :occurrence-squares :requires [:family-failure-carrier]
+  :selection-prerequisite :family-failure-carrier :phase 10 :scope :first-family-failure
   :absence-disposition :record-refusal :status :present
   :source-pin {:repository "futon2" :path "src/futon2/aif/occurrence_square_authoring.clj"
                :commit "3352dc1bf6d6dab931a6d9cbbee3a03b02227e24"

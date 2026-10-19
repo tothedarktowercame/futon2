@@ -1,5 +1,6 @@
 (ns futon2.aif.wm.boundary-dependency-model-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.wm.boundary-dependency-model :as model]))
 
 (def facts-path "holes/labs/wm-contract/logic-model/p32/boundary-facts.edn")
@@ -15,7 +16,7 @@
         cycles (model/selection-preparation-cycles facts)
         feedback (model/measured-preparation-feedback facts)]
     (is (= #{[:c1-reading-selection-historical :p1-reading-preparation-historical]
-             [:c2-square-selection :p2-square-authoring]}
+             }
            (set (map (juxt :consumer :producer) cycles))))
     (is (every? #(and (= :present (:status %))
                       (= 2 (count (:source-pins %)))) cycles))
@@ -73,6 +74,18 @@
     (is (= :current (:scenario current)))
     (is (= [] (:producer-ids current)))
     (is (= #{[:c1-reading-selection-historical :p1-reading-preparation-historical]
-             [:c2-square-selection :p2-square-authoring]}
+             }
            (set (map (juxt :consumer :producer)
                      (model/selection-preparation-cycles without-current)))))))
+
+(deftest square-need-is-extracted-from-a-family-failure-without-an-action
+  (is (= {:target "T-no-action"
+          :excerpt-digest "excerpt-pin"
+          :analysis-digest "analysis-pin"}
+         (square-authoring/selected-need
+          {:decision {:selection-certificate
+                      {:target-policy-field
+                       {:families [{:target-id "T-no-action"
+                                    :failures [{:kind :occurrence-squares-not-authored
+                                                :excerpt-digest "excerpt-pin"
+                                                :analysis-digest "analysis-pin"}]}]}}}}))))
