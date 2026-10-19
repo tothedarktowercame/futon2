@@ -113,11 +113,15 @@
             weighted-resource-cost (* resource-cost
                                       (double (or (:resource-weight controller) 0.0)))
             canonical-g (+ risk ambiguity (- eig))
-            normalized-g (-> (/ canonical-g 2.0)
-                             (+ weighted-resource-cost)
-                             (+ cadence-cost)
-                             (- continuation-credit)
-                             (max 0.0) (min 1.0))]
+            ;; This is the former injury-comparison value.  It remains visible
+            ;; only to make the unresolved conversion auditable: it is neither
+            ;; canonical G nor an authorised policy prior.
+            legacy-clamped-comparison
+            (-> (/ canonical-g 2.0)
+                (+ weighted-resource-cost)
+                (+ cadence-cost)
+                (- continuation-credit)
+                (max 0.0) (min 1.0))]
         {:schema schema :status :scored :target target
          :prediction prediction
          :preference-distribution preference-distribution
@@ -147,7 +151,20 @@
                  :resource-history (or resource-history
                                        {:status :absent :reason :target-unobserved})
                  :resource-cost resource-cost
-                 :weighted-resource-cost weighted-resource-cost}
-         :g normalized-g
+                 :weighted-resource-cost weighted-resource-cost
+                 :engineering-influence
+                 {:resource-cost weighted-resource-cost
+                  :cadence-cost cadence-cost
+                  :continuation-credit continuation-credit
+                  :status :declared-not-converted-to-policy-prior}
+                 :legacy-comparison
+                 {:status :unresolved
+                  :reason :policy-prior-conversion-not-declared
+                  :value legacy-clamped-comparison
+                  :former-combination
+                  :clamped-canonical-g-plus-engineering}}
+         ;; R5's canonical quantity; callers must not read a legacy bounded
+         ;; comparison receipt as a replacement G.
+         :g canonical-g
          :belief-source-pin (:source-pin belief)
          :preference-authority preference-authority}))))

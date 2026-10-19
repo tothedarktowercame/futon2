@@ -717,22 +717,15 @@
                     :preference-authority (:preference-authority outer-learning)
                     :controller (:controller outer-learning)}))
                 candidates))
-        shadow-candidates
-        (when learning-scores
-          (mapv (fn [candidate score]
-                  (if (= :scored (:status score))
-                    (assoc-in candidate [:channels :outer-target-outcome-cost]
-                              {:value (:g score) :freshness :current
-                               :source (:belief-source-pin score)
-                               :observation score})
-                    candidate))
-                candidates learning-scores))
+        ;; The injury comparator accepts bounded current G channels.  No
+        ;; authority currently maps the score's engineering terms into a
+        ;; policy prior, so attaching the old clamped composite here would
+        ;; relabel engineering influence as canonical G.  Keep scores in the
+        ;; receipt as advisory instead of inventing that conversion.
+        shadow-candidates (when learning-scores candidates)
         shadow-selection
         (when shadow-candidates
-          (meta/select {:snapshot snapshot :candidates shadow-candidates
-                        :comparison :complete-union
-                        :missing-channel-cost
-                        (get-in outer-learning [:controller :missing-channel-cost])}))
+          selection)
         effective-selection
         (if (and injury? (= :live (:mode outer-learning)))
           (or shadow-selection
@@ -849,7 +842,14 @@
         receipt (assoc receipt :outer-learning
                        (cond-> certificate
                          learning-scores (assoc :scores learning-scores
-                                                :selection shadow-selection)))]
+                                                :selection shadow-selection
+                                                :injury-score-comparison
+                                                {:status :advisory
+                                                 :reason :policy-prior-conversion-unresolved
+                                                 :selection-basis :machine-injury-repair-cost
+                                                 :canonical-gs (mapv #(when (= :scored (:status %))
+                                                                        (:g %))
+                                                                     learning-scores)})))]
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot

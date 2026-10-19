@@ -15,6 +15,7 @@
         dataset {:status :produced :source-pin {:path "runs" :sha256 "abc"}
                  :rows [{:run/id "r1" :click/id "c1"
                          :task {:id "M-a"}
+                         :terminal-cause {:class :task-outcome}
                          :terminal-outcome {:class :grounded-progress}
                          :selected-want-effects
                          {:status :present
@@ -45,6 +46,7 @@
                  {:prior (belief/prior 1)
                   :dataset {:status :produced :source-pin {:path "runs" :sha256 "abc"}
                             :rows [{:run/id "r" :click/id "c" :task {:id "M-a"}
+                                    :terminal-cause {:class :task-outcome}
                                     :terminal-outcome {:class :closure}
                                     :selected-want-effects {:status :absent}
                                     :collateral-progress {:status :absent}
@@ -64,4 +66,38 @@
     (is (= 0.25 (get-in without [:terms :recent-selection-opportunity-cost])))
     (is (= 0.0 (get-in with [:terms :recent-selection-opportunity-cost])))
     (is (= 0.35 (get-in with [:terms :continuation-credit])))
-    (is (< (:g with) (:g without)))))
+    (is (= (:g with) (:g without))
+        "continuation is declared engineering influence, not canonical G")
+    (is (< (get-in with [:terms :legacy-comparison :value])
+           (get-in without [:terms :legacy-comparison :value])))))
+
+(deftest resource-influence-does-not-relabel-canonical-g-in-the-injury-receipt
+  (let [alpha (:alpha (belief/prior 1))
+        base-belief {:status :produced
+                     :outcome-vocabulary belief/outcome-vocabulary
+                     :prior {:alpha alpha}
+                     :source-pin {:path "fixture" :sha256 "abc"}}
+        low (assoc-in base-belief [:targets "A-heal"]
+                      {:alpha alpha
+                       :resource-use {:wall-clock-ms 75
+                                      :elapsed-observations 1
+                                      :tokens 0 :token-observations 0}})
+        high (assoc-in base-belief [:targets "A-heal"]
+                       {:alpha alpha
+                        :resource-use {:wall-clock-ms 100
+                                       :elapsed-observations 1
+                                       :tokens 0 :token-observations 0}})
+        input {:target "A-heal" :preference-costs costs
+               :preference-transform transform :preference-authority :operator
+               :controller {:wall-clock-budget-ms 100 :token-budget 1
+                            :resource-weight 2.0}}
+        low-score (score/score (assoc input :belief low))
+        high-score (score/score (assoc input :belief high))]
+    (is (= (:g low-score) (:g high-score))
+        "hold canonical G fixed while the observed resource prior changes")
+    (is (< (get-in low-score [:terms :weighted-resource-cost])
+           (get-in high-score [:terms :weighted-resource-cost])))
+    (is (= 1.0 (get-in low-score [:terms :legacy-comparison :value])))
+    (is (= 1.0 (get-in high-score [:terms :legacy-comparison :value])))
+    (is (= :policy-prior-conversion-not-declared
+           (get-in high-score [:terms :legacy-comparison :reason])))))
