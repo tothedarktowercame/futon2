@@ -24,6 +24,12 @@
                 :opened-at "2026-09-21T00:56:55Z"
                 :discharge-contract repair/review-failure-discharge-contract} changes)))
 
+(defn record! [root directory record]
+  (let [file (io/file root directory (str (:repair/id record) ".edn"))]
+    (io/make-parents file)
+    (spit file (pr-str record))
+    record))
+
 (deftest real-store-finding-yields-evidence-only-t-proposal
   (with-store
     (fn [root]
@@ -51,7 +57,8 @@
       (finding! root "repair-dismiss"
                 {:failure-data {:author-job {:execution {:executed false :tool-events 0 :command-events 0}}}})
       (let [resolvable (finding! root "repair-resolve" {:repair-class :environmental-hold})]
-        (is (= 2 (count (:proposals (supply/supply root)))))
+        ;; Environmental hold is lifecycle-visible but never actionable.
+        (is (= 1 (count (:proposals (supply/supply root)))))
         (repair/dismiss-unexecuted! root "repair-dismiss"
                                     {:authority "constructed-test-disposition" :reason :never-executed :actor "test"})
         (repair/resolve! root resolvable
@@ -68,7 +75,7 @@
         (let [r (supply/supply root)]
           (is (empty? (:proposals r)))
           (is (empty? (:declines r)))
-          (is (empty? (get-in r [:repair-scan :open-finding-ids]))))))))
+          (is (empty? (get-in r [:repair-scan :actionable-ids]))))))))
 
 (deftest schema-less-or-malformed-contract-is-a-decline-not-invented-acceptance
   (with-store
@@ -93,10 +100,57 @@
                       :artifact-shape :code-commit}]
         (finding! root "repair-environment" {:repair-class :environmental-hold :target nil
                                             :backtrace nil :discharge-contract contract})
-        (let [p (first (:proposals (supply/supply root)))]
-          (is (= contract (get-in p [:evidence :discharge-contract])))
-          (is (nil? (get-in p [:evidence :target])))
-          (is (= {:status :absent :reason :not-retained} (get-in p [:evidence :backtrace]))))))))
+        (let [r (supply/supply root)]
+          (is (empty? (:proposals r)))
+          (is (= ["repair-environment"]
+                 (get-in r [:repair-scan :lifecycle-census
+                            :environmental-hold :ids]))))))))
+
+(deftest real-store-lifecycle-census-reconciles-actionable-proposed-and-blocked
+  (with-store
+    (fn [root]
+      ;; All records use the canonical immutable filesystem layout and the
+      ;; production readers; no lifecycle/proposal reader is redefined.
+      (finding! root "actionable-complete")
+      (finding! root "actionable-blocked" {:discharge-contract nil})
+      (finding! root "awaiting-implementation")
+      (record! root "implementations"
+               {:repair/id "awaiting-implementation"
+                :repair/status :awaiting-validation
+                :implemented-at "2026-10-19T01:00:00Z"})
+      (finding! root "environmental-hold" {:repair-class :environmental-hold})
+      (finding! root "later-resolved")
+      (record! root "resolutions"
+               {:repair/id "later-resolved" :repair/status :resolved
+                :resolved-at "2026-10-19T02:00:00Z"})
+      (let [result (supply/supply root)
+            scan (:repair-scan result)
+            blocked (first (:blocked result))]
+        (is (= ["actionable-blocked" "actionable-complete"]
+               (:actionable-ids scan)))
+        (is (= ["actionable-complete"] (:proposal-ids scan)))
+        (is (= ["actionable-blocked"] (:blocked-ids scan)))
+        (is (= :repair-finding-evidence-missing (:reason blocked)))
+        (is (= [:discharge-contract [:discharge-contract :requires]
+                [:discharge-contract :artifact-shape]]
+               (:missing-evidence blocked)))
+        (is (string? (get-in blocked [:finding-source :path])))
+        (is (= 64 (count (get-in blocked [:finding-source :sha256]))))
+        (is (= ["awaiting-implementation"]
+               (get-in scan [:lifecycle-census :awaiting-validation :ids])))
+        (is (= ["environmental-hold"]
+               (get-in scan [:lifecycle-census :environmental-hold :ids])))
+        (is (= ["later-resolved"]
+               (get-in scan [:lifecycle-census :closed :ids])))
+        (is (= {:actionable-count 2 :proposed-count 1 :blocked-count 1
+                :reconciled-ids ["actionable-blocked" "actionable-complete"]
+                :reconciled? true}
+               (:actionable-reconciliation scan)))
+        (is (= :wm/repair-obligation-lifecycle-census-v1
+               (:lifecycle-census-schema scan)))
+        (is (= :repair-obligation/lifecycle-census
+               (:lifecycle-census-authority scan)))
+        (is (= 64 (count (get-in scan [:lifecycle-census-pin :sha256]))))))))
 
 (deftest no-committed-closure-witness-means-no-executable-repair
   (with-store

@@ -68,15 +68,47 @@
                     :evidence trail}}))))
 
 (defn supply
-  "Fresh read each tick: dispositions are never cached as open proposals.
-   Resolution/dismissal filtering delegates to the real repair-store reader."
+  "Fresh read each tick.  Only lifecycle-qualified actionable IDs may enter
+   proposal construction; every such ID reconciles to a proposal or a pinned
+   blocked record."
   ([] (supply repair/default-root))
   ([root]
-   (let [open (repair/open-obligations root)
-         entries (mapv #(finding-proposal root (:repair/id %)) open)]
-     {:proposals (vec (keep :proposal entries))
-      :declines (vec (keep :decline entries))
-      :repair-scan {:root (.getCanonicalPath (io/file root))
-                    :read-at (str (Instant/now))
-                    :open-finding-ids (mapv :repair/id open)
-                    :openness-authority :repair-obligation/open-obligations}})))
+   (let [census (repair/lifecycle-census root)
+         actionable-ids (get-in census [:actionable-open :ids])
+         entries (mapv #(finding-proposal root %) actionable-ids)
+         proposals (vec (keep :proposal entries))
+         blocked (vec (keep :decline entries))
+         proposal-ids (mapv :repair/id proposals)
+         blocked-ids (mapv :repair/id blocked)
+         reconciled-ids (vec (sort (concat proposal-ids blocked-ids)))
+         buckets (into {}
+                       (map (fn [bucket] [bucket (get census bucket)]))
+                       [:actionable-open :awaiting-validation
+                        :environmental-hold :closed])]
+     {:proposals proposals
+      ;; Preserve the established caller key while naming its lifecycle role.
+      :declines blocked
+      :blocked blocked
+      :repair-scan
+      {:root (.getCanonicalPath (io/file root))
+       :read-at (str (Instant/now))
+       :lifecycle-census buckets
+       :lifecycle-census-schema (:schema census)
+       :lifecycle-census-authority :repair-obligation/lifecycle-census
+       :lifecycle-census-pin
+       {:path "repair-obligation/lifecycle-census"
+        :sha256 (evidence/value-digest census)}
+       :finding-count (:finding-count census)
+       :lifecycle-reconciled? (:reconciled? census)
+       :actionable-ids actionable-ids
+       :proposal-ids proposal-ids
+       :blocked-ids blocked-ids
+       :blocked-reasons
+       (mapv #(select-keys % [:repair/id :reason :missing-evidence
+                              :finding-source]) blocked)
+       :actionable-reconciliation
+       {:actionable-count (count actionable-ids)
+        :proposed-count (count proposal-ids)
+        :blocked-count (count blocked-ids)
+        :reconciled-ids reconciled-ids
+        :reconciled? (= (vec (sort actionable-ids)) reconciled-ids)}}})))
