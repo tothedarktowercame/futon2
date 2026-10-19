@@ -523,6 +523,7 @@
         {ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations registry-tasks)
         snapshot (fetch-snapshot)
+        snapshot-verification (meta/validate-snapshot snapshot)
         standing (into {} (map (fn [task]
                                  [(:id task)
                                   (registry/mission-standing-observation task)]))
@@ -583,13 +584,21 @@
                                     :graph-source (:graph-source snapshot)})))
         injury? (boolean (seq algorithm-tasks))
         candidates (if injury? (algorithm-candidates algorithm-tasks) [])
-        policy-field (when-not injury?
+        policy-field (when (and (not injury?)
+                                (= :verified (:status snapshot-verification))
+                                (map? policy-field-config))
                        (policy-field-fn on-map policy-field-config))
         incomplete (when policy-field
                      (filterv #(not= :computed (:status %)) (:families policy-field)))
-        selection (if injury?
+        selection (cond
+                    (not= :verified (:status snapshot-verification))
+                    snapshot-verification
+                    injury?
                     (meta/select {:snapshot snapshot :candidates candidates})
+                    (not (map? policy-field-config))
                     {:schema meta/schema :status :refused
+                     :reason :policy-field-config-required}
+                    :else {:schema meta/schema :status :refused
                      :reason (if (seq incomplete)
                                :incomplete-policy-menu-coverage
                                :policy-selection-port-required)})
@@ -642,6 +651,7 @@
                       (assoc :policy {:kind :cascade-live-policy-menu-v1
                                       :branch :ordinary-cascade-policy
                                       :status (:reason selection)
+                                      :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
                                       :family-census (family-selection/field-census policy-field)
                                       :missing-targets (mapv :target-id incomplete)
@@ -754,9 +764,11 @@
 (defn preview-live
   "Read the authoritative registries once and produce the same receipt used by
   the production selector. This is the read-only Arxana/API projection."
-  []
-  (select-live {:tasks (live-registry-tasks) :retain-manifest? true
-                :outer-learning (outer-learning-runtime/load-shadow)}))
+  ([] (preview-live nil))
+  ([policy-field-config]
+   (select-live {:tasks (live-registry-tasks) :retain-manifest? true
+                 :policy-field-config policy-field-config
+                 :outer-learning (outer-learning-runtime/load-shadow)})))
 
 (defn preview-live-browser
   "Compute the canonical live selection and return its bounded UI projection."

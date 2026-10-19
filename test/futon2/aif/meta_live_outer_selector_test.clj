@@ -28,6 +28,20 @@
   [{:id "M-a" :kind :mission :priority 2 :source (pin "M-a.md" "c")}
    {:id "M-b" :kind :mission :priority 8 :source (pin "M-b.md" "d")}])
 
+(defn- complete-policy-field [task-rows _]
+  {:schema :wm/pre-choice-policy-field-v1
+   :source-pin (pin "wm://test-policy-menu" "e")
+   :coverage {:targets (count task-rows) :current (count task-rows)}
+   :families (mapv (fn [{:keys [id]}]
+                     {:target-id id :status :computed
+                      :policies [{:policy-id (str id "/policy-1")}]
+                      :failures []}) task-rows)})
+
+(defn- select-ordinary [opts]
+  (live/select-live (assoc opts
+                           :policy-field-config {:authority :test-fixture}
+                           :policy-field-fn complete-policy-field)))
+
 (def admitted-algorithm
   {:id "A-self-heal" :kind :algorithm :source (pin "A-self-heal.md" "e")
    :repairs-capability :wm-click-completes-with-reviewable-receipts
@@ -96,20 +110,19 @@
                           :graph graph-bytes
                           :agency agency-bytes})))
 
-(deftest live-adapter-selects-and-translates-without-a-draw
-  (let [receipt (live/select-live {:tasks tasks :fetch-snapshot (constantly snapshot)})]
+(deftest live-adapter-stops-at-the-complete-policy-menu
+  (let [receipt (select-ordinary {:tasks tasks :fetch-snapshot (constantly snapshot)})]
     (is (= :wm/outer-task-selection-v1 (:schema receipt)))
-    (is (= :meta-live-pipeline-task-state (get-in receipt [:policy :kind])))
-    (is (= "M-a" (get-in receipt [:chosen :id])))
-    (is (= {:type :advance-mission :target "M-a"} (:action receipt)))
+    (is (= :cascade-live-policy-menu-v1 (get-in receipt [:policy :kind])))
+    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= (pin "wm://test-policy-menu" "e")
+           (get-in receipt [:policy :field-source-pin])))
+    (is (nil? (:action receipt)))
     (is (= {:absent :deterministic-meta-policy} (:draw receipt)))
-    (is (= :minimum-pairwise-task-state-G
-           (get-in receipt [:policy :meta-selection :reason])))
-    (is (contains? (set (get-in receipt [:policy :meta-selection
-                                         :pairwise 0 :shared-channels]))
-                   :pipeline-freshness-cost))
-    (is (= ["M-a" "M-b"]
-           (mapv :id (get-in receipt [:policy :meta-selection :ranking]))))))
+    (is (= {:status :retired :consumed false}
+           (get-in receipt [:policy :legacy-target-shadow])))
+    (is (= :policy-selection-not-yet-performed
+           (get-in receipt [:q8-frontier :reason])))))
 
 (deftest learned-outcomes-run-in-shadow-without-changing-live-action
   (let [belief (outer-belief/build
@@ -125,7 +138,7 @@
                                              :blocked 0 :untouched 1}}
                                    :collateral-progress {:status :present}
                                    :blocker {:status :absent}}]}})
-        receipt (live/select-live
+        receipt (select-ordinary
                  {:tasks tasks :fetch-snapshot (constantly snapshot)
                   :outer-learning
                   {:mode :shadow :belief belief
@@ -139,14 +152,11 @@
                    {:closure 0.0 :selected-want-progress 0.2
                     :grounded-collateral-progress 0.5 :typed-blocker 0.9
                     :abstention-or-failure 1.0}}})]
-    (is (= "M-a" (get-in receipt [:action :target])))
-    (is (= :shadow (get-in receipt [:outer-learning :mode])))
-    (is (= 2 (count (get-in receipt [:outer-learning :scores]))))
-    (is (= :complete-union
-           (get-in receipt [:outer-learning :selection :pairwise 0 :comparison])))
-    (is (= :shadow-consumed (get-in receipt [:outer-learning :status])))
-    (is (map? (get-in receipt [:outer-learning :posterior-revision])))
-    (is (boolean? (get-in receipt [:outer-learning :changed?])))))
+    (is (nil? (:action receipt)))
+    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= {:status :retired :consumed false}
+           (get-in receipt [:policy :legacy-target-shadow])))
+    (is (nil? (get-in receipt [:outer-learning :scores])))))
 
 (deftest unavailable-learning-state-is-a-typed-certificate-refusal
   (let [receipt (live/select-live
@@ -176,7 +186,7 @@
                                    :collateral-progress {:status :present}
                                    :blocker {:status :absent}}]}})
         receipt
-        (live/select-live
+        (select-ordinary
          {:tasks tasks :fetch-snapshot (constantly snapshot)
           :outer-learning
           {:mode :live :belief belief :preference-authority :operator
@@ -189,11 +199,11 @@
            :controller {:missing-channel-cost 1.0
                         :recent-selection-cost 0.5
                         :continuation-credit 0.7}}})]
-    (is (= :live-consumed (get-in receipt [:outer-learning :status])))
-    (is (= (get-in receipt [:outer-learning :shadow-selection])
-           (get-in receipt [:action :target])))
-    (is (= "M-a" (get-in receipt [:outer-learning :baseline-selection])))
-    (is (false? (get-in receipt [:outer-learning :repeat-authorized?])))))
+    (is (nil? (:action receipt)))
+    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= {:status :retired :consumed false}
+           (get-in receipt [:policy :legacy-target-shadow])))
+    (is (nil? (get-in receipt [:outer-learning :scores])))))
 
 (deftest continuation-evidence-can-justify-reselecting-a-recent-target
   (let [belief (outer-belief/build
@@ -226,51 +236,49 @@
                    :channels {:equal-cost {:value 0.5 :freshness :current
                                            :source (pin "equal" "7")}}})
                 task-rows))
-        without (live/select-live {:tasks tasks :fetch-snapshot (constantly snapshot)
+        without (select-ordinary {:tasks tasks :fetch-snapshot (constantly snapshot)
                                    :candidate-fn equal-candidates
                                    :outer-learning base})
         continuation {:status :present :next-step "Complete the next criterion"
                       :acceptance-condition "Pinned criterion becomes observed"
                       :evidence {:path "M-a.md" :sha256 (apply str (repeat 64 "a"))}}
-        with (live/select-live
+        with (select-ordinary
               {:tasks tasks :fetch-snapshot (constantly snapshot)
                :candidate-fn equal-candidates
                :outer-learning (assoc-in base [:controller :continuations "M-a"]
                                          continuation)})]
-    (is (= "M-b" (get-in without [:outer-learning :shadow-selection])))
-    (is (= "M-a" (get-in with [:outer-learning :shadow-selection])))
-    (is (= continuation
-           (->> (get-in with [:outer-learning :scores])
-                (filter #(= "M-a" (:target %))) first
-                :terms :continuation-evidence)))))
+    (is (nil? (:action without)))
+    (is (nil? (:action with)))
+    (is (= (get-in without [:policy :field-source-pin])
+           (get-in with [:policy :field-source-pin])))
+    (is (= {:status :retired :consumed false}
+           (get-in with [:policy :legacy-target-shadow])))))
 
-(deftest missing-or-equal-evidence-refuses-with-complete-support
+(deftest ordinary-policy-menu-never-invokes-target-candidate-selection
   (testing "missing is absence"
-    (let [receipt (live/select-live {:tasks (mapv #(dissoc % :priority) tasks)
+    (let [calls (atom 0)
+          receipt (select-ordinary {:tasks (mapv #(dissoc % :priority) tasks)
                                      :fetch-snapshot (constantly snapshot)
                                      :candidate-fn
                                      (fn [task-rows _]
+                                       (swap! calls inc)
                                        (mapv (fn [{:keys [id kind]}]
                                                {:id id :kind kind
                                                 :support {:automated-feasibility :unknown}
                                                 :channels {}})
                                              task-rows))})]
-      (is (= :shared-current-channel-unavailable
-             (get-in receipt [:policy :meta-selection :reason])))
+      (is (zero? @calls))
+      (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
       (is (= 2 (count (:support receipt))))
       (is (nil? (:action receipt)))))
-  (testing "live equal-G minima fail rather than selecting by identity"
+  (testing "target equality cannot decide before the policy port"
     (let [equal-snapshot (assoc-in snapshot [:graph :tickets :items 1 :mtime-ms] 200)
-          receipt (live/select-live {:tasks (mapv #(assoc % :priority 1) tasks)
+          receipt (select-ordinary {:tasks (mapv #(assoc % :priority 1) tasks)
                                      :fetch-snapshot (constantly equal-snapshot)})]
-      (is (= :no-unique-task-state-minimum
-             (get-in receipt [:policy :meta-selection :reason])))
+      (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
       (is (nil? (:action receipt)))
-      (is (= ["M-a" "M-b"]
-             (get-in receipt [:policy :meta-selection :details :undefeated])))
-      (is (= :fail
-             (get-in receipt [:policy :meta-selection :details
-                              :selection-discrimination :verdict]))))))
+      (is (= {:status :retired :invoked false :configured true}
+             (get-in receipt [:policy :target-candidate-selector]))))))
 
 (deftest current-pipeline-centrality-discriminates-with-pinned-reasons
   (let [central (-> snapshot
@@ -294,7 +302,7 @@
   (let [with-inventory-only
         (update-in snapshot [:graph :tickets :items]
                    conj {:stem "M-inventory-only" :mtime-ms 300})
-        receipt (live/select-live
+        receipt (select-ordinary
                  {:tasks (conj tasks
                                {:id "M-inventory-only" :kind :mission
                                 :priority 0
@@ -305,7 +313,8 @@
            (->> (:excluded receipt)
                 (filter #(= "M-inventory-only" (:id %)))
                 first :ineligible-reason)))
-    (is (= "M-a" (get-in receipt [:chosen :id])))))
+    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (nil? (:action receipt)))))
 
 (deftest conflicting-mission-standing-fails-closed-with-exact-authority
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
@@ -396,22 +405,27 @@
              (set (:unsupported-channels candidate)))))))
 
 (deftest partial-live-snapshot-remains-a-typed-outer-refusal
-  (let [receipt (live/select-live
+  (let [field-calls (atom 0)
+        receipt (live/select-live
                  {:tasks tasks
+                  :policy-field-config {}
+                  :policy-field-fn (fn [& _] (swap! field-calls inc))
                   :fetch-snapshot #(assoc-in snapshot
                                              [:graph :section-status :clusters :status]
                                              :failed)})]
     (is (= :pipeline-snapshot-invalid
            (get-in receipt [:policy :meta-selection :reason])))
     (is (= 2 (count (:support receipt))))
+    (is (zero? @field-calls))
     (is (nil? (:action receipt)))))
 
 (deftest off-map-tasks-are-accounted-as-typed-exclusions
   (let [off-map {:id "M-z" :kind :mission :priority 0
                  :source (pin "M-z.md" "e")}
-        receipt (live/select-live {:tasks (conj tasks off-map)
+        receipt (select-ordinary {:tasks (conj tasks off-map)
                                    :fetch-snapshot (constantly snapshot)})]
-    (is (= "M-a" (get-in receipt [:chosen :id])))
+    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (nil? (:action receipt)))
     (is (= ["M-z"] (mapv :id (:excluded receipt))))
     (is (= :pipeline/not-on-current-map
            (get-in receipt [:excluded 0 :ineligible-reason])))
@@ -603,11 +617,22 @@
                       [(committed-task repo "M-a" "codex-test")
                        (committed-task repo "M-b" "codex-test")])
           snapshot (authorized-snapshot snapshot)
-          receipt (live/select-live {:tasks tasks
+          receipt (select-ordinary {:tasks tasks
                                      :fetch-snapshot (constantly snapshot)
                                      :retain-manifest? true})]
       (is (= :captured (get-in receipt [:decision-input-manifest :status])))
       (is (= :pending-independent-replay
              (:decision-input-verification receipt)))
       (is (string? (:decision-input-manifest-sha256 receipt)))
-      (is (some? (:action receipt))))))
+      (is (nil? (:action receipt)))
+      (is (= :policy-selection-port-required
+             (get-in receipt [:policy :status]))))))
+
+(deftest missing-policy-field-config-is-a-typed-stop
+  (let [calls (atom 0)
+        receipt (live/select-live
+                 {:tasks tasks :fetch-snapshot (constantly snapshot)
+                  :policy-field-fn (fn [& _] (swap! calls inc))})]
+    (is (zero? @calls))
+    (is (= :policy-field-config-required (get-in receipt [:policy :status])))
+    (is (nil? (:action receipt)))))

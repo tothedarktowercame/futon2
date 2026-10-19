@@ -17,6 +17,14 @@
   :target-action-formed false
   :q2-q8-status :policy-selection-not-yet-performed
   :legacy-target-shadow {:status :retired :consumed false}}
+ :repair
+ {:pipeline-snapshot-invalid-precedes-field-construction true
+  :missing-policy-field-config :policy-field-config-required
+  :preview-live-zero-arity :typed-policy-field-config-required
+  :off-map-accounting-preserved true
+  :production-manifest-authority-preserved true
+  :focused-gate {:namespaces 4 :tests 57 :assertions 257
+                 :failures 0 :errors 0}}
  :injury-branch {:separate true :selector :meta/select :policy-field-called false}
  :next-port :packet-3e-policy-posterior-selection
  :live-click-launched false}

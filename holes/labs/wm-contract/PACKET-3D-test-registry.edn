@@ -1,10 +1,11 @@
 {:repo-root "/home/joe/worktrees/futon2-outer-policy-boundary"
  :code-paths ["src/futon2/aif/meta_live_outer_selector.clj"
+              "src/futon2/aif/meta_pipeline_selector.clj"
               "src/futon2/aif/full_loop_runtime.clj"
               "src/futon2/aif/wm/family_selection.clj"]
- :test-paths ["test/futon2/aif/outer_policy_field_boundary_test.clj"]
+ :test-paths ["test/futon2/aif/meta_live_outer_selector_test.clj"]
  :command ["clojure" "-M:test" "-n"
-           "futon2.aif.outer-policy-field-boundary-test"]
- :author "codex-6" :origin "Packet 3D pre-choice full policy field"
+           "futon2.aif.meta-live-outer-selector-test"]
+ :author "codex-6" :origin "Packet 3D pre-choice policy field repair"
  :artifact-dir "/tmp/packet-3d-test-registry"
  :agency-url "http://localhost:7070"}

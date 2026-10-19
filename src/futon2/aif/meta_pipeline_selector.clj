@@ -87,6 +87,14 @@
           (some #(not= :ok (:status %)) (vals section-status)))
       (conj :cascade-section-incomplete))))
 
+(defn validate-snapshot
+  "Validate the pinned pipeline snapshot without selecting any candidate."
+  [snapshot]
+  (let [errors (snapshot-errors snapshot)]
+    (if (seq errors)
+      (refusal :pipeline-snapshot-invalid {:errors errors})
+      {:schema schema :status :verified})))
+
 (defn pipeline-node-ids
   "Return registry-canonical M/E/T ids and exact non-work identities in graph.
 
