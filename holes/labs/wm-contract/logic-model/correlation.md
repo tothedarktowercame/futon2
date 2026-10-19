@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 10 / A24 / P13: [producer reconciliation](p13-certificate-producers.md)
+traces assessed Q2/Q8 absence to NR/unverifiable. The enumerated certificate/report
+chain records absence rather than throwing or inventing success. This static
+finding does not establish serving-route continuation or cover every runtime gate.
+
 Row 10 / P12 (`81e479a12`, `56dda8f1a`, `5ce3db21c`): requirements
 publication failure is transport failure, not missing Q computation. Completed
 verdicts precede publication and survive failed receipt replacement. Post-check

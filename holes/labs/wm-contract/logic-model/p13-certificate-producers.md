@@ -70,7 +70,7 @@ the initially named selector pointer):
    Pin: `4eabbda7:src/futon2/aif/outer_policy_objective.clj:120-145`.
 2. `assessed_policy_basis/seal` stores the menu/evidence/receipt and verifies
    it without IO.  Pin: `4eabbda7:src/futon2/aif/assessed_policy_basis.clj:1-45`.
-3. `selected_outer_cascade_policy/seal` labels this basis and explicitly puts
+3. `selected_outer_cascade_policy/seal-assessed` labels this basis and explicitly puts
    `{:status :absent :reason :assessed-population-basis}` in the Q8
    recomputation; its verifier recognizes the assessed scope and requires the
    partial assessed receipt.  Pin:

@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P13 / P26: [certificate producer map](p13-certificate-producers.md) distinguishes
+per-record requirements recomputation from historical `data/wm-certificates/`.
+Q2/Q8 absent assessed-population carriers feed field-level NR and Lean
+unverifiable outcomes; no passing certificate is manufactured. Static review only.
+
 P26 / P12 (`81e479a12`, `56dda8f1a`, `5ce3db21c`): completed evaluation
 produces the requirements sidecar before evidence transport. Publication has
 pending/published/failed/skipped receipt states; post-check log, persistence or

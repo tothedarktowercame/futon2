@@ -9,6 +9,10 @@ identified. No serving-store observation has been made after landing.
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P13: the run record retains Q2/Q8 carriers, including typed absence. The adjacent
+requirements sidecar is generated later by recomputation, not by the historical
+Lean-artifact directory. See [source-pinned producer map](p13-certificate-producers.md).
+
 P12 requirements sidecar (`5ce3db21c`): `<run-record>.requirements.edn` holds
 computed Q verdicts/counts independently of HTTP publication. Sibling temporary
 files are replaced atomically and cleaned on ordinary write/replace failure;
