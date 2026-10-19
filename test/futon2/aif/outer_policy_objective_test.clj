@@ -2,6 +2,8 @@
   (:require [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.outer-policy-objective :as sut]
             [futon2.aif.outer-policy-evidence :as policy-evidence]
+            [futon2.aif.outer-policy-evidence-test :as evidence-fixture]
+            [futon2.aif.wm.executable-cascade :as xc]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.wm.selection-cascade-identity :as identity]))
@@ -96,6 +98,32 @@
     (is (= (:declaration-pin partial) (:declaration-pin r)))
     (is (= (:dataset-pin partial) (:dataset-pin r)))
     (is (nil? (:action r)))))
+
+(deftest joined-partial-evidence-preserves-producer-causes
+  ;; Only canonical-cascade fixture validation is stubbed. Both the evidence
+  ;; producer and objective consumer execute their actual implementations.
+  (with-redefs [xc/digest :digest
+                xc/validate-cascade (constantly {:status :certified})]
+    (let [menu evidence-fixture/sealed
+          declaration (evidence-fixture/declaration
+                       {"d1" (evidence-fixture/spec [1.0 1.0])
+                        "d2" (update-in (evidence-fixture/spec [1.0 1.0])
+                                        [:ln-e :cadence :source-pin] dissoc :sha256)})
+          joined (policy-evidence/join
+                  menu declaration []
+                  [{:policy-id "p2" :target-id "T" :cascade-digest "d2"
+                    :status :absent :reason :preference-transform-invalid}])
+          result (sut/evaluate joined menu)
+          missing (first (get-in result [:strict-verdict :missing]))]
+      (is (= :partial (:status joined) (:status result)))
+      (is (= "d2" (:cascade-digest missing)))
+      (is (= [:ln-e-cadence :policy-score-absent] (:absent-terms missing)))
+      (is (= :preference-transform-invalid (get-in missing [:score-absence :reason])))
+      (is (= [1 1 0] (mapv (:frontier result)
+                           [:strict-assessed :strict-absent :ordinary-assessed])))
+      (is (= (select-keys joined [:menu-pin :declaration-pin :dataset-pin])
+             (select-keys result [:menu-pin :declaration-pin :dataset-pin])))
+      (is (nil? (:action result))))))
 
 (deftest exact-tie-and-atomic-refusals
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]
