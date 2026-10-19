@@ -417,7 +417,7 @@
                :pipeline-freshness-cost}
              (set (:unsupported-channels candidate)))))))
 
-(deftest partial-live-snapshot-remains-a-typed-outer-refusal
+(deftest unavailable-structural-section-measures-no-data-without-inventing-targets
   (let [field-calls (atom 0)
         receipt (live/select-live
                  {:tasks tasks
@@ -426,9 +426,16 @@
                   :fetch-snapshot #(assoc-in snapshot
                                              [:graph :section-status :clusters :status]
                                              :failed)})]
-    (is (= :pipeline-snapshot-invalid
+    (is (= :pipeline-target-data-unavailable
            (get-in receipt [:policy :meta-selection :reason])))
-    (is (= 2 (count (:support receipt))))
+    (is (empty? (:support receipt)))
+    (is (= #{{:id "M-a" :ineligible-reason :pipeline/membership-unavailable}
+             {:id "M-b" :ineligible-reason :pipeline/membership-unavailable}}
+           (set (map #(select-keys % [:id :ineligible-reason])
+                     (:unknown-targets receipt)))))
+    (is (= [:clusters]
+           (get-in receipt [:policy :pipeline-membership
+                            :unavailable-structural-sections])))
     (is (zero? @field-calls))
     (is (nil? (:action receipt)))))
 

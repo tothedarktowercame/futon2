@@ -38,6 +38,20 @@
     (string? x) (when-let [[_ _ kind stem] (re-matches qualified-work-id x)]
                   (str (kind-prefix kind) stem))))
 
+(def ^:private structural-sections
+  [{:section :lineage :status-keys [:lineage "clock/clocked-on"]
+    :node-ids (fn [graph]
+                (mapcat (juxt :mission :target :predecessor :successor)
+                        (:lineage graph)))}
+   {:section :clusters :status-keys [:clusters "cascade/cluster-member"]
+    :node-ids (fn [graph] (map :mission (:clusters graph)))}
+   {:section :arrows :status-keys [:arrows "code/v05/mined-move"]
+    :node-ids (fn [graph] (mapcat (juxt :have :want) (:arrows graph)))}
+   {:section :held :status-keys [:held "held/on-mission"]
+    :node-ids (fn [graph] (map :mission (:held graph)))}
+   {:section :patterns :status-keys [:patterns "mission-scope/pattern"]
+    :node-ids (fn [graph] (map :mission (get-in graph [:patterns :edges])))}])
+
 (defn- raw-pipeline-node-ids [graph]
   ;; Only structural work positions define membership.  The tickets section is
   ;; an inventory/mtime surface, and :pattern names evidence associated with a
@@ -48,6 +62,81 @@
    (mapcat (juxt :have :want) (:arrows graph))
    (map :mission (:held graph))
    (map :mission (get-in graph [:patterns :edges]))))
+
+(defn section-availability
+  "Measure supplied cascade sections without treating an unavailable section as
+  an observed empty one.  Old partial snapshots named only the sections they
+  supplied; those omitted names remain unspecified rather than being invented
+  as failures.  An entirely missing status map is an unavailable population."
+  [snapshot]
+  (let [statuses (get-in snapshot [:graph :section-status])
+        status-map? (map? statuses)
+        entries (if status-map? statuses {})
+        entry (fn [[section value]]
+                {:section section
+                 :status (:status value)
+                 :availability (if (= :ok (:status value))
+                                 :available :unavailable)
+                 :reason (when-not (= :ok (:status value))
+                           (or (:error value) :section-not-ok))})
+        measured (->> entries (map entry) (sort-by #(pr-str (:section %))) vec)
+        unavailable (filterv #(= :unavailable (:availability %)) measured)]
+    {:status (cond
+               (not status-map?) :absent
+               (empty? entries) :absent
+               (empty? unavailable) :complete
+               :else :partial)
+     :sections measured
+     :available-sections (mapv :section (filter #(= :available (:availability %)) measured))
+     :unavailable-sections unavailable}))
+
+(defn pipeline-membership
+  "Return only node identities evidenced by available structural sections.
+
+  A task absent from these ids is *unknown*, rather than known off-map, when a
+  supplied structural section is unavailable.  This is deliberately a
+  population measurement: it never promotes an unknown task into membership."
+  [snapshot]
+  (let [graph (:graph snapshot)
+        availability (section-availability snapshot)
+        status-by-key (into {} (map (juxt :section identity) (:sections availability)))
+        unavailable? (fn [{:keys [status-keys]}]
+                       (let [entry (some #(get status-by-key %) status-keys)]
+                         (or (= :absent (:status availability))
+                             (and entry (= :unavailable (:availability entry))))))
+        unavailable-sections (->> structural-sections
+                                  (filter unavailable?)
+                                  (mapv :section))
+        available-raw (mapcat (fn [{:keys [node-ids] :as section}]
+                                (if (unavailable? section) [] (node-ids graph)))
+                              structural-sections)
+        ;; Reuse the canonicalisation/collision rules over precisely the
+        ;; available structural rows, not the entire (possibly stale) graph.
+        analysis (let [raw-ids (set (filter string? available-raw))
+                       malformed (->> raw-ids
+                                      (filter #(and (re-find #"-d/(mission|excursion|ticket)/" %)
+                                                    (not (re-matches qualified-work-id %))))
+                                      sort vec)
+                       qualified (keep (fn [raw]
+                                         (when-let [[_ authority kind stem]
+                                                    (re-matches qualified-work-id raw)]
+                                           {:raw raw :authority authority
+                                            :canonical (str (kind-prefix kind) stem)}))
+                                       raw-ids)
+                       by-canonical (group-by :canonical qualified)
+                       collisions (into (sorted-map)
+                                        (keep (fn [[canonical rows]]
+                                                (when (< 1 (count (set (map :authority rows))))
+                                                  [canonical (vec (sort (map :raw rows)))])))
+                                        by-canonical)
+                       ids (reduce (fn [ids {:keys [raw canonical]}]
+                                     (conj (disj ids raw) canonical)) raw-ids qualified)]
+                   {:ids (apply disj ids (concat malformed (keys collisions)))
+                    :malformed malformed :collisions collisions})]
+    (assoc analysis
+           :section-availability availability
+           :unavailable-structural-sections unavailable-sections
+           :membership-complete? (empty? unavailable-sections))))
 
 (defn- pipeline-identity-analysis [graph]
   (let [raw-ids (set (filter string? (raw-pipeline-node-ids graph)))
@@ -72,9 +161,8 @@
                               raw-ids qualified)]
     {:ids canonicalized :malformed malformed :collisions collisions}))
 
-(defn- snapshot-errors [{:keys [schema summary-source graph-source summary graph]}]
-  (let [section-status (:section-status graph)]
-    (cond-> []
+(defn- snapshot-errors [{:keys [schema summary-source graph-source summary]}]
+  (cond-> []
       (not= snapshot-schema schema) (conj :snapshot-schema-invalid)
       (not (pin? summary-source)) (conj :summary-source-unpinned)
       (not (pin? graph-source)) (conj :graph-source-unpinned)
@@ -82,10 +170,7 @@
       (not-every? true? (map #(get-in summary [:standards %])
                              [:s1-regenerates :s2-evidence :s3-reconstitution
                               :s4-honest-holes :s5-composed]))
-      (conj :cascade-standards-incomplete)
-      (or (empty? section-status)
-          (some #(not= :ok (:status %)) (vals section-status)))
-      (conj :cascade-section-incomplete))))
+      (conj :cascade-standards-incomplete)))
 
 (defn validate-snapshot
   "Validate the pinned pipeline snapshot without selecting any candidate."

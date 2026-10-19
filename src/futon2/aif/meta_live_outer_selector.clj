@@ -560,7 +560,8 @@
                             (:reason observation))))
                       :ineligibility-evidence (get standing (:id %)))
               standing-refused)
-        nodes (meta/pipeline-node-ids (:graph snapshot))
+        membership (meta/pipeline-membership snapshot)
+        nodes (:ids membership)
         ;; Git provenance is useful only for structural map members.  Resolve
         ;; membership before spawning provenance reads so the complete ticket
         ;; inventory cannot make browser latency grow with every file in it.
@@ -582,8 +583,23 @@
                       :ineligibility-evidence (:ownership %))
               actively-owned)
         on-map selectable-tasks
+        membership-unknown? (not (:membership-complete? membership))
+        unknown-membership (->> standing-admitted
+                                (remove #(contains? nodes (:id %)))
+                                (filter (constantly membership-unknown?))
+                                (mapv #(assoc (outer/task-view %)
+                                              :eligible false
+                                              :eligibility-status :unknown
+                                              :ineligible-reason
+                                              :pipeline/membership-unavailable
+                                              :ineligibility-evidence
+                                              {:section-availability
+                                               (:section-availability membership)
+                                               :unavailable-structural-sections
+                                               (:unavailable-structural-sections membership)})))
         off-map (->> standing-admitted
                      (remove #(contains? nodes (:id %)))
+                     (remove (constantly membership-unknown?))
                      (mapv #(assoc (outer/task-view %)
                                    :eligible false
                                    :ineligible-reason :pipeline/not-on-current-map
@@ -600,7 +616,12 @@
                             family-selection/full-eligible-target-field)
         policy-menu-fn (or policy-menu-fn
                            family-selection/sealed-pre-choice-menu)
+        no-available-targets? (and (not injury?) (empty? on-map))
+        no-target-reason (if membership-unknown?
+                           :pipeline-target-data-unavailable
+                           :pipeline-target-population-observed-empty)
         policy-field (when (and (not injury?)
+                                (seq on-map)
                                 (= :verified (:status snapshot-verification))
                                 (map? policy-field-config))
                        (policy-field-fn on-map policy-field-config))
@@ -653,6 +674,10 @@
         (when-not injury?
           (cond
             (not= :verified (:status snapshot-verification)) snapshot-verification
+            no-available-targets?
+            {:status :abstained :reason no-target-reason
+             :section-availability (:section-availability membership)
+             :unknown-targets (mapv :id unknown-membership)}
             (not (map? policy-field-config))
             {:status :refused :reason :policy-field-config-required}
             (not= :sealed (:status sealed-menu))
@@ -673,6 +698,8 @@
                     snapshot-verification
                     injury?
                     (meta/select {:snapshot snapshot :candidates candidates})
+                    no-available-targets?
+                    (assoc ordinary-result :schema meta/schema)
                     (not (map? policy-field-config))
                     {:schema meta/schema :status :refused
                      :reason :policy-field-config-required}
@@ -733,8 +760,15 @@
                                                 ordinary-reason)
                                       :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
-                                      :family-census (family-selection/field-census policy-field)
-                                      :frontier (family-selection/measured-frontier policy-field)
+                                      :family-census (when policy-field
+                                                       (family-selection/field-census policy-field))
+                                      :frontier (when policy-field
+                                                  (family-selection/measured-frontier policy-field))
+                                      :pipeline-section-availability
+                                      (:section-availability membership)
+                                      :pipeline-membership
+                                      (select-keys membership [:membership-complete?
+                                                               :unavailable-structural-sections])
                                       :sealed-menu sealed-menu
                                       :evidence-provider-source-pin (:source-pin provided)
                                       :policy-evidence policy-evidence
@@ -767,6 +801,9 @@
                                                 :outer-policy-selection-refused)})
                     (not activated-carrier)
                     (dissoc :action)))
+        receipt (cond-> receipt
+                  (seq unknown-membership)
+                  (assoc :unknown-targets unknown-membership))
         ;; Requirements Q8: the open population, its typed exclusions and
         ;; the exact candidates and pairwise result the effective selection
         ;; used, certified here where they are in hand
