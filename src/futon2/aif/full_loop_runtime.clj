@@ -43,6 +43,55 @@
 (def default-cascade-continuation-close-root
   "/home/joe/code/futon2/data/wm-cascade-continuation-closes")
 
+(def budget-observation-schema :wm/meta-click-budget-observation-v1)
+
+(defn- valid-click-availability? [availability]
+  (and (= :wm/ordinary-click-availability-v1 (:schema availability))
+       (= :ordinary-click (:unit availability))
+       (map? (:ledger-source availability))
+       (string? (get-in availability [:ledger-source :path]))
+       (string? (get-in availability [:ledger-source :sha256]))
+       (boolean (re-matches #"[0-9a-f]{64}" (get-in availability [:ledger-source :sha256])))
+       (every? integer? [(:allocated availability) (:consumed availability)
+                         (:available availability)])
+       (<= 0 (:consumed availability) (:allocated availability))
+       (= (:available availability) (- (:allocated availability) (:consumed availability)))))
+
+(defn observe-ordinary-click-budget
+  "Read one pre-admission ordinary-click snapshot without changing its ledger.
+  Reader failure and malformed material are unavailable observations, never a
+  synthetic zero."
+  [opts]
+  (let [read (cond
+               (contains? opts :ordinary-click-availability) (constantly (:ordinary-click-availability opts))
+               (:ordinary-click-availability-fn opts) (:ordinary-click-availability-fn opts)
+               :else (try (requiring-resolve 'futon3c.wm.ordinary-click-budget/availability)
+                          (catch Throwable _ nil)))]
+    (if-not read
+      {:schema budget-observation-schema :status :unavailable
+       :reason :ordinary-click-budget-reader-unavailable
+       :provenance {:status :absent} :observation-time {:status :absent}
+       :phase :pre-admission}
+      (try
+        (let [availability (read)]
+          (if-not (valid-click-availability? availability)
+            {:schema budget-observation-schema :status :unavailable
+             :reason :ordinary-click-budget-observation-malformed
+             :provenance {:status :absent} :observation-time {:status :absent}
+             :phase :pre-admission}
+            {:schema budget-observation-schema
+             :status (if (pos? (:available availability)) :available :exhausted)
+             :availability availability :ledger-source (:ledger-source availability)
+             :provenance {:status :present :ledger-source (:ledger-source availability)}
+             :observation-time {:status :present
+                                :value (or (:budget-observed-at opts) (Instant/now))}
+             :phase :pre-admission}))
+        (catch Throwable _
+          {:schema budget-observation-schema :status :unavailable
+           :reason :ordinary-click-budget-reader-failed
+           :provenance {:status :absent} :observation-time {:status :absent}
+           :phase :pre-admission})))))
+
 (defn- ensure-reading-precision-campaign!
   [opts]
   (let [path (or (:reading-precision-campaign-path opts)
@@ -231,11 +280,7 @@
                              (injury-store/load-authority
                               (or (:meta-injury-root opts)
                                   injury-store/default-root)))
-        click-availability (or (:ordinary-click-availability opts)
-                               (try
-                                 ((requiring-resolve
-                                   'futon3c.wm.ordinary-click-budget/availability))
-                                 (catch Throwable _ nil)))
+        click-availability (observe-ordinary-click-budget opts)
         meta-observation (or (:meta-field-observation opts)
                              (when injury-authority
                                (meta-field/observe

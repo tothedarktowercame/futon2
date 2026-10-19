@@ -14,6 +14,7 @@
 
 (def schema :wm/meta-field-observation-v1)
 (def algorithm-catalog-schema :wm/approved-algorithm-catalog-v1)
+(def budget-observation-schema :wm/meta-click-budget-observation-v1)
 (def default-algorithm-catalog
   "/home/joe/code/futon2/resources/wm/approved-algorithms.edn")
 
@@ -90,16 +91,19 @@
 
 (defn- positive-click-authority?
   [receipt required]
-  (and (= :wm/ordinary-click-availability-v1 (:schema receipt))
-       (= :ordinary-click (:unit receipt))
-       (pin? (:ledger-source receipt))
-       (integer? (:allocated receipt))
-       (integer? (:consumed receipt))
-       (integer? (:available receipt))
-       (<= 0 (:consumed receipt) (:allocated receipt))
-       (= (:available receipt) (- (:allocated receipt) (:consumed receipt)))
+  (let [availability (if (= budget-observation-schema (:schema receipt))
+                       (when (= :available (:status receipt)) (:availability receipt))
+                       receipt)]
+    (and (= :wm/ordinary-click-availability-v1 (:schema availability))
+       (= :ordinary-click (:unit availability))
+       (pin? (:ledger-source availability))
+       (integer? (:allocated availability))
+       (integer? (:consumed availability))
+       (integer? (:available availability))
+       (<= 0 (:consumed availability) (:allocated availability))
+       (= (:available availability) (- (:allocated availability) (:consumed availability)))
        (pos-int? required)
-       (>= (:available receipt) required)))
+       (>= (:available availability) required))))
 
 (defn- matching-injury-authority?
   [observation capability]
