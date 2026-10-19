@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+A9/R2 / P24: [channel reconciliation](p24-observation-channels.md) names the
+fourteen stack channels, not session test/compile/diff features. Numeric zero
+alone does not establish observed zero: tagged metadata/envelope distinguishes
+absent source. The document traces separate review/warrant/diff evidence paths
+and proposes replacement R2 prose. Paper not yet edited; no new witness or
+end-to-end validation claimed. This is a documentation discrepancy, not a new gate.
+
 Row 7 / A43 / P21: tripwire recipient is explicitly configured then roster-resolved,
 not hardcoded claude-6. Trip report retains resolution before action; missing seat
 does not throw out of the run. Accepted enqueue is separately unacknowledged.
