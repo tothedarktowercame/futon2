@@ -16,6 +16,7 @@
             [futon2.aif.outer-policy-evidence :as policy-evidence]
             [futon2.aif.outer-policy-evidence-provider :as evidence-provider]
             [futon2.aif.outer-policy-objective :as policy-objective]
+            [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.selected-outer-cascade-policy :as selected-policy]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.q2-construction :as q2]
@@ -619,15 +620,35 @@
                                                 (:records provided) (:score-records provided)))
         policy-objective (when (contains? #{:computed :partial} (:status policy-evidence))
                            (policy-objective/evaluate policy-evidence sealed-menu))
-        selected-carrier (when (= :selected (:status policy-objective))
-                           (selected-policy/seal sealed-menu policy-evidence policy-objective))
-        selected-target (get-in policy-objective [:action :target])
+        assessed-basis (when (and (= :partial (:status policy-objective))
+                                  (= :selected (get-in policy-objective
+                                                       [:assessed-selection :status])))
+                         (assessed-basis/seal sealed-menu policy-evidence policy-objective))
+        candidate-carrier
+        (cond
+          (= :selected (:status policy-objective))
+          (selected-policy/seal sealed-menu policy-evidence policy-objective)
+
+          assessed-basis
+          (selected-policy/seal-assessed assessed-basis))
+        selected-carrier (when (= :sealed (:status candidate-carrier)) candidate-carrier)
+        selected-projection (when selected-carrier
+                              (selected-policy/decision selected-carrier))
+        selected-action (get-in selected-projection [:decision :action])
+        selected-target (:target selected-action)
         selected-task (first (filter #(= selected-target (:id %))
                                      (map outer/task-view on-map)))
-        carrier-defect (when selected-carrier
-                         (or (selected-policy/verify selected-carrier)
-                             (when-not selected-task
+        admitted-target? (contains? (set (map :id on-map)) selected-target)
+        carrier-defect (when candidate-carrier
+                         (or (when-not selected-carrier
+                               (or (:reason candidate-carrier)
+                                   :selected-policy-carrier-unsealed))
+                             (selected-policy/verify selected-carrier)
+                             (when-not (= :selected (:status selected-projection))
+                               :selected-policy-projection-refused)
+                             (when-not admitted-target?
                                :selected-policy-target-not-admitted)))
+        activated-carrier (when-not carrier-defect selected-carrier)
         ordinary-result
         (when-not injury?
           (cond
@@ -637,10 +658,13 @@
             (not= :sealed (:status sealed-menu))
             {:status :refused :reason (or (:reason sealed-menu) :sealed-policy-menu-invalid)}
             (not= :provided (:status provided)) provided
-            (not= :computed (:status policy-evidence)) policy-evidence
+            (not (contains? #{:computed :partial} (:status policy-evidence))) policy-evidence
+            carrier-defect {:status :refused :reason carrier-defect}
+            activated-carrier
+            (assoc policy-objective :selection-basis
+                   (get-in selected-projection [:decision :selection-certificate :selection-basis]))
             (not (contains? #{:selected :abstained} (:status policy-objective))) policy-objective
             (= :abstained (:status policy-objective)) policy-objective
-            carrier-defect {:status :refused :reason carrier-defect}
             :else policy-objective))
         selection (cond
                     (not= :verified (:status snapshot-verification))
@@ -697,13 +721,13 @@
         receipt (if injury?
                   (assoc-in receipt [:policy :branch] :verified-machine-injury-algorithm)
                   (cond-> (-> receipt
-                              (assoc :policy {:kind (if selected-carrier
+                              (assoc :policy {:kind (if activated-carrier
                                                      :cascade-live-policy-v1
                                                      :cascade-live-policy-menu-v1)
                                       :branch :ordinary-cascade-policy
-                                      :status (if selected-carrier :selected
+                                      :status (if activated-carrier :selected
                                                 (:status ordinary-result))
-                                      :reason (when-not selected-carrier
+                                      :reason (when-not activated-carrier
                                                 (:reason ordinary-result))
                                       :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
@@ -714,7 +738,8 @@
                                       :policy-evidence policy-evidence
                                       :missing-policy-evidence (:missing policy-evidence)
                                       :policy-objective policy-objective
-                                      :selected-outer-cascade-policy selected-carrier
+                                      :assessed-policy-basis assessed-basis
+                                      :selected-outer-cascade-policy activated-carrier
                                       :missing-targets (mapv :target-id incomplete)
                                       :absent-terms (vec (distinct (concat
                                                                     (:absent-terms provided)
@@ -729,15 +754,15 @@
                                        :configured (boolean candidate-fn)}})
                               (assoc :policy-field policy-field)
                               (assoc :outer-policy-recomputation
-                                     (when selected-carrier
-                                       (:recomputation selected-carrier))))
-                    selected-carrier
+                                     (when activated-carrier
+                                       (:recomputation activated-carrier))))
+                    activated-carrier
                     (assoc :chosen selected-task
-                           :action (:action policy-objective))
-                    (not selected-carrier)
+                           :action selected-action)
+                    (not activated-carrier)
                     (assoc :chosen {:absent (or (:reason ordinary-result)
                                                 :outer-policy-selection-refused)})
-                    (not selected-carrier)
+                    (not activated-carrier)
                     (dissoc :action)))
         ;; Requirements Q8: the open population, its typed exclusions and
         ;; the exact candidates and pairwise result the effective selection
@@ -745,8 +770,8 @@
         live? (= :live (:mode outer-learning))
         receipt (assoc receipt :q8-frontier
                        (if-not injury?
-                         (if selected-carrier
-                           {:status :certified :carrier (:recomputation selected-carrier)}
+                         (if activated-carrier
+                           {:status :certified :carrier (:recomputation activated-carrier)}
                            {:status :absent :reason (:reason ordinary-result)})
                          (q8/outer-frontier
                         {:tasks tasks :excluded all-excluded
@@ -759,8 +784,8 @@
         ;; effective selection could choose, formed as the chosen :action is
         receipt (assoc receipt :q2-outer-actions
                        (if-not injury?
-                         (if selected-carrier
-                           {:status :certified :carrier (:recomputation selected-carrier)}
+                         (if activated-carrier
+                           {:status :certified :carrier (:recomputation activated-carrier)}
                            {:status :absent :reason (:reason ordinary-result)})
                          (q2/outer-actions
                         {:candidates (if live? shadow-candidates candidates)
