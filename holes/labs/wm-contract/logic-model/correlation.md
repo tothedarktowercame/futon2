@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+A6/R1 / P23: [categorical belief reconciliation](p23-categorical-belief.md)
+identifies a paper-shape mismatch: entity-ID to seven-status posterior, not the
+paper's six operational-hypothesis keys. A/B/D and unknown-event omission are
+source-pinned; historical mu-post demonstrates representation only. Replacement
+R1 prose is proposed, not applied. A7 predict/update witness status and current
+serving/calibration status are not upgraded. No new runtime gate or belief repair.
+
 A9/R2 / P24: [channel reconciliation](p24-observation-channels.md) names the
 fourteen stack channels, not session test/compile/diff features. Numeric zero
 alone does not establish observed zero: tagged metadata/envelope distinguishes
