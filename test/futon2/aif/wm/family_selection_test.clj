@@ -137,6 +137,29 @@
         :reading-root (temp-dir "field-once-reading-") :graph-path "/missing"})
       (is (= 1 @calls)))))
 
+(deftest full-eligible-field-is-one-pinned-pre-choice-menu
+  (let [root (temp-dir "full-field-reading-")
+        graph (graph-file (temp-dir "full-field-graph-"))
+        files (into {} (for [target ["M-a" "M-b"]
+                             :let [f (io/file root (str target ".md"))]]
+                         (do (spit f (str "# " target "\n\n## HEAD\nCurrent work.\n"))
+                             [target f])))]
+    (doseq [[target f] files]
+      (reading-registry/publish!
+       root (reading-publication target f (reading-registry/excerpt-digest f))))
+    (let [config {:target-reading-root root :pattern-graph-path graph}
+          tasks (mapv (fn [[target f]] {:id target :source {:path (.getPath f)}}) files)
+          field (sut/full-eligible-target-field tasks config)
+          pin (get-in field [:source-pin :sha256])]
+      (is (= 2 (get-in field [:coverage :targets])))
+      (is (= 2 (get-in field [:coverage :current])))
+      (is (= #{"M-a" "M-b"} (set (map :target-id (:families field)))))
+      (is (every? seq (map :policies (:families field))))
+      (spit (files "M-b") "\nchanged" :append true)
+      (let [changed (sut/full-eligible-target-field tasks config)]
+        (is (not= pin (get-in changed [:source-pin :sha256])))
+        (is (= :failed (get-in changed [:families 1 :status])))))))
+
 (deftest unreadable-target-source-is-counted
   (let [graph (graph-file (temp-dir "field-unreadable-graph-"))
         result (sut/families-for-field

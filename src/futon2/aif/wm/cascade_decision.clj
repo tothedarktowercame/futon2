@@ -1020,15 +1020,10 @@
                      (map (fn [t] {:target-id t :source-path nil
                                    :source-absent :target-source-row-absent}))
                      rowless)
-          field (family-selection/families-for-field
-                 {:target-sources rows
-                  :reading-root reading-root
-                  :graph-path (:pattern-graph-path opts)
-                  :occurrence-square-root (:occurrence-square-root opts)
-                  :pattern-texts (:occurrence-square-pattern-texts opts)
-                  :pattern-library-root (:pattern-library-root opts)
-                  :require-occurrence-squares? (:require-occurrence-squares? opts)
-                  :retraction (:target-policy-retraction opts)})]
+          field (family-selection/full-eligible-target-field
+                 [] (assoc opts
+                           :target-source-declarations rows
+                           :target-reading-root reading-root))]
       (assoc field
              :status :formed
              :reading-root reading-root

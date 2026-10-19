@@ -197,6 +197,46 @@
      :families families
      :coverage (field-coverage families)}))
 
+(defn full-eligible-target-field
+  "Construct the one complete, source-pinned pre-choice policy field.
+  TASKS is the already-filtered ordinary outer frontier. This pure boundary
+  performs no authoring or dispatch; it only delegates to families-for-field."
+  [tasks {:keys [target-source-declarations target-reading-root pattern-graph-path occurrence-square-root
+                 occurrence-square-pattern-texts pattern-library-root
+                 require-occurrence-squares? target-policy-retraction] :as config}]
+  (let [declarations
+        (or target-source-declarations
+            (mapv (fn [{:keys [id source]}]
+                (if-let [path (:path source)]
+                  {:target-id id :source-kind :head :source-path path
+                   :source-pin source}
+                  {:target-id id :source-kind :head :source-path nil
+                   :source-absent :target-source-path-absent}))
+                  tasks))
+        field (families-for-field
+               {:target-sources declarations
+                :reading-root target-reading-root
+                :graph-path pattern-graph-path
+                :occurrence-square-root occurrence-square-root
+                :pattern-texts occurrence-square-pattern-texts
+                :pattern-library-root pattern-library-root
+                :require-occurrence-squares? require-occurrence-squares?
+                :retraction target-policy-retraction})
+        config-view (select-keys config
+                                 [:target-reading-root :pattern-graph-path
+                                  :occurrence-square-root :pattern-library-root
+                                  :require-occurrence-squares?
+                                  :target-policy-retraction])
+        body {:schema :wm/pre-choice-policy-field-v1
+              :configuration config-view
+              :target-sources declarations
+              :graph (:graph field)
+              :coverage (:coverage field)
+              :families (:families field)}]
+    (assoc body :source-pin
+           {:path "wm://pre-choice-policy-field-v1"
+            :sha256 (identity/sha256 (.getBytes (pr-str body) "UTF-8"))})))
+
 (defn field-census
   "The recordable census of FIELD (families-for-field's result): the graph pin
   or its refusal, the coverage counts, and per target its status, counts,
