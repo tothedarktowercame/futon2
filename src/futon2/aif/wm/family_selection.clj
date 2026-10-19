@@ -235,7 +235,11 @@
   sees, recorded with C) or adds :refusal when nothing is left, which
   returns {:status :repeat-refused} without calling the selector."
   [families {:keys [attach-f certify exclude] :as opts}]
-  (let [rows
+  (let [coverage-failures (vec (mapcat :failures
+                                       (remove #(= :computed (:status %)) families)))
+        missing-targets (vec (map :target-id
+                                  (remove #(= :computed (:status %)) families)))
+        rows
         (mapv
          (fn [family]
            (let [target (:target-id family)
@@ -324,6 +328,17 @@
                               row)))
                         rows)]
     (cond
+      (seq missing-targets)
+      {:status :abstained
+       :decision {:status :abstained
+                  :kind :incomplete-policy-menu-coverage
+                  :missing-targets missing-targets
+                  :absent-terms (vec (distinct (map :kind coverage-failures)))}
+       :ranked []
+       :target-policy-families summaries
+       :failures failures
+       :failure-count (count failures)}
+
       (:refusal excluded)
       {:status :repeat-refused
        :refusal (:refusal excluded)

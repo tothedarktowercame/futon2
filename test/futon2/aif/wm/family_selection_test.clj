@@ -199,7 +199,7 @@
     (is (= expected (get-in result [:decision :action]))
         "the chosen policy is the argmax computed from the recorded F/G posterior")))
 
-(deftest failed-target-is-counted-and-does-not-enter-selection
+(deftest one-missing-target-refuses-the-whole-policy-menu
   (let [failed (assoc (failed-family "T-missing" :no-current-target-reading)
                       ;; A failed family must contribute no placeholder even
                       ;; if malformed input happens to carry one.
@@ -207,9 +207,11 @@
         result (sut/select-over-families [failed (computed-family "T-ready" 1)]
                                          {:beta 1 :enactment-fold nil
                                           :novelty-inputs {}})]
-    (is (= :selected (:status result)))
-    (is (= 1 (count (:ranked result))))
-    (is (= "T-ready" (get-in result [:decision :action :target])))
+    (is (= :abstained (:status result)))
+    (is (= :incomplete-policy-menu-coverage (get-in result [:decision :kind])))
+    (is (= ["T-missing"] (get-in result [:decision :missing-targets])))
+    (is (= [:no-current-target-reading] (get-in result [:decision :absent-terms])))
+    (is (empty? (:ranked result)))
     (is (= 1 (:failure-count result)))
     (is (= {:kind :no-current-target-reading :target-id "T-missing"}
            (first (:failures result))))))
@@ -220,7 +222,7 @@
                  (failed-family "T-b" :stale-target-reading)]
                 {:beta 1 :enactment-fold nil :novelty-inputs {}})]
     (is (= :abstained (:status result)))
-    (is (= :no-computed-policy-family (get-in result [:decision :kind])))
+    (is (= :incomplete-policy-menu-coverage (get-in result [:decision :kind])))
     (is (nil? (get-in result [:decision :action])))
     (is (empty? (:ranked result)))
     (is (= 2 (:failure-count result)))
