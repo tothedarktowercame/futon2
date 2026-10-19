@@ -71,6 +71,56 @@
                  :grounded-no-change :artifact-only} outcome) :abstention-or-failure
     :else :typed-unknown))
 
+(def ^:private apparatus-failure-kinds
+  #{:resume-protocol-violation :phase-failure :dispatch-failed
+    :transport-failure :build-failed :cancelled :substrate-unavailable
+    :agent-unavailable :occurrence-square-redecision-failed})
+
+(def ^:private apparatus-failure-stages
+  #{:cascade-resume :dispatch :transport :build :occurrence-square-redecision})
+
+(defn terminal-cause
+  "The one terminal-evidence cause boundary used by the outer learner.
+  Outcome labels alone never turn incomplete/build failures into task evidence."
+  [record]
+  (let [outcome (raw-outcome record)
+        failure (:failure record)
+        kind (or (:kind failure) (get-in record [:terminal-receipt :failure-kind]))
+        stage (or (:stage failure) (get-in record [:terminal-receipt :failure-stage]))
+        detail (or (:detail failure) (get-in record [:terminal-receipt :failure-detail]))
+        base {:schema :wm/terminal-cause-v1 :outcome outcome
+              :kind kind :stage stage :detail detail}]
+    (cond
+      (or (contains? apparatus-failure-kinds kind)
+          (contains? apparatus-failure-stages stage))
+      (assoc base :class :apparatus-failure :reason :typed-apparatus-failure)
+
+      (= :untyped-failure kind)
+      (assoc base :class :unclassified :reason :untyped-terminal-failure)
+
+      (contains? #{:grounded-change :already-satisfied :grounded-progress} outcome)
+      (assoc base :class :task-outcome :reason :witnessed-task-outcome)
+
+      (or (and (contains? #{:abstained :grounded-no-change :artifact-only} outcome)
+               (some? kind))
+          (contains? #{:task-failure :typed-blocker :guardrail-refusal} kind))
+      (assoc base :class :task-outcome :reason :typed-task-outcome)
+
+      (contains? #{:incomplete :build-failed :cancelled} outcome)
+      (assoc base :class :unclassified :reason :terminal-label-not-causal-evidence)
+
+      :else
+      (assoc base :class :unclassified :reason :terminal-cause-unclassified))))
+
+(defn- interoceptive-evidence [record source selection cause]
+  (when (contains? #{:apparatus-failure :unclassified} (:class cause))
+    (let [body {:schema :wm/r20-terminal-evidence-v1
+                :run/id (:run/id record) :click/id (:click/id record)
+                :selected-target (:id selection)
+                :cause (select-keys cause [:class :reason :kind :stage :outcome :detail])
+                :record-reference source}]
+      (assoc body :digest (field/digest body)))))
+
 (defn- typed-value [value unit source]
   (if (some? value)
     {:status :present :value value :unit unit :source source}
@@ -191,14 +241,14 @@
     :or {read-bytes #(java.nio.file.Files/readAllBytes (.toPath (io/file %)))}}]
   (if-let [bad (manifest-check manifest expected-manifest-pin)]
     (refusal bad {})
-    (loop [entries (:entries manifest) rows [] exclusions []]
+    (loop [entries (:entries manifest) rows [] exclusions [] interoception []]
       (if-let [{:keys [path sha256] :as source} (first entries)]
         (let [bytes (try (read-bytes path) (catch Throwable _ nil))
               actual (when bytes (field/sha256 bytes))]
           (cond
             (nil? bytes)
             (recur (next entries) rows
-                   (conj exclusions {:source source :reason :record-unreadable}))
+                   (conj exclusions {:source source :reason :record-unreadable}) interoception)
             (not= sha256 actual)
             (refusal :record-source-drift {:path path :expected sha256 :actual actual})
             :else
@@ -206,9 +256,12 @@
                               (catch Throwable _ ::invalid))]
               (if (= ::invalid record)
                 (recur (next entries) rows
-                       (conj exclusions {:source source :reason :record-invalid-edn}))
+                       (conj exclusions {:source source :reason :record-invalid-edn}) interoception)
                 (let [run-id (:run/id record) click-id (:click/id record)
                       selection (selected-target record)
+                      cause (terminal-cause record)
+                      intero (interoceptive-evidence record source selection cause)
+                      interoception (cond-> interoception intero (conj intero))
                       target (:id selection) kind (target-kind target)
                       started-at (when (string? (:startedAt record))
                                    (try (Instant/parse (:startedAt record))
@@ -223,7 +276,8 @@
                                             (nil? target) :outer-task-identity-missing
                                             :else :outer-task-kind-invalid)
                                   :evidence {:run/id run-id :click/id click-id
-                                             :selected-target target}}))
+                                             :selected-target target}})
+                           interoception)
                     (if-not started-at
                       (recur (next entries) rows
                              (conj exclusions
@@ -232,7 +286,8 @@
                                               :start-instant-missing
                                               :start-instant-malformed)
                                     :evidence {:run/id run-id :click/id click-id
-                                               :startedAt (:startedAt record)}}))
+                                               :startedAt (:startedAt record)}})
+                             interoception)
                       (let [outcome (raw-outcome record)
                             want-effects (selected-want-effects record)
                             artifact (grounded-artifact record)
@@ -249,6 +304,7 @@
                                                             (get-in record [:run-output :outcome]) [:run-output :outcome]
                                                             (get-in record [:terminal :outcome]) [:terminal :outcome]
                                                             :else {:absent :not-recorded})}
+                               :terminal-cause cause
                                :elapsed (timing record) :token-use (token-use record)
                                :selected-want-effects want-effects
                                :grounded-artifact artifact
@@ -261,7 +317,7 @@
                                {:target-source (if (= :canonical-outer (:source selection))
                                                  [:outer-task-selection :chosen :id]
                                                  [:decision :selection-law :per-policy-argmax :action :target])}}]
-                        (recur (next entries) (conj rows row) exclusions)))))))))
+                        (recur (next entries) (conj rows row) exclusions interoception)))))))))
         (let [duplicate-identities (->> rows
                                         (group-by (juxt :run/id :click/id))
                                         (keep (fn [[identity matches]]
@@ -286,6 +342,7 @@
               body {:schema schema :status :produced
                     :manifest-source-pin expected-manifest-pin
                     :rows rows :exclusions exclusions
+                    :interoceptive-evidence interoception
                     :counts {:inputs (count (:entries manifest))
                              :usable (count rows) :excluded (count exclusions)
                              :task-kinds (into (sorted-map) (frequencies (map #(get-in % [:task :kind]) rows)))

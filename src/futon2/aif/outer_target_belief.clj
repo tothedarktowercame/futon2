@@ -29,11 +29,21 @@
        (every? #(and (number? %) (pos? %)) (vals (:alpha p)))))
 
 (defn- observation [row]
-  (let [terminal (get-in row [:terminal-outcome :class])
+  (let [cause (get-in row [:terminal-cause :class])
+        terminal (get-in row [:terminal-outcome :class])
         effects (:selected-want-effects row)
         counts (:counts effects)
         selected-effect (+ (get counts :reached 0) (get counts :progressed 0))]
     (cond
+      (not= :task-outcome cause)
+      {:status :refused
+       :reason (case cause
+                 :apparatus-failure :apparatus-failure-not-task-evidence
+                 :unclassified :terminal-cause-unclassified
+                 :terminal-cause-missing)
+       :evidence {:terminal-cause (:terminal-cause row)
+                  :terminal-class terminal}}
+
       (= :closure terminal)
       {:status :present :class :closure
        :evidence [[:terminal-outcome]]}
@@ -167,6 +177,7 @@
          :details (dissoc conflict :reason)}
         (let [body {:schema schema :status :produced
                     :dataset-source-pin (:source-pin dataset)
+                    :interoceptive-evidence (:interoceptive-evidence dataset)
                     :prior (select-keys prior [:schema :authority :alpha])
                     :targets (:targets folded)
                     :events (:events folded)

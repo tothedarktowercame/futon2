@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/worktrees/futon2-outer-belief-cause"
+ :code-paths ["src/futon2/aif/meta_outcome_dataset.clj"
+              "src/futon2/aif/outer_target_belief.clj"]
+ :test-paths ["test/futon2/aif/meta_outcome_dataset_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.meta-outcome-dataset-test"]
+ :author "codex-6"
+ :origin "T-outer-belief-separate-machine-failure"
+ :artifact-dir "/tmp/outer-belief-terminal-cause-registry"
+ :agency-url "http://localhost:7070"}

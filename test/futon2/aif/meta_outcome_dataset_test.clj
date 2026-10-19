@@ -98,6 +98,7 @@
     (is (= {:prior-occurrences 1 :position 2} (:repetition one)))
     (is (true? (get-in one [:quality :outer-selection-retained])))
     (is (= :canonical-outer (get-in one [:quality :selected-identity-class])))
+    (is (= :task-outcome (get-in one [:terminal-cause :class])))
     (is (false? (get-in two [:quality :outer-selection-retained])))
     (is (= :legacy-inner-fallback
            (get-in two [:quality :selected-identity-class])))
@@ -189,3 +190,53 @@
   (is (= :typed-blocker (dataset/outcome-class :guardrail-refusal)))
   (is (= :abstention-or-failure (dataset/outcome-class :abstained)))
   (is (= :typed-unknown (dataset/outcome-class :future-outcome))))
+
+(deftest terminal-cause-boundary-pins-apparatus-and-ambiguous-evidence
+  (let [selected (records "/runs/one.edn")
+        rs {"/runs/resume.edn"
+            (-> selected
+                (assoc :run/id "resume" :click/id "resume-click"
+                       :startedAt "2026-09-20T00:00:00Z"
+                       :terminal-receipt {:outcome :incomplete
+                                          :failure-kind :resume-protocol-violation}
+                       :failure {:kind :resume-protocol-violation
+                                 :stage :cascade-resume
+                                 :detail {:repairable true}}))
+            "/runs/phase.edn"
+            (-> selected
+                (assoc :run/id "phase" :click/id "phase-click"
+                       :startedAt "2026-09-20T00:00:01Z"
+                       :terminal-receipt {:outcome :incomplete :failure-kind :phase-failure}
+                       :failure {:kind :phase-failure :stage :selection}))
+            "/runs/untyped.edn"
+            (-> selected
+                (assoc :run/id "untyped" :click/id "untyped-click"
+                       :startedAt "2026-09-20T00:00:02Z"
+                       :terminal-receipt {:outcome :incomplete :failure-kind :untyped-failure}
+                       :failure {:kind :untyped-failure :stage :cascade-execution}))
+            "/runs/no-target.edn"
+            {:run/id "no-target" :click/id "no-target-click"
+             :startedAt "2026-09-20T00:00:03Z"
+             :terminal-receipt {:outcome :incomplete :failure-kind :phase-failure}
+             :failure {:kind :phase-failure :stage :selection}}}
+        reader #(utf8 (rs %))
+        m (dataset/manifest (keys rs) reader)
+        result (dataset/produce {:manifest m :expected-manifest-pin (:source-pin m)
+                                 :read-bytes reader})
+        evidence (:interoceptive-evidence result)]
+    (is (= 3 (count (:rows result))))
+    (is (= 4 (count evidence)))
+    (is (= #{:apparatus-failure :unclassified}
+           (set (map #(get-in % [:cause :class]) evidence))))
+    (is (= #{"resume" "phase" "untyped" "no-target"}
+           (set (map :run/id evidence))))
+    (is (every? #(re-matches #"[0-9a-f]{64}" (:digest %)) evidence))
+    (is (= :outer-task-identity-missing (get-in result [:exclusions 0 :reason])))
+    (is (= :apparatus-failure
+           (:class (dataset/terminal-cause (rs "/runs/resume.edn")))))
+    (is (= :unclassified
+           (:class (dataset/terminal-cause (rs "/runs/untyped.edn")))))
+    (is (= :task-outcome
+           (:class (dataset/terminal-cause
+                    (assoc selected :terminal-receipt {:outcome :guardrail-refusal}
+                           :failure {:kind :task-failure :stage :enactment})))))))

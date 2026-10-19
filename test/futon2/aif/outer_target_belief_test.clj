@@ -4,6 +4,7 @@
 
 (defn- row [run target terminal & {:keys [effects collateral blocker]}]
   {:run/id run :click/id (str run "-click") :task {:id target :kind :mission}
+   :terminal-cause {:schema :wm/terminal-cause-v1 :class :task-outcome}
    :terminal-outcome {:class terminal}
    :selected-want-effects (or effects {:status :absent})
    :collateral-progress (or collateral {:status :absent})
@@ -54,6 +55,34 @@
                  :collateral {:status :present :kind :grounded-collateral-progress})])})]
     (is (= :selected-want-progress
            (get-in result [:events 0 :observation :class])))))
+
+(deftest apparatus-and-ambiguous-failures-never-update-target-alpha
+  (let [apparatus (assoc (row "r-apparatus" "M-a" :abstention-or-failure)
+                         :terminal-cause {:schema :wm/terminal-cause-v1
+                                          :class :apparatus-failure
+                                          :kind :resume-protocol-violation
+                                          :stage :cascade-resume})
+        ambiguous (assoc (row "r-ambiguous" "M-a" :abstention-or-failure)
+                         :terminal-cause {:schema :wm/terminal-cause-v1
+                                          :class :unclassified
+                                          :kind :untyped-failure})
+        task-failure (row "r-task" "M-a" :abstention-or-failure)
+        result (belief/build {:prior (belief/prior 1)
+                              :dataset (dataset [apparatus ambiguous task-failure])})]
+    (is (= {:rows 3 :applied 1 :unresolved 2} (:counts result)))
+    (is (= 2 (get-in result [:targets "M-a" :alpha :abstention-or-failure])))
+    (is (= [:apparatus-failure-not-task-evidence
+            :terminal-cause-unclassified]
+           (mapv #(get-in % [:observation :reason]) (take 2 (:events result)))))))
+
+(deftest replay-order-does-not-change-alpha-and-no-target-is-not-a-belief
+  (let [rows [(row "r-success" "M-a" :closure)
+              (row "r-failure" "M-a" :abstention-or-failure)]
+        a (belief/build {:prior (belief/prior 1) :dataset (dataset rows)})
+        b (belief/build {:prior (belief/prior 1) :dataset (dataset (reverse rows))})]
+    (is (= (get-in a [:targets "M-a" :alpha])
+           (get-in b [:targets "M-a" :alpha])))
+    (is (nil? (get-in a [:targets nil])))))
 
 (deftest refuses-implicit-or-malformed-authority
   (is (= :prior-invalid

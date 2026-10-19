@@ -1,0 +1,64 @@
+{:schema :wm/outer-belief-terminal-cause-audit-v1
+ :ticket "holes/tickets/T-outer-belief-separate-machine-failure.md"
+ :authority {:base-commit "2079cc548472f5793b7bbc6de8a1b5553b9d7c43"
+             :manifest "/home/joe/code/futon2/data/wm-learning/run-record-manifest.edn"
+             :manifest-edited false}
+ :dataset {:old-sha256 "017856e97a85c298d1bbe0b78ccef4d6511d63e3157ffd207c36836978d948cb"
+           :new-sha256 "1d7e53e91930519ea04e2829511413a176b99b262cf8eec8f01b94119da6feaf"
+           :rows 29 :old-applied 29 :new-applied 22 :new-unresolved 7}
+ :alpha-order [:closure :selected-want-progress :grounded-collateral-progress
+               :typed-blocker :abstention-or-failure]
+ :excluded-from-alpha
+ [{:run/id "2026-10-16-d845555a-88f3-442b-aef5-f6d17379cae9" :target "M-stack-geometry"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :terminal-cause-unclassified}
+  {:run/id "2026-10-17-2d07a990-cf5c-4327-a4f2-9653aa2246b1" :target "M-pattern-posteriors"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :apparatus-failure-not-task-evidence}
+  {:run/id "2026-10-17-d4c0fd8f-f04c-44cf-afcf-65e85327806a" :target "M-custom-harness"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :apparatus-failure-not-task-evidence}
+  {:run/id "2026-10-17-a94d597b-d0f2-4314-ac21-c13fcfde5c7a" :target "M-recommendation-bindings"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :terminal-cause-unclassified}
+  {:run/id "2026-10-18-ccaa1478-2c3b-4c84-9593-f11eb5a31e90" :target "M-formal-war-machine"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :apparatus-failure-not-task-evidence}
+  {:run/id "2026-10-18-78e3527a-052f-4fef-b33e-abd5c67b1f85" :target "M-digital-nomad-patterns"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :apparatus-failure-not-task-evidence}
+  {:run/id "2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc" :target "M-self-improvement-loop"
+   :old-alpha [1 1 1 2 1] :new-alpha [1 1 1 1 1] :reason :apparatus-failure-not-task-evidence}]
+ :included-run-ids
+ ["2026-10-14-6a64c83f-4732-4af1-b286-561f22109667"
+  "2026-10-14-d8fcde03-a588-4fc7-8658-06e56a4dbde8"
+  "2026-10-14-0b92b122-0c1c-4fde-ac1c-4e632242648c"
+  "2026-10-15-b8f72b63-97c0-4289-948e-d7c370dd2ba4"
+  "2026-10-16-edabd1a5-6399-4156-8839-3e7f2c2d159c"
+  "2026-10-16-40806a49-fbf0-4d8e-a091-9ab40c6436ce"
+  "2026-10-16-ccfdc0c8-1b56-4404-a7d2-68dee6b5ff83"
+  "2026-10-16-26dd4305-3ddc-4aa4-a813-a5c60b9cde9c"
+  "2026-10-16-c2e0a133-bbe0-45f7-9c2c-60888170bd47"
+  "2026-10-16-094d82f0-22b2-4774-8f64-1f95c553d0d2"
+  "2026-10-16-20372529-d383-40a8-9c6b-9b1be7d289bf"
+  "2026-10-16-2a81e7f3-bef3-4c61-bdec-1cd7f031a017"
+  "2026-10-16-08f62de8-db1e-4fe3-9a01-ad264bcc3533"
+  "2026-10-16-a62ec0bb-2c17-462a-99c4-420e6db6e62d"
+  "2026-10-16-afb08e58-4b5f-4489-90dd-855b299782ba"
+  "2026-10-16-14c04155-4bb9-4da5-9f2d-d1279c470351"
+  "2026-10-16-0059c683-2614-4baa-aa6d-1bd52234b40c"
+  "2026-10-16-8ac6038a-086b-40b4-b269-fd23df9ccf05"
+  "2026-10-16-3ccfb952-b47f-487a-aefc-475792b10057"
+  "2026-10-17-a9af4bb8-12c3-4fa5-a74b-7d0dc861da40"
+  "2026-10-17-9e3d4379-35ba-480d-b067-5a4c42c0329f"
+  "2026-10-17-173c5a65-fed9-4bc1-8aa2-b3b4df08dba5"]
+ :requested-records
+ [{:run/id "2026-10-18-9c3a318d-a329-4dca-a19b-17976a0acfde"
+   :previously-folded false :selected-target nil
+   :cause {:class :unclassified :kind :untyped-failure :stage :cascade-execution}
+   :disposition :interoceptive-only
+   :digest "dcbc32a4b5f493c5fa02236b5ac99e11f5b2018adb5402640dea403d08130fa5"}
+  {:run/id "2026-10-18-78e3527a-052f-4fef-b33e-abd5c67b1f85"
+   :previously-folded true :selected-target "M-digital-nomad-patterns"
+   :cause {:class :apparatus-failure :kind :resume-protocol-violation :stage :cascade-resume}
+   :disposition :interoceptive-only
+   :digest "5b3e8c4546ac1a4dd2dda2fedb93f2c6bf04bc7c88363ccb909c22263b66a858"}
+  {:run/id "2026-10-18-f016ed51-62de-426e-88c2-768fa18b00dc"
+   :previously-folded true :selected-target "M-self-improvement-loop"
+   :cause {:class :apparatus-failure :kind :resume-protocol-violation :stage :cascade-resume}
+   :disposition :interoceptive-only
+   :digest "4332f4bc2209172a222b6e035d9579a2edf2b652f165fb4b7d7bb56ff89e0450"}]}
