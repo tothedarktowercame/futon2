@@ -64,6 +64,25 @@
     {:manifest manifest :expected-manifest-pin (:source-pin manifest)
      :read-bytes read-bytes}))
 
+(deftest pinned-set-key-record-has-a-total-deterministic-dataset-source-pin
+  ;; F5 reproduction: this admitted record has {#{} 1} at
+  ;; [:d-task-enactment :verification :precision-family :model :q0].  Manifest
+  ;; construction calls the producer's source-pin canonicalisation before
+  ;; produce reads the record; the old default sorted-map comparator threw a
+  ;; ClassCastException there.
+  (let [path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-14-d8fcde03-a588-4fc7-8658-06e56a4dbde8.edn"
+        manifest (dataset/manifest [path])
+        authority {:manifest manifest :expected-manifest-pin (:source-pin manifest)}
+        first-result (dataset/produce authority)
+        second-result (dataset/produce authority)]
+    (is (= :produced (:status first-result)))
+    (is (= {#{} 1}
+           (get-in first-result [:rows 0 :verified-record
+                                 :d-task-enactment :verification
+                                 :precision-family :model :q0])))
+    (is (= (:source-pin first-result) (:source-pin second-result)))
+    (is (= first-result second-result))))
+
 (deftest extracts-only-explicit-measurements-and-repetition
   (let [a (authority) result (dataset/produce a)
         by-run (into {} (map (juxt :run/id identity) (:rows result)))

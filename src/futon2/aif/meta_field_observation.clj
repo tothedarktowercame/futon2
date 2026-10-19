@@ -22,9 +22,17 @@
   (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
     (apply str (map #(format "%02x" (bit-and % 0xff)) digest))))
 
+(defn- canonical-key-compare
+  "A total, value-preserving order for arbitrary EDN map keys.  Admitted run
+  records may use collections (including sets) as keys, for which Clojure's
+  default sorted-map comparator is not defined."
+  [left right]
+  (compare (pr-str left) (pr-str right)))
+
 (defn- canonical [x]
   (cond
-    (map? x) (into (sorted-map) (map (fn [[k v]] [k (canonical v)])) x)
+    (map? x) (into (sorted-map-by canonical-key-compare)
+                    (map (fn [[k v]] [k (canonical v)])) x)
     (set? x) (mapv canonical (sort-by pr-str x))
     (sequential? x) (mapv canonical x)
     :else x))
