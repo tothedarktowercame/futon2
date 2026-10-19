@@ -208,12 +208,19 @@
   (some (fn [[flag value]] (when (= "-n" flag) value))
         (partition 2 1 command)))
 
+(def ^:private namespace-segment-pattern
+  ;; The same segment rule the futon3c run port applies when it derives the
+  ;; file path (F6b): symbol-safe characters, no empty segment, no "." or
+  ;; "..", no leading dash.  A namespace that fails it has no test path, so
+  ;; the proposal is a source mismatch and never reaches a port.
+  #"(?!-)[A-Za-z0-9_-]+")
+
 (defn- namespace-test-path [namespace]
   (when (and (string? namespace) (not (str/blank? namespace)))
-    (str "test/" (-> namespace
-                     (str/replace "." "/")
-                     (str/replace "-" "_"))
-         ".clj")))
+    (let [segments (str/split namespace #"\." -1)]
+      (when (every? #(re-matches namespace-segment-pattern %) segments)
+        (str "test/" (str/join "/" (map #(str/replace % "-" "_") segments))
+             ".clj")))))
 
 (defn- concrete-acceptance? [case]
   (let [source (:source case)]

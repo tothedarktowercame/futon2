@@ -391,13 +391,23 @@
                       (constantly {:status :proposed
                                    :acceptance-test acceptance-test})}
                      diagnosis)))
+        ;; A namespace with an unsafe segment ("../x") has no test path under
+        ;; the shared segment rule (F6b derives the same path in the run port),
+        ;; even when its :path is spelled to match a naive derivation.
+        unsafe-case (-> (acceptance-case "unsafe-namespace")
+                        (assoc :command ["clojure" "-M:test" "-n" "../x"])
+                        (assoc :source {:namespace "../x" :path "test///x.clj"
+                                        :text "(ns x)"}))
         missing (produce missing-case)
-        mismatched (produce mismatched-case)]
+        mismatched (produce mismatched-case)
+        unsafe (produce unsafe-case)]
     (is (= :meta-self-heal/acceptance-prose-or-malformed (:reason missing)))
     (is (= :meta-self-heal/acceptance-proposal-source-mismatch
            (:reason mismatched)))
+    (is (= :meta-self-heal/acceptance-proposal-source-mismatch (:reason unsafe)))
     (is (nil? (:acceptance-evidence-pin missing)))
     (is (nil? (:acceptance-evidence-pin mismatched)))
+    (is (nil? (:acceptance-evidence-pin unsafe)))
     (is (zero? @persisted))))
 
 (deftest historical-source-less-proposal-never-runs-or-reaches-review
