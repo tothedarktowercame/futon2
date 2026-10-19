@@ -591,6 +591,14 @@
                                     :graph-source (:graph-source snapshot)})))
         injury? (boolean (seq algorithm-tasks))
         candidates (if injury? (algorithm-candidates algorithm-tasks) [])
+        ;; `selector` transports optional injection keys explicitly.  Clojure's
+        ;; destructuring :or does not replace a present nil, so production
+        ;; requests without an injected constructor used to call nil here and
+        ;; stop in the debugger before META could classify the injury.
+        policy-field-fn (or policy-field-fn
+                            family-selection/full-eligible-target-field)
+        policy-menu-fn (or policy-menu-fn
+                           family-selection/sealed-pre-choice-menu)
         policy-field (when (and (not injury?)
                                 (= :verified (:status snapshot-verification))
                                 (map? policy-field-config))

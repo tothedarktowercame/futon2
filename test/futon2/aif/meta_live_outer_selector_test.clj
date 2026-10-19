@@ -432,6 +432,19 @@
     (is (zero? @field-calls))
     (is (nil? (:action receipt)))))
 
+(deftest explicit-nil-constructor-injections-use-production-defaults
+  (let [receipt (live/select-live
+                 {:tasks tasks
+                  :policy-field-config {:authority :test-fixture}
+                  :policy-field-fn nil
+                  :policy-menu-fn nil
+                  :fetch-snapshot (constantly snapshot)})]
+    (is (= :refused (get-in receipt [:policy :status])))
+    (is (contains? #{:incomplete-policy-menu-coverage
+                     :outer-policy-evidence-provider-required}
+                   (get-in receipt [:policy :meta-selection :reason])))
+    (is (nil? (:action receipt)))))
+
 (deftest off-map-tasks-are-accounted-as-typed-exclusions
   (let [off-map {:id "M-z" :kind :mission :priority 0
                  :source (pin "M-z.md" "e")}
