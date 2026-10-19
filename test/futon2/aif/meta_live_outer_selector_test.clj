@@ -233,21 +233,35 @@
         belief (outer-belief/build
                 {:prior (outer-belief/prior 1 :operator)
                  :dataset {:status :produced :source-pin (pin "runs" "6") :rows []}})
-        receipt (live/select-live
-                 {:tasks (conj tasks algorithm) :fetch-snapshot (constantly snapshot)
-                  :outer-learning
-                  {:mode :live :belief belief :preference-authority :operator
-                   :preference-transform {:kind :softmax-negative-cost :inverse-temperature 1.0}
-                   :preference-costs {:closure 0.0 :selected-want-progress 0.2
-                                      :grounded-collateral-progress 0.5 :typed-blocker 0.9
-                                      :abstention-or-failure 1.0}
-                   :controller {:missing-channel-cost 1.0 :resource-weight 2.0}}})]
-    (is (= "A-heal" (get-in receipt [:action :target])))
-    (is (= :advisory (get-in receipt [:outer-learning :injury-score-comparison :status])))
-    (is (= :policy-prior-conversion-unresolved
-           (get-in receipt [:outer-learning :injury-score-comparison :reason])))
-    (is (= :machine-injury-repair-cost
-           (get-in receipt [:outer-learning :injury-score-comparison :selection-basis])))))
+        learning (fn [mode costs]
+                   {:mode mode :belief belief :preference-authority :operator
+                    :preference-transform {:kind :softmax-negative-cost :inverse-temperature 1.0}
+                    :preference-costs costs
+                    :controller {:missing-channel-cost 1.0 :resource-weight 2.0}})
+        select (fn [outer-learning]
+                 (live/select-live {:tasks (conj tasks algorithm)
+                                    :fetch-snapshot (constantly snapshot)
+                                    :outer-learning outer-learning}))]
+    (doseq [mode [:live :shadow]]
+      (let [receipt (select (learning mode
+                                      {:closure 0.0 :selected-want-progress 0.2
+                                       :grounded-collateral-progress 0.5 :typed-blocker 0.9
+                                       :abstention-or-failure 1.0}))]
+        (is (= "A-heal" (get-in receipt [:action :target])))
+        (is (= :advisory (get-in receipt [:outer-learning :status])))
+        (is (= mode (get-in receipt [:outer-learning :mode])))
+        (is (false? (get-in receipt [:outer-learning :scores-consumed])))
+        (is (nil? (get-in receipt [:outer-learning :consumption-path])))
+        (is (= :policy-prior-conversion-unresolved
+               (get-in receipt [:outer-learning :injury-score-comparison :reason])))
+        (is (= :machine-injury-repair-cost
+               (get-in receipt [:outer-learning :injury-score-comparison :selection-basis])))))
+    (let [receipt (select (learning :live {}))]
+      (is (= "A-heal" (get-in receipt [:action :target]))
+          "score absence is advisory; the baseline injury selection remains usable")
+      (is (= :advisory (get-in receipt [:outer-learning :status])))
+      (is (= {:refused 1} (get-in receipt [:outer-learning :score-statuses])))
+      (is (false? (get-in receipt [:outer-learning :scores-consumed]))))))
 
 (deftest continuation-evidence-can-justify-reselecting-a-recent-target
   (let [belief (outer-belief/build

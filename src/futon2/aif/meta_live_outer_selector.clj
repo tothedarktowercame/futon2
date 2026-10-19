@@ -198,7 +198,8 @@
 (defn- exactly-one [xs]
   (when (= 1 (count xs)) (first xs)))
 
-(defn- learning-certificate [outer-learning scores learned-selection baseline-selection]
+(defn- learning-certificate [outer-learning scores learned-selection baseline-selection
+                            injury-advisory?]
   (let [belief (:belief outer-learning)
         controller (:controller outer-learning)
         mode (:mode outer-learning)
@@ -224,6 +225,16 @@
       {:schema :wm/outer-learning-certificate-v1
        :status :refused :reason :outer-learning-state-unavailable
        :mode mode :belief-refusal belief
+       :re-arm-condition (:re-arm-condition controller)}
+
+      injury-advisory?
+      {:schema :wm/outer-learning-certificate-v1
+       :status :advisory :mode mode
+       :reason :policy-prior-conversion-unresolved
+       :score-statuses (frequencies (map :status scores))
+       :scores-consumed false
+       :selection-basis :machine-injury-repair-cost
+       :baseline-selection (:selected baseline-selection)
        :re-arm-condition (:re-arm-condition controller)}
 
       (or (not all-scored?) (not= :selected (:status learned-selection)))
@@ -838,7 +849,7 @@
                          :action-of (fn [c] {:type (get action-type (:kind c))
                                              :target (:id c)})})))
         certificate (learning-certificate outer-learning learning-scores
-                                          shadow-selection selection)
+                                          shadow-selection selection injury?)
         receipt (assoc receipt :outer-learning
                        (cond-> certificate
                          learning-scores (assoc :scores learning-scores
