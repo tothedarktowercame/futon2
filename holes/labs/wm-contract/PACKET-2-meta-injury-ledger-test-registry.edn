@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/worktrees/futon2-meta-self-heal-ledger"
+ :code-paths ["src/futon2/aif/meta_injury_ledger.clj"]
+ :test-paths ["test/futon2/aif/meta_injury_ledger_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.meta-injury-ledger-test"]
+ :author "codex-6"
+ :namespace "futon2.aif.meta-injury-ledger-test"
+ :origin "Dedicated META self-heal Packet 2 retained pure ledger"
+ :artifact-dir "/home/joe/code/storage/test-registry/artifacts"}
