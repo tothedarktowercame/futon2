@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P16b supersedes the earlier unwired-helper status: runtime now calls preparation
+through injected diagnosis port, retaining observation and threading only newly
+available persisted evidence. Existing supplied pin remains compatibility path.
+Produced source-record pin is explicit at the boundary. Named production transport
+is still absent; absence of P17 acceptance still prevents repair readiness.
+
 No-producer #3 / P16: `meta-self-heal-production/produce-diagnosis!` now
 accepts durable injury history and active entry, verifies source bytes, invokes
 injected `:meta-diagnosis-fn`, and persists successful response receipts before

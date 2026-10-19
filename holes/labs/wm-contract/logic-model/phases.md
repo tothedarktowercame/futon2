@@ -1,5 +1,11 @@
 # WM click runner: phase order (static reading)
 
+P16b update: phase 0a runtime preparation now invokes the injectable diagnosis
+producer and carries its observation into readiness/routing. Before coordination,
+produced evidence must match work-order injury ID, causal source pin and diagnosis
+pin, including resumed transactions. Absent ledger is not-required; unreadable
+ledger is unavailable. Transport/P17 and serving verification remain outstanding.
+
 P16 phase 0a increment: a standalone diagnosis producer can turn pinned injury
 source into an injected request and content-addressed persisted response.
 The serving phase does NOT invoke/thread it yet. No runtime continuation,

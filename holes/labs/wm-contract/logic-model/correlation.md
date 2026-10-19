@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P16b: runtime caller integration now exists for the injected diagnosis
+producer. Produced evidence binds to actual prepared/resumed transaction's
+injury/cause/pin triple before effects; changed selection is a typed mismatch,
+not reusable evidence. Hermetic actual-producer/route-boundary tests passed.
+No production transport or P17 acceptance producer is claimed, and existing
+missing-acceptance readiness refusal remains; ordinary continuation is not proved.
+
 Row 7 / P16: diagnosis producer exists as an unwired helper, with exact source
 pin verification and content-addressed receipt paths (changed diagnosis bytes
 use different paths). Existing-byte reuse is verified. Missing port/source,
