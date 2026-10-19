@@ -27,7 +27,9 @@
 (defn- refusal [reason details]
   {:schema schema :status :refused :reason reason :details details})
 
-(defn- project-run-record [record source-record]
+(defn project-run-record
+  "Canonical immutable injury projection retained beside a terminal run record."
+  [record source-record]
   {:schema :wm/injury-evidence-v1
    :source-record source-record
    :run-id (:run/id record)

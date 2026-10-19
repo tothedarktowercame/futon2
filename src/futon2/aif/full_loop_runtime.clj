@@ -8,6 +8,8 @@
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.meta-field-observation :as meta-field]
+            [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
             [futon2.aif.reading-policy-precision :as reading-precision]
@@ -193,6 +195,7 @@
                              :require-occurrence-squares?
                              ;; an operator's identity-bound beta declaration
                              :reading-precision-declaration])
+          (select-keys opts [:meta-field-observation :meta-field-source-pin])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
@@ -214,7 +217,26 @@
   "Build the report-backed functions for one production invocation."
   [opts]
   (ensure-reading-precision-campaign! opts)
-  (let [outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
+  (let [injury-authority (or (:meta-injury-authority opts)
+                             (injury-store/load-authority
+                              (or (:meta-injury-root opts)
+                                  injury-store/default-root)))
+        click-availability (or (:ordinary-click-availability opts)
+                               (try
+                                 ((requiring-resolve
+                                   'futon3c.wm.ordinary-click-budget/availability))
+                                 (catch Throwable _ nil)))
+        meta-observation (or (:meta-field-observation opts)
+                             (when injury-authority
+                               (meta-field/observe
+                                {:catalog-path meta-field/default-algorithm-catalog
+                                 :click-availability click-availability
+                                 :injury-authority injury-authority})))
+        opts (cond-> opts
+               meta-observation
+               (assoc :meta-field-observation meta-observation
+                      :meta-field-source-pin (:source-pin meta-observation)))
+        outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
         evidence-provider (or (:outer-policy-evidence-provider opts)
                               (when-let [path (:outer-policy-evidence-provider-path opts)]
                                 (policy-evidence-provider/load-static path)))

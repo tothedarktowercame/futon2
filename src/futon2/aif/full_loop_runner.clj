@@ -84,6 +84,7 @@
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
+            [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -7895,6 +7896,17 @@
                          {:source "wm-full-loop" :status "idle"})))
         final-result (assoc result :runner/source source-check :repair/publication publication)
         persisted (persist-run-record! raw-opts run-id started-at final-result)
+        injury-deposit
+        (when (= :present (:run-record-status persisted))
+          (run-phase!
+           raw-opts
+           {:opportunity-id (:click-id raw-opts)
+            :attempt-id (:attempt-id final-result)}
+           :meta-injury-deposit
+           #(meta-injury-store/deposit!
+             (or (:meta-injury-root raw-opts) meta-injury-store/default-root)
+             (:run-record persisted))
+           #(select-keys % [:schema :status :capability :run-id :head-path])))
         learning-publication
         (when-let [manifest-path (:outer-learning-manifest-path raw-opts)]
           (run-phase!
@@ -7908,5 +7920,7 @@
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
     (cond-> (merge final-result {:run/id run-id} persisted)
+      injury-deposit
+      (assoc :meta-injury-deposit injury-deposit)
       learning-publication
       (assoc :outer-learning-publication learning-publication))))
