@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P17b: proposal producer is runtime-reachable through injected port with
+actual P16/P17 output-shape regression coverage. Returned observation retains
+diagnosis/source linkage and optional immutable proposal pin. Original readiness
+refusal survives failed proposal; proposed is not reviewed or usable repair
+authority. Existing acceptance veto, named transport and admission remain open;
+no ordinary continuation or serving readiness is established.
+
 Row 7 / P17: an acceptance proposal producer now retains exact diagnosis pin
 and injury/source identity in a content-addressed receipt. Missing, mismatched,
 drifted or unreadable diagnosis and failed proposal persistence yield no pin.

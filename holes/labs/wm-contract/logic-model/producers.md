@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P17b supersedes unwired proposal status: runtime calls prepare-acceptance after
+available diagnosis, retaining typed proposal observation on returned results.
+Proposals remain unreviewed/not-run and are not copied to repair readiness's
+:acceptance-test. Supplied acceptance compatibility remains. Named transport and
+review/admission consumer are absent; no accepted test producer is claimed.
+
 P17 / no-producer #3: `produce-acceptance!` exists as an unwired injected-port
 proposal producer. It verifies persisted P16 diagnosis bytes and injury/source
 identity, then persists a content-addressed specification with ID, command and

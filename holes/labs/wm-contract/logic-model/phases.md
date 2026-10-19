@@ -1,5 +1,11 @@
 # WM click runner: phase order (static reading)
 
+P17b phase 0a: runtime now retains acceptance preparation observations on refused,
+routed, ordinary and retry results. Only available diagnosis triggers proposal
+production; retry/no-active produce not-required observations. This return-value
+retention is not a claim that every observation is in the persisted run record.
+Unreviewed proposals never become :acceptance-test authority automatically.
+
 P17 phase 0a helper increment: verified diagnosis receipt can feed a prospective
 acceptance-specification request. Receipt binds diagnosis pin, injury and source;
 it remains proposed/unreviewed/not-run. Runtime preparation does not yet invoke
