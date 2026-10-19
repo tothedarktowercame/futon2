@@ -139,6 +139,9 @@
                           :diagnosis-status (:status response)
                           :diagnosis-reason (or (:reason response)
                                                 :meta-self-heal/diagnosis-not-succeeded)
+                          ;; F9: the producer port's own detail (e.g. the
+                          ;; transport's 429 text) travels onto the record.
+                          :diagnosis-detail (:detail response)
                           :repair-claimed? false})
 
                 (not (map? (:diagnosis response)))
