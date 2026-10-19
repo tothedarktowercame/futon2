@@ -34,6 +34,20 @@
 (defn- temp-dir [prefix]
   (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0))))
 
+(deftest omitted-reading-root-uses-the-producers-registry
+  (let [seen (atom nil)]
+    (with-redefs [graph-pin/load-pinned (fn [_] {:status :loaded :graph {}})
+                  reading-registry/excerpt-digest (constantly "pinned")
+                  reading-registry/current-reading
+                  (fn [root target digest]
+                    (reset! seen [root target digest])
+                    {:status :absent :kind :no-current-target-reading
+                     :target-id target :expected-digest digest})]
+      (sut/families-for-field
+       {:target-sources [{:target-id "T-real" :source-path "/source"}]
+        :graph-path "/graph" :reading-root nil})
+      (is (= [reading-registry/default-root "T-real" "pinned"] @seen)))))
+
 (defn- graph-file [dir]
   (let [file (io/file dir "graph.json")]
     (spit file (json/generate-string

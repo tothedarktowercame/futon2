@@ -168,10 +168,10 @@
                  (if (map? digest)
                    (failed-field-family target-id (dissoc digest :status))
                    (let [reading (reading-registry/current-reading
-                                  reading-root target-id digest)
+                                  (or reading-root reading-registry/default-root) target-id digest)
                          squares (when-not (= :absent (:status reading))
                                    (square-registry/current
-                                    occurrence-square-root target-id
+                                    (or occurrence-square-root square-registry/default-root) target-id
                                     (:analysis-digest reading)
                                     (or pattern-texts
                                         (square-registry/library-resolver
