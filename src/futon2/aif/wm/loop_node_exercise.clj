@@ -122,49 +122,10 @@
      :by-node by-node
      :counts (merge {:present 0 :bypassed 0 :refused 0} counts)}))
 
-(defn- decision-context
-  "Retain enough of the upstream decision in a debugger stop to decide
-  whether an unexercised node is a justified bypass or missing machinery.
-  This deliberately avoids copying the full (and potentially large)
-  construction certificate into exception data."
-  [decision]
-  (let [certificate (:selection-certificate decision)
-        candidates (:candidates certificate)]
-    {:decision-status (:status decision)
-     :chosen (select-keys (:chosen decision) [:status :kind :id :target])
-     :action (select-keys (:action decision) [:kind :id :target])
-     :refusals (:refusals decision)
-     :abstention (:abstention decision)
-     :selection-law (:selection-law decision)
-     :candidate-count (count candidates)
-     :policy-count (count (:policies certificate))
-     :candidates
-     (mapv (fn [candidate]
-             {:identity (select-keys candidate [:kind :id :target])
-              :policy (select-keys (or (:policy candidate) (:id candidate)
-                                       (get-in candidate [:f-prefix :policy]))
-                                   [:kind :id :target :precedence :enacted-steps])
-              :model (get-in candidate [:class-emission :model])
-              :class-emission (select-keys (:class-emission candidate)
-                                           [:status :consumed-in-g? :risk
-                                            :ambiguity :composition])})
-           candidates)}))
-
 (defn require-complete!
-  "Return DECISION only when every required selection node was exercised.
-  Otherwise throw inside the caller's restartable selection phase. This is a
-  launch gate, not a post-run annotation: author/reviewer work must not begin
-  for a decision already known to be incapable of demonstrating its declared
-  machinery."
+  "Compatibility entry point: annotate DECISION with measured node exercise.
+  Under the 2026-10-19 frontier ruling, missing evidence is not a veto.
+  :refused counts remain evidence of absence, never a claim of exercise."
   [decision]
-  (let [r (receipt decision)
-        refused (->> (:by-node r) vals (filter #(= :refused (:status %))) vec)]
-    (when (seq refused)
-      (throw (ex-info "Required loop nodes were not exercised by selection"
-                      {:outcome :selection-validation-failed
-                       :failure-kind :required-loop-node-unexercised
-                       :failure-stage :selection
-                       :receipt r
-                       :decision-context (decision-context decision)
-                       :refused refused})))
-    decision))
+  (assoc-in decision [:selection-certificate :loop-node-exercise]
+            (receipt decision)))

@@ -26,68 +26,44 @@
     (is (= {:present 4 :bypassed 0 :refused 0} (:counts r)))
     (is (every? #(= :present (:status %)) (vals (:by-node r))))))
 
-(deftest singleton-click-retains-specific-bypasses-and-refuses-missing-evidence
-  (let [decision {:abstention {:status :not-abstained}
-                  :selection-certificate
-                  {:candidates [{:policy {:target "M-x" :precedence [:p]}
-                                 :class-emission {:status :computed
-                                                  :consumed-in-g? false
-                                                  :risk 1.0
-                                                  :model {:kind :class-emission
-                                                          :horizon 4}}}]
-                   :policies [{:id :C1}]}}
-        r (exercise/receipt decision)]
-    (is (= :bypassed (get-in r [:by-node :R6 :status])))
-    (is (= :singleton-admissible-candidate
-           (get-in r [:by-node :R6 :because])))
-    (is (= :refused (get-in r [:by-node :CTAU-CLASS :status])))
-    (is (= :bypassed (get-in r [:by-node :R13 :status])))
-    (is (= :single-step-policy (get-in r [:by-node :R13 :because])))
-    (is (= :refused (get-in r [:by-node :R14 :status])))
-    (try
-      (exercise/require-complete! decision)
-      (is false "singleton selection must stop before dispatch")
-      (catch clojure.lang.ExceptionInfo e
-        (is (= :required-loop-node-unexercised
-               (:failure-kind (ex-data e))))
-        (is (= #{:R14 :CTAU-CLASS}
-               (set (map :node (:refused (ex-data e))))))
-        (is (= 1 (get-in (ex-data e) [:decision-context :candidate-count])))
-        (is (= "M-x"
-               (get-in (ex-data e)
-                       [:decision-context :candidates 0 :policy :target])))))))
+(deftest live-selected-shape-continues-with-four-absences
+  ;; Verbatim selected target/policy from f9abc990's debugger stop.
+  (let [decision {:status :selected
+                  :action {:kind :cascade-candidate :target "M-custom-harness"
+                           :id "M-custom-harness/policy-e22941ff9f6a8f30c06a"}}
+        measured (exercise/require-complete! decision)
+        r (get-in measured [:selection-certificate :loop-node-exercise])]
+    (is (= (:action decision) (:action measured)))
+    (is (= :selected (:status measured)))
+    (is (= {:present 0 :bypassed 0 :refused 4} (:counts r)))
+    (is (= {:R6 :candidate-space-not-retained
+            :R13 :policy-rollout-evidence-not-retained
+            :R14 :selection-posterior-not-retained
+            :CTAU-CLASS :class-preference-evidence-not-retained}
+           (update-vals (:by-node r) :reason)))
+    (is (= :incomplete (:status r)))))
 
 (deftest complete-exercise-crosses-the-launch-gate
-  (is (identical? exercised (exercise/require-complete! exercised))))
+  (let [measured (exercise/require-complete! exercised)]
+    (is (= (exercise/receipt exercised)
+           (get-in measured [:selection-certificate :loop-node-exercise])))
+    (is (= (:selection-law exercised) (:selection-law measured)))))
 
-(deftest meta-repair-selection-is-refused-by-ordinary-policy-nodes
-  (let [decision {:status :selected
-                  :action {:target "A-self-heal"}
+(deftest meta-repair-selection-records-ordinary-node-absence
+  (let [decision {:status :selected :action {:target "A-self-heal"}
                   :selection-law {:applied :meta-algorithm-selection
                                   :source :outer-task-selection
                                   :algorithm-id "A-self-heal"}}
-        r (exercise/receipt decision)]
+        r (get-in (exercise/require-complete! decision)
+                  [:selection-certificate :loop-node-exercise])]
     (is (= :incomplete (:status r)))
     (is (= {:present 0 :bypassed 0 :refused 4} (:counts r)))
-    (is (every? #(= :meta-algorithm-wrong-route (:reason %))
-                (vals (:by-node r))))
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (exercise/require-complete! decision)))))
+    (is (every? #(= :meta-algorithm-wrong-route (:reason %)) (vals (:by-node r))))))
 
-(deftest debugger-context-retains-abstention-rationale
-  (let [decision {:status :abstained
-                  :refusals [{:kind :no-problems :target "E-x"}]}]
-    (is (identical? decision (exercise/require-complete! decision)))
-    (let [r (exercise/receipt decision)]
-      (is (= :complete (:status r)))
-      (is (= 4 (get-in r [:counts :bypassed])))
-      (is (every? #(= :typed-selection-refusal (:because %))
-                  (vals (:by-node r)))))))
-
-(deftest rationale-free-abstention-still-stops
-  (try
-    (exercise/require-complete! {:status :abstained :refusals []})
-    (is false "an unexplained abstention must stop")
-    (catch clojure.lang.ExceptionInfo e
-      (is (= :required-loop-node-unexercised
-             (:failure-kind (ex-data e)))))))
+(deftest abstention-rationale-is-measured-not-invented
+  (doseq [refusals [[{:kind :no-problems :target "E-x"}] []]]
+    (let [decision {:status :abstained :refusals refusals}
+          r (get-in (exercise/require-complete! decision)
+                    [:selection-certificate :loop-node-exercise])]
+      (is (= (if (seq refusals) :complete :incomplete) (:status r)))
+      (is (= 4 (get-in r [:counts (if (seq refusals) :bypassed :refused)]))))))

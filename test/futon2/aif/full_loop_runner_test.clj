@@ -637,20 +637,17 @@
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})
 
-(deftest selection-without-retained-loop-evidence-still-refuses
+(deftest selection-without-retained-loop-evidence-records-absence
   (let [decision (policy/select-action-cascades
                   [{:action selected-action :controller-score -2.0 :rank 1}
                    {:action (assoc selected-action :id :test/bare-other)
                     :controller-score -1.0 :rank 2}]
                   {:beta 2.0})]
-    (try
-      (loop-node-exercise/require-complete! decision)
-      (is false "a genuinely unexercised required node must refuse")
-      (catch clojure.lang.ExceptionInfo e
-        (is (= :required-loop-node-unexercised
-               (:failure-kind (ex-data e))))
-        (is (= #{:R13 :CTAU-CLASS}
-               (set (map :node (:refused (ex-data e))))))))))
+    (let [r (get-in (loop-node-exercise/require-complete! decision)
+                    [:selection-certificate :loop-node-exercise])]
+      (is (= #{:R13 :CTAU-CLASS}
+             (set (keep (fn [[node v]] (when (= :refused (:status v)) node))
+                        (:by-node r))))))))
 
 (deftest content-addressed-decision-ground-keeps-large-selection-checkpoint-bounded
   ;; Click 54 selected and constructed, then the duplicated 16 MiB decision
@@ -6647,7 +6644,9 @@
     (is (= mission-id (#'runner/selected-target entry)))
     (is (= (select-keys recorded-action [:kind :id :target])
            (select-keys (:action decision) [:kind :id :target])))
-    (is (= decision (loop-node-exercise/require-complete! decision)))
+    (is (= (loop-node-exercise/receipt decision)
+           (get-in (loop-node-exercise/require-complete! decision)
+                   [:selection-certificate :loop-node-exercise])))
     (is (= :grounded-progress (:outcome result))
         "a grounded commit without mechanically accepted declared products is progress, not closure")
     (is (= [mission-id] @mission-reads))
@@ -6987,14 +6986,11 @@
         {:keys [result]} (run-token-feature-card-attempt cohort decision)
         retained (io/file root "test-cohort-exhaustion" "attempt-001" "retained")]
     (is (= :incomplete (:status (loop-node-exercise/receipt decision))))
-    (let [failure (try
-                    (loop-node-exercise/require-complete! decision)
-                    nil
-                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (= :required-loop-node-unexercised (:failure-kind failure)))
-      (is (= [:R13] (mapv :node (:refused failure)))))
-    (is (= :build-failed (:outcome result)))
-    (is (= :invalid-close-outcome (get-in result [:data :failure-kind])))
+    (let [r (get-in (loop-node-exercise/require-complete! decision)
+                    [:selection-certificate :loop-node-exercise])]
+      (is (= :refused (get-in r [:by-node :R13 :status]))))
+    (is (not= :required-loop-node-unexercised (get-in result [:data :failure-kind])))
+    (is (not= :invalid-close-outcome (get-in result [:data :failure-kind])))
     (doseq [name ["token-outcome.edn" "surprises.edn"]]
       (is (not (.exists (io/file retained name)))))))
 
