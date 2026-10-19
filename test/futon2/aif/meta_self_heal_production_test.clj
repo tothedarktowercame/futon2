@@ -417,6 +417,10 @@
                     :run-pin {:path "test://acceptance-before-repair"
                               :sha256 (apply str (repeat 64 "b"))}}
         seen-review (atom nil)
+        run-calls (atom [])
+        run-once (fn [acceptance-test]
+                   (swap! run-calls conj acceptance-test)
+                   run-result)
         accept (fn [request]
                  (reset! seen-review request)
                  (assoc (select-keys request [:injury-id :source-record-pin
@@ -425,7 +429,7 @@
                         :status :accepted))
         admitted (production/admit-acceptance!
                   {:meta-acceptance-root (str dir "/acceptances")
-                   :meta-acceptance-run-fn (constantly run-result)
+                   :meta-acceptance-run-fn run-once
                    :meta-acceptance-review-fn accept} proposal)
         tampered (production/admit-acceptance!
                   {:meta-acceptance-run-fn (constantly run-result)
@@ -441,7 +445,14 @@
         missing-run (production/admit-acceptance!
                      {:meta-acceptance-review-fn
                       (fn [_] (swap! review-calls inc) {:status :accepted})}
-                     proposal)]
+                     proposal)
+        ;; A run port that answers with a shape the protocol does not accept
+        ;; (no outcome, exit, summary or pin) is a typed refusal before review.
+        malformed-run (production/admit-acceptance!
+                       {:meta-acceptance-run-fn (constantly {:status :ran})
+                        :meta-acceptance-review-fn
+                        (fn [_] (swap! review-calls inc) {:status :accepted})}
+                       proposal)]
     (is (= :accepted (:status admitted)))
     (is (= (:acceptance-evidence-pin proposal) (:proposal-evidence-pin admitted)))
     (is (= (:acceptance-test proposal) (:acceptance-test admitted)))
@@ -451,8 +462,13 @@
     (is (= :meta-self-heal/acceptance-proposal-identity-mismatch (:reason tampered)))
     (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
     (is (= :acceptance-test-still-fails (:review-reason refused)))
+    (is (= [(:acceptance-test proposal)] @run-calls)
+        "the run port is called exactly once, with the proposal's own acceptance test")
     (is (= :meta-self-heal/acceptance-run-port-unavailable (:reason missing-run)))
-    (is (zero? @review-calls))
+    (is (= :meta-self-heal/acceptance-run-refused (:reason malformed-run)))
+    (is (= {:status :ran} (:acceptance-result malformed-run)))
+    (is (zero? @review-calls)
+        "neither a missing port nor a malformed run result reaches the reviewer")
     (is (nil? (:acceptance-test tampered)))))
 
 (deftest runtime-prepares-and-threads-only-a-durable-diagnosis-pin
