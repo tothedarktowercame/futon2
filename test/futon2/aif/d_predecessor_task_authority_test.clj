@@ -191,6 +191,58 @@
               (:kind (task/verify (assoc record :dispatch forged-dispatch)
                                   expected jobs))))))))
 
+(deftest l2-missing-prospective-carry-binds-action-but-leaves-learning-unavailable
+  ;; L2 selected this exact action before its later loop-node stop.  The carry
+  ;; is deliberately absent; none of its unavailable values is reconstructed.
+  (let [action {:kind :cascade-candidate
+                :id "M-custom-harness/policy-e22941ff9f6a8f30c06a"
+                :target "M-custom-harness"}]
+    (with-artifact
+     {:target "M-custom-harness" :action action}
+     (fn [{:keys [inputs expected jobs root]}]
+       (let [context (task/context {:action action :selection-certificate {}}
+                                   (:occurrence expected) (:declaration-pins expected))
+             capture-input (assoc context
+                                  :declaration-reads (:declaration-pins expected)
+                                  :before (get-in inputs [:dispatch :before]))
+             captured (task/capture-result capture-input)
+             present-context
+             (task/context
+              {:action action
+               :selection-certificate
+               {:token-belief-stage
+                {:prospective-carry {:occurrence-id "l2-present-carry"
+                                     :universe (:universe expected)}}}}
+              (:occurrence expected) (:declaration-pins expected))
+             present-captured
+             (task/capture-result
+              (assoc present-context :declaration-reads (:declaration-pins expected)
+                     :before (get-in inputs [:dispatch :before])))
+             changed-action (task/capture-result
+                             (assoc capture-input :selected-action
+                                    (assoc action :id "M-custom-harness/policy-changed")))]
+         (is (= :captured (:status captured)))
+         (is (= {:schema :wm/prospective-carry-receipt-v1
+                 :status :absent
+                 :reason :prospective-carry-not-retained}
+                (get-in captured [:dispatch :prospective-carry])))
+         (is (not (contains? (:dispatch captured) :carry-occurrence-id)))
+         (is (not (contains? (:dispatch captured) :universe)))
+         (is (= :captured (:status present-captured)))
+         (is (= "l2-present-carry"
+                (get-in present-captured [:dispatch :carry-occurrence-id])))
+         (is (= (:universe expected) (get-in present-captured [:dispatch :universe])))
+         (is (= :selected-enacted-action-mismatch (:kind changed-action)))
+         (is (= {:status :unavailable
+                 :kind :prospective-carry-unavailable
+                 :prospective-carry (get-in captured [:dispatch :prospective-carry])}
+                (select-keys (task/complete! root captured context
+                                           (assoc inputs :dispatch-route :fresh-author) jobs)
+                             [:status :kind :prospective-carry])))
+         (spit (get-in capture-input [:declaration-reads 0 :path]) "{:changed true}")
+         (is (= :declaration-changed-before-dispatch
+                (:kind (task/capture-result capture-input)))))))))
+
 (deftest missing-selected-declaration-does-not-mask-enactment-authority
   (let [schedule {:status :held :reason :observation-placement-not-declared}]
     (with-artifact

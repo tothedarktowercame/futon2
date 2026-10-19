@@ -34,6 +34,22 @@
 (defn- require! [p kind data] (when-not p (refuse! kind data)))
 (defn- sha [bytes] (evidence/sha256 bytes))
 (defn- file-bytes [path] (Files/readAllBytes (.toPath (io/file path))))
+
+(def prospective-carry-schema :wm/prospective-carry-receipt-v1)
+
+(defn- prospective-carry-receipt [carry]
+  (cond
+    (and (string? (:occurrence-id carry)) (set? (:universe carry)))
+    {:schema prospective-carry-schema :status :present
+     :occurrence-id (:occurrence-id carry) :universe (:universe carry)}
+
+    (nil? carry)
+    {:schema prospective-carry-schema :status :absent
+     :reason :prospective-carry-not-retained}
+
+    :else
+    {:schema prospective-carry-schema :status :absent
+     :reason :prospective-carry-incomplete}))
 (defn- read-one [bytes]
   (with-open [r (PushbackReader. (StringReader. (String. ^bytes bytes "UTF-8")))]
     (let [eof (Object.) value (edn/read {:eof eof} r)]
@@ -61,21 +77,26 @@
 (defn capture
   "Retain the minted occurrence and declaration bytes before dispatch.
    No pre-side token mapping is inferred from interpretation facts."
-  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id
+  [{:keys [occurrence carry-occurrence-id universe prospective-carry declaration-reads before candidate-id
            precision-family selected-action]}]
   (retention/validate-occurrence occurrence)
-  (require! (and (string? carry-occurrence-id) (set? universe)) :carry-identity-unavailable {})
   (require! (= selected-action (:action/value occurrence))
             :selected-enacted-action-mismatch {})
-  (let [action-sha256 (identity/digest selected-action)
+  (let [carry (or prospective-carry
+                  (prospective-carry-receipt
+                   {:occurrence-id carry-occurrence-id :universe universe}))
+        _ (require! (and (= prospective-carry-schema (:schema carry))
+                         (contains? #{:present :absent} (:status carry)))
+                    :prospective-carry-receipt-invalid {})
+        action-sha256 (identity/digest selected-action)
         action-identity (select-keys selected-action [:kind :id :target])
         observation-carrier
         {:schema :wm/selected-action-observation-carrier-v1
          :target (:target selected-action)
          :selected-action-sha256 action-sha256
          :observation-locators (or (:observation-locators selected-action) {})}]
-    {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
-     :carry-occurrence-id carry-occurrence-id :universe universe
+    (cond-> {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
+     :prospective-carry carry
      :r6-candidate-occurrence candidate-id
      :candidate-to-minted-join
      {:schema :wm/selected-enacted-action-correspondence-v1
@@ -90,7 +111,10 @@
              (let [bytes (file-bytes path)]
                (require! (= sha256 (sha bytes)) :declaration-changed-before-dispatch {:path path})
                {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
-           (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
+           (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}
+      (= :present (:status carry))
+      (assoc :carry-occurrence-id (:occurrence-id carry)
+             :universe (:universe carry)))))
 
 (defn- token-authorities
   "Return declaration authorities first, using the selected-action carrier only
@@ -376,8 +400,7 @@
       {:status :refused :reason :meta-algorithm-wrong-route
        :required-route :dedicated-meta-self-heal}
       {:occurrence occurrence :selected-action (:action decision)
-       :carry-occurrence-id (:occurrence-id carry)
-       :universe (:universe carry)
+       :prospective-carry (prospective-carry-receipt carry)
        :precision-family (get-in decision [:selection-certificate :precision-family])
        :candidate-id (or (:r6-candidate-occurrence decision)
                          (:selected/occurrence-id decision))
@@ -405,7 +428,11 @@
     (if-not (= :captured (:status captured))
       (or captured {:status :refused :authority authority :scope scope
                     :kind :dispatch-evidence-unavailable})
-      (let [inputs {:dispatch (:dispatch captured)
+      (if (= :absent (get-in captured [:dispatch :prospective-carry :status]))
+        {:status :unavailable :authority authority :scope scope
+         :kind :prospective-carry-unavailable
+         :prospective-carry (get-in captured [:dispatch :prospective-carry])}
+        (let [inputs {:dispatch (:dispatch captured)
                     :artifact-binding (:artifact-binding data)
                     :author-job (:author-job data) :review-job (:review-job data)
                     :files (:files data) :repository (get-in data [:artifact-binding :repo])
@@ -415,10 +442,10 @@
                              (nil? (:artifact-binding data)) :binding-not-retained
                              (= :fresh-author (:dispatch-route data)) :fresh-author
                              :else :dispatch-not-retained)}]
-        (try (produce! root inputs expected read-job)
-             (catch Exception e
-               {:status :refused :authority authority :scope scope
-                :kind (or (:d-predecessor/refusal (ex-data e)) :task-evidence-unavailable)}))))))
+          (try (produce! root inputs expected read-job)
+               (catch Exception e
+                 {:status :refused :authority authority :scope scope
+                  :kind (or (:d-predecessor/refusal (ex-data e)) :task-evidence-unavailable)})))))))
 
 (def observation-authority :d-task-token-observations-v2)
 (def observation-scope
