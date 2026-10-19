@@ -39,7 +39,7 @@ All paths below are in repository `futon2` at commit
    families, then attached at lines 1377–1379.
 5. `reading-family-decision`, lines 1217–1226 abstains on that empty field.
    The runner's phase-selection terminal predicate (`full_loop_runner.clj`,
-   lines 6385–6419) permits phase 10 only when `selected-need` is non-nil.
+   lines 6385–6426) permits phase 10 only when `selected-need` is non-nil.
    `occurrence_square_authoring/selected-need`, lines 27–37 sees no family;
    phase 10 (`full_loop_runner.clj`, lines 6474–6479) is not reached.
 
