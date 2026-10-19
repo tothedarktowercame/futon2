@@ -50,6 +50,24 @@
     (catch Throwable t
       (refusal :store/read-failed {:detail (ex-message t)}))))
 
+(defn load-durable-ledger
+  "Load a disk-backed ledger with an exact source pin for coordinator input."
+  [path]
+  (try
+    (let [file (io/file path)]
+      (if-not (.isFile file)
+        (refusal :store/durable-ledger-required)
+        (let [bytes (Files/readAllBytes (.toPath file))
+              loaded (load-ledger path)]
+          (if-not (= :loaded (:status loaded))
+            loaded
+            {:schema :wm/durable-meta-injury-ledger-v1
+             :status :loaded
+             :source-pin {:path path :sha256 (load-identity/sha256 bytes)}
+             :ledger (:ledger loaded)}))))
+    (catch Throwable t
+      (refusal :store/durable-load-failed {:detail (ex-message t)}))))
+
 (defn- force-write! [^Path path text]
   (with-open [channel (FileChannel/open
                        path (into-array StandardOpenOption

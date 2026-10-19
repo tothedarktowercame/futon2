@@ -93,6 +93,10 @@
     (is (= :appended (:status first)))
     (is (= :atomic-locked-one-form (:durability first)))
     (is (= :loaded (:status (store/load-ledger path))))
+    (let [durable (store/load-durable-ledger path)]
+      (is (= :wm/durable-meta-injury-ledger-v1 (:schema durable)))
+      (is (= path (get-in durable [:source-pin :path])))
+      (is (= (:ledger first) (:ledger durable))))
     (is (= :duplicate (:status duplicate)))
     (is (= bytes-before bytes-after))
     (is (= :read (:status (store/read-one-form bytes-after))))
