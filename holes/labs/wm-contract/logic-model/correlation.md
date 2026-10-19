@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Integration reload / row 8: see `integration-reload-2026-10-19.md` (workers
+`1534a1761`, `a78537ac3`). Reload discovery, required canonical-path attribution
+and load registration are distinct. Runner drift refuses; additionally any
+non-current runtime, report.war-machine, meta-live-outer-selector or
+meta-pipeline-selector triggers stale-outer-selection-composition. Other
+displacement reporting is not that gate. This corrected source inventory
+does not establish loaded/disk agreement or serving readiness.
+
+
 P29 / rows 3,7 / A18-R5 (workers `bef353c1d`, `11501fff9`): canonical
 target G is risk + ambiguity - EIG; engineering resource/cadence/continuation
 terms are distinct. Injury learned scores are advisory, not consumed; baseline
