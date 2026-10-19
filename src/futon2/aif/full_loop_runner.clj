@@ -1065,6 +1065,36 @@
       {:status :not-applicable
        :reason :selected-target-reading-not-required}))
 
+(defn- retained-reading-frontiers
+  "Keep the current menu measurement separate from bounded preparation work.
+  Preparation's pending count is never a selection verdict."
+  [result outer-task-selection]
+  (let [preparation (retained-selected-target-reading result)
+        field (or (get-in outer-task-selection [:policy :policy-field])
+                  (get-in outer-task-selection [:policy-field])
+                  (get-in result [:checkpoints :selection :judgment
+                                  :decision :selection-certificate :target-policy-field])
+                  (get-in result [:checkpoints :selection :sorry
+                                  :decision :selection-certificate :target-policy-field]))
+        families (:families field)
+        reading-absent? #(some (fn [f] (contains? #{:no-current-target-reading
+                                                    :stale-target-reading} (:kind f)))
+                              (:failures %))]
+    {:selection-frontier
+     (if (seq families)
+       {:field-source-pin (:source-pin field)
+        :eligible-ids (mapv :target-id families)
+        :assessed-ids (mapv :target-id (filter #(= :computed (:status %)) families))
+        :reading-absent-ids (mapv :target-id (filter reading-absent? families))
+        :other-exclusions (into {} (keep (fn [f]
+                                            (let [ks (vec (remove #(contains? #{:no-current-target-reading :stale-target-reading}
+                                                                         (:kind %)) (:failures f)))]
+                                              (when (seq ks) [(:target-id f) ks]))) families))}
+       {:status :unavailable :reason :target-policy-field-not-retained})
+     :preparation-backlog
+     (select-keys preparation [:schema :status :reason :deadline-ms :field-source-pin
+                               :frontier :records :pending :other-failures])}))
+
 (defn persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -1253,6 +1283,7 @@
                     ;; absence/refusal produced when an ask was required.
                     :interpretation-ask (retained-interpretation-ask result)
                     :selected-target-reading (retained-selected-target-reading result)
+                    :reading-frontiers (retained-reading-frontiers result outer-task-selection)
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
