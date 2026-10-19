@@ -827,6 +827,21 @@
       (assoc :candidate (get-in decision [:selection-law :candidate])))
     {:status :absent :reason :no-chosen-action}))
 
+(defn- bounded-failure-value
+  "Retain nested refusal evidence with explicit size/depth truncation."
+  [value depth]
+  (cond
+    (string? value) (if (> (count value) 300) (str (subs value 0 300) "…") value)
+    (or (nil? value) (keyword? value) (number? value) (boolean? value)) value
+    (zero? depth) {:omitted :depth-limit}
+    (map? value) (cond-> (into {} (map (fn [[k v]] [k (bounded-failure-value v (dec depth))]))
+                             (take 32 (sort-by (comp pr-str key) value)))
+                  (> (count value) 32) (assoc :omitted :entry-limit))
+    (sequential? value) (let [items (vec (take 33 value))]
+                          (cond-> (mapv #(bounded-failure-value % (dec depth)) (take 32 items))
+                            (> (count items) 32) (conj {:omitted :entry-limit})))
+    :else {:omitted :unsupported-value}))
+
 (defn- failure-detail [error-data]
   (let [scalar? (fn [v]
                   (or (keyword? v) (number? v) (boolean? v) (nil? v)
@@ -837,6 +852,8 @@
             (reduce-kv
              (fn [{:keys [kept omitted]} k v]
                (cond
+                 (contains? #{:refusals :outer-task-selection} k)
+                 {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
                  {:kept (assoc kept k v) :omitted omitted}
@@ -2318,6 +2335,12 @@
                   (cond-> {:kind :wm/selection-terminal-abstention
                            :failure-kind outcome :failure-stage phase
                            :outcome outcome :decision decision
+                           :outer-task-selection
+                           (let [outer (:outer-task-selection judgement)]
+                             (cond-> (select-keys outer [:schema :status :reason :chosen])
+                               (:policy outer)
+                               (assoc :policy (select-keys (:policy outer)
+                                                         [:status :reason :branch :absent-terms]))))
                            :refusals refusals :targets targets}
                     (= 1 (count targets)) (assoc :target (first targets))
                     (seq context) (assoc :selection-context context))))))))

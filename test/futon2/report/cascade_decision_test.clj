@@ -461,7 +461,8 @@
         base (route/assembled fx 1)
         with-rowless (update base :refusals conj {:target "M-rowless" :kind :no-admitted-interpretation})
         r (wm-cd/cascade-decision with-rowless (route/opts fx {}))
-        outer {:target {:absent :outer-task-not-selected} :kind :outer-task-selection-refused}
+        outer {:target {:absent :outer-task-not-selected} :kind :outer-task-selection-refused
+               :reason :outer-policy-evidence-provider-required}
         empty-field (wm-cd/cascade-decision {:problems [] :refusals [outer] :target-sources []}
                                             (route/opts fx {}))
         bare (wm-cd/cascade-decision {:problems [] :refusals [] :target-sources []}
@@ -471,7 +472,8 @@
     (is (some #(and (= "M-rowless" (:target %))
                     (= :no-policy-family (:kind %)))
               (get-in r [:decision :refusals])))
-    (is (= [outer] (mapv #(select-keys % [:target :kind]) (get-in empty-field [:decision :refusals])))
+    (is (= :outer-policy-evidence-provider-required (get-in empty-field [:decision :reason])))
+    (is (= [outer] (mapv #(select-keys % [:target :kind :reason]) (get-in empty-field [:decision :refusals])))
         "the outer selector's refusal is the empty field's abstention")
     (is (= [[:no-policy-family :no-enumerated-target]] (refusal-kinds bare)))))
 

@@ -43,11 +43,26 @@
   (or (get-in record [:failure :cause :cause-id])
       (get-in record [:failure :detail :cause-id])
       [(failure-kind record) (failure-stage record) (target record)]))
+(defn- unconfigured-route? [record]
+  (and (= :abstained (failure-kind record))
+       (some (fn [node]
+               (and (map? node)
+                    (some #{:outer-policy-evidence-provider-required}
+                          (vals (select-keys node [:reason :kind :failure-kind :absent])))))
+             (tree-seq coll? seq
+                       [(get-in record [:failure :detail :refusals])
+                        (get-in record [:failure :detail :outer-task-selection])
+                        (:outer-task-selection record)]))))
 (defn- cause-id [record]
-  (str "cause/" (identity/digest [:meta-terminal-cause (cause-key record)])))
+  (str "cause/" (identity/digest
+                 (cond-> [:meta-terminal-cause (cause-key record)]
+                   (unconfigured-route? record)
+                   (conj :outer-policy-evidence-provider-required)))))
 (defn- injury-id [record]
-  (str "injury/" (subs (identity/digest [:meta-terminal-injury
-                                         (cause-key record)]) 0 40)))
+  (str "injury/" (subs (identity/digest
+                        (cond-> [:meta-terminal-injury (cause-key record)]
+                          (unconfigured-route? record)
+                          (conj :outer-policy-evidence-provider-required))) 0 40)))
 (defn- seal-classification [classification]
   (let [digest (identity/digest [:meta-terminal-classification classification])]
     (assoc classification :classification-pin
@@ -77,7 +92,8 @@
           run (run-id record)
           click (click-id record)
           terminal-outcome (outcome record)
-          non-injury-reason (or (get explicit-non-injury-kinds kind)
+          non-injury-reason (or (when-not (unconfigured-route? record)
+                                 (get explicit-non-injury-kinds kind))
                                 (when (and (nil? kind)
                                            (contains? successful-outcomes terminal-outcome))
                                   :successful-task-outcome)

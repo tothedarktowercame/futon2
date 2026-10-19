@@ -346,6 +346,13 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
 
 
 def fire(n: int, args, since_epoch: int) -> dict:
+    preflight = outer_policy_preflight()
+    if preflight is not None:
+        record({"event": "preflight-refused", "reason": preflight})
+        return {"n": n, "rc": 4, "click-id": None, "spent": False,
+                "outcome": "preflight-refused", "run-id": None,
+                "carried": False, "last-result": {"reason": preflight},
+                "log": None, "since-epoch": since_epoch, "in-flight-repairs": []}
     reset_cast_sessions(args)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
     before = budget_lines()
@@ -396,6 +403,24 @@ def fire(n: int, args, since_epoch: int) -> dict:
 
 
 # ---------------------------------------------------------------- debugger
+
+def outer_policy_preflight() -> str | None:
+    """Check the serving configuration before resets, dispatch or ration spend.
+
+    This only checks presence; selection still validates the provider's evidence.
+    """
+    result = jvm_eval(
+        "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
+        "(if (or (:outer-policy-evidence-provider opts) "
+        "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts)))) "
+        ":wm/provider-configured :wm/provider-required))", timeout=30)
+    if result["rc"] != 0:
+        return "outer-policy-preflight-unavailable"
+    if re.search(r":value\s+:wm/provider-configured(?:\s|})", result["out"]):
+        return None
+    if re.search(r":value\s+:wm/provider-required(?:\s|})", result["out"]):
+        return "outer-policy-evidence-provider-required"
+    return "outer-policy-preflight-unavailable"
 
 UNIVERSES = "universe-not-admitted/universes"
 
@@ -756,6 +781,8 @@ def run(args) -> int:
             f"carried={c['carried']} rc={c['rc']}  [spent {spent}/{args.clicks}, carrying {ticks}/{args.ticks}]")
         record({"event": "click", **{k: v for k, v in c.items() if k != "last-result"},
                 "last-result": c["last-result"], "spent-total": spent, "carrying-total": ticks})
+        if c["outcome"] == "preflight-refused":
+            return stop(args, c["last-result"]["reason"], 1)
         if c["rc"] == 3 and not c["spent"]:
             return stop(args, "wm_click.sh could not launch (exit 3: seats or single-flight held 30 min)", 1)
         if c["carried"]:

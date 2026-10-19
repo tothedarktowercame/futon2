@@ -1391,8 +1391,11 @@
                 (assoc-in [:decision :live-c-coverage]
                           {:status :observation-only
                            :reason :shape-policy-c-is-decision-c}))
-      (= :abstained (get-in result [:decision :status]))
-      (assoc-in [:decision :reason] :no-acting-cascade-candidate)
+      (and (= :abstained (get-in result [:decision :status]))
+           (nil? (get-in result [:decision :reason])))
+      (assoc-in [:decision :reason]
+                (or (some :reason (get-in result [:decision :refusals]))
+                    :no-acting-cascade-candidate))
       ;; an abstained field still retains the queue's entries and why each
       ;; was not admitted (no selection: no choice, no stratum posterior)
       (and (= :abstained (get-in result [:decision :status])) (seq (:entries queue)))
