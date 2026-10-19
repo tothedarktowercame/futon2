@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P29 injury comparison: no clamped target score is inserted into the comparison
+channel. Requested live/shadow mode can yield advisory/not-consumed learning
+evidence while baseline repair-cost selection proceeds. Scores and explicit
+conversion absence remain in the receipt; no consumption-path claim is emitted
+for this advisory branch. Ordinary provider consumes unchanged engineering
+terms and records the now-canonical score separately.
+
+
 P08 / consumer 24: `load-pinned` follows a publication manifest when present,
 checking graph/pin agreement and manifest SHA; otherwise legacy adjacent-pin
 loading remains. It never repins unknown bytes. Atomic manifest selection is

@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P29 / rows 3,7 / A18-R5 (workers `bef353c1d`, `11501fff9`): canonical
+target G is risk + ambiguity - EIG; engineering resource/cadence/continuation
+terms are distinct. Injury learned scores are advisory, not consumed; baseline
+machine-injury-repair-cost selects. The old clamped mixture remains an explicit
+unresolved receipt, not canonical G or a fabricated policy prior. Ordinary
+provider retains its term-based declaration path. This is bounded separation,
+not completed injury-prior conversion or live AIF validation.
+
+
 P08 / row 5 (`01a688786`, `bcea02d28`, `8ea0026ed`; futon3c producer workers
 `cd8701d93`, `3c89fdc9`): rebuild now publishes immutable graph/pin generations
 and atomically selects one manifest; reader enforces its digest binding. Tests
