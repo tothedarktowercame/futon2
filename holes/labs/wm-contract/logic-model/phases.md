@@ -1,5 +1,12 @@
 # WM click runner: phase order (static reading)
 
+Reviewed P14 update (worker `1077757b6` + `732b2f0c4`): phases 32→33–35
+retain independent post-record publication observations in a linked sidecar.
+The pinned run bytes remain unchanged. Without readable linkage all sinks are
+explicitly not attempted; otherwise sink exceptions are isolated and later
+sinks proceed. Legacy runner result fields remain available. No serving probe
+or live click has verified this revised integration.
+
 Reviewed P11 update (`5874be666` + `89e689716`): observed selected judgement is
 available before validation/construction. Early close can publish it with explicit
 early-terminal phase/stage/outcome; normal construction and close share one

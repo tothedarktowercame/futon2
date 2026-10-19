@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P14 / P13/P16/P17 (`1077757b6`, `732b2f0c4` worker commits): runner
+post-persist injury deposit, injury-ledger ingest and configured learning
+publication produce independently retained sink observations. `:returned`
+means invocation returned, not sink success; own status/result remains intact.
+Exceptions do not suppress later sinks. Missing run-byte linkage prevents
+publication with explicit not-attempted receipts; no hash is invented.
+Legacy top-level runner results remain projected. Static/hermetic evidence only.
+
 P13 / P26: [certificate producer map](p13-certificate-producers.md) distinguishes
 per-record requirements recomputation from historical `data/wm-certificates/`.
 Q2/Q8 absent assessed-population carriers feed field-level NR and Lean

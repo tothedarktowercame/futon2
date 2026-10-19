@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 9/10 / P14: publication after record persistence now has a linked receipt
+instead of being inferred from the earlier event snapshot. Sink returned,
+returned-nil, failed and not-attempted are distinct; returned refusal is not
+success. Receipt persistence/linkage failures cannot replace the original
+terminal outcome on the reviewed paths. Hermetic adapter tests only, not live
+runner verification.
+
 Row 10 / A24 / P13: [producer reconciliation](p13-certificate-producers.md)
 traces assessed Q2/Q8 absence to NR/unverifiable. The enumerated certificate/report
 chain records absence rather than throwing or inventing success. This static
