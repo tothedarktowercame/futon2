@@ -199,7 +199,7 @@
                 :target "M-custom-harness"}]
     (with-artifact
      {:target "M-custom-harness" :action action}
-     (fn [{:keys [inputs expected jobs root]}]
+     (fn [{:keys [inputs expected jobs root commit]}]
        (let [context (task/context {:action action :selection-certificate {}}
                                    (:occurrence expected) (:declaration-pins expected))
              capture-input (assoc context
@@ -218,6 +218,16 @@
              (task/capture-result
               (assoc present-context :declaration-reads (:declaration-pins expected)
                      :before (get-in inputs [:dispatch :before])))
+             present-binding (task/prompt-binding (:dispatch present-captured))
+             present-jobs
+             (-> jobs
+                 (assoc-in ["author-job" :events 0 :text] present-binding)
+                 (assoc-in ["review-job" :events 0 :text]
+                           (str present-binding "\nReview " commit
+                                "\nRepository: " (:repository inputs))))
+             present-completed
+             (task/complete! (str root "/present") present-captured present-context
+                             (assoc inputs :dispatch-route :fresh-author :commit commit) present-jobs)
              changed-action (task/capture-result
                              (assoc capture-input :selected-action
                                     (assoc action :id "M-custom-harness/policy-changed")))]
@@ -232,13 +242,29 @@
          (is (= "l2-present-carry"
                 (get-in present-captured [:dispatch :carry-occurrence-id])))
          (is (= (:universe expected) (get-in present-captured [:dispatch :universe])))
+         (is (= :admitted (get-in present-completed [:verification :status])))
+         (is (= :carry-occurrence-mismatch
+                (get-in (task/complete! (str root "/changed-carry") present-captured
+                                        (assoc present-context :carry-occurrence-id "changed-carry")
+                                        (assoc inputs :dispatch-route :fresh-author :commit commit) present-jobs)
+                        [:verification :kind])))
+         (is (= :carry-domain-changed
+                (get-in (task/complete! (str root "/changed-domain") present-captured
+                                        (assoc present-context :universe #{})
+                                        (assoc inputs :dispatch-route :fresh-author :commit commit) present-jobs)
+                        [:verification :kind])))
          (is (= :selected-enacted-action-mismatch (:kind changed-action)))
          (is (= {:status :unavailable
                  :kind :prospective-carry-unavailable
                  :prospective-carry (get-in captured [:dispatch :prospective-carry])}
-                (select-keys (task/complete! root captured context
+                (select-keys (task/complete! (str root "/absent") captured context
                                            (assoc inputs :dispatch-route :fresh-author) jobs)
                              [:status :kind :prospective-carry])))
+         (is (= :prospective-carry-receipt-invalid
+                (:kind (task/capture-result
+                        (assoc capture-input :prospective-carry
+                               {:schema :wm/prospective-carry-receipt-v1
+                                :status :present})))))
          (spit (get-in capture-input [:declaration-reads 0 :path]) "{:changed true}")
          (is (= :declaration-changed-before-dispatch
                 (:kind (task/capture-result capture-input)))))))))

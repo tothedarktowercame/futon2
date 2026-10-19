@@ -50,6 +50,13 @@
     :else
     {:schema prospective-carry-schema :status :absent
      :reason :prospective-carry-incomplete}))
+
+(defn- valid-prospective-carry-receipt? [carry]
+  (and (= prospective-carry-schema (:schema carry))
+       (case (:status carry)
+         :present (and (string? (:occurrence-id carry)) (set? (:universe carry)))
+         :absent (keyword? (:reason carry))
+         false)))
 (defn- read-one [bytes]
   (with-open [r (PushbackReader. (StringReader. (String. ^bytes bytes "UTF-8")))]
     (let [eof (Object.) value (edn/read {:eof eof} r)]
@@ -85,8 +92,7 @@
   (let [carry (or prospective-carry
                   (prospective-carry-receipt
                    {:occurrence-id carry-occurrence-id :universe universe}))
-        _ (require! (and (= prospective-carry-schema (:schema carry))
-                         (contains? #{:present :absent} (:status carry)))
+        _ (require! (valid-prospective-carry-receipt? carry)
                     :prospective-carry-receipt-invalid {})
         action-sha256 (identity/digest selected-action)
         action-identity (select-keys selected-action [:kind :id :target])
@@ -399,14 +405,19 @@
     (if algorithm?
       {:status :refused :reason :meta-algorithm-wrong-route
        :required-route :dedicated-meta-self-heal}
-      {:occurrence occurrence :selected-action (:action decision)
-       :prospective-carry (prospective-carry-receipt carry)
+      (let [carry-receipt (prospective-carry-receipt carry)]
+        (cond->
+         {:occurrence occurrence :selected-action (:action decision)
+          :prospective-carry carry-receipt
        :precision-family (get-in decision [:selection-certificate :precision-family])
        :candidate-id (or (:r6-candidate-occurrence decision)
                          (:selected/occurrence-id decision))
        :candidate-to-minted-join :not-established
        :declaration-pins
-       (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))})))
+       (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}
+          (= :present (:status carry-receipt))
+          (assoc :carry-occurrence-id (:occurrence-id carry-receipt)
+                 :universe (:universe carry-receipt)))))))
 
 (defn produce! [root inputs expected read-job]
   (let [record (claim inputs)
