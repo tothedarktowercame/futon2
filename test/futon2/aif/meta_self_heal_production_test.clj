@@ -377,6 +377,37 @@
     (is (= :present (:status result)))
     (is (= acceptance (:acceptance-test result)))))
 
+(deftest acceptance-admission-binds-the-exact-persisted-proposal
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        proposal (production/produce-acceptance!
+                  {:meta-acceptance-root (str dir "/acceptances")
+                   :meta-acceptance-fn
+                   (constantly {:status :proposed
+                                :acceptance-test {:id "P22-admission"
+                                                  :command ["not-run"] :expected :injury}})}
+                  diagnosis)
+        accept (fn [request]
+                 (assoc (select-keys request [:injury-id :source-record-pin
+                                              :diagnosis-evidence-pin
+                                              :proposal-evidence-pin :acceptance-test])
+                        :status :accepted))
+        admitted (production/admit-acceptance!
+                  {:meta-acceptance-root (str dir "/acceptances")
+                   :meta-acceptance-review-fn accept} proposal)
+        tampered (production/admit-acceptance!
+                  {:meta-acceptance-review-fn accept}
+                  (assoc-in proposal [:acceptance-test :id] "changed"))
+        refused (production/admit-acceptance!
+                 {:meta-acceptance-review-fn (constantly {:status :refused})}
+                 proposal)]
+    (is (= :accepted (:status admitted)))
+    (is (= (:acceptance-evidence-pin proposal) (:proposal-evidence-pin admitted)))
+    (is (= (:acceptance-test proposal) (:acceptance-test admitted)))
+    (is (= :meta-self-heal/acceptance-proposal-identity-mismatch (:reason tampered)))
+    (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
+    (is (nil? (:acceptance-test tampered)))))
+
 (deftest runtime-prepares-and-threads-only-a-durable-diagnosis-pin
   (let [dir (root)
         source-pin (recorded-injury-source! dir)
@@ -519,7 +550,7 @@
                    {} {:durable-ledger {:status :refused}
                        :active-injuries nil})))))
 
-(deftest runtime-retains-proposed-acceptance-without-granting-acceptance-authority
+(deftest runtime-admits-only-an-independently-reviewed-pinned-acceptance
   (let [dir (root)
         source-pin (recorded-injury-source! dir)
         context {:durable-ledger
@@ -548,7 +579,13 @@
                                   {:status :proposed
                                    :acceptance-test {:id "P17-runtime"
                                                      :command ["not-run"]
-                                                     :expected :configuration}})}))
+                                                     :expected :configuration}})
+            :meta-acceptance-review-fn
+            (fn [request]
+              (assoc (select-keys request [:injury-id :source-record-pin
+                                           :diagnosis-evidence-pin
+                                           :proposal-evidence-pin :acceptance-test])
+                     :status :accepted))}))
         supplied-test {:id "already-reviewed" :command ["not-run"] :expected :unknown}
         supplied
         (with-redefs [production/diagnosis-context (constantly context)
@@ -589,10 +626,10 @@
                                          (fn [_] (swap! acceptance-calls inc)
                                            (throw (Exception. "must not call")))})))]
     (is (= :original-readiness (:reason proposed)))
-    (is (= :proposed (get-in proposed [:acceptance-observation :status])))
+    (is (= :accepted (get-in proposed [:acceptance-observation :status])))
     (is (some? (get-in proposed [:acceptance-observation :acceptance-evidence-pin])))
-    (is (nil? (:acceptance-test (first @readiness-opts))))
-    (is (= :unreviewed (get-in proposed [:acceptance-observation :review-status])))
+    (is (= "P17-runtime" (get-in (first @readiness-opts) [:acceptance-test :id])))
+    (is (= :accepted (get-in proposed [:acceptance-observation :review-status])))
     (is (= supplied-test (:acceptance-test (second @readiness-opts))))
     (is (= :present (get-in supplied [:acceptance-observation :status])))
     (is (= :original-readiness (:reason failed)))

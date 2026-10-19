@@ -307,6 +307,94 @@
                 (assoc written :injury-id (:injury-id diagnosis)
                        :repair-claimed? false)))))))))
 
+(defn- read-acceptance-proposal [proposal]
+  (let [pin (:acceptance-evidence-pin proposal)]
+    (if-not (pin? pin)
+      (refusal :meta-self-heal/acceptance-proposal-pin-unavailable)
+      (try
+        (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+          (if-not (= (:sha256 pin) (load-identity/sha256 bytes))
+            (refusal :meta-self-heal/acceptance-proposal-pin-mismatch)
+            (let [parsed (store/read-one-form (String. bytes "UTF-8"))
+                  receipt (:value parsed)
+                  expected (select-keys proposal [:injury-id :source-record-pin
+                                                   :diagnosis-evidence-pin :acceptance-test])]
+              (cond
+                (not= :read (:status parsed))
+                (refusal :meta-self-heal/acceptance-proposal-unreadable)
+                (not= :wm/meta-acceptance-receipt-v1 (:schema receipt))
+                (refusal :meta-self-heal/acceptance-proposal-unreadable)
+                (not= :proposed (:status receipt))
+                (refusal :meta-self-heal/acceptance-proposal-not-proposed)
+                (not= :unreviewed (:review-status receipt))
+                (refusal :meta-self-heal/acceptance-proposal-review-state-invalid)
+                (not= expected (select-keys receipt (keys expected)))
+                (refusal :meta-self-heal/acceptance-proposal-identity-mismatch)
+                :else {:status :available :pin pin :receipt receipt}))))
+        (catch Throwable _
+          (refusal :meta-self-heal/acceptance-proposal-unreadable))))))
+
+(defn admit-acceptance!
+  "Independently review one immutable, concrete proposal.  No prose, stale pin,
+  or review response for different diagnosis/source/proposal identity can become
+  coordinator authority.  This records admission; it never runs the case."
+  [opts proposal]
+  (let [proposal-read (read-acceptance-proposal proposal)
+        review (:meta-acceptance-review-fn opts)]
+    (cond
+      (not= :available (:status proposal-read))
+      (assoc proposal-read :repair-claimed? false)
+      (not (ifn? review))
+      (refusal :meta-self-heal/acceptance-review-port-unavailable
+               {:injury-id (:injury-id proposal) :repair-claimed? false})
+      :else
+      (let [request {:schema :wm/meta-acceptance-review-request-v1
+                     :injury-id (:injury-id proposal)
+                     :source-record-pin (:source-record-pin proposal)
+                     :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
+                     :proposal-evidence-pin (:acceptance-evidence-pin proposal)
+                     :acceptance-test (:acceptance-test proposal)
+                     :result-status :not-run :repair-claimed? false}
+            response (try (review request)
+                          (catch Throwable _ {:status :failed
+                                               :reason :meta-self-heal/acceptance-review-threw}))
+            identity-keys [:injury-id :source-record-pin :diagnosis-evidence-pin
+                           :proposal-evidence-pin :acceptance-test]]
+        (cond
+          (not (map? response))
+          (refusal :meta-self-heal/acceptance-review-malformed {:request request})
+          (not= :accepted (:status response))
+          (refusal :meta-self-heal/acceptance-review-refused
+                   {:request request :review-status (:status response)
+                    :review-reason (:reason response)})
+          (not= (select-keys request identity-keys)
+                (select-keys response identity-keys))
+          (refusal :meta-self-heal/acceptance-review-identity-mismatch {:request request})
+          :else
+          (let [receipt {:schema :wm/meta-acceptance-admission-v1
+                         :status :accepted :review-status :accepted
+                         :result-status :not-run
+                         :injury-id (:injury-id proposal)
+                         :source-record-pin (:source-record-pin proposal)
+                         :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
+                         :proposal-evidence-pin (:acceptance-evidence-pin proposal)
+                         :acceptance-test (:acceptance-test proposal)
+                         :review response :repair-claimed? false}
+                written (persist-acceptance!
+                         (acceptance-path (or (:meta-acceptance-root opts)
+                                              default-acceptance-root) receipt)
+                         receipt)]
+            (if (= :persisted (:status written))
+              (merge written (select-keys receipt [:injury-id :source-record-pin
+                                                    :diagnosis-evidence-pin
+                                                    :proposal-evidence-pin
+                                                    :acceptance-test :review-status
+                                                    :result-status :repair-claimed?])
+                     {:status :accepted :acceptance-admission-pin
+                      (:acceptance-evidence-pin written)})
+              (assoc written :injury-id (:injury-id proposal)
+                     :repair-claimed? false))))))))
+
 (defn prepare-acceptance
   "Runtime-facing proposal preparation.  A proposed/unreviewed specification
   remains observation only; this function never returns it as coordinator
@@ -317,7 +405,10 @@
     {:status :present :acceptance-test (:acceptance-test opts) :source :supplied}
 
     (= :available (:status diagnosis-observation))
-    (produce-acceptance! opts diagnosis-observation)
+    (let [proposal (produce-acceptance! opts diagnosis-observation)]
+      (if (= :proposed (:status proposal))
+        (admit-acceptance! opts proposal)
+        proposal))
 
     (= :not-required (:status diagnosis-observation))
     {:status :not-required :reason :meta-self-heal/acceptance-no-diagnosis-required}
@@ -445,10 +536,15 @@
         missing (cond-> []
                   (nil? transaction-path) (conj :transaction-path)
                   (and active? (nil? (effect-ports opts))) (conj :repair-ports)
-                  (and active? (nil? (:diagnosis-evidence-pin opts)))
-                  (conj :diagnosis-evidence)
-                  (and active? (nil? (:acceptance-test opts)))
-                  (conj :acceptance-test))]
+                  (and active? (nil? (:diagnosis-evidence-pin opts))
+                       (not (ifn? (:meta-diagnosis-fn opts))))
+                  (conj :diagnosis-port)
+                  (and active? (nil? (:acceptance-test opts))
+                       (not (ifn? (:meta-acceptance-fn opts))))
+                  (conj :acceptance-proposal-port)
+                  (and active? (nil? (:acceptance-test opts))
+                       (not (ifn? (:meta-acceptance-review-fn opts))))
+                  (conj :acceptance-review-port))]
     (cond
       (and durable (not= :loaded (:status durable)))
       (refusal :meta-self-heal/ledger-unreadable {:ledger-result durable})

@@ -485,7 +485,10 @@
                          (assoc :meta-acceptance-observation acceptance-observation)
                          (= :available (:status diagnosis-observation))
                          (assoc :diagnosis-evidence-pin
-                                (:diagnosis-evidence-pin diagnosis-observation)))
+                                (:diagnosis-evidence-pin diagnosis-observation))
+                         (#{:accepted :present} (:status acceptance-observation))
+                         (assoc :acceptance-test
+                                (:acceptance-test acceptance-observation)))
         readiness (if retry
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
                     (meta-self-heal/production-readiness effective-opts diagnosis-context))]
