@@ -15,7 +15,7 @@
     (str (io/file (.getParentFile record)
                   (str "terminal-publication-" run-id ".edn")))))
 
-(defn- run-pin [run-record-path]
+(defn read-run-pin [run-record-path]
   (let [record (io/file run-record-path)]
     (when-not (.isFile record)
       (throw (ex-info "Persisted run record is unavailable"
@@ -46,11 +46,31 @@
     {:sink sink :status :not-attempted
      :reason (or reason :sink-unavailable)}
     (try
-      {:sink sink :status :succeeded :result (thunk)}
+      (let [result (thunk)]
+        ;; Invocation completed is deliberately weaker than sink success.  The
+        ;; real injury stores can return typed refusals, so keep their own
+        ;; status/reason intact instead of upgrading it here.
+        (if (nil? result)
+          {:sink sink :status :returned-nil}
+          {:sink sink :status :returned
+           :sink-status (when (map? result) (:status result))
+           :result result}))
       (catch Throwable t
         {:sink sink :status :failed
          :reason (or (:kind (ex-data t)) :sink-threw)
          :error-class (.getName (class t))}))))
+
+(defn sink-result
+  "Compatibility projection for the runner's pre-P14 top-level sink fields.
+  Returned values retain their exact old value.  New failure observations are
+  typed, while an intentionally unattempted sink remains absent as before."
+  [publication sink]
+  (let [attempt (some #(when (= sink (:sink %)) %) (get-in publication [:receipt :sinks]))]
+    (case (:status attempt)
+      :returned (:result attempt)
+      :returned-nil nil
+      :failed (dissoc attempt :sink)
+      nil)))
 
 (defn publish!
   "Attempt each supplied sink exactly once and persist their independent results.
@@ -60,18 +80,30 @@
   exception is retained as data so remaining sinks still run.  Receipt-write
   failure returns no durable-path claim and never rewrites the run record."
   [run-record-path run-id sinks]
-  (let [receipt {:schema schema
-                 :run-id run-id
-                 :run-record (run-pin run-record-path)
-                 :sinks (mapv attempt sinks)}]
-    (try
-      {:status :present
-       :path (write-receipt! (receipt-path run-record-path run-id) receipt)
-       :receipt receipt}
-      (catch Throwable t
-        {:status :failed
-         :reason :terminal-publication-receipt-persistence-failed
-         :error-class (.getName (class t))
-         ;; This is the in-memory observation only, not a claim that it was
-         ;; written anywhere.
-         :receipt receipt}))))
+  (try
+    (let [receipt {:schema schema
+                   :run-id run-id
+                   :run-record (read-run-pin run-record-path)
+                   :sinks (mapv attempt sinks)}]
+      (try
+        {:status :present
+         :path (write-receipt! (receipt-path run-record-path run-id) receipt)
+         :receipt receipt}
+        (catch Throwable t
+          {:status :failed
+           :reason :terminal-publication-receipt-persistence-failed
+           :error-class (.getName (class t))
+           ;; This is the in-memory observation only, not a claim that it was
+           ;; written anywhere.
+           :receipt receipt})))
+    (catch Throwable t
+      ;; Without exact persisted bytes there can be neither a linked receipt
+      ;; nor a safe publication attempt.  Do not invent a hash or run sinks
+      ;; against an unlinked terminal result.
+      {:status :unavailable
+       :reason (or (:kind (ex-data t)) :terminal-publication-run-link-unavailable)
+       :error-class (.getName (class t))
+       :sinks (mapv (fn [{:keys [sink]}]
+                       {:sink sink :status :not-attempted
+                        :reason :run-record-linkage-unavailable})
+                     sinks)})))

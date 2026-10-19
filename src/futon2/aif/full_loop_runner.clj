@@ -8204,10 +8204,22 @@
                            (fn [value]
                              (select-keys value [:status :manifest-path :manifest-sha256]))))}
                 {:sink :outer-learning-publication
-                 :reason :outer-learning-manifest-not-configured})]))) ]
+                 :reason :outer-learning-manifest-not-configured})])))
+        injury-deposit (terminal-publication/sink-result terminal-publication
+                                                         :meta-injury-deposit)
+        authoritative-injury-ingest (terminal-publication/sink-result terminal-publication
+                                                                      :meta-terminal-injury-ingest)
+        learning-publication (terminal-publication/sink-result terminal-publication
+                                                               :outer-learning-publication)]
     ;; The SAME identity annotates the result persist-run-record! sees; the
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
     (cond-> (merge final-result {:run/id run-id} persisted)
       terminal-publication
-      (assoc :terminal-publication terminal-publication))))
+      (assoc :terminal-publication terminal-publication)
+      injury-deposit
+      (assoc :meta-injury-deposit injury-deposit)
+      authoritative-injury-ingest
+      (assoc :meta-terminal-injury-ingest authoritative-injury-ingest)
+      learning-publication
+      (assoc :outer-learning-publication learning-publication))))
