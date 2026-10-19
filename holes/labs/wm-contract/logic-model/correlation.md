@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P28 / A28-R13 (`e41ea6408`, `p28-cascade-scoring.md`): reading-family cascade
+scoring sums each horizon step and uses declared per-step/capacity/pattern
+normalization, not temporal discounting. Whole-horizon support is statically
+present but not live-validated here. The paper's discount assertion is refuted
+for this route; `rollout/project-policy` separately retains discounted scoring.
+The algebraic rank-reversal example is synthetic, not calibration evidence.
+Proposed paper replacement remains unapplied.
+
+
 P25 / A12-A13 / R7 (`e9ea25f79`, `p25-precision-mechanisms.md`): channel Pi
 weights errors in R3; declared fixed zeta tempers token likelihood (identity
 path explicitly fixed-vacuous); identity-bound reading beta feeds the policy

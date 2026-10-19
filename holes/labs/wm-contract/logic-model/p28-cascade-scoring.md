@@ -140,4 +140,3 @@ The existing JSON correlation annotation can retain its historical 5b4526f95ed6
 anchors, but should add the current source pin and route boundary above. This
 packet makes no shared-live-kernel inference and does not upgrade any
 unvalidated claim.
-
