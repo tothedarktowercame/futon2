@@ -19,6 +19,10 @@
   (merge (harness/work-order-options env)
          {:meta-injury-ledger-path (:ledger-path env)
           :meta-repair-transaction-path (str (:root env) "/transaction.edn")
+          :meta-acceptance-run-fn
+          (constantly {:status :ran :outcome :passed :exit 0 :summary "fixture pass"
+                       :run-pin {:path "fixture://acceptance-run"
+                                 :sha256 (apply str (repeat 64 "a"))}})
           :meta-repair-ports ports}))
 
 (defn- recorded-injury-source! [dir]
@@ -58,7 +62,8 @@
                    {:meta-injury-ledger-path (:ledger-path env)})]
     (is (= {:status :ready
             :self-heal {:status :absent
-                         :absent-terms [:diagnosis-port
+                         :absent-terms [:acceptance-run-port
+                                        :diagnosis-port
                                         :acceptance-proposal-port
                                         :acceptance-review-port]}}
            (select-keys ordinary [:status :self-heal])))
@@ -407,25 +412,47 @@
                                 :acceptance-test {:id "P22-admission"
                                                   :command ["not-run"] :expected :injury}})}
                   diagnosis)
+        run-result {:status :ran :outcome :failed :exit 1
+                    :summary "reproduced fold-output-invalid"
+                    :run-pin {:path "test://acceptance-before-repair"
+                              :sha256 (apply str (repeat 64 "b"))}}
+        seen-review (atom nil)
         accept (fn [request]
+                 (reset! seen-review request)
                  (assoc (select-keys request [:injury-id :source-record-pin
                                               :diagnosis-evidence-pin
                                               :proposal-evidence-pin :acceptance-test])
                         :status :accepted))
         admitted (production/admit-acceptance!
                   {:meta-acceptance-root (str dir "/acceptances")
+                   :meta-acceptance-run-fn (constantly run-result)
                    :meta-acceptance-review-fn accept} proposal)
         tampered (production/admit-acceptance!
-                  {:meta-acceptance-review-fn accept}
+                  {:meta-acceptance-run-fn (constantly run-result)
+                   :meta-acceptance-review-fn accept}
                   (assoc-in proposal [:acceptance-test :id] "changed"))
         refused (production/admit-acceptance!
-                 {:meta-acceptance-review-fn (constantly {:status :refused})}
-                 proposal)]
+                 {:meta-acceptance-run-fn (constantly run-result)
+                  :meta-acceptance-review-fn
+                  (constantly {:status :refused
+                               :reason/type :acceptance-test-still-fails})}
+                 proposal)
+        review-calls (atom 0)
+        missing-run (production/admit-acceptance!
+                     {:meta-acceptance-review-fn
+                      (fn [_] (swap! review-calls inc) {:status :accepted})}
+                     proposal)]
     (is (= :accepted (:status admitted)))
     (is (= (:acceptance-evidence-pin proposal) (:proposal-evidence-pin admitted)))
     (is (= (:acceptance-test proposal) (:acceptance-test admitted)))
+    (is (= :ran-before-repair (:result-status @seen-review)))
+    (is (= run-result (:result @seen-review)))
+    (is (= run-result (:result admitted)))
     (is (= :meta-self-heal/acceptance-proposal-identity-mismatch (:reason tampered)))
     (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
+    (is (= :acceptance-test-still-fails (:review-reason refused)))
+    (is (= :meta-self-heal/acceptance-run-port-unavailable (:reason missing-run)))
+    (is (zero? @review-calls))
     (is (nil? (:acceptance-test tampered)))))
 
 (deftest runtime-prepares-and-threads-only-a-durable-diagnosis-pin
@@ -523,6 +550,11 @@
         base-opts {:meta-injury-ledger-path ledger-path
                    :meta-repair-transaction-path (str dir "/transaction.edn")
                    :meta-repair-ports {:author (constantly nil)}
+                   :meta-acceptance-run-fn
+                   (constantly {:status :ran :outcome :failed :exit 1
+                                :summary "fixture injury reproduced"
+                                :run-pin {:path "fixture://route-acceptance"
+                                          :sha256 (apply str (repeat 64 "e"))}})
                    :acceptance-test {:id "P17-absent-but-shaped"
                                      :command ["not-run"] :expected :unavailable}
                    :diagnosis-evidence-pin diagnosis-a
@@ -609,6 +641,11 @@
                                    :acceptance-test {:id "P17-runtime"
                                                      :command ["not-run"]
                                                      :expected :configuration}})
+            :meta-acceptance-run-fn
+            (constantly {:status :ran :outcome :failed :exit 1
+                         :summary "runtime reproduced injury"
+                         :run-pin {:path "fixture://runtime-acceptance"
+                                   :sha256 (apply str (repeat 64 "f"))}})
             :meta-acceptance-review-fn
             (fn [request]
               (assoc (select-keys request [:injury-id :source-record-pin
