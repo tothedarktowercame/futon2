@@ -52,8 +52,10 @@
   [facts kind]
   (filter #(= kind (:kind %)) facts))
 
-(defn producers-for [facts input]
-  (filter #(= input (:output %)) (facts-of-kind facts :producer)))
+(defn producers-for [facts consumer]
+  (filter #(and (= (:input consumer) (:output %))
+                (= (:scenario consumer) (:scenario %)))
+          (facts-of-kind facts :producer)))
 
 (defn producer-status [consumer producers]
   (let [covers? #(get scope-covers? [(:scope %) (:scope consumer)])
@@ -75,12 +77,13 @@
   (->> (facts-of-kind facts :consumer)
        (filter :required?)
        (keep (fn [consumer]
-               (let [producers (producers-for facts (:input consumer))
+               (let [producers (producers-for facts consumer)
                      status (producer-status consumer producers)]
                  (when (not= :present status)
                    {:kind :input-availability
                     :status status
                     :consumer (:id consumer)
+                    :scenario (:scenario consumer)
                     :input (:input consumer)
                     :consumer-phase (:phase consumer)
                     :consumer-scope (:scope consumer)
@@ -94,7 +97,7 @@
   [facts]
   (vec
    (for [consumer (facts-of-kind facts :consumer)
-         producer (producers-for facts (:input consumer))
+         producer (producers-for facts consumer)
          :when (and (= :present (:status consumer))
                     (= :present (:status producer))
                     (some #{(:produces consumer)} (:requires producer))
@@ -105,6 +108,7 @@
      {:kind :selection-preparation-cycle
       :status :present
       :consumer (:id consumer)
+      :scenario (:scenario consumer)
       :producer (:id producer)
       :input (:input consumer)
       :selection-phase (:phase consumer)
@@ -117,7 +121,7 @@
   [facts]
   (vec
    (for [consumer (facts-of-kind facts :consumer)
-         producer (producers-for facts (:input consumer))
+         producer (producers-for facts consumer)
          :when (and (= :present (:status consumer))
                     (= :present (:status producer))
                     (some #{(:produces consumer)} (:requires producer))
@@ -126,6 +130,7 @@
      {:kind :measured-preparation-feedback
       :status :present
       :consumer (:id consumer)
+      :scenario (:scenario consumer)
       :producer (:id producer)
       :input (:input consumer)})))
 
@@ -139,6 +144,7 @@
                  {:kind :retention
                   :status (:status edge)
                   :edge (:id edge)
+                  :scenario (:scenario edge)
                   :carrier (:carrier edge)
                   :from (:from edge)
                   :to (:to edge)

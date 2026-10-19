@@ -21,6 +21,7 @@
                       (= 2 (count (:source-pins %)))) cycles))
     (is (= [{:kind :measured-preparation-feedback :status :present
              :consumer :c1-reading-selection-current
+             :scenario :current
              :producer :p1-reading-preparation-current
              :input :target-reading}]
            feedback))))
@@ -62,3 +63,16 @@
          (model/producer-status {:scope :eligible-targets}
                                 [{:status :present :scope :selected-target}
                                  {:status :unknown :scope :all}]))))
+
+(deftest scenario-joins-do-not-treat-a-historical-producer-as-current
+  (let [facts (model/load-facts facts-path)
+        without-current (vec (remove #(= :p1-reading-preparation-current (:id %)) facts))
+        inputs (model/unproduced-inputs without-current)
+        current (first (filter #(= :c1-reading-selection-current (:consumer %)) inputs))]
+    (is (= :missing (:status current)))
+    (is (= :current (:scenario current)))
+    (is (= [] (:producer-ids current)))
+    (is (= #{[:c1-reading-selection-historical :p1-reading-preparation-historical]
+             [:c2-square-selection :p2-square-authoring]}
+           (set (map (juxt :consumer :producer)
+                     (model/selection-preparation-cycles without-current)))))))
