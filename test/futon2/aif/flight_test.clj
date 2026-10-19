@@ -3,9 +3,14 @@
   closure, and a click that advances nothing ends the flight. The judge's
   side (construction-inputs/flight-assembly-input) restricts
   assembly to the flight's target and wants."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight :as flight]
-            [futon2.aif.wm.construction-inputs :as construction-inputs]))
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.repair-proposals :as repair-proposals]
+            [futon2.aif.wm.construction-inputs :as construction-inputs])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (def target "M-test")
 (def wants [:a :b :c])
@@ -16,15 +21,91 @@
   (flight/start (flight/choose-target {:requested target})
                 (or ws {:kind :checkbox}) {:id "flight-t"}))
 
-(deftest stop-lines-come-first
-  (let [c (flight/choose-target
-           {:requested target
-            :open-obligations [{:repair/id "occ-b" :opened-at "2026-09-24T02"}
-                               {:repair/id "occ-a" :opened-at "2026-09-24T01"}]})]
-    (is (= "T-occ-a" (:target c)))
-    (is (= :open-stop-line (get-in c [:chosen-because :kind])))
-    (is (= 2 (get-in c [:chosen-because :open-stop-lines]))))
-  (is (= target (:target (flight/choose-target {:requested target :open-obligations []}))))
+(defn- with-repair-store [f]
+  (let [root (.toFile (Files/createTempDirectory "flight-repair-supply-"
+                                                  (make-array FileAttribute 0)))]
+    (try
+      (f (str root))
+      (finally
+        (doseq [file (reverse (file-seq root))]
+          (Files/delete (.toPath file)))))))
+
+(defn- finding! [root id opened-at & [changes]]
+  (repair/record-system-failure!
+   root
+   (merge {:attempt-id (str "attempt-" id)
+           :repair-id id
+           :repair-class :machine-failure
+           :target "M-original"
+           :failure-stage :construction
+           :outcome :failed
+           :failure-kind :fold-output-invalid
+           :error "Constructor supplied no folded coverage"
+           :backtrace {:error-class "clojure.lang.ExceptionInfo"
+                       :code-state {:repo "futon2"}}
+           :opened-at opened-at
+           :discharge-contract repair/review-failure-discharge-contract}
+          changes)))
+
+(defn- record! [root directory record]
+  (let [file (io/file root directory (str (:repair/id record) ".edn"))]
+    (io/make-parents file)
+    (spit file (pr-str record))
+    record))
+
+(deftest lifecycle-qualified-repair-supply-chooses-only-concrete-actionable-proposals
+  (with-repair-store
+    (fn [root]
+      ;; The canonical lifecycle/proposal readers see all three findings.  The
+      ;; two older records are retained as evidence, but only NEW is a concrete
+      ;; actionable proposal eligible for flight priority.
+      (finding! root "old-awaiting" "2026-10-19T01:00:00Z")
+      (record! root "implementations"
+               {:repair/id "old-awaiting" :repair/status :awaiting-validation
+                :implemented-at "2026-10-19T01:01:00Z"})
+      (finding! root "old-blocked" "2026-10-19T02:00:00Z"
+                {:discharge-contract nil})
+      (finding! root "new-concrete" "2026-10-19T03:00:00Z")
+      (let [supplied (repair-proposals/supply root)
+            chosen (flight/choose-target {:requested target
+                                           :repair-proposal-supply supplied})
+            evidence (get-in chosen [:chosen-because :repair-proposal-supply])]
+        (is (= "T-new-concrete" (:target chosen)))
+        (is (= :actionable-repair-proposal (get-in chosen [:chosen-because :kind])))
+        (is (= "new-concrete" (get-in chosen [:chosen-because :repair/id])))
+        (is (= supplied evidence))
+        (is (= ["old-awaiting"]
+               (get-in evidence [:repair-scan :lifecycle-census
+                                 :awaiting-validation :ids])))
+        (is (= ["old-blocked"]
+               (get-in evidence [:repair-scan :blocked-ids])))
+        (is (= :repair-finding-evidence-missing
+               (get-in evidence [:blocked 0 :reason])))
+        (is (= ["new-concrete"]
+               (get-in evidence [:repair-scan :proposal-ids])))))))
+
+(deftest no-concrete-repair-proposal-falls-back-to-requested-with-supply-evidence
+  (with-repair-store
+    (fn [root]
+      (finding! root "awaiting" "2026-10-19T01:00:00Z")
+      (record! root "implementations"
+               {:repair/id "awaiting" :repair/status :awaiting-validation
+                :implemented-at "2026-10-19T01:01:00Z"})
+      (finding! root "blocked" "2026-10-19T02:00:00Z" {:discharge-contract nil})
+      (let [supplied (repair-proposals/supply root)
+            chosen (flight/choose-target {:requested target
+                                           :repair-proposal-supply supplied})]
+        (is (empty? (:proposals supplied)))
+        (is (= target (:target chosen)))
+        (is (= :requested (get-in chosen [:chosen-because :kind])))
+        (is (= supplied (get-in chosen [:chosen-because :repair-proposal-supply])))))))
+
+(deftest legacy-open-obligations-do-not-supply-executable-repair-authority
+  (is (= target
+         (:target (flight/choose-target
+                   {:requested target
+                    :open-obligations [{:repair/id "old-stop-line"
+                                        :opened-at "2026-10-19T01:00:00Z"}]}))))
   (is (nil? (flight/choose-target {}))))
 
 (defn- world

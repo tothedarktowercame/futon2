@@ -308,18 +308,45 @@
 ;; ---------------------------------------------------------------------------
 ;; Choosing the target
 
+(defn- concrete-repair-proposal?
+  "The flight can prioritize only the completed, lifecycle-qualified proposal
+   shape emitted by repair-proposals/supply.  In particular, a finding in an
+   old :open-obligations collection is not executable authority here."
+  [proposal]
+  (let [repair-id (:repair/id proposal)
+        target (:target proposal)]
+    (and (= :wm/cascade-proposal-v1 (:schema proposal))
+         (= :proposed (:status proposal))
+         (= :repair-finding-proposed (:origin proposal))
+         (= :T (:target-type proposal))
+         (string? repair-id) (not (str/blank? repair-id))
+         (string? target) (= target (repairs/target-id repair-id))
+         (string? (get-in proposal [:evidence :opened-at])))))
+
 (defn choose-target
-  "The flight's target. The oldest open stop-line's repair target comes
-  first; otherwise REQUESTED. Returns {:target … :chosen-because …}, or nil
-  when there is neither."
-  [{:keys [open-obligations requested]}]
-  (if-let [ob (first (sort-by (juxt :opened-at :repair/id) open-obligations))]
-    {:target (repairs/target-id (:repair/id ob))
-     :chosen-because {:kind :open-stop-line :repair/id (:repair/id ob)
-                      :authority "bbae7593: repair fixes go to the front of the queue"
-                      :open-stop-lines (count open-obligations)}}
-    (when requested
-      {:target requested :chosen-because {:kind :requested}})))
+  "The flight's target.  A lifecycle-qualified repair-proposal supply may put
+   its oldest concrete actionable proposal first; otherwise REQUESTED wins.
+   The whole supplied read model is retained as selection evidence, including
+   lifecycle buckets and blocked/non-actionable records.  :open-obligations is
+   deliberately not a choice input.  Returns {:target … :chosen-because …},
+   or nil when there is neither."
+  [{:keys [repair-proposal-supply requested] :as choices}]
+  (let [supplied? (contains? choices :repair-proposal-supply)
+        supply-evidence (when supplied? repair-proposal-supply)
+        proposal (first (sort-by (juxt #(get-in % [:evidence :opened-at]) :repair/id)
+                                 (filter concrete-repair-proposal?
+                                         (:proposals repair-proposal-supply))))]
+    (if proposal
+      {:target (:target proposal)
+       :chosen-because {:kind :actionable-repair-proposal
+                        :repair/id (:repair/id proposal)
+                        :proposal-id (:proposal-id proposal)
+                        :authority :repair-proposals/supply
+                        :repair-proposal-supply supply-evidence}}
+      (when requested
+        {:target requested
+         :chosen-because (cond-> {:kind :requested}
+                            supplied? (assoc :repair-proposal-supply supply-evidence))}))))
 
 (defn start
   "A new flight on CHOSEN (from `choose-target`) with WANT-SOURCE."
