@@ -59,3 +59,21 @@
     (spit record-path (str (pr-str (assoc (failed-record) :traceWritten true)) "\n"))
     (is (= :injury-run-record-drift
            (:reason (injury/produce (sut/load-authority root)))))))
+
+(deftest failed-meta-algorithm-remains-an-active-injury
+  (let [tmp (.toFile (Files/createTempDirectory "wm-algorithm-injury" (make-array java.nio.file.attribute.FileAttribute 0)))
+        record (-> (failed-record)
+                   (assoc :failure {:kind :fold-output-invalid :stage :construction})
+                   (assoc :terminal-receipt {:kind :failure
+                                             :failure-kind :fold-output-invalid
+                                             :target-kind :algorithm})
+                   (assoc :loop-node-exercise {:schema :wm/loop-node-exercise-v1
+                                               :status :complete
+                                               :counts {:present 0 :bypassed 4 :refused 0}})
+                   (assoc :run-output {:schema :wm/run-output-v1 :status :absent
+                                       :reason :run-not-grounded :outcome :incomplete}))
+        record-path (str tmp "/run.edn")
+        _ (spit record-path (str (pr-str record) "\n"))
+        deposited (sut/deposit! (str tmp "/injuries") record-path)]
+    (is (= :active (:status deposited)))
+    (is (= injury/capability (:capability deposited)))))

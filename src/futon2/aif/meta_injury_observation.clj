@@ -38,7 +38,7 @@
              :stage (get-in record [:failure :stage])
              :detail-kind (get-in record [:failure :detail :kind])}
    :terminal-receipt (select-keys (:terminal-receipt record)
-                                  [:kind :failure-kind])
+                                  [:kind :failure-kind :target-kind])
    :outer-task-selection (select-keys (:outer-task-selection record)
                                       [:schema :status :reason])
    :loop-node-exercise (select-keys (:loop-node-exercise record)
@@ -88,7 +88,7 @@
              :click-id (:click-id record)
              :failure (select-keys (:failure record) [:kind :stage :detail-kind])
              :terminal-receipt (select-keys (:terminal-receipt record)
-                                            [:kind :failure-kind])
+                                            [:kind :failure-kind :target-kind])
              :outer-task-selection (select-keys (:outer-task-selection record)
                                                 [:schema :status :reason])
              :loop-node-exercise (select-keys (:loop-node-exercise record)
@@ -96,19 +96,22 @@
              :run-output (select-keys (:run-output record)
                                       [:schema :status :reason :outcome])
              :trace-written (:trace-written record)}
+            selection-injury?
+            (and (= :abstained (get-in evidence [:failure :kind]))
+                 (= :selection (get-in evidence [:failure :stage]))
+                 (= :wm/selection-terminal-abstention
+                    (get-in evidence [:failure :detail-kind])))
+            algorithm-route-injury?
+            (and (= :algorithm (get-in evidence [:terminal-receipt :target-kind]))
+                 (= :failure (get-in evidence [:terminal-receipt :kind]))
+                 (contains? #{:construction :cascade-execution :build :review :close}
+                            (get-in evidence [:failure :stage])))
             active?
             (and (= expected-projection record)
                  (string? (:run-id evidence)) (string? (:click-id evidence))
-                 (= :abstained (get-in evidence [:failure :kind]))
-                 (= :selection (get-in evidence [:failure :stage]))
-                 (= :wm/selection-terminal-abstention
-                    (get-in evidence [:failure :detail-kind]))
+                 (or selection-injury? algorithm-route-injury?)
                  (= :failure (get-in evidence [:terminal-receipt :kind]))
-                 (= :abstained (get-in evidence [:terminal-receipt :failure-kind]))
-                 (= :absent (get-in evidence [:outer-task-selection :status]))
-                 (= :incomplete (get-in evidence [:loop-node-exercise :status]))
                  (= :absent (get-in evidence [:run-output :status]))
-                 (= :abstained (get-in evidence [:run-output :outcome]))
                  (false? (:trace-written evidence)))
             body (cond
                    (not= expected-projection record)
