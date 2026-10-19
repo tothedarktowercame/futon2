@@ -890,34 +890,42 @@
 
 (def ^:private retained-refusal-cause-limit 2)
 
-(defn- refusal-cause-candidates [error-data cause-chain]
-  (let [roots [(select-keys (or error-data {})
-                            [:refusals :outer-task-selection :original-failure])
-               cause-chain]
-        children (fn [value]
-                   (cond
-                     (map? value) (vals value)
-                     (sequential? value) value
-                     :else nil))]
-    (->> roots
-         (mapcat #(take 128 (tree-seq coll? children %)))
-         (filter map?)
-         (keep (fn [m]
-                 (let [cause (select-keys m [:target :stage :kind :failure-kind :reason :missing])]
-                   (when (seq (select-keys cause [:kind :failure-kind :reason])) cause))))
+(defn- refusal-cause-candidates [error-data cause-chain original-failure]
+  ;; Do not walk arbitrary judgment trees: only these carrier shapes are a
+  ;; refusal-cause interface.  Their full vectors are intentionally consumed,
+  ;; so the reported count is exact rather than a lower bound.
+  (let [containers (concat [error-data original-failure
+                            (:error-data original-failure)]
+                           (mapcat (fn [{:keys [data]}]
+                                     [data (:original-failure data)
+                                      (:error-data data)])
+                                   cause-chain))
+        cause (fn [m]
+                (when (map? m)
+                  (let [projected (select-keys m [:target :stage :kind :failure-kind
+                                                  :reason :missing])]
+                    (when (seq (select-keys projected [:kind :failure-kind :reason]))
+                      projected))))
+        family-causes (fn [container]
+                        (mapcat (fn [refusal]
+                                  (cons refusal (or (:failures refusal) [])))
+                                (or (:refusals container) [])))]
+    (->> containers
+         (mapcat #(cons % (family-causes %)))
+         (keep cause)
          distinct
          vec)))
 
 (defn- write-refusal-cause-overflow! [dir run-id causes]
-  (let [file (io/file dir (str "tick-run-record-" run-id "-refusal-causes.edn"))
+  (let [file (io/file dir (str "refusal-causes-" run-id ".edn"))
         artifact {:schema :wm/refusal-cause-overflow-v1 :causes causes}]
     (io/make-parents file)
     (spit file (str (pr-str artifact) "\n"))
     {:path (.getCanonicalPath file)
      :sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))}))
 
-(defn- refusal-cause-summary [error-data cause-chain overflow-writer]
-  (let [causes (refusal-cause-candidates error-data cause-chain)
+(defn- refusal-cause-summary [error-data cause-chain original-failure overflow-writer]
+  (let [causes (refusal-cause-candidates error-data cause-chain original-failure)
         retained (vec (take retained-refusal-cause-limit causes))
         omitted (vec (drop retained-refusal-cause-limit causes))]
     (cond-> {:schema :wm/refusal-cause-summary-v1
@@ -969,7 +977,7 @@
                :detail (cond-> (failure-detail (:error-data d))
                          (:wrapped-by effective)
                          (assoc :wrapped-by (:wrapped-by effective)))
-               :causes (refusal-cause-summary (:error-data d) (:cause-chain d)
+               :causes (refusal-cause-summary (:error-data d) (:cause-chain d) original
                                                overflow-writer)}
         (:target d) (assoc :target (:target d))
         ask (assoc :context {:phase (:failure-stage d)

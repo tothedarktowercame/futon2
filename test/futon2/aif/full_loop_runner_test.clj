@@ -7081,20 +7081,32 @@
         result {:data {:failure-kind :invalid-close-outcome
                        :failure-stage :close
                        :error "synthetic L2 close wrapper"
-                       :original-failure {:failure-kind :incomplete-policy-menu-coverage
-                                          :failure-stage :selection}
+                       :original-failure
+                       {:failure-kind :incomplete-policy-menu-coverage
+                        :failure-stage :selection
+                        :error-data
+                        {:refusals
+                         (vec
+                          (concat
+                           ;; More than the old traversal cap: the late causes
+                           ;; must still contribute to exact counts and overflow.
+                           (for [n (range 130)]
+                             {:target (str "M-earlier-" n)
+                              :stage :policy-family
+                              :kind :no-policy-family
+                              :failure-kind :early-family-refusal})
+                           [{:target "M-l1-reading" :stage :policy-family
+                             :kind :no-policy-family
+                             :failure-kind :no-current-target-reading
+                             :failures [{:kind :no-current-target-reading
+                                         :reason :no-current-target-reading}]}
+                            {:target "M-l1-menu" :stage :policy-family
+                             :kind :no-policy-family
+                             :failure-kind :incomplete-policy-menu-coverage
+                             :failures [{:kind :incomplete-policy-menu-coverage}]}]))}}
                        :error-data
                        {:refusals
-                        [{:target "M-l1-reading" :stage :policy-family
-                          :kind :no-policy-family
-                          :failure-kind :no-current-target-reading
-                          :failures [{:kind :no-current-target-reading
-                                      :reason :no-current-target-reading}]}
-                         {:target "M-l1-menu" :stage :policy-family
-                          :kind :no-policy-family
-                          :failure-kind :incomplete-policy-menu-coverage
-                          :failures [{:kind :incomplete-policy-menu-coverage}]}
-                         {:target "M-l2-close" :stage :selection
+                        [{:target "M-l2-close" :stage :selection
                           :kind :required-loop-node-unexercised
                           :failure-kind :required-loop-node-unexercised}]}
                        :cause-chain
@@ -7121,12 +7133,28 @@
       (is (pos? (:omitted-count summary)))
       (is (.isFile (io/file (get-in summary [:overflow :path]))))
       (is (= (get-in summary [:overflow :path])
-             (.getCanonicalPath (io/file root "tick-run-record-synthetic-refusal-causes.edn"))))
+             (.getCanonicalPath (io/file root "refusal-causes-synthetic.edn"))))
+      (is (not (re-matches #"tick-run-record-.*\\.edn"
+                           (.getName (io/file (get-in summary [:overflow :path]))))))
+      (is (= (get-in summary [:overflow :sha256])
+             (#'runner/sha256-bytes
+              (Files/readAllBytes (.toPath (io/file (get-in summary [:overflow :path])))))))
       (is (every? kinds [:no-current-target-reading
                           :incomplete-policy-menu-coverage
                           :required-loop-node-unexercised]))
       (finally
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+
+(deftest terminal-projection-marks-unpersisted-refusal-overflow-absent
+  (let [error-data {:refusals [{:kind :first} {:kind :second} {:kind :third}]}
+        nil-summary (#'runner/refusal-cause-summary error-data nil nil (constantly nil))
+        thrown-summary (#'runner/refusal-cause-summary
+                        error-data nil nil
+                        (fn [_] (throw (ex-info "overflow write failed" {}))))]
+    (is (= {:status :absent :reason :cause-overflow-artifact-not-persisted}
+           (:overflow nil-summary)))
+    (is (= {:status :absent :reason :cause-overflow-persistence-failed}
+           (:overflow thrown-summary)))))
 
 (deftest aligned-example-retention-binds-real-evidence-and-manifest
   (kernel-fixture/with-example
