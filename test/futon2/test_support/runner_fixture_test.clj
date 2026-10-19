@@ -28,14 +28,14 @@
       (fn []
         (testing "the fixture redirects the default injury root away from the canonical store"
           (is (not= canonical-root meta-injury-store/default-root)))
-        (when (.exists (io/file live-run-record))
-          (let [result (meta-injury-store/deposit! live-run-record)]
-            (reset! seen result)
-            (testing "the real deposit lands under the fixture root"
-              (is (string? (:head-path result)))
-              (is (.startsWith ^String (str (:head-path result))
-                               ^String meta-injury-store/default-root)))))))
+        (testing "the pinned L1 record is present; the deposit half is required, not optional"
+          (is (.exists (io/file live-run-record))))
+        (let [result (meta-injury-store/deposit! live-run-record)]
+          (reset! seen result)
+          (testing "the real deposit lands under the fixture root"
+            (is (string? (:head-path result)))
+            (is (.startsWith ^String (str (:head-path result))
+                             ^String meta-injury-store/default-root))))))
     (testing "the canonical injury store is byte-for-byte the same file set afterwards"
       (is (= before (file-set canonical-root))))
-    (when-not @seen
-      (println "runner-fixture-test: live L1 record absent; deposit half not exercised"))))
+    (is (some? @seen) "deposit was exercised")))
