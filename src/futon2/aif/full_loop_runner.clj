@@ -6397,9 +6397,11 @@
                     ;; always select; repair memory is evidence, never a divert.
                     judgement ((or (:judgement-transform-fn opts) identity) judgement)
                     _ (retain-selection! judgement)
-                    _ (when (or (:require-loop-node-exercise? opts)
-                                (get *runtime-defaults* :require-loop-node-exercise?))
-                        (loop-node-exercise/require-complete! (:decision judgement)))]
+                    judgement (if (or (:require-loop-node-exercise? opts)
+                                      (get *runtime-defaults* :require-loop-node-exercise?))
+                                (update judgement :decision loop-node-exercise/require-complete!)
+                                judgement)
+                    _ (retain-selection! judgement)]
                 (when-let [state (:scan-report/state opts)]
                   ;; Capture exactly the judgement used below, never rescan.
                   (reset! state (assoc (or (:render-data generated) (:data generated))
@@ -6567,9 +6569,11 @@
                         j ((or (:judgement-transform-fn opts) identity)
                            (:judgement generated))
                         _ (retain-selection! j)
-                        _ (when (or (:require-loop-node-exercise? opts)
-                                    (get *runtime-defaults* :require-loop-node-exercise?))
-                            (loop-node-exercise/require-complete! (:decision j)))]
+                        j (if (or (:require-loop-node-exercise? opts)
+                                  (get *runtime-defaults* :require-loop-node-exercise?))
+                            (update j :decision loop-node-exercise/require-complete!)
+                            j)
+                        _ (retain-selection! j)]
                     (reset! effective-configuration
                             (or (:effective-run-configuration j)
                                 (assoc @effective-configuration :evaluation :not-retained)))
