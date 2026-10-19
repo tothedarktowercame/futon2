@@ -2,6 +2,16 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P27 / A22-R14 (`e8022bf8d`, `p27-gain-learning.md`): selection gain's pure
+bounded update consumes signed realised-versus-expected performance after
+default five-sample burn-in. Offline folds exist; the current report runner's
+flat carry is removed, so this reading establishes no live selector consumer.
+Regression/uncertainty/contradiction/time-pressure diagnostics do not feed the
+inspected update law. Ruled tripwire coupling remains unwired. Keep update-law
+existence separate from live consumption and calibration; paper correction is
+proposed only.
+
+
 P28 / A28-R13 (`e41ea6408`, `p28-cascade-scoring.md`): reading-family cascade
 scoring sums each horizon step and uses declared per-step/capacity/pattern
 normalization, not temporal discounting. Whole-horizon support is statically
