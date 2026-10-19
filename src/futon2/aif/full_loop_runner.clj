@@ -888,6 +888,52 @@
                                :refused :reason])))
         (reverse (exception-cause-chain throwable))))
 
+(def ^:private retained-refusal-cause-limit 2)
+
+(defn- refusal-cause-candidates [error-data cause-chain]
+  (let [roots [(select-keys (or error-data {})
+                            [:refusals :outer-task-selection :original-failure])
+               cause-chain]
+        children (fn [value]
+                   (cond
+                     (map? value) (vals value)
+                     (sequential? value) value
+                     :else nil))]
+    (->> roots
+         (mapcat #(take 128 (tree-seq coll? children %)))
+         (filter map?)
+         (keep (fn [m]
+                 (let [cause (select-keys m [:target :stage :kind :failure-kind :reason :missing])]
+                   (when (seq (select-keys cause [:kind :failure-kind :reason])) cause))))
+         distinct
+         vec)))
+
+(defn- write-refusal-cause-overflow! [dir run-id causes]
+  (let [file (io/file dir (str "tick-run-record-" run-id "-refusal-causes.edn"))
+        artifact {:schema :wm/refusal-cause-overflow-v1 :causes causes}]
+    (io/make-parents file)
+    (spit file (str (pr-str artifact) "\n"))
+    {:path (.getCanonicalPath file)
+     :sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))}))
+
+(defn- refusal-cause-summary [error-data cause-chain overflow-writer]
+  (let [causes (refusal-cause-candidates error-data cause-chain)
+        retained (vec (take retained-refusal-cause-limit causes))
+        omitted (vec (drop retained-refusal-cause-limit causes))]
+    (cond-> {:schema :wm/refusal-cause-summary-v1
+             :total-count (count causes)
+             :retained-count (count retained)
+             :omitted-count (count omitted)
+             :causes retained}
+      (seq omitted)
+      (assoc :overflow
+             (or (try
+                   (overflow-writer causes)
+                   (catch Throwable _
+                     {:status :absent :reason :cause-overflow-persistence-failed}))
+                 {:status :absent
+                  :reason :cause-overflow-artifact-not-persisted})))))
+
 (defn- run-record-failure
   "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
   the flight's click entry can say why (record-summary reads only the run
@@ -895,8 +941,9 @@
   writes it: :failure-kind :failure-stage :error :cause :error-data), as
   {:kind :stage :error :cause :detail}; {:absent :no-failure} when the close carries
   no failure kind. A close no exception reached has no cause to give."
-  [result]
-  (let [d (:data result)
+  ([result] (run-record-failure result (constantly nil)))
+  ([result overflow-writer]
+   (let [d (:data result)
         original (:original-failure d)
         effective (if (:failure-kind original)
                     (merge d original
@@ -921,11 +968,13 @@
                         {:absent :close-without-exception})
                :detail (cond-> (failure-detail (:error-data d))
                          (:wrapped-by effective)
-                         (assoc :wrapped-by (:wrapped-by effective)))}
+                         (assoc :wrapped-by (:wrapped-by effective)))
+               :causes (refusal-cause-summary (:error-data d) (:cause-chain d)
+                                               overflow-writer)}
         (:target d) (assoc :target (:target d))
         ask (assoc :context {:phase (:failure-stage d)
                              :interpretation-ask ask}))
-      {:absent :no-failure})))
+      {:absent :no-failure}))))
 
 (defn grounded-commit-for
   "PROOF-2b (click 13, tick-run-record-2026-09-30-1790737908): the grounded
@@ -1197,7 +1246,9 @@
                          :terminal q6-terminal}
                     :q8 q8-carrier
                     :route route
-                    :failure (run-record-failure result)
+                    :failure (run-record-failure
+                              result
+                              #(write-refusal-cause-overflow! dir run-id %))
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)

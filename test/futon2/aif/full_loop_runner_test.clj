@@ -7072,6 +7072,62 @@
     (is (= :required-loop-node-unexercised
            (get-in projected [:cause 0 :data :failure-kind])))))
 
+(deftest terminal-projection-retains-bounded-refusal-causes-with-overflow-artifact
+  ;; L1's incomplete menu / no-current-target-reading and L2's close wrapper
+  ;; are represented here as synthetic structured causes; their click counts
+  ;; are unavailable and are not reconstructed.
+  (let [root (.toFile (Files/createTempDirectory "wm-refusal-cause-test-"
+                                             (make-array FileAttribute 0)))
+        result {:data {:failure-kind :invalid-close-outcome
+                       :failure-stage :close
+                       :error "synthetic L2 close wrapper"
+                       :original-failure {:failure-kind :incomplete-policy-menu-coverage
+                                          :failure-stage :selection}
+                       :error-data
+                       {:refusals
+                        [{:target "M-l1-reading" :stage :policy-family
+                          :kind :no-policy-family
+                          :failure-kind :no-current-target-reading
+                          :failures [{:kind :no-current-target-reading
+                                      :reason :no-current-target-reading}]}
+                         {:target "M-l1-menu" :stage :policy-family
+                          :kind :no-policy-family
+                          :failure-kind :incomplete-policy-menu-coverage
+                          :failures [{:kind :incomplete-policy-menu-coverage}]}
+                         {:target "M-l2-close" :stage :selection
+                          :kind :required-loop-node-unexercised
+                          :failure-kind :required-loop-node-unexercised}]}
+                       :cause-chain
+                       [{:exception-class "clojure.lang.ExceptionInfo"
+                         :message "synthetic L2 close wrapper"
+                         :data {:failure-kind :invalid-close-outcome
+                                :failure-stage :close}}]}}
+        projected (#'runner/run-record-failure
+                   result
+                   #(#'runner/write-refusal-cause-overflow! root "synthetic" %))
+        summary (:causes projected)
+        overflow (edn/read-string (slurp (get-in summary [:overflow :path])))
+        kinds (set (mapcat (fn [cause]
+                             (keep cause [:kind :failure-kind :reason]))
+                           (:causes overflow)))]
+    (try
+      (is (= :incomplete-policy-menu-coverage (:kind projected)))
+      (is (= :selection (:stage projected)))
+      (is (= {:failure-kind :invalid-close-outcome :failure-stage :close}
+             (get-in projected [:detail :wrapped-by])))
+      (is (= (:total-count summary)
+             (+ (:retained-count summary) (:omitted-count summary))))
+      (is (= 2 (:retained-count summary)))
+      (is (pos? (:omitted-count summary)))
+      (is (.isFile (io/file (get-in summary [:overflow :path]))))
+      (is (= (get-in summary [:overflow :path])
+             (.getCanonicalPath (io/file root "tick-run-record-synthetic-refusal-causes.edn"))))
+      (is (every? kinds [:no-current-target-reading
+                          :incomplete-policy-menu-coverage
+                          :required-loop-node-unexercised]))
+      (finally
+        (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+
 (deftest aligned-example-retention-binds-real-evidence-and-manifest
   (kernel-fixture/with-example
    (fn [{:keys [context expected jobs]}]
