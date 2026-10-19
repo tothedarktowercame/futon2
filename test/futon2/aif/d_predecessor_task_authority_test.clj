@@ -17,6 +17,14 @@
 
 (def ^:dynamic *git-environment* (into {} (System/getenv)))
 
+(deftest meta-algorithm-uses-minted-occurrence-as-dispatch-identity
+  (let [action {:kind :algorithm :id "A-self-heal" :target "A-self-heal"}
+        occurrence {:action/id "action-meta-1"}
+        context (task/context {:action action} occurrence [])]
+    (is (= "action-meta-1" (:carry-occurrence-id context)))
+    (is (= "action-meta-1" (:candidate-id context)))
+    (is (= #{} (:universe context)))))
+
 (def ^:private git-routing-environment-keys
   ["GIT_DIR" "GIT_WORK_TREE" "GIT_INDEX_FILE" "GIT_COMMON_DIR"])
 
