@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P11 P04 (`96bb168cb`): provider emits per-policy score receipts and measured
+menu/scored/score-absent frontier, repinning its response after adding them.
+Declaration contains only computed rows; all-unscorable produces an explicit
+no-policy-scores declaration, not invented numeric authority. This producer
+change alone does not establish selection continuation.
+
 P30 update (P01, `ac4ca5bab` + `72352574b`): selected-action completion with
 absent prospective carry emits `:status :unavailable`,
 `:kind :prospective-carry-unavailable` and the absent receipt. It does not invoke

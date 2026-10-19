@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 3 P04 (`96bb168cb`, reviewed worker `ca237ea35`): provider retains original
+policy identities/digests with computed or absent scores and a measured frontier.
+Partial declarations include computed rows only; response pin covers the receipts.
+Mixed case reports 2/1/1; all-unscorable reports zero assessed without invented
+terms. Worker namespace 4 tests/23 assertions passed, including all-scorable
+integration checks. Downstream join remains incomplete pending P05/P06; no
+serving observation is claimed.
+
 Row 2 P02a evidence (`e935329a2` worker): actual selected-carrier projection omits
 the pre-choice family field, while direct no-action consumer input yields a square
 need. Review limits this result to the selected branch: the test stubs semantic

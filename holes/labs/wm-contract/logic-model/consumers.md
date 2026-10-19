@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 33 P04 (`96bb168cb`): provider scores sealed entries individually and
+retains score records/frontier. Returned unscorable results do not erase computed
+neighbours; original identities and absence results remain pinned. No smaller
+menu is resealed. This handles returned score refusals, not arbitrary thrown
+exceptions. Downstream evidence joining remains P05.
+
 Row 38 P02a: the selected-carrier projection lacks the family carrier consumed
 by `selected-need`; the direct consumer works without an action. This constructed
 test does not cover the no-selected-policy fallback or full outer-selector route.
