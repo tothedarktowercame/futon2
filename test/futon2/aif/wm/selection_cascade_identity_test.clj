@@ -197,6 +197,21 @@
     (is (empty? (:entries forged)))
     (is (= :identity-forged (get-in forged [:refusals 0 :kind])))))
 
+(deftest sealed-menu-pin-rejects-whole-chain-substitution
+  (let [field (pinned-field [(family (occurrence-policy 1))] "6")
+        sealed (family-selection/sealed-pre-choice-menu
+                field (:bind-cascade-identity join-opts))
+        record (get-in sealed [:entries 0 :canonical-cascade])
+        changed (assoc-in record [:structural :policy-id] "T-occ/substituted")
+        changed (assoc changed :digest (xc/digest changed))
+        substituted (-> sealed
+                        (assoc-in [:entries 0 :canonical-cascade] changed)
+                        (assoc-in [:entries 0 :cascade-digest] (:digest changed)))]
+    (is (= :sealed (:status sealed)))
+    (is (= :menu-pin-mismatch
+           (family-selection/verify-sealed-menu substituted)))
+    (is (not= (:digest record) (:digest changed)))))
+
 (deftest canonical-identity-binds-before-the-one-selector
   (let [result (family-selection/select-over-families
                 [(family (occurrence-policy 1) (occurrence-policy 2))]

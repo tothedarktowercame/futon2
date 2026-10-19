@@ -3,7 +3,8 @@
   (:require [futon2.aif.load-identity :as identity]
             [futon2.aif.meta-outcome-dataset :as outcomes]
             [futon2.aif.parameter-novelty :as novelty]
-            [futon2.aif.wm.executable-cascade :as xc]))
+            [futon2.aif.wm.executable-cascade :as xc]
+            [futon2.aif.wm.family-selection :as family-selection]))
 
 (identity/register! *ns* *file*)
 
@@ -33,9 +34,8 @@
         mass-sum (reduce + 0.0 (filter number? masses))
         sealed-error
         (cond
-          (not= :wm/sealed-outer-policy-menu-v1 (:schema sealed)) :sealed-menu-schema
-          (not= :sealed (:status sealed)) :sealed-menu-status
-          (not (pin? (:menu-pin sealed))) :menu-pin
+          (family-selection/verify-sealed-menu sealed)
+          (family-selection/verify-sealed-menu sealed)
           (not (pin? (:field-source-pin sealed))) :field-source-pin
           (some (fn [e]
                   (let [record (:canonical-cascade e)]
@@ -55,6 +55,7 @@
           (not (pin? declared-pin)) :declaration-pin
           (not (pin? (:preference-authority declaration))) :preference-authority
           (not= (:preference-authority declaration) (:authority preference)) :preference-authority-mismatch
+          (not= :probability (:units preference)) :preference-units
           (not= vocab (:vocabulary preference)) :preference-vocabulary
           (not (and (vector? masses) (= (count vocab) (count masses))
                     (every? #(and (finite? %) (pos? %)) masses))) :preference-mass

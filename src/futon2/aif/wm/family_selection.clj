@@ -296,6 +296,29 @@
      :ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
                    (range 1 (inc (count scored))) scored)}))
 
+(def sealed-menu-body-keys
+  [:schema :field-source-pin :family-census :entries :refusals :failures])
+
+(defn sealed-menu-pin
+  "Canonical seal of the exact pre-choice body. Public so every consumer
+  verifies the producer's serialization rather than reproducing it."
+  [carrier]
+  {:path "wm://sealed-outer-policy-menu-v1"
+   :sha256 (identity/sha256
+            (.getBytes (pr-str (select-keys carrier sealed-menu-body-keys)) "UTF-8"))})
+
+(defn verify-sealed-menu
+  [carrier]
+  (let [ids (mapv :policy-id (:entries carrier))
+        digests (mapv :cascade-digest (:entries carrier))]
+    (cond
+      (not= :wm/sealed-outer-policy-menu-v1 (:schema carrier)) :sealed-menu-schema
+      (not= :sealed (:status carrier)) :sealed-menu-status
+      (not= (sealed-menu-pin carrier) (:menu-pin carrier)) :menu-pin-mismatch
+      (not= (count ids) (count (distinct ids))) :duplicate-policy-id
+      (not= (count digests) (count (distinct digests))) :duplicate-cascade-digest
+      :else nil)))
+
 (defn sealed-pre-choice-menu
   "Atomically form and canonical-bind a complete pre-choice policy menu.
   FIELD is the pinned full-field carrier.  JOIN supplies only existing
@@ -332,10 +355,7 @@
           (assoc body :status :refused :reason :no-canonically-bound-policy)
 
           :else
-          (assoc body :status :sealed
-                 :menu-pin {:path "wm://sealed-outer-policy-menu-v1"
-                            :sha256 (identity/sha256
-                                     (.getBytes (pr-str body) "UTF-8"))}))))))
+          (assoc body :status :sealed :menu-pin (sealed-menu-pin body)))))))
 
 (defn select-over-families
   "Score every policy in each computed family, then call

@@ -3,16 +3,19 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.outer-policy-evidence :as sut]
             [futon2.aif.parameter-novelty :as novelty]
-            [futon2.aif.wm.executable-cascade :as xc]))
+            [futon2.aif.wm.executable-cascade :as xc]
+            [futon2.aif.wm.family-selection :as family-selection]))
 
 (defn pin [p c] {:path p :sha256 (apply str (repeat 64 c))})
 (def entries [{:policy-id "p1" :target-id "T" :cascade-digest "d1"
                :canonical-cascade {:digest "d1"}}
               {:policy-id "p2" :target-id "T" :cascade-digest "d2"
                :canonical-cascade {:digest "d2"}}])
-(def sealed {:schema :wm/sealed-outer-policy-menu-v1 :status :sealed
-             :menu-pin (pin "wm://menu" "a")
-             :field-source-pin (pin "wm://field" "f") :entries entries})
+(def sealed-body {:schema :wm/sealed-outer-policy-menu-v1
+                  :field-source-pin (pin "wm://field" "f")
+                  :family-census {} :entries entries :refusals [] :failures []})
+(def sealed (assoc sealed-body :status :sealed
+                   :menu-pin (family-selection/sealed-menu-pin sealed-body)))
 (use-fixtures :each (fn [run]
                       (with-redefs [xc/digest :digest
                                     xc/validate-cascade (constantly {:status :certified})]
@@ -102,6 +105,16 @@
     (is (= :preference-normalization
            (:reason (sut/join sealed (reseal (assoc-in d [:preference :distribution]
                                                         [0.8 0.3])) []))))
-    (is (= :menu-pin (:reason (sut/join (dissoc sealed :menu-pin) d []))))
-    (is (= :sealed-entry-invalid
+    (is (= :menu-pin-mismatch (:reason (sut/join (dissoc sealed :menu-pin) d []))))
+    (is (= :preference-units
+           (:reason (sut/join sealed (reseal (assoc-in d [:preference :units] :nats)) []))))
+    (is (= :duplicate-policy-id
+           (:reason (sut/join (let [s (assoc-in sealed [:entries 1 :policy-id] "p1")]
+                                (assoc s :menu-pin (family-selection/sealed-menu-pin s))) d []))))
+    (is (= :duplicate-cascade-digest
+           (:reason (sut/join (let [s (-> sealed
+                                          (assoc-in [:entries 1 :cascade-digest] "d1")
+                                          (assoc-in [:entries 1 :canonical-cascade :digest] "d1"))]
+                                (assoc s :menu-pin (family-selection/sealed-menu-pin s))) d []))))
+    (is (= :menu-pin-mismatch
            (:reason (sut/join (assoc-in sealed [:entries 0 :cascade-digest] "forged") d []))))))
