@@ -1,6 +1,8 @@
-import subprocess, tempfile, threading, unittest
+import contextlib, importlib.util, io, json, subprocess, tempfile, threading, unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest import mock
+import urllib.error
 
 ROOT=Path(__file__).resolve().parents[2]
 SCRIPT=ROOT/"scripts/wm_run_alert.py"
@@ -9,6 +11,20 @@ SCRIPT=ROOT/"scripts/wm_run_alert.py"
 CLICK20=next((path for path in (ROOT/"data/wm-runs/tick-run-record-2026-09-30-1790748841.edn",
                                 Path("/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-30-1790748841.edn"))
               if path.is_file()), ROOT/"data/wm-runs/tick-run-record-2026-09-30-1790748841.edn")
+
+def loaded_alert_module():
+  spec=importlib.util.spec_from_file_location("wm_run_alert_under_test",SCRIPT)
+  module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+  return module
+
+FACTS={"enumeratedTasks":[],"openMissions":[],"openExcursions":[],"openTickets":[],
+       "targetConstruction":[],"libraryPatternCount":0,"cascadesWithoutG":[],
+       "constructedCascades":[],"preferenceSteps":[],"horizonLength":0,"gTerms":0,
+       "interpretationOrder":[],"previousChoice":"none","currentChoice":"none",
+       "previousInputDigest":"none","currentInputDigest":"none","pathAbsenceCount":0,
+       "targetsReachingScoring":[],"targetsWithG":[],"comparedPolicies":[],
+       "completionPairsStrictlyPreferred":0,"completionPreferencePairs":0,
+       "arrangementPairsDistinguishedByG":0,"differentArrangementPairs":0}
 
 class AlertTest(unittest.TestCase):
   def invoke(self, extra=(), record=CLICK20, no_evidence=True):
@@ -28,6 +44,16 @@ class AlertTest(unittest.TestCase):
     self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
     return f"http://127.0.0.1:{server.server_port}/evidence"
 
+  def mocked_evaluation(self):
+    td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup); root=Path(td.name)
+    record=root/"run.edn"; record.write_text("{}\n")
+    facts=root/"facts.json"; facts.write_text(json.dumps({"facts":FACTS,"diagnostics":{}}))
+    module=loaded_alert_module()
+    module.run=lambda cmd,_: subprocess.CompletedProcess(cmd,0,
+      "\n".join(f"Requirement.q{q}, fixture Outcome.holds" for q in range(1,11)),"")
+    module.lake_executable=lambda: "lake"; module.sha=lambda *_: "fixture-sha"
+    return module,root,record,facts
+
   def test_click20_alerts_and_exits_nonzero(self):
     p,rec=self.invoke(); self.assertNotEqual(p.returncode,0); self.assertTrue(p.stdout.startswith("ALERT FOR JOE\n"))
     for q in (1,2,4,5,6,7,8,9,10): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
@@ -41,12 +67,46 @@ class AlertTest(unittest.TestCase):
     p,rec=self.invoke(["--evidence-url",self.publisher(403)],no_evidence=False)
     self.assertEqual(3,p.returncode); self.assertIn("ALERT FOR JOE",p.stdout)
     self.assertRegex(p.stdout,r"(?m)^Q1 (violated|unverifiable):")
-    self.assertIn("EVIDENCE PUBLICATION FAILED: HTTP Error 403: Forbidden",p.stdout)
+    self.assertIn("EVIDENCE PUBLICATION FAILED: HTTPError status 403",p.stdout)
     self.assertNotIn("requirements NOT CHECKED",p.stdout)
     persisted=Path(str(rec)+".requirements.edn").read_text()
     self.assertIn('":evidence-publication"',persisted)
     self.assertIn('":evidence-http-status"',persisted)
     self.assertIn("403",persisted)
+
+  def test_alert_log_failure_after_evaluation_is_not_unchecked(self):
+    module,root,record,facts=self.mocked_evaluation(); log=root/"alerts.log"; verdict=Path(str(record)+".requirements.edn")
+    original_open=Path.open
+    def deny_alert_log(path,*args,**kwargs):
+      if path == log: raise PermissionError("fixture log denied")
+      return original_open(path,*args,**kwargs)
+    out=io.StringIO()
+    with mock.patch.object(Path,"open",deny_alert_log), contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),"--alerts-log",str(log),"--no-evidence"])
+    self.assertEqual(3,status); self.assertIn("CONFORMS",out.getvalue())
+    self.assertIn("POST-CHECK VERDICT-OR-ALERT-LOG FAILED: PermissionError",out.getvalue())
+    self.assertNotIn("requirements NOT CHECKED",out.getvalue())
+    self.assertIn('":verdicts"',verdict.read_text())
+
+  def test_receipt_persistence_failure_after_evaluation_is_not_unchecked(self):
+    module,root,record,facts=self.mocked_evaluation(); log=root/"alerts.log"; verdict=Path(str(record)+".requirements.edn")
+    original_write=Path.write_text; writes=0
+    def deny_second_verdict_write(path,data,*args,**kwargs):
+      nonlocal writes
+      if path == verdict:
+        writes+=1
+        if writes == 2: raise PermissionError("fixture receipt denied")
+      return original_write(path,data,*args,**kwargs)
+    transport=urllib.error.HTTPError("http://fixture",403,"Forbidden",None,None); out=io.StringIO()
+    with mock.patch.object(Path,"write_text",deny_second_verdict_write), \
+         mock.patch.object(module.urllib.request,"urlopen",side_effect=transport), \
+         contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),"--alerts-log",str(log)])
+    self.assertEqual(3,status); self.assertIn("CONFORMS",out.getvalue())
+    self.assertIn("EVIDENCE PUBLICATION FAILED: HTTPError status 403",out.getvalue())
+    self.assertIn("POST-CHECK PUBLICATION-RECEIPT-PERSISTENCE FAILED: PermissionError",out.getvalue())
+    self.assertNotIn("requirements NOT CHECKED",out.getvalue())
+    self.assertIn('":pending"',verdict.read_text())
 
   def test_successful_publication_keeps_requirements_exit_status(self):
     p,rec=self.invoke(["--evidence-url",self.publisher(201)],no_evidence=False)

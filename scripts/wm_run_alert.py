@@ -50,12 +50,23 @@ def edn(x):
 
 def publication_failure(e):
     """A typed receipt for an evidence transport failure, never a Q verdict."""
-    receipt={":status":":failed", ":error-class":type(e).__name__, ":message":str(e)}
+    receipt={":status":":failed", ":error-class":type(e).__name__}
     if isinstance(e, urllib.error.HTTPError):
       receipt.update({":kind":":evidence-http-status", ":http-status":e.code})
     else:
       receipt[":kind"]=":evidence-publication-error"
     return receipt
+
+def post_check_failure(stage, e):
+    """Report a failure after evaluation without recasting Qs as uncomputed."""
+    print(f"POST-CHECK {stage} FAILED: {type(e).__name__}", flush=True)
+    return 3
+
+def publication_diagnostic(e):
+    """Keep transport diagnostics typed; arbitrary exception text can hold secrets."""
+    if isinstance(e, urllib.error.HTTPError):
+      return f"HTTPError status {e.code}"
+    return type(e).__name__
 
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
@@ -88,32 +99,44 @@ def main(argv=None):
               ":not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[]),
               ":module-shas":{":mathlib-head":sha(ml),":requirements":sha(ml,"DarkTower/WarMachine/Requirements.lean"),":reader":sha(ml,"DarkTower/WarMachine/RequirementsReader.lean")},
               ":exporter-sha":sha(f2,"scripts/wm_run_facts.clj")}
-      result[":evidence-publication"]=( {":status":":skipped", ":reason":":no-evidence"}
-                                        if a.no_evidence else {":status":":pending"})
+    except Exception as e:
+      print("ALERT FOR JOE\nrequirements NOT CHECKED: "+str(e), flush=True)
+      return 2
+
+    result[":evidence-publication"]=( {":status":":skipped", ":reason":":no-evidence"}
+                                      if a.no_evidence else {":status":":pending"})
+    try:
       verdict.write_text(edn(result)+"\n")
       log=Path(a.alerts_log or f2/"data/wm-click-loop/alerts.log"); log.parent.mkdir(parents=True,exist_ok=True)
       with log.open("a") as out: out.write(f"{started.isoformat()} {record.name}\n{block}\n\n")
-      if not a.no_evidence:
-        payload={"evidence/id":"e-wm-requirements-"+hashlib.sha256(str(record).encode()).hexdigest()[:24],
+    except Exception as e:
+      return post_check_failure("VERDICT-OR-ALERT-LOG", e)
+
+    if not a.no_evidence:
+      payload={"evidence/id":"e-wm-requirements-"+hashlib.sha256(str(record).encode()).hexdigest()[:24],
           "evidence/subject":{"ref/type":"wm-run","ref/id":record.name},"evidence/type":"reflection",
           "evidence/claim-type":"observation","evidence/at":started.isoformat(),"evidence/author":"wm-run-alert",
           "evidence/body":{"event":"wm-requirements","conforms":not bad,"verdict-file":str(verdict),"block":block},
           "evidence/tags":["war-machine","requirements","alert"]}
-        req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"},method="POST")
+      req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"},method="POST")
+      try:
+        with urllib.request.urlopen(req,timeout=10) as response:
+          if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
+        result[":evidence-publication"]={":status":":published"}
+      except Exception as e:
+        result[":evidence-publication"]=publication_failure(e)
+        print("EVIDENCE PUBLICATION FAILED: "+publication_diagnostic(e), flush=True)
         try:
-          with urllib.request.urlopen(req,timeout=10) as response:
-            if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
-          result[":evidence-publication"]={":status":":published"}
-        except Exception as e:
-          result[":evidence-publication"]=publication_failure(e)
           verdict.write_text(edn(result)+"\n")
-          print("EVIDENCE PUBLICATION FAILED: "+str(e), flush=True)
-          return 3
+        except Exception as write_error:
+          return post_check_failure("PUBLICATION-RECEIPT-PERSISTENCE", write_error)
+        return 3
+      try:
         verdict.write_text(edn(result)+"\n")
-      if not verdict.is_file(): raise RuntimeError("verdict file absent after check")
-      return 1 if bad else 0
-    except Exception as e:
-      print("ALERT FOR JOE\nrequirements NOT CHECKED: "+str(e), flush=True)
-      return 2
+      except Exception as e:
+        return post_check_failure("PUBLICATION-RECEIPT-PERSISTENCE", e)
+    if not verdict.is_file():
+      return post_check_failure("VERDICT-PERSISTENCE", RuntimeError())
+    return 1 if bad else 0
 
 if __name__ == "__main__": sys.exit(main())
