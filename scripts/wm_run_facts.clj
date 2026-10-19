@@ -154,8 +154,11 @@
                                      "added-tasks" (get-in r [:delta :added-tasks])
                                      "removed-tasks" (get-in r [:delta :removed-tasks])}
                             "current-open-tasks" (vec (:current-open-tasks r))}
-         "frontierSelection" {"selected" (lean-entry (:selected s))
-                              "current-epoch" (:current-epoch s)}
+         "frontierSelection" (cond-> {"selected" (lean-entry (:selected s))
+                                       "current-epoch" (:current-epoch s)}
+                                (:selection-verdict (:carrier v))
+                                (assoc "verdict"
+                                       (update-keys (:selection-verdict (:carrier v)) name)))
          "selectedCascade" {"selected-task" (:selected-task c)
                             "available-admissible" (ids (:available-admissible c))
                             "constructed" (ids (:constructed c))

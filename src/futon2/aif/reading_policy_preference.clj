@@ -114,24 +114,53 @@
   [record sched h]
   (let [decl (:g-normalization record)
         raw (:raw-g-terms record)
-        terms {:risk (or (:progress-risk record) (:scorer-risk record) (:risk record))
-               :ambiguity (or (:progress-ambiguity record)
-                              (:scorer-ambiguity record) (:ambiguity record))
+        progress-terms (scoring/normalize-g-terms decl raw)
+        class-cert (get-in record [:class-emission :certificate :g-terms])
+        class-decl (:normalization-declaration class-cert)
+        class-raw0 (:raw class-cert)
+        class-raw (when class-raw0
+                    {:risk (:risk class-raw0)
+                     :ambiguity (:ambiguity class-raw0)
+                     :information-gain (:expected-information-gain class-raw0)})
+        class-terms (when (and class-decl class-raw)
+                      (scoring/normalize-g-terms class-decl class-raw))
+        fit-ambiguity (get-in record [:fit :fit-ambiguity] 0.0)
+        terms {:risk (:risk record)
+               :ambiguity (:ambiguity record)
                :information-gain (:information-gain record)}
+        composed {:risk (when (and progress-terms class-terms)
+                          (+ (double (:risk progress-terms))
+                             (double (:risk class-terms))))
+                  :ambiguity (when (and progress-terms class-terms)
+                               (+ (double (:ambiguity progress-terms))
+                                  (double (:ambiguity class-terms))
+                                  (double fit-ambiguity)))
+                  :information-gain (:information-gain progress-terms)}
         per-step? (= :per-step-capacity-and-pattern (:law decl))]
     (cond
       (nil? decl) {:status :absent :reason :no-normalization-declaration-in-scored-record}
-      (nil? (scoring/normalize-g-terms decl raw)) {:refusal :g-normalization-unrecognized}
+      (nil? progress-terms) {:refusal :g-normalization-unrecognized}
+      (nil? class-terms) {:refusal :class-g-normalization-unrecognized}
       (and per-step?
            (not (and (= h (:horizon-steps decl))
                      (= (max 2 (count (get sched 1))) (:outcome-count decl))
                      (= (scoring/candidate-pattern-count (:candidate record))
                         (:pattern-count decl)))))
       {:refusal :g-normalization-inputs-not-the-record's}
-      (not= terms (scoring/normalize-g-terms decl raw))
+      (some (fn [k]
+              (or (not (and (number? (get terms k)) (number? (get composed k))))
+                  (> (Math/abs (- (double (get terms k)) (double (get composed k))))
+                     normalization-tolerance)))
+            [:risk :ambiguity :information-gain])
       {:refusal :g-normalization-not-bound-to-terms}
-      :else {:declaration decl :raw raw :terms terms
-             :fit-ambiguity (get-in record [:fit :fit-ambiguity] 0.0)})))
+      :else {:declaration decl
+             :raw raw
+             :terms terms
+             :fit-ambiguity fit-ambiguity
+             :components {:progress {:declaration decl :raw raw :terms progress-terms}
+                          :class-emission {:declaration class-decl :raw class-raw
+                                           :terms class-terms}
+                          :fit-ambiguity fit-ambiguity}})))
 
 (defn- refuse [record kind & extras]
   (merge {:schema receipt-schema

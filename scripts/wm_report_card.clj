@@ -185,6 +185,19 @@
                 ;; the human report a second, weaker authority. Their supplied
                 ;; carriers are displayed, while the generated Lean checker is
                 ;; the deciding authority.
+                (and (= :Q8 q)
+                     (= :fail (get-in facts ["frontierSelection" "verdict" "status"])))
+                {:requirement q :status :fail
+                 :deciding-facts deciding
+                 :reason (str "Requirements.lean Q8 predicate evaluated false: "
+                              (get-in facts ["frontierSelection" "verdict" "reason"])
+                              "; tied members "
+                              (pr-str (get-in facts ["frontierSelection" "verdict"
+                                                    "tied-members"]))
+                              "; absent terms "
+                              (pr-str (get-in facts ["frontierSelection" "verdict"
+                                                    "absent-terms"])))}
+
                 (or (= :Q8 q)
                     (and (= :Q9 q) (some? (get facts "factorizedPreference"))))
                 {:requirement q :status :not-recomputable

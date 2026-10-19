@@ -113,7 +113,32 @@
      :ranking-version ranking-version
      :dependencies (vec (sort [(digest [:wm/q8-task-observation id evidence-digest])
                                (digest [:wm/q8-ranking-law ranking-law ranking-version m])]))
-     :comparison-key (comparison-key channels m)}))
+     :comparison-key (comparison-key channels m)
+     :absent-terms (vec (sort (:unsupported-channels candidate)))}))
+
+(defn strict-selection-correspondence
+  "The single runtime/Lean correspondence boundary for War Machine selection.
+  It mirrors SelectionCertificate.Valid: a selected member must have a
+  strictly smaller comparison key than every distinct frontier member.  A
+  tied minimum is a decided failure and carries the tied members and the
+  terms absent from their observations."
+  [entries selected]
+  (if-let [selected-entry (first (filter #(= selected (:task %)) entries))]
+    (let [k (:comparison-key selected-entry)
+          tied (vec (sort (map :task (filter #(and (not= selected (:task %))
+                                                    (= k (:comparison-key %))) entries))))
+          lower (vec (sort (map :task (filter #(< (:comparison-key %) k) entries))))]
+      (cond
+      (seq lower) {:status :fail :reason :selected-not-strict-key-minimum
+                   :lower-members lower}
+      (seq tied) {:status :fail :reason :tied-minimum
+                  :tied-members (vec (sort (conj tied selected)))
+                  :absent-terms
+                  (vec (sort (set (mapcat :absent-terms
+                                          (filter #(some #{(:task %)} (conj tied selected))
+                                                  entries)))))}
+        :else {:status :pass}))
+    {:status :not-recomputable :reason :selected-entry-absent}))
 
 (defn outer-frontier
   "Sealed outer frontier for one outer selection. TASKS is the open
@@ -142,6 +167,10 @@
                         :comparison comparison :missing-channel-cost missing-channel-cost}
               :census census
               :selected selected}
+        selection-verdict (when (and (= :selected (:status selection))
+                                     (= :complete-union comparison)
+                                     (every? (comp some? :comparison-key) entries))
+                            (strict-selection-correspondence entries selected))
         refusal
         (cond
           (not= :selected (:status selection))
@@ -151,15 +180,21 @@
           (some (comp nil? :comparison-key) entries)
           {:reason :channel-value-not-exact
            :tasks (vec (keep #(when (nil? (:comparison-key %)) (:task %)) entries))}
+          (= :not-recomputable (:status selection-verdict)) selection-verdict
+          (and (= :fail (:status selection-verdict))
+               (not= :tied-minimum (:reason selection-verdict))) selection-verdict
+          (= :tied-minimum (:reason selection-verdict)) nil
           :else
           (if-let [d (pairwise-disagreement (:pairwise selection) ks)]
             (assoc d :reason (:kind d))
-            (let [k (get ks selected)]
-              (when-not (and k (every? (fn [[t v]] (or (= t selected) (< k v))) ks))
-                {:reason :selected-not-strict-key-minimum :selected selected}))))]
+            nil))]
     (seal (if refusal
             (merge base {:status :not-recomputable} (dissoc refusal :kind))
-            (assoc base :status :certified :entries entries
+            (assoc base
+                   :status (if (= :fail (:status selection-verdict))
+                             :decided-failure :certified)
+                   :selection-verdict selection-verdict
+                   :entries entries
                    :pairwise {:pairs (count (:pairwise selection))
                               :digest (digest (vec (:pairwise selection)))})))))
 
@@ -271,7 +306,7 @@
   decision's CHOSEN-TARGET."
   [{:keys [outer predecessor decision chosen-target run-id]}]
   (let [outer-ok? (and (= outer-schema (:schema outer)) (intact? outer))
-        certified? (and outer-ok? (= :certified (:status outer)))
+        certified? (and outer-ok? (contains? #{:certified :decided-failure} (:status outer)))
         prior (when (= :present (:status predecessor)) (:frontier predecessor))
         {:keys [frontier] r :refresh} (when certified? (refresh outer prior run-id))
         selected (:selected outer)
@@ -284,7 +319,9 @@
                   (and certified? (not= :present (:status c))) (conj (:reason c))
                   (and certified? (not= selected chosen-target)) (conj :chosen-target-not-outer-selection))]
     (seal (cond-> {:schema certificate-schema
-                   :status (if (empty? reasons) :certified :not-recomputable)
+                   :status (if (empty? reasons)
+                             (if (= :decided-failure (:status outer)) :decided-failure :certified)
+                             :not-recomputable)
                    :bindings {:outer-frontier (:sha256 outer)
                               :predecessor (:sha256 predecessor)
                               :q6 (get-in decision [:selection-certificate :q6 :sha256])
@@ -295,12 +332,32 @@
             (assoc :census (:census outer)
                    :refresh (dissoc r :status)
                    :selection {:selected sel-entry :current-epoch (:freshness-epoch sel-entry)}
+                   :selection-verdict (:selection-verdict outer)
                    :cascade (dissoc c :status))))))
+
+(defn- retained-outer
+  "Recompute the outer carrier from the retained production selection.  This
+  also upgrades pre-fix tied records whose old outer carrier discarded its
+  entries after classifying the tie as not-recomputable."
+  [record]
+  (let [selection (get-in record [:outer-task-selection :outer-learning :selection])
+        ranked (:ranking selection)
+        old (get-in record [:outer-task-selection :q8-frontier])]
+    (if (and (= :selected-not-strict-key-minimum (:reason old))
+             (seq ranked) (seq (:pairwise selection)))
+      (outer-frontier
+       {:tasks (get-in record [:outer-task-selection :support])
+        :excluded (:typed-exclusions selection)
+        :candidates ranked
+        :selection selection
+        :comparison :complete-union
+        :missing-channel-cost (get-in old [:ranking :missing-channel-cost])})
+      old)))
 
 (defn record-inputs
   "The certificate's inputs, read from a persisted RECORD alone."
   [record]
-  {:outer (get-in record [:outer-task-selection :q8-frontier])
+  {:outer (retained-outer record)
    :predecessor (get-in record [:q6 :predecessor])
    :decision (:decision record)
    :chosen-target (get-in record [:decision :chosen :target])
@@ -310,14 +367,19 @@
   "The record's own :q8 carrier when it is intact and equals the carrier
   recomputed from the record; else a typed not-recomputable reason."
   [record]
-  (let [q8 (:q8 record)]
+  (let [q8 (:q8 record)
+        recomputed (certificate (record-inputs record))
+        legacy-tie? (and (= :selected-not-strict-key-minimum (first (:reasons q8)))
+                         (= :decided-failure (:status recomputed))
+                         (= :tied-minimum (get-in recomputed [:selection-verdict :reason])))]
     (cond
       (nil? q8) {:status :not-recomputable :reason :q8-carrier-absent}
       (not (and (= certificate-schema (:schema q8)) (intact? q8)))
       {:status :not-recomputable :reason :q8-carrier-tampered}
-      (not= q8 (certificate (record-inputs record)))
+      (and (not legacy-tie?) (not= q8 recomputed))
       {:status :not-recomputable :reason :q8-carrier-not-bound-to-record}
-      (not= :certified (:status q8))
+      legacy-tie? {:status :verified :carrier recomputed}
+      (not (contains? #{:certified :decided-failure} (:status q8)))
       {:status :not-recomputable :reason (first (:reasons q8))}
       :else {:status :verified :carrier q8})))
 
@@ -338,9 +400,7 @@
                                                           (set (get-in r [:delta :changed-observations]))))))
         removed (set (:removed r))
         prior (:prior r) current (:current r)
-        key-le (fn [a b] (or (< (:comparison-key a) (:comparison-key b))
-                             (and (= (:comparison-key a) (:comparison-key b))
-                                  (<= (compare (:task a) (:task b)) 0))))
+        key-lt (fn [a b] (< (:comparison-key a) (:comparison-key b)))
         sel (:selected s)
         remaining (set/difference (:scored c) (:requirement-excluded c))
         excludable (if (and (:refused? q6) (:same-digest? q6)) #{(:previous-cascade q6)} #{})]
@@ -374,7 +434,7 @@
       (some #{sel} current)
       (= (task-set current) eligible)
       (= (:freshness-epoch sel) (:current-epoch s))
-      (every? #(key-le sel %) current)
+      (every? #(or (= sel %) (key-lt sel %)) current)
       ;; selected cascade
       (= (:selected-task c) (:task sel))
       (= (:available-admissible c) (:constructed c) (:admitted c) (:scored c))

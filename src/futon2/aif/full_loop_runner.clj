@@ -6487,6 +6487,17 @@
                 (catch Throwable e
                   (retain-redecision-failure! e interpretation-ask-record)))
               judgement0-squares)
+            ;; Q2/Q4/Q8 are earned when the selection exists.  Put that exact
+            ;; decision and outer receipt on the pending terminal checkpoint
+            ;; before selected-reading, cascade resume, dispatch or build can
+            ;; throw.  The richer checkpoint below replaces this on success.
+            _selection-carriers-retained
+            (when (selected-entry judgement0)
+              (let [cell (term {:controller-decision (:decision judgement0)
+                                :outer-task-selection (:outer-task-selection judgement0)}
+                               (decision-ground (:decision judgement0)))]
+                (reset! pending-selection cell)
+                (swap! checkpoints assoc :selection cell)))
             ;; Q5: the one G selection is complete here. Its instant opens
             ;; the event clock the selected-only reading phase shares.
             selection-clock (monotonic-clock)

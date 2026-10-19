@@ -70,6 +70,7 @@
   so the declaration still reproduces the G that was compared."
   [receipt]
   (-> receipt
+      (update :normalization dissoc :components :fit-ambiguity)
       (assoc-in [:normalization :declaration] {:law :raw-cumulative :version 1})
       (assoc-in [:normalization :raw] (get-in receipt [:normalization :terms]))))
 
@@ -167,6 +168,10 @@
     (reseal r #(r0 % (fn [x] (-> x
                                  (assoc-in [:normalization :raw :information-gain] 0.0)
                                  (assoc-in [:normalization :terms :information-gain] 0.0)
+                                 (assoc-in [:normalization :components :progress :raw
+                                            :information-gain] 0.0)
+                                 (assoc-in [:normalization :components :progress :terms
+                                            :information-gain] 0.0)
                                  (assoc-in [:g-terms :information-gain] 0.0)
                                  (update :g + delta)))))))
 

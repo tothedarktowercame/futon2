@@ -46,6 +46,53 @@
 
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
 
+(defn- selected-normalization
+  "Bind normalization to the selected decision row.  Current receipts carry
+  the composite binding directly.  Pre-fix receipts carry the normalized
+  progress component and fit ambiguity; their selected row retains the class
+  emission certificate, so the same composite remains recomputable."
+  [receipt row]
+  (let [norm (:normalization receipt)]
+    (if (:components norm)
+      norm
+      (if (= :raw-cumulative (get-in norm [:declaration :law]))
+        (if (= (:terms norm)
+               (scoring/normalize-g-terms (:declaration norm) (:raw norm)))
+          (assoc norm :components
+                 {:selected-decision {:declaration (:declaration norm)
+                                      :raw (:raw norm) :terms (:terms norm)}})
+          {:refusal :normalization-not-bound-to-g-terms})
+      (let [class-cert (get-in row [:class-emission :certificate :g-terms])
+            class-decl (:normalization-declaration class-cert)
+            class-raw0 (:raw class-cert)
+            class-raw {:risk (:risk class-raw0)
+                       :ambiguity (:ambiguity class-raw0)
+                       :information-gain (:expected-information-gain class-raw0)}
+            class-terms (scoring/normalize-g-terms class-decl class-raw)
+            progress (:terms norm)
+            fit (:fit-ambiguity norm)
+            composed (when (and class-terms (number? fit))
+                       {:risk (+ (double (:risk progress)) (double (:risk class-terms)))
+                        :ambiguity (+ (double (:ambiguity progress))
+                                      (double (:ambiguity class-terms)) (double fit))
+                        :information-gain (:information-gain progress)})]
+        (if (and composed
+                 (every? (fn [k]
+                           (<= (Math/abs (- (double (get composed k))
+                                            (double (get-in receipt [:g-terms k]))))
+                               pref/normalization-tolerance))
+                         [:risk :ambiguity :information-gain]))
+          {:declaration (:declaration norm)
+           :raw (:raw norm)
+           :terms (:g-terms receipt)
+           :fit-ambiguity fit
+           :components {:progress {:declaration (:declaration norm)
+                                    :raw (:raw norm) :terms progress}
+                        :class-emission {:declaration class-decl
+                                         :raw class-raw :terms class-terms}
+                        :fit-ambiguity fit}}
+          {:refusal :normalization-not-bound-to-g-terms}))))))
+
 (defn graded-step?
   "True when DIST (outcome [done met?] -> weight) rises strictly with done
   for each met?, over at least two done values."
@@ -62,28 +109,35 @@
   the receipt's horizon H and schedule SCHED, and it reproduces the terms
   whose sum is the compared G; else the refusal kind."
   [norm h sched g terms]
-  (let [{:keys [declaration raw fit-ambiguity]} norm
+  (let [{:keys [declaration raw components]} norm
         bound (:terms norm)
-        recomputed (scoring/normalize-g-terms declaration raw)
-        expected {:risk (:risk bound)
-                  :ambiguity (when (and (number? (:ambiguity bound)) (number? fit-ambiguity))
-                               (+ (double (:ambiguity bound)) fit-ambiguity))
-                  :information-gain (:information-gain bound)}]
+        top-recomputed (scoring/normalize-g-terms declaration raw)
+        recomputed-components
+        (for [[k c] (dissoc components :fit-ambiguity)]
+          [k (scoring/normalize-g-terms (:declaration c) (:raw c))])]
     (cond
       (or (nil? declaration) (= :absent (:status norm))) :normalization-absent
-      (nil? recomputed) :normalization-unrecognized
+      (:refusal norm) (:refusal norm)
+      (or (nil? top-recomputed)
+          (some (comp nil? second) recomputed-components)) :normalization-unrecognized
       (and (= :per-step-capacity-and-pattern (:law declaration))
            (not (and (= h (:horizon-steps declaration))
                      (= (max 2 (count (get sched 1))) (:outcome-count declaration)))))
       :normalization-inputs-not-the-receipt's
-      (not= recomputed bound) :normalization-not-bound-to-g-terms
-      (not (and (finite? g) (every? finite? (vals expected))
-                (<= (Math/abs (- (double g) (- (+ (:risk expected) (:ambiguity expected))
-                                               (:information-gain expected))))
+      (some (fn [[k recomputed]]
+              (not= recomputed (get-in components [k :terms])))
+            recomputed-components)
+      :normalization-not-bound-to-g-terms
+      (not= top-recomputed (or (get-in components [:progress :terms])
+                               (get-in components [:selected-decision :terms])))
+      :normalization-not-bound-to-g-terms
+      (not (and (finite? g) (every? finite? (vals bound))
+                (<= (Math/abs (- (double g) (- (+ (:risk bound) (:ambiguity bound))
+                                               (:information-gain bound))))
                     pref/normalization-tolerance)))
       :normalization-not-bound-to-g-terms
       ;; a recorded finite term must be the normalized one
-      (some (fn [[t v]] (and (finite? v) (not= v (get expected t)))) terms)
+      (some (fn [[t v]] (and (finite? v) (not= v (get bound t)))) terms)
       :normalization-not-bound-to-g-terms)))
 
 (defn- policy-facts
@@ -94,7 +148,10 @@
         h (:horizon receipt)
         sched (:preference receipt)
         terms (:g-terms receipt)
-        norm (:normalization receipt)]
+        ;; Rebuild the declared composite normalization from the exact scored
+        ;; row whose G the selected decision compared.  The receipt is evidence
+        ;; for C and the terms; it is not a second source of G normalization.
+        norm (when row (selected-normalization receipt row))]
     (cond
       (nil? receipt) {:refusal :compared-policy-without-receipt}
       (not= :certified (:status receipt)) {:refusal :receipt-not-certified}
@@ -162,13 +219,17 @@
   recomputed from the persisted decision; else a typed reason."
   [record]
   (let [decision (:decision record)
-        q4 (get-in decision [:selection-certificate :q4])]
+        q4 (get-in decision [:selection-certificate :q4])
+        recomputed (carrier (update decision :selection-certificate dissoc :q4))
+        legacy-normalization? (and (= :normalization-not-bound-to-g-terms (:reason q4))
+                                   (= :certified (:status recomputed)))]
     (cond
       (nil? q4) {:status :not-recomputable :reason :q4-carrier-absent}
       (not (and (= schema (:schema q4)) (intact? q4)))
       {:status :not-recomputable :reason :q4-carrier-tampered}
-      (not= q4 (carrier (update decision :selection-certificate dissoc :q4)))
+      (and (not legacy-normalization?) (not= q4 recomputed))
       {:status :not-recomputable :reason :q4-carrier-not-bound-to-record}
+      legacy-normalization? {:status :verified :carrier recomputed}
       (not= :certified (:status q4)) {:status :not-recomputable :reason (:reason q4)}
       :else {:status :verified :carrier q4})))
 
