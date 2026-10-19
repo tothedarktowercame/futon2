@@ -38,6 +38,23 @@
     (str/starts-with? (str target) "T-") :ticket
     :else nil))
 
+(defn- read-record-bytes
+  "Classify a manifest read without making one unavailable record authoritative
+  over its verified neighbours.  The source pin remains the original manifest
+  claim; this function never derives a replacement pin from changed bytes."
+  [read-bytes path]
+  (try
+    {:status :readable :bytes (read-bytes path)}
+    (catch java.nio.file.NoSuchFileException t
+      {:status :absent :reason :record-missing
+       :details {:error-class (.getName (class t))}})
+    (catch java.io.FileNotFoundException t
+      {:status :absent :reason :record-missing
+       :details {:error-class (.getName (class t))}})
+    (catch Throwable t
+      {:status :absent :reason :record-unreadable
+       :details {:error-class (.getName (class t))}})))
+
 (defn- canonical-outer-receipt? [receipt]
   (and (= :wm/outer-task-selection-v1 (:schema receipt))
        (map? (:policy receipt))
@@ -247,14 +264,19 @@
     (refusal bad {})
     (loop [entries (:entries manifest) rows [] exclusions [] interoception []]
       (if-let [{:keys [path sha256] :as source} (first entries)]
-        (let [bytes (try (read-bytes path) (catch Throwable _ nil))
-              actual (when bytes (field/sha256 bytes))]
+        (let [{read-status :status bytes :bytes read-reason :reason
+               read-details :details} (read-record-bytes read-bytes path)
+              actual (when (= :readable read-status) (field/sha256 bytes))]
           (cond
-            (nil? bytes)
+            (= :absent read-status)
             (recur (next entries) rows
-                   (conj exclusions {:source source :reason :record-unreadable}) interoception)
+                   (conj exclusions (cond-> {:source source :reason read-reason}
+                                      read-details (assoc :details read-details)))
+                   interoception)
             (not= sha256 actual)
-            (refusal :record-source-drift {:path path :expected sha256 :actual actual})
+            (recur (next entries) rows
+                   (conj exclusions {:source source :reason :record-source-drift
+                                     :expected sha256 :actual actual}) interoception)
             :else
             (let [record (try (edn/read-string (String. ^bytes bytes "UTF-8"))
                               (catch Throwable _ ::invalid))]
@@ -296,6 +318,10 @@
                             want-effects (selected-want-effects record)
                             artifact (grounded-artifact record)
                             row {:source source :run/id run-id :click/id click-id
+                               ;; The parsed record is retained only after its manifest bytes
+                               ;; have verified.  Consumers must use this value rather than
+                               ;; rereading the path (which could have disappeared or drifted).
+                               :verified-record record
                                :task {:id target :kind kind}
                                :started-at {:status :present
                                             :value (.toString started-at)
@@ -356,7 +382,17 @@
                               :token-use (count (filter #(= :present (get-in % [:token-use :status])) rows))
                               :closure-or-progress (count (filter #(contains? #{:closure :grounded-progress}
                                                                             (get-in % [:terminal-outcome :class])) rows))
-                              :repetition (count (filter #(pos? (get-in % [:repetition :prior-occurrences])) rows))}}}]
+                              :repetition (count (filter #(pos? (get-in % [:repetition :prior-occurrences])) rows))}
+                             :record-read
+                             {:declared (count (:entries manifest))
+                              :readable (- (count (:entries manifest))
+                                           (count (filter #(contains? #{:record-missing :record-unreadable}
+                                                                      (:reason %)) exclusions)))
+                              :verified (count rows)
+                              :excluded (count exclusions)
+                              :missing (count (filter #(= :record-missing (:reason %)) exclusions))
+                              :drifted (count (filter #(= :record-source-drift (:reason %)) exclusions))
+                              :reasons (into (sorted-map) (frequencies (map :reason exclusions)))}}}]
           (cond
             (seq duplicate-identities)
             (refusal :record-identities-duplicated

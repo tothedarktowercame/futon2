@@ -1,6 +1,8 @@
 (ns futon2.aif.meta-outcome-dataset-test
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.meta-outcome-dataset :as dataset]))
+            [futon2.aif.meta-outcome-dataset :as dataset]
+            [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.outer-policy-provider-runtime]))
 
 (defn- utf8 [x] (.getBytes (pr-str x) "UTF-8"))
 
@@ -71,7 +73,7 @@
             :terminal-classes {:closure 1 :grounded-progress 1}
             :availability {:elapsed-ms 1 :token-use 1
                            :closure-or-progress 2 :repetition 1}}
-           (:counts result)))
+           (dissoc (:counts result) :record-read)))
     (is (= {:status :present :value 120 :unit :milliseconds
             :source [:registered-run/timing :wall-clock-ms]}
            (:elapsed one)))
@@ -170,18 +172,19 @@
                        {:manifest m :expected-manifest-pin (:source-pin m)
                         :read-bytes reader})))))))
 
-(deftest manifest-and-record-source-mutations-refuse
+(deftest manifest-and-record-source-mutations-are-isolated
   (let [a (authority)]
     (is (= :manifest-paths-duplicated
            (:reason (dataset/produce
                      (let [m (dataset/manifest ["/runs/one.edn" "/runs/one.edn"] read-bytes)]
                        {:manifest m :expected-manifest-pin (:source-pin m)
                         :read-bytes read-bytes})))))
-    (is (= :record-source-drift
-           (:reason (dataset/produce
-                     (assoc a :read-bytes
-                            #(if (= % "/runs/two.edn")
-                               (.getBytes "changed" "UTF-8") (read-bytes %)))))))
+    (let [result (dataset/produce
+                  (assoc a :read-bytes
+                         #(if (= % "/runs/two.edn")
+                            (.getBytes "changed" "UTF-8") (read-bytes %))))]
+      (is (= :produced (:status result)))
+      (is (= :record-source-drift (get-in result [:exclusions 0 :reason]))))
     (let [same-record {"/runs/copy-a.edn" (records "/runs/one.edn")
                        "/runs/copy-b.edn" (records "/runs/one.edn")}
           reader #(utf8 (same-record %))
@@ -190,6 +193,53 @@
              (:reason (dataset/produce {:manifest m
                                         :expected-manifest-pin (:source-pin m)
                                         :read-bytes reader})))))))
+
+(deftest verified-records-survive-missing-and-drifted-manifest-neighbours
+  (let [missing "/tmp/click-scan-16313651870851502188/tick-run-record-scan-success.edn"
+        changed "/runs/changed.edn"
+        sources {"/runs/one.edn" (records "/runs/one.edn")
+                 changed (records "/runs/two.edn")}
+        reader (fn [path]
+                 (cond
+                   (= path missing) (throw (java.nio.file.NoSuchFileException. path))
+                   (= path changed) (utf8 (assoc (sources path) :run/id "changed-bytes"))
+                   :else (utf8 (sources path))))
+        manifest-body {:schema dataset/manifest-schema
+                       :entries [{:path "/runs/one.edn"
+                                  :sha256 (field/sha256 (utf8 (sources "/runs/one.edn")))}
+                                 {:path missing :sha256 (apply str (repeat 64 "0"))}
+                                 {:path changed
+                                  :sha256 (field/sha256 (utf8 (sources changed)))}]}
+        manifest (assoc manifest-body :source-pin
+                        {:path "wm://run-record-manifest-v1"
+                         :sha256 (field/digest manifest-body)})
+        result (dataset/produce {:manifest manifest
+                                 :expected-manifest-pin (:source-pin manifest)
+                                 :read-bytes reader})]
+    (is (= :produced (:status result)))
+    (is (= ["run-1"] (mapv :run/id (:rows result))))
+    (is (= [missing changed] (mapv #(get-in % [:source :path]) (:exclusions result))))
+    (is (= [:record-missing :record-source-drift]
+           (mapv :reason (:exclusions result))))
+    (is (= {:declared 3 :readable 2 :verified 1 :excluded 2
+            :missing 1 :drifted 1
+            :reasons {:record-missing 1 :record-source-drift 1}}
+           (get-in result [:counts :record-read])))
+    (is (= (records "/runs/one.edn")
+           (:verified-record (first (:rows result)))))))
+
+(deftest provider-terminal-projection-uses-the-verified-record-not-the-path
+  (let [row {:source {:path "/tmp/click-scan-missing/record.edn"
+                      :sha256 (apply str (repeat 64 "0"))}
+             :verified-record (records "/runs/one.edn")
+             :terminal-outcome {:class :closure}
+             :terminal-cause {:class :task-outcome}}
+        terminal-record (ns-resolve 'futon2.aif.outer-policy-provider-runtime
+                                    'terminal-record)
+        result (terminal-record row)]
+    (is (= "run-1" (:run/id result)))
+    (is (= :closure (:observed-outcome result)))
+    (is (nil? (:selected-cascade-digest result)))))
 
 (deftest canonical-outcome-vocabulary-is-explicit
   (is (= :closure (dataset/outcome-class :grounded-change)))

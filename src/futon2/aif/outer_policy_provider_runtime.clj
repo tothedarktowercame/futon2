@@ -1,19 +1,13 @@
 (ns futon2.aif.outer-policy-provider-runtime
   "Adapt the existing learning authority and pinned outcomes to the current policy menu."
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [futon2.aif.load-identity :as identity]
+  (:require [futon2.aif.load-identity :as identity]
             [futon2.aif.outer-learning-runtime :as learning]
             [futon2.aif.outer-target-belief :as belief]
             [futon2.aif.outer-target-score :as score]
             [futon2.aif.outer-policy-evidence-provider :as provider]))
 
 (defn- terminal-record [row]
-  (let [{:keys [path sha256]} (:source row)
-        bytes (java.nio.file.Files/readAllBytes (.toPath (io/file path)))
-        _ (when-not (= sha256 (identity/sha256 bytes))
-            (throw (ex-info "Policy outcome source drift" {:path path})))
-        record (edn/read-string (String. bytes "UTF-8"))
+  (let [record (:verified-record row)
         outcome (belief/observation row)]
     (assoc record
            :selected-cascade-digest
