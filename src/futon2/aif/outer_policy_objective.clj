@@ -100,19 +100,53 @@
        :reason malformed-top
        :invalid invalid}
       (if (or (seq invalid) (empty? rows))
+        (let [assessed (vec (remove #(seq (:absent-terms %)) rows))
+              logits (mapv #(get-in % [:terms :logit]) assessed)
+              posterior (when (seq assessed) (softmax logits))
+              scored (mapv #(assoc %1 :posterior %2) assessed posterior)
+              minimum (when (seq scored) (apply min (map #(get-in % [:terms :objective]) scored)))
+              tied (when minimum (filterv #(== (double minimum)
+                                                (double (get-in % [:terms :objective]))) scored))
+              tie? (> (count tied) 1)
+              u (when tie? (if (nil? draw) (rand) draw))
+              selected (when (and (seq tied) (or (not tie?) (and (finite? u) (<= 0.0 u) (< u 1.0))))
+                         (nth tied (if tie? (int (* u (count tied))) 0)))
+              decision (when selected {:action {:type :advance-cascade-live-policy
+                                                 :target (:target-id selected)
+                                                 :policy-id (:policy-id selected)
+                                                 :cascade-digest (:cascade-digest selected)}
+                                       :selection-certificate {:selected-canonical-cascade (:canonical-cascade selected)}})
+              check (when decision (identity/verify-selected-identity decision (:entries sealed)))]
         {:schema schema :status :partial
          :strict-verdict {:status :absent
                           :reason (or (first (:absent-terms (first invalid)))
                                       :objective-input-invalid)
                           :missing invalid}
-         :policies (vec (remove #(seq (:absent-terms %)) rows))
-         :frontier {:strict-assessed (count (remove #(seq (:absent-terms %)) rows))
+         :policies scored
+         :assessed-selection
+         (cond
+           (empty? assessed) {:status :no-choice :reason :preparation-needed
+                              :scope :assessed-population :assessed-ids []}
+           (and tie? (not (and (finite? u) (<= 0.0 u) (< u 1.0))))
+           {:status :no-choice :reason :invalid-tie-draw :scope :assessed-population}
+           (not= :verified (:status check))
+           {:status :refused :reason :cascade-identity-mismatch :identity-check check
+            :scope :assessed-population}
+           :else {:status :selected :scope :assessed-population
+                  :basis :gamma-times-G-minus-lnE-over-assessed-population
+                  :action (:action decision) :selected selected :identity-check check
+                  :assessed-ids (mapv #(select-keys % [:policy-id :target-id :cascade-digest]) assessed)
+                  :absent (mapv #(select-keys % [:policy-id :target-id :cascade-digest :absent-terms :score-absence]) invalid)
+                  :posterior-denominator (reduce + (map #(Math/exp (- (double %) (apply max logits))) logits))
+                  :draw (when tie? {:law :uniform-over-equal-minima :u u
+                                    :candidates (mapv :cascade-digest tied)})})
+         :frontier {:strict-assessed (count assessed)
                     :strict-absent (count invalid)
                     :ordinary-assessed 0
                     :ordinary-basis :absent-no-comparable-policy-comparison}
          :menu-pin (:menu-pin evidence)
          :declaration-pin (:declaration-pin evidence)
-         :dataset-pin (:dataset-pin evidence)}
+         :dataset-pin (:dataset-pin evidence)})
       (let [logits (mapv #(get-in % [:terms :logit]) rows)
             probabilities (softmax logits)
             scored (mapv #(assoc %1 :posterior %2) rows probabilities)
