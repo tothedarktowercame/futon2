@@ -87,6 +87,7 @@
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.selection-timing :as selection-timing]
@@ -8165,46 +8166,48 @@
                               {:status :absent
                                :reason :selection-judgement-not-observed}))
         persisted (persist-run-record! raw-opts run-id started-at final-result)
-        injury-deposit
+        terminal-publication
         (when (= :present (:run-record-status persisted))
-          (run-phase!
-           raw-opts
-           {:opportunity-id (:click-id raw-opts)
-            :attempt-id (:attempt-id final-result)}
-           :meta-injury-deposit
-           #(meta-injury-store/deposit!
-             (or (:meta-injury-root raw-opts) meta-injury-store/default-root)
-             (:run-record persisted))
-           #(select-keys % [:schema :status :capability :run-id :head-path])))
-        authoritative-injury-ingest
-        (when (= :present (:run-record-status persisted))
-          (run-phase!
-           raw-opts
-           {:opportunity-id (:click-id raw-opts)
-            :attempt-id (:attempt-id final-result)}
-           :meta-terminal-injury-ingest
-           #(meta-injury-store/ingest-record-file!
-             (or (:meta-injury-ledger-path raw-opts)
-                 meta-self-heal/default-ledger-path)
-             (:run-record persisted))
-           #(select-keys % [:status :transition :durability :reason
-                            :classification :entry])))
-        learning-publication
-        (when-let [manifest-path (:outer-learning-manifest-path raw-opts)]
-          (run-phase!
-           raw-opts
-           {:opportunity-id (:click-id raw-opts)
-            :attempt-id (:attempt-id final-result)}
-           :outer-learning-publication
-           #(outer-learning-manifest/record! manifest-path (:run-record persisted))
-           #(select-keys % [:status :manifest-path :manifest-sha256])))]
+          (let [context {:opportunity-id (:click-id raw-opts)
+                         :attempt-id (:attempt-id final-result)}
+                record-path (:run-record persisted)]
+            (terminal-publication/publish!
+             record-path run-id
+             [{:sink :meta-injury-deposit
+               :thunk (fn []
+                        (run-phase!
+                         raw-opts context :meta-injury-deposit
+                         (fn []
+                           (meta-injury-store/deposit!
+                            (or (:meta-injury-root raw-opts) meta-injury-store/default-root)
+                            record-path))
+                         (fn [value]
+                           (select-keys value [:schema :status :capability :run-id :head-path]))))}
+              {:sink :meta-terminal-injury-ingest
+               :thunk (fn []
+                        (run-phase!
+                         raw-opts context :meta-terminal-injury-ingest
+                         (fn []
+                           (meta-injury-store/ingest-record-file!
+                            (or (:meta-injury-ledger-path raw-opts)
+                                meta-self-heal/default-ledger-path)
+                            record-path))
+                         (fn [value]
+                           (select-keys value [:status :transition :durability :reason
+                                               :classification :entry]))))}
+              (if-let [manifest-path (:outer-learning-manifest-path raw-opts)]
+                {:sink :outer-learning-publication
+                 :thunk (fn []
+                          (run-phase!
+                           raw-opts context :outer-learning-publication
+                           (fn [] (outer-learning-manifest/record! manifest-path record-path))
+                           (fn [value]
+                             (select-keys value [:status :manifest-path :manifest-sha256]))))}
+                {:sink :outer-learning-publication
+                 :reason :outer-learning-manifest-not-configured})]))) ]
     ;; The SAME identity annotates the result persist-run-record! sees; the
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
     (cond-> (merge final-result {:run/id run-id} persisted)
-      injury-deposit
-      (assoc :meta-injury-deposit injury-deposit)
-      authoritative-injury-ingest
-      (assoc :meta-terminal-injury-ingest authoritative-injury-ingest)
-      learning-publication
-      (assoc :outer-learning-publication learning-publication))))
+      terminal-publication
+      (assoc :terminal-publication terminal-publication))))
