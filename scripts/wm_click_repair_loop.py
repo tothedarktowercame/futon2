@@ -419,7 +419,9 @@ def outer_policy_preflight() -> str | None:
         result = jvm_eval(
             "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
             "(if (or (:outer-policy-evidence-provider opts) "
-            "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts)))) "
+            "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts))) "
+            "(when-let [v (resolve 'futon2.aif.outer-policy-provider-runtime/production-provider)] "
+            "(fn? @v))) "
             ":wm/provider-configured :wm/provider-required))", timeout=PREFLIGHT_TIMEOUT_S)
     except (OSError, subprocess.TimeoutExpired):
         return "outer-policy-preflight-unavailable"

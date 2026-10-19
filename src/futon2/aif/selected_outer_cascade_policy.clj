@@ -26,7 +26,7 @@
        (select-keys carrier body-keys)))
 
 (defn seal
-  "Seal a selected strict-objective receipt. Ties/refusals cannot be carried."
+  "Seal an objective selection, including a replayable draw among equal minima."
   [menu evidence-carrier objective-receipt]
   (if-not (= :selected (:status objective-receipt))
     {:schema schema :status :refused :reason :strict-policy-selection-required
@@ -64,7 +64,7 @@
           entry (:selected-entry carrier)
           action (:action receipt)
           recomputed (when (and (map? ev) (map? menu))
-                       (objective/evaluate ev menu))]
+                       (objective/evaluate ev menu (get-in receipt [:draw :u])))]
       (cond
         (not= schema (:schema carrier)) :selected-policy-schema
         (not= :sealed (:status carrier)) :selected-policy-status

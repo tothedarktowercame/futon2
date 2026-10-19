@@ -28,7 +28,7 @@
        (= (set outcome-vocabulary) (set (keys (:alpha p))))
        (every? #(and (number? %) (pos? %)) (vals (:alpha p)))))
 
-(defn- observation [row]
+(defn observation [row]
   (let [cause (get-in row [:terminal-cause :class])
         terminal (get-in row [:terminal-outcome :class])
         effects (:selected-want-effects row)

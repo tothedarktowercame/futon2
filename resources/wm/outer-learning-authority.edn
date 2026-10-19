@@ -1,5 +1,7 @@
 {:schema :wm/outer-learning-authority-v1
  :mode :live
+ :outer-policy {:gamma 1.0
+                :interpretation "Unit precision for the unnormalised objective in nats; calibration, not a learned observation."}
  :prior {:concentration 1 :authority :operator-provisional}
  :preferences
  {:authority :operator-provisional

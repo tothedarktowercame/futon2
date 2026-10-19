@@ -45,6 +45,8 @@
          {:mode (:mode authority)
           :belief {:status :refused :reason :learning-authority-schema-invalid}}
          {:mode (:mode authority)
+          :authority authority
+          :dataset outcomes
           :belief learned
           :preference-authority
           {:kind (get-in authority [:preferences :authority])

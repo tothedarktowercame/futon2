@@ -13,6 +13,7 @@
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
+            [futon2.aif.outer-policy-provider-runtime :as policy-provider-runtime]
             [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
@@ -240,7 +241,8 @@
         outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
         evidence-provider (or (:outer-policy-evidence-provider opts)
                               (when-let [path (:outer-policy-evidence-provider-path opts)]
-                                (policy-evidence-provider/load-static path)))
+                                (policy-evidence-provider/load-static path))
+                              policy-provider-runtime/production-provider)
         outer-selector (fn [input]
                          (outer-selector
                           (assoc input :outer-policy-evidence-provider

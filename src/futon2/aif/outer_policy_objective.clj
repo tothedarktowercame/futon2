@@ -23,10 +23,11 @@
     (mapv #(/ % z) ws)))
 
 (defn evaluate
-  "Compute policy terms and select the unique strict objective minimum.
+  "Compute policy terms and select a minimum, recording a uniform draw on ties.
   EVIDENCE must be computed; SEALED is used only for canonical identity
   transport and post-selection verification."
-  [evidence sealed]
+  ([evidence sealed] (evaluate evidence sealed nil))
+  ([evidence sealed draw]
   (let [vocab (:outcome-vocabulary evidence)
         c (get-in evidence [:preference :distribution])
         gamma (:gamma evidence)
@@ -100,11 +101,11 @@
             minimum (apply min (map #(get-in % [:terms :objective]) scored))
             tied (filterv #(== (double minimum)
                                (double (get-in % [:terms :objective]))) scored)]
-        (if (not= 1 (count tied))
-          {:schema schema :status :abstained :reason :no-unique-policy-objective-minimum
-           :verdict :fail :tied (mapv #(select-keys % [:policy-id :cascade-digest]) tied)
-           :absent-terms [:strict-policy-discrimination] :policies scored}
-          (let [selected (first tied)
+        (let [tie? (> (count tied) 1)
+              u (when tie? (if (nil? draw) (rand) draw))]
+          (if (and tie? (not (and (finite? u) (<= 0.0 u) (< u 1.0))))
+            {:schema schema :status :refused :reason :invalid-tie-draw}
+          (let [selected (nth tied (if tie? (int (* u (count tied))) 0))
                 decision {:action {:type :advance-cascade-live-policy
                                    :target (:target-id selected)
                                    :policy-id (:policy-id selected)
@@ -117,8 +118,10 @@
                :identity-check check}
               {:schema schema :status :selected :action (:action decision)
                :selected selected :policies scored :identity-check check
+               :draw (when tie? {:law :uniform-over-equal-minima :u u
+                                  :candidates (mapv :cascade-digest tied)})
                :menu-pin (:menu-pin evidence) :declaration-pin (:declaration-pin evidence)
                :dataset-pin (:dataset-pin evidence)
-               :comparison {:law :unique-strict-objective-minimum
+               :comparison {:law (if tie? :uniform-over-equal-minima :unique-strict-objective-minimum)
                             :objective :gamma-times-G-minus-lnE
-                            :posterior :softmax-lnE-minus-gamma-G}})))))))
+                            :posterior :softmax-lnE-minus-gamma-G}})))))))))

@@ -106,15 +106,13 @@
     (is (identical? carrier
                     (get-in second-pass [:policy :selected-outer-cascade-policy])))))
 
-(deftest exact-objective-tie-is-a-decided-abstention
+(deftest exact-objective-tie-can-begin-a-cycle
   (let [receipt (run-live (explicit-provider [0.0 0.0] []))]
-    (is (= :abstained (get-in receipt [:policy :status])))
-    (is (= :no-unique-policy-objective-minimum
-           (get-in receipt [:policy :reason])))
-    (is (= 2 (count (get-in receipt [:policy :policy-objective :tied]))))
-    (is (some #{:strict-policy-discrimination}
-              (get-in receipt [:policy :absent-terms])))
-    (is (nil? (:action receipt)))))
+    (is (= :selected (get-in receipt [:policy :status])))
+    (is (= :uniform-over-equal-minima
+           (get-in receipt [:policy :policy-objective :draw :law])))
+    (is (some? (:action receipt)))
+    (is (nil? (selected/verify (get-in receipt [:policy :selected-outer-cascade-policy]))))))
 
 (deftest incomplete-authority-and-apparatus-records-do-not-sneak-through
   (let [{:keys [menu declaration]} (fixture)

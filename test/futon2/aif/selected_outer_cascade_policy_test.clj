@@ -75,16 +75,16 @@
                    reseal-objective)]]]
       (is (= reason (sut/verify (mutate carrier))) (name reason)))))
 
-(deftest tie-cannot-be-sealed
+(deftest tie-draw-can-be-sealed-and-recomputed
   (let [{:keys [menu]} (production-carriers)
         digests (mapv :cascade-digest (:entries menu))
         ev (evidence/join menu (declaration digests [0.0 0.0]) [])
         tied (objective/evaluate ev menu)
         carrier (sut/seal menu ev tied)]
-    (is (= :abstained (:status tied)))
-    (is (= :refused (:status carrier)))
-    (is (= :strict-policy-selection-required (:reason carrier)))
-    (is (= 2 (count (:tied carrier))))))
+    (is (= :selected (:status tied)))
+    (is (= :sealed (:status carrier)))
+    (is (nil? (sut/verify carrier)))
+    (is (= 2 (count (get-in tied [:draw :candidates]))))))
 
 (deftest consume-without-selection-and-legacy-boundary
   (let [{:keys [carrier]} (production-carriers)

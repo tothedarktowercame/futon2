@@ -37,8 +37,8 @@
 (defn resolve-provider [provider sealed-menu]
   (try
     (let [result (cond
-                   (ifn? provider) (provider sealed-menu)
                    (map? provider) provider
+                   (ifn? provider) (provider sealed-menu)
                    :else {:schema schema :status :refused
                           :reason :outer-policy-evidence-provider-required})]
       (if-let [defect (verify result)]

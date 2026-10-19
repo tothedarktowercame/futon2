@@ -76,9 +76,11 @@
 (deftest exact-tie-and-atomic-refusals
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]
         tied (sut/evaluate (evidence rows) (sealed rows))]
-    (is (= :abstained (:status tied)))
-    (is (= :fail (:verdict tied)))
-    (is (= #{"a" "b"} (set (map :policy-id (:tied tied)))))
+    (is (= :selected (:status tied)))
+    (is (= :uniform-over-equal-minima (get-in tied [:draw :law])))
+    (is (= "a" (get-in (sut/evaluate (evidence rows) (sealed rows) 0.0) [:action :policy-id])))
+    (is (= "b" (get-in (sut/evaluate (evidence rows) (sealed rows) 0.99) [:action :policy-id])))
+    (is (= tied (sut/evaluate (evidence rows) (sealed rows) (get-in tied [:draw :u]))))
     (is (= :evidence-not-computed
            (:reason (sut/evaluate (assoc (evidence rows) :status :refused) (sealed rows)))))
     (is (= :preference
