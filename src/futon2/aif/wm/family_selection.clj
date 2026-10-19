@@ -352,7 +352,7 @@
                   :entries entries :refusals refusals
                   :failures (vec (concat failures (mapcat :failures rows) refusals))}]
         (cond
-          (seq refusals)
+          (and (empty? entries) (seq refusals))
           (assoc body :status :refused :reason :canonical-binding-refused
                  :entries [])
 

@@ -172,6 +172,16 @@
     (is (= 1 (count (:entries result))))
     (is (nil? (family-selection/verify-sealed-menu result)))))
 
+(deftest sealed-menu-keeps-bound-entries-when-other-entries-are-unbound
+  (let [menu (family-selection/sealed-pre-choice-menu
+              (pinned-field [(family (occurrence-policy 1))
+                             (family (pattern-grain-policy 9))] "7")
+              (:bind-cascade-identity join-opts))]
+    (is (= :sealed (:status menu)))
+    (is (= 1 (count (:entries menu))))
+    (is (seq (:refusals menu)))
+    (is (nil? (family-selection/verify-sealed-menu menu)))))
+
 (deftest sealed-menu-refuses-all-unbound-and-forged-menus-atomically
   (let [all-unbound (family-selection/sealed-pre-choice-menu
                      (pinned-field [(family (pattern-grain-policy 9))] "4")
