@@ -15,7 +15,8 @@
             [futon2.aif.outer-learning-runtime :as outer-learning-runtime]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.q2-construction :as q2]
-            [futon2.aif.q8-frontier :as q8]))
+            [futon2.aif.q8-frontier :as q8]
+            [futon2.aif.wm.family-selection :as family-selection]))
 
 (load-identity/register! *ns* *file*)
 
@@ -512,9 +513,11 @@
 
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
-  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning]
+  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning
+           policy-field-config policy-field-fn]
     :or {fetch-snapshot fetch-pipeline-snapshot
-         candidate-fn task-state-candidates}}]
+         candidate-fn task-state-candidates
+         policy-field-fn family-selection/full-eligible-target-field}}]
   (let [algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
         registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
         {ordinary-tasks :tasks repair-excluded :excluded}
@@ -578,14 +581,20 @@
                                    :ineligibility-evidence
                                    {:summary-source (:summary-source snapshot)
                                     :graph-source (:graph-source snapshot)})))
-        ordinary-candidates (candidate-fn on-map snapshot)
-        candidates (if (seq algorithm-tasks)
-                     (into (algorithm-candidates algorithm-tasks)
-                           ordinary-candidates)
-                     ordinary-candidates)
-        selection (meta/select {:snapshot snapshot :candidates candidates})
+        injury? (boolean (seq algorithm-tasks))
+        candidates (if injury? (algorithm-candidates algorithm-tasks) [])
+        policy-field (when-not injury?
+                       (policy-field-fn on-map policy-field-config))
+        incomplete (when policy-field
+                     (filterv #(not= :computed (:status %)) (:families policy-field)))
+        selection (if injury?
+                    (meta/select {:snapshot snapshot :candidates candidates})
+                    {:schema meta/schema :status :refused
+                     :reason (if (seq incomplete)
+                               :incomplete-policy-menu-coverage
+                               :policy-selection-port-required)})
         learning-scores
-        (when (contains? #{:shadow :live} (:mode outer-learning))
+        (when (and injury? (contains? #{:shadow :live} (:mode outer-learning)))
           (mapv (fn [candidate]
                   (outer-score/score
                    {:belief (:belief outer-learning)
@@ -612,7 +621,7 @@
                         :missing-channel-cost
                         (get-in outer-learning [:controller :missing-channel-cost])}))
         effective-selection
-        (if (= :live (:mode outer-learning))
+        (if (and injury? (= :live (:mode outer-learning)))
           (or shadow-selection
               {:schema meta/schema :status :refused
                :reason :outer-learning-state-unavailable})
@@ -627,26 +636,50 @@
                                    injury-excluded))
         receipt (canonical-receipt (into algorithm-tasks on-map)
                                    all-excluded effective-selection)
+        receipt (if injury?
+                  (assoc-in receipt [:policy :branch] :verified-machine-injury-algorithm)
+                  (-> receipt
+                      (assoc :policy {:kind :cascade-live-policy-menu-v1
+                                      :branch :ordinary-cascade-policy
+                                      :status (:reason selection)
+                                      :field-source-pin (:source-pin policy-field)
+                                      :family-census (family-selection/field-census policy-field)
+                                      :missing-targets (mapv :target-id incomplete)
+                                      :absent-terms (vec (distinct
+                                                          (mapcat #(map :kind (:failures %))
+                                                                  incomplete)))
+                                      :legacy-target-shadow
+                                      {:status :retired :consumed false}
+                                      :target-candidate-selector
+                                      {:status :retired :invoked false
+                                       :configured (boolean candidate-fn)}})
+                      (assoc :policy-field policy-field)
+                      (assoc :chosen {:absent (:reason selection)})
+                      (dissoc :action)))
         ;; Requirements Q8: the open population, its typed exclusions and
         ;; the exact candidates and pairwise result the effective selection
         ;; used, certified here where they are in hand
         live? (= :live (:mode outer-learning))
         receipt (assoc receipt :q8-frontier
-                       (q8/outer-frontier
+                       (if-not injury?
+                         {:status :absent :reason :policy-selection-not-yet-performed}
+                         (q8/outer-frontier
                         {:tasks tasks :excluded all-excluded
                          :candidates (if live? shadow-candidates candidates)
                          :selection effective-selection
                          :comparison (if live? :complete-union :shared-only)
                          :missing-channel-cost
-                         (when live? (get-in outer-learning [:controller :missing-channel-cost]))}))
+                         (when live? (get-in outer-learning [:controller :missing-channel-cost]))})))
         ;; Requirements Q2: one task-level action for each candidate the
         ;; effective selection could choose, formed as the chosen :action is
         receipt (assoc receipt :q2-outer-actions
-                       (q2/outer-actions
+                       (if-not injury?
+                         {:status :absent :reason :policy-selection-not-yet-performed}
+                         (q2/outer-actions
                         {:candidates (if live? shadow-candidates candidates)
                          :selection effective-selection
                          :action-of (fn [c] {:type (get action-type (:kind c))
-                                             :target (:id c)})}))
+                                             :target (:id c)})})))
         certificate (learning-certificate outer-learning learning-scores
                                           shadow-selection selection)
         receipt (assoc receipt :outer-learning
@@ -662,7 +695,8 @@
       receipt)))
 
 (defn selector
-  [{:keys [tasks meta-field-observation meta-field-source-pin]}]
+  [{:keys [tasks meta-field-observation meta-field-source-pin
+           policy-field-config policy-field-fn]}]
   (let [verification (when meta-field-observation
                        (field/verify meta-field-observation
                                      {:expected-snapshot-pin
@@ -677,6 +711,8 @@
                  :reason :meta-field-observation-unverified
                  :details {:verification verification}})
       (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
+                    :policy-field-config policy-field-config
+                    :policy-field-fn policy-field-fn
                     :outer-learning (outer-learning-runtime/load-shadow)}))))
 
 (defn browser-receipt

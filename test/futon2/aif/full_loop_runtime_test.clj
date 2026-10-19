@@ -152,12 +152,26 @@
                           {:judgement {:outer-task-selection receipt}}))]
           (let [defaults (runtime/production-defaults
                           {:run-id "same-click"
-                           :outer-task-selection-fn selector})]
+                           :outer-task-selection-fn selector
+                           :target-reading-root "/readings"
+                           :pattern-graph-path "/graph"
+                           :occurrence-square-root "/squares"
+                           :pattern-library-root "/patterns"
+                           :require-occurrence-squares? true
+                           :target-policy-retraction {:k 3}})]
             ((:judge-fn defaults) 1)
             ((:judge-fn defaults) 1)
             defaults))]
     (is (= 1 (count @calls)))
-    (is (= {:tasks ["population-1"]} (first @calls)))
+    (is (= {:tasks ["population-1"]}
+           (dissoc (first @calls) :policy-field-config)))
+    (is (= {:target-reading-root "/readings"
+            :pattern-graph-path "/graph"
+            :occurrence-square-root "/squares"
+            :pattern-library-root "/patterns"
+            :require-occurrence-squares? true
+            :target-policy-retraction {:k 3}}
+           (:policy-field-config (first @calls))))
     (is (= 2 @invocations))
     (is (fn? (:judge-fn defaults)))))
 

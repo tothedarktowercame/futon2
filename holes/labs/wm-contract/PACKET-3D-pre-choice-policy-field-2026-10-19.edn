@@ -1,0 +1,22 @@
+{:schema :wm/packet-3d-receipt-v1
+ :outcome :ordinary-outer-path-stops-at-full-policy-menu
+ :call-path
+ ["full-loop-runtime/production-defaults"
+  "meta-live-outer-selector/selector"
+  "meta-live-outer-selector/select-live"
+  "standing/map/ownership eligibility"
+  "wm.family-selection/full-eligible-target-field"
+  "wm.family-selection/families-for-field"
+  ":policy-selection-port-required"]
+ :configuration
+ [:target-reading-root :pattern-graph-path :occurrence-square-root
+  :occurrence-square-pattern-texts :pattern-library-root
+  :require-occurrence-squares? :target-policy-retraction]
+ :ordinary-branch
+ {:target-selector-called false
+  :target-action-formed false
+  :q2-q8-status :policy-selection-not-yet-performed
+  :legacy-target-shadow {:status :retired :consumed false}}
+ :injury-branch {:separate true :selector :meta/select :policy-field-called false}
+ :next-port :packet-3e-policy-posterior-selection
+ :live-click-launched false}

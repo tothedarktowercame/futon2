@@ -212,7 +212,17 @@
           (let [retained @outer-receipt]
             (if (not= ::unselected retained)
               retained
-              (let [selected (outer-selector input)]
+              (let [policy-field-config
+                    (select-keys opts
+                                 [:target-reading-root :pattern-graph-path
+                                  :occurrence-square-root
+                                  :occurrence-square-pattern-texts
+                                  :pattern-library-root
+                                  :require-occurrence-squares?
+                                  :target-policy-retraction])
+                    selected (outer-selector
+                              (assoc input :policy-field-config
+                                     policy-field-config))]
                 (reset! outer-receipt selected)
                 selected))))
         opts (-> opts
