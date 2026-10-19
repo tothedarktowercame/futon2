@@ -3,13 +3,17 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.meta-injury-observation :as injury]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-terminal-injury :as terminal])
   (:import [java.io PushbackReader StringReader]
            [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
            [java.nio.file Files Path StandardCopyOption StandardOpenOption]
-           [java.nio.file.attribute FileAttribute]))
+           [java.nio.file.attribute FileAttribute]
+           [java.util UUID]))
+
+(def default-root "/home/joe/code/futon2/data/wm-meta-injuries")
 
 (def eof-token (Object.))
 (defn- refusal [reason & [details]]
@@ -116,3 +120,61 @@
             (transact-classification! ledger-path classification)))))
     (catch Throwable t
       (refusal :store/record-ingest-failed {:detail (ex-message t)}))))
+
+;; Compatibility boundary for the pre-ledger observation route. Packet 2 does
+;; not use HEAD.edn to derive active injuries, but existing callers remain
+;; byte-for-byte compatible until the later quarantine packet.
+(defn- read-bytes [path] (Files/readAllBytes (.toPath (io/file path))))
+(defn- legacy-atomic-write! [target text]
+  (let [target (io/file target)
+        tmp (io/file (.getParentFile target)
+                     (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))]
+    (io/make-parents target)
+    (spit tmp text)
+    (Files/move (.toPath tmp) (.toPath target)
+                (into-array StandardCopyOption
+                            [StandardCopyOption/ATOMIC_MOVE
+                             StandardCopyOption/REPLACE_EXISTING]))
+    (.getCanonicalPath target)))
+
+(defn deposit!
+  "Legacy observation deposit retained for compatibility. It is not an
+  authority for :wm/meta-injury-ledger-v1 active state."
+  ([run-record-path] (deposit! default-root run-record-path))
+  ([root run-record-path]
+   (let [record-bytes (read-bytes run-record-path)
+         record (edn/read-string (String. record-bytes "UTF-8"))
+         run-pin {:path (.getCanonicalPath (io/file run-record-path))
+                  :sha256 (load-identity/sha256 record-bytes)}
+         projection (injury/project-run-record record run-pin)
+         projection-path (io/file root (str (:run-id projection) ".edn"))
+         projection-path (legacy-atomic-write! projection-path
+                                               (str (pr-str projection) "\n"))
+         projection-bytes (read-bytes projection-path)
+         source-pin {:path projection-path
+                     :sha256 (load-identity/sha256 projection-bytes)}
+         authority {:schema :wm/meta-injury-authority-v1
+                    :source-pin source-pin :run-record-pin run-pin}
+         observation (injury/produce {:source-bytes projection-bytes
+                                      :expected-source-pin source-pin
+                                      :run-record-bytes record-bytes
+                                      :expected-run-record-pin run-pin})
+         head (assoc authority :status (:status observation)
+                     :capability (:capability observation)
+                     :run-id (:run-id projection))
+         head-path (legacy-atomic-write! (io/file root "HEAD.edn")
+                                         (str (pr-str head) "\n"))]
+     (assoc head :head-path head-path :observation observation))))
+
+(defn load-authority
+  "Legacy pinned observation authority; never consulted by ledger active-set."
+  ([] (load-authority default-root))
+  ([root]
+   (let [head-file (io/file root "HEAD.edn")]
+     (when (.isFile head-file)
+       (let [{:keys [source-pin run-record-pin]}
+             (edn/read-string (slurp head-file))]
+         {:source-bytes (read-bytes (:path source-pin))
+          :expected-source-pin source-pin
+          :run-record-bytes (read-bytes (:path run-record-pin))
+          :expected-run-record-pin run-record-pin})))))
