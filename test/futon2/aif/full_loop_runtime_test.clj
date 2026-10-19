@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.flight-runner :as flight-runner]
@@ -110,7 +111,9 @@
                   (str "(require 'futon2.aif.flight-runner) "
                        "(prn (boolean (find-ns 'futon2.report.war-machine)))"))]
     (is (zero? exit) err)
-    (is (= false (edn/read-string out)))))
+    ;; JVM startup may emit container thread/timing diagnostics on stdout;
+    ;; the child contract is its final EDN form.
+    (is (= false (edn/read-string (last (str/split-lines out)))))))
 
 (deftest runtime-supplies-the-report-backed-judge
   (let [seen (atom nil)
