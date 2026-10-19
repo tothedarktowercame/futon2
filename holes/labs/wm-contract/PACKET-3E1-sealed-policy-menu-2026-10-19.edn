@@ -1,0 +1,14 @@
+{:schema :wm/packet-3e1-receipt-v1
+ :carrier :wm/sealed-outer-policy-menu-v1
+ :stages [:score-family-field :construct-ranked
+          :selection-cascade-identity/bind-ranked]
+ :selection-performed false
+ :certification-performed false
+ :binds [:field-source-pin :family-census :policy-id :target-id
+         :cascade-digest :canonical-cascade :score-decomposition]
+ :atomic-refusals [:incomplete-policy-menu-coverage
+                   :canonical-binding-refused
+                   :no-canonically-bound-policy]
+ :next-join {:location [:entries]
+             :purpose :digest-keyed-policy-evidence-before-selection}
+ :live-click-launched false}

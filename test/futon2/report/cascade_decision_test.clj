@@ -259,17 +259,16 @@
            (refusal-kinds r))
         "each target's refusal is typed; the decision passed emit! by construction")))
 
-(deftest missing-slice-is-counted-while-another-target-proceeds
+(deftest missing-slice-refuses-the-whole-field
   ;; the reading-route counterpart of a missing slice is a missing reading
   (let [fld (route/field {"M-a" p-ab "M-unread" nil})
         r (route/decide-field fld {"M-a" 1 "M-unread" 1} {})
-        cert (get-in r [:decision :selection-certificate])]
-    (is (= 1 (:selector-calls r)))
-    (is (= "M-a" (get-in r [:decision :action :target])) "the other target is still selected")
-    (is (= 1 (count (filter #(and (= "M-unread" (:target-id %))
-                                  (= :no-current-target-reading (:kind %)))
-                            (:family-failures cert))))
-        "the failure is counted once and reaches the decision")))
+        refusals (get-in r [:decision :refusals])]
+    (is (= 0 (:selector-calls r)))
+    (is (= :abstained (get-in r [:decision :status])))
+    (is (nil? (get-in r [:decision :action])))
+    (is (some #(and (= "M-unread" (:target %))
+                    (= :no-policy-family (:kind %))) refusals))))
 
 (deftest h5a-tick-1-decision
   ;; retired: locators on the action, interpretation receipts on candidates,
@@ -467,11 +466,11 @@
                                             (route/opts fx {}))
         bare (wm-cd/cascade-decision {:problems [] :refusals [] :target-sources []}
                                      (route/opts fx {}))]
-    (is (= "M-current" (get-in r [:decision :action :target])) "the target with a row still selects")
-    (is (some #(and (= "M-rowless" (:target-id %)) (= :target-source-row-absent (:kind %)))
-              (get-in r [:decision :selection-certificate :family-failures])))
-    (is (= 1 (get-in r [:decision :selection-certificate :target-policy-field
-                        :coverage :source-path-absent])))
+    (is (= :abstained (get-in r [:decision :status])))
+    (is (nil? (get-in r [:decision :action])))
+    (is (some #(and (= "M-rowless" (:target %))
+                    (= :no-policy-family (:kind %)))
+              (get-in r [:decision :refusals])))
     (is (= [outer] (mapv #(select-keys % [:target :kind]) (get-in empty-field [:decision :refusals])))
         "the outer selector's refusal is the empty field's abstention")
     (is (= [[:no-policy-family :no-enumerated-target]] (refusal-kinds bare)))))

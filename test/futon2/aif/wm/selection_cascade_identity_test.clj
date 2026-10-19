@@ -125,6 +125,78 @@
 (def join-opts
   {:bind-cascade-identity {:readings (fn [_] readings)}})
 
+(defn- pinned-field [families ch]
+  {:schema :wm/pre-choice-policy-field-v1
+   :source-pin {:path "wm://fixture-field" :sha256 (sha ch)}
+   :coverage {:targets (count families) :current (count families)}
+   :families families})
+
+(deftest sealed-menu-is-occurrence-grain-canonical-and-deterministic
+  (let [f1 (family (occurrence-policy 1) (occurrence-policy 2))
+        f2 (assoc (family (assoc (occurrence-policy 3)
+                                 :target "T-other" :mission "T-other"
+                                 :policy-id "T-other/policy-3"))
+                  :target-id "T-other")
+        field (pinned-field [f1 f2] "1")
+        a (family-selection/sealed-pre-choice-menu
+           field (:bind-cascade-identity join-opts))
+        b (family-selection/sealed-pre-choice-menu
+           field (:bind-cascade-identity join-opts))]
+    (is (= :sealed (:status a)))
+    (is (= 3 (count (:entries a))))
+    (is (= (:menu-pin a) (:menu-pin b)))
+    (is (= (:source-pin field) (:field-source-pin a)))
+    (doseq [entry (:entries a)]
+      (is (string? (:policy-id entry)))
+      (is (string? (:target-id entry)))
+      (is (string? (:cascade-digest entry)))
+      (is (= :wm/executable-cascade-v1
+             (get-in entry [:canonical-cascade :schema])))
+      (is (= :nats (get-in entry [:certificate :g-terms :units]))))
+    (let [mutated (family-selection/sealed-pre-choice-menu
+                   (assoc field :source-pin {:path "wm://fixture-field"
+                                             :sha256 (sha "2")})
+                   (:bind-cascade-identity join-opts))]
+      (is (not= (:menu-pin a) (:menu-pin mutated))))))
+
+(deftest sealed-menu-refuses-incomplete-coverage-before-scoring
+  (let [calls (atom 0)
+        incomplete {:status :failed :target-id "T-missing" :policies []
+                    :failures [{:kind :no-current-target-reading}]}
+        result (with-redefs [shape-g/score-policy
+                             (fn [_] (swap! calls inc) {:status :computed})]
+                 (family-selection/sealed-pre-choice-menu
+                  (pinned-field [(family (occurrence-policy 1)) incomplete] "3")
+                  (:bind-cascade-identity join-opts)))]
+    (is (zero? @calls))
+    (is (= :refused (:status result)))
+    (is (= :incomplete-policy-menu-coverage (:reason result)))
+    (is (= ["T-missing"] (:missing-targets result)))
+    (is (nil? (:entries result)))))
+
+(deftest sealed-menu-refuses-all-unbound-and-forged-menus-atomically
+  (let [all-unbound (family-selection/sealed-pre-choice-menu
+                     (pinned-field [(family (pattern-grain-policy 9))] "4")
+                     (:bind-cascade-identity join-opts))
+        forged (with-redefs [sut/bind-ranked
+                             (fn [& _]
+                               {:ranked [] :digests {}
+                                :refusals [{:kind :identity-forged
+                                            :policy-id "T-occ/policy-1"
+                                            :carried (sha "f")
+                                            :rebuilt (sha "e")} ]})]
+                 (family-selection/sealed-pre-choice-menu
+                  (pinned-field [(family (occurrence-policy 1))] "5")
+                  (:bind-cascade-identity join-opts)))]
+    (is (= :refused (:status all-unbound)))
+    (is (= :canonical-binding-refused (:reason all-unbound)))
+    (is (empty? (:entries all-unbound)))
+    (is (seq (:refusals all-unbound)))
+    (is (= :refused (:status forged)))
+    (is (= :canonical-binding-refused (:reason forged)))
+    (is (empty? (:entries forged)))
+    (is (= :identity-forged (get-in forged [:refusals 0 :kind])))))
+
 (deftest canonical-identity-binds-before-the-one-selector
   (let [result (family-selection/select-over-families
                 [(family (occurrence-policy 1) (occurrence-policy 2))]

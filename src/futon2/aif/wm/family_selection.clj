@@ -256,6 +256,87 @@
                        (assoc :provenance (:provenance family))))
                    (:families field))})
 
+(defn score-family-field
+  "Pure scoring stage.  It preserves one row per target and every typed
+  construction/scoring failure; it never selects or certifies."
+  [families]
+  (mapv
+   (fn [family]
+     (let [target (:target-id family)
+           ready? (= :computed (:status family))
+           reading-pin (select-keys (:provenance family)
+                                    [:analysis-digest :excerpt-digest])
+           attempted (if ready?
+                       (mapv (fn [p] [(assoc p :reading-pin reading-pin)
+                                      (shape-g/score-policy p)])
+                             (:policies family)) [])
+           scored (filterv #(= :computed (:status (second %))) attempted)
+           score-failures
+           (mapv (fn [[p score]]
+                   (annotate-failure
+                    target (merge {:kind (or (:kind score) :policy-scoring-refused)
+                                   :policy-id (:policy-id p)}
+                                  (select-keys score [:cycle :reason :units :roots
+                                                      :bound :limit]))))
+                 (remove #(= :computed (:status (second %))) attempted))
+           failures (into (mapv #(annotate-failure target %) (:failures family))
+                          score-failures)]
+       {:target-id target :distinct-count (:distinct-count family)
+        :constructed-keys (mapv (fn [[p score]] (constructed-key p score)) attempted)
+        :scored scored
+        :policies (mapv (fn [[p score]] (policy-summary p score)) scored)
+        :failures failures :failure-count (count failures)}))
+   families))
+
+(defn construct-ranked
+  "Construct occurrence-grain ranked carriers without selecting."
+  [rows]
+  (let [scored (vec (mapcat :scored rows))]
+    {:scored scored
+     :ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
+                   (range 1 (inc (count scored))) scored)}))
+
+(defn sealed-pre-choice-menu
+  "Atomically form and canonical-bind a complete pre-choice policy menu.
+  FIELD is the pinned full-field carrier.  JOIN supplies only existing
+  occurrence readings and explicitly authored executable additions."
+  [field join]
+  (let [families (:families field)
+        incomplete (filterv #(not= :computed (:status %)) families)
+        failures (vec (mapcat #(map (partial annotate-failure (:target-id %))
+                                    (:failures %)) families))]
+    (if (seq incomplete)
+      {:schema :wm/sealed-outer-policy-menu-v1 :status :refused
+       :reason :incomplete-policy-menu-coverage
+       :field-source-pin (:source-pin field)
+       :missing-targets (mapv :target-id incomplete)
+       :failures failures}
+      (let [rows (score-family-field families)
+            {:keys [ranked]} (construct-ranked rows)
+            bound (cascade-identity/bind-ranked ranked
+                                                (or (:readings join) (constantly {}))
+                                                (:authored join))
+            refusals (vec (:refusals bound))
+            entries (vec (:ranked bound))
+            body {:schema :wm/sealed-outer-policy-menu-v1
+                  :field-source-pin (:source-pin field)
+                  :family-census (field-census field)
+                  :entries entries :refusals refusals
+                  :failures (vec (concat (mapcat :failures rows) refusals))}]
+        (cond
+          (seq refusals)
+          (assoc body :status :refused :reason :canonical-binding-refused
+                 :entries [])
+
+          (empty? entries)
+          (assoc body :status :refused :reason :no-canonically-bound-policy)
+
+          :else
+          (assoc body :status :sealed
+                 :menu-pin {:path "wm://sealed-outer-policy-menu-v1"
+                            :sha256 (identity/sha256
+                                     (.getBytes (pr-str body) "UTF-8"))}))))))
+
 (defn select-over-families
   "Score every policy in each computed family, then call
   policy/select-action-cascades once over their union. Failed families add
@@ -279,39 +360,8 @@
                                        (remove #(= :computed (:status %)) families)))
         missing-targets (vec (map :target-id
                                   (remove #(= :computed (:status %)) families)))
-        rows
-        (mapv
-         (fn [family]
-           (let [target (:target-id family)
-                 ready? (= :computed (:status family))
-                 reading-pin (select-keys (:provenance family) [:analysis-digest :excerpt-digest])
-                 attempted (if ready?
-                             (mapv (fn [p] [(assoc p :reading-pin reading-pin)
-                                            (shape-g/score-policy p)])
-                                   (:policies family))
-                             [])
-                 scored (filterv #(= :computed (:status (second %))) attempted)
-                 score-failures
-                 (mapv (fn [[p score]]
-                         (annotate-failure
-                          target (merge {:kind (or (:kind score) :policy-scoring-refused)
-                                        :policy-id (:policy-id p)}
-                                        (select-keys score [:cycle :reason :units :roots
-                                                            :bound :limit]))))
-                       (remove #(= :computed (:status (second %))) attempted))
-                 failures (into (mapv #(annotate-failure target %) (:failures family))
-                                score-failures)]
-             {:target-id target
-              :distinct-count (:distinct-count family)
-              :constructed-keys (mapv (fn [[p score]] (constructed-key p score)) attempted)
-              :scored scored
-              :policies (mapv (fn [[p score]] (policy-summary p score)) scored)
-              :failures failures
-              :failure-count (count failures)}))
-         families)
-        scored (vec (mapcat :scored rows))
-        ranked (mapv (fn [rank [p score]] (scored->ranked p score rank))
-                     (range 1 (inc (count scored))) scored)
+        rows (score-family-field families)
+        {:keys [scored ranked]} (construct-ranked rows)
         ;; Packet B pre-selector join: bind each ranked entry to the
         ;; canonical :wm/executable-cascade-v1 identity.  Entries whose
         ;; canonical construction or validation refuses are removed with a

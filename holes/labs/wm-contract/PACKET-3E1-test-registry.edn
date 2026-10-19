@@ -1,0 +1,10 @@
+{:repo-root "/home/joe/worktrees/futon2-outer-policy-menu-stage"
+ :code-paths ["src/futon2/aif/wm/family_selection.clj"
+              "src/futon2/aif/wm/selection_cascade_identity.clj"
+              "src/futon2/aif/wm/executable_cascade.clj"]
+ :test-paths ["test/futon2/aif/wm/selection_cascade_identity_test.clj"]
+ :command ["clojure" "-M:test" "-n"
+           "futon2.aif.wm.selection-cascade-identity-test"]
+ :author "codex-6" :origin "Packet 3E1 sealed pre-choice policy menu"
+ :artifact-dir "/tmp/packet-3e1-test-registry"
+ :agency-url "http://localhost:7070"}
