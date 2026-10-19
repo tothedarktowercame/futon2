@@ -277,7 +277,13 @@
         selected-judgment (atom nil)]
     {:judge-fn (fn [days]
                  (try
-                   (let [generated (selection-judge opts days)]
+                   (let [generated (selection-judge opts days)
+                         frontier (get-in generated [:judgement :outer-task-selection
+                                                     :policy :frontier])
+                         generated (cond-> generated
+                                     frontier
+                                     (assoc-in [:judgement :decision :selection-certificate
+                                                :reading-frontier] frontier))]
                      (reset! selected-judgment (:judgement generated))
                      generated)
                    (catch Throwable e
