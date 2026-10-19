@@ -117,6 +117,11 @@
   (last (filter #(and (= ledger/transition-schema (:schema %))
                       (= injury-id (:injury-id %)))
                 (ledger-entries history))))
+(defn- enacted-for-retry [history click-id]
+  (last (filter #(and (= ledger/transition-schema (:schema %))
+                      (= :enacted (:state %))
+                      (= click-id (:retry-click %)))
+                (ledger-entries history))))
 
 (defn integrate
   "Pure deterministic ingestion. Non-injuries append inert observations.
@@ -136,10 +141,28 @@
        :ledger history :classification classification}
 
       (= :non-injury (:classification classification))
-      (let [appended (ledger/append-observation
-                      history (:record-pin classification)
-                      (:non-injury-reason classification))]
-        (assoc appended :classification classification :transition :observation))
+      (if-let [enacted (enacted-for-retry history (:click-id classification))]
+        (let [authored (last (filter #(and (= ledger/transition-schema (:schema %))
+                                          (= (:injury-id enacted) (:injury-id %))
+                                          (= :authored (:state %))
+                                          (= (:attempt enacted) (:attempt %)))
+                                    (ledger-entries history)))
+              appended
+              (ledger/append-transition
+               history {:injury-id (:injury-id enacted)
+                        :state :discharged
+                        :attempt (:attempt enacted)
+                        :repair-id (:repair-id enacted)
+                        :patch-sha (:patch-sha authored)
+                        :retry-click (:click-id classification)
+                        :outcome :success
+                        :result-record-pin (:record-pin classification)})]
+          (assoc appended :classification classification
+                 :transition :discharged))
+        (let [appended (ledger/append-observation
+                        history (:record-pin classification)
+                        (:non-injury-reason classification))]
+          (assoc appended :classification classification :transition :observation)))
 
       (= :injury (:classification classification))
       (let [previous (latest-injury history (:injury-id classification))]

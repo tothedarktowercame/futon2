@@ -111,6 +111,8 @@
                    :record-pin {:path "offline/retry-record.edn"
                                 :sha256 (apply str (repeat 64 "9"))}}]
          (cond
+           (= mode :retry-queued)
+           (sealed request :queued base)
            (= mode :retry-failure)
            (sealed request :failed
                    (assoc base :new-cause-pin

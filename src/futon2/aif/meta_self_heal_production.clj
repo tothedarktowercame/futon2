@@ -8,6 +8,10 @@
            [java.nio.file.attribute FileAttribute]))
 
 (def checkpoints [:claim :author :review :enact])
+(def default-ledger-path
+  "/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn")
+(def default-transaction-path
+  "/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn")
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 (defn- persist-transaction! [path transaction]
   (try
@@ -67,10 +71,44 @@
                      :repair-reviewer :author-session :reviewer-session
                      :repair-reviewer-session :target-repository :target-worktree]))
 
+(defn production-readiness
+  "Pre-ration readiness for the dedicated repair boundary.  An absent ledger
+  is a valid empty state, but when a durable active injury exists every effect
+  authority must already be configured.  Callers can therefore refuse before
+  accepting or charging an ordinary click."
+  [opts]
+  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        transaction-path (or (:meta-repair-transaction-path opts)
+                             default-transaction-path)
+        durable (when (.isFile (io/file ledger-path))
+                  (store/load-durable-ledger ledger-path))
+        active (when (= :loaded (:status durable))
+                 (ledger/active-injuries (:ledger durable)))
+        active? (seq (:injuries active))
+        missing (cond-> []
+                  (nil? transaction-path) (conj :transaction-path)
+                  (and active? (nil? (effect-ports opts))) (conj :repair-ports)
+                  (and active? (nil? (:diagnosis-evidence-pin opts)))
+                  (conj :diagnosis-evidence)
+                  (and active? (nil? (:acceptance-test opts)))
+                  (conj :acceptance-test))]
+    (cond
+      (and durable (not= :loaded (:status durable)))
+      (refusal :meta-self-heal/ledger-unreadable {:ledger-result durable})
+
+      (seq missing)
+      (refusal :meta-self-heal/production-config-required
+               {:route :dedicated-meta-self-heal :absent-terms missing
+                :ordinary-selection-called? false :before-ration-spend? true})
+
+      :else {:status :ready :active-injury? (boolean active?)
+             :meta-injury-ledger-path ledger-path
+             :meta-repair-transaction-path transaction-path})))
+
 (defn route!
   "Nil means no active durable injury. A map consumes the opportunity."
   [opts]
-  (let [ledger-path (:meta-injury-ledger-path opts)]
+  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)]
     (when (and ledger-path (.isFile (io/file ledger-path)))
       (let [durable (store/load-durable-ledger ledger-path)
             active (when (= :loaded (:status durable))

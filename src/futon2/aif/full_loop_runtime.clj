@@ -377,8 +377,18 @@
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
   [opts]
-  (or (meta-self-heal/route! opts)
-      (run-ordinary-opportunity! opts)))
+  (let [opts (assoc opts
+                    :meta-injury-ledger-path
+                    (or (:meta-injury-ledger-path opts)
+                        meta-self-heal/default-ledger-path)
+                    :meta-repair-transaction-path
+                    (or (:meta-repair-transaction-path opts)
+                        meta-self-heal/default-transaction-path))
+        readiness (meta-self-heal/production-readiness opts)]
+    (if (= :refused (:status readiness))
+      readiness
+      (or (meta-self-heal/route! opts)
+          (run-ordinary-opportunity! opts)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

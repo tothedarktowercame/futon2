@@ -199,11 +199,15 @@
   "Legacy pinned observation authority; never consulted by ledger active-set."
   ([] (load-authority default-root))
   ([root]
-   (let [head-file (io/file root "HEAD.edn")]
-     (when (.isFile head-file)
-       (let [{:keys [source-pin run-record-pin]}
-             (edn/read-string (slurp head-file))]
-         {:source-bytes (read-bytes (:path source-pin))
-          :expected-source-pin source-pin
-          :run-record-bytes (read-bytes (:path run-record-pin))
-          :expected-run-record-pin run-record-pin})))))
+   (try
+     (let [head-file (io/file root "HEAD.edn")]
+       (when (.isFile head-file)
+         (let [{:keys [source-pin run-record-pin]}
+               (edn/read-string (slurp head-file))]
+           (when (and (.isFile (io/file (:path source-pin)))
+                      (.isFile (io/file (:path run-record-pin))))
+             {:source-bytes (read-bytes (:path source-pin))
+              :expected-source-pin source-pin
+              :run-record-bytes (read-bytes (:path run-record-pin))
+              :expected-run-record-pin run-record-pin}))))
+     (catch Throwable _ nil))))

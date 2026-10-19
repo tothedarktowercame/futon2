@@ -6998,6 +6998,27 @@
     (doseq [name ["token-outcome.edn" "surprises.edn"]]
       (is (not (.exists (io/file retained name)))))))
 
+(deftest terminal-projection-prefers-original-typed-failure-over-close-wrapper
+  (let [projected (#'runner/run-record-failure
+                   {:data {:failure-kind :invalid-close-outcome
+                           :failure-stage :close
+                           :error "invalid close outcome"
+                           :original-failure
+                           {:failure-kind :required-loop-node-unexercised
+                            :failure-stage :selection}
+                           :cause-chain
+                           [{:exception-class "clojure.lang.ExceptionInfo"
+                             :message "Required loop nodes were not exercised"
+                             :data {:failure-kind
+                                    :required-loop-node-unexercised
+                                    :failure-stage :selection}}]}})]
+    (is (= :required-loop-node-unexercised (:kind projected)))
+    (is (= :selection (:stage projected)))
+    (is (= {:failure-kind :invalid-close-outcome :failure-stage :close}
+           (get-in projected [:detail :wrapped-by])))
+    (is (= :required-loop-node-unexercised
+           (get-in projected [:cause 0 :data :failure-kind])))))
+
 (deftest aligned-example-retention-binds-real-evidence-and-manifest
   (kernel-fixture/with-example
    (fn [{:keys [context expected jobs]}]

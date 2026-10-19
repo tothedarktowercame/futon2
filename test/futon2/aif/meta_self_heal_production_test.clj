@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as production]
@@ -68,6 +69,19 @@
     (is (= 1 (get @resumed-calls :review)))
     (is (= 1 (get @resumed-calls :enact)))
     (is (= 1 (get @resumed-calls :retry)))))
+
+(deftest retry-is-enqueued-and-not-recursively-executed
+  (let [env (harness/prepare-environment! (root))
+        calls (atom {})
+        result (runtime/run-opportunity!
+                (opts env (harness/fake-ports (:repo env) calls
+                                              :retry-queued)))]
+    (is (= :awaiting-retry (:status result)))
+    (is (= "offline-retry-click-1" (:retry-click result)))
+    (is (= {:author 1 :review 1 :enact 1 :retry 1} @calls))
+    (is (seq (:injuries
+              (ledger/active-injuries
+               (:ledger (store/load-ledger (:ledger-path env)))))))))
 
 (deftest agency-adapter-binds-fresh-seat-job-and-session-evidence
   (let [seen (atom nil)

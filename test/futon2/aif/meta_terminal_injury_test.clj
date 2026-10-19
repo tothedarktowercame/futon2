@@ -125,3 +125,37 @@
     (is (= :duplicate (:status second)))
     (is (= (:ledger first) (:ledger second)))
     (is (= :refused (:status (terminal/integrate (:ledger first) forged))))))
+
+(deftest successful-attributable-retry-discharges-but-unrelated-success-does-not
+  (let [failure (classify {:run/id "failed" :click/id "detected"
+                           :failure {:kind :reload-failed :stage :reload}}
+                          pin-a)
+        injury-id (:injury-id failure)
+        open (:ledger (terminal/integrate ledger/empty-ledger failure))
+        claim (append! open {:injury-id injury-id :state :claimed :attempt 1
+                             :repair-id "repair/async" :algorithm "self-heal"
+                             :author-session "a" :reviewer-session "r"})
+        authored (append! claim {:injury-id injury-id :state :authored :attempt 1
+                                 :repair-id "repair/async" :patch-sha patch
+                                 :worktree "/tmp/w"})
+        reviewed (append! authored {:injury-id injury-id :state :reviewed :attempt 1
+                                    :repair-id "repair/async" :verdict :approved
+                                    :reviewer-sha review :reviewer-session "r"})
+        enacted (append! reviewed {:injury-id injury-id :state :enacted :attempt 1
+                                   :repair-id "repair/async"
+                                   :integration-commit integration
+                                   :retry-click "retry-click"})
+        unrelated (classify {:run/id "other" :click/id "other-click"
+                             :outcome :success}
+                            {:path "fixtures/other.edn"
+                             :sha256 (apply str (repeat 64 "d"))})
+        after-unrelated (:ledger (terminal/integrate enacted unrelated))
+        retry (classify {:run/id "retry" :click/id "retry-click"
+                         :outcome :success}
+                        {:path "fixtures/retry-success.edn"
+                         :sha256 (apply str (repeat 64 "e"))})
+        discharged (terminal/integrate after-unrelated retry)]
+    (is (= #{injury-id}
+           (set (keys (:injuries (ledger/active-injuries after-unrelated))))))
+    (is (= :discharged (:transition discharged)))
+    (is (empty? (:injuries (ledger/active-injuries (:ledger discharged)))))))

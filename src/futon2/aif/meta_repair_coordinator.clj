@@ -89,7 +89,7 @@
                     (not= (:attempt expected) (:attempt receipt)) (conj :attempt)
                     (not= (:predecessor-pin expected) (:predecessor-pin receipt))
                     (conj :predecessor-pin)
-                    (not (#{:succeeded :failed :rejected} (:status receipt)))
+                    (not (#{:succeeded :failed :rejected :queued} (:status receipt)))
                     (conj :status))]
       (if (seq defects) (refusal :port-receipt/invalid {:defects defects})
           {:status :valid}))
@@ -343,7 +343,14 @@
                                (= retry-click (:retry-click retry-payload)))
                   (stop! (refusal :coordinator/retry-attribution-refused
                                   {:ledger history4 :transaction tx4})))
-                (if (= :succeeded (:status retry-receipt))
+                (cond
+                  (= :queued (:status retry-receipt))
+                  {:status :awaiting-retry
+                   :ledger history4
+                   :transaction tx4
+                   :retry-click retry-click}
+
+                  (= :succeeded (:status retry-receipt))
                   (let [closed (accepted!
                                 (append-transition!
                                  history4 {:injury-id injury-id :state :discharged
@@ -354,6 +361,8 @@
                                            :port-receipt-pin
                                            (:receipt-pin retry-receipt)}))]
                     {:status :discharged :ledger (:ledger closed) :transaction tx4})
+
+                  :else
                   (let [reopened (accepted!
                                   (ledger/append-retry-result
                                    history4 {:injury-id injury-id :repair-id repair-id

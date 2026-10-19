@@ -85,6 +85,7 @@
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
             [futon2.aif.meta-injury-store :as meta-injury-store]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -848,6 +849,28 @@
         (cond-> kept
           (seq omitted) (assoc :omitted (vec (sort omitted))))))))
 
+(defn- exception-cause-chain
+  "Retain every typed exception cause, outermost first.  Close is a durable
+  wrapper boundary, not permission to replace the failure that caused close
+  to fail."
+  [^Throwable throwable]
+  (loop [current throwable chain []]
+    (if current
+      (recur (.getCause current)
+             (conj chain
+                   (cond-> {:exception-class (.getName (class current))
+                            :message (or (ex-message current) "")}
+                     (instance? clojure.lang.ExceptionInfo current)
+                     (assoc :data (ex-data current)))))
+      chain)))
+
+(defn- original-typed-failure [^Throwable throwable]
+  (some (fn [{:keys [data]}]
+          (when (and (map? data) (:failure-kind data))
+            (select-keys data [:failure-kind :failure-stage :phase :kind
+                               :refused :reason])))
+        (reverse (exception-cause-chain throwable))))
+
 (defn- run-record-failure
   "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
   the flight's click entry can say why (record-summary reads only the run
@@ -857,20 +880,31 @@
   no failure kind. A close no exception reached has no cause to give."
   [result]
   (let [d (:data result)
+        original (:original-failure d)
+        effective (if (:failure-kind original)
+                    (merge d original
+                           {:wrapped-by (select-keys d [:failure-kind
+                                                       :failure-stage])})
+                    d)
         ask (or (get-in result [:checkpoints :selection :judgment
                                 :interpretation-ask])
                 (get-in result [:checkpoints :selection :sorry
                                 :interpretation-ask]))]
-    (if-let [kind (:failure-kind d)]
+    (if-let [kind (:failure-kind effective)]
       (cond-> {:kind kind
-               :stage (or (:failure-stage d) {:absent :no-failure-stage})
+               :stage (or (:failure-stage effective)
+                          {:absent :no-failure-stage})
                :error (if (str/blank? (str (:error d)))
                         {:absent :no-error-message}
                         (:error d))
-               :cause (if (contains? d :cause)
-                        (:cause d)
+               :cause (cond
+                        (seq (:cause-chain d)) (:cause-chain d)
+                        (contains? d :cause) (:cause d)
+                        :else
                         {:absent :close-without-exception})
-               :detail (failure-detail (:error-data d))}
+               :detail (cond-> (failure-detail (:error-data d))
+                         (:wrapped-by effective)
+                         (assoc :wrapped-by (:wrapped-by effective)))}
         (:target d) (assoc :target (:target d))
         ask (assoc :context {:phase (:failure-stage d)
                              :interpretation-ask ask}))
@@ -5217,6 +5251,7 @@
         (atom ((runtime-default opts :effective-run-configuration-fn) opts))
         reviewer-of-record (participants/observe! opts)
         closing? (atom false)
+        pending-close-data (atom nil)
         roster-result (try
                         {:value
                          (run-phase! opts @phase-context :agent-readiness
@@ -5371,6 +5406,7 @@
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
         close-core! (fn [outcome data]
+                 (reset! pending-close-data data)
                  (reset! closing? true)
                  (persist-selection! nil)
                  (doseq [cp required-checkpoints
@@ -7640,6 +7676,14 @@
           ;; after adjudication.  Closing is now a last-resort durable boundary.
           (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
                                (ex-data e) {})
+                cause-chain (exception-cause-chain e)
+                retained-close-failure
+                (when-let [close-data @pending-close-data]
+                  (when (:failure-kind close-data)
+                    (select-keys close-data [:failure-kind :failure-stage
+                                             :phase :kind :refused :reason])))
+                original-failure (or (original-typed-failure e)
+                                     retained-close-failure)
                 refusal-kind (or (:interpretation-evidence/refusal failure-data)
                                  (:limb-evidence/refusal failure-data)
                                  (:evidence-manifest/refusal failure-data)
@@ -7675,6 +7719,11 @@
                             :error (.getMessage e)
                             :exception-class exception-class
                             :refusal-data failure-data
+                            :cause-chain cause-chain
+                            :original-failure
+                            (or original-failure
+                                {:failure-kind refusal-kind
+                                 :failure-stage :close})
                             :repair-obligation finding
                             :duration-ms (- (System/currentTimeMillis) started)
                             :resource-use {:agent-turns @dispatched-turns}
@@ -7941,6 +7990,19 @@
              (or (:meta-injury-root raw-opts) meta-injury-store/default-root)
              (:run-record persisted))
            #(select-keys % [:schema :status :capability :run-id :head-path])))
+        authoritative-injury-ingest
+        (when (= :present (:run-record-status persisted))
+          (run-phase!
+           raw-opts
+           {:opportunity-id (:click-id raw-opts)
+            :attempt-id (:attempt-id final-result)}
+           :meta-terminal-injury-ingest
+           #(meta-injury-store/ingest-record-file!
+             (or (:meta-injury-ledger-path raw-opts)
+                 meta-self-heal/default-ledger-path)
+             (:run-record persisted))
+           #(select-keys % [:status :transition :durability :reason
+                            :classification :entry])))
         learning-publication
         (when-let [manifest-path (:outer-learning-manifest-path raw-opts)]
           (run-phase!
@@ -7956,5 +8018,7 @@
     (cond-> (merge final-result {:run/id run-id} persisted)
       injury-deposit
       (assoc :meta-injury-deposit injury-deposit)
+      authoritative-injury-ingest
+      (assoc :meta-terminal-injury-ingest authoritative-injury-ingest)
       learning-publication
       (assoc :outer-learning-publication learning-publication))))
