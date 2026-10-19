@@ -201,8 +201,8 @@
                              :ns "futon2.aif.policy-precision"
                              :meaning "softmax inverse temperature on −F−γ·G over policies (β = 1/γ, B.19 fixed point); NOT the likelihood tempering exponent on A"}
     :legacy-weight-exponent-kappa {:ns "futon2.aif.belief"
-                                   :law "κ(w) = log₂(1+w) applied to A rows"
-                                   :meaning "legacy channel-weight exponent; retained in belief.clj, not reinterpreted as ζ"}}
+                                   :law "κ(w) = log₂(1+w); likelihood-ratio routes retain row-only powers, while the formal categorical :aif route uses power-then-normalise over outcomes per state (:wm/likelihood-tempering-semantics-v2)"
+                                   :meaning "belief-event weight exponent; retained in belief.clj, not reinterpreted as ζ"}}
    :wiring {:tempered-rates "tempered-rates — effective rates whose token-likelihood IS A_ζ (verified against temper-row of the enumerating observation-distribution); applicable to any consumer of rates: observation-distribution, predict-observations (Q(o|π)), horizon-g and horizon-g-sparse's factorized path"
             :demonstration "RUN-r7-zeta-effect-2026-09-18 (futon2/holes/labs/wm-contract/): recorded run showing a declared FIXED ζ measurably changing Q(o|π) and G through predict-observations, horizon-g and (addenda 2) the full efe/rank-actions tick path"
             :status "ζ is DECLARED FIXED (1 on the default identity path; other values declared explicitly per call); no prior/update law is invented"}
@@ -232,4 +232,3 @@
    :tempered-path is declared-fixed-APPLIED, :absent is reserved for a future
    run where ζ was never considered — the three states stay distinguishable."
   (:certificate-statuses zeta-declaration))
-

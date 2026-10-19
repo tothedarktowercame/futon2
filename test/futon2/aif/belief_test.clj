@@ -1071,13 +1071,18 @@
     (is (belief/valid-initial-prior? belief/initial-prior-v1))))
 
 (deftest model-manifest-test
-  (testing "model-manifest returns three distinct hashes"
+  (testing "model-manifest binds models and likelihood-tempering semantics"
     (let [m (belief/model-manifest)]
       (is (string? (:observation-model-hash m)))
       (is (string? (:transition-model-hash m)))
       (is (string? (:initial-prior-hash m)))
-      (is (= 3 (count (distinct (vals m))))
-          "hashes should be distinct across the three components")))
+      (is (= :wm/likelihood-tempering-semantics-v2
+             (get-in m [:likelihood-tempering-semantics :schema])))
+      (is (string? (:likelihood-tempering-hash m)))
+      (is (= 3 (count (distinct (map m [:observation-model-hash
+                                         :transition-model-hash
+                                         :initial-prior-hash]))))
+          "model hashes should be distinct across the three components")))
   (testing "model-manifest is deterministic"
     (is (= (belief/model-manifest) (belief/model-manifest)))))
 

@@ -12,7 +12,8 @@
     (is (= {:likelihood-mode :aif} (wm/arena-belief-update-opts)))
     (is (= (belief/model-manifest) (:belief-model-manifest flags)))
     (is (= #{:observation-model-hash :transition-model-hash
-             :initial-prior-hash}
+             :initial-prior-hash :likelihood-tempering-semantics
+             :likelihood-tempering-hash}
            (set (keys (:belief-model-manifest flags)))))))
 
 (deftest live-arena-executes-the-aif-filter-path

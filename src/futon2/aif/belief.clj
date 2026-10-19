@@ -288,6 +288,16 @@
                              (into (sorted-map) v)
                              v)])))))
 
+(def likelihood-tempering-semantics-v2
+  "Versioned categorical precision law for the formal :aif route.  This is
+  part of run provenance because v1 exponentiated the observed row without
+  restoring each fixed-state distribution over outcomes."
+  {:schema :wm/likelihood-tempering-semantics-v2
+   :route :aif
+   :operator :power-then-normalise-over-outcomes-per-state
+   :kappa-law :log2-one-plus-weight
+   :units :probability})
+
 (defn model-manifest
   "Build a provenance manifest for the declared AIF model components.
    Returns a map with version hashes suitable for trace stamping (C9)."
@@ -295,7 +305,9 @@
   ([A B D]
    {:observation-model-hash (model-version A)
     :transition-model-hash  (model-version B)
-    :initial-prior-hash     (model-version D)}))
+    :initial-prior-hash     (model-version D)
+    :likelihood-tempering-semantics likelihood-tempering-semantics-v2
+    :likelihood-tempering-hash (model-version likelihood-tempering-semantics-v2)}))
 
 ;; --- The explicit categorical filter (C3, C12) ---
 
@@ -312,11 +324,59 @@
                         (* (double (get-in B [s s'] 0.0))
                            (double (get q s 0.0)))))])))
 
+(defn tempered-observation-model
+  "Return Aκ(o|s) = A(o|s)^κ / Σo' A(o'|s)^κ for every state.
+
+  This is the shared categorical likelihood-precision operator for the formal
+  :aif route.  It is total over arbitrary inputs: malformed models, negative
+  or non-finite κ, and impossible tempered columns return typed refusals."
+  [A kappa]
+  (try
+    (cond
+      (not (valid-observation-model? A))
+      (belief-refusal :invalid-observation-model)
+
+      (not (and (number? kappa) (Double/isFinite (double kappa))
+                (<= 0.0 (double kappa))))
+      (belief-refusal :invalid-likelihood-precision)
+
+      (= 1.0 (double kappa)) A
+
+      :else
+      (let [k (double kappa)
+            outcomes (vec (keys A))
+            powered-columns
+            (into {}
+                  (for [s status-set]
+                    [s (into {}
+                             (for [o outcomes
+                                   :let [p (double (get-in A [o s]))]]
+                               [o (if (zero? k) 1.0 (Math/pow p k))]))]))
+            bad-column (first
+                        (for [[s column] powered-columns
+                              :let [z (reduce + (vals column))]
+                              :when (not (and (Double/isFinite (double z))
+                                              (pos? (double z))))]
+                          s))]
+        (if bad-column
+          {:status :refused :reason :impossible-tempered-observation-column
+           :state bad-column}
+          (into {}
+                (for [o outcomes]
+                  [o (into {}
+                           (for [s status-set
+                                 :let [column (get powered-columns s)
+                                       z (reduce + (vals column))]]
+                             [s (/ (double (get column o)) (double z))]))])))))
+    (catch Throwable _
+      (belief-refusal :invalid-tempered-observation-model))))
+
 (defn update-step
   "Update step of the categorical filter:
-     q(s_t) ∝ A(o_t | s_t)^κ(w) · q⁻(s_t)
-   The tempered likelihood A[o|s]^κ(w) is applied as in the :a-matrix
-   mode, but A is now the normalised observation model."
+     Aκ(o|s) = A(o|s)^κ(w) / Σo' A(o'|s)^κ(w)
+     q(s_t) ∝ Aκ(o_t | s_t) · q⁻(s_t)
+   Unlike the likelihood-ratio :a-matrix route, categorical precision must
+   preserve a probability distribution over outcomes for every state."
   [A observed w q-predicted]
   (cond
     (belief-refusal? q-predicted) q-predicted
@@ -324,12 +384,18 @@
     (not (and (number? w) (Double/isFinite (double w)) (<= 0 w)))
     (belief-refusal :invalid-observation-weight)
     (not (valid-observation-model? A)) (belief-refusal :invalid-observation-model)
+    (not (contains? status-set observed)) (belief-refusal :unknown-observation)
     :else
-    (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))]
-      (normalise
-       (into {} (for [[s prior] q-predicted
-                      :let [a (get-in A [observed s])]]
-                  [s (* prior (Math/pow (double a) kappa))]))))))
+    (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))
+          tempered (tempered-observation-model A kappa)]
+      (cond
+        (zero? kappa) q-predicted
+        (belief-refusal? tempered)
+        tempered
+        :else
+        (normalise
+         (into {} (for [[s prior] q-predicted]
+                    [s (* prior (double (get-in tempered [observed s])))])))))))
 
 (defn omitted-observation
   "Retain a typed event receipt without changing the posterior coordinates.
@@ -341,7 +407,7 @@
 (defn categorical-filter-step
   "One complete prediction-update cycle of the categorical filter:
      q⁻ = B × q        (prediction)
-     q  ∝ A(o|·)^κ(w) · q⁻   (tempered update)
+     q  ∝ Aκ(o|·) · q⁻       (column-normalised tempered update)
    This is the explicit A × (B × q) computation. Returns the new
    posterior. Validates the model components once per call (fail-closed
    on malformed model data per C9)."
@@ -399,7 +465,8 @@
                        :a-matrix — Bayes with the explicit observation
                        model: p'(s) ∝ p(s)·A[o][s]^κ(w), κ(w) = log₂(1+w).
                        :aif — categorical filter with normalised A/B/D:
-                       q⁻ = B×q; q ∝ A(o|·)^κ(w)·q⁻. Validates model
+                       q⁻ = B×q; q ∝ Aκ(o|·)·q⁻, where power tempering
+                       is renormalised over outcomes for each state. Validates model
                        components on every call (fail-closed per C9).
      :a-matrix         observation model to use in :a-matrix mode
                        (default `a-matrix-v0`). With `a-matrix-identity`
@@ -413,17 +480,19 @@
   ([posterior event {:keys [likelihood-mode a-matrix]
                      :or {likelihood-mode :legacy} :as opts}]
    (let [{:keys [type weight]} event
-         w (double (or weight 1.0))]
+         raw-w (or weight 1.0)]
      (if (belief-refusal? posterior)
        posterior
        (if (contains? status-set type)
        (case likelihood-mode
          :legacy
-         (normalise
-          (into {} (for [[k v] posterior]
-                     [k (if (= k type) (* v (+ 1.0 w)) v)])))
+         (let [w (double raw-w)]
+           (normalise
+            (into {} (for [[k v] posterior]
+                       [k (if (= k type) (* v (+ 1.0 w)) v)]))))
          :a-matrix
-         (let [L (likelihood-vector (or a-matrix a-matrix-v0) type w)]
+         (let [w (double raw-w)
+               L (likelihood-vector (or a-matrix a-matrix-v0) type w)]
            (normalise
             (into {} (for [[k v] posterior]
                        [k (* v (double (get L k 1.0)))]))))
@@ -431,7 +500,7 @@
          (categorical-filter-step posterior event
                                    (get opts :observation-model observation-model-v1)
                                    (get opts :transition-model transition-model-v1)
-                                   {:weight w}))
+                                   {:weight raw-w}))
        (omitted-observation posterior event))))))
 
 (defn update-belief
