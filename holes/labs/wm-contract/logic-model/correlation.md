@@ -2,6 +2,8 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 3/9 update (P03): `3c4b9da4a` (reviewed worker `d1c2717c5`) isolates missing, unreadable, and drifted manifest records as typed exclusions. Verified usable neighbours proceed, retaining parsed records for provider projection without a second filesystem read. The constructed valid/missing/drifted case yields one learning row and two exclusions. Worker namespace: 9 tests/62 assertions passed; reviewer inspected the read/verify/projection chain and passed diff whitespace check. No serving-JVM or live-click observation is claimed; later score/objective boundaries remain separate packets.
+
 Rows 1/6/10 update (P00): `b4359d675` (reviewed worker commit `6fc4fadef`) retains existing abstained `:reading-frontier` and `:loop-node-exercise` in the terminal decision certificate, with or without Q2 construction. Selected retention remains unchanged. This supersedes row 6's pending terminal-retention repair for these carriers only; missing upstream measurements are not reconstructed. Worker focused written-record test: 1 test/11 assertions passed, synthetic counts with L1's refusal kind pinned. No post-fix click is claimed.
 
 The original audit below remains a historical reading at its stated revision.

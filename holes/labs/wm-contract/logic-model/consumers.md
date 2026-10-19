@@ -2,6 +2,8 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 31/32 update (P03, `3c4b9da4a`, reviewed worker `d1c2717c5`): dataset read partitions records once. Missing/unreadable/drifted records retain source pins and reason counts as exclusions rather than refusing verified neighbours. `terminal-record` projects the retained `:verified-record`; it no longer rereads manifest paths. Identity/chronology checks still apply to learning rows. No serving probe or live click is claimed.
+
 Row 54 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): terminal projection retains existing abstained `:reading-frontier` and `:loop-node-exercise` alongside Q2 carriers. Its guard no longer requires `:q2-construction`. Selected-decision projection is unchanged. Focused synthetic written-record regression passed; no live-click verification claimed.
 
 The original audit below remains a historical reading at its stated revision.

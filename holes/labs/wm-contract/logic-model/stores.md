@@ -1,5 +1,9 @@
 # WM click runner: data stores on disk
 
+## Reviewed update — 2026-10-19, codex-1
+
+Manifest reader update (P03, `3c4b9da4a`, reviewed worker `d1c2717c5`): reader reports declared/readable/verified/excluded counts, missing/drifted counts and exclusion reason frequencies. Here `:verified` counts usable retained learning rows, not every hash-matching file. Original manifest pins are preserved; changed bytes are not repinned. Parsed verified records travel with dataset rows so provider projection does not reread mutable paths. Constructed three-record regression passed; no live store mutation or serving observation. Original inventory below remains historical.
+
 - futon2 commit read: `1de600e2c` (HEAD at write time; it was `f76041cc7` at the start of the inspection, so HEAD moved while I worked. Working tree otherwise clean except untracked `holes/labs/...`.)
 - futon3c commit not recorded; one uncommitted change in `futon3c/src/futon3c/wm/ordinary_click_budget.clj` matters below.
 - Inspected: 2026-10-19 08:13 UTC (`date -u`). All mtimes are UTC from `find -printf %T@`. "files" counts regular files (`find -type f`), recursive.
