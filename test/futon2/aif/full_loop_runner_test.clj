@@ -3631,6 +3631,26 @@
          :belief {} :belief-pre {} :observation {} :free-energy {}
          :prediction-errors {} :precision-state {} :micro-step-trace []
          :mode :maintain}
+        failure-case
+        (fn [label trace-fn]
+          (let [case-root (.toFile (Files/createTempDirectory
+                                    (str "wm-p11-" label "-")
+                                    (make-array FileAttribute 0)))
+                attempts (atom 0)
+                result (runner/run-opportunity!
+                        (assoc (isolated-runner-opts)
+                               :run-id (str "p11-" label)
+                               :judge-fn (fn [_] {:judgement selected-judgement})
+                               :trace-fn (fn [j] (swap! attempts inc) (trace-fn j))
+                               :run-record-dir (.getPath (io/file case-root "runs"))
+                               :repair-open-fn (constantly [])
+                               :construct-fn (fn [& _]
+                                               (throw (ex-info "validation stopped after selection"
+                                                               {:outcome :incomplete
+                                                                :failure-kind :fixture-validation-failed
+                                                                :failure-stage :construction})))))]
+            {:root case-root :attempts attempts :result result
+             :record (edn/read-string (slurp (:run-record result)))}))
         early-result
         (runner/run-opportunity!
          (assoc (isolated-runner-opts)
@@ -3646,6 +3666,9 @@
                                                  :failure-kind :fixture-validation-failed
                                                  :failure-stage :construction})))))
         early-records (trace/read-trace :dir (.getPath root))
+        throwing (failure-case "trace-throws"
+                               (fn [_] (throw (ex-info "trace writer failed" {}))))
+        nil-return (failure-case "trace-nil" (constantly nil))
         successful-root (.toFile (Files/createTempDirectory "wm-p11-success-"
                                                            (make-array FileAttribute 0)))
         successful-id "p11-successful-selection"
@@ -3678,12 +3701,24 @@
       (is (= successful-id (:run/id (first successful-records))))
       (is (not (contains? (first successful-records) :trace/terminal)))
       (is (map? successful))
+      (doseq [{:keys [attempts result record]} [throwing nil-return]]
+        (is (= 1 @attempts))
+        (is (.isFile (io/file (:run-record result))))
+        (is (= :fixture-validation-failed (get-in record [:failure :kind])))
+        (is (false? (:traceWritten record)))
+        (is (= :failed (get-in record [:trace-publication :status])))
+        (is (not= :selection-judgement-not-observed
+                  (get-in record [:trace-publication :reason]))))
+      (is (= :trace-publication-threw
+             (get-in throwing [:record :trace-publication :reason])))
+      (is (= :trace-publication-returned-no-path
+             (get-in nil-return [:record :trace-publication :reason])))
       (is (= {:status :absent :reason :selection-judgement-not-observed}
              (:trace-publication pre-judgement-result)))
       (is (= 1 (count (trace/read-trace :dir (.getPath root))))
           "pre-judgement failure creates no trace row")
       (finally
-        (doseq [dir [root successful-root]
+        (doseq [dir [root successful-root (:root throwing) (:root nil-return)]
                 file (reverse (file-seq dir))]
           (io/delete-file file true))))))))
 

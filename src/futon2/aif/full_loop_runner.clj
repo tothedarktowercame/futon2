@@ -5515,33 +5515,59 @@
         (fn [terminal]
           ;; A run identity is the trace's existing deduplication identity.
           ;; This core owns one publication atom, so an early terminal close
-          ;; and the ordinary construction path cannot append two rows.
+          ;; and the ordinary construction path cannot append two rows. A
+          ;; failed write is terminal for this run too: close must retain its
+          ;; original failure rather than retrying or replacing it.
           (when-let [judgement @observed-selection]
-            (when-not (contains? #{:repair-machine-failure
+            (or @trace-publication
+                (let [repair-action?
+                      (contains? #{:repair-machine-failure
                                    :revalidate-historical-repair}
                                  (get-in judgement [:decision :action :type]))
-              (or @trace-publication
-                  (let [publication
-                        (publish-selection-trace!
-                         opts
-                         (cond-> (assoc judgement :run/id (:run-id opts)
-                                               :trace/reason
-                                               {:kind :routing-rule
-                                                :rule (if terminal
-                                                        :early-terminal-selection-observed
-                                                        :constructed-selection-persisted)
-                                                :question "Does the observed selection require operator review?"})
-                           terminal (assoc :trace/terminal terminal)))]
-                    (reset! trace-publication publication)
-                    publication)))))
+                      state
+                      (if repair-action?
+                        {:status :skipped
+                         :reason :repair-action-not-traced
+                         :run/id (:run-id opts)}
+                        (try
+                          (let [publication
+                                (publish-selection-trace!
+                                 opts
+                                 (cond-> (assoc judgement :run/id (:run-id opts)
+                                                       :trace/reason
+                                                       {:kind :routing-rule
+                                                        :rule (if terminal
+                                                                :early-terminal-selection-observed
+                                                                :constructed-selection-persisted)
+                                                        :question "Does the observed selection require operator review?"})
+                                   terminal (assoc :trace/terminal terminal)))]
+                            (if (and (string? (:path publication))
+                                     (not (str/blank? (:path publication))))
+                              (assoc publication
+                                     :status :present
+                                     :run/id (:run-id opts)
+                                     :persistence (if (:record publication)
+                                                    :record-returned
+                                                    :returned-path-unverified)
+                                     :terminal terminal)
+                              {:status :failed
+                               :reason :trace-publication-returned-no-path
+                               :run/id (:run-id opts)
+                               :terminal terminal}))
+                          (catch Throwable e
+                            {:status :failed
+                             :reason :trace-publication-threw
+                             :run/id (:run-id opts)
+                             :terminal terminal
+                             :error-class (.getName (class e))
+                             :error (or (ex-message e) "trace publication failed")})))]
+                  (reset! trace-publication state)
+                  state))))
         trace-publication-receipt
         (fn []
           (if-let [publication @trace-publication]
-            (cond-> {:status :present
-                     :path (:path publication)
-                     :run/id (:run-id opts)}
-              (get-in publication [:judgement :trace/terminal])
-              (assoc :terminal (get-in publication [:judgement :trace/terminal])))
+            (select-keys publication [:status :reason :path :run/id :persistence
+                                      :terminal :error-class :error])
             {:status :absent :reason :selection-judgement-not-observed}))
         close-core! (fn [outcome data]
                  (reset! pending-close-data data)
@@ -5556,7 +5582,8 @@
                    (when-let [record (:record publication)]
                      (swap! pending-selection reconcile-selection-publication record)
                      (swap! checkpoints update :selection reconcile-selection-publication record))
-                   (persist-selection! (:path publication)))
+                   (persist-selection! (when (= :present (:status publication))
+                                         (:path publication))))
                  (doseq [cp required-checkpoints
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
