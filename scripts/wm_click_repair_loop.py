@@ -138,7 +138,7 @@ def reset_cast_sessions(args) -> None:
         row = agents.get(seat)
         if not row:
             raise RuntimeError(f"cast seat is not registered: {seat}")
-        if row.get("status") != "idle" or not row.get("invoke-ready?"):
+        if row.get("status") not in ("idle", "restored") or not row.get("invoke-ready?"):
             raise RuntimeError(f"cast seat is not idle and invoke-ready: {seat}")
     resets = {}
     for seat in seats:

@@ -163,6 +163,25 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertEqual(3, post.call_count)
         self.assertEqual("cast-reset", record.call_args.args[0]["event"])
 
+    def test_each_click_can_reset_a_restored_role_cast(self):
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "1", "--owner", "codex-1",
+            "--issuing-caller", "codex-1", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        rows = {seat: {"status": "restored", "invoke-ready?": True}
+                for seat in (args.author, args.reviewer, args.repair_reviewer)}
+        with mock.patch.object(loop, "get_json", return_value={"agents": rows}), \
+             mock.patch.object(loop, "post_json",
+                               return_value={"ok": True,
+                                             "old-session-id": None}) as post, \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            loop.reset_cast_sessions(args)
+        self.assertEqual(3, post.call_count)
+
     def test_cast_reset_fails_closed_when_a_role_is_busy(self):
         loop = load_loop()
         args = loop.parse_args([
