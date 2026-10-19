@@ -328,3 +328,59 @@
     (is (= :ordinary (:status no-active-result)))
     (is (= :not-required (get-in no-active-result [:diagnosis-observation :status])))
     (is (nil? (:diagnosis-evidence-pin @ordinary-seen)))))
+
+(deftest route-binds-produced-diagnosis-to-its-prepared-transaction
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        _ (spit ledger-path "{}")
+        source-a {:path "records/a.edn" :sha256 (apply str (repeat 64 "a"))}
+        source-b {:path "records/b.edn" :sha256 (apply str (repeat 64 "b"))}
+        diagnosis-a {:path "diagnoses/a.edn" :sha256 (apply str (repeat 64 "c"))}
+        diagnosis-b {:path "diagnoses/b.edn" :sha256 (apply str (repeat 64 "d"))}
+        transaction-b {:work-order {:injury-id "injury-b"
+                                    :cause-record-pin source-b
+                                    :diagnosis-evidence-pin diagnosis-b}}
+        transaction-a {:work-order {:injury-id "injury-a"
+                                    :cause-record-pin source-a
+                                    :diagnosis-evidence-pin diagnosis-a}}
+        base-opts {:meta-injury-ledger-path ledger-path
+                   :meta-repair-transaction-path (str dir "/transaction.edn")
+                   :meta-repair-ports {:author (constantly nil)}
+                   :acceptance-test {:id "P17-absent-but-shaped"
+                                     :command ["not-run"] :expected :unavailable}
+                   :diagnosis-evidence-pin diagnosis-a
+                   :meta-diagnosis-observation
+                   {:status :available :injury-id "injury-a"
+                    :source-record-pin source-a :diagnosis-evidence-pin diagnosis-a}}
+        effects (atom 0)
+        active-b {:status :computed :injuries {"injury-b" {:injury-id "injury-b"}}}
+        run-route (fn [active transaction]
+                    (with-redefs [store/load-durable-ledger (constantly {:status :loaded :ledger {}})
+                                  ledger/active-injuries (constantly active)
+                                  coordinator/prepare (constantly {:transaction transaction})
+                                  coordinator/coordinate (fn [& _] (swap! effects inc)
+                                                           (throw (ex-info "coordinate" {})))]
+                      (production/route! base-opts)))]
+    (let [mismatch (run-route active-b transaction-b)]
+      (is (= :meta-self-heal/diagnosis-transaction-mismatch (:reason mismatch)))
+      (is (= "injury-a" (get-in mismatch [:expected :injury-id])))
+      (is (= "injury-b" (get-in mismatch [:actual :injury-id])))
+      (is (zero? @effects)))
+    (let [positive (try
+                     (run-route {:status :computed
+                                 :injuries {"injury-a" {:injury-id "injury-a"}}}
+                                transaction-a)
+                     :returned
+                     (catch clojure.lang.ExceptionInfo e
+                       (if (= "coordinate" (.getMessage e)) :coordinated :wrong)))]
+      (is (= :coordinated positive))
+      (is (= 1 @effects)))))
+
+(deftest absent-ledger-is-not-required-while-unreadable-ledger-is-unavailable
+  (is (= :not-required
+         (:status (production/prepare-diagnosis {} {:durable-ledger nil
+                                                     :active-injuries nil}))))
+  (is (= :unavailable
+         (:status (production/prepare-diagnosis
+                   {} {:durable-ledger {:status :refused}
+                       :active-injuries nil})))))

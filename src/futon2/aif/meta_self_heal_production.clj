@@ -243,6 +243,9 @@
     {:status :present :diagnosis-evidence-pin (:diagnosis-evidence-pin opts)
      :source :supplied}
 
+    (nil? durable-ledger)
+    {:status :not-required :reason :meta-self-heal/no-durable-injury-ledger}
+
     (not= :loaded (:status durable-ledger))
     {:status :unavailable :reason :meta-self-heal/diagnosis-ledger-unavailable}
 
@@ -291,6 +294,26 @@
              :meta-injury-ledger-path ledger-path
              :meta-repair-transaction-path transaction-path}))))
 
+(defn- diagnosis-transaction-binding
+  "A newly produced receipt belongs to one injury and one causal record.  Do
+  not let a ledger change (or resumed transaction) repurpose its pin."
+  [opts transaction]
+  (let [observation (:meta-diagnosis-observation opts)
+        work-order (:work-order transaction)]
+    (if (not= :available (:status observation))
+      {:status :valid :source :not-newly-produced}
+      (let [expected {:injury-id (:injury-id observation)
+                      :source-record-pin (:source-record-pin observation)
+                      :diagnosis-evidence-pin (:diagnosis-evidence-pin observation)}
+            actual {:injury-id (:injury-id work-order)
+                    :source-record-pin (:cause-record-pin work-order)
+                    :diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)}]
+        (if (= expected actual)
+          {:status :valid :source :produced-diagnosis}
+          (refusal :meta-self-heal/diagnosis-transaction-mismatch
+                   {:diagnosis-observation observation
+                    :expected expected :actual actual}))))))
+
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
    This is the only path allowed to run ordinary machinery while an injury is
@@ -335,9 +358,13 @@
                         :ordinary-selection-called? false})
               (let [transaction (or (load-transaction transaction-path)
                                     (:transaction (coordinator/prepare
-                                                   durable (work-order-options opts))))]
-                (loop [durable durable transaction transaction
-                       phases checkpoints receipts []]
+                                                   durable (work-order-options opts))))
+                    binding (diagnosis-transaction-binding opts transaction)]
+                (if-not (= :valid (:status binding))
+                  (assoc binding :route :dedicated-meta-self-heal
+                         :ordinary-selection-called? false)
+                  (loop [durable durable transaction transaction
+                         phases checkpoints receipts []]
                   (if-let [phase (first phases)]
                     (let [result (coordinator/coordinate
                                   durable transaction (assoc ports :stop-after phase))
@@ -365,4 +392,4 @@
                        :retry-click (get-in result [:transaction :receipts 2
                                                     :payload :retry-click])
                        :checkpoint-receipts receipts :ledger-write lw
-                       :transaction-write tw :transaction (:transaction result)})))))))))))
+                       :transaction-write tw :transaction (:transaction result)}))))))))))))
