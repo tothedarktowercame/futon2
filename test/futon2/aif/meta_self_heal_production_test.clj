@@ -25,6 +25,18 @@
                                  :sha256 (apply str (repeat 64 "a"))}})
           :meta-repair-ports ports}))
 
+(defn- acceptance-case
+  ([id] (acceptance-case id :configuration))
+  ([id expected]
+   (let [namespace "futon2.aif.meta-selection-contract-acceptance-test"]
+     {:id id
+      :command ["clojure" "-M:test" "-n" namespace]
+      :expected expected
+      :source {:namespace namespace
+               :path "test/futon2/aif/meta_selection_contract_acceptance_test.clj"
+               :text (str "(ns " namespace "\n  (:require [clojure.test :refer [deftest is]]))\n"
+                          "(deftest acceptance-control (is true))\n")}})))
+
 (defn- recorded-injury-source! [dir]
   ;; This is the separately recorded campaign fold-output-invalid shape, not
   ;; P16's L1 reading-coverage pin or an invented diagnosis fixture.
@@ -306,9 +318,9 @@
                  (fn [request]
                    (reset! seen request)
                    {:status :proposed
-                    :acceptance-test {:id "P17-reproduce-recorded-injury"
-                                      :command ["bb" "checks/reproduce.clj"]
-                                      :expected {:kind :configuration-injury}}})}
+                    :acceptance-test
+                    (acceptance-case "P17-reproduce-recorded-injury"
+                                     {:kind :configuration-injury})})}
                 diagnosis)
         bytes (java.nio.file.Files/readAllBytes
                (.toPath (java.io.File. (get-in result [:acceptance-evidence-pin :path]))))
@@ -318,6 +330,8 @@
     (is (= (:source-record-pin diagnosis) (:source-record-pin @seen)))
     (is (= :unreviewed (:review-status receipt)))
     (is (= :not-run (:result-status receipt)))
+    (is (= (get-in result [:acceptance-test :source])
+           (get-in receipt [:acceptance-test :source])))
     (is (= (:acceptance-evidence-pin result)
            {:path (get-in result [:acceptance-evidence-pin :path])
             :sha256 (load-identity/sha256 bytes)}))
@@ -360,6 +374,59 @@
     (is (every? nil? (map :acceptance-evidence-pin
                           [missing failed malformed prose changed-source unreadable drifted])))))
 
+(deftest acceptance-source-is-required-and-namespace-path-must-match-command
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        persisted (atom 0)
+        missing-case (dissoc (acceptance-case "missing-source") :source)
+        mismatched-case (assoc-in (acceptance-case "mismatched-source")
+                                  [:source :path]
+                                  "test/futon2/aif/not_the_command_namespace.clj")
+        produce (fn [acceptance-test]
+                  (with-redefs [production/persist-acceptance!
+                                (fn [& _] (swap! persisted inc)
+                                  {:status :persisted})]
+                    (production/produce-acceptance!
+                     {:meta-acceptance-fn
+                      (constantly {:status :proposed
+                                   :acceptance-test acceptance-test})}
+                     diagnosis)))
+        missing (produce missing-case)
+        mismatched (produce mismatched-case)]
+    (is (= :meta-self-heal/acceptance-prose-or-malformed (:reason missing)))
+    (is (= :meta-self-heal/acceptance-proposal-source-mismatch
+           (:reason mismatched)))
+    (is (nil? (:acceptance-evidence-pin missing)))
+    (is (nil? (:acceptance-evidence-pin mismatched)))
+    (is (zero? @persisted))))
+
+(deftest historical-source-less-proposal-never-runs-or-reaches-review
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        valid (production/produce-acceptance!
+               {:meta-acceptance-root (str dir "/acceptances")
+                :meta-acceptance-fn
+                (constantly {:status :proposed
+                             :acceptance-test (acceptance-case "historical-control")})}
+               diagnosis)
+        old-receipt (-> (edn/read-string
+                         (slurp (get-in valid [:acceptance-evidence-pin :path])))
+                        (update :acceptance-test dissoc :source))
+        old-path (str dir "/historical-source-less.edn")
+        old-bytes (.getBytes (str (pr-str old-receipt) "\n") "UTF-8")
+        _ (spit old-path (String. old-bytes "UTF-8"))
+        historical (-> valid
+                       (update :acceptance-test dissoc :source)
+                       (assoc :acceptance-evidence-pin
+                              {:path old-path :sha256 (load-identity/sha256 old-bytes)}))
+        calls (atom [])
+        refused (production/admit-acceptance!
+                 {:meta-acceptance-run-fn #(swap! calls conj [:run %])
+                  :meta-acceptance-review-fn #(swap! calls conj [:review %])}
+                 historical)]
+    (is (= :meta-self-heal/acceptance-proposal-not-concrete (:reason refused)))
+    (is (empty? @calls))))
+
 (deftest acceptance-persistence-is-immutable-and-failure-never-claims-a-pin
   (let [dir (root)
         diagnosis (produced-diagnosis! dir)
@@ -367,9 +434,8 @@
         opts {:meta-acceptance-root (str dir "/acceptances")
               :meta-acceptance-fn
               (fn [_] {:status :proposed
-                         :acceptance-test {:id (str "P17-" (swap! calls inc))
-                                           :command ["bb" "checks/reproduce.clj"]
-                                           :expected :configuration}})}
+                         :acceptance-test
+                         (acceptance-case (str "P17-" (swap! calls inc)))})}
         first-result (production/produce-acceptance! opts diagnosis)
         first-bytes (java.nio.file.Files/readAllBytes
                      (.toPath (java.io.File.
@@ -394,7 +460,7 @@
     (is (nil? (:acceptance-evidence-pin failed)))))
 
 (deftest supplied-acceptance-remains-a-non-invoking-compatibility-path
-  (let [acceptance {:id "supplied" :command ["not-run"] :expected :unknown}
+  (let [acceptance (acceptance-case "supplied" :unknown)
         result (production/produce-acceptance!
                 {:acceptance-test acceptance
                  :meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))}
@@ -409,8 +475,8 @@
                   {:meta-acceptance-root (str dir "/acceptances")
                    :meta-acceptance-fn
                    (constantly {:status :proposed
-                                :acceptance-test {:id "P22-admission"
-                                                  :command ["not-run"] :expected :injury}})}
+                                :acceptance-test
+                                (acceptance-case "P22-admission" :injury)})}
                   diagnosis)
         run-result {:status :ran :outcome :failed :exit 1
                     :summary "reproduced fold-output-invalid"
@@ -459,6 +525,9 @@
     (is (= :ran-before-repair (:result-status @seen-review)))
     (is (= run-result (:result @seen-review)))
     (is (= run-result (:result admitted)))
+    (is (= (get-in proposal [:acceptance-test :source])
+           (get-in @seen-review [:acceptance-test :source])))
+    (is (= [(get proposal :acceptance-test)] @run-calls))
     (is (= :meta-self-heal/acceptance-proposal-identity-mismatch (:reason tampered)))
     (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
     (is (= :acceptance-test-still-fails (:review-reason refused)))
@@ -560,9 +629,9 @@
         transaction-a {:work-order {:injury-id "injury-a"
                                     :cause-record-pin source-a
                                     :diagnosis-evidence-pin diagnosis-a
-                                    :acceptance-test {:id "P17-absent-but-shaped"
-                                                      :command ["not-run"]
-                                                      :expected :unavailable}}}
+                                    :acceptance-test
+                                    (acceptance-case "P17-absent-but-shaped"
+                                                     :unavailable)}}
         base-opts {:meta-injury-ledger-path ledger-path
                    :meta-repair-transaction-path (str dir "/transaction.edn")
                    :meta-repair-ports {:author (constantly nil)}
@@ -571,16 +640,16 @@
                                 :summary "fixture injury reproduced"
                                 :run-pin {:path "fixture://route-acceptance"
                                           :sha256 (apply str (repeat 64 "e"))}})
-                   :acceptance-test {:id "P17-absent-but-shaped"
-                                     :command ["not-run"] :expected :unavailable}
+                   :acceptance-test
+                   (acceptance-case "P17-absent-but-shaped" :unavailable)
                    :diagnosis-evidence-pin diagnosis-a
                    :meta-diagnosis-observation produced
                    :meta-acceptance-observation
                    {:status :accepted :injury-id "injury-a"
                     :source-record-pin source-a
                     :diagnosis-evidence-pin diagnosis-a
-                    :acceptance-test {:id "P17-absent-but-shaped"
-                                      :command ["not-run"] :expected :unavailable}}}
+                    :acceptance-test
+                    (acceptance-case "P17-absent-but-shaped" :unavailable)}}
         effects (atom 0)
         active-b {:status :computed :injuries {"injury-b" {:injury-id "injury-b"}}}
         run-route (fn [active transaction]
@@ -654,9 +723,8 @@
                                  {:status :succeeded :diagnosis {:class :configuration}})
             :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
                                   {:status :proposed
-                                   :acceptance-test {:id "P17-runtime"
-                                                     :command ["not-run"]
-                                                     :expected :configuration}})
+                                   :acceptance-test
+                                   (acceptance-case "P17-runtime")})
             :meta-acceptance-run-fn
             (constantly {:status :ran :outcome :failed :exit 1
                          :summary "runtime reproduced injury"
@@ -668,7 +736,7 @@
                                            :diagnosis-evidence-pin
                                            :proposal-evidence-pin :acceptance-test])
                      :status :accepted))}))
-        supplied-test {:id "already-reviewed" :command ["not-run"] :expected :unknown}
+        supplied-test (acceptance-case "already-reviewed" :unknown)
         supplied
         (with-redefs [production/diagnosis-context (constantly context)
                       production/production-readiness refused-readiness]

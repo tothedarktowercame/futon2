@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-self-heal-production
   "Fail-closed serving arbitration for durable dedicated META repair."
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.load-identity :as load-identity]
@@ -203,10 +204,40 @@
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-diagnosis-unreadable))))))
 
+(defn- command-namespace [command]
+  (some (fn [[flag value]] (when (= "-n" flag) value))
+        (partition 2 1 command)))
+
+(defn- namespace-test-path [namespace]
+  (when (and (string? namespace) (not (str/blank? namespace)))
+    (str "test/" (-> namespace
+                     (str/replace "." "/")
+                     (str/replace "-" "_"))
+         ".clj")))
+
 (defn- concrete-acceptance? [case]
-  (and (map? case) (string? (:id case)) (seq (:id case))
-       (vector? (:command case)) (seq (:command case))
-       (every? string? (:command case)) (contains? case :expected)))
+  (let [source (:source case)]
+    (and (map? case) (string? (:id case)) (not (str/blank? (:id case)))
+         (vector? (:command case)) (seq (:command case))
+         (every? string? (:command case)) (contains? case :expected)
+         (map? source)
+         (every? #(and (string? %) (not (str/blank? %)))
+                 [(:namespace source) (:path source) (:text source)])
+         (= (:namespace source) (command-namespace (:command case)))
+         (= (:path source) (namespace-test-path (:namespace source))))))
+
+(defn- source-shaped? [case]
+  (let [source (:source case)]
+    (and (map? source)
+         (every? #(and (string? %) (not (str/blank? %)))
+                 [(:namespace source) (:path source) (:text source)]))))
+
+(defn- source-mismatch? [case]
+  (and (source-shaped? case)
+       (or (not= (get-in case [:source :namespace])
+                 (command-namespace (:command case)))
+           (not= (get-in case [:source :path])
+                 (namespace-test-path (get-in case [:source :namespace]))))))
 
 (defn persist-acceptance!
   "Persist an immutable proposed specification.  It deliberately never runs
@@ -245,7 +276,9 @@
 (defn produce-acceptance!
   "Request and retain a concrete, unreviewed acceptance specification for one
   verified diagnosis.  This is proposal production only: no returned command
-  is executed and no repair or passing result is claimed."
+  is executed and no repair or passing result is claimed.  Historical inputs
+  acceptance-25481c81... and acceptance-405aaeb0... were specifications
+  without code; source is now part of the content-addressed receipt."
   [opts diagnosis]
   (if-let [acceptance (:acceptance-test opts)]
     {:status :present :acceptance-test acceptance :source :supplied}
@@ -281,6 +314,9 @@
             (refusal :meta-self-heal/acceptance-unavailable
                      {:request request :acceptance-status (:status response)
                       :acceptance-reason (:reason response) :repair-claimed? false})
+            (source-mismatch? (:acceptance-test response))
+            (refusal :meta-self-heal/acceptance-proposal-source-mismatch
+                     {:request request :repair-claimed? false})
             (not (concrete-acceptance? (:acceptance-test response)))
             (refusal :meta-self-heal/acceptance-prose-or-malformed
                      {:request request :repair-claimed? false})
@@ -330,6 +366,10 @@
                 (refusal :meta-self-heal/acceptance-proposal-review-state-invalid)
                 (not= expected (select-keys receipt (keys expected)))
                 (refusal :meta-self-heal/acceptance-proposal-identity-mismatch)
+                (source-mismatch? (:acceptance-test receipt))
+                (refusal :meta-self-heal/acceptance-proposal-source-mismatch)
+                (not (concrete-acceptance? (:acceptance-test receipt)))
+                (refusal :meta-self-heal/acceptance-proposal-not-concrete)
                 :else {:status :available :pin pin :receipt receipt}))))
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-proposal-unreadable))))))
