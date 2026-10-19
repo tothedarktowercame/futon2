@@ -42,12 +42,15 @@ class RouteCheckTest(unittest.TestCase):
     ran, out = self.run_check(f'{{:click/id "c2" :run-record "{CLICK2_RECORD}"}}', canned)
     self.assertIn(":verdict :violates", out)
     self.assertIn(":first-missing-edge [:readinessReady :ordinarySelection]", out)
+    self.assertIn(":gaps []", out)   # the two projection notes are :notes, not gaps
+    self.assertIn(":notes [{:position 0, :source [:meta-self-heal/readiness :acceptance-observation]", out)
     self.assertEqual(ran.returncode, 1)
 
   def test_click4_is_a_suffix_not_a_path(self):
     ran, out = self.run_check(CLICK4, "VERDICT true\nEDGE 0 true\nEDGE 1 true\n")
     self.assertIn(":path [:readinessReady :routeRefused :terminalRecord]", out)
-    self.assertIn("{:position 0, :status :not-recorded}", out)
+    self.assertIn(":gaps [{:position 0, :status :not-recorded}]", out)
+    self.assertIn(":notes []", out)
     self.assertIn(":verdict :conforms-suffix", out)
     self.assertNotIn(":verdict :conforms,", out)
     self.assertIn("conformsSuffix", module().lean_source(["readinessReady", "routeRefused", "terminalRecord"], True))

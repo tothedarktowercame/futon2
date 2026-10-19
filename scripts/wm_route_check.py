@@ -57,11 +57,11 @@ def project(binding, record):
     path, gaps = [], []
     obs = (readiness or {}).get("acceptance-observation") or {}
     rule = next((r for r in ACCEPTANCE_PREFIX if r[0](obs)), None)
-    if rule: path += rule[1]; notes.append({"position": 0, "source": "[:meta-self-heal/readiness :acceptance-observation]", "note": rule[2]})
+    if rule: path += rule[1]; notes.append({"position": 0, "source": [":meta-self-heal/readiness", ":acceptance-observation"], "note": rule[2]})
     else: gaps.append({"position": 0, "status": "not-recorded"})
     if readiness is not None:
       if readiness.get("status") == "absent":
-        notes.append({"position": len(path), "source": ":meta-self-heal/readiness",
+        notes.append({"position": len(path), "source": [":meta-self-heal/readiness"],
                       "note": "F2a preflight observation, not a production-readiness result; readinessReady because the click spent a ration in selection, which a refused readiness prevents"})
       elif readiness.get("status") != "ready":
         return [], gaps, notes, "readiness-status-not-projectable"
@@ -139,8 +139,8 @@ def main(argv=None):
   try: shas = {":mathlib-head": git(ml, "rev-parse", "HEAD"), ":self-heal-route": git(ml, "hash-object", LEAN_MODULE)}
   except Exception as e: shas = {":unavailable": type(e).__name__}
   out = {":click/id": binding.get("click/id"), ":path": [kw(s) for s in path],
-         ":gaps": [{kw(k): (kw(v) if k == "status" else v) for k, v in g.items()} for g in gaps]
-                  + [{kw(k): v for k, v in n.items()} for n in notes],
+         ":gaps": [{kw(k): (kw(v) if k == "status" else v) for k, v in g.items()} for g in gaps],
+         ":notes": [{kw(k): v for k, v in n.items()} for n in notes],
          ":verdict": kw(result["verdict"]), ":checked-at": started, ":module-shas": shas,
          ":producer-sha": git(Path(__file__).resolve().parent, "hash-object", Path(__file__).resolve())}
   if "first-missing-edge" in result: out[":first-missing-edge"] = [kw(s) for s in result["first-missing-edge"]]
