@@ -413,9 +413,15 @@
         diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts))
         diagnosis-observation (when-not retry
                                 (meta-self-heal/prepare-diagnosis opts diagnosis-context))
+        acceptance-observation (if retry
+                                {:status :not-required
+                                 :reason :meta-self-heal/acceptance-retry-not-prepared}
+                                (meta-self-heal/prepare-acceptance opts diagnosis-observation))
         effective-opts (cond-> opts
                          diagnosis-observation
                          (assoc :meta-diagnosis-observation diagnosis-observation)
+                         acceptance-observation
+                         (assoc :meta-acceptance-observation acceptance-observation)
                          (= :available (:status diagnosis-observation))
                          (assoc :diagnosis-evidence-pin
                                 (:diagnosis-evidence-pin diagnosis-observation)))
@@ -424,11 +430,15 @@
                     (meta-self-heal/production-readiness effective-opts diagnosis-context))]
     (cond
       (= :refused (:status readiness))
-      (assoc readiness :diagnosis-observation diagnosis-observation)
-      retry (run-ordinary-opportunity! effective-opts)
+      (assoc readiness :diagnosis-observation diagnosis-observation
+             :acceptance-observation acceptance-observation)
+      retry (assoc (run-ordinary-opportunity! effective-opts)
+                   :diagnosis-observation diagnosis-observation
+                   :acceptance-observation acceptance-observation)
       :else (let [routed (meta-self-heal/route! effective-opts)]
               (assoc (or routed (run-ordinary-opportunity! effective-opts))
-                     :diagnosis-observation diagnosis-observation)))))
+                     :diagnosis-observation diagnosis-observation
+                     :acceptance-observation acceptance-observation)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

@@ -518,3 +518,89 @@
          (:status (production/prepare-diagnosis
                    {} {:durable-ledger {:status :refused}
                        :active-injuries nil})))))
+
+(deftest runtime-retains-proposed-acceptance-without-granting-acceptance-authority
+  (let [dir (root)
+        source-pin (recorded-injury-source! dir)
+        context {:durable-ledger
+                 {:status :loaded
+                  :ledger {:entries [{:injury-id "injury-recorded-l1" :state :open
+                                      :cause-record-pin source-pin}]}}
+                 :active-injuries {:status :computed
+                                   :injuries {"injury-recorded-l1"
+                                              {:injury-id "injury-recorded-l1" :state :open}}}}
+        no-active (assoc context :active-injuries {:status :computed :injuries {}})
+        readiness-opts (atom [])
+        diagnosis-calls (atom 0)
+        acceptance-calls (atom 0)
+        refused-readiness (fn [opts _]
+                            (swap! readiness-opts conj opts)
+                            {:status :refused :reason :original-readiness})
+        proposed
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness refused-readiness]
+          (runtime/run-opportunity!
+           {:meta-diagnosis-root (str dir "/diagnoses")
+            :meta-acceptance-root (str dir "/acceptances")
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 {:status :succeeded :diagnosis {:class :configuration}})
+            :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
+                                  {:status :proposed
+                                   :acceptance-test {:id "P17-runtime"
+                                                     :command ["not-run"]
+                                                     :expected :configuration}})}))
+        supplied-test {:id "already-reviewed" :command ["not-run"] :expected :unknown}
+        supplied
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness refused-readiness]
+          (runtime/run-opportunity!
+           {:diagnosis-evidence-pin {:path "diagnoses/supplied.edn"
+                                     :sha256 (apply str (repeat 64 "a"))}
+            :acceptance-test supplied-test
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 (throw (Exception. "must not call")))
+            :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
+                                  (throw (Exception. "must not call")))}))
+        failed
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness refused-readiness]
+          (runtime/run-opportunity!
+           {:meta-diagnosis-root (str dir "/diagnoses-failed")
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 {:status :succeeded :diagnosis {:class :configuration}})
+            :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
+                                  {:status :failed :reason :offline})}))
+        ordinary-calls (atom 0)
+        no-active-result
+        (with-redefs [production/diagnosis-context (constantly no-active)
+                      production/production-readiness (fn [_ _] {:status :ready})
+                      production/route! (constantly nil)]
+          (with-redefs-fn {#'runtime/run-ordinary-opportunity!
+                           (fn [_] (swap! ordinary-calls inc) {:status :ordinary})}
+            #(runtime/run-opportunity! {:meta-acceptance-fn
+                                         (fn [_] (swap! acceptance-calls inc)
+                                           (throw (Exception. "must not call")))})))
+        retry-result
+        (with-redefs [production/attributable-retry-readiness (fn [& _] {:status :ready})]
+          (with-redefs-fn {#'runtime/run-ordinary-opportunity!
+                           (fn [_] (swap! ordinary-calls inc) {:status :ordinary})}
+            #(runtime/run-opportunity! {:meta-repair-retry {:retry-click "retry"}
+                                         :meta-acceptance-fn
+                                         (fn [_] (swap! acceptance-calls inc)
+                                           (throw (Exception. "must not call")))})))]
+    (is (= :original-readiness (:reason proposed)))
+    (is (= :proposed (get-in proposed [:acceptance-observation :status])))
+    (is (some? (get-in proposed [:acceptance-observation :acceptance-evidence-pin])))
+    (is (nil? (:acceptance-test (first @readiness-opts))))
+    (is (= :unreviewed (get-in proposed [:acceptance-observation :review-status])))
+    (is (= supplied-test (:acceptance-test (second @readiness-opts))))
+    (is (= :present (get-in supplied [:acceptance-observation :status])))
+    (is (= :original-readiness (:reason failed)))
+    (is (= :meta-self-heal/acceptance-unavailable
+           (get-in failed [:acceptance-observation :reason])))
+    (is (nil? (get-in failed [:acceptance-observation :acceptance-evidence-pin])))
+    (is (= :not-required (get-in no-active-result [:acceptance-observation :status])))
+    (is (= :not-required (get-in retry-result [:acceptance-observation :status])))
+    (is (= 2 @diagnosis-calls))
+    (is (= 2 @acceptance-calls))
+    (is (= 2 @ordinary-calls))))

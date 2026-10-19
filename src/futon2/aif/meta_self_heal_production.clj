@@ -306,6 +306,26 @@
                                 :repair-claimed? false})
                 (assoc written :injury-id (:injury-id diagnosis)
                        :repair-claimed? false)))))))))
+
+(defn prepare-acceptance
+  "Runtime-facing proposal preparation.  A proposed/unreviewed specification
+  remains observation only; this function never returns it as coordinator
+  :acceptance-test authority."
+  [opts diagnosis-observation]
+  (cond
+    (:acceptance-test opts)
+    {:status :present :acceptance-test (:acceptance-test opts) :source :supplied}
+
+    (= :available (:status diagnosis-observation))
+    (produce-acceptance! opts diagnosis-observation)
+
+    (= :not-required (:status diagnosis-observation))
+    {:status :not-required :reason :meta-self-heal/acceptance-no-diagnosis-required}
+
+    :else
+    {:status :unavailable :reason :meta-self-heal/acceptance-diagnosis-unavailable
+     :diagnosis-status (:status diagnosis-observation)
+     :repair-claimed? false}))
 (defn- persist-transaction! [path transaction]
   (try
     (if-not (= :valid (:status (coordinator/verify-transaction transaction)))
