@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P08 / P5,P6: miner delegates to `publish_pattern_graph.clj`; `publish!` takes
+one byte snapshot, validates and creates a content-addressed graph/pin pair,
+then replaces only the publication manifest. Conflicting generation bytes
+refuse without replacement. Producer/reader code landed in dependency order;
+no production graph regenerated. See P08 review ledger for code pins.
+
+
 P09 / P42 (`452a37c26`, `7ea8150f4`): reload events now retain changed
 source-identity dependency attribution or explicit `click-in-flight` deferral.
 The required-sources map parser is lexical, not a complete dependency graph;

@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P08 / row 5 (`01a688786`, `bcea02d28`, `8ea0026ed`; futon3c producer workers
+`cd8701d93`, `3c89fdc9`): rebuild now publishes immutable graph/pin generations
+and atomically selects one manifest; reader enforces its digest binding. Tests
+cover interruption, changed source after snapshot and graph/pin conflicts.
+No production rebuild or serving validation. Raw readers (pattern-graph-view,
+centrality_tokens, unblocks_relation) are not migrated and may see old raw data.
+
+
 P33 / rows 3,9 / A25,A33 (`1d694b3d3`): the existing terminal-cause → belief
 observation boundary excludes apparatus and unclassified evidence from task
 updates. The new non-task census retains apparatus/unknown/missing counts,

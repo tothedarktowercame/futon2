@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P08 / consumer 24: `load-pinned` follows a publication manifest when present,
+checking graph/pin agreement and manifest SHA; otherwise legacy adjacent-pin
+loading remains. It never repins unknown bytes. Atomic manifest selection is
+the coherence boundary, not atomic replacement of two independent files.
+Raw/unpinned consumers remain unchanged; no live read is claimed.
+
+
 P33 / consumer 31 downstream (`1d694b3d3`): `outer-target-belief/build`
 retains a non-task observation census alongside existing not-applied events.
 Apparatus and unclassified causes do not increment target alpha; other refused
