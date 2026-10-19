@@ -461,7 +461,8 @@
 
 (defn run-opportunity!
   "Arbitrate durable META injuries before constructing any ordinary policy
-  field. An active injury consumes the opportunity without fallback."
+  field. A serviceable active injury takes the dedicated route; an explicitly
+  absent dedicated-production interface is retained and ordinary work proceeds."
   [opts]
   (let [opts (assoc opts
                     :meta-injury-ledger-path
@@ -489,9 +490,15 @@
                          (#{:accepted :present} (:status acceptance-observation))
                          (assoc :acceptance-test
                                 (:acceptance-test acceptance-observation)))
+        readiness-opts (if (and (not retry)
+                                (seq (get-in diagnosis-context
+                                             [:active-injuries :injuries])))
+                         (assoc effective-opts
+                                :meta-self-heal/readiness-route :ordinary)
+                         effective-opts)
         readiness (if retry
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
-                    (meta-self-heal/production-readiness effective-opts diagnosis-context))]
+                    (meta-self-heal/production-readiness readiness-opts diagnosis-context))]
     (cond
       (= :refused (:status readiness))
       (assoc readiness :diagnosis-observation diagnosis-observation
@@ -499,6 +506,11 @@
       retry (assoc (run-ordinary-opportunity! effective-opts)
                    :diagnosis-observation diagnosis-observation
                    :acceptance-observation acceptance-observation)
+      (:self-heal readiness)
+      (assoc (run-ordinary-opportunity!
+              (assoc readiness-opts :meta-self-heal-readiness (:self-heal readiness)))
+             :diagnosis-observation diagnosis-observation
+             :acceptance-observation acceptance-observation)
       :else (let [routed (meta-self-heal/route! effective-opts)]
               (assoc (or routed (run-ordinary-opportunity! effective-opts))
                      :diagnosis-observation diagnosis-observation
