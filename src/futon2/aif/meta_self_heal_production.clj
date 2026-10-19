@@ -155,6 +155,7 @@
                                receipt)]
                   (if (= :persisted (:status written))
                     (merge written {:status :available :injury-id injury-id
+                                    :source-record-pin source-pin
                                     :request request :repair-claimed? false})
                     (assoc written :injury-id injury-id :request request
                            :repair-claimed? false)))))))))))
