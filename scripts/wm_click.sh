@@ -34,7 +34,12 @@ F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
 BASE="http://localhost:7070"
 # codex-22 was the charter's reviewer and is no longer on the roster, so the
 # default casting failed preflight on every invocation (claude-4, 2026-09-19).
-AUTHOR="wm-author"; REVIEWER="wm-reviewer"; REPAIR="wm-repair-reviewer"
+# wm-author / wm-reviewer / wm-repair-reviewer are Codex seats on one shared
+# account; on 2026-10-19 three of four clicks were lost to its 429s. Joe,
+# 2026-10-19: "my suggestion would be to use zai runners in wm roles rather
+# than codex". Defaults are now Zai seats (each answered a liveness whistle
+# at 21:11Z). Override with --author / --reviewer / --repair-reviewer.
+AUTHOR="zai-2"; REVIEWER="zai-3"; REPAIR="zai-8"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
 RUN=0; PROBE=0
 
