@@ -50,12 +50,23 @@
        (= :ordinary-click (:unit availability))
        (map? (:ledger-source availability))
        (string? (get-in availability [:ledger-source :path]))
+       (seq (get-in availability [:ledger-source :path]))
        (string? (get-in availability [:ledger-source :sha256]))
        (boolean (re-matches #"[0-9a-f]{64}" (get-in availability [:ledger-source :sha256])))
        (every? integer? [(:allocated availability) (:consumed availability)
                          (:available availability)])
        (<= 0 (:consumed availability) (:allocated availability))
        (= (:available availability) (- (:allocated availability) (:consumed availability)))))
+
+(defn- observation-time [opts]
+  (try
+    (let [provided (:budget-observed-at opts)
+          instant (cond
+                    (nil? provided) (Instant/now)
+                    (string? provided) (Instant/parse provided)
+                    :else nil)]
+      (when instant (.toString instant)))
+    (catch Throwable _ nil)))
 
 (defn observe-ordinary-click-budget
   "Read one pre-admission ordinary-click snapshot without changing its ledger.
@@ -73,19 +84,24 @@
        :provenance {:status :absent} :observation-time {:status :absent}
        :phase :pre-admission}
       (try
-        (let [availability (read)]
+        (let [availability (read)
+              observed-at (observation-time opts)]
           (if-not (valid-click-availability? availability)
             {:schema budget-observation-schema :status :unavailable
              :reason :ordinary-click-budget-observation-malformed
              :provenance {:status :absent} :observation-time {:status :absent}
              :phase :pre-admission}
-            {:schema budget-observation-schema
-             :status (if (pos? (:available availability)) :available :exhausted)
-             :availability availability :ledger-source (:ledger-source availability)
-             :provenance {:status :present :ledger-source (:ledger-source availability)}
-             :observation-time {:status :present
-                                :value (or (:budget-observed-at opts) (Instant/now))}
-             :phase :pre-admission}))
+            (if-not observed-at
+              {:schema budget-observation-schema :status :unavailable
+               :reason :ordinary-click-budget-observation-time-malformed
+               :provenance {:status :present :ledger-source (:ledger-source availability)}
+               :observation-time {:status :absent} :phase :pre-admission}
+              {:schema budget-observation-schema
+               :status (if (pos? (:available availability)) :available :exhausted)
+               :availability availability :ledger-source (:ledger-source availability)
+               :provenance {:status :present :ledger-source (:ledger-source availability)}
+               :observation-time {:status :present :value observed-at}
+               :phase :pre-admission})))
         (catch Throwable _
           {:schema budget-observation-schema :status :unavailable
            :reason :ordinary-click-budget-reader-failed

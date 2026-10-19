@@ -1,5 +1,6 @@
 (ns futon2.aif.budget-observation-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-field-observation :as field]))
 
@@ -38,8 +39,16 @@
         positive (runtime/observe-ordinary-click-budget
                   {:ordinary-click-availability-fn (constantly (availability 2))
                    :budget-observed-at "2026-10-19T09:01:00Z"})
+        default-time (runtime/observe-ordinary-click-budget
+                      {:ordinary-click-availability-fn (constantly (availability 2))})
         malformed (runtime/observe-ordinary-click-budget
                    {:ordinary-click-availability-fn (constantly {:available 0})})
+        malformed-time (runtime/observe-ordinary-click-budget
+                        {:ordinary-click-availability-fn (constantly (availability 2))
+                         :budget-observed-at "not-an-instant"})
+        malformed-path (runtime/observe-ordinary-click-budget
+                        {:ordinary-click-availability-fn
+                         (constantly (assoc-in (availability 2) [:ledger-source :path] ""))})
         zero-field (field-from-budget zero)
         unavailable-field (field-from-budget unavailable)
         positive-field (field-from-budget positive)
@@ -49,11 +58,18 @@
     (is (= :unavailable (:status unavailable)))
     (is (= :available (:status positive)))
     (is (= :unavailable (:status malformed)))
+    (is (= :unavailable (:status malformed-time)))
+    (is (= :unavailable (:status malformed-path)))
     (is (= {:status :present :ledger-source (pin "/budget-ledger.jsonl" "a")}
            (:provenance zero)))
     (is (= {:status :present :value "2026-10-19T09:01:00Z"}
            (:observation-time positive)))
     (is (= {:status :absent} (:provenance unavailable)))
+    (is (string? (get-in default-time [:observation-time :value])))
+    (is (= default-time (edn/read-string (pr-str default-time))))
+    (is (= zero-field (edn/read-string (pr-str zero-field))))
+    (is (= :ordinary-click-budget-observation-time-malformed (:reason malformed-time)))
+    (is (= :ordinary-click-budget-observation-malformed (:reason malformed-path)))
     (is (= :algorithm/click-resource-unavailable (:ineligible-reason zero-exclusion)))
     (is (= :exhausted (get-in zero-exclusion [:ineligibility-evidence :availability :status])))
     (is (= :algorithm/click-resource-unavailable (:ineligible-reason unavailable-exclusion)))
