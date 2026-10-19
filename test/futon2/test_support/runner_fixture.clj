@@ -5,6 +5,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.policy :as policy]
@@ -30,10 +31,12 @@
       (sorted-map))))
 
 (defn with-hermetic-traces
-  "Temporary trace, run-record, learning-ledger and morning-brief roots for a
-  runner test namespace, and a check that the production trace and brief
-  file sets did not change. A futon3c test that drove the runner without this
-  fixture wrote two fixture ticks into the live trace on 2026-09-28."
+  "Temporary trace, run-record, learning-ledger, morning-brief and meta-injury
+  roots for a runner test namespace, and a check that the production trace,
+  brief and injury file sets did not change. A futon3c test that drove the
+  runner without this fixture wrote two fixture ticks into the live trace on
+  2026-09-28; on 2026-10-19 four fixture runs wrote injury records and HEAD.edn
+  into data/wm-meta-injuries because this fixture left the injury root live."
   [f]
   (let [root (.toFile (Files/createTempDirectory "wm-runner-trace-suite-"
                                                 (make-array FileAttribute 0)))
@@ -42,18 +45,23 @@
                                   (make-array FileAttribute 0)))
         live-trace @#'trace/default-trace-dir
         live-brief morning-brief/default-root
-        before [(production-file-set live-trace) (production-file-set live-brief)]]
+        live-injuries meta-injury-store/default-root
+        before [(production-file-set live-trace) (production-file-set live-brief)
+                (production-file-set live-injuries)]]
     (try
       (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
                        #'runner/default-run-record-dir (.getPath run-record-root)
                        #'learning-ledger/default-root
                        (str (io/file root "learning-ledger"))
                        #'morning-brief/default-root
-                       (str (io/file root "morning-brief"))}
+                       (str (io/file root "morning-brief"))
+                       #'meta-injury-store/default-root
+                       (str (io/file root "meta-injuries"))}
         f)
       (is (= before [(production-file-set live-trace)
-                      (production-file-set live-brief)])
-          "the suite must not add, remove or grow production trace or morning-brief files")
+                      (production-file-set live-brief)
+                      (production-file-set live-injuries)])
+          "the suite must not add, remove or grow production trace, morning-brief or meta-injury files")
       (finally
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))
         (doseq [file (reverse (file-seq run-record-root))]
