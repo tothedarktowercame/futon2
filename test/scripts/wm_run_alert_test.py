@@ -91,22 +91,47 @@ class AlertTest(unittest.TestCase):
   def test_receipt_persistence_failure_after_evaluation_is_not_unchecked(self):
     module,root,record,facts=self.mocked_evaluation(); log=root/"alerts.log"; verdict=Path(str(record)+".requirements.edn")
     original_write=Path.write_text; writes=0
-    def deny_second_verdict_write(path,data,*args,**kwargs):
+    def truncate_second_receipt_temp(path,data,*args,**kwargs):
       nonlocal writes
-      if path == verdict:
+      if path.parent == root and path.name.endswith(".tmp"):
         writes+=1
-        if writes == 2: raise PermissionError("fixture receipt denied")
+        if writes == 2:
+          original_write(path,"{")
+          raise OSError("fixture receipt write interrupted")
       return original_write(path,data,*args,**kwargs)
     transport=urllib.error.HTTPError("http://fixture",403,"Forbidden",None,None); out=io.StringIO()
-    with mock.patch.object(Path,"write_text",deny_second_verdict_write), \
+    with mock.patch.object(Path,"write_text",truncate_second_receipt_temp), \
          mock.patch.object(module.urllib.request,"urlopen",side_effect=transport), \
          contextlib.redirect_stdout(out):
       status=module.main(["--run-record",str(record),"--facts-json",str(facts),"--alerts-log",str(log)])
     self.assertEqual(3,status); self.assertIn("CONFORMS",out.getvalue())
     self.assertIn("EVIDENCE PUBLICATION FAILED: HTTPError status 403",out.getvalue())
-    self.assertIn("POST-CHECK PUBLICATION-RECEIPT-PERSISTENCE FAILED: PermissionError",out.getvalue())
+    self.assertIn("POST-CHECK PUBLICATION-RECEIPT-PERSISTENCE FAILED: OSError",out.getvalue())
     self.assertNotIn("requirements NOT CHECKED",out.getvalue())
     self.assertIn('":pending"',verdict.read_text())
+    self.assertEqual([],list(root.glob(f".{verdict.name}.*.tmp")))
+
+  def test_receipt_replace_failure_preserves_exact_pending_sidecar_bytes(self):
+    module,root,record,facts=self.mocked_evaluation(); log=root/"alerts.log"; verdict=Path(str(record)+".requirements.edn")
+    original_replace=module.os.replace; replaces=0; initial={}
+    def deny_second_verdict_replace(source,destination):
+      nonlocal replaces
+      if Path(destination) == verdict:
+        replaces+=1
+        if replaces == 2:
+          initial["bytes"]=verdict.read_bytes()
+          raise OSError("fixture replace denied")
+      return original_replace(source,destination)
+    transport=urllib.error.HTTPError("http://fixture",403,"Forbidden",None,None); out=io.StringIO()
+    with mock.patch.object(module.os,"replace",deny_second_verdict_replace), \
+         mock.patch.object(module.urllib.request,"urlopen",side_effect=transport), \
+         contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),"--alerts-log",str(log)])
+    self.assertEqual(3,status); self.assertIn("CONFORMS",out.getvalue())
+    self.assertIn("POST-CHECK PUBLICATION-RECEIPT-PERSISTENCE FAILED: OSError",out.getvalue())
+    self.assertNotIn("requirements NOT CHECKED",out.getvalue())
+    self.assertEqual(initial["bytes"],verdict.read_bytes())
+    self.assertEqual([],list(root.glob(f".{verdict.name}.*.tmp")))
 
   def test_successful_publication_keeps_requirements_exit_status(self):
     p,rec=self.invoke(["--evidence-url",self.publisher(201)],no_evidence=False)

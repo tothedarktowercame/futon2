@@ -68,6 +68,19 @@ def publication_diagnostic(e):
       return f"HTTPError status {e.code}"
     return type(e).__name__
 
+def write_verdict(path, result):
+    """Atomically replace a verdict only after the complete new bytes exist."""
+    fd,tmp_name=tempfile.mkstemp(prefix=f".{path.name}.",suffix=".tmp",dir=path.parent)
+    tmp=Path(tmp_name)
+    try:
+      os.close(fd)
+      tmp.write_text(edn(result)+"\n")
+      os.replace(tmp,path)
+    except Exception:
+      try: tmp.unlink()
+      except FileNotFoundError: pass
+      raise
+
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
     p.add_argument("--futon2-root", default=str(Path(__file__).resolve().parents[1]))
@@ -106,7 +119,7 @@ def main(argv=None):
     result[":evidence-publication"]=( {":status":":skipped", ":reason":":no-evidence"}
                                       if a.no_evidence else {":status":":pending"})
     try:
-      verdict.write_text(edn(result)+"\n")
+      write_verdict(verdict,result)
       log=Path(a.alerts_log or f2/"data/wm-click-loop/alerts.log"); log.parent.mkdir(parents=True,exist_ok=True)
       with log.open("a") as out: out.write(f"{started.isoformat()} {record.name}\n{block}\n\n")
     except Exception as e:
@@ -127,12 +140,12 @@ def main(argv=None):
         result[":evidence-publication"]=publication_failure(e)
         print("EVIDENCE PUBLICATION FAILED: "+publication_diagnostic(e), flush=True)
         try:
-          verdict.write_text(edn(result)+"\n")
+          write_verdict(verdict,result)
         except Exception as write_error:
           return post_check_failure("PUBLICATION-RECEIPT-PERSISTENCE", write_error)
         return 3
       try:
-        verdict.write_text(edn(result)+"\n")
+        write_verdict(verdict,result)
       except Exception as e:
         return post_check_failure("PUBLICATION-RECEIPT-PERSISTENCE", e)
     if not verdict.is_file():
