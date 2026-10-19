@@ -1,5 +1,10 @@
 # WM click runner: phase order (static reading)
 
+P17 phase 0a helper increment: verified diagnosis receipt can feed a prospective
+acceptance-specification request. Receipt binds diagnosis pin, injury and source;
+it remains proposed/unreviewed/not-run. Runtime preparation does not yet invoke
+this helper, and no returned command is executed. Approval/admission remains open.
+
 P16b update: phase 0a runtime preparation now invokes the injectable diagnosis
 producer and carries its observation into readiness/routing. Before coordination,
 produced evidence must match work-order injury ID, causal source pin and diagnosis

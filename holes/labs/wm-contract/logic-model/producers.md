@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P17 / no-producer #3: `produce-acceptance!` exists as an unwired injected-port
+proposal producer. It verifies persisted P16 diagnosis bytes and injury/source
+identity, then persists a content-addressed specification with ID, command and
+expected observation. Shape validation is not executable-test validation or
+review approval. Proposed/unreviewed/not-run receipts are not admitted repair
+evidence. Runtime, named port and review consumer remain absent.
+
 P16b supersedes the earlier unwired-helper status: runtime now calls preparation
 through injected diagnosis port, retaining observation and threading only newly
 available persisted evidence. Existing supplied pin remains compatibility path.

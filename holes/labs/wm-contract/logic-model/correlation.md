@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P17: an acceptance proposal producer now retains exact diagnosis pin
+and injury/source identity in a content-addressed receipt. Missing, mismatched,
+drifted or unreadable diagnosis and failed proposal persistence yield no pin.
+This is hermetically tested proposal production, not accepted test evidence,
+execution, or repair readiness. Existing missing-acceptance veto and runtime/
+transport/review wiring remain open.
+
 Row 7 / P16b: runtime caller integration now exists for the injected diagnosis
 producer. Produced evidence binds to actual prepared/resumed transaction's
 injury/cause/pin triple before effects; changed selection is a typed mismatch,
