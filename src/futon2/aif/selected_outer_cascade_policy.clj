@@ -102,6 +102,10 @@
           action (if (= :assessed-population basis-kind)
                    (get-in raw-receipt [:assessed-selection :action])
                    (:action raw-receipt))
+          expected-entry (first (filter #(and (= (:policy-id %) (:policy-id action))
+                                             (= (:cascade-digest %) (:cascade-digest action))
+                                             (= (:target-id %) (:target action)))
+                                        (:entries menu)))
           recomputed (when (and (map? ev) (map? menu))
                        (objective/evaluate ev menu
                                            (if (= :assessed-population basis-kind)
@@ -139,6 +143,7 @@
              (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed))))
         :selected-policy-objective-recomputation
         (nil? entry) :selected-policy-entry-missing
+        (not= entry expected-entry) :selected-policy-entry-substitution
         (not= (:cascade-digest entry) (get-in entry [:canonical-cascade :digest]))
         :selected-policy-canonical-record
         (not= (:cascade-digest entry) (executable/digest (:canonical-cascade entry)))
@@ -161,9 +166,7 @@
           selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
        :decision {:status :selected
-                  :action (if assessed?
-                            (:action selection)
-                            (:action entry))
+                  :action (:action entry)
                   :selection-certificate
                   {:selection-route :wm/selected-outer-cascade-policy-v1
                    :selected-canonical-cascade (:canonical-cascade entry)
