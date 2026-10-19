@@ -17,6 +17,8 @@ durable reverted-F2c click-2 fallback as a violation rather than as behaviour.
 
 Still pending: an admission witness carrying its bounded run result, and an
 enact witness.  Their states are present in the table but have no record
-witness in L1. Finding F7 is also pending: click 1's binding carries only
-binding/run-record absence, while the dedicated-route disposition existed in
-the serving process's last-result and is not durable; futon3c owns its repair.
+witness in L1. Finding F7 (click bindings did not retain a refused click's
+disposition) is landed in futon3c `baa9d55fa`: from click 3 on, a refused click's
+binding carries `:runtime-disposition` and can be a record witness. Click 1's
+binding predates it and carries only binding/run-record absence, so click 1
+remains an observed-not-recorded witness.
