@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows3/6 P07c (worker `8bbc3fe35` + `391094c5`): selector activates an assessed
+choice only through verified P07a/P07b carrier and admitted target. Original
+partial evidence/objective remains partial; executable menu action is retained.
+Assessed Q8 and Q2 coverage stay explicitly absent with scope/selected identity,
+not falsely certified. Zero assessed exposes preparation-needed. Worker actual
+producer-selector seam passes 33 assertions. Downstream Q2/Q8 certification and
+debugger behavior remain unverified; no serving continuation claim.
+
 Section2 P11 (`5874be666` + `89e689716`): selected early-terminal observations
 can reach the trace even when construction fails. Trace publication failure is
 separate from the original run failure; nil/throwing writers cannot mask it.

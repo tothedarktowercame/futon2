@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows35/36/41/42 P07c: verified assessed carriers now cross the immediate selector
+handoff; target admission and canonical integrity checks remain. Receipt's policy
+status may be selected while its evidence/objective remain partial, explicitly
+distinguished by assessed basis. Q8/Q2 full coverage remains absent; zero assessed
+has preparation-needed reason and no action. Downstream certificate consumers
+must not infer all-population certification from this selected action.
+
 Consumer54 P11 (`5874be666` + `89e689716`): run record retains compact
 trace-publication state. Nil/throwing writers yield failed receipts, no path and
 false traceWritten, preserving original terminal failure. Pre-judgement absence
