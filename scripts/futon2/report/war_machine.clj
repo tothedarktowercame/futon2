@@ -6769,8 +6769,9 @@
                                (get-in outer-task-selection
                                        [:policy :selected-outer-cascade-policy])
                                :outer-policy-selection-claimed?
-                               (or (contains? (get outer-task-selection :policy)
-                                              :selected-outer-cascade-policy)
+                               (or (some? (get-in outer-task-selection
+                                                  [:policy
+                                                   :selected-outer-cascade-policy]))
                                    (and (= :cascade-live-policy-v1
                                            (get-in outer-task-selection [:policy :kind]))
                                         (= :selected
