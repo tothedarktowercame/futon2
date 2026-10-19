@@ -97,6 +97,17 @@
         (.force directory-channel true))
       (finally (Files/deleteIfExists temp)))))
 
+(defn persist-ledger! [path value]
+  (try
+    (let [checked (ledger/validate-ledger value)]
+      (if-not (= :valid (:status checked))
+        (refusal :store/invalid-ledger {:defects (:defects checked)})
+        (do (atomic-write! path value)
+            {:status :persisted :path path :ledger-pin (:ledger-pin value)
+             :durability :atomic-one-form})))
+    (catch Throwable t
+      (refusal :store/persist-failed {:detail (ex-message t)}))))
+
 (defn transact-classification!
   "Lock, validate, integrate, and atomically replace the one-form ledger.
   Duplicate replay is byte-preserving: no rewrite occurs."

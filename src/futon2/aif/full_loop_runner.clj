@@ -2513,28 +2513,12 @@
 
 (defmethod construct-selected-action :run-algorithm
   [entry]
-  (let [{:keys [target] :as action} (:action entry)]
-    (when (and (string? target) (not (str/blank? target)))
-      {:mission target
-       :psi (str "execute approved META algorithm " target)
-       :construction-kind :meta-algorithm-execution
-       :selected-action action
-       :algorithm-contract
-       {:algorithm-id target
-        :selection-law :meta-algorithm-selection
-        :requires [:started :completed :independently-verified]
-        :procedure-source (str "holes/labs/" target ".md")
-        :forbids [:ordinary-cascade-reselection
-                  :selected-target-reading
-                  :unverified-completion]}
-       :shown ["p4ng/meta-reflection-loop-agent"
-               "futon-theory/stop-the-line"
-               "musn/pause-backtrace"]
-       :semilattice [{:from :retained-machine-injury :to :bounded-repair}
-                     {:from :bounded-repair :to :independent-review}
-                     {:from :independent-review :to :debugger-restart}
-                     {:from :debugger-restart :to :terminal-verification}]
-       :policy-holes []})))
+  {:status :refused
+   :reason :meta-algorithm-wrong-route
+   :action (:action entry)
+   :required-route :dedicated-meta-self-heal
+   :forbidden-boundaries [:ordinary-loop-node :pattern-fold
+                          :policy-selection :d-task-authority]})
 
 (defn historical-admission-failures
   "The names of the admission conditions that do not hold, in the order they

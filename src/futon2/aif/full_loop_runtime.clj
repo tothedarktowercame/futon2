@@ -10,6 +10,7 @@
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
             [futon2.aif.reading-policy-precision :as reading-precision]
@@ -321,7 +322,7 @@
      :effective-run-configuration-fn wm/effective-run-configuration
      :mode-flags-fn wm/arena-mode-flags}))
 
-(defn run-opportunity!
+(defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed."
   [opts]
   ;; Mint before building the composition root.  The runner historically
@@ -371,6 +372,13 @@
                                (open-cascade-resume-handler runner-opts0)))]
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
+
+(defn run-opportunity!
+  "Arbitrate durable META injuries before constructing any ordinary policy
+  field. An active injury consumes the opportunity without fallback."
+  [opts]
+  (or (meta-self-heal/route! opts)
+      (run-ordinary-opportunity! opts)))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.
