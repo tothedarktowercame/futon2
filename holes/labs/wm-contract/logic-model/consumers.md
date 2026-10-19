@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 47/49 update (P01, `ac4ca5bab` + `72352574b`): context retains a typed
+present/absent prospective-carry receipt; legacy ID/universe keys exist only when
+present. Capture accepts explicit absence, but checks receipt shape, action
+identity and declaration bytes. Present completion remains compatible with the
+verifier; absent completion returns `:prospective-carry-unavailable`, without
+claiming predecessor learning. Constructed completion/integrity test passed;
+no serving reload/probe/click is claimed.
+
 Rows 26/38 clarification from P32 (`71c83c4e8`): square authoring reads
 missing-square family failures from the decision certificate, not a chosen
 action. At `3352dc1b`, runner `occurrence-square-authoring-step:2159-2181` checks

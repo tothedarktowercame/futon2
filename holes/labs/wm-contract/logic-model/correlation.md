@@ -2,6 +2,16 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 6 update (P01, `ac4ca5bab` + `72352574b`; worker `97eaef944` + `aad0ea61e`):
+missing prospective carry is a typed absent receipt, not a dispatch veto. Capture
+still binds selected/enacted action and pinned declaration bytes. Completion
+returns unavailable predecessor learning for absent carry. Present carry retains
+legacy context/dispatch keys and verifies normally. Focused L2-shaped regression
+reports 1 test/14 assertions passing, including admitted present completion and
+identity/domain/declaration rejection controls. No serving observation is claimed.
+This changes absence handling, not evidence that a live carry was retained; P32's
+unknown prospective-carry retention fact is not thereby resolved.
+
 P32 method/rows 1/2/6 (`381c62a44` through `71c83c4e8`, reviewed worker tip
 `16a960f97`): advisory executable facts live in `p32/boundary-facts.edn` with
 structured repository/path/commit/locator pins. Queries join only within explicit

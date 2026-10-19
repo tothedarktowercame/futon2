@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P30 update (P01, `ac4ca5bab` + `72352574b`): selected-action completion with
+absent prospective carry emits `:status :unavailable`,
+`:kind :prospective-carry-unavailable` and the absent receipt. It does not invoke
+predecessor claim production on that path. Present-carry completion continues
+through the existing verifier with compatible ID/universe context keys.
+
 P4 clarification from P32 (`71c83c4e8`): occurrence-square authoring at `3352dc1b`
 accepts a first missing-square family failure without a chosen action. The static
 model represents first-family availability, not all-target coverage. Whether the
