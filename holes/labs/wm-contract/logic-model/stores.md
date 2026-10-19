@@ -9,6 +9,13 @@ identified. No serving-store observation has been made after landing.
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P12 requirements sidecar (`5ce3db21c`): `<run-record>.requirements.edn` holds
+computed Q verdicts/counts independently of HTTP publication. Sibling temporary
+files are replaced atomically and cleaned on ordinary write/replace failure;
+the previous sidecar survives those failures. A pending receipt may remain when
+the publication result cannot be persisted. This is atomic replacement, not a
+claim of fsync-backed power-loss durability. No production store probe performed.
+
 Manifest reader update (P03, `3c4b9da4a`, reviewed worker `d1c2717c5`): reader reports declared/readable/verified/excluded counts, missing/drifted counts and exclusion reason frequencies. Here `:verified` counts usable retained learning rows, not every hash-matching file. Original manifest pins are preserved; changed bytes are not repinned. Parsed verified records travel with dataset rows so provider projection does not reread mutable paths. Constructed three-record regression passed; no live store mutation or serving observation. Original inventory below remains historical.
 
 - futon2 commit read: `1de600e2c` (HEAD at write time; it was `f76041cc7` at the start of the inspection, so HEAD moved while I worked. Working tree otherwise clean except untracked `holes/labs/...`.)

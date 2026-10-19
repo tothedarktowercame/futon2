@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 10 / P12 (`81e479a12`, `56dda8f1a`, `5ce3db21c`): requirements
+publication failure is transport failure, not missing Q computation. Completed
+verdicts precede publication and survive failed receipt replacement. Post-check
+failures have separate typed diagnostics/exit 3. Worker 8-test regression run
+includes HTTP403, checker failure, alert-log failure, partial temporary write
+and failed replacement. No live publisher/serving-route observation is claimed.
+
 Rows3/6 P07c (worker `8bbc3fe35` + `391094c5`): selector activates an assessed
 choice only through verified P07a/P07b carrier and admitted target. Original
 partial evidence/objective remains partial; executable menu action is retained.

@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P26 / P12 (`81e479a12`, `56dda8f1a`, `5ce3db21c`): completed evaluation
+produces the requirements sidecar before evidence transport. Publication has
+pending/published/failed/skipped receipt states; post-check log, persistence or
+transport failures return 3 without recasting computed Q verdicts as NOT CHECKED.
+Receipt replacement is atomic. If replacement fails, prior receipt remains;
+stdout reports the persistence failure, not a falsely persisted failed receipt.
+Worker focused tests passed; no live publication observation.
+
 P24 P11 (`5874be666` + `89e689716`): selected observation can produce one trace
 at normal construction or early close within the same runner invocation. An early
 row identifies actual phase/stage, without manufacturing construction completion.
