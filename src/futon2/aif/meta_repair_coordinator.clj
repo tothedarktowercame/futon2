@@ -207,6 +207,10 @@
 (defn- held! [reason phase history transaction receipt]
   (stop! {:status :held :reason reason :phase phase :ledger history
           :transaction transaction :receipt receipt}))
+(defn- checkpoint! [ports phase history transaction]
+  (when (= phase (:stop-after ports))
+    (stop! {:status :checkpoint :phase phase :ledger history
+            :transaction transaction})))
 
 (defn coordinate
   "Run or resume one dedicated transaction. Every effect receipt is retained,
@@ -252,6 +256,8 @@
                 (stop! (refusal :coordinator/resume-state-refused
                                 {:state (:state claim-entry)})))
 
+            _ (checkpoint! ports :claim history1 transaction)
+
             author-result (accepted!
                            (invoke-once transaction :author
                                         (:entry-pin claim-entry) (:author ports)))
@@ -273,6 +279,7 @@
                                      :port-receipt-pin (:receipt-pin author-receipt)}))
                          {:ledger history1})
               history2 (:ledger authored)
+              _ (checkpoint! ports :author history2 tx1)
               review-result (accepted!
                              (invoke-once tx1 :review (:receipt-pin author-receipt)
                                           (:review ports)))
@@ -295,6 +302,7 @@
                                        :port-receipt-pin (:receipt-pin review-receipt)}))
                            {:ledger history2})
                 history3 (:ledger reviewed)
+                _ (checkpoint! ports :review history3 tx2)
                 enact-result (accepted!
                               (invoke-once tx2 :enact (:receipt-pin review-receipt)
                                            (:enact ports)))
@@ -323,6 +331,7 @@
                                                         :integration-commit]))))
                               {:ledger history3})
                     history4 (:ledger enacted)
+                    _ (checkpoint! ports :enact history4 tx3)
                     retry-result (accepted!
                                   (invoke-once tx3 :retry (:receipt-pin enact-receipt)
                                                (:retry ports)))
