@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P33 / consumer 31 downstream (`1d694b3d3`): `outer-target-belief/build`
+retains a non-task observation census alongside existing not-applied events.
+Apparatus and unclassified causes do not increment target alpha; other refused
+observations fall in the missing bucket with their specific reason retained.
+Existing causal classification is unchanged; evidence is synthetic/static.
+
+
 P09 / consumer 2 (`452a37c26`, `7ea8150f4`): reload callers consume a typed
 deferred result through `reload_when_idle`, not as successful reload. An
 unheld active click defers; a demonstrably debugger-held run keeps the existing

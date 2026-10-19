@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P33 / rows 3,9 / A25,A33 (`1d694b3d3`): the existing terminal-cause → belief
+observation boundary excludes apparatus and unclassified evidence from task
+updates. The new non-task census retains apparatus/unknown/missing counts,
+run/click identities and refusal reasons. Same coarse incomplete label with
+typed task-failure versus phase-failure has different update behavior in a
+synthetic producer-to-consumer test. This is not a replay of the exact L2 cause
+or a serving observation. No excluded observation is substituted as success.
+
+
 P09 / row 8 (`452a37c26`, `7ea8150f4`): reload planner attributes changed
 sources against the declared identity inventory, now including family-selection.
 In-flight unheld clicks return typed deferred state; callers wait before
