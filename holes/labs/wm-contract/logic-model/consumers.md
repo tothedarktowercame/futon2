@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 35/42 P06b: partial objective offers `:assessed-selection` scoped to
+`:assessed-population`, with assessed/absent identities and conditional posterior.
+This is not global strict selection and does not change the ordinary comparator
+absence. The downstream selected carrier must recompute/verify this distinct
+basis before dispatch; current selector integration remains incomplete.
+
 Rows 35/42 P06 increment: partial evidence is evaluated as partial objective
 measurement, preserving original local causes rather than diagnosing deliberately
 omitted numeric fields. Counts distinguish strict assessed/absent from zero

@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 3 P06b (worker `d91e5202`, coordinator test `ea79745f0`): partial objective
+now emits a separately scoped assessed-selection receipt using the existing
+objective and tie law over computed rows only. Full menu pins/absences remain;
+full-menu strict verdict stays absent. Zero assessed means preparation-needed,
+not a winner. Actual three-policy P05 producer regression passed, including tie
+replay and pin/identity rejection (namespace 10 tests/103 assertions). Receipt
+is not yet admitted by production sealing: P07 remains required; no live claim.
+
 Row 3 P06 measurement increment (worker `43fce0a8a` + `5045fe687`, coordinator
 test `b53251e02`): selector forwards P04 score records through P05 and evaluates
 partial evidence. Objective retains upstream missing terms/score causes and
