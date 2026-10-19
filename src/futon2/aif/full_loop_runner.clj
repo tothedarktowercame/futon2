@@ -2664,6 +2664,8 @@
   ([construction wiring-fn required?]
    (let [port-missing? (and required? (not (fn? wiring-fn)))
          repair-id (get-in construction [:repair-contract :repair-id])
+         algorithm-id (get-in construction [:algorithm-contract :algorithm-id])
+         obligation-id (or repair-id algorithm-id)
          result0 (when-not port-missing?
                    (if wiring-fn
                      (wiring-fn construction)
@@ -2688,15 +2690,19 @@
          ;; makes each remainder actionable.  Enrich only the production fold;
          ;; injected folds remain unmodified so their contract violations are
          ;; observable at the gate.
-         result (if (and (nil? wiring-fn) (map? result0) (seq repair-id)
+         result (if (and (nil? wiring-fn) (map? result0) (seq obligation-id)
                          (vector? (:policy-holes result0)))
                   (update result0 :policy-holes
                           (fn [holes]
                             (mapv (fn [{:keys [unfolded-pattern] :as hole}]
                                     (assoc hole
-                                           :free (str "Unfolded repair pattern " unfolded-pattern)
-                                           :why (str "Required by stop-line obligation " repair-id)
-                                           :obligation/id repair-id))
+                                           :free (str "Unfolded "
+                                                      (if algorithm-id "algorithm" "repair")
+                                                      " pattern " unfolded-pattern)
+                                           :why (if algorithm-id
+                                                  (str "Required by selected META algorithm " algorithm-id)
+                                                  (str "Required by stop-line obligation " repair-id))
+                                           :obligation/id obligation-id))
                                   holes)))
                   result0)
          patterns (vec (:shown construction))

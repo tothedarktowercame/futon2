@@ -21,6 +21,10 @@
     (is (= {:type :run-algorithm :target "A-self-heal"} (:action entry)))
     (is (= :meta-algorithm-execution (:construction-kind construction)))
     (is (= "A-self-heal" (get-in construction [:algorithm-contract :algorithm-id])))
+    (let [wiring (runner/construction-wiring-result construction)]
+      (is (= :wired (:status wiring)))
+      (is (every? #(= "A-self-heal" (:obligation/id %))
+                  (get-in wiring [:fold-output :policy-holes]))))
     (is (some #{:ordinary-cascade-reselection}
               (get-in construction [:algorithm-contract :forbids])))
     (is (nil? (runner/selection-terminal-condition :selection algorithm-selection))
