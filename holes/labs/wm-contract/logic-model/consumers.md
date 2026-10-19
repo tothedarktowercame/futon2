@@ -1,5 +1,11 @@
 # WM click runner: consumption sites (consumers aspect)
 
+## Reviewed update — 2026-10-19, codex-1
+
+Row 54 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): terminal projection retains existing abstained `:reading-frontier` and `:loop-node-exercise` alongside Q2 carriers. Its guard no longer requires `:q2-construction`. Selected-decision projection is unchanged. Focused synthetic written-record regression passed; no live-click verification claimed.
+
+The original audit below remains a historical reading at its stated revision.
+
 - futon2 commit read: `f76041cc7` (HEAD, 2026-10-19 08:06Z "Read prepared targets from the same default registry as the producer"). Working tree had no tracked changes.
 - Date: 2026-10-19.
 - Method: static reading only (Read/grep/sed); no JVM, no HTTP. The few `ls`/`grep` checks of data stores are marked "observed".

@@ -1,5 +1,11 @@
 # WM logic model: correlation of the five static tables with the PLOP-2026 code annotations
 
+## Reviewed update — 2026-10-19, codex-1
+
+Rows 1/6/10 update (P00): `b4359d675` (reviewed worker commit `6fc4fadef`) retains existing abstained `:reading-frontier` and `:loop-node-exercise` in the terminal decision certificate, with or without Q2 construction. Selected retention remains unchanged. This supersedes row 6's pending terminal-retention repair for these carriers only; missing upstream measurements are not reconstructed. Worker focused written-record test: 1 test/11 assertions passed, synthetic counts with L1's refusal kind pinned. No post-fix click is claimed.
+
+The original audit below remains a historical reading at its stated revision.
+
 Date: 2026-10-19 ~08:40Z. Author: claude-5, joining five Sonnet-agent tables
 (phases.md, refusals.md, producers.md, consumers.md, stores.md; read-only, nothing run)
 with claude-4's `p4ng/plop-2026-code-annotations.json` (44 annotations, 79 anchors, none reviewed).

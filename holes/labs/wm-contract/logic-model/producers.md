@@ -1,5 +1,11 @@
 # WM click runner: producers of inputs the click requires
 
+## Reviewed update — 2026-10-19, codex-1
+
+P24 update (P00, `b4359d675`, reviewed worker `6fc4fadef`): written run records emit existing abstained frontier and loop-node measurements from the sorry-cell certificate even without Q2 construction. No default counts or selected action are manufactured. Worker regression passed for both Q2 cases; absent upstream data remains absent.
+
+The original audit below remains a historical reading at its stated revision.
+
 futon2 commit read: `1de600e2c` (HEAD when written; reading began at `f76041cc7`, and the only
 change between them is one line in `src/futon2/aif/wm/family_selection.clj` plus a test).
 Date: 2026-10-19. Method: static reading (grep/sed) only; nothing was executed.
