@@ -180,9 +180,9 @@
                  :session-id (:session-id request)
                  :payload {:patch-sha (apply str (repeat 40 "a"))
                            :worktree "/tmp/worktree"}})
-              "wm-author")
+              :author)
         order {:injury-id "injury-1" :repair-id "repair-1" :attempt 1
-               :author-session "fresh-author"}
+               :author "wm-author" :author-session "fresh-author"}
         receipt (port {:work-order order :phase :author
                        :predecessor-pin {:path "p" :sha256
                                          (apply str (repeat 64 "a"))}})]

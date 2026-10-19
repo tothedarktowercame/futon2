@@ -709,10 +709,16 @@
                  (= :valid (:status (coordinator/verify-transaction (:value read)))))
         (:value read)))))
 
-(defn agency-port [invoke seat]
+(defn agency-port
+  "ROLE is :author or :reviewer. The seat invoked is the one the sealed work
+  order names for that role (click wm-click-36b47627, 2026-10-19: the seat
+  names were fixed here as wm-author / wm-reviewer, so a click cast on other
+  seats would still have dispatched its repair phases to the defaults)."
+  [invoke role]
   (fn [{:keys [work-order phase predecessor-pin transaction] :as request}]
-    (let [session-key ({"wm-author" :author-session
-                        "wm-reviewer" :reviewer-session} seat)
+    (let [seat (get work-order role)
+          session-key ({:author :author-session
+                        :reviewer :reviewer-session} role)
           ;; Enact/review adapters receive the sealed transaction too, so a
           ;; concrete serving boundary can bind its effect to the exact prior
           ;; author/reviewer evidence rather than reconstructing it.
@@ -737,8 +743,8 @@
   (or (:meta-repair-ports opts)
       (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
                  (:repair-retry-fn opts))
-        {:author (agency-port (:agency-invoke-fn opts) "wm-author")
-         :review (agency-port (:agency-invoke-fn opts) "wm-reviewer")
+        {:author (agency-port (:agency-invoke-fn opts) :author)
+         :review (agency-port (:agency-invoke-fn opts) :reviewer)
          :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
          :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")})))
 (defn- work-order-options [opts]
