@@ -77,14 +77,27 @@
       (is (= (:action partial) (get-in projection [:decision :action])))
       (is (not= (get-in partial [:policy :policy-objective :assessed-selection :action])
                 (:action partial)))
+      (is (= (get-in carrier [:recomputation :q8 :status])
+             (get-in partial [:q8-frontier :status])))
+      (is (= (get-in carrier [:recomputation :q8 :reason])
+             (get-in partial [:q8-frontier :reason])))
+      (is (= :assessed-population (get-in partial [:q8-frontier :basis])))
+      (is (= :assessed-population (get-in partial [:q8-frontier :scope])))
+      (is (= :absent (get-in partial [:q2-outer-actions :status])))
+      (is (= :assessed-population (get-in partial [:q2-outer-actions :basis])))
+      (is (= (get-in carrier [:recomputation :q2])
+             (get-in partial [:q2-outer-actions :selected-identity])))
       (is (= :strict-objective
              (get-in strict [:policy :selected-outer-cascade-policy :basis-kind])))
       (is (= :selected (get-in strict [:policy :policy-objective :status])))
+      (is (= :certified (get-in strict [:q8-frontier :status])))
+      (is (= :certified (get-in strict [:q2-outer-actions :status])))
       (is (= :partial (get-in empty [:policy :status])))
       (is (= :no-choice (get-in empty [:policy :policy-objective
                                        :assessed-selection :status])))
       (is (= :preparation-needed (get-in empty [:policy :policy-objective
                                                  :assessed-selection :reason])))
+      (is (= :preparation-needed (get-in empty [:policy :reason])))
       (is (nil? (get-in empty [:policy :selected-outer-cascade-policy])))
       (is (nil? (:action empty)))
       (let [tampered (-> basis

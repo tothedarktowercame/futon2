@@ -666,6 +666,8 @@
             (not (contains? #{:selected :abstained} (:status policy-objective))) policy-objective
             (= :abstained (:status policy-objective)) policy-objective
             :else policy-objective))
+        ordinary-reason (or (:reason ordinary-result)
+                            (get-in ordinary-result [:assessed-selection :reason]))
         selection (cond
                     (not= :verified (:status snapshot-verification))
                     snapshot-verification
@@ -728,7 +730,7 @@
                                       :status (if activated-carrier :selected
                                                 (:status ordinary-result))
                                       :reason (when-not activated-carrier
-                                                (:reason ordinary-result))
+                                                ordinary-reason)
                                       :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
                                       :family-census (family-selection/field-census policy-field)
@@ -761,6 +763,7 @@
                            :action selected-action)
                     (not activated-carrier)
                     (assoc :chosen {:absent (or (:reason ordinary-result)
+                                                ordinary-reason
                                                 :outer-policy-selection-refused)})
                     (not activated-carrier)
                     (dissoc :action)))
@@ -771,8 +774,12 @@
         receipt (assoc receipt :q8-frontier
                        (if-not injury?
                          (if activated-carrier
-                           {:status :certified :carrier (:recomputation activated-carrier)}
-                           {:status :absent :reason (:reason ordinary-result)})
+                           (if (= :assessed-population (:basis-kind activated-carrier))
+                             (assoc (get-in activated-carrier [:recomputation :q8])
+                                    :basis :assessed-population
+                                    :scope (:scope activated-carrier))
+                             {:status :certified :carrier (:recomputation activated-carrier)})
+                           {:status :absent :reason ordinary-reason})
                          (q8/outer-frontier
                         {:tasks tasks :excluded all-excluded
                          :candidates (if live? shadow-candidates candidates)
@@ -785,8 +792,13 @@
         receipt (assoc receipt :q2-outer-actions
                        (if-not injury?
                          (if activated-carrier
-                           {:status :certified :carrier (:recomputation activated-carrier)}
-                           {:status :absent :reason (:reason ordinary-result)})
+                           (if (= :assessed-population (:basis-kind activated-carrier))
+                             {:status :absent :reason :assessed-population-basis
+                              :basis :assessed-population
+                              :scope (:scope activated-carrier)
+                              :selected-identity (get-in activated-carrier [:recomputation :q2])}
+                             {:status :certified :carrier (:recomputation activated-carrier)})
+                           {:status :absent :reason ordinary-reason})
                          (q2/outer-actions
                         {:candidates (if live? shadow-candidates candidates)
                          :selection effective-selection
