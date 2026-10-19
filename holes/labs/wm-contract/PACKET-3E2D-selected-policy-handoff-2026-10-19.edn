@@ -1,0 +1,32 @@
+{:packet :3E2d-prerequisite
+ :base "55d33118bd3a9a5708604bd7e803f632c5a9a8ce"
+ :schema :wm/selected-outer-cascade-policy-v1
+ :production-route
+ ["outer-task-selection receipt retains :policy/:selected-outer-cascade-policy"
+  "report/war-machine passes the intact carrier and explicit claim to cascade-decision"
+  "cascade-decision verifies and projects the canonical entry without field construction or selection"
+  "selected-target-reading prefers the verified carrier target"
+  "full-loop-runtime retains the identical first receipt across selected-reading redecision"]
+ :verification
+ {:focused-test {:namespaces
+                 [futon2.aif.selected-outer-cascade-policy-test
+                  futon2.aif.outer-policy-evidence-test
+                  futon2.aif.outer-policy-objective-test
+                  futon2.aif.wm.family-selection-test
+                  futon2.aif.wm.cascade-decision-isolation-test
+                  futon2.aif.full-loop-runtime-test
+                  futon2.aif.selected-target-reading-test]
+                 :tests 63 :assertions 322 :failures 0 :errors 0}
+  :clj-kondo {:errors 0 :warnings 0
+              :note "unused-binding linter disabled for one pre-existing cascade-decision warning"}
+  :check-parens :ok
+  :diff-check :pending-post-edit}
+ :selection-calls-on-preselected-route
+ {:target-policy-field 0 :reading-family-decision 0
+  :family-selection/select-over-families 0}
+ :compatibility
+ {:legacy-no-claim :preserved
+  :claimed-without-carrier :typed-refusal}
+ :not-in-scope
+ [:production-evidence-provider :outer-policy-selection-wiring :live-click]
+ :click-launched false}

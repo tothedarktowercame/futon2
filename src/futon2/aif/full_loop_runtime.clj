@@ -195,6 +195,20 @@
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
 
+(defn retained-outer-selector
+  "Retain the exact first outer receipt across the selected-reading second
+  pass. In particular, the sealed selected-policy carrier is never rebuilt."
+  [outer-selector policy-field-config]
+  (let [retained (atom ::unselected)]
+    (fn [input]
+      (let [receipt @retained]
+        (if (not= ::unselected receipt)
+          receipt
+          (let [selected (outer-selector
+                          (assoc input :policy-field-config policy-field-config))]
+            (reset! retained selected)
+            selected))))))
+
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
@@ -206,25 +220,16 @@
         ;; second pass is inner cascade reconstruction for the same chosen
         ;; outer action, not a new outer opportunity. Retain the exact first receipt so query-time
         ;; evidence is requested for, and consumed by, one stable target.
-        outer-receipt (atom ::unselected)
+        policy-field-config
+        (select-keys opts
+                     [:target-reading-root :pattern-graph-path
+                      :occurrence-square-root
+                      :occurrence-square-pattern-texts
+                      :pattern-library-root
+                      :require-occurrence-squares?
+                      :target-policy-retraction])
         pinned-outer-selector
-        (fn [input]
-          (let [retained @outer-receipt]
-            (if (not= ::unselected retained)
-              retained
-              (let [policy-field-config
-                    (select-keys opts
-                                 [:target-reading-root :pattern-graph-path
-                                  :occurrence-square-root
-                                  :occurrence-square-pattern-texts
-                                  :pattern-library-root
-                                  :require-occurrence-squares?
-                                  :target-policy-retraction])
-                    selected (outer-selector
-                              (assoc input :policy-field-config
-                                     policy-field-config))]
-                (reset! outer-receipt selected)
-                selected))))
+        (retained-outer-selector outer-selector policy-field-config)
         opts (-> opts
                  (update :outer-task-policy #(or % :meta))
                  (assoc :outer-task-selection-fn pinned-outer-selector))

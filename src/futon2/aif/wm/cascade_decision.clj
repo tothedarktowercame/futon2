@@ -20,6 +20,7 @@
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q4-preference :as q4-preference]
             [futon2.aif.selected-reading :as selected-reading]
+            [futon2.aif.selected-outer-cascade-policy :as selected-outer-policy]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -1327,7 +1328,26 @@
   products are recorded as retired. A field with no scored policy abstains
   with every family failure."
   [assembled opts]
-  (let [policy-field (target-policy-field assembled opts)
+  (cond
+    (:selected-outer-cascade-policy opts)
+    (let [projected (selected-outer-policy/decision
+                     (:selected-outer-cascade-policy opts))]
+      (if (= :selected (:status projected))
+        (dissoc projected :status)
+        {:decision
+         (abstain [{:target (get-in opts [:selected-outer-cascade-policy :target-id])
+                    :stage :outer-policy-handoff
+                    :kind :outer-task-selection-refused
+                    :failure-kind (:reason projected)}])}))
+
+    (:outer-policy-selection-claimed? opts)
+    {:decision
+     (abstain [{:target nil :stage :outer-policy-handoff
+                :kind :outer-task-selection-refused
+                :failure-kind :claimed-policy-selection-without-carrier}])}
+
+    :else
+    (let [policy-field (target-policy-field assembled opts)
         view (observation-label-view opts)
         opts (assoc opts :observation-labels-view view)
         queue (ticket-queue/validate! (if (contains? opts :ticket-queue)
@@ -1395,7 +1415,7 @@
                               :reading-precision-carry]))
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply]
-                (:proposal-supply assembled)))))
+                (:proposal-supply assembled))))))
 
 (defn select-and-record-cascade!
   "Select using the existing habit snapshot, without reinforcing the selection.

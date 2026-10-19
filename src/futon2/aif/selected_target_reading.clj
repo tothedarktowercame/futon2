@@ -8,6 +8,7 @@
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
+            [futon2.aif.selected-outer-cascade-policy :as selected-outer-policy]
             [futon2.aif.target-reading-registry :as registry]))
 
 (def default-request-root
@@ -200,7 +201,13 @@
   "Return the exact outer-selected target/source/current-digest need, or nil.
   A failure belonging to another target is never eligible."
   [judgement]
-  (let [outer-target (get-in judgement [:outer-task-selection :chosen :id])
+  (let [carrier (get-in judgement [:outer-task-selection :policy
+                                   :selected-outer-cascade-policy])
+        carrier-target (when (and carrier
+                                  (nil? (selected-outer-policy/verify carrier)))
+                         (:target-id carrier))
+        outer-target (or carrier-target
+                         (get-in judgement [:outer-task-selection :chosen :id]))
         families (get-in judgement [:decision :selection-certificate
                                     :target-policy-field :families])
         ;; The live judge can expose the target-local family before its outer

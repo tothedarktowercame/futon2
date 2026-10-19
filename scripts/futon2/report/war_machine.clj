@@ -6762,6 +6762,19 @@
         cascade-result (cd/select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts
+                               ;; A strict outer policy selection is a sealed
+                               ;; executable-cascade choice, not permission to
+                               ;; run the legacy inner selector again.
+                               :selected-outer-cascade-policy
+                               (get-in outer-task-selection
+                                       [:policy :selected-outer-cascade-policy])
+                               :outer-policy-selection-claimed?
+                               (or (contains? (get outer-task-selection :policy)
+                                              :selected-outer-cascade-policy)
+                                   (and (= :cascade-live-policy-v1
+                                           (get-in outer-task-selection [:policy :kind]))
+                                        (= :selected
+                                           (get-in outer-task-selection [:policy :status]))))
                                :constructor-scored-with
                                (if (contains? cascade-sources :construction)
                                  :caller-supplied-evaluator :same-observation-labels-snapshot)

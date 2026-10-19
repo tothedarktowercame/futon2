@@ -1,0 +1,14 @@
+{:repo-root "/home/joe/worktrees/futon2-selected-outer-policy-handoff"
+ :code-paths ["src/futon2/aif/selected_outer_cascade_policy.clj"
+              "src/futon2/aif/wm/cascade_decision.clj"
+              "src/futon2/aif/selected_target_reading.clj"
+              "src/futon2/aif/full_loop_runtime.clj"
+              "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/selected_outer_cascade_policy_test.clj"]
+ :command ["clojure" "-M:test" "-n"
+           "futon2.aif.selected-outer-cascade-policy-test"]
+ :author "codex-6"
+ :namespace "futon2.aif.selected-outer-cascade-policy-test"
+ :origin "Packet 3E2d prerequisite sealed selected-policy handoff"
+ :artifact-dir "/tmp/packet-3e2d-handoff-test-registry"
+ :agency-url "http://localhost:7070"}
