@@ -17,6 +17,10 @@
 (defn- pin? [x] (and (string? (:path x)) (string? (:sha256 x))
                      (boolean (re-matches #"[0-9a-f]{64}" (:sha256 x)))))
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
+(defn- valid-prior? [vocab prior]
+  (and (vector? prior)
+       (= (count vocab) (count prior))
+       (every? #(and (finite? %) (pos? %)) prior)))
 (defn- declaration-pin [d]
   (identity/sha256 (.getBytes (pr-str (dissoc d :pin)) "UTF-8")))
 (defn- dataset-pin [rows]
@@ -151,19 +155,21 @@
                  components (:ln-e spec)
                  absent (cond-> []
                           (nil? spec) (conj :policy-declaration)
-                          (not= (count vocab) (count prior)) (conj :prior-alpha)
-                          (not-every? #(and (finite? %) (pos? %)) prior) (conj :prior-alpha)
-                          (not (and (contains? components :resource)
+                          (not (valid-prior? vocab prior)) (conj :prior-alpha)
+                          (not (and (map? components)
+                                    (contains? components :resource)
                                     (finite? (get-in components [:resource :value]))
                                     (= :nats (get-in components [:resource :units]))
                                     (pin? (get-in components [:resource :source-pin]))))
                           (conj :ln-e-resource)
-                          (not (and (contains? components :cadence)
+                          (not (and (map? components)
+                                    (contains? components :cadence)
                                     (finite? (get-in components [:cadence :value]))
                                     (= :nats (get-in components [:cadence :units]))
                                     (pin? (get-in components [:cadence :source-pin]))))
                           (conj :ln-e-cadence)
-                          (not (and (contains? components :continuation)
+                          (not (and (map? components)
+                                    (contains? components :continuation)
                                     (finite? (get-in components [:continuation :value]))
                                     (= :nats (get-in components [:continuation :units]))
                                     (pin? (get-in components [:continuation :source-pin]))))
@@ -174,8 +180,7 @@
                  task (filter #(= :task-outcome (get-in % [::cause :class])) classified)
                  unknown (remove (set vocab) (map :observed-outcome task))
                  counts (frequencies (map :observed-outcome task))
-                 absent (vec (distinct (cond-> absent (seq unknown) (conj :unknown-outcome))) )
-                 posterior (mapv + (or prior []) (mapv #(get counts % 0) vocab))
+                 absent (vec (distinct (cond-> absent (seq unknown) (conj :unknown-outcome))))
                  base (cond-> {:policy-id (:policy-id entry) :target-id (:target-id entry)
                                :cascade-digest digest :absent-terms absent
                                :excluded (mapv #(select-keys % [:run/id :selected-cascade-digest ::cause])
@@ -183,17 +188,18 @@
                         score-absence (assoc :score-absence score-absence))]
              (if (seq absent)
                (assoc base :status :absent)
-               (assoc base
-                      :status :computed
-                      :prior-alpha prior :task-counts (mapv #(get counts % 0) vocab)
-                      :posterior-alpha posterior
-                      :posterior-predictive
-                      (let [n (double (reduce + posterior))]
-                        {:vocabulary vocab :distribution (mapv #(/ (double %) n) posterior)
-                         :units :probability})
-                      :eig (novelty/categorical-information vocab posterior)
-                      :ln-e-components components
-                      :ln-e (reduce + (map #(get-in components [% :value]) component-names))))))
+               (let [posterior (mapv + prior (mapv #(get counts % 0) vocab))]
+                 (assoc base
+                        :status :computed
+                        :prior-alpha prior :task-counts (mapv #(get counts % 0) vocab)
+                        :posterior-alpha posterior
+                        :posterior-predictive
+                        (let [n (double (reduce + posterior))]
+                          {:vocabulary vocab :distribution (mapv #(/ (double %) n) posterior)
+                           :units :probability})
+                        :eig (novelty/categorical-information vocab posterior)
+                        :ln-e-components components
+                        :ln-e (reduce + (map #(get-in components [% :value]) component-names)))))))
          entries)
         missing (filterv #(= :absent (:status %)) rows)]
     (if (or sealed-error malformed-declaration)

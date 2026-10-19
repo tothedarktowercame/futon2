@@ -100,6 +100,15 @@
       (is (= {:status :absent :policy-id "p2" :target-id "T" :cascade-digest "d2"
               :absent-terms [:ln-e-cadence] :excluded []}
              (get-in r [:entries 1])))))
+  (testing "malformed local priors never evaluate a posterior"
+    (doseq [bad-prior [[nil 1.0] :not-a-vector]]
+      (let [r (sut/join sealed (declaration {"d1" (spec [1.0 1.0])
+                                               "d2" (spec bad-prior)}) [])]
+        (is (= :partial (:status r)))
+        (is (= :computed (get-in r [:entries 0 :status])))
+        (is (= :absent (get-in r [:entries 1 :status])))
+        (is (= [:prior-alpha] (get-in r [:entries 1 :absent-terms])))
+        (is (= ["d1" "d2"] (get-in r [:frontier :menu :policy-digests]))))))
   (testing "all incomplete is an honest empty joined set"
     (let [r (sut/join sealed (declaration {}) [])]
       (is (= :partial (:status r)))
