@@ -7134,8 +7134,11 @@
       (is (.isFile (io/file (get-in summary [:overflow :path]))))
       (is (= (get-in summary [:overflow :path])
              (.getCanonicalPath (io/file root "refusal-causes-synthetic.edn"))))
-      (is (not (re-matches #"tick-run-record-.*\\.edn"
+      (is (re-matches #"tick-run-record-.*\.edn" "tick-run-record-synthetic.edn"))
+      (is (not (re-matches #"tick-run-record-.*\.edn"
                            (.getName (io/file (get-in summary [:overflow :path]))))))
+      (is (= (:total-count summary) (count (:causes overflow))))
+      (is (> (:total-count summary) 130))
       (is (= (get-in summary [:overflow :sha256])
              (#'runner/sha256-bytes
               (Files/readAllBytes (.toPath (io/file (get-in summary [:overflow :path])))))))
