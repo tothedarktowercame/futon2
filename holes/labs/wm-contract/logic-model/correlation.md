@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / A43 / P21: tripwire recipient is explicitly configured then roster-resolved,
+not hardcoded claude-6. Trip report retains resolution before action; missing seat
+does not throw out of the run. Accepted enqueue is separately unacknowledged.
+Production responsible-seat configuration and durable post-transport receipts
+remain absent; this is not a proven live notification route.
+
 Row 3 prerequisite / P20: section-level observation permits useful partial
 snapshot membership without treating unknown scope as complete or zero. Explicit
 OK structural evidence is required for admission; unknown IDs/reasons remain

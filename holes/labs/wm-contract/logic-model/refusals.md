@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+R20 context / P21: off-roster, unconfigured and unavailable-roster states are
+undelivered recipient resolutions in the trip report, not run failures. Explicit
+park-and-summon retains its park operation; default action remains record.
+Transport failure is an unavailable delivery observation; it is not evidence
+of delivery and post-transport durability is not provided by this packet.
+
 Chain 8 / P15: configuration injury uses explicit retained provider-absence
 cause fields, including P10 `[:failure :causes :causes]`. Arbitrary decision
 metadata is not causal evidence. Scored no-action and partial-frontier selection
