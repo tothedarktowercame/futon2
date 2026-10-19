@@ -29,7 +29,6 @@
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
 (def default-action :record)
 (def default-agency-base "http://127.0.0.1:7070")
-(def summon-recipient "claude-6")
 (def investigation-window-ms (* 45 60 1000))
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def repair-children ["findings" "implementations" "resolutions" "dismissals"])
@@ -752,7 +751,11 @@
 
 (defn- post-park! [opts payload]
   (if-let [park-fn (:tripwire/park-fn opts)]
-    (park-fn opts payload)
+    (let [response (park-fn opts payload)]
+      (when-not (map? response)
+        (throw (ex-info "Tripwire park returned no accountable response"
+                        {:failure-kind :wm-tripwire-park-response-missing})))
+      response)
     (successful-response!
      :tripwire-park
      (http/post (str (agency-base opts) "/api/alpha/park")
@@ -827,44 +830,70 @@
        "report: " report-path "\n"
        "Checklist: investigate then discharge or revise the wire per the practical contract."))
 
-(defn- summon! [opts report report-path]
-  (when-not (contains? (registered-agents opts) summon-recipient)
-    (throw (ex-info "Tripwire summon recipient is not registered"
-                    {:recipient summon-recipient})))
-  (let [text (investigation-text report report-path)
+(defn- responsible-recipient [opts]
+  (let [seat (:tripwire/responsible-seat opts)]
+    (when (and (string? seat) (not (str/blank? seat))) seat)))
+
+(defn- resolve-recipient [opts]
+  (if-let [recipient (responsible-recipient opts)]
+    (try
+      (if (contains? (registered-agents opts) recipient)
+        {:status :resolved :recipient recipient}
+        {:status :undelivered :recipient recipient :reason :recipient-off-roster})
+      (catch Throwable _
+        {:status :undelivered :recipient recipient :reason :roster-unavailable}))
+    {:status :undelivered :reason :responsible-recipient-unconfigured}))
+
+(defn- summon! [opts report report-path resolution]
+  (if-not (= :resolved (:status resolution))
+    resolution
+    (let [recipient (:recipient resolution)
+          text (investigation-text report report-path)
         dependency-id (str (:trip/id report) "-investigation")]
-    (post-park! opts {:agent summon-recipient
-                      :surface "emacs-repl"
-                      :mode :background
-                      :awaiting [dependency-id]
-                      :deadline-ms (+ (System/currentTimeMillis)
-                                      investigation-window-ms)
-                      :payload text})
-    (post-bell! opts {:agent-id summon-recipient
-                      :caller "wm-full-loop"
-                      :surface "bell"
-                      :mission-id "M-wm-tripwires-investigation"
-                      :type "request"
-                      :prompt text})))
+      (try
+        (post-park! opts {:agent recipient
+                          :surface "emacs-repl"
+                          :mode :background
+                          :awaiting [dependency-id]
+                          :deadline-ms (+ (System/currentTimeMillis)
+                                          investigation-window-ms)
+                          :payload text})
+        (let [response (post-bell! opts {:agent-id recipient
+                                          :caller "wm-full-loop"
+                                          :surface "bell"
+                                          :mission-id "M-wm-tripwires-investigation"
+                                          :type "request"
+                                          :prompt text})]
+          {:status :accepted-enqueue :recipient recipient
+           :job-id (:job-id response)
+           ;; Bell acceptance is not agent delivery or acknowledgement.
+           :delivery-status :unacknowledged})
+        (catch Throwable e
+          (stderr! "park/summon action failed; degraded to :stop-line" e)
+          {:status :unavailable :recipient recipient
+           :reason :notification-transport-unavailable})))))
 
 (defn- handle-action! [opts report report-path]
   (case (:trip/action report)
-    :record nil
+    :record {:status :not-attempted :reason :record-action}
     :stop-line
     (try
       (record-finding! opts report report-path)
+      {:status :not-attempted :reason :stop-line-action}
       (catch Throwable e
         (stderr! "stop-line action failed; degraded to durable :record" e)))
     :park-and-summon
     (try
       (record-finding! opts report report-path)
       (try
-        (summon! opts report report-path)
+        (summon! opts report report-path (:trip/notification report))
         (catch Throwable e
-          (stderr! "park/summon action failed; degraded to :stop-line" e)))
+          (stderr! "park/summon action failed; degraded to :stop-line" e)
+          {:status :unavailable :reason :notification-action-failed}))
       (catch Throwable e
         (stderr! "stop-line action failed; degraded to durable :record" e)))
-    (stderr! "unknown trip action; degraded to durable :record" nil)))
+    (do (stderr! "unknown trip action; degraded to durable :record" nil)
+        {:status :not-attempted :reason :unknown-trip-action})))
 
 (defn- record-trip! [opts raw-report]
   (if *handling-trip?*
@@ -878,11 +907,13 @@
           (stderr! "degraded trip report failed; recursion remains contained" e))))
     (binding [*handling-trip?* true]
       (try
-        (let [report (assoc raw-report
+        (let [notification (resolve-recipient opts)
+              report (assoc raw-report
                             :trip/id (or (:trip/id raw-report)
                                          (str "trip-" (UUID/randomUUID)))
                             :trip/action (or (:tripwire/action opts)
-                                             default-action))
+                                             default-action)
+                            :trip/notification notification)
               report-path
               ((or (:tripwire/report-writer opts)
                    #(write-trip-report! (or (:tripwire/report-root opts)
@@ -891,8 +922,15 @@
                report)]
           (when (str/blank? (str report-path))
             (throw (ex-info "Trip report writer returned no artifact path" {})))
-          (handle-action! opts report report-path)
-          {:report report :report-path report-path})
+          (let [delivery (handle-action! opts report report-path)]
+            (when-let [observe-delivery (:tripwire/delivery-observer opts)]
+              (try (observe-delivery {:trip/id (:trip/id report)
+                                      :trip/report-path report-path
+                                      :notification notification
+                                      :delivery delivery})
+                   (catch Throwable e
+                     (stderr! "trip delivery observation failed; trip remains recorded" e))))
+            {:report report :report-path report-path :delivery delivery}))
         (catch Throwable e
           (stderr! "trip report action failed; runner remains untouched" e))))))
 

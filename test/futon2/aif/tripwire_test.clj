@@ -439,18 +439,85 @@
     (is (= :turn-conservation
            (-> result :trip/witnesses first :kind)))))
 
+(deftest configured-tripwire-recipient-is-recorded-before-one-honest-notice-attempt
+  (let [record (synthetic-trip-record)
+        reports (atom [])
+        deliveries (atom [])
+        effects (atom [])
+        off-roster {:tripwire/action :park-and-summon
+                    :tripwire/responsible-seat "codex-off-roster"
+                    :tripwire/report-writer #(do (swap! reports conj %) "/tmp/trip-off-roster.edn")
+                    :tripwire/roster-fn (constantly #{"codex-live"})
+                    :tripwire/park-fn (fn [& _] (swap! effects conj :park) {})
+                    :tripwire/bell-fn (fn [& _] (swap! effects conj :bell))
+                    :tripwire/delivery-observer #(swap! deliveries conj %)}]
+    (is (= record (tripwire/observe! off-roster record)))
+    (is (= {:status :undelivered :recipient "codex-off-roster"
+            :reason :recipient-off-roster}
+           (:trip/notification (first @reports))))
+    (is (empty? @effects))
+    (is (= :undelivered (get-in @deliveries [0 :delivery :status])))
+    (reset! reports []) (reset! deliveries [])
+    (let [ledger (atom {:order [] :jobs {}})
+          registered {:tripwire/action :park-and-summon
+                      :tripwire/responsible-seat "codex-live"
+                      :run-id "run-p21" :click-id "click-p21"
+                      :registered-run/job-ledger ledger
+                      :tripwire/report-writer #(do (swap! reports conj %) "/tmp/trip-live-recipient.edn")
+                      :tripwire/repair-record-fn (constantly nil)
+                      :tripwire/roster-fn (constantly #{"codex-live"})
+                      :tripwire/park-fn (fn [_ _] {})
+                      :tripwire/bell-fn (fn [_ payload]
+                                          (swap! effects conj payload)
+                                          {:accepted true :job-id "p21-job"})
+                      :tripwire/delivery-observer #(swap! deliveries conj %)}]
+      (is (= record (tripwire/observe! registered record)))
+      (is (= 1 (count @effects)))
+      (is (= "codex-live" (:agent-id (first @effects))))
+      (is (= :resolved (get-in (first @reports) [:trip/notification :status])))
+      (is (= {:status :accepted-enqueue :recipient "codex-live"
+              :job-id "p21-job" :delivery-status :unacknowledged}
+             (get-in @deliveries [0 :delivery]))))))
+
+(deftest nil-transport-and-report-write-failure-do-not-invent-delivery
+  (let [record (synthetic-trip-record)
+        reports (atom []) deliveries (atom []) calls (atom 0)
+        opts {:tripwire/action :park-and-summon
+              :tripwire/responsible-seat "codex-live"
+              :run-id "run-p21-nil" :click-id "click-p21-nil"
+              :registered-run/job-ledger (atom {:order [] :jobs {}})
+              :tripwire/report-writer #(do (swap! reports conj %) "/tmp/trip-nil-transport.edn")
+              :tripwire/repair-record-fn (constantly nil)
+              :tripwire/roster-fn (constantly #{"codex-live"})
+              :tripwire/park-fn (fn [_ _] {})
+              :tripwire/bell-fn (fn [& _] nil)
+              :tripwire/delivery-observer #(swap! deliveries conj %)}]
+    (is (= record (tripwire/observe! opts record)))
+    (is (= :resolved (get-in (first @reports) [:trip/notification :status])))
+    (is (= {:status :unavailable :recipient "codex-live"
+            :reason :notification-transport-unavailable}
+           (get-in @deliveries [0 :delivery])))
+    (let [failed-write (assoc opts
+                              :tripwire/report-writer (fn [_] (throw (ex-info "write failed" {})))
+                              :tripwire/bell-fn (fn [& _] (swap! calls inc)))]
+      (is (= record (tripwire/observe! failed-write record)))
+      (is (zero? @calls))
+      (is (= 1 (count @deliveries))
+          "a failed report produces neither a durable notice nor another delivery observation"))))
+
 (deftest park-and-summon-builds-background-join-and-roster-checked-bell
   (let [finding (atom nil)
         park (atom nil)
         bell (atom nil)
         ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :tripwire/responsible-seat "claude-6"
               :run-id "run-trip" :click-id "click-trip"
               :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-summon.edn")
               :tripwire/repair-record-fn #(reset! finding %)
               :tripwire/roster-fn (fn [_] #{"claude-6" "codex-7"})
-              :tripwire/park-fn (fn [_ payload] (reset! park payload))
+              :tripwire/park-fn (fn [_ payload] (reset! park payload) {})
               :tripwire/bell-fn (fn [_ payload]
                                   (reset! bell payload)
                                   {:accepted true :job-id "trip-job"})}]
@@ -478,11 +545,12 @@
   (let [effects (atom [])
         ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :tripwire/responsible-seat "claude-6"
               :run-id "run-roster" :click-id "click-roster"
               :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-real-roster.edn")
               :tripwire/repair-record-fn (fn [_] (swap! effects conj :repair))
-              :tripwire/park-fn (fn [& _] (swap! effects conj :park))
+              :tripwire/park-fn (fn [& _] (swap! effects conj :park) {})
               :tripwire/bell-fn (fn [& _]
                                   (swap! effects conj :bell)
                                   {:accepted true :job-id "roster-job"})}]
@@ -521,6 +589,7 @@
   (let [effects (atom [])
         err (java.io.StringWriter.)
         opts {:tripwire/action :park-and-summon
+              :tripwire/responsible-seat "claude-6"
               :tripwire/report-writer (fn [_] "/tmp/trip-park-fail.edn")
               :tripwire/repair-record-fn
               (fn [_] (swap! effects conj :repair))
@@ -541,13 +610,14 @@
         err (java.io.StringWriter.)
         ledger (atom {:order [] :jobs {}})
         opts {:tripwire/action :park-and-summon
+              :tripwire/responsible-seat "claude-6"
               :run-id "run-bell-fail" :click-id "click-bell-fail"
               :registered-run/job-ledger ledger
               :tripwire/report-writer (fn [_] "/tmp/trip-bell-fail.edn")
               :tripwire/repair-record-fn
               (fn [_] (swap! effects conj :repair))
               :tripwire/roster-fn (fn [_] #{"claude-6"})
-              :tripwire/park-fn (fn [& _] (swap! effects conj :park))
+              :tripwire/park-fn (fn [& _] (swap! effects conj :park) {})
               :tripwire/bell-fn
               (fn [& _] (swap! effects conj :bell)
                 (throw (ex-info "bell unavailable" {})))}]
