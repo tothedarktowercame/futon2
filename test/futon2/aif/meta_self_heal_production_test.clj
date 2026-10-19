@@ -358,7 +358,7 @@
         escaped (diagnose-with
                  (root)
                  (diagnosis-fixture-with-entry
-                  2 {:file "../futon2/src/futon2/aif/full_loop_runner.clj"}))]
+                  2 {:file "../elsewhere/src/futon2/aif/full_loop_runner.clj"}))]
     (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason absent)))
     (is (= :absent (:production-functions-field absent)))
     (is (= production/required-production-roles (:missing-roles absent)))
@@ -370,7 +370,7 @@
     (is (= [:terminal-routing-entrypoint] (:missing-roles missing-role)))
     (is (nil? (:unresolvable-vars missing-role)))
     (is (nil? (persisted-diagnoses role-dir)))
-    (is (= ["../futon2/src/futon2/aif/full_loop_runner.clj"] (:missing-files escaped)))
+    (is (= ["../elsewhere/src/futon2/aif/full_loop_runner.clj"] (:missing-files escaped)))
     (is (= [:terminal-routing-entrypoint] (:missing-roles escaped)))
     (is (every? nil? (map :diagnosis-evidence-pin [absent unresolvable missing-role escaped])))
     (is (every? false? (map :repair-claimed? [absent unresolvable missing-role escaped])))))
@@ -643,6 +643,13 @@
                      {:meta-acceptance-review-fn
                       (fn [_] (swap! review-calls inc) {:status :accepted})}
                      proposal)
+        ;; F16: a run that passes before any repair does not pin the injury;
+        ;; refused typed, and the reviewer is never asked.
+        passing-run (production/admit-acceptance!
+                     {:meta-acceptance-run-fn (constantly (assoc run-result :outcome :passed :exit 0))
+                      :meta-acceptance-review-fn
+                      (fn [_] (swap! review-calls inc) {:status :accepted})}
+                     proposal)
         ;; A run port that answers with a shape the protocol does not accept
         ;; (no outcome, exit, summary or pin) is a typed refusal before review.
         malformed-run (production/admit-acceptance!
@@ -665,6 +672,8 @@
     (is (= [(:acceptance-test proposal)] @run-calls)
         "the run port is called exactly once, with the proposal's own acceptance test")
     (is (= :meta-self-heal/acceptance-run-port-unavailable (:reason missing-run)))
+    (is (= :meta-self-heal/acceptance-test-passes-before-repair (:reason passing-run)))
+    (is (= :passed (get-in passing-run [:acceptance-result :outcome])))
     (is (= :meta-self-heal/acceptance-run-refused (:reason malformed-run)))
     (is (= {:status :ran} (:acceptance-result malformed-run)))
     (is (zero? @review-calls)

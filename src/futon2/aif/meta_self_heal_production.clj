@@ -509,7 +509,11 @@
                      :acceptance-test (:acceptance-test proposal)
                      :result-status :ran-before-repair
                      :result run-result :repair-claimed? false}
-            response (when valid-run?
+            ;; F16 (off-click replay 5, 2026-10-19): a proposal whose run
+            ;; PASSES before any repair does not pin the injury; it is refused
+            ;; here, typed, without spending a reviewer invoke.
+            passes-before-repair? (and valid-run? (= :passed (:outcome run-result)))
+            response (when (and valid-run? (not passes-before-repair?))
                        (try (review request)
                           (catch Throwable _ {:status :failed
                                                :reason :meta-self-heal/acceptance-review-threw})))
@@ -518,6 +522,10 @@
         (cond
           (not valid-run?)
           (refusal :meta-self-heal/acceptance-run-refused
+                   {:request request :acceptance-result run-result
+                    :repair-claimed? false})
+          passes-before-repair?
+          (refusal :meta-self-heal/acceptance-test-passes-before-repair
                    {:request request :acceptance-result run-result
                     :repair-claimed? false})
           (not (map? response))
