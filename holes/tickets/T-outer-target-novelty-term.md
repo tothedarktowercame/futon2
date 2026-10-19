@@ -49,6 +49,17 @@ Out of scope: the resource/cadence/continuation terms and the [0, 1] clamp
 - The outer selector's `:absent-terms` diagnostic still reports what is
   missing.
 
+## Prior design to weigh (July, efe route)
+
+The same failure occurred on 2026-07-19/21 on the efe route (fourteen
+never-observed candidates at bit-identical scores; the discrimination gate
+refused). The fix then was "Native-Currency Discrimination" (PLoP conference
+catalogue): structural zone load enters the preferences C
+(`preferences.clj` `c-zone-load-key`, `efe.clj` `:capability-zone-load`) and
+per-target predicted-outcome uncertainty replaces a flat ambiguity, so the
+core discriminates without a new term. It is compatible with the novelty term;
+the outer-objective design should choose between or combine them deliberately.
+
 ## Specification note (added 2026-10-18, before any work)
 
 The Lean specification does not currently require this. In
