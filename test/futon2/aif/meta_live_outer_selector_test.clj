@@ -18,7 +18,11 @@
              :standards {:s1-regenerates true :s2-evidence true
                          :s3-reconstitution true :s4-honest-holes true
                          :s5-composed true}}
-   :graph {:section-status {:clusters {:status :ok}}
+   :graph {:section-status {:lineage {:status :ok}
+                            :clusters {:status :ok}
+                            :arrows {:status :ok}
+                            :held {:status :ok}
+                            :patterns {:status :ok}}
            :lineage [] :clusters [{:mission "M-a"} {:mission "M-b"}]
            :arrows [] :held []
            :tickets {:items [{:stem "M-a" :mtime-ms 200}
@@ -436,6 +440,34 @@
     (is (= [:clusters]
            (get-in receipt [:policy :pipeline-membership
                             :unavailable-structural-sections])))
+    (is (zero? @field-calls))
+    (is (nil? (:action receipt)))))
+
+(deftest omitted-structural-status-keeps-stale-rows-unknown
+  (let [field-calls (atom 0)
+        stale-task {:id "M-stale" :kind :mission :priority 2
+                    :source (pin "M-stale.md" "e")}
+        receipt (live/select-live
+                 {:tasks [stale-task]
+                  :policy-field-config {}
+                  :policy-field-fn (fn [& _] (swap! field-calls inc))
+                  :fetch-snapshot
+                  #(assoc snapshot :graph
+                          {:section-status {:agency {:status :ok}}
+                           :lineage [] :clusters [{:mission "M-stale"}]
+                           :arrows [] :held [] :tickets {:items []}
+                           :patterns {:edges []}})})]
+    (is (= :pipeline-target-data-unavailable
+           (get-in receipt [:policy :meta-selection :reason])))
+    (is (empty? (:support receipt)))
+    (is (= [{:id "M-stale"
+             :eligibility-status :unknown
+             :ineligible-reason :pipeline/membership-unavailable}]
+           (mapv #(select-keys % [:id :eligibility-status :ineligible-reason])
+                 (:unknown-targets receipt))))
+    (is (= #{:lineage :clusters :arrows :held :patterns}
+           (set (get-in receipt [:policy :pipeline-membership
+                                 :unknown-structural-sections]))))
     (is (zero? @field-calls))
     (is (nil? (:action receipt)))))
 

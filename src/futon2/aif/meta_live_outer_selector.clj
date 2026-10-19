@@ -596,7 +596,9 @@
                                               {:section-availability
                                                (:section-availability membership)
                                                :unavailable-structural-sections
-                                               (:unavailable-structural-sections membership)})))
+                                               (:unavailable-structural-sections membership)
+                                               :unknown-structural-sections
+                                               (:unknown-structural-sections membership)})))
         off-map (->> standing-admitted
                      (remove #(contains? nodes (:id %)))
                      (remove (constantly membership-unknown?))
@@ -768,7 +770,8 @@
                                       (:section-availability membership)
                                       :pipeline-membership
                                       (select-keys membership [:membership-complete?
-                                                               :unavailable-structural-sections])
+                                                               :unavailable-structural-sections
+                                                               :unknown-structural-sections])
                                       :sealed-menu sealed-menu
                                       :evidence-provider-source-pin (:source-pin provided)
                                       :policy-evidence policy-evidence

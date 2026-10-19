@@ -64,31 +64,46 @@
    (map :mission (get-in graph [:patterns :edges]))))
 
 (defn section-availability
-  "Measure supplied cascade sections without treating an unavailable section as
-  an observed empty one.  Old partial snapshots named only the sections they
-  supplied; those omitted names remain unspecified rather than being invented
-  as failures.  An entirely missing status map is an unavailable population."
+  "Measure cascade-section availability without treating omissions as `:ok`.
+
+  Structural sections are target evidence: a missing status therefore means
+  unknown coverage, not a legacy promise that its rows are current.  Other
+  supplied sections (for example :agency) remain visible in the measurement."
   [snapshot]
   (let [statuses (get-in snapshot [:graph :section-status])
-        status-map? (map? statuses)
-        entries (if status-map? statuses {})
-        entry (fn [[section value]]
+        statuses (if (map? statuses) statuses {})
+        structural-status-keys (set (mapcat :status-keys structural-sections))
+        entry (fn [section value unknown?]
                 {:section section
-                 :status (:status value)
-                 :availability (if (= :ok (:status value))
-                                 :available :unavailable)
-                 :reason (when-not (= :ok (:status value))
-                           (or (:error value) :section-not-ok))})
-        measured (->> entries (map entry) (sort-by #(pr-str (:section %))) vec)
-        unavailable (filterv #(= :unavailable (:availability %)) measured)]
+                 :status (if unknown? :unknown (:status value))
+                 :availability (cond
+                                 unknown? :unknown
+                                 (= :ok (:status value)) :available
+                                 :else :unavailable)
+                 :reason (cond
+                           unknown? :section-status-unspecified
+                           (= :ok (:status value)) nil
+                           :else (or (:error value) :section-not-ok))})
+        structural (mapv (fn [{:keys [section status-keys]}]
+                           (if-let [value (some #(get statuses %) status-keys)]
+                             (entry section value false)
+                             (entry section nil true)))
+                         structural-sections)
+        extras (->> statuses
+                    (remove (fn [[section _]] (contains? structural-status-keys section)))
+                    (map (fn [[section value]] (entry section value false))))
+        measured (->> (concat structural extras)
+                      (sort-by #(pr-str (:section %))) vec)
+        unavailable (filterv #(= :unavailable (:availability %)) measured)
+        unknown (filterv #(= :unknown (:availability %)) measured)]
     {:status (cond
-               (not status-map?) :absent
-               (empty? entries) :absent
-               (empty? unavailable) :complete
+               (and (empty? unavailable) (empty? unknown)) :complete
+               (and (empty? statuses) (seq unknown)) :absent
                :else :partial)
      :sections measured
      :available-sections (mapv :section (filter #(= :available (:availability %)) measured))
-     :unavailable-sections unavailable}))
+     :unavailable-sections unavailable
+     :unknown-sections unknown}))
 
 (defn pipeline-membership
   "Return only node identities evidenced by available structural sections.
@@ -100,13 +115,17 @@
   (let [graph (:graph snapshot)
         availability (section-availability snapshot)
         status-by-key (into {} (map (juxt :section identity) (:sections availability)))
-        unavailable? (fn [{:keys [status-keys]}]
-                       (let [entry (some #(get status-by-key %) status-keys)]
-                         (or (= :absent (:status availability))
-                             (and entry (= :unavailable (:availability entry))))))
+        unavailable? (fn [{:keys [section]}]
+                       (not= :available
+                             (:availability (get status-by-key section))))
         unavailable-sections (->> structural-sections
-                                  (filter unavailable?)
+                                  (filter #(= :unavailable
+                                              (:availability (get status-by-key (:section %)))))
                                   (mapv :section))
+        unknown-sections (->> structural-sections
+                              (filter #(= :unknown
+                                          (:availability (get status-by-key (:section %)))))
+                              (mapv :section))
         available-raw (mapcat (fn [{:keys [node-ids] :as section}]
                                 (if (unavailable? section) [] (node-ids graph)))
                               structural-sections)
@@ -136,7 +155,9 @@
     (assoc analysis
            :section-availability availability
            :unavailable-structural-sections unavailable-sections
-           :membership-complete? (empty? unavailable-sections))))
+           :unknown-structural-sections unknown-sections
+           :membership-complete? (and (empty? unavailable-sections)
+                                      (empty? unknown-sections)))))
 
 (defn- pipeline-identity-analysis [graph]
   (let [raw-ids (set (filter string? (raw-pipeline-node-ids graph)))
@@ -293,8 +314,8 @@
                {:comparison comparison :value missing-channel-cost})
 
       :else
-      (let [analysis (pipeline-identity-analysis (:graph snapshot))
-            nodes (pipeline-node-ids (:graph snapshot))
+      (let [analysis (pipeline-membership snapshot)
+            nodes (:ids analysis)
             malformed (into {}
                             (keep (fn [c]
                                     (when-let [errors (seq (candidate-errors

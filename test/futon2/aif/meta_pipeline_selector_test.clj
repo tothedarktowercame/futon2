@@ -14,7 +14,11 @@
                          :s3-reconstitution true :s4-honest-holes true
                          :s4-evidence {:checked "cascade/hole-target"}
                          :s5-composed true}}
-   :graph {:section-status {:clusters {:status :ok} :patterns {:status :ok}}
+   :graph {:section-status {:lineage {:status :ok}
+                            :clusters {:status :ok}
+                            :arrows {:status :ok}
+                            :held {:status :ok}
+                            :patterns {:status :ok}}
            :lineage []
            :clusters [{:cluster "c" :mission "M-a"}
                       {:cluster "c" :mission "M-b"}
@@ -92,6 +96,16 @@
            (set (:unavailable-structural-sections membership))))
     (is (false? (:membership-complete? membership)))
     (is (empty? (:ids membership)))))
+
+(deftest meta-selection-cannot-use-a-row-from-a-failed-section
+  (let [failed (assoc-in snapshot [:graph :section-status :clusters]
+                         {:status :failed :error :timeout})
+        receipt (selector/select {:snapshot failed
+                                  :candidates [(candidate "M-a" 0.2)]})]
+    (is (= :candidate-invalid (:reason receipt)))
+    (is (= [:not-in-pipeline-cascade]
+           (get-in receipt [:details :candidate-errors "M-a"])))
+    (is (nil? (:selected receipt)))))
 
 (deftest live-adapter-forms-fields-from-available-sections-only
   (let [tasks [{:id "M-a" :kind :mission :priority 2 :source (pin "M-a.md" "c")}
