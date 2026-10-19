@@ -46,6 +46,10 @@
    'futon2.aif.full-loop-runner "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj"
    'futon2.aif.full-loop-runtime "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj"
    'futon2.aif.meta-live-outer-selector "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj"
+   ;; Reached from meta-live-outer-selector on the selection path.  Keep this
+   ;; explicit so the runner's source-identity report and idle reload planning
+   ;; can name a landed family-selection change even when the runner is unchanged.
+   'futon2.aif.wm.family-selection "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj"
    'futon2.aif.meta-pipeline-selector "/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj"
    'futon2.aif.interpretation-construction "/home/joe/code/futon2/src/futon2/aif/interpretation_construction.clj"
    'futon2.aif.run-narrative "/home/joe/code/futon2/src/futon2/aif/run_narrative.clj"

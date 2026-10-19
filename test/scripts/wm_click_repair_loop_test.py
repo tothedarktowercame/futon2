@@ -21,6 +21,40 @@ def load_loop():
 
 
 class RepairLoopCastTest(unittest.TestCase):
+    def test_changed_identity_dependency_reloads_when_runner_is_unchanged(self):
+        loop = load_loop()
+        family = loop.F2 / "src/futon2/aif/wm/family_selection.clj"
+        inventory = ROOT / "src/futon2/aif/load_identity.clj"
+        with mock.patch.object(loop, "SOURCE_IDENTITY_INVENTORY", inventory), \
+             mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "changed_click_files", return_value=[family]), \
+             mock.patch.object(loop, "dirty", return_value=False), \
+             mock.patch.object(loop, "jvm_eval", return_value={"rc": 0, "out": ":reloaded", "err": ""}) as reload, \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            self.assertIn("futon2.aif.wm.family-selection", loop.source_identity_inventory())
+            ok, text, _ = loop.reload_changed(123)
+        self.assertTrue(ok)
+        self.assertEqual("", text)
+        self.assertIn("futon2.aif.wm.family-selection", reload.call_args.args[0])
+        event = record.call_args.args[0]
+        self.assertEqual(["futon2.aif.wm.family-selection"], event["source-identity-dependencies"])
+        self.assertNotIn("futon2.aif.full-loop-runner", event["source-identity-dependencies"])
+
+    def test_active_click_defers_with_zero_reload_and_no_launch(self):
+        loop = load_loop()
+        with mock.patch.object(loop, "click_running", return_value=True), \
+             mock.patch.object(loop, "debugger_stop", return_value=None), \
+             mock.patch.object(loop, "jvm_eval") as reload, \
+             mock.patch.object(loop.subprocess, "Popen") as launch, \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            result = loop.reload_changed(123)
+        self.assertEqual((None, "click-in-flight", 123), result)
+        reload.assert_not_called()
+        launch.assert_not_called()
+        self.assertEqual("click-in-flight", record.call_args.args[0]["reason"])
+
     def test_missing_provider_prevents_seat_reset_and_click_launch(self):
         loop = load_loop()
         with mock.patch.object(loop, "jvm_eval", return_value={

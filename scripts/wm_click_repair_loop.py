@@ -84,6 +84,7 @@ DEBUG = {"abstained", "no-selection"}
 DEBUGGER = STATE / "debugger"
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F3C, "src/futon3c/wm")]
+SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
 
 
 def now() -> str:
@@ -193,6 +194,41 @@ def changed_click_files(since_epoch: int) -> list[Path]:
     return sorted(files)
 
 
+def source_identity_inventory() -> dict[str, Path]:
+    """Read the runner's declared source-identity inventory without loading Clojure.
+
+    The inventory is the explicit click-path census maintained by
+    load_identity/required-sources. Reload planning uses it for attribution,
+    not as a guessed dependency graph: changed-click-file discovery remains
+    the set eligible to reload.
+    """
+    try:
+        text = SOURCE_IDENTITY_INVENTORY.read_text(errors="replace")
+    except OSError:
+        return {}
+    entries = {}
+    for namespace, raw_path in re.findall(r'^\s*\'([\w.\-]+)\s+"([^"]+\.clj)"', text, re.MULTILINE):
+        path = Path(raw_path)
+        if raw_path.startswith("/home/joe/code/futon2/"):
+            path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
+        elif raw_path.startswith("/home/joe/code/futon3c/"):
+            path = F3C / raw_path.removeprefix("/home/joe/code/futon3c/")
+        entries[namespace] = path
+    return entries
+
+
+def reload_plan(since_epoch: int) -> tuple[list[Path], list[str]]:
+    """Return landed reload candidates and their declared identity names.
+
+    A changed dependency remains reloadable even when full-loop-runner itself
+    did not change. The second result is an attribution census; absence from
+    it is deliberately not treated as a numeric zero or an eligibility veto.
+    """
+    files = changed_click_files(since_epoch)
+    by_path = {path: namespace for namespace, path in source_identity_inventory().items()}
+    return files, sorted(by_path[path] for path in files if path in by_path)
+
+
 def dirty(path: Path) -> bool:
     repo = F2 if F2 in path.parents else F3C
     return bool(git(repo, "status", "--porcelain", "--", str(path.relative_to(repo))).strip())
@@ -231,11 +267,14 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
     """Reload every click-path namespace committed since since_epoch. Returns
     (ok, failure-text, new-since). Reload only between clicks, or while the
     named run is demonstrably stopped at the restart debugger."""
-    while click_running() and not (held_run_id and debugger_stop(held_run_id)):
-        log("reload: a click is in flight; waiting")
-        time.sleep(60)
+    if click_running() and not (held_run_id and debugger_stop(held_run_id)):
+        log("reload: deferred; a click is in flight")
+        record({"event": "reload", "ok": None, "since": since_epoch,
+                "reason": "click-in-flight", "namespaces": [],
+                "source-identity-dependencies": []})
+        return None, "click-in-flight", since_epoch
     started = int(time.time())
-    files = changed_click_files(since_epoch)
+    files, identity_dependencies = reload_plan(since_epoch)
     skipped = [f for f in files if dirty(f)]
     order = [(ns, f) for ns, f in reload_order([f for f in files if f not in skipped])]
     for f in skipped:
@@ -251,8 +290,18 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
             return False, text, since_epoch
     log(f"reload: {len(order)} namespace(s) since @{since_epoch}: {' '.join(ns for ns, _ in order) or '-'}")
     record({"event": "reload", "ok": True, "since": since_epoch,
-            "namespaces": [ns for ns, _ in order], "skipped-dirty": [str(f) for f in skipped]})
+            "namespaces": [ns for ns, _ in order], "skipped-dirty": [str(f) for f in skipped],
+            "source-identity-dependencies": identity_dependencies})
     return True, "", started
+
+
+def reload_when_idle(since_epoch: int, held_run_id: str | None = None) -> tuple[bool, str, int]:
+    """Wait between clicks; never turn an active click into a reload attempt."""
+    while True:
+        ok, text, updated = reload_changed(since_epoch, held_run_id)
+        if ok is not None:
+            return ok, text, updated
+        time.sleep(60)
 
 
 # ---------------------------------------------------------------- clicks
@@ -328,7 +377,7 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
     verdict, detail = repair(args, reason, None, in_flight_repairs, live_page)
     in_flight_repairs.append(detail)
     if verdict == "repaired":
-        ok, reload_text, since_epoch = reload_changed(
+        ok, reload_text, since_epoch = reload_when_idle(
             since_epoch, held_run_id=stop["run-id"])
         if ok:
             resumed = retry_held_run(stop["run-id"])
@@ -767,7 +816,7 @@ def run(args) -> int:
         f"max-repairs={args.max_repairs} repair-seat={args.repair_seat} ===")
     record({"event": "start", "args": vars(args)})
     since = jvm_start_epoch()
-    ok, text, since = reload_changed(since)
+    ok, text, since = reload_when_idle(since)
     fault_repairs: list[str] = []
     while not ok:  # a namespace that will not load is a repair before any click
         if len(fault_repairs) >= args.max_repairs:
@@ -776,7 +825,7 @@ def run(args) -> int:
         fault_repairs.append(detail)
         if verdict in ("cannot-repair", "no-defect"):
             return stop(args, f"reload failing and the repair seat answered {verdict}: {detail[:300]}", 1)
-        ok, text, since = reload_changed(since)
+        ok, text, since = reload_when_idle(since)
 
     spent = ticks = quiet = 0
     last_abstention: dict | None = None
@@ -834,7 +883,7 @@ def run(args) -> int:
         fault_repairs.append(f"{reason} -> {detail}")
         if verdict == "cannot-repair" or (page and verdict == "no-defect"):
             return stop(args, f"repair seat answered {verdict}: {detail[:300]}", 1)
-        ok, text, since = reload_changed(since)
+        ok, text, since = reload_when_idle(since)
         while not ok:
             if len(fault_repairs) >= args.max_repairs:
                 return stop(args, f"reload failing after repairs: {text[:300]}", 1)
@@ -842,7 +891,7 @@ def run(args) -> int:
             fault_repairs.append(f"{text[:200]} -> {detail}")
             if verdict in ("cannot-repair", "no-defect"):
                 return stop(args, f"reload failing; repair seat answered {verdict}", 1)
-            ok, text, since = reload_changed(since)
+            ok, text, since = reload_when_idle(since)
     return stop(args, f"done: {spent} clicks spent, {ticks} carried a tick")
 
 
