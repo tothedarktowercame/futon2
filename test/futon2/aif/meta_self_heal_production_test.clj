@@ -65,6 +65,32 @@
     (is (= :refused (:status dedicated)))
     (is (= :meta-self-heal/production-config-required (:reason dedicated)))))
 
+(deftest ordinary-readiness-retains-refused-prepared-acceptance
+  ;; Historical pin: wm-click-576d3263 was refused after its acceptance review
+  ;; returned :refused. These ports and ledger are isolated test values only.
+  (let [env (harness/prepare-environment! (root))
+        acceptance-observation {:status :refused
+                                 :reason :meta-self-heal/acceptance-review-refused
+                                 :review-status :refused
+                                 :review-reason nil}
+        readiness (production/production-readiness
+                   {:meta-injury-ledger-path (:ledger-path env)
+                    :meta-self-heal/readiness-route :ordinary
+                    :meta-repair-ports {:author (constantly nil)}
+                    :meta-diagnosis-fn (constantly nil)
+                    :meta-acceptance-fn (constantly nil)
+                    :meta-acceptance-review-fn (constantly nil)
+                    :diagnosis-evidence-pin {:path "diagnoses/pinned.edn"
+                                             :sha256 (apply str (repeat 64 "a"))}
+                    :meta-acceptance-observation acceptance-observation}
+                   (production/diagnosis-context
+                    {:meta-injury-ledger-path (:ledger-path env)}))]
+    (is (= :ready (:status readiness)))
+    (is (= {:status :absent
+            :absent-terms [:acceptance-test]
+            :acceptance-observation acceptance-observation}
+           (:self-heal readiness)))))
+
 (deftest runtime-routes-ordinary-work-with-the-real-self-heal-absence
   ;; Historical pin: wm-click-07653f2a met the 08:19Z active-injury ledger.
   ;; The ledger and terminal record below are isolated temporary artifacts.
@@ -99,8 +125,68 @@
     (is (= {:status :absent
             :absent-terms [:diagnosis-port
                            :acceptance-proposal-port
-                           :acceptance-review-port]}
+                           :acceptance-review-port
+                           :acceptance-test]
+            :acceptance-observation
+            {:status :unavailable
+             :reason :meta-self-heal/acceptance-diagnosis-unavailable}}
            (:meta-self-heal-readiness @ordinary-opts)))
+    (is (= (:meta-self-heal-readiness @ordinary-opts)
+           (:meta-self-heal/readiness
+            (edn/read-string (slurp (:run-record result))))))))
+
+(deftest runtime-routes-refused-acceptance-to-ordinary-work
+  ;; Historical pin: wm-click-576d3263 was stopped at a refused acceptance
+  ;; review. The isolated producer stubs return no executable repair result.
+  (let [env (harness/prepare-environment! (root))
+        record-dir (str (:root env) "/run-records")
+        ordinary-opts (atom nil)
+        result (with-redefs [production/route!
+                             (fn [_] (throw (Exception. "must not route dedicated")))]
+                 (with-redefs-fn
+                   {#'runtime/run-ordinary-opportunity!
+                    (fn [opts]
+                      (reset! ordinary-opts opts)
+                      (let [terminal {:attempt-id "f2c-runtime-attempt"
+                                      :outcome :incomplete
+                                      :ordinary-selection-called? true
+                                      :wm/route [{:node :SELECTION
+                                                  :via :ordinary-selection
+                                                  :at "2026-10-19T00:00:00Z"}]
+                                      :data {:failure-kind :abstained
+                                             :failure-stage :selection}
+                                      :checkpoints {:selection
+                                                    {:sorry {:decision {:status :abstained}}}}}
+                            written (runner/persist-run-record!
+                                     opts "f2c-runtime-ordinary"
+                                     "2026-10-19T00:00:00Z" terminal)]
+                        (assoc terminal :run-record (:run-record written))))}
+                   #(runtime/run-opportunity!
+                     (assoc (dissoc (opts env (harness/fake-ports (:repo env) (atom {}) :success))
+                                    :diagnosis-evidence-pin :acceptance-test)
+                            :run-record-dir record-dir
+                            :scan-render-fn (fn [& _] nil)
+                            :meta-diagnosis-root (str (:root env) "/diagnoses")
+                            :meta-acceptance-root (str (:root env) "/acceptances")
+                            :meta-diagnosis-fn
+                            (constantly {:status :succeeded
+                                         :diagnosis {:class :configuration}})
+                            :meta-acceptance-fn
+                            (constantly {:status :proposed
+                                         :acceptance-test {:id "F2c-not-run"
+                                                           :command ["not-run"]
+                                                           :expected :configuration}})
+                            :meta-acceptance-review-fn
+                            (constantly {:status :refused})))))]
+    (is (true? (:ordinary-selection-called? result)))
+    (is (= :meta-self-heal/acceptance-review-refused
+           (get-in @ordinary-opts [:meta-self-heal-readiness
+                                   :acceptance-observation :reason])))
+    (is (= :refused
+           (get-in @ordinary-opts [:meta-self-heal-readiness
+                                   :acceptance-observation :review-status])))
+    (is (contains? (get-in @ordinary-opts [:meta-self-heal-readiness])
+                   :acceptance-observation))
     (is (= (:meta-self-heal-readiness @ordinary-opts)
            (:meta-self-heal/readiness
             (edn/read-string (slurp (:run-record result))))))))

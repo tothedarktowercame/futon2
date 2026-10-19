@@ -525,7 +525,11 @@
 
   The ordinary route retains unavailable dedicated self-heal machinery as an
   observation, not an ordinary-selection veto. The dedicated route remains
-  fail-closed without its required inputs."
+  fail-closed without its required inputs. Runtime calls preparation before
+  this function, so a prepared non-admitted acceptance is an :acceptance-test
+  absence even when its producer ports are configured. A direct pre-preparation
+  caller may still receive plain readiness from configured ports; it must not
+  call route! before preparing its observations."
   ([opts] (production-readiness opts (diagnosis-context opts)))
   ([opts {:keys [meta-injury-ledger-path durable-ledger active-injuries]}]
   (let [ledger-path meta-injury-ledger-path
@@ -534,6 +538,12 @@
         durable durable-ledger
         active active-injuries
         active? (seq (:injuries active))
+        acceptance-observation (:meta-acceptance-observation opts)
+        prepared-acceptance-absent?
+        (and active?
+             (nil? (:acceptance-test opts))
+             (map? acceptance-observation)
+             (not (#{:accepted :present} (:status acceptance-observation))))
         missing (cond-> []
                   (nil? transaction-path) (conj :transaction-path)
                   (and active? (nil? (effect-ports opts))) (conj :repair-ports)
@@ -546,10 +556,16 @@
                   (and active? (nil? (:acceptance-test opts))
                        (not (ifn? (:meta-acceptance-review-fn opts))))
                   (conj :acceptance-review-port))
-        self-heal-absence (vec (filter #{:diagnosis-port
-                                         :acceptance-proposal-port
-                                         :acceptance-review-port}
-                                       missing))]
+        self-heal-absence (cond-> (vec (filter #{:diagnosis-port
+                                                  :acceptance-proposal-port
+                                                  :acceptance-review-port}
+                                                missing))
+                            prepared-acceptance-absent? (conj :acceptance-test))
+        self-heal (cond-> {:status :absent :absent-terms self-heal-absence}
+                    prepared-acceptance-absent?
+                    (assoc :acceptance-observation
+                           (select-keys acceptance-observation
+                                        [:status :reason :review-status :review-reason])))]
     (cond
       (and durable (not= :loaded (:status durable)))
       (refusal :meta-self-heal/ledger-unreadable {:ledger-result durable})
@@ -559,7 +575,7 @@
       {:status :ready :active-injury? true
        :meta-injury-ledger-path ledger-path
        :meta-repair-transaction-path transaction-path
-       :self-heal {:status :absent :absent-terms self-heal-absence}}
+       :self-heal self-heal}
 
       (seq missing)
       (refusal :meta-self-heal/production-config-required
