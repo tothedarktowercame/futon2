@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 3 P06 measurement increment (worker `43fce0a8a` + `5045fe687`, coordinator
+test `b53251e02`): selector forwards P04 score records through P05 and evaluates
+partial evidence. Objective retains upstream missing terms/score causes and
+menu/declaration/dataset pins with strict-assessed/absent counts. Coordinator
+added real P05 join -> objective regression; namespace 9 tests/89 assertions
+passed. No ordinary comparator is established and no winner is invented. Full
+P06 continuation remains OPEN: ordinary-result still returns partial evidence,
+selected sealing remains unchanged, and no serving reload/probe/click occurred.
+
 Row 3 P05 (`845c427dd` + `afd1d2a17`, worker `4a9184509` + `3e470b455`):
 valid global authority with policy-local missing terms yields partial evidence,
 preserving original menu/digests and joined/term-absent frontier. Local malformed

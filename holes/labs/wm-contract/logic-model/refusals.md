@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows B/E P06 increment: policy-local objective absence is retained as a partial
+strict verdict with exact upstream terms/score causes; integrity/global defects
+still refuse. This improves cause retention, not continuation: ordinary-result
+remains non-selected and the debugger gate is unchanged. Do not mark the original
+strict-objective coverage blocker resolved by this measurement-only increment.
+
 Evidence-join row B P05 (`845c427dd` + `afd1d2a17`): policy-local missing terms
 or malformed priors now produce typed absent rows in a partial receipt instead
 of atomic policy-evidence-incomplete refusal. Invalid global declaration/menu

@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 35/42 P06 increment: partial evidence is evaluated as partial objective
+measurement, preserving original local causes rather than diagnosing deliberately
+omitted numeric fields. Counts distinguish strict assessed/absent from zero
+ordinary assessed with `:absent-no-comparable-policy-comparison`. No selected
+carrier is minted. Production ordinary-result still returns partial evidence;
+continuation remains unresolved. P05-to-objective test passes, not a live run.
+
 Row 34 P05 (`845c427dd` + `afd1d2a17`): evidence join retains computable rows
 beside typed local absences, original menu pin, and measured frontier. Malformed
 local prior shapes/types become `:prior-alpha` absence without posterior/EIG
