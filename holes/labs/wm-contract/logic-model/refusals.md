@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Chains 2–5/7 P10 (worker `afcd14896` + `a5d8ba5ba`, test `06f78ee44`): terminal
+failure retains projected causes from supported refusal containers, original
+failure/error-data and typed cause-chain data, with distinct cause counts and
+two in-record entries. Overflow stores the complete supported projected cause
+set in a digest-pinned sidecar outside the run-record filename namespace; failed
+writes remain explicit absences. Counts are not a census of arbitrary judgement
+trees. Original kind and close wrapper stay distinct. Synthetic boundary tests
+pass; no live persistence claim.
+
 Rows B/E P06 increment: policy-local objective absence is retained as a partial
 strict verdict with exact upstream terms/score causes; integrity/global defects
 still refuse. This improves cause retention, not continuation: ordinary-result

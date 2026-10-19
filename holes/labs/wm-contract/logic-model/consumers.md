@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 54 P10: terminal projection writes `refusal-causes-<run>.edn` only when
+supported projected causes exceed the in-record limit; path and byte hash are
+retained. Sidecars do not match `tick-run-record-.*\.edn`. Original nested causes
+and independent wrapper data are collected; nil/throwing writers yield explicit
+absent references. No serving-process verification has been performed.
+
 Rows 35/42 P06b: partial objective offers `:assessed-selection` scoped to
 `:assessed-population`, with assessed/absent identities and conditional posterior.
 This is not global strict selection and does not change the ordinary comparator

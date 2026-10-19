@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Section 2 P10: scalar failure-detail remains lossy, but terminal failure now has
+a separate bounded cause projection and complete overflow for the supported
+refusal-container interface. No silent traversal cap is used there. Coordinator
+corrected the scanner regex control and checked overflow count/hash coverage;
+focused 2 tests/19 assertions pass. This does not claim arbitrary nested judgement
+retention or live persistence.
+
 Row 3 P06b (worker `d91e5202`, coordinator test `ea79745f0`): partial objective
 now emits a separately scoped assessed-selection receipt using the existing
 objective and tie law over computed rows only. Full menu pins/absences remain;
