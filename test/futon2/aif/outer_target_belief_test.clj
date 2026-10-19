@@ -73,7 +73,15 @@
     (is (= 2 (get-in result [:targets "M-a" :alpha :abstention-or-failure])))
     (is (= [:apparatus-failure-not-task-evidence
             :terminal-cause-unclassified]
-           (mapv #(get-in % [:observation :reason]) (take 2 (:events result)))))))
+           (mapv #(get-in % [:observation :reason]) (take 2 (:events result)))))
+    (is (= {:apparatus {:count 1
+                        :identities [["r-apparatus" "r-apparatus-click"]]
+                        :reasons {:apparatus-failure-not-task-evidence 1}}
+            :unknown {:count 1
+                      :identities [["r-ambiguous" "r-ambiguous-click"]]
+                      :reasons {:terminal-cause-unclassified 1}}
+            :missing {:count 0 :identities [] :reasons {}}}
+           (:non-task-observations result)))))
 
 (deftest replay-order-does-not-change-alpha-and-no-target-is-not-a-belief
   (let [rows [(row "r-success" "M-a" :closure)

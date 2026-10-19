@@ -78,6 +78,30 @@
           (map (fn [outcome] [outcome (/ (get alpha outcome) total)]))
           outcome-vocabulary)))
 
+(defn- non-task-observation-census
+  "Retain, rather than collapse, rows that deliberately did not update a task
+   posterior.  This is an observation about the apparatus/unknown boundary, not
+   a substitute zero or a successful task outcome."
+  [events]
+  (reduce (fn [census {:keys [identity observation] outcome-update :update}]
+            (if (= :applied outcome-update)
+              census
+              (let [cause (get-in observation [:evidence :terminal-cause :class])
+                    bucket (case cause
+                             :apparatus-failure :apparatus
+                             :unclassified :unknown
+                             :missing)]
+                (update census bucket
+                        (fn [{:keys [count identities reasons]
+                              :or {count 0 identities [] reasons {}}}]
+                          {:count (inc count)
+                           :identities (conj identities identity)
+                           :reasons (update reasons (:reason observation) (fnil inc 0))})))))
+          {:apparatus {:count 0 :identities [] :reasons {}}
+           :unknown {:count 0 :identities [] :reasons {}}
+           :missing {:count 0 :identities [] :reasons {}}}
+          events))
+
 (defn build
   "Fold a produced META outcome dataset into target-qualified posteriors.
   Dataset order is authoritative chronology."
@@ -181,6 +205,8 @@
                     :prior (select-keys prior [:schema :authority :alpha])
                     :targets (:targets folded)
                     :events (:events folded)
+                    :non-task-observations
+                    (non-task-observation-census (:events folded))
                     :counts {:rows (count (:rows dataset))
                              :applied (count (filter #(= :applied (:update %))
                                                      (:events folded)))
