@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P22 / A44 (`1ad352646`, `b3ec03875`, `2a9ee410f`): explicit incident-close
+adapter retains covered versus unresolved dispositions. Covered requires a
+registered wire, verified source bytes, and an identity/source-bound injected
+verifier receipt; missing authority is unresolved, not covered. All coverage
+computation/persistence failures are post-close observations and cannot recast
+a completed close as failed. Production close caller/verifier remain absent;
+this does not establish operational closure coverage or live repair success.
+
+
 A6/R1 / P23: [categorical belief reconciliation](p23-categorical-belief.md)
 identifies a paper-shape mismatch: entity-ID to seven-status posterior, not the
 paper's six operational-hypothesis keys. A/B/D and unknown-event omission are

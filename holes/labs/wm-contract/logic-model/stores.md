@@ -9,6 +9,15 @@ identified. No serving-store observation has been made after landing.
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P22 (`1ad352646`, `b3ec03875`, `2a9ee410f`) adds an adapter-owned
+`incident-coverage/<incident-id>.edn` receipt linked to closure evidence.
+Complete sibling temporary bytes are published by create-only hard link under
+the store lock. Identical existing receipts are idempotent; different receipts
+conflict without overwrite. Persistence failure is unavailable coverage, not
+failure of an already completed close. This is outside the trip-report scanner
+namespace and has no configured production close caller yet.
+
+
 P18 budget observation does not mutate the budget ledger. Valid snapshots carry
 ledger-source pin and ISO observation time; missing/failed/malformed reader data
 has explicit absent provenance. Invalid injected time retains known provenance
