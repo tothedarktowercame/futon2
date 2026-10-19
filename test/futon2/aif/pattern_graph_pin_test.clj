@@ -1,5 +1,6 @@
 (ns futon2.aif.pattern-graph-pin-test
   (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.pattern-graph-pin :as sut]))
@@ -53,6 +54,8 @@
                      (spit file (json/generate-string (assoc fixture :records 13)))
                      file)]
     (is (= :published (:status (sut/publish! old-source root))))
+    ;; Reusing the content-addressed generation is accepted only for its same bytes.
+    (is (= :published (:status (sut/publish! old-source root))))
     (is (= 12 (get-in (sut/load-pinned root) [:pin :inputs :analyses])))
     (is (= :refused
            (:status (sut/publish! new-source root
@@ -64,6 +67,24 @@
       (is (not= (get-in (sut/publish! new-source root) [:pin :sha256])
                 (get-in loaded [:pin :sha256]))))
     (is (= 13 (get-in (sut/load-pinned root) [:pin :inputs :analyses])))))
+
+(deftest publication-uses-one-snapshot-and-binds-manifest-digest
+  (let [dir (temp-dir)
+        root (io/file dir "published-graph.json")
+        source (write-graph! dir fixture)
+        changed (assoc fixture :records 13)]
+    ;; The producer mutates its input after publication snapshots it.  The
+    ;; selected generation still contains only the snapshot's old bytes.
+    (is (= :published
+           (:status (sut/publish! source root
+                                  {:after-snapshot #(spit source (json/generate-string changed))}))))
+    (is (= 12 (get-in (sut/load-pinned root) [:pin :inputs :analyses])))
+    (let [manifest (io/file (str root ".publication.edn"))]
+      (spit manifest (pr-str (assoc (edn/read-string (slurp manifest)) :sha256 "substituted")))
+      (let [refusal (sut/load-pinned root)]
+        (is (= :refused (:status refusal)))
+        (is (= :graph-publication-invalid (:kind refusal)))
+        (is (nil? (:graph refusal)))))))
 
 (deftest missing-pin-is-typed
   (let [file (write-graph! (temp-dir) fixture)

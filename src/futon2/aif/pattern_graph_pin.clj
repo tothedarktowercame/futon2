@@ -13,7 +13,8 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as identity])
-  (:import [java.nio.file Files StandardCopyOption]))
+  (:import [java.nio.charset StandardCharsets]
+           [java.nio.file FileAlreadyExistsException Files StandardCopyOption]))
 
 (identity/register! *ns* *file*)
 
@@ -109,18 +110,22 @@
                              StandardCopyOption/REPLACE_EXISTING]))
     value))
 
-(defn- atomic-copy! [source destination]
+(defn- immutable-bytes! [destination bytes]
   (.mkdirs (.getParentFile destination))
-  (let [tmp (io/file (.getParentFile destination)
-                     (str "." (.getName destination) "." (System/nanoTime) ".tmp"))]
-    (Files/copy (.toPath (io/file source)) (.toPath tmp)
-                (into-array java.nio.file.StandardCopyOption
-                            [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
-    (Files/move (.toPath tmp) (.toPath destination)
-                (into-array StandardCopyOption
-                            [StandardCopyOption/ATOMIC_MOVE
-                             StandardCopyOption/REPLACE_EXISTING]))
-    destination))
+  (if (.isFile destination)
+    (when-not (= (identity/sha256 bytes) (file-sha256 destination))
+      (throw (ex-info "generation path has different bytes" {:path (str destination)})))
+    (let [tmp (io/file (.getParentFile destination)
+                       (str "." (.getName destination) "." (System/nanoTime) ".tmp"))]
+      (Files/write (.toPath tmp) bytes (make-array java.nio.file.OpenOption 0))
+      (try
+        (Files/move (.toPath tmp) (.toPath destination)
+                    (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
+        (catch FileAlreadyExistsException _
+          (when-not (= (identity/sha256 bytes) (file-sha256 destination))
+            (throw (ex-info "generation path has different bytes" {:path (str destination)})))
+          (Files/deleteIfExists (.toPath tmp))))))
+  destination)
 
 (defn pin!
   "Pin GRAPH-PATH's current bytes and effective (co-rejected-free) topology."
@@ -163,19 +168,24 @@
    interruption leaves the prior readable generation selected.  BEFORE-SWITCH
    is test-only fault injection."
   ([source root] (publish! source root {}))
-  ([source root {:keys [before-switch]}]
+  ([source root {:keys [before-switch after-snapshot]}]
    (try
-     (let [raw (json/parse-string (slurp source) true)
+     (let [bytes (Files/readAllBytes (.toPath (io/file source)))
+           _ (when after-snapshot (after-snapshot))
+           raw (json/parse-string (String. bytes StandardCharsets/UTF_8) true)
            graph (normalized-graph raw)]
        (if-let [refusal (graph-refusal raw graph)]
          refusal
-         (let [sha (file-sha256 source)
+         (let [sha (identity/sha256 bytes)
                generation (io/file (str root ".generations") sha)
                graph-file (io/file generation "graph.json")
-               pin-path (pin-file graph-file)
-               pin (pin-value source raw graph)]
-           (atomic-copy! source graph-file)
-           (atomic-write! pin-path (assoc pin :sha256 (file-sha256 graph-file)))
+               pin-path (pin-file graph-file)]
+           (immutable-bytes! graph-file bytes)
+           (let [pin (pin-value graph-file raw graph)]
+             (if (.isFile pin-path)
+               (when-not (= pin (edn/read-string (slurp pin-path)))
+                 (throw (ex-info "generation pin differs" {:path (str pin-path)})))
+               (atomic-write! pin-path pin)))
            (let [checked (load-pinned-at graph-file pin-path (str root))]
              (if (not= :loaded (:status checked))
                checked
@@ -201,12 +211,16 @@
     (cond
       (.isFile manifest-path)
       (try
-        (let [{:keys [schema graph-path pin-path]} (edn/read-string (slurp manifest-path))
+        (let [{:keys [schema graph-path pin-path sha256]} (edn/read-string (slurp manifest-path))
               published-graph (io/file graph-path)
-              published-pin (io/file pin-path)]
+              published-pin (io/file pin-path)
+              loaded (when (and (= :wm/pattern-graph-publication-v1 schema)
+                                (= (.getCanonicalPath (pin-file published-graph)) (.getCanonicalPath published-pin)))
+                       (load-pinned-at published-graph published-pin (str graph-file)))]
           (if (and (= :wm/pattern-graph-publication-v1 schema)
-                   (= (.getCanonicalPath (pin-file published-graph)) (.getCanonicalPath published-pin)))
-            (load-pinned-at published-graph published-pin (str graph-file))
+                   (= (.getCanonicalPath (pin-file published-graph)) (.getCanonicalPath published-pin))
+                   (= sha256 (get-in loaded [:pin :sha256])))
+            loaded
             {:status :refused :kind :graph-publication-invalid :path (str manifest-path)}))
         (catch Exception e
           {:status :refused :kind :graph-publication-invalid :path (str manifest-path)
