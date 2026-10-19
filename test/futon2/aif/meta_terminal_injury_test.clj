@@ -55,6 +55,40 @@
       (is (= :injury (:classification classification)))
       (is (= (or stage :unknown-stage) (:failure-stage classification))))))
 
+(deftest abstention-cause-classification-requires-retained-evidence
+  ;; L1 historical terminal cause: it is the demonstrated missing-production
+  ;; machinery value, without inferring any historical population count.
+  (let [l1-provider-record
+        {:run/id "l1-provider" :click/id "l1-click"
+         :failure {:kind :abstained :stage :selection
+                   :detail {:refusals [{:reason :outer-policy-evidence-provider-required}]}}}
+        scored-no-action
+        {:run/id "scored-none" :click/id "same-coarse-outcome"
+         :failure {:kind :abstained :stage :selection
+                   :detail {:refusals [{:reason :policy-nondiscrimination}]}}
+         :decision {:status :abstained}}
+        partial-frontier-continued
+        {:run/id "partial-continued" :click/id "same-coarse-outcome"
+         :failure {:kind :abstained :stage :close}
+         :decision {:status :selected
+                    :selection-certificate
+                    {:reading-frontier {:eligible 3 :assessed 1 :reading-absent 2}}}}
+        unknown-absence
+        {:run/id "unknown-absence" :click/id "same-coarse-outcome"
+         :failure {:kind :abstained :stage :selection
+                   :detail {:refusals [{:reason :no-current-target-reading}]}}}
+        classified (mapv #(classify % pin-a)
+                         [l1-provider-record scored-no-action
+                          partial-frontier-continued unknown-absence])]
+    (is (= [:injury :non-injury :non-injury :non-injury]
+           (mapv :classification classified)))
+    (is (= :missing-production-machinery (:observation-class (first classified))))
+    (is (= [:evaluated-no-action :partial-frontier-continuation
+            :ordinary-selection-abstention]
+           (mapv :non-injury-reason (subvec classified 1))))
+    (is (= [:evaluated-no-action :partial-frontier-continuation :ordinary-abstention]
+           (mapv :observation-class (subvec classified 1))))))
+
 (deftest trace-output-absence-and-unrelated-success-cannot-erase-open-injury
   (let [injury (classify {:run/id "failed" :click/id "failed-click"
                           :failure {:kind :apparatus-phase-failure

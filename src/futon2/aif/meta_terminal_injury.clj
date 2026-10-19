@@ -53,6 +53,30 @@
                        [(get-in record [:failure :detail :refusals])
                         (get-in record [:failure :detail :outer-task-selection])
                         (:outer-task-selection record)]))))
+(defn- contains-cause? [record cause]
+  (some #(= cause %)
+        (tree-seq coll? seq
+                  [(get-in record [:failure :detail :refusals])
+                   (get-in record [:failure :detail :outer-task-selection])
+                   (:decision record)
+                   (:outer-task-selection record)])))
+(defn- evaluated-no-action? [record]
+  ;; This names the scored terminal result, not an absence found while trying
+  ;; to construct it. Do not generalize a missing score into this evidence.
+  (and (= :abstained (failure-kind record))
+       (contains-cause? record :policy-nondiscrimination)))
+(defn- partial-frontier-continuation? [record]
+  ;; A selected decision alongside its retained frontier proves that selection
+  ;; continued. Counts alone do not establish a continuation.
+  (and (= :abstained (failure-kind record))
+       (= :selected (get-in record [:decision :status]))
+       (map? (get-in record [:decision :selection-certificate :reading-frontier]))))
+(defn- abstention-reason [record]
+  (cond
+    (unconfigured-route? record) nil
+    (partial-frontier-continuation? record) :partial-frontier-continuation
+    (evaluated-no-action? record) :evaluated-no-action
+    :else :ordinary-selection-abstention))
 (defn- cause-id [record]
   (str "cause/" (identity/digest
                  (cond-> [:meta-terminal-cause (cause-key record)]
@@ -92,13 +116,15 @@
           run (run-id record)
           click (click-id record)
           terminal-outcome (outcome record)
-          non-injury-reason (or (when-not (unconfigured-route? record)
-                                 (get explicit-non-injury-kinds kind))
-                                (when (and (nil? kind)
-                                           (contains? successful-outcomes terminal-outcome))
-                                  :successful-task-outcome)
-                                (when (and (nil? kind) (nil? terminal-outcome))
-                                  :absent-terminal-failure))
+          non-injury-reason (if (= :abstained kind)
+                              (when-not (unconfigured-route? record)
+                                (abstention-reason record))
+                              (or (get explicit-non-injury-kinds kind)
+                                  (when (and (nil? kind)
+                                             (contains? successful-outcomes terminal-outcome))
+                                    :successful-task-outcome)
+                                  (when (and (nil? kind) (nil? terminal-outcome))
+                                    :absent-terminal-failure)))
           defects (cond-> []
                     (not (map? record)) (conj :record/map)
                     (not (pin? source-pin)) (conj :record/source-pin)
@@ -114,10 +140,18 @@
                   :failure-kind (or kind :none) :failure-stage stage
                   :trace-written (boolean (:traceWritten record))
                   :run-output-present (boolean (:run-output record))}
-           non-injury-reason (assoc :non-injury-reason non-injury-reason)
+           non-injury-reason (assoc :non-injury-reason non-injury-reason
+                                    :observation-class
+                                    (case non-injury-reason
+                                      :evaluated-no-action :evaluated-no-action
+                                      :partial-frontier-continuation :partial-frontier-continuation
+                                      :ordinary-abstention))
            (nil? non-injury-reason)
            (assoc :cause-id (cause-id record)
                   :injury-id (injury-id record)
+                  :observation-class (if (unconfigured-route? record)
+                                       :missing-production-machinery
+                                       :terminal-failure)
                   :target (or (target record) {:absent :target-not-recorded}))))))
     (catch Throwable t
       (refusal :terminal-record/malformed {:detail (ex-message t)}))))
