@@ -1070,6 +1070,7 @@
   Preparation's pending count is never a selection verdict."
   [result outer-task-selection]
   (let [preparation (retained-selected-target-reading result)
+        prepared-frontier (:frontier preparation)
         field (or (get-in outer-task-selection [:policy :policy-field])
                   (get-in outer-task-selection [:policy-field])
                   (get-in result [:checkpoints :selection :judgment
@@ -1081,7 +1082,17 @@
                                                     :stale-target-reading} (:kind f)))
                               (:failures %))]
     {:selection-frontier
-     (if (seq families)
+     ;; A pre-choice preparation record is the only carrier that survives a
+     ;; successful redecision with the original 700-wide menu intact.  The
+     ;; redecided outer receipt is deliberately narrower (the selected family),
+     ;; so never use it to overwrite that producer measurement.
+     (if (seq (:eligible-target-ids prepared-frontier))
+       {:field-source-pin (:field-source-pin preparation)
+        :eligible-ids (:eligible-target-ids prepared-frontier)
+        :assessed-ids (:assessed-target-ids prepared-frontier)
+        :reading-absent-ids (:reading-absent-ids prepared-frontier)
+        :other-exclusions (:other-failures preparation)}
+       (if (seq families)
        {:field-source-pin (:source-pin field)
         :eligible-ids (mapv :target-id families)
         :assessed-ids (mapv :target-id (filter #(= :computed (:status %)) families))
@@ -1090,7 +1101,7 @@
                                             (let [ks (vec (remove #(contains? #{:no-current-target-reading :stale-target-reading}
                                                                          (:kind %)) (:failures f)))]
                                               (when (seq ks) [(:target-id f) ks]))) families))}
-       {:status :unavailable :reason :target-policy-field-not-retained})
+       {:status :unavailable :reason :target-policy-field-not-retained}))
      :preparation-backlog
      (select-keys preparation [:schema :status :reason :deadline-ms :field-source-pin
                                :frontier :records :pending :other-failures])}))
