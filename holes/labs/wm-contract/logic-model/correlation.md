@@ -2,6 +2,15 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P26 / A16-R4 (`0a6383ef5`, `p26-model-process.md`): direct predictive consumers
+are EFE scoring and cascade-lane R4; external author dispatch and independent
+repository artifact binding are a distinct generative process, not a common
+live/predictive kernel. Model existence and model/process calibration must be
+separate claims: the former is statically evidenced, the latter was not
+evaluated here. The paper's shared-live-kernel prescription is a documentation
+mismatch; replacement prose is proposed, not applied. No serving validation.
+
+
 P22 / A44 (`1ad352646`, `b3ec03875`, `2a9ee410f`): explicit incident-close
 adapter retains covered versus unresolved dispositions. Covered requires a
 registered wire, verified source bytes, and an identity/source-bound injected
