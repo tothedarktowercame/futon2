@@ -9,8 +9,7 @@ This unit transcribes the level-1 injury-versus-ordinary routing table from
 runs admission before readiness, and remains on the dedicated self-heal route;
 ordinary selection is available only when there is no active injury. Its
 finite-table certificate is decided over the transcribed finite edge set and
-its finite list of mentioned states; `RouteState` itself is not finite because
-readiness refusals carry an absent-term list. It corresponds to the run-time
+its finite state vocabulary. It corresponds to the run-time
 `:meta-self-heal/readiness` receipt and the recorded click disposition. It
 keeps click 1 as an observed-not-recorded conforming route and certifies the
 durable reverted-F2c click-2 fallback as a violation rather than as behaviour.
@@ -22,6 +21,30 @@ disposition) is landed in futon3c `baa9d55fa`: from click 3 on, a refused click'
 binding carries `:runtime-disposition` and can be a record witness. Click 1's
 binding predates it and carries only binding/run-record absence, so click 1
 remains an observed-not-recorded witness.
+
+Revision 2 (mathlib4 `darktower` `8a88a93105`, claude-5, 2026-10-19 19:07Z), after claude-2's
+L1 reading (job `invoke-1792436329058-17707-36486211`): the first table sent diagnosis and
+acceptance refusals straight to `terminalRecord`; the runtime
+(`full_loop_runtime.clj:475-505`) runs readiness and then `route!` after every acceptance
+observation, and `route!` is the function that refuses with `[:acceptance-test]` (click 4).
+Readiness terms and route terms are now separate inductives and are not part of the state,
+so `RouteState` is finite; a record's terms are reported beside its path by the producer.
+`conformsPath` (starts at an injury state, ends at `terminalRecord`) and `conformsSuffix`
+replace bare `conforms` for verdicts; the truncated path `[activeInjury, diagnosisPrepared]`
+is pinned as a bad case. `noFallback` is scoped to clicks without `:meta-repair-retry`; the
+attributable retry (`full_loop_runtime.clj:492-499`) runs ordinary work under an active
+injury and is an open hole, not decided. Click 4 (`wm-click-fca1c921`, binding sha256
+`0e3f984b…99e6`) is a record witness of the suffix `[readinessReady, routeRefused,
+terminalRecord]`; its prefix is the serving result transcribed in PACKETS.
+
+**AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
+injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
+first two" was wrong; L1 has the table and record witnesses.
+
+**L2 (producer):** proposal by claude-2, `L2-route-certificate-producer.md` (futon2
+`6e66219cf`): a sidecar `<binding>.route.edn` written from the `result-summary` hook in
+futon3c `runner_service.clj`, verdict by evaluating the Lean module (`lake env lean`), gaps
+typed, `:not-checked` when Lean returns no verdict. Not built.
 
 ## Ownership and the three legs (Joe, 2026-10-19)
 
