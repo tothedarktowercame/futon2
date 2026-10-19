@@ -18,7 +18,7 @@
 
 (defn row [id alpha ln-e]
   (let [n (double (reduce + alpha)) q (mapv #(/ (double %) n) alpha)]
-    {:policy-id id :target-id "same-target" :cascade-digest (str "digest-" id)
+    {:status :computed :policy-id id :target-id "same-target" :cascade-digest (str "digest-" id)
      :posterior-alpha alpha
      :posterior-predictive {:vocabulary [:success :failure]
                             :distribution q :units :probability}
@@ -72,6 +72,23 @@
         r (sut/evaluate (evidence rows) (sealed rows))]
     (is (= (get-in r [:policies 0 :terms :G]) (get-in r [:policies 1 :terms :G])))
     (is (= "b" (get-in r [:action :policy-id])))))
+
+(deftest partial-evidence-retains-strict-absence-without-a-winner
+  (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]
+        e (evidence rows)
+        absent {:status :absent :policy-id "b" :target-id "same-target"
+                :cascade-digest "digest-b" :absent-terms [:ln-e-cadence]}
+        partial (reseal-evidence (assoc e :status :partial
+                                         :entries [(first rows) absent]))
+        r (sut/evaluate partial (sealed rows))]
+    (is (= :partial (:status r)))
+    (is (= :absent (get-in r [:strict-verdict :status])))
+    (is (= 1 (get-in r [:frontier :strict-assessed])))
+    (is (= 1 (get-in r [:frontier :strict-absent])))
+    (is (= 0 (get-in r [:frontier :ordinary-assessed])))
+    (is (= :absent-no-comparable-policy-comparison
+           (get-in r [:frontier :ordinary-basis])))
+    (is (nil? (:action r)))))
 
 (deftest exact-tie-and-atomic-refusals
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]

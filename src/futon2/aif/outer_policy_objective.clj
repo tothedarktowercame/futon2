@@ -91,10 +91,22 @@
                                :units :nats}}))))
               (:entries evidence)))
         invalid (filterv #(seq (:absent-terms %)) rows)]
-    (if (or malformed-top (seq invalid) (empty? rows))
+    (if malformed-top
       {:schema schema :status :refused
-       :reason (or malformed-top (first (:absent-terms (first invalid))) :objective-input-invalid)
+       :reason malformed-top
        :invalid invalid}
+      (if (or (seq invalid) (empty? rows))
+        {:schema schema :status :partial
+         :strict-verdict {:status :absent
+                          :reason (or (first (:absent-terms (first invalid)))
+                                      :objective-input-invalid)
+                          :missing invalid}
+         :policies (vec (remove #(seq (:absent-terms %)) rows))
+         :frontier {:strict-assessed (count (remove #(seq (:absent-terms %)) rows))
+                    :strict-absent (count invalid)
+                    :ordinary-assessed 0
+                    :ordinary-basis :absent-no-comparable-policy-comparison}
+         :menu-pin (:menu-pin evidence)}
       (let [logits (mapv #(get-in % [:terms :logit]) rows)
             probabilities (softmax logits)
             scored (mapv #(assoc %1 :posterior %2) rows probabilities)
@@ -124,4 +136,4 @@
                :dataset-pin (:dataset-pin evidence)
                :comparison {:law (if tie? :uniform-over-equal-minima :unique-strict-objective-minimum)
                             :objective :gamma-times-G-minus-lnE
-                            :posterior :softmax-lnE-minus-gamma-G}})))))))))
+                            :posterior :softmax-lnE-minus-gamma-G}}))))))))))
