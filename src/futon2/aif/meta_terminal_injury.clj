@@ -43,23 +43,26 @@
   (or (get-in record [:failure :cause :cause-id])
       (get-in record [:failure :detail :cause-id])
       [(failure-kind record) (failure-stage record) (target record)]))
+(def ^:private cause-fields [:reason :kind :failure-kind :absent])
+(defn- supported-cause-entries [record]
+  ;; P10 retains a bounded cause vector here.  The other entries are the
+  ;; terminal refusal positions produced by the runner.  Deliberately do not
+  ;; traverse a decision: arbitrary metadata is not a terminal cause.
+  (concat (or (get-in record [:failure :causes :causes]) [])
+          (or (get-in record [:failure :detail :refusals]) [])
+          (keep identity
+                [(get-in record [:failure :detail :outer-task-selection :policy])
+                 (get-in record [:failure :detail :outer-task-selection :chosen])
+                 (get-in record [:outer-task-selection :policy])
+                 (get-in record [:outer-task-selection :chosen])])))
+(defn- contains-cause? [record cause]
+  (some (fn [entry]
+          (and (map? entry)
+               (some #{cause} (vals (select-keys entry cause-fields)))))
+        (supported-cause-entries record)))
 (defn- unconfigured-route? [record]
   (and (= :abstained (failure-kind record))
-       (some (fn [node]
-               (and (map? node)
-                    (some #{:outer-policy-evidence-provider-required}
-                          (vals (select-keys node [:reason :kind :failure-kind :absent])))))
-             (tree-seq coll? seq
-                       [(get-in record [:failure :detail :refusals])
-                        (get-in record [:failure :detail :outer-task-selection])
-                        (:outer-task-selection record)]))))
-(defn- contains-cause? [record cause]
-  (some #(= cause %)
-        (tree-seq coll? seq
-                  [(get-in record [:failure :detail :refusals])
-                   (get-in record [:failure :detail :outer-task-selection])
-                   (:decision record)
-                   (:outer-task-selection record)])))
+       (contains-cause? record :outer-policy-evidence-provider-required)))
 (defn- evaluated-no-action? [record]
   ;; This names the scored terminal result, not an absence found while trying
   ;; to construct it. Do not generalize a missing score into this evidence.
@@ -145,7 +148,13 @@
                                     (case non-injury-reason
                                       :evaluated-no-action :evaluated-no-action
                                       :partial-frontier-continuation :partial-frontier-continuation
-                                      :ordinary-abstention))
+                                      :ordinary-selection-abstention :ordinary-abstention
+                                      :successful-task-outcome :successful-task-outcome
+                                      :operator-cancelled :operator-cancelled
+                                      :declared-no-work :declared-no-work
+                                      :diagnostic-only :diagnostic-only
+                                      :absent-terminal-failure :absent-terminal-failure
+                                      :non-injury))
            (nil? non-injury-reason)
            (assoc :cause-id (cause-id record)
                   :injury-id (injury-id record)

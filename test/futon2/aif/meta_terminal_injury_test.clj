@@ -56,12 +56,14 @@
       (is (= (or stage :unknown-stage) (:failure-stage classification))))))
 
 (deftest abstention-cause-classification-requires-retained-evidence
-  ;; L1 historical terminal cause: it is the demonstrated missing-production
-  ;; machinery value, without inferring any historical population count.
-  (let [l1-provider-record
-        {:run/id "l1-provider" :click/id "l1-click"
+  ;; Synthetic provider fixture in the P10 retained-cause shape. Recorded L1
+  ;; instead stopped at :incomplete-policy-menu-coverage / :no-current-target-
+  ;; reading (frontier ruling, 2026-10-19), so it is tested separately below.
+  (let [provider-p10-record
+        {:run/id "provider-p10" :click/id "provider-click"
          :failure {:kind :abstained :stage :selection
-                   :detail {:refusals [{:reason :outer-policy-evidence-provider-required}]}}}
+                   :causes {:total-count 1 :retained-count 1 :omitted-count 0
+                            :causes [{:reason :outer-policy-evidence-provider-required}]}}}
         scored-no-action
         {:run/id "scored-none" :click/id "same-coarse-outcome"
          :failure {:kind :abstained :stage :selection
@@ -74,20 +76,42 @@
                     :selection-certificate
                     {:reading-frontier {:eligible 3 :assessed 1 :reading-absent 2}}}}
         unknown-absence
-        {:run/id "unknown-absence" :click/id "same-coarse-outcome"
+        {:run/id "l1-reading-stop" :click/id "same-coarse-outcome"
          :failure {:kind :abstained :stage :selection
-                   :detail {:refusals [{:reason :no-current-target-reading}]}}}
+                   :detail {:refusals [{:reason :incomplete-policy-menu-coverage}
+                                       {:absent :no-current-target-reading}]}}}
+        incidental-provider-metadata
+        {:run/id "incidental-provider" :click/id "same-coarse-outcome"
+         :failure {:kind :abstained :stage :selection
+                   :detail {:refusals [{:reason :policy-nondiscrimination}]}}
+         :decision {:status :abstained
+                    :metadata {:historical-label :outer-policy-evidence-provider-required}}}
         classified (mapv #(classify % pin-a)
-                         [l1-provider-record scored-no-action
-                          partial-frontier-continued unknown-absence])]
-    (is (= [:injury :non-injury :non-injury :non-injury]
+                         [provider-p10-record scored-no-action partial-frontier-continued
+                          unknown-absence incidental-provider-metadata])]
+    (is (= [:injury :non-injury :non-injury :non-injury :non-injury]
            (mapv :classification classified)))
     (is (= :missing-production-machinery (:observation-class (first classified))))
     (is (= [:evaluated-no-action :partial-frontier-continuation
-            :ordinary-selection-abstention]
+            :ordinary-selection-abstention :evaluated-no-action]
            (mapv :non-injury-reason (subvec classified 1))))
-    (is (= [:evaluated-no-action :partial-frontier-continuation :ordinary-abstention]
+    (is (= [:evaluated-no-action :partial-frontier-continuation :ordinary-abstention
+            :evaluated-no-action]
            (mapv :observation-class (subvec classified 1))))))
+
+(deftest non-abstention-non-injuries-retain-their-own-observation-class
+  (doseq [[record expected]
+          [[{:run/id "success" :click/id "success-click" :outcome :success}
+            :successful-task-outcome]
+           [{:run/id "cancelled" :click/id "cancel-click"
+             :failure {:kind :operator-cancelled :stage :operator}}
+            :operator-cancelled]
+           [{:run/id "diagnostic" :click/id "diagnostic-click"
+             :failure {:kind :diagnostic-only :stage :diagnostic}}
+            :diagnostic-only]]]
+    (let [classification (classify record pin-a)]
+      (is (= :non-injury (:classification classification)))
+      (is (= expected (:observation-class classification))))))
 
 (deftest trace-output-absence-and-unrelated-success-cannot-erase-open-injury
   (let [injury (classify {:run/id "failed" :click/id "failed-click"
