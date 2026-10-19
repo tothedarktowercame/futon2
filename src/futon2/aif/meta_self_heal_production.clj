@@ -321,9 +321,16 @@
             (refusal :meta-self-heal/acceptance-port-malformed
                      {:request request :repair-claimed? false})
             (not= :proposed (:status response))
+            ;; F10 (click wm-click-fca1c921, 2026-10-19): the producer's own
+            ;; typed refusal (:failure with its kind, reason and :missing) and
+            ;; a transport :detail travel onto the record; the refusal said
+            ;; only :acceptance-unavailable before.
             (refusal :meta-self-heal/acceptance-unavailable
                      {:request request :acceptance-status (:status response)
-                      :acceptance-reason (:reason response) :repair-claimed? false})
+                      :acceptance-reason (:reason response)
+                      :acceptance-failure (:failure response)
+                      :acceptance-detail (:detail response)
+                      :repair-claimed? false})
             (source-mismatch? (:acceptance-test response))
             (refusal :meta-self-heal/acceptance-proposal-source-mismatch
                      {:request request :repair-claimed? false})

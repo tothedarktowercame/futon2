@@ -344,8 +344,15 @@
         port (fn [_] (swap! calls inc) {:status :proposed :prose "fixed"})
         missing (production/produce-acceptance!
                  {:meta-acceptance-fn (fn [_] (throw (Exception. "must not call")))} {})
+        ;; F10: a typed refusal from the producer (its :failure, and a
+        ;; transport :detail) travels onto the record.
         failed (production/produce-acceptance!
-                {:meta-acceptance-fn (constantly {:status :failed :reason :offline})} diagnosis)
+                {:meta-acceptance-fn
+                 (constantly {:status :failed :reason :offline
+                              :failure {:kind :production-function-identity-absent
+                                        :missing {:callable-production-vars [:selection-entrypoint]}}
+                              :detail "Exit 1: exceeded retry limit, last status: 429 Too Many Requests"})}
+                diagnosis)
         malformed (production/produce-acceptance!
                    {:meta-acceptance-fn (constantly :not-a-map)} diagnosis)
         prose (production/produce-acceptance! {:meta-acceptance-fn port} diagnosis)
@@ -365,6 +372,13 @@
                                :sha256 (apply str (repeat 64 "0")))))]
     (is (= :meta-self-heal/acceptance-diagnosis-pin-unavailable (:reason missing)))
     (is (= :meta-self-heal/acceptance-unavailable (:reason failed)))
+    (is (= :failed (:acceptance-status failed)))
+    (is (= :offline (:acceptance-reason failed)))
+    (is (= {:kind :production-function-identity-absent
+            :missing {:callable-production-vars [:selection-entrypoint]}}
+           (:acceptance-failure failed)))
+    (is (= "Exit 1: exceeded retry limit, last status: 429 Too Many Requests"
+           (:acceptance-detail failed)))
     (is (= :meta-self-heal/acceptance-port-malformed (:reason malformed)))
     (is (= :meta-self-heal/acceptance-prose-or-malformed (:reason prose)))
     (is (= :meta-self-heal/acceptance-diagnosis-identity-mismatch (:reason changed-source)))
