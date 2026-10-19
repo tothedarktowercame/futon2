@@ -785,7 +785,11 @@
   (let [wire-id (:wire-id wire)
         verification (:verification wire)
         source-pin (:source-pin verification)
-        verifier (:tripwire/wire-verifier opts)]
+        verifier (:tripwire/wire-verifier opts)
+        source-read (try
+                      {:status :readable :sha256 (source-sha256 (:path source-pin))}
+                      (catch Throwable _
+                        {:status :unavailable}))]
     (cond
       (not (contains? @wire-registry wire-id))
       {:status :unavailable :reason :wire-reference-unknown}
@@ -793,7 +797,13 @@
       (not (coverage-pin? source-pin))
       {:status :unavailable :reason :wire-reference-source-unpinned}
 
-      (not= (:sha256 source-pin) (source-sha256 (:path source-pin)))
+      (not= :readable (:status source-read))
+      {:status :unavailable :reason :wire-reference-source-unavailable}
+
+      (nil? (:sha256 source-read))
+      {:status :unavailable :reason :wire-reference-source-unavailable}
+
+      (not= (:sha256 source-pin) (:sha256 source-read))
       {:status :unavailable :reason :wire-reference-source-drift}
 
       (not (fn? verifier))
@@ -839,6 +849,30 @@
        :closure-evidence (:closure-evidence closure)
        :disposition disposition})))
 
+(defn- post-close-coverage
+  "Coverage is an observation after a successful close, never part of the
+  close-port outcome.  Any unexpected computation failure is retained here."
+  [opts closure]
+  (try
+    (let [receipt (coverage-receipt opts closure)]
+      (if-not receipt
+        {:status :unavailable :reason :closure-evidence-unpinned}
+        (try
+          (let [result ((or (:tripwire/coverage-writer opts)
+                            write-incident-coverage!)
+                        (or (:tripwire/incident-coverage-root opts)
+                            default-incident-coverage-root)
+                        receipt)]
+            (if (and (map? result)
+                     (contains? #{:persisted :conflict} (:status result))
+                     (string? (:path result)))
+              (assoc result :receipt receipt)
+              {:status :unavailable :reason :coverage-writer-result-invalid}))
+          (catch Throwable _
+            {:status :unavailable :reason :coverage-persistence-failed}))))
+    (catch Throwable _
+      {:status :unavailable :reason :coverage-computation-failed})))
+
 (defn close-incident!
   "Invoke the configured incident-close port, then record its coverage outcome.
 
@@ -865,28 +899,8 @@
            :closure closure}
 
           :else
-          (let [receipt (coverage-receipt opts closure)]
-            (if-not receipt
-              {:status :closed :closure closure
-               :coverage {:status :unavailable
-                          :reason :closure-evidence-unpinned}}
-              (try
-                (let [result ((or (:tripwire/coverage-writer opts)
-                                  write-incident-coverage!)
-                              (or (:tripwire/incident-coverage-root opts)
-                                  default-incident-coverage-root)
-                              receipt)]
-                  {:status :closed :closure closure
-                   :coverage (if (and (map? result)
-                                      (contains? #{:persisted :conflict} (:status result))
-                                      (string? (:path result)))
-                               (assoc result :receipt receipt)
-                               {:status :unavailable
-                                :reason :coverage-writer-result-invalid})})
-                (catch Throwable _
-                  {:status :closed :closure closure
-                   :coverage {:status :unavailable
-                              :reason :coverage-persistence-failed}}))))))
+          {:status :closed :closure closure
+           :coverage (post-close-coverage opts closure)}))
       (catch Throwable _
         {:status :unavailable :reason :incident-close-failed
          :incident incident}))))

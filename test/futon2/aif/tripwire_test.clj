@@ -447,6 +447,14 @@
         covered (tripwire/close-incident! opts incident)
         fabricated (tripwire/close-incident!
                     (dissoc opts :tripwire/wire-verifier) incident)
+        unreadable (with-redefs-fn
+                     {#'tripwire/source-sha256
+                      (fn [_] (throw (java.io.IOException. "fixture unreadable")))}
+                     #(tripwire/close-incident! opts incident))
+        verifier-failed (tripwire/close-incident!
+                         (assoc opts :tripwire/wire-verifier
+                                (fn [_] (throw (ex-info "fixture verifier failed" {}))))
+                         incident)
         drifted (do (spit (:path source-pin) "changed T1 bytes")
                     (tripwire/close-incident! opts incident))
         failed (tripwire/close-incident!
@@ -458,6 +466,16 @@
     (is (= :unresolved (get-in fabricated [:coverage :receipt :disposition :status])))
     (is (= :wire-reference-verification-unavailable
            (get-in fabricated [:coverage :receipt :disposition :reason])))
+    (is (= :closed (:status unreadable)))
+    (is (= closure (:closure unreadable)))
+    (is (= :unresolved (get-in unreadable [:coverage :receipt :disposition :status])))
+    (is (= :wire-reference-source-unavailable
+           (get-in unreadable [:coverage :receipt :disposition :reason])))
+    (is (= :closed (:status verifier-failed)))
+    (is (= closure (:closure verifier-failed)))
+    (is (= :unresolved (get-in verifier-failed [:coverage :receipt :disposition :status])))
+    (is (= :wire-reference-verification-failed
+           (get-in verifier-failed [:coverage :receipt :disposition :reason])))
     (is (= :unresolved (get-in drifted [:coverage :receipt :disposition :status])))
     (is (= :wire-reference-source-drift
            (get-in drifted [:coverage :receipt :disposition :reason])))
