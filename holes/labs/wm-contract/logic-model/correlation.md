@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 6 P07a (`4a2f7da8a`, authored `12b2482f1`): separately typed, non-executable
+assessed-policy basis retains original menu/full evidence/partial objective and
+recomputes the entire receipt with its recorded draw. Canonical identity, pins,
+scope and membership remain checked; zero assessed cannot seal. Codex-4 independently
+approved the code and 14-assertion producer-chain evidence. This proves only the
+pure basis verifier, not production dispatch or authorship authentication. P07b
+must adapt the verified basis without bypassing existing identity checks.
+
 Section 2 P10: scalar failure-detail remains lossy, but terminal failure now has
 a separate bounded cause projection and complete overflow for the supported
 refusal-container interface. No silent traversal cap is used there. Coordinator

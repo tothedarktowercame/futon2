@@ -2,6 +2,11 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 36/41 P07a (`4a2f7da8a`): an isolated assessed-basis verifier now exists.
+It is not called by current strict executable carrier seal/decision. It verifies
+original menu and full evidence, replays the partial objective including tie draw,
+and rejects mutated basis/scope/action. Runtime handoff integration remains P07b.
+
 Row 54 P10: terminal projection writes `refusal-causes-<run>.edn` only when
 supported projected causes exceed the in-record limit; path and byte hash are
 retained. Sidecars do not match `tick-run-record-.*\.edn`. Original nested causes
