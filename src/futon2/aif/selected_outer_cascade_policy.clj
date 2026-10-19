@@ -1,6 +1,7 @@
 (ns futon2.aif.selected-outer-cascade-policy
   "Sealed handoff from the strict outer policy selector to cascade execution."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.wm.executable-cascade :as executable]
@@ -12,7 +13,8 @@
 (def ^:private body-keys
   [:schema :status :target-id :policy-id :cascade-digest :selected-entry
    :sealed-menu :menu-pin :evidence-carrier :evidence-pin
-   :objective-receipt :objective-pin :recomputation])
+   :objective-receipt :objective-pin :recomputation
+   :basis-kind :scope :assessed-basis])
 
 (defn- pin [path value]
   {:path path
@@ -38,6 +40,7 @@
           objective-receipt (assoc objective-receipt :objective-pin
                                    (objective-pin objective-receipt))
           body {:schema schema :status :sealed
+                :basis-kind :strict-objective
                 :target-id (get-in objective-receipt [:action :target])
                 :policy-id (get-in objective-receipt [:action :policy-id])
                 :cascade-digest (get-in objective-receipt [:action :cascade-digest])
@@ -54,6 +57,37 @@
                                 :q8 (:comparison objective-receipt)}}]
       (assoc body :carrier-pin (carrier-pin body)))))
 
+(defn seal-assessed
+  "Adapt a verified P07a assessed basis into executable identity transport.
+  This retains the original menu, full evidence and partial receipt; it does
+  not describe the selected action as a full-menu strict optimum."
+  [basis]
+  (if-let [defect (assessed-basis/verify basis)]
+    {:schema schema :status :refused :reason :assessed-policy-basis-required
+     :basis-defect defect}
+    (let [menu (:menu basis)
+          ev (:evidence basis)
+          receipt (:receipt basis)
+          action (get-in receipt [:assessed-selection :action])
+          entry (first (filter #(and (= (:policy-id %) (:policy-id action))
+                                     (= (:cascade-digest %) (:cascade-digest action)))
+                               (:entries menu)))
+          objective-receipt (assoc receipt :objective-pin (objective-pin receipt))
+          body {:schema schema :status :sealed
+                :basis-kind :assessed-population :scope :assessed-population
+                :target-id (:target action) :policy-id (:policy-id action)
+                :cascade-digest (:cascade-digest action) :selected-entry entry
+                :sealed-menu menu :menu-pin (:menu-pin menu)
+                :evidence-carrier ev :evidence-pin (:evidence-pin ev)
+                :objective-receipt objective-receipt
+                :objective-pin (:objective-pin objective-receipt)
+                :assessed-basis basis
+                :recomputation {:q2 (select-keys action [:target :policy-id :cascade-digest])
+                                :q4 (:policies receipt)
+                                :q8 {:status :absent
+                                     :reason :assessed-population-basis}}}]
+      (assoc body :carrier-pin (carrier-pin body)))))
+
 (defn verify
   "Total semantic verification. Returns nil when valid, otherwise a keyword."
   [carrier]
@@ -61,13 +95,23 @@
     (let [menu (:sealed-menu carrier)
           ev (:evidence-carrier carrier)
           receipt (:objective-receipt carrier)
+          raw-receipt (dissoc receipt :objective-pin)
+          basis-kind (or (:basis-kind carrier) :strict-objective)
+          basis (:assessed-basis carrier)
           entry (:selected-entry carrier)
-          action (:action receipt)
+          action (if (= :assessed-population basis-kind)
+                   (get-in raw-receipt [:assessed-selection :action])
+                   (:action raw-receipt))
           recomputed (when (and (map? ev) (map? menu))
-                       (objective/evaluate ev menu (get-in receipt [:draw :u])))]
+                       (objective/evaluate ev menu
+                                           (if (= :assessed-population basis-kind)
+                                             (get-in raw-receipt [:assessed-selection :draw :u])
+                                             (get-in raw-receipt [:draw :u]))))]
       (cond
         (not= schema (:schema carrier)) :selected-policy-schema
         (not= :sealed (:status carrier)) :selected-policy-status
+        (not (contains? #{:strict-objective :assessed-population} basis-kind))
+        :selected-policy-basis-kind
         (not= (carrier-pin carrier) (:carrier-pin carrier)) :selected-policy-seal
         (family/verify-sealed-menu menu) :selected-policy-menu-invalid
         (not= (:menu-pin menu) (:menu-pin carrier)) :selected-policy-menu-substitution
@@ -75,8 +119,24 @@
         (not= (:evidence-pin ev) (:evidence-pin carrier)) :selected-policy-evidence-substitution
         (not= (objective-pin receipt) (:objective-pin receipt)) :selected-policy-objective-seal
         (not= (:objective-pin receipt) (:objective-pin carrier)) :selected-policy-objective-substitution
-        (not= :selected (:status receipt)) :selected-policy-not-strict
-        (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed)))
+        (and (= :assessed-population basis-kind)
+             (not= :assessed-population (:scope carrier))) :selected-policy-assessed-scope
+        (and (= :assessed-population basis-kind) (assessed-basis/verify basis))
+        :selected-policy-assessed-basis-invalid
+        (and (= :assessed-population basis-kind) (not= menu (:menu basis)))
+        :selected-policy-assessed-menu-substitution
+        (and (= :assessed-population basis-kind) (not= ev (:evidence basis)))
+        :selected-policy-assessed-evidence-substitution
+        (and (= :assessed-population basis-kind) (not= raw-receipt (:receipt basis)))
+        :selected-policy-assessed-receipt-substitution
+        (and (= :assessed-population basis-kind) (not= :partial (:status raw-receipt)))
+        :selected-policy-assessed-not-partial
+        (and (= :assessed-population basis-kind) (not= raw-receipt recomputed))
+        :selected-policy-assessed-recomputation
+        (and (= :strict-objective basis-kind) (not= :selected (:status raw-receipt)))
+        :selected-policy-not-strict
+        (and (= :strict-objective basis-kind)
+             (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed))))
         :selected-policy-objective-recomputation
         (nil? entry) :selected-policy-entry-missing
         (not= (:cascade-digest entry) (get-in entry [:canonical-cascade :digest]))
@@ -95,14 +155,26 @@
   [carrier]
   (if-let [defect (verify carrier)]
     {:status :refused :reason defect}
-    (let [entry (:selected-entry carrier)]
+    (let [entry (:selected-entry carrier)
+          assessed? (= :assessed-population (:basis-kind carrier))
+          raw-receipt (dissoc (:objective-receipt carrier) :objective-pin)
+          selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
        :decision {:status :selected
-                  :action (:action entry)
+                  :action (if assessed?
+                            (:action selection)
+                            (:action entry))
                   :selection-certificate
                   {:selection-route :wm/selected-outer-cascade-policy-v1
                    :selected-canonical-cascade (:canonical-cascade entry)
                    :selected-outer-cascade-policy carrier
+                   :selection-basis (if assessed?
+                                      {:kind :assessed-population
+                                       :scope (:scope selection)
+                                       :assessed-ids (:assessed-ids selection)
+                                       :absent (:absent selection)
+                                       :draw (:draw selection)}
+                                      {:kind :strict-objective})
                    :q2 (get-in carrier [:recomputation :q2])
                    :q4 (get-in carrier [:recomputation :q4])
                    :q8 (get-in carrier [:recomputation :q8])}}
