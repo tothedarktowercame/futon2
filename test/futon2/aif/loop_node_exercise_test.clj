@@ -60,6 +60,21 @@
 (deftest complete-exercise-crosses-the-launch-gate
   (is (identical? exercised (exercise/require-complete! exercised))))
 
+(deftest meta-repair-selection-bypasses-ordinary-policy-nodes
+  (let [decision {:status :selected
+                  :action {:target "A-self-heal"}
+                  :selection-law {:applied :meta-algorithm-selection
+                                  :source :outer-task-selection
+                                  :algorithm-id "A-self-heal"}}
+        r (exercise/receipt decision)]
+    (is (identical? decision (exercise/require-complete! decision)))
+    (is (= :complete (:status r)))
+    (is (= {:present 0 :bypassed 4 :refused 0} (:counts r)))
+    (is (every? #(= :verified-machine-injury-algorithm (:because %))
+                (vals (:by-node r))))
+    (is (every? #(= "A-self-heal" (get-in % [:evidence :algorithm-id]))
+                (vals (:by-node r))))))
+
 (deftest debugger-context-retains-abstention-rationale
   (let [decision {:status :abstained
                   :refusals [{:kind :no-problems :target "E-x"}]}]

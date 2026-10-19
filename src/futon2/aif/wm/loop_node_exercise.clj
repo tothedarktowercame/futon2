@@ -50,10 +50,26 @@
         abstention (get-in decision [:abstention :status])
         typed-abstention? (and (= :abstained (:status decision))
                                (seq (:refusals decision)))
+        meta-algorithm? (= :meta-algorithm-selection
+                           (get-in decision [:selection-law :applied]))
         by-node
-        (if typed-abstention?
+        (cond
+          meta-algorithm?
+          (into {}
+                (map (fn [node]
+                       [node (decision-bypass
+                              node :verified-machine-injury-algorithm
+                              {:algorithm-id (get-in decision
+                                                     [:selection-law :algorithm-id])
+                               :selection-source (get-in decision
+                                                         [:selection-law :source])})])
+                     [:R6 :R13 :R14 :CTAU-CLASS]))
+
+          typed-abstention?
           (into {} (map (fn [node] [node (bypassed node (:refusals decision))])
                         [:R6 :R13 :R14 :CTAU-CLASS]))
+
+          :else
           {:R6 (cond
                  (> (count candidates) 1)
                  (present :R6 {:candidate-count (count candidates)
