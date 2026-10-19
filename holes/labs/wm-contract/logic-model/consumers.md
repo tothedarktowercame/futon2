@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P09 / consumer 2 (`452a37c26`, `7ea8150f4`): reload callers consume a typed
+deferred result through `reload_when_idle`, not as successful reload. An
+unheld active click defers; a demonstrably debugger-held run keeps the existing
+exception. Source-identity dependency names are attribution, not reload authority.
+
+
 Consumers 19/20 / P20: snapshot section availability is measured rather than
 requiring every section OK. Only explicit OK structural sections contribute
 membership; failed/omitted scope makes absent target membership unknown rather

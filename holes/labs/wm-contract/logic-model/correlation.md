@@ -2,6 +2,14 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P09 / row 8 (`452a37c26`, `7ea8150f4`): reload planner attributes changed
+sources against the declared identity inventory, now including family-selection.
+In-flight unheld clicks return typed deferred state; callers wait before
+continuing. The existing demonstrably debugger-held reload exception remains.
+Dirty exclusion and changed-namespace ordering are unchanged. This is mocked
+and static evidence only, not loaded/disk agreement in the serving JVM.
+
+
 P27 / A22-R14 (`e8022bf8d`, `p27-gain-learning.md`): selection gain's pure
 bounded update consumes signed realised-versus-expected performance after
 default five-sample burn-in. Offline folds exist; the current report runner's

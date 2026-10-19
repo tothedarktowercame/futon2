@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P09 / P42 (`452a37c26`, `7ea8150f4`): reload events now retain changed
+source-identity dependency attribution or explicit `click-in-flight` deferral.
+The required-sources map parser is lexical, not a complete dependency graph;
+changed-file discovery and ordering remain existing mechanisms. No new live
+loaded-identity receipt has been produced.
+
+
 P21 producer / P20 packet: section-availability/pipeline-membership report
 available, unavailable and unknown structural scopes. Verified available target
 identities can reach field formation beside missing unrelated sections. No
