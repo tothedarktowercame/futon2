@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+P14 producer / P19 packet: catalog observation retains expected source pins and
+actual drift hashes in exclusions. Available catalog proof accounts for input
+entries across rows/exclusions. Missing/malformed catalog preserves registry
+tasks with explicit catalog absence; zero admitted algorithms is not an observed
+empty catalog. Hermetic public-observe tests passed, no live snapshot claimed.
+
 P15 producer / P18 packet: runtime observe-ordinary-click-budget produces typed
 pre-admission available/exhausted/unavailable observations instead of nil on read
 failure. Known snapshot provenance is retained; observation timestamps serialize

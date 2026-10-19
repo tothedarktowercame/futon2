@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Consumer 16 / P19: approved algorithm source validation is row-scoped. Invalid
+pins, unreadable sources and hash drift retain exclusions; verified neighbours
+remain subject to budget/injury conditions. Catalog-local duplicate identities
+invalidate the algorithm population; global task/algorithm identity collisions
+remain field refusals. Neither case admits ambiguous/unverified algorithms.
+
 Consumer 15 / P18: META field accepts typed pre-admission budget observations
 while retaining legacy availability compatibility. Resource exclusions carry
 the exact observation, distinguishing exhausted from read-error/malformed.

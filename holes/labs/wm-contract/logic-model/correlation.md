@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 7 / P19: one drifted approved algorithm no longer refuses unrelated valid
+algorithms/registry tasks. Exact source defect remains excluded; catalog absence
+is distinguished from observed empty population. Valid algorithms still require
+independent resource/injury authority. This static/hermetic boundary repair does
+not establish serving selection or execution.
+
 Row 7 / P18: resource exclusion now retains exact budget observation status and
 reason instead of conflating failed reads with exhaustion. Positive snapshot is
 explicitly pre-admission and cannot bypass injury or execution authority checks.
