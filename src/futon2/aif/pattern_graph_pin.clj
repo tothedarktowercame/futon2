@@ -110,21 +110,23 @@
                              StandardCopyOption/REPLACE_EXISTING]))
     value))
 
-(defn- immutable-bytes! [destination bytes]
+(defn- create-only-bytes!
+  "Make DESTINATION a hard link to a fully written sibling temp.  createLink is
+   create-only: unlike move with ATOMIC_MOVE it cannot replace a concurrent
+   destination.  Reuse is accepted only when the already-visible bytes match."
+  [destination bytes]
   (.mkdirs (.getParentFile destination))
-  (if (.isFile destination)
-    (when-not (= (identity/sha256 bytes) (file-sha256 destination))
-      (throw (ex-info "generation path has different bytes" {:path (str destination)})))
-    (let [tmp (io/file (.getParentFile destination)
-                       (str "." (.getName destination) "." (System/nanoTime) ".tmp"))]
-      (Files/write (.toPath tmp) bytes (make-array java.nio.file.OpenOption 0))
-      (try
-        (Files/move (.toPath tmp) (.toPath destination)
-                    (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
-        (catch FileAlreadyExistsException _
-          (when-not (= (identity/sha256 bytes) (file-sha256 destination))
-            (throw (ex-info "generation path has different bytes" {:path (str destination)})))
-          (Files/deleteIfExists (.toPath tmp))))))
+  (let [tmp (io/file (.getParentFile destination)
+                     (str "." (.getName destination) "." (System/nanoTime) ".tmp"))]
+    (Files/write (.toPath tmp) bytes (make-array java.nio.file.OpenOption 0))
+    (try
+      (Files/createLink (.toPath destination) (.toPath tmp))
+      (catch FileAlreadyExistsException _
+        (when-not (and (.isFile destination)
+                       (= (identity/sha256 bytes) (file-sha256 destination)))
+          (throw (ex-info "generation path has different bytes" {:path (str destination)}))))
+      (finally
+        (Files/deleteIfExists (.toPath tmp)))))
   destination)
 
 (defn pin!
@@ -180,12 +182,9 @@
                generation (io/file (str root ".generations") sha)
                graph-file (io/file generation "graph.json")
                pin-path (pin-file graph-file)]
-           (immutable-bytes! graph-file bytes)
+           (create-only-bytes! graph-file bytes)
            (let [pin (pin-value graph-file raw graph)]
-             (if (.isFile pin-path)
-               (when-not (= pin (edn/read-string (slurp pin-path)))
-                 (throw (ex-info "generation pin differs" {:path (str pin-path)})))
-               (atomic-write! pin-path pin)))
+             (create-only-bytes! pin-path (.getBytes (str (pr-str pin) "\n") StandardCharsets/UTF_8)))
            (let [checked (load-pinned-at graph-file pin-path (str root))]
              (if (not= :loaded (:status checked))
                checked

@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as sut]))
 
 (defn temp-dir []
@@ -85,6 +86,28 @@
         (is (= :refused (:status refusal)))
         (is (= :graph-publication-invalid (:kind refusal)))
         (is (nil? (:graph refusal)))))))
+
+(deftest generation-conflicts-never-replace-graph-or-pin
+  (let [dir (temp-dir)
+        source (write-graph! dir fixture)
+        sha (identity/sha256 (.getBytes (slurp source) "UTF-8"))
+        graph-root (io/file dir "graph-conflict.json")
+        graph-file (io/file (str graph-root ".generations") sha "graph.json")]
+    (.mkdirs (.getParentFile graph-file))
+    (spit graph-file "conflicting graph bytes")
+    (is (= :refused (:status (sut/publish! source graph-root))))
+    (is (= "conflicting graph bytes" (slurp graph-file))))
+  (let [dir (temp-dir)
+        source (write-graph! dir fixture)
+        sha (identity/sha256 (.getBytes (slurp source) "UTF-8"))
+        pin-root (io/file dir "pin-conflict.json")
+        graph-file (io/file (str pin-root ".generations") sha "graph.json")
+        pin-file (io/file (str graph-file ".pin.edn"))]
+    (.mkdirs (.getParentFile graph-file))
+    (io/copy source graph-file)
+    (spit pin-file "{:conflicting true}\n")
+    (is (= :refused (:status (sut/publish! source pin-root))))
+    (is (= "{:conflicting true}\n" (slurp pin-file)))))
 
 (deftest missing-pin-is-typed
   (let [file (write-graph! (temp-dir) fixture)
