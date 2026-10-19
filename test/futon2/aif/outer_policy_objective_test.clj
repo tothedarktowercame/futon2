@@ -125,6 +125,42 @@
              (select-keys result [:menu-pin :declaration-pin :dataset-pin])))
       (is (nil? (:action result))))))
 
+(deftest assessed-comparison-from-three-policy-producer
+  (with-redefs [xc/digest :digest
+                xc/validate-cascade (constantly {:status :certified})]
+    (let [body (update evidence-fixture/sealed-body :entries conj
+                       {:policy-id "p3" :target-id "T" :cascade-digest "d3"
+                        :canonical-cascade {:digest "d3"}})
+          menu (assoc body :status :sealed :menu-pin (family-selection/sealed-menu-pin body))
+          spec (evidence-fixture/spec [1.0 1.0])
+          make-evidence (fn [policies]
+                          (policy-evidence/join menu (evidence-fixture/declaration policies) []))
+          e (make-evidence {"d1" spec "d2" (assoc-in spec [:ln-e :resource :value] 2.0)})
+          r (sut/evaluate e menu)
+          choice (:assessed-selection r)
+          tied (make-evidence {"d1" spec "d2" spec})
+          tie-result (sut/evaluate tied menu 0.99)]
+      (is (= :partial (:status r)))
+      (is (= :assessed-population (:scope choice)))
+      (is (= "d2" (get-in choice [:action :cascade-digest])))
+      (is (= ["d1" "d2"] (mapv :cascade-digest (:assessed-ids choice))))
+      (is (= ["d3"] (mapv :cascade-digest (:absent choice))))
+      (is (= (:menu-pin menu) (:menu-pin r)))
+      (is (= :absent (get-in r [:strict-verdict :status])))
+      (is (< (abs (- 1.0 (reduce + (map :posterior (:policies r))))) 1.0e-12))
+      (is (< (abs (- (+ 1.0 (Math/exp -2.0)) (:posterior-denominator choice))) 1.0e-12))
+      (is (= "d2" (get-in tie-result [:assessed-selection :action :cascade-digest])))
+      (is (= tie-result (sut/evaluate tied menu
+                                     (get-in tie-result [:assessed-selection :draw :u]))))
+      (is (= :no-choice (get-in (sut/evaluate (make-evidence {}) menu)
+                                [:assessed-selection :status])))
+      (is (= :evidence-pin-mismatch
+             (:reason (sut/evaluate (update e :entries pop) menu))))
+      (with-redefs [identity/verify-selected-identity
+                    (constantly {:status :cascade-identity-mismatch})]
+        (is (= :cascade-identity-mismatch
+               (get-in (sut/evaluate e menu) [:assessed-selection :reason])))))))
+
 (deftest exact-tie-and-atomic-refusals
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 0.0)]
         tied (sut/evaluate (evidence rows) (sealed rows))]
