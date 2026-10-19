@@ -79,6 +79,10 @@
 (def ^:private apparatus-failure-stages
   #{:cascade-resume :dispatch :transport :build :occurrence-square-redecision})
 
+(def ^:private task-outcome-kinds
+  #{:task-failure :typed-blocker :guardrail-refusal :abstained
+    :grounded-no-change :artifact-only})
+
 (defn terminal-cause
   "The one terminal-evidence cause boundary used by the outer learner.
   Outcome labels alone never turn incomplete/build failures into task evidence."
@@ -101,9 +105,9 @@
       (contains? #{:grounded-change :already-satisfied :grounded-progress} outcome)
       (assoc base :class :task-outcome :reason :witnessed-task-outcome)
 
-      (or (and (contains? #{:abstained :grounded-no-change :artifact-only} outcome)
-               (some? kind))
-          (contains? #{:task-failure :typed-blocker :guardrail-refusal} kind))
+      (and (contains? task-outcome-kinds kind)
+           (or (contains? #{:abstained :grounded-no-change :artifact-only} outcome)
+               (contains? #{:task-failure :typed-blocker :guardrail-refusal} kind)))
       (assoc base :class :task-outcome :reason :typed-task-outcome)
 
       (contains? #{:incomplete :build-failed :cancelled} outcome)

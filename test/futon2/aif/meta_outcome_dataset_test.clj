@@ -124,6 +124,14 @@
         (is (= :dataset-does-not-match-run-record-authority
                (:reason (dataset/verify (mutate result) a))))))))
 
+(deftest unknown-typed-terminal-kind-is-not-task-evidence
+  (let [cause (dataset/terminal-cause
+               {:run-output {:outcome :abstained}
+                :failure {:kind :novel-unreviewed-terminal-kind
+                          :stage :selection}})]
+    (is (= :unclassified (:class cause)))
+    (is (= :terminal-cause-unclassified (:reason cause)))))
+
 (deftest chronology-and-outer-receipt-quality-fail-closed
   (let [base (select-keys records ["/runs/one.edn" "/runs/two.edn"])
         altered
