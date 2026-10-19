@@ -10,6 +10,9 @@
 
 (def schema :wm/outer-policy-evidence-v1)
 (def component-names [:resource :cadence :continuation])
+(def evidence-body-keys
+  [:schema :status :menu-pin :declaration-pin :dataset-pin
+   :outcome-vocabulary :preference :preference-authority :gamma :entries])
 
 (defn- pin? [x] (and (string? (:path x)) (re-matches #"[0-9a-f]{64}" (:sha256 x))))
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
@@ -18,6 +21,22 @@
 (defn- dataset-pin [rows]
   {:path "wm://outer-policy-terminal-dataset-v1" :authority :durable-run-records
    :sha256 (identity/sha256 (.getBytes (pr-str rows) "UTF-8"))})
+
+(defn evidence-pin [carrier]
+  {:path "wm://outer-policy-evidence-v1"
+   :sha256 (identity/sha256
+            (.getBytes (pr-str (select-keys carrier evidence-body-keys)) "UTF-8"))})
+
+(defn verify-evidence [carrier]
+  (let [ids (mapv :policy-id (:entries carrier))
+        digests (mapv :cascade-digest (:entries carrier))]
+    (cond
+      (not= schema (:schema carrier)) :evidence-schema
+      (not= :computed (:status carrier)) :evidence-not-computed
+      (not= (evidence-pin carrier) (:evidence-pin carrier)) :evidence-pin-mismatch
+      (not= (count ids) (count (distinct ids))) :duplicate-policy-id
+      (not= (count digests) (count (distinct digests))) :duplicate-cascade-digest
+      :else nil)))
 
 (defn join
   "Join SEALED policy entries to explicit DECLARATION and durable RECORDS.
@@ -104,8 +123,9 @@
       {:schema schema :status :refused
        :reason (or sealed-error malformed-declaration :policy-evidence-incomplete)
        :missing (mapv #(select-keys % [:cascade-digest :absent-terms]) missing)}
-      {:schema schema :status :computed :menu-pin (:menu-pin sealed)
-       :declaration-pin declared-pin :dataset-pin (dataset-pin records)
-       :outcome-vocabulary vocab :preference preference
-       :preference-authority (:preference-authority declaration)
-       :gamma (:gamma declaration) :entries rows})))
+      (let [body {:schema schema :status :computed :menu-pin (:menu-pin sealed)
+                  :declaration-pin declared-pin :dataset-pin (dataset-pin records)
+                  :outcome-vocabulary vocab :preference preference
+                  :preference-authority (:preference-authority declaration)
+                  :gamma (:gamma declaration) :entries rows}]
+        (assoc body :evidence-pin (evidence-pin body))))))

@@ -1,7 +1,9 @@
 (ns futon2.aif.outer-policy-objective-test
   (:require [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.outer-policy-objective :as sut]
+            [futon2.aif.outer-policy-evidence :as policy-evidence]
             [futon2.aif.parameter-novelty :as novelty]
+            [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.wm.selection-cascade-identity :as identity]))
 
 (use-fixtures :each
@@ -24,18 +26,26 @@
      :ln-e-components {:resource {:value ln-e} :cadence {:value 0.0}
                        :continuation {:value 0.0}}}))
 
-(defn evidence [rows]
-  {:schema :wm/outer-policy-evidence-v1 :status :computed
-   :outcome-vocabulary [:success :failure]
-   :preference {:vocabulary [:success :failure]
-                :distribution [0.8 0.2] :units :probability}
-   :gamma 1.0 :menu-pin {:path "m"} :declaration-pin {:path "d"}
-   :dataset-pin {:path "r"} :entries rows})
-
 (defn sealed [rows]
-  {:entries (mapv (fn [r] {:policy-id (:policy-id r) :target-id (:target-id r)
-                            :cascade-digest (:cascade-digest r)
-                            :canonical-cascade {:digest (:cascade-digest r)}}) rows)})
+  (let [body {:schema :wm/sealed-outer-policy-menu-v1
+              :field-source-pin {:path "field" :sha256 (apply str (repeat 64 "a"))}
+              :family-census {} :refusals [] :failures []
+              :entries (mapv (fn [r] {:policy-id (:policy-id r) :target-id (:target-id r)
+                                       :cascade-digest (:cascade-digest r)
+                                       :canonical-cascade {:digest (:cascade-digest r)}}) rows)}]
+    (assoc body :status :sealed :menu-pin (family-selection/sealed-menu-pin body))))
+
+(defn evidence [rows]
+  (let [s (sealed rows)
+        body {:schema :wm/outer-policy-evidence-v1 :status :computed
+              :outcome-vocabulary [:success :failure]
+              :preference {:vocabulary [:success :failure]
+                           :distribution [0.8 0.2] :units :probability}
+              :gamma 1.0 :menu-pin (:menu-pin s) :declaration-pin {:path "d"}
+              :dataset-pin {:path "r"} :entries rows}]
+    (assoc body :evidence-pin (policy-evidence/evidence-pin body))))
+
+(defn reseal-evidence [e] (assoc e :evidence-pin (policy-evidence/evidence-pin e)))
 
 (deftest ambiguity-closed-form
   (let [a [2.0 3.0]
@@ -68,11 +78,31 @@
     (is (= :evidence-not-computed
            (:reason (sut/evaluate (assoc (evidence rows) :status :refused) (sealed rows)))))
     (is (= :vocabulary-mismatch
-           (:reason (sut/evaluate (assoc-in (evidence rows) [:preference :vocabulary] [:x :y])
+           (:reason (sut/evaluate (reseal-evidence
+                                   (assoc-in (evidence rows) [:preference :vocabulary] [:x :y]))
                                   (sealed rows)))))
-    (is (= :objective-input-invalid
-           (:reason (sut/evaluate (update (evidence rows) :entries conj {:target-id "T"})
+    (is (= :policy-population-mismatch
+           (:reason (sut/evaluate (reseal-evidence
+                                   (update (evidence rows) :entries conj {:target-id "T"}))
                                   (sealed rows)))))))
+
+(deftest cross-stage-integrity-refuses-before-selection
+  (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [3.0 3.0] 0.0)]
+        s (sealed rows) e (evidence rows)]
+    (is (= :evidence-pin-mismatch (:reason (sut/evaluate (update e :entries pop) s))))
+    (is (= :menu-pin-mismatch
+           (:reason (sut/evaluate (reseal-evidence (assoc e :menu-pin {:path "other"})) s))))
+    (doseq [mutate [(fn [x] (update-in x [:entries 0 :ln-e] inc))
+                    (fn [x] (update-in x [:entries 0 :posterior-predictive :distribution 0] + 0.1))
+                    (fn [x] (update-in x [:entries 0 :posterior-alpha 0] inc))]]
+      (is (= :evidence-pin-mismatch (:reason (sut/evaluate (mutate e) s)))))
+    (is (= :ln-e-mismatch
+           (:reason (sut/evaluate (reseal-evidence (update-in e [:entries 0 :ln-e] inc)) s))))
+    (is (= :posterior-not-normalized
+           (:reason (sut/evaluate (reseal-evidence
+                                   (update-in e [:entries 0 :posterior-predictive :distribution 0] + 0.1)) s))))
+    (is (= :posterior-alpha-mismatch
+           (:reason (sut/evaluate (reseal-evidence (update-in e [:entries 0 :posterior-alpha 0] inc)) s))))))
 
 (deftest unscaled-large-g-and-digest-transport
   (let [rows [(row "a" [1.0 9.0] 0.0) (row "b" [9.0 1.0] 0.0)]

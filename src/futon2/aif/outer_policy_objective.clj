@@ -1,6 +1,8 @@
 (ns futon2.aif.outer-policy-objective
   "Pure policy-grain G/posterior objective over computed outer evidence."
   (:require [futon2.aif.parameter-novelty :as novelty]
+            [futon2.aif.outer-policy-evidence :as policy-evidence]
+            [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.wm.selection-cascade-identity :as identity]))
 
 (def schema :wm/outer-policy-objective-v1)
@@ -29,9 +31,15 @@
         c (get-in evidence [:preference :distribution])
         gamma (:gamma evidence)
         entries-by-digest (into {} (map (juxt :cascade-digest clojure.core/identity)) (:entries sealed))
+        evidence-population (set (map (juxt :policy-id :cascade-digest) (:entries evidence)))
+        sealed-population (set (map (juxt :policy-id :cascade-digest) (:entries sealed)))
         malformed-top (cond
-                        (not= :wm/outer-policy-evidence-v1 (:schema evidence)) :evidence-schema
-                        (not= :computed (:status evidence)) :evidence-not-computed
+                        (policy-evidence/verify-evidence evidence)
+                        (policy-evidence/verify-evidence evidence)
+                        (family-selection/verify-sealed-menu sealed)
+                        (family-selection/verify-sealed-menu sealed)
+                        (not= (:menu-pin evidence) (:menu-pin sealed)) :menu-pin-mismatch
+                        (not= evidence-population sealed-population) :policy-population-mismatch
                         (not (and (vector? vocab) (= vocab (get-in evidence [:preference :vocabulary]))))
                         :vocabulary-mismatch
                         (not (and (finite? gamma) (pos? gamma))) :gamma
@@ -51,7 +59,22 @@
                                          (every? #(and (finite? %) (pos? %)) q)
                                          (every? #(and (finite? %) (pos? %)) c)
                                          (every? #(and (finite? %) (pos? %)) alpha)
-                                         (finite? eig) (finite? ln-e))) (conj :finite-objective-input))]
+                                         (finite? eig) (finite? ln-e))) (conj :finite-objective-input)
+                               (and (seq q) (> (abs (- 1.0 (reduce + q))) 1.0e-10))
+                               (conj :posterior-not-normalized)
+                               (and (seq alpha) (seq q)
+                                    (let [n (double (reduce + alpha))]
+                                      (some true? (map #(> (abs (- (double %1) (/ (double %2) n))) 1.0e-10)
+                                                       q alpha))))
+                               (conj :posterior-alpha-mismatch)
+                               (and (finite? ln-e)
+                                    (not= ln-e (reduce + (map #(get-in row [:ln-e-components % :value])
+                                                               [:resource :cadence :continuation]))))
+                               (conj :ln-e-mismatch)
+                               (and (seq alpha) (finite? eig)
+                                    (> (abs (- eig (:nats (novelty/categorical-information vocab alpha))))
+                                       1.0e-10))
+                               (conj :eig-mismatch))]
                   (if (seq absent)
                     (assoc (select-keys row [:policy-id :target-id :cascade-digest])
                            :absent-terms absent)
@@ -68,7 +91,8 @@
               (:entries evidence))
         invalid (filterv #(seq (:absent-terms %)) rows)]
     (if (or malformed-top (seq invalid) (empty? rows))
-      {:schema schema :status :refused :reason (or malformed-top :objective-input-invalid)
+      {:schema schema :status :refused
+       :reason (or malformed-top (first (:absent-terms (first invalid))) :objective-input-invalid)
        :invalid invalid}
       (let [logits (mapv #(get-in % [:terms :logit]) rows)
             probabilities (softmax logits)
