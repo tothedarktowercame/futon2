@@ -14,6 +14,7 @@
                       {:status :verified :digest (get-in decision [:action :cascade-digest])}
                       {:status :cascade-identity-mismatch}))]
       (run))))
+(defn pin [path c] {:path path :sha256 (apply str (repeat 64 c))})
 
 (defn row [id alpha ln-e]
   (let [n (double (reduce + alpha)) q (mapv #(/ (double %) n) alpha)]
@@ -23,8 +24,9 @@
                             :distribution q :units :probability}
      :eig (novelty/categorical-information [:success :failure] alpha)
      :ln-e ln-e
-     :ln-e-components {:resource {:value ln-e} :cadence {:value 0.0}
-                       :continuation {:value 0.0}}}))
+     :ln-e-components {:resource {:value ln-e :units :nats :source-pin (pin "resource" "1")}
+                       :cadence {:value 0.0 :units :nats :source-pin (pin "cadence" "2")}
+                       :continuation {:value 0.0 :units :nats :source-pin (pin "continuation" "3")}}}))
 
 (defn sealed [rows]
   (let [body {:schema :wm/sealed-outer-policy-menu-v1
@@ -40,9 +42,11 @@
         body {:schema :wm/outer-policy-evidence-v1 :status :computed
               :outcome-vocabulary [:success :failure]
               :preference {:vocabulary [:success :failure]
-                           :distribution [0.8 0.2] :units :probability}
-              :gamma 1.0 :menu-pin (:menu-pin s) :declaration-pin {:path "d"}
-              :dataset-pin {:path "r"} :entries rows}]
+                           :distribution [0.8 0.2] :units :probability
+                           :authority (pin "prefs" "4")}
+              :preference-authority (pin "prefs" "4")
+              :gamma 1.0 :menu-pin (:menu-pin s) :declaration-pin (pin "declaration" "5")
+              :dataset-pin (pin "dataset" "6") :entries rows}]
     (assoc body :evidence-pin (policy-evidence/evidence-pin body))))
 
 (defn reseal-evidence [e] (assoc e :evidence-pin (policy-evidence/evidence-pin e)))
@@ -77,11 +81,11 @@
     (is (= #{"a" "b"} (set (map :policy-id (:tied tied)))))
     (is (= :evidence-not-computed
            (:reason (sut/evaluate (assoc (evidence rows) :status :refused) (sealed rows)))))
-    (is (= :vocabulary-mismatch
+    (is (= :preference
            (:reason (sut/evaluate (reseal-evidence
                                    (assoc-in (evidence rows) [:preference :vocabulary] [:x :y]))
                                   (sealed rows)))))
-    (is (= :policy-population-mismatch
+    (is (= :row-identity
            (:reason (sut/evaluate (reseal-evidence
                                    (update (evidence rows) :entries conj {:target-id "T"}))
                                   (sealed rows)))))))
@@ -90,19 +94,43 @@
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [3.0 3.0] 0.0)]
         s (sealed rows) e (evidence rows)]
     (is (= :evidence-pin-mismatch (:reason (sut/evaluate (update e :entries pop) s))))
-    (is (= :menu-pin-mismatch
+    (is (= :menu-pin
            (:reason (sut/evaluate (reseal-evidence (assoc e :menu-pin {:path "other"})) s))))
     (doseq [mutate [(fn [x] (update-in x [:entries 0 :ln-e] inc))
                     (fn [x] (update-in x [:entries 0 :posterior-predictive :distribution 0] + 0.1))
                     (fn [x] (update-in x [:entries 0 :posterior-alpha 0] inc))]]
       (is (= :evidence-pin-mismatch (:reason (sut/evaluate (mutate e) s)))))
-    (is (= :ln-e-mismatch
+    (is (= :ln-e
            (:reason (sut/evaluate (reseal-evidence (update-in e [:entries 0 :ln-e] inc)) s))))
-    (is (= :posterior-not-normalized
+    (is (= :posterior-predictive
            (:reason (sut/evaluate (reseal-evidence
                                    (update-in e [:entries 0 :posterior-predictive :distribution 0] + 0.1)) s))))
     (is (= :posterior-alpha-mismatch
            (:reason (sut/evaluate (reseal-evidence (update-in e [:entries 0 :posterior-alpha 0] inc)) s))))))
+
+(deftest resealed-malformations-are-total-typed-refusals
+  (let [rows [(row "a" [2.0 2.0] 0.0)] s (sealed rows) e (evidence rows)
+        cases [[:ln-e-components #(update-in % [:entries 0 :ln-e-components] dissoc :resource)]
+               [:ln-e-components #(assoc-in % [:entries 0 :ln-e-components :resource :value] ##NaN)]
+               [:posterior-alpha #(assoc-in % [:entries 0 :posterior-alpha] [])]
+               [:posterior-alpha #(assoc-in % [:entries 0 :posterior-alpha] [1.0])]
+               [:posterior-alpha #(assoc-in % [:entries 0 :posterior-alpha] [-1.0 2.0])]
+               [:posterior-predictive #(assoc-in % [:entries 0 :posterior-predictive :distribution] [])]
+               [:posterior-predictive #(assoc-in % [:entries 0 :posterior-predictive :distribution] [1.0])]
+               [:posterior-predictive #(assoc-in % [:entries 0 :posterior-predictive :distribution] [0.8 0.8])]
+               [:eig #(assoc-in % [:entries 0 :eig] {:status :absent :reason :x})]
+               [:eig #(assoc-in % [:entries 0 :eig :units] :bits)]
+               [:preference #(assoc-in % [:preference :units] :nats)]
+               [:preference-distribution #(assoc-in % [:preference :distribution] [0.8 0.8])]
+               [:preference-authority-mismatch #(assoc-in % [:preference :authority] (pin "other" "7"))]
+               [:dataset-pin #(assoc % :dataset-pin {:sha256 (apply str (repeat 64 "8"))})]
+               [:empty-policy-evidence #(assoc % :entries [])]]]
+    (doseq [[reason mutate] cases]
+      (let [result (try (sut/evaluate (reseal-evidence (mutate e)) s)
+                        (catch Throwable t t))]
+        (is (map? result) (str reason " must not throw"))
+        (is (= :refused (:status result)))
+        (is (= reason (:reason result)))))))
 
 (deftest unscaled-large-g-and-digest-transport
   (let [rows [(row "a" [1.0 9.0] 0.0) (row "b" [9.0 1.0] 0.0)]

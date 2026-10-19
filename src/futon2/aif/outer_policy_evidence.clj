@@ -14,7 +14,8 @@
   [:schema :status :menu-pin :declaration-pin :dataset-pin
    :outcome-vocabulary :preference :preference-authority :gamma :entries])
 
-(defn- pin? [x] (and (string? (:path x)) (re-matches #"[0-9a-f]{64}" (:sha256 x))))
+(defn- pin? [x] (and (string? (:path x)) (string? (:sha256 x))
+                     (boolean (re-matches #"[0-9a-f]{64}" (:sha256 x)))))
 (defn- finite? [x] (and (number? x) (Double/isFinite (double x))))
 (defn- declaration-pin [d]
   (identity/sha256 (.getBytes (pr-str (dissoc d :pin)) "UTF-8")))
@@ -28,15 +29,66 @@
             (.getBytes (pr-str (select-keys carrier evidence-body-keys)) "UTF-8"))})
 
 (defn verify-evidence [carrier]
-  (let [ids (mapv :policy-id (:entries carrier))
-        digests (mapv :cascade-digest (:entries carrier))]
-    (cond
-      (not= schema (:schema carrier)) :evidence-schema
-      (not= :computed (:status carrier)) :evidence-not-computed
-      (not= (evidence-pin carrier) (:evidence-pin carrier)) :evidence-pin-mismatch
-      (not= (count ids) (count (distinct ids))) :duplicate-policy-id
-      (not= (count digests) (count (distinct digests))) :duplicate-cascade-digest
-      :else nil)))
+  (try
+    (let [entries (:entries carrier) vocab (:outcome-vocabulary carrier)
+          preference (:preference carrier) c (:distribution preference)
+          ids (mapv :policy-id entries) digests (mapv :cascade-digest entries)
+          row-error
+          (some
+           (fn [row]
+             (let [alpha (:posterior-alpha row)
+                   q (get-in row [:posterior-predictive :distribution])
+                   eig (:eig row) components (:ln-e-components row)
+                   values (mapv #(get-in components [% :value]) component-names)
+                   recomputed (when (and (vector? alpha) (every? #(and (finite? %) (pos? %)) alpha))
+                                (novelty/categorical-information vocab alpha))]
+               (cond
+                 (not (and (string? (:policy-id row)) (string? (:target-id row))
+                           (string? (:cascade-digest row)))) :row-identity
+                 (not (and (vector? alpha) (= (count vocab) (count alpha))
+                           (every? #(and (finite? %) (pos? %)) alpha))) :posterior-alpha
+                 (not= vocab (get-in row [:posterior-predictive :vocabulary])) :posterior-vocabulary
+                 (not (and (vector? q) (= (count vocab) (count q))
+                           (every? #(and (finite? %) (pos? %)) q)
+                           (<= (abs (- 1.0 (reduce + q))) 1.0e-10))) :posterior-predictive
+                 (let [n (double (reduce + alpha))]
+                   (some true? (map #(> (abs (- (double %1) (/ (double %2) n))) 1.0e-10)
+                                    q alpha))) :posterior-alpha-mismatch
+                 (not (and (= :computed (:status eig)) (= :nats (:units eig))
+                           (finite? (:nats eig)) (= :computed (:status recomputed))
+                           (<= (abs (- (:nats eig) (:nats recomputed))) 1.0e-10))) :eig
+                 (not-every? #(and (contains? components %)
+                                   (finite? (get-in components [% :value]))
+                                   (= :nats (get-in components [% :units]))
+                                   (pin? (get-in components [% :source-pin]))) component-names)
+                 :ln-e-components
+                 (not (and (finite? (:ln-e row))
+                           (<= (abs (- (:ln-e row) (reduce + values))) 1.0e-10))) :ln-e
+                 :else nil))) entries)]
+      (cond
+        (not= schema (:schema carrier)) :evidence-schema
+        (not= :computed (:status carrier)) :evidence-not-computed
+        (not (pin? (:menu-pin carrier))) :menu-pin
+        (not (pin? (:declaration-pin carrier))) :declaration-pin
+        (not (pin? (:dataset-pin carrier))) :dataset-pin
+        (not (pin? (:evidence-pin carrier))) :evidence-pin
+        (not= (evidence-pin carrier) (:evidence-pin carrier)) :evidence-pin-mismatch
+        (not (and (vector? vocab) (seq vocab)
+                  (= (count vocab) (count (distinct vocab))))) :outcome-vocabulary
+        (not (and (map? preference) (= vocab (:vocabulary preference))
+                  (= :probability (:units preference)))) :preference
+        (not (and (vector? c) (= (count vocab) (count c))
+                  (every? #(and (finite? %) (pos? %)) c)
+                  (<= (abs (- 1.0 (reduce + c))) 1.0e-10))) :preference-distribution
+        (not (pin? (:preference-authority carrier))) :preference-authority
+        (not= (:preference-authority carrier) (:authority preference)) :preference-authority-mismatch
+        (not (and (finite? (:gamma carrier)) (pos? (:gamma carrier)))) :gamma
+        (not (and (vector? entries) (seq entries))) :empty-policy-evidence
+        (not= (count ids) (count (distinct ids))) :duplicate-policy-id
+        (not= (count digests) (count (distinct digests))) :duplicate-cascade-digest
+        row-error row-error
+        :else nil))
+    (catch Throwable _ :malformed-policy-evidence)))
 
 (defn join
   "Join SEALED policy entries to explicit DECLARATION and durable RECORDS.

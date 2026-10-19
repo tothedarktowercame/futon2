@@ -44,7 +44,7 @@
                         :vocabulary-mismatch
                         (not (and (finite? gamma) (pos? gamma))) :gamma
                         :else nil)
-        rows (mapv
+        rows (when-not malformed-top (mapv
               (fn [row]
                 (let [q (get-in row [:posterior-predictive :distribution])
                       alpha (:posterior-alpha row) eig (get-in row [:eig :nats])
@@ -88,7 +88,7 @@
                                :lnE ln-e :lnE-components (:ln-e-components row)
                                :gamma gamma :objective objective :logit (- objective)
                                :units :nats}}))))
-              (:entries evidence))
+              (:entries evidence)))
         invalid (filterv #(seq (:absent-terms %)) rows)]
     (if (or malformed-top (seq invalid) (empty? rows))
       {:schema schema :status :refused
