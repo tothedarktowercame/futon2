@@ -70,16 +70,21 @@ JVM epoch and completes `reload_when_idle` before it can enter `fire` (lines
 
 The list below is the changed runtime surface identified from the packet's
 landed commits and their current direct requirements.  “Declared” means present
-in `load-identity/required-sources`; it means the runner can report a
-loaded-versus-disk digest if the namespace has registered, not that it is
-present in the JVM.  The declaration itself warns that unregistered entries
-remain `:unregistered` rather than silently disappearing
+in the fixed `load-identity/required-sources` canonical-path map.  This must
+not be conflated with registration: `load-identity/report` unions all registry
+names with the declared names; a registered but undeclared name has a `nil`
+canonical path and its comparison is `:unavailable`, rather than absent from
+the report ([load_identity.clj](../../../../src/futon2/aif/load_identity.clj),
+lines 116–156).  Conversely, a declared namespace which has not registered is
+reported as `:unregistered`.  Neither status establishes presence in the JVM.
+The declaration itself calls out the latter case rather than silently dropping
+it
 ([load_identity.clj](../../../../src/futon2/aif/load_identity.clj), lines
 10–17, 45–103).
 
 | Packet/change surface | Current namespace and direct route | Reload discovery / identity attribution | Source pin and limit |
 |---|---|---|---|
-| P00/P07/P10/P11/P14 terminal and selection retention | `futon2.aif.full-loop-runner`, plus `trace`, `assessed-policy-basis`, `selected-outer-cascade-policy`, and `terminal-publication-receipt` | Runner, trace, assessed basis and selected policy are declared; a committed change in futon2 `src` is discovered regardless. | The runner identity report compares load-time source digests with canonical bytes and expressly excludes bytecode identity, partial loads, and later Var mutation ([full_loop_runner.clj](../../../../src/futon2/aif/full_loop_runner.clj), lines 636–663). |
+| P00/P07/P10/P11/P14 terminal and selection retention | `futon2.aif.full-loop-runner`, plus `trace`, `assessed-policy-basis`, `selected-outer-cascade-policy`, and `terminal-publication-receipt` | Only runner and trace are declared in the current map. Assessed basis, selected policy, and terminal-publication receipt may still appear in `report` if registered, but without a declared canonical path their comparison is `:unavailable`; every committed futon2 `src` change is discovered regardless. | The runner identity report compares load-time source digests with canonical bytes and expressly excludes bytecode identity, partial loads, and later Var mutation ([full_loop_runner.clj](../../../../src/futon2/aif/full_loop_runner.clj), lines 636–663). |
 | P01/P02/P03–P06 outer evidence/objective path | `d-predecessor-task-authority`, `outer-policy-provider-runtime`, `outer-policy-evidence`, `outer-policy-objective`, consumed by `meta-live-outer-selector` | The selector is declared; individual outer-provider/evidence/objective modules are not listed in `required-sources` lines 18–103, so changed files remain reload candidates but are absent from the attributed identity list. | Current selector requires the score/belief, evidence, objective and family-selection route ([meta_live_outer_selector.clj](../../../../src/futon2/aif/meta_live_outer_selector.clj), lines 8–25). This is an attribution gap, not proof of missing runtime loading. |
 | P08 graph publication / reader | `futon2.aif.pattern-graph-pin`, consumed by `futon2.aif.wm.family-selection` | Family selection is declared; graph pin is not. Both are under futon2 `src`, so either committed source is discoverable; only family selection appears in the P09 attribution census. | `family-selection` directly requires graph pin and calls `load-pinned` ([family_selection.clj](../../../../src/futon2/aif/wm/family_selection.clj), lines 7–16, 136–155). The ledger limits P08 to manifest-aware readers: `pattern-graph-view` still calls `load-unpinned` (line 66) and `scripts/unblocks_relation.clj` still directly reads a pin (line 179). Those raw readers are not migrated or made coherent by a JVM reload. |
 | P09 deployment boundary | `load-identity` and the Python reload loop; explicit family-selection dependency | `load-identity` itself is under futon2 `src`; declared paths include runner/runtime, meta selector, family selection, pipeline selector and tripwire. | Source inventory parsing is bounded to `required-sources` (reload loop lines 197–247). It cannot prove that all declared sources registered or that consumers accept a reload. |
@@ -95,14 +100,16 @@ selectors, family selection, futon3c runner service, and tripwire
 45–103).  That is the concrete loaded/disk reporting scope.  It is narrower
 than the committed-source candidate set by design.
 
-## Cross-repository and signature risks to resolve before a probe
+## Cross-repository and signature limits to record with a probe
 
 1. **P08 publisher is not a reload target.**  `scripts/publish_pattern_graph.clj`
    is outside `CLICK_PATHS`; the futon3c miner commits cited above are in a
    different repository, and `CLICK_PATHS` includes only its
    `src/futon3c/wm` tree.  A publisher/miner deployment therefore needs its
-   own checkout/commit verification before a reader probe.  This is a source
-   boundary, not an assertion that either checkout is wrong.
+   own checkout/commit verification before one can assert that a reader sees
+   the intended producer output.  It does not block a read-only source-state
+   probe.  This is a source boundary, not an assertion that either checkout is
+   wrong.
 2. **Identity attribution is incomplete for several landed dependencies.**
    `pattern-graph-pin`, `outer-target-score`, `outer-target-belief`,
    `meta-field-observation`, `meta-self-heal-production`, and the outer
@@ -112,11 +119,17 @@ than the committed-source candidate set by design.
    function arity at the reload call: the loop always uses Clojure
    `(require namespace :reload)` (lines 312–315).  Compatibility of a changed
    namespace with already-loaded callers is unmeasured.
-3. **The runner's refusal authority is intentionally narrow.**  Only its own
-   `:drift` is refusal-authoritative; broader displacement is report-only
-   ([full_loop_runner.clj](../../../../src/futon2/aif/full_loop_runner.clj),
-   lines 636–681).  A successful runner identity response cannot certify every
-   dependency in this census.
+3. **The runner has two refusal checks, not one.**  First, its own
+   `:runner/source-check :drift` throws `:stale-runner-source`; `:unavailable`
+   does not trigger that branch.  Second, it collects every non-`:current`
+   result for exactly `futon2.aif.full-loop-runtime`,
+   `futon2.report.war-machine`, `futon2.aif.meta-live-outer-selector`, and
+   `futon2.aif.meta-pipeline-selector`, then throws
+   `:stale-outer-selection-composition` with those entries under
+   `:critical-namespaces` ([full_loop_runner.clj](../../../../src/futon2/aif/full_loop_runner.clj),
+   lines 665–698).  `loaded-displacement` remains report-only.  A successful
+   identity response still cannot certify every other dependency in this
+   census.
 
 ## Coordinator review: proposed zero-click probes (do not execute from this packet)
 
@@ -140,18 +153,19 @@ git -C /home/joe/code/futon3c rev-parse HEAD
 /home/joe/code/futon3c/scripts/proof-eval.sh \
   '(futon2.aif.full-loop-runner/runner-source-drift)'
 
-# 4. If (and only if) the report identifies stale named namespaces, use the
-# reviewed idle reload controller rather than hand-editing its ordering.  The
-# coordinator must first verify no click is running; this packet does not
-# authorize running the command.
+# 4. Inspect the loop CLI only; do not use `run` as a source-state probe.
+# Any later reload must use the reviewed idle controller rather than a
+# hand-edited ordering, but incomplete attribution remains a reportable gap,
+# not a prerequisite to this read-only probe.
 python3 /home/joe/code/futon2/scripts/wm_click_repair_loop.py --help
 ```
 
 The fourth line is intentionally only a CLI-surface review: `run` itself
 obtains a start epoch and can eventually invoke `fire` (reload loop lines
 837–875), so it is not a safe substitute for a source-only serving probe.
-Before any actual reload, the coordinator should resolve the incomplete
-identity-attribution list above and record the target futon3c miner revision.
+Any actual reload should record the incomplete identity-attribution list and
+the target futon3c miner revision as limits; neither absence blocks the
+source-state probe proposed above.
 
 ## Limits and proposed model update
 
