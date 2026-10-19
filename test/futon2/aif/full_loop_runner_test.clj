@@ -229,6 +229,63 @@
         "no pin and no seam route stays empty: nothing is invented for
          non-packet clicks")))
 
+(deftest abstained-sorry-retains-frontier-and-loop-receipt-with-or-without-q2
+  ;; L1 stopped at :incomplete-policy-menu-coverage. Its click-specific
+  ;; counts were lost, so these are deliberately synthetic frontier values.
+  (let [record-dir (.getPath
+                    (.toFile
+                     (Files/createTempDirectory
+                      "wm-abstained-frontier-record-test-"
+                      (make-array FileAttribute 0))))
+        frontier {:eligible-count 7
+                  :assessed-count 2
+                  :reading-absent-ids ["M-synthetic-absent-a"
+                                        "M-synthetic-absent-b"]}
+        exercise {:schema :wm/loop-node-exercise-v1
+                  :status :incomplete
+                  :counts {:present 0 :bypassed 0 :refused 4}
+                  :by-node {:R6 {:status :refused
+                                 :reason :candidate-space-not-retained}}}
+        retain (fn [run-id q2?]
+                 (let [certificate (cond-> {:reading-frontier frontier
+                                             :loop-node-exercise exercise}
+                                     q2? (assoc :q2-construction
+                                                {:status :absent
+                                                 :reason :synthetic-q2-construction}) )
+                       result {:attempt-id (str "attempt-" run-id)
+                               :outcome :incomplete
+                               :wm/route [{:node :SELECTION :via :abstained
+                                           :at "2026-10-19T00:00:00Z"}]
+                               :data {:failure-kind :abstained
+                                      :failure-stage :selection
+                                      :error "synthetic L1 abstention"}
+                               :checkpoints
+                               {:selection
+                                {:sorry
+                                 {:decision {:status :abstained
+                                             :refusals [{:kind :incomplete-policy-menu-coverage
+                                                         :target "M-synthetic-frontier"
+                                                         :missing [:current-reading]}]
+                                             :selection-certificate certificate}}}}}]
+                   ;; Exercise the owned written-record projection directly.
+                   ;; run-opportunity! rejects a worktree before persistence:
+                   ;; its serving-JVM identity guard compares this source to
+                   ;; the canonical checkout.
+                   (let [written (runner/persist-run-record!
+                                  {:run-record-dir record-dir
+                                   :click-id (str "click-" run-id)}
+                                  run-id "2026-10-19T00:00:00Z" result)]
+                     (edn/read-string (slurp (:run-record written))))))]
+    (doseq [[run-id q2?] [["abstained-with-q2" true]
+                          ["abstained-without-q2" false]]]
+      (let [record (retain run-id q2?)
+            certificate (get-in record [:decision :selection-certificate])]
+        (is (= frontier (:reading-frontier certificate)))
+        (is (= exercise (:loop-node-exercise certificate)))
+        (is (= q2? (contains? certificate :q2-construction)))
+        (is (nil? (get-in record [:decision :action]))
+            "retaining measurements never turns an abstention into a selection")))))
+
 (deftest every-terminal-wrapper-category-persists-a-run-record
   (let [record-dir (.getPath
                     (.toFile

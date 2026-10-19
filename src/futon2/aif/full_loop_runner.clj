@@ -1169,16 +1169,22 @@
                                       ;; the chosen plan, so a flight can read
                                       ;; what it left unreached from the record
                                       :chosen (chosen-summary retained-decision))
-                               ;; Requirements Q2: an abstention selected
-                               ;; nothing, but the selected task's
-                               ;; construction (a zero-policy family and its
-                               ;; failures) still happened and is kept
+                               ;; An abstention selected nothing, but its
+                               ;; already-measured construction, frontier,
+                               ;; and loop-node receipts remain evidence.
+                               ;; Q2 is one such carrier, not the guard for
+                               ;; retaining the others: an incomplete menu
+                               ;; can have a frontier with no Q2 construction.
                                (and (nil? retained-decision)
-                                    (get-in selection-sorry [:decision :selection-certificate
-                                                             :q2-construction]))
+                                    (seq (select-keys
+                                          (get-in selection-sorry
+                                                  [:decision :selection-certificate])
+                                          [:q2-construction :target-policy-field
+                                           :reading-frontier :loop-node-exercise])))
                                (assoc :selection-certificate
                                       (select-keys (get-in selection-sorry [:decision :selection-certificate])
-                                                   [:q2-construction :target-policy-field])))
+                                                   [:q2-construction :target-policy-field
+                                                    :reading-frontier :loop-node-exercise])))
                     ;; PROOF-2b: the click's interpretation ask.  Once a tick
                     ;; has selected an admitted action, an ask is not missing:
                     ;; it is inapplicable.  Keep that distinct from the typed
