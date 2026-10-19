@@ -3617,6 +3617,76 @@
     (is (false? (:include-advisory-lanes? @seen)))
     (is (not (contains? @seen :strategic-selection-fn)))))
 
+(deftest early-terminal-selection-trace-retains-observed-judgement-once
+  (with-redefs-fn {#'runner/refuse-on-runner-source-drift!
+                    (constantly {:runner/source-check :fixture-current})}
+    (fn []
+      (let [root (.toFile (Files/createTempDirectory "wm-p11-trace-"
+                                                (make-array FileAttribute 0)))
+        run-id "2026-10-19-f9abc990-b43a-491b-8f2b-d8b14c7fa796"
+        selected-judgement
+        {:decision {:status :selected
+                    :selection-law {:applied :meta-algorithm-selection}
+                    :action {:type :run-algorithm :target "M-p11-trace"}}
+         :belief {} :belief-pre {} :observation {} :free-energy {}
+         :prediction-errors {} :precision-state {} :micro-step-trace []
+         :mode :maintain}
+        early-result
+        (runner/run-opportunity!
+         (assoc (isolated-runner-opts)
+                :run-id run-id
+                :judge-fn (fn [_] {:judgement selected-judgement})
+                :trace-fn #(trace/write-trace! % :dir (.getPath root)
+                                             :return-record? true)
+                :run-record-dir (.getPath (io/file root "runs"))
+                :repair-open-fn (constantly [])
+                :construct-fn (fn [& _]
+                                (throw (ex-info "validation stopped after selection"
+                                                {:outcome :incomplete
+                                                 :failure-kind :fixture-validation-failed
+                                                 :failure-stage :construction})))))
+        early-records (trace/read-trace :dir (.getPath root))
+        successful-root (.toFile (Files/createTempDirectory "wm-p11-success-"
+                                                           (make-array FileAttribute 0)))
+        successful-id "p11-successful-selection"
+        successful
+        (runner/run-opportunity!
+         (assoc (isolated-runner-opts)
+                :run-id successful-id
+                :judge-fn (fn [_] {:judgement selected-judgement})
+                :trace-fn #(trace/write-trace! % :dir (.getPath successful-root)
+                                             :return-record? true)
+                :run-record-dir (.getPath (io/file successful-root "runs"))
+                :repair-open-fn (constantly [])
+                :construct-fn (fn [& _] {:shown [] :policy-holes []})))
+        successful-records (trace/read-trace :dir (.getPath successful-root))
+        pre-judgement-result
+        (runner/run-opportunity!
+         (assoc (isolated-runner-opts)
+                :run-id "p11-before-judgement"
+                :trace-dir (.getPath root)
+                :run-record-dir (.getPath (io/file root "pre-runs"))
+                :code-state-fn #(throw (ex-info "pre-judgement failure" {}))))]
+    (try
+      (is (= :present (get-in early-result [:trace-publication :status])))
+      (is (= run-id (:run/id (first early-records))))
+      (is (= 1 (count early-records)))
+      (is (= :early-terminal (get-in early-records [0 :trace/terminal :status])))
+      (is (= :construction (get-in early-records [0 :trace/terminal :stage])))
+      (is (not (contains? (first early-records) :construction)))
+      (is (= 1 (count successful-records)))
+      (is (= successful-id (:run/id (first successful-records))))
+      (is (not (contains? (first successful-records) :trace/terminal)))
+      (is (map? successful))
+      (is (= {:status :absent :reason :selection-judgement-not-observed}
+             (:trace-publication pre-judgement-result)))
+      (is (= 1 (count (trace/read-trace :dir (.getPath root))))
+          "pre-judgement failure creates no trace row")
+      (finally
+        (doseq [dir [root successful-root]
+                file (reverse (file-seq dir))]
+          (io/delete-file file true))))))))
+
 (deftest restored-agent-is-woken-once-before-readiness-proceeds
   (let [phases (atom [])
         roster-calls (atom 0)

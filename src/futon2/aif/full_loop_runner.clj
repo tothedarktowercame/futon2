@@ -1214,6 +1214,10 @@
                     :live-c-coverage (or (:live-c-coverage decision)
                                          {:status :absent :reason :coverage-not-recorded})
                     :traceWritten (boolean (:trace-path result))
+                    :trace-publication
+                    (or (:trace-publication result)
+                        {:status :absent
+                         :reason :trace-publication-not-reported})
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
                     :decision (cond->
@@ -5332,6 +5336,8 @@
         d-task-context (atom nil)
         pending-selection (atom nil)
         selection-persisted? (atom false)
+        observed-selection (atom nil)
+        trace-publication (atom nil)
         dispatched-turns (atom 0)
         standing-readback-state (atom nil)
         effective-configuration
@@ -5475,6 +5481,7 @@
           ;; Observation precedes validation: a later refusal does not undo
           ;; the fact that the selector produced this decision and frontier.
           (when (= :selected (get-in judgement [:decision :status]))
+            (reset! observed-selection judgement)
             (let [cell (term {:controller-decision (:decision judgement)
                              :selected-mission (get-in judgement [:decision :action :target])
                              :outer-task-selection (:outer-task-selection judgement)}
@@ -5504,10 +5511,52 @@
                    :selection cell)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
+        publish-observed-selection!
+        (fn [terminal]
+          ;; A run identity is the trace's existing deduplication identity.
+          ;; This core owns one publication atom, so an early terminal close
+          ;; and the ordinary construction path cannot append two rows.
+          (when-let [judgement @observed-selection]
+            (when-not (contains? #{:repair-machine-failure
+                                   :revalidate-historical-repair}
+                                 (get-in judgement [:decision :action :type]))
+              (or @trace-publication
+                  (let [publication
+                        (publish-selection-trace!
+                         opts
+                         (cond-> (assoc judgement :run/id (:run-id opts)
+                                               :trace/reason
+                                               {:kind :routing-rule
+                                                :rule (if terminal
+                                                        :early-terminal-selection-observed
+                                                        :constructed-selection-persisted)
+                                                :question "Does the observed selection require operator review?"})
+                           terminal (assoc :trace/terminal terminal)))]
+                    (reset! trace-publication publication)
+                    publication)))))
+        trace-publication-receipt
+        (fn []
+          (if-let [publication @trace-publication]
+            (cond-> {:status :present
+                     :path (:path publication)
+                     :run/id (:run-id opts)}
+              (get-in publication [:judgement :trace/terminal])
+              (assoc :terminal (get-in publication [:judgement :trace/terminal])))
+            {:status :absent :reason :selection-judgement-not-observed}))
         close-core! (fn [outcome data]
                  (reset! pending-close-data data)
                  (reset! closing? true)
-                 (persist-selection! nil)
+                 (let [publication
+                       (publish-observed-selection!
+                        {:status :early-terminal
+                         :phase (last-error-phase @phase-events)
+                         :stage (or (:failure-stage data)
+                                    (last-error-phase @phase-events))
+                         :outcome outcome})]
+                   (when-let [record (:record publication)]
+                     (swap! pending-selection reconcile-selection-publication record)
+                     (swap! checkpoints update :selection reconcile-selection-publication record))
+                   (persist-selection! (:path publication)))
                  (doseq [cp required-checkpoints
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
@@ -5695,8 +5744,9 @@
                             {:delivery-qa-ref ref
                              :field-desk-endpoint
                              (delivery-qa/endpoint opts)})))
-                       trace-path (get-in @checkpoints
-                                          [:construction :judgment :trace-path])
+                       trace-path (or (get-in @checkpoints
+                                               [:construction :judgment :trace-path])
+                                      (:path @trace-publication))
                        close-state (let [{:keys [entity-id belief run-id]}
                                          @selected-entity-belief]
                                      (entity-state-at-close
@@ -6052,6 +6102,7 @@
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
                                :trace-path trace-path
+                               :trace-publication (trace-publication-receipt)
                                :data data}
                                 execution-identity
                                 (assoc :execution-identity execution-identity
@@ -7029,12 +7080,8 @@
           ;; A constructed selection enters the canonical trace as an event.
           ;; Cascade habit reinforcement requires observed token outcomes at close;
           ;; neither selection nor successful construction reinforces it.
-          (let [publication (when-not repair-action?
-                              (publish-selection-trace!
-                               opts (assoc judgement :d-task-context @d-task-context :trace/reason
-                                           {:kind :routing-rule
-                                            :rule :constructed-selection-persisted
-                                            :question "Does the constructed selection require operator review?"})))
+          (reset! observed-selection (assoc judgement :d-task-context @d-task-context))
+          (let [publication (publish-observed-selection! nil)
                 trace-path (:path publication)
                 _ (when-let [record (:record publication)]
                     (swap! pending-selection reconcile-selection-publication record)
@@ -8084,7 +8131,12 @@
       (finally
         (post-wm-status! (config raw-opts)
                          {:source "wm-full-loop" :status "idle"})))
-        final-result (assoc result :runner/source source-check :repair/publication publication)
+        final-result (cond-> (assoc result :runner/source source-check
+                                      :repair/publication publication)
+                       (not (:trace-publication result))
+                       (assoc :trace-publication
+                              {:status :absent
+                               :reason :selection-judgement-not-observed}))
         persisted (persist-run-record! raw-opts run-id started-at final-result)
         injury-deposit
         (when (= :present (:run-record-status persisted))

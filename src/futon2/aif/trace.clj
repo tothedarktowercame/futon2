@@ -533,6 +533,10 @@
     ;; run, NOT that the record belongs to an unnamed one.
     (:run/id judge-output)
     (assoc :run/id (:run/id judge-output))
+    ;; P11: a selected judgment can close before construction.  This is a
+    ;; phase observation, not a construction or dispatch receipt.
+    (contains? judge-output :trace/terminal)
+    (assoc :trace/terminal (:trace/terminal judge-output))
     (:cohort-attempt judge-output)
     (assoc :cohort-attempt (:cohort-attempt judge-output))
     (:policy-depth judge-output)
