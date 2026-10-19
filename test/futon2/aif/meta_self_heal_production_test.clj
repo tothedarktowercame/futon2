@@ -1,12 +1,14 @@
 (ns futon2.aif.meta-self-heal-production-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as production]
-            [futon2.aif.meta-self-heal-harness :as harness]))
+            [futon2.aif.meta-self-heal-harness :as harness]
+            [futon2.aif.load-identity :as load-identity]))
 
 (defn- root []
   (.getCanonicalPath
@@ -18,6 +20,21 @@
          {:meta-injury-ledger-path (:ledger-path env)
           :meta-repair-transaction-path (str (:root env) "/transaction.edn")
           :meta-repair-ports ports}))
+
+(defn- recorded-injury-source! [dir]
+  ;; This is the recorded L1 fold-output-invalid shape, not an invented
+  ;; diagnosis fixture.  Its bytes are pinned as production receives them.
+  (let [record (:record (second (edn/read-string
+                                 (slurp "test/fixtures/meta-self-heal/campaign-2026-10-19.edn"))))
+        path (str dir "/record.edn")
+        bytes (.getBytes (str (pr-str record) "\n") "UTF-8")]
+    (spit path (String. bytes "UTF-8"))
+    {:path path :sha256 (load-identity/sha256 bytes)}))
+
+(defn- durable-with-active-source [pin]
+  {:ledger {:entries [{:injury-id "injury-recorded-l1"
+                       :state :open :cause-record-pin pin}]}
+   :active {:injury-id "injury-recorded-l1" :state :open}})
 
 (deftest active-injury-preempts-ordinary-runtime-and-persists-every-boundary
   (let [env (harness/prepare-environment! (root))
@@ -111,3 +128,70 @@
     (is (= :dedicated-meta-self-heal (:required-route result)))
     (is (= #{:ordinary-loop-node :pattern-fold :policy-selection :d-task-authority}
            (set (:forbidden-boundaries result))))))
+
+(deftest pinned-injury-evidence-produces-a-durable-diagnosis-input
+  (let [dir (root)
+        pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        seen (atom nil)
+        result (production/produce-diagnosis!
+                {:meta-diagnosis-root (str dir "/diagnoses")
+                 :meta-diagnosis-fn #(do (reset! seen %)
+                                          {:status :succeeded
+                                           :diagnosis {:class :configuration}})}
+                {:ledger ledger} active)
+        receipt (edn/read-string (slurp (get-in result [:diagnosis-evidence-pin :path])))]
+    (is (= :available (:status result)))
+    (is (= pin (:source-record-pin @seen)))
+    (is (= "2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f"
+           (get-in @seen [:injury-record :run/id])))
+    (is (= :fold-output-invalid (get-in @seen [:injury-record :failure :kind])))
+    (is (= (get-in result [:diagnosis-evidence-pin :sha256])
+           (load-identity/sha256
+            (java.nio.file.Files/readAllBytes
+             (.toPath (java.io.File. (get-in result [:diagnosis-evidence-pin :path])))))))
+    (is (= pin (:source-record-pin receipt)))
+    (is (false? (:repair-claimed? receipt)))))
+
+(deftest diagnosis-absence-and-bad-source-never-claim-a-repair-or-a-pin
+  (let [dir (root)
+        pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        failed (production/produce-diagnosis!
+                {:meta-diagnosis-fn (constantly {:status :failed :reason :offline})}
+                {:ledger ledger} active)
+        bad-pin (assoc pin :sha256 (apply str (repeat 64 "0")))
+        bad (production/produce-diagnosis!
+             {:meta-diagnosis-fn (fn [_] (throw (Exception. "must not call")))}
+             {:ledger (:ledger (durable-with-active-source bad-pin))} active)]
+    (is (= :meta-self-heal/diagnosis-unavailable (:reason failed)))
+    (is (= :offline (:diagnosis-reason failed)))
+    (is (nil? (:diagnosis-evidence-pin failed)))
+    (is (false? (:repair-claimed? failed)))
+    (is (= :meta-self-heal/diagnosis-source-pin-mismatch (:reason bad)))
+    (is (nil? (:diagnosis-evidence-pin bad)))
+    (is (false? (:repair-claimed? bad)))))
+
+(deftest diagnosis-persistence-failure-is-not-a-durable-diagnosis
+  (let [dir (root)
+        pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        result (with-redefs [production/persist-diagnosis!
+                             (fn [& _] {:status :refused
+                                        :reason :meta-self-heal/diagnosis-persist-failed})]
+                 (production/produce-diagnosis!
+                  {:meta-diagnosis-fn (constantly {:status :succeeded
+                                                   :diagnosis {:class :configuration}})}
+                  {:ledger ledger} active))]
+    (is (= :meta-self-heal/diagnosis-persist-failed (:reason result)))
+    (is (nil? (:diagnosis-evidence-pin result)))
+    (is (false? (:repair-claimed? result)))))
+
+(deftest existing-diagnosis-pin-remains-a-non-invoking-compatibility-path
+  (let [pin {:path "diagnoses/existing.edn" :sha256 (apply str (repeat 64 "a"))}
+        result (production/produce-diagnosis!
+                {:diagnosis-evidence-pin pin
+                 :meta-diagnosis-fn (fn [_] (throw (Exception. "must not call")))}
+                {} {:injury-id "injury-1"})]
+    (is (= :present (:status result)))
+    (is (= pin (:diagnosis-evidence-pin result)))))
