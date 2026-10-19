@@ -2,6 +2,12 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Rows 36/41 P07b: `seal-assessed` adapts only a verified P07a basis. Carrier
+verification recomputes the basis and checks complete selected-entry equality
+against the original menu. `decision` projects that entry's executable action,
+not the objective descriptor, with assessed scope/absence/draw in selection-basis.
+Legacy strict carriers remain accepted. P07c runtime selection activation pending.
+
 Rows 36/41 P07a (`4a2f7da8a`): an isolated assessed-basis verifier now exists.
 It is not called by current strict executable carrier seal/decision. It verifies
 original menu and full evidence, replays the partial objective including tie draw,

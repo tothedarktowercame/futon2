@@ -2,6 +2,13 @@
 
 ## Reviewed update — 2026-10-19, codex-1
 
+Row 6 P07b (worker `608c9072` + `c71ef391`): executable carrier now supports
+verified assessed-population basis, replaying full original menu/evidence through
+P07a. Both bases project the original menu entry executable action; complete
+entry equality rejects independently substituted actions. Basis scope/absences
+remain certificate evidence. Strict and legacy strict carrier controls pass.
+Worker focused 2 tests/21 assertions passed; no runtime caller activation yet.
+
 Row 6 P07a (`4a2f7da8a`, authored `12b2482f1`): separately typed, non-executable
 assessed-policy basis retains original menu/full evidence/partial objective and
 recomputes the entire receipt with its recorded draw. Canonical identity, pins,
