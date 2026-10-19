@@ -154,7 +154,7 @@
         (is (= :external-snapshot-pin-mismatch
                (:reason (field/verify forged {:expected-snapshot-pin authority}))))))))
 
-(deftest catalog-and-source-adversarial-mutations-refuse
+(deftest catalog-and-source-adversarial-mutations-remain-observed
   (let [bytes (.getBytes "body" "UTF-8")
         catalog (fn [entries] (.getBytes
                                (pr-str {:schema :wm/approved-algorithm-catalog-v1
@@ -173,18 +173,61 @@
                 :read-bytes #(case % "/catalog.edn" catalog-bytes
                                     "/A-one.md" algorithm-bytes)}))]
     (testing "algorithm file drift"
-      (is (= :source-drift
-             (:reason (run (catalog [entry]) (.getBytes "changed" "UTF-8"))))))
+      (is (= :algorithm/source-drift
+             (:ineligible-reason
+              (first (:exclusions (run (catalog [entry]) (.getBytes "changed" "UTF-8"))))))))
     (testing "duplicate approved identity"
-      (is (= :duplicate-identities
-             (:reason (run (catalog [entry entry]) bytes)))))
+      (is (= :algorithm/catalog-invalid
+             (:ineligible-reason (first (:exclusions (run (catalog [entry entry]) bytes)))))))
     (testing "catalog/file shape mismatch"
-      (is (= :algorithm-catalog-file-mismatch
-             (:reason (run (catalog [(dissoc entry :source)]) bytes)))))
+      (is (= :algorithm/source-pin-invalid
+             (:ineligible-reason
+              (first (:exclusions (run (catalog [(dissoc entry :source)]) bytes)))))))
     (testing "algorithm identity cannot collide with a task identity"
       (let [collision (assoc entry :id "M-open")]
         (is (= :duplicate-identities
                (:reason (run (catalog [collision]) bytes))))))))
+
+(deftest drifted-catalog-row-is-excluded-without-losing-the-field
+  (let [good-bytes (.getBytes "good algorithm" "UTF-8")
+        drifted-bytes (.getBytes "drifted algorithm" "UTF-8")
+        algorithm (fn [id path digest]
+                    {:id id :status :approved :source {:path path :sha256 digest}
+                     :repairs-capability :wm-click-completes-with-reviewable-receipts
+                     :evidence-locator {:kind :debugger-stop-and-terminal-run-record
+                                        :id :wm-click-completes-with-reviewable-receipts}
+                     :resource-requirements {:ordinary-clicks 1}})
+        drifted (algorithm "A-drift" "/A-drift.md" (field/sha256 good-bytes))
+        verified (algorithm "A-good" "/A-good.md" (field/sha256 good-bytes))
+        catalog (.getBytes (pr-str {:schema :wm/approved-algorithm-catalog-v1
+                                    :entries [drifted verified]}) "UTF-8")
+        observe (fn [catalog-bytes]
+                  (field/observe {:registry-snapshot current-registry
+                                  :catalog-path "/catalog.edn"
+                                  :click-availability positive-clicks
+                                  :injury-authority injury-authority
+                                  :read-bytes #(case % "/catalog.edn" catalog-bytes
+                                                     "/A-drift.md" drifted-bytes
+                                                     "/A-good.md" good-bytes)}))
+        observation (observe catalog)
+        drift-exclusion (some #(when (= "A-drift" (:id %)) %) (:exclusions observation))]
+    (is (some #(= "M-open" (:id %)) (:rows observation)))
+    (is (some #(= "A-good" (:id %)) (:rows observation)))
+    (is (= :algorithm/source-drift (:ineligible-reason drift-exclusion)))
+    (is (= (:source drifted) (get-in drift-exclusion [:ineligibility-evidence :expected])))
+    (is (= (field/sha256 drifted-bytes)
+           (get-in drift-exclusion [:ineligibility-evidence :actual :sha256])))
+    (is (= 1 (get-in observation [:counts :algorithm])))
+    (is (= 2 (get-in observation [:algorithm-catalog-proof :entry-total])))
+    (is (= :verified (:status (verify-produced observation))))
+    (doseq [catalog-bytes [(.getBytes "{" "UTF-8")
+                           (.getBytes (pr-str {:schema :wrong :entries []}) "UTF-8")]]
+      (let [partial (observe catalog-bytes)]
+        (is (some #(= "M-open" (:id %)) (:rows partial)))
+        (is (= 0 (get-in partial [:counts :algorithm])))
+        (is (contains? #{:algorithm/catalog-unreadable :algorithm/catalog-invalid}
+                       (:ineligible-reason
+                        (some #(when (= :algorithm (:kind %)) %) (:exclusions partial)))))))))
 
 (deftest whole-snapshot-pin-detects-dropped-and-altered-rows
   (let [observation (field/observe {:registry-snapshot current-registry})]

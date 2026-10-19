@@ -130,10 +130,13 @@
                                (keep (fn [[id n]] (when (> n 1) id))) vec)]
         (cond
           (not= algorithm-catalog-schema (:schema catalog))
-          (refusal :algorithm-catalog-invalid {:error :schema :source pin})
+          {:rows [] :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-invalid
+                                  :ineligibility-evidence {:error :schema :catalog-source pin}}]}
 
           (seq duplicate-ids)
-          (refusal :duplicate-identities {:kind :algorithm :ids duplicate-ids :source pin})
+          {:rows [] :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-invalid
+                                  :ineligibility-evidence {:error :duplicate-identities :ids duplicate-ids
+                                                            :catalog-source pin}}]}
 
           :else
           (loop [remaining entries rows [] exclusions []]
@@ -148,53 +151,60 @@
                                 :ineligibility-evidence {:catalog-source pin :entry entry}}))
 
                   (not (pin? source))
-                  (refusal :algorithm-catalog-file-mismatch
-                           {:id (:id entry) :error :source-pin-invalid :catalog-source pin})
-
-                  (not (positive-click-authority?
-                        click-availability
-                        (get-in entry [:resource-requirements :ordinary-clicks])))
                   (recur (next remaining) rows
-                         (conj exclusions
-                               {:id (:id entry) :kind :algorithm
-                                :ineligible-reason :algorithm/click-resource-unavailable
-                                :ineligibility-evidence
-                                {:catalog-source pin
-                                 :source source
-                                 :required (:resource-requirements entry)
-                                 :availability click-availability}}))
-
-                  (not (matching-injury-authority?
-                        injury-observation (:repairs-capability entry)))
-                  (recur (next remaining) rows
-                         (conj exclusions
-                               {:id (:id entry) :kind :algorithm
-                                :ineligible-reason :algorithm/injury-capability-unavailable
-                                :ineligibility-evidence
-                                {:catalog-source pin
-                                 :source source
-                                 :repairs-capability (:repairs-capability entry)
-                                 :injury-observation injury-observation
-                                 :injury-verification (:injury-verification
-                                                      injury-observation)}}))
+                         (conj exclusions {:id (:id entry) :kind :algorithm
+                                           :ineligible-reason :algorithm/source-pin-invalid
+                                           :ineligibility-evidence {:catalog-source pin :source source}}))
 
                   :else
-                  (let [actual (sha256 (read-bytes (:path source)))]
-                    (if (not= actual (:sha256 source))
-                      (refusal :source-drift
-                               {:id (:id entry) :expected (:sha256 source)
-                                :actual actual :path (:path source)})
+                  (let [actual (try (sha256 (read-bytes (:path source)))
+                                    (catch Throwable _ ::unreadable))]
+                    (cond
+                      (= ::unreadable actual)
+                      (recur (next remaining) rows
+                             (conj exclusions {:id (:id entry) :kind :algorithm
+                                               :ineligible-reason :algorithm/source-unreadable
+                                               :ineligibility-evidence {:catalog-source pin :expected source}}))
+
+                      (not= actual (:sha256 source))
+                      (recur (next remaining) rows
+                             (conj exclusions {:id (:id entry) :kind :algorithm
+                                               :ineligible-reason :algorithm/source-drift
+                                               :ineligibility-evidence
+                                               {:catalog-source pin :expected source
+                                                :actual {:path (:path source) :sha256 actual}}}))
+
+                      (not (positive-click-authority?
+                            click-availability
+                            (get-in entry [:resource-requirements :ordinary-clicks])))
+                      (recur (next remaining) rows
+                             (conj exclusions {:id (:id entry) :kind :algorithm
+                                               :ineligible-reason :algorithm/click-resource-unavailable
+                                               :ineligibility-evidence
+                                               {:catalog-source pin :source source
+                                                :required (:resource-requirements entry)
+                                                :availability click-availability}}))
+
+                      (not (matching-injury-authority?
+                            injury-observation (:repairs-capability entry)))
+                      (recur (next remaining) rows
+                             (conj exclusions {:id (:id entry) :kind :algorithm
+                                               :ineligible-reason :algorithm/injury-capability-unavailable
+                                               :ineligibility-evidence
+                                               {:catalog-source pin :source source
+                                                :repairs-capability (:repairs-capability entry)
+                                                :injury-observation injury-observation
+                                                :injury-verification (:injury-verification injury-observation)}}))
+
+                      :else
                       (recur (next remaining)
                              (conj rows {:id (:id entry) :kind :algorithm
-                                         :source source :approved true
-                                         :catalog-source pin
+                                         :source source :approved true :catalog-source pin
                                          :repairs-capability (:repairs-capability entry)
-                                         :algorithm-admission
-                                         {:evidence-locator (:evidence-locator entry)
-                                          :injury-observation injury-observation}
-                                         :resource-admission
-                                         {:required (:resource-requirements entry)
-                                          :availability click-availability}})
+                                         :algorithm-admission {:evidence-locator (:evidence-locator entry)
+                                                               :injury-observation injury-observation}
+                                         :resource-admission {:required (:resource-requirements entry)
+                                                              :availability click-availability}})
                              exclusions)))))
               {:rows rows :exclusions exclusions :catalog-source pin
                :catalog-proof
@@ -208,9 +218,10 @@
         {:rows []
          :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-unavailable
                        :ineligibility-evidence {:expected-path path}}]})
-      (catch Throwable t
-        (refusal :algorithm-catalog-unreadable
-                 {:path path :message (ex-message t)})))))
+      (catch Throwable _
+        {:rows []
+         :exclusions [{:kind :algorithm :ineligible-reason :algorithm/catalog-unreadable
+                       :ineligibility-evidence {:expected-path path}}]}))))
 
 (defn observe
   "Produce a pinned whole-field snapshot.
@@ -317,7 +328,10 @@
                                                (and (= :excluded representation)
                                                     (contains?
                                                      #{:algorithm/click-resource-unavailable
-                                                       :algorithm/injury-capability-unavailable}
+                                                       :algorithm/injury-capability-unavailable
+                                                       :algorithm/source-pin-invalid
+                                                       :algorithm/source-unreadable
+                                                       :algorithm/source-drift}
                                                      ineligible-reason)))))
                                  (and (not= :approved status)
                                       (not (and (= :excluded representation)
