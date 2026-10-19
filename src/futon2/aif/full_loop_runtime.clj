@@ -410,14 +410,25 @@
                     (or (:meta-repair-transaction-path opts)
                         meta-self-heal/default-transaction-path))
         retry (:meta-repair-retry opts)
+        diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts))
+        diagnosis-observation (when-not retry
+                                (meta-self-heal/prepare-diagnosis opts diagnosis-context))
+        effective-opts (cond-> opts
+                         diagnosis-observation
+                         (assoc :meta-diagnosis-observation diagnosis-observation)
+                         (= :available (:status diagnosis-observation))
+                         (assoc :diagnosis-evidence-pin
+                                (:diagnosis-evidence-pin diagnosis-observation)))
         readiness (if retry
-                    (meta-self-heal/attributable-retry-readiness opts retry)
-                    (meta-self-heal/production-readiness opts))]
+                    (meta-self-heal/attributable-retry-readiness effective-opts retry)
+                    (meta-self-heal/production-readiness effective-opts diagnosis-context))]
     (cond
-      (= :refused (:status readiness)) readiness
-      retry (run-ordinary-opportunity! opts)
-      :else (or (meta-self-heal/route! opts)
-                (run-ordinary-opportunity! opts)))))
+      (= :refused (:status readiness))
+      (assoc readiness :diagnosis-observation diagnosis-observation)
+      retry (run-ordinary-opportunity! effective-opts)
+      :else (let [routed (meta-self-heal/route! effective-opts)]
+              (assoc (or routed (run-ordinary-opportunity! effective-opts))
+                     :diagnosis-observation diagnosis-observation)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

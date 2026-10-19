@@ -261,3 +261,70 @@
                 {} {:injury-id "injury-1"})]
     (is (= :present (:status result)))
     (is (= pin (:diagnosis-evidence-pin result)))))
+
+(deftest runtime-prepares-and-threads-only-a-durable-diagnosis-pin
+  (let [dir (root)
+        source-pin (recorded-injury-source! dir)
+        context {:durable-ledger
+                 {:status :loaded
+                  :ledger {:entries [{:injury-id "injury-recorded-l1"
+                                      :state :open :cause-record-pin source-pin}]}}
+                 :active-injuries {:status :computed
+                                   :injuries {"injury-recorded-l1"
+                                              {:injury-id "injury-recorded-l1"
+                                               :state :open}}}}
+        no-active (assoc context :active-injuries {:status :computed :injuries {}})
+        ready-opts (atom [])
+        route-opts (atom [])
+        diagnosis-calls (atom 0)
+        readiness (fn [opts _] (swap! ready-opts conj opts) {:status :ready})
+        route (fn [opts] (swap! route-opts conj opts) {:status :routed})
+        available
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness readiness
+                      production/route! route]
+          (runtime/run-opportunity!
+           {:meta-diagnosis-root (str dir "/diagnoses")
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 {:status :succeeded :diagnosis {:class :configuration}})}))
+        failed
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness readiness
+                      production/route! route]
+          (runtime/run-opportunity!
+           {:meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 {:status :failed :reason :offline})}))
+        supplied-pin {:path "diagnoses/supplied.edn"
+                      :sha256 (apply str (repeat 64 "a"))}
+        supplied
+        (with-redefs [production/diagnosis-context (constantly context)
+                      production/production-readiness readiness
+                      production/route! route]
+          (runtime/run-opportunity!
+           {:diagnosis-evidence-pin supplied-pin
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+                                 (throw (Exception. "must not call")))}))
+        ordinary-seen (atom nil)
+        no-active-result
+        (with-redefs [production/diagnosis-context (constantly no-active)
+                      production/production-readiness readiness
+                      production/route! (constantly nil)]
+          (with-redefs-fn
+            {#'runtime/run-ordinary-opportunity!
+             (fn [opts] (reset! ordinary-seen opts) {:status :ordinary})}
+            #(runtime/run-opportunity! {:meta-diagnosis-fn
+                                         (fn [_] (swap! diagnosis-calls inc)
+                                           (throw (Exception. "must not call")))})))]
+    (is (= :routed (:status available)))
+    (is (= :available (get-in available [:diagnosis-observation :status])))
+    (is (= (get-in available [:diagnosis-observation :diagnosis-evidence-pin])
+           (:diagnosis-evidence-pin (first @route-opts))))
+    (is (= :meta-self-heal/diagnosis-unavailable
+           (get-in failed [:diagnosis-observation :reason])))
+    (is (nil? (:diagnosis-evidence-pin (second @route-opts))))
+    (is (= :present (get-in supplied [:diagnosis-observation :status])))
+    (is (= supplied-pin (:diagnosis-evidence-pin (nth @route-opts 2))))
+    (is (= 2 @diagnosis-calls))
+    (is (= :ordinary (:status no-active-result)))
+    (is (= :not-required (get-in no-active-result [:diagnosis-observation :status])))
+    (is (nil? (:diagnosis-evidence-pin @ordinary-seen)))))

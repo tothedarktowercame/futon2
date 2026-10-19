@@ -219,19 +219,57 @@
                      :repair-reviewer :author-session :reviewer-session
                      :repair-reviewer-session :target-repository :target-worktree]))
 
+(defn diagnosis-context
+  "Read the durable injury state once for runtime diagnosis preparation.  The
+  context is evidence, not readiness: an unreadable ledger remains available
+  to readiness as its original typed defect."
+  [opts]
+  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        durable (when (.isFile (io/file ledger-path))
+                  (store/load-durable-ledger ledger-path))
+        active (when (= :loaded (:status durable))
+                 (ledger/active-injuries (:ledger durable)))]
+    {:meta-injury-ledger-path ledger-path
+     :durable-ledger durable
+     :active-injuries active}))
+
+(defn prepare-diagnosis
+  "Prepare exactly the injury route that coordinator/prepare will select.  A
+  supplied pin is intentionally not re-produced; no active injury is an
+  explicit not-required observation."
+  [opts {:keys [durable-ledger active-injuries]}]
+  (cond
+    (:diagnosis-evidence-pin opts)
+    {:status :present :diagnosis-evidence-pin (:diagnosis-evidence-pin opts)
+     :source :supplied}
+
+    (not= :loaded (:status durable-ledger))
+    {:status :unavailable :reason :meta-self-heal/diagnosis-ledger-unavailable}
+
+    (not= :computed (:status active-injuries))
+    {:status :unavailable :reason :meta-self-heal/diagnosis-active-set-unavailable}
+
+    (empty? (:injuries active-injuries))
+    {:status :not-required :reason :meta-self-heal/no-active-injury}
+
+    :else
+    (let [injury-id (first (sort (keys (:injuries active-injuries))))
+          entry (assoc (get-in active-injuries [:injuries injury-id])
+                       :injury-id injury-id)]
+      (produce-diagnosis! opts durable-ledger entry))))
+
 (defn production-readiness
   "Pre-ration readiness for the dedicated repair boundary.  An absent ledger
   is a valid empty state, but when a durable active injury exists every effect
   authority must already be configured.  Callers can therefore refuse before
   accepting or charging an ordinary click."
-  [opts]
-  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+  ([opts] (production-readiness opts (diagnosis-context opts)))
+  ([opts {:keys [meta-injury-ledger-path durable-ledger active-injuries]}]
+  (let [ledger-path meta-injury-ledger-path
         transaction-path (or (:meta-repair-transaction-path opts)
                              default-transaction-path)
-        durable (when (.isFile (io/file ledger-path))
-                  (store/load-durable-ledger ledger-path))
-        active (when (= :loaded (:status durable))
-                 (ledger/active-injuries (:ledger durable)))
+        durable durable-ledger
+        active active-injuries
         active? (seq (:injuries active))
         missing (cond-> []
                   (nil? transaction-path) (conj :transaction-path)
@@ -251,7 +289,7 @@
 
       :else {:status :ready :active-injury? (boolean active?)
              :meta-injury-ledger-path ledger-path
-             :meta-repair-transaction-path transaction-path})))
+             :meta-repair-transaction-path transaction-path}))))
 
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
