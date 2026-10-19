@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/worktrees/futon2-outer-policy-objective-3e2b"
+ :code-paths ["src/futon2/aif/outer_policy_objective.clj"
+              "src/futon2/aif/outer_policy_evidence.clj"
+              "src/futon2/aif/parameter_novelty.clj"
+              "src/futon2/aif/wm/selection_cascade_identity.clj"]
+ :test-paths ["test/futon2/aif/outer_policy_objective_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.outer-policy-objective-test"]
+ :author "codex-6" :origin "Packet 3E2b pure strict outer policy objective"
+ :artifact-dir "/tmp/packet-3e2b-test-registry" :agency-url "http://localhost:7070"}

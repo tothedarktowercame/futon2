@@ -1,0 +1,12 @@
+{:schema :wm/packet-3e2b-receipt-v1
+ :output-schema :wm/outer-policy-objective-v1
+ :equations {:risk "KL(q||C)"
+             :ambiguity "digamma(alpha0+1)-sum_i q_i*digamma(alpha_i+1)"
+             :G "risk+ambiguity-novelty"
+             :objective "gamma*G-lnE"
+             :posterior "softmax(lnE-gamma*G)"}
+ :units :nats :comparison :unique-strict-objective-minimum
+ :runtime-insertion {:input :wm/outer-policy-evidence-v1
+                     :after :sealed-menu-evidence-join
+                     :before :selected-target-reading}
+ :runtime-wired false :live-click-launched false}
