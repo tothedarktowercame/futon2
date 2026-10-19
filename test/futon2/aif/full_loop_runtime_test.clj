@@ -139,6 +139,8 @@
 (deftest production-pins-one-outer-selection-across-redecision
   (let [calls (atom [])
         invocations (atom 0)
+        evidence-provider {:schema :wm/outer-policy-evidence-provider-v1
+                           :status :refused :reason :test-authority}
         selector (fn [input]
                    (swap! calls conj input)
                    {:chosen {:id (str "M-choice-" (count @calls))}})
@@ -158,13 +160,17 @@
                            :occurrence-square-root "/squares"
                            :pattern-library-root "/patterns"
                            :require-occurrence-squares? true
+                           :outer-policy-evidence-provider evidence-provider
                            :target-policy-retraction {:k 3}})]
             ((:judge-fn defaults) 1)
             ((:judge-fn defaults) 1)
             defaults))]
     (is (= 1 (count @calls)))
     (is (= {:tasks ["population-1"]}
-           (dissoc (first @calls) :policy-field-config)))
+           (dissoc (first @calls) :policy-field-config
+                   :outer-policy-evidence-provider)))
+    (is (identical? evidence-provider
+                    (:outer-policy-evidence-provider (first @calls))))
     (is (= {:target-reading-root "/readings"
             :pattern-graph-path "/graph"
             :occurrence-square-root "/squares"

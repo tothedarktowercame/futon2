@@ -9,6 +9,7 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
             [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
@@ -214,6 +215,13 @@
   [opts]
   (ensure-reading-precision-campaign! opts)
   (let [outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
+        evidence-provider (or (:outer-policy-evidence-provider opts)
+                              (when-let [path (:outer-policy-evidence-provider-path opts)]
+                                (policy-evidence-provider/load-static path)))
+        outer-selector (fn [input]
+                         (outer-selector
+                          (assoc input :outer-policy-evidence-provider
+                                 evidence-provider)))
         ;; A click may invoke the report judge twice when an interpretation ask
         ;; publishes missing construction input.  Outer state can change while
         ;; that ask runs (including the graph and learning manifest), but the

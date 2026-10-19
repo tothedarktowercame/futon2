@@ -13,10 +13,15 @@
             [futon2.aif.outer-task-selection :as outer]
             [futon2.aif.outer-target-score :as outer-score]
             [futon2.aif.outer-learning-runtime :as outer-learning-runtime]
+            [futon2.aif.outer-policy-evidence :as policy-evidence]
+            [futon2.aif.outer-policy-evidence-provider :as evidence-provider]
+            [futon2.aif.outer-policy-objective :as policy-objective]
+            [futon2.aif.selected-outer-cascade-policy :as selected-policy]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.q2-construction :as q2]
             [futon2.aif.q8-frontier :as q8]
-            [futon2.aif.wm.family-selection :as family-selection]))
+            [futon2.aif.wm.family-selection :as family-selection]
+            [futon2.aif.wm.cascade-decision :as cascade-decision]))
 
 (load-identity/register! *ns* *file*)
 
@@ -514,10 +519,12 @@
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
   [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning
-           policy-field-config policy-field-fn]
+           policy-field-config policy-field-fn policy-menu-fn
+           policy-menu-join outer-policy-evidence-provider]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates
-         policy-field-fn family-selection/full-eligible-target-field}}]
+         policy-field-fn family-selection/full-eligible-target-field
+         policy-menu-fn family-selection/sealed-pre-choice-menu}}]
   (let [algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
         registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
         {ordinary-tasks :tasks repair-excluded :excluded}
@@ -590,6 +597,45 @@
                        (policy-field-fn on-map policy-field-config))
         incomplete (when policy-field
                      (filterv #(not= :computed (:status %)) (:families policy-field)))
+        menu-join (or policy-menu-join
+                      {:readings (fn [entry]
+                                   (cascade-decision/occurrence-readings
+                                    entry (:reading-pin entry)))})
+        sealed-menu (when (and policy-field (empty? incomplete))
+                      (policy-menu-fn policy-field menu-join))
+        provided (when (= :sealed (:status sealed-menu))
+                   (evidence-provider/resolve-provider
+                    outer-policy-evidence-provider sealed-menu))
+        policy-evidence (when (= :provided (:status provided))
+                          (policy-evidence/join sealed-menu (:declaration provided)
+                                                (:records provided)))
+        policy-objective (when (= :computed (:status policy-evidence))
+                           (policy-objective/evaluate policy-evidence sealed-menu))
+        selected-carrier (when (= :selected (:status policy-objective))
+                           (selected-policy/seal sealed-menu policy-evidence policy-objective))
+        selected-target (get-in policy-objective [:action :target])
+        selected-task (first (filter #(= selected-target (:id %))
+                                     (map outer/task-view on-map)))
+        carrier-defect (when selected-carrier
+                         (or (selected-policy/verify selected-carrier)
+                             (when-not selected-task
+                               :selected-policy-target-not-admitted)))
+        ordinary-result
+        (when-not injury?
+          (cond
+            (not= :verified (:status snapshot-verification)) snapshot-verification
+            (not (map? policy-field-config))
+            {:status :refused :reason :policy-field-config-required}
+            (seq incomplete)
+            {:status :refused :reason :incomplete-policy-menu-coverage}
+            (not= :sealed (:status sealed-menu))
+            {:status :refused :reason (or (:reason sealed-menu) :sealed-policy-menu-invalid)}
+            (not= :provided (:status provided)) provided
+            (not= :computed (:status policy-evidence)) policy-evidence
+            (not (contains? #{:selected :abstained} (:status policy-objective))) policy-objective
+            (= :abstained (:status policy-objective)) policy-objective
+            carrier-defect {:status :refused :reason carrier-defect}
+            :else policy-objective))
         selection (cond
                     (not= :verified (:status snapshot-verification))
                     snapshot-verification
@@ -598,10 +644,7 @@
                     (not (map? policy-field-config))
                     {:schema meta/schema :status :refused
                      :reason :policy-field-config-required}
-                    :else {:schema meta/schema :status :refused
-                     :reason (if (seq incomplete)
-                               :incomplete-policy-menu-coverage
-                               :policy-selection-port-required)})
+                    :else (assoc ordinary-result :schema meta/schema))
         learning-scores
         (when (and injury? (contains? #{:shadow :live} (:mode outer-learning)))
           (mapv (fn [candidate]
@@ -647,32 +690,57 @@
                                    all-excluded effective-selection)
         receipt (if injury?
                   (assoc-in receipt [:policy :branch] :verified-machine-injury-algorithm)
-                  (-> receipt
-                      (assoc :policy {:kind :cascade-live-policy-menu-v1
+                  (cond-> (-> receipt
+                              (assoc :policy {:kind (if selected-carrier
+                                                     :cascade-live-policy-v1
+                                                     :cascade-live-policy-menu-v1)
                                       :branch :ordinary-cascade-policy
-                                      :status (:reason selection)
+                                      :status (if selected-carrier :selected
+                                                (:status ordinary-result))
+                                      :reason (when-not selected-carrier
+                                                (:reason ordinary-result))
                                       :meta-selection selection
                                       :field-source-pin (:source-pin policy-field)
                                       :family-census (family-selection/field-census policy-field)
+                                      :sealed-menu sealed-menu
+                                      :evidence-provider-source-pin (:source-pin provided)
+                                      :policy-evidence policy-evidence
+                                      :missing-policy-evidence (:missing policy-evidence)
+                                      :policy-objective policy-objective
+                                      :selected-outer-cascade-policy selected-carrier
                                       :missing-targets (mapv :target-id incomplete)
-                                      :absent-terms (vec (distinct
-                                                          (mapcat #(map :kind (:failures %))
-                                                                  incomplete)))
+                                      :absent-terms (vec (distinct (concat
+                                                                    (:absent-terms provided)
+                                                                    (mapcat :absent-terms (:missing policy-evidence))
+                                                                    (:absent-terms policy-objective)
+                                                                    (mapcat #(map :kind (:failures %))
+                                                                            incomplete))))
                                       :legacy-target-shadow
                                       {:status :retired :consumed false}
                                       :target-candidate-selector
                                       {:status :retired :invoked false
                                        :configured (boolean candidate-fn)}})
-                      (assoc :policy-field policy-field)
-                      (assoc :chosen {:absent (:reason selection)})
-                      (dissoc :action)))
+                              (assoc :policy-field policy-field)
+                              (assoc :outer-policy-recomputation
+                                     (when selected-carrier
+                                       (:recomputation selected-carrier))))
+                    selected-carrier
+                    (assoc :chosen selected-task
+                           :action (:action policy-objective))
+                    (not selected-carrier)
+                    (assoc :chosen {:absent (or (:reason ordinary-result)
+                                                :outer-policy-selection-refused)})
+                    (not selected-carrier)
+                    (dissoc :action)))
         ;; Requirements Q8: the open population, its typed exclusions and
         ;; the exact candidates and pairwise result the effective selection
         ;; used, certified here where they are in hand
         live? (= :live (:mode outer-learning))
         receipt (assoc receipt :q8-frontier
                        (if-not injury?
-                         {:status :absent :reason :policy-selection-not-yet-performed}
+                         (if selected-carrier
+                           {:status :certified :carrier (:recomputation selected-carrier)}
+                           {:status :absent :reason (:reason ordinary-result)})
                          (q8/outer-frontier
                         {:tasks tasks :excluded all-excluded
                          :candidates (if live? shadow-candidates candidates)
@@ -684,7 +752,9 @@
         ;; effective selection could choose, formed as the chosen :action is
         receipt (assoc receipt :q2-outer-actions
                        (if-not injury?
-                         {:status :absent :reason :policy-selection-not-yet-performed}
+                         (if selected-carrier
+                           {:status :certified :carrier (:recomputation selected-carrier)}
+                           {:status :absent :reason (:reason ordinary-result)})
                          (q2/outer-actions
                         {:candidates (if live? shadow-candidates candidates)
                          :selection effective-selection
@@ -706,7 +776,8 @@
 
 (defn selector
   [{:keys [tasks meta-field-observation meta-field-source-pin
-           policy-field-config policy-field-fn]}]
+           policy-field-config policy-field-fn policy-menu-fn policy-menu-join
+           outer-policy-evidence-provider]}]
   (let [verification (when meta-field-observation
                        (field/verify meta-field-observation
                                      {:expected-snapshot-pin
@@ -723,6 +794,9 @@
       (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
                     :policy-field-config policy-field-config
                     :policy-field-fn policy-field-fn
+                    :policy-menu-fn policy-menu-fn
+                    :policy-menu-join policy-menu-join
+                    :outer-policy-evidence-provider outer-policy-evidence-provider
                     :outer-learning (outer-learning-runtime/load-shadow)}))))
 
 (defn browser-receipt

@@ -30,6 +30,14 @@
                  :policies (if (= status :computed) [{:policy-id "p-b"}] [])
                  :failures (if (= status :computed) [] [{:kind :no-current-target-reading}])}]}))
 
+(defn- sealed-menu [field _]
+  {:schema :wm/sealed-outer-policy-menu-v1
+   :status :sealed
+   :field-source-pin (:source-pin field)
+   :menu-pin (pin "wm://sealed-menu" "f")
+   :entries [{:policy-id "p-a" :cascade-digest (apply str (repeat 64 "1"))}
+             {:policy-id "p-b" :cascade-digest (apply str (repeat 64 "2"))}]})
+
 (deftest ordinary-path-stops-at-one-complete-policy-menu
   (let [seen (atom nil) target-select-calls (atom 0)
         config {:target-reading-root "/readings" :pattern-graph-path "/graph"}
@@ -37,15 +45,18 @@
                  {:tasks tasks :fetch-snapshot (constantly snapshot)
                   :candidate-fn (fn [& _] (swap! target-select-calls inc) [])
                   :policy-field-config config
-                  :policy-field-fn (field seen :computed)})]
+                  :policy-field-fn (field seen :computed)
+                  :policy-menu-fn sealed-menu})]
     (is (zero? @target-select-calls))
     (is (= ["M-a" "M-b"] (:ids @seen)))
     (is (= config (:config @seen)))
     (is (= :cascade-live-policy-menu-v1 (get-in receipt [:policy :kind])))
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
+    (is (= :outer-policy-evidence-provider-required
+           (get-in receipt [:policy :reason])))
     (is (= (pin "wm://menu" "e") (get-in receipt [:policy :field-source-pin])))
     (is (nil? (:action receipt)))
-    (is (= :policy-selection-not-yet-performed
+    (is (= :outer-policy-evidence-provider-required
            (get-in receipt [:q8-frontier :reason])))))
 
 (deftest incomplete-policy-field-refuses-every-target
@@ -53,7 +64,8 @@
                  {:tasks tasks :fetch-snapshot (constantly snapshot)
                   :policy-field-config {}
                   :policy-field-fn (field (atom nil) :failed)})]
-    (is (= :incomplete-policy-menu-coverage (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
+    (is (= :incomplete-policy-menu-coverage (get-in receipt [:policy :reason])))
     (is (= ["M-b"] (get-in receipt [:policy :missing-targets])))
     (is (= [:no-current-target-reading] (get-in receipt [:policy :absent-terms])))
     (is (nil? (:action receipt)))

@@ -40,7 +40,20 @@
 (defn- select-ordinary [opts]
   (live/select-live (assoc opts
                            :policy-field-config {:authority :test-fixture}
-                           :policy-field-fn complete-policy-field)))
+                           :policy-field-fn complete-policy-field
+                           ;; These tests exercise the outer admission boundary,
+                           ;; not executable-cascade scoring.  Stop at the new
+                           ;; explicit evidence-provider boundary with a sealed
+                           ;; menu-shaped fixture.
+                           :policy-menu-fn
+                           (fn [field _]
+                             {:schema :wm/sealed-outer-policy-menu-v1
+                              :status :sealed
+                              :field-source-pin (:source-pin field)
+                              :menu-pin (pin "wm://test-sealed-menu" "f")
+                              :entries [{:policy-id "fixture/policy"
+                                         :cascade-digest (apply str (repeat 64 "1"))}]})
+                           )))
 
 (def admitted-algorithm
   {:id "A-self-heal" :kind :algorithm :source (pin "A-self-heal.md" "e")
@@ -114,14 +127,14 @@
   (let [receipt (select-ordinary {:tasks tasks :fetch-snapshot (constantly snapshot)})]
     (is (= :wm/outer-task-selection-v1 (:schema receipt)))
     (is (= :cascade-live-policy-menu-v1 (get-in receipt [:policy :kind])))
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
     (is (= (pin "wm://test-policy-menu" "e")
            (get-in receipt [:policy :field-source-pin])))
     (is (nil? (:action receipt)))
     (is (= {:absent :deterministic-meta-policy} (:draw receipt)))
     (is (= {:status :retired :consumed false}
            (get-in receipt [:policy :legacy-target-shadow])))
-    (is (= :policy-selection-not-yet-performed
+    (is (= :outer-policy-evidence-provider-required
            (get-in receipt [:q8-frontier :reason])))))
 
 (deftest learned-outcomes-run-in-shadow-without-changing-live-action
@@ -153,7 +166,7 @@
                     :grounded-collateral-progress 0.5 :typed-blocker 0.9
                     :abstention-or-failure 1.0}}})]
     (is (nil? (:action receipt)))
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
     (is (= {:status :retired :consumed false}
            (get-in receipt [:policy :legacy-target-shadow])))
     (is (nil? (get-in receipt [:outer-learning :scores])))))
@@ -200,7 +213,7 @@
                         :recent-selection-cost 0.5
                         :continuation-credit 0.7}}})]
     (is (nil? (:action receipt)))
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
     (is (= {:status :retired :consumed false}
            (get-in receipt [:policy :legacy-target-shadow])))
     (is (nil? (get-in receipt [:outer-learning :scores])))))
@@ -268,14 +281,14 @@
                                                 :channels {}})
                                              task-rows))})]
       (is (zero? @calls))
-      (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+      (is (= :refused (get-in receipt [:policy :status])))
       (is (= 2 (count (:support receipt))))
       (is (nil? (:action receipt)))))
   (testing "target equality cannot decide before the policy port"
     (let [equal-snapshot (assoc-in snapshot [:graph :tickets :items 1 :mtime-ms] 200)
           receipt (select-ordinary {:tasks (mapv #(assoc % :priority 1) tasks)
                                      :fetch-snapshot (constantly equal-snapshot)})]
-      (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+      (is (= :refused (get-in receipt [:policy :status])))
       (is (nil? (:action receipt)))
       (is (= {:status :retired :invoked false :configured true}
              (get-in receipt [:policy :target-candidate-selector]))))))
@@ -313,7 +326,7 @@
            (->> (:excluded receipt)
                 (filter #(= "M-inventory-only" (:id %)))
                 first :ineligible-reason)))
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
     (is (nil? (:action receipt)))))
 
 (deftest conflicting-mission-standing-fails-closed-with-exact-authority
@@ -424,7 +437,7 @@
                  :source (pin "M-z.md" "e")}
         receipt (select-ordinary {:tasks (conj tasks off-map)
                                    :fetch-snapshot (constantly snapshot)})]
-    (is (= :policy-selection-port-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
     (is (nil? (:action receipt)))
     (is (= ["M-z"] (mapv :id (:excluded receipt))))
     (is (= :pipeline/not-on-current-map
@@ -625,7 +638,7 @@
              (:decision-input-verification receipt)))
       (is (string? (:decision-input-manifest-sha256 receipt)))
       (is (nil? (:action receipt)))
-      (is (= :policy-selection-port-required
+      (is (= :refused
              (get-in receipt [:policy :status]))))))
 
 (deftest missing-policy-field-config-is-a-typed-stop
@@ -634,5 +647,6 @@
                  {:tasks tasks :fetch-snapshot (constantly snapshot)
                   :policy-field-fn (fn [& _] (swap! calls inc))})]
     (is (zero? @calls))
-    (is (= :policy-field-config-required (get-in receipt [:policy :status])))
+    (is (= :refused (get-in receipt [:policy :status])))
+    (is (= :policy-field-config-required (get-in receipt [:policy :reason])))
     (is (nil? (:action receipt)))))
