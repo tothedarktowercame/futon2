@@ -25,21 +25,38 @@ class RepairLoopCastTest(unittest.TestCase):
         loop = load_loop()
         family = loop.F2 / "src/futon2/aif/wm/family_selection.clj"
         inventory = ROOT / "src/futon2/aif/load_identity.clj"
-        with mock.patch.object(loop, "SOURCE_IDENTITY_INVENTORY", inventory), \
+        unrelated = "\n(def unrelated {'outside.inventory \"/tmp/outside.clj\"})\n"
+        with tempfile.NamedTemporaryFile("w") as source:
+            source.write(inventory.read_text() + unrelated)
+            source.flush()
+            with mock.patch.object(loop, "SOURCE_IDENTITY_INVENTORY", Path(source.name)), \
              mock.patch.object(loop, "click_running", return_value=False), \
              mock.patch.object(loop, "changed_click_files", return_value=[family]), \
              mock.patch.object(loop, "dirty", return_value=False), \
              mock.patch.object(loop, "jvm_eval", return_value={"rc": 0, "out": ":reloaded", "err": ""}) as reload, \
              mock.patch.object(loop, "record") as record, \
              mock.patch.object(loop, "log"):
-            self.assertIn("futon2.aif.wm.family-selection", loop.source_identity_inventory())
-            ok, text, _ = loop.reload_changed(123)
+                identities = loop.source_identity_inventory()
+                self.assertIn("futon2.aif.observation-checks", identities)
+                self.assertIn("futon2.aif.wm.family-selection", identities)
+                self.assertNotIn("outside.inventory", identities)
+                ok, text, _ = loop.reload_changed(123)
         self.assertTrue(ok)
         self.assertEqual("", text)
         self.assertIn("futon2.aif.wm.family-selection", reload.call_args.args[0])
         event = record.call_args.args[0]
         self.assertEqual(["futon2.aif.wm.family-selection"], event["source-identity-dependencies"])
         self.assertNotIn("futon2.aif.full-loop-runner", event["source-identity-dependencies"])
+
+    def test_reload_when_idle_retries_deferred_result_before_success(self):
+        loop = load_loop()
+        with mock.patch.object(loop, "reload_changed", side_effect=[
+                (None, "click-in-flight", 123), (True, "", 456)]) as reload, \
+             mock.patch.object(loop.time, "sleep") as sleep:
+            result = loop.reload_when_idle(123)
+        self.assertEqual((True, "", 456), result)
+        self.assertEqual(2, reload.call_count)
+        sleep.assert_called_once_with(60)
 
     def test_active_click_defers_with_zero_reload_and_no_launch(self):
         loop = load_loop()

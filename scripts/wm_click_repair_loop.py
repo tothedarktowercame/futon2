@@ -194,6 +194,35 @@ def changed_click_files(since_epoch: int) -> list[Path]:
     return sorted(files)
 
 
+def required_sources_declaration(text: str) -> str:
+    """Extract only the map literal assigned to load_identity/required-sources."""
+    declaration = re.search(r"\(def\s+required-sources\b", text)
+    if not declaration:
+        return ""
+    start = text.find("{", declaration.end())
+    if start < 0:
+        return ""
+    depth, quoted, escaped = 0, False, False
+    for end in range(start, len(text)):
+        char = text[end]
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:end + 1]
+    return ""
+
+
 def source_identity_inventory() -> dict[str, Path]:
     """Read the runner's declared source-identity inventory without loading Clojure.
 
@@ -207,7 +236,8 @@ def source_identity_inventory() -> dict[str, Path]:
     except OSError:
         return {}
     entries = {}
-    for namespace, raw_path in re.findall(r'^\s*\'([\w.\-]+)\s+"([^"]+\.clj)"', text, re.MULTILINE):
+    declaration = required_sources_declaration(text)
+    for namespace, raw_path in re.findall(r"'([\w.\-]+)\s+\"([^\"]+\.clj)\"", declaration):
         path = Path(raw_path)
         if raw_path.startswith("/home/joe/code/futon2/"):
             path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
@@ -263,7 +293,7 @@ def click_running() -> bool:
         return True
 
 
-def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bool, str, int]:
+def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bool | None, str, int]:
     """Reload every click-path namespace committed since since_epoch. Returns
     (ok, failure-text, new-since). Reload only between clicks, or while the
     named run is demonstrably stopped at the restart debugger."""
