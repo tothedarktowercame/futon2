@@ -6,8 +6,11 @@
 ;;   (conj :term), as in a cond-> of absent terms   kind :absent-term
 ;;   classifier outcome literals in meta-terminal-injury.clj kind :classification
 ;;   qualified/local helper invocation              kind :call
-;; plus one :defn row per top-level definition, an anchor for line citations only.
-;; Usage: bb code_sites.clj  -> JSON array of sites on stdout.
+;; plus one :defn row per top-level definition, carrying its line span and source text,
+;; which align.py uses to resolve the Lean anchors `(TAG fn ...)` and drops from its output.
+;; Usage: bb code_sites.clj [REV ...]  -> JSON array of sites on stdout.
+;; Each REV is repo=sha (e.g. /home/joe/code/futon2=ef89bd061) and reads that repo at that
+;; commit instead of HEAD.
 (require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.io :as io] '[clojure.string :as str])
 
 (def sources
@@ -17,14 +20,21 @@
    ["R" "/home/joe/code/futon2" "src/futon2/aif/full_loop_runtime.clj" #{"run-opportunity!"}]
    ["A" "/home/joe/code/futon3c" "src/futon3c/wm/meta_self_heal_adapters.clj" nil]
    ["S" "/home/joe/code/futon3c" "src/futon3c/wm/runner_service.clj" #{"meta-self-heal-preflight!"}]
-   ["T" "/home/joe/code/futon2" "src/futon2/aif/meta_terminal_injury.clj" nil]])
+   ["T" "/home/joe/code/futon2" "src/futon2/aif/meta_terminal_injury.clj" nil]
+   ;; cited by the Lean text but owing no outcome sites: :defn rows only
+   ["L" "/home/joe/code/futon2" "src/futon2/aif/meta_injury_ledger.clj" #{}]
+   ["I" "/home/joe/code/futon2" "src/futon2/aif/meta_injury_store.clj" #{}]
+   ["U" "/home/joe/code/futon2" "src/futon2/aif/full_loop_runner.clj" #{}]])
 
-(defn head [repo] (str/trim (:out (clojure.java.shell/sh "git" "-C" repo "rev-parse" "--short=9" "HEAD"))))
+(def revs (into {} (map #(str/split % #"=" 2)) *command-line-args*))
 
-(defn committed [repo file]
-  ;; Read the file as committed at HEAD, never the working tree: the sha the report
+(defn head [repo]
+  (str/trim (:out (clojure.java.shell/sh "git" "-C" repo "rev-parse" "--short=9" (get revs repo "HEAD")))))
+
+(defn committed [repo sha file]
+  ;; Read the file as committed at a sha, never the working tree: the sha the report
   ;; names must be the content it read, and another lane may be mid-edit.
-  (:out (clojure.java.shell/sh "git" "-C" repo "show" (str "HEAD:" file))))
+  (:out (clojure.java.shell/sh "git" "-C" repo "show" (str sha ":" file))))
 
 (defn forms [text]
   (e/parse-string-all text {:all true :row-key :line :col-key :col :end-row-key :end-line
@@ -117,13 +127,19 @@
 
 (let [all (for [[tag repo file only] sources
                 :let [sha (head repo)
-                      parsed (forms (committed repo file))
+                      text (committed repo sha file)
+                      text-lines (str/split-lines text)
+                      parsed (forms text)
                       local-defns (set (keep defn-name parsed))]
                 form parsed
                 :let [n (top-name form)]
-                :when (and n (or (nil? only) (only n)))
-                s (cons {:tag tag :fn n :line (:line (meta form)) :kind :defn}
-                        (sites-in tag n local-defns form))]
+                ;; every definition gets its :defn row, so an anchor can name any function
+                ;; in the file; only-fns limits the outcome sites, not the anchors
+                :when n
+                s (cons (let [{:keys [line end-line]} (meta form)]
+                          {:tag tag :fn n :line line :end-line end-line :kind :defn
+                           :source (str/join "\n" (subvec text-lines (dec line) end-line))})
+                        (when (or (nil? only) (only n)) (sites-in tag n local-defns form)))]
             (assoc s :file file :sha sha
                    :id (str tag ":" (:line s) (when (:reason s) (str ":" (name (:reason s)))))))]
   (println (json/generate-string (vec (sort-by (juxt :tag :line) (distinct all))))))

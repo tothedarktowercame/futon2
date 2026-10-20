@@ -1,0 +1,186 @@
+L55	A:617-620	launch-bounded-acceptance!		outcome (cond | (zero? (long (or (:outer-exit receipt) 125))) :passed | (= "test-failure" (:reason receipt)) :
+L78	P:730-744	admit-acceptance*	status-map:accepted	written (persist-acceptance! | (acceptance-path (or (:meta-acceptance-root opts) | default-acceptance-root) re
+L96	P:765	prepare-acceptance	status-map:meta-self-heal/acceptance-diagnosis-unavailable	{:status :unavailable :reason :meta-self-heal/acceptance-diagnosis-unavailable
+L114	P:865-866	diagnosis-context		active (when (= :loaded (:status durable)) | (ledger/active-injuries (:ledger durable)))]
+L130	A:742-758	ports	status-map:queued	:repair-retry-fn | (fn [{:keys [work-order] :as request}] | (let [retry-click (or (:retry-click request)
+L136	T:202-224	integrate	refusal:ledger/tampered,refusal:classification/invalid,status-map:record-already-ingested	[history classification] | (try | (cond
+L138	T:241-256	integrate		(let [appended (ledger/append-observation | history (:record-pin classification) | (:non-injury-reason classif
+L143	T:111-150	classify	classification:successful-task-outcome,classification:absent-terminal-failure,absent-term:record/map,absent-term:record/source-pin,absent-term:record/run-id,absent-term:record/click-id,refusal:terminal-record/malformed,status-map:classified	(defn classify | "Classify one terminal record with its immutable source pin. Apparatus, | algorithm, malforme
+L145	T:63-65	unconfigured-route?		(defn- unconfigured-route? [record] | (and (= :abstained (failure-kind record)) | (contains-cause? record :out
+L145	T:77-82	abstention-reason	classification:partial-frontier-continuation,classification:evaluated-no-action,classification:ordinary-selection-abstention	(defn- abstention-reason [record] | (cond | (unconfigured-route? record) nil
+L152	P:1053-1056	route!		(let [resumed (load-transaction transaction-path) | prepared (when-not resumed | (coordinator/prepare durable 
+L152	C:178	invoke-once		([transaction phase predecessor-pin port]
+L156	S:991	close-click!		(swap! !post-release-retries pop)
+L182	A:660-672	retry-click-id		(defn retry-click-id | "Return the child-click identity for REPAIR-ID, ATTEMPT, and re-queue ordinal. | 
+L185	S:997	close-click!		:idempotency-key (str "meta-retry/" (:retry-click retry))
+L188	L:367-404	append-requeue		(defn append-requeue | "Append a fresh retry identity after an inconclusive retry without consuming | an autho
+L189	L:151-152	state-defects		(not= (:requeues entry) (inc (or (:requeues previous) 0))) | (> (or (:requeues entry) 0) retry-limit)
+L190	L:394-398	append-requeue		(if (>= requeues (:retry-limit ledger)) | (append-transition ledger | (assoc common :state :abandoned
+L191	L:174-175	state-defects		:retry-budget-spent | (or (not= (:requeues entry) retry-limit)
+L198	T:126-128	classify	classification:successful-task-outcome	(when (and (nil? kind) | (contains? successful-outcomes terminal-outcome)) | :successful-task-outcome)
+L221	T:185-196	append-other-injury-retry-observation		(defn- append-other-injury-retry-observation | [appended classification enacted transition] | (let [observed (
+L221	T:246-301	integrate	refusal:injury/retry-click-mismatch,refusal:injury/terminal-history-requires-new-transaction	(= :injury (:classification classification)) | (let [previous (latest-injury history (:injury-id classificatio
+L226	L:331-344	pending-requeue		(defn pending-requeue | "Return the attributed inconclusive observation for an injury's latest | enacted retry
+L228	T:222-227	integrate		(ledger-entries history))) | appended | (ledger/append-transition
+L229	T:233-277	integrate		(assoc appended :classification classification | :transition :discharged)) | (let [appended (ledger/append-obs
+L231	T:253-266	integrate		(nil? previous) | (let [appended | (ledger/append-transition
+L231	T:288-297	integrate		(contains? ledger/active-states (:state previous)) | (let [appended (ledger/append-observation | history (:rec
+L231	T:268-286	integrate	refusal:injury/retry-click-mismatch	(= :enacted (:state previous)) | (if (= (:retry-click previous) (:click-id classification)) | (let [appended
+L231	T:299-300	integrate	refusal:injury/terminal-history-requires-new-transaction	(refusal :injury/terminal-history-requires-new-transaction | {:state (:state previous)})))
+L233	C:247-251	coordinate-queued-retry	status-map:awaiting-retry	(if-not (ledger/pending-requeue history injury-id) | {:status :awaiting-retry | :ledger history
+L241	L:92	state-defects		retry-limit (:retry-limit ledger)
+L241	L:394	append-requeue		(if (>= requeues (:retry-limit ledger))
+L245	S:997	close-click!		:idempotency-key (str "meta-retry/" (:retry-click retry))
+L246	C:252-257	coordinate-queued-retry	refusal:coordinator/retry-click-id-unavailable	(let [next-n (inc n) | retry-click-id (:retry-click-id ports) | _ (when-not (fn? retry-click-id)
+L286	P:857	diagnosis-context		(defn diagnosis-context
+L286	P:871	prepare-diagnosis		(defn prepare-diagnosis
+L287	P:903	production-readiness		(defn production-readiness
+L288	P lines 1029-1031	route!		durable (if context (:durable-ledger context) | (when (and ledger-path (.isFile (io/file ledger-path))) | (sto
+L321	S lines 990-1001	close-click!		(when-let [retry (peek @!post-release-retries)] | (swap! !post-release-retries pop) | (future
+L323	R lines 473-477	run-opportunity!		retry (:meta-repair-retry opts) | diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts)) |
+L330	P:1002-1022	attributable-retry-readiness	status-map:ready,refusal:meta-self-heal/retry-attribution-refused	(defn attributable-retry-readiness | "Authorize the one ordinary retry named by the latest enacted transition.
+L331	R lines 511-513	run-opportunity!		retry (assoc (run-ordinary-opportunity! effective-opts) | :diagnosis-observation diagnosis-observation | :acce
+L486	P:888	prepare-diagnosis		(nil? durable-ledger)
+L486	P:894	prepare-diagnosis		(empty? (:injuries active-injuries))
+L486	P:891	prepare-diagnosis		(not= :loaded (:status durable-ledger))
+L486	P:937	production-readiness		(and durable (not= :loaded (:status durable)))
+L487	P:880	prepare-diagnosis		(and (= :loaded (:status durable-ledger))
+L493	S:983-996	close-click!		(println "[wm-click]" (pr-str (assoc summary :click-id click-id :route-check route-check))) | (flush) | (signa
+L493	R:473-505	run-opportunity!	status-map:meta-self-heal/acceptance-not-prepared,status-map:meta-self-heal/acceptance-retry-not-prepared,status-map:not-required,status-map:meta-self-heal/active-set-unavailable	retry (:meta-repair-retry opts) | diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts)) |
+L493	P:1002-1022	attributable-retry-readiness	status-map:ready,refusal:meta-self-heal/retry-attribution-refused	(defn attributable-retry-readiness | "Authorize the one ordinary retry named by the latest enacted transition.
+L727	A:458	producer-invoke!	status-map:meta-self-heal/producer-invoke-failed	(not (:ok final-result)) (cond-> {:status :failed
+L727	A:453	producer-invoke!	status-map:meta-self-heal/producer-seat-unavailable	(not agent) {:status :failed :reason :meta-self-heal/producer-seat-unavailable}
+L728	P:508	produce-acceptance-from-request!	refusal:meta-self-heal/acceptance-unavailable	(refusal :meta-self-heal/acceptance-unavailable
+L732	A:469	producer-invoke!	status-map:meta-self-heal/producer-response-malformed	(not (map? parsed)) (cond-> {:status :failed
+L732	P:508	produce-acceptance-from-request!	refusal:meta-self-heal/acceptance-unavailable	(refusal :meta-self-heal/acceptance-unavailable
+L740	P:508	produce-acceptance-from-request!	refusal:meta-self-heal/acceptance-unavailable	(refusal :meta-self-heal/acceptance-unavailable
+L742	P:520	produce-acceptance-from-request!	refusal:meta-self-heal/acceptance-prose-or-malformed	(refusal :meta-self-heal/acceptance-prose-or-malformed
+L745	P:516	produce-acceptance-from-request!	refusal:meta-self-heal/acceptance-proposal-source-mismatch	(refusal :meta-self-heal/acceptance-proposal-source-mismatch
+L748	P:579	produce-acceptance!	refusal:meta-self-heal/acceptance-request-function-unresolvable	(refusal :meta-self-heal/acceptance-request-function-unresolvable
+L755	P:700	admit-acceptance*	refusal:meta-self-heal/acceptance-review-malformed	(refusal :meta-self-heal/acceptance-review-malformed {:request request})
+L756	P:710-718	admit-acceptance*	refusal:meta-self-heal/acceptance-review-identity-mismatch	(not= request-identity response-identity) | (refusal :meta-self-heal/acceptance-review-identity-mismatch | {:r
+L759	P:682-689	admit-acceptance*		identity-keys [:injury-id :source-record-pin :diagnosis-evidence-pin | :proposal-evidence-pin :acceptance-test
+L762	P:692	admit-acceptance*	refusal:meta-self-heal/acceptance-run-refused	(refusal :meta-self-heal/acceptance-run-refused
+L763	A:605	launch-bounded-acceptance!	status-map:meta-self-heal/acceptance-unit-launch-failed	{:status :failed :reason :meta-self-heal/acceptance-unit-launch-failed}
+L764	A:636-645	run-acceptance!	status-map:meta-self-heal/acceptance-source-path-refused,status-map:meta-self-heal/acceptance-source-path-refused,status-map:acceptance-test-id-invalid,status-map:meta-self-heal/acceptance-command-not-admissible,status-map:meta-self-heal/acceptance-command-not-admissible	{:status :failed :reason :meta-self-heal/acceptance-source-path-refused} | (.exists ^java.io.File (:file locat
+L765	A:639	run-acceptance!	status-map:acceptance-test-id-invalid	(not (nonblank? id)) {:status :failed :reason :acceptance-test-id-invalid}
+L766	P:656	admit-acceptance*	status-map:meta-self-heal/acceptance-run-threw	{:status :failed
+L768	P:696	admit-acceptance*	refusal:meta-self-heal/acceptance-test-passes-before-repair	(refusal :meta-self-heal/acceptance-test-passes-before-repair
+L771	P:702	admit-acceptance*	refusal:meta-self-heal/acceptance-review-refused	(refusal :meta-self-heal/acceptance-review-refused
+L772	A:453	producer-invoke!	status-map:meta-self-heal/producer-seat-unavailable	(not agent) {:status :failed :reason :meta-self-heal/producer-seat-unavailable}
+L773	A:458	producer-invoke!	status-map:meta-self-heal/producer-invoke-failed	(not (:ok final-result)) (cond-> {:status :failed
+L773	A:469	producer-invoke!	status-map:meta-self-heal/producer-response-malformed	(not (map? parsed)) (cond-> {:status :failed
+L773	P:680	admit-acceptance*	status-map:meta-self-heal/acceptance-review-threw	(catch Throwable _ {:status :failed
+L777	P:702	admit-acceptance*	refusal:meta-self-heal/acceptance-review-refused	(refusal :meta-self-heal/acceptance-review-refused
+L800	A:617-620	launch-bounded-acceptance!		outcome (cond | (zero? (long (or (:outer-exit receipt) 125))) :passed | (= "test-failure" (:reason receipt)) :
+L800	A:626	launch-bounded-acceptance!		(write-run-result id output-file (str summary "\n") :errored -1)))))))
+L919	P:12	checkpoints		(def checkpoints [:claim :author :review :enact])
+L921	C:188	invoke-once		extra))
+L922	C:194	invoke-once		{:phase phase :receipt-defects (:defects checked)
+L923	C:337	coordinate		review-result (accepted!
+L928	C:208	None		?
+L930	C:321	coordinate	held:author-failed	(held! :author-failed :author history1 tx1 author-receipt))
+L932	C:343	coordinate	held:review-rejected	(held! :review-rejected :review history2 tx2 review-receipt))
+L934	C:366	coordinate	held:enact-failed	(held! :enact-failed :enact history3 tx3 enact-receipt))
+L938	C:216	checkpoint!		(defn- checkpoint! [ports phase history transaction]
+L942	C:290	coordinate	refusal:coordinator/input-refused	(stop! (refusal :coordinator/input-refused {:defects defects})))
+L944	C:310	coordinate	refusal:coordinator/resume-state-refused	(stop! (refusal :coordinator/resume-state-refused
+L946	C:193	invoke-once	refusal:coordinator/port-receipt-refused	(refusal :coordinator/port-receipt-refused
+L948	C:199	invoke-once	refusal:coordinator/port-threw	(refusal :coordinator/port-threw
+L950	C:325	coordinate	refusal:coordinator/author-payload-refused	(stop! (refusal :coordinator/author-payload-refused
+L952	C:345	coordinate	refusal:coordinator/review-patch-substitution	(stop! (refusal :coordinator/review-patch-substitution
+L954	C:371	coordinate	refusal:coordinator/enact-payload-refused	(stop! (refusal :coordinator/enact-payload-refused
+L956	C:245	coordinate-queued-retry	refusal:coordinator/retry-attribution-refused	(stop! (refusal :coordinator/retry-attribution-refused
+L956	C:398	coordinate	refusal:coordinator/retry-attribution-refused	(stop! (refusal :coordinator/retry-attribution-refused
+L958	C:206	append-transition!	refusal:coordinator/ledger-transition-refused	(refusal :coordinator/ledger-transition-refused
+L960	C:430	coordinate	refusal:coordinator/malformed	(refusal :coordinator/malformed {:detail (ex-message e)})))
+L960	C:432	coordinate	refusal:coordinator/malformed	(refusal :coordinator/malformed {:detail (ex-message t)}))))
+L965	P:1118	route!	refusal:meta-self-heal/checkpoint-persist-failed	(refusal :meta-self-heal/checkpoint-persist-failed
+L975	C:415	coordinate	status-map:discharged	{:status :discharged :ledger (:ledger closed) :transaction tx4})
+L980	C:426	coordinate	status-map:computed	{:status (get-in reopened [:entry :state])
+L985	C:426	coordinate	status-map:computed	{:status (get-in reopened [:entry :state])
+L993	C:248	coordinate-queued-retry	status-map:awaiting-retry	{:status :awaiting-retry
+L1002	T line 236	integrate		history (:record-pin classification) :retry-inconclusive
+L1004	T line 189	append-other-injury-retry-observation		:retry-inconclusive
+L1067	P:1118	route!	refusal:meta-self-heal/checkpoint-persist-failed	(refusal :meta-self-heal/checkpoint-persist-failed
+L1107	P:880-882	prepare-diagnosis	status-map:meta-self-heal/diagnosis-active-set-unavailable	(and (= :loaded (:status durable-ledger)) | (not= :computed (:status active-injuries))) | {:status :unavailabl
+L1108	P:764-767	prepare-acceptance	status-map:meta-self-heal/acceptance-diagnosis-unavailable	:else | {:status :unavailable :reason :meta-self-heal/acceptance-diagnosis-unavailable | :diagnosis-status (:s
+L1110	P:952	production-readiness	status-map:ready	:else {:status :ready :active-injury? (boolean active?)
+L1111	P:1029-1039	route!	refusal:meta-self-heal/active-set-unavailable	durable (if context (:durable-ledger context) | (when (and ledger-path (.isFile (io/file ledger-path))) | (sto
+L1112	S:502-503	cast-preflight-refusal		status (some-> (:status record) name)] | (cond
+L1136	P:1015-1018	attributable-retry-readiness		expected (select-keys enacted [:injury-id :repair-id :retry-click]) | supplied (select-keys retry [:injury-id 
+L1143	P:1017-1022	attributable-retry-readiness	status-map:ready,refusal:meta-self-heal/retry-attribution-refused	(if (and (= :loaded (:status durable)) enacted authored | (= expected supplied) (= (:patch-sha authored) (:pat
+L1185	T:111-167	classify	classification:successful-task-outcome,classification:absent-terminal-failure,absent-term:record/map,absent-term:record/source-pin,absent-term:record/run-id,absent-term:record/click-id,refusal:terminal-record/malformed,status-map:classified,refusal:terminal-record/malformed	(defn classify | "Classify one terminal record with its immutable source pin. Apparatus, | algorithm, malforme
+L1186	T:185-275	append-other-injury-retry-observation	refusal:ledger/tampered,refusal:classification/invalid,status-map:record-already-ingested	(defn- append-other-injury-retry-observation | [appended classification enacted transition] | (let [observed (
+L1189	T:15	successful-outcomes		(def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
+L1194	L:299-317	validate-ledger		(observation-defects entry)) | next-defects (cond-> base-defects | (seq semantic-defects)
+L1202	T lines 247-251	integrate		(let [previous (latest-injury history (:injury-id classification)) | enacted (enacted-for-retry history (:clic
+L1203	T lines 253-266	integrate		(nil? previous) | (let [appended | (ledger/append-transition
+L1204	T lines 288-297	integrate		(contains? ledger/active-states (:state previous)) | (let [appended (ledger/append-observation | history (:rec
+L1206	T:185-196	append-other-injury-retry-observation		(defn- append-other-injury-retry-observation | [appended classification enacted transition] | (let [observed (
+L1219	T:299-300	integrate	refusal:injury/terminal-history-requires-new-transaction	(refusal :injury/terminal-history-requires-new-transaction | {:state (:state previous)})))
+L1227	T:82	abstention-reason	classification:ordinary-selection-abstention	:else :ordinary-selection-abstention))
+L1234	T:81	abstention-reason	classification:evaluated-no-action	(evaluated-no-action? record) :evaluated-no-action
+L1234	T:66-70	evaluated-no-action?		(defn- evaluated-no-action? [record] | ;; This names the scored terminal result, not an absence found while tr
+L1238	T:80	abstention-reason	classification:partial-frontier-continuation	(partial-frontier-continuation? record) :partial-frontier-continuation
+L1238	T:71-76	partial-frontier-continuation?		(defn- partial-frontier-continuation? [record] | ;; A selected decision alongside its retained frontier proves
+L1242	T:12	explicit-non-injury-kinds	classification:operator-cancelled	:operator-cancelled :operator-cancelled
+L1246	T:13	explicit-non-injury-kinds	classification:declared-no-work	:declared-no-work :declared-no-work
+L1250	T:14	explicit-non-injury-kinds	classification:diagnostic-only	:diagnostic-only :diagnostic-only})
+L1272	L:308-314	validate-ledger		(conj seen (:entry-id entry)))) | (if (seq defects) | {:status :refused :reason :ledger/invalid
+L1281	T:202-224	integrate	refusal:ledger/tampered,refusal:classification/invalid,status-map:record-already-ingested	[history classification] | (try | (cond
+L1297	T:202-224	integrate	refusal:ledger/tampered,refusal:classification/invalid,status-map:record-already-ingested	[history classification] | (try | (cond
+L1298	T:111-167	classify	classification:successful-task-outcome,classification:absent-terminal-failure,absent-term:record/map,absent-term:record/source-pin,absent-term:record/run-id,absent-term:record/click-id,refusal:terminal-record/malformed,status-map:classified,refusal:terminal-record/malformed	(defn classify | "Classify one terminal record with its immutable source pin. Apparatus, | algorithm, malforme
+L1298	T:77-82	abstention-reason	classification:partial-frontier-continuation,classification:evaluated-no-action,classification:ordinary-selection-abstention	(defn- abstention-reason [record] | (cond | (unconfigured-route? record) nil
+L1321	T:204-221	integrate	refusal:ledger/tampered,refusal:classification/invalid,status-map:record-already-ingested	(cond | (not= :valid (:status (ledger/validate-ledger history))) | (refusal :ledger/tampered)
+L1323	T:222-225	integrate		(ledger-entries history))) | appended | (ledger/append-transition
+L1324	T:241-256	integrate		(let [appended (ledger/append-observation | history (:record-pin classification) | (:non-injury-reason classif
+L1324	T:231	integrate		:outcome :success
+L1325	L:308-314	validate-ledger		(conj seen (:entry-id entry)))) | (if (seq defects) | {:status :refused :reason :ledger/invalid
+L1326	T:227-239	integrate		:attempt (:attempt enacted) | :repair-id (:repair-id enacted) | :patch-sha (:patch-sha authored)
+L1349	L:314	validate-ledger		(refusal :ledger/malformed {:detail (ex-message t)}))))
+L1351	L:360	append-retry-result		:reason :attempt-limit-exhausted)
+L1351	L:314	validate-ledger		(refusal :ledger/malformed {:detail (ex-message t)}))))
+L1353	L:173	state-defects		:attempt-limit-exhausted (not= attempt limit)
+L1357	L:397	append-requeue		:reason :retry-budget-spent
+L1358	L:394	append-requeue		(if (>= requeues (:retry-limit ledger))
+L1360	C:261	coordinate-queued-retry	status-map:retry-budget-spent	{:status :abandoned :reason :retry-budget-spent
+L1360	C line 260	coordinate-queued-retry		(if (= :abandoned (get-in requeued [:entry :state]))
+L1362	L:174-176	state-defects		:retry-budget-spent | (or (not= (:requeues entry) retry-limit) | (> attempt limit))
+L1377	C line 247	coordinate-queued-retry		(if-not (ledger/pending-requeue history injury-id)
+L1377	L:331	pending-requeue		(defn pending-requeue
+L1378	L:402	append-requeue		{:state :enacted
+L1380	L:392	append-requeue		:attempt (:attempt previous)
+L1380	L:390	append-requeue		(let [requeues (or (:requeues previous) 0)
+L1381	L:404	append-requeue		:requeues (inc requeues)
+L1381	C line 267	coordinate-queued-retry		(recur history' transaction)))))))
+L1381	C line 232	coordinate-queued-retry		n (or (:requeues latest) 0)
+L1382	C lines 233-238	coordinate-queued-retry		queued (when (pos? n) | (accepted! | (invoke-once transaction (requeue-phase n)
+L1389	C:248	coordinate-queued-retry	status-map:awaiting-retry	{:status :awaiting-retry
+L1389	C line 247	coordinate-queued-retry		(if-not (ledger/pending-requeue history injury-id)
+L1419	P:1053-1056	route!		(let [resumed (load-transaction transaction-path) | prepared (when-not resumed | (coordinator/prepare durable 
+L1420	C:177-179	invoke-once		(defn- invoke-once | ([transaction phase predecessor-pin port] | (invoke-once transaction phase predecessor-pi
+L1421	C:348-352	coordinate		(accepted! | (append-transition! | history2 {:injury-id injury-id :state :reviewed
+L1471	L:331-344	pending-requeue		(defn pending-requeue | "Return the attributed inconclusive observation for an injury's latest | enacted retry
+L1472	T:222-227	integrate		(ledger-entries history))) | appended | (ledger/append-transition
+L1474	T:185-196	append-other-injury-retry-observation		(defn- append-other-injury-retry-observation | [appended classification enacted transition] | (let [observed (
+L1474	T:253-266	integrate		(nil? previous) | (let [appended | (ledger/append-transition
+L1474	T:288-297	integrate		(contains? ledger/active-states (:state previous)) | (let [appended (ledger/append-observation | history (:rec
+L1475	T:268-286	integrate	refusal:injury/retry-click-mismatch	(= :enacted (:state previous)) | (if (= (:retry-click previous) (:click-id classification)) | (let [appended
+L1475	T:299-300	integrate	refusal:injury/terminal-history-requires-new-transaction	(refusal :injury/terminal-history-requires-new-transaction | {:state (:state previous)})))
+L1484	C:401-402	coordinate		(= :queued (:status retry-receipt)) | (coordinate-queued-retry history4 tx4 ports injury-id repair-id
+L1484	C:227-267	coordinate-queued-retry	refusal:coordinator/retry-attribution-refused,status-map:awaiting-retry,refusal:coordinator/retry-click-id-unavailable,status-map:retry-budget-spent	(defn- coordinate-queued-retry | [history transaction ports injury-id repair-id attempt] | (loop [history hist
+L1484	C:247	coordinate-queued-retry		(if-not (ledger/pending-requeue history injury-id)
+L1485	C:252-257	coordinate-queued-retry	refusal:coordinator/retry-click-id-unavailable	(let [next-n (inc n) | retry-click-id (:retry-click-id ports) | _ (when-not (fn? retry-click-id)
+L1485	A:660-672	retry-click-id		(defn retry-click-id | "Return the child-click identity for REPAIR-ID, ATTEMPT, and re-queue ordinal. | 
+L1486	C:258	coordinate-queued-retry		requeued (accepted! (ledger/append-requeue history injury-id new-id))
+L1486	L:394	append-requeue		(if (>= requeues (:retry-limit ledger))
+L1487	L:397-398	append-requeue		:reason :retry-budget-spent | :requeues requeues))
+L1487	C:261	coordinate-queued-retry	status-map:retry-budget-spent	{:status :abandoned :reason :retry-budget-spent
+L1489	L:399-404	append-requeue		(append-transition | ledger | (merge common
+L1489	C:267	coordinate-queued-retry		(recur history' transaction)))))))
+L1490	C:247-251	coordinate-queued-retry	status-map:awaiting-retry	(if-not (ledger/pending-requeue history injury-id) | {:status :awaiting-retry | :ledger history
+L1522	T:268-286	integrate	refusal:injury/retry-click-mismatch	(= :enacted (:state previous)) | (if (= (:retry-click previous) (:click-id classification)) | (let [appended
+L1522	T:299-300	integrate	refusal:injury/terminal-history-requires-new-transaction	(refusal :injury/terminal-history-requires-new-transaction | {:state (:state previous)})))
+L1525	L:331-344	pending-requeue		(defn pending-requeue | "Return the attributed inconclusive observation for an injury's latest | enacted retry
+L1525	C:247-251	coordinate-queued-retry	status-map:awaiting-retry	(if-not (ledger/pending-requeue history injury-id) | {:status :awaiting-retry | :ledger history

@@ -1,4 +1,5 @@
 import importlib.util
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -52,12 +53,10 @@ class AnchorFunctionScopingTest(unittest.TestCase):
                                      "(P production-readiness) :meta-self-heal/production-config-required")])
     self.assertEqual(["P:10:production-config-required"], edge_ids(edges, "keyword"))
 
-  def test_negative_anchor_keyword_does_not_confirm_a_line_citation(self):
+  def test_line_citation_makes_no_edge(self):
+    # rev 20: line numbers are not a citation basis at all
     sites = [site("coordinate-queued-retry", "retry-budget-spent", 261, "C")]
-    edges = align(sites, [entity("abandoned",
-                                 "a second literal at C:261 is not this constructor: (not C coordinate-queued-retry :retry-budget-spent)")])
-    self.assertEqual([], edge_ids(edges, "line"))
-    self.assertEqual(["C:261:retry-budget-spent"], edge_ids(edges, "line-unconfirmed"))
+    self.assertEqual([], align(sites, [entity("abandoned", "returned at C:261")]))
 
   def test_positive_anchor_makes_bare_keywords_prose(self):
     sites = [site("production-readiness", "alpha", 10),
@@ -77,9 +76,9 @@ class AnchorFunctionScopingTest(unittest.TestCase):
     self.assertEqual([], align([call], [entity("bare", "ledger/append-retry-result")]))
     self.assertEqual([], align([call], [entity("negative", "(not C coordinate ledger/append-retry-result)")]))
 
-  def test_line_and_name_citations_do_not_reach_a_call_site(self):
+  def test_keyword_and_name_citations_do_not_reach_a_call_site(self):
     call = site("coordinate", "ledger/append-retry-result", 10, "C", "call")
-    self.assertEqual([], align([call], [entity("reopened", "the requeue at C:10 says `:append-retry-result`")]))
+    self.assertEqual([], align([call], [entity("reopened", "the requeue says `:append-retry-result`")]))
     self.assertEqual([], align([call], [entity("appendRetryResult", "no anchor names the callee")]))
 
   def test_name_rule_is_scoped_to_anchored_function(self):
@@ -89,25 +88,106 @@ class AnchorFunctionScopingTest(unittest.TestCase):
     self.assertEqual(["P:30:acceptance-unavailable"], edge_ids(edges, "name"))
 
 
-class StaleCitationDefnLineTest(unittest.TestCase):
-  """A cite that drifts onto a defn line is stale unless the text names that function."""
+def status_map(fn, status, line, tag="C", reason=None):
+  row = {"id": f"{tag}:{line}", "tag": tag, "fn": fn, "line": line, "kind": "status-map", "status": status}
+  if reason:
+    row["reason"] = reason
+  return row
+
+
+class StatusMapTest(unittest.TestCase):
+  """A reasonless status map is reached by its status, inside an anchor only (rev 20)."""
+  def test_anchored_status_reaches_reasonless_map(self):
+    edges = align([status_map("coordinate-queued-retry", "awaiting-retry", 248)],
+                  [entity("awaitingRetry", "`(C coordinate-queued-retry :awaiting-retry)`")])
+    self.assertEqual(["C:248"], edge_ids(edges, "keyword"))
+
+  def test_bare_status_reaches_nothing(self):
+    self.assertEqual([], align([status_map("coordinate", "discharged", 415)],
+                               [entity("discharged", "`:discharged`: the retry succeeded")]))
+
+  def test_status_in_another_function_is_not_reached(self):
+    self.assertEqual([], align([status_map("coordinate", "awaiting-retry", 400)],
+                               [entity("awaitingRetry", "`(C coordinate-queued-retry :awaiting-retry)`")]))
+
+  def test_anchor_naming_a_reason_does_not_reach_reasonless_maps(self):
+    sites = [status_map("run-opportunity!", "not-required", 479, "R", "meta-self-heal/acceptance-retry-not-prepared"),
+             status_map("run-opportunity!", "not-required", 498, "R")]
+    edges = align(sites, [entity("retryClick",
+                                 "(R run-opportunity! {:status :not-required :reason :meta-self-heal/acceptance-retry-not-prepared})")])
+    self.assertEqual(["R:479"], edge_ids(edges, "keyword"))
+
+  def test_status_does_not_reach_a_map_with_another_reason(self):
+    sites = [status_map("prepare-diagnosis", "unavailable", 882, "P", "meta-self-heal/diagnosis-active-set-unavailable"),
+             status_map("prepare-diagnosis", "unavailable", 892, "P", "meta-self-heal/diagnosis-ledger-unavailable")]
+    edges = align(sites, [entity("activeSetUnavailable",
+                                 "(P prepare-diagnosis {:status :unavailable :reason :meta-self-heal/diagnosis-active-set-unavailable})")])
+    self.assertEqual(["P:882"], edge_ids(edges, "keyword"))
+
+  def test_status_only_anchor_does_not_reach_a_map_with_a_reason(self):
+    sites = [status_map("prepare-diagnosis", "unavailable", 892, "P", "meta-self-heal/diagnosis-ledger-unavailable"),
+             status_map("prepare-diagnosis", "unavailable", 900, "P")]
+    edges = align(sites, [entity("ledgerUnreadable", "(P prepare-diagnosis {:status :unavailable})")])
+    self.assertEqual(["P:900"], edge_ids(edges, "keyword"))
+
+
+def defn(fn, source, tag="P"):
+  return {"tag": tag, "fn": fn, "line": 1, "end-line": 1, "kind": "defn", "source": source}
+
+
+class AnchorResolutionTest(unittest.TestCase):
+  """Every anchor must resolve against the code; one that does not is an error (rev 20)."""
   def setUp(self):
-    self.rows = [{"id": "P:30", "tag": "P", "fn": "admit-acceptance!", "line": 30, "kind": "defn"},
-                 site("admit-acceptance!", "meta-self-heal/acceptance-run-refused", 40)]
-    self.owed = [r for r in self.rows if r["kind"] != "defn"]
+    self.rows = [defn("admit-acceptance*", '(defn admit-acceptance* [x] (refusal :meta-self-heal/acceptance-run-refused) (ledger/append x) "identity-keys")'),
+                 defn("admit-acceptance!", "(defn admit-acceptance! [x] (admit-acceptance* x))"),
+                 defn("route!", "(defn route! [] {:status ::checkpoint-persist-failed})"),
+                 site("admit-acceptance*", "meta-self-heal/acceptance-run-refused", 5)]
 
-  def test_drifted_cite_on_defn_line_is_stale(self):
-    ents = [entity("runRefused", "`:acceptance-run-refused` (P:30): refused.")]
-    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents),
-                     [("lean:RouteState.runRefused", "P:30")])
+  def unresolved(self, text):
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+      f.write(text)
+    return [why for _f, _n, _a, why in _ALIGN.unresolved_anchors(self.rows, [f.name])]
 
-  def test_cite_of_named_function_line_is_not_stale(self):
-    ents = [entity("runRefused", "refused inside `admit-acceptance!` (P:30).")]
-    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents), [])
+  def test_good_anchors_resolve(self):
+    self.assertEqual([], self.unresolved(
+      '(P admit-acceptance* :meta-self-heal/acceptance-run-refused) (P admit-acceptance* ledger/append) '
+      '(P admit-acceptance* "identity-keys") (P admit-acceptance!) (P route! :meta-self-heal/checkpoint-persist-failed)'))
 
-  def test_cite_of_site_line_is_not_stale(self):
-    ents = [entity("runRefused", "`:acceptance-run-refused` (P:40).")]
-    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents), [])
+  def test_missing_function(self):
+    self.assertEqual(["no function `admit-acceptance` in P"], self.unresolved("(P admit-acceptance)"))
+
+  def test_keyword_that_moved_to_another_function(self):
+    # rev 19's eight `(P admit-acceptance! :...)` anchors after the split into admit-acceptance*
+    self.assertEqual(["not in `admit-acceptance!`: :meta-self-heal/acceptance-run-refused"],
+                     self.unresolved("(P admit-acceptance! :meta-self-heal/acceptance-run-refused)"))
+
+  def test_missing_callee_and_needle(self):
+    self.assertEqual(['not in `admit-acceptance*`: ledger/append-requeue, "persist-acceptance!"'],
+                     self.unresolved('(P admit-acceptance* ledger/append-requeue "persist-acceptance!")'))
+
+  def test_negative_anchor_is_checked_too(self):
+    self.assertEqual(["no function `nope` in P"], self.unresolved("(not P nope :x)"))
+
+  def test_keyword_inside_a_needle_is_not_cited(self):
+    rows = [defn("integrate", "(defn integrate [p] (nil? previous))", "T")]
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+      f.write('(T integrate "nil? previous")')
+    self.assertEqual([], _ALIGN.unresolved_anchors(rows, [f.name]))
+    forms = _ALIGN.anchor_forms('(T integrate "a :kw ns/callee")')
+    self.assertEqual((set(), set(), ["a :kw ns/callee"]), (forms[0][2], forms[0][3], forms[0][6]))
+
+  def test_line_shaped_anchor_is_unresolved(self):
+    self.assertEqual(["no function `lines` in P"], self.unresolved("(P lines 1029-1031)"))
+
+
+class LineCitationTest(unittest.TestCase):
+  def test_line_citations_are_listed(self):
+    text = ("P:12, C line 260, T lines 247-251, `full_loop_runtime.clj:475-505`, "
+            "`meta_injury_store.clj` L36-49, (L231), but not units L1 or L2")
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+      f.write(text)
+    self.assertEqual(["P:12", "C line 260", "T lines 247-251", ".clj:475", "L36-49", "L231"],
+                     [c for _f, _n, c in _ALIGN.line_citations([f.name])])
 
 
 if __name__ == "__main__":
