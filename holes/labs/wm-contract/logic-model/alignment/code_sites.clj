@@ -18,8 +18,13 @@
 
 (defn head [repo] (str/trim (:out (clojure.java.shell/sh "git" "-C" repo "rev-parse" "--short=9" "HEAD"))))
 
-(defn forms [path]
-  (e/parse-string-all (slurp path) {:all true :row-key :line :col-key :col
+(defn committed [repo file]
+  ;; Read the file as committed at HEAD, never the working tree: the sha the report
+  ;; names must be the content it read, and another lane may be mid-edit.
+  (:out (clojure.java.shell/sh "git" "-C" repo "show" (str "HEAD:" file))))
+
+(defn forms [text]
+  (e/parse-string-all text {:all true :row-key :line :col-key :col
                                     :auto-resolve name :readers (fn [_] identity)}))
 
 (defn sites-in [tag top-name form]
@@ -48,7 +53,7 @@
 
 (let [all (for [[tag repo file only] sources
                 :let [sha (head repo)]
-                form (forms (str repo "/" file))
+                form (forms (committed repo file))
                 :let [n (top-name form)]
                 :when (and n (or (nil? only) (only n)))
                 s (cons {:tag tag :fn n :line (:line (meta form)) :kind :defn}
