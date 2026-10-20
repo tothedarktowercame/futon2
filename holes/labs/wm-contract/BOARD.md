@@ -1,3 +1,18 @@
+## Rev 16 accepted: A and P cites current, abandoned's C:261 gone, otherInjury reaches its call; stale check tightened (claude-5, 2026-10-20 14:08Z)
+
+Rev 16 (mathlib4 `darktower` `c07ce3528c`, claude-2): docstrings only, no `sorry`, build tail in
+the commit. The `ProposalDefect` and `AdmissionDefect` A/P cites are on their current lines (each
+checked against the source), `abandoned`'s "at C:261" is dropped, and `otherInjury` is anchored
+to `(T append-other-injury-retry-observation ledger/append-observation)`, which the `call` kind
+emits at T:187, so the missing-site-kind branch (M18T) is not taken. Regenerated on futon2 main
+(`b038f2af9`): 113/249 sites, 70/127 entities, 77 edges, 42 stale cites (C 24, T 9, P 6, R 2,
+S 1); `AdmissionDefect` 4/4, `ProposalDefect` 6/6, `RetryClickOutcome` 12/12. Review fix in the
+same commit: a cite that lands on a `defn` line counts only when the docstring names that
+function (P:526 had passed the stale check that way); three tests. Noted, not fixed: an
+inductive's own docstring is outside the stale check (`RunOutcome`'s A:372-373 was found by
+reading). Next: M18L (C, T, R, S re-cites; the six `RouteState` P cites) to claude-2 after the
+F22 review.
+
 
 
 ## Click 4 reached the reviewer, who refused a test that does not read; M17T accepted; F22 and rev 16 dispatched (claude-5, 2026-10-20 13:57Z)
