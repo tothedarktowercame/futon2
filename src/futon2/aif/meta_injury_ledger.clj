@@ -25,7 +25,7 @@
    ;; An author-port refusal is a retryable route symptom.  It reopens from
    ;; the claim that owns the failed author receipt, while ordinary retry
    ;; results continue to reopen from an enacted repair.
-   :reopened #{:enacted :claimed}
+   :reopened #{:enacted :claimed :abandoned}
    :abandoned #{:enacted :claimed}})
 
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
@@ -67,6 +67,12 @@
 (defn- transitions [ledger] (filter transition? (:entries ledger)))
 (defn- injury-history [ledger injury-id]
   (filter #(= injury-id (:injury-id %)) (transitions ledger)))
+(defn- effective-attempt-limit [ledger injury-id]
+  (+ (:attempt-limit ledger)
+     (transduce (comp (filter #(and (= :reopened (:state %))
+                                    (= :port-refusal-corrected (:reason %))))
+                      (map #(count (:corrected-port-receipt-pins %))))
+                + 0 (injury-history ledger injury-id))))
 (defn- latest [ledger injury-id] (last (injury-history ledger injury-id)))
 (defn- authored [ledger injury-id]
   (last (filter #(= :authored (:state %)) (injury-history ledger injury-id))))
@@ -75,6 +81,16 @@
 (defn- prior-session-ids [ledger]
   (into #{} (mapcat (juxt :author-session :reviewer-session))
         (filter #(= :claimed (:state %)) (transitions ledger))))
+
+(defn- author-failed-reopen? [state previous-state entry]
+  (and (= state :reopened)
+       (= previous-state :claimed)
+       (= :author-failed (:reason entry))))
+
+(defn- corrected-reopen? [state previous-state entry]
+  (and (= state :reopened)
+       (= previous-state :abandoned)
+       (= :port-refusal-corrected (:reason entry))))
 
 (defn- common-defects [entry]
   (cond-> []
@@ -91,12 +107,11 @@
         patch (authored ledger (:injury-id entry))
         used-sessions (prior-session-ids ledger)
         attempt (:attempt entry)
-        limit (:attempt-limit ledger)
+        limit (effective-attempt-limit ledger (:injury-id entry))
         retry-limit (:retry-limit ledger)
         requeue? (and (= state :enacted) (= previous-state :enacted))
-        author-failed-reopen? (and (= state :reopened)
-                                    (= previous-state :claimed)
-                                    (= :author-failed (:reason entry)))]
+        author-failed-reopen? (author-failed-reopen? state previous-state entry)
+        corrected-reopen? (corrected-reopen? state previous-state entry)]
     (cond-> []
       (not (contains? (get allowed-predecessors state #{}) previous-state))
       (conj :transition/illegal-order)
@@ -163,6 +178,7 @@
       (conj :requeue/evidence)
       (and (#{:discharged :reopened} state)
            (not author-failed-reopen?)
+           (not corrected-reopen?)
            (or (not (nonblank? (:retry-click entry)))
                (not= (:patch-sha entry) (:patch-sha patch))
                (not= (:retry-click entry) (:retry-click previous))
@@ -176,13 +192,22 @@
       (and (= state :reopened) (= previous-state :enacted)
            (= :author-failed (:reason entry)))
       (conj :reopen/reason-unexpected)
+      (and (= state :reopened) (= previous-state :abandoned)
+           (or (not corrected-reopen?)
+               (not (sha? (:correction-commit entry)))
+               (not (and (vector? (:corrected-port-receipt-pins entry))
+                         (seq (:corrected-port-receipt-pins entry))
+                         (every? pin? (:corrected-port-receipt-pins entry))))))
+      (conj :reopen/correction-evidence)
       (and (= state :abandoned) (= previous-state :claimed)
            (not (pin? (:port-receipt-pin entry))))
       (conj :abandonment/author-failure-evidence)
       (and (= state :discharged)
            (not (#{:success :grounded-change :closed} (:outcome entry))))
       (conj :discharge/outcome)
-      (and (= state :reopened) (not author-failed-reopen?)
+      (and (= state :reopened)
+           (not author-failed-reopen?)
+           (not corrected-reopen?)
            (or (not (pin? (:new-cause-pin entry))) (> attempt limit)))
       (conj :reopen/evidence-or-limit)
       (and (= state :abandoned)
@@ -367,13 +392,15 @@
     (let [checked (validate-ledger ledger)]
       (if-not (= :valid (:status checked))
         (refusal :ledger/tampered {:ledger-defects (:defects checked)})
-        (let [previous (latest ledger (:injury-id proposed))
-              next-attempt (inc (or (:attempt previous) 0))]
-          (if (> next-attempt (:attempt-limit ledger))
+        (let [injury-id (:injury-id proposed)
+              previous (latest ledger injury-id)
+              next-attempt (inc (or (:attempt previous) 0))
+              limit (effective-attempt-limit ledger injury-id)]
+          (if (> next-attempt limit)
             (append-transition ledger
                                (-> proposed
                                    (assoc :state :abandoned
-                                          :attempt (:attempt-limit ledger)
+                                          :attempt limit
                                           :reason :attempt-limit-exhausted)
                                    (dissoc :retry-click :new-cause-pin :patch-sha)))
             (append-transition ledger (assoc proposed :state :reopened

@@ -20,6 +20,12 @@
   ;; author answer, rather than reconstructed as a test-only transition.
   (edn/read-string (slurp "test/futon2/aif/fixtures/click-7-ledger.edn")))
 
+(defn- click-10-abandoned-ledger []
+  ;; Byte-identical live ledger snapshot at 2026-10-20 19:24Z, sha256
+  ;; 3aaa6dc63bd65be00e3c70a337f1871c27b154167ec889f4815ece37a3249bc6.
+  (edn/read-string
+   (slurp "test/futon2/aif/fixtures/meta-injury-ledger-2026-10-20-d755c886-abandoned.edn")))
+
 (defn appended [ledger transition]
   (let [result (ledger/append-transition ledger transition)]
     (is (= :appended (:status result)) (pr-str result))
@@ -475,3 +481,77 @@
     (is (= :attempt-limit-exhausted (get-in result [:entry :reason])))
     (is (= pin (get-in result [:entry :port-receipt-pin])))
     (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))))
+
+(deftest corrected-port-refusals-reopen-an-abandoned-live-injury
+  (let [history (click-10-abandoned-ledger)
+        injury "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+        repair "repair/239cf98836afc977cd589141c224ec3f4bca83dc"
+        by-ordinal (into {} (map (juxt :ordinal identity)) (:entries history))
+        pin9 (:port-receipt-pin (by-ordinal 9))
+        pin11 (:port-receipt-pin (by-ordinal 11))
+        correction {:injury-id injury :repair-id repair
+                    :state :reopened :attempt 4
+                    :reason :port-refusal-corrected
+                    :correction-commit "f63a3da99bb19f4c2217e20ed6f47572e996ccbc"
+                    :corrected-port-receipt-pins [pin9 pin11]}
+        result (ledger/append-transition history correction)]
+    (is (= :valid (:status (ledger/validate-ledger history))))
+    (is (= :appended (:status result)) (pr-str result))
+    (is (= 4 (get-in result [:entry :attempt])))
+    (is (= :reopened
+           (get-in (ledger/active-injuries (:ledger result))
+                   [:injuries injury :state])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))
+
+    (doseq [[label proposed expected-defect]
+            [[:wrong-reason (assoc correction :reason :author-failed)
+              :reopen/correction-evidence]
+             [:missing-commit (dissoc correction :correction-commit)
+              :reopen/correction-evidence]
+             [:empty-pins (assoc correction :corrected-port-receipt-pins [])
+              :reopen/correction-evidence]
+             [:skipped-attempt (assoc correction :attempt 5)
+              :attempt/not-incremented]]]
+      (let [refused (ledger/append-transition history proposed)]
+        (is (= :transition/invalid (:reason refused)) (name label))
+        (is (some #{expected-defect} (:defects refused)) (name label))))))
+
+(deftest corrected-port-refusals-extend-the-effective-attempt-limit
+  (let [history (click-10-abandoned-ledger)
+        injury "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+        repair "repair/239cf98836afc977cd589141c224ec3f4bca83dc"
+        by-ordinal (into {} (map (juxt :ordinal identity)) (:entries history))
+        pins [(:port-receipt-pin (by-ordinal 9))
+              (:port-receipt-pin (by-ordinal 11))]
+        correction (appended history
+                              {:injury-id injury :repair-id repair
+                               :state :reopened :attempt 4
+                               :reason :port-refusal-corrected
+                               :correction-commit "f63a3da99bb19f4c2217e20ed6f47572e996ccbc"
+                               :corrected-port-receipt-pins pins})
+        claim (fn [ledger attempt suffix]
+                (appended ledger
+                          {:injury-id injury :repair-id repair
+                           :state :claimed :attempt attempt
+                           :algorithm "META-dedicated-self-heal"
+                           :author-session (str "corrected-author-" suffix)
+                           :reviewer-session (str "corrected-reviewer-" suffix)
+                           :work-order-pin (first pins)}))
+        failed-pin {:path "meta-repair-port-receipts/corrected/author.edn"
+                    :sha256 (apply str (repeat 64 "e"))}
+        attempt4 (claim correction 4 "four")
+        reopened5 (ledger/append-retry-result
+                   attempt4 {:injury-id injury :repair-id repair
+                             :reason :author-failed
+                             :port-receipt-pin failed-pin})
+        attempt5 (claim (:ledger reopened5) 5 "five")
+        abandoned (ledger/append-retry-result
+                   attempt5 {:injury-id injury :repair-id repair
+                             :reason :author-failed
+                             :port-receipt-pin failed-pin})]
+    (is (= :reopened (get-in reopened5 [:entry :state])))
+    (is (= 5 (get-in reopened5 [:entry :attempt])))
+    (is (= :abandoned (get-in abandoned [:entry :state])))
+    (is (= 5 (get-in abandoned [:entry :attempt])))
+    (is (= :attempt-limit-exhausted (get-in abandoned [:entry :reason])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger abandoned)))))))
