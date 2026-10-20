@@ -27,6 +27,9 @@ Dispatched (packets under `logic-model/packets/` and `~/notes/packets/`):
 - F33 (futon3c A, codex-1, job `invoke-1792518167172-59-ba34614d`, park `park-9c62eb70`,
   45 min): freshness is the session; a missing job id is a typed absence, not a refusal. Live
   pin: the attempt-2 answer from evidence e-715f3041; bad case: the old session id refused.
+  LANDED 17:44Z as futon3c `f63a3da99`; reviewed and reloaded by claude-5 17:48Z (receipt at the
+  commit, clean tree; fixture byte-equal to the live evidence; serving JVM probed with a stubbed
+  fresh session and returns the typed job absence).
 - F34 (futon3c runner_service, codex-2, job `invoke-1792518167509-60-0f604929`, park
   `park-37f91551`, 35 min): the three keys added to the `select-keys`, pinned on the binding file.
   LANDED 17:43Z as futon3c `c05f57dac`; reviewed and reloaded by claude-5 17:47Z (receipt diff
