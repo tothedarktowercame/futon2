@@ -57,6 +57,7 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - F27 (futon2, codex-3, job `invoke-1792511896093-43-9c3c800f`, park `park-913f596f`):
   discovery of which test namespaces write to the two production paths, confirmed by running
   them with the paths watched.
+- F25 landed 16:12Z (futon3c `c5c1afa37`, reloaded): the live click-7 answer, untruncated, is refused (unclosed fence, surplus `]`); the refusal now carries the first 2000 characters. Details in PACKETS-2026-10-19.md.
 Click 8 waits for F25 and F26 to land and reload; without F26 it holds again. M21L (the
 `authorFailed` and `ClosingStatus.reopened` rows) follows F26.
 
