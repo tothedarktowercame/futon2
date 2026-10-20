@@ -8,8 +8,8 @@ _SPEC.loader.exec_module(_ALIGN)
 align = _ALIGN.align
 
 
-def site(fn, reason, line):
-  return {"id": f"P:{line}:{reason.split('/')[-1]}", "tag": "P", "fn": fn,
+def site(fn, reason, line, tag="P"):
+  return {"id": f"{tag}:{line}:{reason.split('/')[-1]}", "tag": tag, "fn": fn,
           "line": line, "kind": "refusal", "reason": reason}
 
 
@@ -33,11 +33,24 @@ class AnchorFunctionScopingTest(unittest.TestCase):
                                      "(P production-readiness :meta-self-heal/production-config-required)")])
     self.assertEqual(["P:10:production-config-required"], edge_ids(edges, "keyword"))
 
-  def test_keyword_outside_anchor_keeps_unscoped_behavior(self):
+  def test_keyword_outside_any_anchor_keeps_unscoped_behavior(self):
     edges = align(self.sites, [entity("readinessRefused",
-                                     "(P production-readiness) :meta-self-heal/production-config-required")])
+                                     ":meta-self-heal/production-config-required")])
     self.assertEqual(["P:10:production-config-required", "P:20:production-config-required"],
                      edge_ids(edges, "keyword"))
+
+  def test_negative_anchor_excludes_its_keyword_from_all_keyword_edges(self):
+    sites = [site("classify", "reason-x", 10, "T")]
+    positive = align(sites, [entity("positive", "(T classify :reason-x)")])
+    negative = align(sites, [entity("negative", "(not T classify :reason-x) :reason-x")])
+    self.assertEqual(["T:10:reason-x"], edge_ids(positive, "keyword"))
+    self.assertEqual([], negative)
+
+  def test_positive_anchor_makes_bare_keywords_prose(self):
+    sites = [site("production-readiness", "alpha", 10),
+             site("route!", "beta", 20)]
+    edges = align(sites, [entity("readinessRefused", "(P production-readiness :alpha) :beta")])
+    self.assertEqual(["P:10:alpha"], edge_ids(edges, "keyword"))
 
   def test_name_rule_is_scoped_to_anchored_function(self):
     sites = [site("prepare-acceptance", "acceptance-unavailable", 30),

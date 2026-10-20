@@ -6,16 +6,16 @@ Code read at: A = `src/futon3c/wm/meta_self_heal_adapters.clj` @ `ec18c8909`; C 
 
 Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit/SelfHealPrepare.lean`
 
-**Code sites realised by a Lean entity: 110/249 (44%).**
+**Code sites realised by a Lean entity: 91/249 (37%).**
 
-**Lean entities with a code endpoint: 56/127 (44%).**
+**Lean entities with a code endpoint: 55/127 (43%).**
 
 | site kind | covered |
 |---|---|
 | absent-term | 12/58 (21%) |
 | classification | 8/8 (100%) |
 | held | 3/3 (100%) |
-| refusal | 76/92 (83%) |
+| refusal | 57/92 (62%) |
 | status-map | 11/88 (12%) |
 
 | Lean inductive | constructors with a code endpoint |
@@ -24,7 +24,7 @@ Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit
 | AdmissionDefect | 1/4 (25%) |
 | BindingVerdict | 0/4 (0%) |
 | BoundaryDefect | 0/2 (0%) |
-| ClosingStatus | 4/5 (80%) |
+| ClosingStatus | 3/5 (60%) |
 | CoordinationOutcome | 0/4 (0%) |
 | CoordinationPhase | 0/6 (0%) |
 | CoordinatorRefusal | 10/10 (100%) |
@@ -42,7 +42,7 @@ Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit
 | RouteTerm | 5/5 (100%) |
 | RunOutcome | 0/3 (0%) |
 
-Edges by basis: keyword 40, line 3, name 14, line-unconfirmed 7
+Edges by basis: keyword 39, line 3, name 14, line-unconfirmed 7
 
 ## Uncovered code sites
 
@@ -138,13 +138,32 @@ Edges by basis: keyword 40, line 3, name 14, line-unconfirmed 7
 | P:183:diagnosis-port-threw | `produce-diagnosis!` | status-map | failed | meta-self-heal/diagnosis-port-threw |
 | P:221 | `produce-diagnosis!` | status-map | available |  |
 | P:232 | `produce-diagnosis!` | status-map | available |  |
+| P:249:acceptance-diagnosis-pin-unavailable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-pin-unavailable |
+| P:256:acceptance-diagnosis-pin-mismatch | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-pin-mismatch |
+| P:266:acceptance-diagnosis-unreadable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-unreadable |
+| P:268:acceptance-diagnosis-unreadable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-unreadable |
+| P:270:acceptance-diagnosis-unavailable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-unavailable |
+| P:272:acceptance-diagnosis-unavailable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-unavailable |
+| P:274:acceptance-diagnosis-identity-mismatch | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-identity-mismatch |
+| P:278:diagnosis-production-functions-absent | `read-diagnosis-receipt` | refusal |  | meta-self-heal/diagnosis-production-functions-absent |
 | P:280 | `read-diagnosis-receipt` | status-map | available |  |
+| P:282:acceptance-diagnosis-unreadable | `read-diagnosis-receipt` | refusal |  | meta-self-heal/acceptance-diagnosis-unreadable |
 | P:341 | `persist-acceptance!` | status-map | persisted |  |
 | P:446:acceptance-port-threw | `produce-acceptance-from-request!` | status-map | failed | meta-self-heal/acceptance-port-threw |
 | P:485 | `produce-acceptance-from-request!` | status-map | proposed |  |
 | P:499 | `produce-acceptance-from-request!` | status-map | proposed |  |
 | P:520 | `produce-acceptance!` | status-map | present |  |
+| P:548:acceptance-proposal-pin-unavailable | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-pin-unavailable |
+| P:552:acceptance-proposal-pin-mismatch | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-pin-mismatch |
+| P:559:acceptance-proposal-unreadable | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-unreadable |
+| P:561:acceptance-proposal-unreadable | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-unreadable |
+| P:563:acceptance-proposal-not-proposed | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-not-proposed |
+| P:565:acceptance-proposal-review-state-invalid | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-review-state-invalid |
+| P:567:acceptance-proposal-identity-mismatch | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-identity-mismatch |
+| P:569:acceptance-proposal-source-mismatch | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-source-mismatch |
+| P:571:acceptance-proposal-not-concrete | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-not-concrete |
 | P:572 | `read-acceptance-proposal` | status-map | available |  |
+| P:574:acceptance-proposal-unreadable | `read-acceptance-proposal` | refusal |  | meta-self-heal/acceptance-proposal-unreadable |
 | P:600:acceptance-run-threw | `admit-acceptance!` | status-map | failed | meta-self-heal/acceptance-run-threw |
 | P:624:acceptance-review-threw | `admit-acceptance!` | status-map | failed | meta-self-heal/acceptance-review-threw |
 | P:652 | `admit-acceptance!` | status-map | accepted |  |
@@ -226,6 +245,7 @@ Edges by basis: keyword 40, line 3, name 14, line-unconfirmed 7
 - `SelfHealRoute.PersistWrite.ledgerWrite` (line 953)
 - `SelfHealRoute.PersistWrite.transactionWrite` (line 953)
 - `SelfHealRoute.ClosingStatus.reopened` (line 969)
+- `SelfHealRoute.ClosingStatus.retryInconclusive` (line 991)
 - `SelfHealRoute.CoordinationOutcome.held` (line 996)
 - `SelfHealRoute.CoordinationOutcome.refused` (line 997)
 - `SelfHealRoute.CoordinationOutcome.persistFailed` (line 998)

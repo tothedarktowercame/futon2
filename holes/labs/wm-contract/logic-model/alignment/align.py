@@ -64,22 +64,24 @@ def cited_keywords(text):
 def cited_lines(text):
   return {(t, int(n)) for t, n in re.findall(r"\b([PCRAST]):(\d+)", text)}
 
-ANCHOR_FORM = re.compile(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)")
+ANCHOR_FORM = re.compile(r"\((?:(not)\s+)?(P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)")
 
 def anchor_forms(text):
-  """Return (tag, function, keywords, span) for simple `(P function ...)` anchors.
+  """Return (tag, function, keywords, span, positive?) for simple anchors.
 
   These are deliberately documentation anchors, not a parser for Lean.  Their
   contents have no nested parens in the contract grammar, so retaining the
   enclosing form lets a cited outcome keyword keep the function it names.
+  `(not P function ...)` is an exclusion: it consumes its keywords as prose
+  without claiming a code endpoint.
   """
-  return [(m.group(1), m.group(2), cited_keywords(m.group(3)), m.span())
+  return [(m.group(2), m.group(3), cited_keywords(m.group(4)), m.span(), not m.group(1))
           for m in ANCHOR_FORM.finditer(text)]
 
 def outside_anchors(text, forms):
   """The text with every anchor form cut out: keywords here keep the old, unscoped reading."""
-  ends = [0, *(end for *_, (_, end) in forms)]
-  starts = [*(start for *_, (start, _) in forms), len(text)]
+  ends = [0, *(form[3][1] for form in forms)]
+  starts = [*(form[3][0] for form in forms), len(text)]
   return "".join(text[last:start] for last, start in zip(ends, starts))
 
 # The code functions each Lean inductive models.  The name rule links a constructor
@@ -105,9 +107,12 @@ def align(sites, entities):
     text = e["text"]
     forms = anchor_forms(text)
     outside_kws, lines, nm = cited_keywords(outside_anchors(text, forms)), cited_lines(text), kebab(e["name"])
+    negative_kws = set().union(*(form[2] for form in forms if not form[4])) if forms else set()
+    outside_kws -= negative_kws
     scoped_kws = {}
     anchored_fns = {}
-    for tag, fn, form_kws, _span in forms:
+    positive_forms = [form for form in forms if form[4]]
+    for tag, fn, form_kws, _span, _positive in positive_forms:
       anchored_fns.setdefault(tag, set()).add(fn)
       for kw in form_kws:
         scoped_kws.setdefault(kw, set()).add((tag, fn))
@@ -121,7 +126,10 @@ def align(sites, entities):
       in_scope = e["inductive"] not in SCOPE or s["fn"] in SCOPE[e["inductive"]]
       cited = {full} if "/" in full else {full, short}
       scoped = set().union(*(scoped_kws.get(k, set()) for k in cited)) if cited else set()
-      unscoped = any(k in outside_kws for k in cited)
+      # Once a docstring names a positive anchor, unanchored keywords are
+      # explanatory prose.  A docstring with no anchor preserves the legacy
+      # bare-keyword reading; negative forms have already been removed above.
+      unscoped = not positive_forms and any(k in outside_kws for k in cited)
       anchor_name_scope = anchored_fns.get(s["tag"])
       if r and s["kind"] != "absent-term" and (unscoped or (s["tag"], s["fn"]) in scoped):
         basis = "keyword"

@@ -3842,16 +3842,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.proposalRefused",
-    "P:212:diagnosis-production-functions-absent",
-    "P:249:acceptance-diagnosis-pin-unavailable",
-    "P:256:acceptance-diagnosis-pin-mismatch",
-    "P:266:acceptance-diagnosis-unreadable",
-    "P:268:acceptance-diagnosis-unreadable",
-    "P:270:acceptance-diagnosis-unavailable",
-    "P:272:acceptance-diagnosis-unavailable",
-    "P:274:acceptance-diagnosis-identity-mismatch",
-    "P:278:diagnosis-production-functions-absent",
-    "P:282:acceptance-diagnosis-unreadable",
     "P:346:acceptance-path-conflict",
     "P:355:acceptance-path-conflict",
     "P:358:acceptance-persist-failed",
@@ -3861,8 +3851,7 @@
     "P:479:acceptance-proposal-source-mismatch",
     "P:482:acceptance-prose-or-malformed",
     "P:530:acceptance-port-unavailable",
-    "P:538:acceptance-request-function-unresolvable",
-    "P:697:acceptance-diagnosis-unavailable"
+    "P:538:acceptance-request-function-unresolvable"
    ],
    "props": {
     "basis": "keyword",
@@ -3873,17 +3862,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.admissionRefused",
-    "P:479:acceptance-proposal-source-mismatch",
-    "P:548:acceptance-proposal-pin-unavailable",
-    "P:552:acceptance-proposal-pin-mismatch",
-    "P:559:acceptance-proposal-unreadable",
-    "P:561:acceptance-proposal-unreadable",
-    "P:563:acceptance-proposal-not-proposed",
-    "P:565:acceptance-proposal-review-state-invalid",
-    "P:567:acceptance-proposal-identity-mismatch",
-    "P:569:acceptance-proposal-source-mismatch",
-    "P:571:acceptance-proposal-not-concrete",
-    "P:574:acceptance-proposal-unreadable",
     "P:592:acceptance-run-port-unavailable",
     "P:595:acceptance-review-port-unavailable",
     "P:630:acceptance-run-refused",
@@ -4241,17 +4219,6 @@
    "props": {
     "basis": "line",
     "lean-line": 983
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.retryInconclusive",
-    "T:128:successful-task-outcome"
-   ],
-   "props": {
-    "basis": "keyword",
-    "lean-line": 991
    }
   },
   {
