@@ -75,6 +75,35 @@
   ;; was sealed failed; this is the stale attempt the route must retire.
   (edn/read-string (slurp (str "test/futon2/aif/fixtures/click-7-" name ".edn"))))
 
+(deftest persisted-transaction-carries-intake-bindings-for-the-active-injury
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path}
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        context (production/diagnosis-context options)
+        carried (production/carried-bindings options context)]
+    (is (= (:diagnosis-evidence-pin order) (:diagnosis-evidence-pin carried)))
+    (is (= (:acceptance-test order) (:acceptance-test carried)))
+    (is (= :carried-transaction (:source carried)))
+    (is (= (:transaction-pin transaction) (:transaction-pin carried)))
+    (is (= (:attempt order) (:attempt carried)))
+    (is (nil? (production/carried-bindings
+               (assoc options :meta-repair-transaction-path (str dir "/missing.edn"))
+               context)))
+    (is (nil? (production/carried-bindings
+               options
+               (assoc context :active-injuries
+                      {:status :computed
+                       :injuries {"injury/not-the-transaction" {:state :open}}}))))
+    (spit transaction-path "{")
+    (is (nil? (production/carried-bindings options context)))))
+
 (defn- durable-with-active-source [pin]
   {:ledger {:entries [{:injury-id "injury-recorded-l1"
                        :state :open :cause-record-pin pin}]}

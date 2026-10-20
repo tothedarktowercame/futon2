@@ -789,6 +789,32 @@
                  (= :valid (:status (coordinator/verify-transaction (:value read)))))
         (:value read)))))
 
+(defn carried-bindings-observation
+  "Read a valid persisted repair transaction once and describe whether its
+  diagnosis and acceptance bindings belong to an active injury."
+  [opts context]
+  (let [active (:active-injuries context)]
+    (if (or (not= :computed (:status active))
+            (empty? (:injuries active)))
+      {:status :absent :reason :no-active-injury}
+      (if-let [transaction (load-transaction (:meta-repair-transaction-path opts))]
+        (let [work-order (:work-order transaction)]
+          (if (contains? (:injuries active) (:injury-id work-order))
+            {:diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
+             :acceptance-test (:acceptance-test work-order)
+             :source :carried-transaction
+             :transaction-pin (:transaction-pin transaction)
+             :attempt (:attempt work-order)}
+            {:status :absent :reason :transaction-injury-not-active}))
+        {:status :absent :reason :no-transaction}))))
+
+(defn carried-bindings
+  "Return persisted diagnosis and acceptance bindings for an active injury."
+  [opts context]
+  (let [observation (carried-bindings-observation opts context)]
+    (when (= :carried-transaction (:source observation))
+      observation)))
+
 (defn- retire-stale-transaction!
   "Preserve a resumed transaction that belongs to an earlier authoring attempt.
   A reopened ledger is authoritative; replacing this file would otherwise make

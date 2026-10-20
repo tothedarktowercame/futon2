@@ -8,6 +8,7 @@
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
@@ -19,6 +20,84 @@
             [futon2.report.war-machine :as wm]))
 
 (defn- digest [x] (evidence/value-digest x))
+
+(defn- f32-root []
+  (.getCanonicalPath
+   (.toFile (java.nio.file.Files/createTempDirectory
+             "wm-f32-carried-bindings"
+             (make-array java.nio.file.attribute.FileAttribute 0)))))
+
+(defn- f32-fixture [name]
+  (edn/read-string
+   (slurp (str "test/futon2/aif/fixtures/click-7-" name ".edn"))))
+
+(defn- f32-seal [request status payload]
+  (let [work-order (:work-order request)]
+    (coordinator/seal-port-receipt
+     {:phase (:phase request) :injury-id (:injury-id work-order)
+      :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+      :predecessor-pin (:predecessor-pin request)
+      :status status :payload payload})))
+
+(deftest claimed-injury-carries-intake-bindings-from-its-transaction
+  (let [dir (f32-root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (f32-fixture "ledger")
+        transaction (f32-fixture "transaction")
+        order (:work-order transaction)
+        calls (atom {:diagnosis 0 :acceptance 0 :run 0 :admission-review 0})
+        never (fn [key]
+                (fn [& _]
+                  (swap! calls update key inc)
+                  {:status :refused :reason :unexpected-intake-call}))
+        ports {:author #(f32-seal % :succeeded
+                                  {:patch-sha (apply str (repeat 40 "a"))
+                                   :worktree dir})
+               :review #(f32-seal % :failed {:reason :review-offline})
+               :enact #(f32-seal % :failed {:reason :unused})
+               :retry #(f32-seal % :failed {:reason :unused})}
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        result (runtime/run-opportunity!
+                {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-diagnosis-fn (never :diagnosis)
+                 :meta-acceptance-fn (never :acceptance)
+                 :meta-acceptance-run-fn (never :run)
+                 :meta-acceptance-review-fn (never :admission-review)
+                 :meta-repair-ports ports
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order)
+                 :target-worktree dir})]
+    (is (= {:diagnosis 0 :acceptance 0 :run 0 :admission-review 0} @calls))
+    (is (= {:status :present :source :supplied}
+           (select-keys (:diagnosis-observation result) [:status :source])))
+    (is (= :present (get-in result [:acceptance-observation :status])))
+    (is (= :carried-transaction (get-in result [:carried-bindings :source])))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (= 2 (:attempt result)))
+    (is (= 1 (get-in result [:continued-from 0 :attempt])))))
+
+(deftest missing-transaction-preserves-diagnosis-production
+  (let [dir (f32-root)
+        ledger-path (str dir "/ledger.edn")
+        calls (atom 0)
+        _ (spit ledger-path (str (pr-str (f32-fixture "ledger")) "\n"))
+        result (runtime/run-opportunity!
+                {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path (str dir "/missing.edn")
+                 :meta-diagnosis-fn (fn [& _]
+                                      (swap! calls inc)
+                                      {:status :unavailable
+                                       :reason :fixture-unavailable})})]
+    (is (= 1 @calls))
+    (is (= {:status :absent :reason :no-transaction}
+           (:carried-bindings result)))))
 
 (deftest production-registers-the-bounded-beta-campaign
   (runtime/production-defaults {})

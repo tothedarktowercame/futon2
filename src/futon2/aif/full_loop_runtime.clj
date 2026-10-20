@@ -472,6 +472,18 @@
                         meta-self-heal/default-transaction-path))
         retry (:meta-repair-retry opts)
         diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts))
+        carried-bindings (if retry
+                           {:status :absent :reason :retry}
+                           (meta-self-heal/carried-bindings-observation
+                            opts diagnosis-context))
+        opts (if (= :carried-transaction (:source carried-bindings))
+               (reduce (fn [options key]
+                         (if (contains? options key)
+                           options
+                           (assoc options key (get carried-bindings key))))
+                       opts
+                       [:diagnosis-evidence-pin :acceptance-test])
+               opts)
         diagnosis-observation (when-not retry
                                 (meta-self-heal/prepare-diagnosis opts diagnosis-context))
         acceptance-observation (if (= :meta-self-heal/diagnosis-active-set-unavailable
@@ -504,17 +516,21 @@
       {:status :refused :reason :meta-self-heal/active-set-unavailable
        :route :dedicated-meta-self-heal :ordinary-selection-called? false
        :active-injuries (select-keys (:active-injuries diagnosis-context) [:status :reason :defects])
-       :diagnosis-observation diagnosis-observation :acceptance-observation acceptance-observation}
+       :diagnosis-observation diagnosis-observation :acceptance-observation acceptance-observation
+       :carried-bindings carried-bindings}
       (= :refused (:status readiness))
       (assoc readiness :diagnosis-observation diagnosis-observation
-             :acceptance-observation acceptance-observation)
+             :acceptance-observation acceptance-observation
+             :carried-bindings carried-bindings)
       retry (assoc (run-ordinary-opportunity! effective-opts)
                    :diagnosis-observation diagnosis-observation
-                   :acceptance-observation acceptance-observation)
+                   :acceptance-observation acceptance-observation
+                   :carried-bindings carried-bindings)
       :else (let [routed (meta-self-heal/route! effective-opts)]
               (assoc (or routed (run-ordinary-opportunity! effective-opts))
                      :diagnosis-observation diagnosis-observation
-                     :acceptance-observation acceptance-observation)))))
+                     :acceptance-observation acceptance-observation
+                     :carried-bindings carried-bindings)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.
