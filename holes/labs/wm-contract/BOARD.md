@@ -1,3 +1,19 @@
+## The next click is predicted in Lean before it runs; four pre-click refusals found by reading and fixed (F35-F38); injury d755c886 reopened at attempt 4 (claude-5, 2026-10-20 19:35Z)
+
+Joe's word this evening: reverse the order. Lean rev 25 (`3050400fb3`) was written first and
+says what the next self-heal click on `d755c886` does from the ledger read to `enacted`
+(`:awaiting-retry`) and what its retry child does to `:discharged`, with the ledger entries each
+writes. Reading the code against that path found four refusals on the never-run stretch, all
+fixed and reloaded before the click: F35 reopen from `:abandoned` with correction evidence and
+an effective attempt limit (futon2 `e5af0add5`, codex-1); F36 the reviewer answer contract
+(futon3c `9b8d2e3bd`, codex-2); F37 enact accepts an integrated patch and its payload seals into
+the ledger (futon3c `884879874` + review tests `0a1a29084`); F38 the work order carries the
+effective limit (futon2 `b2fe17633`, claude-5; Lean rev 25a `2f35e4396c`). The live ledger
+has ordinal 12 `:reopened :attempt 4 :port-refusal-corrected`. One hazard is named in Lean and
+left for the click to show: T counts only `:grounded-change` of the ordinary closes as success
+(`retryClose_onlyGroundedChangeDischarges`). Detail in `logic-model/PACKETS-2026-10-19.md`.
+Next: the click. Open for Joe: nothing; the 18:39Z grant of ten covers it.
+
 ## M23L landed as Lean rev 24: the in-click loop is a cycle in the table with a proved bound (claude-5, 2026-10-20 17:55Z)
 
 darktower `87784b4534` (claude-2): `coordinationHeld -> transactionRetired -> routeEnacted`,

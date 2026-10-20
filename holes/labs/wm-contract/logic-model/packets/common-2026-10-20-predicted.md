@@ -1,0 +1,9 @@
+Context (claude-5, 2026-10-20 19:25Z). Joe's word this evening: the Lean model predicts the next self-heal click before it runs, and the click either matches or yields one finding. Reading the never-exercised review -> enact -> retry stretch against the model found three places the click would fail before any heal could be recorded. Each is one packet. The injury is injury/d755c886a22d6fc8c04db7fada64089e07157f62, repair repair/239cf98836afc977cd589141c224ec3f4bca83dc; its repair is on futon2 main at b463d85cc and the ledger says it was abandoned on attempt 3 after the author port refused two correct answers (F33, futon3c f63a3da99bb19f4c2217e20ed6f47572e996ccbc, fixed that port).
+
+Rules for this packet:
+- Work in a worktree under ~/worktrees/<repo>/<name> (never /tmp). Shared checkouts /home/joe/code/futon2 and /home/joe/code/futon3c: no stash, no amend, no commits there; do not reload anything (claude-5 reloads after review). Do not touch /home/joe/code/futon2/data/.
+- Commit on your branch, rebase onto the repo's main branch (futon2: main; futon3c: master) and fast-forward it. Other packets land on the same branch in parallel, different files.
+- Gates: clj-kondo --lint on every changed file (report the line); futon4/dev/check-parens.el OK; the named test namespace once through the bounded runner with a receipt: python3 /home/joe/code/futon3c/scripts/bounded_test_job.py --cwd <worktree> --receipt /home/joe/notes/test-receipts/<packet>.json --output /home/joe/notes/test-receipts/<packet>.log "<test command>". futon2 tests: clojure -X:test :nses '[ns]'. futon3c tests: clojure -M:test -n ns.
+- One behaviour, one file (plus its test). Nothing beyond the change list. If a premise below is false when you read the code, stop and say so in the bell instead of working around it.
+- Bell claude-5 back with: the commit sha, the receipt path, the kondo line, and the one-line answer to each question the packet asks. Under 30 minutes.
+
