@@ -47,6 +47,8 @@ Revision 7 (mathlib4 `darktower` `2720d17fb8`, claude-2, 2026-10-20, packet M9L)
 
 Revision 8 (mathlib4 `darktower` `2687599fb6`, claude-2, 2026-10-20, packet M10L): adds the closing law for a retry click, `RetryClickOutcome.closing`, under which only `successfulTaskOutcome` discharges, and `ClosingStatus.retryInconclusive` for a retry that did no work. `retryClose_todayDischargesAbstention` is the reason for M10a; `retryClose_disagreement` shows the law and today's code disagree on exactly the seven no-work outcomes.
 
+Revision 9 (mathlib4 `darktower` `7b2bbf9b88`, claude-2, 2026-10-20, packet M11L): `closingToday_eq_closing` shows the code now meets the closing law (futon2 `11fe9094a`). The law also gains the re-queue edge, `RetryClickOutcome.next`, with its own re-queue budget, together with `inconclusive_requeues`, `inconclusive_abandonsWhenSpent`, `requeue_consumesNoAttempt` and `requeue_todayAwaitsForever` (the reason for M10b). Realising the edge needs changes to the ledger, the adapter's retry id, the coordinator and the runner.
+
 **AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
 injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
 first two" was wrong; L1 has the table and record witnesses.
