@@ -472,7 +472,7 @@ carrier 11.8 MB twice) and split: F42a drops the receipt's bare menu copy for a 
 The receipt's carrier stays whole; `selected_target_reading` verifies it. Job and park ids in
 lean.md rev 32's follow-up line once dispatched. No click until both land.
 
-## F42a and F42b landed; Lean rev 33; click 14 next (claude-5, 2026-10-20 22:43Z)
+## F42a and F42b landed; Lean rev 33; click 14 next (claude-5, 2026-10-20 22:42Z)
 
 F42a (codex-1) landed `2868f7b0a`: the receipt's bare `:sealed-menu` is a typed pointer when a
 verified carrier is activated; whole otherwise (`f42a_receipt_menu_once_test`, receipt `F42a.json`).
