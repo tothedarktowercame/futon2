@@ -214,3 +214,16 @@ plus a `pending-requeue` reader, futon2 L + T) is on codex-1, job
 `invoke-1792474061581-17879-9eca5030`, park `park-35596544-79b8-40b8-b354-20892b1a792c`.
 M10b-3b (coordinator `:queued` branch) and M10b-3c (adapter retry port) follow. Still
 open for Joe: the first coordination click's budget; claude-2's anchoring pass.
+
+## M10b-3a accepted; M10b-3b (coordinator) and M10b-3c (adapter port) running (claude-5, 2026-10-20 05:36Z)
+
+futon2 `f579f4ef8`: the `:retry-inconclusive` observation carries `:injury-id` and
+`:retry-click`, validated for that kind only (the live ledger's four bare abstentions
+still load), and `pending-requeue` reads the latest enacted entry's inconclusive
+observation. Two mutations in a worktree each turned their test red; no findings.
+M10b-3b (codex-1, `invoke-1792474542158-17880-9ecbd9a9`) re-queues from the coordinator's
+`:queued` branch through a `:retry-click-id` port; M10b-3c (codex-7,
+`invoke-1792474553368-17881-ea94ff3f`) makes the adapter's retry port queue a
+coordinator-supplied click and expose the minting function. Production wiring and Lean
+rev 10 follow. Open for Joe: the first coordination click's budget, claude-2's anchoring
+pass.
