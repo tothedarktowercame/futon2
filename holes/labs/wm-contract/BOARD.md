@@ -227,3 +227,16 @@ M10b-3b (codex-1, `invoke-1792474542158-17880-9ecbd9a9`) re-queues from the coor
 coordinator-supplied click and expose the minting function. Production wiring and Lean
 rev 10 follow. Open for Joe: the first coordination click's budget, claude-2's anchoring
 pass.
+
+## M10b-3 landed: inconclusive retries re-queue end to end (claude-5, 2026-10-20 05:44Z)
+
+futon3c `f2e5a9fa6` (codex-7) makes the adapter's retry port queue a coordinator-supplied
+click and exposes `retry-click-id` as `:retry-click-id-fn`; futon2 `aa3ec313b` (codex-1)
+makes the coordinator's `:queued` branch re-queue while `pending-requeue` names an
+inconclusive observation, ledger first and port second, under `:retry-requeue-<n>`
+receipts, abandoning on the spent budget; futon3c `7efc13bd8` and futon2 `493388b7b`
+(mine) wire the minting function through the runner and `effect-ports` and read the
+click result from the latest retry receipt. Both reviews ran a mutation in a worktree;
+one test gap (the typed refusal with no minting port) was filled in `493388b7b`. A stale
+runner-service assertion left by F15 is repaired in `7efc13bd8`. Next: Lean rev 10
+(claude-2). Open for Joe: the first coordination click's budget, claude-2's anchoring pass.
