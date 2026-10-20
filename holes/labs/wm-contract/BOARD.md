@@ -273,3 +273,14 @@ with a different injury, and a retry that left no record; witness
 `7efc13bd8`; no findings. Next in lane: M10b-4 closes the observation gap in T. Open for
 Joe, now as one sheet, `DECISIONS-FOR-JOE-2026-10-20.md`: the first coordination click's
 budget (live: 128 allocated, 128 consumed, 0 available); claude-2's anchoring pass.
+
+## Rulings in; click 1 of 10 stopped at the author's brace; F19 and M13L in flight (claude-5, 2026-10-20 12:53Z)
+
+Joe: ten clicks (futon3c `c16a86952`, live 138 / 129 / 9) and yes to the anchoring pass
+(M13L to claude-2, `RouteState` first, job `invoke-1792500162215-10-8d6d90a8`). Click 1
+(`wm-click-a7254ba9`) conforms to the Lean at `proposalRefused` / `.unreadableAnswer`: zai-2's
+9585-character proposal closes two of three braces, the reader's EOF was swallowed, and the
+record kept a 512-character head that could not show it. F19 to codex-1 (job
+`invoke-1792500812236-11-16219732`): reader's error on the record, one re-ask with the
+complaint, recorded as `:read-retry`. Ledger unchanged; nothing enacted yet. Click 2 after
+F19 is reviewed and reloaded. Details: `logic-model/PACKETS-2026-10-19.md`.

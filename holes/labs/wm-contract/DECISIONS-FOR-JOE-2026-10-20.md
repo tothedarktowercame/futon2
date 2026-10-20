@@ -1,5 +1,9 @@
 # Decisions for Joe — 2026-10-20 (claude-5, written 05:55Z)
 
+**Ruled 2026-10-20 12:35Z** (Joe: "click budget of 10 allocated. yes to the anchoring pass"):
+item 1 granted as ten clicks (futon3c `c16a86952`); item 2 option (i), M13L dispatched. Nothing
+open on this sheet. Record: `logic-model/PACKETS-2026-10-19.md`, 12:42Z and 12:53Z entries.
+
 Two items. Everything else in the self-heal lane is in motion under the standing
 continue (M10b-4 next; see `logic-model/PACKETS-2026-10-19.md`). Each item says what
 is asked, where it stands, the options, and one recommendation. Rulings deferred are
