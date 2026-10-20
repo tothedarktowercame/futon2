@@ -1126,8 +1126,11 @@
                  (production/route!
                   (assoc (opts env (harness/fake-ports (:repo env) (atom {}) :success))
                          ;; The admitted acceptance observation route! binds
-                         ;; back to the work order before coordination; the
-                         ;; harness work order supplies the same four values.
+                         ;; back to the work order before coordination. Built
+                         ;; from the work order, so the binding passes by
+                         ;; construction: these are loop tests, not binding
+                         ;; tests; the binding's own red test is
+                         ;; acceptance-binding-refuses-a-proposal-the-work-order-does-not-carry.
                          :meta-acceptance-observation
                          (let [order (:work-order transaction)]
                            {:status :accepted :injury-id (:injury-id order)
@@ -1207,13 +1210,17 @@
         base (opts env ports)
         ctx (production/diagnosis-context base)
         no-second-read (fn [& _] (throw (ex-info "second read" {})))
-        routed (with-redefs [store/load-durable-ledger no-second-read
-                             ledger/active-injuries no-second-read]
+        ;; Only the file read is forbidden: coordinator/prepare calls
+        ;; ledger/active-injuries on the context's ledger inside its own try, so
+        ;; forbidding that too would turn this into a preparation refusal and the
+        ;; assertions below would pass for the wrong reason (M8R finding 13).
+        routed (with-redefs [store/load-durable-ledger no-second-read]
                  (production/route! (assoc base :meta-diagnosis-context ctx)))]
     (is (= :computed (get-in ctx [:active-injuries :status])))
     (is (map? routed) "route! ran from the context without a read of its own")
     (is (= :dedicated-meta-self-heal (:route routed)))
     (is (not= :meta-self-heal/active-set-unavailable (:reason routed)))
+    (is (not= :meta-self-heal/preparation-refused (:reason routed)) "prepare ran on the context's ledger")
     ;; The disagreement: the file changes after the context was taken.  Before M6a the
     ;; second read found no injury here and route! returned nil (ordinary work after a
     ;; diagnosis was spent, order error 3).
@@ -1249,7 +1256,20 @@
     (is (= :meta-self-heal/diagnosis-active-set-unavailable (get-in result [:diagnosis-observation :reason])))
     (is (= :not-required (get-in result [:acceptance-observation :status])))
     (is (zero? @acceptance-calls))
-    (is (zero? @ordinary-calls))))
+    (is (zero? @ordinary-calls))
+    ;; With a supplied pin (every harness click) the same clause fires, since the
+    ;; read decides before the pin (prepare-diagnosis, M8R finding 15); before that
+    ;; reorder the pin answered :present and only route!'s guard caught the case,
+    ;; after an acceptance observation the rev 6 table has no edge for.
+    (let [pinned (with-redefs [ledger/active-injuries
+                               (constantly {:status :refused :reason :ledger/invalid :defects [:entry/seal]})]
+                   (with-redefs-fn {#'production/prepare-acceptance (fn [& _] (swap! acceptance-calls inc) nil)
+                                    #'runtime/run-ordinary-opportunity! (fn [& _] (swap! ordinary-calls inc) nil)}
+                     #(runtime/run-opportunity! (opts env ports))))]
+      (is (= :meta-self-heal/active-set-unavailable (:reason pinned)))
+      (is (= :not-required (get-in pinned [:acceptance-observation :status])))
+      (is (zero? @acceptance-calls))
+      (is (zero? @ordinary-calls)))))
 
 (deftest route-refuses-not-nil-when-the-context-active-set-is-uncomputable
   (let [env (harness/prepare-environment! (root))
@@ -1262,3 +1282,57 @@
     (is (= :meta-self-heal/active-set-unavailable (:reason result)))
     (is (false? (:ordinary-selection-called? result)))
     (is (= {:status :refused :reason :ledger/invalid} (:active-injuries result)))))
+
+;; M8R (claude-2's review of the tests above, 2026-10-20): the cases it found missing.
+(deftest coordinator-refusal-with-a-transaction-but-no-ledger-writes-only-the-transaction
+  ;; Half of refusal-totality #66: port-receipt-refused (C:188) and port-threw (C:194)
+  ;; carry :transaction without :ledger.
+  (let [env (harness/prepare-environment! (root))
+        before (slurp (:ledger-path env))
+        {:keys [result calls]} (scripted-route
+                                env
+                                [(fn [_ t] {:status :refused :reason :coordinator/port-threw
+                                            :phase :author :transaction t})])]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/port-threw (:reason result)))
+    (is (= :author (:phase result)))
+    (is (= 1 calls))
+    (is (= :persisted (get-in result [:transaction-write :status])))
+    (is (not (contains? result :ledger-write)))
+    (is (= before (slurp (:ledger-path env))))))
+
+(deftest final-coordinate-keeps-the-coordinator-phase-over-final
+  ;; The retry port runs inside the final call; a port refusal there carries
+  ;; :phase :retry (SelfHealRoute rev 5 CoordinationPhase.retry), which wins over :final.
+  (let [checkpoint (fn [phase] (fn [l t] {:status :checkpoint :phase phase :ledger l :transaction t}))
+        {:keys [result calls]}
+        (scripted-route
+         [(checkpoint :claim) (checkpoint :author) (checkpoint :review) (checkpoint :enact)
+          (fn [l t] {:status :refused :reason :coordinator/port-receipt-refused :phase :retry
+                     :ledger l :transaction t})])]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/port-receipt-refused (:reason result)))
+    (is (= :retry (:phase result)))
+    (is (= 5 calls))))
+
+(deftest acceptance-binding-refuses-a-proposal-the-work-order-does-not-carry
+  ;; Row #62: an admitted observation whose test differs from the work order's must
+  ;; refuse before coordination (the scripted-route fixture bypasses this by construction).
+  (let [env (harness/prepare-environment! (root))
+        ports (harness/fake-ports (:repo env) (atom {}) :success)
+        base (opts env ports)
+        prepared (coordinator/prepare (:durable env) (harness/work-order-options env))
+        order (:work-order (:transaction prepared))
+        calls (atom 0)
+        result (with-redefs [coordinator/coordinate (fn [& _] (swap! calls inc) (throw (ex-info "coordinate" {})))]
+                 (production/route!
+                  (assoc base :meta-acceptance-observation
+                         {:status :accepted :injury-id (:injury-id order)
+                          :source-record-pin (:cause-record-pin order)
+                          :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                          :acceptance-test (assoc (:acceptance-test order) :id "some-other-proposal")})))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/acceptance-transaction-mismatch (:reason result)))
+    (is (= "some-other-proposal" (get-in result [:expected :acceptance-test :id])))
+    (is (= (:id (:acceptance-test order)) (get-in result [:actual :acceptance-test :id])))
+    (is (zero? @calls))))

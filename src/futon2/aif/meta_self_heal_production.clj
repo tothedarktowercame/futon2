@@ -769,9 +769,16 @@
 (defn prepare-diagnosis
   "Prepare exactly the injury route that coordinator/prepare will select.  A
   supplied pin is intentionally not re-produced; no active injury is an
-  explicit not-required observation."
+  explicit not-required observation.  The read decides first (SelfHealRoute
+  rev 6, ledgerRead): a loaded ledger whose active set did not compute is
+  unavailable before a supplied pin can short-circuit (M8R finding 15,
+  2026-10-20), so run-opportunity! ends the click there under a pin too."
   [opts {:keys [durable-ledger active-injuries]}]
   (cond
+    (and (= :loaded (:status durable-ledger))
+         (not= :computed (:status active-injuries)))
+    {:status :unavailable :reason :meta-self-heal/diagnosis-active-set-unavailable}
+
     (:diagnosis-evidence-pin opts)
     {:status :present :diagnosis-evidence-pin (:diagnosis-evidence-pin opts)
      :source :supplied}
@@ -781,9 +788,6 @@
 
     (not= :loaded (:status durable-ledger))
     {:status :unavailable :reason :meta-self-heal/diagnosis-ledger-unavailable}
-
-    (not= :computed (:status active-injuries))
-    {:status :unavailable :reason :meta-self-heal/diagnosis-active-set-unavailable}
 
     (empty? (:injuries active-injuries))
     {:status :not-required :reason :meta-self-heal/no-active-injury}
