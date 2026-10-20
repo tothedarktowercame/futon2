@@ -4,6 +4,7 @@
 ;;   (held! :reason ...)              kind :held
 ;;   a map literal with a :status key       kind :status-map (status :computed when not a literal)
 ;;   (conj :term), as in a cond-> of absent terms   kind :absent-term
+;;   classifier outcome literals in meta-terminal-injury.clj kind :classification
 ;; plus one :defn row per top-level definition, an anchor for line citations only.
 ;; Usage: bb code_sites.clj  -> JSON array of sites on stdout.
 (require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.io :as io] '[clojure.string :as str])
@@ -28,6 +29,55 @@
   (e/parse-string-all text {:all true :row-key :line :col-key :col :end-row-key :end-line
                                     :auto-resolve name :readers (fn [_] identity)}))
 
+(defn classification-site [tag top-name line kw]
+  {:tag tag :fn top-name :line line
+   :kind :classification :reason kw})
+
+(defn keyword-results-of-cond [form]
+  (when (and (seq? form) (= 'cond (first form)))
+    (keep (fn [[test result]]
+            (when (keyword? result)
+              [(if (= test :else)
+                 (:end-line (meta form))
+                 (or (:line (meta test)) (:line (meta form)))) result]))
+          (partition 2 (rest form)))))
+
+(defn find-binding [form binding]
+  (letfn [(walk [x]
+            (cond
+              (vector? x) (or (some (fn [[k v]] (when (= binding k) v))
+                                    (partition 2 x))
+                           (some walk x))
+              (coll? x) (some walk (if (map? x) (mapcat identity x) x))))]
+    (walk form)))
+
+(defn classification-sites [tag top-name form]
+  ;; These are the only three classifier sources.  Do not collect the later
+  ;; :observation-class case: it re-labels these outcomes, rather than deciding
+  ;; one, and would duplicate every classification edge.
+  (case top-name
+    "explicit-non-injury-kinds"
+    (for [m (tree-seq coll? #(if (map? %) (mapcat identity %) %) form)
+          :when (map? m)
+          [idx [k v]] (map-indexed vector m)
+          :when (and (keyword? k) (keyword? v) (not= k :abstained))]
+      ;; Edamame records location metadata on the map, not its atomic entries.
+      ;; This fixed source map has one key/value entry per subsequent line.
+      (classification-site tag top-name (+ (:line (meta m)) idx) v))
+
+    "abstention-reason"
+    (for [x (tree-seq coll? #(if (map? %) (mapcat identity %) %) form)
+          [line kw] (keyword-results-of-cond x)]
+      (classification-site tag top-name line kw))
+
+    "classify"
+    (for [x (tree-seq coll? #(if (map? %) (mapcat identity %) %)
+                      (find-binding form 'non-injury-reason))
+          :when (and (seq? x) (= 'when (first x)) (keyword? (last x)))]
+      (classification-site tag top-name (:end-line (meta x)) (last x)))
+
+    []))
+
 (defn sites-in [tag top-name form]
   (let [out (transient [])]
     (letfn [(walk [x]
@@ -46,7 +96,7 @@
                                (keyword? (:reason x)) (assoc :reason (:reason x)))))
                 (when (coll? x) (run! walk (if (map? x) (mapcat identity x) x)))))]
       (walk form))
-    (persistent! out)))
+    (into (persistent! out) (classification-sites tag top-name form))))
 
 (defn top-name [form]
   (when (and (seq? form) (symbol? (first form)) (str/starts-with? (name (first form)) "def"))
