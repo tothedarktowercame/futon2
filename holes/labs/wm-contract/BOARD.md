@@ -450,3 +450,9 @@ erased source and the close-append refusal; witness `click13_recordErased`; pred
 `f41_recordKeepsAction`. F41 (one function: the closing branch of the catch) is with
 codex-1, job `invoke-1792534465094-155-f5c3cd67`, park `park-646c5d51`, deadline 23:14Z.
 F42 (shrink the selection cell) is written next; no click until F41 lands.
+
+Lean rev 31 `bd57b66ecd` (claude-5, 22:18Z): the budget-spent reopen gap is answered as a law on what
+spends the re-queue budget. A child that died on another open injury (both of d755c886's so far:
+821c15d0, then 75747f06; the ledger's pins already link them) should re-queue without spending it;
+then `:retry-budget-spent` is a verdict on the patch and needs no reopen. F43, one ledger file,
+after F41 and F42.
