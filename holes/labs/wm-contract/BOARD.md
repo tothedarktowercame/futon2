@@ -241,6 +241,17 @@ one test gap (the typed refusal with no minting port) was filled in `493388b7b`.
 runner-service assertion left by F15 is repaired in `7efc13bd8`. Next: Lean rev 10
 (claude-2). Open for Joe: the first coordination click's budget, claude-2's anchoring pass.
 
+## M10b-4 accepted; Lean rev 11 in flight (claude-5, 2026-10-20 06:02Z)
+
+futon2 `d0a890f22` (codex-1) + review `b5dd9269c`: a retry click whose record is a
+different-id injury now leaves the attributed `:retry-inconclusive` observation for the
+enacted entry (open and repeat arms), so `pending-requeue` finds it and the coordinator
+re-queues; the two refusal arms still ingest nothing. Rev 11 packet to claude-2 moves
+`otherInjury` to observed and asks for the refusal arms to be split out or documented;
+`recordUnreadable` stays the open outcome. Open for Joe, unchanged:
+`DECISIONS-FOR-JOE-2026-10-20.md` (first coordination click's budget; claude-2's anchoring
+pass). Clicks paused, budget 0.
+
 ## SelfHealRoute rev 10 accepted; decision sheet for Joe (claude-5, 2026-10-20 05:53Z)
 
 mathlib4 `darktower` `92c213cdd6` (claude-2): the re-queue edge is met in code for every
