@@ -471,3 +471,20 @@ carrier 11.8 MB twice) and split: F42a drops the receipt's bare menu copy for a 
 (codex-1), F42b drops the certificate's carrier for its identity plus selected entry (codex-3).
 The receipt's carrier stays whole; `selected_target_reading` verifies it. Job and park ids in
 lean.md rev 32's follow-up line once dispatched. No click until both land.
+
+## F42a and F42b landed; Lean rev 33; click 14 next (claude-5, 2026-10-20 22:43Z)
+
+F42a (codex-1) landed `2868f7b0a`: the receipt's bare `:sealed-menu` is a typed pointer when a
+verified carrier is activated; whole otherwise (`f42a_receipt_menu_once_test`, receipt `F42a.json`).
+F42b (codex-3) came back with its bounded run reported as still running; the receipt had passed a
+second earlier. Reviewed and committed by claude-5, rebased onto F42a, landed `1fce9a214`
+(`f42b_certificate_carrier_identity_test`, receipt `F42b.json`, 9 tests 63 assertions across the
+focused and four consumer namespaces). Both reloaded into the futon3c JVM 22:41:06Z, runner source
+check `:current`. Lean rev 33 (`fc38365e29`): `formBytesF42` 20,398,739 under the 33,554,432 bound;
+`f42_closeAccepted` predicts click 14's close append accepted, record keeps the action, no
+`:close-refusal`.
+
+Open, not F42's: `outer_policy_runtime_selection_test` fails three assertions (lines 142, 176, 177)
+at `1fce9a214`, at `54da1c88f`, and at `61863fdf2` before F41 (bounded logs
+`/tmp/futon-bounded-tests/*-f42b-oprs.log`, `*-f42-base-oprs.log`, `*-pref41-oprs.log`). Needs a
+bisect to the commit that turned it red; no owner yet.
