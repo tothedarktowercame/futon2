@@ -474,11 +474,16 @@
         diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts))
         diagnosis-observation (when-not retry
                                 (meta-self-heal/prepare-diagnosis opts diagnosis-context))
-        acceptance-observation (if retry
+        acceptance-observation (if (= :meta-self-heal/diagnosis-active-set-unavailable
+                                     (:reason diagnosis-observation))
+                                {:status :not-required :reason :meta-self-heal/acceptance-not-prepared
+                                 :diagnosis-reason :meta-self-heal/diagnosis-active-set-unavailable}
+                                (if retry
                                 {:status :not-required
                                  :reason :meta-self-heal/acceptance-retry-not-prepared}
-                                (meta-self-heal/prepare-acceptance opts diagnosis-observation))
+                                (meta-self-heal/prepare-acceptance opts diagnosis-observation)))
         effective-opts (cond-> opts
+                         diagnosis-context (assoc :meta-diagnosis-context diagnosis-context)
                          diagnosis-observation
                          (assoc :meta-diagnosis-observation diagnosis-observation)
                          acceptance-observation
@@ -489,10 +494,17 @@
                          (#{:accepted :present} (:status acceptance-observation))
                          (assoc :acceptance-test
                                 (:acceptance-test acceptance-observation)))
-        readiness (if retry
+        readiness (if (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
+                    {:status :not-required}
+                    (if retry
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
-                    (meta-self-heal/production-readiness effective-opts diagnosis-context))]
+                    (meta-self-heal/production-readiness effective-opts diagnosis-context)))]
     (cond
+      (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
+      {:status :refused :reason :meta-self-heal/active-set-unavailable
+       :route :dedicated-meta-self-heal :ordinary-selection-called? false
+       :active-injuries (select-keys (:active-injuries diagnosis-context) [:status :reason :defects])
+       :diagnosis-observation diagnosis-observation :acceptance-observation acceptance-observation}
       (= :refused (:status readiness))
       (assoc readiness :diagnosis-observation diagnosis-observation
              :acceptance-observation acceptance-observation)

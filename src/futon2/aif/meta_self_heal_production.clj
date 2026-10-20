@@ -918,11 +918,18 @@
 (defn route!
   "Nil means no active durable injury. A map consumes the opportunity."
   [opts]
-  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)]
-    (when (and ledger-path (.isFile (io/file ledger-path)))
-      (let [durable (store/load-durable-ledger ledger-path)
-            active (when (= :loaded (:status durable))
-                     (ledger/active-injuries (:ledger durable)))]
+  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        context (:meta-diagnosis-context opts)
+        durable (if context (:durable-ledger context)
+                    (when (and ledger-path (.isFile (io/file ledger-path)))
+                      (store/load-durable-ledger ledger-path)))
+        active (if context (:active-injuries context)
+                   (when (= :loaded (:status durable)) (ledger/active-injuries (:ledger durable))))]
+    (when durable
+      (if (and (= :loaded (:status durable)) (not= :computed (:status active)))
+        (refusal :meta-self-heal/active-set-unavailable
+                 {:route :dedicated-meta-self-heal :ordinary-selection-called? false
+                  :active-injuries (select-keys active [:status :reason :defects])})
         (when (seq (:injuries active))
           (let [transaction-path (:meta-repair-transaction-path opts)
                 ports (effect-ports opts)
