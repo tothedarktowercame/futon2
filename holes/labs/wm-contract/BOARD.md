@@ -434,3 +434,19 @@ an entry on the sealed route, the action on the record, re-queue not abandonment
 on another injury. Click 13 is with claude-2 (`invoke-1792532848981-136-730eb575`), one click.
 Lesson for packets: a test that must run from a worktree goes in its own namespace, as F40a's did.
 
+
+## Click 13 read; one finding; Lean rev 30; F41 to codex-1 (claude-5, 2026-10-20 22:15Z)
+
+Click 13 (claude-2) ran the one re-queue after F40. The entry held (F40a works: the sealed
+route selected `M-war-machine-wiring` and the run reached cascade-resume, which ended
+`:open-cascade-review-answer-invalid` after 326 s). The record then lost the decision, but
+not through F40b's stub: the durable selection append at close was refused oversized
+(33.5 MB, the sealed menu carried three times), the rethrow skipped the required sorries,
+the cohort close refused `:required-checkpoints-missing`, and that throw escaped to the
+initialization catch, which writes `:checkpoints {}`. Injury `75747f06` (ordinal 20) was
+opened on that record and its pin misdescribes the cause. d755c886: ordinal 19 enacted
+attempt 4, ordinal 21 retry-inconclusive, not abandoned. Lean rev 30 `890b7c8218` adds the
+erased source and the close-append refusal; witness `click13_recordErased`; prediction
+`f41_recordKeepsAction`. F41 (one function: the closing branch of the catch) is with
+codex-1, job `invoke-1792534465094-155-f5c3cd67`, park `park-646c5d51`, deadline 23:14Z.
+F42 (shrink the selection cell) is written next; no click until F41 lands.
