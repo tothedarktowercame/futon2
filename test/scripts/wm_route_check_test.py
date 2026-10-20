@@ -269,6 +269,7 @@ class RouteCheckTest(unittest.TestCase):
                   ' :acceptance-reason :meta-self-heal/producer-response-malformed :acceptance-failure nil :repair-claimed? false}')
   EDGES6 = "".join(f"EDGE {i} true\n" for i in range(6))
 
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
   def test_429_observation_projects_noReviewerAnswer_and_kernel_places_it(self):
     ran, out = self.run_check(CLICK4, None, self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
     self.assertIn(':boundary-observation {:state :admissionRefused, :defect ".admission .noReviewerAnswer", :run nil}', out)
@@ -276,6 +277,7 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(":verdict :conforms,", out)
     self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
 
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
   def test_unreadable_answer_projects_proposal_defect(self):
     ran, out = self.run_check(CLICK4, None, self.click_state(":completed", self.OBS_8DF4_EDN), self.C4_ID)
     self.assertIn(":path [:activeInjury :diagnosisPrepared :proposalRefused :readinessReady :routeRefused :terminalRecord]", out)
@@ -287,13 +289,14 @@ class RouteCheckTest(unittest.TestCase):
     state = self.click_state(":completed", self.OBS_429_EDN.replace(":meta-self-heal/producer-invoke-failed", ":something-else"))
     ran, out = self.run_check(CLICK4, "VERDICT true\n" + self.EDGES6, state, self.C4_ID)
     self.assertIn(":admissionRefused :readinessReady", out)
-    self.assertIn(':status :defect-not-projectable', out)
+    self.assertIn(':gaps [{:position :boundary, :status :defect-not-projectable', out)
     self.assertIn(':review-status "failed", :review-reason "something-else"', out)
     self.assertIn(":placement :not-evaluated", out)
     self.assertNotIn(":boundary-observation", out)
-    self.assertIn(":verdict :conforms-suffix", out)
+    self.assertIn(":verdict :conforms,", out)  # the start is known; a missing defect is not a missing prefix (M8R 8)
     self.assertNotIn("PLACED", module().lean_source(self.FULL_429, False, None))
 
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
   def test_misplaced_defect_is_a_violation_from_the_kernel(self):
     # The bad case this packet is named for: the M2b misplacement (a transport failure at
     # review placed at reviewRefused).  Before M5 only a Python rule caught it; now the
@@ -321,6 +324,7 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(':placement-violation {:state :admissionRefused, :defect ".admission .noReviewerAnswer"}', out)
     self.assertEqual(ran.returncode, 1)
 
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
   def test_run_refusals_project_admission_defects_and_run_outcome(self):
     refused = ('{:status :refused :reason :meta-self-heal/acceptance-run-refused'
                ' :acceptance-result {:status :errored} :repair-claimed? false}')
@@ -335,14 +339,48 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(":placement :placed", out)
     self.assertIn(":verdict :conforms,", out)
 
-  def test_active_set_unavailable_is_a_full_path_from_the_read(self):
-    # Rev 6: the disposition M6a returns for row #5 starts at ledgerRead, so no position-0 gap.
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
+  def test_active_set_unavailable_is_a_full_path_only_under_the_m6a_marker(self):
+    # Rev 6: the full path from ledgerRead is certified only when the click-state says the
+    # click ended at the read (M6a's not-required marker).  Under a supplied pin the
+    # runtime ran acceptance first and the observation is :present: that stays a suffix
+    # with a typed gap, never the short full path (M8R finding 12).
     binding = CLICK4.replace(":reason :meta-self-heal/production-config-required", ":reason :meta-self-heal/active-set-unavailable")
-    ran, out = self.run_check(binding, None, None, self.C4_ID)
+    marker = "{:status :not-required :reason :meta-self-heal/acceptance-not-prepared :diagnosis-reason :meta-self-heal/diagnosis-active-set-unavailable}"
+    ran, out = self.run_check(binding, None, self.click_state(":completed", marker), self.C4_ID)
     self.assertIn(":path [:ledgerRead :activeSetUnavailable :terminalRecord]", out)
-    self.assertIn(":verdict :conforms,", out)
+    self.assertIn(":gaps []", out); self.assertIn(":verdict :conforms,", out)
     self.assertIn(":placement :not-evaluated", out)
     self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+    ran, out = self.run_check(binding, None, self.click_state(":completed", "{:status :present :source :supplied}"), self.C4_ID)
+    self.assertIn(":path [:activeSetUnavailable :terminalRecord]", out)
+    self.assertIn(":status :acceptance-observation-not-projectable", out)
+    self.assertIn(":verdict :conforms-suffix", out)
+    ran, out = self.run_check(binding, None, None, self.C4_ID)
+    self.assertIn(":path [:activeSetUnavailable :terminalRecord]", out)
+    self.assertIn(":status :acceptance-record-absent", out)
+
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
+  def test_wrong_state_table_is_caught_by_the_kernel_through_the_script(self):
+    # The M2b reversion: put the pre-M2b rule back (any :review-status :failed placed at
+    # reviewRefused), run main on the 429 observation against the live kernel, and the
+    # placement law refuses the pair (M8R finding 7).
+    m = module()
+    i = next(k for k, r in enumerate(m.ACCEPTANCE_PREFIX) if r[0](self.OBS_429))
+    pred, prefix, note = m.ACCEPTANCE_PREFIX[i]
+    m.ACCEPTANCE_PREFIX[i] = (pred, prefix[:-1] + ["reviewRefused"], note)
+    with tempfile.TemporaryDirectory() as td:
+      d = Path(td); b = d/"click-run-binding-x.edn"; b.write_text(CLICK4)
+      acc = d/"acceptances"; acc.mkdir(); (acc/f"click-{self.C4_ID}.edn").write_text(self.click_state(":completed", self.OBS_429_EDN))
+      import contextlib, io
+      with contextlib.redirect_stdout(io.StringIO()):
+        rc = m.main(["--binding", str(b), "--acceptance-dir", str(acc)])
+      out = Path(str(b) + ".route.edn").read_text()
+    self.assertEqual(rc, 1)
+    self.assertIn(":reviewRefused :readinessReady", out)
+    self.assertIn(":verdict :violates", out); self.assertIn(':reason "placement"', out)
+    self.assertIn(":placement :violates-placement", out)
+    self.assertIn(':placement-violation {:state :reviewRefused, :defect ".admission .noReviewerAnswer"}', out)
 
   def test_review_refusal_run_is_read_from_the_nested_request_result_only(self):
     # M7L: the bounded run of a review refusal is under the review request; only its

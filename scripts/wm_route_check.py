@@ -50,6 +50,10 @@ ACCEPTANCE_PREFIX = [
                                  "meta-self-heal/acceptance-request-function-unresolvable"),
    ["activeInjury", "diagnosisPrepared", "proposalRefused"],
    "produce-acceptance! refused the proposal itself (P:467, P:470, P:526): proposalRefused"),
+  # M6a's marker: the click ended at the read, no acceptance was prepared (rev 6 ledgerRead).
+  (lambda o: o.get("status") == "not-required" and o.get("reason") == "meta-self-heal/acceptance-not-prepared",
+   ["ledgerRead"],
+   "run-opportunity! ended the click at the ledger read (M6a); the observation is the typed not-required marker"),
   (lambda o: o.get("reason") in ("meta-self-heal/acceptance-run-refused",
                                  "meta-self-heal/acceptance-test-passes-before-repair"),
    ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused"],
@@ -84,7 +88,7 @@ CLICK_STATE_SOURCE = [":wm/click-state", ":result", ":runtime-disposition", ":ac
 # The states the table places after every acceptance observation (SelfHealRoute
 # `transitions`, "readiness after every acceptance observation").  A suffix that starts
 # elsewhere leaves readiness unrecorded between the observation and the suffix.
-AFTER_OBSERVATION = {"readinessReady", "readinessRefused", "ledgerUnreadable"}
+AFTER_OBSERVATION = {"readinessReady", "readinessRefused", "ledgerUnreadable", "activeSetUnavailable"}
 
 def acceptance_file(directory, click_id):
   """runner_service.clj `acceptance-file`: click-<id>.edn, id sanitised."""
@@ -156,7 +160,8 @@ def boundary_observation(obs, prefix):
   runv = obs.get("acceptance-result") or obs.get("acceptance-run") or ((obs.get("request") or {}).get("result")) or {}
   run = "." + runv["outcome"] if runv.get("status") == "ran" and runv.get("outcome") in ("passed", "failed", "errored") else None
   if defect is None and not (obs.get("status") == "accepted" or reason in NO_DEFECT_BY_CONSTRUCTION):
-    gap = {"position": 0, "status": "defect-not-projectable", "reason": reason}
+    # Its own position: a missing defect does not make the path's start unknown (M8R 8).
+    gap = {"position": ":boundary", "status": "defect-not-projectable", "reason": reason}
     gap.update({k: obs[k] for k in ("acceptance-status", "acceptance-reason", "review-status", "review-reason") if obs.get(k) is not None})
     return state, None, run, gap
   return state, defect, run, None
@@ -195,7 +200,10 @@ def project(binding, record, click_state=None):
   # SelfHealRoute rev 6 (mathlib4 494d0f8e6a): the route starts at the one ledger read, and an
   # uncomputable active set ends the click there (M6a makes run-opportunity! return this reason).
   # The read is the start, so this is a full path, not a suffix.
-  if d.get("reason") == "meta-self-heal/active-set-unavailable": return ["ledgerRead", "activeSetUnavailable", "terminalRecord"], [], notes, None
+  # The read is the start, so the full path needs the M6a marker observation (prefix
+  # rule below) to be read; under a supplied pin the runtime ran acceptance and readiness
+  # first, and that observation must not be certified away (M8R finding 12).
+  if d.get("reason") == "meta-self-heal/active-set-unavailable": return ["activeSetUnavailable", "terminalRecord"], gaps, notes, None
   # route! after readiness (SelfHealRoute rev 3, mathlib4 a84278e893): a refused
   # coordinator/prepare is its own refusal since futon2 df2209a33 (2026-10-19 20:38Z);
   # before that commit the same refusal was recorded as a binding mismatch (click
@@ -279,7 +287,7 @@ def main(argv=None):
   boundary = None
   obs = click_state.get("observation") if click_state else ((record or {}).get("meta-self-heal/readiness") or {}).get("acceptance-observation")
   prefix = next((r[1] for r in ACCEPTANCE_PREFIX if r[0](obs)), None) if obs else None
-  if prefix and path and path[:len(prefix)] == prefix:
+  if prefix and path and path[:len(prefix)] == prefix and prefix != ["ledgerRead"]:
     state, defect, run, boundary_gap = boundary_observation(obs, prefix)
     if boundary_gap: gaps.append(boundary_gap)
     else: boundary = (state, defect, run)
