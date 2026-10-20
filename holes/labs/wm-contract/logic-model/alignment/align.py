@@ -129,13 +129,17 @@ def align(sites, entities):
       # Once a docstring names a positive anchor, unanchored keywords are
       # explanatory prose.  A docstring with no anchor preserves the legacy
       # bare-keyword reading; negative forms have already been removed above.
-      unscoped = not positive_forms and any(k in outside_kws for k in cited)
+      # A bare keyword in a docstring that has a positive anchor reaches only the
+      # anchored functions of its tag (rev 12 lists a function's reasons after a
+      # bare `(P fn)` anchor); with no anchor it keeps the legacy whole-file reading.
+      unscoped = (any(k in outside_kws for k in cited)
+                  and (not positive_forms or s["fn"] in anchored_fns.get(s["tag"], set())))
       anchor_name_scope = anchored_fns.get(s["tag"])
       if r and s["kind"] != "absent-term" and (unscoped or (s["tag"], s["fn"]) in scoped):
         basis = "keyword"
       elif any(t == s["tag"] and s["line"] <= n <= (s.get("end-line") or s["line"]) for t, n in lines):
         # a line citation counts only when the cited site says what the text says
-        all_kws = cited_keywords(text)
+        all_kws = cited_keywords(text) - negative_kws   # a `(not ...)` keyword confirms nothing
         basis = "line" if (full in all_kws or short in all_kws or status in all_kws) else "line-unconfirmed"
       elif r and short == nm and (s["fn"] in anchor_name_scope if anchor_name_scope else in_scope) and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
         basis = "name"

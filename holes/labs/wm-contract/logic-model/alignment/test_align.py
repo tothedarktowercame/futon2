@@ -46,6 +46,19 @@ class AnchorFunctionScopingTest(unittest.TestCase):
     self.assertEqual(["T:10:reason-x"], edge_ids(positive, "keyword"))
     self.assertEqual([], negative)
 
+  def test_bare_keyword_in_anchored_docstring_reaches_only_anchored_functions(self):
+    # rev 12's form: a function anchor with no keyword, then that function's reasons bare
+    edges = align(self.sites, [entity("readinessRefused",
+                                     "(P production-readiness) :meta-self-heal/production-config-required")])
+    self.assertEqual(["P:10:production-config-required"], edge_ids(edges, "keyword"))
+
+  def test_negative_anchor_keyword_does_not_confirm_a_line_citation(self):
+    sites = [site("coordinate-queued-retry", "retry-budget-spent", 261, "C")]
+    edges = align(sites, [entity("abandoned",
+                                 "a second literal at C:261 is not this constructor: (not C coordinate-queued-retry :retry-budget-spent)")])
+    self.assertEqual([], edge_ids(edges, "line"))
+    self.assertEqual(["C:261:retry-budget-spent"], edge_ids(edges, "line-unconfirmed"))
+
   def test_positive_anchor_makes_bare_keywords_prose(self):
     sites = [site("production-readiness", "alpha", 10),
              site("route!", "beta", 20)]
