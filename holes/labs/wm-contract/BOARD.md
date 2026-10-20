@@ -27,7 +27,10 @@ fixed and reloaded before the click: F35 reopen from `:abandoned` with correctio
 an effective attempt limit (futon2 `e5af0add5`, codex-1); F36 the reviewer answer contract
 (futon3c `9b8d2e3bd`, codex-2); F37 enact accepts an integrated patch and its payload seals into
 the ledger (futon3c `884879874` + review tests `0a1a29084`); F38 the work order carries the
-effective limit (futon2 `b2fe17633`, claude-5; Lean rev 25a `2f35e4396c`). The live ledger
+effective limit (futon2 `b2fe17633`, claude-5; Lean rev 25a `2f35e4396c`). F35 reviewed at
+20:00Z (`logic-model/lean.md`): one finding, the correction's pins were checked for shape only,
+so pins nobody refused raised the budget; fixed as futon2 `83d1056de` (pins must be this
+injury's own refused receipts, once each), reloaded, live ledger valid. The live ledger
 has ordinal 12 `:reopened :attempt 4 :port-refusal-corrected`. One hazard is named in Lean and
 left for the click to show: T counts only `:grounded-change` of the ordinary closes as success
 (`retryClose_onlyGroundedChangeDischarges`). Detail in `logic-model/PACKETS-2026-10-19.md`.
