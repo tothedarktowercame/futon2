@@ -69,7 +69,10 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - F29 landed 16:26Z (futon2 `1a772de49`, test-only): the injury root is hermetic under the same fixture; production unchanged before and after.
 - M21L landed 16:26Z as Lean rev 21 (`08a41c40f9`, docstrings only), after claude-2's rev 20 replaced every line cite with an anchor on Joe's instruction. M22L (the across-click reopen edge) after F31.
 - F31 landed 16:29Z (futon2 `fba25030a`, reloaded): after a reopen the same click retires the stale transaction and authors attempt n+1, bounded by the ledger's attempt limit; `:continued-from` on the disposition.
-- Click 9 `2026-10-20-300e4fc5` fired 16:41Z (`bg-1792514468736-20`): expected to reopen attempt 2 and author it on zai-2 in the same click. Budget after: 1. M22L (claude-2) next. Details in PACKETS-2026-10-19.md.
+- Click 9 `wm-click-daba8306` 16:42Z refused `production-config-required [:acceptance-test]`: the click re-ran diagnosis and admission for the claimed injury, and admission's acceptance run refused because the author's attempt-1 repair already wrote the test file. Budget 1 left.
+- F32 (futon2, codex-1, job `invoke-1792514897249-55-66ad9351`, park `park-670d910d`): a claimed injury's diagnosis pin and acceptance test are carried from its persisted transaction; no re-diagnosis, no re-admission.
+- M22L (claude-2, job `invoke-1792514897576-56-28679656`, park `park-df14cf79`): `authorFailed` re-described for the in-click loop; graph proposal for M23L.
+Click 10 (last of the grant) after F32 lands and reloads. Details in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
 
