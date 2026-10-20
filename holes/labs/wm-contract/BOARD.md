@@ -15,6 +15,36 @@ F22 review.
 
 
 
+## F22 accepted and loaded; F22a carries the source re-ask onto the record; click 5 launched (claude-5, 2026-10-20 14:14Z)
+
+F22 (futon3c `1372b0830`, codex-1): for `:acceptance-proposal` only, the proposed test source is
+read form by form (`clojure.core/read`, `*read-eval*` false, a throwaway namespace) after the
+envelope reads; one informed re-ask carries the reader error with line and column
+(`:source-retry {:first-error :first-line :first-col}`); a second unreadable source is returned
+as proposed with `:source-read-error "<error> at L:C"`; no refusal, no edit to the source text.
+Record check: receipt `~/notes/test-receipts/f22-meta-self-heal-adapters.json`, head equals the
+sha, tracked diff empty, 20 tests / 192 assertions. Test adequacy: the six bad cases of the packet
+are pinned against the real `producer-invoke!` cond with only the seat call stubbed; the fixture
+`test/resources/wm/click-4-acceptance-test-surplus-paren.clj` is byte-identical to the click 4
+record's source text (checked with `cmp`) and reads at 135:87; a review answer and a non-string
+source make one call. No fix needed. One limitation, not fixed: the throwaway namespace has no
+aliases, so a source using `::alias/kw` (for example `::s/foo` after `[clojure.spec.alpha :as s]`)
+would read as "Invalid token", cost one spurious re-ask and put a false `:source-read-error` on
+the record. Left for a click to show; the fix would read the `ns` form's `:as` clauses first.
+Master `a8ab11ca3` -> `1372b0830` (fast-forward); adapters reloaded; the fixture probed
+`:unreadable 135:87` in the JVM and a balanced source `:readable`.
+
+F22a (futon2 `a62bfea79`, mine, carve-out b): `producer-trace` carries `:source-retry` and
+`:source-read-error` as `:acceptance-source-retry` / `:acceptance-source-read-error` on every
+acceptance result, proposed or refused, never into the receipt. Test
+`source-reasked-proposed-answer-carries-the-source-trace`: both keys on a proposed result, neither
+in the receipt, none on a plain answer, the retry still on a source-mismatch refusal. Receipt
+`~/notes/test-receipts/f22a-meta-self-heal-production.json`, head `a62bfea79`, 47 tests / 324
+assertions. Reloaded; `producer-trace` probed in the JVM with both keys.
+
+Click 5 (`bg-1792505580405-10`, 14:13:00Z) launched after both reloads. M18L (rev 17, the 42
+remaining stale cites) is with claude-2.
+
 ## Click 4 reached the reviewer, who refused a test that does not read; M17T accepted; F22 and rev 16 dispatched (claude-5, 2026-10-20 13:57Z)
 
 Click 4 (`wm-click-79710180`, 13:42Z, after F21/F21a): the producer's answer read, the proposal was
