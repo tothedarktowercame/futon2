@@ -960,46 +960,55 @@
                 (if-not (= :valid (:status binding))
                   (assoc binding :route :dedicated-meta-self-heal
                          :ordinary-selection-called? false)
-                  (letfn [(disposition [result phase receipts lw tw]
-                            (cond-> {:status (:status result)
-                                     :reason (:reason result)
-                                     :phase (or (:phase result) phase)
-                                     :route :dedicated-meta-self-heal
-                                     :ordinary-selection-called? false
-                                     :injury-id (get-in result [:transaction :work-order :injury-id])
-                                     :repair-id (get-in result [:transaction :work-order :repair-id])
-                                     :attempt (get-in result [:transaction :work-order :attempt])
-                                     :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
-                                     :retry-click (get-in result [:transaction :receipts 2 :payload :retry-click])
-                                     :checkpoint-receipts receipts}
-                              (contains? result :ledger) (assoc :ledger-write lw)
-                              (contains? result :transaction) (assoc :transaction-write tw
-                                                                       :transaction (:transaction result))))]
+                  ;; Review fix for dfe565350 (claude-5, 2026-10-20): the
+                  ;; non-checkpoint path inside the loop and the final
+                  ;; coordinate call settle the same way, so one helper
+                  ;; serves both. A coordinator result that is not a
+                  ;; :checkpoint is the disposition: its :status, :reason
+                  ;; and :phase are returned as they are, and the loop stops
+                  ;; at that phase (refusal-totality rows #66-#68). Its ledger
+                  ;; and transaction are written only when the result carries
+                  ;; them: a refusal without a ledger has nothing valid to
+                  ;; write, and reporting that nil write as
+                  ;; :checkpoint-persist-failed was the mask of row #66.
+                  (letfn [(settle [result phase receipts]
+                            (let [lw (when (contains? result :ledger)
+                                       (store/persist-ledger! ledger-path (:ledger result)))
+                                  tw (when (contains? result :transaction)
+                                       (persist-transaction! transaction-path
+                                                             (:transaction result)))]
+                              (cond-> {:status (:status result)
+                                       :reason (:reason result)
+                                       :phase (or (:phase result) phase)
+                                       :route :dedicated-meta-self-heal
+                                       :ordinary-selection-called? false
+                                       :injury-id (get-in result [:transaction :work-order :injury-id])
+                                       :repair-id (get-in result [:transaction :work-order :repair-id])
+                                       :attempt (get-in result [:transaction :work-order :attempt])
+                                       :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
+                                       :retry-click (get-in result [:transaction :receipts 2 :payload :retry-click])
+                                       :checkpoint-receipts receipts}
+                                lw (assoc :ledger-write lw)
+                                tw (assoc :transaction-write tw
+                                          :transaction (:transaction result)))))]
                     (loop [durable durable transaction transaction
                            phases checkpoints receipts []]
-                  (if-let [phase (first phases)]
-                    (let [result (coordinator/coordinate
-                                  durable transaction (assoc ports :stop-after phase))
-                          lw (when (= :checkpoint (:status result))
-                               (store/persist-ledger! ledger-path (:ledger result)))
-                          tw (when (= :checkpoint (:status result))
-                               (persist-transaction! transaction-path (:transaction result)))]
-                      (if (= :checkpoint (:status result))
-                        (if-not (and (= :persisted (:status lw))
-                                     (= :persisted (:status tw)))
-                          (refusal :meta-self-heal/checkpoint-persist-failed
-                                   {:phase phase :ledger-write lw :transaction-write tw})
-                          (recur (store/load-durable-ledger ledger-path)
-                                 (:transaction result) (next phases)
-                                 (conj receipts {:phase phase
-                                                 :ledger-pin (:ledger-pin (:ledger result))
-                                                 :transaction-pin (:transaction-pin (:transaction result))})))
-                        (let [lw (when (contains? result :ledger)
-                                   (store/persist-ledger! ledger-path (:ledger result)))
-                              tw (when (contains? result :transaction)
-                                   (persist-transaction! transaction-path (:transaction result)))]
-                          (disposition result phase receipts lw tw))))
-                    (let [result (coordinator/coordinate durable transaction ports)
-                          lw (store/persist-ledger! ledger-path (:ledger result))
-                          tw (persist-transaction! transaction-path (:transaction result))]
-                      (disposition result nil receipts lw tw))))))))))))))
+                      (if-let [phase (first phases)]
+                        (let [result (coordinator/coordinate
+                                      durable transaction (assoc ports :stop-after phase))]
+                          (if-not (= :checkpoint (:status result))
+                            (settle result phase receipts)
+                            (let [lw (store/persist-ledger! ledger-path (:ledger result))
+                                  tw (persist-transaction! transaction-path (:transaction result))]
+                              (if-not (and (= :persisted (:status lw))
+                                           (= :persisted (:status tw)))
+                                (refusal :meta-self-heal/checkpoint-persist-failed
+                                         {:phase phase :ledger-write lw :transaction-write tw})
+                                (recur (store/load-durable-ledger ledger-path)
+                                       (:transaction result) (next phases)
+                                       (conj receipts {:phase phase
+                                                       :ledger-pin (:ledger-pin (:ledger result))
+                                                       :transaction-pin
+                                                       (:transaction-pin (:transaction result))}))))))
+                        (settle (coordinator/coordinate durable transaction ports)
+                                nil receipts)))))))))))))

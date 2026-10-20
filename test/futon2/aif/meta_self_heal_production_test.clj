@@ -1101,3 +1101,101 @@
     (is (= :dedicated-meta-self-heal (:route result)))
     (is (false? (:ordinary-selection-called? result)))
     (is (= {} @calls) "no phase port is invoked without a transaction")))
+
+;; M4a (futon2 dfe565350 + review fix, 2026-10-20): `route!` returns a
+;; non-checkpoint coordinator result as the disposition. These four run the
+;; real `store/persist-ledger!` and `persist-transaction!` on the harness
+;; environment; only `coordinator/coordinate` is scripted, call by call.
+(defn- scripted-route
+  "Run route! on a fresh harness environment with coordinate answering from
+  RESULTS in order. Returns {:result :calls :env :ledger :transaction}."
+  ([results] (scripted-route (harness/prepare-environment! (root)) results))
+  ([env results]
+  (let [prepared (coordinator/prepare (:durable env) (harness/work-order-options env))
+        ledger (:ledger (:durable env))
+        transaction (:transaction prepared)
+        calls (atom 0)
+        script (mapv (fn [r] (if (fn? r) (r ledger transaction) r)) results)
+        result (with-redefs [coordinator/coordinate
+                             (fn [& _]
+                               (let [n (swap! calls inc)]
+                                 (if (<= n (count script))
+                                   (nth script (dec n))
+                                   (throw (ex-info "coordinate called past the script"
+                                                   {:call n})))))]
+                 (production/route!
+                  (assoc (opts env (harness/fake-ports (:repo env) (atom {}) :success))
+                         ;; The admitted acceptance observation route! binds
+                         ;; back to the work order before coordination; the
+                         ;; harness work order supplies the same four values.
+                         :meta-acceptance-observation
+                         (let [order (:work-order transaction)]
+                           {:status :accepted :injury-id (:injury-id order)
+                            :source-record-pin (:cause-record-pin order)
+                            :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                            :acceptance-test (:acceptance-test order)}))))]
+    {:result result :calls @calls :env env :ledger ledger :transaction transaction})))
+
+(deftest coordinator-refusal-without-ledger-is-returned-not-reported-as-persist-failure
+  ;; Refusal-totality row #66: before dfe565350 this surfaced as
+  ;; :meta-self-heal/checkpoint-persist-failed because the nil ledger was
+  ;; handed to persist-ledger!.
+  (let [env (harness/prepare-environment! (root))
+        before (slurp (:ledger-path env))
+        {:keys [result calls]} (scripted-route
+                                env
+                                [{:status :refused :reason :coordinator/input-refused
+                                  :defects [:attempt]}])]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/input-refused (:reason result)))
+    (is (= :claim (:phase result)))
+    (is (not (str/includes? (pr-str result) "checkpoint-persist-failed")))
+    (is (not (contains? result :ledger-write)))
+    (is (not (contains? result :transaction-write)))
+    (is (= 1 calls))
+    (is (= before (slurp (:ledger-path env))))))
+
+(deftest held-result-stops-the-loop-and-keeps-its-reason-and-phase
+  ;; Order error 4 / row #67: before dfe565350 a held result persisted fine
+  ;; and the loop went on to :review as if a checkpoint had been reached.
+  (let [{:keys [result calls]}
+        (scripted-route
+         [(fn [l t] {:status :checkpoint :phase :claim :ledger l :transaction t})
+          (fn [l t] {:status :held :reason :author-failed :phase :author
+                     :ledger l :transaction t :receipt {:status :failed}})])]
+    (is (= :held (:status result)))
+    (is (= :author-failed (:reason result)))
+    (is (= :author (:phase result)))
+    (is (= 2 calls) "the loop did not go on to :review and the final coordinate did not run")
+    (is (= :persisted (get-in result [:ledger-write :status])))
+    (is (= :persisted (get-in result [:transaction-write :status])))
+    (is (= [:claim] (mapv :phase (:checkpoint-receipts result))))
+    (is (= :dedicated-meta-self-heal (:route result)))))
+
+(deftest checkpoint-persist-failure-is-still-reported
+  ;; The one case that keeps :checkpoint-persist-failed: a :checkpoint result
+  ;; whose ledger the store refuses.
+  (let [{:keys [result calls]}
+        (scripted-route
+         [(fn [_ t] {:status :checkpoint :phase :claim :ledger nil :transaction t})])]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/checkpoint-persist-failed (:reason result)))
+    (is (= :claim (:phase result)))
+    (is (= :store/invalid-ledger (get-in result [:ledger-write :reason])))
+    (is (= 1 calls))))
+
+(deftest final-coordinate-result-carries-reason-and-phase
+  ;; Row #68: before dfe565350 the final map had :status only.
+  (let [checkpoint (fn [phase] (fn [l t] {:status :checkpoint :phase phase :ledger l :transaction t}))
+        {:keys [result calls]}
+        (scripted-route
+         [(checkpoint :claim) (checkpoint :author) (checkpoint :review) (checkpoint :enact)
+          (fn [l t] {:status :refused :reason :coordinator/enact-payload-refused
+                     :ledger l :transaction t})])]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/enact-payload-refused (:reason result)))
+    (is (contains? result :phase))
+    (is (nil? (:phase result)) "the coordinator gave no phase and the loop had finished")
+    (is (= 5 calls))
+    (is (= [:claim :author :review :enact] (mapv :phase (:checkpoint-receipts result))))
+    (is (= :persisted (get-in result [:ledger-write :status])))))
