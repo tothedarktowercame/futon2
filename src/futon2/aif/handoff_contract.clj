@@ -6,15 +6,51 @@
 
 (def schema :wm/handoff-contract-v1)
 
+(defn- parse-map [s]
+  (try (let [v (json/parse-string s true)] (when (map? v) v))
+       (catch Exception _ nil)))
+
+(defn- balanced-object-spans
+  "The top-level balanced `{...}` spans of s, in order. Depth is counted
+  outside JSON strings within a span (`\\\"` and `\\\\` escapes respected);
+  text outside every span is not inspected for quotes. nil when a `}` closes
+  nothing or a `{` is left open at the end."
+  [^String s]
+  (let [n (count s)]
+    (loop [i 0 depth 0 start 0 quoted? false escaped? false spans []]
+      (if (= i n)
+        (when (zero? depth) spans)
+        (let [c (.charAt s i)]
+          (cond
+            (and quoted? escaped?) (recur (inc i) depth start true false spans)
+            (and quoted? (= c \\)) (recur (inc i) depth start true true spans)
+            (and quoted? (= c \")) (recur (inc i) depth start false false spans)
+            quoted? (recur (inc i) depth start true false spans)
+            (and (pos? depth) (= c \")) (recur (inc i) depth start true false spans)
+            (= c \{) (recur (inc i) (inc depth) (if (zero? depth) i start)
+                            false false spans)
+            (= c \}) (cond
+                       (zero? depth) nil
+                       (= 1 depth) (recur (inc i) 0 start false false
+                                          (conj spans (subs s start (inc i))))
+                       :else (recur (inc i) (dec depth) start false false spans))
+            :else (recur (inc i) depth start false false spans)))))))
+
 (defn response-json-object
   "Decode one JSON object from an external handoff response. A response may
-  be the map itself, an unfenced JSON object, or exactly one Markdown fence
-  containing exactly one JSON object; brief prose before or after that one
-  fence is accepted (occ-c6325db5, 2026-10-17: the author returned the
-  validated analysis fenced, followed by a one-line completion note, and the
-  whole-response-fence requirement refused it and abstained the click). The
-  fenced object is then still unique. Unfenced prose, more than one fence,
-  arrays/scalars and malformed JSON are refused as nil.
+  be the map itself; or a string holding exactly one Markdown fence containing
+  exactly one JSON object, with prose before or after the fence accepted
+  (occ-c6325db5, 2026-10-17: the author returned the validated analysis
+  fenced, followed by a one-line completion note, and the
+  whole-response-fence requirement refused it and abstained the click); or,
+  when there is no fence, a string holding exactly one balanced top-level
+  JSON object, with prose before or after it accepted (F44a, 2026-10-20:
+  on clicks 13 and 14 the author answered with a sentence and then one
+  unfenced object, and the nil decode closed the click
+  :open-cascade-review-answer-invalid before the reviewer was contacted).
+  The fence rule keeps precedence when a fence is present. More than one
+  fence, two unfenced objects, a `{` in the prose that leaves the object
+  unclosed, arrays, scalars, prose alone and malformed JSON are refused as nil.
 
   This is a representation rule, not a semantic validator: callers still
   validate request binding, schema and fields after decoding."
@@ -22,14 +58,18 @@
   (cond
     (map? raw) raw
     (string? raw)
-    (or (try (let [v (json/parse-string raw true)]
-               (when (map? v) v))
-             (catch Exception _ nil))
-        (let [fences (re-seq #"(?s)```[^\n]*\n(.*?)```" raw)]
-          (when (= 1 (count fences))
-            (try (let [v (json/parse-string (second (first fences)) true)]
-                   (when (map? v) v))
-                 (catch Exception _ nil)))))))
+    (let [fences (re-seq #"(?s)```[^\n]*\n(.*?)```" raw)]
+      (if (seq fences)
+        (when (= 1 (count fences))
+          (parse-map (second (first fences))))
+        (let [whole (try (json/parse-string raw true)
+                         (catch Exception _ ::unparsed))
+              spans (balanced-object-spans raw)]
+          ;; a whole string that parses to an array or scalar is refused
+          ;; here; a bare object is its own single span
+          (when (and (or (map? whole) (= ::unparsed whole))
+                     (= 1 (count spans)))
+            (parse-map (first spans))))))))
 
 (defn contract [{:keys [id version response validator] :as value}]
   (when-not (and (keyword? id) (pos-int? version) (map? response)

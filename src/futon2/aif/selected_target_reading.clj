@@ -30,8 +30,9 @@
    a single Markdown code fence (occ-dc843e15, 2026-10-17: a valid fenced
    analysis was refused :selected-target-reading-answer-invalid and the
    whole click abstained). One fence wrapping exactly one JSON object is
-   accepted; prose around an unfenced object, multiple fences, or anything
-   that still does not parse to a map is still refused."
+   accepted, as is prose around exactly one unfenced object (F44a,
+   2026-10-20); multiple fences, two objects, or anything that still does
+   not parse to a map is still refused."
   [raw]
   (handoff/response-json-object raw))
 
