@@ -6464,20 +6464,55 @@
                                             :admitted-evidence admitted-ids}
                                            :evidence-manifest
                                            (:manifest failure-evidence)))
-                           closed-event (when cohort?
-                                          (if cohort-source
-                                            (cohort/close-attempt!
-                                             cohort-source
-                                             (:data-root execution-cohort)
-                                             attempt-id closed)
-                                            (cohort/close-attempt!
-                                             attempt-id closed)))]
+                           ;; F41 (click 13, 2026-10-20): close-core! threw
+                           ;; from persist-selection! before its own
+                           ;; not-reached sorries were written, so the cohort
+                           ;; close below refused :required-checkpoints-missing
+                           ;; and that throw escaped this handler to the
+                           ;; initialization catch, which wrote an empty
+                           ;; checkpoint map under a synthetic attempt id.
+                           ;; The durable event set, not the in-memory keys,
+                           ;; says what is still absent: a refused selection
+                           ;; append leaves @checkpoints holding the cell while
+                           ;; the cohort holds only its typed sorry.  Any
+                           ;; refusal of the close itself is retained on the
+                           ;; returned record beside the original failure; it
+                           ;; never replaces it.
+                           close-result
+                           (try
+                             (doseq [cp required-checkpoints
+                                     :when (not (contains? @checkpoint-events cp))]
+                               (checkpoint! cp
+                                            (sorry (keyword (str "not-reached-"
+                                                                 (name cp)))
+                                                   {:outcome :build-failed
+                                                    :close-fallback refusal-kind})))
+                             {:closed-event
+                              (when cohort?
+                                (if cohort-source
+                                  (cohort/close-attempt!
+                                   cohort-source
+                                   (:data-root execution-cohort)
+                                   attempt-id closed)
+                                  (cohort/close-attempt!
+                                   attempt-id closed)))}
+                             (catch Throwable close-error
+                               {:closed-event nil
+                                :close-refusal
+                                (if (instance? clojure.lang.ExceptionInfo
+                                               close-error)
+                                  (ex-data close-error)
+                                  {:error-class (.getName (class close-error))
+                                   :error (ex-message close-error)})}))]
                        {:attempt-id attempt-id
                         :opportunity-id opportunity-id
                         :outcome :build-failed
                         :checkpoints @checkpoints
-                        :data sorry-data
-                        :closed-event closed-event}))))]
+                        :data (cond-> sorry-data
+                                (:close-refusal close-result)
+                                (assoc :close-refusal
+                                       (:close-refusal close-result)))
+                        :closed-event (:closed-event close-result)}))))]
     (try
       (when-let [e (:error roster-result)]
         (if (= :agent-unavailable (:failure-kind (ex-data e)))
