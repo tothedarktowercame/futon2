@@ -1,3 +1,57 @@
+## F23 accepted with one hardening; F23a carries the repair onto the record; click 6 reached an accepting reviewer and was refused on identity; F24 dispatched; M19L to claude-2 (claude-5, 2026-10-20 14:39Z)
+
+F23 (futon3c `6d7758c4e`, codex-1, job `invoke-1792506169956-31-10968f4b`): when the proposed
+test source does not read and the reader says `Unmatched delimiter`, `source-read-result` removes
+the one character at the reader's position (reader column minus one) and reads again; if that
+reads, the answer is `:repaired` with `:source-repair {:removed :line :col :error}` and the
+proposal's source text is the repaired text; otherwise F22's one informed re-ask as before. A
+second answer can be repaired the same way, so a re-asked then repaired answer carries both
+`:source-retry` and `:source-repair`. Record check: receipt
+`~/notes/test-receipts/f23-meta-self-heal-adapters.json`, head equals the sha, tracked diff
+empty, 21 tests / 211 assertions. Test adequacy: click 4 repairs at 135:86 and click 5 at 115:87
+with every line after 115 unchanged (`t4` present), both pinned against the real
+`producer-invoke!` cond with the seat call stubbed; two surplus delimiters, a deficit and an
+unterminated string keep the re-ask; the repaired source re-reads `:readable`; only `subs` on
+either side of one index, nothing added; all three cond branches carry the key. Fixture
+`click-5-acceptance-test-surplus-paren-mid-file.clj` is the saved click 5 source. Review fix
+`33f7fc241` (mine): the character removed must be the delimiter the reader named in its error,
+else the F22 re-ask; one test with `remove-source-character` redefined to return a different
+character, 214 assertions, run once in the worktree JVM. Master `1372b0830` -> `33f7fc241`.
+
+F23a (futon2 `fbe391738`, mine, carve-out b): `producer-trace` carries `:source-repair` as
+`:acceptance-source-repair`; the key is in `producer-trace-keys`, so F22b carries it through
+admission. Test `source-repaired-answer-carries-the-repair-through-admission`: on the proposal,
+not in the receipt, no `:acceptance-source-retry` beside it, on a review refusal. Receipt
+`~/notes/test-receipts/f23a-meta-self-heal-production.json`, head `fbe391738`, 49 tests / 343
+assertions once. Both namespaces reloaded; in the JVM the click 4 fixture, the click 5 fixture
+and the saved click 5 source each come back `:repaired` at 135:86 / 115:87 / 115:87 and re-read
+`:readable`; `producer-trace` on a `:source-repair` map yields the new key.
+
+Click 6 (`bg-1792506704979-12`, 14:31:44Z, `wm-click-a8f4dea6`), after both reloads: the author's
+test read first time (the envelope was one `}` short and F21 completed it, `:acceptance-read-repair
+{:appended 1}`; no `:source-retry`, no `:source-repair`), the proposal was persisted, admitted and
+run before repair (4 tests, 4 failures and 1 error, `:ran-before-repair`), and for the first time
+the reviewer (zai-3) answered `:accepted`. Admission refused that answer:
+`acceptance-review-identity-mismatch`. Compared key by key in the JVM against the request in the
+record: the reviewer echoed `:injury-id`, the three pins and `:acceptance-test` `:id`, `:command`
+and `:expected` exactly, and left out `:source` (namespace, path, 3905 characters of text).
+`identity-keys` (P:682, commit `842793850`, 2026-10-19, codex-2; no ruling found) compares
+`:acceptance-test` whole, so the yes was refused, and the refusal carries only `:request`, not
+which key differed or what the reviewer wrote. No test pins `acceptance-review-identity-mismatch`.
+Route check `[:readinessReady :routeRefused :terminalRecord]`, conforms-suffix, gap
+`:acceptance-observation-not-projectable`; no run record (`runner-did-not-return-run-record`).
+The reviewer's answer is saved verbatim at `~/notes/wm-click-sources/click-6-a8f4dea6-reviewer-answer.edn`.
+Under the 10-19 ruling the refusal is the symptom. F24 (codex-1, job
+`invoke-1792507117244-33-82243d91`, park `park-5c6b2c56`): compare `:acceptance-test` without
+`:source` on both sides (the proposal pin identifies the source) and put `:review-identity
+{:differs [...] :response-keys [...]}` on the mismatch refusal; the test's live pin is the saved
+answer. F24a (mine): the review prompt asks for the five values without the source echo. Click 7
+after both are loaded.
+M19L (claude-2, job `invoke-1792506892401-32-c66d2a39`, park `park-322ec520`): the A and P
+re-cites at A `33f7fc241` / P `fbe391738`; the scratch regeneration at those shas lists 20 stale
+(103/252, 60/127, 66 edges) plus three cites that now pass by coincidence (P:658 twice, P:807)
+and the `P lines 979-981` reference, all named in the packet.
+
 ## Rev 17 accepted: the 42 stale cites cleared at the packet's shas; 22 new ones from F22/F22b drift (claude-5, 2026-10-20 14:27Z)
 
 Rev 17 (mathlib4 `darktower` `09205984e5`, claude-2, M18L): docstrings only, no `sorry`, build
