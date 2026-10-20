@@ -41,6 +41,8 @@ Revision 5 (mathlib4 `darktower` `d6f4b88ca3`, claude-2, 2026-10-20, packet M4L)
 
 Revision 6 (mathlib4 `darktower` `494d0f8e6a`, claude-2, 2026-10-20, packet M6L): the route starts at `ledgerRead`, and `activeSetUnavailable` (row #5) ends the click with no path to ordinary work, so `RouteState` has 25 states. Theorems: `noFallback_rev6`, `ledgerRead_decides`, `ledgerUnreadable_withoutInjury` (order error 1 corrected), `fallthrough_5_isViolation` and `fallthrough_5_elided_isViolation`; the latter two state the reason for M6a. Order error 3 is recorded in the `ledgerRead` docstring.
 
+Rev 6 notes (mathlib4 `4128f17061`, claude-2, M7L): `activeSetUnavailable` is reachable only by construction, because both loads run the same pure `validate-ledger`. The rev 4 witnesses read their bounded run from `[:result :runtime-disposition :acceptance-observation :request :result]`.
+
 **AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
 injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
 first two" was wrong; L1 has the table and record witnesses.
