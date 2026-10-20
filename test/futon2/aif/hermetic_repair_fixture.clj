@@ -3,6 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is testing]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
@@ -11,6 +12,7 @@
 (def production-repair-root repair/default-root)
 (def production-trip-root tripwire/default-trip-root)
 (def production-phase-log runner/default-phase-log)
+(def production-meta-injury-root meta-injury-store/default-root)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -25,6 +27,11 @@
            set)
       #{})))
 
+(defn production-file-set [root]
+  (into {} (for [file (file-seq (io/file root)) :when (.isFile file)]
+             [(.toString (.relativize (.toPath (io/file root)) (.toPath file)))
+              [(.length file) (slurp file)]])))
+
 (defn with-hermetic-stores
   "Run a test namespace against temporary default stores and prove that the
   production file sets did not change. This catches any path that accidentally
@@ -33,17 +40,21 @@
   (let [repair-before (file-set production-repair-root)
         trips-before (file-set production-trip-root)
         phase-bytes-before (.length (io/file production-phase-log))
+        injuries-before (production-file-set production-meta-injury-root)
         repair-root (temp-root "wm-repair-suite-")
         trip-root (temp-root "wm-trip-suite-")
+        injury-root (str (io/file repair-root "wm-meta-injuries"))
         phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
                   tripwire/default-trip-root trip-root
+                  meta-injury-store/default-root injury-root
                   runner/default-phase-log phase-log]
       (run-tests))
     (testing "the suite cannot deposit production repair or trip artifacts"
       (is (= repair-before (file-set production-repair-root)))
       (is (= trips-before (file-set production-trip-root)))
-      (is (= phase-bytes-before (.length (io/file production-phase-log)))))))
+      (is (= phase-bytes-before (.length (io/file production-phase-log))))
+      (is (= injuries-before (production-file-set production-meta-injury-root))))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,
