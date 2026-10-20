@@ -344,5 +344,24 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(":placement :not-evaluated", out)
     self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
 
+  def test_review_refusal_run_is_read_from_the_nested_request_result_only(self):
+    # M7L: the bounded run of a review refusal is under the review request; only its
+    # :status :outcome :exit reach the sidecar, never the request (it carries the test).
+    obs = (self.OBS_429_EDN[:-1] + ' :request {:result {:status :ran :outcome :failed :exit 1 :summary "secret-summary"}'
+           ' :acceptance-test {:id "t" :source {:text "secret-nested-source"}}}}')
+    ran, out = self.run_check(CLICK4, "VERDICT true\n" + self.EDGES6 + "PLACED true\n",
+                              self.click_state(":completed", obs), self.C4_ID)
+    self.assertIn(':boundary-observation {:state :admissionRefused, :defect ".admission .noReviewerAnswer", :run ".failed"}', out)
+    self.assertNotIn("secret", out)
+    m = module()
+    state, defect, run, gap = m.boundary_observation({**self.OBS_429, "request": {"result": {"status": "ran", "outcome": "errored"}}},
+                                                     ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused"])
+    self.assertEqual((state, defect, run, gap), ("admissionRefused", ".admission .noReviewerAnswer", ".errored", None))
+
+  @unittest.skipUnless(LIVE_36B.is_file(), "live 36b47627 record not on this host")
+  def test_live_36b47627_run_is_failed_as_the_rev4_witness_says(self):
+    got = module().read_click_state(self.LIVE_36B)
+    self.assertEqual(got["observation"].get("acceptance-run"), {"status": "ran", "outcome": "failed", "exit": 1})
+
 if __name__ == "__main__":
   unittest.main()

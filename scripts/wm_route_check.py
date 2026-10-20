@@ -98,8 +98,13 @@ def read_click_state(path):
   ks = " ".join(":" + k for k in OBSERVATION_KEYS)
   form = ("(require '[cheshire.core :as j])"
           f"(let [d (clojure.edn/read-string {{:default (fn [_ v] v)}} (slurp {json.dumps(str(path))}))"
-          " o (get-in d [:result :runtime-disposition :acceptance-observation])]"
-          f" (println (j/generate-string {{:status (:status d) :observation (when (map? o) (select-keys o [{ks}]))}})))")
+          " o (get-in d [:result :runtime-disposition :acceptance-observation])"
+          # M7L (2026-10-20): the bounded run of a review refusal sits under the review
+          # request admit-acceptance! attaches (:request :result); three keys of it are
+          # read, never the request (it carries :acceptance-test).
+          " r (get-in o [:request :result])"
+          f" obs (when (map? o) (cond-> (select-keys o [{ks}]) (map? r) (assoc :acceptance-run (select-keys r [:status :outcome :exit]))))]"
+          " (println (j/generate-string {:status (:status d) :observation obs})))")
   got = json.loads(subprocess.run(["bb", "-e", form], text=True, capture_output=True, check=True).stdout)
   return {"exists": True, "path": str(path.resolve()), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
           "status": got.get("status"), "observation": got.get("observation")}
@@ -146,7 +151,9 @@ def boundary_observation(obs, prefix):
   elif reason == "meta-self-heal/acceptance-review-refused" and obs.get("review-status") == "failed":
     defect = ".admission .noReviewerAnswer" if rr in TRANSPORT + ("meta-self-heal/producer-response-malformed", "meta-self-heal/acceptance-review-threw") else None
   elif reason == "meta-self-heal/acceptance-review-refused" and obs.get("review-status") == "refused": defect = ".admission .reviewerRefused"
-  runv = (obs.get("acceptance-result") or {})
+  # :acceptance-result (run refusals, P:618/622), or the review request's run (M7L; the
+  # click-state reader lifts it to :acceptance-run, a run record lifts it here).
+  runv = obs.get("acceptance-result") or obs.get("acceptance-run") or ((obs.get("request") or {}).get("result")) or {}
   run = "." + runv["outcome"] if runv.get("status") == "ran" and runv.get("outcome") in ("passed", "failed", "errored") else None
   if defect is None and not (obs.get("status") == "accepted" or reason in NO_DEFECT_BY_CONSTRUCTION):
     gap = {"position": 0, "status": "defect-not-projectable", "reason": reason}
