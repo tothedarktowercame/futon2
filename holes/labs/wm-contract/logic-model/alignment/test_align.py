@@ -1,0 +1,50 @@
+import importlib.util
+import unittest
+from pathlib import Path
+
+_SPEC = importlib.util.spec_from_file_location("align", Path(__file__).with_name("align.py"))
+_ALIGN = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(_ALIGN)
+align = _ALIGN.align
+
+
+def site(fn, reason, line):
+  return {"id": f"P:{line}:{reason.split('/')[-1]}", "tag": "P", "fn": fn,
+          "line": line, "kind": "refusal", "reason": reason}
+
+
+def entity(name, text):
+  return {"id": f"lean:RouteState.{name}", "inductive": "RouteState",
+          "name": name, "line": 1, "text": text}
+
+
+def edge_ids(edges, basis):
+  return next(edge["hx/endpoints"][1:] for edge in edges
+              if edge["props"]["basis"] == basis)
+
+
+class AnchorFunctionScopingTest(unittest.TestCase):
+  def setUp(self):
+    self.sites = [site("production-readiness", "meta-self-heal/production-config-required", 10),
+                  site("route!", "meta-self-heal/production-config-required", 20)]
+
+  def test_keyword_inside_anchor_is_scoped_to_its_function(self):
+    edges = align(self.sites, [entity("readinessRefused",
+                                     "(P production-readiness :meta-self-heal/production-config-required)")])
+    self.assertEqual(["P:10:production-config-required"], edge_ids(edges, "keyword"))
+
+  def test_keyword_outside_anchor_keeps_unscoped_behavior(self):
+    edges = align(self.sites, [entity("readinessRefused",
+                                     "(P production-readiness) :meta-self-heal/production-config-required")])
+    self.assertEqual(["P:10:production-config-required", "P:20:production-config-required"],
+                     edge_ids(edges, "keyword"))
+
+  def test_name_rule_is_scoped_to_anchored_function(self):
+    sites = [site("prepare-acceptance", "acceptance-unavailable", 30),
+             site("produce-acceptance-from-request!", "acceptance-unavailable", 40)]
+    edges = align(sites, [entity("acceptanceUnavailable", "(P prepare-acceptance)")])
+    self.assertEqual(["P:30:acceptance-unavailable"], edge_ids(edges, "name"))
+
+
+if __name__ == "__main__":
+  unittest.main()

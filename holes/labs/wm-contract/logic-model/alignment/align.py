@@ -64,6 +64,16 @@ def cited_keywords(text):
 def cited_lines(text):
   return {(t, int(n)) for t, n in re.findall(r"\b([PCRAST]):(\d+)", text)}
 
+def anchor_forms(text):
+  """Return (tag, function, keywords) for simple `(P function ...)` anchors.
+
+  These are deliberately documentation anchors, not a parser for Lean.  Their
+  contents have no nested parens in the contract grammar, so retaining the
+  enclosing form lets a cited outcome keyword keep the function it names.
+  """
+  return [(m.group(1), m.group(2), cited_keywords(m.group(3)))
+          for m in re.finditer(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)", text)]
+
 # The code functions each Lean inductive models.  The name rule links a constructor
 # to a site only inside this scope, so `CoordinatorRefusal.malformed` cannot reach
 # `:work-order/malformed`.  This table is itself part of the alignment: it says which
@@ -84,7 +94,18 @@ TERMS = {"ReadinessTerm", "RouteTerm", "Field"}
 def align(sites, entities):
   edges = []
   for e in entities:
-    kws, lines, nm = cited_keywords(e["text"]), cited_lines(e["text"]), kebab(e["name"])
+    text = e["text"]
+    forms = anchor_forms(text)
+    form_spans = [m.span() for m in re.finditer(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)", text)]
+    outside = "".join(text[last:start] for last, start in zip([0, *(end for _, end in form_spans)],
+                                                               [*(start for start, _ in form_spans), len(text)]))
+    outside_kws, lines, nm = cited_keywords(outside), cited_lines(text), kebab(e["name"])
+    scoped_kws = {}
+    anchored_fns = {}
+    for tag, fn, form_kws in forms:
+      anchored_fns.setdefault(tag, set()).add(fn)
+      for kw in form_kws:
+        scoped_kws.setdefault(kw, set()).add((tag, fn))
     hits = {}
     for s in sites:
       r = s.get("reason") or ""
@@ -93,12 +114,17 @@ def align(sites, entities):
       basis = None
       status = s.get("status") or ""
       in_scope = e["inductive"] not in SCOPE or s["fn"] in SCOPE[e["inductive"]]
-      if r and s["kind"] != "absent-term" and (full in kws or ("/" not in full and short in kws)):
+      cited = {full} if "/" in full else {full, short}
+      scoped = set().union(*(scoped_kws.get(k, set()) for k in cited)) if cited else set()
+      unscoped = any(k in outside_kws for k in cited)
+      anchor_name_scope = anchored_fns.get(s["tag"])
+      if r and s["kind"] != "absent-term" and (unscoped or (s["tag"], s["fn"]) in scoped):
         basis = "keyword"
       elif any(t == s["tag"] and s["line"] <= n <= (s.get("end-line") or s["line"]) for t, n in lines):
         # a line citation counts only when the cited site says what the text says
-        basis = "line" if (full in kws or short in kws or status in kws) else "line-unconfirmed"
-      elif r and short == nm and in_scope and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
+        all_kws = cited_keywords(text)
+        basis = "line" if (full in all_kws or short in all_kws or status in all_kws) else "line-unconfirmed"
+      elif r and short == nm and (s["fn"] in anchor_name_scope if anchor_name_scope else in_scope) and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
         basis = "name"
       if basis: hits.setdefault(basis, []).append(s["id"])
     for basis, ids in hits.items():
