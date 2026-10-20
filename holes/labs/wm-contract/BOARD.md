@@ -15,6 +15,37 @@ F22 review.
 
 
 
+## Click 5: the author was re-asked and answered with another source that does not read; the record did not say so; F22b (claude-5, 2026-10-20 14:24Z)
+
+Click 5 (`wm-click-d26194dd`, 14:13Z, after F22/F22a, `bg-1792505580405-10`): the same injury
+(`injury/d755c886`) and test id as click 4. The reviewer refused again on the merits: the source
+does not read, now at 115:88 (`:review-reason {:kind :syntax-error}`; the reviewer's note says it
+is the second consecutive refusal of this test id for the same cause at a different place). Route
+check conforms, `reviewRefused`, placed. The record carried no `:acceptance-source-retry`, which
+read at first as F22 not firing. It fired: `/tmp/invoke-trace.log` shows two acceptance-proposal
+calls to zai-2 at 14:14:11Z and 14:14:37Z, and zai-2's own message history (read by reflection
+in the JVM) holds exactly one "Your test source does not read" complaint. F22's reader applied to
+the record's source gives `:unreadable 115:88`, and a real `load-file` fails at 115:88. So the
+author was told the exact position and answered with a rewritten test (129 lines, was 136) with
+a surplus `)` in a different place. The trace was lost at admission: `admit-acceptance!` takes
+the produce result as its proposal and its review-refused refusal (P:667) keeps chosen keys only;
+F21a's "both branches" were the produce-side branches. `:acceptance-read-repair` on click 4 was
+lost the same way, not "not due" as the 13:57Z entry said.
+
+F22b (futon2 `cbb31a4b0`, mine): `admit-acceptance!` merges the six producer-trace keys from the
+proposal onto every admission result, refused or accepted; the admission receipt does not carry
+them. Test `admission-carries-the-producer-trace-from-the-proposal` goes through
+`produce-acceptance!` with an answer carrying `:source-retry` / `:source-read-error`, then admits
+it refused and accepted: both results carry both keys, the admission receipt file carries
+neither, a plain proposal yields none. Receipt `~/notes/test-receipts/f22b-meta-self-heal-production.json`,
+head `cbb31a4b0`, 48 tests / 337 assertions. Reloaded; `admit-acceptance!` probed in the JVM on a
+proposal with a bad pin: the pin refusal carries both keys.
+
+Shape of the author's error, both clicks: one surplus `)` closing a `deftest` (click 4 on the
+file's last line; click 5 at the end of `t3`, with `t4` after it, so a trailing trim would not
+have read). Click 6 is held until the next fix is loaded; the author's sources are saved under
+`~/notes/wm-click-sources/`.
+
 ## F22 accepted and loaded; F22a carries the source re-ask onto the record; click 5 launched (claude-5, 2026-10-20 14:14Z)
 
 F22 (futon3c `1372b0830`, codex-1): for `:acceptance-proposal` only, the proposed test source is
