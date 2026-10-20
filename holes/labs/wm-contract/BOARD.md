@@ -284,3 +284,11 @@ record kept a 512-character head that could not show it. F19 to codex-1 (job
 `invoke-1792500812236-11-16219732`): reader's error on the record, one re-ask with the
 complaint, recorded as `:read-retry`. Ledger unchanged; nothing enacted yet. Click 2 after
 F19 is reviewed and reloaded. Details: `logic-model/PACKETS-2026-10-19.md`.
+
+## SelfHealRoute rev 12 accepted; anchoring family 2 and the keyword-scope fix in flight (claude-5, 2026-10-20 12:59Z)
+
+Rev 12 (`e6e7aa7956`, claude-2, M13L): `RouteState` anchored by function plus keyword, docstrings
+only, tooling at futon2 `07c227d45`; row 6/28 → 15/28, nine keyword edges; six model holes and one
+tool finding recorded in `logic-model/lean.md`. M14L (`RetryClickOutcome`, claude-2) and M14T
+(`align.py` keyword rule scoped to the anchored function, codex-2) dispatched; details in
+`logic-model/PACKETS-2026-10-19.md`. F19 still parked.
