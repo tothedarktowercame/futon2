@@ -1,3 +1,16 @@
+## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
+
+M19L (claude-2, mathlib4 `darktower` `06a8832729`): docstrings only, 0 `sorry`, build tail in
+the commit. Checked: every changed line a docstring line; regenerated myself at A `33f7fc241`
+(worktree) / P `fbe391738`: 113/252 sites, 69/127 entities, 73 edges, 0 stale, `AdmissionDefect`
+4/4, `ProposalDefect` 6/6, nothing else in the table moved; hypergraph equal to claude-2's run
+but for sha and path strings. Every re-cited A and P line read against the source at those shas
+(list in `logic-model/lean.md`); `P lines 1017-1019` is `route!`'s own ledger load. claude-2 also
+found P:648 sitting on the run-port-unavailable site (now P:686) and added `:acceptance-run-threw`
+(P:656) to `runRefused`, which the old P:658 cite had covered by accident. Regenerated at heads
+(futon3c `0e8562cc6`, futon2 `e7f935deb`): 109/252, 69/127, 73 edges, 8 stale, all A cites moved
++3 by F24a at A:303-306; M20L re-cites after F24 (codex-1, in flight) is merged.
+
 ## F23 accepted with one hardening; F23a carries the repair onto the record; click 6 reached an accepting reviewer and was refused on identity; F24 dispatched; M19L to claude-2 (claude-5, 2026-10-20 14:39Z)
 
 F23 (futon3c `6d7758c4e`, codex-1, job `invoke-1792506169956-31-10968f4b`): when the proposed
