@@ -68,7 +68,8 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - F31 (futon2, codex-2, job `invoke-1792513611119-52-8eebcb71`, park `park-b4a5719f`): after a reopen the same click continues into attempt n+1, so a failed attempt costs one click, not two.
 - F29 landed 16:26Z (futon2 `1a772de49`, test-only): the injury root is hermetic under the same fixture; production unchanged before and after.
 - M21L landed 16:26Z as Lean rev 21 (`08a41c40f9`, docstrings only), after claude-2's rev 20 replaced every line cite with an anchor on Joe's instruction. M22L (the across-click reopen edge) after F31.
-Click 9 waits for F31 to land and reload (budget: 2 clicks). Details in PACKETS-2026-10-19.md.
+- F31 landed 16:29Z (futon2 `fba25030a`, reloaded): after a reopen the same click retires the stale transaction and authors attempt n+1, bounded by the ledger's attempt limit; `:continued-from` on the disposition.
+- Click 9 `2026-10-20-300e4fc5` fired 16:41Z (`bg-1792514468736-20`): expected to reopen attempt 2 and author it on zai-2 in the same click. Budget after: 1. M22L (claude-2) next. Details in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
 
