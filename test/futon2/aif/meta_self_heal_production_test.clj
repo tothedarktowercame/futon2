@@ -1198,3 +1198,67 @@
     (is (= 5 calls))
     (is (= [:claim :author :review :enact] (mapv :phase (:checkpoint-receipts result))))
     (is (= :persisted (get-in result [:ledger-write :status])))))
+
+;; M6a (futon2 3975321a3, 2026-10-20; SelfHealRoute rev 6 mathlib4 494d0f8e6a): the
+;; route decides from the one ledger read, and an uncomputable active set ends the click.
+(deftest route-decides-from-the-context-read-not-a-second-read
+  (let [env (harness/prepare-environment! (root))
+        ports (harness/fake-ports (:repo env) (atom {}) :success)
+        base (opts env ports)
+        ctx (production/diagnosis-context base)
+        no-second-read (fn [& _] (throw (ex-info "second read" {})))
+        routed (with-redefs [store/load-durable-ledger no-second-read
+                             ledger/active-injuries no-second-read]
+                 (production/route! (assoc base :meta-diagnosis-context ctx)))]
+    (is (= :computed (get-in ctx [:active-injuries :status])))
+    (is (map? routed) "route! ran from the context without a read of its own")
+    (is (= :dedicated-meta-self-heal (:route routed)))
+    (is (not= :meta-self-heal/active-set-unavailable (:reason routed)))
+    ;; The disagreement: the file changes after the context was taken.  Before M6a the
+    ;; second read found no injury here and route! returned nil (ordinary work after a
+    ;; diagnosis was spent, order error 3).
+    (let [_ (spit (:ledger-path env) (pr-str ledger/empty-ledger))
+          again (production/route! (assoc base :meta-diagnosis-context ctx))
+          fresh (production/route! base)]
+      (is (map? again) "the context's read still routes")
+      (is (= :dedicated-meta-self-heal (:route again)))
+      (is (nil? fresh) "without a context route! reads the file, which now has no injury"))))
+
+(deftest uncomputable-active-set-ends-the-click-before-acceptance
+  ;; Not reachable from a file today: load-ledger validates before :loaded and
+  ;; active-injuries runs the same validate-ledger (meta_injury_store.clj L36-49,
+  ;; meta_injury_ledger.clj L284-288), so the dependency is scripted to return the
+  ;; refusal it would return.  The branch exists in prepare-diagnosis (P:786) and the
+  ;; table makes it terminal.
+  (let [env (harness/prepare-environment! (root))
+        ports (harness/fake-ports (:repo env) (atom {}) :success)
+        acceptance-calls (atom 0) ordinary-calls (atom 0)
+        result (with-redefs [ledger/active-injuries
+                             (constantly {:status :refused :reason :ledger/invalid :defects [:entry/seal]})]
+                 (with-redefs-fn {#'production/prepare-acceptance (fn [& _] (swap! acceptance-calls inc) nil)
+                                  #'runtime/run-ordinary-opportunity! (fn [& _] (swap! ordinary-calls inc) nil)}
+                   ;; No supplied pin: with one, prepare-diagnosis answers :present before
+                   ;; the active-set check, and the refusal then comes from route!'s own
+                   ;; guard (the third test) rather than from run-opportunity!.
+                   #(runtime/run-opportunity! (dissoc (opts env ports) :diagnosis-evidence-pin))))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/active-set-unavailable (:reason result)))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (false? (:ordinary-selection-called? result)))
+    (is (= {:status :refused :reason :ledger/invalid :defects [:entry/seal]} (:active-injuries result)))
+    (is (= :meta-self-heal/diagnosis-active-set-unavailable (get-in result [:diagnosis-observation :reason])))
+    (is (= :not-required (get-in result [:acceptance-observation :status])))
+    (is (zero? @acceptance-calls))
+    (is (zero? @ordinary-calls))))
+
+(deftest route-refuses-not-nil-when-the-context-active-set-is-uncomputable
+  (let [env (harness/prepare-environment! (root))
+        ports (harness/fake-ports (:repo env) (atom {}) :success)
+        ctx (assoc (production/diagnosis-context (opts env ports))
+                   :active-injuries {:status :refused :reason :ledger/invalid})
+        result (production/route! (assoc (opts env ports) :meta-diagnosis-context ctx))]
+    (is (= :loaded (get-in ctx [:durable-ledger :status])))
+    (is (map? result) "a refusal, not nil")
+    (is (= :meta-self-heal/active-set-unavailable (:reason result)))
+    (is (false? (:ordinary-selection-called? result)))
+    (is (= {:status :refused :reason :ledger/invalid} (:active-injuries result)))))
