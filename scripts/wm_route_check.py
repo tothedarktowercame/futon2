@@ -6,7 +6,7 @@ fields onto `DarkTower.WarMachine.SelfHealRoute.RouteState`, has Lean decide
 `conformsPath` / `conformsSuffix`, and writes `<binding>.route.edn`.  A state
 the record does not establish is a typed gap, never a guess; a Lean run that
 prints no verdict is `:not-checked`, never a default verdict."""
-import argparse, datetime, json, os, re, shutil, subprocess, sys, tempfile
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 LEAN_MODULE = "DarkTower/WarMachine/SelfHealRoute.lean"
@@ -61,8 +61,55 @@ def read_edn(path, keys):
           f"(println (j/generate-string (select-keys (clojure.edn/read-string {{:default (fn [_ v] v)}} (slurp {json.dumps(str(path))})) [{' '.join(keys)}])))")
   return json.loads(subprocess.run(["bb", "-e", form], text=True, capture_output=True, check=True).stdout)
 
-def project(binding, record):
-  """Return (path, gaps, notes, reason).  reason is set when no path is projectable."""
+# M3a (2026-10-20): a binding that names no run record still has an acceptance
+# observation, in the click-state record runner_service.clj `result-summary` writes and
+# `persist-click-state!` completes (futon3c data/wm-click-acceptances, gitignored).  Only
+# these observation fields are read; the record's :request (the test source) and
+# :review-detail never reach a sidecar.
+ACCEPTANCE_DIR = "/home/joe/code/futon3c/data/wm-click-acceptances"
+OBSERVATION_KEYS = ["status", "reason", "review-status", "review-reason",
+                    "acceptance-status", "acceptance-reason", "diagnosis-status"]
+CLICK_STATE_SOURCE = [":wm/click-state", ":result", ":runtime-disposition", ":acceptance-observation"]
+# The states the table places after every acceptance observation (SelfHealRoute
+# `transitions`, "readiness after every acceptance observation").  A suffix that starts
+# elsewhere leaves readiness unrecorded between the observation and the suffix.
+AFTER_OBSERVATION = {"readinessReady", "readinessRefused", "ledgerUnreadable"}
+
+def acceptance_file(directory, click_id):
+  """runner_service.clj `acceptance-file`: click-<id>.edn, id sanitised."""
+  return Path(directory)/("click-" + re.sub(r"[^A-Za-z0-9._-]", "_", str(click_id)) + ".edn")
+
+def read_click_state(path):
+  """{:exists? false}, or the record's top-level :status and its observation's selected
+  keys (None when the record has no observation at that path)."""
+  path = Path(path)
+  if not path.is_file(): return {"exists": False, "path": str(path)}
+  ks = " ".join(":" + k for k in OBSERVATION_KEYS)
+  form = ("(require '[cheshire.core :as j])"
+          f"(let [d (clojure.edn/read-string {{:default (fn [_ v] v)}} (slurp {json.dumps(str(path))}))"
+          " o (get-in d [:result :runtime-disposition :acceptance-observation])]"
+          f" (println (j/generate-string {{:status (:status d) :observation (when (map? o) (select-keys o [{ks}]))}})))")
+  got = json.loads(subprocess.run(["bb", "-e", form], text=True, capture_output=True, check=True).stdout)
+  return {"exists": True, "path": str(path.resolve()), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+          "status": got.get("status"), "observation": got.get("observation")}
+
+def acceptance_prefix(state):
+  """(prefix, gap, note) for a click-state read.  Exactly one of prefix or gap is set."""
+  if state is None: return None, {"position": 0, "status": "not-recorded"}, None
+  if not state["exists"]: return None, {"position": 0, "status": "acceptance-record-absent"}, None
+  if state.get("status") != "completed":
+    return None, {"position": 0, "status": "acceptance-record-not-completed", "click-status": state.get("status")}, None
+  obs = state.get("observation")
+  if obs is None: return None, {"position": 0, "status": "not-recorded"}, None
+  rule = next((r for r in ACCEPTANCE_PREFIX if r[0](obs)), None)
+  if rule is None: return None, {"position": 0, "status": "acceptance-observation-not-projectable"}, None
+  return rule[1], None, {"position": 0, "source": CLICK_STATE_SOURCE, "note": rule[2]}
+
+def project(binding, record, click_state=None):
+  """Return (path, gaps, notes, reason).  reason is set when no path is projectable.
+  CLICK_STATE is consulted only when RECORD is None (see `join_acceptance`)."""
+  if record is None and click_state is not None:
+    return join_acceptance(project(binding, None), click_state)
   notes = []
   if record is not None:
     readiness, failure = record.get("meta-self-heal/readiness"), record.get("failure") or {}
@@ -106,6 +153,18 @@ def project(binding, record):
   if ready and not route: return ["readinessRefused", "terminalRecord"], gaps, notes, None
   return [], gaps, notes, "absent-terms-ambiguous-between-readiness-and-route"
 
+def join_acceptance(projected, click_state):
+  """Prepend a recorded observation's prefix to a disposition suffix, or type the gap."""
+  path, gaps, notes, reason = projected
+  # Pre-F7 bindings carry no disposition: still record that the observation was read.
+  if gaps != [{"position": 0, "status": "not-recorded"}] and reason != "no-durable-disposition": return projected
+  prefix, gap, note = acceptance_prefix(click_state)
+  notes = ([note] if note else []) + notes
+  if prefix is None: return path, [gap], notes, reason
+  if reason or not path: return path, [], notes, reason
+  if path[0] in AFTER_OBSERVATION: return prefix + path, [], notes, None
+  return path, [{"position": 0, "status": "readiness-not-recorded"}], notes, None
+
 def lean_source(path, suffix):
   lst = "[" + ", ".join(path) + "]"
   lines = ["import DarkTower.WarMachine.SelfHealRoute", "open DarkTower.WarMachine.SelfHealRoute RouteState",
@@ -141,13 +200,15 @@ def main(argv=None):
   p = argparse.ArgumentParser(); p.add_argument("--binding", required=True)
   p.add_argument("--mathlib-root", default="/home/joe/code/mathlib4")
   p.add_argument("--lean-output", help="canned Lean stdout; hermetic tests only")
+  p.add_argument("--acceptance-dir", default=ACCEPTANCE_DIR, help="click-state records (click-<id>.edn)")
   a = p.parse_args(argv); binding_path = Path(a.binding); ml = Path(a.mathlib_root)
   out_path = Path(str(binding_path) + ".route.edn")
   started = datetime.datetime.now(datetime.timezone.utc).isoformat()
   binding = read_edn(binding_path, [":click/id", ":run-record", ":runtime-disposition"])
   record = read_edn(binding["run-record"], [":meta-self-heal/readiness", ":failure"]) if binding.get("run-record") else None
-  path, gaps, notes, reason = project(binding, record)
-  suffix = any(g.get("status") == "not-recorded" and g["position"] == 0 for g in gaps)
+  click_state = None if record is not None else read_click_state(acceptance_file(a.acceptance_dir, binding.get("click/id")))
+  path, gaps, notes, reason = project(binding, record, click_state)
+  suffix = any(g["position"] == 0 for g in gaps)
   if reason or not path:
     result = {"verdict": "not-checked", "reason": reason or "empty-path"}
   elif a.lean_output is not None:
@@ -161,10 +222,12 @@ def main(argv=None):
   try: shas = {":mathlib-head": git(ml, "rev-parse", "HEAD"), ":self-heal-route": git(ml, "hash-object", LEAN_MODULE)}
   except Exception as e: shas = {":unavailable": type(e).__name__}
   out = {":click/id": binding.get("click/id"), ":path": [kw(s) for s in path],
-         ":gaps": [{kw(k): (kw(v) if k == "status" else v) for k, v in g.items()} for g in gaps],
+         ":gaps": [{kw(k): (kw(v) if k in ("status", "click-status") and isinstance(v, str) else v) for k, v in g.items()} for g in gaps],
          ":notes": [{kw(k): v for k, v in n.items()} for n in notes],
          ":verdict": kw(result["verdict"]), ":checked-at": started, ":module-shas": shas,
          ":producer-sha": git(Path(__file__).resolve().parent, "hash-object", Path(__file__).resolve())}
+  if click_state and click_state["exists"] and any(n.get("source") == CLICK_STATE_SOURCE for n in notes):
+    out[":acceptance-record"] = {":path": click_state["path"], ":sha256": click_state["sha256"]}
   if "first-missing-edge" in result: out[":first-missing-edge"] = [kw(s) for s in result["first-missing-edge"]]
   if "reason" in result: out[":reason"] = result["reason"]
   fd, tmp = tempfile.mkstemp(prefix=f".{out_path.name}.", suffix=".tmp", dir=out_path.parent); os.close(fd)

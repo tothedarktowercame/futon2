@@ -1,4 +1,4 @@
-import importlib.util, subprocess, tempfile, unittest
+import hashlib, importlib.util, subprocess, tempfile, unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,10 +21,14 @@ def module():
   m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m
 
 class RouteCheckTest(unittest.TestCase):
-  def run_check(self, binding_text, lean_output=None):
+  def run_check(self, binding_text, lean_output=None, click_state=None, click_id=None):
+    # Hermetic: the click-state directory is always a temp dir, never the live record.
     td = tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup); d = Path(td.name)
     b = d/"click-run-binding-x.edn"; b.write_text(binding_text)
-    cmd = ["python3", "-I", str(SCRIPT), "--binding", str(b)]
+    acc = d/"acceptances"; acc.mkdir()
+    if click_state is not None: (acc/f"click-{click_id}.edn").write_text(click_state)
+    self.acceptance_dir = acc
+    cmd = ["python3", "-I", str(SCRIPT), "--binding", str(b), "--acceptance-dir", str(acc)]
     if lean_output is not None:
       (d/"lean.out").write_text(lean_output); cmd += ["--lean-output", str(d/"lean.out")]
     ran = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
@@ -49,7 +53,7 @@ class RouteCheckTest(unittest.TestCase):
   def test_click4_is_a_suffix_not_a_path(self):
     ran, out = self.run_check(CLICK4, "VERDICT true\nEDGE 0 true\nEDGE 1 true\n")
     self.assertIn(":path [:readinessReady :routeRefused :terminalRecord]", out)
-    self.assertIn(":gaps [{:position 0, :status :not-recorded}]", out)
+    self.assertIn(":gaps [{:position 0, :status :acceptance-record-absent}]", out)
     self.assertIn(":notes []", out)
     self.assertIn(":verdict :conforms-suffix", out)
     self.assertNotIn(":verdict :conforms,", out)
@@ -164,6 +168,99 @@ class RouteCheckTest(unittest.TestCase):
       ran, out = self.run_check(binding)
       self.assertIn(f":path [:readinessReady :{state} :terminalRecord]", out)
       self.assertIn(":verdict :conforms-suffix", out)
+
+  # M3a: bindings with no run record read the acceptance observation from the click-state
+  # record (futon3c data/wm-click-acceptances).  Before M3a every case below was
+  # {:position 0 :status :not-recorded}; that is what these tests are named for.
+  C4_ID = "wm-click-fca1c921-75a7-4ebf-8713-0c464ffbfb0f"
+  REQUEST_TEXT = "(ns secret-test-source (:require [clojure.test]))"
+  LIVE_36B = Path("/home/joe/code/futon3c/data/wm-click-acceptances/click-wm-click-36b47627-6e08-4402-a09f-1ef09caa8bdc.edn")
+  FULL_429 = ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused",
+              "readinessReady", "routeRefused", "terminalRecord"]
+
+  def click_state(self, status, obs_edn):
+    result = "" if obs_edn is None else f" :result {{:runtime-disposition {{:acceptance-observation {obs_edn}}}}}"
+    return (f'{{:schema :wm/click-state-v1 :click-id "{self.C4_ID}" :status {status}'
+            f' :request {{:test-source "{self.REQUEST_TEXT}"}}{result}}}')
+
+  OBS_429_EDN = ('{:status :refused :reason :meta-self-heal/acceptance-review-refused :review-status :failed'
+                 ' :review-reason :meta-self-heal/producer-invoke-failed :review-detail "Exit 1: 429 Too Many Requests"}')
+
+  def test_click_state_bad_cases_are_typed_gaps(self):
+    suffix = ":path [:readinessReady :routeRefused :terminalRecord]"
+    cases = [(None, ":gaps [{:position 0, :status :acceptance-record-absent}]"),
+             (self.click_state(":running", self.OBS_429_EDN),
+              ":gaps [{:position 0, :status :acceptance-record-not-completed, :click-status :running}]"),
+             (self.click_state(":completed", "{:repair-claimed? false :acceptance-test {:id \"t\"}}"),
+              ":gaps [{:position 0, :status :acceptance-observation-not-projectable}]"),
+             (self.click_state(":completed", self.OBS_429_EDN.replace(":review-status :failed", ":review-status :timeout")),
+              ":gaps [{:position 0, :status :acceptance-observation-not-projectable}]"),
+             (self.click_state(":completed", None), ":gaps [{:position 0, :status :not-recorded}]")]
+    for state, gap in cases:
+      ran, out = self.run_check(CLICK4, "VERDICT true\nEDGE 0 true\nEDGE 1 true\n", state, self.C4_ID)
+      self.assertIn(gap, out); self.assertIn(suffix, out)
+      self.assertIn(":verdict :conforms-suffix", out)
+      self.assertNotIn("secret-test-source", out); self.assertNotIn("Too Many", out)
+      self.assertNotIn(":acceptance-record {", out)
+
+  def test_click_state_observation_gives_a_full_path(self):
+    state = self.click_state(":completed", self.OBS_429_EDN)
+    canned = "VERDICT true\n" + "".join(f"EDGE {i} true\n" for i in range(6))
+    ran, out = self.run_check(CLICK4, canned, state, self.C4_ID)
+    self.assertIn(":path [" + " ".join(":" + s for s in self.FULL_429) + "]", out)
+    self.assertIn(":gaps []", out)
+    self.assertIn(":verdict :conforms,", out)
+    self.assertIn(":source [:wm/click-state :result :runtime-disposition :acceptance-observation]", out)
+    pin = hashlib.sha256((self.acceptance_dir/f"click-{self.C4_ID}.edn").read_bytes()).hexdigest()
+    self.assertIn(f':sha256 "{pin}"', out)
+    self.assertNotIn("secret-test-source", out); self.assertNotIn("Too Many", out)
+    self.assertIn("conformsPath", module().lean_source(self.FULL_429, False))
+    self.assertEqual(ran.returncode, 0)
+
+  def test_click_state_before_ordinary_selection_keeps_readiness_gap(self):
+    binding = ('{:click/id "' + self.C4_ID + '" :runtime-disposition {:status :refused'
+               ' :ordinary-selection-called? true}}')
+    ran, out = self.run_check(binding, "VERDICT true\nEDGE 0 true\n", self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
+    self.assertIn(":path [:ordinarySelection :terminalRecord]", out)
+    self.assertIn(":gaps [{:position 0, :status :readiness-not-recorded}]", out)
+    self.assertIn("no reviewer answer", out)
+    self.assertIn(":verdict :conforms-suffix", out)
+
+  def test_click_state_with_ambiguous_terms_stays_not_checked_with_note(self):
+    binding = ('{:click/id "' + self.C4_ID + '" :runtime-disposition {:status :refused'
+               ' :reason :meta-self-heal/production-config-required}}')
+    ran, out = self.run_check(binding, "VERDICT true\n", self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
+    self.assertIn(":verdict :not-checked", out)
+    self.assertIn('"absent-terms-ambiguous-between-readiness-and-route"', out)
+    self.assertIn(":source [:wm/click-state", out)
+
+  def test_click_state_without_binding_disposition_records_the_read(self):
+    # Pre-F7 bindings (07653f2a, 576d3263, e162ce2d) have no :runtime-disposition.
+    binding = '{:click/id "' + self.C4_ID + '" :binding-status :absent}'
+    ran, out = self.run_check(binding, "VERDICT true\n", self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
+    self.assertIn('"no-durable-disposition"', out); self.assertIn(":verdict :not-checked", out)
+    self.assertIn(":source [:wm/click-state", out)
+    ran, out = self.run_check(binding, "VERDICT true\n")
+    self.assertIn(":gaps [{:position 0, :status :acceptance-record-absent}]", out)
+
+  def test_acceptance_file_name_is_sanitised(self):
+    self.assertEqual(module().acceptance_file("/d", "wm-click a/b").name, "click-wm-click_a_b.edn")
+
+  @unittest.skipUnless(LIVE_36B.is_file(), "click 36b47627's click-state record not on this host")
+  def test_live_click_state_pin_matches_lean_witness(self):
+    # Ties test, record and Lean witness (SelfHealRoute.lean click36b47627) together.
+    got = module().read_click_state(self.LIVE_36B)
+    self.assertEqual(got["status"], "completed")
+    self.assertEqual({k: got["observation"].get(k) for k in self.OBS_429}, self.OBS_429)
+    self.assertEqual(got["sha256"], "2cf7272a570702b00c9d263085bd8091b19627d4f5056dcfe994ba01e1300bb4")
+
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
+  def test_full_429_path_live_lean(self):
+    m = module()
+    with tempfile.TemporaryDirectory() as td:
+      f = Path(td)/"T.lean"; f.write_text(m.lean_source(self.FULL_429, False))
+      ran = subprocess.run([m.lake_executable(), "env", "lean", str(f)], cwd=MATHLIB, text=True, capture_output=True)
+    self.assertEqual(m.judge(self.FULL_429, False, ran.stdout, ran.returncode), {"verdict": "conforms"}, ran.stdout + ran.stderr)
 
 if __name__ == "__main__":
   unittest.main()
