@@ -64,15 +64,23 @@ def cited_keywords(text):
 def cited_lines(text):
   return {(t, int(n)) for t, n in re.findall(r"\b([PCRAST]):(\d+)", text)}
 
+ANCHOR_FORM = re.compile(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)")
+
 def anchor_forms(text):
-  """Return (tag, function, keywords) for simple `(P function ...)` anchors.
+  """Return (tag, function, keywords, span) for simple `(P function ...)` anchors.
 
   These are deliberately documentation anchors, not a parser for Lean.  Their
   contents have no nested parens in the contract grammar, so retaining the
   enclosing form lets a cited outcome keyword keep the function it names.
   """
-  return [(m.group(1), m.group(2), cited_keywords(m.group(3)))
-          for m in re.finditer(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)", text)]
+  return [(m.group(1), m.group(2), cited_keywords(m.group(3)), m.span())
+          for m in ANCHOR_FORM.finditer(text)]
+
+def outside_anchors(text, forms):
+  """The text with every anchor form cut out: keywords here keep the old, unscoped reading."""
+  ends = [0, *(end for *_, (_, end) in forms)]
+  starts = [*(start for *_, (start, _) in forms), len(text)]
+  return "".join(text[last:start] for last, start in zip(ends, starts))
 
 # The code functions each Lean inductive models.  The name rule links a constructor
 # to a site only inside this scope, so `CoordinatorRefusal.malformed` cannot reach
@@ -96,13 +104,10 @@ def align(sites, entities):
   for e in entities:
     text = e["text"]
     forms = anchor_forms(text)
-    form_spans = [m.span() for m in re.finditer(r"\((P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)", text)]
-    outside = "".join(text[last:start] for last, start in zip([0, *(end for _, end in form_spans)],
-                                                               [*(start for start, _ in form_spans), len(text)]))
-    outside_kws, lines, nm = cited_keywords(outside), cited_lines(text), kebab(e["name"])
+    outside_kws, lines, nm = cited_keywords(outside_anchors(text, forms)), cited_lines(text), kebab(e["name"])
     scoped_kws = {}
     anchored_fns = {}
-    for tag, fn, form_kws in forms:
+    for tag, fn, form_kws, _span in forms:
       anchored_fns.setdefault(tag, set()).add(fn)
       for kw in form_kws:
         scoped_kws.setdefault(kw, set()).add((tag, fn))
