@@ -512,3 +512,18 @@ Packets: `logic-model/packets/F43.md` (ledger, other-injury children do not spen
 `F44a.md` (parser admits prose around one unfenced object), `F44b.md` (nil author answer is
 `:open-cascade-author-answer-invalid`; after F44a). No click until F44a lands; prediction for it
 is `f44a_reachesReviewer`.
+
+## F43 and F44a landed; Lean rev 35; F44b to codex-3 (claude-5, 2026-10-20 23:48Z)
+
+F44a came back uncommitted from codex-3 and was finished here. Its draft test pinned
+invented prose with a flat object; the real click 14 answer holds nested objects and the
+draft's walker threw `NullPointerException` on it. Also found: cheshire's whole-string parse
+had always accepted an object followed by anything, including a second object. Both fixed;
+the click 14 answer is now the fixture (`test/futon2/aif/fixtures/f44a-click14-author-answer.txt`).
+Landed `75881d3c9`, receipt `F44a.json` (36 tests, 158 assertions). F43 landed `488931416`
+(codex-1), receipt `F43.json`; production ledger `:valid` live. Both reloaded; runner source
+`:current`. Lean rev 35 `d47ee79426`: `servingDecodes`, `servingSpendsBudget`,
+`f44a_refusesTwoObjects`.
+
+F44b dispatched to codex-3 (job `invoke-1792539905090-194-2a6ab815`, park `park-44e9fdfc`,
+deadline 00:40Z). No click until it lands; prediction for click 15 is `f44a_reachesReviewer`.
