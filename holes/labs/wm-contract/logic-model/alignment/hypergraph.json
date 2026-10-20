@@ -3740,8 +3740,7 @@
     "P:191:diagnosis-port-malformed",
     "P:195:diagnosis-unavailable",
     "P:206:diagnosis-response-missing",
-    "P:212:diagnosis-production-functions-absent",
-    "P:278:diagnosis-production-functions-absent"
+    "P:212:diagnosis-production-functions-absent"
    ],
    "props": {
     "basis": "keyword",
@@ -3752,23 +3751,10 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.acceptanceUnavailable",
-    "P:270:acceptance-diagnosis-unavailable",
-    "P:272:acceptance-diagnosis-unavailable",
     "P:685:acceptance-diagnosis-unavailable"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 364
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RouteState.acceptanceUnavailable",
-    "P:460:acceptance-unavailable"
-   ],
-   "props": {
-    "basis": "name",
     "lean-line": 364
    }
   },
@@ -3796,7 +3782,6 @@
     "P:470:acceptance-prose-or-malformed",
     "P:518:acceptance-port-unavailable",
     "P:526:acceptance-request-function-unresolvable",
-    "P:557:acceptance-proposal-source-mismatch",
     "P:685:acceptance-diagnosis-unavailable"
    ],
    "props": {
@@ -3846,8 +3831,7 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.readinessRefused",
-    "P:868:production-config-required",
-    "P:970:production-config-required"
+    "P:868:production-config-required"
    ],
    "props": {
     "basis": "keyword",
@@ -3870,7 +3854,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.routeRefused",
-    "P:868:production-config-required",
     "P:970:production-config-required"
    ],
    "props": {

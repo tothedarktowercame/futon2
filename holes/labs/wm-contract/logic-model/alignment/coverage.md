@@ -41,7 +41,7 @@ Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit
 | RouteTerm | 5/5 (100%) |
 | RunOutcome | 0/3 (0%) |
 
-Edges by basis: keyword 30, line 10, name 15, line-unconfirmed 4
+Edges by basis: keyword 30, line 10, name 14, line-unconfirmed 4
 
 ## Uncovered code sites
 
