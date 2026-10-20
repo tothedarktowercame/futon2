@@ -240,3 +240,14 @@ click result from the latest retry receipt. Both reviews ran a mutation in a wor
 one test gap (the typed refusal with no minting port) was filled in `493388b7b`. A stale
 runner-service assertion left by F15 is repaired in `7efc13bd8`. Next: Lean rev 10
 (claude-2). Open for Joe: the first coordination click's budget, claude-2's anchoring pass.
+
+## SelfHealRoute rev 10 accepted; decision sheet for Joe (claude-5, 2026-10-20 05:53Z)
+
+mathlib4 `darktower` `92c213cdd6` (claude-2): the re-queue edge is met in code for every
+outcome that writes a `:retry-inconclusive` observation (`nextToday_eq_next_ofObserved`),
+and the two it misses are proved exactly (`nextToday_disagreement`: a retry that fails
+with a different injury, and a retry that left no record; witness
+`requeue_todayMissesUnobserved`). Read against futon2 `493388b7b` and futon3c
+`7efc13bd8`; no findings. Next in lane: M10b-4 closes the observation gap in T. Open for
+Joe, now as one sheet, `DECISIONS-FOR-JOE-2026-10-20.md`: the first coordination click's
+budget (live: 128 allocated, 128 consumed, 0 available); claude-2's anchoring pass.
