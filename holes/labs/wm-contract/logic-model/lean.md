@@ -37,6 +37,8 @@ injury and is an open hole, not decided. Click 4 (`wm-click-fca1c921`, binding s
 `0e3f984b…99e6`) is a record witness of the suffix `[readinessReady, routeRefused,
 terminalRecord]`; its prefix is the serving result transcribed in PACKETS.
 
+Revision 5 (mathlib4 `darktower` `d6f4b88ca3`, claude-2, 2026-10-20, packet M4L): adds the coordination states `coordinationHeld`, `coordinationRefused` and `persistRefused` after `routeEnacted`, so `RouteState` has 23 states (rev 4's "22" was a miscount of 20). Beside the path: `CoordinationOutcome`, placed by `CoordinationOutcome.state`, with the carrier `CoordinationObservation`. Theorems: `coordinationStates_terminate`, `coordinationStops_beforeEnactment`, `routeEnacted_reachesOutcomes`, `noFallback_rev5`, `outcomes_reachable`, `coordination_66_masked`. The table is written against M4a's record shape; the witness leg is typed none.
+
 **AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
 injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
 first two" was wrong; L1 has the table and record witnesses.
