@@ -12,6 +12,10 @@
 (def source-pin {:path "/tmp/meta-injury-ledger.edn"
                  :sha256 (apply str (repeat 64 "e"))})
 
+(defn- record-pin [suffix digit]
+  {:path (str "data/wm-runs/" suffix ".edn")
+   :sha256 (apply str (repeat 64 digit))})
+
 (defn- append! [history event]
   (let [result (ledger/append-transition history event)]
     (assert (= :appended (:status result)) (pr-str result))
@@ -63,6 +67,8 @@
      :enact (fn [r] (receipt r :succeeded
                              {:patch-sha sha-a :integration-commit sha-a
                               :retry-click "click-retry-repair-1"}))
+     :retry-click-id (fn [_repair-id _attempt ordinal]
+                       (str "click-retry-requeue-" ordinal))
      :retry (fn [r] (receipt r :succeeded
                              {:repair-id (get-in r [:work-order :repair-id])
                               :patch-sha sha-a :retry-click "click-retry-repair-1"
@@ -74,8 +80,9 @@
 
 (deftest happy-path-is-dedicated-and-discharges-attributably
   (let [counts (atom {:author 0 :review 0 :enact 0 :retry 0 :forbidden 0})
-        wrapped (into {}
-                      (for [[phase port] (ports)]
+        base-ports (ports)
+        wrapped (into {:retry-click-id (:retry-click-id base-ports)}
+                      (for [[phase port] (select-keys base-ports coordinator/phases)]
                         [phase (fn [request]
                                  (swap! counts update phase inc)
                                  (port request))]))
@@ -95,6 +102,120 @@
            (->> (get-in result [:ledger :entries]) (keep :state) vec)))
     (is (= "click-retry-repair-1"
            (get-in result [:ledger :entries 5 :retry-click])))))
+
+(defn- awaiting-retry
+  ([history] (awaiting-retry history {}))
+  ([history overrides]
+   (let [start (prepared history (options))]
+     (coordinator/coordinate
+      (durable history) (:transaction start)
+      (ports (merge {:retry (fn [r]
+                              (receipt r :queued
+                                       {:repair-id (get-in r [:work-order :repair-id])
+                                        :patch-sha sha-a
+                                        :retry-click "click-retry-repair-1"}))}
+                    overrides))))))
+
+(defn- inconclusive [history suffix retry-click]
+  (let [result (ledger/append-observation
+                history (record-pin suffix (subs suffix 0 1))
+                :retry-inconclusive
+                {:injury-id "injury/2026-10-19/reload"
+                 :retry-click retry-click})]
+    (assert (= :appended (:status result)) (pr-str result))
+    (:ledger result)))
+
+(deftest inconclusive-retries-requeue-in-order-and-replay-without-effects
+  ;; Pins the ledger-first +1 ordinal, request attribution, dynamic phase, and
+  ;; receipt replay rules for first and second inconclusive retry outcomes.
+  (let [initial (awaiting-retry (opened-ledger))
+        history1 (inconclusive (:ledger initial) "2-first" "click-retry-repair-1")
+        calls (atom [])
+        ps (ports {:retry (fn [r]
+                            (swap! calls conj r)
+                            (receipt r :queued {:retry-click (:retry-click r)}))})
+        first (coordinator/coordinate (durable history1) (:transaction initial) ps)
+        calls-after-first (vec @calls)
+        replay (coordinator/coordinate (durable (:ledger first))
+                                       (:transaction first) ps)
+        calls-after-replay (vec @calls)
+        history2 (inconclusive (:ledger replay) "3-second"
+                               "click-retry-requeue-1")
+        second (coordinator/coordinate (durable history2) (:transaction replay) ps)]
+    (is (= :awaiting-retry (:status first)))
+    (is (= "click-retry-requeue-1" (:retry-click first)))
+    (is (= 1 (-> first :ledger :entries last :requeues)))
+    (is (= 1 (count calls-after-first)))
+    (is (= {:phase :retry-requeue-1
+            :retry-click "click-retry-requeue-1"
+            :requeue-ordinal 1}
+           (select-keys (clojure.core/first calls-after-first)
+                        [:phase :retry-click :requeue-ordinal])))
+    (is (some #(= :retry-requeue-1 (:phase %))
+              (get-in first [:transaction :receipts])))
+    (is (= (:ledger first) (:ledger replay)))
+    (is (= calls-after-first calls-after-replay))
+    (is (= :awaiting-retry (:status second)))
+    (is (= "click-retry-requeue-2" (:retry-click second)))
+    (is (= 2 (-> second :ledger :entries last :requeues)))
+    (is (= :retry-requeue-2 (-> @calls last :phase)))
+    (is (= 2 (-> @calls last :requeue-ordinal)))))
+
+(deftest appended-requeue-without-receipt-is-queued-on-resume
+  ;; Pins crash repair between the durable append and the retry-port receipt.
+  (let [initial (awaiting-retry (opened-ledger))
+        observed (inconclusive (:ledger initial) "4-crash" "click-retry-repair-1")
+        appended (ledger/append-requeue observed "injury/2026-10-19/reload"
+                                        "click-retry-requeue-1")
+        calls (atom [])
+        ps (ports {:retry (fn [r]
+                            (swap! calls conj r)
+                            (receipt r :queued {:retry-click (:retry-click r)}))})
+        result (coordinator/coordinate (durable (:ledger appended))
+                                       (:transaction initial) ps)]
+    (is (= :awaiting-retry (:status result)))
+    (is (= (:ledger appended) (:ledger result)))
+    (is (= 1 (count @calls)))
+    (is (= :retry-requeue-1 (-> @calls first :phase)))
+    (is (= "click-retry-requeue-1" (:retry-click result)))))
+
+(deftest spent-retry-budget-abandons-before-another-port-call
+  ;; Pins the separate retry budget and the no-effect terminal boundary.
+  (let [limited (ledger/seal-ledger (assoc ledger/empty-ledger :retry-limit 1))
+        history (append! limited
+                         {:injury-id "injury/2026-10-19/reload"
+                          :state :open :attempt 1 :cause-record-pin pin-a
+                          :failure-stage :reload :failure-kind :phase-failure
+                          :detected-click "click-2026-10-19-4"})
+        initial (awaiting-retry history)
+        observed1 (inconclusive (:ledger initial) "5-first" "click-retry-repair-1")
+        calls (atom 0)
+        ps (ports {:retry (fn [r]
+                            (swap! calls inc)
+                            (receipt r :queued {:retry-click (:retry-click r)}))})
+        requeued (coordinator/coordinate (durable observed1)
+                                         (:transaction initial) ps)
+        observed2 (inconclusive (:ledger requeued) "6-spent"
+                                "click-retry-requeue-1")
+        _ (reset! calls 0)
+        result (coordinator/coordinate (durable observed2)
+                                       (:transaction requeued) ps)]
+    (is (= :abandoned (:status result)))
+    (is (= :retry-budget-spent (:reason result)))
+    (is (= :abandoned (-> result :ledger :entries last :state)))
+    (is (zero? @calls))))
+
+(deftest requeue-port-must-echo-the-minted-retry-click
+  ;; Pins attribution validation for the dynamically minted retry identity.
+  (let [initial (awaiting-retry (opened-ledger))
+        observed (inconclusive (:ledger initial) "7-wrong" "click-retry-repair-1")
+        result (coordinator/coordinate
+                (durable observed) (:transaction initial)
+                (ports {:retry (fn [r]
+                                 (receipt r :queued
+                                          {:retry-click "click/unrelated"}))}))]
+    (is (= :coordinator/retry-attribution-refused (:reason result)))
+    (is (= 1 (-> result :ledger :entries last :requeues)))))
 
 (deftest rejection-and-port-failures-stop-without-silent-advance
   (doseq [[label override expected-state expected-reason]

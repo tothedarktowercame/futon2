@@ -174,26 +174,31 @@
 (defn- expected [order phase predecessor-pin]
   {:phase phase :injury-id (:injury-id order) :repair-id (:repair-id order)
    :attempt (:attempt order) :predecessor-pin predecessor-pin})
-(defn- invoke-once [transaction phase predecessor-pin port]
-  (if-let [existing (receipt-for transaction phase)]
-    {:status :recorded :receipt existing :transaction transaction}
-    (try
-      (let [response (port {:work-order (:work-order transaction)
-                            :transaction transaction
-                            :phase phase :predecessor-pin predecessor-pin})
-            checked (verify-port-receipt
-                     response (expected (:work-order transaction)
-                                        phase predecessor-pin))]
-        (if-not (= :valid (:status checked))
-          (refusal :coordinator/port-receipt-refused
-                   {:phase phase :receipt-defects (:defects checked)
-                    :transaction transaction})
-          {:status :accepted :receipt response
-           :transaction (append-receipt transaction response)}))
-      (catch Throwable t
-        (refusal :coordinator/port-threw
-                 {:phase phase :detail (ex-message t)
-                  :transaction transaction})))))
+(defn- invoke-once
+  ([transaction phase predecessor-pin port]
+   (invoke-once transaction phase predecessor-pin port {}))
+  ([transaction phase predecessor-pin port extra]
+   (if-let [existing (receipt-for transaction phase)]
+     {:status :recorded :receipt existing :transaction transaction}
+     (try
+       (let [response (port (merge {:work-order (:work-order transaction)
+                                    :transaction transaction
+                                    :phase phase
+                                    :predecessor-pin predecessor-pin}
+                                   extra))
+             checked (verify-port-receipt
+                      response (expected (:work-order transaction)
+                                         phase predecessor-pin))]
+         (if-not (= :valid (:status checked))
+           (refusal :coordinator/port-receipt-refused
+                    {:phase phase :receipt-defects (:defects checked)
+                     :transaction transaction})
+           {:status :accepted :receipt response
+            :transaction (append-receipt transaction response)}))
+       (catch Throwable t
+         (refusal :coordinator/port-threw
+                  {:phase phase :detail (ex-message t)
+                   :transaction transaction}))))))
 
 (defn- append-transition! [history event]
   (let [result (ledger/append-transition history event)]
@@ -212,6 +217,54 @@
   (when (= phase (:stop-after ports))
     (stop! {:status :checkpoint :phase phase :ledger history
             :transaction transaction})))
+
+(defn- requeue-phase [n]
+  (keyword (str "retry-requeue-" n)))
+
+(defn- last-receipt-pin [transaction]
+  (:receipt-pin (last (:receipts transaction))))
+
+(defn- coordinate-queued-retry
+  [history transaction ports injury-id repair-id attempt]
+  (loop [history history
+         transaction transaction]
+    (let [latest (latest-transition history injury-id)
+          n (or (:requeues latest) 0)
+          queued (when (pos? n)
+                   (accepted!
+                    (invoke-once transaction (requeue-phase n)
+                                 (last-receipt-pin transaction) (:retry ports)
+                                 {:retry-click (:retry-click latest)
+                                  :requeue-ordinal n})))
+          retry-receipt (:receipt queued)
+          transaction (or (:transaction queued) transaction)]
+      (when (and retry-receipt
+                 (not (and (= :queued (:status retry-receipt))
+                           (= (:retry-click latest)
+                              (get-in retry-receipt [:payload :retry-click])))))
+        (stop! (refusal :coordinator/retry-attribution-refused
+                        {:ledger history :transaction transaction})))
+      (if-not (ledger/pending-requeue history injury-id)
+        {:status :awaiting-retry
+         :ledger history
+         :transaction transaction
+         :retry-click (:retry-click latest)}
+        (let [next-n (inc n)
+              retry-click-id (:retry-click-id ports)
+              _ (when-not (fn? retry-click-id)
+                  (stop! (refusal :coordinator/retry-click-id-unavailable
+                                  {:ledger history :transaction transaction})))
+              new-id (retry-click-id repair-id attempt next-n)
+              requeued (accepted! (ledger/append-requeue history injury-id new-id))
+              history' (:ledger requeued)]
+          (if (= :abandoned (get-in requeued [:entry :state]))
+            {:status :abandoned :reason :retry-budget-spent
+             :ledger history' :transaction transaction}
+            ;; Persist the ledger entry before calling the retry port. A resume
+            ;; queues an appended entry that lacks a receipt; if the port ran but
+            ;; transaction persistence failed, its stable click id names the same
+            ;; meta-retry child on the repeated call.
+            (recur history' transaction)))))))
 
 (defn coordinate
   "Run or resume one dedicated transaction. Every effect receipt is retained,
@@ -346,10 +399,8 @@
                                   {:ledger history4 :transaction tx4})))
                 (cond
                   (= :queued (:status retry-receipt))
-                  {:status :awaiting-retry
-                   :ledger history4
-                   :transaction tx4
-                   :retry-click retry-click}
+                  (coordinate-queued-retry history4 tx4 ports injury-id repair-id
+                                           attempt)
 
                   (= :succeeded (:status retry-receipt))
                   (let [closed (accepted!
