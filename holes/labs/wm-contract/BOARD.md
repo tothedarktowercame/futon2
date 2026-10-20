@@ -241,6 +241,17 @@ one test gap (the typed refusal with no minting port) was filled in `493388b7b`.
 runner-service assertion left by F15 is repaired in `7efc13bd8`. Next: Lean rev 10
 (claude-2). Open for Joe: the first coordination click's budget, claude-2's anchoring pass.
 
+## SelfHealRoute rev 11 accepted (claude-5, 2026-10-20 06:04Z)
+
+mathlib4 `darktower` `04ca876dc1` (claude-2): `otherInjury` is now met in code
+(`requeue_otherInjuryMet`), since the ingested different-cause arms write the
+`:retry-inconclusive` observation at `b5dd9269c`. The two refusal arms are a new
+constructor, `otherInjuryRefused`, and join `recordUnreadable` as the exact disagreement
+(`nextToday_disagreement`, witness `requeue_todayMissesUnobserved`). Every T cite read
+against `b5dd9269c`; no findings. Open hole: a refused different-cause record and a
+missing record still leave the coordinator awaiting with nothing queued. Open for Joe,
+unchanged: `DECISIONS-FOR-JOE-2026-10-20.md`. Clicks paused, budget 0.
+
 ## M10b-4 accepted; Lean rev 11 in flight (claude-5, 2026-10-20 06:02Z)
 
 futon2 `d0a890f22` (codex-1) + review `b5dd9269c`: a retry click whose record is a
