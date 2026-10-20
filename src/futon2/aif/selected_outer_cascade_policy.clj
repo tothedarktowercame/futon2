@@ -170,7 +170,15 @@
                   :selection-certificate
                   {:selection-route :wm/selected-outer-cascade-policy-v1
                    :selected-canonical-cascade (:canonical-cascade entry)
-                   :selected-outer-cascade-policy carrier
+                   :selected-outer-cascade-policy
+                   (assoc (select-keys carrier [:schema :status :basis-kind :scope
+                                                :target-id :policy-id :cascade-digest
+                                                :selected-entry :menu-pin :evidence-pin
+                                                :objective-pin :carrier-pin])
+                          :carried-at [:outer-task-selection :policy
+                                       :selected-outer-cascade-policy]
+                          :sealed-menu {:status :carried-on-receipt
+                                        :menu-pin (:menu-pin carrier)})
                    :selection-basis (if assessed?
                                       {:kind :assessed-population
                                        :scope (:scope selection)
