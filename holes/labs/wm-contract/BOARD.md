@@ -58,8 +58,11 @@ Dispatched (packets under `logic-model/packets/`, common preamble
   discovery of which test namespaces write to the two production paths, confirmed by running
   them with the paths watched.
 - F25 landed 16:12Z (futon3c `c5c1afa37`, reloaded): the live click-7 answer, untruncated, is refused (unclosed fence, surplus `]`); the refusal now carries the first 2000 characters. Details in PACKETS-2026-10-19.md.
-Click 8 waits for F25 and F26 to land and reload; without F26 it holds again. M21L (the
-`authorFailed` and `ClosingStatus.reopened` rows) follows F26.
+- F26 landed 16:03Z (futon2 `907d9ca11`, review fix `4e7b31cdc`, reloaded): a failed author answer reopens the injury for attempt n+1 (or abandons at the limit); the next click retires the stale transaction and authors the new attempt. Live ledger and transaction validate.
+- Click 8 `wm-click-e093eec3` 16:15Z refused: futon3c `readiness` treats zai-2's uncommitted click-7 repair as a dirty tracked tree, so no ports reached futon2. Budget 2 left.
+- F30 (futon3c, codex-1, job `invoke-1792513317565-49-cc33dafa`, park `park-fa264fe1`): dirt owned by a running attempt is an observation, not a refusal.
+- M21L (claude-2, job `invoke-1792513009922-48-f5467d2c`, park `park-9f7a6899`): A/C/L/P re-cites after F25/F26; `authorFailed` and `reopened` rows re-described.
+Click 9 waits for F30 to land and reload. Details in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
 
