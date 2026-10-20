@@ -161,10 +161,24 @@ def align(sites, entities):
                     "props": {"basis": basis, "lean-line": e["line"]}})
   return edges
 
+def stale_citations(rows, owed, entities):
+  """Line citations that name no site at HEAD: stale or wrong.
+  A citation may name any line of a multi-line site (the :reason line of a map).
+  A :defn row anchors a citation of a function's first line, but only when the
+  entity's text also names that function: a cite that has drifted onto a defn
+  line after an edit is stale, not a citation of the function (rev 16 review:
+  P:526 and A:372-373 escaped the check this way)."""
+  defn_fn = {(r["tag"], r["line"]): r["fn"] for r in rows if r["kind"] == "defn"}
+  site_lines = {(s["tag"], n) for s in owed for n in range(s["line"], (s.get("end-line") or s["line"]) + 1)}
+  def names_defn(text, t, n):
+    fn = defn_fn.get((t, n))
+    return fn is not None and (f"`{fn}`" in text or f"({t} {fn} " in text or f"({t} {fn})" in text)
+  return sorted({(e["id"], f"{t}:{n}") for e in entities for t, n in cited_lines(e["text"])
+                 if (t, n) not in site_lines and not names_defn(e["text"], t, n)})
+
 def main(sites_path, out_dir, *lean_files):
   rows = json.loads(Path(sites_path).read_text())
   # :defn rows anchor citations of a function's first line; they are not outcome sites.
-  defn_lines = {(r["tag"], r["line"]) for r in rows if r["kind"] == "defn"}
   sites = [r for r in rows if r["kind"] != "defn"]
   # :call rows are evidence for an anchor that names the callee, not outcome
   # sites the model owes an endpoint: they stay out of the totals, the
@@ -176,11 +190,7 @@ def main(sites_path, out_dir, *lean_files):
   real = [ed for ed in edges if ed["props"]["basis"] != "line-unconfirmed"]
   covered_sites = {i for ed in real for i in ed["hx/endpoints"][1:]}
   covered_ents = {ed["hx/endpoints"][0] for ed in real}
-  # line citations that name no site at HEAD: stale or wrong
-  # a citation may name any line of a multi-line site (the :reason line of a map)
-  site_lines = {(s["tag"], n) for s in owed for n in range(s["line"], (s.get("end-line") or s["line"]) + 1)} | defn_lines
-  stale = sorted({(e["id"], f"{t}:{n}") for e in entities for t, n in cited_lines(e["text"])
-                  if (t, n) not in site_lines})
+  stale = stale_citations(rows, owed, entities)
   out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
   (out/"hypergraph.json").write_text(json.dumps({"sites": sites, "entities": entities, "hyperedges": edges}, indent=1))
   def frac(a, b): return f"{a}/{b} ({100*a/b:.0f}%)" if b else "0/0"

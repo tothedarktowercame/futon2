@@ -89,5 +89,26 @@ class AnchorFunctionScopingTest(unittest.TestCase):
     self.assertEqual(["P:30:acceptance-unavailable"], edge_ids(edges, "name"))
 
 
+class StaleCitationDefnLineTest(unittest.TestCase):
+  """A cite that drifts onto a defn line is stale unless the text names that function."""
+  def setUp(self):
+    self.rows = [{"id": "P:30", "tag": "P", "fn": "admit-acceptance!", "line": 30, "kind": "defn"},
+                 site("admit-acceptance!", "meta-self-heal/acceptance-run-refused", 40)]
+    self.owed = [r for r in self.rows if r["kind"] != "defn"]
+
+  def test_drifted_cite_on_defn_line_is_stale(self):
+    ents = [entity("runRefused", "`:acceptance-run-refused` (P:30): refused.")]
+    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents),
+                     [("lean:RouteState.runRefused", "P:30")])
+
+  def test_cite_of_named_function_line_is_not_stale(self):
+    ents = [entity("runRefused", "refused inside `admit-acceptance!` (P:30).")]
+    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents), [])
+
+  def test_cite_of_site_line_is_not_stale(self):
+    ents = [entity("runRefused", "`:acceptance-run-refused` (P:40).")]
+    self.assertEqual(_ALIGN.stale_citations(self.rows, self.owed, ents), [])
+
+
 if __name__ == "__main__":
   unittest.main()

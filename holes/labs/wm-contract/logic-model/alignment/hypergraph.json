@@ -1433,7 +1433,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:16:str/blank?"
   },
   {
@@ -1443,7 +1443,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:19:nonblank?"
   },
   {
@@ -1455,7 +1455,7 @@
    "kind": "status-map",
    "end-line": 22,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -1464,7 +1464,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:25:identity/digest"
   },
   {
@@ -1474,7 +1474,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:29:pin?"
   },
   {
@@ -1484,7 +1484,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:31:identity/digest"
   },
   {
@@ -1494,7 +1494,7 @@
    "kind": "call",
    "reason": "sealed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:34:sealed"
   },
   {
@@ -1504,7 +1504,7 @@
    "kind": "absent-term",
    "reason": "schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:43:schema"
   },
   {
@@ -1514,7 +1514,7 @@
    "kind": "call",
    "reason": "seal-valid?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:44:seal-valid?"
   },
   {
@@ -1524,7 +1524,7 @@
    "kind": "absent-term",
    "reason": "seal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:45:seal"
   },
   {
@@ -1534,7 +1534,7 @@
    "kind": "absent-term",
    "reason": "identities",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:50:identities"
   },
   {
@@ -1544,7 +1544,7 @@
    "kind": "absent-term",
    "reason": "sessions/distinct",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:51:distinct"
   },
   {
@@ -1554,7 +1554,7 @@
    "kind": "absent-term",
    "reason": "sessions/present",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:52:present"
   },
   {
@@ -1564,7 +1564,7 @@
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:53:attempt"
   },
   {
@@ -1574,7 +1574,7 @@
    "kind": "absent-term",
    "reason": "attempt-limit",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:54:attempt-limit"
   },
   {
@@ -1584,7 +1584,7 @@
    "kind": "absent-term",
    "reason": "attempt/exceeds-limit",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:56:exceeds-limit"
   },
   {
@@ -1594,7 +1594,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:57:pin?"
   },
   {
@@ -1604,7 +1604,7 @@
    "kind": "absent-term",
    "reason": "cause-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:57:cause-pin"
   },
   {
@@ -1614,7 +1614,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:58:pin?"
   },
   {
@@ -1624,7 +1624,7 @@
    "kind": "absent-term",
    "reason": "diagnosis-evidence",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:59:diagnosis-evidence"
   },
   {
@@ -1634,7 +1634,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:61:nonblank?"
   },
   {
@@ -1644,7 +1644,7 @@
    "kind": "absent-term",
    "reason": "acceptance-test",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:65:acceptance-test"
   },
   {
@@ -1654,7 +1654,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:66:pin?"
   },
   {
@@ -1664,7 +1664,7 @@
    "kind": "absent-term",
    "reason": "ledger-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:66:ledger-pin"
   },
   {
@@ -1674,7 +1674,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:67:pin?"
   },
   {
@@ -1684,7 +1684,7 @@
    "kind": "absent-term",
    "reason": "ledger-source-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:67:ledger-source-pin"
   },
   {
@@ -1694,7 +1694,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:68:refusal"
   },
   {
@@ -1704,7 +1704,7 @@
    "kind": "refusal",
    "reason": "work-order/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:68:invalid"
   },
   {
@@ -1716,7 +1716,7 @@
    "kind": "status-map",
    "end-line": 69,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -1725,7 +1725,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:71:refusal"
   },
   {
@@ -1735,7 +1735,7 @@
    "kind": "refusal",
    "reason": "work-order/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:71:malformed"
   },
   {
@@ -1745,7 +1745,7 @@
    "kind": "call",
    "reason": "sealed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:76:sealed"
   },
   {
@@ -1755,7 +1755,7 @@
    "kind": "absent-term",
    "reason": "schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:83:schema"
   },
   {
@@ -1765,7 +1765,7 @@
    "kind": "call",
    "reason": "seal-valid?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:84:seal-valid?"
   },
   {
@@ -1775,7 +1775,7 @@
    "kind": "absent-term",
    "reason": "seal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:85:seal"
   },
   {
@@ -1785,7 +1785,7 @@
    "kind": "absent-term",
    "reason": "phase",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:86:phase"
   },
   {
@@ -1795,7 +1795,7 @@
    "kind": "absent-term",
    "reason": "injury-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:87:injury-id"
   },
   {
@@ -1805,7 +1805,7 @@
    "kind": "absent-term",
    "reason": "repair-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:88:repair-id"
   },
   {
@@ -1815,7 +1815,7 @@
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:89:attempt"
   },
   {
@@ -1825,7 +1825,7 @@
    "kind": "absent-term",
    "reason": "predecessor-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:91:predecessor-pin"
   },
   {
@@ -1835,7 +1835,7 @@
    "kind": "absent-term",
    "reason": "status",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:93:status"
   },
   {
@@ -1845,7 +1845,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:94:refusal"
   },
   {
@@ -1855,7 +1855,7 @@
    "kind": "refusal",
    "reason": "port-receipt/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:94:invalid"
   },
   {
@@ -1867,7 +1867,7 @@
    "kind": "status-map",
    "end-line": 95,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -1876,7 +1876,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:97:refusal"
   },
   {
@@ -1886,7 +1886,7 @@
    "kind": "refusal",
    "reason": "port-receipt/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:97:malformed"
   },
   {
@@ -1896,7 +1896,7 @@
    "kind": "call",
    "reason": "sealed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:100:sealed"
   },
   {
@@ -1906,7 +1906,7 @@
    "kind": "call",
    "reason": "seal-valid?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:108:seal-valid?"
   },
   {
@@ -1916,7 +1916,7 @@
    "kind": "call",
    "reason": "verify-work-order",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:109:verify-work-order"
   },
   {
@@ -1928,7 +1928,7 @@
    "kind": "status-map",
    "end-line": 111,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -1937,7 +1937,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:112:refusal"
   },
   {
@@ -1947,7 +1947,7 @@
    "kind": "refusal",
    "reason": "transaction/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:112:invalid"
   },
   {
@@ -1957,7 +1957,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:114:refusal"
   },
   {
@@ -1967,7 +1967,7 @@
    "kind": "refusal",
    "reason": "transaction/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:114:malformed"
   },
   {
@@ -1977,7 +1977,7 @@
    "kind": "call",
    "reason": "ledger/active-injuries",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:120:ledger/active-injuries"
   },
   {
@@ -1987,7 +1987,7 @@
    "kind": "call",
    "reason": "ledger/active-injuries",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:130:ledger/active-injuries"
   },
   {
@@ -1997,7 +1997,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:136:identity/digest"
   },
   {
@@ -2007,7 +2007,7 @@
    "kind": "call",
    "reason": "seal-work-order",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:138:seal-work-order"
   },
   {
@@ -2017,7 +2017,7 @@
    "kind": "call",
    "reason": "cause-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:147:cause-pin"
   },
   {
@@ -2027,7 +2027,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:152:schema"
   },
   {
@@ -2037,7 +2037,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/status",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:153:status"
   },
   {
@@ -2047,7 +2047,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:154:pin?"
   },
   {
@@ -2057,7 +2057,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/source-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:154:source-pin"
   },
   {
@@ -2067,7 +2067,7 @@
    "kind": "call",
    "reason": "ledger/validate-ledger",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:155:ledger/validate-ledger"
   },
   {
@@ -2077,7 +2077,7 @@
    "kind": "absent-term",
    "reason": "ledger/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:156:invalid"
   },
   {
@@ -2087,7 +2087,7 @@
    "kind": "absent-term",
    "reason": "active-set/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:157:invalid"
   },
   {
@@ -2097,7 +2097,7 @@
    "kind": "absent-term",
    "reason": "active-injury/required",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:158:required"
   },
   {
@@ -2107,7 +2107,7 @@
    "kind": "absent-term",
    "reason": "active-injury/not-found",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:159:not-found"
   },
   {
@@ -2117,7 +2117,7 @@
    "kind": "call",
    "reason": "verify-work-order",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:160:verify-work-order"
   },
   {
@@ -2127,7 +2127,7 @@
    "kind": "absent-term",
    "reason": "work-order/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:161:invalid"
   },
   {
@@ -2137,7 +2137,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:163:refusal"
   },
   {
@@ -2147,7 +2147,7 @@
    "kind": "refusal",
    "reason": "coordinator/preparation-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:163:preparation-refused"
   },
   {
@@ -2159,7 +2159,7 @@
    "kind": "status-map",
    "end-line": 166,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2168,7 +2168,7 @@
    "kind": "call",
    "reason": "seal-transaction",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:165:seal-transaction"
   },
   {
@@ -2180,7 +2180,7 @@
    "kind": "status-map",
    "end-line": 166,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2189,7 +2189,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:168:refusal"
   },
   {
@@ -2199,7 +2199,7 @@
    "kind": "refusal",
    "reason": "coordinator/preparation-malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:168:preparation-malformed"
   },
   {
@@ -2209,7 +2209,7 @@
    "kind": "call",
    "reason": "seal-transaction",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:173:seal-transaction"
   },
   {
@@ -2219,7 +2219,7 @@
    "kind": "call",
    "reason": "receipt-for",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:181:receipt-for"
   },
   {
@@ -2231,7 +2231,7 @@
    "kind": "status-map",
    "end-line": 182,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2240,7 +2240,7 @@
    "kind": "call",
    "reason": "verify-port-receipt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:189:verify-port-receipt"
   },
   {
@@ -2250,7 +2250,7 @@
    "kind": "call",
    "reason": "expected",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:190:expected"
   },
   {
@@ -2260,7 +2260,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:193:refusal"
   },
   {
@@ -2270,7 +2270,7 @@
    "kind": "refusal",
    "reason": "coordinator/port-receipt-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:193:port-receipt-refused"
   },
   {
@@ -2282,7 +2282,7 @@
    "kind": "status-map",
    "end-line": 197,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2291,7 +2291,7 @@
    "kind": "call",
    "reason": "append-receipt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:197:append-receipt"
   },
   {
@@ -2301,7 +2301,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:199:refusal"
   },
   {
@@ -2311,7 +2311,7 @@
    "kind": "refusal",
    "reason": "coordinator/port-threw",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:199:port-threw"
   },
   {
@@ -2321,7 +2321,7 @@
    "kind": "call",
    "reason": "ledger/append-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:204:ledger/append-transition"
   },
   {
@@ -2331,7 +2331,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:206:refusal"
   },
   {
@@ -2341,7 +2341,7 @@
    "kind": "refusal",
    "reason": "coordinator/ledger-transition-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:206:ledger-transition-refused"
   },
   {
@@ -2351,7 +2351,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:211:stop!"
   },
   {
@@ -2361,7 +2361,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:214:stop!"
   },
   {
@@ -2373,7 +2373,7 @@
    "kind": "status-map",
    "end-line": 215,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2382,7 +2382,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:218:stop!"
   },
   {
@@ -2394,7 +2394,7 @@
    "kind": "status-map",
    "end-line": 219,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2403,7 +2403,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:231:latest-transition"
   },
   {
@@ -2413,7 +2413,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:234:accepted!"
   },
   {
@@ -2423,7 +2423,7 @@
    "kind": "call",
    "reason": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:235:invoke-once"
   },
   {
@@ -2433,7 +2433,7 @@
    "kind": "call",
    "reason": "requeue-phase",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:235:requeue-phase"
   },
   {
@@ -2443,7 +2443,7 @@
    "kind": "call",
    "reason": "last-receipt-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:236:last-receipt-pin"
   },
   {
@@ -2453,7 +2453,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:245:stop!"
   },
   {
@@ -2463,7 +2463,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:245:refusal"
   },
   {
@@ -2473,7 +2473,7 @@
    "kind": "refusal",
    "reason": "coordinator/retry-attribution-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:245:retry-attribution-refused"
   },
   {
@@ -2483,7 +2483,7 @@
    "kind": "call",
    "reason": "ledger/pending-requeue",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:247:ledger/pending-requeue"
   },
   {
@@ -2495,7 +2495,7 @@
    "kind": "status-map",
    "end-line": 251,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2504,7 +2504,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:255:stop!"
   },
   {
@@ -2514,7 +2514,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:255:refusal"
   },
   {
@@ -2524,7 +2524,7 @@
    "kind": "refusal",
    "reason": "coordinator/retry-click-id-unavailable",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:255:retry-click-id-unavailable"
   },
   {
@@ -2534,7 +2534,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:258:accepted!"
   },
   {
@@ -2544,7 +2544,7 @@
    "kind": "call",
    "reason": "ledger/append-requeue",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:258:ledger/append-requeue"
   },
   {
@@ -2557,7 +2557,7 @@
    "kind": "status-map",
    "end-line": 262,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -2566,7 +2566,7 @@
    "kind": "call",
    "reason": "active-entry",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:279:active-entry"
   },
   {
@@ -2576,7 +2576,7 @@
    "kind": "call",
    "reason": "verify-transaction",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:281:verify-transaction"
   },
   {
@@ -2586,7 +2586,7 @@
    "kind": "absent-term",
    "reason": "transaction",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:282:transaction"
   },
   {
@@ -2596,7 +2596,7 @@
    "kind": "call",
    "reason": "ledger/validate-ledger",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:283:ledger/validate-ledger"
   },
   {
@@ -2606,7 +2606,7 @@
    "kind": "absent-term",
    "reason": "ledger",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:284:ledger"
   },
   {
@@ -2616,7 +2616,7 @@
    "kind": "absent-term",
    "reason": "active-injury",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:285:active-injury"
   },
   {
@@ -2626,7 +2626,7 @@
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:286:attempt"
   },
   {
@@ -2636,7 +2636,7 @@
    "kind": "absent-term",
    "reason": "repair-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:288:repair-id"
   },
   {
@@ -2646,7 +2646,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:290:stop!"
   },
   {
@@ -2656,7 +2656,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:290:refusal"
   },
   {
@@ -2666,7 +2666,7 @@
    "kind": "refusal",
    "reason": "coordinator/input-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:290:input-refused"
   },
   {
@@ -2676,7 +2676,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:293:latest-transition"
   },
   {
@@ -2686,7 +2686,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:295:accepted!"
   },
   {
@@ -2696,7 +2696,7 @@
    "kind": "call",
    "reason": "append-transition!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:296:append-transition!"
   },
   {
@@ -2706,7 +2706,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:307:latest-transition"
   },
   {
@@ -2716,7 +2716,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:310:stop!"
   },
   {
@@ -2726,7 +2726,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:310:refusal"
   },
   {
@@ -2736,7 +2736,7 @@
    "kind": "refusal",
    "reason": "coordinator/resume-state-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:310:resume-state-refused"
   },
   {
@@ -2746,7 +2746,7 @@
    "kind": "call",
    "reason": "checkpoint!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:313:checkpoint!"
   },
   {
@@ -2756,7 +2756,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:315:accepted!"
   },
   {
@@ -2766,7 +2766,7 @@
    "kind": "call",
    "reason": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:316:invoke-once"
   },
   {
@@ -2776,7 +2776,7 @@
    "kind": "call",
    "reason": "held!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:321:held!"
   },
   {
@@ -2786,7 +2786,7 @@
    "kind": "held",
    "reason": "author-failed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:321:author-failed"
   },
   {
@@ -2796,7 +2796,7 @@
    "kind": "call",
    "reason": "sha?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:324:sha?"
   },
   {
@@ -2806,7 +2806,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:324:nonblank?"
   },
   {
@@ -2816,7 +2816,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:325:stop!"
   },
   {
@@ -2826,7 +2826,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:325:refusal"
   },
   {
@@ -2836,7 +2836,7 @@
    "kind": "refusal",
    "reason": "coordinator/author-payload-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:325:author-payload-refused"
   },
   {
@@ -2846,7 +2846,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:327:latest-transition"
   },
   {
@@ -2856,7 +2856,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:328:accepted!"
   },
   {
@@ -2866,7 +2866,7 @@
    "kind": "call",
    "reason": "append-transition!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:329:append-transition!"
   },
   {
@@ -2876,7 +2876,7 @@
    "kind": "call",
    "reason": "checkpoint!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:336:checkpoint!"
   },
   {
@@ -2886,7 +2886,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:337:accepted!"
   },
   {
@@ -2896,7 +2896,7 @@
    "kind": "call",
    "reason": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:338:invoke-once"
   },
   {
@@ -2906,7 +2906,7 @@
    "kind": "call",
    "reason": "held!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:343:held!"
   },
   {
@@ -2916,7 +2916,7 @@
    "kind": "held",
    "reason": "review-rejected",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:343:review-rejected"
   },
   {
@@ -2926,7 +2926,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:345:stop!"
   },
   {
@@ -2936,7 +2936,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:345:refusal"
   },
   {
@@ -2946,7 +2946,7 @@
    "kind": "refusal",
    "reason": "coordinator/review-patch-substitution",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:345:review-patch-substitution"
   },
   {
@@ -2956,7 +2956,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:347:latest-transition"
   },
   {
@@ -2966,7 +2966,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:348:accepted!"
   },
   {
@@ -2976,7 +2976,7 @@
    "kind": "call",
    "reason": "append-transition!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:349:append-transition!"
   },
   {
@@ -2986,7 +2986,7 @@
    "kind": "call",
    "reason": "checkpoint!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:359:checkpoint!"
   },
   {
@@ -2996,7 +2996,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:360:accepted!"
   },
   {
@@ -3006,7 +3006,7 @@
    "kind": "call",
    "reason": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:361:invoke-once"
   },
   {
@@ -3016,7 +3016,7 @@
    "kind": "call",
    "reason": "held!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:366:held!"
   },
   {
@@ -3026,7 +3026,7 @@
    "kind": "held",
    "reason": "enact-failed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:366:enact-failed"
   },
   {
@@ -3036,7 +3036,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:370:nonblank?"
   },
   {
@@ -3046,7 +3046,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:371:stop!"
   },
   {
@@ -3056,7 +3056,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:371:refusal"
   },
   {
@@ -3066,7 +3066,7 @@
    "kind": "refusal",
    "reason": "coordinator/enact-payload-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:371:enact-payload-refused"
   },
   {
@@ -3076,7 +3076,7 @@
    "kind": "call",
    "reason": "latest-transition",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:374:latest-transition"
   },
   {
@@ -3086,7 +3086,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:375:accepted!"
   },
   {
@@ -3096,7 +3096,7 @@
    "kind": "call",
    "reason": "append-transition!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:376:append-transition!"
   },
   {
@@ -3106,7 +3106,7 @@
    "kind": "call",
    "reason": "checkpoint!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:388:checkpoint!"
   },
   {
@@ -3116,7 +3116,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:389:accepted!"
   },
   {
@@ -3126,7 +3126,7 @@
    "kind": "call",
    "reason": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:390:invoke-once"
   },
   {
@@ -3136,7 +3136,7 @@
    "kind": "call",
    "reason": "stop!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:398:stop!"
   },
   {
@@ -3146,7 +3146,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:398:refusal"
   },
   {
@@ -3156,7 +3156,7 @@
    "kind": "refusal",
    "reason": "coordinator/retry-attribution-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:398:retry-attribution-refused"
   },
   {
@@ -3166,7 +3166,7 @@
    "kind": "call",
    "reason": "coordinate-queued-retry",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:402:coordinate-queued-retry"
   },
   {
@@ -3176,7 +3176,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:406:accepted!"
   },
   {
@@ -3186,7 +3186,7 @@
    "kind": "call",
    "reason": "append-transition!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:407:append-transition!"
   },
   {
@@ -3198,7 +3198,7 @@
    "kind": "status-map",
    "end-line": 415,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -3207,7 +3207,7 @@
    "kind": "call",
    "reason": "accepted!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:418:accepted!"
   },
   {
@@ -3217,7 +3217,7 @@
    "kind": "call",
    "reason": "ledger/append-retry-result",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:419:ledger/append-retry-result"
   },
   {
@@ -3229,7 +3229,7 @@
    "kind": "status-map",
    "end-line": 427,
    "tag": "C",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "C",
@@ -3238,7 +3238,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:430:refusal"
   },
   {
@@ -3248,7 +3248,7 @@
    "kind": "refusal",
    "reason": "coordinator/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:430:malformed"
   },
   {
@@ -3258,7 +3258,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:432:refusal"
   },
   {
@@ -3268,7 +3268,7 @@
    "kind": "refusal",
    "reason": "coordinator/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "C:432:malformed"
   },
   {
@@ -3280,7 +3280,7 @@
    "kind": "status-map",
    "end-line": 21,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3289,7 +3289,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:30:load-identity/sha256"
   },
   {
@@ -3299,7 +3299,7 @@
    "kind": "call",
    "reason": "receipt-bytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:30:receipt-bytes"
   },
   {
@@ -3309,7 +3309,7 @@
    "kind": "call",
    "reason": "Files/readAllBytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:44:Files/readAllBytes"
   },
   {
@@ -3319,7 +3319,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:44:io/file"
   },
   {
@@ -3329,7 +3329,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:45:load-identity/sha256"
   },
   {
@@ -3339,7 +3339,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:46:refusal"
   },
   {
@@ -3349,7 +3349,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:46:diagnosis-source-pin-mismatch"
   },
   {
@@ -3359,7 +3359,7 @@
    "kind": "call",
    "reason": "store/read-one-form",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:47:store/read-one-form"
   },
   {
@@ -3371,7 +3371,7 @@
    "kind": "status-map",
    "end-line": 49,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3380,7 +3380,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:50:refusal"
   },
   {
@@ -3390,7 +3390,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:50:diagnosis-source-unreadable"
   },
   {
@@ -3400,7 +3400,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:53:refusal"
   },
   {
@@ -3410,7 +3410,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:53:diagnosis-source-unreadable"
   },
   {
@@ -3420,7 +3420,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:61:io/file"
   },
   {
@@ -3430,7 +3430,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:62:io/file"
   },
   {
@@ -3440,7 +3440,7 @@
    "kind": "call",
    "reason": "receipt-bytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:63:receipt-bytes"
   },
   {
@@ -3450,7 +3450,7 @@
    "kind": "call",
    "reason": "Files/createDirectories",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:64:Files/createDirectories"
   },
   {
@@ -3460,7 +3460,7 @@
    "kind": "call",
    "reason": "Files/createTempFile",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:65:Files/createTempFile"
   },
   {
@@ -3470,7 +3470,7 @@
    "kind": "call",
    "reason": "Files/isRegularFile",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:68:Files/isRegularFile"
   },
   {
@@ -3480,7 +3480,7 @@
    "kind": "call",
    "reason": "Files/readAllBytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:70:Files/readAllBytes"
   },
   {
@@ -3492,7 +3492,7 @@
    "kind": "status-map",
    "end-line": 72,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3501,7 +3501,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:72:load-identity/sha256"
   },
   {
@@ -3511,7 +3511,7 @@
    "kind": "call",
    "reason": "Files/exists",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:75:Files/exists"
   },
   {
@@ -3521,7 +3521,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:76:refusal"
   },
   {
@@ -3531,7 +3531,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:76:diagnosis-path-conflict"
   },
   {
@@ -3541,7 +3541,7 @@
    "kind": "call",
    "reason": "Files/write",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:79:Files/write"
   },
   {
@@ -3551,7 +3551,7 @@
    "kind": "call",
    "reason": "Files/move",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:81:Files/move"
   },
   {
@@ -3561,7 +3561,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:86:refusal"
   },
   {
@@ -3571,7 +3571,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:86:diagnosis-path-conflict"
   },
   {
@@ -3581,7 +3581,7 @@
    "kind": "call",
    "reason": "Files/deleteIfExists",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:87:Files/deleteIfExists"
   },
   {
@@ -3591,7 +3591,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:89:refusal"
   },
   {
@@ -3601,7 +3601,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:89:diagnosis-persist-failed"
   },
   {
@@ -3611,7 +3611,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:106:io/file"
   },
   {
@@ -3621,7 +3621,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:107:io/file"
   },
   {
@@ -3631,7 +3631,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:108:io/file"
   },
   {
@@ -3641,7 +3641,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:128:str/blank?"
   },
   {
@@ -3651,7 +3651,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:129:str/blank?"
   },
   {
@@ -3661,7 +3661,7 @@
    "kind": "call",
    "reason": "repository-file?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:133:repository-file?"
   },
   {
@@ -3671,7 +3671,7 @@
    "kind": "call",
    "reason": "resolvable-var?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:135:resolvable-var?"
   },
   {
@@ -3681,7 +3681,7 @@
    "kind": "call",
    "reason": "repository-file?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:136:repository-file?"
   },
   {
@@ -3693,7 +3693,7 @@
    "kind": "status-map",
    "end-line": 157,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3702,7 +3702,7 @@
    "kind": "call",
    "reason": "active-cause-pin",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:159:active-cause-pin"
   },
   {
@@ -3712,7 +3712,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:163:refusal"
   },
   {
@@ -3722,7 +3722,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:163:diagnosis-source-pin-unavailable"
   },
   {
@@ -3732,7 +3732,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:167:refusal"
   },
   {
@@ -3742,7 +3742,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:167:diagnosis-port-unavailable"
   },
   {
@@ -3752,7 +3752,7 @@
    "kind": "call",
    "reason": "source-record",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:172:source-record"
   },
   {
@@ -3765,7 +3765,7 @@
    "kind": "status-map",
    "end-line": 184,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3774,7 +3774,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:187:refusal"
   },
   {
@@ -3784,7 +3784,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-returned-nil",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:187:diagnosis-port-returned-nil"
   },
   {
@@ -3794,7 +3794,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:191:refusal"
   },
   {
@@ -3804,7 +3804,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:191:diagnosis-port-malformed"
   },
   {
@@ -3814,7 +3814,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:195:refusal"
   },
   {
@@ -3824,7 +3824,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:195:diagnosis-unavailable"
   },
   {
@@ -3834,7 +3834,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:206:refusal"
   },
   {
@@ -3844,7 +3844,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-response-missing",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:206:diagnosis-response-missing"
   },
   {
@@ -3854,7 +3854,7 @@
    "kind": "call",
    "reason": "production-functions-defects",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:209:production-functions-defects"
   },
   {
@@ -3864,7 +3864,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:212:refusal"
   },
   {
@@ -3874,7 +3874,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-production-functions-absent",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:212:diagnosis-production-functions-absent"
   },
   {
@@ -3884,7 +3884,7 @@
    "kind": "call",
    "reason": "production-functions-defects",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:213:production-functions-defects"
   },
   {
@@ -3896,7 +3896,7 @@
    "kind": "status-map",
    "end-line": 225,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3905,7 +3905,7 @@
    "kind": "call",
    "reason": "persist-diagnosis!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:226:persist-diagnosis!"
   },
   {
@@ -3915,7 +3915,7 @@
    "kind": "call",
    "reason": "diagnosis-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:227:diagnosis-path"
   },
   {
@@ -3927,7 +3927,7 @@
    "kind": "status-map",
    "end-line": 234,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -3936,7 +3936,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:239:load-identity/sha256"
   },
   {
@@ -3946,7 +3946,7 @@
    "kind": "call",
    "reason": "receipt-bytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:239:receipt-bytes"
   },
   {
@@ -3956,7 +3956,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:248:pin?"
   },
   {
@@ -3966,7 +3966,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:249:refusal"
   },
   {
@@ -3976,7 +3976,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:249:acceptance-diagnosis-pin-unavailable"
   },
   {
@@ -3986,7 +3986,7 @@
    "kind": "call",
    "reason": "Files/readAllBytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:253:Files/readAllBytes"
   },
   {
@@ -3996,7 +3996,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:253:io/file"
   },
   {
@@ -4006,7 +4006,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:255:load-identity/sha256"
   },
   {
@@ -4016,7 +4016,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:256:refusal"
   },
   {
@@ -4026,7 +4026,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:256:acceptance-diagnosis-pin-mismatch"
   },
   {
@@ -4036,7 +4036,7 @@
    "kind": "call",
    "reason": "store/read-one-form",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:259:store/read-one-form"
   },
   {
@@ -4046,7 +4046,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:266:refusal"
   },
   {
@@ -4056,7 +4056,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:266:acceptance-diagnosis-unreadable"
   },
   {
@@ -4066,7 +4066,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:268:refusal"
   },
   {
@@ -4076,7 +4076,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:268:acceptance-diagnosis-unreadable"
   },
   {
@@ -4086,7 +4086,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:270:refusal"
   },
   {
@@ -4096,7 +4096,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:270:acceptance-diagnosis-unavailable"
   },
   {
@@ -4106,7 +4106,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:272:refusal"
   },
   {
@@ -4116,7 +4116,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:272:acceptance-diagnosis-unavailable"
   },
   {
@@ -4126,7 +4126,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:274:refusal"
   },
   {
@@ -4136,7 +4136,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:274:acceptance-diagnosis-identity-mismatch"
   },
   {
@@ -4146,7 +4146,7 @@
    "kind": "call",
    "reason": "production-functions-defects",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:277:production-functions-defects"
   },
   {
@@ -4156,7 +4156,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:278:refusal"
   },
   {
@@ -4166,7 +4166,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-production-functions-absent",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:278:diagnosis-production-functions-absent"
   },
   {
@@ -4176,7 +4176,7 @@
    "kind": "call",
    "reason": "production-functions-defects",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:279:production-functions-defects"
   },
   {
@@ -4188,7 +4188,7 @@
    "kind": "status-map",
    "end-line": 280,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4197,7 +4197,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:282:refusal"
   },
   {
@@ -4207,7 +4207,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:282:acceptance-diagnosis-unreadable"
   },
   {
@@ -4217,7 +4217,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:296:str/blank?"
   },
   {
@@ -4227,7 +4227,7 @@
    "kind": "call",
    "reason": "str/split",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:297:str/split"
   },
   {
@@ -4237,7 +4237,7 @@
    "kind": "call",
    "reason": "str/join",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:299:str/join"
   },
   {
@@ -4247,7 +4247,7 @@
    "kind": "call",
    "reason": "str/replace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:299:str/replace"
   },
   {
@@ -4257,7 +4257,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:304:str/blank?"
   },
   {
@@ -4267,7 +4267,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:308:str/blank?"
   },
   {
@@ -4277,7 +4277,7 @@
    "kind": "call",
    "reason": "command-namespace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:310:command-namespace"
   },
   {
@@ -4287,7 +4287,7 @@
    "kind": "call",
    "reason": "namespace-test-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:311:namespace-test-path"
   },
   {
@@ -4297,7 +4297,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:316:str/blank?"
   },
   {
@@ -4307,7 +4307,7 @@
    "kind": "call",
    "reason": "source-shaped?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:320:source-shaped?"
   },
   {
@@ -4317,7 +4317,7 @@
    "kind": "call",
    "reason": "command-namespace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:322:command-namespace"
   },
   {
@@ -4327,7 +4327,7 @@
    "kind": "call",
    "reason": "namespace-test-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:324:namespace-test-path"
   },
   {
@@ -4337,7 +4337,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:331:io/file"
   },
   {
@@ -4347,7 +4347,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:332:io/file"
   },
   {
@@ -4357,7 +4357,7 @@
    "kind": "call",
    "reason": "receipt-bytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:333:receipt-bytes"
   },
   {
@@ -4367,7 +4367,7 @@
    "kind": "call",
    "reason": "Files/createDirectories",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:334:Files/createDirectories"
   },
   {
@@ -4377,7 +4377,7 @@
    "kind": "call",
    "reason": "Files/createTempFile",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:335:Files/createTempFile"
   },
   {
@@ -4387,7 +4387,7 @@
    "kind": "call",
    "reason": "Files/isRegularFile",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:338:Files/isRegularFile"
   },
   {
@@ -4397,7 +4397,7 @@
    "kind": "call",
    "reason": "Files/readAllBytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:340:Files/readAllBytes"
   },
   {
@@ -4409,7 +4409,7 @@
    "kind": "status-map",
    "end-line": 342,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4418,7 +4418,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:342:load-identity/sha256"
   },
   {
@@ -4428,7 +4428,7 @@
    "kind": "call",
    "reason": "Files/exists",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:345:Files/exists"
   },
   {
@@ -4438,7 +4438,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:346:refusal"
   },
   {
@@ -4448,7 +4448,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:346:acceptance-path-conflict"
   },
   {
@@ -4458,7 +4458,7 @@
    "kind": "call",
    "reason": "Files/write",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:348:Files/write"
   },
   {
@@ -4468,7 +4468,7 @@
    "kind": "call",
    "reason": "Files/move",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:350:Files/move"
   },
   {
@@ -4478,7 +4478,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:355:refusal"
   },
   {
@@ -4488,7 +4488,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:355:acceptance-path-conflict"
   },
   {
@@ -4498,7 +4498,7 @@
    "kind": "call",
    "reason": "Files/deleteIfExists",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:356:Files/deleteIfExists"
   },
   {
@@ -4508,7 +4508,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:358:refusal"
   },
   {
@@ -4518,7 +4518,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:358:acceptance-persist-failed"
   },
   {
@@ -4528,7 +4528,7 @@
    "kind": "call",
    "reason": "str/includes?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:386:str/includes?"
   },
   {
@@ -4538,7 +4538,7 @@
    "kind": "call",
    "reason": "resolve-var",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:393:resolve-var"
   },
   {
@@ -4548,7 +4548,7 @@
    "kind": "call",
    "reason": "describe-function",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:404:describe-function"
   },
   {
@@ -4558,7 +4558,7 @@
    "kind": "call",
    "reason": "harness-section",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:422:harness-section"
   },
   {
@@ -4571,7 +4571,7 @@
    "kind": "status-map",
    "end-line": 466,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4580,7 +4580,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:469:refusal"
   },
   {
@@ -4590,7 +4590,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-returned-nil",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:469:acceptance-port-returned-nil"
   },
   {
@@ -4600,7 +4600,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:472:refusal"
   },
   {
@@ -4610,7 +4610,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:472:acceptance-port-malformed"
   },
   {
@@ -4620,7 +4620,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:485:refusal"
   },
   {
@@ -4630,7 +4630,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:485:acceptance-unavailable"
   },
   {
@@ -4640,7 +4640,7 @@
    "kind": "call",
    "reason": "producer-trace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:491:producer-trace"
   },
   {
@@ -4650,7 +4650,7 @@
    "kind": "call",
    "reason": "source-mismatch?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:492:source-mismatch?"
   },
   {
@@ -4660,7 +4660,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:493:refusal"
   },
   {
@@ -4670,7 +4670,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-source-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:493:acceptance-proposal-source-mismatch"
   },
   {
@@ -4680,7 +4680,7 @@
    "kind": "call",
    "reason": "producer-trace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:495:producer-trace"
   },
   {
@@ -4690,7 +4690,7 @@
    "kind": "call",
    "reason": "concrete-acceptance?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:496:concrete-acceptance?"
   },
   {
@@ -4700,7 +4700,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:497:refusal"
   },
   {
@@ -4710,7 +4710,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-prose-or-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:497:acceptance-prose-or-malformed"
   },
   {
@@ -4720,7 +4720,7 @@
    "kind": "call",
    "reason": "producer-trace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:499:producer-trace"
   },
   {
@@ -4732,7 +4732,7 @@
    "kind": "status-map",
    "end-line": 509,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4741,7 +4741,7 @@
    "kind": "call",
    "reason": "persist-acceptance!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:510:persist-acceptance!"
   },
   {
@@ -4751,7 +4751,7 @@
    "kind": "call",
    "reason": "acceptance-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:511:acceptance-path"
   },
   {
@@ -4763,7 +4763,7 @@
    "kind": "status-map",
    "end-line": 520,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4772,7 +4772,7 @@
    "kind": "call",
    "reason": "producer-trace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:521:producer-trace"
   },
   {
@@ -4782,7 +4782,7 @@
    "kind": "call",
    "reason": "producer-trace",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:524:producer-trace"
   },
   {
@@ -4794,7 +4794,7 @@
    "kind": "status-map",
    "end-line": 538,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -4803,7 +4803,7 @@
    "kind": "call",
    "reason": "read-diagnosis-receipt",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:539:read-diagnosis-receipt"
   },
   {
@@ -4813,7 +4813,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:548:refusal"
   },
   {
@@ -4823,7 +4823,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:548:acceptance-port-unavailable"
   },
   {
@@ -4833,7 +4833,7 @@
    "kind": "call",
    "reason": "request-enrichment",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:553:request-enrichment"
   },
   {
@@ -4843,7 +4843,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:556:refusal"
   },
   {
@@ -4853,7 +4853,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-request-function-unresolvable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:556:acceptance-request-function-unresolvable"
   },
   {
@@ -4863,7 +4863,7 @@
    "kind": "call",
    "reason": "produce-acceptance-from-request!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:560:produce-acceptance-from-request!"
   },
   {
@@ -4873,7 +4873,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:565:pin?"
   },
   {
@@ -4883,7 +4883,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:566:refusal"
   },
   {
@@ -4893,7 +4893,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:566:acceptance-proposal-pin-unavailable"
   },
   {
@@ -4903,7 +4903,7 @@
    "kind": "call",
    "reason": "Files/readAllBytes",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:568:Files/readAllBytes"
   },
   {
@@ -4913,7 +4913,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:568:io/file"
   },
   {
@@ -4923,7 +4923,7 @@
    "kind": "call",
    "reason": "load-identity/sha256",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:569:load-identity/sha256"
   },
   {
@@ -4933,7 +4933,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:570:refusal"
   },
   {
@@ -4943,7 +4943,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:570:acceptance-proposal-pin-mismatch"
   },
   {
@@ -4953,7 +4953,7 @@
    "kind": "call",
    "reason": "store/read-one-form",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:571:store/read-one-form"
   },
   {
@@ -4963,7 +4963,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:577:refusal"
   },
   {
@@ -4973,7 +4973,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:577:acceptance-proposal-unreadable"
   },
   {
@@ -4983,7 +4983,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:579:refusal"
   },
   {
@@ -4993,7 +4993,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:579:acceptance-proposal-unreadable"
   },
   {
@@ -5003,7 +5003,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:581:refusal"
   },
   {
@@ -5013,7 +5013,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-not-proposed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:581:acceptance-proposal-not-proposed"
   },
   {
@@ -5023,7 +5023,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:583:refusal"
   },
   {
@@ -5033,7 +5033,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-review-state-invalid",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:583:acceptance-proposal-review-state-invalid"
   },
   {
@@ -5043,7 +5043,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:585:refusal"
   },
   {
@@ -5053,7 +5053,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:585:acceptance-proposal-identity-mismatch"
   },
   {
@@ -5063,7 +5063,7 @@
    "kind": "call",
    "reason": "source-mismatch?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:586:source-mismatch?"
   },
   {
@@ -5073,7 +5073,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:587:refusal"
   },
   {
@@ -5083,7 +5083,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-source-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:587:acceptance-proposal-source-mismatch"
   },
   {
@@ -5093,7 +5093,7 @@
    "kind": "call",
    "reason": "concrete-acceptance?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:588:concrete-acceptance?"
   },
   {
@@ -5103,7 +5103,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:589:refusal"
   },
   {
@@ -5113,7 +5113,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-not-concrete",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:589:acceptance-proposal-not-concrete"
   },
   {
@@ -5125,7 +5125,7 @@
    "kind": "status-map",
    "end-line": 590,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5134,7 +5134,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:592:refusal"
   },
   {
@@ -5144,7 +5144,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:592:acceptance-proposal-unreadable"
   },
   {
@@ -5154,7 +5154,7 @@
    "kind": "call",
    "reason": "read-acceptance-proposal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:603:read-acceptance-proposal"
   },
   {
@@ -5164,7 +5164,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:610:refusal"
   },
   {
@@ -5174,7 +5174,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-run-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:610:acceptance-run-port-unavailable"
   },
   {
@@ -5184,7 +5184,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:613:refusal"
   },
   {
@@ -5194,7 +5194,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:613:acceptance-review-port-unavailable"
   },
   {
@@ -5207,7 +5207,7 @@
    "kind": "status-map",
    "end-line": 620,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5216,7 +5216,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:627:pin?"
   },
   {
@@ -5229,7 +5229,7 @@
    "kind": "status-map",
    "end-line": 643,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5238,7 +5238,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:648:refusal"
   },
   {
@@ -5248,7 +5248,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-run-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:648:acceptance-run-refused"
   },
   {
@@ -5258,7 +5258,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:652:refusal"
   },
   {
@@ -5268,7 +5268,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-test-passes-before-repair",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:652:acceptance-test-passes-before-repair"
   },
   {
@@ -5278,7 +5278,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:656:refusal"
   },
   {
@@ -5288,7 +5288,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:656:acceptance-review-malformed"
   },
   {
@@ -5298,7 +5298,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:658:refusal"
   },
   {
@@ -5308,7 +5308,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:658:acceptance-review-refused"
   },
   {
@@ -5318,7 +5318,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:668:refusal"
   },
   {
@@ -5328,7 +5328,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:668:acceptance-review-identity-mismatch"
   },
   {
@@ -5340,7 +5340,7 @@
    "kind": "status-map",
    "end-line": 679,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5349,7 +5349,7 @@
    "kind": "call",
    "reason": "persist-acceptance!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:680:persist-acceptance!"
   },
   {
@@ -5359,7 +5359,7 @@
    "kind": "call",
    "reason": "acceptance-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:681:acceptance-path"
   },
   {
@@ -5371,7 +5371,7 @@
    "kind": "status-map",
    "end-line": 692,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-acceptance",
@@ -5382,7 +5382,7 @@
    "kind": "status-map",
    "end-line": 703,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5391,7 +5391,7 @@
    "kind": "call",
    "reason": "produce-acceptance!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:706:produce-acceptance!"
   },
   {
@@ -5401,7 +5401,7 @@
    "kind": "call",
    "reason": "admit-acceptance!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:708:admit-acceptance!"
   },
   {
@@ -5414,7 +5414,7 @@
    "kind": "status-map",
    "end-line": 712,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-acceptance",
@@ -5426,7 +5426,7 @@
    "kind": "status-map",
    "end-line": 717,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5435,7 +5435,7 @@
    "kind": "call",
    "reason": "coordinator/verify-transaction",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:720:coordinator/verify-transaction"
   },
   {
@@ -5445,7 +5445,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:721:refusal"
   },
   {
@@ -5455,7 +5455,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/transaction-invalid",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:721:transaction-invalid"
   },
   {
@@ -5465,7 +5465,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:722:io/file"
   },
   {
@@ -5475,7 +5475,7 @@
    "kind": "call",
    "reason": "Files/createDirectories",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:723:Files/createDirectories"
   },
   {
@@ -5485,7 +5485,7 @@
    "kind": "call",
    "reason": "Files/createTempFile",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:724:Files/createTempFile"
   },
   {
@@ -5495,7 +5495,7 @@
    "kind": "call",
    "reason": "Files/move",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:727:Files/move"
   },
   {
@@ -5507,7 +5507,7 @@
    "kind": "status-map",
    "end-line": 731,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5516,7 +5516,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:733:refusal"
   },
   {
@@ -5526,7 +5526,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/transaction-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:733:transaction-persist-failed"
   },
   {
@@ -5536,7 +5536,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:736:io/file"
   },
   {
@@ -5546,7 +5546,7 @@
    "kind": "call",
    "reason": "store/read-one-form",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:737:store/read-one-form"
   },
   {
@@ -5556,7 +5556,7 @@
    "kind": "call",
    "reason": "coordinator/verify-transaction",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:739:coordinator/verify-transaction"
   },
   {
@@ -5566,7 +5566,7 @@
    "kind": "call",
    "reason": "coordinator/seal-port-receipt",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:757:coordinator/seal-port-receipt"
   },
   {
@@ -5578,7 +5578,7 @@
    "kind": "status-map",
    "end-line": 763,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5587,7 +5587,7 @@
    "kind": "call",
    "reason": "coordinator/seal-port-receipt",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:767:coordinator/seal-port-receipt"
   },
   {
@@ -5599,7 +5599,7 @@
    "kind": "status-map",
    "end-line": 771,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5608,7 +5608,7 @@
    "kind": "call",
    "reason": "agency-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:776:agency-port"
   },
   {
@@ -5618,7 +5618,7 @@
    "kind": "call",
    "reason": "agency-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:777:agency-port"
   },
   {
@@ -5628,7 +5628,7 @@
    "kind": "call",
    "reason": "endpoint-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:778:endpoint-port"
   },
   {
@@ -5638,7 +5638,7 @@
    "kind": "call",
    "reason": "endpoint-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:779:endpoint-port"
   },
   {
@@ -5648,7 +5648,7 @@
    "kind": "call",
    "reason": "str/starts-with?",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:798:str/starts-with?"
   },
   {
@@ -5658,7 +5658,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:813:io/file"
   },
   {
@@ -5668,7 +5668,7 @@
    "kind": "call",
    "reason": "store/load-durable-ledger",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:814:store/load-durable-ledger"
   },
   {
@@ -5678,7 +5678,7 @@
    "kind": "call",
    "reason": "ledger/active-injuries",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:816:ledger/active-injuries"
   },
   {
@@ -5691,7 +5691,7 @@
    "kind": "status-map",
    "end-line": 832,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-diagnosis",
@@ -5702,7 +5702,7 @@
    "kind": "status-map",
    "end-line": 836,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-diagnosis",
@@ -5714,7 +5714,7 @@
    "kind": "status-map",
    "end-line": 839,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-diagnosis",
@@ -5726,7 +5726,7 @@
    "kind": "status-map",
    "end-line": 842,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "prepare-diagnosis",
@@ -5738,7 +5738,7 @@
    "kind": "status-map",
    "end-line": 845,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5747,7 +5747,7 @@
    "kind": "call",
    "reason": "produce-diagnosis!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:851:produce-diagnosis!"
   },
   {
@@ -5757,7 +5757,7 @@
    "kind": "call",
    "reason": "diagnosis-context",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:859:diagnosis-context"
   },
   {
@@ -5767,7 +5767,7 @@
    "kind": "absent-term",
    "reason": "transaction-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:868:transaction-path"
   },
   {
@@ -5777,7 +5777,7 @@
    "kind": "call",
    "reason": "effect-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:869:effect-ports"
   },
   {
@@ -5787,7 +5787,7 @@
    "kind": "absent-term",
    "reason": "repair-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:869:repair-ports"
   },
   {
@@ -5797,7 +5797,7 @@
    "kind": "absent-term",
    "reason": "acceptance-run-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:871:acceptance-run-port"
   },
   {
@@ -5807,7 +5807,7 @@
    "kind": "absent-term",
    "reason": "diagnosis-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:874:diagnosis-port"
   },
   {
@@ -5817,7 +5817,7 @@
    "kind": "absent-term",
    "reason": "acceptance-proposal-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:877:acceptance-proposal-port"
   },
   {
@@ -5827,7 +5827,7 @@
    "kind": "absent-term",
    "reason": "acceptance-review-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:880:acceptance-review-port"
   },
   {
@@ -5837,7 +5837,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:888:refusal"
   },
   {
@@ -5847,7 +5847,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/ledger-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:888:ledger-unreadable"
   },
   {
@@ -5859,7 +5859,7 @@
    "kind": "status-map",
    "end-line": 895,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "production-readiness",
@@ -5870,7 +5870,7 @@
    "kind": "status-map",
    "end-line": 895,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5879,7 +5879,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:898:refusal"
   },
   {
@@ -5889,7 +5889,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/production-config-required",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:898:production-config-required"
   },
   {
@@ -5901,7 +5901,7 @@
    "kind": "status-map",
    "end-line": 904,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "diagnosis-transaction-binding",
@@ -5912,7 +5912,7 @@
    "kind": "status-map",
    "end-line": 913,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "diagnosis-transaction-binding",
@@ -5923,7 +5923,7 @@
    "kind": "status-map",
    "end-line": 921,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5932,7 +5932,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:922:refusal"
   },
   {
@@ -5942,7 +5942,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-transaction-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:922:diagnosis-transaction-mismatch"
   },
   {
@@ -5954,7 +5954,7 @@
    "kind": "status-map",
    "end-line": 934,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5963,7 +5963,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:936:refusal"
   },
   {
@@ -5973,7 +5973,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-transaction-unadmitted",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:936:acceptance-transaction-unadmitted"
   },
   {
@@ -5985,7 +5985,7 @@
    "kind": "status-map",
    "end-line": 947,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -5994,7 +5994,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:948:refusal"
   },
   {
@@ -6004,7 +6004,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-transaction-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:948:acceptance-transaction-mismatch"
   },
   {
@@ -6014,7 +6014,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:958:io/file"
   },
   {
@@ -6024,7 +6024,7 @@
    "kind": "call",
    "reason": "store/load-durable-ledger",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:959:store/load-durable-ledger"
   },
   {
@@ -6036,7 +6036,7 @@
    "kind": "status-map",
    "end-line": 969,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -6045,7 +6045,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:970:refusal"
   },
   {
@@ -6055,7 +6055,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/retry-attribution-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:970:retry-attribution-refused"
   },
   {
@@ -6065,7 +6065,7 @@
    "kind": "call",
    "reason": "io/file",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:980:io/file"
   },
   {
@@ -6075,7 +6075,7 @@
    "kind": "call",
    "reason": "store/load-durable-ledger",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:981:store/load-durable-ledger"
   },
   {
@@ -6085,7 +6085,7 @@
    "kind": "call",
    "reason": "ledger/active-injuries",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:983:ledger/active-injuries"
   },
   {
@@ -6095,7 +6095,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:986:refusal"
   },
   {
@@ -6105,7 +6105,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/active-set-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:986:active-set-unavailable"
   },
   {
@@ -6115,7 +6115,7 @@
    "kind": "call",
    "reason": "effect-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:991:effect-ports"
   },
   {
@@ -6125,7 +6125,7 @@
    "kind": "absent-term",
    "reason": "transaction-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:993:transaction-path"
   },
   {
@@ -6135,7 +6135,7 @@
    "kind": "absent-term",
    "reason": "repair-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:994:repair-ports"
   },
   {
@@ -6145,7 +6145,7 @@
    "kind": "absent-term",
    "reason": "acceptance-run-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:996:acceptance-run-port"
   },
   {
@@ -6155,7 +6155,7 @@
    "kind": "absent-term",
    "reason": "diagnosis-evidence",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:997:diagnosis-evidence"
   },
   {
@@ -6165,7 +6165,7 @@
    "kind": "absent-term",
    "reason": "acceptance-test",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:998:acceptance-test"
   },
   {
@@ -6175,7 +6175,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1000:refusal"
   },
   {
@@ -6185,7 +6185,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/production-config-required",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1000:production-config-required"
   },
   {
@@ -6195,7 +6195,7 @@
    "kind": "call",
    "reason": "load-transaction",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1003:load-transaction"
   },
   {
@@ -6205,7 +6205,7 @@
    "kind": "call",
    "reason": "coordinator/prepare",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1005:coordinator/prepare"
   },
   {
@@ -6215,7 +6215,7 @@
    "kind": "call",
    "reason": "work-order-options",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1005:work-order-options"
   },
   {
@@ -6225,7 +6225,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1014:refusal"
   },
   {
@@ -6235,7 +6235,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/preparation-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1014:preparation-refused"
   },
   {
@@ -6245,7 +6245,7 @@
    "kind": "call",
    "reason": "diagnosis-transaction-binding",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1018:diagnosis-transaction-binding"
   },
   {
@@ -6255,7 +6255,7 @@
    "kind": "call",
    "reason": "acceptance-transaction-binding",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1020:acceptance-transaction-binding"
   },
   {
@@ -6265,7 +6265,7 @@
    "kind": "call",
    "reason": "store/persist-ledger!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1039:store/persist-ledger!"
   },
   {
@@ -6275,7 +6275,7 @@
    "kind": "call",
    "reason": "persist-transaction!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1041:persist-transaction!"
   },
   {
@@ -6287,7 +6287,7 @@
    "kind": "status-map",
    "end-line": 1053,
    "tag": "P",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "P",
@@ -6296,7 +6296,7 @@
    "kind": "call",
    "reason": "latest-retry-click",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1052:latest-retry-click"
   },
   {
@@ -6306,7 +6306,7 @@
    "kind": "call",
    "reason": "coordinator/coordinate",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1060:coordinator/coordinate"
   },
   {
@@ -6316,7 +6316,7 @@
    "kind": "call",
    "reason": "store/persist-ledger!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1064:store/persist-ledger!"
   },
   {
@@ -6326,7 +6326,7 @@
    "kind": "call",
    "reason": "persist-transaction!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1065:persist-transaction!"
   },
   {
@@ -6336,7 +6336,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1068:refusal"
   },
   {
@@ -6346,7 +6346,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/checkpoint-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1068:checkpoint-persist-failed"
   },
   {
@@ -6356,7 +6356,7 @@
    "kind": "call",
    "reason": "store/load-durable-ledger",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1070:store/load-durable-ledger"
   },
   {
@@ -6366,7 +6366,7 @@
    "kind": "call",
    "reason": "coordinator/coordinate",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "P:1080:coordinator/coordinate"
   },
   {
@@ -6376,7 +6376,7 @@
    "kind": "call",
    "reason": "meta-self-heal/diagnosis-context",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:474:meta-self-heal/diagnosis-context"
   },
   {
@@ -6386,7 +6386,7 @@
    "kind": "call",
    "reason": "meta-self-heal/prepare-diagnosis",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:476:meta-self-heal/prepare-diagnosis"
   },
   {
@@ -6399,7 +6399,7 @@
    "kind": "status-map",
    "end-line": 480,
    "tag": "R",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "fn": "run-opportunity!",
@@ -6411,7 +6411,7 @@
    "kind": "status-map",
    "end-line": 483,
    "tag": "R",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "R",
@@ -6420,7 +6420,7 @@
    "kind": "call",
    "reason": "meta-self-heal/prepare-acceptance",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:484:meta-self-heal/prepare-acceptance"
   },
   {
@@ -6432,7 +6432,7 @@
    "kind": "status-map",
    "end-line": 498,
    "tag": "R",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "R",
@@ -6441,7 +6441,7 @@
    "kind": "call",
    "reason": "meta-self-heal/attributable-retry-readiness",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:500:meta-self-heal/attributable-retry-readiness"
   },
   {
@@ -6451,7 +6451,7 @@
    "kind": "call",
    "reason": "meta-self-heal/production-readiness",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:501:meta-self-heal/production-readiness"
   },
   {
@@ -6464,7 +6464,7 @@
    "kind": "status-map",
    "end-line": 507,
    "tag": "R",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "R",
@@ -6473,7 +6473,7 @@
    "kind": "call",
    "reason": "run-ordinary-opportunity!",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:511:run-ordinary-opportunity!"
   },
   {
@@ -6483,7 +6483,7 @@
    "kind": "call",
    "reason": "meta-self-heal/route!",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:514:meta-self-heal/route!"
   },
   {
@@ -6493,7 +6493,7 @@
    "kind": "call",
    "reason": "run-ordinary-opportunity!",
    "file": "src/futon2/aif/full_loop_runtime.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "R:515:run-ordinary-opportunity!"
   },
   {
@@ -6526,7 +6526,7 @@
    "kind": "classification",
    "reason": "operator-cancelled",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:12:operator-cancelled"
   },
   {
@@ -6536,7 +6536,7 @@
    "kind": "classification",
    "reason": "declared-no-work",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:13:declared-no-work"
   },
   {
@@ -6546,7 +6546,7 @@
    "kind": "classification",
    "reason": "diagnostic-only",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:14:diagnostic-only"
   },
   {
@@ -6556,7 +6556,7 @@
    "kind": "call",
    "reason": "str/blank?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:18:str/blank?"
   },
   {
@@ -6566,7 +6566,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:20:nonblank?"
   },
   {
@@ -6578,7 +6578,7 @@
    "kind": "status-map",
    "end-line": 23,
    "tag": "T",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "T",
@@ -6587,7 +6587,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:41:nonblank?"
   },
   {
@@ -6597,7 +6597,7 @@
    "kind": "call",
    "reason": "failure-kind",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:45:failure-kind"
   },
   {
@@ -6607,7 +6607,7 @@
    "kind": "call",
    "reason": "failure-stage",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:45:failure-stage"
   },
   {
@@ -6617,7 +6617,7 @@
    "kind": "call",
    "reason": "target",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:45:target"
   },
   {
@@ -6627,7 +6627,7 @@
    "kind": "call",
    "reason": "supported-cause-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:62:supported-cause-entries"
   },
   {
@@ -6637,7 +6637,7 @@
    "kind": "call",
    "reason": "failure-kind",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:64:failure-kind"
   },
   {
@@ -6647,7 +6647,7 @@
    "kind": "call",
    "reason": "contains-cause?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:65:contains-cause?"
   },
   {
@@ -6657,7 +6657,7 @@
    "kind": "call",
    "reason": "failure-kind",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:69:failure-kind"
   },
   {
@@ -6667,7 +6667,7 @@
    "kind": "call",
    "reason": "contains-cause?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:70:contains-cause?"
   },
   {
@@ -6677,7 +6677,7 @@
    "kind": "call",
    "reason": "failure-kind",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:74:failure-kind"
   },
   {
@@ -6687,7 +6687,7 @@
    "kind": "call",
    "reason": "unconfigured-route?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:79:unconfigured-route?"
   },
   {
@@ -6697,7 +6697,7 @@
    "kind": "call",
    "reason": "partial-frontier-continuation?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:80:partial-frontier-continuation?"
   },
   {
@@ -6707,7 +6707,7 @@
    "kind": "classification",
    "reason": "partial-frontier-continuation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:80:partial-frontier-continuation"
   },
   {
@@ -6717,7 +6717,7 @@
    "kind": "call",
    "reason": "evaluated-no-action?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:81:evaluated-no-action?"
   },
   {
@@ -6727,7 +6727,7 @@
    "kind": "classification",
    "reason": "evaluated-no-action",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:81:evaluated-no-action"
   },
   {
@@ -6737,7 +6737,7 @@
    "kind": "classification",
    "reason": "ordinary-selection-abstention",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:82:ordinary-selection-abstention"
   },
   {
@@ -6747,7 +6747,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:84:identity/digest"
   },
   {
@@ -6757,7 +6757,7 @@
    "kind": "call",
    "reason": "cause-key",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:85:cause-key"
   },
   {
@@ -6767,7 +6767,7 @@
    "kind": "call",
    "reason": "unconfigured-route?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:86:unconfigured-route?"
   },
   {
@@ -6777,7 +6777,7 @@
    "kind": "absent-term",
    "reason": "outer-policy-evidence-provider-required",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:87:outer-policy-evidence-provider-required"
   },
   {
@@ -6787,7 +6787,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:89:identity/digest"
   },
   {
@@ -6797,7 +6797,7 @@
    "kind": "call",
    "reason": "cause-key",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:90:cause-key"
   },
   {
@@ -6807,7 +6807,7 @@
    "kind": "call",
    "reason": "unconfigured-route?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:91:unconfigured-route?"
   },
   {
@@ -6817,7 +6817,7 @@
    "kind": "absent-term",
    "reason": "outer-policy-evidence-provider-required",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:92:outer-policy-evidence-provider-required"
   },
   {
@@ -6827,7 +6827,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:94:identity/digest"
   },
   {
@@ -6837,7 +6837,7 @@
    "kind": "call",
    "reason": "identity/digest",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:102:identity/digest"
   },
   {
@@ -6847,7 +6847,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:105:pin?"
   },
   {
@@ -6859,7 +6859,7 @@
    "kind": "status-map",
    "end-line": 106,
    "tag": "T",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "T",
@@ -6868,7 +6868,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:107:refusal"
   },
   {
@@ -6878,7 +6878,7 @@
    "kind": "refusal",
    "reason": "classification/invalid",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:107:invalid"
   },
   {
@@ -6888,7 +6888,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:109:refusal"
   },
   {
@@ -6898,7 +6898,7 @@
    "kind": "refusal",
    "reason": "classification/malformed",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:109:malformed"
   },
   {
@@ -6908,7 +6908,7 @@
    "kind": "call",
    "reason": "failure-kind",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:117:failure-kind"
   },
   {
@@ -6918,7 +6918,7 @@
    "kind": "call",
    "reason": "failure-stage",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:118:failure-stage"
   },
   {
@@ -6928,7 +6928,7 @@
    "kind": "call",
    "reason": "run-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:119:run-id"
   },
   {
@@ -6938,7 +6938,7 @@
    "kind": "call",
    "reason": "click-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:120:click-id"
   },
   {
@@ -6948,7 +6948,7 @@
    "kind": "call",
    "reason": "outcome",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:121:outcome"
   },
   {
@@ -6958,7 +6958,7 @@
    "kind": "call",
    "reason": "unconfigured-route?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:123:unconfigured-route?"
   },
   {
@@ -6968,7 +6968,7 @@
    "kind": "call",
    "reason": "abstention-reason",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:124:abstention-reason"
   },
   {
@@ -6978,7 +6978,7 @@
    "kind": "classification",
    "reason": "successful-task-outcome",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:128:successful-task-outcome"
   },
   {
@@ -6988,7 +6988,7 @@
    "kind": "classification",
    "reason": "absent-terminal-failure",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:130:absent-terminal-failure"
   },
   {
@@ -6998,7 +6998,7 @@
    "kind": "absent-term",
    "reason": "record/map",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:132:map"
   },
   {
@@ -7008,7 +7008,7 @@
    "kind": "call",
    "reason": "pin?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:133:pin?"
   },
   {
@@ -7018,7 +7018,7 @@
    "kind": "absent-term",
    "reason": "record/source-pin",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:133:source-pin"
   },
   {
@@ -7028,7 +7028,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:134:nonblank?"
   },
   {
@@ -7038,7 +7038,7 @@
    "kind": "absent-term",
    "reason": "record/run-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:134:run-id"
   },
   {
@@ -7048,7 +7048,7 @@
    "kind": "call",
    "reason": "nonblank?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:135:nonblank?"
   },
   {
@@ -7058,7 +7058,7 @@
    "kind": "absent-term",
    "reason": "record/click-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:135:click-id"
   },
   {
@@ -7068,7 +7068,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:137:refusal"
   },
   {
@@ -7078,7 +7078,7 @@
    "kind": "refusal",
    "reason": "terminal-record/malformed",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:137:malformed"
   },
   {
@@ -7088,7 +7088,7 @@
    "kind": "call",
    "reason": "seal-classification",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:138:seal-classification"
   },
   {
@@ -7100,7 +7100,7 @@
    "kind": "status-map",
    "end-line": 145,
    "tag": "T",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "T",
@@ -7109,7 +7109,7 @@
    "kind": "call",
    "reason": "cause-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:159:cause-id"
   },
   {
@@ -7119,7 +7119,7 @@
    "kind": "call",
    "reason": "injury-id",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:160:injury-id"
   },
   {
@@ -7129,7 +7129,7 @@
    "kind": "call",
    "reason": "unconfigured-route?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:161:unconfigured-route?"
   },
   {
@@ -7139,7 +7139,7 @@
    "kind": "call",
    "reason": "target",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:164:target"
   },
   {
@@ -7149,7 +7149,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:166:refusal"
   },
   {
@@ -7159,7 +7159,7 @@
    "kind": "refusal",
    "reason": "terminal-record/malformed",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:166:malformed"
   },
   {
@@ -7169,7 +7169,7 @@
    "kind": "call",
    "reason": "ledger-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:174:ledger-entries"
   },
   {
@@ -7179,7 +7179,7 @@
    "kind": "call",
    "reason": "ledger-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:178:ledger-entries"
   },
   {
@@ -7189,7 +7189,7 @@
    "kind": "call",
    "reason": "ledger-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:183:ledger-entries"
   },
   {
@@ -7199,7 +7199,7 @@
    "kind": "call",
    "reason": "ledger/append-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:187:ledger/append-observation"
   },
   {
@@ -7209,7 +7209,7 @@
    "kind": "call",
    "reason": "ledger/validate-ledger",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:205:ledger/validate-ledger"
   },
   {
@@ -7219,7 +7219,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:206:refusal"
   },
   {
@@ -7229,7 +7229,7 @@
    "kind": "refusal",
    "reason": "ledger/tampered",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:206:tampered"
   },
   {
@@ -7239,7 +7239,7 @@
    "kind": "call",
    "reason": "verify-classification",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:208:verify-classification"
   },
   {
@@ -7249,7 +7249,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:209:refusal"
   },
   {
@@ -7259,7 +7259,7 @@
    "kind": "refusal",
    "reason": "classification/invalid",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:209:invalid"
   },
   {
@@ -7269,7 +7269,7 @@
    "kind": "call",
    "reason": "already-ingested?",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:211:already-ingested?"
   },
   {
@@ -7282,7 +7282,7 @@
    "kind": "status-map",
    "end-line": 213,
    "tag": "T",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   },
   {
    "tag": "T",
@@ -7291,7 +7291,7 @@
    "kind": "call",
    "reason": "enacted-for-retry",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:216:enacted-for-retry"
   },
   {
@@ -7301,7 +7301,7 @@
    "kind": "call",
    "reason": "ledger-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:222:ledger-entries"
   },
   {
@@ -7311,7 +7311,7 @@
    "kind": "call",
    "reason": "ledger/append-transition",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:224:ledger/append-transition"
   },
   {
@@ -7321,7 +7321,7 @@
    "kind": "call",
    "reason": "ledger/append-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:235:ledger/append-observation"
   },
   {
@@ -7331,7 +7331,7 @@
    "kind": "call",
    "reason": "ledger/append-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:241:ledger/append-observation"
   },
   {
@@ -7341,7 +7341,7 @@
    "kind": "call",
    "reason": "latest-injury",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:247:latest-injury"
   },
   {
@@ -7351,7 +7351,7 @@
    "kind": "call",
    "reason": "enacted-for-retry",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:248:enacted-for-retry"
   },
   {
@@ -7361,7 +7361,7 @@
    "kind": "call",
    "reason": "ledger/append-transition",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:255:ledger/append-transition"
   },
   {
@@ -7371,7 +7371,7 @@
    "kind": "call",
    "reason": "append-other-injury-retry-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:264:append-other-injury-retry-observation"
   },
   {
@@ -7381,7 +7381,7 @@
    "kind": "call",
    "reason": "ledger/append-retry-result",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:271:ledger/append-retry-result"
   },
   {
@@ -7391,7 +7391,7 @@
    "kind": "call",
    "reason": "ledger-entries",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:279:ledger-entries"
   },
   {
@@ -7401,7 +7401,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:284:refusal"
   },
   {
@@ -7411,7 +7411,7 @@
    "kind": "refusal",
    "reason": "injury/retry-click-mismatch",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:284:retry-click-mismatch"
   },
   {
@@ -7421,7 +7421,7 @@
    "kind": "call",
    "reason": "ledger/append-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:289:ledger/append-observation"
   },
   {
@@ -7431,7 +7431,7 @@
    "kind": "call",
    "reason": "append-other-injury-retry-observation",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:293:append-other-injury-retry-observation"
   },
   {
@@ -7441,7 +7441,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:299:refusal"
   },
   {
@@ -7451,7 +7451,7 @@
    "kind": "refusal",
    "reason": "injury/terminal-history-requires-new-transaction",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:299:terminal-history-requires-new-transaction"
   },
   {
@@ -7461,7 +7461,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:302:refusal"
   },
   {
@@ -7471,7 +7471,7 @@
    "kind": "refusal",
    "reason": "classification/unknown",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:302:unknown"
   },
   {
@@ -7481,7 +7481,7 @@
    "kind": "call",
    "reason": "refusal",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:304:refusal"
   },
   {
@@ -7491,7 +7491,7 @@
    "kind": "refusal",
    "reason": "injury-integration/malformed",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:304:malformed"
   },
   {
@@ -7501,7 +7501,7 @@
    "kind": "call",
    "reason": "integrate",
    "file": "src/futon2/aif/meta_terminal_injury.clj",
-   "sha": "817400c3a",
+   "sha": "2ebc9d551",
    "id": "T:310:integrate"
   },
   {
@@ -7513,7 +7513,7 @@
    "kind": "status-map",
    "end-line": 311,
    "tag": "T",
-   "sha": "817400c3a"
+   "sha": "2ebc9d551"
   }
  ],
  "entities": [
@@ -7835,7 +7835,7 @@
    "name": "transport",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 730,
-   "text": "/-- Transport or seat failure on the author's proposal invoke: `:producer-invoke-failed` (A:233) or `:producer-seat-unavailable` (A:227), carried as `:acceptance-reason` of `:acceptance-unavailable` (P:460). Unwitnessed at proposal on disk. -/"
+   "text": "/-- Transport or seat failure on the author's proposal invoke: `:producer-invoke-failed` (A:347) or `:producer-seat-unavailable` (A:342), carried as `:acceptance-reason` of `:acceptance-unavailable` (P:485). Unwitnessed at proposal on disk. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.unreadableAnswer",
@@ -7843,7 +7843,7 @@
    "name": "unreadableAnswer",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 734,
-   "text": "/-- The author answered, but not with one EDN map: `:producer-response-malformed` (A:237) as `:acceptance-reason` of `:acceptance-unavailable` (P:460). Witness: click `8df4e8d2`. -/"
+   "text": "/-- The author answered, but not with one EDN map: `:producer-response-malformed` (A:355) as `:acceptance-reason` of `:acceptance-unavailable` (P:485). Witness: click `8df4e8d2`. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.authorRefused",
@@ -7851,7 +7851,7 @@
    "name": "authorRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 737,
-   "text": "/-- The author's own typed refusal: `:acceptance-status :refused` under `:acceptance-unavailable` (P:460). Witness: click `fca1c921`. -/"
+   "text": "/-- The author's own typed refusal: `:acceptance-status :refused` under `:acceptance-unavailable` (P:485). Witness: click `fca1c921`. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.prose",
@@ -7859,7 +7859,7 @@
    "name": "prose",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 740,
-   "text": "/-- `:acceptance-prose-or-malformed` (P:470): the answer is not a concrete test. Unwitnessed. -/"
+   "text": "/-- `:acceptance-prose-or-malformed` (P:497): the answer is not a concrete test. Unwitnessed. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.sourceMismatch",
@@ -7867,7 +7867,7 @@
    "name": "sourceMismatch",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 743,
-   "text": "/-- `:acceptance-proposal-source-mismatch` (P:467): the test source's namespace or path disagree. Unwitnessed. -/"
+   "text": "/-- `:acceptance-proposal-source-mismatch` (P:493): the test source's namespace or path disagree. Unwitnessed. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.unresolvableFunction",
@@ -7875,7 +7875,7 @@
    "name": "unresolvableFunction",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 746,
-   "text": "/-- `:acceptance-request-function-unresolvable` (P:526): a function the diagnosis names does not resolve in the serving JVM. Unwitnessed. -/"
+   "text": "/-- `:acceptance-request-function-unresolvable` (P:556): a function the diagnosis names does not resolve in the serving JVM. Unwitnessed. -/"
   },
   {
    "id": "lean:SelfHealRoute.AdmissionDefect.runRefused",
@@ -7883,7 +7883,7 @@
    "name": "runRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 753,
-   "text": "/-- `:acceptance-run-refused` (P:618): the bounded run did not return a valid `:ran` result (it covers A:359, A:390-398 and the un-namespaced A:393). Unwitnessed. -/"
+   "text": "/-- `:acceptance-run-refused` (P:648): the bounded run did not return a valid `:ran` result (it covers A:485, A:516-525 and the un-namespaced A:519). Unwitnessed. -/"
   },
   {
    "id": "lean:SelfHealRoute.AdmissionDefect.passesBeforeRepair",
@@ -7891,7 +7891,7 @@
    "name": "passesBeforeRepair",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 756,
-   "text": "/-- `:acceptance-test-passes-before-repair` (P:622, F16): refused before any reviewer invoke. Unwitnessed on a click (off-click replay 5 only). -/"
+   "text": "/-- `:acceptance-test-passes-before-repair` (P:652, F16): refused before any reviewer invoke. Unwitnessed on a click (off-click replay 5 only). -/"
   },
   {
    "id": "lean:SelfHealRoute.AdmissionDefect.noReviewerAnswer",
@@ -7899,7 +7899,7 @@
    "name": "noReviewerAnswer",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 762,
-   "text": "/-- `:acceptance-review-refused` (P:628) with `:review-status :failed`: there is no reviewer answer that could be read. That covers a transport or seat failure (A:227, A:233), a malformed answer (A:237), or the review port throwing (P:613); widened in rev 8 to match the checker and refusal-totality #48b (M8R). Witnesses: clicks `36b47627`, `fdc08aea`, `78180753` (429). -/"
+   "text": "/-- `:acceptance-review-refused` (P:658) with `:review-status :failed`: there is no reviewer answer that could be read. That covers a transport or seat failure (A:342, A:347), a malformed answer (A:355), or the review port throwing (P:642); widened in rev 8 to match the checker and refusal-totality #48b (M8R). Witnesses: clicks `36b47627`, `fdc08aea`, `78180753` (429). -/"
   },
   {
    "id": "lean:SelfHealRoute.AdmissionDefect.reviewerRefused",
@@ -7907,7 +7907,7 @@
    "name": "reviewerRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 767,
-   "text": "/-- `:acceptance-review-refused` (P:628) with `:review-status :refused`: the reviewer answered on the merits. Witnesses: click `1a6de51f` (`:acceptance-test-did-not-fail-for-injury-reason`) and click `6cdf2a7c` (reason not recorded, under the pre-run contract). -/"
+   "text": "/-- `:acceptance-review-refused` (P:658) with `:review-status :refused`: the reviewer answered on the merits. Witnesses: click `1a6de51f` (`:acceptance-test-did-not-fail-for-injury-reason`) and click `6cdf2a7c` (reason not recorded, under the pre-run contract). -/"
   },
   {
    "id": "lean:SelfHealRoute.BoundaryDefect.proposal",
@@ -8139,7 +8139,7 @@
    "name": "abandoned",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
    "line": 976,
-   "text": "/-- `:abandoned` (C:375): the attempt after this one would exceed the budget. Rev 14 anchor (futon2 `43bb57fc7`; C, T and L unchanged since `d0a890f22`): `(C coordinate ledger/append-retry-result)`, the same computed status (C:426 at this HEAD), `:abandoned` when `(L append-retry-result :attempt-limit-exhausted)` takes its first arm. A second abandoned literal exists at C:261; it is `RetryNext.abandoned .retryBudgetSpent`, not this constructor: `(not C coordinate-queued-retry :retry-budget-spent)`. -/"
+   "text": "/-- `:abandoned` (C:375): the attempt after this one would exceed the budget. Rev 14 anchor (futon2 `43bb57fc7`; C, T and L unchanged since `d0a890f22`): `(C coordinate ledger/append-retry-result)`, the same computed status (C:426 at this HEAD), `:abandoned` when `(L append-retry-result :attempt-limit-exhausted)` takes its first arm. A second abandoned literal exists; it is `RetryNext.abandoned .retryBudgetSpent`, not this constructor: `(not C coordinate-queued-retry :retry-budget-spent)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.ClosingStatus.awaitingRetry",
@@ -8274,15 +8274,15 @@
    "inductive": "RetryClickOutcome",
    "name": "otherInjury",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1199,
-   "text": "/-- `:injury` with a different injury id, and the record is ingested. Cited at futon2 `b5dd9269c` (M10b-4). `integrate` binds `other-injury-retry?` (T:247-251). If the different id is unknown, it opens a new injury (T:253-266). If it is active, it appends a `:repeated-active-injury` observation (T:288-297). Either way it then appends the attributed `:retry-inconclusive` observation for the enacted entry through `append-other-injury-retry-observation` (T:185-196). The enacted entry's state is untouched. Added in rev 8 (finding) and widened by the rev 8 review. Rev 11 split off the refused arms as `otherInjuryRefused`. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T append-other-injury-retry-observation :retry-inconclusive)`, called from `(T integrate)` on the `(nil? previous)` arm with transition `:open` and on the `ledger/active-states` arm with transition `:active-injury-retained`. -/"
+   "line": 1201,
+   "text": "/-- `:injury` with a different injury id, and the record is ingested. Cited at futon2 `b5dd9269c` (M10b-4). `integrate` binds `other-injury-retry?` (T:247-251). If the different id is unknown, it opens a new injury (T:253-266). If it is active, it appends a `:repeated-active-injury` observation (T:288-297). Either way it then appends the attributed `:retry-inconclusive` observation for the enacted entry through `append-other-injury-retry-observation` (T:185-196). The enacted entry's state is untouched. Added in rev 8 (finding) and widened by the rev 8 review. Rev 11 split off the refused arms as `otherInjuryRefused`. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`), re-anchored in rev 16 to the call the function makes: `(T append-other-injury-retry-observation ledger/append-observation)` which appends the retry-inconclusive observation for the enacted entry. The function is called from `(T integrate)` on the `(nil? previous)` arm with transition `:open` and on the `ledger/active-states` arm with transition `:active-injury-retained`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
    "inductive": "RetryClickOutcome",
    "name": "otherInjuryRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1211,
+   "line": 1213,
    "text": "/-- Rev 11: `:injury` with a different injury id, and the record is refused, not ingested (at `b5dd9269c`). This happens when the different id is itself `:enacted` and this click is not its retry click (`:injury/retry-click-mismatch`, T:268-286), or when the different id is terminal (`:injury/terminal-history-requires-new-transaction`, T:299-300). `integrate` returns `{:status :refused}` with no ledger, so no observation is written and the pin stays un-ingested. It is a separate constructor, not an unobserved `otherInjury`, because the coordinator receives a refusal rather than an ingested record without an observation. Under the law it is still inconclusive for the enacted injury. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T integrate :injury/retry-click-mismatch)`, `(T integrate :injury/terminal-history-requires-new-transaction)`. -/"
   },
   {
@@ -8290,7 +8290,7 @@
    "inductive": "RetryClickOutcome",
    "name": "ordinarySelectionAbstention",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1218,
+   "line": 1220,
    "text": "/-- `:ordinary-selection-abstention` (T:82): an abstention. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T abstention-reason :ordinary-selection-abstention)`, the `:else` arm, reached from `classify` when the failure kind is `:abstained` and the route is configured. The `{:abstained :ordinary-selection-abstention}` entry of `explicit-non-injury-kinds` is never read for it: `classify` takes the `:abstained` branch first. -/"
   },
   {
@@ -8298,7 +8298,7 @@
    "inductive": "RetryClickOutcome",
    "name": "evaluatedNoAction",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1222,
+   "line": 1224,
    "text": "/-- `:evaluated-no-action` (T:81, T:66-70): scored, and no action chosen. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T abstention-reason :evaluated-no-action)`, guarded by `evaluated-no-action?` (`:policy-nondiscrimination` among the causes). -/"
   },
   {
@@ -8306,7 +8306,7 @@
    "inductive": "RetryClickOutcome",
    "name": "partialFrontierContinuation",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1226,
+   "line": 1228,
    "text": "/-- `:partial-frontier-continuation` (T:80, T:71-76). Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T abstention-reason :partial-frontier-continuation)`, guarded by `partial-frontier-continuation?`. -/"
   },
   {
@@ -8314,7 +8314,7 @@
    "inductive": "RetryClickOutcome",
    "name": "operatorCancelled",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1230,
+   "line": 1232,
    "text": "/-- `:operator-cancelled` (T:12). Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T explicit-non-injury-kinds :operator-cancelled)`, read in `classify`'s `non-injury-reason`. -/"
   },
   {
@@ -8322,7 +8322,7 @@
    "inductive": "RetryClickOutcome",
    "name": "declaredNoWork",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1234,
+   "line": 1236,
    "text": "/-- `:declared-no-work` (T:13). Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T explicit-non-injury-kinds :declared-no-work)`, read in `classify`'s `non-injury-reason`. -/"
   },
   {
@@ -8330,7 +8330,7 @@
    "inductive": "RetryClickOutcome",
    "name": "diagnosticOnly",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1238,
+   "line": 1240,
    "text": "/-- `:diagnostic-only` (T:14). Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T explicit-non-injury-kinds :diagnostic-only)`, read in `classify`'s `non-injury-reason`. -/"
   },
   {
@@ -8338,7 +8338,7 @@
    "inductive": "RetryClickOutcome",
    "name": "absentTerminalFailure",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1242,
+   "line": 1244,
    "text": "/-- `:absent-terminal-failure` (T:129-130): no failure kind and no outcome. Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): `(T classify :absent-terminal-failure)`, the `non-injury-reason` arm for a nil failure kind and a nil outcome. -/"
   },
   {
@@ -8346,7 +8346,7 @@
    "inductive": "RetryClickOutcome",
    "name": "recordUnreadable",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1253,
+   "line": 1255,
    "text": "/-- Rev 9: the retry click left no record that can be read. Then nothing reaches `integrate`, and the entry stays `:enacted`. Absence is evidence of neither success nor failure, so this is inconclusive (the 2026-09-24 rule that absence must not read as a value). Rev 13 anchor (futon2 `9d3026e1a`, T unchanged since `d0a890f22`): no producing site in T for a retry that wrote no record: nothing is ingested. A record that exists but cannot be ingested stops before `integrate` at `(meta-injury-store ingest-record-file! :store/record-ingest-failed)` or at `read-one-form`'s non-`:read` result (that file has no tag), and a record that does not classify stops at `(T classify :terminal-record/malformed)`. Reading those as this constructor is my reading, not something the Lean states. -/"
   },
   {
@@ -8354,7 +8354,7 @@
    "inductive": "AbandonReason",
    "name": "attemptLimitExhausted",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1339,
+   "line": 1341,
    "text": "/-- `:attempt-limit-exhausted` (L:314): the next authoring would exceed `:attempt-limit`. Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): `(L append-retry-result :attempt-limit-exhausted)` (L:360 at this HEAD; the L:314 cite is from before L moved), reached through `(C coordinate ledger/append-retry-result)`. `validate-ledger`'s abandonment check (L:173) accepts it only at `attempt = limit`. -/"
   },
   {
@@ -8362,7 +8362,7 @@
    "inductive": "AbandonReason",
    "name": "retryBudgetSpent",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1348,
+   "line": 1350,
    "text": "/-- Rev 9 (new, M10b): the re-queue budget for inconclusive retries is spent. A re-queue authors nothing, so it does not count against `:attempt-limit`. Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): `(L append-requeue :retry-budget-spent)` (L:397), the arm where the entry's requeue count has reached the ledger's retry limit (L:394), with the attempt carried over unchanged. `(C coordinate-queued-retry :retry-budget-spent)` (C:261) returns it, after reading the appended entry's state (C:260), before any retry port call. `validate-ledger` accepts it only when the requeue count equals the retry limit (L:174-176). -/"
   },
   {
@@ -8370,7 +8370,7 @@
    "inductive": "RetryNext",
    "name": "queued",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1371,
+   "line": 1373,
    "text": "/-- A fresh retry click is queued for the same enacted entry. Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): `(C coordinate-queued-retry ledger/append-requeue)` (C:258), on the arm where `ledger/pending-requeue` (C:247, L:331) finds the attributed observation, and then `(L append-requeue :enacted)` (L:402), a new enacted entry with a new retry click. The entry's fields: `attempt` is the ledger's attempt, copied from the previous entry (L:392); `requeues` is the ledger's requeue count, read at L:390 and written incremented at L:404. On the `recur` (C:267), C reads that count back (C:232) and, being positive, calls the retry port with the requeue ordinal (C:233-238). The queued click then ends the same way as `awaitingNothingQueued`: the new entry has no observation yet, so `coordinate` returns the awaiting-retry status. In the code the two constructors differ by the appended entry and the port call, not by the status. -/"
   },
   {
@@ -8378,7 +8378,7 @@
    "inductive": "RetryNext",
    "name": "awaitingNothingQueued",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1375,
+   "line": 1377,
    "text": "/-- The transaction ends `:awaiting-retry`, and nothing is queued. Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): `(C coordinate-queued-retry :awaiting-retry)` (C:248), the arm where `ledger/pending-requeue` (C:247) returns nil. -/"
   },
   {
@@ -8386,7 +8386,7 @@
    "inductive": "RetryNext",
    "name": "discharged",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1378,
+   "line": 1380,
    "text": "/-- Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): no producing site of its own; see `ClosingStatus.discharged`, which `next` passes through. -/"
   },
   {
@@ -8394,7 +8394,7 @@
    "inductive": "RetryNext",
    "name": "reopened",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1381,
+   "line": 1383,
    "text": "/-- Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): no producing site of its own; see `ClosingStatus.reopened`, which `next` passes through. -/"
   },
   {
@@ -8402,7 +8402,7 @@
    "inductive": "RetryNext",
    "name": "abandoned",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 1384,
+   "line": 1386,
    "text": "/-- Rev 15 anchor (futon2 `5a066d9ab`; C and L unchanged since `aa3ec313b`): no producing site of its own; see the two `AbandonReason` constructors, which carry the sites. -/"
   },
   {
@@ -8897,8 +8897,79 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.transport",
+    "A:342:producer-seat-unavailable",
+    "A:347:producer-invoke-failed",
+    "P:485:acceptance-unavailable"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 730
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.unreadableAnswer",
+    "A:355:producer-response-malformed",
+    "P:485:acceptance-unavailable"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 734
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.authorRefused",
+    "P:485:acceptance-unavailable"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 737
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.prose",
+    "P:497:acceptance-prose-or-malformed"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 740
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.sourceMismatch",
+    "P:493:acceptance-proposal-source-mismatch"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 743
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.ProposalDefect.unresolvableFunction",
+    "P:556:acceptance-request-function-unresolvable"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 746
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
     "lean:SelfHealRoute.AdmissionDefect.runRefused",
-    "P:618:acceptance-run-threw"
+    "A:485:acceptance-unit-launch-failed",
+    "A:516:acceptance-source-path-refused",
+    "A:519:acceptance-test-id-invalid"
    ],
    "props": {
     "basis": "line-unconfirmed",
@@ -8908,12 +8979,49 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.AdmissionDefect.noReviewerAnswer",
-    "P:613:acceptance-review-port-unavailable"
+    "lean:SelfHealRoute.AdmissionDefect.runRefused",
+    "P:648:acceptance-run-refused"
    ],
    "props": {
-    "basis": "line-unconfirmed",
+    "basis": "line",
+    "lean-line": 753
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.AdmissionDefect.passesBeforeRepair",
+    "P:652:acceptance-test-passes-before-repair"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 756
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.AdmissionDefect.noReviewerAnswer",
+    "A:342:producer-seat-unavailable",
+    "A:347:producer-invoke-failed",
+    "A:355:producer-response-malformed",
+    "P:642:acceptance-review-threw",
+    "P:658:acceptance-review-refused"
+   ],
+   "props": {
+    "basis": "line",
     "lean-line": 762
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.AdmissionDefect.reviewerRefused",
+    "P:658:acceptance-review-refused"
+   ],
+   "props": {
+    "basis": "line",
+    "lean-line": 767
    }
   },
   {
@@ -9120,17 +9228,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ClosingStatus.abandoned",
-    "C:261:retry-budget-spent"
-   ],
-   "props": {
-    "basis": "line",
-    "lean-line": 976
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.abandoned",
     "C:419:ledger/append-retry-result"
    ],
    "props": {
@@ -9185,13 +9282,24 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
+    "lean:SelfHealRoute.RetryClickOutcome.otherInjury",
+    "T:187:ledger/append-observation"
+   ],
+   "props": {
+    "basis": "call",
+    "lean-line": 1201
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
     "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
     "T:284:retry-click-mismatch",
     "T:299:terminal-history-requires-new-transaction"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1211
+    "lean-line": 1213
    }
   },
   {
@@ -9202,7 +9310,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1218
+    "lean-line": 1220
    }
   },
   {
@@ -9213,7 +9321,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1222
+    "lean-line": 1224
    }
   },
   {
@@ -9224,7 +9332,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1226
+    "lean-line": 1228
    }
   },
   {
@@ -9235,7 +9343,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1230
+    "lean-line": 1232
    }
   },
   {
@@ -9246,7 +9354,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1234
+    "lean-line": 1236
    }
   },
   {
@@ -9257,7 +9365,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1238
+    "lean-line": 1240
    }
   },
   {
@@ -9268,7 +9376,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1242
+    "lean-line": 1244
    }
   },
   {
@@ -9280,7 +9388,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1253
+    "lean-line": 1255
    }
   },
   {
@@ -9291,7 +9399,7 @@
    ],
    "props": {
     "basis": "call",
-    "lean-line": 1339
+    "lean-line": 1341
    }
   },
   {
@@ -9302,7 +9410,7 @@
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1348
+    "lean-line": 1350
    }
   },
   {
@@ -9313,7 +9421,7 @@
    ],
    "props": {
     "basis": "call",
-    "lean-line": 1371
+    "lean-line": 1373
    }
   },
   {
@@ -9324,7 +9432,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 1375
+    "lean-line": 1377
    }
   },
   {
