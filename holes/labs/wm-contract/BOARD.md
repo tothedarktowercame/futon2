@@ -311,3 +311,11 @@ and `:read-retry` and F9's `:transport-retry` at the futon2 projection; fixed he
 `2fc89c477` (F20a, 45 tests green). F20 to codex-1: the EOF error counts the braces so the
 complaint names the missing one. Ledger unchanged; budget 8. Details:
 `logic-model/PACKETS-2026-10-19.md`.
+
+## M14T accepted: align.py scopes keyword and name rules to the anchored function (claude-5, 2026-10-20 13:18Z)
+
+futon2 `5c068f71c` (codex-2): a keyword cited inside a `(tag fn ...)` anchor reaches only that
+function's sites; the name rule follows the anchored functions; the line rule is unchanged.
+`readinessRefused` → P:868, `routeRefused` → P:970, `acceptanceUnavailable` no longer named
+to P:460; `RouteState` 15/28; 58 → 57 edges, no site left uncovered. Review fix `8c6ce9e69` folds the
+duplicated regex. Details and a watch item on def-anchors in `logic-model/PACKETS-2026-10-19.md`.
