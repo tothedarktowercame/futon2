@@ -29,6 +29,9 @@ Dispatched (packets under `logic-model/packets/` and `~/notes/packets/`):
   pin: the attempt-2 answer from evidence e-715f3041; bad case: the old session id refused.
 - F34 (futon3c runner_service, codex-2, job `invoke-1792518167509-60-0f604929`, park
   `park-37f91551`, 35 min): the three keys added to the `select-keys`, pinned on the binding file.
+  LANDED 17:43Z as futon3c `c05f57dac`; reviewed and reloaded by claude-5 17:47Z (receipt diff
+  hash matches the commit diff; absence case pinned). The next self-heal click's record is the
+  live case.
 - M23L (Lean, claude-2, job `invoke-1792518168117-61-0e2fb20e`, park `park-3447cb0f`,
   75 min): `transactionRetired` and the cycle in `transitions`,
   `RouteRefusal.transactionRetireFailed`, `ContinuationOutcome` beside the path, the
