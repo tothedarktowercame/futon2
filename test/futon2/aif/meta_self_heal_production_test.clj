@@ -566,7 +566,13 @@
                  (constantly {:status :failed :reason :offline
                               :failure {:kind :production-function-identity-absent
                                         :missing {:callable-production-vars [:selection-entrypoint]}}
-                              :detail "Exit 1: exceeded retry limit, last status: 429 Too Many Requests"})}
+                              :detail "Exit 1: exceeded retry limit, last status: 429 Too Many Requests"
+                              ;; F20: the reader's error, the one informed
+                              ;; re-ask and the one transport retry travel too.
+                              :read-error "EOF while reading"
+                              :read-retry {:first-error "read a symbol, not a map with keyword keys"
+                                           :first-preview "I have everything verified…"}
+                              :transport-retry {:status 429 :waited-ms 0}})}
                 diagnosis)
         malformed (production/produce-acceptance!
                    {:meta-acceptance-fn (constantly :not-a-map)} diagnosis)
@@ -594,6 +600,17 @@
            (:acceptance-failure failed)))
     (is (= "Exit 1: exceeded retry limit, last status: 429 Too Many Requests"
            (:acceptance-detail failed)))
+    (is (= "EOF while reading" (:acceptance-read-error failed))
+        "F20: deleting the :acceptance-read-error copy makes this fail")
+    (is (= {:first-error "read a symbol, not a map with keyword keys"
+            :first-preview "I have everything verified…"}
+           (:acceptance-read-retry failed)))
+    (is (= {:status 429 :waited-ms 0} (:acceptance-transport-retry failed)))
+    (is (not (contains? (production/produce-acceptance!
+                         {:meta-acceptance-fn (constantly {:status :failed :reason :offline})}
+                         diagnosis)
+                        :acceptance-read-retry))
+        "an answer that needed no re-ask carries no retry key")
     (is (= :meta-self-heal/acceptance-port-malformed (:reason malformed)))
     (is (= :meta-self-heal/acceptance-prose-or-malformed (:reason prose)))
     (is (= :meta-self-heal/acceptance-diagnosis-identity-mismatch (:reason changed-source)))

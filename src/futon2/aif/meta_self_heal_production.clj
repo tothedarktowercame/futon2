@@ -457,12 +457,24 @@
       ;; typed refusal (:failure with its kind, reason and :missing) and
       ;; a transport :detail travel onto the record; the refusal said
       ;; only :acceptance-unavailable before.
+      ;; F20 (click wm-click-bf3c996a, 2026-10-20): the producer's reader
+      ;; error (F19 :read-error), its one informed re-ask (:read-retry
+      ;; with the first error and preview) and its one rate-limit retry
+      ;; (F9 :transport-retry) were on the producer's answer but not
+      ;; copied here, so the record showed a refused proposal and two
+      ;; seat calls it could not explain.
       (refusal :meta-self-heal/acceptance-unavailable
-               {:request request :acceptance-status (:status response)
-                :acceptance-reason (:reason response)
-                :acceptance-failure (:failure response)
-                :acceptance-detail (:detail response)
-                :repair-claimed? false})
+               (cond-> {:request request :acceptance-status (:status response)
+                        :acceptance-reason (:reason response)
+                        :acceptance-failure (:failure response)
+                        :acceptance-detail (:detail response)
+                        :repair-claimed? false}
+                 (contains? response :read-error)
+                 (assoc :acceptance-read-error (:read-error response))
+                 (contains? response :read-retry)
+                 (assoc :acceptance-read-retry (:read-retry response))
+                 (contains? response :transport-retry)
+                 (assoc :acceptance-transport-retry (:transport-retry response))))
       (source-mismatch? (:acceptance-test response))
       (refusal :meta-self-heal/acceptance-proposal-source-mismatch
                {:request request :repair-claimed? false})
