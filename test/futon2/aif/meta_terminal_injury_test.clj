@@ -276,6 +276,8 @@
     (is (= :retry-inconclusive (:transition result)) (pr-str (:transition result)))
     (is (= ledger/observation-schema (:schema last-entry)))
     (is (= :retry-inconclusive (:observation-kind last-entry)))
+    (is (= injury-id (:injury-id last-entry)))
+    (is (= "retry-click" (:retry-click last-entry)))
     (is (= :enacted (:state (get active injury-id))))
     (is (= {:injury-id injury-id :repair-id "repair/async" :retry-click "retry-click"}
            (:retry-of result)))))
@@ -287,12 +289,15 @@
                                  :click/id "retry-click")
                           (pin-of (str (+ 2 i))))
           result (terminal/integrate ledger retry)
-          active (:injuries (ledger/active-injuries (:ledger result)))]
+          active (:injuries (ledger/active-injuries (:ledger result)))
+          observation (last (:entries (:ledger result)))]
       (is (= [:non-injury reason]
              [(:classification retry) (:non-injury-reason retry)]) (pr-str reason))
       (is (= :retry-inconclusive (:transition result)) (pr-str reason))
-      (is (= :retry-inconclusive (:observation-kind (last (:entries (:ledger result)))))
+      (is (= :retry-inconclusive (:observation-kind observation))
           (pr-str reason))
+      (is (= injury-id (:injury-id observation)) (pr-str reason))
+      (is (= "retry-click" (:retry-click observation)) (pr-str reason))
       (is (= :enacted (:state (get active injury-id))) (pr-str reason))
       (is (= :enacted (:state (last (filter #(= ledger/transition-schema (:schema %))
                                             (:entries (:ledger result))))))

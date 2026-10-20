@@ -220,30 +220,44 @@
          :ledger (seal-ledger (update ledger :entries conj (:entry checked)))
          :entry (:entry checked)}))))
 
+(defn- observation-defects [entry]
+  (cond-> []
+    (not (pin? (:record-pin entry))) (conj :observation/record-pin)
+    (not (keyword? (:observation-kind entry))) (conj :observation/kind)
+    (and (= :retry-inconclusive (:observation-kind entry))
+         (or (not (nonblank? (:injury-id entry)))
+             (not (nonblank? (:retry-click entry)))))
+    (conj :observation/retry-attribution)))
+
 (defn append-observation
-  "Append a pinned non-transition record. It cannot alter injury state."
-  [ledger record-pin observation-kind]
-  (try
-    (let [checked (validate-ledger ledger)]
-      (cond
-        (not= :valid (:status checked))
-        (refusal :ledger/tampered {:ledger-defects (:defects checked)})
-        (not (pin? record-pin)) (refusal :observation/record-pin)
-        (not (keyword? observation-kind)) (refusal :observation/kind)
-        :else
-        (let [previous (last (:entries ledger))
-              entry (seal-entry
-                     {:schema observation-schema
-                      :ordinal (inc (count (:entries ledger)))
-                      :record-pin record-pin :observation-kind observation-kind
-                      :predecessor (when previous
-                                     {:entry-id (:entry-id previous)
-                                      :entry-pin (:entry-pin previous)})})]
-          {:status :appended
-           :ledger (seal-ledger (update ledger :entries conj entry))
-           :entry entry})))
-    (catch Throwable t
-      (refusal :observation/malformed {:detail (ex-message t)}))))
+  "Append a pinned non-transition record. It cannot alter injury state.
+  Retry-inconclusive observations may name the enacted injury and retry click
+  through ATTRIBUTION; other observation kinds remain backward compatible."
+  ([ledger record-pin observation-kind]
+   (append-observation ledger record-pin observation-kind {}))
+  ([ledger record-pin observation-kind attribution]
+   (try
+     (let [checked (validate-ledger ledger)]
+       (if-not (= :valid (:status checked))
+         (refusal :ledger/tampered {:ledger-defects (:defects checked)})
+         (let [previous (last (:entries ledger))
+               entry (merge
+                      {:schema observation-schema
+                       :ordinal (inc (count (:entries ledger)))
+                       :record-pin record-pin :observation-kind observation-kind
+                       :predecessor (when previous
+                                      {:entry-id (:entry-id previous)
+                                       :entry-pin (:entry-pin previous)})}
+                      (select-keys attribution [:injury-id :retry-click]))
+               defects (observation-defects entry)]
+           (if (seq defects)
+             (refusal (first defects) {:defects defects})
+             (let [sealed (seal-entry entry)]
+               {:status :appended
+                :ledger (seal-ledger (update ledger :entries conj sealed))
+                :entry sealed})))))
+     (catch Throwable t
+       (refusal :observation/malformed {:detail (ex-message t)})))))
 
 (defn validate-ledger
   "Total validation of seals, global append chain and every injury transition."
@@ -282,14 +296,13 @@
                 semantic-defects (if (transition? entry)
                                    (into (common-defects entry)
                                          (state-defects prefix entry))
-                                   (cond-> []
-                                     (not (pin? (:record-pin entry)))
-                                     (conj :observation/record-pin)
-                                     (not (keyword? (:observation-kind entry)))
-                                     (conj :observation/kind)))
+                                   (observation-defects entry))
                 next-defects (cond-> base-defects
                                (seq semantic-defects)
-                               (conj :entry/transition-invalid))
+                               (conj :entry/transition-invalid)
+                               (some #{:observation/retry-attribution}
+                                     semantic-defects)
+                               (conj :observation/retry-attribution))
                 next-prefix (seal-ledger (update prefix :entries conj entry))]
             (recur next-prefix (next remaining) next-defects
                    (conj seen (:entry-id entry))))
@@ -314,6 +327,20 @@
                                 (when (contains? active-states (:state entry))
                                   [injury-id entry]))))
                       (into {}))})))
+
+(defn pending-requeue
+  "Return the attributed inconclusive observation for an injury's latest
+  enacted retry click. An older retry's observation is superseded by requeue."
+  [ledger injury-id]
+  (when (= :valid (:status (validate-ledger ledger)))
+    (let [enacted (latest ledger injury-id)]
+      (when (= :enacted (:state enacted))
+        (last (filter #(and (observation? %)
+                            (= :retry-inconclusive (:observation-kind %))
+                            (> (:ordinal %) (:ordinal enacted))
+                            (= injury-id (:injury-id %))
+                            (= (:retry-click enacted) (:retry-click %)))
+                      (:entries ledger)))))))
 
 (defn append-retry-result
   "Append reopened, or the typed abandoned state when the next attempt would

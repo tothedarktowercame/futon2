@@ -219,8 +219,10 @@
                         :result-record-pin (:record-pin classification)})]
           (assoc appended :classification classification
                  :transition :discharged))
-        (let [appended (ledger/append-observation history (:record-pin classification)
-                                                  :retry-inconclusive)]
+        (let [appended (ledger/append-observation
+                        history (:record-pin classification) :retry-inconclusive
+                        {:injury-id (:injury-id enacted)
+                         :retry-click (:click-id classification)})]
           (assoc appended :classification classification :transition :retry-inconclusive
                  :retry-of (select-keys enacted [:injury-id :repair-id :retry-click]))))
         (let [appended (ledger/append-observation

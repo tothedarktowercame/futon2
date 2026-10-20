@@ -282,6 +282,61 @@
     (is (= :appended (:status discharged)))
     (is (= :valid (:status (ledger/validate-ledger (:ledger discharged)))))))
 
+(deftest retry-inconclusive-observation-requires-both-attribution-fields
+  ;; Pins :observation/retry-attribution independently for missing injury,
+  ;; missing retry click, and a present-but-blank retry click.
+  (let [history (through-enacted)
+        appended (ledger/append-observation
+                  history (second campaign-records) :retry-inconclusive
+                  {:injury-id "injury/2026-10-19/meta-route"
+                   :retry-click "retry/meta-self-heal/1"})
+        index (dec (count (get-in appended [:ledger :entries])))
+        entry (:entry appended)
+        forged [(dissoc entry :injury-id)
+                (dissoc entry :retry-click)
+                (assoc entry :retry-click "  ")]]
+    (doseq [candidate forged]
+      (let [tampered (-> (:ledger appended)
+                         (assoc-in [:entries index] (ledger/seal-entry candidate))
+                         ledger/seal-ledger)
+            checked (ledger/validate-ledger tampered)]
+        (is (= :refused (:status checked)))
+        (is (some #{:observation/retry-attribution} (:defects checked)))))))
+
+(deftest unattributed-ordinary-observation-remains-valid
+  ;; Pins backward compatibility for the live ledger's bare ordinary records.
+  (let [result (ledger/append-observation ledger/empty-ledger
+                                          (first campaign-records)
+                                          :ordinary-selection-abstention)]
+    (is (= :appended (:status result)))
+    (is (nil? (get-in result [:entry :injury-id])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))))
+
+(deftest pending-requeue-reads-only-the-latest-enacted-retry-attribution
+  ;; Pins all four reader exclusions: matching latest enactment returns;
+  ;; another injury, a superseded retry, and terminal state do not.
+  (let [injury-id "injury/2026-10-19/meta-route"
+        enacted (through-enacted)
+        attributed (ledger/append-observation
+                    enacted (second campaign-records) :retry-inconclusive
+                    {:injury-id injury-id :retry-click "retry/meta-self-heal/1"})
+        other (ledger/append-observation
+               enacted (second campaign-records) :retry-inconclusive
+               {:injury-id "injury/other" :retry-click "retry/meta-self-heal/1"})
+        requeued (ledger/append-requeue (:ledger attributed) injury-id "retry/fresh")
+        discharged (ledger/append-transition
+                    (:ledger attributed)
+                    {:injury-id injury-id :state :discharged :attempt 1
+                     :repair-id "repair/meta-self-heal-route"
+                     :patch-sha patch-sha :retry-click "retry/meta-self-heal/1"
+                     :outcome :success})]
+    (is (= (:entry attributed)
+           (ledger/pending-requeue (:ledger attributed) injury-id)))
+    (is (nil? (ledger/pending-requeue (:ledger other) injury-id)))
+    (is (nil? (ledger/pending-requeue (:ledger requeued) injury-id)))
+    (is (nil? (ledger/pending-requeue (:ledger discharged) injury-id)))
+    (is (nil? (ledger/pending-requeue ledger/empty-ledger injury-id)))))
+
 (deftest open-injuries-cannot-be-downgraded-or-silently-removed
   (let [history (opened)]
     (doseq [state [:open :authored :reviewed :enacted :discharged :abandoned]]
