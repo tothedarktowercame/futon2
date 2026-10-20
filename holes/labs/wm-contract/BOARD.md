@@ -64,7 +64,9 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - M21L (claude-2, job `invoke-1792513009922-48-f5467d2c`, park `park-9f7a6899`): A/C/L/P re-cites after F25/F26; `authorFailed` and `reopened` rows re-described.
 - F28 landed 16:05Z (futon2 `5af8d7156`, test-only): the phases log is hermetic under `with-hermetic-stores`.
 - F29 (futon2, codex-3, job `invoke-1792513471792-50-a20027d2`, park `park-89208ac8`): the injury root hermetic under the same fixture.
-Click 9 waits for F30 to land and reload. Details in PACKETS-2026-10-19.md.
+- F30 landed 16:23Z (futon3c `fe7d3d28e`, reloaded): dirt owned by the running attempt is an observation on the readiness record; live readiness is `:ready` again.
+- F31 (futon2, codex-2, job `invoke-1792513611119-52-8eebcb71`, park `park-b4a5719f`): after a reopen the same click continues into attempt n+1, so a failed attempt costs one click, not two.
+Click 9 waits for F31 to land and reload (budget: 2 clicks). Details in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
 
