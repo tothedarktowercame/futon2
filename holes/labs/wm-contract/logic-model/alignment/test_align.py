@@ -19,8 +19,8 @@ def entity(name, text):
 
 
 def edge_ids(edges, basis):
-  return next(edge["hx/endpoints"][1:] for edge in edges
-              if edge["props"]["basis"] == basis)
+  return next((edge["hx/endpoints"][1:] for edge in edges
+               if edge["props"]["basis"] == basis), [])
 
 
 class AnchorFunctionScopingTest(unittest.TestCase):
