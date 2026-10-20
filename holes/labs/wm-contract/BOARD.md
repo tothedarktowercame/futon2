@@ -73,7 +73,9 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - F32 (futon2, codex-1, job `invoke-1792514897249-55-66ad9351`, park `park-670d910d`): a claimed injury's diagnosis pin and acceptance test are carried from its persisted transaction; no re-diagnosis, no re-admission.
 - M22L (claude-2, job `invoke-1792514897576-56-28679656`, park `park-df14cf79`): `authorFailed` re-described for the in-click loop; graph proposal for M23L.
 - M22L landed 16:49Z as Lean rev 23 (`cf8ae1eddc`, docstrings only): `authorFailed` is the in-click loop. Two F31 gaps (`:continued-from` dropped on refusal; reload-not-loaded falls through) fixed by claude-5 in the F32 wake. M23L (the cycle and its bound) after click 10.
-Click 10 (last of the grant) after F32 lands and reloads. Details in PACKETS-2026-10-19.md.
+- F32 landed 16:50Z (futon2 `d3a5d938c`, reloaded): a claimed injury's diagnosis pin and acceptance test are carried from its persisted transaction; no re-diagnosis, no re-admission.
+- The two F31 gaps fixed 17:02Z (futon2 `16be63148`, reloaded): `:continued-from` kept on continuation refusals; `:continuation` marker when the loop stops after persisted writes.
+Click 10 (last of the grant) fired after the reload; id in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
 
