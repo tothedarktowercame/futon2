@@ -18,11 +18,22 @@ BINDING_MISMATCH = {"meta-self-heal/diagnosis-transaction-mismatch", "meta-self-
 # record [:meta-self-heal/readiness :acceptance-observation]; reasons from
 # meta_self_heal_production.clj `prepare-acceptance` / `admit-acceptance!`.
 # Any other observation leaves the prefix :not-recorded.
+# `:acceptance-review-refused` carries `:review-status` from the review invoke's
+# response (meta_self_heal_production.clj P:628 at futon2 9b97bb99c).  `:refused` is the
+# reviewer's own answer; `:failed` is a transport failure (`:producer-invoke-failed`,
+# adapters A:233), so there is no reviewer answer and the state is admissionRefused
+# ("refused before or without a reviewer answer"), per SelfHealRoute rev 4
+# `BoundaryDefect.state` (mathlib4 2e33839f88, `checkerPlacement_isViolation`).  Any
+# other `:review-status` is left as a gap, never guessed.
 ACCEPTANCE_PREFIX = [
   (lambda o: o.get("status") == "refused" and o.get("reason") == "meta-self-heal/acceptance-review-refused"
-             and o.get("review-status") is not None,
+             and o.get("review-status") == "refused",
    ["activeInjury", "diagnosisPrepared", "admissionRun", "reviewRefused"],
-   "a reviewer answer (:review-status) exists only after admit-acceptance!, which runs only on an :available diagnosis"),
+   "the reviewer answered :refused (:review-status :refused), which exists only after admit-acceptance!, which runs only on an :available diagnosis"),
+  (lambda o: o.get("status") == "refused" and o.get("reason") == "meta-self-heal/acceptance-review-refused"
+             and o.get("review-status") == "failed",
+   ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused"],
+   "the review invoke failed in transport (:review-status :failed), so there is no reviewer answer: admissionRefused, not reviewRefused (SelfHealRoute rev 4, AdmissionDefect.noReviewerAnswer)"),
   (lambda o: o.get("status") == "accepted",
    ["activeInjury", "diagnosisPrepared", "admissionRun", "reviewAccepted"],
    "an :accepted observation is returned only by admit-acceptance!"),

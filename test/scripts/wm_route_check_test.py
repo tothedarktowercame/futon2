@@ -117,6 +117,45 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(":verdict :conforms-suffix", out)
     self.assertIn("masked preparation refusal", out)
 
+  # The acceptance observation of clicks 36b47627 / fdc08aea / 78180753 (2026-10-19, 429 at
+  # review), as recorded under futon3c data/wm-click-acceptances; and click 1a6de51f's, where
+  # the reviewer answered.  Both verbatim field sets.
+  OBS_429 = {"status": "refused", "reason": "meta-self-heal/acceptance-review-refused",
+             "review-status": "failed", "review-reason": "meta-self-heal/producer-invoke-failed"}
+  OBS_REVIEWED = {"status": "refused", "reason": "meta-self-heal/acceptance-review-refused",
+                  "review-status": "refused", "review-reason": "acceptance-test-did-not-fail-for-injury-reason"}
+
+  def test_review_transport_failure_is_admission_not_review_refused(self):
+    # The bad case (refusal-totality #48b): before this fix any non-nil :review-status
+    # projected to reviewRefused, so a 429 at review read as a reviewer's answer.
+    m = module()
+    def record(obs): return {"meta-self-heal/readiness": {"status": "ready", "acceptance-observation": obs}}
+    binding = {"runtime-disposition": {"ordinary-selection-called?": True}}
+    path, gaps, notes, why = m.project(binding, record(self.OBS_429))
+    self.assertEqual((path, gaps, why), (["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused",
+                                          "readinessReady", "ordinarySelection", "terminalRecord"], [], None))
+    self.assertNotIn("reviewRefused", path)
+    self.assertIn("no reviewer answer", notes[0]["note"])
+    path, gaps, notes, why = m.project(binding, record(self.OBS_REVIEWED))
+    self.assertEqual(path[:4], ["activeInjury", "diagnosisPrepared", "admissionRun", "reviewRefused"])
+    # A :review-status the rule does not name is a gap, not a guess.
+    path, gaps, notes, why = m.project(binding, record({**self.OBS_429, "review-status": "timeout"}))
+    self.assertEqual(gaps, [{"position": 0, "status": "not-recorded"}]); self.assertNotIn("admissionRun", path)
+
+  @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
+  def test_admission_refused_path_live_lean(self):
+    # The kernel decides the projected path on the actual table: the four self-heal edges
+    # through admissionRefused hold, and the only missing edge is the one click 2 first
+    # exposed (the runtime ran ordinary selection after the route), not anything at admission.
+    m = module(); path = ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused", "readinessReady", "ordinarySelection", "terminalRecord"]
+    with tempfile.TemporaryDirectory() as td:
+      f = Path(td)/"T.lean"; f.write_text(m.lean_source(path, False))
+      ran = subprocess.run([m.lake_executable(), "env", "lean", str(f)], cwd=MATHLIB, text=True, capture_output=True)
+    self.assertEqual(m.judge(path, False, ran.stdout, ran.returncode),
+                     {"verdict": "violates", "first-missing-edge": ["readinessReady", "ordinarySelection"]}, ran.stdout + ran.stderr)
+    self.assertEqual(ran.stdout.count("EDGE"), 6)
+    for i in range(4): self.assertIn(f"EDGE {i} true", ran.stdout)
+
   @unittest.skipUnless(OLEAN.is_file(), "SelfHealRoute.olean not built on this host")
   def test_rev3_states_live_lean(self):
     # The two new suffixes are decided by the kernel on the actual table, not by this script.
