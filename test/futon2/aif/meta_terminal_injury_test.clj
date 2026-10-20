@@ -219,8 +219,9 @@
     (is (empty? (:injuries (ledger/active-injuries (:ledger discharged)))))))
 
 (defn- enacted-ledger
-  "A ledger with one injury carried to :enacted, its retry click \"retry-click\"."
-  []
+  "A ledger with one injury carried to :enacted."
+  ([] (enacted-ledger "retry-click"))
+  ([retry-click]
   (let [failure (classify {:run/id "failed" :click/id "detected"
                            :failure {:kind :reload-failed :stage :reload}}
                           pin-a)
@@ -238,8 +239,8 @@
         enacted (append! reviewed {:injury-id injury-id :state :enacted :attempt 1
                                    :repair-id "repair/async"
                                    :integration-commit integration
-                                   :retry-click "retry-click"})]
-    {:injury-id injury-id :ledger enacted}))
+                                   :retry-click retry-click})]
+    {:injury-id injury-id :ledger enacted})))
 
 (defn- pin-of [c] {:path (str "fixtures/" c ".edn") :sha256 (apply str (repeat 64 c))})
 
@@ -302,6 +303,62 @@
       (is (= :enacted (:state (last (filter #(= ledger/transition-schema (:schema %))
                                             (:entries (:ledger result))))))
           (pr-str reason)))))
+
+(deftest different-injury-on-retry-click-is-inconclusive-for-enacted-injury
+  ;; Pins requeue_todayMissesUnobserved: both new and already-active other
+  ;; injuries leave the attributed observation needed by pending-requeue,
+  ;; while the same injury follows append-retry-result instead.
+  (let [{injury-a :injury-id history-a :ledger}
+        (enacted-ledger "wm-retry-r-1")
+        unknown-b (classify {:run/id "other-new" :click/id "wm-retry-r-1"
+                             :failure {:kind :review-failed :stage :review}}
+                            (pin-of "b"))
+        opened-b (terminal/integrate history-a unknown-b)
+        pending-open (ledger/pending-requeue (:ledger opened-b) injury-a)
+
+        seed-b (classify {:run/id "other-seed" :click/id "other-detection"
+                          :failure {:kind :review-failed :stage :review}}
+                         (pin-of "c"))
+        with-active-b (:ledger (terminal/integrate history-a seed-b))
+        repeated-b (classify {:run/id "other-repeat" :click/id "wm-retry-r-1"
+                              :failure {:kind :review-failed :stage :review}}
+                             (pin-of "d"))
+        retained-b (terminal/integrate with-active-b repeated-b)
+        pending-repeat (ledger/pending-requeue (:ledger retained-b) injury-a)
+
+        same-a (classify {:run/id "same-injury" :click/id "wm-retry-r-1"
+                          :failure {:kind :reload-failed :stage :reload}}
+                         (pin-of "e"))
+        reopened-a (terminal/integrate history-a same-a)]
+    (is (not= injury-a (:injury-id unknown-b)))
+    (is (= :open (:transition opened-b)))
+    (is (= :open (->> (:entries (:ledger opened-b))
+                      (filter #(= (:injury-id unknown-b) (:injury-id %)))
+                      last :state)))
+    (is (= :retry-inconclusive (:observation-kind pending-open)))
+    (is (= injury-a (:injury-id pending-open)))
+    (is (= "wm-retry-r-1" (:retry-click pending-open)))
+    (is (= {:injury-id injury-a :repair-id "repair/async"
+            :retry-click "wm-retry-r-1"}
+           (:retry-of opened-b)))
+
+    (is (= :active-injury-retained (:transition retained-b)))
+    (is (= :repeated-active-injury
+           (->> (:entries (:ledger retained-b))
+                (filter #(= :repeated-active-injury (:observation-kind %)))
+                last :observation-kind)))
+    (is (= :retry-inconclusive (:observation-kind pending-repeat)))
+    (is (= injury-a (:injury-id pending-repeat)))
+    (is (= "wm-retry-r-1" (:retry-click pending-repeat)))
+    (is (= {:injury-id injury-a :repair-id "repair/async"
+            :retry-click "wm-retry-r-1"}
+           (:retry-of retained-b)))
+
+    (is (= injury-a (:injury-id same-a)))
+    (is (= :reopened (:transition reopened-a)))
+    (is (nil? (ledger/pending-requeue (:ledger reopened-a) injury-a)))
+    (is (empty? (filter #(= :retry-inconclusive (:observation-kind %))
+                        (:entries (:ledger reopened-a)))))))
 
 (deftest no-work-record-off-the-retry-click-records-its-reason
   (let [{:keys [injury-id ledger]} (enacted-ledger)

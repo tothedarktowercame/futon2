@@ -182,6 +182,19 @@
                       (= click-id (:retry-click %)))
                 (ledger-entries history))))
 
+(defn- append-other-injury-retry-observation
+  [appended classification enacted transition]
+  (let [observed (ledger/append-observation
+                  (:ledger appended) (:record-pin classification)
+                  :retry-inconclusive
+                  {:injury-id (:injury-id enacted)
+                   :retry-click (:click-id classification)})]
+    (if (= :appended (:status observed))
+      (assoc observed :classification classification :transition transition
+             :retry-of (select-keys enacted
+                                    [:injury-id :repair-id :retry-click]))
+      (assoc observed :classification classification))))
+
 (defn integrate
   "Pure deterministic ingestion. Non-injuries append inert observations.
   First injury occurrence opens; an enacted repair's attributable retry may
@@ -231,7 +244,11 @@
           (assoc appended :classification classification :transition :observation)))
 
       (= :injury (:classification classification))
-      (let [previous (latest-injury history (:injury-id classification))]
+      (let [previous (latest-injury history (:injury-id classification))
+            enacted (enacted-for-retry history (:click-id classification))
+            other-injury-retry? (and enacted
+                                     (not= (:injury-id enacted)
+                                           (:injury-id classification)))]
         (cond
           (nil? previous)
           (let [appended
@@ -243,7 +260,10 @@
                           :failure-stage (:failure-stage classification)
                           :failure-kind (:failure-kind classification)
                           :detected-click (:click-id classification)})]
-            (assoc appended :classification classification :transition :open))
+            (if other-injury-retry?
+              (append-other-injury-retry-observation
+               appended classification enacted :open)
+              (assoc appended :classification classification :transition :open)))
 
           (= :enacted (:state previous))
           (if (= (:retry-click previous) (:click-id classification))
@@ -269,8 +289,11 @@
           (let [appended (ledger/append-observation
                           history (:record-pin classification)
                           :repeated-active-injury)]
-            (assoc appended :classification classification
-                   :transition :active-injury-retained))
+            (if other-injury-retry?
+              (append-other-injury-retry-observation
+               appended classification enacted :active-injury-retained)
+              (assoc appended :classification classification
+                     :transition :active-injury-retained)))
 
           :else
           (refusal :injury/terminal-history-requires-new-transaction
