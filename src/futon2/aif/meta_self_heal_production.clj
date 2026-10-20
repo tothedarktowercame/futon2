@@ -431,7 +431,8 @@
   "The record keys producer-trace writes; admit-acceptance! carries them from
    the proposal onto every admission result (F22b)."
   [:acceptance-read-error :acceptance-read-retry :acceptance-transport-retry
-   :acceptance-read-repair :acceptance-source-retry :acceptance-source-read-error])
+   :acceptance-read-repair :acceptance-source-retry :acceptance-source-read-error
+   :acceptance-source-repair])
 
 (defn- producer-trace
   "What the producer did to get its answer, as record keys: F19's reader error
@@ -439,7 +440,8 @@
    (:transport-retry), F21's brace completion (:read-repair, click
    wm-click-4c3c26e2, 2026-10-20: the answer was one `}` short for the fourth
    time and the re-ask did not change that, so the reader completes it and
-   says so), and F22's source re-ask (:source-retry, :source-read-error).
+   says so), F22's source re-ask (:source-retry, :source-read-error), and
+   F23's one-character source repair (:source-repair).
    Carried on every result of produce-acceptance-from-request!,
    proposed or refused; never into the content-addressed receipt."
   [response]
@@ -459,7 +461,13 @@
     (contains? response :source-retry)
     (assoc :acceptance-source-retry (:source-retry response))
     (contains? response :source-read-error)
-    (assoc :acceptance-source-read-error (:source-read-error response))))
+    (assoc :acceptance-source-read-error (:source-read-error response))
+    ;; F23a (clicks wm-click-79710180 and wm-click-d26194dd, 2026-10-20):
+    ;; the producer removed one surplus delimiter at the reader's position
+    ;; (:source-repair, with the character, its line and column and the
+    ;; reader error); the proposal's source text is the repaired text.
+    (contains? response :source-repair)
+    (assoc :acceptance-source-repair (:source-repair response))))
 
 (defn- produce-acceptance-from-request!
   "The port call and receipt half of produce-acceptance!, once every

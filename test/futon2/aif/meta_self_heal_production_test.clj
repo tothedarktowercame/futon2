@@ -586,6 +586,39 @@
     (is (not (contains? plain-refused :acceptance-source-retry)))
     (is (not (contains? plain-refused :acceptance-source-read-error)))))
 
+(deftest source-repaired-answer-carries-the-repair-through-admission
+  ;; F23a (clicks wm-click-79710180 and wm-click-d26194dd, 2026-10-20): the
+  ;; author's test had one surplus `)` closing a deftest; F23 removes that
+  ;; one character at the reader's position and records what it removed as
+  ;; :source-repair. The record key :acceptance-source-repair travels onto
+  ;; the proposal and onto every admission result, never into a receipt.
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        repair {:removed ")" :line 135 :col 86 :error "Unmatched delimiter: )"}
+        traced (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances-repaired")
+                 :meta-acceptance-fn (fn [_] {:status :proposed
+                                              :acceptance-test (acceptance-case "P24-repaired" :injury)
+                                              :source-repair repair})}
+                diagnosis)
+        receipt (edn/read-string (slurp (get-in traced [:acceptance-evidence-pin :path])))
+        run-result {:status :ran :outcome :failed :exit 1
+                    :summary "ran after the repair"
+                    :run-pin {:path "test://acceptance-after-repair"
+                              :sha256 (apply str (repeat 64 "d"))}}
+        refused (production/admit-acceptance!
+                 {:meta-acceptance-run-fn (constantly run-result)
+                  :meta-acceptance-review-fn (constantly {:status :refused :reason {:kind :does-not-pin}})}
+                 traced)]
+    (is (= :proposed (:status traced)))
+    (is (= repair (:acceptance-source-repair traced))
+        "F23a: deleting the :acceptance-source-repair copy makes this fail")
+    (is (nil? (:acceptance-source-retry traced)) "a repaired first answer was not re-asked")
+    (is (not (contains? receipt :acceptance-source-repair)) "the receipt is the proposal, not its transport")
+    (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
+    (is (= repair (:acceptance-source-repair refused))
+        "F23a: leaving the key out of producer-trace-keys makes this fail")))
+
 (def ^:private documented-function
   ;; An extra, well-formed entry whose var has a docstring, so :doc is exercised.
   {:role :runtime-entrypoint
