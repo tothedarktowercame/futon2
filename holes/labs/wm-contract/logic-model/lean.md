@@ -43,6 +43,8 @@ Revision 6 (mathlib4 `darktower` `494d0f8e6a`, claude-2, 2026-10-20, packet M6L)
 
 Rev 6 notes (mathlib4 `4128f17061`, claude-2, M7L): `activeSetUnavailable` is reachable only by construction, because both loads run the same pure `validate-ledger`. The rev 4 witnesses read their bounded run from `[:result :runtime-disposition :acceptance-observation :request :result]`.
 
+Revision 7 (mathlib4 `darktower` `2720d17fb8`, claude-2, 2026-10-20, packet M9L): the retry click is a separate start (`retryClick` → `retryReady` / `retryRefused`), and `retryReady → ordinarySelection` is the second of exactly two doors into ordinary work (`ordinaryWork_twoDoors`), so `RouteState` has 28 states. The child click's terminal ingest closes the injury. Holes: an abstained retry discharges as a success, and a retry that writes no run record re-awaits on every later click.
+
 **AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
 injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
 first two" was wrong; L1 has the table and record witnesses.
