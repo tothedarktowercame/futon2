@@ -430,10 +430,11 @@
 (defn- producer-trace
   "What the producer did to get its answer, as record keys: F19's reader error
    and one informed re-ask (:read-retry), F9's one rate-limit retry
-   (:transport-retry), and F21's brace completion (:read-repair, click
+   (:transport-retry), F21's brace completion (:read-repair, click
    wm-click-4c3c26e2, 2026-10-20: the answer was one `}` short for the fourth
    time and the re-ask did not change that, so the reader completes it and
-   says so). Carried on every result of produce-acceptance-from-request!,
+   says so), and F22's source re-ask (:source-retry, :source-read-error).
+   Carried on every result of produce-acceptance-from-request!,
    proposed or refused; never into the content-addressed receipt."
   [response]
   (cond-> {}
@@ -444,7 +445,15 @@
     (contains? response :transport-retry)
     (assoc :acceptance-transport-retry (:transport-retry response))
     (contains? response :read-repair)
-    (assoc :acceptance-read-repair (:read-repair response))))
+    (assoc :acceptance-read-repair (:read-repair response))
+    ;; F22a (click wm-click-79710180, 2026-10-20): the producer's one
+    ;; informed re-ask when the proposed test source does not read
+    ;; (:source-retry, with the first reader error and its line and column)
+    ;; and the error that remained after it (:source-read-error).
+    (contains? response :source-retry)
+    (assoc :acceptance-source-retry (:source-retry response))
+    (contains? response :source-read-error)
+    (assoc :acceptance-source-read-error (:source-read-error response))))
 
 (defn- produce-acceptance-from-request!
   "The port call and receipt half of produce-acceptance!, once every

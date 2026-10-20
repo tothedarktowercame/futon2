@@ -487,6 +487,50 @@
     (is (= repair (:acceptance-read-repair mismatched))
         "a repaired answer refused later still says it was repaired")))
 
+(deftest source-reasked-proposed-answer-carries-the-source-trace
+  ;; F22a (click wm-click-79710180, 2026-10-20): the author's test had a
+  ;; surplus `)` at 135:87 and the reviewer was used as a paren checker.
+  ;; F22 re-asks once at the producer boundary; the re-ask (:source-retry)
+  ;; and any error that remained (:source-read-error) travel onto the
+  ;; observation, proposed or refused, and never into the receipt.
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        retry {:first-error "Unmatched delimiter: )" :first-line 135 :first-col 87}
+        remaining "Unmatched delimiter: ) at 2:16"
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-acceptance-fn (fn [_] {:status :proposed
+                                              :acceptance-test (acceptance-case "P18-reasked" {:kind :configuration-injury})
+                                              :source-retry retry
+                                              :source-read-error remaining})}
+                diagnosis)
+        receipt (edn/read-string (slurp (get-in result [:acceptance-evidence-pin :path])))
+        plain (production/produce-acceptance!
+               {:meta-acceptance-root (str dir "/acceptances-plain")
+                :meta-acceptance-fn (fn [_] {:status :proposed
+                                             :acceptance-test (acceptance-case "P18-plain" {:kind :configuration-injury})})}
+               diagnosis)
+        mismatched (production/produce-acceptance!
+                    {:meta-acceptance-root (str dir "/acceptances-mm")
+                     :meta-acceptance-fn (fn [_] {:status :proposed :source-retry retry
+                                                  :acceptance-test (assoc (acceptance-case "P18-mm" {:kind :configuration-injury})
+                                                                          :source {:namespace "other.ns" :path "test/other/ns.clj" :text "(ns other.ns)"})})}
+                    diagnosis)]
+    (is (= :proposed (:status result)))
+    (is (= retry (:acceptance-source-retry result))
+        "F22a: deleting the :acceptance-source-retry copy makes this fail")
+    (is (= remaining (:acceptance-source-read-error result))
+        "F22a: deleting the :acceptance-source-read-error copy makes this fail")
+    (is (not (contains? receipt :acceptance-source-retry)) "the receipt is the proposal, not its transport")
+    (is (not (contains? receipt :acceptance-source-read-error)))
+    (is (= :proposed (:status plain)))
+    (is (not (contains? plain :acceptance-source-retry)) "an answer that read first time carries no key")
+    (is (not (contains? plain :acceptance-source-read-error)))
+    (is (= :meta-self-heal/acceptance-proposal-source-mismatch (:reason mismatched)))
+    (is (= retry (:acceptance-source-retry mismatched))
+        "a re-asked answer refused later still says it was re-asked")
+    (is (not (contains? mismatched :acceptance-source-read-error)))))
+
 (def ^:private documented-function
   ;; An extra, well-formed entry whose var has a docstring, so :doc is exercised.
   {:role :runtime-entrypoint
