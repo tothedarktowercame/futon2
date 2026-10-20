@@ -79,7 +79,10 @@ LINE_CITE = re.compile(r"\b[PCRASTLIU](?::| lines? )\d+(?:-\d+)?|\.clj:\d+|\bL\d
 def cited_callees(text):
   return set(re.findall(r"(?<![:\w.-])([A-Za-z][A-Za-z0-9_.!?-]*/[A-Za-z][A-Za-z0-9_.!?-]*)", text))
 
-ANCHOR_FORM = re.compile(r"\((?:(not)\s+)?(P|C|R|A|S|T|L|I|U)\s+([a-z*][^\s()]*)\s*([^()]*)\)")
+# the body of an anchor has no parentheses outside a quoted fragment; an opening that
+# ANCHOR_FORM cannot finish (`(P route! (when (seq ...)))`) is reported, not ignored
+ANCHOR_FORM = re.compile(r"\((?:(not)\s+)?(P|C|R|A|S|T|L|I|U)\s+([a-z*][^\s()]*)\s*((?:\"[^\"]*\"|[^()\"])*)\)")
+ANCHOR_OPEN = re.compile(r"\((?:not\s+)?(?:P|C|R|A|S|T|L|I|U)\s+[a-z*][^\s()]*")
 NEEDLE = re.compile(r'"([^"]*)"')
 
 def anchor_forms(text):
@@ -90,7 +93,8 @@ def anchor_forms(text):
   enclosing form lets a cited outcome keyword keep the function it names.
   `(not P function ...)` is an exclusion: it consumes its keywords as prose
   without claiming a code endpoint. A quoted fragment is matched against the
-  function's source only; keywords and callees inside it are not cited.
+  function's source only; keywords and callees inside it are not cited, and it
+  may contain parentheses.
   """
   out = []
   for m in ANCHOR_FORM.finditer(text):
@@ -206,6 +210,9 @@ def unresolved_anchors(rows, lean_files):
     if r["kind"] not in ("defn", "call"):
       for v in (r.get("reason"), r.get("status")):
         if v: outcome.setdefault((r["tag"], r["fn"]), set()).update({v, v.split("/")[-1]})
+  def has_callee(tag, fn, callee):
+    # whole symbol: `ledger/append` is not a citation of `ledger/append-retry-result`
+    return re.search(r"(?<![\w./!?*+<>=-])" + re.escape(callee) + r"(?![\w./!?*+<>=-])", source[(tag, fn)]) is not None
   def has_keyword(tag, fn, kw):
     if kw in outcome.get((tag, fn), set()): return True
     src = source[(tag, fn)]
@@ -215,13 +222,19 @@ def unresolved_anchors(rows, lean_files):
   out = []
   for path in lean_files:
     text = Path(path).read_text()
+    parsed = {m.start() for m in ANCHOR_FORM.finditer(text)}
+    for m in ANCHOR_OPEN.finditer(text):
+      if m.start() not in parsed:
+        line = text.count("\n", 0, m.start()) + 1
+        out.append((Path(path).stem, line, text[m.start():text.find("\n", m.start())].strip(),
+                    "does not parse: parentheses belong inside a quoted fragment"))
     for tag, fn, kws, callees, (start, end), _positive, needles in anchor_forms(text):
       line, anchor = text.count("\n", 0, start) + 1, " ".join(text[start:end].split())
       if (tag, fn) not in source:
         out.append((Path(path).stem, line, anchor, f"no function `{fn}` in {tag}")); continue
       src = source[(tag, fn)]
       missing = ([f":{k}" for k in sorted(kws) if not has_keyword(tag, fn, k)]
-                 + [c for c in sorted(callees) if c not in src]
+                 + [c for c in sorted(callees) if not has_callee(tag, fn, c)]
                  + [f'"{n}"' for n in needles if n not in src])
       if missing:
         out.append((Path(path).stem, line, anchor, f"not in `{fn}`: " + ", ".join(missing)))

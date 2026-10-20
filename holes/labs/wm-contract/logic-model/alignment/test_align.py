@@ -179,6 +179,31 @@ class AnchorResolutionTest(unittest.TestCase):
   def test_line_shaped_anchor_is_unresolved(self):
     self.assertEqual(["no function `lines` in P"], self.unresolved("(P lines 1029-1031)"))
 
+  def test_callee_prefix_is_not_a_citation(self):
+    # review (claude-5, rev 20): `ledger/append` resolved against a function that only
+    # calls `ledger/append-retry-result`, and then made no call edge: green and dead
+    rows = [defn("coordinate", "(defn coordinate [h] (ledger/append-retry-result h))", "C")]
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+      f.write("(C coordinate ledger/append) (C coordinate ledger/append-retry-result)")
+    self.assertEqual(["not in `coordinate`: ledger/append"],
+                     [why for *_rest, why in _ALIGN.unresolved_anchors(rows, [f.name])])
+
+  def test_needle_may_contain_parentheses(self):
+    rows = [defn("route!", "(defn route! [a] (when (seq (:injuries active)) a))")]
+    forms = _ALIGN.anchor_forms('(P route! "(when (seq (:injuries active))")')
+    self.assertEqual(["(when (seq (:injuries active))"], forms[0][6])
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+      f.write('(P route! "(when (seq (:injuries active))") (P route! "(seq (:injuries gone))")')
+    self.assertEqual(['not in `route!`: "(seq (:injuries gone))"'],
+                     [why for *_rest, why in _ALIGN.unresolved_anchors(rows, [f.name])])
+
+  def test_unquoted_parentheses_are_reported_not_ignored(self):
+    # rev 20 shipped four such anchors; ANCHOR_FORM could not match them, so they were
+    # neither resolved nor listed
+    self.assertEqual(["does not parse: parentheses belong inside a quoted fragment"],
+                     self.unresolved("(P route! (when (seq (:injuries active))))"))
+    self.assertEqual([], self.unresolved("(P route!) and prose (parenthetical) text"))
+
 
 class LineCitationTest(unittest.TestCase):
   def test_line_citations_are_listed(self):
