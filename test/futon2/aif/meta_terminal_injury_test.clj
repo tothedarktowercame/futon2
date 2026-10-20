@@ -217,3 +217,96 @@
            (set (keys (:injuries (ledger/active-injuries after-unrelated))))))
     (is (= :discharged (:transition discharged)))
     (is (empty? (:injuries (ledger/active-injuries (:ledger discharged)))))))
+
+(defn- enacted-ledger
+  "A ledger with one injury carried to :enacted, its retry click \"retry-click\"."
+  []
+  (let [failure (classify {:run/id "failed" :click/id "detected"
+                           :failure {:kind :reload-failed :stage :reload}}
+                          pin-a)
+        injury-id (:injury-id failure)
+        open (:ledger (terminal/integrate ledger/empty-ledger failure))
+        claim (append! open {:injury-id injury-id :state :claimed :attempt 1
+                             :repair-id "repair/async" :algorithm "self-heal"
+                             :author-session "a" :reviewer-session "r"})
+        authored (append! claim {:injury-id injury-id :state :authored :attempt 1
+                                 :repair-id "repair/async" :patch-sha patch
+                                 :worktree "/tmp/w"})
+        reviewed (append! authored {:injury-id injury-id :state :reviewed :attempt 1
+                                    :repair-id "repair/async" :verdict :approved
+                                    :reviewer-sha review :reviewer-session "r"})
+        enacted (append! reviewed {:injury-id injury-id :state :enacted :attempt 1
+                                   :repair-id "repair/async"
+                                   :integration-commit integration
+                                   :retry-click "retry-click"})]
+    {:injury-id injury-id :ledger enacted}))
+
+(defn- pin-of [c] {:path (str "fixtures/" c ".edn") :sha256 (apply str (repeat 64 c))})
+
+;; The seven no-work outcomes, each record built so that classify yields the
+;; reason named for it (rev 8 RetryClickOutcome, the no-work constructors).
+(def no-work-retry-records
+  [[:ordinary-selection-abstention
+    {:failure {:kind :abstained :stage :selection}}]
+   [:evaluated-no-action
+    {:failure {:kind :abstained :stage :selection
+               :detail {:refusals [{:reason :policy-nondiscrimination}]}}
+     :decision {:status :abstained}}]
+   [:partial-frontier-continuation
+    {:failure {:kind :abstained :stage :close}
+     :decision {:status :selected
+                :selection-certificate
+                {:reading-frontier {:eligible 3 :assessed 1 :reading-absent 2}}}}]
+   [:operator-cancelled {:failure {:kind :operator-cancelled :stage :selection}}]
+   [:declared-no-work {:failure {:kind :declared-no-work :stage :selection}}]
+   [:diagnostic-only {:failure {:kind :diagnostic-only :stage :selection}}]
+   [:absent-terminal-failure {}]])
+
+(deftest abstained-retry-click-keeps-the-injury-enacted
+  ;; The bad case: a retry click that abstained (the ordinary outcome since
+  ;; 10-15) must not record the repair as healed.
+  (let [{:keys [injury-id ledger]} (enacted-ledger)
+        retry (classify {:run/id "retry-abstained" :click/id "retry-click"
+                         :failure {:kind :abstained :stage :selection}}
+                        (pin-of "1"))
+        result (terminal/integrate ledger retry)
+        active (:injuries (ledger/active-injuries (:ledger result)))
+        last-entry (last (:entries (:ledger result)))]
+    (is (= :ordinary-selection-abstention (:non-injury-reason retry)))
+    (is (= :retry-inconclusive (:transition result)) (pr-str (:transition result)))
+    (is (= ledger/observation-schema (:schema last-entry)))
+    (is (= :retry-inconclusive (:observation-kind last-entry)))
+    (is (= :enacted (:state (get active injury-id))))
+    (is (= {:injury-id injury-id :repair-id "repair/async" :retry-click "retry-click"}
+           (:retry-of result)))))
+
+(deftest every-no-work-retry-outcome-is-inconclusive
+  (doseq [[i [reason record]] (map-indexed vector no-work-retry-records)]
+    (let [{:keys [injury-id ledger]} (enacted-ledger)
+          retry (classify (assoc record :run/id (str "retry-" (name reason))
+                                 :click/id "retry-click")
+                          (pin-of (str (+ 2 i))))
+          result (terminal/integrate ledger retry)
+          active (:injuries (ledger/active-injuries (:ledger result)))]
+      (is (= [:non-injury reason]
+             [(:classification retry) (:non-injury-reason retry)]) (pr-str reason))
+      (is (= :retry-inconclusive (:transition result)) (pr-str reason))
+      (is (= :retry-inconclusive (:observation-kind (last (:entries (:ledger result)))))
+          (pr-str reason))
+      (is (= :enacted (:state (get active injury-id))) (pr-str reason))
+      (is (= :enacted (:state (last (filter #(= ledger/transition-schema (:schema %))
+                                            (:entries (:ledger result))))))
+          (pr-str reason)))))
+
+(deftest no-work-record-off-the-retry-click-records-its-reason
+  (let [{:keys [injury-id ledger]} (enacted-ledger)
+        other (classify {:run/id "other-abstained" :click/id "other-click"
+                         :failure {:kind :abstained :stage :selection}}
+                        (pin-of "9"))
+        result (terminal/integrate ledger other)
+        last-entry (last (:entries (:ledger result)))]
+    (is (= :observation (:transition result)))
+    (is (nil? (:retry-of result)))
+    (is (= :ordinary-selection-abstention (:observation-kind last-entry)))
+    (is (= :enacted (:state (get (:injuries (ledger/active-injuries (:ledger result)))
+                                 injury-id))))))
