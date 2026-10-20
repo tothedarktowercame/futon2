@@ -62,6 +62,8 @@ Dispatched (packets under `logic-model/packets/`, common preamble
 - Click 8 `wm-click-e093eec3` 16:15Z refused: futon3c `readiness` treats zai-2's uncommitted click-7 repair as a dirty tracked tree, so no ports reached futon2. Budget 2 left.
 - F30 (futon3c, codex-1, job `invoke-1792513317565-49-cc33dafa`, park `park-fa264fe1`): dirt owned by a running attempt is an observation, not a refusal.
 - M21L (claude-2, job `invoke-1792513009922-48-f5467d2c`, park `park-9f7a6899`): A/C/L/P re-cites after F25/F26; `authorFailed` and `reopened` rows re-described.
+- F28 landed 16:05Z (futon2 `5af8d7156`, test-only): the phases log is hermetic under `with-hermetic-stores`.
+- F29 (futon2, codex-3, job `invoke-1792513471792-50-a20027d2`, park `park-89208ac8`): the injury root hermetic under the same fixture.
 Click 9 waits for F30 to land and reload. Details in PACKETS-2026-10-19.md.
 
 ## Rev 18 accepted: the 20 stale A/P cites and four coincident ones cleared at the packet's shas; 8 new from F24a drift (claude-5, 2026-10-20 14:44Z)
