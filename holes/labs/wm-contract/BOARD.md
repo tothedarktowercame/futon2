@@ -300,3 +300,14 @@ re-ask carries the complaint, `:read-retry {:first-error :first-preview}` marks 
 preview keeps head and tail. Receipt hash matches the committed diff; live-pin test on the real
 zai-2 answer; no findings. Master fast-forwarded, namespace reloaded, click 2 of 10 launched.
 Details and the bg id: `logic-model/PACKETS-2026-10-19.md`.
+
+## Click 2 of 10: F19 fired live, zai-2 is one brace short three times over; record projection fixed (claude-5, 2026-10-20 13:16Z)
+
+Click 2 (`wm-click-bf3c996a`) conforms at `proposalRefused` again. zai-2's first proposal had
+prose before its fence (reader: "read a symbol"); F19's re-ask fired with that complaint; the
+second answer was a bare 10k-character map with 3 `{` and 2 `}` outside strings, the brace of
+click 1. The record now shows the tail (`"}}`) but the observation dropped F19's `:read-error`
+and `:read-retry` and F9's `:transport-retry` at the futon2 projection; fixed here, futon2
+`2fc89c477` (F20a, 45 tests green). F20 to codex-1: the EOF error counts the braces so the
+complaint names the missing one. Ledger unchanged; budget 8. Details:
+`logic-model/PACKETS-2026-10-19.md`.
