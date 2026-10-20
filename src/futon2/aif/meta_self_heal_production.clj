@@ -743,10 +743,32 @@
   (or (:meta-repair-ports opts)
       (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
                  (:repair-retry-fn opts))
-        {:author (agency-port (:agency-invoke-fn opts) :author)
-         :review (agency-port (:agency-invoke-fn opts) :reviewer)
-         :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
-         :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")})))
+        (cond-> {:author (agency-port (:agency-invoke-fn opts) :author)
+                 :review (agency-port (:agency-invoke-fn opts) :reviewer)
+                 :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
+                 :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")}
+          ;; M10b-3 (2026-10-20): the futon3c adapter exposes its pure click
+          ;; minting function as :retry-click-id-fn; the coordinator reads it
+          ;; as :retry-click-id when it re-queues an inconclusive retry. Its
+          ;; absence is not a port defect here: the coordinator refuses
+          ;; :coordinator/retry-click-id-unavailable only at the requeue.
+          (fn? (:retry-click-id-fn opts))
+          (assoc :retry-click-id (:retry-click-id-fn opts))))))
+(defn latest-retry-click
+  "The retry click the transaction currently names. Receipts are keyed by
+   phase, not by index: after author, review, enact and retry, each requeue
+   of an inconclusive retry appends a :retry-requeue-<n> receipt (M10b-3b),
+   so the click at receipt index 2 (the enact receipt's minted click) goes
+   stale on the first requeue. Read the last retry-family receipt's click,
+   else the enact receipt's, else nil."
+  [transaction]
+  (let [receipts (:receipts transaction)
+        phase-name #(when (keyword? (:phase %)) (name (:phase %)))
+        retry? #(let [n (phase-name %)]
+                  (and n (or (= "retry" n) (str/starts-with? n "retry-requeue-"))))]
+    (or (get-in (last (filter retry? receipts)) [:payload :retry-click])
+        (get-in (some #(when (= :enact (:phase %)) %) receipts)
+                [:payload :retry-click]))))
 (defn- work-order-options [opts]
   (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
                      :repair-reviewer :author-session :reviewer-session
@@ -997,7 +1019,7 @@
                                        :repair-id (get-in result [:transaction :work-order :repair-id])
                                        :attempt (get-in result [:transaction :work-order :attempt])
                                        :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
-                                       :retry-click (get-in result [:transaction :receipts 2 :payload :retry-click])
+                                       :retry-click (latest-retry-click (:transaction result))
                                        :checkpoint-receipts receipts}
                                 lw (assoc :ledger-write lw)
                                 tw (assoc :transaction-write tw

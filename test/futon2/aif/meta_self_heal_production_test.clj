@@ -1336,3 +1336,42 @@
     (is (= "some-other-proposal" (get-in result [:expected :acceptance-test :id])))
     (is (= (:id (:acceptance-test order)) (get-in result [:actual :acceptance-test :id])))
     (is (zero? @calls))))
+
+(deftest effect-ports-carry-the-adapter-click-minting-function
+  "M10b-3 (2026-10-20): the futon3c adapter exposes :retry-click-id-fn and the
+   coordinator reads :retry-click-id from the ports map when it re-queues an
+   inconclusive retry. Absence stays absent; a supplied port map passes through."
+  (let [id-fn (fn [repair-id attempt ordinal] (str repair-id "/" attempt "/" ordinal))
+        base {:agency-invoke-fn identity :repair-enact-fn identity
+              :repair-retry-fn identity}
+        with-fn (#'production/effect-ports (assoc base :retry-click-id-fn id-fn))
+        without (#'production/effect-ports base)
+        supplied (#'production/effect-ports
+                  (assoc base :retry-click-id-fn id-fn
+                         :meta-repair-ports {:author (constantly nil)}))]
+    (is (identical? id-fn (:retry-click-id with-fn)))
+    (is (every? fn? (map with-fn [:author :review :enact :retry])))
+    (is (not (contains? without :retry-click-id)))
+    (is (= {:author (:author supplied)} supplied)
+        "an explicit port map is used as given, nothing merged in")))
+
+(deftest latest-retry-click-follows-the-requeue-receipts-not-index-two
+  "No live transaction.edn existed under data/wm-meta-injuries on 2026-10-20,
+   so the receipts below are authored in the phase order the coordinator
+   seals them: author, review, enact, retry, then retry-requeue-<n>."
+  (let [receipt (fn [phase click] {:phase phase :payload {:retry-click click}})
+        enacted [{:phase :author :payload {:patch-sha "p"}} {:phase :review}
+                 (receipt :enact "click-0")]
+        retried (conj enacted (receipt :retry "click-0"))
+        requeued (into retried [(receipt :retry-requeue-1 "click-1")
+                                (receipt :retry-requeue-2 "click-2")])]
+    (is (= "click-2" (production/latest-retry-click {:receipts requeued}))
+        "the newest requeue receipt names the click")
+    (is (= "click-0" (production/latest-retry-click {:receipts retried})))
+    (is (= "click-0" (production/latest-retry-click {:receipts enacted}))
+        "before any retry receipt the enact receipt's minted click stands")
+    (is (nil? (production/latest-retry-click {:receipts (subvec enacted 0 2)})))
+    (is (nil? (production/latest-retry-click nil)))
+    (is (= "click-0" (production/latest-retry-click
+                      {:receipts (conj retried {:phase :retry-later :payload {:retry-click "x"}})}))
+        "an unrelated phase whose name merely starts with retry is not a retry receipt")))

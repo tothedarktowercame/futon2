@@ -217,6 +217,26 @@
     (is (= :coordinator/retry-attribution-refused (:reason result)))
     (is (= 1 (-> result :ledger :entries last :requeues)))))
 
+(deftest requeue-without-a-minting-port-refuses-typed-before-any-ledger-append
+  ;; M10b-3 production wiring (claude-5, 2026-10-20): the futon3c adapter's
+  ;; :retry-click-id-fn reaches the coordinator as :retry-click-id through
+  ;; production effect-ports and runner_service select-keys. If either hop
+  ;; drops it, the requeue must refuse by name, not throw, and must not call
+  ;; the retry port.
+  (let [initial (awaiting-retry (opened-ledger))
+        observed (inconclusive (:ledger initial) "8-nofn" "click-retry-repair-1")
+        calls (atom 0)
+        ps (dissoc (ports {:retry (fn [r]
+                                    (swap! calls inc)
+                                    (receipt r :queued {:retry-click (:retry-click r)}))})
+                   :retry-click-id)
+        result (coordinator/coordinate (durable observed) (:transaction initial) ps)]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/retry-click-id-unavailable (:reason result)))
+    (is (zero? @calls))
+    (is (= 0 (or (-> result :ledger :entries last :requeues) 0))
+        "nothing is appended before the port is known to exist")))
+
 (deftest rejection-and-port-failures-stop-without-silent-advance
   (doseq [[label override expected-state expected-reason]
           [[:author {:author (fn [r] (receipt r :failed {:reason :author-crash}))}
