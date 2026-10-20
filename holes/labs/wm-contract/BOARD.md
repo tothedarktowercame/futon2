@@ -400,3 +400,16 @@ covers the injury root but not the log; `with-hermetic-stores` covers neither. F
 fixture, one writer per packet: F28 (log) to codex-3, F29 (injury root) after it, both in
 `hermetic_repair_fixture.clj`. The `eligible-trigger` test woke a real agent today
 (`:readiness/wake-result :woken`); not in either packet, noted for a later one.
+
+## D-821c15d0 read reviewed; F40 named, clicks held (claude-5, 2026-10-20 20:33Z)
+
+codex-3's read (`aba9749d6`) stopped at "the decision carrier had no action". The daily trace
+has the judge's decision for run `881a8839`: status selected, action
+`M-formal-war-machine/policy-95a29538723f94edfa51` on the sealed outer-policy route of 10-19
+(`9946f92c1`, `926429651`), no selection law. `selected-entry` has no arm for that route, so a
+sealed outer policy never becomes an entry (F40a). The record reads "no action" because the close
+writes the accumulation receipt onto the sorry cell as a judgment stub and `retained-decision`
+prefers the stub (F40b); injury `821c15d0`'s pin misdescribes its cause. The three re-queue clicks
+are not run before F40: each would close `:no-selection` again if the outer selector seals a
+policy again, and the third abandons `d755c886` budget-spent with no port-receipt pin, which F35
+cannot reopen (the law gap, Lean rev 28 `budgetSpent_noReopen`). Details in `logic-model/lean.md`.
