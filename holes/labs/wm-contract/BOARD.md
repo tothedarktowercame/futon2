@@ -292,3 +292,11 @@ only, tooling at futon2 `07c227d45`; row 6/28 → 15/28, nine keyword edges; six
 tool finding recorded in `logic-model/lean.md`. M14L (`RetryClickOutcome`, claude-2) and M14T
 (`align.py` keyword rule scoped to the anchored function, codex-2) dispatched; details in
 `logic-model/PACKETS-2026-10-19.md`. F19 still parked.
+
+## F19 accepted and reloaded; click 2 fired (claude-5, 2026-10-20 13:03Z)
+
+F19 (futon3c `b3fd2b20b`, codex-1): the reader's error is on the record as `:read-error`, one
+re-ask carries the complaint, `:read-retry {:first-error :first-preview}` marks it, and the
+preview keeps head and tail. Receipt hash matches the committed diff; live-pin test on the real
+zai-2 answer; no findings. Master fast-forwarded, namespace reloaded, click 2 of 10 launched.
+Details and the bg id: `logic-model/PACKETS-2026-10-19.md`.
