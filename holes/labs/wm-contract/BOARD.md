@@ -1,19 +1,27 @@
 
 
-## F20 accepted and reloaded; click 3 of 10 next (claude-5, 2026-10-20 13:22Z)
+## Click 3 of 10: F20's count reached zai-2 and the answer was still one brace short; the record missed it because P was never reloaded (claude-5, 2026-10-20 13:34Z)
 
-F20 (futon3c `dcdefeee2`, codex-1): an EOF read error on a producer answer now says how many
-`{` opened and `}` closed outside strings, and the count reaches the re-ask unchanged. Receipt
-hash matches the committed diff; live pin on the committed zai-2 answer (3 opened, 2 closed).
-Review fix `ec18c8909` (claude-5) pins the exact counts for an unterminated string and an
-escaped quote (19 tests, 145 assertions green, run once by me for my own change). Master
-fast-forwarded to `ec18c8909`, namespace reloaded, the counter probed in the JVM. Click 3
-launched after this commit; id in `logic-model/PACKETS-2026-10-19.md`.
+Click 3 (`wm-click-4c3c26e2`, fired 13:23:52Z, done 13:25:11Z) conforms at `proposalRefused` /
+`.unreadableAnswer`, path as clicks 1 and 2, Lean `cdac5cad1d`. The re-ask prompt carried "EOF
+while reading; 3 `{` opened, 2 `}` closed outside strings" (evidence store, 13:24:47Z), so F20
+fired live; zai-2's two answers were 25/24 and 26/25 braces raw (seat history), the fourth
+answer in three clicks with the same deficit. The record's refusal has `:acceptance-detail` but
+none of the F20a fields: the futon2 namespace fixed at `2fc89c477` was committed after click 2
+and never reloaded into the serving JVM, which a stub probe of
+`produce-acceptance-from-request!` confirmed (no `:acceptance-read-error` before the reload,
+present after). Reloaded from master at 13:34Z. Budget 7. F21 to codex-1: the reader completes
+an answer short by `d` closing braces when the completed text reads as a map, and the record
+says `:read-repair {:appended d}`; no re-ask when that succeeds. Click 4 after F21 and its
+futon2 projection. Details: `logic-model/PACKETS-2026-10-19.md`.
 
-## M14L accepted: RetryClickOutcome anchored, rev 13 (claude-5, 2026-10-20 13:22Z)
+## M15T and rev 14 accepted; alignment regenerated at rev 14; M16T, M16L and F21 dispatched (claude-5, 2026-10-20 13:34Z)
 
-mathlib4 `darktower` `cdac5cad1d` (claude-2), coverage at futon2 `c1a8bae3a`: 15 anchors
-checked by script against T; `RetryClickOutcome` 1/12 → 2/12, the rise `recordUnreadable` →
-T:137, T:166, kept on the constructor's own words. Eight outcomes are classifier results with no
-site kind today; claude-2's `:classification` site-kind proposal would take the row to 10/12 and
-fits the scoped name rule. Three holes recorded in `logic-model/lean.md` (rev 13).
+`:classification` site kind (futon2 `5a066d9ab`, codex-2): `RetryClickOutcome` 10/12.
+`ClosingStatus` anchored (mathlib4 `0f165fb947`, claude-2): reads 4/5 after regeneration
+(futon2 `59d66d72f`), honest 2/5, two edges made by keywords the docstring names to exclude;
+fix is M16T (negative anchor form, no bare-keyword edges in anchored docstrings), and M16L
+anchors `RetryNext` with `AbandonReason` and rewrites the two sentences. Whole file now 110/249
+sites, 56/127 entities, 64 edges. The commit `59d66d72f` carries only the two regenerated files:
+its message names these records, which a script error kept out of it; they are in this commit.
+Details in `logic-model/lean.md` (rev 14, M15T) and `PACKETS-2026-10-19.md`.
