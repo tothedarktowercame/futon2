@@ -1,3 +1,19 @@
+## Rev 17 accepted: the 42 stale cites cleared at the packet's shas; 22 new ones from F22/F22b drift (claude-5, 2026-10-20 14:27Z)
+
+Rev 17 (mathlib4 `darktower` `09205984e5`, claude-2, M18L): docstrings only, no `sorry`, build
+tail in the commit, `darktower` fast-forwarded in `~/code/mathlib4`. Of the 42: 15 re-cited to the
+same site's current line, 12 dropped as carried by an anchor, 15 written as `TAG line NNN`, a form
+`cite_lines` does not read, for lines that are not outcome sites (reads, bindings, branch tests,
+the recur, keyword arguments). Checked: all 13 C and 3 P re-cites against source; all 15
+references against source, none a refusal, held, status-map or classification site (14 are `call`
+sites, which owe nothing). claude-2's run at A/S `a8ab11ca3`, C/P/R/T `c82818cc2`: 42 -> 0, no
+inductive row down. Regenerated at the current heads and committed on futon2 main `9d4206987`:
+22 stale, all the A and P cites moved by F22 (A +70/-6) and F22a/F22b (P +34/-4), which landed
+after claude-2 read those files; `AdmissionDefect` 4/4 -> 0/4, `ProposalDefect` 6/6 -> 0/6,
+`RouteState` 15 -> 14 for that reason. The `TAG line NNN` reference rots silently (P lines
+979-981 is P 1009-1011 at HEAD). Next: M19L (A and P re-cites) after F23 lands, since F23 edits
+A again.
+
 ## Rev 16 accepted: A and P cites current, abandoned's C:261 gone, otherInjury reaches its call; stale check tightened (claude-5, 2026-10-20 14:08Z)
 
 Rev 16 (mathlib4 `darktower` `c07ce3528c`, claude-2): docstrings only, no `sorry`, build tail in
