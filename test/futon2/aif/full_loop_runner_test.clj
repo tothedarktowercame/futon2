@@ -290,6 +290,10 @@
   ;; The decision is copied verbatim from the daily trace for
   ;; 2026-10-20-881a8839-d725-493e-95cf-eb06dd71b92c, whose terminal record
   ;; previously grew a receipt-only :judgment stub and shadowed this action.
+  ;; The fixture is the F40a projection (f5c7b6d96): :status, :action and
+  ;; :selection-certificate of that decision, values verbatim; the pin below
+  ;; is the sha256 of the projected map's pr-str (the whole map's pr-str
+  ;; hashed 08ebbe9f615fa1075bf87d13a10575dc6fd27c8887672eed8febdfa91fb066dc).
   (let [fixture "test/futon2/aif/fixtures/trace-decision-2026-10-20-881a8839.edn"
         decision (edn/read-string (slurp fixture))
         accumulation {:status :recorded :source "trace-fixture"}
@@ -303,7 +307,7 @@
         judgment (#'runner/reconcile-selection-publication
                   {:judgment {:controller-decision decision}}
                   {:accumulation-receipt accumulation :bmr-receipt bmr})]
-    (is (= "08ebbe9f615fa1075bf87d13a10575dc6fd27c8887672eed8febdfa91fb066dc"
+    (is (= "c2362894ee100c1ee0bc6779746d88b8317346ebcf57056259afa1a58074be1a"
            (load-identity/sha256 (.getBytes (pr-str decision) "UTF-8"))))
     (is (not (contains? reconciled :judgment)))
     (is (= accumulation (get-in reconciled [:sorry :decision :accumulation])))
