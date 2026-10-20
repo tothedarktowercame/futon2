@@ -195,6 +195,93 @@
     (is (= :attempt-limit-exhausted (:reason (:entry exhausted))))
     (is (empty? (:injuries (ledger/active-injuries (:ledger exhausted)))))))
 
+(deftest requeue-keeps-attempt-and-changes-only-retry-identity
+  ;; Pins requeue_consumesNoAttempt and the exact +1 requeue law: deleting
+  ;; either comparison from :requeue/evidence makes the forged transition valid.
+  (let [history (through-enacted)
+        forged (ledger/validate-transition
+                history {:injury-id "injury/2026-10-19/meta-route"
+                         :state :enacted :attempt 2
+                         :repair-id "repair/meta-self-heal-route"
+                         :patch-sha patch-sha :requeues 1
+                         :retry-click "retry/meta-self-heal/requeued"
+                         :integration-commit integration-sha})
+        reused (ledger/append-requeue
+                history "injury/2026-10-19/meta-route"
+                "retry/meta-self-heal/1")]
+    (is (= :transition/invalid (:reason forged)))
+    (is (some #{:attempt/changed-outside-reopen} (:defects forged)))
+    (is (= :requeue/retry-click-reused (:reason reused)))))
+
+(deftest retry-budget-abandons-without-consuming-an-attempt
+  ;; Pins inconclusive_abandonsWhenSpent and the independent budget: changing
+  ;; the boundary to attempt-limit or incrementing attempt breaks these checks.
+  (let [history (through-enacted)
+        r1 (ledger/append-requeue history "injury/2026-10-19/meta-route" "retry/r1")
+        r2 (ledger/append-requeue (:ledger r1) "injury/2026-10-19/meta-route" "retry/r2")
+        r3 (ledger/append-requeue (:ledger r2) "injury/2026-10-19/meta-route" "retry/r3")
+        spent (ledger/append-requeue (:ledger r3) "injury/2026-10-19/meta-route" "retry/r4")]
+    (is (= [1 2 3] (mapv #(get-in % [:entry :requeues]) [r1 r2 r3])))
+    (is (= :abandoned (get-in spent [:entry :state])))
+    (is (= :retry-budget-spent (get-in spent [:entry :reason])))
+    (is (= 1 (get-in spent [:entry :attempt])))
+    (is (= 3 (get-in spent [:entry :requeues])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger spent)))))))
+
+(deftest requeue-requires-latest-enacted-entry
+  ;; Pins the re-queue source state. Broadening it to active/terminal entries
+  ;; makes at least one of these typed refusals append.
+  (let [open (opened)
+        authored-history (-> open (claimed 1 "not-enacted") (authored 1))
+        enacted-history (through-enacted)
+        discharged (:ledger
+                    (ledger/append-transition
+                     enacted-history
+                     {:injury-id "injury/2026-10-19/meta-route"
+                      :state :discharged :attempt 1
+                      :repair-id "repair/meta-self-heal-route"
+                      :patch-sha patch-sha :retry-click "retry/meta-self-heal/1"
+                      :outcome :success}))]
+    (doseq [history [open authored-history discharged]]
+      (is (= :requeue/not-enacted
+             (:reason (ledger/append-requeue
+                       history "injury/2026-10-19/meta-route" "retry/new")))))))
+
+(deftest retry-limit-is-sealed-ledger-authority
+  ;; Pins presence, positivity and seal-prefix propagation of :retry-limit.
+  (doseq [invalid [(ledger/seal-ledger (dissoc ledger/empty-ledger :retry-limit
+                                                :ledger-pin))
+                   (ledger/seal-ledger (assoc ledger/empty-ledger :retry-limit 0))
+                   (ledger/seal-ledger (assoc ledger/empty-ledger :retry-limit -1))]]
+    (let [checked (ledger/validate-ledger invalid)]
+      (is (= :refused (:status checked)))
+      (is (some #{:ledger/retry-limit} (:defects checked))))))
+
+(deftest requeues-round-trip-to-newest-attributable-retry
+  ;; Pins the newest enacted entry as active state and as the sole predecessor
+  ;; of discharge; removing retry-click/requeue carry breaks this round trip.
+  (let [history (through-enacted)
+        r1 (ledger/append-requeue history "injury/2026-10-19/meta-route" "retry/fresh-1")
+        latest1 (get-in (ledger/active-injuries (:ledger r1))
+                        [:injuries "injury/2026-10-19/meta-route"])
+        r2 (ledger/append-requeue (:ledger r1) "injury/2026-10-19/meta-route"
+                                  "retry/fresh-2")
+        latest2 (get-in (ledger/active-injuries (:ledger r2))
+                        [:injuries "injury/2026-10-19/meta-route"])
+        discharged (ledger/append-transition
+                    (:ledger r2)
+                    {:injury-id "injury/2026-10-19/meta-route"
+                     :state :discharged :attempt 1
+                     :repair-id "repair/meta-self-heal-route"
+                     :patch-sha patch-sha :retry-click "retry/fresh-2"
+                     :outcome :grounded-change})]
+    (is (= "retry/fresh-1" (:retry-click latest1)))
+    (is (= 1 (:requeues latest1)))
+    (is (= "retry/fresh-2" (:retry-click latest2)))
+    (is (= 2 (:requeues latest2)))
+    (is (= :appended (:status discharged)))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger discharged)))))))
+
 (deftest open-injuries-cannot-be-downgraded-or-silently-removed
   (let [history (opened)]
     (doseq [state [:open :authored :reviewed :enacted :discharged :abandoned]]

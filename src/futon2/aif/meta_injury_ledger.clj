@@ -20,7 +20,7 @@
    :claimed #{:open :reopened}
    :authored #{:claimed}
    :reviewed #{:authored}
-   :enacted #{:reviewed}
+   :enacted #{:reviewed :enacted}
    :discharged #{:enacted}
    :reopened #{:enacted}
    :abandoned #{:enacted}})
@@ -57,7 +57,7 @@
          {:path "meta-injury-ledger/ledger.edn"
           :sha256 (ledger-digest ledger)}))
 (def empty-ledger
-  (seal-ledger {:schema ledger-schema :attempt-limit 3 :entries []}))
+  (seal-ledger {:schema ledger-schema :attempt-limit 3 :retry-limit 3 :entries []}))
 
 (defn- transition? [entry] (= transition-schema (:schema entry)))
 (defn- observation? [entry] (= observation-schema (:schema entry)))
@@ -88,7 +88,9 @@
         patch (authored ledger (:injury-id entry))
         used-sessions (prior-session-ids ledger)
         attempt (:attempt entry)
-        limit (:attempt-limit ledger)]
+        limit (:attempt-limit ledger)
+        retry-limit (:retry-limit ledger)
+        requeue? (and (= state :enacted) (= previous-state :enacted))]
     (cond-> []
       (not (contains? (get allowed-predecessors state #{}) previous-state))
       (conj :transition/illegal-order)
@@ -133,7 +135,7 @@
                (not (sha? (:reviewer-sha entry)))
                (not= (:reviewer-session entry) (:reviewer-session claimed))))
       (conj :review/evidence)
-      (and (= state :enacted)
+      (and (= state :enacted) (not requeue?)
            (or (not= :approved (:verdict previous))
                (not (nonblank? (:retry-click entry)))
                (= (boolean (:reload-receipt entry))
@@ -142,6 +144,17 @@
                (and (:integration-commit entry)
                     (not (sha? (:integration-commit entry))))))
       (conj :enactment/evidence)
+      (and requeue?
+           (or (not (nonblank? (:retry-click entry)))
+               (= (:retry-click entry) (:retry-click previous))
+               (not= attempt (:attempt previous))
+               (not= (:requeues entry) (inc (or (:requeues previous) 0)))
+               (> (or (:requeues entry) 0) retry-limit)
+               (not= (:patch-sha entry)
+                     (or (:patch-sha previous) (:patch-sha patch)))
+               (not= (:reload-receipt entry) (:reload-receipt previous))
+               (not= (:integration-commit entry) (:integration-commit previous))))
+      (conj :requeue/evidence)
       (and (#{:discharged :reopened} state)
            (or (not (nonblank? (:retry-click entry)))
                (not= (:patch-sha entry) (:patch-sha patch))
@@ -156,8 +169,12 @@
            (or (not (pin? (:new-cause-pin entry))) (> attempt limit)))
       (conj :reopen/evidence-or-limit)
       (and (= state :abandoned)
-           (or (not= attempt limit)
-               (not= :attempt-limit-exhausted (:reason entry))))
+           (case (:reason entry)
+             :attempt-limit-exhausted (not= attempt limit)
+             :retry-budget-spent
+             (or (not= (:requeues entry) retry-limit)
+                 (> attempt limit))
+             true))
       (conj :abandonment/not-exhausted))))
 
 (declare validate-ledger)
@@ -235,6 +252,7 @@
     (let [top-defects (cond-> []
                         (not= ledger-schema (:schema ledger)) (conj :ledger/schema)
                         (not (positive-int? (:attempt-limit ledger))) (conj :ledger/attempt-limit)
+                        (not (positive-int? (:retry-limit ledger))) (conj :ledger/retry-limit)
                         (not (vector? (:entries ledger))) (conj :ledger/entries)
                         (not (pin? (:ledger-pin ledger))) (conj :ledger/pin)
                         (and (pin? (:ledger-pin ledger))
@@ -242,7 +260,8 @@
                                    (get-in ledger [:ledger-pin :sha256])))
                         (conj :ledger/seal))
           entries (if (vector? (:entries ledger)) (:entries ledger) [])]
-      (loop [prefix (seal-ledger (assoc (select-keys ledger [:schema :attempt-limit])
+      (loop [prefix (seal-ledger (assoc (select-keys ledger [:schema :attempt-limit
+                                                              :retry-limit])
                                        :entries []))
              remaining entries defects top-defects seen #{}]
         (if-let [entry (first remaining)]
@@ -317,3 +336,48 @@
                                              :attempt next-attempt))))))
     (catch Throwable t
       (refusal :retry-result/malformed {:detail (ex-message t)}))))
+
+(defn append-requeue
+  "Append a fresh retry identity after an inconclusive retry without consuming
+  an authoring attempt. Once the independent retry budget is spent, append the
+  typed terminal abandonment instead."
+  [ledger injury-id new-retry-click]
+  (try
+    (let [checked (validate-ledger ledger)]
+      (if-not (= :valid (:status checked))
+        (refusal :ledger/tampered {:ledger-defects (:defects checked)})
+        (let [previous (latest ledger injury-id)]
+          (cond
+            (not= :enacted (:state previous))
+            (refusal :requeue/not-enacted
+                     {:injury-id injury-id :state (:state previous)})
+
+            (not (nonblank? new-retry-click))
+            (refusal :requeue/retry-click-blank {:injury-id injury-id})
+
+            (= new-retry-click (:retry-click previous))
+            (refusal :requeue/retry-click-reused
+                     {:injury-id injury-id :retry-click new-retry-click})
+
+            :else
+            (let [requeues (or (:requeues previous) 0)
+                  common {:injury-id injury-id
+                          :attempt (:attempt previous)
+                          :repair-id (:repair-id previous)}]
+              (if (>= requeues (:retry-limit ledger))
+                (append-transition ledger
+                                   (assoc common :state :abandoned
+                                          :reason :retry-budget-spent
+                                          :requeues requeues))
+                (append-transition
+                 ledger
+                 (merge common
+                        {:state :enacted
+                         :retry-click new-retry-click
+                         :requeues (inc requeues)
+                         :patch-sha (or (:patch-sha previous)
+                                        (:patch-sha (authored ledger injury-id)))}
+                        (select-keys previous
+                                     [:reload-receipt :integration-commit])))))))))
+    (catch Throwable t
+      (refusal :requeue/malformed {:detail (ex-message t)}))))
