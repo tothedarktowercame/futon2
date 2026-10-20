@@ -103,14 +103,14 @@
   an invented value. The participants' reviewer-of-record beside it."
   [record]
   {:kind :action-receipt
-   :click-id (:click/id record)
+   :click-id (or (:click/id record) {:absent :no-click-id})
    :target (selected-target record)
    :target-kind (target-kind (selected-target record))
    :action-kind (or (get-in record [:decision :selection-law
                                     :per-policy-argmax :action :kind])
                     {:absent :no-recorded-action-kind})
    :G (selected-g-decomposition record)
-   :outcome (:outcome record)
+   :outcome (or (:outcome record) {:absent :no-recorded-outcome})
    :commit (or (:grounded-commit record)
                (when-let [sha (get-in record
                                       [:d-task-enactment :verification

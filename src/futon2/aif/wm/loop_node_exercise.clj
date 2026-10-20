@@ -25,9 +25,10 @@
 
 (defn receipt [decision]
   (let [certificate (:selection-certificate decision)
-        candidates (:candidates certificate)
-        policies (:policies certificate)
-        comparison (get-in decision [:selection-law :policy-comparison])
+        candidates (or (:candidates certificate) (:candidates decision))
+        policies (or (:policies certificate) (:policies decision))
+        comparison (or (get-in decision [:selection-law :policy-comparison])
+                       (:policy-comparison decision))
         policy-of (fn [candidate]
                     (or (:policy candidate) (:id candidate)
                         (get-in candidate [:f-prefix :policy])))
@@ -37,15 +38,23 @@
                                     (number? (get-in % [:class-emission :risk])))
                               candidates)
         horizons (keep #(get-in % [:class-emission :model :horizon]) candidates)
-        precedences (mapv #(mapv (fn [entry]
-                                   (if (map? entry) (:id entry) entry))
-                                 (:precedence (policy-of %)))
-                          candidates)
+        precedences
+        (let [per-candidate
+              (mapv #(mapv (fn [entry]
+                             (if (map? entry) (:id entry) entry))
+                           (:precedence (policy-of %)))
+                    candidates)]
+          (or (when (some seq per-candidate) per-candidate)
+              (when-let [p (:precedence comparison)]
+                [(mapv #(if (map? %) (:id %) %) p)])
+              []))
         probabilities (or (get-in certificate [:policy-precision-state :probabilities])
                           (get-in certificate [:precision-family :probabilities])
+                          (get-in decision [:policy-precision-state :probabilities])
                           (get-in decision [:selection-law :posterior]))
         temperature (or (get-in certificate [:policy-precision-state :temperature])
                         (get-in certificate [:precision-family :temperature])
+                        (get-in decision [:policy-precision-state :temperature])
                         (get-in decision [:selection-law :beta]))
         abstention (get-in decision [:abstention :status])
         typed-abstention? (and (= :abstained (:status decision))

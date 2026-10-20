@@ -140,12 +140,22 @@
     (is (= "2026-09-25-1bc6d9f0-no-terminal-state" (:id r)))))
 
 (deftest attach-never-throws-and-types-an-invalid-receipt
-  ;; no :click/id on a selected record -> the action receipt is ill-formed
+  ;; 2026-10-20 meta repair (injury/d755c886): a selected record missing its
+  ;; click bookkeeping no longer voids the action receipt — absences are
+  ;; typed, the exactly-one-kind contract is unchanged. The ill-formed path
+  ;; attach still must survive is the candidate-identity mismatch throw.
   (let [record (tr/attach (dissoc selected-record :click/id) :grounded-change)
         r (:terminal-receipt record)]
+    (is (= :action-receipt (:kind r)))
+    (is (= {:absent :no-click-id} (:click-id r)))
+    (is (= 64 (count (:terminal-receipt-digest record)))))
+  (let [mismatch (assoc-in selected-record
+                           [:decision :selection-certificate :scoring 0 :id :id]
+                           :C-other)
+        r (:terminal-receipt (tr/attach mismatch :grounded-change))]
     (is (= :failure (:kind r)))
     (is (= :terminal-receipt-invalid (:failure-kind r)))
-    (is (= 64 (count (:terminal-receipt-digest record))))))
+    (is (= 64 (count (:terminal-receipt-digest (tr/attach mismatch :grounded-change)))))))
 
 (deftest a-receipt-of-both-kinds-is-rejected
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not exactly one kind"
