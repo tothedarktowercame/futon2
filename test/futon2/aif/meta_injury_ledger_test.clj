@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-injury-ledger-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.meta-injury-ledger :as ledger]))
 
 (def campaign-records
@@ -13,6 +14,11 @@
 (def patch-sha "95145f09395145f09395145f09395145f0939514")
 (def review-sha "42bfb4bb542bfb4bb542bfb4bb542bfb4bb542bf")
 (def integration-sha "5a5b421bc5a5b421bc5a5b421bc5a5b421bc5a5b")
+
+(defn- click-7-ledger []
+  ;; Captured from the live click-7 ledger after wm-click-25cd3682's failed
+  ;; author answer, rather than reconstructed as a test-only transition.
+  (edn/read-string (slurp "test/futon2/aif/fixtures/click-7-ledger.edn")))
 
 (defn appended [ledger transition]
   (let [result (ledger/append-transition ledger transition)]
@@ -421,3 +427,51 @@
     (is (refused? spent (assoc base :attempt 1 :requeues 2
                                :reason :retry-budget-spent)))
     (is (refused? spent (assoc base :attempt 1 :requeues 3 :reason :gave-up)))))
+
+(deftest click-7-claimed-author-failure-reopens-with-sealed-port-evidence
+  (let [history (click-7-ledger)
+        injury "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+        claimed (last (filter #(= injury (:injury-id %)) (:entries history)))
+        pin {:path "meta-self-heal/author/click-7-failed.edn"
+             :sha256 (apply str (repeat 64 "f"))}
+        proposal {:injury-id injury :repair-id (:repair-id claimed)
+                  :reason :author-failed :port-receipt-pin pin}
+        reopened (ledger/append-retry-result history proposal)
+        invalid (ledger/append-transition
+                 history (assoc proposal :state :reopened :attempt 2
+                                :port-receipt-pin nil))
+        enacted-unexpected (ledger/append-transition
+                            (through-enacted)
+                            {:injury-id "injury/2026-10-19/meta-route"
+                             :state :reopened :attempt 2
+                             :repair-id "repair/meta-self-heal-route"
+                             :reason :author-failed
+                             :port-receipt-pin pin})]
+    (is (= :claimed (:state claimed)) "the fixture pins click 7's live hold")
+    (is (= :reopened (get-in reopened [:entry :state])))
+    (is (= 2 (get-in reopened [:entry :attempt])))
+    (is (= pin (get-in reopened [:entry :port-receipt-pin])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger reopened)))))
+    (is (some #{:reopen/author-failure-evidence} (:defects invalid)))
+    (is (some #{:reopen/reason-unexpected} (:defects enacted-unexpected)))))
+
+(deftest third-claimed-author-failure-abandons-at-the-existing-attempt-limit
+  (let [injury "injury/2026-10-19/meta-route"
+        pin {:path "meta-self-heal/author/failed.edn"
+             :sha256 (apply str (repeat 64 "f"))}
+        retry (fn [history]
+                (:ledger (ledger/append-retry-result
+                          history {:injury-id injury
+                                   :repair-id "repair/meta-self-heal-route"
+                                   :reason :author-failed :port-receipt-pin pin})))
+        attempt1 (claimed (opened) 1 "a")
+        attempt2 (claimed (retry attempt1) 2 "b")
+        attempt3 (claimed (retry attempt2) 3 "c")
+        result (ledger/append-retry-result
+                attempt3 {:injury-id injury
+                          :repair-id "repair/meta-self-heal-route"
+                          :reason :author-failed :port-receipt-pin pin})]
+    (is (= :abandoned (get-in result [:entry :state])))
+    (is (= :attempt-limit-exhausted (get-in result [:entry :reason])))
+    (is (= pin (get-in result [:entry :port-receipt-pin])))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))))

@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-repair-coordinator-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-repair-coordinator :as coordinator]))
 
@@ -10,7 +11,11 @@
 (def diagnosis-pin {:path "holes/labs/wm-contract/meta-self-heal-diagnosis.edn"
                     :sha256 (apply str (repeat 64 "d"))})
 (def source-pin {:path "/tmp/meta-injury-ledger.edn"
-                 :sha256 (apply str (repeat 64 "e"))})
+            :sha256 (apply str (repeat 64 "e"))})
+
+(defn- click-7-fixture [name]
+  ;; Captured click-7 evidence, not a reconstructed ledger/transaction.
+  (edn/read-string (slurp (str "test/futon2/aif/fixtures/click-7-" name ".edn"))))
 
 (defn- record-pin [suffix digit]
   {:path (str "data/wm-runs/" suffix ".edn")
@@ -240,7 +245,7 @@
 (deftest rejection-and-port-failures-stop-without-silent-advance
   (doseq [[label override expected-state expected-reason]
           [[:author {:author (fn [r] (receipt r :failed {:reason :author-crash}))}
-            :claimed :author-failed]
+            :reopened :author-failed]
            [:review {:review (fn [r] (receipt r :rejected {:reason :changes}))}
             :authored :review-rejected]
            [:reload {:enact (fn [r] (receipt r :failed {:reason :reload-failed}))}
@@ -296,7 +301,7 @@
     (is (= :coordinator/retry-attribution-refused (:reason unattributed)))
     (is (= :enacted (-> unattributed :ledger :entries last :state)))))
 
-(deftest recorded-failure-is-not-dispatched-twice-on-resume
+(deftest recorded-failure-cannot-replay-from-a-reopened-transaction
   (let [calls (atom 0)
         history (opened-ledger)
         tx (:transaction (prepared history (options)))
@@ -307,9 +312,34 @@
         second (coordinator/coordinate (durable (:ledger first))
                                        (:transaction first) ps)]
     (is (= :held (:status first)))
-    (is (= :held (:status second)))
+    ;; Production retires this stale transaction before it can get here.  The
+    ;; coordinator itself still refuses the illegal second reopen rather than
+    ;; dispatching the recorded failed author receipt again.
+    (is (= :refused (:status second)))
+    (is (= :coordinator/input-refused (:reason second)))
     (is (= 1 @calls))
-    (is (= (:receipt-pin (:receipt first)) (:receipt-pin (:receipt second))))))
+    (is (= :reopened (-> first :ledger :entries last :state)))))
+
+(deftest click-7-author-failure-appends-a-reopened-second-attempt
+  (let [history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        calls (atom 0)
+        result (coordinator/coordinate
+                (durable history) transaction
+                (ports {:author (fn [request]
+                                  (swap! calls inc)
+                                  (receipt request :failed
+                                           {:reason :agency-response-not-one-edn-map}))}))
+        appended (last (:entries (:ledger result)))]
+    (is (= :held (:status result)))
+    (is (= :author-failed (:reason result)))
+    (is (= :reopened (:state appended)))
+    (is (= 2 (:attempt appended)))
+    (is (= :author-failed (:reason appended)))
+    (is (= (:receipt-pin (:receipt result)) (:port-receipt-pin appended)))
+    (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))
+    ;; The recorded failed receipt is replayed; no new author effect is sent.
+    (is (zero? @calls))))
 
 (defn- failed-attempt [history attempt]
   (let [injury "injury/2026-10-19/reload"

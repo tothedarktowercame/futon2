@@ -789,6 +789,22 @@
                  (= :valid (:status (coordinator/verify-transaction (:value read)))))
         (:value read)))))
 
+(defn- retire-stale-transaction!
+  "Preserve a resumed transaction that belongs to an earlier authoring attempt.
+  A reopened ledger is authoritative; replacing this file would otherwise make
+  the old failed author receipt replay forever."
+  [path transaction]
+  (let [attempt (get-in transaction [:work-order :attempt])
+        retired-path (str path ".attempt-" attempt ".retired.edn")]
+    (try
+      (Files/move (.toPath (io/file path))
+                  (.toPath (io/file retired-path))
+                  (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
+      {:status :retired :path retired-path :attempt attempt}
+      (catch Throwable _
+        (refusal :meta-self-heal/transaction-retire-failed
+                 {:path path :attempt attempt})))))
+
 (defn agency-port
   "ROLE is :author or :reviewer. The seat invoked is the one the sealed work
   order names for that role (click wm-click-36b47627, 2026-10-19: the seat
@@ -1050,7 +1066,14 @@
               (refusal :meta-self-heal/production-config-required
                        {:route :dedicated-meta-self-heal :absent-terms missing
                         :ordinary-selection-called? false})
-              (let [resumed (load-transaction transaction-path)
+              (let [resumed0 (load-transaction transaction-path)
+                    resumed-injury (get-in resumed0 [:work-order :injury-id])
+                    ledger-attempt (get-in active [:injuries resumed-injury :attempt])
+                    retirement (when (and resumed0 (integer? ledger-attempt)
+                                          (< (get-in resumed0 [:work-order :attempt])
+                                             ledger-attempt))
+                                 (retire-stale-transaction! transaction-path resumed0))
+                    resumed (when-not (= :retired (:status retirement)) resumed0)
                     prepared (when-not resumed
                                (coordinator/prepare durable (work-order-options opts)))
                     transaction (or resumed (:transaction prepared))
@@ -1070,7 +1093,10 @@
                                          (acceptance-transaction-binding opts transaction))
                     binding (or (when-not (= :valid (:status diagnosis-binding)) diagnosis-binding)
                                 acceptance-binding)]
-                (if-not (= :valid (:status binding))
+                (if (= :refused (:status retirement))
+                  (assoc retirement :route :dedicated-meta-self-heal
+                         :ordinary-selection-called? false)
+                  (if-not (= :valid (:status binding))
                   (assoc binding :route :dedicated-meta-self-heal
                          :ordinary-selection-called? false)
                   ;; Review fix for dfe565350 (claude-5, 2026-10-20): the
@@ -1101,6 +1127,9 @@
                                        :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
                                        :retry-click (latest-retry-click (:transaction result))
                                        :checkpoint-receipts receipts}
+                                (= :retired (:status retirement))
+                                (assoc :transaction-retired
+                                       (select-keys retirement [:path :attempt]))
                                 lw (assoc :ledger-write lw)
                                 tw (assoc :transaction-write tw
                                           :transaction (:transaction result)))))]
@@ -1128,4 +1157,4 @@
                         ;; darktower d6f4b88ca3); the coordinator's own
                         ;; :phase, when it gives one, is kept over it.
                         (settle (coordinator/coordinate durable transaction ports)
-                                :final receipts)))))))))))))
+                                :final receipts))))))))))))))

@@ -118,8 +118,16 @@
                       (= injury-id (:injury-id %))) (:entries history))))
 (defn- active-entry [durable injury-id]
   (get-in (ledger/active-injuries (:ledger durable)) [:injuries injury-id]))
-(defn- cause-pin [entry]
-  (or (:new-cause-pin entry) (:cause-record-pin entry)))
+(defn- cause-pin [history entry]
+  ;; A claimed-author-failed reopen carries the sealed failed-port receipt,
+  ;; not a new failure record.  Recover the original causal pin from this
+  ;; injury's append-only history when preparing its next attempt.
+  (or (:new-cause-pin entry) (:cause-record-pin entry)
+      (some->> (:entries history)
+               (filter #(and (= (:injury-id entry) (:injury-id %))
+                             (or (:new-cause-pin %) (:cause-record-pin %))))
+               last
+               (#(or (:new-cause-pin %) (:cause-record-pin %))))))
 
 (defn prepare
   "Build a dedicated work order from a disk-pinned active injury. No active
@@ -144,7 +152,7 @@
                                       :target-repository :target-worktree])
                         {:injury-id injury-id :repair-id repair-id :attempt attempt
                          :attempt-limit (:attempt-limit history)
-                         :cause-record-pin (cause-pin entry)
+                         :cause-record-pin (cause-pin history entry)
                          :ledger-pin (:ledger-pin history)
                          :ledger-source-pin (:source-pin durable)}))
           defects (cond-> []
@@ -318,7 +326,16 @@
             author-receipt (:receipt author-result)
             tx1 (:transaction author-result)]
         (when-not (= :succeeded (:status author-receipt))
-          (held! :author-failed :author history1 tx1 author-receipt))
+          ;; A failed sealed author answer is evidence for a fresh attempt,
+          ;; not a terminal hold.  append-retry-result supplies the existing
+          ;; attempt-limit behavior and validates the claim predecessor.
+          (let [reopened (accepted!
+                          (ledger/append-retry-result
+                           history1 {:injury-id injury-id :repair-id repair-id
+                                     :reason :author-failed
+                                     :port-receipt-pin
+                                     (:receipt-pin author-receipt)}))]
+            (held! :author-failed :author (:ledger reopened) tx1 author-receipt)))
         (let [patch-sha (get-in author-receipt [:payload :patch-sha])
               worktree (get-in author-receipt [:payload :worktree])
               _ (when-not (and (sha? patch-sha) (nonblank? worktree))

@@ -70,6 +70,11 @@
     (spit path (String. bytes "UTF-8"))
     {:path path :sha256 (load-identity/sha256 bytes)}))
 
+(defn- click-7-fixture [name]
+  ;; Byte-for-byte evidence captured after wm-click-25cd3682's author receipt
+  ;; was sealed failed; this is the stale attempt the route must retire.
+  (edn/read-string (slurp (str "test/futon2/aif/fixtures/click-7-" name ".edn"))))
+
 (defn- durable-with-active-source [pin]
   {:ledger {:entries [{:injury-id "injury-recorded-l1"
                        :state :open :cause-record-pin pin}]}
@@ -1325,6 +1330,63 @@
     (is (= :dedicated-meta-self-heal (:route result)))
     (is (false? (:ordinary-selection-called? result)))
     (is (zero? @effects))))
+
+(deftest click-7-stale-transaction-is-retired-before-attempt-two-authoring
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        failed-author-pin {:path "meta-self-heal/author/click-7-failed.edn"
+                           :sha256 (apply str (repeat 64 "f"))}
+        reopened (:ledger (ledger/append-retry-result
+                           history {:injury-id (:injury-id order)
+                                    :repair-id (:repair-id order)
+                                    :reason :author-failed
+                                    :port-receipt-pin failed-author-pin}))
+        _ (spit ledger-path (str (pr-str reopened) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        author-orders (atom [])
+        sealed (fn [request]
+                 (let [work-order (:work-order request)]
+                   (coordinator/seal-port-receipt
+                    {:phase (:phase request) :injury-id (:injury-id work-order)
+                     :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                     :predecessor-pin (:predecessor-pin request)
+                     :status :failed
+                     :payload {:reason :agency-response-not-one-edn-map}})))
+        ports {:author (fn [request] (swap! author-orders conj (:work-order request))
+                           (sealed request))
+               :review sealed :enact sealed :retry sealed}
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-repair-ports ports
+                 :meta-acceptance-run-fn (constantly {:status :ran :outcome :failed
+                                                      :exit 1 :summary "fixture"
+                                                      :run-pin failed-author-pin})
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                 :acceptance-test (:acceptance-test order)
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order)
+                 :target-worktree dir}
+        result (with-redefs-fn
+                 {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
+                  #'production/acceptance-transaction-binding (fn [& _] {:status :valid})}
+                 #(production/route! options))
+        retired (str transaction-path ".attempt-1.retired.edn")]
+    (is (= :held (:status result)))
+    (is (= :author-failed (:reason result)))
+    (is (= {:path retired :attempt 1} (:transaction-retired result)))
+    (is (.isFile (java.io.File. retired)))
+    (is (= 2 (get-in (first @author-orders) [:attempt])))
+    (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
+    (is (= :reopened
+           (-> (store/load-durable-ledger ledger-path) :ledger :entries last :state)))))
 
 (deftest production-shaped-options-without-identities-refuse-at-preparation
   "The exact option shape of click wm-click-c78d0f27, through the runtime:

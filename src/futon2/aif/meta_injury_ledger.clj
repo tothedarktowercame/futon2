@@ -22,8 +22,11 @@
    :reviewed #{:authored}
    :enacted #{:reviewed :enacted}
    :discharged #{:enacted}
-   :reopened #{:enacted}
-   :abandoned #{:enacted}})
+   ;; An author-port refusal is a retryable route symptom.  It reopens from
+   ;; the claim that owns the failed author receipt, while ordinary retry
+   ;; results continue to reopen from an enacted repair.
+   :reopened #{:enacted :claimed}
+   :abandoned #{:enacted :claimed}})
 
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
 (defn- pin? [x]
@@ -90,7 +93,10 @@
         attempt (:attempt entry)
         limit (:attempt-limit ledger)
         retry-limit (:retry-limit ledger)
-        requeue? (and (= state :enacted) (= previous-state :enacted))]
+        requeue? (and (= state :enacted) (= previous-state :enacted))
+        author-failed-reopen? (and (= state :reopened)
+                                    (= previous-state :claimed)
+                                    (= :author-failed (:reason entry)))]
     (cond-> []
       (not (contains? (get allowed-predecessors state #{}) previous-state))
       (conj :transition/illegal-order)
@@ -156,16 +162,27 @@
                (not= (:integration-commit entry) (:integration-commit previous))))
       (conj :requeue/evidence)
       (and (#{:discharged :reopened} state)
+           (not author-failed-reopen?)
            (or (not (nonblank? (:retry-click entry)))
                (not= (:patch-sha entry) (:patch-sha patch))
                (not= (:retry-click entry) (:retry-click previous))
                (= (:retry-click entry)
                   (:detected-click (first (injury-history ledger (:injury-id entry)))))))
       (conj :retry/attribution)
+      (and (= state :reopened) (= previous-state :claimed)
+           (or (not= :author-failed (:reason entry))
+               (not (pin? (:port-receipt-pin entry)))))
+      (conj :reopen/author-failure-evidence)
+      (and (= state :reopened) (= previous-state :enacted)
+           (= :author-failed (:reason entry)))
+      (conj :reopen/reason-unexpected)
+      (and (= state :abandoned) (= previous-state :claimed)
+           (not (pin? (:port-receipt-pin entry))))
+      (conj :abandonment/author-failure-evidence)
       (and (= state :discharged)
            (not (#{:success :grounded-change :closed} (:outcome entry))))
       (conj :discharge/outcome)
-      (and (= state :reopened)
+      (and (= state :reopened) (not author-failed-reopen?)
            (or (not (pin? (:new-cause-pin entry))) (> attempt limit)))
       (conj :reopen/evidence-or-limit)
       (and (= state :abandoned)
