@@ -4,6 +4,7 @@
 ;;   (held! :reason ...)              kind :held
 ;;   a map literal with a :status key       kind :status-map (status :computed when not a literal)
 ;;   (conj :term), as in a cond-> of absent terms   kind :absent-term
+;; plus one :defn row per top-level definition, an anchor for line citations only.
 ;; Usage: bb code_sites.clj  -> JSON array of sites on stdout.
 (require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.io :as io] '[clojure.string :as str])
 
@@ -50,7 +51,8 @@
                 form (forms (str repo "/" file))
                 :let [n (top-name form)]
                 :when (and n (or (nil? only) (only n)))
-                s (sites-in tag n form)]
+                s (cons {:tag tag :fn n :line (:line (meta form)) :kind :defn}
+                        (sites-in tag n form))]
             (assoc s :file file :sha sha
                    :id (str tag ":" (:line s) (when (:reason s) (str ":" (name (:reason s)))))))]
   (println (json/generate-string (vec (sort-by (juxt :tag :line) (distinct all))))))

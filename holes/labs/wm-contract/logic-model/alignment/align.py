@@ -107,14 +107,17 @@ def align(sites, entities):
   return edges
 
 def main(sites_path, out_dir, *lean_files):
-  sites = json.loads(Path(sites_path).read_text())
+  rows = json.loads(Path(sites_path).read_text())
+  # :defn rows anchor citations of a function's first line; they are not outcome sites.
+  defn_lines = {(r["tag"], r["line"]) for r in rows if r["kind"] == "defn"}
+  sites = [r for r in rows if r["kind"] != "defn"]
   entities = [e for f in lean_files for e in lean_entities(f)]
   edges = align(sites, entities)
   real = [ed for ed in edges if ed["props"]["basis"] != "line-unconfirmed"]
   covered_sites = {i for ed in real for i in ed["hx/endpoints"][1:]}
   covered_ents = {ed["hx/endpoints"][0] for ed in real}
   # line citations that name no site at HEAD: stale or wrong
-  site_lines = {(s["tag"], s["line"]) for s in sites}
+  site_lines = {(s["tag"], s["line"]) for s in sites} | defn_lines
   stale = sorted({(e["id"], f"{t}:{n}") for e in entities for t, n in cited_lines(e["text"])
                   if (t, n) not in site_lines})
   out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
