@@ -286,6 +286,34 @@
         (is (nil? (get-in record [:decision :action]))
             "retaining measurements never turns an abstention into a selection")))))
 
+(deftest selection-publication-reconciles-onto-the-carried-sorry-decision
+  ;; The decision is copied verbatim from the daily trace for
+  ;; 2026-10-20-881a8839-d725-493e-95cf-eb06dd71b92c, whose terminal record
+  ;; previously grew a receipt-only :judgment stub and shadowed this action.
+  (let [fixture "test/futon2/aif/fixtures/trace-decision-2026-10-20-881a8839.edn"
+        decision (edn/read-string (slurp fixture))
+        accumulation {:status :recorded :source "trace-fixture"}
+        bmr {:status :absent :reason :proposal-family-unavailable}
+        reconciled (#'runner/reconcile-selection-publication
+                    {:sorry {:kind :no-selection :decision decision}}
+                    {:accumulation-receipt accumulation :bmr-receipt bmr})
+        absent (#'runner/reconcile-selection-publication
+                {:sorry {:kind :no-selection}}
+                {:accumulation-receipt accumulation :bmr-receipt bmr})
+        judgment (#'runner/reconcile-selection-publication
+                  {:judgment {:controller-decision decision}}
+                  {:accumulation-receipt accumulation :bmr-receipt bmr})]
+    (is (= "08ebbe9f615fa1075bf87d13a10575dc6fd27c8887672eed8febdfa91fb066dc"
+           (load-identity/sha256 (.getBytes (pr-str decision) "UTF-8"))))
+    (is (not (contains? reconciled :judgment)))
+    (is (= accumulation (get-in reconciled [:sorry :decision :accumulation])))
+    (is (= bmr (get-in reconciled [:sorry :decision :accumulation-bmr])))
+    (is (= "M-formal-war-machine/policy-95a29538723f94edfa51"
+           (get-in reconciled [:sorry :decision :action :id])))
+    (is (= {:sorry {:kind :no-selection}} absent))
+    (is (= accumulation (get-in judgment [:judgment :controller-decision :accumulation])))
+    (is (= bmr (get-in judgment [:judgment :controller-decision :accumulation-bmr])))))
+
 (deftest ordinary-self-heal-readiness-is-retained-only-when-carried
   ;; Historical input pin: wm-click-07653f2a met the active injury ledger at
   ;; 08:19Z. This exercises its typed absence through the real record writer.

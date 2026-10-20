@@ -5366,15 +5366,25 @@
 (defn- reconcile-selection-publication [cell record]
   (if-not (contains? record :accumulation-receipt)
     cell
-    (let [cell (cond-> (assoc-in cell
-                                 [:judgment :controller-decision :accumulation]
-                                 (:accumulation-receipt record))
-                 ;; ITEM6-CONSUMER-I: the SAME BMR receipt rides beside it.
-                 (contains? record :bmr-receipt)
-                 (assoc-in [:judgment :controller-decision :accumulation-bmr]
-                           (:bmr-receipt record)))]
-      (assoc cell :ground
-             (decision-ground (get-in cell [:judgment :controller-decision]))))))
+    (let [decision-path (cond
+                          (map? (get-in cell [:judgment :controller-decision]))
+                          [:judgment :controller-decision]
+                          (map? (get-in cell [:sorry :decision]))
+                          [:sorry :decision])]
+      ;; A :no-selection sorry can still carry the judge's selected decision.
+      ;; Do not manufacture a partial :judgment cell merely to retain the two
+      ;; publication receipts: that truthy stub shadows the sorry decision at
+      ;; terminal projection.
+      (if-not decision-path
+        cell
+        (let [cell (cond-> (assoc-in cell (conj decision-path :accumulation)
+                                     (:accumulation-receipt record))
+                     ;; ITEM6-CONSUMER-I: the SAME BMR receipt rides beside it.
+                     (contains? record :bmr-receipt)
+                     (assoc-in (conj decision-path :accumulation-bmr)
+                               (:bmr-receipt record)))]
+          (assoc cell :ground
+                 (decision-ground (get-in cell decision-path))))))))
 
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
