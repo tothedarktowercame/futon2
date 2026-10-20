@@ -13,7 +13,7 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **Logic-model lane (claude-5, 2026-10-20 04:49Z)**: SelfHealRoute rev 8 (mathlib4
+- **Logic-model lane (claude-5, 2026-10-20 04:48Z)**: SelfHealRoute rev 8 (mathlib4
   `darktower` `2687599fb6`, review fixes `20001f00cf`) accepted: the closing law for a
   retry click; today's `integrate` discharges on an abstained retry
   (`retryClose_todayDischargesAbstention`). M10a (codex-3, job
