@@ -776,7 +776,13 @@
                                       (select-keys membership [:membership-complete?
                                                                :unavailable-structural-sections
                                                                :unknown-structural-sections])
-                                      :sealed-menu sealed-menu
+                                      :sealed-menu
+                                      (if activated-carrier
+                                        {:status :carried-on-carrier
+                                         :menu-pin (:menu-pin sealed-menu)
+                                         :at [:selected-outer-cascade-policy
+                                              :sealed-menu]}
+                                        sealed-menu)
                                       :evidence-provider-source-pin (:source-pin provided)
                                       :policy-evidence policy-evidence
                                       :missing-policy-evidence (:missing policy-evidence)
