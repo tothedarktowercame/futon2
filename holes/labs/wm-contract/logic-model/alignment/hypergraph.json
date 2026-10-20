@@ -7,7 +7,7 @@
    "kind": "absent-term",
    "reason": "cast-not-distinct",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:53:cast-not-distinct"
   },
   {
@@ -17,7 +17,7 @@
    "kind": "absent-term",
    "reason": "cast-not-ready",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:57:cast-not-ready"
   },
   {
@@ -27,7 +27,7 @@
    "kind": "absent-term",
    "reason": "repository-unreadable",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:58:repository-unreadable"
   },
   {
@@ -37,7 +37,7 @@
    "kind": "absent-term",
    "reason": "tracked-worktree-dirty",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:60:tracked-worktree-dirty"
   },
   {
@@ -47,7 +47,7 @@
    "kind": "absent-term",
    "reason": "injury-ledger-path",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:62:injury-ledger-path"
   },
   {
@@ -57,7 +57,7 @@
    "kind": "absent-term",
    "reason": "transaction-path",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:64:transaction-path"
   },
   {
@@ -67,7 +67,7 @@
    "kind": "absent-term",
    "reason": "queued-retry-authority",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "sha": "80516025d",
+   "sha": "c16a86952",
    "id": "A:65:queued-retry-authority"
   },
   {
@@ -79,7 +79,7 @@
    "kind": "status-map",
    "end-line": 75,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "reset-cast!",
@@ -91,7 +91,7 @@
    "kind": "status-map",
    "end-line": 86,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "reset-cast!",
@@ -102,7 +102,7 @@
    "kind": "status-map",
    "end-line": 88,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -113,7 +113,7 @@
    "kind": "status-map",
    "end-line": 162,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -124,7 +124,7 @@
    "kind": "status-map",
    "end-line": 164,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -135,7 +135,7 @@
    "kind": "status-map",
    "end-line": 167,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -146,7 +146,7 @@
    "kind": "status-map",
    "end-line": 169,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -157,7 +157,7 @@
    "kind": "status-map",
    "end-line": 171,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -168,7 +168,7 @@
    "kind": "status-map",
    "end-line": 173,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "agency-invoke!",
@@ -179,7 +179,7 @@
    "kind": "status-map",
    "end-line": 175,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "producer-invoke!",
@@ -191,7 +191,7 @@
    "kind": "status-map",
    "end-line": 227,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "producer-invoke!",
@@ -203,7 +203,7 @@
    "kind": "status-map",
    "end-line": 234,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "producer-invoke!",
@@ -215,7 +215,7 @@
    "kind": "status-map",
    "end-line": 238,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "write-run-result",
@@ -226,7 +226,7 @@
    "kind": "status-map",
    "end-line": 325,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "launch-bounded-acceptance!",
@@ -238,7 +238,7 @@
    "kind": "status-map",
    "end-line": 359,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -250,7 +250,7 @@
    "kind": "status-map",
    "end-line": 390,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -262,7 +262,7 @@
    "kind": "status-map",
    "end-line": 392,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -274,7 +274,7 @@
    "kind": "status-map",
    "end-line": 393,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -286,7 +286,7 @@
    "kind": "status-map",
    "end-line": 396,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -298,7 +298,7 @@
    "kind": "status-map",
    "end-line": 399,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "run-acceptance!",
@@ -310,51 +310,51 @@
    "kind": "status-map",
    "end-line": 409,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "enact!",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "line": 423,
+   "line": 437,
    "status": "failed",
-   "id": "A:423",
+   "id": "A:437",
    "kind": "status-map",
-   "end-line": 424,
+   "end-line": 438,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "enact!",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "line": 434,
+   "line": 448,
    "status": "succeeded",
-   "id": "A:434",
+   "id": "A:448",
    "kind": "status-map",
-   "end-line": 436,
+   "end-line": 450,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "ports",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "line": 470,
+   "line": 484,
    "status": "ready",
-   "id": "A:470",
+   "id": "A:484",
    "kind": "status-map",
-   "end-line": 493,
+   "end-line": 512,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "ports",
    "file": "src/futon3c/wm/meta_self_heal_adapters.clj",
-   "line": 490,
+   "line": 509,
    "status": "queued",
-   "id": "A:490",
+   "id": "A:509",
    "kind": "status-map",
-   "end-line": 493,
+   "end-line": 512,
    "tag": "A",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "refusal",
@@ -365,7 +365,7 @@
    "kind": "status-map",
    "end-line": 22,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
@@ -374,7 +374,7 @@
    "kind": "absent-term",
    "reason": "schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:43:schema"
   },
   {
@@ -384,7 +384,7 @@
    "kind": "absent-term",
    "reason": "seal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:45:seal"
   },
   {
@@ -394,7 +394,7 @@
    "kind": "absent-term",
    "reason": "identities",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:50:identities"
   },
   {
@@ -404,7 +404,7 @@
    "kind": "absent-term",
    "reason": "sessions/distinct",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:51:distinct"
   },
   {
@@ -414,7 +414,7 @@
    "kind": "absent-term",
    "reason": "sessions/present",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:52:present"
   },
   {
@@ -424,7 +424,7 @@
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:53:attempt"
   },
   {
@@ -434,7 +434,7 @@
    "kind": "absent-term",
    "reason": "attempt-limit",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:54:attempt-limit"
   },
   {
@@ -444,7 +444,7 @@
    "kind": "absent-term",
    "reason": "attempt/exceeds-limit",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:56:exceeds-limit"
   },
   {
@@ -454,7 +454,7 @@
    "kind": "absent-term",
    "reason": "cause-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:57:cause-pin"
   },
   {
@@ -464,7 +464,7 @@
    "kind": "absent-term",
    "reason": "diagnosis-evidence",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:59:diagnosis-evidence"
   },
   {
@@ -474,7 +474,7 @@
    "kind": "absent-term",
    "reason": "acceptance-test",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:65:acceptance-test"
   },
   {
@@ -484,7 +484,7 @@
    "kind": "absent-term",
    "reason": "ledger-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:66:ledger-pin"
   },
   {
@@ -494,7 +494,7 @@
    "kind": "absent-term",
    "reason": "ledger-source-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:67:ledger-source-pin"
   },
   {
@@ -504,7 +504,7 @@
    "kind": "refusal",
    "reason": "work-order/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:68:invalid"
   },
   {
@@ -516,7 +516,7 @@
    "kind": "status-map",
    "end-line": 69,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
@@ -525,7 +525,7 @@
    "kind": "refusal",
    "reason": "work-order/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:71:malformed"
   },
   {
@@ -535,7 +535,7 @@
    "kind": "absent-term",
    "reason": "schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:83:schema"
   },
   {
@@ -545,7 +545,7 @@
    "kind": "absent-term",
    "reason": "seal",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:85:seal"
   },
   {
@@ -555,7 +555,7 @@
    "kind": "absent-term",
    "reason": "phase",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:86:phase"
   },
   {
@@ -565,7 +565,7 @@
    "kind": "absent-term",
    "reason": "injury-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:87:injury-id"
   },
   {
@@ -575,7 +575,7 @@
    "kind": "absent-term",
    "reason": "repair-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:88:repair-id"
   },
   {
@@ -585,7 +585,7 @@
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:89:attempt"
   },
   {
@@ -595,7 +595,7 @@
    "kind": "absent-term",
    "reason": "predecessor-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:91:predecessor-pin"
   },
   {
@@ -605,7 +605,7 @@
    "kind": "absent-term",
    "reason": "status",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:93:status"
   },
   {
@@ -615,7 +615,7 @@
    "kind": "refusal",
    "reason": "port-receipt/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:94:invalid"
   },
   {
@@ -627,7 +627,7 @@
    "kind": "status-map",
    "end-line": 95,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
@@ -636,7 +636,7 @@
    "kind": "refusal",
    "reason": "port-receipt/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:97:malformed"
   },
   {
@@ -648,7 +648,7 @@
    "kind": "status-map",
    "end-line": 111,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
@@ -657,7 +657,7 @@
    "kind": "refusal",
    "reason": "transaction/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:112:invalid"
   },
   {
@@ -667,7 +667,7 @@
    "kind": "refusal",
    "reason": "transaction/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:114:malformed"
   },
   {
@@ -677,7 +677,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/schema",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:152:schema"
   },
   {
@@ -687,7 +687,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/status",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:153:status"
   },
   {
@@ -697,7 +697,7 @@
    "kind": "absent-term",
    "reason": "durable-ledger/source-pin",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:154:source-pin"
   },
   {
@@ -707,7 +707,7 @@
    "kind": "absent-term",
    "reason": "ledger/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:156:invalid"
   },
   {
@@ -717,7 +717,7 @@
    "kind": "absent-term",
    "reason": "active-set/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:157:invalid"
   },
   {
@@ -727,7 +727,7 @@
    "kind": "absent-term",
    "reason": "active-injury/required",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:158:required"
   },
   {
@@ -737,7 +737,7 @@
    "kind": "absent-term",
    "reason": "active-injury/not-found",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:159:not-found"
   },
   {
@@ -747,7 +747,7 @@
    "kind": "absent-term",
    "reason": "work-order/invalid",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:161:invalid"
   },
   {
@@ -757,7 +757,7 @@
    "kind": "refusal",
    "reason": "coordinator/preparation-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:163:preparation-refused"
   },
   {
@@ -769,7 +769,7 @@
    "kind": "status-map",
    "end-line": 166,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare",
@@ -780,7 +780,7 @@
    "kind": "status-map",
    "end-line": 166,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
@@ -789,275 +789,307 @@
    "kind": "refusal",
    "reason": "coordinator/preparation-malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "C:168:preparation-malformed"
   },
   {
    "fn": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 179,
+   "line": 182,
    "status": "recorded",
-   "id": "C:179",
+   "id": "C:182",
    "kind": "status-map",
-   "end-line": 179,
+   "end-line": 182,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
    "fn": "invoke-once",
-   "line": 188,
+   "line": 193,
    "kind": "refusal",
    "reason": "coordinator/port-receipt-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:188:port-receipt-refused"
+   "sha": "3fe0a2b6d",
+   "id": "C:193:port-receipt-refused"
   },
   {
    "fn": "invoke-once",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 191,
+   "line": 196,
    "status": "accepted",
-   "id": "C:191",
+   "id": "C:196",
    "kind": "status-map",
-   "end-line": 192,
+   "end-line": 197,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
    "fn": "invoke-once",
-   "line": 194,
+   "line": 199,
    "kind": "refusal",
    "reason": "coordinator/port-threw",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:194:port-threw"
+   "sha": "3fe0a2b6d",
+   "id": "C:199:port-threw"
   },
   {
    "tag": "C",
    "fn": "append-transition!",
-   "line": 201,
+   "line": 206,
    "kind": "refusal",
    "reason": "coordinator/ledger-transition-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:201:ledger-transition-refused"
+   "sha": "3fe0a2b6d",
+   "id": "C:206:ledger-transition-refused"
   },
   {
    "fn": "held!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 209,
+   "line": 214,
    "status": "held",
-   "id": "C:209",
+   "id": "C:214",
    "kind": "status-map",
-   "end-line": 210,
+   "end-line": 215,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "checkpoint!",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 213,
+   "line": 218,
    "status": "checkpoint",
-   "id": "C:213",
+   "id": "C:218",
    "kind": "status-map",
-   "end-line": 214,
+   "end-line": 219,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate-queued-retry",
+   "line": 245,
+   "kind": "refusal",
+   "reason": "coordinator/retry-attribution-refused",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:245:retry-attribution-refused"
+  },
+  {
+   "fn": "coordinate-queued-retry",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "line": 248,
+   "status": "awaiting-retry",
+   "id": "C:248",
+   "kind": "status-map",
+   "end-line": 251,
+   "tag": "C",
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate-queued-retry",
+   "line": 255,
+   "kind": "refusal",
+   "reason": "coordinator/retry-click-id-unavailable",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:255:retry-click-id-unavailable"
+  },
+  {
+   "fn": "coordinate-queued-retry",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "reason": "retry-budget-spent",
+   "line": 261,
+   "status": "abandoned",
+   "id": "C:261:retry-budget-spent",
+   "kind": "status-map",
+   "end-line": 262,
+   "tag": "C",
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 229,
+   "line": 282,
    "kind": "absent-term",
    "reason": "transaction",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:229:transaction"
+   "sha": "3fe0a2b6d",
+   "id": "C:282:transaction"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 231,
+   "line": 284,
    "kind": "absent-term",
    "reason": "ledger",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:231:ledger"
+   "sha": "3fe0a2b6d",
+   "id": "C:284:ledger"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 232,
+   "line": 285,
    "kind": "absent-term",
    "reason": "active-injury",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:232:active-injury"
+   "sha": "3fe0a2b6d",
+   "id": "C:285:active-injury"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 233,
+   "line": 286,
    "kind": "absent-term",
    "reason": "attempt",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:233:attempt"
+   "sha": "3fe0a2b6d",
+   "id": "C:286:attempt"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 235,
+   "line": 288,
    "kind": "absent-term",
    "reason": "repair-id",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:235:repair-id"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 237,
-   "kind": "refusal",
-   "reason": "coordinator/input-refused",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:237:input-refused"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 257,
-   "kind": "refusal",
-   "reason": "coordinator/resume-state-refused",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:257:resume-state-refused"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 268,
-   "kind": "held",
-   "reason": "author-failed",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:268:author-failed"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 272,
-   "kind": "refusal",
-   "reason": "coordinator/author-payload-refused",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:272:author-payload-refused"
+   "sha": "3fe0a2b6d",
+   "id": "C:288:repair-id"
   },
   {
    "tag": "C",
    "fn": "coordinate",
    "line": 290,
+   "kind": "refusal",
+   "reason": "coordinator/input-refused",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:290:input-refused"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 310,
+   "kind": "refusal",
+   "reason": "coordinator/resume-state-refused",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:310:resume-state-refused"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 321,
+   "kind": "held",
+   "reason": "author-failed",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:321:author-failed"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 325,
+   "kind": "refusal",
+   "reason": "coordinator/author-payload-refused",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:325:author-payload-refused"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 343,
    "kind": "held",
    "reason": "review-rejected",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:290:review-rejected"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 292,
-   "kind": "refusal",
-   "reason": "coordinator/review-patch-substitution",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:292:review-patch-substitution"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 313,
-   "kind": "held",
-   "reason": "enact-failed",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:313:enact-failed"
-  },
-  {
-   "tag": "C",
-   "fn": "coordinate",
-   "line": 318,
-   "kind": "refusal",
-   "reason": "coordinator/enact-payload-refused",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:318:enact-payload-refused"
+   "sha": "3fe0a2b6d",
+   "id": "C:343:review-rejected"
   },
   {
    "tag": "C",
    "fn": "coordinate",
    "line": 345,
    "kind": "refusal",
+   "reason": "coordinator/review-patch-substitution",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:345:review-patch-substitution"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 366,
+   "kind": "held",
+   "reason": "enact-failed",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:366:enact-failed"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 371,
+   "kind": "refusal",
+   "reason": "coordinator/enact-payload-refused",
+   "file": "src/futon2/aif/meta_repair_coordinator.clj",
+   "sha": "3fe0a2b6d",
+   "id": "C:371:enact-payload-refused"
+  },
+  {
+   "tag": "C",
+   "fn": "coordinate",
+   "line": 398,
+   "kind": "refusal",
    "reason": "coordinator/retry-attribution-refused",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:345:retry-attribution-refused"
+   "sha": "3fe0a2b6d",
+   "id": "C:398:retry-attribution-refused"
   },
   {
    "fn": "coordinate",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 349,
-   "status": "awaiting-retry",
-   "id": "C:349",
-   "kind": "status-map",
-   "end-line": 352,
-   "tag": "C",
-   "sha": "343b60ef3"
-  },
-  {
-   "fn": "coordinate",
-   "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 364,
+   "line": 415,
    "status": "discharged",
-   "id": "C:364",
+   "id": "C:415",
    "kind": "status-map",
-   "end-line": 364,
+   "end-line": 415,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "coordinate",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "line": 375,
+   "line": 426,
    "status": "computed",
-   "id": "C:375",
+   "id": "C:426",
    "kind": "status-map",
-   "end-line": 376,
+   "end-line": 427,
    "tag": "C",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 379,
+   "line": 430,
    "kind": "refusal",
    "reason": "coordinator/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:379:malformed"
+   "sha": "3fe0a2b6d",
+   "id": "C:430:malformed"
   },
   {
    "tag": "C",
    "fn": "coordinate",
-   "line": 381,
+   "line": 432,
    "kind": "refusal",
    "reason": "coordinator/malformed",
    "file": "src/futon2/aif/meta_repair_coordinator.clj",
-   "sha": "343b60ef3",
-   "id": "C:381:malformed"
+   "sha": "3fe0a2b6d",
+   "id": "C:432:malformed"
   },
   {
    "fn": "refusal",
@@ -1068,7 +1100,7 @@
    "kind": "status-map",
    "end-line": 21,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1077,7 +1109,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:46:diagnosis-source-pin-mismatch"
   },
   {
@@ -1089,7 +1121,7 @@
    "kind": "status-map",
    "end-line": 49,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1098,7 +1130,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:50:diagnosis-source-unreadable"
   },
   {
@@ -1108,7 +1140,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:53:diagnosis-source-unreadable"
   },
   {
@@ -1120,7 +1152,7 @@
    "kind": "status-map",
    "end-line": 72,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1129,7 +1161,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:76:diagnosis-path-conflict"
   },
   {
@@ -1139,7 +1171,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:86:diagnosis-path-conflict"
   },
   {
@@ -1149,7 +1181,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:89:diagnosis-persist-failed"
   },
   {
@@ -1161,7 +1193,7 @@
    "kind": "status-map",
    "end-line": 157,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1170,7 +1202,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-source-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:163:diagnosis-source-pin-unavailable"
   },
   {
@@ -1180,7 +1212,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:167:diagnosis-port-unavailable"
   },
   {
@@ -1193,7 +1225,7 @@
    "kind": "status-map",
    "end-line": 184,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1202,7 +1234,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-returned-nil",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:187:diagnosis-port-returned-nil"
   },
   {
@@ -1212,7 +1244,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-port-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:191:diagnosis-port-malformed"
   },
   {
@@ -1222,7 +1254,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:195:diagnosis-unavailable"
   },
   {
@@ -1232,7 +1264,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-response-missing",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:206:diagnosis-response-missing"
   },
   {
@@ -1242,7 +1274,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-production-functions-absent",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:212:diagnosis-production-functions-absent"
   },
   {
@@ -1254,7 +1286,7 @@
    "kind": "status-map",
    "end-line": 225,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "produce-diagnosis!",
@@ -1265,7 +1297,7 @@
    "kind": "status-map",
    "end-line": 234,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1274,7 +1306,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:249:acceptance-diagnosis-pin-unavailable"
   },
   {
@@ -1284,7 +1316,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:256:acceptance-diagnosis-pin-mismatch"
   },
   {
@@ -1294,7 +1326,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:266:acceptance-diagnosis-unreadable"
   },
   {
@@ -1304,7 +1336,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:268:acceptance-diagnosis-unreadable"
   },
   {
@@ -1314,7 +1346,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:270:acceptance-diagnosis-unavailable"
   },
   {
@@ -1324,7 +1356,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:272:acceptance-diagnosis-unavailable"
   },
   {
@@ -1334,7 +1366,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:274:acceptance-diagnosis-identity-mismatch"
   },
   {
@@ -1344,7 +1376,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-production-functions-absent",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:278:diagnosis-production-functions-absent"
   },
   {
@@ -1356,7 +1388,7 @@
    "kind": "status-map",
    "end-line": 280,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1365,7 +1397,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-diagnosis-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:282:acceptance-diagnosis-unreadable"
   },
   {
@@ -1377,7 +1409,7 @@
    "kind": "status-map",
    "end-line": 342,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1386,7 +1418,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:346:acceptance-path-conflict"
   },
   {
@@ -1396,7 +1428,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-path-conflict",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:355:acceptance-path-conflict"
   },
   {
@@ -1406,7 +1438,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:358:acceptance-persist-failed"
   },
   {
@@ -1419,7 +1451,7 @@
    "kind": "status-map",
    "end-line": 447,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1428,7 +1460,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-returned-nil",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:450:acceptance-port-returned-nil"
   },
   {
@@ -1438,7 +1470,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:453:acceptance-port-malformed"
   },
   {
@@ -1448,7 +1480,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:460:acceptance-unavailable"
   },
   {
@@ -1458,7 +1490,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-source-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:467:acceptance-proposal-source-mismatch"
   },
   {
@@ -1468,7 +1500,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-prose-or-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:470:acceptance-prose-or-malformed"
   },
   {
@@ -1480,7 +1512,7 @@
    "kind": "status-map",
    "end-line": 481,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "produce-acceptance-from-request!",
@@ -1491,7 +1523,7 @@
    "kind": "status-map",
    "end-line": 492,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "produce-acceptance!",
@@ -1502,7 +1534,7 @@
    "kind": "status-map",
    "end-line": 508,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1511,7 +1543,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:518:acceptance-port-unavailable"
   },
   {
@@ -1521,7 +1553,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-request-function-unresolvable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:526:acceptance-request-function-unresolvable"
   },
   {
@@ -1531,7 +1563,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-pin-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:536:acceptance-proposal-pin-unavailable"
   },
   {
@@ -1541,7 +1573,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-pin-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:540:acceptance-proposal-pin-mismatch"
   },
   {
@@ -1551,7 +1583,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:547:acceptance-proposal-unreadable"
   },
   {
@@ -1561,7 +1593,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:549:acceptance-proposal-unreadable"
   },
   {
@@ -1571,7 +1603,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-not-proposed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:551:acceptance-proposal-not-proposed"
   },
   {
@@ -1581,7 +1613,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-review-state-invalid",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:553:acceptance-proposal-review-state-invalid"
   },
   {
@@ -1591,7 +1623,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:555:acceptance-proposal-identity-mismatch"
   },
   {
@@ -1601,7 +1633,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-source-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:557:acceptance-proposal-source-mismatch"
   },
   {
@@ -1611,7 +1643,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-not-concrete",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:559:acceptance-proposal-not-concrete"
   },
   {
@@ -1623,7 +1655,7 @@
    "kind": "status-map",
    "end-line": 560,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1632,7 +1664,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-proposal-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:562:acceptance-proposal-unreadable"
   },
   {
@@ -1642,7 +1674,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-run-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:580:acceptance-run-port-unavailable"
   },
   {
@@ -1652,7 +1684,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-port-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:583:acceptance-review-port-unavailable"
   },
   {
@@ -1665,7 +1697,7 @@
    "kind": "status-map",
    "end-line": 590,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "admit-acceptance!",
@@ -1677,7 +1709,7 @@
    "kind": "status-map",
    "end-line": 613,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1686,7 +1718,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-run-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:618:acceptance-run-refused"
   },
   {
@@ -1696,7 +1728,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-test-passes-before-repair",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:622:acceptance-test-passes-before-repair"
   },
   {
@@ -1706,7 +1738,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-malformed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:626:acceptance-review-malformed"
   },
   {
@@ -1716,7 +1748,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:628:acceptance-review-refused"
   },
   {
@@ -1726,7 +1758,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-review-identity-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:638:acceptance-review-identity-mismatch"
   },
   {
@@ -1738,7 +1770,7 @@
    "kind": "status-map",
    "end-line": 649,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "admit-acceptance!",
@@ -1749,7 +1781,7 @@
    "kind": "status-map",
    "end-line": 662,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-acceptance",
@@ -1760,7 +1792,7 @@
    "kind": "status-map",
    "end-line": 673,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-acceptance",
@@ -1772,7 +1804,7 @@
    "kind": "status-map",
    "end-line": 682,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-acceptance",
@@ -1784,7 +1816,7 @@
    "kind": "status-map",
    "end-line": 687,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1793,7 +1825,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/transaction-invalid",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:691:transaction-invalid"
   },
   {
@@ -1805,7 +1837,7 @@
    "kind": "status-map",
    "end-line": 701,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
@@ -1814,7 +1846,7 @@
    "kind": "refusal",
    "reason": "meta-self-heal/transaction-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
+   "sha": "3fe0a2b6d",
    "id": "P:703:transaction-persist-failed"
   },
   {
@@ -1826,7 +1858,7 @@
    "kind": "status-map",
    "end-line": 733,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "endpoint-port",
@@ -1837,375 +1869,375 @@
    "kind": "status-map",
    "end-line": 741,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-diagnosis",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
    "reason": "meta-self-heal/diagnosis-active-set-unavailable",
-   "line": 780,
+   "line": 802,
    "status": "unavailable",
-   "id": "P:780:diagnosis-active-set-unavailable",
+   "id": "P:802:diagnosis-active-set-unavailable",
    "kind": "status-map",
-   "end-line": 780,
+   "end-line": 802,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-diagnosis",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 783,
+   "line": 805,
    "status": "present",
-   "id": "P:783",
+   "id": "P:805",
    "kind": "status-map",
-   "end-line": 784,
+   "end-line": 806,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-diagnosis",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
    "reason": "meta-self-heal/no-durable-injury-ledger",
-   "line": 787,
+   "line": 809,
    "status": "not-required",
-   "id": "P:787:no-durable-injury-ledger",
+   "id": "P:809:no-durable-injury-ledger",
    "kind": "status-map",
-   "end-line": 787,
+   "end-line": 809,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-diagnosis",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
    "reason": "meta-self-heal/diagnosis-ledger-unavailable",
-   "line": 790,
+   "line": 812,
    "status": "unavailable",
-   "id": "P:790:diagnosis-ledger-unavailable",
+   "id": "P:812:diagnosis-ledger-unavailable",
    "kind": "status-map",
-   "end-line": 790,
+   "end-line": 812,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "prepare-diagnosis",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
    "reason": "meta-self-heal/no-active-injury",
-   "line": 793,
+   "line": 815,
    "status": "not-required",
-   "id": "P:793:no-active-injury",
+   "id": "P:815:no-active-injury",
    "kind": "status-map",
-   "end-line": 793,
+   "end-line": 815,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 816,
+   "line": 838,
    "kind": "absent-term",
    "reason": "transaction-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:816:transaction-path"
+   "sha": "3fe0a2b6d",
+   "id": "P:838:transaction-path"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 817,
+   "line": 839,
    "kind": "absent-term",
    "reason": "repair-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:817:repair-ports"
+   "sha": "3fe0a2b6d",
+   "id": "P:839:repair-ports"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 819,
+   "line": 841,
    "kind": "absent-term",
    "reason": "acceptance-run-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:819:acceptance-run-port"
+   "sha": "3fe0a2b6d",
+   "id": "P:841:acceptance-run-port"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 822,
+   "line": 844,
    "kind": "absent-term",
    "reason": "diagnosis-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:822:diagnosis-port"
+   "sha": "3fe0a2b6d",
+   "id": "P:844:diagnosis-port"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 825,
+   "line": 847,
    "kind": "absent-term",
    "reason": "acceptance-proposal-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:825:acceptance-proposal-port"
+   "sha": "3fe0a2b6d",
+   "id": "P:847:acceptance-proposal-port"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 828,
+   "line": 850,
    "kind": "absent-term",
    "reason": "acceptance-review-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:828:acceptance-review-port"
+   "sha": "3fe0a2b6d",
+   "id": "P:850:acceptance-review-port"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 836,
+   "line": 858,
    "kind": "refusal",
    "reason": "meta-self-heal/ledger-unreadable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:836:ledger-unreadable"
+   "sha": "3fe0a2b6d",
+   "id": "P:858:ledger-unreadable"
   },
   {
    "fn": "production-readiness",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 840,
+   "line": 862,
    "status": "ready",
-   "id": "P:840",
+   "id": "P:862",
    "kind": "status-map",
-   "end-line": 843,
+   "end-line": 865,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "production-readiness",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 843,
+   "line": 865,
    "status": "absent",
-   "id": "P:843",
+   "id": "P:865",
    "kind": "status-map",
-   "end-line": 843,
+   "end-line": 865,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "production-readiness",
-   "line": 846,
+   "line": 868,
    "kind": "refusal",
    "reason": "meta-self-heal/production-config-required",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:846:production-config-required"
+   "sha": "3fe0a2b6d",
+   "id": "P:868:production-config-required"
   },
   {
    "fn": "production-readiness",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 850,
+   "line": 872,
    "status": "ready",
-   "id": "P:850",
+   "id": "P:872",
    "kind": "status-map",
-   "end-line": 852,
+   "end-line": 874,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "diagnosis-transaction-binding",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 861,
+   "line": 883,
    "status": "valid",
-   "id": "P:861",
+   "id": "P:883",
    "kind": "status-map",
-   "end-line": 861,
+   "end-line": 883,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "diagnosis-transaction-binding",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 869,
+   "line": 891,
    "status": "valid",
-   "id": "P:869",
+   "id": "P:891",
    "kind": "status-map",
-   "end-line": 869,
+   "end-line": 891,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "diagnosis-transaction-binding",
-   "line": 870,
+   "line": 892,
    "kind": "refusal",
    "reason": "meta-self-heal/diagnosis-transaction-mismatch",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:870:diagnosis-transaction-mismatch"
+   "sha": "3fe0a2b6d",
+   "id": "P:892:diagnosis-transaction-mismatch"
   },
   {
    "fn": "acceptance-transaction-binding",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 882,
+   "line": 904,
    "status": "valid",
-   "id": "P:882",
+   "id": "P:904",
    "kind": "status-map",
-   "end-line": 882,
+   "end-line": 904,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "acceptance-transaction-binding",
-   "line": 884,
+   "line": 906,
    "kind": "refusal",
    "reason": "meta-self-heal/acceptance-transaction-unadmitted",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:884:acceptance-transaction-unadmitted"
+   "sha": "3fe0a2b6d",
+   "id": "P:906:acceptance-transaction-unadmitted"
   },
   {
    "fn": "acceptance-transaction-binding",
-   "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 895,
-   "status": "valid",
-   "id": "P:895",
-   "kind": "status-map",
-   "end-line": 895,
-   "tag": "P",
-   "sha": "343b60ef3"
-  },
-  {
-   "tag": "P",
-   "fn": "acceptance-transaction-binding",
-   "line": 896,
-   "kind": "refusal",
-   "reason": "meta-self-heal/acceptance-transaction-mismatch",
-   "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:896:acceptance-transaction-mismatch"
-  },
-  {
-   "fn": "attributable-retry-readiness",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
    "line": 917,
-   "status": "ready",
+   "status": "valid",
    "id": "P:917",
    "kind": "status-map",
    "end-line": 917,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "P",
+   "fn": "acceptance-transaction-binding",
+   "line": 918,
+   "kind": "refusal",
+   "reason": "meta-self-heal/acceptance-transaction-mismatch",
+   "file": "src/futon2/aif/meta_self_heal_production.clj",
+   "sha": "3fe0a2b6d",
+   "id": "P:918:acceptance-transaction-mismatch"
+  },
+  {
+   "fn": "attributable-retry-readiness",
+   "file": "src/futon2/aif/meta_self_heal_production.clj",
+   "line": 939,
+   "status": "ready",
+   "id": "P:939",
+   "kind": "status-map",
+   "end-line": 939,
+   "tag": "P",
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "attributable-retry-readiness",
-   "line": 918,
+   "line": 940,
    "kind": "refusal",
    "reason": "meta-self-heal/retry-attribution-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:918:retry-attribution-refused"
+   "sha": "3fe0a2b6d",
+   "id": "P:940:retry-attribution-refused"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 934,
+   "line": 956,
    "kind": "refusal",
    "reason": "meta-self-heal/active-set-unavailable",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:934:active-set-unavailable"
+   "sha": "3fe0a2b6d",
+   "id": "P:956:active-set-unavailable"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 941,
+   "line": 963,
    "kind": "absent-term",
    "reason": "transaction-path",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:941:transaction-path"
+   "sha": "3fe0a2b6d",
+   "id": "P:963:transaction-path"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 942,
+   "line": 964,
    "kind": "absent-term",
    "reason": "repair-ports",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:942:repair-ports"
+   "sha": "3fe0a2b6d",
+   "id": "P:964:repair-ports"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 944,
+   "line": 966,
    "kind": "absent-term",
    "reason": "acceptance-run-port",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:944:acceptance-run-port"
+   "sha": "3fe0a2b6d",
+   "id": "P:966:acceptance-run-port"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 945,
+   "line": 967,
    "kind": "absent-term",
    "reason": "diagnosis-evidence",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:945:diagnosis-evidence"
+   "sha": "3fe0a2b6d",
+   "id": "P:967:diagnosis-evidence"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 946,
+   "line": 968,
    "kind": "absent-term",
    "reason": "acceptance-test",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:946:acceptance-test"
+   "sha": "3fe0a2b6d",
+   "id": "P:968:acceptance-test"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 948,
+   "line": 970,
    "kind": "refusal",
    "reason": "meta-self-heal/production-config-required",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:948:production-config-required"
+   "sha": "3fe0a2b6d",
+   "id": "P:970:production-config-required"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 962,
+   "line": 984,
    "kind": "refusal",
    "reason": "meta-self-heal/preparation-refused",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:962:preparation-refused"
+   "sha": "3fe0a2b6d",
+   "id": "P:984:preparation-refused"
   },
   {
    "fn": "route!",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "line": 991,
+   "line": 1013,
    "status": "computed",
-   "id": "P:991",
+   "id": "P:1013",
    "kind": "status-map",
-   "end-line": 1001,
+   "end-line": 1023,
    "tag": "P",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "tag": "P",
    "fn": "route!",
-   "line": 1016,
+   "line": 1038,
    "kind": "refusal",
    "reason": "meta-self-heal/checkpoint-persist-failed",
    "file": "src/futon2/aif/meta_self_heal_production.clj",
-   "sha": "343b60ef3",
-   "id": "P:1016:checkpoint-persist-failed"
+   "sha": "3fe0a2b6d",
+   "id": "P:1038:checkpoint-persist-failed"
   },
   {
    "fn": "run-opportunity!",
@@ -2217,7 +2249,7 @@
    "kind": "status-map",
    "end-line": 480,
    "tag": "R",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "run-opportunity!",
@@ -2229,7 +2261,7 @@
    "kind": "status-map",
    "end-line": 483,
    "tag": "R",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "run-opportunity!",
@@ -2240,7 +2272,7 @@
    "kind": "status-map",
    "end-line": 498,
    "tag": "R",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "run-opportunity!",
@@ -2252,30 +2284,246 @@
    "kind": "status-map",
    "end-line": 507,
    "tag": "R",
-   "sha": "343b60ef3"
+   "sha": "3fe0a2b6d"
   },
   {
    "fn": "meta-self-heal-preflight!",
    "file": "src/futon3c/wm/runner_service.clj",
    "reason": "injected-partial-resolver",
-   "line": 360,
+   "line": 366,
    "status": "ready",
-   "id": "S:360:injected-partial-resolver",
+   "id": "S:366:injected-partial-resolver",
    "kind": "status-map",
-   "end-line": 360,
+   "end-line": 366,
    "tag": "S",
-   "sha": "80516025d"
+   "sha": "c16a86952"
   },
   {
    "fn": "meta-self-heal-preflight!",
    "file": "src/futon3c/wm/runner_service.clj",
-   "line": 363,
+   "line": 369,
    "status": "computed",
-   "id": "S:363",
+   "id": "S:369",
    "kind": "status-map",
-   "end-line": 366,
+   "end-line": 372,
    "tag": "S",
-   "sha": "80516025d"
+   "sha": "c16a86952"
+  },
+  {
+   "fn": "refusal",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "line": 23,
+   "status": "refused",
+   "id": "T:23",
+   "kind": "status-map",
+   "end-line": 23,
+   "tag": "T",
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "T",
+   "fn": "cause-id",
+   "line": 87,
+   "kind": "absent-term",
+   "reason": "outer-policy-evidence-provider-required",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:87:outer-policy-evidence-provider-required"
+  },
+  {
+   "tag": "T",
+   "fn": "injury-id",
+   "line": 92,
+   "kind": "absent-term",
+   "reason": "outer-policy-evidence-provider-required",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:92:outer-policy-evidence-provider-required"
+  },
+  {
+   "fn": "verify-classification",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "line": 106,
+   "status": "valid",
+   "id": "T:106",
+   "kind": "status-map",
+   "end-line": 106,
+   "tag": "T",
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "T",
+   "fn": "verify-classification",
+   "line": 107,
+   "kind": "refusal",
+   "reason": "classification/invalid",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:107:invalid"
+  },
+  {
+   "tag": "T",
+   "fn": "verify-classification",
+   "line": 109,
+   "kind": "refusal",
+   "reason": "classification/malformed",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:109:malformed"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 132,
+   "kind": "absent-term",
+   "reason": "record/map",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:132:map"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 133,
+   "kind": "absent-term",
+   "reason": "record/source-pin",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:133:source-pin"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 134,
+   "kind": "absent-term",
+   "reason": "record/run-id",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:134:run-id"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 135,
+   "kind": "absent-term",
+   "reason": "record/click-id",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:135:click-id"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 137,
+   "kind": "refusal",
+   "reason": "terminal-record/malformed",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:137:malformed"
+  },
+  {
+   "fn": "classify",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "line": 139,
+   "status": "classified",
+   "id": "T:139",
+   "kind": "status-map",
+   "end-line": 145,
+   "tag": "T",
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "T",
+   "fn": "classify",
+   "line": 166,
+   "kind": "refusal",
+   "reason": "terminal-record/malformed",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:166:malformed"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 206,
+   "kind": "refusal",
+   "reason": "ledger/tampered",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:206:tampered"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 209,
+   "kind": "refusal",
+   "reason": "classification/invalid",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:209:invalid"
+  },
+  {
+   "fn": "integrate",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "reason": "record-already-ingested",
+   "line": 212,
+   "status": "duplicate",
+   "id": "T:212:record-already-ingested",
+   "kind": "status-map",
+   "end-line": 213,
+   "tag": "T",
+   "sha": "3fe0a2b6d"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 284,
+   "kind": "refusal",
+   "reason": "injury/retry-click-mismatch",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:284:retry-click-mismatch"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 299,
+   "kind": "refusal",
+   "reason": "injury/terminal-history-requires-new-transaction",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:299:terminal-history-requires-new-transaction"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 302,
+   "kind": "refusal",
+   "reason": "classification/unknown",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:302:unknown"
+  },
+  {
+   "tag": "T",
+   "fn": "integrate",
+   "line": 304,
+   "kind": "refusal",
+   "reason": "injury-integration/malformed",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "sha": "3fe0a2b6d",
+   "id": "T:304:malformed"
+  },
+  {
+   "fn": "replay",
+   "file": "src/futon2/aif/meta_terminal_injury.clj",
+   "line": 311,
+   "status": "seed",
+   "id": "T:311",
+   "kind": "status-map",
+   "end-line": 311,
+   "tag": "T",
+   "sha": "3fe0a2b6d"
   }
  ],
  "entities": [
@@ -2284,7 +2532,7 @@
    "inductive": "ReadinessTerm",
    "name": "transactionPath",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 206,
+   "line": 272,
    "text": ""
   },
   {
@@ -2292,7 +2540,7 @@
    "inductive": "ReadinessTerm",
    "name": "repairPorts",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 206,
+   "line": 272,
    "text": ""
   },
   {
@@ -2300,7 +2548,7 @@
    "inductive": "ReadinessTerm",
    "name": "acceptanceRunPort",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 206,
+   "line": 272,
    "text": ""
   },
   {
@@ -2308,7 +2556,7 @@
    "inductive": "ReadinessTerm",
    "name": "diagnosisPort",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 206,
+   "line": 272,
    "text": ""
   },
   {
@@ -2316,7 +2564,7 @@
    "inductive": "ReadinessTerm",
    "name": "acceptanceProposalPort",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 207,
+   "line": 273,
    "text": ""
   },
   {
@@ -2324,7 +2572,7 @@
    "inductive": "ReadinessTerm",
    "name": "acceptanceReviewPort",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 207,
+   "line": 273,
    "text": ""
   },
   {
@@ -2332,7 +2580,7 @@
    "inductive": "RouteTerm",
    "name": "transactionPath",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 213,
+   "line": 279,
    "text": ""
   },
   {
@@ -2340,7 +2588,7 @@
    "inductive": "RouteTerm",
    "name": "repairPorts",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 213,
+   "line": 279,
    "text": ""
   },
   {
@@ -2348,7 +2596,7 @@
    "inductive": "RouteTerm",
    "name": "acceptanceRunPort",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 213,
+   "line": 279,
    "text": ""
   },
   {
@@ -2356,7 +2604,7 @@
    "inductive": "RouteTerm",
    "name": "diagnosisEvidence",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 213,
+   "line": 279,
    "text": ""
   },
   {
@@ -2364,7 +2612,7 @@
    "inductive": "RouteTerm",
    "name": "acceptanceTest",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 213,
+   "line": 279,
    "text": ""
   },
   {
@@ -2372,231 +2620,231 @@
    "inductive": "RouteState",
    "name": "ledgerRead",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 229,
-   "text": "/-- Rev 6: the one ledger read, `diagnosis-context` (P:755). `prepare-diagnosis` (P:769) and `production-readiness` (P:797) decide from it, before any injury is known. Order error 3: `route!` reads the ledger a second time (P:923-925), and that read has no state here. A runtime that reads twice conforms only while the two reads agree. M6a is to make `route!` use the context's read. Rev 8 note: with one read, a stale context overwrites a ledger file that changed between the read and coordination's persist. That is the one-read design taken literally, and it is pinned by `route-decides-from-the-context-read-not-a-second-read` (futon2 `6dd147e6a`). -/"
+   "line": 299,
+   "text": "/-- Rev 6: the one ledger read, `diagnosis-context` (P:755). `prepare-diagnosis` (P:769) and `production-readiness` (P:801) decide from it, before any injury is known. Order error 3: `route!` reads the ledger a second time (P:923-925), and that read has no state here. A runtime that reads twice conforms only while the two reads agree. M6a is to make `route!` use the context's read. Rev 8 note: with one read, a stale context overwrites a ledger file that changed between the read and coordination's persist. That is the one-read design taken literally, and it is pinned by `route-decides-from-the-context-read-not-a-second-read` (futon2 `6dd147e6a`). Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P diagnosis-context {:durable-ledger :active-injuries})`. The map has no `:status`, so no status literal is the site. Since then `route!` takes `(:meta-diagnosis-context opts)` and reads the ledger itself only when it is given no context (`(P route! durable)`), so order error 3 no longer arises from `run-opportunity!`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.noActiveInjury",
    "inductive": "RouteState",
    "name": "noActiveInjury",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 230,
-   "text": ""
+   "line": 305,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): no ledger file, `(P prepare-diagnosis {:status :not-required :reason :meta-self-heal/no-durable-injury-ledger})` (#3); an empty active set, `(P prepare-diagnosis {:status :not-required :reason :meta-self-heal/no-active-injury})` (#6). `route!` then returns nil (`(P route! (when (seq (:injuries active))))`). -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.activeInjury",
    "inductive": "RouteState",
    "name": "activeInjury",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 231,
-   "text": ""
+   "line": 309,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P prepare-diagnosis :else)`: the ledger loaded, the active set computed and is non-empty, and `produce-diagnosis!` is called on its first injury id. That branch has no status literal of its own. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.activeSetUnavailable",
    "inductive": "RouteState",
    "name": "activeSetUnavailable",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 234,
-   "text": "/-- Rev 6, row #5: the ledger loaded, but `ledger/active-injuries` did not return `:computed` (P:786, `:diagnosis-active-set-unavailable`). A terminal refusal. -/"
+   "line": 319,
+   "text": "/-- Rev 6, row #5: the ledger loaded, but `ledger/active-injuries` did not return `:computed` (P:780, `:diagnosis-active-set-unavailable`). A terminal refusal. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): the observation `(P prepare-diagnosis {:status :unavailable :reason :meta-self-heal/diagnosis-active-set-unavailable})`, then the refusal `(R run-opportunity! {:status :refused :reason :meta-self-heal/active-set-unavailable})` in the first `cond` arm. `(P route! :meta-self-heal/active-set-unavailable)` is the same guard for a caller that is not `run-opportunity!`; from `run-opportunity!` it is not reached, because the R arm ends the click on the same context first. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.retryClick",
    "inductive": "RouteState",
    "name": "retryClick",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 240,
-   "text": "/-- Rev 7: the start of a retry click. Its options carry `:meta-repair-retry` (S:989-995): the child of a parent that ended `:awaiting-retry`, launched only after the parent click is durably complete. It makes no ledger read of its own and no diagnosis (R:473-477). It carries the acceptance observation `:acceptance-retry-not-prepared` (#22), which is typed, not a state. -/"
+   "line": 329,
+   "text": "/-- Rev 7: the start of a retry click. Its options carry `:meta-repair-retry` (S:989-995): the child of a parent that ended `:awaiting-retry`, launched only after the parent click is durably complete. It makes no ledger read of its own and no diagnosis (R:473-477). It carries the acceptance observation `:acceptance-retry-not-prepared` (#22), which is typed, not a state. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(S close-click! :meta-repair-retry)` sets the option, in the child `click!` it launches after the parent's release. In `run-opportunity!` the branch is `(R run-opportunity! retry)`, and its one site is the observation `(R run-opportunity! {:status :not-required :reason :meta-self-heal/acceptance-retry-not-prepared})`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.retryReady",
    "inductive": "RouteState",
    "name": "retryReady",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 244,
-   "text": "/-- Rev 7: `attributable-retry-readiness` (P:896-915) returns `:ready` with the attribution. The retry then runs ordinary work (R:500-502), and `route!` is not called. -/"
+   "line": 335,
+   "text": "/-- Rev 7: `attributable-retry-readiness` (P:896-915) returns `:ready` with the attribution. The retry then runs ordinary work (R:500-502), and `route!` is not called. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P attributable-retry-readiness {:status :ready :attribution})`, then `(R run-opportunity! retry)` runs `run-ordinary-opportunity!`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.retryRefused",
    "inductive": "RouteState",
    "name": "retryRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 247,
-   "text": "/-- Rev 7, #57: `:meta-self-heal/retry-attribution-refused` (P:914), with `:expected` and `:supplied`. -/"
+   "line": 340,
+   "text": "/-- Rev 7, #57: `:meta-self-heal/retry-attribution-refused` (P:918), with `:expected` and `:supplied`. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P attributable-retry-readiness :meta-self-heal/retry-attribution-refused)`, returned by `(R run-opportunity! (= :refused (:status readiness)))`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.diagnosisPrepared",
    "inductive": "RouteState",
    "name": "diagnosisPrepared",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 249,
-   "text": ""
+   "line": 345,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P produce-diagnosis! {:status :available})`, after `persist-diagnosis!` returned `:persisted`; or a supplied pin, `(P prepare-diagnosis {:status :present :source :supplied})`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.diagnosisRefused",
    "inductive": "RouteState",
    "name": "diagnosisRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 250,
-   "text": ""
+   "line": 359,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): every non-`:available` result of `produce-diagnosis!`: `(P produce-diagnosis! :meta-self-heal/diagnosis-source-pin-unavailable)`, `(P produce-diagnosis! :meta-self-heal/diagnosis-port-unavailable)`, `(P produce-diagnosis! :meta-self-heal/diagnosis-port-returned-nil)`, `(P produce-diagnosis! :meta-self-heal/diagnosis-port-malformed)`, `(P produce-diagnosis! :meta-self-heal/diagnosis-unavailable)` (a port that threw lands here, its reason carried as `:diagnosis-reason`), `(P produce-diagnosis! :meta-self-heal/diagnosis-response-missing)`, `(P produce-diagnosis! :meta-self-heal/diagnosis-production-functions-absent)`; passed through from `(P source-record :meta-self-heal/diagnosis-source-pin-mismatch)`, `(P source-record :meta-self-heal/diagnosis-source-unreadable)`, `(P persist-diagnosis! :meta-self-heal/diagnosis-path-conflict)` and `(P persist-diagnosis! :meta-self-heal/diagnosis-persist-failed)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.acceptanceUnavailable",
    "inductive": "RouteState",
    "name": "acceptanceUnavailable",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 252,
-   "text": "diagnosis not `:available`: `:acceptance-diagnosis-unavailable`"
+   "line": 364,
+   "text": "/-- Diagnosis not `:available`: `:acceptance-diagnosis-unavailable`. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P prepare-acceptance {:status :unavailable :reason :meta-self-heal/acceptance-diagnosis-unavailable})`, the `:else` arm. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.proposalRefused",
    "inductive": "RouteState",
    "name": "proposalRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 253,
-   "text": "`produce-acceptance!` did not return `:proposed`"
+   "line": 382,
+   "text": "/-- `produce-acceptance!` did not return `:proposed`. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): from `(P read-diagnosis-receipt)`: `:meta-self-heal/acceptance-diagnosis-pin-unavailable`, `:meta-self-heal/acceptance-diagnosis-pin-mismatch`, `:meta-self-heal/acceptance-diagnosis-unreadable`, `:meta-self-heal/acceptance-diagnosis-identity-mismatch`, and that function's own `:meta-self-heal/acceptance-diagnosis-unavailable` and `:meta-self-heal/diagnosis-production-functions-absent`; `(P produce-acceptance! :meta-self-heal/acceptance-port-unavailable)`, `(P produce-acceptance! :meta-self-heal/acceptance-request-function-unresolvable)`; `(P produce-acceptance-from-request! :meta-self-heal/acceptance-port-returned-nil)`, `(P produce-acceptance-from-request! :meta-self-heal/acceptance-port-malformed)`, `(P produce-acceptance-from-request! :meta-self-heal/acceptance-unavailable)` (a port that threw lands here), `(P produce-acceptance-from-request! :meta-self-heal/acceptance-proposal-source-mismatch)`, `(P produce-acceptance-from-request! :meta-self-heal/acceptance-prose-or-malformed)`; and the proposal receipt's write, `(P persist-acceptance! :meta-self-heal/acceptance-path-conflict)`, `(P persist-acceptance! :meta-self-heal/acceptance-persist-failed)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.admissionRun",
    "inductive": "RouteState",
    "name": "admissionRun",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 254,
-   "text": "`admit-acceptance!` entered"
+   "line": 388,
+   "text": "/-- `admit-acceptance!` entered. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): no producing site. `(P prepare-acceptance)` calls `admit-acceptance!` when `produce-acceptance!` returns `(P produce-acceptance-from-request! {:status :proposed})`; the entry has no status literal. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.admissionRefused",
    "inductive": "RouteState",
    "name": "admissionRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 255,
-   "text": "admission refused before or without a reviewer answer"
+   "line": 405,
+   "text": "/-- Admission refused before or without a reviewer answer. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): before the reviewer is called: from `(P read-acceptance-proposal)`, `:meta-self-heal/acceptance-proposal-pin-unavailable`, `:meta-self-heal/acceptance-proposal-pin-mismatch`, `:meta-self-heal/acceptance-proposal-unreadable`, `:meta-self-heal/acceptance-proposal-not-proposed`, `:meta-self-heal/acceptance-proposal-review-state-invalid`, `:meta-self-heal/acceptance-proposal-identity-mismatch`, that function's `:meta-self-heal/acceptance-proposal-source-mismatch` and `:meta-self-heal/acceptance-proposal-not-concrete`; `(P admit-acceptance! :meta-self-heal/acceptance-run-port-unavailable)`, `(P admit-acceptance! :meta-self-heal/acceptance-review-port-unavailable)`, `(P admit-acceptance! :meta-self-heal/acceptance-run-refused)` (a run that threw lands here), `(P admit-acceptance! :meta-self-heal/acceptance-test-passes-before-repair)`. A reviewer that throws is not here: its answer becomes `{:status :failed}` and lands in `reviewRefused`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.reviewAccepted",
    "inductive": "RouteState",
    "name": "reviewAccepted",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 256,
-   "text": ""
+   "line": 408,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P admit-acceptance! {:status :accepted :acceptance-admission-pin})`, after `persist-acceptance!` returned `:persisted`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.reviewRefused",
    "inductive": "RouteState",
    "name": "reviewRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 257,
-   "text": ""
+   "line": 414,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): the reviewer was called and gave no usable acceptance: `(P admit-acceptance! :meta-self-heal/acceptance-review-malformed)`, `(P admit-acceptance! :meta-self-heal/acceptance-review-refused)` (a reviewer that threw lands here, `:review-status :failed`), `(P admit-acceptance! :meta-self-heal/acceptance-review-identity-mismatch)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.readinessReady",
    "inductive": "RouteState",
    "name": "readinessReady",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 259,
-   "text": ""
+   "line": 419,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P production-readiness {:status :ready :active-injury?})`, the `:else` arm, or the ordinary-route arm that keeps the absence as `{:self-heal {:status :absent}}`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.readinessRefused",
    "inductive": "RouteState",
    "name": "readinessRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 260,
-   "text": "`:production-config-required` with port terms"
+   "line": 423,
+   "text": "/-- `:production-config-required` with port terms. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P production-readiness :meta-self-heal/production-config-required)`, with `:route :dedicated-meta-self-heal` and `:before-ration-spend? true`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.ledgerUnreadable",
    "inductive": "RouteState",
    "name": "ledgerUnreadable",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 261,
-   "text": "`:ledger-unreadable`"
+   "line": 428,
+   "text": "/-- `:ledger-unreadable`. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P production-readiness :meta-self-heal/ledger-unreadable)`. Diagnosis has already recorded the same fact as `(P prepare-diagnosis {:status :unavailable :reason :meta-self-heal/diagnosis-ledger-unavailable})`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.routeEnacted",
    "inductive": "RouteState",
    "name": "routeEnacted",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 263,
-   "text": ""
+   "line": 434,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): no producing site. `(P route!)` enters the checkpoint loop when `(P diagnosis-transaction-binding {:status :valid})` and `(P acceptance-transaction-binding {:status :valid})` both hold; the entry has no status literal. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.routeRefused",
    "inductive": "RouteState",
    "name": "routeRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 264,
-   "text": "`:production-config-required` with route terms"
+   "line": 439,
+   "text": "/-- `:production-config-required` with route terms. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P route! :meta-self-heal/production-config-required)`, with `:absent-terms` from `:transaction-path`, `:repair-ports`, `:acceptance-run-port`, `:diagnosis-evidence`, `:acceptance-test`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.preparationRefused",
    "inductive": "RouteState",
    "name": "preparationRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 265,
-   "text": "`:preparation-refused`: `coordinator/prepare` returned no transaction"
+   "line": 442,
+   "text": "/-- `:preparation-refused`: `coordinator/prepare` returned no transaction. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P route! :meta-self-heal/preparation-refused)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.bindingRefused",
    "inductive": "RouteState",
    "name": "bindingRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 266,
-   "text": "`:diagnosis-transaction-mismatch` / `:acceptance-transaction-mismatch`"
+   "line": 449,
+   "text": "/-- `:diagnosis-transaction-mismatch` / `:acceptance-transaction-mismatch`. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P diagnosis-transaction-binding :meta-self-heal/diagnosis-transaction-mismatch)`, `(P acceptance-transaction-binding :meta-self-heal/acceptance-transaction-mismatch)`, and also `(P acceptance-transaction-binding :meta-self-heal/acceptance-transaction-unadmitted)`, which the trailing comment did not name; `(P route! (if-not (= :valid (:status binding))))` returns them. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.enacted",
    "inductive": "RouteState",
    "name": "enacted",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 267,
-   "text": ""
+   "line": 454,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P route! settle)` on the result of the `coordinate` call after the checkpoint loop, when that result is a closing: the status literals are those of `ClosingStatus`, `(C coordinate-queued-retry {:status :awaiting-retry})`, `(C coordinate {:status :discharged})` and the computed `(C coordinate {:status (get-in reopened [:entry :state])})`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.coordinationHeld",
    "inductive": "RouteState",
    "name": "coordinationHeld",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 268,
-   "text": "rev 5: a port answered and the transaction waits (`:held`)"
+   "line": 458,
+   "text": "/-- Rev 5: a port answered and the transaction waits (`:held`). Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(C held! {:status :held})`, returned through `(P route! settle)`. The reasons are `HeldReason`'s. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.coordinationRefused",
    "inductive": "RouteState",
    "name": "coordinationRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 269,
-   "text": "rev 5: `coordinator/coordinate` refused, with or without a ledger"
+   "line": 462,
+   "text": "/-- Rev 5: `coordinator/coordinate` refused, with or without a ledger. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): a `(C coordinate)` refusal returned through `(P route! settle)`. The reasons are `CoordinatorRefusal`'s. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.persistRefused",
    "inductive": "RouteState",
    "name": "persistRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 270,
-   "text": "rev 5: a `:checkpoint` result's ledger or transaction write failed"
+   "line": 465,
+   "text": "/-- Rev 5: a `:checkpoint` result's ledger or transaction write failed. Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): `(P route! :meta-self-heal/checkpoint-persist-failed)`. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.ordinarySelection",
    "inductive": "RouteState",
    "name": "ordinarySelection",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 271,
-   "text": ""
+   "line": 469,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): no status literal. `(R run-opportunity! run-ordinary-opportunity!)`, from two branches: `retry` after `retryReady`, and `(or routed ...)` when `route!` returned nil. -/"
   },
   {
    "id": "lean:SelfHealRoute.RouteState.terminalRecord",
    "inductive": "RouteState",
    "name": "terminalRecord",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 272,
-   "text": ""
+   "line": 472,
+   "text": "/-- Rev 12 anchor (futon2 `3fe0a2b6d`, futon3c `c16a86952`): no producing site in the files read (P, C, R, A, S, T). It is the click's record, written after `run-opportunity!` returns. -/"
   },
   {
    "id": "lean:SelfHealRoute.ProposalDefect.transport",
    "inductive": "ProposalDefect",
    "name": "transport",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 530,
+   "line": 730,
    "text": "/-- Transport or seat failure on the author's proposal invoke: `:producer-invoke-failed` (A:233) or `:producer-seat-unavailable` (A:227), carried as `:acceptance-reason` of `:acceptance-unavailable` (P:460). Unwitnessed at proposal on disk. -/"
   },
   {
@@ -2604,7 +2852,7 @@
    "inductive": "ProposalDefect",
    "name": "unreadableAnswer",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 534,
+   "line": 734,
    "text": "/-- The author answered, but not with one EDN map: `:producer-response-malformed` (A:237) as `:acceptance-reason` of `:acceptance-unavailable` (P:460). Witness: click `8df4e8d2`. -/"
   },
   {
@@ -2612,7 +2860,7 @@
    "inductive": "ProposalDefect",
    "name": "authorRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 537,
+   "line": 737,
    "text": "/-- The author's own typed refusal: `:acceptance-status :refused` under `:acceptance-unavailable` (P:460). Witness: click `fca1c921`. -/"
   },
   {
@@ -2620,7 +2868,7 @@
    "inductive": "ProposalDefect",
    "name": "prose",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 540,
+   "line": 740,
    "text": "/-- `:acceptance-prose-or-malformed` (P:470): the answer is not a concrete test. Unwitnessed. -/"
   },
   {
@@ -2628,7 +2876,7 @@
    "inductive": "ProposalDefect",
    "name": "sourceMismatch",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 543,
+   "line": 743,
    "text": "/-- `:acceptance-proposal-source-mismatch` (P:467): the test source's namespace or path disagree. Unwitnessed. -/"
   },
   {
@@ -2636,7 +2884,7 @@
    "inductive": "ProposalDefect",
    "name": "unresolvableFunction",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 546,
+   "line": 746,
    "text": "/-- `:acceptance-request-function-unresolvable` (P:526): a function the diagnosis names does not resolve in the serving JVM. Unwitnessed. -/"
   },
   {
@@ -2644,7 +2892,7 @@
    "inductive": "AdmissionDefect",
    "name": "runRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 553,
+   "line": 753,
    "text": "/-- `:acceptance-run-refused` (P:618): the bounded run did not return a valid `:ran` result (it covers A:359, A:390-398 and the un-namespaced A:393). Unwitnessed. -/"
   },
   {
@@ -2652,7 +2900,7 @@
    "inductive": "AdmissionDefect",
    "name": "passesBeforeRepair",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 556,
+   "line": 756,
    "text": "/-- `:acceptance-test-passes-before-repair` (P:622, F16): refused before any reviewer invoke. Unwitnessed on a click (off-click replay 5 only). -/"
   },
   {
@@ -2660,7 +2908,7 @@
    "inductive": "AdmissionDefect",
    "name": "noReviewerAnswer",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 562,
+   "line": 762,
    "text": "/-- `:acceptance-review-refused` (P:628) with `:review-status :failed`: there is no reviewer answer that could be read. That covers a transport or seat failure (A:227, A:233), a malformed answer (A:237), or the review port throwing (P:613); widened in rev 8 to match the checker and refusal-totality #48b (M8R). Witnesses: clicks `36b47627`, `fdc08aea`, `78180753` (429). -/"
   },
   {
@@ -2668,7 +2916,7 @@
    "inductive": "AdmissionDefect",
    "name": "reviewerRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 567,
+   "line": 767,
    "text": "/-- `:acceptance-review-refused` (P:628) with `:review-status :refused`: the reviewer answered on the merits. Witnesses: click `1a6de51f` (`:acceptance-test-did-not-fail-for-injury-reason`) and click `6cdf2a7c` (reason not recorded, under the pre-run contract). -/"
   },
   {
@@ -2676,7 +2924,7 @@
    "inductive": "BoundaryDefect",
    "name": "proposal",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 572,
+   "line": 772,
    "text": ""
   },
   {
@@ -2684,7 +2932,7 @@
    "inductive": "BoundaryDefect",
    "name": "admission",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 573,
+   "line": 773,
    "text": ""
   },
   {
@@ -2692,7 +2940,7 @@
    "inductive": "RunOutcome",
    "name": "passed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 589,
+   "line": 789,
    "text": ""
   },
   {
@@ -2700,7 +2948,7 @@
    "inductive": "RunOutcome",
    "name": "failed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 589,
+   "line": 789,
    "text": ""
   },
   {
@@ -2708,7 +2956,7 @@
    "inductive": "RunOutcome",
    "name": "errored",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 589,
+   "line": 789,
    "text": ""
   },
   {
@@ -2716,7 +2964,7 @@
    "inductive": "CoordinationPhase",
    "name": "claim",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2724,7 +2972,7 @@
    "inductive": "CoordinationPhase",
    "name": "author",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2732,7 +2980,7 @@
    "inductive": "CoordinationPhase",
    "name": "review",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2740,7 +2988,7 @@
    "inductive": "CoordinationPhase",
    "name": "enact",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2748,7 +2996,7 @@
    "inductive": "CoordinationPhase",
    "name": "retry",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2756,7 +3004,7 @@
    "inductive": "CoordinationPhase",
    "name": "final",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 711,
+   "line": 911,
    "text": ""
   },
   {
@@ -2764,7 +3012,7 @@
    "inductive": "HeldReason",
    "name": "authorFailed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 717,
+   "line": 917,
    "text": "/-- `:author-failed` (C:268). -/"
   },
   {
@@ -2772,7 +3020,7 @@
    "inductive": "HeldReason",
    "name": "reviewRejected",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 719,
+   "line": 919,
    "text": "/-- `:review-rejected` (C:290). -/"
   },
   {
@@ -2780,7 +3028,7 @@
    "inductive": "HeldReason",
    "name": "enactFailed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 721,
+   "line": 921,
    "text": "/-- `:enact-failed` (C:313). -/"
   },
   {
@@ -2788,7 +3036,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "inputRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 729,
+   "line": 929,
    "text": "/-- `:coordinator/input-refused` (C:237); no ledger. -/"
   },
   {
@@ -2796,7 +3044,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "resumeStateRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 731,
+   "line": 931,
    "text": "/-- `:coordinator/resume-state-refused` (C:257); no ledger. -/"
   },
   {
@@ -2804,7 +3052,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "portReceiptRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 733,
+   "line": 933,
    "text": "/-- `:coordinator/port-receipt-refused` (C:188); carries `:phase`, no ledger. -/"
   },
   {
@@ -2812,7 +3060,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "portThrew",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 735,
+   "line": 935,
    "text": "/-- `:coordinator/port-threw` (C:194); carries `:phase`, no ledger. -/"
   },
   {
@@ -2820,7 +3068,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "authorPayloadRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 737,
+   "line": 937,
    "text": "/-- `:coordinator/author-payload-refused` (C:272); carries a ledger. -/"
   },
   {
@@ -2828,7 +3076,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "reviewPatchSubstitution",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 739,
+   "line": 939,
    "text": "/-- `:coordinator/review-patch-substitution` (C:292); carries a ledger. -/"
   },
   {
@@ -2836,7 +3084,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "enactPayloadRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 741,
+   "line": 941,
    "text": "/-- `:coordinator/enact-payload-refused` (C:318); carries a ledger. -/"
   },
   {
@@ -2844,7 +3092,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "retryAttributionRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 743,
+   "line": 943,
    "text": "/-- `:coordinator/retry-attribution-refused` (C:345); carries a ledger. -/"
   },
   {
@@ -2852,7 +3100,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "ledgerTransitionRefused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 745,
+   "line": 945,
    "text": "/-- `:coordinator/ledger-transition-refused` (C:201); carries the ledger it refused. -/"
   },
   {
@@ -2860,7 +3108,7 @@
    "inductive": "CoordinatorRefusal",
    "name": "malformed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 747,
+   "line": 947,
    "text": "/-- `:coordinator/malformed` (C:379, C:381); no ledger. -/"
   },
   {
@@ -2868,7 +3116,7 @@
    "inductive": "PersistWrite",
    "name": "ledgerWrite",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 753,
+   "line": 953,
    "text": ""
   },
   {
@@ -2876,7 +3124,7 @@
    "inductive": "PersistWrite",
    "name": "transactionWrite",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 753,
+   "line": 953,
    "text": ""
   },
   {
@@ -2884,7 +3132,7 @@
    "inductive": "ClosingStatus",
    "name": "discharged",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 759,
+   "line": 959,
    "text": "/-- `:discharged` (C:357, C:364): the retry succeeded. -/"
   },
   {
@@ -2892,7 +3140,7 @@
    "inductive": "ClosingStatus",
    "name": "reopened",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 761,
+   "line": 961,
    "text": "/-- `:reopened` (C:375, via `ledger/append-retry-result`): the retry did not discharge. -/"
   },
   {
@@ -2900,7 +3148,7 @@
    "inductive": "ClosingStatus",
    "name": "abandoned",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 763,
+   "line": 963,
    "text": "/-- `:abandoned` (C:375): the attempt after this one would exceed the budget. -/"
   },
   {
@@ -2908,7 +3156,7 @@
    "inductive": "ClosingStatus",
    "name": "awaitingRetry",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 767,
+   "line": 967,
    "text": "/-- `:awaiting-retry` (C:349): the retry port queued the retry click. The production retry port only persists and enqueues, so this is the closing status a production click is expected to reach. The M4a shape does not name it (finding). -/"
   },
   {
@@ -2916,7 +3164,7 @@
    "inductive": "ClosingStatus",
    "name": "retryInconclusive",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 771,
+   "line": 971,
    "text": "/-- Rev 8: the retry click ran but did not test the repair (`RetryClickOutcome.closing`). The injury is neither discharged nor reopened, and the transaction stays `:enacted` and active. -/"
   },
   {
@@ -2924,7 +3172,7 @@
    "inductive": "CoordinationOutcome",
    "name": "held",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 776,
+   "line": 976,
    "text": ""
   },
   {
@@ -2932,7 +3180,7 @@
    "inductive": "CoordinationOutcome",
    "name": "refused",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 777,
+   "line": 977,
    "text": ""
   },
   {
@@ -2940,7 +3188,7 @@
    "inductive": "CoordinationOutcome",
    "name": "persistFailed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 778,
+   "line": 978,
    "text": ""
   },
   {
@@ -2948,7 +3196,7 @@
    "inductive": "CoordinationOutcome",
    "name": "closed",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 779,
+   "line": 979,
    "text": ""
   },
   {
@@ -2956,7 +3204,7 @@
    "inductive": "RetryField",
    "name": "injuryId",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 906,
+   "line": 1106,
    "text": ""
   },
   {
@@ -2964,7 +3212,7 @@
    "inductive": "RetryField",
    "name": "repairId",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 906,
+   "line": 1106,
    "text": ""
   },
   {
@@ -2972,7 +3220,7 @@
    "inductive": "RetryField",
    "name": "retryClick",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 906,
+   "line": 1106,
    "text": ""
   },
   {
@@ -2980,7 +3228,7 @@
    "inductive": "RetryField",
    "name": "patchSha",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 906,
+   "line": 1106,
    "text": ""
   },
   {
@@ -2988,7 +3236,7 @@
    "inductive": "RetryAttributionDefect",
    "name": "ledgerNotLoaded",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 913,
+   "line": 1113,
    "text": "/-- The ledger did not load (`(= :loaded (:status durable))` fails). -/"
   },
   {
@@ -2996,7 +3244,7 @@
    "inductive": "RetryAttributionDefect",
    "name": "noEnactedEntry",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 915,
+   "line": 1115,
    "text": "/-- No `:enacted` entry in the ledger. -/"
   },
   {
@@ -3004,7 +3252,7 @@
    "inductive": "RetryAttributionDefect",
    "name": "noAuthoredEntry",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 917,
+   "line": 1117,
    "text": "/-- No `:authored` entry for the enacted injury and repair. -/"
   },
   {
@@ -3012,7 +3260,7 @@
    "inductive": "RetryAttributionDefect",
    "name": "fieldDiffers",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 919,
+   "line": 1119,
    "text": "/-- One field of `:supplied` differs from `:expected`. -/"
   },
   {
@@ -3020,7 +3268,7 @@
    "inductive": "RetryClickOutcome",
    "name": "successfulTaskOutcome",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 956,
+   "line": 1156,
    "text": "/-- `:successful-task-outcome` (T:126-128): no failure kind, and an outcome in `successful-outcomes` (T:15). The only outcome that tests the repair and passes. -/"
   },
   {
@@ -3028,7 +3276,7 @@
    "inductive": "RetryClickOutcome",
    "name": "sameInjury",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 959,
+   "line": 1159,
    "text": "/-- `:injury` with the enacted entry's injury id: `append-retry-result` (T:244, L:299-317). The retry failed for the same cause. -/"
   },
   {
@@ -3036,15 +3284,23 @@
    "inductive": "RetryClickOutcome",
    "name": "otherInjury",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 963,
-   "text": "/-- `:injury` with a different injury id: `latest-injury` is nil, so `integrate` opens a new injury (T:229-239) and does not touch the enacted one. This constructor is not in the packet; it is added here (finding). -/"
+   "line": 1168,
+   "text": "/-- `:injury` with a different injury id, and the record is ingested. Cited at futon2 `b5dd9269c` (M10b-4). `integrate` binds `other-injury-retry?` (T:247-251). If the different id is unknown, it opens a new injury (T:253-266). If it is active, it appends a `:repeated-active-injury` observation (T:288-297). Either way it then appends the attributed `:retry-inconclusive` observation for the enacted entry through `append-other-injury-retry-observation` (T:185-196). The enacted entry's state is untouched. Added in rev 8 (finding) and widened by the rev 8 review. Rev 11 split off the refused arms as `otherInjuryRefused`. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
+   "inductive": "RetryClickOutcome",
+   "name": "otherInjuryRefused",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1178,
+   "text": "/-- Rev 11: `:injury` with a different injury id, and the record is refused, not ingested (at `b5dd9269c`). This happens when the different id is itself `:enacted` and this click is not its retry click (`:injury/retry-click-mismatch`, T:268-286), or when the different id is terminal (`:injury/terminal-history-requires-new-transaction`, T:299-300). `integrate` returns `{:status :refused}` with no ledger, so no observation is written and the pin stays un-ingested. It is a separate constructor, not an unobserved `otherInjury`, because the coordinator receives a refusal rather than an ingested record without an observation. Under the law it is still inconclusive for the enacted injury. -/"
   },
   {
    "id": "lean:SelfHealRoute.RetryClickOutcome.ordinarySelectionAbstention",
    "inductive": "RetryClickOutcome",
    "name": "ordinarySelectionAbstention",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 965,
+   "line": 1180,
    "text": "/-- `:ordinary-selection-abstention` (T:82): an abstention. -/"
   },
   {
@@ -3052,7 +3308,7 @@
    "inductive": "RetryClickOutcome",
    "name": "evaluatedNoAction",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 967,
+   "line": 1182,
    "text": "/-- `:evaluated-no-action` (T:81, T:66-70): scored, and no action chosen. -/"
   },
   {
@@ -3060,7 +3316,7 @@
    "inductive": "RetryClickOutcome",
    "name": "partialFrontierContinuation",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 969,
+   "line": 1184,
    "text": "/-- `:partial-frontier-continuation` (T:80, T:71-76). -/"
   },
   {
@@ -3068,7 +3324,7 @@
    "inductive": "RetryClickOutcome",
    "name": "operatorCancelled",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 971,
+   "line": 1186,
    "text": "/-- `:operator-cancelled` (T:12). -/"
   },
   {
@@ -3076,7 +3332,7 @@
    "inductive": "RetryClickOutcome",
    "name": "declaredNoWork",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 973,
+   "line": 1188,
    "text": "/-- `:declared-no-work` (T:13). -/"
   },
   {
@@ -3084,7 +3340,7 @@
    "inductive": "RetryClickOutcome",
    "name": "diagnosticOnly",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 975,
+   "line": 1190,
    "text": "/-- `:diagnostic-only` (T:14). -/"
   },
   {
@@ -3092,8 +3348,72 @@
    "inductive": "RetryClickOutcome",
    "name": "absentTerminalFailure",
    "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
-   "line": 977,
+   "line": 1192,
    "text": "/-- `:absent-terminal-failure` (T:129-130): no failure kind and no outcome. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryClickOutcome.recordUnreadable",
+   "inductive": "RetryClickOutcome",
+   "name": "recordUnreadable",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1197,
+   "text": "/-- Rev 9: the retry click left no record that can be read. Then nothing reaches `integrate`, and the entry stays `:enacted`. Absence is evidence of neither success nor failure, so this is inconclusive (the 2026-09-24 rule that absence must not read as a value). -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.AbandonReason.attemptLimitExhausted",
+   "inductive": "AbandonReason",
+   "name": "attemptLimitExhausted",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1279,
+   "text": "/-- `:attempt-limit-exhausted` (L:314): the next authoring would exceed `:attempt-limit`. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.AbandonReason.retryBudgetSpent",
+   "inductive": "AbandonReason",
+   "name": "retryBudgetSpent",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1282,
+   "text": "/-- Rev 9 (new, M10b): the re-queue budget for inconclusive retries is spent. A re-queue authors nothing, so it does not count against `:attempt-limit`. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryNext.queued",
+   "inductive": "RetryNext",
+   "name": "queued",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1295,
+   "text": "/-- A fresh retry click is queued for the same enacted entry. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryNext.awaitingNothingQueued",
+   "inductive": "RetryNext",
+   "name": "awaitingNothingQueued",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1297,
+   "text": "/-- The transaction ends `:awaiting-retry`, and nothing is queued. -/"
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryNext.discharged",
+   "inductive": "RetryNext",
+   "name": "discharged",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1298,
+   "text": ""
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryNext.reopened",
+   "inductive": "RetryNext",
+   "name": "reopened",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1299,
+   "text": ""
+  },
+  {
+   "id": "lean:SelfHealRoute.RetryNext.abandoned",
+   "inductive": "RetryNext",
+   "name": "abandoned",
+   "file": "/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean",
+   "line": 1300,
+   "text": ""
   },
   {
    "id": "lean:SelfHealPrepare.Field.diagnosisEvidencePin",
@@ -3229,166 +3549,216 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.transactionPath",
-    "P:816:transaction-path"
+    "P:838:transaction-path"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 206
+    "lean-line": 272
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.repairPorts",
-    "P:817:repair-ports"
+    "P:839:repair-ports"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 206
+    "lean-line": 272
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.acceptanceRunPort",
-    "P:819:acceptance-run-port"
+    "P:841:acceptance-run-port"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 206
+    "lean-line": 272
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.diagnosisPort",
-    "P:822:diagnosis-port"
+    "P:844:diagnosis-port"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 206
+    "lean-line": 272
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.acceptanceProposalPort",
-    "P:825:acceptance-proposal-port"
+    "P:847:acceptance-proposal-port"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 207
+    "lean-line": 273
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ReadinessTerm.acceptanceReviewPort",
-    "P:828:acceptance-review-port"
+    "P:850:acceptance-review-port"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 207
+    "lean-line": 273
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteTerm.transactionPath",
-    "P:941:transaction-path"
+    "P:963:transaction-path"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 213
+    "lean-line": 279
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteTerm.repairPorts",
-    "P:942:repair-ports"
+    "P:964:repair-ports"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 213
+    "lean-line": 279
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteTerm.acceptanceRunPort",
-    "P:944:acceptance-run-port"
+    "P:966:acceptance-run-port"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 213
+    "lean-line": 279
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteTerm.diagnosisEvidence",
-    "P:945:diagnosis-evidence"
+    "P:967:diagnosis-evidence"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 213
+    "lean-line": 279
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteTerm.acceptanceTest",
-    "P:946:acceptance-test"
+    "P:968:acceptance-test"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 213
+    "lean-line": 279
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.noActiveInjury",
-    "P:793:no-active-injury"
+    "P:809:no-durable-injury-ledger",
+    "P:815:no-active-injury"
    ],
    "props": {
-    "basis": "name",
-    "lean-line": 230
+    "basis": "keyword",
+    "lean-line": 305
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.activeSetUnavailable",
-    "P:934:active-set-unavailable",
+    "P:802:diagnosis-active-set-unavailable",
+    "P:956:active-set-unavailable",
     "R:504:active-set-unavailable"
    ],
    "props": {
-    "basis": "name",
-    "lean-line": 234
+    "basis": "keyword",
+    "lean-line": 319
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.RouteState.retryReady",
-    "P:896:acceptance-transaction-mismatch"
+    "lean:SelfHealRoute.RouteState.retryClick",
+    "R:482:acceptance-retry-not-prepared"
    ],
    "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 244
+    "basis": "keyword",
+    "lean-line": 329
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.retryRefused",
-    "P:918:retry-attribution-refused"
+    "P:918:acceptance-transaction-mismatch"
+   ],
+   "props": {
+    "basis": "line-unconfirmed",
+    "lean-line": 340
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.retryRefused",
+    "P:940:retry-attribution-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 247
+    "lean-line": 340
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.diagnosisRefused",
+    "P:46:diagnosis-source-pin-mismatch",
+    "P:50:diagnosis-source-unreadable",
+    "P:53:diagnosis-source-unreadable",
+    "P:76:diagnosis-path-conflict",
+    "P:86:diagnosis-path-conflict",
+    "P:89:diagnosis-persist-failed",
+    "P:163:diagnosis-source-pin-unavailable",
+    "P:167:diagnosis-port-unavailable",
+    "P:187:diagnosis-port-returned-nil",
+    "P:191:diagnosis-port-malformed",
+    "P:195:diagnosis-unavailable",
+    "P:206:diagnosis-response-missing",
+    "P:212:diagnosis-production-functions-absent",
+    "P:278:diagnosis-production-functions-absent"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 359
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.acceptanceUnavailable",
+    "P:270:acceptance-diagnosis-unavailable",
+    "P:272:acceptance-diagnosis-unavailable",
+    "P:685:acceptance-diagnosis-unavailable"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 364
    }
   },
   {
@@ -3399,30 +3769,159 @@
    ],
    "props": {
     "basis": "name",
-    "lean-line": 252
+    "lean-line": 364
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.proposalRefused",
+    "P:212:diagnosis-production-functions-absent",
+    "P:249:acceptance-diagnosis-pin-unavailable",
+    "P:256:acceptance-diagnosis-pin-mismatch",
+    "P:266:acceptance-diagnosis-unreadable",
+    "P:268:acceptance-diagnosis-unreadable",
+    "P:270:acceptance-diagnosis-unavailable",
+    "P:272:acceptance-diagnosis-unavailable",
+    "P:274:acceptance-diagnosis-identity-mismatch",
+    "P:278:diagnosis-production-functions-absent",
+    "P:282:acceptance-diagnosis-unreadable",
+    "P:346:acceptance-path-conflict",
+    "P:355:acceptance-path-conflict",
+    "P:358:acceptance-persist-failed",
+    "P:450:acceptance-port-returned-nil",
+    "P:453:acceptance-port-malformed",
+    "P:460:acceptance-unavailable",
+    "P:467:acceptance-proposal-source-mismatch",
+    "P:470:acceptance-prose-or-malformed",
+    "P:518:acceptance-port-unavailable",
+    "P:526:acceptance-request-function-unresolvable",
+    "P:557:acceptance-proposal-source-mismatch",
+    "P:685:acceptance-diagnosis-unavailable"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 382
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.admissionRefused",
+    "P:467:acceptance-proposal-source-mismatch",
+    "P:536:acceptance-proposal-pin-unavailable",
+    "P:540:acceptance-proposal-pin-mismatch",
+    "P:547:acceptance-proposal-unreadable",
+    "P:549:acceptance-proposal-unreadable",
+    "P:551:acceptance-proposal-not-proposed",
+    "P:553:acceptance-proposal-review-state-invalid",
+    "P:555:acceptance-proposal-identity-mismatch",
+    "P:557:acceptance-proposal-source-mismatch",
+    "P:559:acceptance-proposal-not-concrete",
+    "P:562:acceptance-proposal-unreadable",
+    "P:580:acceptance-run-port-unavailable",
+    "P:583:acceptance-review-port-unavailable",
+    "P:618:acceptance-run-refused",
+    "P:622:acceptance-test-passes-before-repair"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 405
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.reviewRefused",
+    "P:626:acceptance-review-malformed",
+    "P:628:acceptance-review-refused",
+    "P:638:acceptance-review-identity-mismatch"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 414
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.readinessRefused",
+    "P:868:production-config-required",
+    "P:970:production-config-required"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 423
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.ledgerUnreadable",
-    "P:836:ledger-unreadable"
+    "P:812:diagnosis-ledger-unavailable",
+    "P:858:ledger-unreadable"
    ],
    "props": {
-    "basis": "name",
-    "lean-line": 261
+    "basis": "keyword",
+    "lean-line": 428
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.routeRefused",
+    "P:868:production-config-required",
+    "P:970:production-config-required"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 439
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.preparationRefused",
-    "C:163:preparation-refused",
-    "P:962:preparation-refused"
+    "C:163:preparation-refused"
    ],
    "props": {
     "basis": "name",
-    "lean-line": 265
+    "lean-line": 442
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.preparationRefused",
+    "P:984:preparation-refused"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 442
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.bindingRefused",
+    "P:892:diagnosis-transaction-mismatch",
+    "P:906:acceptance-transaction-unadmitted",
+    "P:918:acceptance-transaction-mismatch"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 449
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.RouteState.persistRefused",
+    "P:1038:checkpoint-persist-failed"
+   ],
+   "props": {
+    "basis": "keyword",
+    "lean-line": 465
    }
   },
   {
@@ -3435,7 +3934,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 530
+    "lean-line": 730
    }
   },
   {
@@ -3447,7 +3946,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 534
+    "lean-line": 734
    }
   },
   {
@@ -3458,7 +3957,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 537
+    "lean-line": 737
    }
   },
   {
@@ -3469,7 +3968,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 540
+    "lean-line": 740
    }
   },
   {
@@ -3480,7 +3979,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 543
+    "lean-line": 743
    }
   },
   {
@@ -3491,7 +3990,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 546
+    "lean-line": 746
    }
   },
   {
@@ -3504,7 +4003,7 @@
    ],
    "props": {
     "basis": "line-unconfirmed",
-    "lean-line": 553
+    "lean-line": 753
    }
   },
   {
@@ -3515,7 +4014,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 553
+    "lean-line": 753
    }
   },
   {
@@ -3526,7 +4025,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 556
+    "lean-line": 756
    }
   },
   {
@@ -3541,7 +4040,7 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 562
+    "lean-line": 762
    }
   },
   {
@@ -3552,195 +4051,197 @@
    ],
    "props": {
     "basis": "line",
-    "lean-line": 567
+    "lean-line": 767
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.HeldReason.authorFailed",
-    "C:268:author-failed"
+    "C:321:author-failed"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 717
+    "lean-line": 917
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.HeldReason.reviewRejected",
-    "C:290:review-rejected"
+    "C:290:input-refused"
+   ],
+   "props": {
+    "basis": "line-unconfirmed",
+    "lean-line": 919
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.HeldReason.reviewRejected",
+    "C:343:review-rejected"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 719
+    "lean-line": 919
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.HeldReason.enactFailed",
-    "C:313:enact-failed"
+    "C:366:enact-failed"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 721
+    "lean-line": 921
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.inputRefused",
-    "C:237:input-refused"
+    "C:290:input-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 729
+    "lean-line": 929
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.resumeStateRefused",
-    "C:257:resume-state-refused"
+    "C:310:resume-state-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 731
+    "lean-line": 931
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.portReceiptRefused",
-    "C:188:port-receipt-refused"
+    "C:193:port-receipt-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 733
+    "lean-line": 933
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.portThrew",
-    "C:194:port-threw"
+    "C:199:port-threw"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 735
+    "lean-line": 935
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.authorPayloadRefused",
-    "C:272:author-payload-refused"
+    "C:325:author-payload-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 737
+    "lean-line": 937
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.reviewPatchSubstitution",
-    "C:292:review-patch-substitution"
+    "C:345:review-patch-substitution"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 739
+    "lean-line": 939
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.enactPayloadRefused",
-    "C:318:enact-payload-refused"
+    "C:371:enact-payload-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 741
+    "lean-line": 941
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.retryAttributionRefused",
-    "C:345:retry-attribution-refused"
+    "C:245:retry-attribution-refused",
+    "C:398:retry-attribution-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 743
+    "lean-line": 943
+   }
+  },
+  {
+   "hx/type": "lean-code/realizes",
+   "hx/endpoints": [
+    "lean:SelfHealRoute.CoordinatorRefusal.retryAttributionRefused",
+    "C:345:review-patch-substitution"
+   ],
+   "props": {
+    "basis": "line-unconfirmed",
+    "lean-line": 943
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.ledgerTransitionRefused",
-    "C:201:ledger-transition-refused"
+    "C:206:ledger-transition-refused"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 745
+    "lean-line": 945
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.malformed",
-    "C:379:malformed",
-    "C:381:malformed"
+    "C:430:malformed",
+    "C:432:malformed"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 747
+    "lean-line": 947
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.discharged",
-    "C:364"
+    "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
+    "T:284:retry-click-mismatch",
+    "T:299:terminal-history-requires-new-transaction"
    ],
    "props": {
-    "basis": "line",
-    "lean-line": 759
+    "basis": "keyword",
+    "lean-line": 1178
    }
   },
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.reopened",
-    "C:375"
+    "lean:SelfHealRoute.AbandonReason.retryBudgetSpent",
+    "C:261:retry-budget-spent"
    ],
    "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 761
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.abandoned",
-    "C:375"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 763
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.awaitingRetry",
-    "C:349"
-   ],
-   "props": {
-    "basis": "line",
-    "lean-line": 767
+    "basis": "name",
+    "lean-line": 1282
    }
   },
   {

@@ -14,7 +14,8 @@
    ["C" "/home/joe/code/futon2" "src/futon2/aif/meta_repair_coordinator.clj" nil]
    ["R" "/home/joe/code/futon2" "src/futon2/aif/full_loop_runtime.clj" #{"run-opportunity!"}]
    ["A" "/home/joe/code/futon3c" "src/futon3c/wm/meta_self_heal_adapters.clj" nil]
-   ["S" "/home/joe/code/futon3c" "src/futon3c/wm/runner_service.clj" #{"meta-self-heal-preflight!"}]])
+   ["S" "/home/joe/code/futon3c" "src/futon3c/wm/runner_service.clj" #{"meta-self-heal-preflight!"}]
+   ["T" "/home/joe/code/futon2" "src/futon2/aif/meta_terminal_injury.clj" nil]])
 
 (defn head [repo] (str/trim (:out (clojure.java.shell/sh "git" "-C" repo "rev-parse" "--short=9" "HEAD"))))
 

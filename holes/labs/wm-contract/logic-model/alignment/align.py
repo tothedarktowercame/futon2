@@ -23,7 +23,7 @@ from pathlib import Path
 
 TAG_OF_FILE = {"meta_self_heal_production.clj": "P", "meta_repair_coordinator.clj": "C",
                "full_loop_runtime.clj": "R", "meta_self_heal_adapters.clj": "A",
-               "runner_service.clj": "S"}
+               "runner_service.clj": "S", "meta_terminal_injury.clj": "T"}
 
 def kebab(name):
   return re.sub(r"(?<!^)(?=[A-Z])", "-", name).lower()
@@ -62,7 +62,7 @@ def cited_keywords(text):
          {k.lstrip(":") for k in re.findall(r"(?<![\w`])(:[a-z][A-Za-z0-9./!?-]+)", text)}
 
 def cited_lines(text):
-  return {(t, int(n)) for t, n in re.findall(r"\b([PCRAS]):(\d+)", text)}
+  return {(t, int(n)) for t, n in re.findall(r"\b([PCRAST]):(\d+)", text)}
 
 # The code functions each Lean inductive models.  The name rule links a constructor
 # to a site only inside this scope, so `CoordinatorRefusal.malformed` cannot reach
