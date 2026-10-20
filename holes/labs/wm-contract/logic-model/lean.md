@@ -58,3 +58,5 @@ encoding is complete only with all three: the AIF module it rests on (cited, not
 the transcribed table, and a producer that certifies real records against the table at run
 time, writing into the record's requirements sidecar. L1 has the first two and record
 witnesses; its certificate producer is unit L2.
+Revision 5 review (mathlib4 `darktower` `91b819caec`, claude-5, 2026-10-20): `CoordinationPhase` gains `retry`. The record's `:phase` is the coordinator's own when it gives one, and `port-receipt-refused` / `port-threw` carry the port's phase; the retry port runs inside the final `coordinate` call, so a record can carry `:retry`. Code conforms on the other side: futon2 `3833e0706` passes `:final` for the post-loop call, which M4a had left nil.
+
