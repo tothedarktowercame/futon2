@@ -1207,11 +1207,27 @@
                                              [:injuries injury-id])]
                         (if (and (= :loaded (:status next-durable))
                                  (= :reopened (:state reopened)))
+                          ;; F32 wake fix (claude-5, 2026-10-20): the record of
+                          ;; earlier attempts is carried on every return from
+                          ;; the continuation. Before this, a click that ran
+                          ;; attempts 1 and 2 and then had attempt 2's retirement
+                          ;; or attempt 3's preparation refused reported only
+                          ;; the refusal. A refused retirement keeps its status
+                          ;; and reason in the entry; a retired one keeps the
+                          ;; path and attempt as before.
                           (let [retired (retire-stale-transaction!
-                                         transaction-path (:transaction result))]
+                                         transaction-path (:transaction result))
+                                continued (conj continued
+                                                {:attempt (:attempt result)
+                                                 :reason :author-failed
+                                                 :transaction-retired
+                                                 (if (= :refused (:status retired))
+                                                   (select-keys retired [:status :reason :path :attempt])
+                                                   (select-keys retired [:path :attempt]))})]
                             (if (= :refused (:status retired))
                               (assoc retired :route :dedicated-meta-self-heal
-                                     :ordinary-selection-called? false)
+                                     :ordinary-selection-called? false
+                                     :continued-from continued)
                               (let [prepared (coordinator/prepare
                                               next-durable
                                               (continued-work-order-options
@@ -1229,12 +1245,30 @@
                                                      next-acceptance)]
                                 (if-not (= :valid (:status next-binding))
                                   (assoc next-binding :route :dedicated-meta-self-heal
-                                         :ordinary-selection-called? false)
-                                  (recur next-durable next-transaction
-                                         (conj continued
-                                               {:attempt (:attempt result)
-                                                :reason :author-failed
-                                                :transaction-retired
-                                                (select-keys retired [:path :attempt])}))))))
+                                         :ordinary-selection-called? false
+                                         :continued-from continued)
+                                  (recur next-durable next-transaction continued)))))
+                          ;; F32 wake fix (claude-5, 2026-10-20): when both writes
+                          ;; persisted after an author failure but the loop does
+                          ;; not continue, the click says why. A reload that did
+                          ;; not load is a refusal on the result (the reopened
+                          ;; entry, if any, waits for a later click); an injury
+                          ;; whose latest entry is not :reopened is the ledger's
+                          ;; own stop, reported with that entry's state.
                           (cond-> result
-                            (seq continued) (assoc :continued-from continued))))))))))))))))
+                            (seq continued) (assoc :continued-from continued)
+                            (and next-durable (not= :loaded (:status next-durable)))
+                            (assoc :continuation
+                                   (refusal :meta-self-heal/reload-unavailable
+                                            {:durable (select-keys next-durable
+                                                                   [:status :reason :defects])}))
+                            (= :loaded (:status next-durable))
+                            (assoc :continuation
+                                   (if reopened
+                                     {:status :not-continued :reason :entry-not-reopened
+                                      :entry (select-keys reopened [:state :attempt :reason])}
+                                     {:status :not-continued :reason :injury-not-active
+                                      :entry (->> (get-in next-durable [:ledger :entries])
+                                                  (filter #(= injury-id (:injury-id %)))
+                                                  last
+                                                  (#(select-keys % [:state :attempt :reason])))})))))))))))))))))

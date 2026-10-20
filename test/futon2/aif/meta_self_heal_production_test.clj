@@ -1417,7 +1417,152 @@
     (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
     (is (= [:abandoned 3 :attempt-limit-exhausted]
            (-> (store/load-durable-ledger ledger-path) :ledger :entries last
-               ((juxt :state :attempt :reason)))))))
+               ((juxt :state :attempt :reason)))))
+    ;; F32 wake fix: the ledger's own stop is named on the result.
+    (is (= {:status :not-continued :reason :injury-not-active
+            :entry {:state :abandoned :attempt 3 :reason :attempt-limit-exhausted}}
+           (:continuation result)))))
+
+(deftest click-7-refused-retirement-at-attempt-two-keeps-the-record
+  ;; F32 wake fix (claude-5, 2026-10-20). Attempt 1 replays its failed author
+  ;; receipt and attempt 2 authors and fails; the ledger reopens attempt 3, but
+  ;; attempt 2's transaction cannot be retired because a directory already sits
+  ;; at its retired path (rename onto a directory fails). Before the fix the
+  ;; click reported only the refusal; the record of attempts 1 and 2 was lost.
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        failed-author-pin {:path "meta-self-heal/author/click-7-failed.edn"
+                           :sha256 (apply str (repeat 64 "f"))}
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        blocked-path (str transaction-path ".attempt-2.retired.edn")
+        _ (.mkdirs (java.io.File. blocked-path))
+        author-orders (atom [])
+        sealed (fn [request]
+                 (let [work-order (:work-order request)]
+                   (coordinator/seal-port-receipt
+                    {:phase (:phase request) :injury-id (:injury-id work-order)
+                     :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                     :predecessor-pin (:predecessor-pin request)
+                     :status :failed
+                     :payload {:reason :agency-response-not-one-edn-map}})))
+        ports {:author (fn [request] (swap! author-orders conj (:work-order request))
+                           (sealed request))
+               :review sealed :enact sealed :retry sealed}
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-repair-ports ports
+                 :meta-acceptance-run-fn (constantly {:status :ran :outcome :failed
+                                                      :exit 1 :summary "fixture"
+                                                      :run-pin failed-author-pin})
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                 :acceptance-test (:acceptance-test order)
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order)
+                 :target-worktree dir}
+        result (with-redefs-fn
+                 {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
+                  #'production/acceptance-transaction-binding (fn [& _] {:status :valid})}
+                 #(production/route! options))
+        retired-1 (str transaction-path ".attempt-1.retired.edn")]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/transaction-retire-failed (:reason result)))
+    (is (= 2 (:attempt result)))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (= [{:attempt 1 :reason :author-failed
+             :transaction-retired {:path retired-1 :attempt 1}}
+            {:attempt 2 :reason :author-failed
+             :transaction-retired {:status :refused
+                                   :reason :meta-self-heal/transaction-retire-failed
+                                   :path transaction-path :attempt 2}}]
+           (:continued-from result)))
+    (is (= [2] (mapv :attempt @author-orders)))
+    (is (.isFile (java.io.File. retired-1)))
+    (is (.isFile (java.io.File. transaction-path)))
+    (is (= 2 (-> (slurp transaction-path) edn/read-string :work-order :attempt)))
+    (is (= [:reopened 3]
+           (-> (store/load-durable-ledger ledger-path) :ledger :entries last
+               ((juxt :state :attempt)))))))
+
+(deftest click-7-unloaded-reload-after-author-failure-is-named-on-the-result
+  ;; F32 wake fix (claude-5, 2026-10-20). Both writes persist after attempt 1's
+  ;; author failure, but the ledger read back for the continuation does not
+  ;; load. The stub is the reload's answer, not the thing under test: the first
+  ;; read that sees a :reopened entry is answered :unreadable. Before the fix
+  ;; the click returned the plain held result and the reopened entry waited
+  ;; for a later click with nothing on the result saying so.
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        failed-author-pin {:path "meta-self-heal/author/click-7-failed.edn"
+                           :sha256 (apply str (repeat 64 "f"))}
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        author-orders (atom [])
+        sealed (fn [request]
+                 (let [work-order (:work-order request)]
+                   (coordinator/seal-port-receipt
+                    {:phase (:phase request) :injury-id (:injury-id work-order)
+                     :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                     :predecessor-pin (:predecessor-pin request)
+                     :status :failed
+                     :payload {:reason :agency-response-not-one-edn-map}})))
+        ports {:author (fn [request] (swap! author-orders conj (:work-order request))
+                           (sealed request))
+               :review sealed :enact sealed :retry sealed}
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-repair-ports ports
+                 :meta-acceptance-run-fn (constantly {:status :ran :outcome :failed
+                                                      :exit 1 :summary "fixture"
+                                                      :run-pin failed-author-pin})
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                 :acceptance-test (:acceptance-test order)
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order)
+                 :target-worktree dir}
+        real-load store/load-durable-ledger
+        unloaded-reads (atom 0)
+        result (with-redefs-fn
+                 {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
+                  #'production/acceptance-transaction-binding (fn [& _] {:status :valid})
+                  #'store/load-durable-ledger
+                  (fn [path]
+                    (let [durable (real-load path)]
+                      (if (some #(= :reopened (:state %))
+                                (get-in durable [:ledger :entries]))
+                        (do (swap! unloaded-reads inc)
+                            {:status :unreadable :reason :fixture-reload})
+                        durable)))}
+                 #(production/route! options))]
+    (is (= :held (:status result)))
+    (is (= :author-failed (:reason result)))
+    (is (= 1 (:attempt result)))
+    (is (= 1 @unloaded-reads))
+    (is (= {:status :refused :reason :meta-self-heal/reload-unavailable
+            :durable {:status :unreadable :reason :fixture-reload}}
+           (:continuation result)))
+    (is (not (contains? result :continued-from)))
+    (is (= [] @author-orders))
+    (is (.isFile (java.io.File. transaction-path)))
+    (is (= [:reopened 2]
+           (-> (real-load ledger-path) :ledger :entries last
+               ((juxt :state :attempt)))))))
 
 (deftest click-7-continuation-stops-at-the-first-non-author-hold
   (let [dir (root)
