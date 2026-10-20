@@ -511,7 +511,20 @@
              [:empty-pins (assoc correction :corrected-port-receipt-pins [])
               :reopen/correction-evidence]
              [:skipped-attempt (assoc correction :attempt 5)
-              :attempt/not-incremented]]]
+              :attempt/not-incremented]
+             ;; Review (claude-5, F35): shape-only pins let a correction raise
+             ;; the attempt budget by any number. A pin nobody refused, and
+             ;; the same refusal cited twice, are refused.
+             [:unknown-pins (assoc correction :corrected-port-receipt-pins
+                                   [{:path "meta-repair-port-receipts/fake/a.edn"
+                                     :sha256 (apply str (repeat 64 "a"))}
+                                    {:path "meta-repair-port-receipts/fake/b.edn"
+                                     :sha256 (apply str (repeat 64 "b"))}
+                                    {:path "meta-repair-port-receipts/fake/c.edn"
+                                     :sha256 (apply str (repeat 64 "c"))}])
+              :reopen/correction-pins-unknown]
+             [:repeated-pin (assoc correction :corrected-port-receipt-pins [pin9 pin9])
+              :reopen/correction-pins-unknown]]]
       (let [refused (ledger/append-transition history proposed)]
         (is (= :transition/invalid (:reason refused)) (name label))
         (is (some #{expected-defect} (:defects refused)) (name label))))))

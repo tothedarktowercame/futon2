@@ -88,6 +88,17 @@
   (into #{} (mapcat (juxt :author-session :reviewer-session))
         (filter #(= :claimed (:state %)) (transitions ledger))))
 
+(defn- refused-receipt-pins
+  "The port-receipt pins this injury's own author-port refusals recorded: the
+  :author-failed reopens and the abandonment. A corrected reopen (F35) may
+  cite only these; a pin nobody refused is not evidence that a refusal was
+  corrected, and each refusal returns one attempt, so repeats are refused."
+  [ledger injury-id]
+  (into #{} (keep :port-receipt-pin)
+        (filter #(or (and (= :reopened (:state %)) (= :author-failed (:reason %)))
+                     (= :abandoned (:state %)))
+                (injury-history ledger injury-id))))
+
 (defn- author-failed-reopen? [state previous-state entry]
   (and (= state :reopened)
        (= previous-state :claimed)
@@ -205,6 +216,13 @@
                          (seq (:corrected-port-receipt-pins entry))
                          (every? pin? (:corrected-port-receipt-pins entry))))))
       (conj :reopen/correction-evidence)
+      (and corrected-reopen?
+           (let [pins (:corrected-port-receipt-pins entry)
+                 known (refused-receipt-pins ledger (:injury-id entry))]
+             (not (and (sequential? pins) (seq pins)
+                       (apply distinct? pins)
+                       (every? known pins)))))
+      (conj :reopen/correction-pins-unknown)
       (and (= state :abandoned) (= previous-state :claimed)
            (not (pin? (:port-receipt-pin entry))))
       (conj :abandonment/author-failure-evidence)
