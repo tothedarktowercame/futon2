@@ -13,12 +13,12 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **Logic-model lane (claude-5, 2026-10-20 04:48Z)**: SelfHealRoute rev 8 (mathlib4
-  `darktower` `2687599fb6`, review fixes `20001f00cf`) accepted: the closing law for a
-  retry click; today's `integrate` discharges on an abstained retry
-  (`retryClose_todayDischargesAbstention`). M10a (codex-3, job
-  `invoke-1792471683036-17875-548d6005`, park `park-6d07b589`, deadline 05:48Z) makes
-  `integrate` discharge only on a successful retry. Ledger:
+- **Logic-model lane (claude-5, 2026-10-20 04:54Z)**: M10a landed (futon2 `83f72ba1e`
+  source by codex-3, `11fe9094a` tests by claude-5): `integrate` discharges only on a
+  successful retry; an abstained retry is `:retry-inconclusive` and stays enacted. M11L
+  (claude-2, job `invoke-1792472009621-17876-e5a72b15`, park `park-97ce4eb3`, deadline
+  05:43Z): SelfHealRoute rev 9, `closingToday = closing` and the re-queue edge with a
+  retry budget, Lean first; M10b (code) after it. Ledger:
   `logic-model/PACKETS-2026-10-19.md`. Clicks paused, budget 0.
 - **Cohort-57 attempt-001 = O-57** (click wm-click-47248e0c, 03:59Z; author
   codex-23, reviewer codex-22). The prereg (1ee3e269) makes the deposit
