@@ -67,7 +67,13 @@
 (defn- transitions [ledger] (filter transition? (:entries ledger)))
 (defn- injury-history [ledger injury-id]
   (filter #(= injury-id (:injury-id %)) (transitions ledger)))
-(defn- effective-attempt-limit [ledger injury-id]
+(defn effective-attempt-limit
+  "The attempt budget for one injury: the ledger's :attempt-limit plus the
+  number of refused receipts each corrected reopen (:reason
+  :port-refusal-corrected, F35) names. Public since F38 (2026-10-20): the
+  coordinator's work order carries this value, so a corrected injury's next
+  attempt is not refused at prepare as :attempt/exceeds-limit."
+  [ledger injury-id]
   (+ (:attempt-limit ledger)
      (transduce (comp (filter #(and (= :reopened (:state %))
                                     (= :port-refusal-corrected (:reason %))))

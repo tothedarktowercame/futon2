@@ -395,3 +395,33 @@
   (let [bad (assoc (options) :reviewer-session "author-session-1")]
     (is (= :coordinator/preparation-refused
            (:reason (prepared (opened-ledger) bad))))))
+
+(deftest preparation-carries-the-effective-attempt-limit-after-a-corrected-reopen
+  ;; F38 (claude-5, 2026-10-20). Live pin: the byte-identical ledger snapshot of
+  ;; injury d755c886 abandoned at attempt 3 (F35 fixture), reopened by the
+  ;; correction that names the two refused author receipts. Before F38 the
+  ;; work order copied the raw :attempt-limit 3 and verify-work-order refused
+  ;; attempt 4 as :attempt/exceeds-limit, so prepare could never run it.
+  (let [history (edn/read-string
+                 (slurp "test/futon2/aif/fixtures/meta-injury-ledger-2026-10-20-d755c886-abandoned.edn"))
+        injury "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+        repair "repair/239cf98836afc977cd589141c224ec3f4bca83dc"
+        by-ordinal (into {} (map (juxt :ordinal identity)) (:entries history))
+        corrected (append! history
+                           {:injury-id injury :repair-id repair
+                            :state :reopened :attempt 4
+                            :reason :port-refusal-corrected
+                            :correction-commit "f63a3da99bb19f4c2217e20ed6f47572e996ccbc"
+                            :corrected-port-receipt-pins [(:port-receipt-pin (by-ordinal 9))
+                                                          (:port-receipt-pin (by-ordinal 11))]})
+        result (prepared corrected (options 4))
+        order (:work-order result)]
+    (is (= :prepared (:status result)) (pr-str (select-keys result [:status :reason :defects])))
+    (is (= 4 (:attempt order)))
+    (is (= 5 (:attempt-limit order)) "limit 3 plus the two refused receipts")
+    (is (= :valid (:status (coordinator/verify-work-order order))))
+    ;; The check F38 satisfies is still live: the same order under the raw limit.
+    (let [raw (coordinator/seal-work-order (assoc (dissoc order :work-order-pin) :attempt-limit 3))
+          verdict (coordinator/verify-work-order raw)]
+      (is (= :refused (:status verdict)))
+      (is (some #{:attempt/exceeds-limit} (:defects verdict))))))

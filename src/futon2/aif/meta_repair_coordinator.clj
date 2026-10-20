@@ -151,7 +151,11 @@
                                       :repair-reviewer-session
                                       :target-repository :target-worktree])
                         {:injury-id injury-id :repair-id repair-id :attempt attempt
-                         :attempt-limit (:attempt-limit history)
+                         ;; F38 (2026-10-20): the effective limit, not the
+                         ;; ledger's raw :attempt-limit, so that a corrected
+                         ;; reopen's attempt (4 under a limit of 3 plus two
+                         ;; refused receipts) passes verify-work-order.
+                         :attempt-limit (ledger/effective-attempt-limit history injury-id)
                          :cause-record-pin (cause-pin history entry)
                          :ledger-pin (:ledger-pin history)
                          :ledger-source-pin (:source-pin durable)}))
