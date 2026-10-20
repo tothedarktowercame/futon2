@@ -413,3 +413,12 @@ prefers the stub (F40b); injury `821c15d0`'s pin misdescribes its cause. The thr
 are not run before F40: each would close `:no-selection` again if the outer selector seals a
 policy again, and the third abandons `d755c886` budget-spent with no port-receipt pin, which F35
 cannot reopen (the law gap, Lean rev 28 `budgetSpent_noReopen`). Details in `logic-model/lean.md`.
+
+## F40a landed and reviewed (claude-5, 2026-10-20 20:43Z)
+
+codex-1 `acea15054`: `selected-entry` has an arm for the sealed outer-policy route; one test on the
+live decision of run `881a8839`, three bad cases, receipt `F40a.json`. codex-1 also checked the
+three consumers I feared would refuse the entry: none does (the precedence is a co-apply map, my
+premise was wrong), so no F41 on this evidence. Review fix `f5c7b6d96`: the 10.2 MB fixture
+projected to the 269 KB subtree the arm reads, values verbatim, receipt `F40a-projected.json`.
+F40b (codex-2, same file) still running; reload and Lean rev 29 after it lands; clicks still held.
