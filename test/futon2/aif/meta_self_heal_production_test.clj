@@ -586,6 +586,64 @@
     (is (not (contains? plain-refused :acceptance-source-retry)))
     (is (not (contains? plain-refused :acceptance-source-read-error)))))
 
+(deftest acceptance-review-identifies-source-by-proposal-pin
+  ;; F24 (click wm-click-a8f4dea6, 2026-10-20): the independent reviewer
+  ;; accepted the test identity but omitted its 4 KB :source echo. The
+  ;; persisted proposal pin is the source authority; review identity is the
+  ;; test's id, command and expected result.
+  (let [answer (edn/read-string
+                (slurp "/home/joe/notes/wm-click-sources/click-6-a8f4dea6-reviewer-answer.edn"))
+        proposal-pin (:proposal-evidence-pin answer)
+        proposal-receipt (edn/read-string (slurp (:path proposal-pin)))
+        proposal (assoc (select-keys proposal-receipt
+                                     [:injury-id :source-record-pin
+                                      :diagnosis-evidence-pin :acceptance-test])
+                        :acceptance-evidence-pin proposal-pin)
+        run-result {:status :ran :outcome :failed :exit 1
+                    :summary "4 failures, 1 error"
+                    :run-pin {:path "test://click-6-before-repair"
+                              :sha256 (apply str (repeat 64 "6"))}}
+        invoke (fn [sub response]
+                 (production/admit-acceptance!
+                  {:meta-acceptance-root (str (root) "/" sub)
+                   :meta-acceptance-run-fn (constantly run-result)
+                   :meta-acceptance-review-fn (constantly response)}
+                  proposal))
+        accepted (invoke "accepted" answer)
+        changed-source (invoke "changed-source"
+                               (assoc-in answer [:acceptance-test :source]
+                                         {:namespace "reviewer.echo"
+                                          :path "test/reviewer_echo.clj"
+                                          :text "(ns reviewer.echo)"}))
+        changed-test (invoke "changed-test"
+                             (assoc-in answer [:acceptance-test :id] "other-test"))
+        changed-pin (invoke "changed-pin"
+                            (assoc answer :proposal-evidence-pin
+                                   (assoc proposal-pin :sha256
+                                          (apply str (repeat 64 "0")))))
+        refused (invoke "refused" {:status :refused
+                                    :reason {:kind :not-the-right-test}})]
+    (is (= :accepted (:status accepted))
+        "before F24 the saved reviewer answer refused because it omitted :source")
+    (is (some? (:acceptance-admission-pin accepted)))
+    (is (= :wm/meta-acceptance-admission-v1
+           (:schema (edn/read-string
+                     (slurp (get-in accepted [:acceptance-admission-pin :path])))))
+        "the accepted live-pin review writes an admission receipt")
+    (is (= :accepted (:status changed-source))
+        "the proposal pin, not a reviewer source echo, identifies source")
+    (is (= :meta-self-heal/acceptance-review-identity-mismatch
+           (:reason changed-test)))
+    (is (= [:acceptance-test]
+           (get-in changed-test [:review-identity :differs])))
+    (is (contains? (set (get-in changed-test [:review-identity :response-keys]))
+                   :acceptance-test))
+    (is (= :meta-self-heal/acceptance-review-identity-mismatch
+           (:reason changed-pin)))
+    (is (= [:proposal-evidence-pin]
+           (get-in changed-pin [:review-identity :differs])))
+    (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))))
+
 (deftest source-repaired-answer-carries-the-repair-through-admission
   ;; F23a (clicks wm-click-79710180 and wm-click-d26194dd, 2026-10-20): the
   ;; author's test had one surplus `)` closing a deftest; F23 removes that
