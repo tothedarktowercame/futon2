@@ -205,11 +205,13 @@ class RouteCheckTest(unittest.TestCase):
 
   def test_click_state_observation_gives_a_full_path(self):
     state = self.click_state(":completed", self.OBS_429_EDN)
-    canned = "VERDICT true\n" + "".join(f"EDGE {i} true\n" for i in range(6))
+    # M5: a placed prefix asks the kernel for PLACED too; the pin is extended, not weakened.
+    canned = "VERDICT true\n" + "".join(f"EDGE {i} true\n" for i in range(6)) + "PLACED true\n"
     ran, out = self.run_check(CLICK4, canned, state, self.C4_ID)
     self.assertIn(":path [" + " ".join(":" + s for s in self.FULL_429) + "]", out)
     self.assertIn(":gaps []", out)
     self.assertIn(":verdict :conforms,", out)
+    self.assertIn(":placement :placed", out)
     self.assertIn(":source [:wm/click-state :result :runtime-disposition :acceptance-observation]", out)
     pin = hashlib.sha256((self.acceptance_dir/f"click-{self.C4_ID}.edn").read_bytes()).hexdigest()
     self.assertIn(f':sha256 "{pin}"', out)
@@ -261,6 +263,77 @@ class RouteCheckTest(unittest.TestCase):
       f = Path(td)/"T.lean"; f.write_text(m.lean_source(self.FULL_429, False))
       ran = subprocess.run([m.lake_executable(), "env", "lean", str(f)], cwd=MATHLIB, text=True, capture_output=True)
     self.assertEqual(m.judge(self.FULL_429, False, ran.stdout, ran.returncode), {"verdict": "conforms"}, ran.stdout + ran.stderr)
+
+  # M5 (2026-10-20): the boundary defect beside the state, judged by the kernel.
+  OBS_8DF4_EDN = ('{:status :refused :reason :meta-self-heal/acceptance-unavailable :acceptance-status :failed'
+                  ' :acceptance-reason :meta-self-heal/producer-response-malformed :acceptance-failure nil :repair-claimed? false}')
+  EDGES6 = "".join(f"EDGE {i} true\n" for i in range(6))
+
+  def test_429_observation_projects_noReviewerAnswer_and_kernel_places_it(self):
+    ran, out = self.run_check(CLICK4, None, self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
+    self.assertIn(':boundary-observation {:state :admissionRefused, :defect ".admission .noReviewerAnswer", :run nil}', out)
+    self.assertIn(":placement :placed", out)
+    self.assertIn(":verdict :conforms,", out)
+    self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+
+  def test_unreadable_answer_projects_proposal_defect(self):
+    ran, out = self.run_check(CLICK4, None, self.click_state(":completed", self.OBS_8DF4_EDN), self.C4_ID)
+    self.assertIn(":path [:activeInjury :diagnosisPrepared :proposalRefused :readinessReady :routeRefused :terminalRecord]", out)
+    self.assertIn(':boundary-observation {:state :proposalRefused, :defect ".proposal .unreadableAnswer", :run nil}', out)
+    self.assertIn(":placement :placed", out)
+    self.assertIn(":verdict :conforms,", out)
+
+  def test_unknown_transport_reason_keeps_state_and_gaps_defect(self):
+    state = self.click_state(":completed", self.OBS_429_EDN.replace(":meta-self-heal/producer-invoke-failed", ":something-else"))
+    ran, out = self.run_check(CLICK4, "VERDICT true\n" + self.EDGES6, state, self.C4_ID)
+    self.assertIn(":admissionRefused :readinessReady", out)
+    self.assertIn(':status :defect-not-projectable', out)
+    self.assertIn(':review-status "failed", :review-reason "something-else"', out)
+    self.assertIn(":placement :not-evaluated", out)
+    self.assertNotIn(":boundary-observation", out)
+    self.assertIn(":verdict :conforms-suffix", out)
+    self.assertNotIn("PLACED", module().lean_source(self.FULL_429, False, None))
+
+  def test_misplaced_defect_is_a_violation_from_the_kernel(self):
+    # The bad case this packet is named for: the M2b misplacement (a transport failure at
+    # review placed at reviewRefused).  Before M5 only a Python rule caught it; now the
+    # kernel refuses the pair even though every edge of the path exists.
+    m = module()
+    path = ["activeInjury", "diagnosisPrepared", "admissionRun", "reviewRefused", "readinessReady", "routeRefused", "terminalRecord"]
+    src = m.lean_source(path, False, ("reviewRefused", ".admission .noReviewerAnswer", None))
+    self.assertIn("PLACED", src)
+    with tempfile.TemporaryDirectory() as td:
+      f = Path(td)/"T.lean"; f.write_text(src)
+      ran = subprocess.run([m.lake_executable(), "env", "lean", str(f)], cwd=MATHLIB, text=True, capture_output=True)
+    self.assertIn("PLACED false", ran.stdout, ran.stdout + ran.stderr)
+    self.assertEqual(m.judge(path, False, ran.stdout, ran.returncode, True),
+                     {"verdict": "violates", "reason": "placement", "placed": False})
+    # Hand-written kernel output: the same verdict, and an asked-for PLACED that never printed.
+    self.assertEqual(m.judge(path, False, "VERDICT true\n" + self.EDGES6 + "PLACED false\n", 0, True),
+                     {"verdict": "violates", "reason": "placement", "placed": False})
+    self.assertEqual(m.judge(path, False, "VERDICT true\n" + self.EDGES6, 0, True),
+                     {"verdict": "not-checked", "reason": "lean-printed-no-placement"})
+    # And through the script: the misplacement reaches the sidecar as a placement violation.
+    ran, out = self.run_check(CLICK4, "VERDICT true\n" + self.EDGES6 + "PLACED false\n",
+                              self.click_state(":completed", self.OBS_429_EDN), self.C4_ID)
+    self.assertIn(":verdict :violates", out); self.assertIn(':reason "placement"', out)
+    self.assertIn(":placement :violates-placement", out)
+    self.assertIn(':placement-violation {:state :admissionRefused, :defect ".admission .noReviewerAnswer"}', out)
+    self.assertEqual(ran.returncode, 1)
+
+  def test_run_refusals_project_admission_defects_and_run_outcome(self):
+    refused = ('{:status :refused :reason :meta-self-heal/acceptance-run-refused'
+               ' :acceptance-result {:status :errored} :repair-claimed? false}')
+    ran, out = self.run_check(CLICK4, "VERDICT true\n" + self.EDGES6 + "PLACED true\n",
+                              self.click_state(":completed", refused), self.C4_ID)
+    self.assertIn(":path [:activeInjury :diagnosisPrepared :admissionRun :admissionRefused :readinessReady :routeRefused :terminalRecord]", out)
+    self.assertIn(':boundary-observation {:state :admissionRefused, :defect ".admission .runRefused", :run nil}', out)
+    passes = ('{:status :refused :reason :meta-self-heal/acceptance-test-passes-before-repair'
+              ' :acceptance-result {:status :ran :outcome :passed :exit 0} :repair-claimed? false}')
+    ran, out = self.run_check(CLICK4, None, self.click_state(":completed", passes), self.C4_ID)
+    self.assertIn(':boundary-observation {:state :admissionRefused, :defect ".admission .passesBeforeRepair", :run ".passed"}', out)
+    self.assertIn(":placement :placed", out)
+    self.assertIn(":verdict :conforms,", out)
 
 if __name__ == "__main__":
   unittest.main()

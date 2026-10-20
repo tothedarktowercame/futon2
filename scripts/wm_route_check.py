@@ -43,6 +43,17 @@ ACCEPTANCE_PREFIX = [
   (lambda o: o.get("reason") == "meta-self-heal/acceptance-unavailable",
    ["activeInjury", "diagnosisPrepared", "proposalRefused"],
    "produce-acceptance! did not return :proposed (Lean click-4 witness)"),
+  # M5 (2026-10-20): the proposal and run refusals the prefix lacked.  Each has a
+  # ProposalDefect / AdmissionDefect constructor in SelfHealRoute rev 4 (L381-422).
+  (lambda o: o.get("reason") in ("meta-self-heal/acceptance-prose-or-malformed",
+                                 "meta-self-heal/acceptance-proposal-source-mismatch",
+                                 "meta-self-heal/acceptance-request-function-unresolvable"),
+   ["activeInjury", "diagnosisPrepared", "proposalRefused"],
+   "produce-acceptance! refused the proposal itself (P:467, P:470, P:526): proposalRefused"),
+  (lambda o: o.get("reason") in ("meta-self-heal/acceptance-run-refused",
+                                 "meta-self-heal/acceptance-test-passes-before-repair"),
+   ["activeInjury", "diagnosisPrepared", "admissionRun", "admissionRefused"],
+   "admit-acceptance! refused before any reviewer invoke (P:618, P:622): admissionRefused"),
 ]
 
 def lake_executable():
@@ -68,7 +79,7 @@ def read_edn(path, keys):
 # :review-detail never reach a sidecar.
 ACCEPTANCE_DIR = "/home/joe/code/futon3c/data/wm-click-acceptances"
 OBSERVATION_KEYS = ["status", "reason", "review-status", "review-reason",
-                    "acceptance-status", "acceptance-reason", "diagnosis-status"]
+                    "acceptance-status", "acceptance-reason", "diagnosis-status", "acceptance-result"]
 CLICK_STATE_SOURCE = [":wm/click-state", ":result", ":runtime-disposition", ":acceptance-observation"]
 # The states the table places after every acceptance observation (SelfHealRoute
 # `transitions`, "readiness after every acceptance observation").  A suffix that starts
@@ -104,6 +115,44 @@ def acceptance_prefix(state):
   rule = next((r for r in ACCEPTANCE_PREFIX if r[0](obs)), None)
   if rule is None: return None, {"position": 0, "status": "acceptance-observation-not-projectable"}, None
   return rule[1], None, {"position": 0, "source": CLICK_STATE_SOURCE, "note": rule[2]}
+
+# M5 (2026-10-20): the defect beside the state, from the observation's sub-reason fields
+# (meta_self_heal_production.clj P:460 :acceptance-status/:acceptance-reason, P:628
+# :review-status/:review-reason, at futon2 c0b9a794b; the producer's three transport
+# answers are futon3c meta_self_heal_adapters.clj L227-240).  This table is read
+# independently of ACCEPTANCE_PREFIX, never derived from it: the kernel's `placed`
+# (SelfHealRoute rev 4, BoundaryObservation.placed) is only a check if the state and
+# the defect are two readings.  An unknown sub-reason is a gap, never guessed; note the
+# asymmetry on purpose: the state rule for :review-status :failed takes any
+# :review-reason (M2b), the defect rule does not.
+TRANSPORT = ("meta-self-heal/producer-invoke-failed", "meta-self-heal/producer-seat-unavailable")
+NO_DEFECT_BY_CONSTRUCTION = ("meta-self-heal/acceptance-diagnosis-unavailable",)
+
+def boundary_observation(obs, prefix):
+  """(state, defect, run, gap): the boundary record for the kernel.  STATE is the last
+  state of the placed PREFIX; DEFECT a Lean term or None; RUN a RunOutcome term or None;
+  GAP set (and defect None) when the sub-reason is not in the rev 4 vocabulary."""
+  reason, ar, rr = obs.get("reason"), obs.get("acceptance-reason"), obs.get("review-reason")
+  state = prefix[-1]
+  defect = None
+  if reason == "meta-self-heal/acceptance-unavailable" and obs.get("acceptance-status") == "failed":
+    defect = ".proposal .transport" if ar in TRANSPORT else (".proposal .unreadableAnswer" if ar == "meta-self-heal/producer-response-malformed" else None)
+  elif reason == "meta-self-heal/acceptance-unavailable" and obs.get("acceptance-status") == "refused": defect = ".proposal .authorRefused"
+  elif reason == "meta-self-heal/acceptance-prose-or-malformed": defect = ".proposal .prose"
+  elif reason == "meta-self-heal/acceptance-proposal-source-mismatch": defect = ".proposal .sourceMismatch"
+  elif reason == "meta-self-heal/acceptance-request-function-unresolvable": defect = ".proposal .unresolvableFunction"
+  elif reason == "meta-self-heal/acceptance-run-refused": defect = ".admission .runRefused"
+  elif reason == "meta-self-heal/acceptance-test-passes-before-repair": defect = ".admission .passesBeforeRepair"
+  elif reason == "meta-self-heal/acceptance-review-refused" and obs.get("review-status") == "failed":
+    defect = ".admission .noReviewerAnswer" if rr in TRANSPORT + ("meta-self-heal/producer-response-malformed", "meta-self-heal/acceptance-review-threw") else None
+  elif reason == "meta-self-heal/acceptance-review-refused" and obs.get("review-status") == "refused": defect = ".admission .reviewerRefused"
+  runv = (obs.get("acceptance-result") or {})
+  run = "." + runv["outcome"] if runv.get("status") == "ran" and runv.get("outcome") in ("passed", "failed", "errored") else None
+  if defect is None and not (obs.get("status") == "accepted" or reason in NO_DEFECT_BY_CONSTRUCTION):
+    gap = {"position": 0, "status": "defect-not-projectable", "reason": reason}
+    gap.update({k: obs[k] for k in ("acceptance-status", "acceptance-reason", "review-status", "review-reason") if obs.get(k) is not None})
+    return state, None, run, gap
+  return state, defect, run, None
 
 def project(binding, record, click_state=None):
   """Return (path, gaps, notes, reason).  reason is set when no path is projectable.
@@ -165,20 +214,28 @@ def join_acceptance(projected, click_state):
   if path[0] in AFTER_OBSERVATION: return prefix + path, [], notes, None
   return path, [{"position": 0, "status": "readiness-not-recorded"}], notes, None
 
-def lean_source(path, suffix):
+def lean_source(path, suffix, boundary=None):
   lst = "[" + ", ".join(path) + "]"
   lines = ["import DarkTower.WarMachine.SelfHealRoute", "open DarkTower.WarMachine.SelfHealRoute RouteState",
            f'#eval IO.println s!"VERDICT {{{"conformsSuffix" if suffix else "conformsPath"} {lst}}}"']
   lines += [f'#eval IO.println s!"EDGE {i} {{edge {a} {b}}}"' for i, (a, b) in enumerate(zip(path, path[1:]))]
+  if boundary:
+    state, defect, run = boundary
+    lines += [f'#eval IO.println s!"PLACED {{({{ state := {state}, defect := {"some (" + defect + ")" if defect else "none"}, run := {"some " + run if run else "none"} }} : BoundaryObservation).placed}}"']
   return "\n".join(lines) + "\n"
 
-def judge(path, suffix, stdout, returncode):
+def judge(path, suffix, stdout, returncode, placement=False):
   if returncode != 0: return {"verdict": "not-checked", "reason": f"lean-exit-{returncode}"}
   found = re.findall(r"^VERDICT (true|false)$", stdout, re.M)
   if len(found) != 1: return {"verdict": "not-checked", "reason": "lean-printed-no-verdict"}
-  if found[0] == "true": return {"verdict": "conforms-suffix" if suffix else "conforms"}
+  placed = re.findall(r"^PLACED (true|false)$", stdout, re.M)
+  placed = (placed[0] == "true") if len(placed) == 1 else None
+  if found[0] == "true":
+    if placement and placed is None: return {"verdict": "not-checked", "reason": "lean-printed-no-placement"}
+    if placement and placed is False: return {"verdict": "violates", "reason": "placement", "placed": False}
+    return {"verdict": "conforms-suffix" if suffix else "conforms", **({"placed": placed} if placement else {})}
   edges = dict((int(i), v) for i, v in re.findall(r"^EDGE (\d+) (true|false)$", stdout, re.M))
-  out = {"verdict": "violates"}
+  out = {"verdict": "violates", **({"placed": placed} if placement and placed is not None else {})}
   missing = next((i for i in range(len(path) - 1) if edges.get(i) != "true"), None)
   if missing is not None and edges.get(missing) == "false": out["first-missing-edge"] = [path[missing], path[missing + 1]]
   elif missing is not None: out["reason"] = f"lean-printed-no-edge-{missing}"
@@ -208,17 +265,24 @@ def main(argv=None):
   record = read_edn(binding["run-record"], [":meta-self-heal/readiness", ":failure"]) if binding.get("run-record") else None
   click_state = None if record is not None else read_click_state(acceptance_file(a.acceptance_dir, binding.get("click/id")))
   path, gaps, notes, reason = project(binding, record, click_state)
+  boundary = None
+  obs = click_state.get("observation") if click_state else ((record or {}).get("meta-self-heal/readiness") or {}).get("acceptance-observation")
+  prefix = next((r[1] for r in ACCEPTANCE_PREFIX if r[0](obs)), None) if obs else None
+  if prefix and path and path[:len(prefix)] == prefix:
+    state, defect, run, boundary_gap = boundary_observation(obs, prefix)
+    if boundary_gap: gaps.append(boundary_gap)
+    else: boundary = (state, defect, run)
   suffix = any(g["position"] == 0 for g in gaps)
   if reason or not path:
     result = {"verdict": "not-checked", "reason": reason or "empty-path"}
   elif a.lean_output is not None:
-    result = judge(path, suffix, Path(a.lean_output).read_text(), 0)
+    result = judge(path, suffix, Path(a.lean_output).read_text(), 0, bool(boundary))
   else:
     with tempfile.TemporaryDirectory(prefix="wm-route-") as td:
-      lean = Path(td)/"RouteCheck.lean"; lean.write_text(lean_source(path, suffix))
+      lean = Path(td)/"RouteCheck.lean"; lean.write_text(lean_source(path, suffix, boundary))
       try: ran = subprocess.run([lake_executable(), "env", "lean", str(lean)], cwd=ml, text=True, capture_output=True)
       except Exception as e: ran = None; result = {"verdict": "not-checked", "reason": f"lean-unavailable: {type(e).__name__}"}
-      if ran is not None: result = judge(path, suffix, ran.stdout, ran.returncode)
+      if ran is not None: result = judge(path, suffix, ran.stdout, ran.returncode, bool(boundary))
   try: shas = {":mathlib-head": git(ml, "rev-parse", "HEAD"), ":self-heal-route": git(ml, "hash-object", LEAN_MODULE)}
   except Exception as e: shas = {":unavailable": type(e).__name__}
   out = {":click/id": binding.get("click/id"), ":path": [kw(s) for s in path],
@@ -230,6 +294,14 @@ def main(argv=None):
     out[":acceptance-record"] = {":path": click_state["path"], ":sha256": click_state["sha256"]}
   if "first-missing-edge" in result: out[":first-missing-edge"] = [kw(s) for s in result["first-missing-edge"]]
   if "reason" in result: out[":reason"] = result["reason"]
+  if boundary:
+    state, defect, run = boundary
+    out[":boundary-observation"] = {":state": kw(state), ":defect": defect, ":run": run}
+    placed = result.get("placed")
+    out[":placement"] = kw("placed" if placed is True else "violates-placement" if placed is False else "not-checked")
+    if placed is False: out[":placement-violation"] = {":state": kw(state), ":defect": defect}
+  else:
+    out[":placement"] = kw("not-evaluated")
   fd, tmp = tempfile.mkstemp(prefix=f".{out_path.name}.", suffix=".tmp", dir=out_path.parent); os.close(fd)
   Path(tmp).write_text(edn(out) + "\n"); os.replace(tmp, out_path)
   print(edn(out)); return 0 if result["verdict"] in ("conforms", "conforms-suffix") else 1
