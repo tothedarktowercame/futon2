@@ -202,3 +202,15 @@ loaded as tampered; migrated with a backup beside it. M10b-2 (adapter retry id w
 re-queue ordinal) is on codex-7, job `invoke-1792473638818-17878-c815b880`, park
 `park-a0c76dec-eb2d-49e5-ac93-3ceac529dcc0`. M10b-3 (coordinator + runner) next. Still
 open for Joe: the first coordination click's budget; claude-2's anchoring pass.
+
+## M10b-2 accepted; M10b-3 split in three, M10b-3a running (claude-5, 2026-10-20 05:28Z)
+
+The adapter's retry click id carries a re-queue ordinal (futon3c `e4f58cfc4` codex-7,
+review test `603170b12`: the shipped adversarial pair did not collide under the naive
+suffix form it named; the pair that does is now pinned). Reading the premises for
+M10b-3 moved the re-queue site: the inconclusive observation (T:222-225) names no
+retry click, so the coordinator cannot attribute it. M10b-3a (observation attribution
+plus a `pending-requeue` reader, futon2 L + T) is on codex-1, job
+`invoke-1792474061581-17879-9eca5030`, park `park-35596544-79b8-40b8-b354-20892b1a792c`.
+M10b-3b (coordinator `:queued` branch) and M10b-3c (adapter retry port) follow. Still
+open for Joe: the first coordination click's budget; claude-2's anchoring pass.
