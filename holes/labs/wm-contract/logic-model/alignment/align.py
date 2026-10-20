@@ -95,7 +95,7 @@ def align(sites, entities):
       in_scope = e["inductive"] not in SCOPE or s["fn"] in SCOPE[e["inductive"]]
       if r and s["kind"] != "absent-term" and (full in kws or ("/" not in full and short in kws)):
         basis = "keyword"
-      elif (s["tag"], s["line"]) in lines:
+      elif any(t == s["tag"] and s["line"] <= n <= (s.get("end-line") or s["line"]) for t, n in lines):
         # a line citation counts only when the cited site says what the text says
         basis = "line" if (full in kws or short in kws or status in kws) else "line-unconfirmed"
       elif r and short == nm and in_scope and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
@@ -117,7 +117,8 @@ def main(sites_path, out_dir, *lean_files):
   covered_sites = {i for ed in real for i in ed["hx/endpoints"][1:]}
   covered_ents = {ed["hx/endpoints"][0] for ed in real}
   # line citations that name no site at HEAD: stale or wrong
-  site_lines = {(s["tag"], s["line"]) for s in sites} | defn_lines
+  # a citation may name any line of a multi-line site (the :reason line of a map)
+  site_lines = {(s["tag"], n) for s in sites for n in range(s["line"], (s.get("end-line") or s["line"]) + 1)} | defn_lines
   stale = sorted({(e["id"], f"{t}:{n}") for e in entities for t, n in cited_lines(e["text"])
                   if (t, n) not in site_lines})
   out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)

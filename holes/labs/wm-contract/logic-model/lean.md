@@ -45,6 +45,8 @@ Rev 6 notes (mathlib4 `4128f17061`, claude-2, M7L): `activeSetUnavailable` is re
 
 Revision 7 (mathlib4 `darktower` `2720d17fb8`, claude-2, 2026-10-20, packet M9L): the retry click is a separate start (`retryClick` → `retryReady` / `retryRefused`), and `retryReady → ordinarySelection` is the second of exactly two doors into ordinary work (`ordinaryWork_twoDoors`), so `RouteState` has 28 states. The child click's terminal ingest closes the injury. Holes: an abstained retry discharges as a success, and a retry that writes no run record re-awaits on every later click.
 
+Revision 8 (mathlib4 `darktower` `2687599fb6`, claude-2, 2026-10-20, packet M10L): adds the closing law for a retry click, `RetryClickOutcome.closing`, under which only `successfulTaskOutcome` discharges, and `ClosingStatus.retryInconclusive` for a retry that did no work. `retryClose_todayDischargesAbstention` is the reason for M10a; `retryClose_disagreement` shows the law and today's code disagree on exactly the seven no-work outcomes.
+
 **AIF leg: typed none.** No module under `DarkTower/AIF` or `DarkTower/WarMachine` models
 injury, repair or route arbitration (claude-2, 2026-10-19). The earlier sentence "L1 has the
 first two" was wrong; L1 has the table and record witnesses.

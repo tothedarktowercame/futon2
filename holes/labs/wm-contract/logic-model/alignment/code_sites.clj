@@ -24,7 +24,7 @@
   (:out (clojure.java.shell/sh "git" "-C" repo "show" (str "HEAD:" file))))
 
 (defn forms [text]
-  (e/parse-string-all text {:all true :row-key :line :col-key :col
+  (e/parse-string-all text {:all true :row-key :line :col-key :col :end-row-key :end-line
                                     :auto-resolve name :readers (fn [_] identity)}))
 
 (defn sites-in [tag top-name form]
@@ -40,7 +40,7 @@
                   (and (seq? x) (= 'conj (first x)) (keyword? (second x)) (= 2 (count x)))
                   (conj! out {:tag tag :fn top-name :line line :kind :absent-term :reason (second x)})
                   (and (map? x) (contains? x :status))
-                  (conj! out (cond-> {:tag tag :fn top-name :line line :kind :status-map
+                  (conj! out (cond-> {:tag tag :fn top-name :line line :end-line (:end-line (meta x)) :kind :status-map
                                       :status (if (keyword? (:status x)) (:status x) :computed)}
                                (keyword? (:reason x)) (assoc :reason (:reason x)))))
                 (when (coll? x) (run! walk (if (map? x) (mapcat identity x) x)))))]
