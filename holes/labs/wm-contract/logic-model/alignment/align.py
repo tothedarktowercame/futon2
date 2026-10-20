@@ -64,10 +64,13 @@ def cited_keywords(text):
 def cited_lines(text):
   return {(t, int(n)) for t, n in re.findall(r"\b([PCRAST]):(\d+)", text)}
 
+def cited_callees(text):
+  return set(re.findall(r"(?<![:\w.-])([A-Za-z][A-Za-z0-9_.!?-]*/[A-Za-z][A-Za-z0-9_.!?-]*)", text))
+
 ANCHOR_FORM = re.compile(r"\((?:(not)\s+)?(P|C|R|A|S|T)\s+([a-z][^\s()]*)\s*([^()]*)\)")
 
 def anchor_forms(text):
-  """Return (tag, function, keywords, span, positive?) for simple anchors.
+  """Return (tag, function, keywords, callees, span, positive?) for simple anchors.
 
   These are deliberately documentation anchors, not a parser for Lean.  Their
   contents have no nested parens in the contract grammar, so retaining the
@@ -75,13 +78,14 @@ def anchor_forms(text):
   `(not P function ...)` is an exclusion: it consumes its keywords as prose
   without claiming a code endpoint.
   """
-  return [(m.group(2), m.group(3), cited_keywords(m.group(4)), m.span(), not m.group(1))
+  return [(m.group(2), m.group(3), cited_keywords(m.group(4)), cited_callees(m.group(4)),
+           m.span(), not m.group(1))
           for m in ANCHOR_FORM.finditer(text)]
 
 def outside_anchors(text, forms):
   """The text with every anchor form cut out: keywords here keep the old, unscoped reading."""
-  ends = [0, *(form[3][1] for form in forms)]
-  starts = [*(form[3][0] for form in forms), len(text)]
+  ends = [0, *(form[4][1] for form in forms)]
+  starts = [*(form[4][0] for form in forms), len(text)]
   return "".join(text[last:start] for last, start in zip(ends, starts))
 
 # The code functions each Lean inductive models.  The name rule links a constructor
@@ -107,15 +111,18 @@ def align(sites, entities):
     text = e["text"]
     forms = anchor_forms(text)
     outside_kws, lines, nm = cited_keywords(outside_anchors(text, forms)), cited_lines(text), kebab(e["name"])
-    negative_kws = set().union(*(form[2] for form in forms if not form[4])) if forms else set()
+    negative_kws = set().union(*(form[2] for form in forms if not form[5])) if forms else set()
     outside_kws -= negative_kws
     scoped_kws = {}
+    scoped_callees = {}
     anchored_fns = {}
-    positive_forms = [form for form in forms if form[4]]
-    for tag, fn, form_kws, _span, _positive in positive_forms:
+    positive_forms = [form for form in forms if form[5]]
+    for tag, fn, form_kws, form_callees, _span, _positive in positive_forms:
       anchored_fns.setdefault(tag, set()).add(fn)
       for kw in form_kws:
         scoped_kws.setdefault(kw, set()).add((tag, fn))
+      for callee in form_callees:
+        scoped_callees.setdefault(callee, set()).add((tag, fn))
     hits = {}
     for s in sites:
       r = s.get("reason") or ""
@@ -135,7 +142,9 @@ def align(sites, entities):
       unscoped = (any(k in outside_kws for k in cited)
                   and (not positive_forms or s["fn"] in anchored_fns.get(s["tag"], set())))
       anchor_name_scope = anchored_fns.get(s["tag"])
-      if r and s["kind"] != "absent-term" and (unscoped or (s["tag"], s["fn"]) in scoped):
+      if s["kind"] == "call" and (s["tag"], s["fn"]) in scoped_callees.get(r, set()):
+        basis = "call"
+      elif r and s["kind"] != "absent-term" and (unscoped or (s["tag"], s["fn"]) in scoped):
         basis = "keyword"
       elif any(t == s["tag"] and s["line"] <= n <= (s.get("end-line") or s["line"]) for t, n in lines):
         # a line citation counts only when the cited site says what the text says
@@ -182,7 +191,7 @@ def main(sites_path, out_dir, *lean_files):
   L += [f"| {k} | {frac(*v)} |" for k, v in sorted(by_kind.items())]
   L += ["", "| Lean inductive | constructors with a code endpoint |", "|---|---|"]
   L += [f"| {k} | {frac(*v)} |" for k, v in sorted(by_ind.items())]
-  L += ["", f"Edges by basis: " + ", ".join(f"{b} {sum(1 for e in edges if e['props']['basis']==b)}" for b in ("keyword", "line", "name", "line-unconfirmed")), ""]
+  L += ["", f"Edges by basis: " + ", ".join(f"{b} {sum(1 for e in edges if e['props']['basis']==b)}" for b in ("keyword", "call", "line", "name", "line-unconfirmed")), ""]
   L += ["## Uncovered code sites", "", "| site | function | kind | status | reason |", "|---|---|---|---|---|"]
   L += [f"| {s['id']} | `{s['fn']}` | {s['kind']} | {s.get('status') or ''} | {s.get('reason') or ''} |"
         for s in sites if s["id"] not in covered_sites]

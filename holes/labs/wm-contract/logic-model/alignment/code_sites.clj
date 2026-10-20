@@ -5,6 +5,7 @@
 ;;   a map literal with a :status key       kind :status-map (status :computed when not a literal)
 ;;   (conj :term), as in a cond-> of absent terms   kind :absent-term
 ;;   classifier outcome literals in meta-terminal-injury.clj kind :classification
+;;   qualified/local helper invocation              kind :call
 ;; plus one :defn row per top-level definition, an anchor for line citations only.
 ;; Usage: bb code_sites.clj  -> JSON array of sites on stdout.
 (require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.io :as io] '[clojure.string :as str])
@@ -78,10 +79,18 @@
 
     []))
 
-(defn sites-in [tag top-name form]
+(defn sites-in [tag top-name local-defns form]
   (let [out (transient [])]
     (letfn [(walk [x]
               (let [line (:line (meta x))]
+                ;; Calls are additive evidence: a local `(refusal ...)` is both
+                ;; a call and the existing refusal site below.
+                (when (and (seq? x) (symbol? (first x))
+                           (let [callee (first x)]
+                             (and (not= (str callee) top-name)
+                                  (or (namespace callee) (contains? local-defns (str callee))))) )
+                  (conj! out {:tag tag :fn top-name :line line
+                              :kind :call :reason (str (first x))}))
                 (cond
                   (and (seq? x) (#{'refusal 'held!} (first x)) (keyword? (second x)))
                   (conj! out {:tag tag :fn top-name :line line
@@ -102,13 +111,19 @@
   (when (and (seq? form) (symbol? (first form)) (str/starts-with? (name (first form)) "def"))
     (str (second form))))
 
+(defn defn-name [form]
+  (when (and (seq? form) (#{'defn 'defn-} (first form)))
+    (str (second form))))
+
 (let [all (for [[tag repo file only] sources
-                :let [sha (head repo)]
-                form (forms (committed repo file))
+                :let [sha (head repo)
+                      parsed (forms (committed repo file))
+                      local-defns (set (keep defn-name parsed))]
+                form parsed
                 :let [n (top-name form)]
                 :when (and n (or (nil? only) (only n)))
                 s (cons {:tag tag :fn n :line (:line (meta form)) :kind :defn}
-                        (sites-in tag n form))]
+                        (sites-in tag n local-defns form))]
             (assoc s :file file :sha sha
                    :id (str tag ":" (:line s) (when (:reason s) (str ":" (name (:reason s)))))))]
   (println (json/generate-string (vec (sort-by (juxt :tag :line) (distinct all))))))

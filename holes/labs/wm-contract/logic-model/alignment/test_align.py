@@ -8,9 +8,9 @@ _SPEC.loader.exec_module(_ALIGN)
 align = _ALIGN.align
 
 
-def site(fn, reason, line, tag="P"):
+def site(fn, reason, line, tag="P", kind="refusal"):
   return {"id": f"{tag}:{line}:{reason.split('/')[-1]}", "tag": tag, "fn": fn,
-          "line": line, "kind": "refusal", "reason": reason}
+          "line": line, "kind": kind, "reason": reason}
 
 
 def entity(name, text):
@@ -64,6 +64,18 @@ class AnchorFunctionScopingTest(unittest.TestCase):
              site("route!", "beta", 20)]
     edges = align(sites, [entity("readinessRefused", "(P production-readiness :alpha) :beta")])
     self.assertEqual(["P:10:alpha"], edge_ids(edges, "keyword"))
+
+  def test_anchor_callee_matches_only_its_anchored_function(self):
+    call = site("coordinate", "ledger/append-retry-result", 10, "C", "call")
+    edges = align([call], [entity("reopened", "(C coordinate ledger/append-retry-result)")])
+    self.assertEqual(["C:10:append-retry-result"], edge_ids(edges, "call"))
+    wrong_function = align([call], [entity("queued", "(C coordinate-queued-retry ledger/append-retry-result)")])
+    self.assertEqual([], wrong_function)
+
+  def test_bare_or_negative_callee_never_creates_a_call_edge(self):
+    call = site("coordinate", "ledger/append-retry-result", 10, "C", "call")
+    self.assertEqual([], align([call], [entity("bare", "ledger/append-retry-result")]))
+    self.assertEqual([], align([call], [entity("negative", "(not C coordinate ledger/append-retry-result)")]))
 
   def test_name_rule_is_scoped_to_anchored_function(self):
     sites = [site("prepare-acceptance", "acceptance-unavailable", 30),
