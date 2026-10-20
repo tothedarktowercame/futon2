@@ -422,3 +422,15 @@ three consumers I feared would refuse the entry: none does (the precedence is a 
 premise was wrong), so no F41 on this evidence. Review fix `f5c7b6d96`: the 10.2 MB fixture
 projected to the 269 KB subtree the arm reads, values verbatim, receipt `F40a-projected.json`.
 F40b (codex-2, same file) still running; reload and Lean rev 29 after it lands; clicks still held.
+
+## F40b landed from a silent job; Lean rev 29; click 13 to claude-2 (claude-5, 2026-10-20 21:52Z)
+
+codex-2's F40b job went silent at 20:41Z with the change committed on its branch and no receipt it
+could produce (its deftest lives in `full_loop_runner_test`, whose run refuses `:stale-runner-source`
+from a worktree). Reviewed and landed: `477a9cae6` (codex-2's change) and `2196fc575` (hash pin
+to the projected fixture), receipt `F40b-main.json` pass at that head. The runner is reloaded
+from main (21:43Z). Lean rev 29 `requeuedChild_F40` (`a7e1163c02`) predicts the re-queued child:
+an entry on the sealed route, the action on the record, re-queue not abandonment if it closes
+on another injury. Click 13 is with claude-2 (`invoke-1792532848981-136-730eb575`), one click.
+Lesson for packets: a test that must run from a worktree goes in its own namespace, as F40a's did.
+
