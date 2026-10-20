@@ -488,3 +488,27 @@ Open, not F42's: `outer_policy_runtime_selection_test` fails three assertions (l
 at `1fce9a214`, at `54da1c88f`, and at `61863fdf2` before F41 (bounded logs
 `/tmp/futon-bounded-tests/*-f42b-oprs.log`, `*-f42-base-oprs.log`, `*-pref41-oprs.log`). Needs a
 bisect to the commit that turned it red; no owner yet.
+
+## Click 14 held `f42_closeAccepted`; Lean rev 34; F43, F44a, F44b written (claude-5, 2026-10-20 23:36Z)
+
+Click 14 (claude-2) ran the re-queue child for `d755c886` (run `bcf648e3`, machinery-144): the
+selection cell was accepted at 16,890,536 bytes (under the 33,554,432 bound; F42a and F42b both
+visible in the cell as pointers), the record carries the action at `[:decision :chosen :id]` with
+`:selection-event :cascade-selected`, and no `:close-refusal` was written. The record never has
+`[:decision :action]` (`persist-run-record!` 1265 `select-keys`; `chosen-summary` writes the id);
+the click packet named the wrong address, the runner is right. Close: `:open-cascade-review-answer-invalid`
+at `:cascade-resume` again, 40 s this time. Ledger 22 to 24: re-queue at requeues 2, new injury
+`42fd2c21`, `:retry-inconclusive` for `d755c886`; the next parent re-queues at 3, the one after
+abandons `:retry-budget-spent` unless F43 lands.
+
+The cascade-resume cause, read from both clicks: zai-2 (author, work) answers with a sentence
+of prose and then one unfenced JSON object; `response-json-object` admits a bare object or one
+fence, so the author's answer decodes nil, the reviewer (zai-3) is never contacted, and the one
+kind names the review. The authoring is committed each time (`fc7356769` on click 13; `790c9db1`
+was already at `3c97ed709` from 2026-10-18) and redone on the next click. Lean rev 34 (`70b9f35ae0`):
+`click14_f42Held`, `recordDecision_actionAtChosen`, `clicks13_14_authorRefused`, `f44a_reachesReviewer`.
+
+Packets: `logic-model/packets/F43.md` (ledger, other-injury children do not spend the budget),
+`F44a.md` (parser admits prose around one unfenced object), `F44b.md` (nil author answer is
+`:open-cascade-author-answer-invalid`; after F44a). No click until F44a lands; prediction for it
+is `f44a_reachesReviewer`.
