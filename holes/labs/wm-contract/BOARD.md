@@ -423,7 +423,7 @@ premise was wrong), so no F41 on this evidence. Review fix `f5c7b6d96`: the 10.2
 projected to the 269 KB subtree the arm reads, values verbatim, receipt `F40a-projected.json`.
 F40b (codex-2, same file) still running; reload and Lean rev 29 after it lands; clicks still held.
 
-## F40b landed from a silent job; Lean rev 29; click 13 to claude-2 (claude-5, 2026-10-20 21:52Z)
+## F40b landed from a silent job; Lean rev 29; click 13 to claude-2 (claude-5, 2026-10-20 21:48Z)
 
 codex-2's F40b job went silent at 20:41Z with the change committed on its branch and no receipt it
 could produce (its deftest lives in `full_loop_runner_test`, whose run refuses `:stale-runner-source`
