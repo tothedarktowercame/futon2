@@ -338,6 +338,7 @@
     (is (= :retry-inconclusive (:observation-kind pending-open)))
     (is (= injury-a (:injury-id pending-open)))
     (is (= "wm-retry-r-1" (:retry-click pending-open)))
+    (is (= (:record-pin unknown-b) (:record-pin pending-open)))
     (is (= {:injury-id injury-a :repair-id "repair/async"
             :retry-click "wm-retry-r-1"}
            (:retry-of opened-b)))
@@ -350,6 +351,7 @@
     (is (= :retry-inconclusive (:observation-kind pending-repeat)))
     (is (= injury-a (:injury-id pending-repeat)))
     (is (= "wm-retry-r-1" (:retry-click pending-repeat)))
+    (is (= (:record-pin repeated-b) (:record-pin pending-repeat)))
     (is (= {:injury-id injury-a :repair-id "repair/async"
             :retry-click "wm-retry-r-1"}
            (:retry-of retained-b)))
