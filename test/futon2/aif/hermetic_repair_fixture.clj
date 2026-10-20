@@ -2,6 +2,7 @@
   "Suite fixture that makes production repair/trip stores unreachable."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is testing]]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
@@ -9,6 +10,7 @@
 
 (def production-repair-root repair/default-root)
 (def production-trip-root tripwire/default-trip-root)
+(def production-phase-log runner/default-phase-log)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -30,14 +32,18 @@
   [run-tests]
   (let [repair-before (file-set production-repair-root)
         trips-before (file-set production-trip-root)
+        phase-bytes-before (.length (io/file production-phase-log))
         repair-root (temp-root "wm-repair-suite-")
-        trip-root (temp-root "wm-trip-suite-")]
+        trip-root (temp-root "wm-trip-suite-")
+        phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
-                  tripwire/default-trip-root trip-root]
+                  tripwire/default-trip-root trip-root
+                  runner/default-phase-log phase-log]
       (run-tests))
     (testing "the suite cannot deposit production repair or trip artifacts"
       (is (= repair-before (file-set production-repair-root)))
-      (is (= trips-before (file-set production-trip-root))))))
+      (is (= trips-before (file-set production-trip-root)))
+      (is (= phase-bytes-before (.length (io/file production-phase-log)))))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,
