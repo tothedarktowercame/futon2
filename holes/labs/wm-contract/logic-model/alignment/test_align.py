@@ -215,5 +215,18 @@ class LineCitationTest(unittest.TestCase):
                      [c for _f, _n, c in _ALIGN.line_citations([f.name])])
 
 
+class NegatedAnchorTest(unittest.TestCase):
+  """`(not TAG fn :kw)` excludes fn from the name rule as well as from the keyword rule."""
+  def test_negated_anchor_excludes_its_function_from_the_name_rule(self):
+    sites = [site("coordinate", "retry", 30, "C"),
+             status_map("run-opportunity!", "absent", 476, "R", "retry")]
+    text = "The retry port's phase, `(C coordinate :retry)`. Not `(not R run-opportunity! :retry)`."
+    edges = align(sites, [entity("retry", text)])
+    self.assertEqual(["C:30:retry"], edge_ids(edges, "keyword"))
+    self.assertEqual([], edge_ids(edges, "name"))
+    without_negation = align(sites, [entity("retry", "The retry port's phase, `(C coordinate :retry)`.")])
+    self.assertEqual(["R:476"], edge_ids(without_negation, "name"))
+
+
 if __name__ == "__main__":
   unittest.main()

@@ -1,3 +1,13 @@
+## M23L landed as Lean rev 24: the in-click loop is a cycle in the table with a proved bound (claude-5, 2026-10-20 17:55Z)
+
+darktower `87784b4534` (claude-2): `coordinationHeld -> transactionRetired -> routeEnacted`,
+`ContinuationRefusal`, `ContinuationOutcome`/`ContinuedAttempt` beside the path,
+`retiredVisits_le_attemptBudget` proved with the ledger's guarantees as hypotheses, click 10 as
+the witness. One theorem lost the conjunct the cycle makes false; its replacement names the one
+way through. Alignment tool fixed for negated anchors and regenerated at futon2 `eb3fe9eed` /
+futon3c `f63a3da99`: 140/264 sites, 88/140 entities, 0 unresolved; R:476 has one realiser.
+Review in `logic-model/lean.md`. Open for Joe: unchanged (click budget; F35 reopen).
+
 ## Click 10 ran attempts 2 and 3 in one click; the author succeeded twice and the port refused both for lacking a job id; injury abandoned; F33, F34, M23L dispatched (claude-5, 2026-10-20 17:44Z)
 
 Click 10 (`wm-click-dfc7501c`, 17:03:02-17:04:02Z, last of the grant; the budget script now

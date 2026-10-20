@@ -143,6 +143,10 @@ def align(sites, entities):
     scoped_statuses = {}
     anchored_fns = {}
     positive_forms = [form for form in forms if form[5]]
+    # `(not TAG fn ...)` is an exclusion: a constructor whose text carries one does not
+    # reach that function by name either (rev 24 review: `CoordinationPhase.retry`
+    # with `(not R run-opportunity! :retry)` reached R's `:reason :retry` absence).
+    negated_fns = {(form[0], form[1]) for form in forms if not form[5]}
     for tag, fn, form_kws, form_callees, _span, _positive, _needles in positive_forms:
       anchored_fns.setdefault(tag, set()).add(fn)
       for kw in form_kws:
@@ -189,7 +193,7 @@ def align(sites, entities):
           basis = "call"
       elif s["kind"] != "absent-term" and ((r and unscoped) or (s["tag"], s["fn"]) in scoped):
         basis = "keyword"
-      elif r and short == nm and (s["fn"] in anchor_name_scope if anchor_name_scope else in_scope) and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
+      elif r and short == nm and (s["tag"], s["fn"]) not in negated_fns and (s["fn"] in anchor_name_scope if anchor_name_scope else in_scope) and (s["kind"] != "absent-term") == (e["inductive"] not in TERMS):
         basis = "name"
       if basis: hits.setdefault(basis, []).append(s["id"])
     for basis, ids in hits.items():
