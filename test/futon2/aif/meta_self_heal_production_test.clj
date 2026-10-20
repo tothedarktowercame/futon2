@@ -450,6 +450,43 @@
             :sha256 (load-identity/sha256 bytes)}))
     (is (false? (:repair-claimed? result)))))
 
+(deftest repaired-or-reasked-proposed-answer-carries-the-producer-trace
+  ;; F21 (click wm-click-4c3c26e2, 2026-10-20): a proposed answer the reader
+  ;; completed (:read-repair) or obtained by re-ask (:read-retry) says so on
+  ;; the observation; the content-addressed receipt stays what it was.
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        repair {:appended 1 :error "EOF while reading; 3 `{` opened, 2 `}` closed outside strings"}
+        retry {:first-error "read a symbol, not a map with keyword keys" :first-preview "I have…"}
+        answer (fn [request] {:status :proposed
+                              :acceptance-test (acceptance-case "P17-repaired" {:kind :configuration-injury})
+                              :read-repair repair :read-retry retry})
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptances") :meta-acceptance-fn answer}
+                diagnosis)
+        receipt (edn/read-string (slurp (get-in result [:acceptance-evidence-pin :path])))
+        plain (production/produce-acceptance!
+               {:meta-acceptance-root (str dir "/acceptances-plain")
+                :meta-acceptance-fn (fn [_] {:status :proposed
+                                             :acceptance-test (acceptance-case "P17-plain" {:kind :configuration-injury})})}
+               diagnosis)
+        mismatched (production/produce-acceptance!
+                    {:meta-acceptance-root (str dir "/acceptances-mm")
+                     :meta-acceptance-fn (fn [_] {:status :proposed :read-repair repair
+                                                  :acceptance-test (assoc (acceptance-case "P17-mm" {:kind :configuration-injury})
+                                                                          :source {:namespace "other.ns" :path "test/other/ns.clj" :text "(ns other.ns)"})})}
+                    diagnosis)]
+    (is (= :proposed (:status result)))
+    (is (= repair (:acceptance-read-repair result))
+        "F21: deleting the :acceptance-read-repair copy makes this fail")
+    (is (= retry (:acceptance-read-retry result)))
+    (is (not (contains? receipt :acceptance-read-repair)) "the receipt is the proposal, not its transport")
+    (is (= :proposed (:status plain)))
+    (is (not (contains? plain :acceptance-read-repair)) "an answer that needed no repair carries no key")
+    (is (= :meta-self-heal/acceptance-proposal-source-mismatch (:reason mismatched)))
+    (is (= repair (:acceptance-read-repair mismatched))
+        "a repaired answer refused later still says it was repaired")))
+
 (def ^:private documented-function
   ;; An extra, well-formed entry whose var has a docstring, so :doc is exercised.
   {:role :runtime-entrypoint

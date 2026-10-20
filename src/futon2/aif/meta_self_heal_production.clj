@@ -427,6 +427,25 @@
        :persistence-destination {:note "the test writes only under the harness's temporary roots; canonical data/ and src/ are read-only"}
        :repository (or (:meta-repository-root opts) default-repository-root)})))
 
+(defn- producer-trace
+  "What the producer did to get its answer, as record keys: F19's reader error
+   and one informed re-ask (:read-retry), F9's one rate-limit retry
+   (:transport-retry), and F21's brace completion (:read-repair, click
+   wm-click-4c3c26e2, 2026-10-20: the answer was one `}` short for the fourth
+   time and the re-ask did not change that, so the reader completes it and
+   says so). Carried on every result of produce-acceptance-from-request!,
+   proposed or refused; never into the content-addressed receipt."
+  [response]
+  (cond-> {}
+    (contains? response :read-error)
+    (assoc :acceptance-read-error (:read-error response))
+    (contains? response :read-retry)
+    (assoc :acceptance-read-retry (:read-retry response))
+    (contains? response :transport-retry)
+    (assoc :acceptance-transport-retry (:transport-retry response))
+    (contains? response :read-repair)
+    (assoc :acceptance-read-repair (:read-repair response))))
+
 (defn- produce-acceptance-from-request!
   "The port call and receipt half of produce-acceptance!, once every
   production function the diagnosis names has resolved."
@@ -464,23 +483,20 @@
       ;; copied here, so the record showed a refused proposal and two
       ;; seat calls it could not explain.
       (refusal :meta-self-heal/acceptance-unavailable
-               (cond-> {:request request :acceptance-status (:status response)
-                        :acceptance-reason (:reason response)
-                        :acceptance-failure (:failure response)
-                        :acceptance-detail (:detail response)
-                        :repair-claimed? false}
-                 (contains? response :read-error)
-                 (assoc :acceptance-read-error (:read-error response))
-                 (contains? response :read-retry)
-                 (assoc :acceptance-read-retry (:read-retry response))
-                 (contains? response :transport-retry)
-                 (assoc :acceptance-transport-retry (:transport-retry response))))
+               (merge {:request request :acceptance-status (:status response)
+                       :acceptance-reason (:reason response)
+                       :acceptance-failure (:failure response)
+                       :acceptance-detail (:detail response)
+                       :repair-claimed? false}
+                      (producer-trace response)))
       (source-mismatch? (:acceptance-test response))
       (refusal :meta-self-heal/acceptance-proposal-source-mismatch
-               {:request request :repair-claimed? false})
+               (merge {:request request :repair-claimed? false}
+                      (producer-trace response)))
       (not (concrete-acceptance? (:acceptance-test response)))
       (refusal :meta-self-heal/acceptance-prose-or-malformed
-               {:request request :repair-claimed? false})
+               (merge {:request request :repair-claimed? false}
+                      (producer-trace response)))
       :else
       (let [receipt {:schema :wm/meta-acceptance-receipt-v1
                      :status :proposed :review-status :unreviewed
@@ -501,9 +517,11 @@
                           :diagnosis-evidence-pin (:diagnosis-evidence-pin diagnosis)
                           :acceptance-test (:acceptance-test response)
                           :review-status :unreviewed :result-status :not-run
-                          :repair-claimed? false})
-          (assoc written :injury-id (:injury-id diagnosis)
-                 :repair-claimed? false))))))
+                          :repair-claimed? false}
+                 (producer-trace response))
+          (merge (assoc written :injury-id (:injury-id diagnosis)
+                        :repair-claimed? false)
+                 (producer-trace response)))))))
 
 (defn produce-acceptance!
   "Request and retain a concrete, unreviewed acceptance specification for one
