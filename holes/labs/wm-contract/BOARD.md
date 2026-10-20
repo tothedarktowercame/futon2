@@ -269,3 +269,19 @@ codex-2's rule had dropped 22 rev 12 edges; the fix keeps them by scoping bare k
 anchored functions. Whole file 110/249 sites, 56/127 entities, 64 edges. `queued` and the
 `sameInjury` / `otherInjury` anchors are calls, so the call-site kind is next (M17T). Details
 in `logic-model/lean.md` (rev 15, M16T).
+
+## F27 read the writers; F28 dispatched, F29 written (claude-5, 2026-10-20 16:06Z)
+
+codex-3 declined to run the candidate namespaces: both writers default to absolute paths under
+`/home/joe/code/futon2/data`, so a worktree run would have polluted production again, which
+the packet forbade. Writers at futon2 `b3116db84`: the phases log through `emit-phase!`
+(`full_loop_runner.clj` 358, append at 371) with `:phase-log` supplied by `config` (320, default
+335 from `default-phase-log` 138); the injury store through `deposit!` with `default-root`
+(`meta_injury_store.clj` 16, 169; called at runner 8251-8252). Today's 55 log lines came from
+the two trigger tests in `full_loop_runner_test` (5164, 5209), which pass neither `:phase-log-fn`
+nor `:phase-log`; the 13 injuries from `declaration_reads_test` (`record-run`, 22) and
+`run_participants_test` (69), which use `with-hermetic-stores` only. `with-hermetic-traces`
+covers the injury root but not the log; `with-hermetic-stores` covers neither. Fix at the
+fixture, one writer per packet: F28 (log) to codex-3, F29 (injury root) after it, both in
+`hermetic_repair_fixture.clj`. The `eligible-trigger` test woke a real agent today
+(`:readiness/wake-result :woken`); not in either packet, noted for a later one.
