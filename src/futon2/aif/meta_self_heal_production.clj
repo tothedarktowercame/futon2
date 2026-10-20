@@ -1010,5 +1010,9 @@
                                                        :ledger-pin (:ledger-pin (:ledger result))
                                                        :transaction-pin
                                                        (:transaction-pin (:transaction result))}))))))
+                        ;; :final is the SelfHealRoute CoordinationPhase for
+                        ;; the coordinate call after the loop (mathlib4
+                        ;; darktower d6f4b88ca3); the coordinator's own
+                        ;; :phase, when it gives one, is kept over it.
                         (settle (coordinator/coordinate durable transaction ports)
-                                nil receipts)))))))))))))
+                                :final receipts)))))))))))))

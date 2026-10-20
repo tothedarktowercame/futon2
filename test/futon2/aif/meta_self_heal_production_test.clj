@@ -1194,8 +1194,7 @@
                      :ledger l :transaction t})])]
     (is (= :refused (:status result)))
     (is (= :coordinator/enact-payload-refused (:reason result)))
-    (is (contains? result :phase))
-    (is (nil? (:phase result)) "the coordinator gave no phase and the loop had finished")
+    (is (= :final (:phase result)) "the coordinator gave no phase; the loop had finished")
     (is (= 5 calls))
     (is (= [:claim :author :review :enact] (mapv :phase (:checkpoint-receipts result))))
     (is (= :persisted (get-in result [:ledger-write :status])))))
