@@ -1,3 +1,47 @@
+## Click 10 ran attempts 2 and 3 in one click; the author succeeded twice and the port refused both for lacking a job id; injury abandoned; F33, F34, M23L dispatched (claude-5, 2026-10-20 17:44Z)
+
+Click 10 (`wm-click-dfc7501c`, 17:03:02-17:04:02Z, last of the grant; the budget script now
+says exhausted). The F31 loop worked: attempt 1 was resumed and retired, attempt 2 authored on
+zai-2, held `:author-failed`, retired in-click, attempt 3 authored and held; ledger ordinal 11
+`:abandoned :attempt-limit-exhausted`; disposition `:held :author-failed :attempt 3`. F32
+worked: no intake seat, acceptance run or reviewer was spent (`:diagnosis-observation` and
+`:acceptance-observation` both `:source :supplied`).
+
+What the port did: zai-2 committed the repair at 17:03:39Z (futon2 main `b463d85cc`:
+`loop_node_exercise.clj`, `terminal_receipt.clj`, the acceptance test, `deps.edn`) and both
+attempts answered exactly `{:status :succeeded :payload {:patch-sha "b463d85cc…" :worktree
+"/home/joe/code/futon2"}}` (evidence e-715f3041 17:03:41Z, e-86bc1e67 17:04:02Z). Both author
+receipts are `:failed :agency-session-or-job-not-fresh` with nil ids: A `agency-invoke!`
+(futon3c adapters 316) requires a non-blank job id, and Zai seats mint no Agency job per
+invoke; attempt 1 (click 7) had stopped earlier at `not-one-edn-map`, so no Zai author success
+had ever reached that line. The sessions were fresh. The pinned acceptance command passes at
+main `b463d85cc` (bounded run `bounded-1792517864751-click10-acceptance-at-main`, pass).
+So the repair is on main and the ledger says the injury was abandoned on its third attempt.
+
+A second gap on the record: `:runtime-disposition` on the click record and the run binding
+is a `select-keys` (futon3c `runner_service.clj` 642) that drops `:continued-from`,
+`:continuation` and `:carried-bindings`, so the record does not show that attempt 2 ran in
+this click or why the loop stopped.
+
+Dispatched (packets under `logic-model/packets/` and `~/notes/packets/`):
+- F33 (futon3c A, codex-1, job `invoke-1792518167172-59-ba34614d`, park `park-9c62eb70`,
+  45 min): freshness is the session; a missing job id is a typed absence, not a refusal. Live
+  pin: the attempt-2 answer from evidence e-715f3041; bad case: the old session id refused.
+- F34 (futon3c runner_service, codex-2, job `invoke-1792518167509-60-0f604929`, park
+  `park-37f91551`, 35 min): the three keys added to the `select-keys`, pinned on the binding file.
+- M23L (Lean, claude-2, job `invoke-1792518168117-61-0e2fb20e`, park `park-3447cb0f`,
+  75 min): `transactionRetired` and the cycle in `transitions`,
+  `RouteRefusal.transactionRetireFailed`, `ContinuationOutcome` beside the path, the
+  `attempt-limit - attempt` bound lemma or its named gap, R:476 disambiguated.
+
+Open, for Joe: (1) the click budget is exhausted (ten of the grant used); (2) injury
+`d755c886` is `:abandoned` on two port refusals of a correct answer, and `:abandoned` is
+terminal in L (`allowed-predecessors` has no successor of it). Recommendation: after F33, an L
+and C change (F35) that reopens from `:abandoned` with `:reason :port-refusal-corrected`
+pinned to the F33 commit and the two evidence ids, so the ledger says what happened; until then
+the repair stands on main and the ledger is false about it. No new transition is made without
+Joe's word on (2).
+
 ## Click 7 reached the author; the repair is in the tree but the port could not read the answer, and the route holds forever after a failed author; rev 19 accepted; F25, F26, F27 dispatched (claude-5, 2026-10-20 15:59Z)
 
 Click 7 (`bg-1792507541392-14`, 14:45:41Z, `wm-click-25cd3682`), after F24 and F24a: the
