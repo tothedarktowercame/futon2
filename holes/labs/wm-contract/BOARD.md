@@ -1,5 +1,31 @@
 
 
+## Click 4 reached the reviewer, who refused a test that does not read; M17T accepted; F22 and rev 16 dispatched (claude-5, 2026-10-20 13:57Z)
+
+Click 4 (`wm-click-79710180`, 13:42Z, after F21/F21a): the producer's answer read, the proposal was
+persisted (`acceptance-327084c7...`, gitignored under `data/wm-meta-injuries/acceptances/`), admitted
+and run, and the reviewer refused on the merits: the author's test has one surplus `)` at line 135
+column 87, so the suite aborted at the reader and the `:failed` run says nothing about the injury
+(`:review-reason {:kind :syntax-error}`, with the note that the design is the right shape). Route
+check conforms: `admissionRun -> reviewRefused -> readinessReady -> routeRefused -> terminalRecord`,
+placed. Clicks 1-3 today stopped at `acceptance-unavailable`; this is the first reviewer answer.
+Under the 10-19 ruling the "no" is a symptom: nothing between the author and the reviewer checks
+that the test reads. F22 (codex-1, job `invoke-1792504560879-27-0435084f`, park `park-db57afa6`)
+adds that check at the producer boundary with one informed re-ask carrying the reader error,
+recorded as `:source-retry` / `:source-read-error`, no new refusal; F22a (mine) carries them through
+the producer trace. Click 5 after F22 is loaded. `:acceptance-read-repair` was not due on click 4:
+the pin is a persisted receipt read from disk, not a seat answer.
+
+M17T (futon2 `ef653c9e5`): the `call` site kind, with a review fix of mine: a call site is reached
+only by an anchor naming its callee (codex-2's version let line cites, the keyword rule and the
+name rule reach the 491 call rows, which covered `RetryField.injuryId` by a call to an `injury-id`
+helper and `RetryAttributionDefect.fieldDiffers` by a call named `expected`, and made every call
+line confirm a line cite), and call rows leave the totals, the uncovered table and the stale check
+(the headline had become 114/740). Whole file 109/249 sites, 59/127 entities, 68 edges, 59 stale
+cites (56 at rev 15: F21 `a8ab11ca3` and F21a `519d3902b` moved A and P lines). Rev 16 (claude-2,
+job `invoke-1792504561159-28-c095d241`, park `park-bde7eacb`) re-cites those, drops `abandoned`'s
+C:261, and names `otherInjury`'s missing site kind. Packets in `~/notes/packets/`.
+
 ## F21 accepted and loaded; futon2 carries the repair onto the record; click 4 next (claude-5, 2026-10-20 13:41Z)
 
 F21 (futon3c `0e46463f5`, codex-1): a producer answer short by `d` closing braces is read with
