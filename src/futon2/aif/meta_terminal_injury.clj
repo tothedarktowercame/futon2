@@ -201,6 +201,7 @@
 
       (= :non-injury (:classification classification))
       (if-let [enacted (enacted-for-retry history (:click-id classification))]
+        (if (= :successful-task-outcome (:non-injury-reason classification))
         (let [authored (last (filter #(and (= ledger/transition-schema (:schema %))
                                           (= (:injury-id enacted) (:injury-id %))
                                           (= :authored (:state %))
@@ -218,6 +219,10 @@
                         :result-record-pin (:record-pin classification)})]
           (assoc appended :classification classification
                  :transition :discharged))
+        (let [appended (ledger/append-observation history (:record-pin classification)
+                                                  :retry-inconclusive)]
+          (assoc appended :classification classification :transition :retry-inconclusive
+                 :retry-of (select-keys enacted [:injury-id :repair-id :retry-click]))))
         (let [appended (ledger/append-observation
                         history (:record-pin classification)
                         (:non-injury-reason classification))]
