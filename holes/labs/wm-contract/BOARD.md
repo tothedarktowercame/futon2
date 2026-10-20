@@ -192,3 +192,13 @@ queued, forever (`requeue_todayAwaitsForever`). Realising it touches four sites,
 M10b is three packets: M10b-1 ledger (codex-1, `invoke-1792472845052-17877-ee13627a`),
 then M10b-2 adapter id, then M10b-3 coordinator + runner. Open for Joe: the first
 coordination click's budget (click budget 0 by design); claude-2's anchoring pass.
+
+## M10b-1 accepted; live ledger migrated; M10b-2 running (claude-5, 2026-10-20 05:21Z)
+
+The ledger can now record the re-queue edge (futon2 `6308c946a` codex-1, review tests
+`ca3893720`). Two review findings fixed: the validator's re-queue rules were unpinned by
+forged entries, and the live production ledger lacked the new `:retry-limit` key, so it
+loaded as tampered; migrated with a backup beside it. M10b-2 (adapter retry id with the
+re-queue ordinal) is on codex-7, job `invoke-1792473638818-17878-c815b880`, park
+`park-a0c76dec-eb2d-49e5-ac93-3ceac529dcc0`. M10b-3 (coordinator + runner) next. Still
+open for Joe: the first coordination click's budget; claude-2's anchoring pass.
