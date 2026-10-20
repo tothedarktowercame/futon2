@@ -77,6 +77,11 @@ class AnchorFunctionScopingTest(unittest.TestCase):
     self.assertEqual([], align([call], [entity("bare", "ledger/append-retry-result")]))
     self.assertEqual([], align([call], [entity("negative", "(not C coordinate ledger/append-retry-result)")]))
 
+  def test_line_and_name_citations_do_not_reach_a_call_site(self):
+    call = site("coordinate", "ledger/append-retry-result", 10, "C", "call")
+    self.assertEqual([], align([call], [entity("reopened", "the requeue at C:10 says `:append-retry-result`")]))
+    self.assertEqual([], align([call], [entity("appendRetryResult", "no anchor names the callee")]))
+
   def test_name_rule_is_scoped_to_anchored_function(self):
     sites = [site("prepare-acceptance", "acceptance-unavailable", 30),
              site("produce-acceptance-from-request!", "acceptance-unavailable", 40)]

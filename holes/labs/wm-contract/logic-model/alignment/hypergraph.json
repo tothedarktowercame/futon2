@@ -8706,17 +8706,6 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.RouteState.retryReady",
-    "R:500:meta-self-heal/attributable-retry-readiness"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 335
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
     "lean:SelfHealRoute.RouteState.retryRefused",
     "P:970:retry-attribution-refused"
    ],
@@ -8908,28 +8897,6 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.ProposalDefect.transport",
-    "A:233:rate-limited-error?"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 730
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ProposalDefect.unreadableAnswer",
-    "A:237:Thread/sleep"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 734
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
     "lean:SelfHealRoute.AdmissionDefect.runRefused",
     "P:618:acceptance-run-threw"
    ],
@@ -8942,9 +8909,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.AdmissionDefect.noReviewerAnswer",
-    "A:233:rate-limited-error?",
-    "A:237:Thread/sleep",
-    "P:613:refusal",
     "P:613:acceptance-review-port-unavailable"
    ],
    "props": {
@@ -8967,8 +8931,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.HeldReason.reviewRejected",
-    "C:290:stop!",
-    "C:290:refusal",
     "C:290:input-refused"
    ],
    "props": {
@@ -8985,17 +8947,6 @@
    "props": {
     "basis": "keyword",
     "lean-line": 919
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.HeldReason.enactFailed",
-    "C:313:checkpoint!"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 921
    }
   },
   {
@@ -9102,8 +9053,6 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.CoordinatorRefusal.retryAttributionRefused",
-    "C:345:stop!",
-    "C:345:refusal",
     "C:345:review-patch-substitution"
    ],
    "props": {
@@ -9149,11 +9098,10 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ClosingStatus.reopened",
-    "C:375:accepted!",
-    "C:426"
+    "C:419:ledger/append-retry-result"
    ],
    "props": {
-    "basis": "line-unconfirmed",
+    "basis": "call",
     "lean-line": 969
    }
   },
@@ -9161,10 +9109,10 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ClosingStatus.reopened",
-    "C:419:ledger/append-retry-result"
+    "C:426"
    ],
    "props": {
-    "basis": "call",
+    "basis": "line-unconfirmed",
     "lean-line": 969
    }
   },
@@ -9183,11 +9131,10 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ClosingStatus.abandoned",
-    "C:375:accepted!",
-    "C:426"
+    "C:419:ledger/append-retry-result"
    ],
    "props": {
-    "basis": "line-unconfirmed",
+    "basis": "call",
     "lean-line": 976
    }
   },
@@ -9195,10 +9142,10 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.ClosingStatus.abandoned",
-    "C:419:ledger/append-retry-result"
+    "C:426"
    ],
    "props": {
-    "basis": "call",
+    "basis": "line-unconfirmed",
     "lean-line": 976
    }
   },
@@ -9211,39 +9158,6 @@
    "props": {
     "basis": "line",
     "lean-line": 983
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.ClosingStatus.awaitingRetry",
-    "C:349:append-transition!"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 983
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryField.injuryId",
-    "T:160:injury-id"
-   ],
-   "props": {
-    "basis": "name",
-    "lean-line": 1127
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryAttributionDefect.fieldDiffers",
-    "C:190:expected"
-   ],
-   "props": {
-    "basis": "keyword",
-    "lean-line": 1140
    }
   },
   {
@@ -9271,34 +9185,12 @@
   {
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
-    "lean:SelfHealRoute.RetryClickOutcome.otherInjury",
-    "T:247:latest-injury"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 1199
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
     "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
     "T:284:retry-click-mismatch",
     "T:299:terminal-history-requires-new-transaction"
    ],
    "props": {
     "basis": "keyword",
-    "lean-line": 1211
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryClickOutcome.otherInjuryRefused",
-    "T:299:refusal"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
     "lean-line": 1211
    }
   },
@@ -9317,33 +9209,11 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RetryClickOutcome.evaluatedNoAction",
-    "T:81:evaluated-no-action?"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 1222
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryClickOutcome.evaluatedNoAction",
     "T:81:evaluated-no-action"
    ],
    "props": {
     "basis": "keyword",
     "lean-line": 1222
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryClickOutcome.partialFrontierContinuation",
-    "T:80:partial-frontier-continuation?"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 1226
    }
   },
   {
@@ -9439,34 +9309,11 @@
    "hx/type": "lean-code/realizes",
    "hx/endpoints": [
     "lean:SelfHealRoute.RetryNext.queued",
-    "C:247:ledger/pending-requeue",
-    "C:258:accepted!"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 1371
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryNext.queued",
     "C:258:ledger/append-requeue"
    ],
    "props": {
     "basis": "call",
     "lean-line": 1371
-   }
-  },
-  {
-   "hx/type": "lean-code/realizes",
-   "hx/endpoints": [
-    "lean:SelfHealRoute.RetryNext.awaitingNothingQueued",
-    "C:247:ledger/pending-requeue"
-   ],
-   "props": {
-    "basis": "line-unconfirmed",
-    "lean-line": 1375
    }
   },
   {

@@ -6,18 +6,19 @@ Code read at: A = `src/futon3c/wm/meta_self_heal_adapters.clj` @ `a8ab11ca3`; C 
 
 Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit/SelfHealPrepare.lean`
 
-**Code sites realised by a Lean entity: 114/740 (15%).**
+**Code sites realised by a Lean entity: 109/249 (44%).**
 
-**Lean entities with a code endpoint: 61/127 (48%).**
+**Lean entities with a code endpoint: 59/127 (46%).**
 
 | site kind | covered |
 |---|---|
 | absent-term | 12/58 (21%) |
-| call | 5/491 (1%) |
 | classification | 8/8 (100%) |
 | held | 3/3 (100%) |
 | refusal | 76/92 (83%) |
 | status-map | 10/88 (11%) |
+
+Call sites named by an anchor: 3 of 491 emitted (evidence, not owed an endpoint).
 
 | Lean inductive | constructors with a code endpoint |
 |---|---|
@@ -35,168 +36,54 @@ Lean: `/home/joe/code/mathlib4/DarkTower/WarMachine/SelfHealRoute.lean`, `../jit
 | PrepareOutcome | 0/2 (0%) |
 | ProposalDefect | 0/6 (0%) |
 | ReadinessTerm | 6/6 (100%) |
-| RetryAttributionDefect | 1/4 (25%) |
+| RetryAttributionDefect | 0/4 (0%) |
 | RetryClickOutcome | 11/12 (92%) |
-| RetryField | 1/4 (25%) |
+| RetryField | 0/4 (0%) |
 | RetryNext | 2/5 (40%) |
 | RouteState | 15/28 (54%) |
 | RouteTerm | 5/5 (100%) |
 | RunOutcome | 0/3 (0%) |
 
-Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
+Edges by basis: keyword 39, call 5, line 4, name 13, line-unconfirmed 7
 
 ## Uncovered code sites
 
 | site | function | kind | status | reason |
 |---|---|---|---|---|
-| A:29:str/blank? | `nonblank?` | call |  | str/blank? |
-| A:41:str/trim | `git` | call |  | str/trim |
-| A:50:reg/get-agent | `readiness` | call |  | reg/get-agent |
-| A:51:git | `readiness` | call |  | git |
 | A:53:cast-not-distinct | `readiness` | absent-term |  | cast-not-distinct |
-| A:54:invoke-capable? | `readiness` | call |  | invoke-capable? |
-| A:55:available-seat-state? | `readiness` | call |  | available-seat-state? |
 | A:57:cast-not-ready | `readiness` | absent-term |  | cast-not-ready |
-| A:58:io/file | `readiness` | call |  | io/file |
 | A:58:repository-unreadable | `readiness` | absent-term |  | repository-unreadable |
 | A:60:tracked-worktree-dirty | `readiness` | absent-term |  | tracked-worktree-dirty |
-| A:61:nonblank? | `readiness` | call |  | nonblank? |
 | A:62:injury-ledger-path | `readiness` | absent-term |  | injury-ledger-path |
-| A:63:nonblank? | `readiness` | call |  | nonblank? |
 | A:64:transaction-path | `readiness` | absent-term |  | transaction-path |
 | A:65:queued-retry-authority | `readiness` | absent-term |  | queued-retry-authority |
 | A:66 | `readiness` | status-map | computed |  |
-| A:69:git | `readiness` | call |  | git |
-| A:82:reg/reset-session! | `reset-cast!` | call |  | reg/reset-session! |
-| A:83:reg/get-agent | `reset-cast!` | call |  | reg/get-agent |
 | A:85:cast-reset-failed | `reset-cast!` | status-map | refused | cast-reset-failed |
 | A:88 | `reset-cast!` | status-map | reset |  |
-| A:100:str/trim | `response-preview` | call |  | str/trim |
-| A:100:str/replace | `response-preview` | call |  | str/replace |
-| A:124:edn-type | `wrong-edn-shape` | call |  | edn-type |
-| A:130:edn/read | `read-one-edn` | call |  | edn/read |
-| A:131:edn/read | `read-one-edn` | call |  | edn/read |
-| A:138:read-one-edn | `read-repair-candidate` | call |  | read-one-edn |
-| A:181:str/trim | `one-edn-map` | call |  | str/trim |
-| A:188:edn/read-string | `one-edn-map` | call |  | edn/read-string |
-| A:189:keyword-keyed-map? | `one-edn-map` | call |  | keyword-keyed-map? |
-| A:191:wrong-edn-shape | `one-edn-map` | call |  | wrong-edn-shape |
-| A:194:str/includes? | `one-edn-map` | call |  | str/includes? |
-| A:196:braces-outside-strings | `one-edn-map` | call |  | braces-outside-strings |
-| A:203:read-repair-candidate | `one-edn-map` | call |  | read-repair-candidate |
-| A:206:keyword-keyed-map? | `one-edn-map` | call |  | keyword-keyed-map? |
-| A:210:wrong-edn-shape | `one-edn-map` | call |  | wrong-edn-shape |
-| A:232:reg/invoke-agent! | `invoke-with-rate-limit-retry!` | call |  | reg/invoke-agent! |
-| A:233:rate-limited-error? | `invoke-with-rate-limit-retry!` | call |  | rate-limited-error? |
-| A:237:Thread/sleep | `invoke-with-rate-limit-retry!` | call |  | Thread/sleep |
-| A:238:reg/invoke-agent! | `invoke-with-rate-limit-retry!` | call |  | reg/invoke-agent! |
-| A:247:reg/reset-session! | `agency-invoke!` | call |  | reg/reset-session! |
-| A:252:invoke-with-rate-limit-retry! | `agency-invoke!` | call |  | invoke-with-rate-limit-retry! |
-| A:255:one-edn-map | `agency-invoke!` | call |  | one-edn-map |
 | A:259 | `agency-invoke!` | status-map | failed |  |
 | A:261 | `agency-invoke!` | status-map | failed |  |
 | A:264 | `agency-invoke!` | status-map | failed |  |
 | A:267 | `agency-invoke!` | status-map | failed |  |
-| A:268:nonblank? | `agency-invoke!` | call |  | nonblank? |
 | A:269 | `agency-invoke!` | status-map | failed |  |
-| A:270:nonblank? | `agency-invoke!` | call |  | nonblank? |
 | A:271 | `agency-invoke!` | status-map | failed |  |
 | A:272 | `agency-invoke!` | status-map | computed |  |
-| A:315:reg/get-agent | `producer-invoke!` | call |  | reg/get-agent |
-| A:316:producer-prompt | `producer-invoke!` | call |  | producer-prompt |
-| A:319:invoke-capable? | `producer-invoke!` | call |  | invoke-capable? |
-| A:320:available-seat-state? | `producer-invoke!` | call |  | available-seat-state? |
-| A:321:invoke-with-rate-limit-retry! | `producer-invoke!` | call |  | invoke-with-rate-limit-retry! |
-| A:322:one-edn-map | `producer-invoke!` | call |  | one-edn-map |
-| A:323:response-preview | `producer-invoke!` | call |  | response-preview |
-| A:332:invoke-with-rate-limit-retry! | `producer-invoke!` | call |  | invoke-with-rate-limit-retry! |
-| A:335:one-edn-map | `producer-invoke!` | call |  | one-edn-map |
 | A:342:producer-seat-unavailable | `producer-invoke!` | status-map | failed | meta-self-heal/producer-seat-unavailable |
 | A:347:producer-invoke-failed | `producer-invoke!` | status-map | failed | meta-self-heal/producer-invoke-failed |
 | A:355:producer-response-malformed | `producer-invoke!` | status-map | failed | meta-self-heal/producer-response-malformed |
-| A:358:response-preview | `producer-invoke!` | call |  | response-preview |
-| A:370:MessageDigest/getInstance | `hex-sha256` | call |  | MessageDigest/getInstance |
-| A:374:str/replace | `safe-test-id` | call |  | str/replace |
-| A:384:str/split-lines | `acceptance-summary` | call |  | str/split-lines |
-| A:385:str/starts-with? | `acceptance-summary` | call |  | str/starts-with? |
-| A:389:str/join | `acceptance-summary` | call |  | str/join |
-| A:394:str/trim | `acceptance-summary` | call |  | str/trim |
-| A:395:str/trim | `acceptance-summary` | call |  | str/trim |
-| A:395:str/blank? | `acceptance-summary` | call |  | str/blank? |
-| A:409:str/split | `source-location` | call |  | str/split |
-| A:416:str/join | `source-location` | call |  | str/join |
-| A:416:str/replace | `source-location` | call |  | str/replace |
-| A:418:io/file | `source-location` | call |  | io/file |
-| A:419:io/file | `source-location` | call |  | io/file |
-| A:441:str/replace | `write-run-result` | call |  | str/replace |
-| A:441:Instant/now | `write-run-result` | call |  | Instant/now |
-| A:442:io/file | `write-run-result` | call |  | io/file |
-| A:443:safe-test-id | `write-run-result` | call |  | safe-test-id |
-| A:446:io/output-stream | `write-run-result` | call |  | io/output-stream |
-| A:447:io/file | `write-run-result` | call |  | io/file |
-| A:448:io/file | `write-run-result` | call |  | io/file |
 | A:449 | `write-run-result` | status-map | ran |  |
-| A:450:acceptance-summary | `write-run-result` | call |  | acceptance-summary |
-| A:451:hex-sha256 | `write-run-result` | call |  | hex-sha256 |
-| A:465:safe-test-id | `launch-bounded-acceptance!` | call |  | safe-test-id |
-| A:465:System/currentTimeMillis | `launch-bounded-acceptance!` | call |  | System/currentTimeMillis |
-| A:469:Math/ceil | `launch-bounded-acceptance!` | call |  | Math/ceil |
-| A:470:str/join | `launch-bounded-acceptance!` | call |  | str/join |
-| A:470:executed-command | `launch-bounded-acceptance!` | call |  | executed-command |
-| A:481:io/file | `launch-bounded-acceptance!` | call |  | io/file |
-| A:482:io/file | `launch-bounded-acceptance!` | call |  | io/file |
 | A:485:acceptance-unit-launch-failed | `launch-bounded-acceptance!` | status-map | failed | meta-self-heal/acceptance-unit-launch-failed |
-| A:486:System/currentTimeMillis | `launch-bounded-acceptance!` | call |  | System/currentTimeMillis |
-| A:489:io/file | `launch-bounded-acceptance!` | call |  | io/file |
-| A:490:json/read-str | `launch-bounded-acceptance!` | call |  | json/read-str |
-| A:491:System/currentTimeMillis | `launch-bounded-acceptance!` | call |  | System/currentTimeMillis |
-| A:492:Thread/sleep | `launch-bounded-acceptance!` | call |  | Thread/sleep |
-| A:495:io/file | `launch-bounded-acceptance!` | call |  | io/file |
-| A:501:io/file | `launch-bounded-acceptance!` | call |  | io/file |
-| A:502:write-run-result | `launch-bounded-acceptance!` | call |  | write-run-result |
-| A:503:shell/sh | `launch-bounded-acceptance!` | call |  | shell/sh |
-| A:506:write-run-result | `launch-bounded-acceptance!` | call |  | write-run-result |
-| A:513:source-location | `run-acceptance!` | call |  | source-location |
 | A:516:acceptance-source-path-refused | `run-acceptance!` | status-map | failed | meta-self-heal/acceptance-source-path-refused |
 | A:518:acceptance-source-path-refused | `run-acceptance!` | status-map | failed | meta-self-heal/acceptance-source-path-refused |
-| A:519:nonblank? | `run-acceptance!` | call |  | nonblank? |
 | A:519:acceptance-test-id-invalid | `run-acceptance!` | status-map | failed | acceptance-test-id-invalid |
-| A:520:admissible-acceptance-command? | `run-acceptance!` | call |  | admissible-acceptance-command? |
 | A:521:acceptance-command-not-admissible | `run-acceptance!` | status-map | failed | meta-self-heal/acceptance-command-not-admissible |
 | A:524:acceptance-command-not-admissible | `run-acceptance!` | status-map | failed | meta-self-heal/acceptance-command-not-admissible |
-| A:528:create-parent-dirs! | `run-acceptance!` | call |  | create-parent-dirs! |
-| A:532:launch-bounded-acceptance! | `run-acceptance!` | call |  | launch-bounded-acceptance! |
 | A:534:acceptance-runner-error | `run-acceptance!` | status-map | failed | acceptance-runner-error |
-| A:537:remove-materialized! | `run-acceptance!` | call |  | remove-materialized! |
-| A:538:clojure.core/deref | `run-acceptance!` | call |  | clojure.core/deref |
-| A:561:git | `enact!` | call |  | git |
 | A:563 | `enact!` | status-map | failed |  |
-| A:565:git | `enact!` | call |  | git |
-| A:566:git | `enact!` | call |  | git |
-| A:567:str/starts-with? | `enact!` | call |  | str/starts-with? |
-| A:568:str/ends-with? | `enact!` | call |  | str/ends-with? |
-| A:569:str/split-lines | `enact!` | call |  | str/split-lines |
-| A:570:code-identity/load-file-recorded! | `enact!` | call |  | code-identity/load-file-recorded! |
-| A:572:retry-click-id | `enact!` | call |  | retry-click-id |
 | A:574 | `enact!` | status-map | succeeded |  |
-| A:595:java.util.UUID/randomUUID | `work-order-identities` | call |  | java.util.UUID/randomUUID |
-| A:608:readiness | `ports` | call |  | readiness |
 | A:610 | `ports` | status-map | ready |  |
-| A:611:work-order-identities | `ports` | call |  | work-order-identities |
-| A:613:producer-invoke! | `ports` | call |  | producer-invoke! |
-| A:614:producer-invoke! | `ports` | call |  | producer-invoke! |
-| A:615:run-acceptance! | `ports` | call |  | run-acceptance! |
-| A:619:producer-invoke! | `ports` | call |  | producer-invoke! |
 | A:635 | `ports` | status-map | queued |  |
-| C:16:str/blank? | `nonblank?` | call |  | str/blank? |
-| C:19:nonblank? | `pin?` | call |  | nonblank? |
 | C:22 | `refusal` | status-map | refused |  |
-| C:25:identity/digest | `sealed` | call |  | identity/digest |
-| C:29:pin? | `seal-valid?` | call |  | pin? |
-| C:31:identity/digest | `seal-valid?` | call |  | identity/digest |
-| C:34:sealed | `seal-work-order` | call |  | sealed |
 | C:43:schema | `verify-work-order` | absent-term |  | schema |
-| C:44:seal-valid? | `verify-work-order` | call |  | seal-valid? |
 | C:45:seal | `verify-work-order` | absent-term |  | seal |
 | C:50:identities | `verify-work-order` | absent-term |  | identities |
 | C:51:distinct | `verify-work-order` | absent-term |  | sessions/distinct |
@@ -204,23 +91,14 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 | C:53:attempt | `verify-work-order` | absent-term |  | attempt |
 | C:54:attempt-limit | `verify-work-order` | absent-term |  | attempt-limit |
 | C:56:exceeds-limit | `verify-work-order` | absent-term |  | attempt/exceeds-limit |
-| C:57:pin? | `verify-work-order` | call |  | pin? |
 | C:57:cause-pin | `verify-work-order` | absent-term |  | cause-pin |
-| C:58:pin? | `verify-work-order` | call |  | pin? |
 | C:59:diagnosis-evidence | `verify-work-order` | absent-term |  | diagnosis-evidence |
-| C:61:nonblank? | `verify-work-order` | call |  | nonblank? |
-| C:66:pin? | `verify-work-order` | call |  | pin? |
 | C:66:ledger-pin | `verify-work-order` | absent-term |  | ledger-pin |
-| C:67:pin? | `verify-work-order` | call |  | pin? |
 | C:67:ledger-source-pin | `verify-work-order` | absent-term |  | ledger-source-pin |
-| C:68:refusal | `verify-work-order` | call |  | refusal |
 | C:68:invalid | `verify-work-order` | refusal |  | work-order/invalid |
 | C:69 | `verify-work-order` | status-map | valid |  |
-| C:71:refusal | `verify-work-order` | call |  | refusal |
 | C:71:malformed | `verify-work-order` | refusal |  | work-order/malformed |
-| C:76:sealed | `seal-port-receipt` | call |  | sealed |
 | C:83:schema | `verify-port-receipt` | absent-term |  | schema |
-| C:84:seal-valid? | `verify-port-receipt` | call |  | seal-valid? |
 | C:85:seal | `verify-port-receipt` | absent-term |  | seal |
 | C:86:phase | `verify-port-receipt` | absent-term |  | phase |
 | C:87:injury-id | `verify-port-receipt` | absent-term |  | injury-id |
@@ -228,452 +106,89 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 | C:89:attempt | `verify-port-receipt` | absent-term |  | attempt |
 | C:91:predecessor-pin | `verify-port-receipt` | absent-term |  | predecessor-pin |
 | C:93:status | `verify-port-receipt` | absent-term |  | status |
-| C:94:refusal | `verify-port-receipt` | call |  | refusal |
 | C:94:invalid | `verify-port-receipt` | refusal |  | port-receipt/invalid |
 | C:95 | `verify-port-receipt` | status-map | valid |  |
-| C:97:refusal | `verify-port-receipt` | call |  | refusal |
 | C:97:malformed | `verify-port-receipt` | refusal |  | port-receipt/malformed |
-| C:100:sealed | `seal-transaction` | call |  | sealed |
-| C:108:seal-valid? | `verify-transaction` | call |  | seal-valid? |
-| C:109:verify-work-order | `verify-transaction` | call |  | verify-work-order |
 | C:111 | `verify-transaction` | status-map | valid |  |
-| C:112:refusal | `verify-transaction` | call |  | refusal |
 | C:112:invalid | `verify-transaction` | refusal |  | transaction/invalid |
-| C:114:refusal | `verify-transaction` | call |  | refusal |
 | C:114:malformed | `verify-transaction` | refusal |  | transaction/malformed |
-| C:120:ledger/active-injuries | `active-entry` | call |  | ledger/active-injuries |
-| C:130:ledger/active-injuries | `prepare` | call |  | ledger/active-injuries |
-| C:136:identity/digest | `prepare` | call |  | identity/digest |
-| C:138:seal-work-order | `prepare` | call |  | seal-work-order |
-| C:147:cause-pin | `prepare` | call |  | cause-pin |
 | C:152:schema | `prepare` | absent-term |  | durable-ledger/schema |
 | C:153:status | `prepare` | absent-term |  | durable-ledger/status |
-| C:154:pin? | `prepare` | call |  | pin? |
 | C:154:source-pin | `prepare` | absent-term |  | durable-ledger/source-pin |
-| C:155:ledger/validate-ledger | `prepare` | call |  | ledger/validate-ledger |
 | C:156:invalid | `prepare` | absent-term |  | ledger/invalid |
 | C:157:invalid | `prepare` | absent-term |  | active-set/invalid |
 | C:158:required | `prepare` | absent-term |  | active-injury/required |
 | C:159:not-found | `prepare` | absent-term |  | active-injury/not-found |
-| C:160:verify-work-order | `prepare` | call |  | verify-work-order |
 | C:161:invalid | `prepare` | absent-term |  | work-order/invalid |
-| C:163:refusal | `prepare` | call |  | refusal |
 | C:164 | `prepare` | status-map | prepared |  |
-| C:165:seal-transaction | `prepare` | call |  | seal-transaction |
 | C:165 | `prepare` | status-map | active |  |
-| C:168:refusal | `prepare` | call |  | refusal |
 | C:168:preparation-malformed | `prepare` | refusal |  | coordinator/preparation-malformed |
-| C:173:seal-transaction | `append-receipt` | call |  | seal-transaction |
-| C:181:receipt-for | `invoke-once` | call |  | receipt-for |
 | C:182 | `invoke-once` | status-map | recorded |  |
-| C:189:verify-port-receipt | `invoke-once` | call |  | verify-port-receipt |
-| C:193:refusal | `invoke-once` | call |  | refusal |
 | C:196 | `invoke-once` | status-map | accepted |  |
-| C:197:append-receipt | `invoke-once` | call |  | append-receipt |
-| C:199:refusal | `invoke-once` | call |  | refusal |
-| C:204:ledger/append-transition | `append-transition!` | call |  | ledger/append-transition |
-| C:206:refusal | `append-transition!` | call |  | refusal |
-| C:211:stop! | `accepted!` | call |  | stop! |
-| C:214:stop! | `held!` | call |  | stop! |
 | C:214 | `held!` | status-map | held |  |
-| C:218:stop! | `checkpoint!` | call |  | stop! |
 | C:218 | `checkpoint!` | status-map | checkpoint |  |
-| C:231:latest-transition | `coordinate-queued-retry` | call |  | latest-transition |
-| C:234:accepted! | `coordinate-queued-retry` | call |  | accepted! |
-| C:235:invoke-once | `coordinate-queued-retry` | call |  | invoke-once |
-| C:235:requeue-phase | `coordinate-queued-retry` | call |  | requeue-phase |
-| C:236:last-receipt-pin | `coordinate-queued-retry` | call |  | last-receipt-pin |
-| C:245:stop! | `coordinate-queued-retry` | call |  | stop! |
-| C:245:refusal | `coordinate-queued-retry` | call |  | refusal |
-| C:247:ledger/pending-requeue | `coordinate-queued-retry` | call |  | ledger/pending-requeue |
-| C:255:stop! | `coordinate-queued-retry` | call |  | stop! |
-| C:255:refusal | `coordinate-queued-retry` | call |  | refusal |
 | C:255:retry-click-id-unavailable | `coordinate-queued-retry` | refusal |  | coordinator/retry-click-id-unavailable |
-| C:258:accepted! | `coordinate-queued-retry` | call |  | accepted! |
-| C:279:active-entry | `coordinate` | call |  | active-entry |
-| C:281:verify-transaction | `coordinate` | call |  | verify-transaction |
 | C:282:transaction | `coordinate` | absent-term |  | transaction |
-| C:283:ledger/validate-ledger | `coordinate` | call |  | ledger/validate-ledger |
 | C:284:ledger | `coordinate` | absent-term |  | ledger |
 | C:285:active-injury | `coordinate` | absent-term |  | active-injury |
 | C:286:attempt | `coordinate` | absent-term |  | attempt |
 | C:288:repair-id | `coordinate` | absent-term |  | repair-id |
-| C:290:stop! | `coordinate` | call |  | stop! |
-| C:290:refusal | `coordinate` | call |  | refusal |
-| C:293:latest-transition | `coordinate` | call |  | latest-transition |
-| C:295:accepted! | `coordinate` | call |  | accepted! |
-| C:296:append-transition! | `coordinate` | call |  | append-transition! |
-| C:307:latest-transition | `coordinate` | call |  | latest-transition |
-| C:310:stop! | `coordinate` | call |  | stop! |
-| C:310:refusal | `coordinate` | call |  | refusal |
-| C:313:checkpoint! | `coordinate` | call |  | checkpoint! |
-| C:315:accepted! | `coordinate` | call |  | accepted! |
-| C:316:invoke-once | `coordinate` | call |  | invoke-once |
-| C:321:held! | `coordinate` | call |  | held! |
-| C:324:sha? | `coordinate` | call |  | sha? |
-| C:324:nonblank? | `coordinate` | call |  | nonblank? |
-| C:325:stop! | `coordinate` | call |  | stop! |
-| C:325:refusal | `coordinate` | call |  | refusal |
-| C:327:latest-transition | `coordinate` | call |  | latest-transition |
-| C:328:accepted! | `coordinate` | call |  | accepted! |
-| C:329:append-transition! | `coordinate` | call |  | append-transition! |
-| C:336:checkpoint! | `coordinate` | call |  | checkpoint! |
-| C:337:accepted! | `coordinate` | call |  | accepted! |
-| C:338:invoke-once | `coordinate` | call |  | invoke-once |
-| C:343:held! | `coordinate` | call |  | held! |
-| C:345:stop! | `coordinate` | call |  | stop! |
-| C:345:refusal | `coordinate` | call |  | refusal |
-| C:347:latest-transition | `coordinate` | call |  | latest-transition |
-| C:348:accepted! | `coordinate` | call |  | accepted! |
-| C:349:append-transition! | `coordinate` | call |  | append-transition! |
-| C:359:checkpoint! | `coordinate` | call |  | checkpoint! |
-| C:360:accepted! | `coordinate` | call |  | accepted! |
-| C:361:invoke-once | `coordinate` | call |  | invoke-once |
-| C:366:held! | `coordinate` | call |  | held! |
-| C:370:nonblank? | `coordinate` | call |  | nonblank? |
-| C:371:stop! | `coordinate` | call |  | stop! |
-| C:371:refusal | `coordinate` | call |  | refusal |
-| C:374:latest-transition | `coordinate` | call |  | latest-transition |
-| C:375:accepted! | `coordinate` | call |  | accepted! |
-| C:376:append-transition! | `coordinate` | call |  | append-transition! |
-| C:388:checkpoint! | `coordinate` | call |  | checkpoint! |
-| C:389:accepted! | `coordinate` | call |  | accepted! |
-| C:390:invoke-once | `coordinate` | call |  | invoke-once |
-| C:398:stop! | `coordinate` | call |  | stop! |
-| C:398:refusal | `coordinate` | call |  | refusal |
-| C:402:coordinate-queued-retry | `coordinate` | call |  | coordinate-queued-retry |
-| C:406:accepted! | `coordinate` | call |  | accepted! |
-| C:407:append-transition! | `coordinate` | call |  | append-transition! |
-| C:418:accepted! | `coordinate` | call |  | accepted! |
 | C:426 | `coordinate` | status-map | computed |  |
-| C:430:refusal | `coordinate` | call |  | refusal |
-| C:432:refusal | `coordinate` | call |  | refusal |
 | P:21 | `refusal` | status-map | refused |  |
-| P:30:load-identity/sha256 | `diagnosis-path` | call |  | load-identity/sha256 |
-| P:30:receipt-bytes | `diagnosis-path` | call |  | receipt-bytes |
-| P:44:Files/readAllBytes | `source-record` | call |  | Files/readAllBytes |
-| P:44:io/file | `source-record` | call |  | io/file |
-| P:45:load-identity/sha256 | `source-record` | call |  | load-identity/sha256 |
-| P:46:refusal | `source-record` | call |  | refusal |
-| P:47:store/read-one-form | `source-record` | call |  | store/read-one-form |
 | P:49 | `source-record` | status-map | available |  |
-| P:50:refusal | `source-record` | call |  | refusal |
-| P:53:refusal | `source-record` | call |  | refusal |
-| P:61:io/file | `persist-diagnosis!` | call |  | io/file |
-| P:62:io/file | `persist-diagnosis!` | call |  | io/file |
-| P:63:receipt-bytes | `persist-diagnosis!` | call |  | receipt-bytes |
-| P:64:Files/createDirectories | `persist-diagnosis!` | call |  | Files/createDirectories |
-| P:65:Files/createTempFile | `persist-diagnosis!` | call |  | Files/createTempFile |
-| P:68:Files/isRegularFile | `persist-diagnosis!` | call |  | Files/isRegularFile |
-| P:70:Files/readAllBytes | `persist-diagnosis!` | call |  | Files/readAllBytes |
 | P:71 | `persist-diagnosis!` | status-map | persisted |  |
-| P:72:load-identity/sha256 | `persist-diagnosis!` | call |  | load-identity/sha256 |
-| P:75:Files/exists | `persist-diagnosis!` | call |  | Files/exists |
-| P:76:refusal | `persist-diagnosis!` | call |  | refusal |
-| P:79:Files/write | `persist-diagnosis!` | call |  | Files/write |
-| P:81:Files/move | `persist-diagnosis!` | call |  | Files/move |
-| P:86:refusal | `persist-diagnosis!` | call |  | refusal |
-| P:87:Files/deleteIfExists | `persist-diagnosis!` | call |  | Files/deleteIfExists |
-| P:89:refusal | `persist-diagnosis!` | call |  | refusal |
-| P:106:io/file | `repository-file?` | call |  | io/file |
-| P:107:io/file | `repository-file?` | call |  | io/file |
-| P:108:io/file | `repository-file?` | call |  | io/file |
-| P:128:str/blank? | `production-functions-defects` | call |  | str/blank? |
-| P:129:str/blank? | `production-functions-defects` | call |  | str/blank? |
-| P:133:repository-file? | `production-functions-defects` | call |  | repository-file? |
-| P:135:resolvable-var? | `production-functions-defects` | call |  | resolvable-var? |
-| P:136:repository-file? | `production-functions-defects` | call |  | repository-file? |
 | P:157 | `produce-diagnosis!` | status-map | present |  |
-| P:159:active-cause-pin | `produce-diagnosis!` | call |  | active-cause-pin |
-| P:163:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:167:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:172:source-record | `produce-diagnosis!` | call |  | source-record |
 | P:183:diagnosis-port-threw | `produce-diagnosis!` | status-map | failed | meta-self-heal/diagnosis-port-threw |
-| P:187:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:191:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:195:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:206:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:209:production-functions-defects | `produce-diagnosis!` | call |  | production-functions-defects |
-| P:212:refusal | `produce-diagnosis!` | call |  | refusal |
-| P:213:production-functions-defects | `produce-diagnosis!` | call |  | production-functions-defects |
 | P:221 | `produce-diagnosis!` | status-map | available |  |
-| P:226:persist-diagnosis! | `produce-diagnosis!` | call |  | persist-diagnosis! |
-| P:227:diagnosis-path | `produce-diagnosis!` | call |  | diagnosis-path |
 | P:232 | `produce-diagnosis!` | status-map | available |  |
-| P:239:load-identity/sha256 | `acceptance-path` | call |  | load-identity/sha256 |
-| P:239:receipt-bytes | `acceptance-path` | call |  | receipt-bytes |
-| P:248:pin? | `read-diagnosis-receipt` | call |  | pin? |
-| P:249:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:253:Files/readAllBytes | `read-diagnosis-receipt` | call |  | Files/readAllBytes |
-| P:253:io/file | `read-diagnosis-receipt` | call |  | io/file |
-| P:255:load-identity/sha256 | `read-diagnosis-receipt` | call |  | load-identity/sha256 |
-| P:256:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:259:store/read-one-form | `read-diagnosis-receipt` | call |  | store/read-one-form |
-| P:266:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:268:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:270:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:272:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:274:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:277:production-functions-defects | `read-diagnosis-receipt` | call |  | production-functions-defects |
-| P:278:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:279:production-functions-defects | `read-diagnosis-receipt` | call |  | production-functions-defects |
 | P:280 | `read-diagnosis-receipt` | status-map | available |  |
-| P:282:refusal | `read-diagnosis-receipt` | call |  | refusal |
-| P:296:str/blank? | `namespace-test-path` | call |  | str/blank? |
-| P:297:str/split | `namespace-test-path` | call |  | str/split |
-| P:299:str/join | `namespace-test-path` | call |  | str/join |
-| P:299:str/replace | `namespace-test-path` | call |  | str/replace |
-| P:304:str/blank? | `concrete-acceptance?` | call |  | str/blank? |
-| P:308:str/blank? | `concrete-acceptance?` | call |  | str/blank? |
-| P:310:command-namespace | `concrete-acceptance?` | call |  | command-namespace |
-| P:311:namespace-test-path | `concrete-acceptance?` | call |  | namespace-test-path |
-| P:316:str/blank? | `source-shaped?` | call |  | str/blank? |
-| P:320:source-shaped? | `source-mismatch?` | call |  | source-shaped? |
-| P:322:command-namespace | `source-mismatch?` | call |  | command-namespace |
-| P:324:namespace-test-path | `source-mismatch?` | call |  | namespace-test-path |
-| P:331:io/file | `persist-acceptance!` | call |  | io/file |
-| P:332:io/file | `persist-acceptance!` | call |  | io/file |
-| P:333:receipt-bytes | `persist-acceptance!` | call |  | receipt-bytes |
-| P:334:Files/createDirectories | `persist-acceptance!` | call |  | Files/createDirectories |
-| P:335:Files/createTempFile | `persist-acceptance!` | call |  | Files/createTempFile |
-| P:338:Files/isRegularFile | `persist-acceptance!` | call |  | Files/isRegularFile |
-| P:340:Files/readAllBytes | `persist-acceptance!` | call |  | Files/readAllBytes |
 | P:341 | `persist-acceptance!` | status-map | persisted |  |
-| P:342:load-identity/sha256 | `persist-acceptance!` | call |  | load-identity/sha256 |
-| P:345:Files/exists | `persist-acceptance!` | call |  | Files/exists |
-| P:346:refusal | `persist-acceptance!` | call |  | refusal |
-| P:348:Files/write | `persist-acceptance!` | call |  | Files/write |
-| P:350:Files/move | `persist-acceptance!` | call |  | Files/move |
-| P:355:refusal | `persist-acceptance!` | call |  | refusal |
-| P:356:Files/deleteIfExists | `persist-acceptance!` | call |  | Files/deleteIfExists |
-| P:358:refusal | `persist-acceptance!` | call |  | refusal |
-| P:386:str/includes? | `resolve-var` | call |  | str/includes? |
-| P:393:resolve-var | `describe-function` | call |  | resolve-var |
-| P:404:describe-function | `harness-section` | call |  | describe-function |
-| P:422:harness-section | `request-enrichment` | call |  | harness-section |
 | P:465:acceptance-port-threw | `produce-acceptance-from-request!` | status-map | failed | meta-self-heal/acceptance-port-threw |
-| P:469:refusal | `produce-acceptance-from-request!` | call |  | refusal |
-| P:472:refusal | `produce-acceptance-from-request!` | call |  | refusal |
-| P:485:refusal | `produce-acceptance-from-request!` | call |  | refusal |
-| P:491:producer-trace | `produce-acceptance-from-request!` | call |  | producer-trace |
-| P:492:source-mismatch? | `produce-acceptance-from-request!` | call |  | source-mismatch? |
-| P:493:refusal | `produce-acceptance-from-request!` | call |  | refusal |
-| P:495:producer-trace | `produce-acceptance-from-request!` | call |  | producer-trace |
-| P:496:concrete-acceptance? | `produce-acceptance-from-request!` | call |  | concrete-acceptance? |
-| P:497:refusal | `produce-acceptance-from-request!` | call |  | refusal |
-| P:499:producer-trace | `produce-acceptance-from-request!` | call |  | producer-trace |
 | P:501 | `produce-acceptance-from-request!` | status-map | proposed |  |
-| P:510:persist-acceptance! | `produce-acceptance-from-request!` | call |  | persist-acceptance! |
-| P:511:acceptance-path | `produce-acceptance-from-request!` | call |  | acceptance-path |
 | P:515 | `produce-acceptance-from-request!` | status-map | proposed |  |
-| P:521:producer-trace | `produce-acceptance-from-request!` | call |  | producer-trace |
-| P:524:producer-trace | `produce-acceptance-from-request!` | call |  | producer-trace |
 | P:538 | `produce-acceptance!` | status-map | present |  |
-| P:539:read-diagnosis-receipt | `produce-acceptance!` | call |  | read-diagnosis-receipt |
-| P:548:refusal | `produce-acceptance!` | call |  | refusal |
-| P:553:request-enrichment | `produce-acceptance!` | call |  | request-enrichment |
-| P:556:refusal | `produce-acceptance!` | call |  | refusal |
-| P:560:produce-acceptance-from-request! | `produce-acceptance!` | call |  | produce-acceptance-from-request! |
-| P:565:pin? | `read-acceptance-proposal` | call |  | pin? |
-| P:566:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:568:Files/readAllBytes | `read-acceptance-proposal` | call |  | Files/readAllBytes |
-| P:568:io/file | `read-acceptance-proposal` | call |  | io/file |
-| P:569:load-identity/sha256 | `read-acceptance-proposal` | call |  | load-identity/sha256 |
-| P:570:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:571:store/read-one-form | `read-acceptance-proposal` | call |  | store/read-one-form |
-| P:577:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:579:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:581:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:583:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:585:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:586:source-mismatch? | `read-acceptance-proposal` | call |  | source-mismatch? |
-| P:587:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:588:concrete-acceptance? | `read-acceptance-proposal` | call |  | concrete-acceptance? |
-| P:589:refusal | `read-acceptance-proposal` | call |  | refusal |
 | P:590 | `read-acceptance-proposal` | status-map | available |  |
-| P:592:refusal | `read-acceptance-proposal` | call |  | refusal |
-| P:603:read-acceptance-proposal | `admit-acceptance!` | call |  | read-acceptance-proposal |
-| P:610:refusal | `admit-acceptance!` | call |  | refusal |
-| P:613:refusal | `admit-acceptance!` | call |  | refusal |
 | P:618:acceptance-run-threw | `admit-acceptance!` | status-map | failed | meta-self-heal/acceptance-run-threw |
-| P:627:pin? | `admit-acceptance!` | call |  | pin? |
 | P:642:acceptance-review-threw | `admit-acceptance!` | status-map | failed | meta-self-heal/acceptance-review-threw |
-| P:648:refusal | `admit-acceptance!` | call |  | refusal |
-| P:652:refusal | `admit-acceptance!` | call |  | refusal |
-| P:656:refusal | `admit-acceptance!` | call |  | refusal |
-| P:658:refusal | `admit-acceptance!` | call |  | refusal |
-| P:668:refusal | `admit-acceptance!` | call |  | refusal |
 | P:670 | `admit-acceptance!` | status-map | accepted |  |
-| P:680:persist-acceptance! | `admit-acceptance!` | call |  | persist-acceptance! |
-| P:681:acceptance-path | `admit-acceptance!` | call |  | acceptance-path |
 | P:691 | `admit-acceptance!` | status-map | accepted |  |
 | P:703 | `prepare-acceptance` | status-map | present |  |
-| P:706:produce-acceptance! | `prepare-acceptance` | call |  | produce-acceptance! |
-| P:708:admit-acceptance! | `prepare-acceptance` | call |  | admit-acceptance! |
 | P:712:acceptance-no-diagnosis-required | `prepare-acceptance` | status-map | not-required | meta-self-heal/acceptance-no-diagnosis-required |
-| P:720:coordinator/verify-transaction | `persist-transaction!` | call |  | coordinator/verify-transaction |
-| P:721:refusal | `persist-transaction!` | call |  | refusal |
 | P:721:transaction-invalid | `persist-transaction!` | refusal |  | meta-self-heal/transaction-invalid |
-| P:722:io/file | `persist-transaction!` | call |  | io/file |
-| P:723:Files/createDirectories | `persist-transaction!` | call |  | Files/createDirectories |
-| P:724:Files/createTempFile | `persist-transaction!` | call |  | Files/createTempFile |
-| P:727:Files/move | `persist-transaction!` | call |  | Files/move |
 | P:730 | `persist-transaction!` | status-map | persisted |  |
-| P:733:refusal | `persist-transaction!` | call |  | refusal |
 | P:733:transaction-persist-failed | `persist-transaction!` | refusal |  | meta-self-heal/transaction-persist-failed |
-| P:736:io/file | `load-transaction` | call |  | io/file |
-| P:737:store/read-one-form | `load-transaction` | call |  | store/read-one-form |
-| P:739:coordinator/verify-transaction | `load-transaction` | call |  | coordinator/verify-transaction |
-| P:757:coordinator/seal-port-receipt | `agency-port` | call |  | coordinator/seal-port-receipt |
 | P:758 | `agency-port` | status-map | computed |  |
-| P:767:coordinator/seal-port-receipt | `endpoint-port` | call |  | coordinator/seal-port-receipt |
 | P:768 | `endpoint-port` | status-map | computed |  |
-| P:776:agency-port | `effect-ports` | call |  | agency-port |
-| P:777:agency-port | `effect-ports` | call |  | agency-port |
-| P:778:endpoint-port | `effect-ports` | call |  | endpoint-port |
-| P:779:endpoint-port | `effect-ports` | call |  | endpoint-port |
-| P:798:str/starts-with? | `latest-retry-click` | call |  | str/starts-with? |
-| P:813:io/file | `diagnosis-context` | call |  | io/file |
-| P:814:store/load-durable-ledger | `diagnosis-context` | call |  | store/load-durable-ledger |
-| P:816:ledger/active-injuries | `diagnosis-context` | call |  | ledger/active-injuries |
 | P:835 | `prepare-diagnosis` | status-map | present |  |
-| P:851:produce-diagnosis! | `prepare-diagnosis` | call |  | produce-diagnosis! |
-| P:859:diagnosis-context | `production-readiness` | call |  | diagnosis-context |
-| P:869:effect-ports | `production-readiness` | call |  | effect-ports |
-| P:888:refusal | `production-readiness` | call |  | refusal |
 | P:892 | `production-readiness` | status-map | ready |  |
 | P:895 | `production-readiness` | status-map | absent |  |
-| P:898:refusal | `production-readiness` | call |  | refusal |
 | P:902 | `production-readiness` | status-map | ready |  |
 | P:913 | `diagnosis-transaction-binding` | status-map | valid |  |
 | P:921 | `diagnosis-transaction-binding` | status-map | valid |  |
-| P:922:refusal | `diagnosis-transaction-binding` | call |  | refusal |
 | P:934 | `acceptance-transaction-binding` | status-map | valid |  |
-| P:936:refusal | `acceptance-transaction-binding` | call |  | refusal |
 | P:947 | `acceptance-transaction-binding` | status-map | valid |  |
-| P:948:refusal | `acceptance-transaction-binding` | call |  | refusal |
-| P:958:io/file | `attributable-retry-readiness` | call |  | io/file |
-| P:959:store/load-durable-ledger | `attributable-retry-readiness` | call |  | store/load-durable-ledger |
 | P:969 | `attributable-retry-readiness` | status-map | ready |  |
-| P:970:refusal | `attributable-retry-readiness` | call |  | refusal |
-| P:980:io/file | `route!` | call |  | io/file |
-| P:981:store/load-durable-ledger | `route!` | call |  | store/load-durable-ledger |
-| P:983:ledger/active-injuries | `route!` | call |  | ledger/active-injuries |
-| P:986:refusal | `route!` | call |  | refusal |
-| P:991:effect-ports | `route!` | call |  | effect-ports |
-| P:1000:refusal | `route!` | call |  | refusal |
-| P:1003:load-transaction | `route!` | call |  | load-transaction |
-| P:1005:coordinator/prepare | `route!` | call |  | coordinator/prepare |
-| P:1005:work-order-options | `route!` | call |  | work-order-options |
-| P:1014:refusal | `route!` | call |  | refusal |
-| P:1018:diagnosis-transaction-binding | `route!` | call |  | diagnosis-transaction-binding |
-| P:1020:acceptance-transaction-binding | `route!` | call |  | acceptance-transaction-binding |
-| P:1039:store/persist-ledger! | `route!` | call |  | store/persist-ledger! |
-| P:1041:persist-transaction! | `route!` | call |  | persist-transaction! |
 | P:1043 | `route!` | status-map | computed |  |
-| P:1052:latest-retry-click | `route!` | call |  | latest-retry-click |
-| P:1060:coordinator/coordinate | `route!` | call |  | coordinator/coordinate |
-| P:1064:store/persist-ledger! | `route!` | call |  | store/persist-ledger! |
-| P:1065:persist-transaction! | `route!` | call |  | persist-transaction! |
-| P:1068:refusal | `route!` | call |  | refusal |
-| P:1070:store/load-durable-ledger | `route!` | call |  | store/load-durable-ledger |
-| P:1080:coordinator/coordinate | `route!` | call |  | coordinator/coordinate |
-| R:474:meta-self-heal/diagnosis-context | `run-opportunity!` | call |  | meta-self-heal/diagnosis-context |
-| R:476:meta-self-heal/prepare-diagnosis | `run-opportunity!` | call |  | meta-self-heal/prepare-diagnosis |
 | R:479:acceptance-not-prepared | `run-opportunity!` | status-map | not-required | meta-self-heal/acceptance-not-prepared |
-| R:484:meta-self-heal/prepare-acceptance | `run-opportunity!` | call |  | meta-self-heal/prepare-acceptance |
 | R:498 | `run-opportunity!` | status-map | not-required |  |
-| R:500:meta-self-heal/attributable-retry-readiness | `run-opportunity!` | call |  | meta-self-heal/attributable-retry-readiness |
-| R:501:meta-self-heal/production-readiness | `run-opportunity!` | call |  | meta-self-heal/production-readiness |
-| R:511:run-ordinary-opportunity! | `run-opportunity!` | call |  | run-ordinary-opportunity! |
-| R:514:meta-self-heal/route! | `run-opportunity!` | call |  | meta-self-heal/route! |
-| R:515:run-ordinary-opportunity! | `run-opportunity!` | call |  | run-ordinary-opportunity! |
 | S:366:injected-partial-resolver | `meta-self-heal-preflight!` | status-map | ready | injected-partial-resolver |
 | S:369 | `meta-self-heal-preflight!` | status-map | computed |  |
-| T:18:str/blank? | `nonblank?` | call |  | str/blank? |
-| T:20:nonblank? | `pin?` | call |  | nonblank? |
 | T:23 | `refusal` | status-map | refused |  |
-| T:41:nonblank? | `target` | call |  | nonblank? |
-| T:45:failure-kind | `cause-key` | call |  | failure-kind |
-| T:45:failure-stage | `cause-key` | call |  | failure-stage |
-| T:45:target | `cause-key` | call |  | target |
-| T:62:supported-cause-entries | `contains-cause?` | call |  | supported-cause-entries |
-| T:64:failure-kind | `unconfigured-route?` | call |  | failure-kind |
-| T:65:contains-cause? | `unconfigured-route?` | call |  | contains-cause? |
-| T:69:failure-kind | `evaluated-no-action?` | call |  | failure-kind |
-| T:70:contains-cause? | `evaluated-no-action?` | call |  | contains-cause? |
-| T:74:failure-kind | `partial-frontier-continuation?` | call |  | failure-kind |
-| T:79:unconfigured-route? | `abstention-reason` | call |  | unconfigured-route? |
-| T:80:partial-frontier-continuation? | `abstention-reason` | call |  | partial-frontier-continuation? |
-| T:81:evaluated-no-action? | `abstention-reason` | call |  | evaluated-no-action? |
-| T:84:identity/digest | `cause-id` | call |  | identity/digest |
-| T:85:cause-key | `cause-id` | call |  | cause-key |
-| T:86:unconfigured-route? | `cause-id` | call |  | unconfigured-route? |
 | T:87:outer-policy-evidence-provider-required | `cause-id` | absent-term |  | outer-policy-evidence-provider-required |
-| T:89:identity/digest | `injury-id` | call |  | identity/digest |
-| T:90:cause-key | `injury-id` | call |  | cause-key |
-| T:91:unconfigured-route? | `injury-id` | call |  | unconfigured-route? |
 | T:92:outer-policy-evidence-provider-required | `injury-id` | absent-term |  | outer-policy-evidence-provider-required |
-| T:94:identity/digest | `seal-classification` | call |  | identity/digest |
-| T:102:identity/digest | `verify-classification` | call |  | identity/digest |
-| T:105:pin? | `verify-classification` | call |  | pin? |
 | T:106 | `verify-classification` | status-map | valid |  |
-| T:107:refusal | `verify-classification` | call |  | refusal |
 | T:107:invalid | `verify-classification` | refusal |  | classification/invalid |
-| T:109:refusal | `verify-classification` | call |  | refusal |
 | T:109:malformed | `verify-classification` | refusal |  | classification/malformed |
-| T:117:failure-kind | `classify` | call |  | failure-kind |
-| T:118:failure-stage | `classify` | call |  | failure-stage |
-| T:119:run-id | `classify` | call |  | run-id |
-| T:120:click-id | `classify` | call |  | click-id |
-| T:121:outcome | `classify` | call |  | outcome |
-| T:123:unconfigured-route? | `classify` | call |  | unconfigured-route? |
-| T:124:abstention-reason | `classify` | call |  | abstention-reason |
 | T:132:map | `classify` | absent-term |  | record/map |
-| T:133:pin? | `classify` | call |  | pin? |
 | T:133:source-pin | `classify` | absent-term |  | record/source-pin |
-| T:134:nonblank? | `classify` | call |  | nonblank? |
 | T:134:run-id | `classify` | absent-term |  | record/run-id |
-| T:135:nonblank? | `classify` | call |  | nonblank? |
 | T:135:click-id | `classify` | absent-term |  | record/click-id |
-| T:137:refusal | `classify` | call |  | refusal |
-| T:138:seal-classification | `classify` | call |  | seal-classification |
 | T:139 | `classify` | status-map | classified |  |
-| T:159:cause-id | `classify` | call |  | cause-id |
-| T:161:unconfigured-route? | `classify` | call |  | unconfigured-route? |
-| T:164:target | `classify` | call |  | target |
-| T:166:refusal | `classify` | call |  | refusal |
-| T:174:ledger-entries | `already-ingested?` | call |  | ledger-entries |
-| T:178:ledger-entries | `latest-injury` | call |  | ledger-entries |
-| T:183:ledger-entries | `enacted-for-retry` | call |  | ledger-entries |
-| T:187:ledger/append-observation | `append-other-injury-retry-observation` | call |  | ledger/append-observation |
-| T:205:ledger/validate-ledger | `integrate` | call |  | ledger/validate-ledger |
-| T:206:refusal | `integrate` | call |  | refusal |
 | T:206:tampered | `integrate` | refusal |  | ledger/tampered |
-| T:208:verify-classification | `integrate` | call |  | verify-classification |
-| T:209:refusal | `integrate` | call |  | refusal |
 | T:209:invalid | `integrate` | refusal |  | classification/invalid |
-| T:211:already-ingested? | `integrate` | call |  | already-ingested? |
 | T:212:record-already-ingested | `integrate` | status-map | duplicate | record-already-ingested |
-| T:216:enacted-for-retry | `integrate` | call |  | enacted-for-retry |
-| T:222:ledger-entries | `integrate` | call |  | ledger-entries |
-| T:224:ledger/append-transition | `integrate` | call |  | ledger/append-transition |
-| T:235:ledger/append-observation | `integrate` | call |  | ledger/append-observation |
-| T:241:ledger/append-observation | `integrate` | call |  | ledger/append-observation |
-| T:247:latest-injury | `integrate` | call |  | latest-injury |
-| T:248:enacted-for-retry | `integrate` | call |  | enacted-for-retry |
-| T:255:ledger/append-transition | `integrate` | call |  | ledger/append-transition |
-| T:264:append-other-injury-retry-observation | `integrate` | call |  | append-other-injury-retry-observation |
-| T:279:ledger-entries | `integrate` | call |  | ledger-entries |
-| T:284:refusal | `integrate` | call |  | refusal |
-| T:289:ledger/append-observation | `integrate` | call |  | ledger/append-observation |
-| T:293:append-other-injury-retry-observation | `integrate` | call |  | append-other-injury-retry-observation |
-| T:299:refusal | `integrate` | call |  | refusal |
-| T:302:refusal | `integrate` | call |  | refusal |
 | T:302:unknown | `integrate` | refusal |  | classification/unknown |
-| T:304:refusal | `integrate` | call |  | refusal |
 | T:304:malformed | `integrate` | refusal |  | injury-integration/malformed |
-| T:310:integrate | `replay` | call |  | integrate |
 | T:311 | `replay` | status-map | seed |  |
 
 ## Lean entities with no code endpoint
@@ -719,12 +234,14 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 - `SelfHealRoute.CoordinationOutcome.refused` (line 998)
 - `SelfHealRoute.CoordinationOutcome.persistFailed` (line 999)
 - `SelfHealRoute.CoordinationOutcome.closed` (line 1000)
+- `SelfHealRoute.RetryField.injuryId` (line 1127)
 - `SelfHealRoute.RetryField.repairId` (line 1127)
 - `SelfHealRoute.RetryField.retryClick` (line 1127)
 - `SelfHealRoute.RetryField.patchSha` (line 1127)
 - `SelfHealRoute.RetryAttributionDefect.ledgerNotLoaded` (line 1134)
 - `SelfHealRoute.RetryAttributionDefect.noEnactedEntry` (line 1136)
 - `SelfHealRoute.RetryAttributionDefect.noAuthoredEntry` (line 1138)
+- `SelfHealRoute.RetryAttributionDefect.fieldDiffers` (line 1140)
 - `SelfHealRoute.RetryClickOutcome.otherInjury` (line 1199)
 - `SelfHealRoute.RetryNext.discharged` (line 1378)
 - `SelfHealRoute.RetryNext.reopened` (line 1381)
@@ -749,14 +266,19 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 
 - `SelfHealRoute.AbandonReason.retryBudgetSpent` cites C:260
 - `SelfHealRoute.AdmissionDefect.noReviewerAnswer` cites A:227
+- `SelfHealRoute.AdmissionDefect.noReviewerAnswer` cites A:233
+- `SelfHealRoute.AdmissionDefect.noReviewerAnswer` cites A:237
 - `SelfHealRoute.AdmissionDefect.noReviewerAnswer` cites P:628
 - `SelfHealRoute.AdmissionDefect.passesBeforeRepair` cites P:622
 - `SelfHealRoute.AdmissionDefect.reviewerRefused` cites P:628
 - `SelfHealRoute.AdmissionDefect.runRefused` cites A:359
 - `SelfHealRoute.AdmissionDefect.runRefused` cites A:390
 - `SelfHealRoute.AdmissionDefect.runRefused` cites A:393
+- `SelfHealRoute.ClosingStatus.abandoned` cites C:375
+- `SelfHealRoute.ClosingStatus.awaitingRetry` cites C:349
 - `SelfHealRoute.ClosingStatus.discharged` cites C:357
 - `SelfHealRoute.ClosingStatus.discharged` cites C:364
+- `SelfHealRoute.ClosingStatus.reopened` cites C:375
 - `SelfHealRoute.ClosingStatus.retryInconclusive` cites T:189
 - `SelfHealRoute.ClosingStatus.retryInconclusive` cites T:236
 - `SelfHealRoute.CoordinatorRefusal.authorPayloadRefused` cites C:272
@@ -770,20 +292,27 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 - `SelfHealRoute.CoordinatorRefusal.resumeStateRefused` cites C:257
 - `SelfHealRoute.CoordinatorRefusal.reviewPatchSubstitution` cites C:292
 - `SelfHealRoute.HeldReason.authorFailed` cites C:268
+- `SelfHealRoute.HeldReason.enactFailed` cites C:313
 - `SelfHealRoute.ProposalDefect.authorRefused` cites P:460
 - `SelfHealRoute.ProposalDefect.prose` cites P:470
 - `SelfHealRoute.ProposalDefect.sourceMismatch` cites P:467
 - `SelfHealRoute.ProposalDefect.transport` cites A:227
+- `SelfHealRoute.ProposalDefect.transport` cites A:233
 - `SelfHealRoute.ProposalDefect.transport` cites P:460
+- `SelfHealRoute.ProposalDefect.unreadableAnswer` cites A:237
 - `SelfHealRoute.ProposalDefect.unreadableAnswer` cites P:460
 - `SelfHealRoute.RetryClickOutcome.absentTerminalFailure` cites T:129
+- `SelfHealRoute.RetryClickOutcome.otherInjury` cites T:247
 - `SelfHealRoute.RetryClickOutcome.otherInjury` cites T:253
 - `SelfHealRoute.RetryClickOutcome.otherInjury` cites T:288
 - `SelfHealRoute.RetryClickOutcome.otherInjuryRefused` cites T:268
 - `SelfHealRoute.RetryClickOutcome.sameInjury` cites T:244
 - `SelfHealRoute.RetryClickOutcome.successfulTaskOutcome` cites T:126
+- `SelfHealRoute.RetryNext.awaitingNothingQueued` cites C:247
 - `SelfHealRoute.RetryNext.queued` cites C:232
 - `SelfHealRoute.RetryNext.queued` cites C:233
+- `SelfHealRoute.RetryNext.queued` cites C:247
+- `SelfHealRoute.RetryNext.queued` cites C:258
 - `SelfHealRoute.RetryNext.queued` cites C:267
 - `SelfHealRoute.RouteState.activeSetUnavailable` cites P:780
 - `SelfHealRoute.RouteState.ledgerRead` cites P:755
@@ -792,4 +321,5 @@ Edges by basis: keyword 40, call 5, line 4, name 14, line-unconfirmed 18
 - `SelfHealRoute.RouteState.retryClick` cites R:473
 - `SelfHealRoute.RouteState.retryClick` cites S:989
 - `SelfHealRoute.RouteState.retryReady` cites P:896
+- `SelfHealRoute.RouteState.retryReady` cites R:500
 - `SelfHealRoute.RouteState.retryRefused` cites P:918
