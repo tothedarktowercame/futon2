@@ -1331,7 +1331,7 @@
     (is (false? (:ordinary-selection-called? result)))
     (is (zero? @effects))))
 
-(deftest click-7-stale-transaction-is-retired-before-attempt-two-authoring
+(deftest click-7-author-failures-continue-through-the-ledger-attempt-limit
   (let [dir (root)
         ledger-path (str dir "/ledger.edn")
         transaction-path (str dir "/transaction.edn")
@@ -1340,12 +1340,7 @@
         order (:work-order transaction)
         failed-author-pin {:path "meta-self-heal/author/click-7-failed.edn"
                            :sha256 (apply str (repeat 64 "f"))}
-        reopened (:ledger (ledger/append-retry-result
-                           history {:injury-id (:injury-id order)
-                                    :repair-id (:repair-id order)
-                                    :reason :author-failed
-                                    :port-receipt-pin failed-author-pin}))
-        _ (spit ledger-path (str (pr-str reopened) "\n"))
+        _ (spit ledger-path (str (pr-str history) "\n"))
         _ (spit transaction-path (str (pr-str transaction) "\n"))
         author-orders (atom [])
         sealed (fn [request]
@@ -1381,16 +1376,73 @@
         retired (str transaction-path ".attempt-1.retired.edn")]
     (is (= :held (:status result)))
     (is (= :author-failed (:reason result)))
-    (is (= {:path retired :attempt 1} (:transaction-retired result)))
+    (is (= [{:attempt 1 :reason :author-failed
+             :transaction-retired {:path retired :attempt 1}}
+            {:attempt 2 :reason :author-failed
+             :transaction-retired {:path (str transaction-path ".attempt-2.retired.edn")
+                                   :attempt 2}}]
+           (:continued-from result)))
     (is (.isFile (java.io.File. retired)))
-    (is (= 2 (get-in (first @author-orders) [:attempt])))
+    (is (.isFile (java.io.File. (str transaction-path ".attempt-2.retired.edn"))))
+    (is (= [2 3] (mapv :attempt @author-orders)))
     (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
-    ;; Review fix for 907d9ca11 (claude-5, 2026-10-20): attempt 2's failed
-    ;; receipt must itself reopen attempt 3 on disk, which separates "the
-    ;; held ledger was written" from "the reopened setup ledger was left".
-    (is (= [:reopened 3]
+    (is (= [:abandoned 3 :attempt-limit-exhausted]
            (-> (store/load-durable-ledger ledger-path) :ledger :entries last
-               ((juxt :state :attempt)))))))
+               ((juxt :state :attempt :reason)))))))
+
+(deftest click-7-continuation-stops-at-the-first-non-author-hold
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        pin {:path "meta-self-heal/f31-run.edn"
+             :sha256 (apply str (repeat 64 "f"))}
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        author-orders (atom [])
+        seal (fn [request status payload]
+               (let [work-order (:work-order request)]
+                 (coordinator/seal-port-receipt
+                  {:phase (:phase request) :injury-id (:injury-id work-order)
+                   :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                   :predecessor-pin (:predecessor-pin request)
+                   :status status :payload payload})))
+        ports {:author (fn [request]
+                         (swap! author-orders conj (:work-order request))
+                         (seal request :succeeded
+                               {:patch-sha (apply str (repeat 40 "a"))
+                                :worktree dir}))
+               :review (fn [request] (seal request :failed {:reason :review-offline}))
+               :enact (fn [request] (seal request :failed {:reason :unused}))
+               :retry (fn [request] (seal request :failed {:reason :unused}))}
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-repair-ports ports
+                 :meta-acceptance-run-fn (constantly {:status :ran :outcome :failed
+                                                      :exit 1 :summary "fixture" :run-pin pin})
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                 :acceptance-test (:acceptance-test order)
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order) :target-worktree dir}
+        result (with-redefs-fn
+                 {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
+                  #'production/acceptance-transaction-binding (fn [& _] {:status :valid})}
+                 #(production/route! options))]
+    (is (= :held (:status result)))
+    (is (= :review-rejected (:reason result)))
+    (is (= 2 (:attempt result)))
+    (is (= [2] (mapv :attempt @author-orders)))
+    (is (= [{:attempt 1 :reason :author-failed
+             :transaction-retired {:path (str transaction-path ".attempt-1.retired.edn")
+                                   :attempt 1}}]
+           (:continued-from result)))
+    (is (= 2 (-> (store/load-durable-ledger ledger-path) :ledger :entries last :attempt)))))
 
 (deftest production-shaped-options-without-identities-refuse-at-preparation
   "The exact option shape of click wm-click-c78d0f27, through the runtime:
@@ -1465,6 +1517,7 @@
     (is (not (str/includes? (pr-str result) "checkpoint-persist-failed")))
     (is (not (contains? result :ledger-write)))
     (is (not (contains? result :transaction-write)))
+    (is (not (contains? result :continued-from)))
     (is (= 1 calls))
     (is (= before (slurp (:ledger-path env))))))
 

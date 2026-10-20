@@ -870,6 +870,15 @@
                      :repair-reviewer :author-session :reviewer-session
                      :repair-reviewer-session :target-repository :target-worktree]))
 
+(defn- continued-work-order-options
+  "A continued author attempt needs new port-session identities even though its
+  diagnosis and admission evidence remain bound to the same injury."
+  [opts attempt]
+  (reduce (fn [options key]
+            (update options key #(when % (str % "/attempt-" attempt))))
+          (work-order-options opts)
+          [:author-session :reviewer-session :repair-reviewer-session]))
+
 (defn diagnosis-context
   "Read the durable injury state once for runtime diagnosis preparation.  The
   context is evidence, not readiness: an unreadable ledger remains available
@@ -1132,29 +1141,74 @@
                                        (select-keys retirement [:path :attempt]))
                                 lw (assoc :ledger-write lw)
                                 tw (assoc :transaction-write tw
-                                          :transaction (:transaction result)))))]
-                    (loop [durable durable transaction transaction
-                           phases checkpoints receipts []]
-                      (if-let [phase (first phases)]
-                        (let [result (coordinator/coordinate
-                                      durable transaction (assoc ports :stop-after phase))]
-                          (if-not (= :checkpoint (:status result))
-                            (settle result phase receipts)
-                            (let [lw (store/persist-ledger! ledger-path (:ledger result))
-                                  tw (persist-transaction! transaction-path (:transaction result))]
-                              (if-not (and (= :persisted (:status lw))
-                                           (= :persisted (:status tw)))
-                                (refusal :meta-self-heal/checkpoint-persist-failed
-                                         {:phase phase :ledger-write lw :transaction-write tw})
-                                (recur (store/load-durable-ledger ledger-path)
-                                       (:transaction result) (next phases)
-                                       (conj receipts {:phase phase
-                                                       :ledger-pin (:ledger-pin (:ledger result))
-                                                       :transaction-pin
-                                                       (:transaction-pin (:transaction result))}))))))
-                        ;; :final is the SelfHealRoute CoordinationPhase for
-                        ;; the coordinate call after the loop (mathlib4
-                        ;; darktower d6f4b88ca3); the coordinator's own
-                        ;; :phase, when it gives one, is kept over it.
-                        (settle (coordinator/coordinate durable transaction ports)
-                                :final receipts))))))))))))))
+                                          :transaction (:transaction result)))))
+                          (run-attempt [attempt-durable attempt-transaction]
+                            (loop [durable attempt-durable transaction attempt-transaction
+                                   phases checkpoints receipts []]
+                              (if-let [phase (first phases)]
+                                (let [result (coordinator/coordinate
+                                              durable transaction (assoc ports :stop-after phase))]
+                                  (if-not (= :checkpoint (:status result))
+                                    (settle result phase receipts)
+                                    (let [lw (store/persist-ledger! ledger-path (:ledger result))
+                                          tw (persist-transaction! transaction-path (:transaction result))]
+                                      (if-not (and (= :persisted (:status lw))
+                                                   (= :persisted (:status tw)))
+                                        (refusal :meta-self-heal/checkpoint-persist-failed
+                                                 {:phase phase :ledger-write lw :transaction-write tw})
+                                        (recur (store/load-durable-ledger ledger-path)
+                                               (:transaction result) (next phases)
+                                               (conj receipts {:phase phase
+                                                               :ledger-pin (:ledger-pin (:ledger result))
+                                                               :transaction-pin
+                                                               (:transaction-pin (:transaction result))}))))))
+                                ;; :final is the SelfHealRoute CoordinationPhase for
+                                ;; the coordinate call after the loop (mathlib4
+                                ;; darktower d6f4b88ca3); the coordinator's own
+                                ;; :phase, when it gives one, is kept over it.
+                                (settle (coordinator/coordinate durable transaction ports)
+                                        :final receipts))))]
+                    (loop [attempt-durable durable attempt-transaction transaction
+                           continued []]
+                      (let [result (run-attempt attempt-durable attempt-transaction)
+                            next-durable (when (and (= :held (:status result))
+                                                    (= :author-failed (:reason result))
+                                                    (= :persisted (get-in result [:ledger-write :status]))
+                                                    (= :persisted (get-in result [:transaction-write :status])))
+                                           (store/load-durable-ledger ledger-path))
+                            injury-id (:injury-id result)
+                            reopened (get-in (ledger/active-injuries (:ledger next-durable))
+                                             [:injuries injury-id])]
+                        (if (and (= :loaded (:status next-durable))
+                                 (= :reopened (:state reopened)))
+                          (let [retired (retire-stale-transaction!
+                                         transaction-path (:transaction result))]
+                            (if (= :refused (:status retired))
+                              (assoc retired :route :dedicated-meta-self-heal
+                                     :ordinary-selection-called? false)
+                              (let [prepared (coordinator/prepare
+                                              next-durable
+                                              (continued-work-order-options
+                                               opts (:attempt reopened)))
+                                    next-transaction (:transaction prepared)
+                                    next-diagnosis (if next-transaction
+                                                     (diagnosis-transaction-binding opts next-transaction)
+                                                     (refusal :meta-self-heal/preparation-refused
+                                                              {:prepare (select-keys prepared
+                                                                                     [:status :reason :defects :detail])}))
+                                    next-acceptance (when (= :valid (:status next-diagnosis))
+                                                      (acceptance-transaction-binding opts next-transaction))
+                                    next-binding (or (when-not (= :valid (:status next-diagnosis))
+                                                      next-diagnosis)
+                                                     next-acceptance)]
+                                (if-not (= :valid (:status next-binding))
+                                  (assoc next-binding :route :dedicated-meta-self-heal
+                                         :ordinary-selection-called? false)
+                                  (recur next-durable next-transaction
+                                         (conj continued
+                                               {:attempt (:attempt result)
+                                                :reason :author-failed
+                                                :transaction-retired
+                                                (select-keys retired [:path :attempt])}))))))
+                          (cond-> result
+                            (seq continued) (assoc :continued-from continued))))))))))))))))
