@@ -427,6 +427,12 @@
        :persistence-destination {:note "the test writes only under the harness's temporary roots; canonical data/ and src/ are read-only"}
        :repository (or (:meta-repository-root opts) default-repository-root)})))
 
+(def ^:private producer-trace-keys
+  "The record keys producer-trace writes; admit-acceptance! carries them from
+   the proposal onto every admission result (F22b)."
+  [:acceptance-read-error :acceptance-read-retry :acceptance-transport-retry
+   :acceptance-read-repair :acceptance-source-retry :acceptance-source-read-error])
+
 (defn- producer-trace
   "What the producer did to get its answer, as record keys: F19's reader error
    and one informed re-ask (:read-retry), F9's one rate-limit retry
@@ -600,6 +606,8 @@
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-proposal-unreadable))))))
 
+(declare admit-acceptance*)
+
 (defn admit-acceptance!
   "Run, then independently review, one immutable concrete proposal.  The
   machine-run result is evidence shown to the reviewer; no prose, stale pin,
@@ -607,7 +615,20 @@
   coordinator authority.  This is the corrected contract exposed by
   wm-click-6cdf2a7c: at 17:37:37Z the reviewer correctly refused the former
   `:result-status :not-run` request with
-  `:reason/type :acceptance-test-not-run`."
+  `:reason/type :acceptance-test-not-run`.
+
+  F22b (click wm-click-d26194dd, 2026-10-20): the producer trace that
+  produce-acceptance! put on the proposal (its re-asks, repair and reader
+  errors) is carried onto every admission result, refused or accepted, so
+  the click record can say what the author was asked.  The admission
+  receipt itself does not carry it.  Click 5's author was re-asked once
+  for a source that did not read and answered with another that did not;
+  the reviewer's refusal was the only trace on the record."
+  [opts proposal]
+  (merge (admit-acceptance* opts proposal)
+         (select-keys proposal producer-trace-keys)))
+
+(defn- admit-acceptance*
   [opts proposal]
   (let [proposal-read (read-acceptance-proposal proposal)
         run-acceptance (:meta-acceptance-run-fn opts)

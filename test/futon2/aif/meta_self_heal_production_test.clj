@@ -458,7 +458,7 @@
         diagnosis (produced-diagnosis! dir)
         repair {:appended 1 :error "EOF while reading; 3 `{` opened, 2 `}` closed outside strings"}
         retry {:first-error "read a symbol, not a map with keyword keys" :first-preview "I have…"}
-        answer (fn [request] {:status :proposed
+        answer (fn [_] {:status :proposed
                               :acceptance-test (acceptance-case "P17-repaired" {:kind :configuration-injury})
                               :read-repair repair :read-retry retry})
         result (production/produce-acceptance!
@@ -530,6 +530,61 @@
     (is (= retry (:acceptance-source-retry mismatched))
         "a re-asked answer refused later still says it was re-asked")
     (is (not (contains? mismatched :acceptance-source-read-error)))))
+
+(deftest admission-carries-the-producer-trace-from-the-proposal
+  ;; F22b (click wm-click-d26194dd, 2026-10-20): the author was re-asked
+  ;; once for a source that did not read (F22) and answered with another;
+  ;; F22a put :acceptance-source-retry / :acceptance-source-read-error on
+  ;; the proposal, and admission dropped them, so the record showed only
+  ;; the reviewer's refusal at 115:88. Admission results carry the trace.
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        retry {:first-error "Unmatched delimiter: )" :first-line 135 :first-col 87}
+        remaining "Unmatched delimiter: ) at 115:88"
+        propose (fn [sub trace]
+                  (production/produce-acceptance!
+                   {:meta-acceptance-root (str dir "/acceptances-" sub)
+                    :meta-acceptance-fn (fn [_] (merge {:status :proposed
+                                                        :acceptance-test (acceptance-case (str "P23-" sub) :injury)}
+                                                       trace))}
+                   diagnosis))
+        traced (propose "traced" {:source-retry retry :source-read-error remaining})
+        plain (propose "plain" {})
+        run-result {:status :ran :outcome :failed :exit 1
+                    :summary "aborted at the reader"
+                    :run-pin {:path "test://acceptance-before-repair"
+                              :sha256 (apply str (repeat 64 "c"))}}
+        refuse (constantly {:status :refused :reason {:kind :syntax-error}})
+        accept (fn [request]
+                 (assoc (select-keys request [:injury-id :source-record-pin
+                                              :diagnosis-evidence-pin
+                                              :proposal-evidence-pin :acceptance-test])
+                        :status :accepted))
+        refused (production/admit-acceptance!
+                 {:meta-acceptance-run-fn (constantly run-result)
+                  :meta-acceptance-review-fn refuse} traced)
+        admitted (production/admit-acceptance!
+                  {:meta-acceptance-root (str dir "/admissions")
+                   :meta-acceptance-run-fn (constantly run-result)
+                   :meta-acceptance-review-fn accept} traced)
+        admission-receipt (edn/read-string (slurp (get-in admitted [:acceptance-admission-pin :path])))
+        plain-refused (production/admit-acceptance!
+                       {:meta-acceptance-run-fn (constantly run-result)
+                        :meta-acceptance-review-fn refuse} plain)]
+    (is (= retry (:acceptance-source-retry traced)) "F22a put the trace on the proposal")
+    (is (= :meta-self-heal/acceptance-review-refused (:reason refused)))
+    (is (= retry (:acceptance-source-retry refused))
+        "F22b: deleting the trace merge in admit-acceptance! makes this fail")
+    (is (= remaining (:acceptance-source-read-error refused)))
+    (is (= :accepted (:status admitted)))
+    (is (= retry (:acceptance-source-retry admitted)))
+    (is (= remaining (:acceptance-source-read-error admitted)))
+    (is (= :accepted (:review-status admission-receipt)))
+    (is (not (contains? admission-receipt :acceptance-source-retry)) "the admission receipt is the review, not the transport")
+    (is (not (contains? admission-receipt :acceptance-source-read-error)))
+    (is (= :meta-self-heal/acceptance-review-refused (:reason plain-refused)))
+    (is (not (contains? plain-refused :acceptance-source-retry)))
+    (is (not (contains? plain-refused :acceptance-source-read-error)))))
 
 (def ^:private documented-function
   ;; An extra, well-formed entry whose var has a docstring, so :doc is exercised.
