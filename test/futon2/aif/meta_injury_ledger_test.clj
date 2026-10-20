@@ -291,3 +291,78 @@
         (is (= :refused (:status result)))))
     (is (= #{"injury/2026-10-19/meta-route"}
            (set (keys (:injuries (ledger/active-injuries history))))))))
+
+(deftest forged-requeue-entries-are-refused-by-the-validator
+  ;; A hand-built enacted->enacted entry reaches the ledger through
+  ;; append-transition, not append-requeue, so the validator's
+  ;; :requeue/evidence conjuncts are the authority. Each forged entry differs
+  ;; from the valid re-queue in one field; deleting the conjunct for that
+  ;; field lets that forged entry append.
+  (let [injury "injury/2026-10-19/meta-route"
+        history (through-enacted)
+        valid {:injury-id injury
+               :state :enacted :attempt 1
+               :repair-id "repair/meta-self-heal-route"
+               :patch-sha patch-sha :requeues 1
+               :retry-click "retry/meta-self-heal/requeued"
+               :integration-commit integration-sha}
+        spent (reduce (fn [l click] (:ledger (ledger/append-requeue l injury click)))
+                      history ["retry/r1" "retry/r2" "retry/r3"])
+        forged {:retry-click-blank [history (assoc valid :retry-click " ")]
+                :retry-click-reused [history (assoc valid :retry-click
+                                                    "retry/meta-self-heal/1")]
+                :attempt-changed [history (assoc valid :attempt 2)]
+                :requeues-not-incremented [history (assoc valid :requeues 0)]
+                :requeues-skipped [history (assoc valid :requeues 2)]
+                :requeues-over-limit [spent (assoc valid :requeues 4
+                                                   :retry-click "retry/r4")]
+                :patch-substituted [history (assoc valid :patch-sha review-sha)]
+                :integration-dropped [history (dissoc valid :integration-commit)]
+                :reload-receipt-added [history (assoc valid :reload-receipt
+                                                      (first campaign-records))]}]
+    (is (= :appended (:status (ledger/append-transition history valid))))
+    (is (= 3 (get-in (ledger/active-injuries spent) [:injuries injury :requeues])))
+    (doseq [[label [base entry]] forged]
+      (let [result (ledger/append-transition base entry)]
+        (is (= :transition/invalid (:reason result)) (pr-str label result))
+        (is (some #{:requeue/evidence} (:defects result)) (pr-str label result))))))
+
+(deftest abandonment-reasons-do-not-accept-each-other
+  ;; :attempt-limit-exhausted needs attempt = :attempt-limit and
+  ;; :retry-budget-spent needs :requeues = :retry-limit. Neither shape
+  ;; validates under the other reason, a short budget does not validate, and
+  ;; an unknown reason validates under neither.
+  (let [injury "injury/2026-10-19/meta-route"
+        base {:injury-id injury :state :abandoned
+              :repair-id "repair/meta-self-heal-route"}
+        spent (reduce (fn [l click] (:ledger (ledger/append-requeue l injury click)))
+                      (through-enacted) ["retry/r1" "retry/r2" "retry/r3"])
+        reopen (fn [history attempt pin]
+                 (:ledger (ledger/append-retry-result
+                           history {:injury-id injury
+                                    :repair-id "repair/meta-self-heal-route"
+                                    :patch-sha patch-sha
+                                    :retry-click (str "retry/meta-self-heal/" attempt)
+                                    :new-cause-pin pin})))
+        at-limit (-> (through-enacted)
+                     (reopen 1 (second campaign-records))
+                     (through-enacted 2 "b")
+                     (reopen 2 (nth campaign-records 2))
+                     (through-enacted 3 "c"))
+        refused? (fn [history entry]
+                   (let [result (ledger/append-transition history entry)]
+                     (and (= :transition/invalid (:reason result))
+                          (boolean (some #{:abandonment/not-exhausted}
+                                         (:defects result))))))]
+    (is (= :appended (:status (ledger/append-transition
+                               spent (assoc base :attempt 1 :requeues 3
+                                            :reason :retry-budget-spent)))))
+    (is (= :appended (:status (ledger/append-transition
+                               at-limit (assoc base :attempt 3
+                                               :reason :attempt-limit-exhausted)))))
+    (is (refused? spent (assoc base :attempt 1 :requeues 3
+                               :reason :attempt-limit-exhausted)))
+    (is (refused? at-limit (assoc base :attempt 3 :reason :retry-budget-spent)))
+    (is (refused? spent (assoc base :attempt 1 :requeues 2
+                               :reason :retry-budget-spent)))
+    (is (refused? spent (assoc base :attempt 1 :requeues 3 :reason :gave-up)))))
