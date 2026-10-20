@@ -80,6 +80,20 @@
                       (map #(count (:corrected-port-receipt-pins %))))
                 + 0 (injury-history ledger injury-id))))
 (defn- latest [ledger injury-id] (last (injury-history ledger injury-id)))
+(defn- pending-requeue-entry [ledger injury-id]
+  (let [enacted (latest ledger injury-id)]
+    (when (= :enacted (:state enacted))
+      (last (filter #(and (observation? %)
+                          (= :retry-inconclusive (:observation-kind %))
+                          (> (:ordinal %) (:ordinal enacted))
+                          (= injury-id (:injury-id %))
+                          (= (:retry-click enacted) (:retry-click %)))
+                    (:entries ledger))))))
+(defn- other-open-injury [ledger injury-id record-pin]
+  (last (filter #(and (= :open (:state %))
+                      (not= injury-id (:injury-id %))
+                      (= record-pin (:cause-record-pin %)))
+                (transitions ledger))))
 (defn- authored [ledger injury-id]
   (last (filter #(= :authored (:state %)) (injury-history ledger injury-id))))
 (defn- claim [ledger injury-id]
@@ -127,6 +141,13 @@
         limit (effective-attempt-limit ledger (:injury-id entry))
         retry-limit (:retry-limit ledger)
         requeue? (and (= state :enacted) (= previous-state :enacted))
+        requeue-cause (:requeue-cause entry)
+        other-injury-requeue? (= :other-open-injury (:kind requeue-cause))
+        pending-observation (when requeue?
+                              (pending-requeue-entry ledger (:injury-id entry)))
+        attributed-other (when other-injury-requeue?
+                           (other-open-injury ledger (:injury-id entry)
+                                              (:record-pin requeue-cause)))
         author-failed-reopen? (author-failed-reopen? state previous-state entry)
         corrected-reopen? (corrected-reopen? state previous-state entry)]
     (cond-> []
@@ -186,7 +207,13 @@
            (or (not (nonblank? (:retry-click entry)))
                (= (:retry-click entry) (:retry-click previous))
                (not= attempt (:attempt previous))
-               (not= (:requeues entry) (inc (or (:requeues previous) 0)))
+               (if other-injury-requeue?
+                 (or (not= (:requeues entry) (or (:requeues previous) 0))
+                     (not (nonblank? (:injury-id requeue-cause)))
+                     (not= (:injury-id requeue-cause) (:injury-id attributed-other))
+                     (not= (:record-pin requeue-cause)
+                           (:record-pin pending-observation)))
+                 (not= (:requeues entry) (inc (or (:requeues previous) 0))))
                (> (or (:requeues entry) 0) retry-limit)
                (not= (:patch-sha entry)
                      (or (:patch-sha previous) (:patch-sha patch)))
@@ -399,14 +426,7 @@
   enacted retry click. An older retry's observation is superseded by requeue."
   [ledger injury-id]
   (when (= :valid (:status (validate-ledger ledger)))
-    (let [enacted (latest ledger injury-id)]
-      (when (= :enacted (:state enacted))
-        (last (filter #(and (observation? %)
-                            (= :retry-inconclusive (:observation-kind %))
-                            (> (:ordinal %) (:ordinal enacted))
-                            (= injury-id (:injury-id %))
-                            (= (:retry-click enacted) (:retry-click %)))
-                      (:entries ledger)))))))
+    (pending-requeue-entry ledger injury-id)))
 
 (defn append-retry-result
   "Append reopened, or the typed abandoned state when the next attempt would
@@ -456,10 +476,12 @@
 
             :else
             (let [requeues (or (:requeues previous) 0)
+                  observation (pending-requeue ledger injury-id)
+                  other (other-open-injury ledger injury-id (:record-pin observation))
                   common {:injury-id injury-id
                           :attempt (:attempt previous)
                           :repair-id (:repair-id previous)}]
-              (if (>= requeues (:retry-limit ledger))
+              (if (and (nil? other) (>= requeues (:retry-limit ledger)))
                 (append-transition ledger
                                    (assoc common :state :abandoned
                                           :reason :retry-budget-spent
@@ -467,11 +489,16 @@
                 (append-transition
                  ledger
                  (merge common
-                        {:state :enacted
-                         :retry-click new-retry-click
-                         :requeues (inc requeues)
-                         :patch-sha (or (:patch-sha previous)
-                                        (:patch-sha (authored ledger injury-id)))}
+                        (cond-> {:state :enacted
+                                 :retry-click new-retry-click
+                                 :requeues (if other requeues (inc requeues))
+                                 :patch-sha (or (:patch-sha previous)
+                                                (:patch-sha (authored ledger injury-id)))}
+                          other
+                          (assoc :requeue-cause
+                                 {:kind :other-open-injury
+                                  :injury-id (:injury-id other)
+                                  :record-pin (:record-pin observation)}))
                         (select-keys previous
                                      [:reload-receipt :integration-commit])))))))))
     (catch Throwable t
