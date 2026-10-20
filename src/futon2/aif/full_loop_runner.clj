@@ -2364,6 +2364,20 @@
            ;; grow a key (its value is digested into the occurrence identity,
            ;; the trial configuration and the dedup key).
            :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
+      (and (= :wm/selected-outer-cascade-policy-v1
+              (get-in decision [:selection-certificate :selection-route]))
+           (= :selected (:status decision))
+           (map? (:action decision)))
+      (let [certificate (:selection-certificate decision)
+            sealed-entry (get-in certificate
+                                 [:selected-outer-cascade-policy :selected-entry])]
+        {:action (:action decision)
+         :reading-pin (:reading-pin sealed-entry)
+         :canonical-cascade (or (:selected-canonical-cascade certificate)
+                                (:canonical-cascade sealed-entry))
+         :rank (:rank sealed-entry)
+         :G-efe (:G-efe sealed-entry)
+         :controller-score (:controller-score sealed-entry)})
       :else nil)))
 
 (defn no-selection-reason
