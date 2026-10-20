@@ -680,7 +680,13 @@
                           (catch Throwable _ {:status :failed
                                                :reason :meta-self-heal/acceptance-review-threw})))
             identity-keys [:injury-id :source-record-pin :diagnosis-evidence-pin
-                           :proposal-evidence-pin :acceptance-test]]
+                           :proposal-evidence-pin :acceptance-test]
+            review-identity (fn [value]
+                              (-> (select-keys value identity-keys)
+                                  (update :acceptance-test
+                                          #(select-keys % [:id :command :expected]))))
+            request-identity (review-identity request)
+            response-identity (when (map? response) (review-identity response))]
         (cond
           (not valid-run?)
           (refusal :meta-self-heal/acceptance-run-refused
@@ -701,9 +707,15 @@
                     ;; transport's error as :detail (F9); this record dropped it,
                     ;; so a reviewer rate-limit read only as producer-invoke-failed.
                     :review-detail (:detail response)})
-          (not= (select-keys request identity-keys)
-                (select-keys response identity-keys))
-          (refusal :meta-self-heal/acceptance-review-identity-mismatch {:request request})
+          (not= request-identity response-identity)
+          (refusal :meta-self-heal/acceptance-review-identity-mismatch
+                   {:request request
+                    :review-identity
+                    {:differs (->> identity-keys
+                                   (filter #(not= (get request-identity %)
+                                                  (get response-identity %)))
+                                   vec)
+                     :response-keys (->> (keys response) sort vec)}})
           :else
           (let [receipt {:schema :wm/meta-acceptance-admission-v1
                          :status :accepted :review-status :accepted
