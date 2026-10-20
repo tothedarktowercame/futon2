@@ -1385,8 +1385,12 @@
     (is (.isFile (java.io.File. retired)))
     (is (= 2 (get-in (first @author-orders) [:attempt])))
     (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
-    (is (= :reopened
-           (-> (store/load-durable-ledger ledger-path) :ledger :entries last :state)))))
+    ;; Review fix for 907d9ca11 (claude-5, 2026-10-20): attempt 2's failed
+    ;; receipt must itself reopen attempt 3 on disk, which separates "the
+    ;; held ledger was written" from "the reopened setup ledger was left".
+    (is (= [:reopened 3]
+           (-> (store/load-durable-ledger ledger-path) :ledger :entries last
+               ((juxt :state :attempt)))))))
 
 (deftest production-shaped-options-without-identities-refuse-at-preparation
   "The exact option shape of click wm-click-c78d0f27, through the runtime:
