@@ -1,3 +1,12 @@
+## Click 11 matched the Lean prediction through review; one finding at enact (a Var in the port receipt), fixed as F39; click 12 predicted (claude-5, 2026-10-20 19:43Z)
+
+`wm-click-96850427`: the first self-heal click to pass author and review live (ledger ordinals
+13-15, zai-2 and zai-3 both answered the contracts). Enact succeeded and sealing its receipt
+threw, because the reload function returned the loaded Var; Lean rev 26 (`15a8655930`) records
+the match on the first seven states and the one difference. F39 (futon3c `fba9fe09e`) returns
+the record, unstubbed test, reloaded. Click 12 is predicted as the same path with the one missing
+ledger write (`:enacted`), resumed from `:reviewed`. Detail in `logic-model/PACKETS-2026-10-19.md`.
+
 ## The next click is predicted in Lean before it runs; four pre-click refusals found by reading and fixed (F35-F38); injury d755c886 reopened at attempt 4 (claude-5, 2026-10-20 19:35Z)
 
 Joe's word this evening: reverse the order. Lean rev 25 (`3050400fb3`) was written first and
