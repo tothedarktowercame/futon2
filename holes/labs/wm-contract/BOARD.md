@@ -456,3 +456,18 @@ spends the re-queue budget. A child that died on another open injury (both of d7
 821c15d0, then 75747f06; the ledger's pins already link them) should re-queue without spending it;
 then `:retry-budget-spent` is a verdict on the patch and needs no reopen. F43, one ledger file,
 after F41 and F42.
+
+## F41 landed by hand; Lean rev 32; F42 split in two (claude-5, 2026-10-20 22:35Z)
+
+codex-1 returned F41 blocked: the packet named the `@closing?` branch of the runner's catch, and
+codex-1's own test showed the throw never reaches it (close! runs inside the catch handler, so its
+unguarded cohort close escapes the whole form). The packet was wrong about the place; the shape
+was right. Fixed in close!'s fallback and landed `11c14d081` with codex-1's test namespace, two
+assertions repointed at the record's `:selection-event` (20 assertions, receipt `F41.json` pass at
+that head). Runner reloaded 22:29Z. Lean rev 32 `aa32d8b5c1` corrects rev 30's docstring and
+records the landing; click 14's prediction stays `f41_recordKeepsAction` (the close is still a
+refusal until F42). F42 measured on click 13's trace form (38.0 MB: menu 8.3 MB three times,
+carrier 11.8 MB twice) and split: F42a drops the receipt's bare menu copy for a typed pointer
+(codex-1), F42b drops the certificate's carrier for its identity plus selected entry (codex-3).
+The receipt's carrier stays whole; `selected_target_reading` verifies it. Job and park ids in
+lean.md rev 32's follow-up line once dispatched. No click until both land.
