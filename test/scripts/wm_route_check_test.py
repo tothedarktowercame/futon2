@@ -335,5 +335,14 @@ class RouteCheckTest(unittest.TestCase):
     self.assertIn(":placement :placed", out)
     self.assertIn(":verdict :conforms,", out)
 
+  def test_active_set_unavailable_is_a_full_path_from_the_read(self):
+    # Rev 6: the disposition M6a returns for row #5 starts at ledgerRead, so no position-0 gap.
+    binding = CLICK4.replace(":reason :meta-self-heal/production-config-required", ":reason :meta-self-heal/active-set-unavailable")
+    ran, out = self.run_check(binding, None, None, self.C4_ID)
+    self.assertIn(":path [:ledgerRead :activeSetUnavailable :terminalRecord]", out)
+    self.assertIn(":verdict :conforms,", out)
+    self.assertIn(":placement :not-evaluated", out)
+    self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+
 if __name__ == "__main__":
   unittest.main()

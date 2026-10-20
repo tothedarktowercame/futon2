@@ -185,6 +185,10 @@ def project(binding, record, click_state=None):
   if d.get("ordinary-selection-called?") is True: return ["ordinarySelection", "terminalRecord"], gaps, notes, None
   if d.get("status") != "refused": return [], gaps, notes, "disposition-not-projectable"
   if d.get("reason") == "meta-self-heal/ledger-unreadable": return ["ledgerUnreadable", "terminalRecord"], gaps, notes, None
+  # SelfHealRoute rev 6 (mathlib4 494d0f8e6a): the route starts at the one ledger read, and an
+  # uncomputable active set ends the click there (M6a makes run-opportunity! return this reason).
+  # The read is the start, so this is a full path, not a suffix.
+  if d.get("reason") == "meta-self-heal/active-set-unavailable": return ["ledgerRead", "activeSetUnavailable", "terminalRecord"], [], notes, None
   # route! after readiness (SelfHealRoute rev 3, mathlib4 a84278e893): a refused
   # coordinator/prepare is its own refusal since futon2 df2209a33 (2026-10-19 20:38Z);
   # before that commit the same refusal was recorded as a binding mismatch (click
