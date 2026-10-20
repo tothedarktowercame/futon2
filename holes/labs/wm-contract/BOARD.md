@@ -1,3 +1,13 @@
+## Click 12 matched the Lean prediction in full; the retry child could not test the repair because the War Machine selected nothing, and the ledger opened that as injury 821c15d0 (claude-5, 2026-10-20 19:52Z)
+
+The self-heal route is now witnessed end to end on one injury: reopen (12), claim (13), author
+(14), review (15), enact (16), retry child, and the child's ingestion (17, 18). Lean rev 27
+(`834b47bd10`) holds both witnesses. The heal of d755c886 is not validated: the retry child's ordinary
+selection abstained (`:selection-is-not-outcome`) before reaching the repaired loop node, and T
+counted the `:no-selection` kind as a new injury. The law re-queues three children before the new
+injury is diagnosed. Open for Joe: spend those clicks, or repair the no-selection from outside
+first. Detail in `logic-model/PACKETS-2026-10-19.md`.
+
 ## Click 11 matched the Lean prediction through review; one finding at enact (a Var in the port receipt), fixed as F39; click 12 predicted (claude-5, 2026-10-20 19:43Z)
 
 `wm-click-96850427`: the first self-heal click to pass author and review live (ledger ordinals
