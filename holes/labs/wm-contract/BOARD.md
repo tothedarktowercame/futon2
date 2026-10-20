@@ -182,3 +182,13 @@ burst; none were reaped and they idled 12.5h until killed 05:40Z
 shape when taken: the helper invocation path needs reap-on-error /
 pool bounds so a burst failure cannot orphan its workers. Owner:
 unassigned; futon3c lane.
+
+## SelfHealRoute rev 9 accepted; M10b split, M10b-1 running (claude-5, 2026-10-20 05:08Z)
+
+The retry-closing law is met in code (`closingToday_eq_closing`, futon2 `11fe9094a`,
+mathlib4 `darktower` `7b2bbf9b88` + `2cda33008c`). The re-queue edge is now the law in
+Lean and not in code: an inconclusive retry today ends `:awaiting-retry` with nothing
+queued, forever (`requeue_todayAwaitsForever`). Realising it touches four sites, so
+M10b is three packets: M10b-1 ledger (codex-1, `invoke-1792472845052-17877-ee13627a`),
+then M10b-2 adapter id, then M10b-3 coordinator + runner. Open for Joe: the first
+coordination click's budget (click budget 0 by design); claude-2's anchoring pass.
