@@ -241,7 +241,7 @@
   (loop [history history
          transaction transaction]
     (let [latest (latest-transition history injury-id)
-          n (or (:requeues latest) 0)
+          n (or (ledger/requeue-ordinal history injury-id) 0)
           queued (when (pos? n)
                    (accepted!
                     (invoke-once transaction (requeue-phase n)

@@ -80,6 +80,17 @@
                       (map #(count (:corrected-port-receipt-pins %))))
                 + 0 (injury-history ledger injury-id))))
 (defn- latest [ledger injury-id] (last (injury-history ledger injury-id)))
+(defn requeue-ordinal
+  "Count every re-queue identity minted for the latest enacted attempt.
+  Unlike :requeues, this advances even when another open injury explains an
+  inconclusive child. Returns nil when the injury is not currently enacted."
+  [ledger injury-id]
+  (let [entry (latest ledger injury-id)]
+    (when (= :enacted (:state entry))
+      (max 0
+           (dec (count (filter #(and (= :enacted (:state %))
+                                     (= (:attempt entry) (:attempt %)))
+                               (injury-history ledger injury-id))))))))
 (defn- pending-requeue-entry [ledger injury-id]
   (let [enacted (latest ledger injury-id)]
     (when (= :enacted (:state enacted))
