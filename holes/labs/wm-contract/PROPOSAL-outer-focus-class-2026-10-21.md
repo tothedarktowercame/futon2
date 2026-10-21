@@ -66,6 +66,17 @@ C. **Retire the injury branch** once A and B are in: an injury lowers the
    picks the repair the branch picked. If it does not, that is a finding
    to bring back to Joe, not a reason to keep the branch silently.
 
+   **Decided (Joe, 2026-10-21):** where G and the branch disagree, G's
+   answer stands. An open repair of the focus does not pre-empt focused
+   work that can still be finished; the repair wins only once the injury
+   has lowered the focused work's predicted reach. Joe: "we can always
+   change that if things go south later." The replay should therefore
+   check that G picks the repair when the focus is stuck, and report the
+   rounds where the branch took a repair while focused work was still
+   finishable, as cases the change is meant to alter. Lean statement:
+   `mathlib4/DarkTower/WarMachine/R15InjuryTier.lean`
+   (`stuck_focus_agrees`, `finishable_focus_beats_repair`).
+
 ## Questions for codex-4
 
 - Is `decision-focus-info` the right focus read for the outer selector, or
