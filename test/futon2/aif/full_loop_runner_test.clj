@@ -7239,6 +7239,39 @@
     (is (= :required-loop-node-unexercised
            (get-in projected [:cause 0 :data :failure-kind])))))
 
+(deftest terminal-projection-retains-fold-findings
+  (let [findings [{:policy-hole/index 0
+                   :finding :policy-hole-free-missing}
+                  {:policy-hole/index 0
+                   :finding :policy-hole-why-missing}
+                  {:policy-hole/index 0
+                   :finding :policy-hole-obligation-id-missing}]
+        projected (#'runner/run-record-failure
+                   {:data {:failure-kind :fold-output-invalid
+                           :failure-stage :construction
+                           :error "Construction fold wiring is missing or malformed"
+                           :error-data {:outcome :construction-failed
+                                        :failure-kind :fold-output-invalid
+                                        :fold-findings findings
+                                        :failure-stage :construction
+                                        :target "M-pattern-posteriors"}}})
+        detail (:detail projected)]
+    (is (= findings (:fold-findings detail)))
+    (is (not (some #{:fold-findings} (:omitted detail))))))
+
+(deftest terminal-projection-bounds-fold-findings
+  (let [findings (mapv (fn [index]
+                         {:policy-hole/index index
+                          :finding :policy-hole-free-missing})
+                       (range 33))
+        projected (#'runner/run-record-failure
+                   {:data {:failure-kind :fold-output-invalid
+                           :failure-stage :construction
+                           :error "Construction fold wiring is missing or malformed"
+                           :error-data {:fold-findings findings}}})]
+    (is (= {:omitted :entry-limit}
+           (last (get-in projected [:detail :fold-findings]))))))
+
 (deftest terminal-projection-retains-bounded-refusal-causes-with-overflow-artifact
   ;; L1's incomplete menu / no-current-target-reading and L2's close wrapper
   ;; are represented here as synthetic structured causes; their click counts

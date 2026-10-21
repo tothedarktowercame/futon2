@@ -853,7 +853,7 @@
             (reduce-kv
              (fn [{:keys [kept omitted]} k v]
                (cond
-                 (contains? #{:refusals :outer-task-selection} k)
+                 (contains? #{:refusals :outer-task-selection :fold-findings} k)
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
