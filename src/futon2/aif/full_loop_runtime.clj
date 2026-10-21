@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
@@ -158,7 +159,9 @@
        "source and every hole decision. Reply with one JSON object containing "
        "the author's requisition-id, cascade-digest, by, decisions and patch, "
        "plus accepted-by set to your own seat id.\n\nREQUISITION:\n"
-       (pr-str requisition) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
+       (json/generate-string requisition)
+       "\n\nAUTHOR ANSWER:\n"
+       (json/generate-string author-answer)))
 
 (defn- cascade-effect-author-prompt [request]
   (str "Execute exactly this certified cascade occurrence through the ordinary "
