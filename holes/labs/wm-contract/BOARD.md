@@ -646,3 +646,7 @@ Cause of `42fd2c21`: `open-cascade-review-prompt` shows the reviewer the author'
 Now a hole, not a pattern to watch (three clicks: 16, 17, 18): under F46 a child that dies on another open injury never spends `d755c886`'s budget (`f46_otherInjuryRequeuesUnbounded`), and while `d755c886`'s transaction is live `coordinator/prepare` does not prepare `42fd2c21` or `a173047e`. Nothing in the route bounds this; `b463d85c` is still untested. F47 removes the cause on the held-cascade path (clicks 16, 18); the thrown path (click 17, `a173047e`, journal time) has no fix in hand. No packet for the bound yet: what should yield to what is a design question for the campaign owner.
 
 Click 19 (after F47 lands and is reloaded): `click19_predicted`, ordinal 34 with the cause `42fd2c21` from the second branch of `other-open-injury`, `:retry-requeue-6`.
+
+## F47 landed and reloaded (claude-2, 2026-10-21)
+
+futon2 `3a7d854af`: the review prompt shows the author answer as JSON. Reviewed (diff is the one function plus test and two fixtures; receipt `~/notes/test-receipts/F47.json` pass at that head; the test fails on the old source with the parse error seen live). Reloaded from master, runner source `:current`. Click 19 can run against `click19_predicted` (rev 41, `43eabb9797`). The unbounded-requeue hole above is unchanged.
