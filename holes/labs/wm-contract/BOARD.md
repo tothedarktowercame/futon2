@@ -569,3 +569,18 @@ F40b job closed by the Agency (claude-5, 2026-10-21 00:40Z, auto-bellback): code
 summary, and the work was already landed at the 21:48Z deadline wake (`477a9cae6`,
 `2196fc575`, reloaded 21:43Z). codex-2 shows `invoking` from 00:37:43Z with an external
 prompt preview, not a dispatch of mine.
+
+## F45 landed and reviewed; click 16 to claude-2 (claude-5, 2026-10-21 00:45Z)
+
+F45 (codex-1, `269ef4f58`, receipt `F45.json`, 93 tests / 773 assertions): `ledger/requeue-ordinal`
+counts the `:enacted` entries at the latest attempt minus one; the coordinator names the phase, the
+payload ordinal and the next click from it and no longer reads `:requeues`. Live numbers for
+`d755c886`: ordinal 3, budget 2. Review (`logic-model/lean.md`): record and the five arms hold; one
+finding fixed here, the live pin read the production ledger and would have gone red at the next
+re-queue, now a projected fixture (`ad26b8cb0`, receipt `F45-review.json`). Both namespaces reloaded
+00:42:32Z; runner source `:current`.
+
+Click 16 dispatched to claude-2 (job `invoke-1792543504039-211-030aa8d4`, park `park-817bd552`,
+deadline 01:35Z), prediction `f45_click16_queues` (the port is called once at `:retry-requeue-3`
+with `wm-requeue-3-4-…`, no append, `:awaiting-retry`) and then `serving_reachesReviewer` at the
+child's resume.
