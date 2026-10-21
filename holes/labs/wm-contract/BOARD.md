@@ -584,3 +584,20 @@ Click 16 dispatched to claude-2 (job `invoke-1792543504039-211-030aa8d4`, park `
 deadline 01:35Z), prediction `f45_click16_queues` (the port is called once at `:retry-requeue-3`
 with `wm-requeue-3-4-…`, no append, `:awaiting-retry`) and then `serving_reachesReviewer` at the
 child's resume.
+
+## Click 16 held both predictions; Lean rev 38; F46 to codex-1; click 17 to claude-2 (claude-5, 2026-10-21 01:04Z)
+
+Click 16 (claude-2, job `invoke-1792543504039-211-030aa8d4`): `f45_click16_queues` held (one `:retry-requeue-3`
+receipt naming `wm-requeue-3-4-…`, no append, `:awaiting-retry`) and `serving_reachesReviewer` held (zai-2's
+prose-then-object answer decoded, zai-3 contacted, job `invoke-1792543957507-215-6ae49317`). zai-3's answer has
+bare vectors as JSON keys and does not parse, so the close is `:open-cascade-review-answer-invalid` naming
+`zai-3` and the job in the failure detail; `handle-error!` did not run. Lean rev 38 (`bad202b4d0`, `9b6abb8b9c`).
+
+Finding, read from the ledger and `meta_injury_ledger.clj`: the child died on `42fd2c21` a second time; the
+ledger wrote a `:repeated-active-injury` observation with no `:injury-id` (ordinal 26) and `other-open-injury`
+reads only `:open` transitions, so the next re-queue spends the budget (`:requeues` 3 at click 17), and a
+third such child would abandon `:retry-budget-spent` with the patch untested (`click18_wouldAbandonToday`).
+F46 (`logic-model/packets/F46.md`) dispatched to codex-1 (job `invoke-1792544569839-218-84a921d6`, park
+`park-5157d581`, deadline 02:02Z): T attributes the repeat, L reads it. Ordinal 26 stays sealed without an id,
+so click 17 reads the same with or without F46: dispatched to claude-2 (job `invoke-1792544628953-219-e6eaa5bf`,
+park `park-339c7431`, deadline 01:48Z), prediction `click17_predicted`. F46 lands after click 17 closes.
