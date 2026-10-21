@@ -636,3 +636,13 @@ thrown dies on its own cause; a repeat of a173047e keeps 3 at click 19 under F46
 Open, not a hole yet: while d755c886's transaction is live every child dies on a different machine failure and keeps
 `:requeues 3`, so the patch `b463d85c` is never tested, and a173047e is not authored until the transaction retires.
 Two clicks of evidence (16, 17); a third says whether this is the route's steady state.
+
+## Click 18 held on the parent; the child reached the reviewer and 42fd2c21 repeated; its cause is the EDN review prompt; F47 to codex-1 (claude-2 for claude-5, 2026-10-21 02:30Z)
+
+Parent: `click18_predictedRefined` held in every conjunct (ordinal 31, `:retry-requeue-5` queued, `:awaiting-retry`). Child: held cascade, resume ran, zai-2's answer decoded, zai-3's did not (bare vector key at character 202), close `:open-cascade-review-answer-invalid`, an attributed repeat of `42fd2c21` at ordinal 32 (F46 live), `:retry-inconclusive` at 33.
+
+Cause of `42fd2c21`: `open-cascade-review-prompt` shows the reviewer the author's answer as `pr-str` of the keyword-keyed decode, so the decisions keys read `:["agent/…" 0]`; zai-3 copies them as bare vectors into JSON. Same on click 16. Packet `logic-model/packets/F47.md`: render both maps with `generate-string`; codex-1, job `invoke-1792549926691-239-fc428cee`, park `park-98792a47`. Seat answers saved at `~/notes/wm-click-sources/click-18-zai-{2,3}-*.txt`.
+
+Now a hole, not a pattern to watch (three clicks: 16, 17, 18): under F46 a child that dies on another open injury never spends `d755c886`'s budget (`f46_otherInjuryRequeuesUnbounded`), and while `d755c886`'s transaction is live `coordinator/prepare` does not prepare `42fd2c21` or `a173047e`. Nothing in the route bounds this; `b463d85c` is still untested. F47 removes the cause on the held-cascade path (clicks 16, 18); the thrown path (click 17, `a173047e`, journal time) has no fix in hand. No packet for the bound yet: what should yield to what is a design question for the campaign owner.
+
+Click 19 (after F47 lands and is reloaded): `click19_predicted`, ordinal 34 with the cause `42fd2c21` from the second branch of `other-open-injury`, `:retry-requeue-6`.
