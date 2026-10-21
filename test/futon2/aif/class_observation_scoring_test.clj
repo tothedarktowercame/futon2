@@ -295,15 +295,16 @@
           (pr-str {:repair/status :open :repair/id (subs t 2)
                    :machine-repo "/controlled/repo"
                    :target "M-aif-policy-conditioned-eig"}))
-    ;; The canonical finding is still :open, so the explicit relation-source
-    ;; law chooses the operative repair obligation before the DONE ticket's
-    ;; historical Parent in BOTH focus contexts.
+    ;; The canonical finding is still :open. Its repaired target is focused,
+    ;; so the repair is adjacent (:associated), rather than pretending to be
+    ;; focus itself, in BOTH focus contexts.
     (is (= :retained (:status retained)))
     (doseq [disc [established retained]]
       (let [c (focus/classify-target inputs disc (:as-of disc) t ctx)]
-        (is (= :focus (:class c)) (pr-str c))
+        (is (= :associated (:class c)) (pr-str c))
         (is (= :open-repair-obligation (:kind (:derived-via c))))
-        (is (= (subs t 2) (get-in c [:derived-via :repair-id])))))
+        (is (= (subs t 2) (get-in c [:derived-via :repair-id])))
+        (is (= :focus (get-in c [:derived-via :repaired-target-class])))))
     ;; an M- target reads its corpus row directly, no derivation
     (let [c (focus/classify-target inputs retained (:as-of retained)
                                    "M-aif-policy-conditioned-eig" ctx)]
@@ -411,7 +412,7 @@
     (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
                                    {:ticket-dir (.getPath tickets)
                                     :findings-dir (.getPath findings)})]
-      (is (= :focus (:class c)))
+      (is (= :associated (:class c)))
       (is (= :open-repair-obligation (get-in c [:derived-via :kind])))
       (is (= repair-id (get-in c [:derived-via :repair-id]))))))
 
@@ -452,7 +453,7 @@
       (is (zero? (:exit out)) (str (:err out)))
       (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
           "the probe really ran from futon3c")
-      (is (some #(re-find #":class :focus :kind :open-repair-obligation" %) lines)
+      (is (some #(re-find #":class :associated :kind :open-repair-obligation" %) lines)
           (str "from futon3c cwd the ticket still classifies: " (pr-str lines))))))
 
 (deftest family-stops-when-any-acceptance-target-is-unresolved
@@ -554,7 +555,7 @@
       (is (zero? (:exit out)) (str (:err out)))
       (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
           "the probe really ran from futon3c")
-      (is (some #(re-find #":class :focus :kind :open-repair-obligation" %) lines)
+      (is (some #(re-find #":class :associated :kind :open-repair-obligation" %) lines)
           (str "the PRODUCTION context expression classifies from futon3c: " (pr-str lines))))))
 
 ;; claude-5 handoff: the class certificate says what was actually consumed.

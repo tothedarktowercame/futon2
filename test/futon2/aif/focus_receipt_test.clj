@@ -151,22 +151,40 @@
     (is (= :unknown (:class (focus/classify-target inputs bare as-of target)))
         "the bad case: a bare discover past the last window classifies it :unknown")))
 
-(deftest open-machine-repair-ticket-is-operational-focus
+(deftest open-machine-repair-ticket-is-classed-by-what-it-unblocks
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
                       "focus-repair" (make-array java.nio.file.attribute.FileAttribute 0)))
         id "repair-occ-fixture"
         target (str "T-" id)
         file (io/file dir (str id ".edn"))
-        discovery (focus/decision-focus-info inputs "2026-09-30T00:00:00Z")]
+        as-of "2026-09-30T00:00:00Z"
+        focus-discovery {:status :retained :focus "WM" :as-of as-of
+                         :facet-graph {:active ["WM"] :background []}}
+        unrelated-discovery {:status :retained :focus "APM" :as-of as-of
+                             :facet-graph {:active ["APM"] :background []}}
+        relation (fn [kind]
+                   {:relations [{:target "M-repaired" :facet "WM" :relation kind
+                                 :effective-from "2026-09-01T00:00:00Z"
+                                 :source {:repo "fixture" :commit "0" :path "test"
+                                          :section "fixture"}}]})]
     (spit file (pr-str {:repair/id id :repair/status :open
-                        :machine-repo "/machine"}))
-    (let [r (focus/classify-target inputs discovery (:as-of discovery) target
+                        :machine-repo "/machine" :target "M-repaired"}))
+    (let [ctx {:findings-dir (.getPath dir)}
+          related (focus/classify-target (relation "focus") focus-discovery as-of target ctx)
+          elsewhere (focus/classify-target (relation "useful-elsewhere") unrelated-discovery as-of target ctx)]
+      (is (= :associated (:class related)))
+      (is (= :useful-elsewhere (:class elsewhere)))
+      (is (= :open-repair-obligation (get-in related [:derived-via :kind])))
+      (is (= "M-repaired" (get-in related [:derived-via :repaired-target])))
+      (is (= :focus (get-in related [:derived-via :repaired-target-class]))))
+    (spit file (pr-str {:repair/id id :repair/status :open
+                        :machine-repo "/machine" :target "M-unclassified"}))
+    (let [r (focus/classify-target {:relations []} focus-discovery as-of target
                                    {:findings-dir (.getPath dir)})]
-      (is (= :focus (:class r)))
-      (is (= :open-repair-obligation (get-in r [:relation :source :kind])))
-      (is (= id (get-in r [:derived-via :repair-id]))))
-    (spit file (pr-str {:repair/id id :repair/status :closed
-                        :machine-repo "/machine"}))
-    (is (= :unknown
-           (:class (focus/classify-target inputs discovery (:as-of discovery) target
-                                          {:findings-dir (.getPath dir)}))))))
+      (is (= :unknown (:class r)))
+      (is (= :repaired-target-unknown (get-in r [:relation :reason]))))
+    (spit file (pr-str {:repair/id id :repair/status :open :machine-repo "/machine"}))
+    (let [r (focus/classify-target (relation "focus") focus-discovery as-of target
+                                   {:findings-dir (.getPath dir)})]
+      (is (= :unknown (:class r)))
+      (is (= :repair-target-absent (get-in r [:relation :reason]))))))

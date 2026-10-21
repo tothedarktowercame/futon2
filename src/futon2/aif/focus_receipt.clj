@@ -98,7 +98,7 @@
 (def relation-source-precedence
   "Explicit source law for target classification. A direct corpus row is the
    declared relation. For a repair ticket without one, a still-open canonical
-   repair obligation is the operative focus relation; ticket Parent and the
+   repair obligation inherits the repaired target's class; ticket Parent and the
    finding's historical target are fallbacks only after that obligation is no
    longer open. The order must never depend on directory or map iteration."
   [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
@@ -273,11 +273,37 @@
          active-repair? (and (= :open (:repair/status finding-record))
                              (= (subs target 2) (:repair/id finding-record))
                              (string? (:machine-repo finding-record)))
-         repair-relation (when active-repair?
-                           {:target target :relation "focus" :facet "WM"
-                            :source {:kind :open-repair-obligation
-                                     :repair-id (:repair/id finding-record)
-                                     :machine-repo (:machine-repo finding-record)}})
+         repaired-target (:target finding-record)
+         repair-stack (::repair-targets ctx)
+         repaired-classification
+         (when active-repair?
+           (cond
+             (not (string? repaired-target))
+             {:class :unknown :reason :repair-target-absent}
+
+             (contains? repair-stack repaired-target)
+             {:class :unknown :reason :repair-target-cycle}
+
+             :else
+             (classify-target inputs discovery as-of repaired-target
+                              (update ctx ::repair-targets (fnil conj #{}) target))))
+         repaired-class (:class repaired-classification)
+         repair-source {:kind :open-repair-obligation
+                        :repair-id (:repair/id finding-record)
+                        :machine-repo (:machine-repo finding-record)
+                        :repaired-target repaired-target
+                        :repaired-target-class repaired-class}
+         repair-relation (when (contains? #{:focus :associated :useful-elsewhere}
+                                           repaired-class)
+                           {:target target
+                            :relation (case repaired-class
+                                        (:focus :associated) "associated"
+                                        :useful-elsewhere "useful-elsewhere")
+                            :facet (get-in repaired-classification [:relation :facet])
+                            :source repair-source})
+         repair-unknown-reason (when active-repair?
+                                 (or (:reason repaired-classification)
+                                     :repaired-target-unknown))
          parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
                          (or (when ticket-dir
                              (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
@@ -305,23 +331,26 @@
                           (when parent
                             (row-of parent))
                           (:row m-derivation))
-         derived (cond active-repair? (:source repair-relation)
+         derived (cond active-repair? repair-source
                        (and parent-source relation-row (nil? direct)) parent-source
                        (:row m-derivation) (:derived-via m-derivation))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
-         eligible (or active-repair?
-                      (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
+         eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
-                       (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row)))))]
+                       (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row))))]
      {:target target
       :class (if eligible (keyword (:relation relation-row)) :unknown)
       :relation (if eligible
                   relation-row
                   (cond-> {:status :absent
-                           :reason (cond (and (nil? relation-row) (:absent m-derivation)) (:absent m-derivation)
+                           :reason (cond active-repair? repair-unknown-reason
+                                         (and (nil? relation-row) (:absent m-derivation)) (:absent m-derivation)
                                          (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
                                          (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
                                          :else :relation-outside-focus-facets)}
+                    active-repair?
+                    (assoc :repaired-target repaired-target
+                           :repaired-target-class repaired-class)
                     (and (nil? relation-row) (:absent m-derivation))
                     (assoc :derivation (dissoc m-derivation :absent))))
       :derived-via derived})))
