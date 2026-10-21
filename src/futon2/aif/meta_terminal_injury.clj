@@ -288,7 +288,8 @@
           (contains? ledger/active-states (:state previous))
           (let [appended (ledger/append-observation
                           history (:record-pin classification)
-                          :repeated-active-injury)]
+                          :repeated-active-injury
+                          {:injury-id (:injury-id classification)})]
             (if other-injury-retry?
               (append-other-injury-retry-observation
                appended classification enacted :active-injury-retained)

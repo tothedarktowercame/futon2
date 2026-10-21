@@ -1,0 +1,29 @@
+[{:schema :wm/meta-injury-transition-v1
+  :ordinal 23
+  :state :open
+  :injury-id "injury/42fd2c21a403ea12cea65ce3226f5cb97823aec7"
+  :cause-record-pin
+  {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-20-bcf648e3-5917-46b4-9721-dadd599ad238.edn"
+   :sha256 "258c139df576cb66b44b6a03472acca5e4c9c8f9edfd97a81832e3b5ac76706d"}
+  :attempt 1}
+ {:schema :wm/meta-injury-transition-v1
+  :ordinal 25
+  :state :enacted
+  :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+  :retry-click "wm-requeue-3-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc"
+  :requeues 2
+  :attempt 4}
+ {:schema :wm/meta-injury-observation-v1
+  :ordinal 26
+  :observation-kind :repeated-active-injury
+  :record-pin
+  {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-21-fdbf2abb-d19e-40d5-a438-9b1b921cb1e8.edn"
+   :sha256 "eb4547d9814793b10ad82b579253f10449d37335e95d5d70e11b81a7de021603"}}
+ {:schema :wm/meta-injury-observation-v1
+  :ordinal 27
+  :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62"
+  :observation-kind :retry-inconclusive
+  :record-pin
+  {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-21-fdbf2abb-d19e-40d5-a438-9b1b921cb1e8.edn"
+   :sha256 "eb4547d9814793b10ad82b579253f10449d37335e95d5d70e11b81a7de021603"}
+  :retry-click "wm-requeue-3-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc"}]

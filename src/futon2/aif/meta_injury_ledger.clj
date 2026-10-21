@@ -101,10 +101,18 @@
                           (= (:retry-click enacted) (:retry-click %)))
                     (:entries ledger))))))
 (defn- other-open-injury [ledger injury-id record-pin]
-  (last (filter #(and (= :open (:state %))
-                      (not= injury-id (:injury-id %))
-                      (= record-pin (:cause-record-pin %)))
-                (transitions ledger))))
+  (or (last (filter #(and (= :open (:state %))
+                          (not= injury-id (:injury-id %))
+                          (= record-pin (:cause-record-pin %)))
+                    (transitions ledger)))
+      (last (filter #(and (observation? %)
+                          (= :repeated-active-injury (:observation-kind %))
+                          (= record-pin (:record-pin %))
+                          (nonblank? (:injury-id %))
+                          (not= injury-id (:injury-id %))
+                          (contains? active-states
+                                     (:state (latest ledger (:injury-id %)))))
+                    (:entries ledger)))))
 (defn- authored [ledger injury-id]
   (last (filter #(= :authored (:state %)) (injury-history ledger injury-id))))
 (defn- claim [ledger injury-id]
