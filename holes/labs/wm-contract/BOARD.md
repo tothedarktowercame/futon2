@@ -542,4 +542,5 @@ to the alias. Fixed in the same commit. Landed `ed3c3dc59`, receipt `F44b.json` 
 558 assertions). Reloaded; runner source `:current`. Lean rev 36 `e3c499d42b`: `ContactState`,
 `JobAbsence`, `servingKind`, `serving_kindNamesTheRefusedSide`.
 
-Click 15 next, prediction `serving_reachesReviewer` (dispatch ids in the follow-up line).
+Click 15 dispatched to claude-2 (job `invoke-1792542003079-203-12f8c577`, park `park-de26a242`,
+deadline 01:20Z), prediction `serving_reachesReviewer`.
