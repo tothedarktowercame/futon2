@@ -1,0 +1,90 @@
+{:captured-at "2026-10-21T00:21Z",
+ :source
+ "data/wm-meta-injuries/ledger.edn, transitions of the injury projected to the keys requeue-ordinal reads, values verbatim; captured after click 15 (ordinal 25 is the latest entry)",
+ :entries
+ [{:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :open,
+   :attempt 1,
+   :ordinal 4}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :claimed,
+   :attempt 1,
+   :ordinal 6}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :reopened,
+   :attempt 2,
+   :ordinal 7}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :claimed,
+   :attempt 2,
+   :ordinal 8}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :reopened,
+   :attempt 3,
+   :ordinal 9}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :claimed,
+   :attempt 3,
+   :ordinal 10}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :abandoned,
+   :attempt 3,
+   :ordinal 11}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :reopened,
+   :attempt 4,
+   :ordinal 12}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :claimed,
+   :attempt 4,
+   :ordinal 13}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :authored,
+   :attempt 4,
+   :ordinal 14}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :reviewed,
+   :attempt 4,
+   :ordinal 15}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :enacted,
+   :attempt 4,
+   :retry-click
+   "wm-retry-repair/239cf98836afc977cd589141c224ec3f4bca83dc-4",
+   :ordinal 16}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :enacted,
+   :attempt 4,
+   :retry-click
+   "wm-requeue-1-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+   :requeues 1,
+   :ordinal 19}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :enacted,
+   :attempt 4,
+   :retry-click
+   "wm-requeue-2-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+   :requeues 2,
+   :ordinal 22}
+  {:schema :wm/meta-injury-transition-v1,
+   :injury-id "injury/d755c886a22d6fc8c04db7fada64089e07157f62",
+   :state :enacted,
+   :attempt 4,
+   :retry-click
+   "wm-requeue-3-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+   :requeues 2,
+   :ordinal 25}]}

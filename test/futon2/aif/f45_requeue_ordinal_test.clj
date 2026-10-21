@@ -99,9 +99,18 @@
       (is (= 4 (:requeue-ordinal (last @calls))))
       (is (= 2 (-> fourth :ledger :entries last :requeues))))))
 
+(def live-fixture
+  "The live injury's transitions as they stood after click 15 (ordinal 25 the
+  latest entry), projected to the keys requeue-ordinal reads, values verbatim.
+  The production ledger is not read here: it moves with every click, and a pin
+  on it goes red on the next re-queue. Review fix, F45 (claude-5)."
+  "test/futon2/aif/fixtures/meta-injury-ledger-2026-10-21-d755c886-requeue-ordinal.edn")
+
 (deftest live-ledger-distinguishes-ordinal-from-budget
-  (let [production (edn/read-string
-                    (slurp "/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn"))
-        latest (get-in (ledger/active-injuries production) [:injuries live-injury])]
-    (is (= 3 (ledger/requeue-ordinal production live-injury)))
+  (let [captured (edn/read-string (slurp live-fixture))
+        latest (last (filter #(= live-injury (:injury-id %)) (:entries captured)))]
+    (is (= 15 (count (:entries captured))))
+    (is (= 25 (:ordinal latest)))
+    (is (= :enacted (:state latest)))
+    (is (= 3 (ledger/requeue-ordinal captured live-injury)))
     (is (= 2 (:requeues latest)))))
