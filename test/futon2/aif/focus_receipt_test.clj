@@ -188,3 +188,29 @@
                                    {:findings-dir (.getPath dir)})]
       (is (= :unknown (:class r)))
       (is (= :repair-target-absent (get-in r [:relation :reason]))))))
+
+(deftest open-repair-does-not-fall-back-to-ticket-parent
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "repair-parent" (make-array java.nio.file.attribute.FileAttribute 0)))
+        tickets (doto (io/file root "tickets") .mkdirs)
+        findings (doto (io/file root "findings") .mkdirs)
+        id "repair-occ-parent-fixture"
+        target (str "T-" id)
+        as-of "2026-09-30T00:00:00Z"
+        discovery {:status :retained :focus "WM" :as-of as-of
+                   :facet-graph {:active ["WM"] :background []}}
+        inputs {:relations [{:target "M-parent" :facet "WM" :relation "focus"
+                             :effective-from "2026-09-01T00:00:00Z"
+                             :source {:repo "fixture" :commit "0" :path "test"
+                                      :section "fixture"}}]}
+        ctx {:ticket-dir (.getPath tickets) :findings-dir (.getPath findings)}
+        finding (io/file findings (str id ".edn"))]
+    (spit (io/file tickets (str target ".md")) "# fixture\n\nParent: M-parent\n")
+    (spit finding (pr-str {:repair/id id :repair/status :open :machine-repo "/machine"}))
+    (let [r (focus/classify-target inputs discovery as-of target ctx)]
+      (is (= :unknown (:class r)))
+      (is (= :repair-target-absent (get-in r [:relation :reason]))))
+    (spit finding (pr-str {:repair/id id :repair/status :closed :machine-repo "/machine"}))
+    (let [r (focus/classify-target inputs discovery as-of target ctx)]
+      (is (= :focus (:class r)))
+      (is (= :ticket-parent (get-in r [:derived-via :kind]))))))

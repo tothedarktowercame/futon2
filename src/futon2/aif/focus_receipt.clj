@@ -327,10 +327,14 @@
                                 {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
          ;; relation-source-precedence, written out so changing this policy is
          ;; a reviewable semantic edit rather than incidental collection order.
-         relation-row (or direct repair-relation
-                          (when parent
-                            (row-of parent))
-                          (:row m-derivation))
+         relation-row (or direct
+                          ;; An open obligation decides alone; Parent is only
+                          ;; fallback evidence after the obligation closes.
+                          (if active-repair?
+                            repair-relation
+                            (or (when parent
+                                  (row-of parent))
+                                (:row m-derivation))))
          derived (cond active-repair? repair-source
                        (and parent-source relation-row (nil? direct)) parent-source
                        (:row m-derivation) (:derived-via m-derivation))
