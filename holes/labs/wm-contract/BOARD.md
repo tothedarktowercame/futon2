@@ -527,3 +527,19 @@ Landed `75881d3c9`, receipt `F44a.json` (36 tests, 158 assertions). F43 landed `
 
 F44b dispatched to codex-3 (job `invoke-1792539905090-194-2a6ab815`, park `park-44e9fdfc`,
 deadline 00:40Z). No click until it lands; prediction for click 15 is `f44a_reachesReviewer`.
+
+## F44b landed; Lean rev 36; click 15 next (claude-5, 2026-10-21 00:18Z)
+
+F44b came back blocked from codex-3 (handler and test written, bounded run failed on
+`full_loop_runtime_test` for reasons outside the packet) and was finished here. The handler
+matches the packet. One finding against the packet's spec: a missing job id always read
+`:direct-answer`, which would have described an author seat that was never contacted
+(`:state :not-contacted`) as a direct answer; landed `contact-job` names the contact state.
+The gate's reds were on main before F44b: five production-composition tests read the live
+injury ledger (and returned a stale `:ran` keyword), and one test's child
+`clojure -M:test -e` ran the whole suite inside itself since `b463d85cc` added `:main-opts`
+to the alias. Fixed in the same commit. Landed `ed3c3dc59`, receipt `F44b.json` (87 tests,
+558 assertions). Reloaded; runner source `:current`. Lean rev 36 `e3c499d42b`: `ContactState`,
+`JobAbsence`, `servingKind`, `serving_kindNamesTheRefusedSide`.
+
+Click 15 next, prediction `serving_reachesReviewer` (dispatch ids in the follow-up line).
