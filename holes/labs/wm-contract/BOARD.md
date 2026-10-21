@@ -544,3 +544,21 @@ to the alias. Fixed in the same commit. Landed `ed3c3dc59`, receipt `F44b.json` 
 
 Click 15 dispatched to claude-2 (job `invoke-1792542003079-203-12f8c577`, park `park-de26a242`,
 deadline 01:20Z), prediction `serving_reachesReviewer`.
+
+## Click 15 refused before the resume; Lean rev 37; F45 to codex-1 (claude-5, 2026-10-21 00:38Z)
+
+Click 15 (claude-2, job `invoke-1792542003079-203-12f8c577`) closed `:refused`,
+`:coordinator/retry-attribution-refused`, with no child run, so `serving_reachesReviewer` was not
+tested. Cause, read from `coordinate-queued-retry` and the live ledger and transaction: the
+coordinator names the retry-port phase by `:requeues` and mints the click one past it; F43 keeps
+`:requeues` at 2 for an other-injury child, so ordinal 25 names `wm-requeue-3-4-…` while the
+recur looked up phase `:retry-requeue-2`, found click 14's receipt (`wm-requeue-2-4-…`) and
+refused. My F43 packet left that reader unchanged. Lean rev 37 `29d9c7140f`: `recur`,
+`click15_attributionRefused`, `frozenCount_refusesTheRequeue`, `d755c886_countsDiverged` (three
+re-queue entries, budget 2), `recurF45`, `f45_click16_queues`.
+
+F45 (`packets/F45.md`): `ledger/requeue-ordinal` counts the `:enacted` entries at the attempt;
+the coordinator names the phase and mints the click from it. Dispatched to codex-1 (job
+`invoke-1792543050538-209-4154c059`, park `park-4f494a58`, deadline 01:37Z). No click until it
+lands and is reloaded; click 16's prediction is `f45_click16_queues` and then
+`serving_reachesReviewer`.
