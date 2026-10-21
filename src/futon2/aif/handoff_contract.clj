@@ -47,7 +47,8 @@
   JSON object, with prose before or after it accepted (F44a, 2026-10-20:
   on clicks 13 and 14 the author answered with a sentence and then one
   unfenced object, and the nil decode closed the click
-  :open-cascade-review-answer-invalid before the reviewer was contacted).
+  :open-cascade-review-answer-invalid before the reviewer was contacted;
+  F44b names that case :open-cascade-author-answer-invalid).
   The fence rule keeps precedence when a fence is present. More than one
   fence, two unfenced objects, a `{` in the prose that leaves the object
   unclosed, arrays, scalars, prose alone and malformed JSON are refused as nil.

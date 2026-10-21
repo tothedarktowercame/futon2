@@ -208,6 +208,21 @@
                         {:kind :patch-var-unavailable :namespace n :var v})))
       @resolved)))
 
+(defn- contact-job
+  "The Agency job id a contact's response carries (`agency-answer-fn` returns
+  `{:seat :job-id :state :text}`), else a typed absence naming why there is
+  none: the designated seat was not invoke-ready (`designated-agent-answer-fn`
+  answers `:state :not-contacted`), the dispatch produced no job
+  (`:not-dispatched`), or the answer was injected directly."
+  [response]
+  (or (:job-id response)
+      (let [state (:state response)]
+        (cond-> {:status :absent
+                 :reason (if (#{:not-contacted :not-dispatched} state)
+                           state
+                           :direct-answer)}
+          (:reason response) (assoc :contact-reason (:reason response))))))
+
 (defn open-cascade-resume-handler
   "Production D4 composition. Contact the designated author and distinct
   reviewer through Agency, validate the reviewed answer, hot-load the exact
@@ -230,14 +245,28 @@
                   (open-resume/authoring-requisition ctx author reviewer))]
         (if-not (= :dispatched (:status req))
           (or req ctx)
-          (let [author-answer (handoff/response-map (author-contact req))
-                reviewed (when author-answer
-                           (handoff/response-map
-                            (reviewer-contact {:requisition req
-                                               :author-answer author-answer})))
+          (let [author-response (author-contact req)
+                author-answer (handoff/response-map author-response)
+                reviewer-response (when author-answer
+                                    (reviewer-contact {:requisition req
+                                                       :author-answer author-answer}))
+                reviewed (when reviewer-response
+                           (handoff/response-map reviewer-response))
                 ledger (open-resume/new-ledger (or (:run-id opts) "held-click"))]
-            (if-not reviewed
-              {:status :error :kind :open-cascade-review-answer-invalid}
+            (cond
+              (nil? author-answer)
+              {:status :error
+               :kind :open-cascade-author-answer-invalid
+               :author author
+               :author-job (contact-job author-response)}
+
+              (nil? reviewed)
+              {:status :error
+               :kind :open-cascade-review-answer-invalid
+               :reviewer reviewer
+               :reviewer-job (contact-job reviewer-response)}
+
+              :else
               (open-resume/handle-error!
                ledger error author reviewer reviewed
                {:click-budget (:click-budget opts)

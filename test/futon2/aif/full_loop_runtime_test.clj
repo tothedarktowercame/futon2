@@ -123,7 +123,10 @@
     (is (= ["p/x" 0] (first (keys readings))))))
 
 (deftest production-composition-installs-the-reviewed-same-click-handler
+  ;; No active injury: the production gate reads the ledger and transaction
+  ;; paths it is given, never the live data/wm-meta-injuries files.
   (let [seen (atom nil)
+        dir (f32-root)
         d (digest :cascade)
         holes [{:hole-id :h :owner :wm :question :operation}]
         patch {:namespace "futon2.aif.full-loop-runtime-test"
@@ -154,6 +157,8 @@
              (:status
               (runtime/run-opportunity!
                {:run-id "resume-production"
+                :meta-injury-ledger-path (str dir "/ledger.edn")
+                :meta-repair-transaction-path (str dir "/transaction.edn")
                 :author "wm-author" :reviewer "wm-reviewer"
                 :open-cascade-author-answer-fn author-answer
                 :open-cascade-reviewer-answer-fn reviewer-answer
@@ -185,8 +190,12 @@
                 @configurations))))
 
 (deftest flight-runner-does-not-load-the-report
+  ;; No :test alias in the child: since b463d85cc (2026-10-20) the alias
+  ;; carries :main-opts for cognitect.test-runner, so "-M:test -e" started
+  ;; the whole suite again, including this test, without end.  The child
+  ;; only needs src, which the root :paths provide.
   (let [{:keys [exit out err]}
-        (shell/sh "clojure" "-M:test" "-e"
+        (shell/sh "clojure" "-M" "-e"
                   (str "(require 'futon2.aif.flight-runner) "
                        "(prn (boolean (find-ns 'futon2.report.war-machine)))"))]
     (is (zero? exit) err)
@@ -300,7 +309,10 @@
            @captured))))
 
 (deftest production-runner-receives-and-exercises-selected-target-reading-port
-  (let [runner-opts (atom nil)
+  (let [dir (f32-root)
+        isolated {:meta-injury-ledger-path (str dir "/ledger.edn")
+                  :meta-repair-transaction-path (str dir "/transaction.edn")}
+        runner-opts (atom nil)
         contacted (atom [])
         repair-result {:schema :wm/selected-target-reading-request-v1
                        :status :refused :published false
@@ -311,38 +323,45 @@
                     ((:selected-target-reading-fn opts)
                      {}
                      {:outer-task-selection {:chosen {:id "M-production"}}})
-                    :ran)
+                    {:status :ran})
                   selected-target-reading/repair!
                   (fn [opts _]
                     ((:answer-fn opts) {:target "M-production"})
                     repair-result)]
       (is (= :ran
-             (runtime/run-opportunity!
-              {:run-id "production-selected-reading"
-               :author "wm-author"
-               :reviewer "wm-reviewer"
-               :repair-reviewer "wm-repair-reviewer"
-               :selected-target-reading-answer-fn
-               (fn [issued]
-                 (swap! contacted conj [(:target issued) "wm-author"])
-                 {:state :not-contacted :reason :test-probe})}))))
+             (:status
+              (runtime/run-opportunity!
+               (assoc isolated
+                      :run-id "production-selected-reading"
+                      :author "wm-author"
+                      :reviewer "wm-reviewer"
+                      :repair-reviewer "wm-repair-reviewer"
+                      :selected-target-reading-answer-fn
+                      (fn [issued]
+                        (swap! contacted conj [(:target issued) "wm-author"])
+                        {:state :not-contacted :reason :test-probe})))))))
     (is (fn? (:selected-target-reading-fn @runner-opts))
         "the real production wrapper must pass the port on runner opts")
     (is (= [["M-production" "wm-author"]] @contacted))))
 
 (deftest production-runner-receives-occurrence-square-authoring-port
-  (let [seen (atom nil)]
+  (let [dir (f32-root)
+        isolated {:meta-injury-ledger-path (str dir "/ledger.edn")
+                  :meta-repair-transaction-path (str dir "/transaction.edn")}
+        seen (atom nil)]
     (with-redefs [runner/run-opportunity!
                   (fn [opts]
                     (reset! seen opts)
                     ((:occurrence-square-authoring-fn opts) {} {})
-                    :ran)
+                    {:status :ran})
                   square-authoring/repair! (fn [opts _]
                                              (is (fn? (:answer-fn opts)))
                                              {:status :probe})]
-      (is (= :ran (runtime/run-opportunity!
-                   {:run-id "production-square-authoring"
-                    :author "wm-author" :reviewer "wm-reviewer"}))))
+      (is (= :ran (:status
+                   (runtime/run-opportunity!
+                    (assoc isolated
+                           :run-id "production-square-authoring"
+                           :author "wm-author" :reviewer "wm-reviewer"))))))
     (is (true? (:require-occurrence-squares? @seen)))
     (is (fn? (:occurrence-square-authoring-fn @seen)))))
 
@@ -403,12 +422,16 @@
              (ex-data failure))))))
 
 (deftest production-composition-supplies-the-feedback-store
-  (let [seen (atom nil)]
+  (let [dir (f32-root)
+        isolated {:meta-injury-ledger-path (str dir "/ledger.edn")
+                  :meta-repair-transaction-path (str dir "/transaction.edn")}
+        seen (atom nil)]
     (with-redefs [runner/run-opportunity!
                   (fn [opts]
                     (reset! seen opts)
-                    :ran)]
-      (is (= :ran (runtime/run-opportunity! {:run-id "feedback-default"})))
+                    {:status :ran})]
+      (is (= :ran (:status (runtime/run-opportunity!
+                            (assoc isolated :run-id "feedback-default")))))
       (is (= cascade-feedback/default-path
              (:cascade-feedback-path @seen)))
       (is (= runtime/default-pattern-graph-path (:pattern-graph-path @seen)))
@@ -416,18 +439,22 @@
       (is (map? (:cascade-feedback-metadata @seen))))))
 
 (deftest production-composition-shares-one-selection-timing-collector
-  (let [runner-opts (atom nil)
+  (let [dir (f32-root)
+        isolated {:meta-injury-ledger-path (str dir "/ledger.edn")
+                  :meta-repair-transaction-path (str dir "/transaction.edn")}
+        runner-opts (atom nil)
         judge-opts (atom nil)]
     (with-redefs [runner/run-opportunity!
                   (fn [opts]
                     (reset! runner-opts opts)
                     ((:judge-fn runner/*runtime-defaults*) 1)
-                    :ran)
+                    {:status :ran})
                   wm/generate-war-machine
                   (fn [_ opts]
                     (reset! judge-opts opts)
                     {:judgement {}})]
-      (is (= :ran (runtime/run-opportunity! {:run-id "timing-state"})))
+      (is (= :ran (:status (runtime/run-opportunity!
+                            (assoc isolated :run-id "timing-state")))))
       (is (instance? clojure.lang.IAtom
                      (:selection-timing/state @runner-opts)))
       (is (identical? (:selection-timing/state @runner-opts)
@@ -435,17 +462,20 @@
 
 (deftest production-mints-run-identity-before-closing-over-the-judge
   (let [runner-opts (atom nil)
-        judge-opts (atom nil)]
+        judge-opts (atom nil)
+        dir (f32-root)
+        isolated {:meta-injury-ledger-path (str dir "/ledger.edn")
+                  :meta-repair-transaction-path (str dir "/transaction.edn")}]
     (with-redefs [runner/run-opportunity!
                   (fn [opts]
                     (reset! runner-opts opts)
                     ((:judge-fn runner/*runtime-defaults*) 1)
-                    :ran)
+                    {:status :ran})
                   wm/generate-war-machine
                   (fn [_ opts]
                     (reset! judge-opts opts)
                     {:judgement {}})]
-      (is (= :ran (runtime/run-opportunity! {})))
+      (is (= :ran (:status (runtime/run-opportunity! isolated))))
       (is (string? (:run-id @runner-opts)))
       (is (= (:run-id @runner-opts) (:run-id @judge-opts))
           "accumulation and the durable run record must receive one identity"))))
