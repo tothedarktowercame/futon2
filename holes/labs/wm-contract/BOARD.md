@@ -616,3 +616,23 @@ Click 17 (claude-2, job `invoke-1792544628953-219-e6eaa5bf`): ordinal 28 `:enact
 `wm-requeue-4-4-…`, receipt `:retry-requeue-4` `:queued`: `click17_predicted` held. The child runs; its close and
 ordinals 29 to 30 are read on the park wake (deadline 01:48Z). Lean rev 39 (`35c8e9ad42`): `click17_held`,
 `click18_predicted` (another injury, first or repeat, keeps 3; none abandons).
+
+## Click 17's child threw before the resume; a173047e opened at ordinal 29; Lean rev 40; click 18 to claude-2 (claude-5, 2026-10-21 01:25Z)
+
+Click 17's child (claude-2's reading, confirmed here from the phases log, the record and the ledger): `:selection`
+chose `M-stack-geometry` with `:cascade-id nil`, `:cascade-execution` threw (`journal recorded time must increase`),
+and the runner resumes only a held `:wm/open-cascade-execution-error`, so there was no `:cascade-resume`, no seat
+contact, no `handle-error!`. The record's failure is `:untyped-failure` (`invalid checkpoint cell`, `:checkpoint
+:selection`). Ordinal 29 opens `injury/a173047e…` (attempt 1); ordinal 30 is d755c886's `:retry-inconclusive`. This
+is the first-occurrence arm of `click18_predicted`; the repeat of `42fd2c21` I expected in the park payload was not
+the model's prediction. No opportunity `:end` line for the child.
+
+Lean rev 40 (`ec85260e65`): `resumes` is the runner precondition revs 29 to 39 assumed; `click17_childWitness`;
+`click18_predictedRefined`: `route!` resumes the live d755c886 transaction (a173047e stays `:open`, unprepared),
+ordinal 31 `:enacted` `:requeues 3` with `:requeue-cause` naming a173047e, phase `:retry-requeue-5`, click
+`wm-requeue-5-4-…`, receipt `:queued`, binding `:awaiting-retry`. The child's route is open (held cascade resumes;
+thrown dies on its own cause; a repeat of a173047e keeps 3 at click 19 under F46).
+
+Open, not a hole yet: while d755c886's transaction is live every child dies on a different machine failure and keeps
+`:requeues 3`, so the patch `b463d85c` is never tested, and a173047e is not authored until the transaction retires.
+Two clicks of evidence (16, 17); a third says whether this is the route's steady state.
