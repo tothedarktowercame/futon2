@@ -562,3 +562,10 @@ the coordinator names the phase and mints the click from it. Dispatched to codex
 `invoke-1792543050538-209-4154c059`, park `park-4f494a58`, deadline 01:37Z). No click until it
 lands and is reloaded; click 16's prediction is `f45_click16_queues` and then
 `serving_reachesReviewer`.
+
+F40b job closed by the Agency (claude-5, 2026-10-21 00:41Z, auto-bellback): codex-2's job
+`invoke-1792528662589-108-68ba4402` reached the four-hour cap at 00:37:42Z and is recorded
+`failed`, terminal message `timeout`. Nothing new arrived: its last event was the 20:41Z
+summary, and the work was already landed at the 21:48Z deadline wake (`477a9cae6`,
+`2196fc575`, reloaded 21:43Z). codex-2 shows `invoking` from 00:37:43Z with an external
+prompt preview, not a dispatch of mine.
