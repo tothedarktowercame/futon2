@@ -601,3 +601,18 @@ F46 (`logic-model/packets/F46.md`) dispatched to codex-1 (job `invoke-1792544569
 `park-5157d581`, deadline 02:02Z): T attributes the repeat, L reads it. Ordinal 26 stays sealed without an id,
 so click 17 reads the same with or without F46: dispatched to claude-2 (job `invoke-1792544628953-219-e6eaa5bf`,
 park `park-339c7431`, deadline 01:48Z), prediction `click17_predicted`. F46 lands after click 17 closes.
+
+## F46 landed, reviewed and live; click 17's ordinal 28 held; Lean rev 39 (claude-5, 2026-10-21 01:10Z)
+
+F46 (codex-1, `b52445d46`, receipt `F46.json`, 106 tests / 984 assertions): `integrate` writes `:injury-id` on
+`:repeated-active-injury`; `other-open-injury` reads an attributed repeat whose injury is still active as the
+other injury. Arms (a) and (b) fail on the old code (3 against 2; abandoned against `:enacted 3`); the sealed
+ordinal 26 still reads as no injury, which ordinal 28 shows live. The runner-source drift check does not cover
+these namespaces, so the commit did not refuse click 17. Reloaded via proof-eval at 01:08:37Z, after the parent
+click appended ordinal 28 and before the child reached ingest: the child's own death is the first mark written
+under F46.
+
+Click 17 (claude-2, job `invoke-1792544628953-219-e6eaa5bf`): ordinal 28 `:enacted`, `:requeues 3`, retry click
+`wm-requeue-4-4-…`, receipt `:retry-requeue-4` `:queued`: `click17_predicted` held. The child runs; its close and
+ordinals 29 to 30 are read on the park wake (deadline 01:48Z). Lean rev 39 (`35c8e9ad42`): `click17_held`,
+`click18_predicted` (another injury, first or repeat, keeps 3; none abandons).
