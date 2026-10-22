@@ -1,0 +1,60 @@
+{
+  "caller": "wm-full-loop",
+  "session-id": "zai-f4b6f55a-59d0-4045-8d86-6557fa3333e4",
+  "execution": {
+    "executed": true,
+    "tool-events": 5,
+    "command-events": 0
+  },
+  "job-id": "invoke-1792648468570-2334-585196d9",
+  "agent-id": "zai-3",
+  "artifact-ref": "a5f8c4d7d",
+  "harness": {
+    "kind": "war-machine",
+    "basis": "producer-context",
+    "execution-id": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45",
+    "source-ref": "wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413"
+  },
+  "started-at": "2026-10-22T05:54:29.103425235Z",
+  "mode": "work",
+  "delivery": {
+    "status": "delivered",
+    "surface": "inbox",
+    "destination": "/home/joe/.claude/agency-inbox/wm-full-loop/auto-bellback-invoke-1792648468570-2334-585196d9.json",
+    "recorded-at": "2026-10-22T05:57:22.461879053Z",
+    "note": "bell-job-ready-inbox"
+  },
+  "state": "done",
+  "invocation/model": null,
+  "trace/delivery-observation": {
+    "terminal-job-id": "invoke-1792648468570-2334-585196d9",
+    "delivery-status": "delivered",
+    "inbox-file-created?": true,
+    "registered-push-performed?": false,
+    "polling-available?": true
+  },
+  "trace-id": null,
+  "total-cost-usd": null,
+  "usage": {
+    "cost/input-tokens": 560283,
+    "cost/output-tokens": 5266,
+    "cost/total-tokens": 565549,
+    "cost/cached-input-tokens": 370048,
+    "cost/reasoning-tokens": 1904,
+    "cost/source": "zai",
+    "cost/calls": 6,
+    "cost/model": "glm-5.3"
+  },
+  "result-summary": "Independent review complete. Every check passed: - **Commit verified**: `a5f8c4d7d` is on futon2 main; the file blob at that commit sha256-hashes to exactly the patch's `source-digest` `a5e34ef1cfa0f69c17ccac1fb6dbb7f...",
+  "result": "Independent review complete. Every check passed:\n\n- **Commit verified**: `a5f8c4d7d` is on futon2 main; the file blob at that commit sha256-hashes to exactly the patch's `source-digest` `a5e34ef1cfa0f69c17ccac1fb6dbb7f04bac7cf891c0faa4546aa7eb4ab5813b`; clj-kondo clean.\n- **Hole coverage exact**: the 19 committed clause keys equal the 19 requisition hole ids, set-equal, no extras, no missing.\n- **Each decision independently verified against the actual mission doc** (`futon5a/holes/missions/M-stack-geometry.md`): status line \"OPEN \u2014 IDENTIFY\" (hole 1); cross-refs naming `holistic-argument.sexp` + `holistic-argument-sketch.md` marked \"(formal argument, superseded)\" (2, 3); `three-pillars.md` \"conceptual reframe, living synthesis\" (4); `M-mission-control.md` \"observational layer over ~25 active missions\" (5, 6); `M-portfolio-inference.md` \"generative-model + EFE policy layer above Mission Control\" (7, 8); `M-trip-journal.md` \"hinge-log apparatus, same futon1a ingestion substrate\" (9, 10); sorry-proximity model paired with \"M-trip-journal B\u2192A turns are one candidate observation stream for sorry discovery\" (12, 13); `M-learning-loop.md` sibling \"shares the embedding space and futon1a rendering; pattern-mining uses this\" (14, 15); `M-hypergraph-operator.md` \"eventual Click/Tick analytic layer above the geometry\" (17, 18); `E-webarxana-as-hinge-log-backend.md` \"the Shape A bridge; precedent for how mission entities land in futon1a and how WebArxana renders them\" (19, 20, 21).\n- **Runtime behavior**: `decisions` returns the clause map only for this cascade digest + `:compile` phase and returns a typed `:patch-cascade-context-mismatch` otherwise \u2014 no silent wrong answer. All clauses well-formed (`:wm/pattern-apply`, keywords, 2-element completion-checks).\n- Non-blocking note: decisions 5 and 17 wrap their exact quotations with small author glosses (\"dependency beneath the geometry\" / \"consumer of the geometry\"); the quoted fragments themselves are verbatim in the doc.\n\n```json\n{\"requisition-id\":\"fbad4b8be6eb583b0ad5be984aec251139b288492d200c6d7a15c9618dd11f3f\",\"cascade-digest\":\"27ee1f800ba25111680c7c7c93355afc069f89d3a666c8a238a7574477e0b937\",\"by\":\"zai-2\",\"accepted-by\":\"zai-3\",\"commit\":\"a5f8c4d7d\",\"decisions\":{\"[\\\"futon-theory/mission-lifecycle\\\" 1]\":{\"operation\":\"record-open-identify-status\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":mission-status-line\",\"produces\":\":open-identify-status-record\",\"completion-check\":[\":status-open-identify\",\"mission status line reads 'OPEN \u2014 IDENTIFY'\"]},\"[\\\"agent/evidence-over-assertion\\\" 2]\":{\"operation\":\"cite-formal-predecessor-artifacts\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":predecessor-artifact-reference\",\"produces\":\":cited-formal-predecessors\",\"completion-check\":[\":predecessors-cited-by-name\",\"mission names `holistic-argument.sexp` and `holistic-argument-sketch.md` as the artifacts that preceded the living synthesis\"]},\"[\\\"futon-theory/mission-lifecycle\\\" 3]\":{\"operation\":\"record-predecessor-disposition\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":disposition-fragment\",\"produces\":\":superseded-disposition-record\",\"completion-check\":[\":argument-marked-superseded\",\"mission marks the formal argument 'formal argument, superseded'\"]},\"[\\\"futon-theory/mission-lifecycle\\\" 4]\":{\"operation\":\"adopt-living-synthesis-document\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":synthesis-reference\",\"produces\":\":current-synthesis-record\",\"completion-check\":[\":three-pillars-named-living\",\"mission names `three-pillars.md` as the 'conceptual reframe, living synthesis'\"]},\"[\\\"war-machine/state-capture\\\" 5]\":{\"operation\":\"capture-mission-control-dependency\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":mission-control-reference\",\"produces\":\":mission-control-dependency-record\",\"completion-check\":[\":mission-control-cited-by-path\",\"mission cites M-mission-control.md as the observational dependency beneath the geometry\"]},\"[\\\"war-machine/state-capture\\\" 6]\":{\"operation\":\"record-mission-control-observation-scope\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":observation-scope-fragment\",\"produces\":\":observation-scope-record\",\"completion-check\":[\":scope-approximately-25-missions\",\"mission describes Mission Control as the 'observational layer over ~25 active missions'\"]},\"[\\\"agent/evidence-over-assertion\\\" 7]\":{\"operation\":\"cite-portfolio-inference-dependency\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":portfolio-inference-reference\",\"produces\":\":cited-portfolio-inference\",\"completion-check\":[\":portfolio-cited-by-path\",\"mission cites M-portfolio-inference.md as the inference and policy mission above Mission Control\"]},\"[\\\"agent/evidence-over-assertion\\\" 8]\":{\"operation\":\"name-portfolio-policy-layer\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":policy-layer-fragment\",\"produces\":\":policy-layer-record\",\"completion-check\":[\":efe-layer-named\",\"mission names the 'generative-model + EFE policy layer' positioned above Mission Control\"]},\"[\\\"features/operator-turns-enter-the-observation-vector\\\" 9]\":{\"operation\":\"cite-trip-journal-hinge-log-apparatus\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":hinge-log-reference\",\"produces\":\":cited-hinge-log-apparatus\",\"completion-check\":[\":trip-journal-cited-with-hinge-log\",\"mission cites M-trip-journal.md as the hinge-log apparatus the geometry relies on\"]},\"[\\\"hdm/deep-storage-to-active-graph\\\" 10]\":{\"operation\":\"bind-shared-futon1a-ingestion-substrate\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":substrate-fragment\",\"produces\":\":shared-ingestion-binding\",\"completion-check\":[\":same-futon1a-substrate-named\",\"mission states Stack Geometry and the trip journal use the 'same futon1a ingestion substrate'\"]},\"[\\\"problems/operator-turns-become-inference-observations\\\" 12]\":{\"operation\":\"connect-sorry-proximity-to-ba-turns\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":sorry-proximity-fragment\",\"produces\":\":ba-turn-evidence-binding\",\"completion-check\":[\":proximity-paired-with-ba-turns\",\"mission pairs the sorry-proximity model with M-trip-journal B\u2192A turns\"]},\"[\\\"problems/operator-turns-become-inference-observations\\\" 13]\":{\"operation\":\"assign-sorry-discovery-observation-stream\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":stream-role-fragment\",\"produces\":\":sorry-discovery-stream-record\",\"completion-check\":[\":ba-turns-candidate-stream\",\"mission assigns the B\u2192A turns the role of 'candidate observation stream for sorry discovery'\"]},\"[\\\"problems/llm-over-corpus-mining-lessons\\\" 14]\":{\"operation\":\"cite-learning-loop-sibling-mission\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":sibling-reference\",\"produces\":\":cited-learning-loop-sibling\",\"completion-check\":[\":learning-loop-cited-by-path\",\"mission cites M-learning-loop.md as the pattern-learning sibling mission\"]},\"[\\\"problems/llm-over-corpus-mining-lessons\\\" 15]\":{\"operation\":\"bind-shared-learning-substrate\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":substrate-sharing-fragment\",\"produces\":\":shared-learning-substrate-binding\",\"completion-check\":[\":mining-uses-shared-substrate\",\"mission states the sibling shares the embedding space and futon1a rendering and that 'pattern-mining uses this'\"]},\"[\\\"gauntlet/world-is-hypergraph\\\" 17]\":{\"operation\":\"cite-future-hypergraph-operator\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":operator-reference\",\"produces\":\":cited-operator-layer\",\"completion-check\":[\":hypergraph-operator-cited-eventual\",\"mission cites M-hypergraph-operator.md as the eventual Click/Tick consumer of the geometry\"]},\"[\\\"gauntlet/world-is-hypergraph\\\" 18]\":{\"operation\":\"position-operator-analytic-layer\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":position-fragment\",\"produces\":\":operator-position-record\",\"completion-check\":[\":analytic-layer-above-geometry\",\"mission positions the operator as the 'analytic layer above the geometry'\"]},\"[\\\"hdm/deep-storage-to-active-graph\\\" 19]\":{\"operation\":\"cite-webarxana-bridge-precedent\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":excursion-reference\",\"produces\":\":cited-bridge-precedent\",\"completion-check\":[\":excursion-cited-by-path\",\"mission cites E-webarxana-as-hinge-log-backend.md as the hinge-log bridge precedent\"]},\"[\\\"hdm/deep-storage-to-active-graph\\\" 20]\":{\"operation\":\"record-shape-a-entity-landing-precedent\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":precedent-fragment\",\"produces\":\":entity-landing-precedent\",\"completion-check\":[\":shape-a-named-precedent\",\"mission names the Shape A bridge as the 'precedent for how mission entities land'\"]},\"[\\\"hdm/deep-storage-to-active-graph\\\" 21]\":{\"operation\":\"bind-landing-and-rendering-path\",\"capability\":\":wm/pattern-apply\",\"consumes\":\":rendering-fragment\",\"produces\":\":entity-landing-rendering-binding\",\"completion-check\":[\":futon1a-storage-webarxana-rendering\",\"mission completes the precedent naming futon1a as where mission entities land and WebArxana as how they are rendered\"]}},\"patch\":{\"namespace\":\"futon2.aif.wm.authored.req-fbad4b8b\",\"var\":\"decisions\",\"source-digest\":\"a5e34ef1cfa0f69c17ccac1fb6dbb7f04bac7cf891c0faa4546aa7eb4ab5813b\"}}\n```",
+  "auto-bellback": {
+    "sent?": true,
+    "bell-job-id": "auto-bellback-invoke-1792648468570-2334-585196d9",
+    "at": "2026-10-22T05:57:22.222845968Z"
+  },
+  "terminal-message": null,
+  "finished-at": "2026-10-22T05:57:22.222845968Z",
+  "created-at": "2026-10-22T05:54:28.570122243Z",
+  "terminal-code": null,
+  "surface": "bell"
+}

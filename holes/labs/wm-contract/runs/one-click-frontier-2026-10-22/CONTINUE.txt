@@ -1,3 +1,20 @@
+LATEST: Trial5 ACTIVE in :cascade-resume; no debugger stop yet. Author Zai2
+job2330 done, clauses committed a5f8c4d7d. Runtime dispatched reviewer Zai3 job
+invoke-1792648468570-2334-585196d9; wait for its result/handler, do NOT dispatch
+another author or issue another Trial. After-cascade-resume breakpoint armed.
+New bounded observation e094a0bb4: all19 clause completion descriptions already
+match literal header text in /home/joe/code/futon5a/holes/missions/M-stack-geometry.md
+(lines4-26). Frozen full source SHA7238b915... and19 literal-line matches in
+ordinary-trial-5/preexisting-completion-evidence.json + mission-before-cascade-effects.md.
+Treat compilation acceptance separately from useful NEW effect. Do not manufacture
+changes to satisfy already-true checks. Whistle sent active reviewer, blocking
+client output retained /home/joe/notes/lean-led/scratch/trial5-reviewer-preexisting-completions-dispatch.json
+(no delivery claimed yet). Worker will contact reviewer then reload patch/retry.
+Capture next held boundary and inspect. If ready, continue same run toward useful
+execution; if already-satisfied surface the reading/action contract issue, not
+success. FIVE Trials remain, broad work order unfinished. Selection repair and
+ordered offline replay already verified/deployed (see previous continuation).
+
 LATEST: Trial5 selection repair DEPLOYED and same held run RESUMED successfully.
 Commits30fcfcfed+c394f9ee3; capture7fcf1c90c preserves map/set order. Offline
 replay additionally needs *print-namespace-maps* false (serving value), then
