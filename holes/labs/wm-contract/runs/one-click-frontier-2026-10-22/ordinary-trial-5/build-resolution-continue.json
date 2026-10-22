@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:build-summary {:repo \"/home/joe/code/futon5a\", :files [\"data/mission-crossrefs/mission_crossref_edges.json\" \"data/mission-crossrefs/mission_crossref_edges.jsonl\" \"data/mission-crossrefs/stats.json\" \"holes/missions/M-stack-geometry.md\" \"scripts/build_mission_crossref_edges.py\"]}, :resume {:run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :choice :continue, :delivered true}}}",
+  "err": ""
+}

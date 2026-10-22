@@ -1,0 +1,32 @@
+{
+  "caller": "wm-full-loop",
+  "session-id": null,
+  "execution": {
+    "executed?": false,
+    "tool-events": 0,
+    "command-events": 0
+  },
+  "job-id": "invoke-1792649130675-2347-7689b2a9",
+  "agent-id": "zai-3",
+  "artifact-ref": null,
+  "harness": {
+    "kind": "war-machine",
+    "basis": "producer-context",
+    "execution-id": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45",
+    "source-ref": "wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413"
+  },
+  "started-at": "2026-10-22T06:05:30.954307988Z",
+  "mode": "work",
+  "delivery": {
+    "status": "pending"
+  },
+  "state": "running",
+  "invocation/model": null,
+  "trace-id": null,
+  "result-summary": null,
+  "terminal-message": null,
+  "finished-at": null,
+  "created-at": "2026-10-22T06:05:30.675627546Z",
+  "terminal-code": null,
+  "surface": "bell"
+}

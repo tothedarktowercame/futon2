@@ -1,3 +1,21 @@
+LATEST: same Trial5 author returned real futon5a commit
+9d8d6993c7b3d813aabce8e90862f2d97bbdb727 (crossref extractor+171-edge artifacts,
+Checkpoint19, acceptance remains unchecked; no live ingestion claimed).
+Captured author-wait and build-resolution with ordered helper; actual build
+resolution bound five changed files to /home/joe/code/futon5a. Continued exact
+values via :continue. Now reviewer-wait for Zai3 runtime job
+invoke-1792649130675-2347-7689b2a9. After-reviewer-wait breakpoint armed.
+On completion freeze result and inspect verdict, then continue same run through
+grounding/close where valid; don't stop at author commit. FIVE Trials remain.
+Important: actual author was given no-renderable-criteria and chose new mission
+cross-reference extraction, not19 already-true header clause checks. Keep useful
+mission progress distinct from selected-cascade conformance. Source renderer
+defect reproduced9d10eab37; isolated repair job in compiled-dispatch-repair-dispatch.json
+is independent, not a blocker on this active review. No deploying during flight.
+Work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b remains unfinished until useful
+production close or concrete external blocker. Run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45
+clickc2a23bb2 attempt002. No fresh Trial, broad suites, JVM kills/worktree loads.
+
 NEW independent defect REPRODUCED while execution author runs: frozen compiled
 construction19 steps render0 completion checks via cascade-plan and acceptance
 block yields :no-renderable-criteria. Production execution prompt therefore asks
