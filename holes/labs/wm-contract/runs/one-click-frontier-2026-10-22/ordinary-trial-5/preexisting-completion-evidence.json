@@ -1,0 +1,249 @@
+{
+  "at": "2026-10-22T05:55:49.700785+00:00",
+  "source": "/home/joe/code/futon5a/holes/missions/M-stack-geometry.md",
+  "sha256": "7238b91508c4f47c12b286bafdf114d2af9fb4458fbb54999adc9b827ffb91c4",
+  "author_commit": "a5f8c4d7d",
+  "finding": "All nineteen authored completion descriptions refer to literal content already present in the source header. This is a pre-effect observation, not proof of any performed effect. Review and execution must distinguish already-satisfied from useful change.",
+  "checks": [
+    {
+      "occurrence": 1,
+      "matches": [
+        {
+          "literal": "OPEN \u2014 IDENTIFY",
+          "lines": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 2,
+      "matches": [
+        {
+          "literal": "holistic-argument.sexp",
+          "lines": [
+            7,
+            38,
+            343,
+            1131,
+            1213
+          ]
+        },
+        {
+          "literal": "holistic-argument-sketch.md",
+          "lines": [
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 3,
+      "matches": [
+        {
+          "literal": "formal argument, superseded",
+          "lines": [
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 4,
+      "matches": [
+        {
+          "literal": "three-pillars.md",
+          "lines": [
+            9,
+            38,
+            67,
+            1520
+          ]
+        },
+        {
+          "literal": "conceptual reframe, living synthesis",
+          "lines": [
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 5,
+      "matches": [
+        {
+          "literal": "M-mission-control.md",
+          "lines": [
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 6,
+      "matches": [
+        {
+          "literal": "observational layer over ~25 active missions",
+          "lines": [
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 7,
+      "matches": [
+        {
+          "literal": "M-portfolio-inference.md",
+          "lines": [
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 8,
+      "matches": [
+        {
+          "literal": "generative-model + EFE policy layer above Mission Control",
+          "lines": [
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 9,
+      "matches": [
+        {
+          "literal": "M-trip-journal.md",
+          "lines": [
+            14
+          ]
+        },
+        {
+          "literal": "hinge-log apparatus",
+          "lines": [
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 10,
+      "matches": [
+        {
+          "literal": "same futon1a ingestion substrate",
+          "lines": [
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 12,
+      "matches": [
+        {
+          "literal": "sorry-proximity model; M-trip-journal B\u2192A turns",
+          "lines": [
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 13,
+      "matches": [
+        {
+          "literal": "candidate observation stream for sorry discovery",
+          "lines": [
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 14,
+      "matches": [
+        {
+          "literal": "M-learning-loop.md",
+          "lines": [
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 15,
+      "matches": [
+        {
+          "literal": "embedding space and futon1a rendering; pattern-mining uses this",
+          "lines": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 17,
+      "matches": [
+        {
+          "literal": "M-hypergraph-operator.md",
+          "lines": [
+            22
+          ]
+        },
+        {
+          "literal": "eventual Click/Tick",
+          "lines": [
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 18,
+      "matches": [
+        {
+          "literal": "analytic layer above the geometry",
+          "lines": [
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 19,
+      "matches": [
+        {
+          "literal": "E-webarxana-as-hinge-log-backend.md",
+          "lines": [
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 20,
+      "matches": [
+        {
+          "literal": "the Shape A bridge; precedent for how mission entities land",
+          "lines": [
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "occurrence": 21,
+      "matches": [
+        {
+          "literal": "futon1a and how WebArxana renders them",
+          "lines": [
+            26
+          ]
+        }
+      ]
+    }
+  ]
+}
