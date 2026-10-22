@@ -1,0 +1,10 @@
+{
+  "commit": "3c85d21b4",
+  "verdict": "request-changes",
+  "command": "clojure -M <compiled-renderer-review-probe.clj>",
+  "exit": 0,
+  "stdout": "{:plan {:status :rendered, :steps-shown 1, :steps-total 1, :omitted 0, :text \"selected cascade digest: s\\ncompiled cascade digest: c\\napplication order: (none recorded)\\nguards: (none recorded)\\neffect status: not recorded\\nstep  (pattern not recorded)\\n  operation: not recorded\\n  capability: not recorded\\n  consumes: not recorded -> produces: not recorded\\n  completion check: nil\\n  authored by: not recorded\\n  provenance: reading-record not recorded; source sha256 not recorded\\n\"}, :criteria \"ACCEPTANCE CRITERIA (the tests your work will be measured against):\\nThese are the reviewed completion checks of the compiled cascade (selected digest s, compiled digest c), verbatim.\\n  nil () \u2014 nil\\n\"}\n",
+  "stderr": "",
+  "finding": "steps [{}] renders status rendered and labels nil as reviewed completion check, instead of typed absence",
+  "deployed": false
+}
