@@ -18,7 +18,8 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
-            [futon2.aif.trace :as trace])
+            [futon2.aif.trace :as trace]
+            [futon2.aif.wm.debugger :as debugger])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
@@ -27,6 +28,11 @@
 (load-identity/register! *ns* *file*)
 
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(def default-firing-root
+  "Per-firing outcome records live under their own root, NOT the trip root:
+  cross-run code reads the trip root and must not see firing tallies mixed
+  into trip reports."
+  "/home/joe/code/futon2/data/wm-tripwires/firings")
 (def default-incident-coverage-root
   "/home/joe/code/futon2/data/wm-tripwires/incident-coverage")
 (def default-action :record)
@@ -715,6 +721,57 @@
                                StandardOpenOption/WRITE]))
        (.getPath path))))))
 
+(defn write-firing!
+  "Durably create one immutable per-firing outcome record (Joe, 2026-10-22:
+  a wire that keeps stopping the run with never anything to fix is noise and
+  will be switched off per wire later; that decision is read off these
+  records). CREATE_NEW forbids rewrite, like `write-trip-report!`. The firing
+  root is deliberately separate from the trip root."
+  ([firing] (write-firing! default-firing-root firing))
+  ([root firing]
+   (store-lock/with-store-lock-for root
+    (fn []
+     (let [id (str (or (:trip/id firing) "trip-unknown")
+                   "-firing-" (UUID/randomUUID))
+           path (io/file root (str id ".edn"))
+           record (merge {:schema :wm/tripwire-firing-v1
+                          :recorded-at (str (Instant/now))}
+                         firing)]
+       (io/make-parents path)
+       (Files/write (.toPath path)
+                    (.getBytes (pr-str record) "UTF-8")
+                    (into-array StandardOpenOption
+                                [StandardOpenOption/CREATE_NEW
+                                 StandardOpenOption/WRITE]))
+       (.getPath path))))))
+
+(defn firing-tally
+  "Per wire-id, counts by disposition plus a total, read from the firing
+  root. Same-run repeats of an already-stopped witness are counted under
+  :repeats and are not part of :total (they did not stop the run). This is how `fired 30 times, never anything to fix` is read off a
+  record, not off historical trip reports."
+  ([] (firing-tally default-firing-root))
+  ([root]
+   (let [root-file (io/file root)]
+     (if-not (.exists root-file)
+       {}
+       (->> (file-seq root-file)
+            (filter #(.isFile %))
+            (keep (fn [f]
+                    (try (edn/read-string (slurp f))
+                         (catch Throwable _ nil))))
+            (filter #(#{:wm/tripwire-firing-v1 :wm/tripwire-repeat-v1}
+                       (:schema %)))
+            (group-by :trip/wire-id)
+            (into {}
+                  (map (fn [[wire-id records]]
+                         (let [{firings :wm/tripwire-firing-v1
+                                repeats :wm/tripwire-repeat-v1}
+                               (group-by :schema records)]
+                           [wire-id (cond-> (merge {:total (count firings)}
+                                                   (frequencies (map :disposition firings)))
+                                      (seq repeats) (assoc :repeats (count repeats)))])))))))))
+
 (defn- coverage-pin? [pin]
   (and (map? pin)
        (string? (:path pin))
@@ -1251,6 +1308,12 @@
   ;; report, not correctness).
   (atom #{}))
 
+(defonce ^:private !stopped-trips
+  ;; Run-scoped dedupe for debugger stops: the FIRST occurrence of one
+  ;; [run-id wire-id witness-hash] stops the run; later occurrences within
+  ;; the same run are counted as repeats, never a second stop.
+  (atom #{}))
+
 (defn- note!
   "Record a witness durably and let the run continue (the default since
   2026-09-19). Same durable artifact as a halt, same stderr announcement,
@@ -1367,6 +1430,133 @@
     (stderr! (str "  witness: " (pr-str witness)) nil))
   record)
 
+(defn- first-witness
+  "Evaluate the enabled wires on RECORD, returning the first witness map or
+  nil. Extracted from observe! so the debugger :retry path can re-evaluate
+  the wires on the same record after the operator has hot-loaded a fix."
+  [opts record]
+  (try
+    (let [observation (-> (merge record (:tripwire/snapshot record)
+                                 {:cohort? (:cohort? opts)
+                                  :repair-root (or (:repair-root opts)
+                                                   repair/default-root)})
+                          (assoc :phase-budget-ms (phase-budget opts record))
+                          (#(if (enabled? opts :T6)
+                              (with-repair-boundary opts %)
+                              %))
+                          (#(cross-run-observation opts %)))]
+      (first (for [[wire-id _] @wire-registry
+                   :when (enabled? opts wire-id)
+                   witness (evaluate-wire wire-id observation)]
+               {:wire-id wire-id
+                :witness witness
+                :observation observation})))
+    (catch Throwable e
+      (stderr! "wire evaluation failed; runner remains untouched" e)
+      nil)))
+
+(defn- stop-in-debugger!
+  "When the restart debugger is attached, a witness STOPS the run in the
+  debugger instead of note!/halt! (Joe, 2026-10-22: every tripwire should hit
+  the debugger and run the self-heal algorithm until we have data from a real
+  running machine). The trip is recorded durably FIRST, so the trip report
+  exists while the run is stopped; the stop's condition carries the wire id,
+  the witness and the report path, and retains the phase record as its stop
+  value. Each restart resolution writes one immutable firing record under
+  `default-firing-root`. The abort rethrow carries :debugger/discharged? so
+  run-phase!'s catch does not stop the same trip a second time. A repeat of
+  the same [run wire witness] later in the run is counted, not re-stopped."
+  [opts record {:keys [wire-id witness observation] :as _tripped}]
+  (let [title (get-in @wire-registry [wire-id :title])
+        run-key [(:run-id opts) wire-id (hash witness)]]
+    (if (contains? @!stopped-trips run-key)
+      (do (try
+            (write-firing! (or (:tripwire/firing-root opts) default-firing-root)
+                           {:schema :wm/tripwire-repeat-v1
+                            :trip/wire-id wire-id
+                            :run-id (:run-id opts)
+                            :phase (:phase record)
+                            :transition (:transition record)})
+            (catch Throwable e
+              (stderr! "repeat record failed; the run still continues" e)))
+          (stderr! (str "TRIP " (name wire-id) " repeat in run "
+                        (:run-id opts) "; counted, not stopped again") nil)
+          record)
+      (do
+        (swap! !stopped-trips (fn [s] (conj (if (> (count s) 1024) #{} s) run-key)))
+        (let [recorded (record-trip! opts {:trip/wire-id wire-id
+                                           :trip/witness witness
+                                           :trip/observation observation})
+              report-path (:report-path recorded)
+              trip-id (get-in recorded [:report :trip/id])
+              condition-data {:kind :tripwire-tripped
+                              :outcome :tripwire-tripped
+                              :failure-kind :tripwire-tripped
+                              :failure-stage (:phase record)
+                              :tripwire/wire-id wire-id
+                              :tripwire/title title
+                              :tripwire/witness witness
+                              :tripwire/report report-path}
+              stop! (fn stop! []
+                      (debugger/await-restart!
+                       {:run-id (:run-id opts)
+                        :attempt-id (:attempt-id opts)
+                        :opportunity-id (:opportunity-id opts)
+                        :phase (:phase record)
+                        :nano-time-fn (:nano-time-fn opts)
+                        :debugger-dwell-ledger (:debugger-dwell/state opts)
+                        :debugger-has-stop-value? true
+                        :debugger-stop-value record}
+                       (ex-info (str "War Machine tripwire " (name wire-id)
+                                     " tripped: " title)
+                                condition-data)))]
+          (stderr! (str "STOP " (name wire-id) " (" title ") at phase "
+                        (:phase record) "/" (:transition record)
+                        " — run stopped in the debugger; record written") nil)
+          (stderr! (str "  witness: " (pr-str witness)) nil)
+          (stderr! (str "  report:  " (or report-path "(not written)")) nil)
+          (loop [{:keys [action disposition debugger-dwell]} (stop!)]
+            (try
+              (write-firing! (or (:tripwire/firing-root opts) default-firing-root)
+                             {:trip/id trip-id
+                              :trip/wire-id wire-id
+                              :run-id (:run-id opts)
+                              :phase (:phase record)
+                              :transition (:transition record)
+                              :restart-choice action
+                              :disposition (or disposition :unrecorded)
+                              :report-path report-path
+                              :dwell-ms (:duration-ms debugger-dwell)})
+              (catch Throwable e
+                (stderr! "firing record failed; the restart still proceeds" e)))
+            (case action
+              (:continue :use-value)
+              record
+              :retry
+              (let [again (first-witness opts record)]
+                (cond
+                  (nil? again)
+                  (do (stderr! (str "  " (name wire-id)
+                                    " no longer witnessed after retry; run continues")
+                               nil)
+                      record)
+
+                  (= wire-id (:wire-id again))
+                  (do (stderr! (str "  " (name wire-id)
+                                    " still witnessed after retry; stopping again")
+                               nil)
+                      (recur (stop!)))
+
+                  ;; A different wire now witnesses: it is its own trip, with
+                  ;; its own report and its own wire id on the stop.
+                  :else
+                  (stop-in-debugger! opts record again)))
+              :abort
+              (throw (ex-info (str "War Machine tripwire " (name wire-id)
+                                   " tripped: " title)
+                              (assoc condition-data
+                                     :debugger/discharged? true))))))))))
+
 (defn observe!
   "Evaluate enabled wires; a witness is RECORDED, and by default nothing stops.
 
@@ -1381,6 +1571,10 @@
     evidence for repair selection and the operator, not a veto. Identical
     witnesses within one run are recorded once (`note!`), which preserves the
     09-18 anti-pile-up property (one report, not 205) without the shutdown.
+  - debugger attached (Joe, 2026-10-22): the witness stops the run in the
+    debugger (`stop-in-debugger!`) — the trip is recorded first, each restart
+    resolution writes a per-firing outcome record under the firing root, and
+    the first occurrence per [run wire witness] stops; repeats are counted.
   - `FUTON_WM_TRIPWIRE_HALT=1`: one tripwire, one shutdown (Joe, 2026-09-18),
     except that at a pre-selection phase start a witness whose evidence is a
     set of live, repair-selectable open obligations is DEFERRED, not thrown —
@@ -1391,31 +1585,15 @@
   element, so no later wire runs and no second report is written. Returns
   `record` identically when nothing tripped."
   [opts record]
-  (let [tripped
-        (try
-          (let [observation (-> (merge record (:tripwire/snapshot record)
-                                       {:cohort? (:cohort? opts)
-                                        :repair-root (or (:repair-root opts)
-                                                         repair/default-root)})
-                                (assoc :phase-budget-ms (phase-budget opts record))
-                                (#(if (enabled? opts :T6)
-                                    (with-repair-boundary opts %)
-                                    %))
-                                (#(cross-run-observation opts %)))]
-            (first (for [[wire-id _] @wire-registry
-                         :when (enabled? opts wire-id)
-                         witness (evaluate-wire wire-id observation)]
-                     {:wire-id wire-id
-                      :witness witness
-                      :observation observation})))
-          (catch Throwable e
-            (stderr! "wire evaluation failed; runner remains untouched" e)
-            nil))]
+  (let [tripped (first-witness opts record)]
     (when tripped
       (cond
         (and (pre-selection-phase-start? record)
              (repair-covered-witness? (:witness tripped) (:observation tripped)))
         (defer! opts record tripped)
+
+        (debugger/attached?)
+        (stop-in-debugger! opts record tripped)
 
         *halt-on-witness?*
         (halt! opts record tripped)

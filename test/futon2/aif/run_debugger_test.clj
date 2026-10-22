@@ -356,12 +356,15 @@
     (is (= secret (deref running 2000 ::timeout)))
     (let [receipt (first (:receipts @ledger))
           timing (telemetry/phase-timings @events ledger run-id)]
+      ;; :disposition :unrecorded since the two-argument continue! was used
+      ;; (per-firing dispositions, 2026-10-22).
       (is (= {:schema :wm/debugger-dwell-v1
               :run-id run-id :phase :selection
               :condition-kind :test/selection-broke
               :stopped-at-monotonic-ns 0
               :resumed-at-monotonic-ns (* 24 60 1000000000)
               :restart-choice :use-value
+              :disposition :unrecorded
               :duration-ms (* 24 60 1000)}
              receipt))
       (is (= 0 (get-in timing [:phase-timings-ms :selection])))

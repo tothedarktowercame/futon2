@@ -8,7 +8,9 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as telemetry]
-            [futon2.aif.tripwire :as tripwire])
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.tripwire :as tripwire]
+            [futon2.aif.wm.debugger :as debugger])
   (:import [java.nio.file Files]
            [java.time Instant]))
 
@@ -1038,3 +1040,373 @@
                       group #{} (ms "2026-09-15T06:14:53Z")))]
         (is (= 2 (:age-hours v)))
         (is (= "2026-09-15T04:14:53Z" (:newest-opened-at v)))))))
+
+;; --- Tripwire debugger stops with per-firing outcome records (2026-10-22) ---
+
+(defn- dbg-wait-for-stop
+  [run-id]
+  (loop [remaining 6000]
+    (if-let [stop (first (filter #(= run-id (:run-id %)) (debugger/stopped)))]
+      stop
+      (if (pos? remaining)
+        (do (Thread/sleep 5) (recur (dec remaining)))
+        (throw (ex-info "Debugger stop did not appear" {:run-id run-id}))))))
+
+(defn- dbg-wait-for-new-stop
+  "Wait for a stop of RUN-ID other than the one at PREV-STOPPED-AT. The
+  re-stop after :retry can register within the same poll window in which
+  the previous entry is removed, so waiting for 'gone then stopped' races."
+  [run-id prev-stopped-at]
+  (loop [remaining 6000]
+    (if-let [stop (first (filter #(and (= run-id (:run-id %))
+                                       (not= prev-stopped-at (:stopped-at %)))
+                                 (debugger/stopped)))]
+      stop
+      (if (pos? remaining)
+        (do (Thread/sleep 5) (recur (dec remaining)))
+        (throw (ex-info "Second debugger stop did not appear"
+                        {:run-id run-id :prev-stopped-at prev-stopped-at}))))))
+
+(defn- dbg-wait-gone
+  [run-id]
+  (loop [remaining 6000]
+    (if (pos? (count (filter #(= run-id (:run-id %)) (debugger/stopped))))
+      (if (pos? remaining)
+        (do (Thread/sleep 5) (recur (dec remaining)))
+        (throw (ex-info "Debugger stop did not clear" {:run-id run-id})))
+      true)))
+
+(defn- firing-files [root]
+  (filter #(.isFile %) (file-seq (io/file root))))
+
+(defn- read-firings [root]
+  (filterv #(= :wm/tripwire-firing-v1 (:schema %))
+           (map #(edn/read-string (slurp %)) (firing-files root))))
+
+(defn- gated-witness-opts
+  "Disable every registry wire and gate a synthetic witness through an atom,
+  so a test controls whether the (re-)evaluation still witnesses."
+  [run-id report-root firing-root gate]
+  ;; T8 stays enabled so observe! reaches evaluate-wire (which the test
+  ;; redefines to the gated synthetic witness); every other wire is off.
+  {:tripwire/report-root (.getPath report-root)
+   :tripwire/firing-root (.getPath firing-root)
+   :run-id run-id
+   :tripwire/disabled-wire-ids (vec (keys (dissoc @tripwire/wire-registry :T8)))
+   :tripwire/gate gate})
+
+(deftest attached-witness-stops-continues-and-writes-one-firing
+  (let [run-id (str "dbg-trip-" (System/nanoTime))
+        report-root (temp-dir) firing-root (temp-dir)
+        opts (gated-witness-opts run-id report-root firing-root (atom true))
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/attach!)
+    (try
+      (let [gate (:tripwire/gate opts)
+            running (future
+                      (with-redefs [tripwire/evaluate-wire
+                                    (fn [_wire _obs] (if @gate [{:kind :test-witness}] []))]
+                        (tripwire/observe! opts record)))]
+        (let [stop (dbg-wait-for-stop run-id)]
+          (is (= :tripwire-tripped (get-in stop [:condition :kind])))
+          (is (= :T8 (:tripwire/wire-id (:ex-data stop))))
+          (is (= record (debugger/stop-value run-id))
+              "the phase record is retained as the stop value"))
+        ;; the trip report exists while the run is stopped
+        (is (= 1 (count (filter #(.isFile %) (file-seq report-root))))
+            "the trip was recorded durably before the stop")
+        (debugger/continue! run-id :continue :nothing-to-fix)
+        (is (= record (deref running 3000 ::timeout)))
+        (dbg-wait-gone run-id)
+        (let [firings (read-firings firing-root)]
+          (is (= 1 (count firings)) "exactly one firing record")
+          (is (= :wm/tripwire-firing-v1 (:schema (first firings))))
+          (is (= :nothing-to-fix (:disposition (first firings))))
+          (is (= :continue (:restart-choice (first firings))))
+          (is (= run-id (:run-id (first firings))))
+          (is (:trip/id (first firings)))
+          (is (:report-path (first firings)))))
+      (finally (debugger/detach!)))))
+
+(deftest retry-re-evaluates-wires-on-the-same-record
+  (testing ":retry after the condition is cleared resumes with no second stop"
+    (let [run-id (str "dbg-retry-clear-" (System/nanoTime))
+          report-root (temp-dir) firing-root (temp-dir)
+          gate (atom true)
+          opts (gated-witness-opts run-id report-root firing-root gate)
+          record {:phase :construction :transition :start :attempt-id "a1"}]
+      (debugger/attach!)
+      (try
+        (let [running (future
+                        (with-redefs [tripwire/evaluate-wire
+                                      (fn [_wire _obs] (if @gate [{:kind :test-witness}] []))]
+                          (tripwire/observe! opts record)))]
+          (dbg-wait-for-stop run-id)
+          (reset! gate false)
+          (debugger/continue! run-id :retry)
+          (is (= record (deref running 3000 ::timeout)))
+          (dbg-wait-gone run-id)
+          (is (= [:retry] (mapv :restart-choice (read-firings firing-root)))
+              "the retry resolution is still a firing outcome"))
+        (finally (debugger/detach!)))))
+  (testing ":retry while still witnessed stops again"
+    (let [run-id (str "dbg-retry-again-" (System/nanoTime))
+          report-root (temp-dir) firing-root (temp-dir)
+          gate (atom true)
+          opts (gated-witness-opts run-id report-root firing-root gate)
+          record {:phase :construction :transition :start :attempt-id "a1"}]
+      (debugger/attach!)
+      (try
+        (let [running (future
+                        (with-redefs [tripwire/evaluate-wire
+                                      (fn [_wire _obs] (if @gate [{:kind :test-witness}] []))]
+                          (tripwire/observe! opts record)))]
+          (let [first-stop (dbg-wait-for-stop run-id)]
+            (debugger/continue! run-id :retry)
+            ;; the first stop entry is removed by the run thread when it
+            ;; takes the retry; wait for a DIFFERENT stop, not merely for
+            ;; this one to clear — the re-stop can register in the same
+            ;; poll window, and delivering to the spent promise is the bug.
+            (dbg-wait-for-new-stop run-id (:stopped-at first-stop))
+            (debugger/continue! run-id :continue :fixed))
+          (is (= record (deref running 3000 ::timeout)))
+          (dbg-wait-gone run-id)
+          (is (= {:retry 1 :continue 1}
+                 (frequencies (mapv :restart-choice (read-firings firing-root))))
+              "one firing record per restart resolution")
+          (is (= #{[:retry :unrecorded] [:continue :fixed]}
+                 (set (mapv (juxt :restart-choice :disposition)
+                            (read-firings firing-root))))))
+        (finally (debugger/detach!))))))
+
+(deftest abort-ends-the-run-with-one-stop-and-a-discharged-rethrow
+  (let [run-id (str "dbg-abort-" (System/nanoTime))
+        report-root (temp-dir) firing-root (temp-dir)
+        gate (atom true)
+        opts (gated-witness-opts run-id report-root firing-root gate)
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/attach!)
+    (try
+      (let [stops-seen (atom 0)
+            running (future
+                      (with-redefs [tripwire/evaluate-wire
+                                    (fn [_wire _obs]
+                                      (swap! stops-seen inc)
+                                      (if @gate [{:kind :test-witness}] []))]
+                        (try
+                          (tripwire/observe! opts record)
+                          ::no-throw
+                          (catch clojure.lang.ExceptionInfo e e))))]
+        (dbg-wait-for-stop run-id)
+        (debugger/continue! run-id :abort :failed)
+        (let [thrown (deref running 3000 ::timeout)]
+          (is (instance? clojure.lang.ExceptionInfo thrown))
+          (is (= :tripwire-tripped (:outcome (ex-data thrown))))
+          (is (= :failed (:disposition (first (read-firings firing-root)))))
+          (is (= :abort (:restart-choice (first (read-firings firing-root)))))
+          (is (boolean (:debugger/discharged? (ex-data thrown)))
+              "the abort rethrow is marked discharged")
+          (is (false? (debugger/stoppable-failure? thrown))
+              "run-phase!'s catch will not stop the same trip again"))
+        (dbg-wait-gone run-id)
+        (testing "the bad case: without the discharged mark the rethrow WOULD restop"
+          ;; This is the exact throwable run-phase!'s catch consults. With the
+          ;; mark removed (the pre-repair stoppable-failure?), this predicate
+          ;; returned true and the abort produced a SECOND debugger stop.
+          (is (true? (debugger/stoppable-failure?
+                      (ex-info "tripwire abort" {:outcome :tripwire-tripped})))
+              "an unmarked tripwire abort is still stoppable (the guard's input)")
+          (is (false? (debugger/stoppable-failure?
+                       (ex-info "tripwire abort" {:outcome :tripwire-tripped
+                                                  :debugger/discharged? true})))
+              "the discharged mark is exactly what prevents the second stop")))
+        (finally (debugger/detach!)))))
+
+(deftest run-phase-tripwire-abort-stops-exactly-once
+  ;; The abort throw must survive run-phase!'s catch without a second stop.
+  ;; Tripping on the :end :ok emission exercises the catch path (the :start
+  ;; emission is outside run-phase!'s try).
+  (let [run-id (str "dbg-run-abort-" (System/nanoTime))
+        report-root (temp-dir) firing-root (temp-dir)
+        ;; The witness fires only on the :end emission: the thunk succeeds,
+        ;; the tripwire abort is thrown inside run-phase!'s try, and the
+        ;; catch must NOT produce a second debugger stop.
+        witnessing? (fn [obs] (= :end (:transition obs)))
+        stops-seen (atom 0)
+        opts {:tripwire/report-root (.getPath report-root)
+              :tripwire/firing-root (.getPath firing-root)
+              :run-id run-id
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))
+              :phase-events (atom [])
+              :phase-log-fn (constantly nil)
+              :nano-time-fn #(System/nanoTime)}]
+    (debugger/attach!)
+    (try
+      (let [running (future
+                      (with-redefs [tripwire/evaluate-wire
+                                    (fn [_wire obs]
+                                      (when (witnessing? obs)
+                                        (swap! stops-seen inc))
+                                      (if (witnessing? obs) [{:kind :test-witness}] []))]
+                        (try
+                          (runner/run-phase! opts {:opportunity-id "op"
+                                                   :attempt-id "attempt"}
+                                             :phase-x (constantly :computed))
+                          ::no-throw
+                          (catch clojure.lang.ExceptionInfo e e))))]
+        (dbg-wait-for-stop run-id)
+        (is (= 1 @stops-seen) "the witness fired exactly once (on :end)")
+        (debugger/continue! run-id :abort :failed)
+        (let [thrown (deref running 5000 ::timeout)]
+          (is (instance? clojure.lang.ExceptionInfo thrown))
+          (is (= :tripwire-tripped (:outcome (ex-data thrown))))
+          (is (boolean (:debugger/discharged? (ex-data thrown)))))
+        (dbg-wait-gone run-id)
+        (is (= 1 (count (read-firings firing-root)))
+            "exactly one firing record for the single stop")
+        (is (= 1 (:repeats (:T8 (tripwire/firing-tally (.getPath firing-root)))))
+            "the :end :error re-emission was counted as a repeat")
+        ;; The wire is re-evaluated on the :end :error emission and the repeat
+        ;; is counted, not stopped (the log line above shows it); the proof
+        ;; that no SECOND stop happened is that nothing is stoppable anymore.
+        (is (empty? (filter #(= run-id (:run-id %)) (debugger/stopped)))
+            "the stop registry is empty: exactly one debugger stop happened")
+        (is (= :debugger/run-not-stopped
+               (try (debugger/continue! run-id :continue)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e
+                      (:kind (ex-data e)))))
+            "a second stop would be continuable; there is none"))
+      (finally (debugger/detach!)))))
+
+(deftest detached-witness-keeps-note-behaviour-and-writes-no-firing
+  (let [run-id (str "dbg-detached-" (System/nanoTime))
+        report-root (temp-dir) firing-root (temp-dir)
+        gate (atom true)
+        opts (gated-witness-opts run-id report-root firing-root gate)
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/detach!)
+    (with-redefs [tripwire/evaluate-wire
+                  (fn [_wire _obs] (if @gate [{:kind :test-witness}] []))]
+      (is (= record (tripwire/observe! opts record))
+          "detached: record-and-continue, byte-for-byte the note! behaviour")
+      (is (= 1 (count (filter #(.isFile %) (file-seq report-root)))))
+      (is (empty? (read-firings firing-root))
+          "detached trips produce no firing records"))))
+
+(deftest two-arg-continue-records-unrecorded-disposition
+  (let [run-id (str "dbg-unrecorded-" (System/nanoTime))
+        report-root (temp-dir) firing-root (temp-dir)
+        gate (atom true)
+        opts (gated-witness-opts run-id report-root firing-root gate)
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/attach!)
+    (try
+      (let [running (future
+                      (with-redefs [tripwire/evaluate-wire
+                                    (fn [_wire _obs] (if @gate [{:kind :test-witness}] []))]
+                        (tripwire/observe! opts record)))]
+        (dbg-wait-for-stop run-id)
+        (debugger/continue! run-id :continue)
+        (is (= record (deref running 3000 ::timeout)))
+        (is (= [:unrecorded] (mapv :disposition (read-firings firing-root)))))
+      (finally (debugger/detach!)))))
+
+(deftest firing-tally-counts-by-disposition-per-wire
+  (let [root (temp-dir)
+        write! (fn [wire disposition]
+                 (tripwire/write-firing! (.getPath root)
+                                         {:trip/id "trip-t"
+                                          :trip/wire-id wire
+                                          :run-id "r"
+                                          :phase :p :transition :start
+                                          :restart-choice :continue
+                                          :disposition disposition
+                                          :report-path "x" :dwell-ms 1}))]
+    (write! :T8 :nothing-to-fix)
+    (write! :T8 :nothing-to-fix)
+    (write! :T8 :nothing-to-fix)
+    (write! :T8 :fixed)
+    (write! :T7 :undecided)
+    (is (= {:T8 {:total 4 :nothing-to-fix 3 :fixed 1}
+            :T7 {:total 1 :undecided 1}}
+           (tripwire/firing-tally (.getPath root))))))
+
+(deftest run-phase-tripwire-abort-restops-without-the-discharged-mark
+  ;; The bad case the mark is named for, end to end: with
+  ;; stoppable-failure? ignoring :debugger/discharged? (its pre-2026-10-22
+  ;; body), the abort thrown on the :end emission is caught by run-phase!
+  ;; and stops the run a SECOND time.
+  (let [run-id (str "dbg-run-abort-bad-" (System/nanoTime))
+        opts {:tripwire/report-root (.getPath (temp-dir))
+              :tripwire/firing-root (.getPath (temp-dir))
+              :run-id run-id
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))
+              :phase-events (atom [])
+              :phase-log-fn (constantly nil)}]
+    (debugger/attach!)
+    (try
+      (with-redefs [debugger/stoppable-failure? (constantly true)
+                    tripwire/evaluate-wire
+                    (fn [_wire obs]
+                      (if (= :end (:transition obs)) [{:kind :test-witness}] []))]
+        (let [running (future
+                        (try
+                          (runner/run-phase! opts {:opportunity-id "op"
+                                                   :attempt-id "attempt"}
+                                             :phase-x (constantly :computed))
+                          (catch Throwable e e)))
+              first-stop (dbg-wait-for-stop run-id)]
+          (debugger/continue! run-id :abort :failed)
+          (let [second-stop (dbg-wait-for-new-stop run-id (:stopped-at first-stop))]
+            (is (= :tripwire-tripped (get-in second-stop [:condition :kind]))
+                "without the mark the same tripwire abort stops the run again"))
+          (debugger/continue! run-id :abort)
+          (deref running 5000 ::timeout)))
+      (finally (debugger/detach!)))))
+
+(deftest same-run-repeat-is-counted-not-stopped
+  (let [run-id (str "dbg-repeat-" (System/nanoTime))
+        firing-root (temp-dir)
+        opts (gated-witness-opts run-id (temp-dir) firing-root (atom true))
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/attach!)
+    (try
+      (with-redefs [tripwire/evaluate-wire
+                    (fn [_wire _obs] [{:kind :test-witness}])]
+        (let [running (future (tripwire/observe! opts record))]
+          (dbg-wait-for-stop run-id)
+          (debugger/continue! run-id :continue :nothing-to-fix)
+          (is (= record (deref running 3000 ::timeout))))
+        (is (= record (tripwire/observe! opts record))
+            "the repeat returns at once instead of stopping")
+        (is (empty? (filter #(= run-id (:run-id %)) (debugger/stopped))))
+        (is (= {:T8 {:total 1 :nothing-to-fix 1 :repeats 1}}
+               (tripwire/firing-tally (.getPath firing-root)))))
+      (finally (debugger/detach!)))))
+
+(deftest retry-witnessed-by-another-wire-stops-under-that-wire
+  (let [run-id (str "dbg-retry-other-" (System/nanoTime))
+        firing-root (temp-dir)
+        current (atom :T8)
+        opts (assoc (gated-witness-opts run-id (temp-dir) firing-root (atom true))
+                    :tripwire/disabled-wire-ids
+                    (vec (keys (dissoc @tripwire/wire-registry :T8 :T7))))
+        record {:phase :construction :transition :start :attempt-id "a1"}]
+    (debugger/attach!)
+    (try
+      (with-redefs [tripwire/evaluate-wire
+                    (fn [wire _obs] (if (= wire @current) [{:kind :test-witness}] []))]
+        (let [running (future (tripwire/observe! opts record))
+              first-stop (dbg-wait-for-stop run-id)]
+          (reset! current :T7)
+          (debugger/continue! run-id :retry :fixed)
+          (let [second-stop (dbg-wait-for-new-stop run-id (:stopped-at first-stop))]
+            (is (= :T7 (get-in second-stop [:ex-data :tripwire/wire-id]))))
+          (debugger/continue! run-id :continue :nothing-to-fix)
+          (is (= record (deref running 3000 ::timeout)))
+          (is (= {:T8 {:total 1 :fixed 1} :T7 {:total 1 :nothing-to-fix 1}}
+                 (tripwire/firing-tally (.getPath firing-root))))))
+      (finally (debugger/detach!)))))

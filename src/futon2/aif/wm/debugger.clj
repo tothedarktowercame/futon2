@@ -41,6 +41,12 @@
 (defn breakpoint-armed? [breakpoint]
   (contains? @!breakpoints breakpoint))
 
+(def ^:private dispositions
+  "The per-firing outcome vocabulary (Joe, 2026-10-22): a wire that keeps
+  stopping the run with never anything to fix is noise and will be switched
+  off per wire later — that decision is read off these records."
+  #{:fixed :nothing-to-fix :failed :undecided})
+
 (defn stoppable-failure?
   "True when THROWABLE is a failure that the runner would close as a failure.
 
@@ -48,9 +54,14 @@
   existing close behaviour because run-phase! consults this predicate only
   after checking attached?.  An attached run stops before its surrounding
   close handler, so the operator can repair and retry the same phase or abort
-  to preserve the ordinary terminal refusal."
-  [_throwable]
-  true)
+  to preserve the ordinary terminal refusal.
+
+  A throwable already discharged by a debugger stop is not stoppable again:
+  a tripwire abort that has been decided by the operator must close the run,
+  not bounce back into a second stop when the same throwable propagates
+  through run-phase!'s catch (:debugger/discharged? marks it)."
+  [throwable]
+  (not (boolean (:debugger/discharged? (ex-data throwable)))))
 
 (defn stopped
   "Public descriptions of run threads currently waiting for a restart."
@@ -77,27 +88,36 @@
 
 (defn continue!
   "Deliver CHOICE to stopped RUN-ID. Choice is :continue, :retry, :abort, or
-  [:use-value value]. The restart itself is invoked by the waiting run thread."
-  [run-id choice]
-  (when-not (or (#{:continue :retry :abort} choice)
-                (and (vector? choice) (= :use-value (first choice)) (= 2 (count choice))))
-    (throw (ex-info "Unknown debugger restart choice"
-                    {:kind :debugger/invalid-choice :run-id run-id :choice choice})))
-  (let [stop (get @!stops run-id)]
-    (when-not stop
-      (throw (ex-info "Run is not stopped"
-                      {:kind :debugger/run-not-stopped :run-id run-id})))
-    (when (and (= :continue choice) (not (:has-stop-value? stop)))
-      (throw (ex-info "Continue requires a retained phase result"
-                      {:kind :debugger/invalid-choice-for-stop
-                       :run-id run-id :choice choice
-                       :condition-kind (get-in stop [:condition :kind])})))
-    (if (deliver (:decision stop) choice)
-      {:run-id run-id
-       :choice (if (vector? choice) (first choice) choice)
-       :delivered true}
-      (throw (ex-info "A restart choice was already delivered"
-                      {:kind :debugger/already-continued :run-id run-id})))))
+  [:use-value value]. DISPOSITION is the operator's per-firing outcome
+  (:fixed :nothing-to-fix :failed :undecided); the two-argument form records
+  :disposition :unrecorded in the dwell receipt. The restart itself is
+  invoked by the waiting run thread."
+  ([run-id choice] (continue! run-id choice nil))
+  ([run-id choice disposition]
+   (when-not (or (#{:continue :retry :abort} choice)
+                 (and (vector? choice) (= :use-value (first choice)) (= 2 (count choice))))
+     (throw (ex-info "Unknown debugger restart choice"
+                     {:kind :debugger/invalid-choice :run-id run-id :choice choice})))
+   (when-not (or (nil? disposition) (contains? dispositions disposition))
+     (throw (ex-info "Unknown debugger disposition"
+                     {:kind :debugger/invalid-disposition
+                      :run-id run-id :disposition disposition})))
+   (let [stop (get @!stops run-id)]
+     (when-not stop
+       (throw (ex-info "Run is not stopped"
+                       {:kind :debugger/run-not-stopped :run-id run-id})))
+     (when (and (= :continue choice) (not (:has-stop-value? stop)))
+       (throw (ex-info "Continue requires a retained phase result"
+                       {:kind :debugger/invalid-choice-for-stop
+                        :run-id run-id :choice choice
+                        :condition-kind (get-in stop [:condition :kind])})))
+     (if (deliver (:decision stop) [choice disposition])
+       {:run-id run-id
+        :choice (if (vector? choice) (first choice) choice)
+        :disposition (or disposition :unrecorded)
+        :delivered true}
+       (throw (ex-info "A restart choice was already delivered"
+                       {:kind :debugger/already-continued :run-id run-id}))))))
 
 (defn- condition-kind [throwable]
   (let [data (ex-data throwable)]
@@ -151,20 +171,24 @@
         (fn [_ _condition]
           (swap! !stops assoc run-id entry)
           (try
-            (let [choice @decision
+            (let [[choice disposition] @decision
                   resumed-ns (nano-time)
                   restart-choice (if (vector? choice) (first choice) choice)
                   receipt (retain-dwell!
                            debugger-dwell-ledger
-                           {:schema dwell-schema
-                            :run-id run-id
-                            :phase phase
-                            :condition-kind (:kind condition)
-                            :stopped-at-monotonic-ns stopped-ns
-                            :resumed-at-monotonic-ns resumed-ns
-                            :restart-choice restart-choice
-                            :duration-ms (quot (max 0 (- resumed-ns stopped-ns))
-                                               1000000)})]
+                           (cond-> {:schema dwell-schema
+                                    :run-id run-id
+                                    :phase phase
+                                    :condition-kind (:kind condition)
+                                    :stopped-at-monotonic-ns stopped-ns
+                                    :resumed-at-monotonic-ns resumed-ns
+                                    :restart-choice restart-choice
+                                    :disposition (or disposition :unrecorded)
+                                    :duration-ms (quot (max 0 (- resumed-ns stopped-ns))
+                                                       1000000)}
+                             (:tripwire/wire-id (ex-data throwable))
+                             (assoc :tripwire/wire-id
+                                    (:tripwire/wire-id (ex-data throwable)))))]
               (cond
                 (= :continue choice)
                 (far/invoke-restart ::continue debugger-stop-value receipt)
@@ -175,9 +199,13 @@
             (finally
               (swap! !stops dissoc run-id))))]
        (far/error ::phase-failure entry))
-      (::retry [receipt] {:action :retry :debugger-dwell receipt})
+      (::retry [receipt]
+        {:action :retry :debugger-dwell receipt :disposition (:disposition receipt)})
       (::continue [value receipt]
-        {:action :continue :value value :debugger-dwell receipt})
+        {:action :continue :value value :debugger-dwell receipt
+         :disposition (:disposition receipt)})
       (::use-value [value receipt]
-        {:action :use-value :value value :debugger-dwell receipt})
-      (::abort [receipt] {:action :abort :debugger-dwell receipt}))))
+        {:action :use-value :value value :debugger-dwell receipt
+         :disposition (:disposition receipt)})
+      (::abort [receipt]
+        {:action :abort :debugger-dwell receipt :disposition (:disposition receipt)}))))
