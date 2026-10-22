@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "wm-full-loop",
+    "session-id": null,
+    "execution": {
+      "executed?": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1792649692337-2355-4419e2d0",
+    "agent-id": "zai-2",
+    "artifact-ref": null,
+    "harness": {
+      "kind": "war-machine",
+      "basis": "producer-context",
+      "execution-id": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45",
+      "source-ref": "wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413"
+    },
+    "started-at": "2026-10-22T06:14:52.611421134Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-10-22T06:14:52.339956943Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-10-22T06:14:52.611433888Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-10-22T06:14:52.646858373Z",
+        "text": "D_TASK_DISPATCH_SHA256: 9c3c2415254afaecdbff0fe8fe8e59351880cae15d653324e2f09220c7bb5236\nzai-2: FULL-LOOP REVISION ROUND 2. The independent reviewer requested changes to your implementation. Amend the same selected target using new commits in the existing repository.\n\nSELECTED TARGET: \"M-stack-geometry\"\nCONSTRUCTION CONTRACT: {:construction-kind :compiled-cascade, :shown [\"futon-theory/mission-lifecycle\" \"agent/evidence-over-assertion\" \"futon-theory/mission-lifecycle\" \"futon-theory/mission-lifecycle\" \"war-machine/state-capture\" \"war-machine/state-capture\" \"agent/evidence-over-assertion\" \"agent/evidence-over-assertion\" \"features/operator-turns-enter-the-observation-vector\" \"hdm/deep-storage-to-active-graph\" \"problems/operator-turns-become-inference-observations\" \"problems/operator-turns-become-inference-observations\" \"problems/llm-over-corpus-mining-lessons\" \"problems/llm-over-corpus-mining-lessons\" \"gauntlet/world-is-hypergraph\" \"gauntlet/world-is-hypergraph\" \"hdm/deep-storage-to-active-graph\" \"hdm/deep-storage-to-active-graph\" \"hdm/deep-storage-to-active-graph\"], :operational-plan {:selected-cascade-digest \"c601dc5697a2d5d65c5c8440f08b3905cee1030b9a62dfa03e2ad5e7ab202c27\", :compiled-cascade-digest \"f2d6feed1a394036e4891266361797bad256316bba3e3ec451dee8c204d257c1\", :steps [{:occurrence-id [\"futon-theory/mission-lifecycle\" 1], :pattern \"futon-theory/mission-lifecycle\", :provenance {:reading-record-id \"M-stack-geometry/M-stack-geometry/policy-c7d7518e1e185c2e2318/[\\\"futon-theor \u2026[trimmed]"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "pending"
+    },
+    "state": "running",
+    "invocation/model": null,
+    "trace-id": null,
+    "result-summary": null,
+    "terminal-message": null,
+    "finished-at": null,
+    "created-at": "2026-10-22T06:14:52.337873207Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

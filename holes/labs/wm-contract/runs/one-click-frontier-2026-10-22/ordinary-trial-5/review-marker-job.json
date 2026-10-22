@@ -1,0 +1,132 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-11",
+    "session-id": "zai-f4b6f55a-59d0-4045-8d86-6557fa3333e4",
+    "execution": {
+      "executed": true,
+      "tool-events": 2,
+      "command-events": 0
+    },
+    "job-id": "invoke-1792649611892-2353-b571b2b0",
+    "agent-id": "zai-3",
+    "artifact-ref": "1792649130675",
+    "started-at": "2026-10-22T06:13:32.100144484Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-10-22T06:13:31.892636079Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-10-22T06:13:32.100150906Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-10-22T06:13:32.127359786Z",
+        "text": "Bounded supplemental review for held Trial5, read-only. Your correction job invoke-1792649262785-2348-2be907db retracts original approval job invoke-1792649130675-2347-7689b2a9 for futon5a commit 9d8d6993c7b3d813aabce8e90862f2d97bbdb727. Production review-verdict returns :unverifiable because your final correction lacks the required FULL_LOOP_REVIEW line. Please independently reaffirm your actual verdict in the runtime format (if still warranted, FIRST LINE: FULL_LOOP_REVIEW: REQUEST_CHANGES followed by concrete findings). Do not just echo our requested verdict. Cite both previous jobs and the exact commit. Execute the two tiny read-only runpy probes from parser-independent-probe.json / parser-review-findings.txt in this directory to retain actual execution provenance in THIS job. No file edits, no tests beyond probes, no dispatch, no Trial, no service load. State required corrections and scope; retain still-live target standing. We will preserve the original approval and your retraction separately and validate the genuine returned job before using supported debugger continuation. Directory: /home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-10-22T06:13:36.796782444Z",
+        "text": "Reaffirm verdict in THIS job: run the two probes myself (again, in this turn, from the referenced files), then respond with FULL_LOOP_REVIEW line first. Check the referenced files in that directory."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-10-22T06:13:36.801738915Z",
+        "tools": [
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5 && ls && cat parser-"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"admitted-after-source-retry.json\\nafter-certificate-resume.json\\narchive-ledger-before-trial.edn\\nauthor-wait-capture.clj\\nauthor-wait-capture-response.json\\nauthor-wait-continue.json\\nauthor-wait.edn.gz\\nauthor-wait.json\\nbefore.json\\nbuild-resolution-capture.clj\\nbuild-resolution-capture-response.json\\nbuild-resolution-continue.json\\nbuild-resolution.edn.gz\\nbuild-resolution.json\\ncascade-author-job.json\\ncascade-author-park.json\\ncascade-continue.json\\ncascade-resume- \u2026[trimmed]\u2026 n-continue.json\\nconstruction.edn.gz\\nconstruction.json\\ncorrected-review-job.json\\ncorrected-review-validation.json\\ndispatch-criteria-finding.json\\ndispatch-criteria-replay.clj\\ndispatch-criteria-replay.json\\nexecution-author-park.json\\nexecution-author-status.json\\nexecution-reviewer-park.json\\nexecution-reviewer-status.json\\nfirst-stop.json\\nlaunch.log\\nlearning-certificate-correction-result.json\\nlearning-certificate-repair-dispatch.json\\nlearning-certificate-repair-request.txt\\nlearning-certificate-repair-result.json\\nlive-carrier-verification.json\\nmission-before-cascade-effects.md\\nparser-independent-probe.json\\nparser-review-correction-park.json\\nparser-review-findings.txt\\npost-selection-phases.edn\\npreexisting-completion-evidence.json\\nresume-certified-selection.clj\\nreviewer-preexisting-completions-response.json\\nreviewer-preexisting-completions.txt\\nreviewer-wait-capture.clj\\nreviewer-wait-capture-response.json\\nreviewer-wait.edn.gz\\nreviewer-wait.json\\nreview-marker-request.txt\\nseal-print-probe.clj\\nselection-cost-dispatch.json\\nselection-cost-request.txt\\nselection-frontier-summary.edn\\nselection-ordered-capture.clj\\nselection-ordered-capture-response.json\\nselection-ordered.edn.gz\\nselection-ordered.json\\nselection-replay-capture.clj\\nselection-replay-capture-response.json\\nselection-replay.edn.gz\\nselection-replay.json\\nselection-stack.json\\nselection-stop-capture.clj\\nselection-stop-capture-response.json\\nselection-stop.edn.gz\\nselection-stop.json\\nsource-reload.json\\nsource-retry.json\\nsource-stop-capture.clj\\nsource-stop-capture-response.json\\nsource-stop.edn.gz\\nsource-stop.json\\nwriter-exit-and-held-trial-verification.json\\n{\\n  \\\"script_sha256\\\": \\\"2c27eb5205a006886aa0b0072e85822e127f4964f943eafb37ba9bfc36781c71\\\",\\n  \\\"cross_repo_identity_probe\\\": {\\n    \\\"input\\\": \\\"another-repo/holes/missions/M-stack-geometry.md\\\",\\n    \\\"actual\\\": [\\n      \\\"mission\\\",\\n      \\\"M-stack-geometry\\\"\\n    ],\\n    \\\"expected\\\": \\\"cross-repo identity must not be collapsed to local basename\\\"\\n  },\\n  \\\"source_header_continuation_edges\\\": [\\n    {\\n      \\\"schema\\\": \\\"futon5a/mission-crossref-edge-v1\\\",\\n      \\\"from\\\": \\\"M-stack-geometry\\\",\\n      \\\"to\\\": \\\"same\\\",\\n      \\\"to-kind\\\": \\\"unresolved\\\",\\n      \\\"relation\\\": \\\"futon1a ingestion substrate);\\\",\\n      \\\"source\\\": {\\n        \\\"file\\\": \\\"holes/missions/M-stack-geometry.md\\\"\\n      }\\n    },\\n    {\\n      \\\"schema\\\": \\\"futon5a/mission-crossref-edge-v1\\\",\\n      \\\"from\\\": \\\"M-stack-geometry\\\",\\n      \\\"to\\\": \\\"and\\\",\\n      \\\"to-kind\\\": \\\"unresolved\\\",\\n      \\\"relation\\\": \\\"sorry-proximity model; M-trip-journal B\\\\u2192A turns are one\\\",\\n      \\\"source\\\": {\\n        \\\"file\\\": \\\"holes/missions/M-stack-geometry.md\\\"\\n      }\\n    },\\n    {\\n      \\\"schema\\\": \\\"futon5a/mission-crossref-edge-v1\\\",\\n      \\\"from\\\": \\\"M-stack-geometry\\\",\\n      \\\"to\\\": \\\"candidate\\\",\\n      \\\"to-kind\\\": \\\"unresolved\\\",\\n      \\\"relation\\\": \\\"observation stream for sorry discovery);\\\",\\n      \\\"source\\\": {\\n        \\\"file\\\": \\\"holes/missions/M-stack-geometry.md\\\"\\n      }\\nFor active execution review job invoke-1792649130675-2347-7689b2a9 of futon5a9d8d6993: independent read-only probes found two correctness defects. Evidence canonical futon2 ordinary-trial-5/parser-independent-probe.json pins script SHA2c27eb52. runpy.run_path then classify_target(\\\"another-repo/holes/missions/M-stack-geometry.md\\\", known_targets()) returns (mission,M-stack-geometry): repo-qualified identity silently collapsed to local basename. parse_doc(actual M-stack-geometry.md) emits separate edges to same/and/candidate/embedding/analytic/futon1a from continuation lines of parenthetical prose. These are not unresolved reference IDs; relation text detached from real target. Please incorporate in runtime review verdict, request bounded correction/tests if warranted. Fixed-point generation alone does not validate reference semantics. No code/store mutation by me. Preserve real mission progress versus cascade conformance distinction already recorded. No manufactured edits or selection substitution.\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-10-22T06:13:42.032472494Z",
+        "tools": [
+          "run_shell"
+        ],
+        "previews": [
+          "run_shell cd /home/joe/code/futon5a && sha256sum scripts/build_mission_crossref_edges.py && python3 - <<'PY' import runpy from pat"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"2c27eb5205a006886aa0b0072e85822e127f4964f943eafb37ba9bfc36781c71  scripts/build_mission_crossref_edges.py\\nprobe-1 classify_target cross-repo-qualified: ('mission', 'M-stack-geometry')\\nprobe-2 prose-token edge targets: ['analytic', 'and', 'candidate', 'embedding', 'futon1a', 'same']\\nBOTH DEFECTS REPRODUCED\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "text",
+        "at": "2026-10-22T06:14:02.439759047Z",
+        "text": "FULL_LOOP_REVIEW: REQUEST_CHANGES crossref extractor mis-types repo-qualified refs as local missions and emits 6 prose-token edges; bounded parser fix + regression tests required\n\n**Genuine, independently reaffirmed verdict for held Trial 5 \u2014 not an echo.** This job retracts my prior approval in job `invoke-1792649130675-2347-7689b2a9`; the correction was job `invoke-1792649262785-2348-2be907db`. Target commit: **futon5a `9d8d6993c7b3d813aabce8e90862f2d97bbdb727`** (\"M-stack-geometry Checkpoint 19: typed mission cross-reference edge extraction\").\n\n**Execution provenance in THIS job** (read-only, from the pinned files in `ordinary-trial-5/`):\n- `sha256sum scripts/build_mission_crossref_edges.py` \u2192 `2c27eb5205a006886aa0b0072e85822e127f4964f943eafb37ba9bfc36781c71` \u2014 matches the pin in `parser-independent-probe.json`.\n- Probe 1 (`classify_target` on the cross-repo-qualified path): returned `('mission', 'M-stack-geometry')` \u2014 **defect reproduced**; a foreign-repo reference is silently collapsed to the local basename and mis-typed as a local mission edge.\n- Probe 2 (`parse_doc` on the actual M-stack-geometry.md): prose-token edge targets `['analytic', 'and', 'candidate', 'embedding', 'futon1a', 'same']` \u2014 **defect reproduced**; six edges whose `:to` is a continuation word of parenthetical prose, with the real target's qualifier text detached into `:relation`.\n\n**What still stands from the original review** (and why REQUEST_CHANGES, not REJECT): the commit is substantive, in-scope, new work for M-stack-geometry (Layer-1 typed edges, pre-ingest input for acceptance item 1), honestly checkpointed with item 1 left unchecked; determinism (`--check` fixed point, 171 edges) verified. The defects are reference-semantics, not fabrication of progress \u2014 but they make the edge artifact untrustworthy for its stated purpose (futon1a ingest input) until corrected.\n\n**Required corrections, bounded:**\n1. `classify_target` must classify repo-qualified targets as `cross-repo` **before** ba \u2026[trimmed]"
+      },
+      {
+        "seq": 8,
+        "type": "done",
+        "at": "2026-10-22T06:14:02.601038396Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 9,
+        "type": "delivery-recorded",
+        "at": "2026-10-22T06:14:02.824758251Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-11 via /api/alpha/invoke/jobs/invoke-1792649611892-2353-b571b2b0",
+        "recorded-at": "2026-10-22T06:14:02.823389054Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-11 via /api/alpha/invoke/jobs/invoke-1792649611892-2353-b571b2b0",
+      "recorded-at": "2026-10-22T06:14:02.823389054Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1792649611892-2353-b571b2b0",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "total-cost-usd": null,
+    "usage": {
+      "cost/input-tokens": 384739,
+      "cost/output-tokens": 1118,
+      "cost/total-tokens": 385857,
+      "cost/cached-input-tokens": 382016,
+      "cost/reasoning-tokens": 43,
+      "cost/source": "zai",
+      "cost/calls": 3,
+      "cost/model": "glm-5.3"
+    },
+    "result-summary": "FULL_LOOP_REVIEW: REQUEST_CHANGES crossref extractor mis-types repo-qualified refs as local missions and emits 6 prose-token edges; bounded parser fix + regression tests required **Genuine, independently reaffirmed ve...",
+    "result": "FULL_LOOP_REVIEW: REQUEST_CHANGES crossref extractor mis-types repo-qualified refs as local missions and emits 6 prose-token edges; bounded parser fix + regression tests required\n\n**Genuine, independently reaffirmed verdict for held Trial 5 \u2014 not an echo.** This job retracts my prior approval in job `invoke-1792649130675-2347-7689b2a9`; the correction was job `invoke-1792649262785-2348-2be907db`. Target commit: **futon5a `9d8d6993c7b3d813aabce8e90862f2d97bbdb727`** (\"M-stack-geometry Checkpoint 19: typed mission cross-reference edge extraction\").\n\n**Execution provenance in THIS job** (read-only, from the pinned files in `ordinary-trial-5/`):\n- `sha256sum scripts/build_mission_crossref_edges.py` \u2192 `2c27eb5205a006886aa0b0072e85822e127f4964f943eafb37ba9bfc36781c71` \u2014 matches the pin in `parser-independent-probe.json`.\n- Probe 1 (`classify_target` on the cross-repo-qualified path): returned `('mission', 'M-stack-geometry')` \u2014 **defect reproduced**; a foreign-repo reference is silently collapsed to the local basename and mis-typed as a local mission edge.\n- Probe 2 (`parse_doc` on the actual M-stack-geometry.md): prose-token edge targets `['analytic', 'and', 'candidate', 'embedding', 'futon1a', 'same']` \u2014 **defect reproduced**; six edges whose `:to` is a continuation word of parenthetical prose, with the real target's qualifier text detached into `:relation`.\n\n**What still stands from the original review** (and why REQUEST_CHANGES, not REJECT): the commit is substantive, in-scope, new work for M-stack-geometry (Layer-1 typed edges, pre-ingest input for acceptance item 1), honestly checkpointed with item 1 left unchecked; determinism (`--check` fixed point, 171 edges) verified. The defects are reference-semantics, not fabrication of progress \u2014 but they make the edge artifact untrustworthy for its stated purpose (futon1a ingest input) until corrected.\n\n**Required corrections, bounded:**\n1. `classify_target` must classify repo-qualified targets as `cross-repo` **before** basename resolution; only bare filenames may resolve to `mission`/`excursion`.\n2. Target tokens that cannot be a reference (prose continuations) must not be emitted as edges; exclude them from the edge list and account for them in `stats.json` instead.\n3. Regression tests: both probe cases verbatim (the cross-repo path input and the six prose tokens asserted absent), plus a `--check` fixed-point run.\n\n**Scope of the retraction:** the verdict only; the standing target decision remains **still-live** (deposited by me as decider, zai-3 \u2260 author zai-2); no file edits, no tests beyond the two probes, no dispatch, no Trial, no service load were performed in this job. The real-mission-progress vs cascade-conformance distinction stands: this commit is genuine work needing correction, and the all-preexisting compile cascade separately carries no execution credit.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1792649611892-2353-b571b2b0",
+      "at": "2026-10-22T06:14:02.601021745Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-10-22T06:14:02.601021745Z",
+    "created-at": "2026-10-22T06:13:31.892445604Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

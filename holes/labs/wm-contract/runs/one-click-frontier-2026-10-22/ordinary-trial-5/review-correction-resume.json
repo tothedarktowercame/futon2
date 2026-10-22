@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:prior-review-job \"invoke-1792649130675-2347-7689b2a9\", :corrective-review-job \"invoke-1792649611892-2353-b571b2b0\", :delivered {:run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :choice :use-value, :delivered true}}}",
+  "err": ""
+}
