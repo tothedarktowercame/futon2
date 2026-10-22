@@ -75,6 +75,16 @@
                    reseal-objective)]]]
       (is (= reason (sut/verify (mutate carrier))) (name reason)))))
 
+(deftest selected-outer-decision-retains-observed-precision-row
+  (let [{:keys [carrier objective]} (production-carriers)
+        result (sut/decision carrier)
+        row (get-in result [:decision :selection-certificate :precision-row])]
+    (is (= (:precision-row objective) row))
+    (is (= :absent (get-in row [:F :status])))
+    (is (= false (get-in row [:conforms :conforms])))
+    (is (= (get-in carrier [:selected-entry :action])
+           (get-in result [:decision :action])))))
+
 (deftest tie-draw-can-be-sealed-and-recomputed
   (let [{:keys [menu]} (production-carriers)
         digests (mapv :cascade-digest (:entries menu))

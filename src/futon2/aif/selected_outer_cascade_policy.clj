@@ -188,6 +188,9 @@
                                       {:kind :strict-objective})
                    :q2 (get-in carrier [:recomputation :q2])
                    :q4 (get-in carrier [:recomputation :q4])
-                   :q8 (get-in carrier [:recomputation :q8])}}
+                   :q8 (get-in carrier [:recomputation :q8])
+                   ;; Observed outer-route terms, not a beta update: the
+                   ;; objective receipt is sealed and replay-verified above.
+                   :precision-row (:precision-row raw-receipt)}}
        :ranked [entry]
        :preselected true})))

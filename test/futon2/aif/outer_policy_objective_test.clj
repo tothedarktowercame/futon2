@@ -69,6 +69,36 @@
     (is (= "low" (get-in r [:action :policy-id])))
     (is (< (abs (- 1.0 (reduce + (map :posterior (:policies r))))) 1.0e-12))))
 
+(deftest live-precision-row-is-observed-and-non-conforming-without-an-update
+  (let [rows [(row "low" [1.0 1.0] 0.0) (row "high" [10.0 10.0] 0.0)]
+        r (sut/evaluate (evidence rows) (sealed rows))
+        precision (:precision-row r)]
+    (is (= #{"low" "high"} (set (keys (:E precision)))))
+    (is (= :exp-of-lnE-held-by-outer-policy-objective (:E-source precision)))
+    (is (= :absent (get-in precision [:F :status])))
+    (is (= :absent (get-in precision [:posterior :status])))
+    (is (= :absent (get-in precision [:beta-posterior :status])))
+    (is (= false (get-in precision [:conforms :conforms])))
+    (is (= [:F :posterior :beta-posterior] (get-in precision [:conforms :missing])))
+    (is (empty? (get-in precision [:conforms :failures] [])))
+    (is (= (sort (map :policy-id (:policies r))) (sort (keys (:prior precision)))))))
+
+(deftest precision-conformance-names-observed-term-defects
+  (let [base {:E {"a" 1.0 "b" 2.0}
+              :G {"a" 0.0 "b" 1.0}
+              :F {:status :absent}
+              :prior {"a" (/ 1.0 (+ 1.0 (Math/exp -1.0)))
+                      "b" (/ (Math/exp -1.0) (+ 1.0 (Math/exp -1.0)))}
+              :posterior {:status :absent}
+              :beta-prior 1.0
+              :beta-posterior {:status :absent}}]
+    (is (some #{:prior-not-softmax}
+              (:failures (sut/precision-conformance (assoc-in base [:prior "a"] 0.1)))))
+    (is (some #{:beta-prior-not-positive}
+              (:failures (sut/precision-conformance (assoc base :beta-prior 0.0)))))
+    (is (some #{:E-not-positive}
+              (:failures (sut/precision-conformance (assoc-in base [:E "a"] 0.0)))))))
+
 (deftest ln-e-changes-choice-without-changing-g
   (let [rows [(row "a" [2.0 2.0] 0.0) (row "b" [2.0 2.0] 2.0)]
         r (sut/evaluate (evidence rows) (sealed rows))]
