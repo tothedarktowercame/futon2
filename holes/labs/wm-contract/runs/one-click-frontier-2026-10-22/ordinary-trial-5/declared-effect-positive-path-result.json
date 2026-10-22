@@ -1,0 +1,68 @@
+{
+  "schema": "wm/declared-effect-positive-path-result-v1",
+  "author": "zai-8",
+  "request": "invoke-1792650676519-2366-575b81fd",
+  "mode": "read-only design + standalone offline replay of already-supported functions; no production edits, Trials, JVM loads, fullrunner suites, dispatches, or falsifier weakening",
+  "artifacts": ["declared-effect-replay.clj", "declared-effect-replay-output.edn", "declared-effect-replay.stderr"],
+
+  "replay-result": {
+    "target": "T-repair-occ-444fb018... (declared cascade source)",
+    "revision-pair": {"before": "0798f96ad2082a8f80c8a850c8e1138c036213f9 (ticket OPEN)", "after": "97e17e10f2695c481c55ddaebe9026f2d245663f (ticket DONE)"},
+    "chain": [
+      "facts observed at before through the real C4 reader (observation-checks/check-decl-in-file at pinned sha): admission=true, split-declared=true, others=false, want :restoration-accepted=false (absent-before holds honestly)",
+      "q0 = cascade-model-manifest/observed-belief over the true facts — point mass, fact-initialized, not synthetic, not class-derived",
+      "prediction = token-outcome/freeze-prediction over the declared candidate's vector precedence -> :frozen, wanted predicted mass 1",
+      "measurements = d-predecessor-task-authority/artifact-tokens at the after commit (real git reads, 6 rows) — the want's C4 row observed=true, evidence.resolved-sha=after",
+      "comparison = token-outcome/compare-outcomes -> :compared, verdict :predicted-and-observed",
+      "accounting = selected-want-outcome/receipt -> :verified, by-class {:reached [want]}",
+      "falsifier = reviewer-falsifier/receipt -> :verified, failed-checks []; reviewer-falsifier/verify reconstruction -> :verified"
+    ],
+    "frozen-negatives": [
+      "want-less compiled action (Trial5's exact shape) -> :refused :selected-want-identity-missing",
+      "co-apply map precedence into freeze-prediction -> :refused :prediction-input-unavailable (the exact Trial5 blocker), while manifest/rollout on the SAME co-apply map puts mass 1 on the want — the model supports the compiled shape; only freeze-prediction's (vector? (:precedence action)) guard refuses it",
+      "measure-at-before divergence -> verdict :predicted-not-observed (honest divergence visible)"
+    ]
+  },
+
+  "producer-consumer-map": {
+    "wants": "authored declaration (:want in resources/wm/cascade-sources/*.edn) -> cascade-sources read (cascade_sources.clj:285) -> cascade-problems :want -> token-belief-carry/domain-inputs declaration -> certificate token-belief-stage -> freeze-prediction :wanted AND the action's :want key. All existing; the compiled route simply never runs it.",
+    "q0": "cascade-model-manifest/observed-belief over C4/C3-observed facts at selection time — the same producer shadow-cascade-g already uses (shadow_cascade_g.clj:126). Real fact initialization; no class-probability conversion, no synthetic state.",
+    "precedence": "vector shape for ordinary candidates; the compiled route's {:co-apply {:units :descent :patterns}} shape is ALREADY evaluated by push-forward/evaluate-co-apply (cascade_model_manifest.clj:~435-470, Lean-verified coApplyKernel, equality to cascade-kernel under the chain condition).",
+    "measurements": "d-predecessor-task-authority/artifact-tokens keys off the DECLARATION locators (token-authorities), not the action — already correct for the compiled route.",
+    "score": "selection scoring on the compiled route is untouched by every step above; prediction is evidence recorded beside selection (as freeze-prediction already is, full_loop_runner.clj:7080), never an input to G."
+  },
+
+  "pinned-design": {
+    "smallest-structural-change": [
+      "1. token_outcome.clj:26 — widen the guard from (vector? (:precedence action)) to accept exactly the two precedence shapes push-forward supports: a vector of interpreted pattern maps, or the {:co-apply {:units [...] :descent [...] :patterns {...}}} map the compiled route already carries on the action (frozen construction.edn.gz confirms :co-apply with :units/:descent/:patterns). No model change: rollout evaluates both today.",
+      "2. Selection cell (full_loop_runner.clj:7079-7086): for a compiled-cascade entry whose target has a loaded declaration, mint the prediction from the declaration-side inputs that the ordinary route uses: domain-inputs from cascade-problems/token-belief-carry over the target's declared facts/want, q0 from observed-belief over C4-observed facts, horizon from the source-declared :horizon-steps. Recorded as evidence beside the judgment; selection scoring unchanged.",
+      "3. Thread :want and :observation-locators from the same declaration onto the selected action at the single producer point construct-selected-action :cascade-candidate (full_loop_runner.clj:2634-2655). NOTE: the action's value is digested into occurrence identity / trial configuration / dedup key (comment at 2386-2391) — adding keys changes the identity; this is an explicit decision, listed below."
+    ],
+    "real-outstanding-effect": {
+      "target": "M-f11-find-production-successor",
+      "token": ":hole/h2045faa0e7cc",
+      "state": "unchecked '- [ ] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.' at mission line 102 — the only currently-absent declared want among all four cascade-source declarations",
+      "locator": "existing declared C4 locator (sha HEAD, holes/missions/M-f11-find-production-successor.md) — no retroactive declaration involved"
+    },
+    "why-this-is-not-just-adding-:want": "Confirmed by replay: freeze-prediction needs vector-or-coapply precedence, a declared horizon, and a normalized q0 with set-valued states. M-f11 currently declares no :horizon-steps (a source-declared T is mandatory — cascade_problems.clj:362-372 refuses :horizon-not-declared), and its sibling declared want :hole/h9ab212b3281d is already checked true at HEAD, which would refuse :selected-want-not-false-before for the whole receipt."
+  },
+
+  "unresolved-semantic-decisions": [
+    "D1 action identity: threading declaration-derived :want/:observation-locators onto the compiled selected action changes its digest (occurrence identity, trial configuration, dedup key). Enrich at construct-selected-action (identity changes, single producer) vs. pass an enriched view only to the accounting call sites (5918/7769) and accept that two digests of 'the action' exist. The first is cleaner; it is a decision because it invalidates identity continuity for in-flight runs.",
+    "D2 who mints the compiled route's prediction: extend freeze-prediction's own minter with the compiled shape (guard widening, above) — one schema, one producer — versus a new sibling producer. Recommendation: extend the existing minter; the record schema :wm/token-outcome-prediction-v1 already fits.",
+    "D3 horizon for compiled targets: declarations must carry :horizon-steps (T-repair does; M-f11, M-wm-08, M-aif do not — their effect predictions are currently unbuildable). Decision: require the declaration (fail-fast :horizon-not-declared at selection) versus deriving T from the compiled cascade length. Requiring the declaration preserves 'typed, never defaulted' (R13).",
+    "D4 stale declarations: a declaration whose declared wants include already-observed tokens (M-f11's h9ab212) can never verify end-to-end. Decision: declaration maintenance rule — when a want is observed true, the source's want list is narrowed (legitimate maintenance, distinct from retroactive completion).",
+    "D5 whether the compiled route's certificate should carry the token-belief-stage at compilation time (outer-policy contract change) instead of the runner computing it at selection-cell time. Runner-side keeps the outer-policy compilation contract unchanged."
+  ],
+
+  "bounded-test-plan": {
+    "real-positive": "the replay itself, promoted to a unit test: freeze-prediction on a declared-source decision (T-repair, pinned before/after commits, real git reads) -> comparison -> accounting -> falsifier receipt and verify reconstruction all :verified. Hermetic on git history, no live state.",
+    "frozen-negatives": [
+      "want-less compiled action -> :selected-want-identity-missing (Trial5's exact case, replayed)",
+      "co-apply precedence into the widened freeze-prediction BEFORE the widening -> :prediction-input-unavailable; after the widening, the same input must still refuse if :co-apply lacks :units/:descent/:patterns (malformed map)",
+      "predicted-not-observed divergence at the before commit stays :compared with an honest verdict, never a pass",
+      "no-horizon declaration (M-f11 today) -> typed :horizon-not-declared, never a default"
+    ],
+    "limits": "no falsifier branch added, no want invented, no class->token conversion, no synthetic q0; selection scoring untouched."
+  }
+}
