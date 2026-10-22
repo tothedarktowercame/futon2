@@ -1,0 +1,70 @@
+{
+  "schema": "wm/declared-effect-contract-review-result-v1",
+  "author": "claude-2",
+  "request": "invoke-1792651917088-2373-ae475dc8",
+  "requested-by": "codex-11",
+  "mode": "read-only review at futon2 HEAD c2441f75d; no code, declaration, JVM, Trial or click changes. Read code paths and decoded construction.edn.gz; ran no tests.",
+  "checked": [
+    "full_loop_runner.clj construct-for-decision (2805-2810): an entry with :compiled-cascade goes to compiled-cascade-construction/construct, never construct-selected-action. zai-8 plan step 3 (enrich at construct-selected-action :cascade-candidate) never runs on the compiled route. codex-11 suspected this; it is confirmed.",
+    "selected_outer_cascade_policy/decision (158-196): the outer-route certificate carries :selection-route, :selected-canonical-cascade, :selected-outer-cascade-policy, :selection-basis, :q2/:q4/:q8 and :precision-row. It has no :precision-family :model (q0, horizon) and no :token-belief-stage. So token-outcome/freeze-prediction on this route refuses at the domains/q0/horizon conjuncts before it reaches the (vector? precedence) conjunct. Widening that guard alone changes nothing in production.",
+    "Trial5 construction.edn.gz, decoded: the selected action is {:kind :cascade-candidate :target \"M-stack-geometry\" :precedence {:co-apply {:units :descent :patterns}} :cascade-digest :policy-key ...}. Every pattern's :produces is #{[target :pattern-done occurrence]}.",
+    "resources/wm/cascade-sources/: there are 5 declarations (M-aif-policy-conditioned-eig, M-expressions-of-interest, M-f11-find-production-successor, M-wm-08-external-f2, T-repair-occ-444fb018). None is for M-stack-geometry, Trial5's selected target. :horizon-steps appears only in T-repair, and that file's own comment says load-declared does not lift it.",
+    "declared-effect-replay.clj (30-115): the 'real positive' runs on T-repair's ORDINARY candidate C2. Its patterns are qualified from the legacy declaration and the decision certificate is assembled by hand ({:precision-family {:model {:q0 :horizon 4}} :token-belief-stage ...}). Its co-apply negative wraps the same C2 patterns in a {:co-apply} map with :descent []. No compiled cascade is exercised anywhere in it.",
+    "compiled clauses (Trial5 steps 1-3): each :completion-check is a prose observed condition, e.g. [:status-open-identify \"mission status line reads 'OPEN — IDENTIFY'\"], with a keyword :produces (:open-identify-status-record). There is no C4 locator. The checks I sampled describe the mission's current text.",
+    "outer G observation channel: outer_policy_evidence counts :observed-outcome over vocabulary [:closure :grounded-progress :abstention-or-failure :elapsed-budget-fraction :token-budget-fraction]. meta_outcome_dataset:82 maps :grounded-change to :closure. full_loop_runner:5715 classify-grounded-outcome decides :grounded-change vs :grounded-progress through enacted-step-pattern (3350), which does (vec (:precedence action)).",
+    "bb check: (vec {:co-apply {...}}) gives [[:co-apply {...}]]; (:id head) and (:produces head) are nil.",
+    "occurrence mint: mint-action-occurrence-once! at full_loop_runner:7201 takes {:run-id :cohort-id :attempt-id :selected-action :now}. It runs after the selection-cell (token-outcome-prediction at 7088) is built."
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "verdict": "CONFIRMED by code reading plus bb check, not by a live run",
+      "claim": "On the compiled route, the class observation that outer G learns from counts closure without testing it.",
+      "detail": "classify-grounded-outcome takes the pattern from enacted-step-pattern. On a {:co-apply} map precedence the head is a MapEntry, so 'declared' is empty, and a reviewed grounded commit keeps :grounded-change, which the outer dataset counts as :closure. Its docstring says 'Cascades declaring no products retain the legacy outcome' and treats that as a deliberate exception. A compiled cascade does declare :produces, but in its clauses, in a shape this reader does not look at. This is where class scoring and token accounting currently disagree. selected-want accounting refuses, while the outer learner would record closure. Trial5 failed at build and did not reach this path, so no closure has been recorded yet.",
+      "smallest-fix": "Leave scoring unchanged and fix the observation. When the precedence is not a vector, classify-grounded-outcome must not treat 'no products found' as 'no closure claim'. Give the compiled route a typed classification: :grounded-change only when the frozen effect record (C2 below) is verified :reached, otherwise :grounded-progress. Add a test: compiled action plus a reviewed grounded commit with no verified want must give :grounded-progress."
+    },
+    {
+      "id": "F2",
+      "severity": "high",
+      "claim": "The legacy cascade-source declaration cannot serve as the compiled route's authority in general, because it does not exist for most compiled targets, Trial5's included.",
+      "detail": "The compiled route chooses among outer frontier tasks (Lean Q1/Q2: every open task is wanted, with a task-level outer action). Cascade-source declarations cover 5 targets, and only T-repair declares a horizon. Even where a declaration exists, its candidates and :produces belong to the inner ordinary route and do not name the compiled occurrences. Compiled :produces are [target :pattern-done occ], which never meet a declared want, so a widened freeze-prediction over a real compiled precedence predicts mass 0 on every declared want."
+    },
+    {
+      "id": "F3",
+      "severity": "medium",
+      "claim": "The compiled interpretation should not own the effect declaration either.",
+      "detail": "Compiled clauses are written by the run's own authoring pipeline and reviewed as operational plans. Their completion checks are prose with no C4 locator, and the ones sampled restate text already in the mission, so they would generally be true before the build. If the route declared its own effect, the same run would write and then pass its success criterion. That breaks the separation the falsifier exists to keep."
+    },
+    {
+      "id": "F4",
+      "severity": "medium",
+      "claim": "zai-8's 'real historical positive' shows that freeze, compare, account and falsify work on a legacy ordinary candidate. It does not show the compiled route.",
+      "detail": "The decision and certificate were assembled by hand (horizon 4 given inline), and the co-apply negative is legacy C2 wrapped in a map. The pure coapply repair codex-11 dispatched is still useful as shape support, but its positive test will inherit this limit. Its result should say the input was assembled by hand and that no compiled precedence reaches a declared want."
+    },
+    {
+      "id": "F5",
+      "severity": "low",
+      "claim": "D1 (action identity) can be avoided altogether.",
+      "detail": "Do not put :want or :observation-locators on the action. Bind the effect record by digest into the occurrence mint inputs instead. The selection-cell is built before mint-action-occurrence-once! (7088 then 7201), so the binding is in place before identity exists, and the action digest, trial configuration and dedup key stay unchanged."
+    }
+  ],
+  "answers": {
+    "authority": "The target's authored effect declaration is the authority for wants, locators and horizon. Today that is the cascade-source file, read as a TARGET declaration and pinned by path and sha256, not read as a route declaration. The compiled interpretation is the authority for which occurrences run, in what order, and with which operational completion checks. It never decides which tokens are wanted. Where no declaration exists for the selected target (Trial5's case), the honest result is a typed absent effect frozen at selection, not a want derived from the compiled plan.",
+    "where-to-freeze": "In the selection-cell, as a sibling of :token-outcome-prediction (e.g. :declared-effect, schema :wm/selected-effect-declaration-v1). Not in the action (identity) and not in :selection-certificate: the certificate is sealed and replay-verified as a scoring input, so placing the record there would claim scoring consumed it. Contents: target; declaration pin {path sha256} or {:status :absent :reason :no-target-effect-declaration}; wants; their C4 observations at the selection base revision (the absent-before check, done here, once); wants already true at selection, listed under :excluded-already-true with their observation and not silently dropped; horizon as {:status :declared :value T} or {:status :absent :reason :horizon-not-declared}, never defaulted to cascade length. Pass the record's digest into mint-action-occurrence-once! inputs.",
+    "prediction": "Keep the effect prediction separate from scoring, as you proposed. On the compiled route it is honestly {:status :refused :reason :no-compiled-path-to-declared-want} until a compiled occurrence's :produces names a declared want token. Do not bridge that gap by converting :pattern-done or clause keywords into wants (that would be a class-to-token conversion by another name). Accounting and the falsifier read the frozen effect record. If it is absent, the selected-want check is typed :not-applicable with reason :no-declared-effect, not :refused :selected-want-identity-missing."
+  },
+  "contradictions-with-lean-wiring": [
+    "Q2 has inner construction happen only after the outer choice, for the selected task. A token prediction drawn from the legacy inner declaration's candidates (zai-8 plan step 2) would reintroduce inner-route artifacts into the outer-selected path. Only the declaration's wants, locators and horizon should be imported, never its candidates or precedence.",
+    "Q4 needs each compared policy to have its own declared horizon. Defaulting T to compiled length would violate Q4's 'declared' and R13 (typed, never defaulted).",
+    "Outer G's observation (vocabulary :closure etc.) depends on classify-grounded-outcome. F1 means that observation is currently not grounded on compiled routes. This is an AIF discrepancy in the observation model, not a docs mismatch, so it justifies a code change."
+  ],
+  "smallest-accepted-contract": [
+    "C1: fix the observation (F1). On a non-vector precedence, classify-grounded-outcome never returns :grounded-change unless the frozen effect record verified :reached. Test: a compiled reviewed commit with no verified want gives :grounded-progress. One file, one behaviour, separate handoff.",
+    "C2: a :declared-effect record frozen in the selection-cell as above, with its digest in the occurrence mint inputs. Action, certificate and scoring unchanged. Tests: declared target pins sha and observes wants before; undeclared target (M-stack-geometry) gives typed absent; an already-true want is listed as excluded with its observation; a missing horizon gives typed absent.",
+    "C3: accounting and the falsifier read C2's record instead of (:want selected-action). If absent, selected-want falsifier check :not-applicable :no-declared-effect.",
+    "Out of scope: authoring new declarations, a class-to-token map, horizon defaults, and changes to selection or scoring."
+  ],
+  "route-to-measured-work": "Five Trials remain. C1 alone makes a compiled Trial's class observation honest. A token-level positive further needs a selected target that has a declaration, a want false before, and a compiled occurrence whose :produces names that want. The only currently-false declared want zai-8 found is M-f11 :hole/h2045faa0e7cc, and M-f11 has no horizon. Adding one is authoring a declaration, which belongs to the target's owner or Joe and not to this review. Until then, the most a compiled Trial can honestly measure is a class outcome (:grounded-progress or :closure under C1) with a typed :no-declared-effect. That counts as measured work; it is not a refusal.",
+  "not-checked": "I did not run any test, did not execute freeze-prediction on a real compiled precedence, and did not read reviewer_falsifier.clj in full. F1's outcome comes from reading code plus a bb check of (vec map) and has not been observed live."
+}
