@@ -1,3 +1,22 @@
+LATEST: same Trial5 passed reviewed compile and construction. Both boundaries
+captured losslessly with ordered/printer-aware helper in commit46d66500f:
+ordinary-trial-5/cascade-resume.edn.gz and construction.edn.gz. Runtime accepted
+a5f8c4d7d patch and returned :resumed/:cascade-ready; selected digest c601dc...
+preserved, compiled digest f2d6feed1a394036e4891266361797bad256316bba3e3ec451dee8c204d257c1.
+Continued each actual held value with :continue (no fabricated result).
+Now :author-wait for execution author Zai2 job invoke-1792648760057-2341-075600c8.
+[:after :author-wait] breakpoint is armed. On completion inspect/freeze actual
+stop, then proceed exact Trial through review/grounding/close where valid.
+No useful completion yet. All19 authored conditions were already true in the
+mission header before effects (e094a0bb4). Reviewer confirmed definitions only,
+zero document-delta expected, upstream contract gap: admitted reading describes
+existing-state facts rather than outstanding work. See reviewer-preexisting-completions-response.json.
+Do not manufacture edits or mark no-change as useful success. Use actual author
+outcome to locate next structural repair. Do not silently change selected cascade.
+Run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45 clickc2a23bb2 attempt002;
+FIVE Trials remain, broad work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b stays open.
+No fresh admission/broad tests/serving-JVM kills/worktree source loads.
+
 LATEST: Trial5 ACTIVE in :cascade-resume; no debugger stop yet. Author Zai2
 job2330 done, clauses committed a5f8c4d7d. Runtime dispatched reviewer Zai3 job
 invoke-1792648468570-2334-585196d9; wait for its result/handler, do NOT dispatch
