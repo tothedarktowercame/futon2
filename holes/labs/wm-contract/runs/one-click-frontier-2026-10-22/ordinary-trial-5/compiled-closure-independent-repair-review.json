@@ -1,0 +1,10 @@
+{
+  "commit": "0bb9f6a4b",
+  "verdict": "request-changes",
+  "probe-exit": 0,
+  "findings": [
+    "empty-product coapply still closure without evidence",
+    "malformed map still closure without evidence"
+  ],
+  "scope": "No integration/deploy; actual runner classification and dataset functions invoked standalone"
+}
