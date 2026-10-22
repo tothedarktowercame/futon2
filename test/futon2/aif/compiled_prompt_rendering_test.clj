@@ -123,6 +123,118 @@
       (is (str/includes? plan "COMPILED OPERATIONAL PLAN: NOT RENDERABLE"))
       (is (str/includes? plan "compiled-operational-plan-not-renderable")))))
 
+;; The exact shape the independent review (compiled-renderer-review-probe.clj)
+;; executed against 3c85d21b4: two string digests with steps [{}] used to
+;; render :rendered and label nil as a reviewed completion check.
+(defn- minimal-plan-construction [steps]
+  {:construction-kind :compiled-cascade
+   :operational-plan {:selected-cascade-digest "s"
+                      :compiled-cascade-digest "c"
+                      :steps steps}})
+
+(defn- valid-step [occ]
+  {:occurrence-id [:occ occ]
+   :clause {:operation (str "op-" occ)
+            :capability :cap
+            :completion-check (list 'wm/check occ)}})
+
+(deftest malformed-steps-are-typed-absent-never-rendered
+  (testing "exact review repro: steps [{}] with two string digests"
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-occurrence-id-missing}
+           (cascade-plan/compiled-operational-plan-text
+            (minimal-plan-construction [{}]))))
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-occurrence-id-missing}
+           (cascade-plan/compiled-completion-criteria-text
+            (minimal-plan-construction [{}])))))
+  (testing "missing completion check"
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-completion-check-missing}
+           (cascade-plan/compiled-operational-plan-text
+            (minimal-plan-construction
+             [(-> (valid-step 1)
+                  (update-in [:clause] dissoc :completion-check))])))))
+  (testing "malformed (nil) completion check"
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-completion-check-missing}
+           (cascade-plan/compiled-operational-plan-text
+            (minimal-plan-construction
+             [(assoc-in (valid-step 1) [:clause :completion-check] nil)])))))
+  (testing "clause absent entirely"
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-clause-missing}
+           (cascade-plan/compiled-operational-plan-text
+            (minimal-plan-construction
+             [(dissoc (valid-step 1) :clause)])))))
+  (testing "the acceptance block relays the typed absence, never nil text"
+    (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+            :detail :step-completion-check-missing}
+           (#'runner/acceptance-criterion-block
+            {:action (minimal-plan-construction
+                      [(assoc-in (valid-step 1) [:clause :completion-check] nil)])})))))
+
+(deftest duplicate-occurrence-ids-are-rejected
+  (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+          :detail :duplicate-occurrence-id}
+         (cascade-plan/compiled-operational-plan-text
+          (minimal-plan-construction [(valid-step 1) (valid-step 1)]))))
+  (is (= {:status :absent :reason :compiled-operational-plan-step-invalid
+          :detail :duplicate-occurrence-id}
+         (cascade-plan/compiled-completion-criteria-text
+          (minimal-plan-construction [(valid-step 1) (valid-step 1)])))))
+
+(deftest criteria-preserve-recorded-order
+  ;; into {} keyed by occurrence+operation used to collapse entries and lose
+  ;; recorded ordering; the criteria must list checks in recorded step order.
+  (let [steps [(valid-step :b) (valid-step :a) (valid-step :c)]
+        crit (cascade-plan/compiled-completion-criteria-text
+              (minimal-plan-construction steps))]
+    (is (= (mapv :occurrence-id steps)
+           (mapv :occurrence-id
+                 (sort-by #(str/index-of crit (pr-str (:occurrence-id %))) steps))))
+    (is (= 3 (count (re-seq #"\(op-" crit))))))
+
+(deftest plan-character-budget-includes-header-and-omission-marker
+  (testing "large recorded header cannot break the 18,000-char promise"
+    (let [big-guards (apply str (repeat 4000 "g"))
+          rendered (cascade-plan/compiled-operational-plan-text
+                    (-> (minimal-plan-construction (map valid-step (range 60)))
+                        (assoc-in [:operational-plan :guards] [big-guards])))
+          text (:text rendered)]
+      (is (= :rendered (:status rendered)))
+      (is (<= (count text) 18000)
+          (str "final text with header and marker is " (count text)))
+      (is (pos? (:omitted rendered)))
+      (is (str/includes? text "omitted for space]"))))
+  (testing "large digest headers count against the criteria budget too"
+    (let [big (apply str (repeat 11000 "d"))
+          rendered (cascade-plan/compiled-completion-criteria-text
+                    (-> (minimal-plan-construction (map valid-step (range 60)))
+                        (assoc-in [:operational-plan :compiled-cascade-digest] big)))]
+      (is (string? rendered))
+      (is (<= (count rendered) 12000)
+          (str "final criteria text is " (count rendered)))
+      (is (str/includes? rendered "omitted for space]"))))
+  (testing "omissions are explicitly counted, never silent"
+    (let [rendered (cascade-plan/compiled-operational-plan-text
+                    (minimal-plan-construction
+                     (map (fn [i] (assoc-in (valid-step i)
+                                            [:clause :completion-check]
+                                            (apply list (repeat 200 (list 'wm/x i)))))
+                          (range 200))))
+          text (:text rendered)]
+      (is (pos? (:omitted rendered)))
+      (is (= 200 (:steps-total rendered)))
+      (is (= (:steps-shown rendered)
+             (count (re-seq #"(?m)^step " text))))
+      (is (<= (count text) 18000))
+      (is (re-find (re-pattern (str "\\[" (:steps-shown rendered)
+                                   " of 200 operational steps shown; "
+                                   (:omitted rendered) " omitted"))
+                   text)))))
+
+
 (deftest legacy-construction-rendering-is-preserved
   ;; A legacy (non-compiled) construction still renders the pattern section
   ;; exactly as before; the compiled branch never fires.

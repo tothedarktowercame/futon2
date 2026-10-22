@@ -57,6 +57,28 @@
                 (text (:guard pattern)) "\n"))
          "  produces: " (text (or (:produces box) (:produces pattern))) "\n")))
 
+(defn- step-malformation
+  "Returns a reason keyword when a recorded step cannot be rendered as a
+  step/occurrence/clause/check; nil when the step is well-formed."
+  [step]
+  (cond
+    (nil? (:occurrence-id step)) :step-occurrence-id-missing
+    (not (map? (:clause step))) :step-clause-missing
+    (nil? (get-in step [:clause :operation])) :step-operation-missing
+    (nil? (get-in step [:clause :completion-check])) :step-completion-check-missing
+    :else nil))
+
+(defn- compiled-plan-steps
+  "Validate every recorded step's occurrence/clause/check shape and occurrence
+  uniqueness before rendering.  Returns [:ok steps] or [:invalid reason]."
+  [steps]
+  (or (when-let [bad (some step-malformation steps)]
+        [:invalid bad])
+      (when (let [ids (map :occurrence-id steps)]
+              (not= (count ids) (count (distinct ids))))
+        [:invalid :duplicate-occurrence-id])
+      [:ok steps]))
+
 (defn- step-text
   [{:keys [occurrence-id pattern provenance] :as step}]
   (let [clause (:clause step)]
@@ -95,76 +117,108 @@
                 (string? (:compiled-cascade-digest plan))))
       {:status :absent :reason :compiled-operational-plan-digests-missing}
       :else
-      (let [total (count (:steps plan))
-            header (str "selected cascade digest: " (:selected-cascade-digest plan) "\n"
-                        "compiled cascade digest: " (:compiled-cascade-digest plan) "\n"
-                        "application order: "
-                        (if (seq (:application-order plan))
-                          (text (:application-order plan))
-                          "(none recorded)")
-                        "\n"
-                        "guards: "
-                        (if (seq (:guards plan))
-                          (text (:guards plan))
-                          "(none recorded)")
-                        "\n"
-                        "effect status: " (text (:effect-status plan)) "\n")
-            blocks (compiled-plan-blocks plan)
-            ;; Cumulative budget with explicit counted omission: keep whole
-            ;; steps while they fit; the final line counts what was dropped.
-            budget
-            (reduce (fn [acc block]
-                      (let [candidate (str (:body acc) block)]
-                        (if (<= (count candidate) 18000)
-                          {:shown (inc (:shown acc)) :body candidate}
-                          (reduced acc))))
-                    {:shown 0 :body ""}
-                    blocks)
-            shown (:shown budget)
-            body (:body budget)
-            omitted (- total shown)]
-        {:status :rendered
-         :steps-shown shown :steps-total total :omitted omitted
-         :text (str header body
-                    (when (pos? omitted)
-                      (str "[" shown " of " total " operational steps shown; "
-                           omitted " omitted for space]\n")))}))))
+      (let [[validity bad] (compiled-plan-steps (:steps plan))]
+        (if (= :invalid validity)
+          {:status :absent :reason :compiled-operational-plan-step-invalid
+           :detail bad}
+          (let [steps (:steps plan)
+                total (count steps)
+                header (str "selected cascade digest: " (:selected-cascade-digest plan) "\n"
+                            "compiled cascade digest: " (:compiled-cascade-digest plan) "\n"
+                            "application order: "
+                            (if (seq (:application-order plan))
+                              (text (:application-order plan))
+                              "(none recorded)")
+                            "\n"
+                            "guards: "
+                            (if (seq (:guards plan))
+                              (text (:guards plan))
+                              "(none recorded)")
+                            "\n"
+                            "effect status: " (text (:effect-status plan)) "\n")
+                blocks (compiled-plan-blocks plan)
+                ;; The 18,000-character budget applies to the FINAL text
+                ;; including the header and the counted omission marker, so
+                ;; a large recorded header cannot push the promise over.
+                limit 18000
+                fits? (fn [shown body]
+                        (let [omitted (- total shown)
+                              marker (when (pos? omitted)
+                                       (str "[" shown " of " total
+                                            " operational steps shown; " omitted
+                                            " omitted for space]\n"))]
+                          (<= (count (str header body marker)) limit)))
+                budget
+                (reduce (fn [acc block]
+                          (let [shown (inc (:shown acc))
+                                body (str (:body acc) block)]
+                            (if (fits? shown body)
+                              {:shown shown :body body}
+                              (reduced acc))))
+                        {:shown 0 :body ""}
+                        blocks)
+                shown (:shown budget)
+                body (:body budget)
+                omitted (- total shown)]
+            {:status :rendered
+             :steps-shown shown :steps-total total :omitted omitted
+             :text (str header body
+                        (when (pos? omitted)
+                          (str "[" shown " of " total " operational steps shown; "
+                               omitted " omitted for space]\n")))}))))))
 
 (defn compiled-completion-criteria-text
   "The acceptance-criterion rendering for a :compiled-cascade construction:
   every step's completion check VERBATIM with its occurrence identity,
-  operation, and both recorded digests.  Typed-absent when the compiled plan
-  is absent or malformed; never silently renders as complete.  Nothing is
-  coerced into C3/C4 locator classes -- these are the compiled clauses'
+  operation, and both recorded digests, in RECORDED order (no deduplication:
+  steps are rendered as recorded; a duplicate occurrence id is rejected up
+  front in compiled-operational-plan-text).  Typed-absent when the compiled
+  plan is absent or malformed; never silently renders as complete.  Nothing
+  is coerced into C3/C4 locator classes -- these are the compiled clauses'
   own checks."
   [construction]
   (let [rendered (compiled-operational-plan-text construction)]
     (if (= :absent (:status rendered))
       rendered
-      (let [checks (into {}
-                         (map (fn [step]
-                                {[(:occurrence-id step)
-                                  (get-in step [:clause :operation])]
-                                 (get-in step [:clause :completion-check])}))
-                         (:steps (:operational-plan construction)))
-            lines (for [[[occ op] check] checks]
-                    (str "  " (pr-str occ) " (" op ") — " (pr-str check)))
-            total (count checks)
+      (let [plan (:operational-plan construction)
+            ;; Sequential, preserving recorded order; keys are not collapsed.
+            entries (mapv (fn [step]
+                            {:occurrence-id (:occurrence-id step)
+                             :operation (get-in step [:clause :operation])
+                             :check (get-in step [:clause :completion-check])})
+                          (:steps plan))
+            lines (mapv (fn [{:keys [occurrence-id operation check]}]
+                          (str "  " (pr-str occurrence-id) " (" operation ") \u2014 "
+                               (pr-str check)))
+                        entries)
+            total (count lines)
+            header (str "ACCEPTANCE CRITERIA (the tests your work will be measured against):\n"
+                        "These are the reviewed completion checks of the compiled cascade "
+                        "(selected digest " (:selected-cascade-digest plan)
+                        ", compiled digest " (:compiled-cascade-digest plan)
+                        "), verbatim.\n")
+            ;; The 12,000-character budget includes the header, the joined
+            ;; lines AND the counted omission marker.
+            limit 12000
+            fits? (fn [shown kept]
+                        (let [omitted (- total shown)
+                              marker (when (pos? omitted)
+                                       (str "[" shown " of " total " checks shown; "
+                                            omitted " omitted for space]\n"))]
+                          (<= (count (str header (str/join "\n" kept) "\n" marker))
+                              limit)))
             budget
             (reduce (fn [acc line]
-                      (let [candidate (conj (:lines acc) line)]
-                        (if (<= (count (str/join "\n" candidate)) 12000)
-                          {:shown (inc (:shown acc)) :lines candidate}
+                      (let [shown (inc (:shown acc))
+                            kept (conj (:lines acc) line)]
+                        (if (fits? shown kept)
+                          {:shown shown :lines kept}
                           (reduced acc))))
                     {:shown 0 :lines []}
                     lines)
             shown (:shown budget)
             omitted (- total shown)]
-        (str "ACCEPTANCE CRITERIA (the tests your work will be measured against):\n"
-             "These are the reviewed completion checks of the compiled cascade "
-             "(selected digest " (:selected-cascade-digest (:operational-plan construction))
-             ", compiled digest " (:compiled-cascade-digest (:operational-plan construction))
-             "), verbatim.\n"
+        (str header
              (str/join "\n" (:lines budget)) "\n"
              (when (pos? omitted)
                (str "[" shown " of " total " checks shown; " omitted
