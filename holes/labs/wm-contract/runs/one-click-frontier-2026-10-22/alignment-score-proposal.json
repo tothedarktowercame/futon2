@@ -1,5 +1,5 @@
 {
-  "status": "proposed-awaiting-model-confirmation-and-fresh-baseline",
+  "status": "model-and-structural-method-confirmed; fresh baseline pending",
   "metrics": {
     "wiring": {
       "numerator": "required Lean edges with accepted witness",
@@ -38,5 +38,23 @@
     "confirm live Trial consumes correct artifacts when reachable"
   ],
   "existing_score": "historical verdict text lists 5 true of 8; not current evidence because pins differ and prose export revision is stale",
-  "baseline_job": "invoke-1792640348262-2214-2498d945"
+  "baseline_job": "invoke-1792640348262-2214-2498d945",
+  "lean_definition_pin": "862666e9260522e9ac6bc77246fb6a845197630d",
+  "lean_edge_content_pin": "719e4a3e9c12795dd2f0dcf8aedc92fc327395bf",
+  "edge_content_unchanged_at_definition_pin": true,
+  "required_edge_count": 8,
+  "confirmation_job": "invoke-1792640347977-2213-f8d27fe3",
+  "limitations": [
+    "declared map completeness not established",
+    "live route reachability not established",
+    "value semantics not established by structural witness",
+    "runtime runId equality not established",
+    "between-Trial Carries not established",
+    "receipt consumption of witness verdicts not wired"
+  ],
+  "expected_model_maintenance": [
+    "add interoception endpoint when producer exists",
+    "update renamed endpoint sites",
+    "definition change only upon demonstrated equation discrepancy"
+  ]
 }
