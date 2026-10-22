@@ -4,10 +4,11 @@
   caller-supplied verifier/observer/resolver is accepted. This module does
   not wire the runner or claim an atomic occurrence/binding transaction."
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.declared-effect-record :as record]
             [futon2.aif.occurrence-declared-effect-binding :as binding])
-  (:import [java.nio.file Files StandardOpenOption]
+  (:import [java.nio.file Files StandardOpenOption FileAlreadyExistsException]
            [java.nio.file.attribute FileAttribute]
            [java.security MessageDigest]
            [java.math BigInteger]))
@@ -18,24 +19,35 @@
   (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256") bytes))))
 
 (defn retain-declaration!
-  "Copy exact pinned source bytes to a new digest-named file. Refuses a
-  changed source or pre-existing destination; never overwrites evidence."
+  "Retain pinned source bytes without overwriting evidence. Reusing the
+  digest-named destination is allowed only when its bytes still match."
   [effect-record directory]
-  (let [{:keys [path sha256] :as source} (:declaration effect-record)
-        bytes (Files/readAllBytes (.toPath (io/file path)))
-        actual (sha256-bytes bytes)]
-    (when-not (and (= :pinned (:status source)) (= sha256 actual))
-      (throw (ex-info "Declaration bytes changed" {:reason :declaration-bytes-changed})))
-    (let [dir (.toPath (io/file directory))
-          _ (Files/createDirectories dir (make-array FileAttribute 0))
-          dest (.resolve dir (str "declaration-" actual ".edn"))]
-      (Files/write dest bytes (into-array StandardOpenOption
-                                         [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
-      {:path (str dest) :sha256 actual})))
+  (let [{:keys [path sha256] :as source} (:declaration effect-record)]
+    (when-not (and (= :pinned (:status source))
+                   (string? path) (not (str/blank? path))
+                   (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
+      (throw (ex-info "Declaration is not pinned" {:reason :declaration-not-pinned})))
+    (let [bytes (Files/readAllBytes (.toPath (io/file path)))
+          actual (sha256-bytes bytes)]
+      (when-not (= sha256 actual)
+        (throw (ex-info "Declaration bytes changed" {:reason :declaration-bytes-changed})))
+      (let [dir (.toPath (io/file directory))
+            _ (Files/createDirectories dir (make-array FileAttribute 0))
+            dest (.resolve dir (str "declaration-" actual ".edn"))]
+        (try
+          (Files/write dest bytes (into-array StandardOpenOption
+                                             [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
+          (catch FileAlreadyExistsException _
+            (when-not (= actual (sha256-bytes (Files/readAllBytes dest)))
+              (throw (ex-info "Retained declaration conflicts with its pin"
+                              {:reason :retained-declaration-conflict :path (str dest)})))))
+        {:path (str dest) :sha256 actual}))))
 
 (defn reconstruct-retained
   "Reconstruct the current record using its full base commit and retained
-  declaration bytes. Preserve original declaration path as provenance."
+  declaration bytes. The original path is a provenance label; it is not
+  re-read. This proves the named base, not its equality to the run base;
+  runner wiring must check that equality against the selection snapshot."
   [effect-record declaration-pin]
   (try
     (if-not (and (= #{:path :sha256} (set (keys declaration-pin)))
