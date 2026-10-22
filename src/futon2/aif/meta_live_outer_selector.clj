@@ -199,6 +199,11 @@
 (defn- exactly-one [xs]
   (when (= 1 (count xs)) (first xs)))
 
+(defn- pin-shape?
+  [x]
+  (and (map? x) (string? (:path x)) (string? (:sha256 x))
+       (boolean (re-matches #"[0-9a-f]{64}" (:sha256 x)))))
+
 (defn ordinary-learning-certificate
   "Certificate for the ordinary (non-injury) cascade policy arm.
 
@@ -206,54 +211,61 @@
   retired target comparator; the ordinary arm consumes outer learning through
   a different, pinned chain: the outer policy evidence provider resolves the
   sealed menu, the joined policy evidence feeds the policy objective, and the
-  selected outer cascade policy carrier seals the objective's choice.  This
-  function attests exactly that chain from the pinned artifacts in hand.
+  selected outer cascade policy carrier seals the objective's choice.
+
+  Validation is semantic, not cosmetic.  The carrier is verified with
+  selected-policy/verify (seal, menu, evidence, objective recomputation and
+  selected entry, on actual content); the supplied policy-evidence and
+  policy-objective must BE the carrier's validated artifacts -- including
+  actual content, not only copied pins -- so refused evidence, substituted
+  content keeping old pins, or a changed objective receipt are all refused.
+  The provider is validated with evidence-provider/verify and, when its body
+  is in hand, tied to the consumed evidence through the recorded
+  declaration pin.  When only the receipt-recorded provider source pin is
+  available (frozen replay), the certificate says exactly that and claims
+  nothing more.
 
   Pure: callable against a retained judgement/receipt (Trial 5,
-  ordinary-trial-5 selection-stop.edn.gz, [:stop :ex-data :judgement
-  :outer-task-selection :policy]).  `consumption` carries
-  {:selected-carrier :policy-evidence :policy-objective :menu-pin
-   :provider-source-pin}.  Every failure is a POSITIVE :refused with a typed
-  reason -- never an abstention -- so the selection tripwire can distinguish
-  a genuinely consumed run from a broken one.  The selected policy itself is
-  reported, never altered."
-  [{:keys [outer-learning selected-carrier policy-evidence policy-objective
-           menu-pin provider-source-pin]}]
+  ordinary-trial-5 selection-stop.edn.gz).  Arguments:
+  {:outer-learning :carrier :provided :provider-source-pin
+   :policy-evidence :policy-objective}.  Every failure is a POSITIVE
+  :refused with a typed reason -- never an abstention.  The selected policy
+  is reported from the verified carrier, never altered."
+  [{:keys [outer-learning carrier provided provider-source-pin
+           policy-evidence policy-objective]}]
   (let [belief (:belief outer-learning)
         controller (:controller outer-learning)
         mode (:mode outer-learning)
-        carrier-menu-pin (:menu-pin selected-carrier)
-        carrier-evidence-pin (:evidence-pin selected-carrier)
-        objective-receipt (when (map? selected-carrier)
-                            (:objective-receipt selected-carrier))
-        objective-selected (:selected policy-objective)
+        carrier-defect (when (map? carrier) (selected-policy/verify carrier))
+        objective-receipt (when (map? carrier) (:objective-receipt carrier))
+        raw-objective-receipt (when (map? objective-receipt)
+                                (dissoc objective-receipt :objective-pin))
+        provider-body? (map? provided)
+        provider-defect (when provider-body? (evidence-provider/verify provided))
         reason (cond
-                 (nil? outer-learning)
-                 ::outer-learning-not-configured
-                 (not (contains? #{:shadow :live} mode))
-                 ::outer-learning-mode-not-admitted
-                 (not= :produced (:status belief))
-                 ::outer-learning-state-unavailable
-                 (nil? selected-carrier)
-                 :ordinary-selected-policy-carrier-missing
-                 (not= :sealed (:status selected-carrier))
-                 :ordinary-carrier-unsealed
-                 (not= :selected (:status policy-objective))
-                 :ordinary-objective-unselected
-                 (not= carrier-menu-pin menu-pin)
-                 :ordinary-menu-pin-mismatch
-                 (not= carrier-menu-pin (:menu-pin policy-evidence))
-                 :ordinary-evidence-menu-pin-mismatch
-                 (not= carrier-menu-pin (:menu-pin policy-objective))
-                 :ordinary-objective-menu-pin-mismatch
-                 (not= carrier-evidence-pin (:evidence-pin policy-evidence))
-                 :ordinary-evidence-pin-mismatch
-                 (not= :selected (:status objective-receipt))
-                 :ordinary-objective-receipt-unselected
-                 (not= (:policy-id selected-carrier) (:policy-id objective-selected))
-                 :ordinary-policy-id-mismatch
-                 (not= (:target-id selected-carrier) (:target-id objective-selected))
-                 :ordinary-target-id-mismatch)]
+                 (nil? carrier) :ordinary-selected-policy-carrier-missing
+                 ;; Content binding first: the supplied artifacts must BE the
+                 ;; carrier's embedded artifacts -- on actual content, not
+                 ;; copied pins -- so refused evidence or a substituted
+                 ;; objective is refused even before seal recomputation.
+                 (not (and (map? policy-evidence) (map? (:evidence-carrier carrier))
+                           (= policy-evidence (:evidence-carrier carrier))))
+                 :ordinary-evidence-not-carrier-artifact
+                 (not (and (map? policy-objective) (map? objective-receipt)
+                           (= policy-objective raw-objective-receipt)))
+                 :ordinary-objective-not-carrier-artifact
+                 ;; Provider provenance is independent of the carrier seal.
+                 (and (not provider-body?) (nil? provider-source-pin))
+                 :ordinary-provider-absent
+                 provider-defect :ordinary-provider-invalid
+                 (and (not provider-body?) (not (pin-shape? provider-source-pin)))
+                 :ordinary-provider-pin-invalid
+                 (and provider-body?
+                      (not= (get-in provided [:declaration :pin :sha256])
+                            (get-in policy-evidence [:declaration-pin :sha256])))
+                 :ordinary-provider-declaration-mismatch
+                 ;; Total semantic verification of the sealed carrier itself.
+                 carrier-defect :ordinary-carrier-invalid)]
     (cond
       (nil? outer-learning)
       {:schema :wm/outer-learning-certificate-v1
@@ -277,25 +289,35 @@
         {:schema :wm/outer-learning-certificate-v1
          :status :refused :reason reason
          :mode mode
+         :carrier-defect carrier-defect
+         :provider-defect provider-defect
          :consumption-path [:outer-policy-evidence-provider :policy-evidence
                             :policy-objective :selected-outer-cascade-policy]
          :re-arm-condition (:re-arm-condition controller)}
         {:schema :wm/outer-learning-certificate-v1
-       :status :ordinary-provider-consumed
-       :mode mode
-       :selection-basis :pinned-provider-objective-consumption
-       :consumption-path [:outer-policy-evidence-provider :policy-evidence
-                          :policy-objective :selected-outer-cascade-policy]
-       :provider-source-pin provider-source-pin
-       :menu-pin carrier-menu-pin
-       :evidence-pin carrier-evidence-pin
-       :objective-pin (:objective-pin selected-carrier)
-       :carrier-pin (:carrier-pin selected-carrier)
-       :selected-policy {:policy-id (:policy-id selected-carrier)
-                         :target-id (:target-id selected-carrier)
-                         :basis-kind (:basis-kind selected-carrier)
-                         :cascade-digest (:cascade-digest selected-carrier)}
-       :re-arm-condition (:re-arm-condition controller)}))))
+         :status :ordinary-provider-consumed
+         :mode mode
+         :selection-basis :pinned-provider-objective-consumption
+         :consumption-path [:outer-policy-evidence-provider :policy-evidence
+                            :policy-objective :selected-outer-cascade-policy]
+         :provider-attestation
+         (if provider-body?
+           {:relation :verified-declaration-pin
+            :provider-source-pin (:source-pin provided)
+            :declaration-pin (get-in provided [:declaration :pin])
+            :evidence-declaration-pin (:declaration-pin policy-evidence)}
+           {:relation :receipt-recorded-source-pin
+            :provider-source-pin provider-source-pin
+            :declaration-pin (:declaration-pin policy-evidence)})
+         :menu-pin (:menu-pin carrier)
+         :evidence-pin (:evidence-pin carrier)
+         :objective-pin (:objective-pin carrier)
+         :carrier-pin (:carrier-pin carrier)
+         :selected-policy {:policy-id (:policy-id carrier)
+                           :target-id (:target-id carrier)
+                           :basis-kind (:basis-kind carrier)
+                           :cascade-digest (:cascade-digest carrier)}
+         :re-arm-condition (:re-arm-condition controller)}))))
 
 (defn- learning-certificate [outer-learning scores learned-selection baseline-selection
                             injury-advisory?]
@@ -1008,11 +1030,10 @@
                                             shadow-selection selection injury?)
                       (ordinary-learning-certificate
                        {:outer-learning outer-learning
-                        :selected-carrier activated-carrier
+                        :carrier activated-carrier
+                        :provided provided
                         :policy-evidence policy-evidence
-                        :policy-objective policy-objective
-                        :menu-pin (:menu-pin sealed-menu)
-                        :provider-source-pin (:source-pin provided)}))
+                        :policy-objective policy-objective}))
         receipt (assoc receipt :outer-learning
                        (cond-> certificate
                          learning-scores (assoc :scores learning-scores
