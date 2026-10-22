@@ -1,3 +1,14 @@
+## Active Trial five — selection held
+
+Run `2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45` selected
+`M-stack-geometry`, then stopped on `:wm/outer-learning-not-consumed`.
+`ordinary-trial-5/selection-stop.edn.gz` freezes the complete failure; its
+keyword encoding and SHA256 are recorded in `selection-stop.json`.
+The source guard repair succeeded on the same run. Five project Trials remain.
+Zai5 is repairing the legacy consumption certificate against the actual
+retained ordinary-policy evidence. Do not start another Trial or bypass the
+certificate. See CONTINUE.txt for the exact job and restart conditions.
+
 ## Deployment completed — supersedes the pending status below
 
 Joe requested review and deployment. Futon2 `d443921e6` and futon3c `e65ef06be`

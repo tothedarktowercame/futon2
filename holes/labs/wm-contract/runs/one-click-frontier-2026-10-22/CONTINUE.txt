@@ -1,3 +1,28 @@
+LATEST ACTIVE FRONTIER: Trial5 remains HELD at :selection with
+:wm/outer-learning-not-consumed. Source guard was repaired and retried
+successfully; do NOT repeat source repair or start a fresh Trial.
+Run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45,
+clickwm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413,attempt-002.
+FIVE project Trials remain (global consumed152). Full selection failure is
+frozen losslessly in ordinary-trial-5/selection-stop.edn.gz, committed efe9e7c7d.
+Use EDN reader wm/keyword => (fn [[n k]] (keyword n k)); helper verifies exact
+roundtrip before writing. Source and phase prefix are retained, no new selection
+run required merely to inspect. Mission M-stack-geometry selected; evidence
+computed and carrier sealed, but legacy certificate requires target scores
+that ordinary policy path deliberately retired. See selection-frontier-summary.edn.
+Zai5 job invoke-1792645762858-2312-669e3801 implements bounded lawful certificate
+repair in sibling worktree. Review real frozen-shape positive and mismatch
+negative tests; do not bypass guard, invent consumed scores or change selection.
+After tested commit, canonical recorded reload while exact run held; resume
+same run from frozen boundary using supported debugger restart after verifying
+corrected certificate against actual retained data. Continue to useful execution.
+Zai6 cost discovery failed (provider job); not blocking. Existing broader suite
+failures remain, no broad runner suites. Old archive has further test-shaped
+observations despite new live defaults; owners alerted, shared JVM confirmed new.
+Broad work order remains open. No useful task effect yet.
+
+Older continuation below is superseded where it conflicts:
+
 ACTIVE TRIAL5: wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413,
 run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45, held at runner-source
 with stale-outer-selection-composition: futon2.report.war-machine loaded hash
