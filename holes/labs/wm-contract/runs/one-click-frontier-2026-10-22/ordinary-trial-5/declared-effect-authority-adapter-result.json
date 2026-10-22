@@ -1,0 +1,18 @@
+{
+  "commit": "cbb693cf5",
+  "worktree": "/home/joe/code/futon2-declared-effect-adapter",
+  "base": "isolated binding256b1b26f plus C2 through a2e54d1ae cherry-picked; no main integration",
+  "behavior": [
+    "Named production build/verify adapter accepts no caller verifier ports; uses C2 public reconstruct.",
+    "Pinned declaration bytes copied CREATE_NEW; retained hash must equal record source pin.",
+    "C2 supports storage-path separate from original provenance path; raw byte SHA256 replaces decoded-string hash."
+  ],
+  "tests": {
+    "adapter": "1 test/9 assertions, real historical git: original edit survives; retained corruption/horizon forgery/injected verifier refused",
+    "C2_fast": "28/124 pass",
+    "C2_history": "5/31 pass",
+    "lint": "0/0",
+    "parens": "OK"
+  },
+  "remaining": "Independent review, canonical integration and runner selection/dispatch/build/close/falsifier wiring; no Trial or deployment."
+}
