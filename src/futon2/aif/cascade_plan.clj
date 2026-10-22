@@ -57,6 +57,25 @@
                 (text (:guard pattern)) "\n"))
          "  produces: " (text (or (:produces box) (:produces pattern))) "\n")))
 
+(defn- hex64?
+  "Same digest shape the compiler enforces (cascade_enactment_compiler/hex64?):
+  a lowercase 64-char hex sha256 string."
+  [x]
+  (and (string? x) (boolean (re-matches #"[0-9a-f]{64}" x))))
+
+(defn- completion-check-valid?
+  "A compiled clause's :completion-check, per the producers that mint it:
+  authored clauses (futon2.aif.wm.authored.*, e.g. req-fbad4b8b) carry
+  [:check-name-keyword <observable condition string>], and the compiler's
+  square-derived completions (cascade_enactment_compiler/square-derived-completion)
+  carry [:square-B-observed <B-theory elems>].  Both are vectors whose first
+  element names the check as a keyword and whose second element is the
+  observed condition.  Anything else (including nil and boolean false) is
+  not a compiled completion check."
+  [check]
+  (and (vector? check) (>= (count check) 2)
+       (keyword? (first check)) (some? (second check))))
+
 (defn- step-malformation
   "Returns a reason keyword when a recorded step cannot be rendered as a
   step/occurrence/clause/check; nil when the step is well-formed."
@@ -66,6 +85,8 @@
     (not (map? (:clause step))) :step-clause-missing
     (nil? (get-in step [:clause :operation])) :step-operation-missing
     (nil? (get-in step [:clause :completion-check])) :step-completion-check-missing
+    (not (completion-check-valid? (get-in step [:clause :completion-check])))
+    :step-completion-check-malformed
     :else nil))
 
 (defn- compiled-plan-steps
@@ -99,8 +120,9 @@
 
 (defn compiled-operational-plan-text
   "Typed rendering of a :compiled-cascade construction's operational plan.
-  Returns {:status :absent :reason k} when the plan is absent or malformed --
-  it can never silently render as complete.  Otherwise
+  Returns {:status :absent :reason k} when the plan is absent, malformed
+  (step shape, digest shape) or too large for the promised budget -- it can
+  never silently render as complete.  Otherwise
   {:status :rendered :text s :steps-shown n :steps-total m} where the text
   names BOTH recorded digests (selected and compiled cascade), every rendered
   step's occurrence identity, operation, capability, consumption/product,
@@ -116,6 +138,9 @@
       (not (and (string? (:selected-cascade-digest plan))
                 (string? (:compiled-cascade-digest plan))))
       {:status :absent :reason :compiled-operational-plan-digests-missing}
+      (not (and (hex64? (:selected-cascade-digest plan))
+                (hex64? (:compiled-cascade-digest plan))))
+      {:status :absent :reason :compiled-operational-plan-digests-malformed}
       :else
       (let [[validity bad] (compiled-plan-steps (:steps plan))]
         (if (= :invalid validity)
@@ -123,6 +148,7 @@
            :detail bad}
           (let [steps (:steps plan)
                 total (count steps)
+                limit 18000
                 header (str "selected cascade digest: " (:selected-cascade-digest plan) "\n"
                             "compiled cascade digest: " (:compiled-cascade-digest plan) "\n"
                             "application order: "
@@ -136,36 +162,38 @@
                               "(none recorded)")
                             "\n"
                             "effect status: " (text (:effect-status plan)) "\n")
-                blocks (compiled-plan-blocks plan)
-                ;; The 18,000-character budget applies to the FINAL text
-                ;; including the header and the counted omission marker, so
-                ;; a large recorded header cannot push the promise over.
-                limit 18000
+                marker-for (fn [shown]
+                             (let [omitted (- total shown)]
+                               (when (pos? omitted)
+                                 (str "[" shown " of " total
+                                      " operational steps shown; " omitted
+                                      " omitted for space]\n"))))
                 fits? (fn [shown body]
-                        (let [omitted (- total shown)
-                              marker (when (pos? omitted)
-                                       (str "[" shown " of " total
-                                            " operational steps shown; " omitted
-                                            " omitted for space]\n"))]
-                          (<= (count (str header body marker)) limit)))
-                budget
-                (reduce (fn [acc block]
-                          (let [shown (inc (:shown acc))
-                                body (str (:body acc) block)]
-                            (if (fits? shown body)
-                              {:shown shown :body body}
-                              (reduced acc))))
-                        {:shown 0 :body ""}
-                        blocks)
-                shown (:shown budget)
-                body (:body budget)
-                omitted (- total shown)]
-            {:status :rendered
-             :steps-shown shown :steps-total total :omitted omitted
-             :text (str header body
-                        (when (pos? omitted)
-                          (str "[" shown " of " total " operational steps shown; "
-                               omitted " omitted for space]\n")))}))))))
+                        (<= (count (str header body (marker-for shown))) limit))]
+            ;; The 18,000-character budget applies to the FINAL text
+            ;; including the header and the counted omission marker.  When
+            ;; even the bare header plus a zero-shown marker exceeds it,
+            ;; the digests cannot be rendered truthfully within the
+            ;; promise; refuse as a typed absence instead of silently
+            ;; clipping recorded identity.
+            (if-not (fits? 0 "")
+              {:status :absent :reason :compiled-operational-plan-over-budget
+               :detail {:header-chars (count header) :limit limit}}
+              (let [blocks (compiled-plan-blocks plan)
+                    budget (reduce (fn [acc block]
+                                     (let [shown (inc (:shown acc))
+                                           body (str (:body acc) block)]
+                                       (if (fits? shown body)
+                                         {:shown shown :body body}
+                                         (reduced acc))))
+                                   {:shown 0 :body ""}
+                                   blocks)
+                    shown (:shown budget)
+                    body (:body budget)
+                    omitted (- total shown)]
+                {:status :rendered
+                 :steps-shown shown :steps-total total :omitted omitted
+                 :text (str header body (marker-for shown))}))))))))
 
 (defn compiled-completion-criteria-text
   "The acceptance-criterion rendering for a :compiled-cascade construction:
@@ -173,12 +201,18 @@
   operation, and both recorded digests, in RECORDED order (no deduplication:
   steps are rendered as recorded; a duplicate occurrence id is rejected up
   front in compiled-operational-plan-text).  Typed-absent when the compiled
-  plan is absent or malformed; never silently renders as complete.  Nothing
-  is coerced into C3/C4 locator classes -- these are the compiled clauses'
+  plan is absent, malformed, or the criteria header alone exceeds the
+  12,000-character budget; never silently renders as complete.  Nothing is
+  coerced into C3/C4 locator classes -- these are the compiled clauses'
   own checks."
   [construction]
   (let [rendered (compiled-operational-plan-text construction)]
-    (if (= :absent (:status rendered))
+    (if (and (= :absent (:status rendered))
+             ;; A plan-header over-budget is about the plan's own 18,000-char
+             ;; budget (guards/application order); the criteria header is a
+             ;; different, smaller text judged by its own 12,000-char budget
+             ;; below, so it is not relayed.
+             (not= :compiled-operational-plan-over-budget (:reason rendered)))
       rendered
       (let [plan (:operational-plan construction)
             ;; Sequential, preserving recorded order; keys are not collapsed.
@@ -200,29 +234,32 @@
             ;; The 12,000-character budget includes the header, the joined
             ;; lines AND the counted omission marker.
             limit 12000
+            marker-for (fn [shown]
+                         (let [omitted (- total shown)]
+                           (when (pos? omitted)
+                             (str "[" shown " of " total " checks shown; "
+                                  omitted " omitted for space]\n"))))
             fits? (fn [shown kept]
-                        (let [omitted (- total shown)
-                              marker (when (pos? omitted)
-                                       (str "[" shown " of " total " checks shown; "
-                                            omitted " omitted for space]\n"))]
-                          (<= (count (str header (str/join "\n" kept) "\n" marker))
-                              limit)))
-            budget
-            (reduce (fn [acc line]
-                      (let [shown (inc (:shown acc))
-                            kept (conj (:lines acc) line)]
-                        (if (fits? shown kept)
-                          {:shown shown :lines kept}
-                          (reduced acc))))
-                    {:shown 0 :lines []}
-                    lines)
-            shown (:shown budget)
-            omitted (- total shown)]
-        (str header
-             (str/join "\n" (:lines budget)) "\n"
-             (when (pos? omitted)
-               (str "[" shown " of " total " checks shown; " omitted
-                    " omitted for space]\n")))))))
+                    (<= (count (str header (str/join "\n" kept) "\n"
+                                       (marker-for shown)))
+                        limit))]
+        ;; The criteria header (both digests) can alone exceed the budget;
+        ;; refuse as typed absence rather than silently clipping digests.
+        (if-not (fits? 0 [])
+          {:status :absent :reason :compiled-completion-criteria-over-budget
+           :detail {:header-chars (count header) :limit limit}}
+          (let [budget (reduce (fn [acc line]
+                                 (let [shown (inc (:shown acc))
+                                       kept (conj (:lines acc) line)]
+                                   (if (fits? shown kept)
+                                     {:shown shown :lines kept}
+                                     (reduced acc))))
+                               {:shown 0 :lines []}
+                               lines)
+                shown (:shown budget)]
+            (str header
+                 (str/join "\n" (:lines budget)) "\n"
+                 (marker-for shown))))))))
 
 (defn- compiled-plan-section
   "Plan section for a :compiled-cascade construction: the rendered compiled
