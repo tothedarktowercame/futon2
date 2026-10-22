@@ -1,0 +1,25 @@
+{
+  "agent": "zai-3",
+  "artifacts": [
+    {
+      "path": "coordinator-review-dispatch.json",
+      "sha256": "23bd9111f9d6611584ac859bbfeef1ce344a0f4511b77544187ad56b7d46b541"
+    },
+    {
+      "path": "coordinator-review-result.json",
+      "sha256": "04ecfac471fbf0c9bf0c338fd48b35e7571b9f5df11ef1b6dd23438eee9f885b"
+    },
+    {
+      "path": "coordinator-review-terminal.json",
+      "sha256": "838f2c666eb10c3ebeff22c9459bd971e5a1776f639419c62bfd033a7ec43128"
+    },
+    {
+      "path": "recovery-repair-snapshot.json",
+      "sha256": "c78cfe0f25e474f88ce3c60ff0d341d7aad36a9a44fc80fc8802c626f991a473"
+    }
+  ],
+  "job_id": "invoke-1792640057261-2204-45f22b02",
+  "phase": "coordinator-review",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}
