@@ -1,3 +1,23 @@
+LATEST: active isolated runner wiring branch declared-effect-runner-wiring at
+/home/joe/code/futon2-declared-effect-wiring HEAD c9b75569a, NOT integrated/deployed.
+c856 admission draft reviewed2419: vector shape exemption fixed0bd69c490; all
+cascade candidates now require declaration, missing binding refuses dispatch,
+mission-fn resolved once/reused; moved head refuses attempt, never rewrites base.
+a761bcaf4 retains separate D-task effect context/snapshot and measures active
+wants from retained declaration; prospective carry stays absent. b56a5ee05 extracts
+actual runner pre-author capture boundary and checks context equality. c9b75569a
+re-reads record/binding byte pins, single EDN form, frozen-body equality before
+production reconstruction. Focused boundary1test22assertions passes, lint0/0,
+parensOK; effect-retained-boundary-result.json/log in worktree trial directory.
+Review2425 (invoke-1792656602688-2425-cfa02c9e) covers through b56, pending; c9 is
+later followup not yet independently reviewed. No full-run integration claimed.
+NEXT: actual prediction and identical build/close/falsifier authority wiring,
+attempt contract versioning. No invented q0/horizon/wants or scoring cert/carry.
+Owner-authored target declaration/horizon question remains pending. Trial5 CLOSED
+failure, FIVE Trials remain, work order OPEN. No fresh Trial/deploy until full
+bridge reviewed. No broad runner suites or shared-JVM worktree loads/kills.
+Older continuation paragraphs below are superseded where conflicting.
+
 LATEST: reviewed C2+binding+production authority+retention stack INTEGRATED
 canonical through fefa67278; exact source match7fc3b894c. Focused canonical
 43tests213assertions all pass; declared-effect-canonical-integration.json/logs.
