@@ -76,9 +76,9 @@
     (is (= 1.25 (:beta-prior cold)))
     (is (= :beta-posterior-absent (get-in cold [:update :reason])))
     (is (= (:q-before cold) (:q-after cold)))
-    (is (= :predecessor-has-no-valence-carry (:reason (:q-before old))))
-    (is (= :previous-run-not-closed (:reason (:q-before unclosed))))
-    (is (not= half (:q-before old)))
+    (is (= {:cold-start :redeclared :after :predecessor-has-no-valence-carry} (:source old)))
+    (is (= {:cold-start :redeclared :after :previous-run-not-closed} (:source unclosed)))
+    (is (= half (:q-before old)))
     (is (= :performed (get-in performed [:update :status])))
     (is (close? 7/11 (get-in performed [:q-after :pos])))))
 
@@ -111,6 +111,7 @@
         p1 (previous-run/start! dir "two" "2026-10-22T11:00:00Z")
         c2 (sut/valence-carry p1 precision)]
     (is (= :previous-terminal-carrier-tampered (:reason p1)))
-    (is (= :previous-terminal-carrier-tampered (:reason (:q-before c2))))
+    (is (= {:cold-start :redeclared :after :previous-terminal-carrier-tampered} (:source c2)))
+    (is (= half (:q-before c2)))
     (is (= :not-performed (get-in c2 [:update :status])))
-    (is (nil? (:beta-prior c2)))))
+    (is (= 1.25 (:beta-prior c2)))))

@@ -141,15 +141,20 @@
   (let [cold? (and (= :absent (:status predecessor))
                    (= :no-earlier-started-run (:reason predecessor)))
         prior-carry (get-in predecessor [:previous :valence-carry])
-        q-before (cond
-                   cold? {:pos 0.5 :neg 0.5}
-                   (= :present (:status predecessor))
-                   (or (:q-after prior-carry)
-                       (absent :predecessor-has-no-valence-carry))
-                   :else (absent (:reason predecessor)))
-        source (if cold?
-                 {:cold-start :declared :provenance :declared-cold-start-r20-packet}
-                 {:previous-run/id (:previous-run/id predecessor)})
+        carried-q (:q-after prior-carry)
+        after-reason (cond
+                       cold? nil
+                       (= :present (:status predecessor))
+                       (if (failure? carried-q)
+                         (:reason carried-q)
+                         (when-not carried-q :predecessor-has-no-valence-carry))
+                       :else (:reason predecessor))
+        redeclared? (some? after-reason)
+        q-before (if (or cold? redeclared?) {:pos 0.5 :neg 0.5} carried-q)
+        source (cond
+                 cold? {:cold-start :declared :provenance :declared-cold-start-r20-packet}
+                 redeclared? {:cold-start :redeclared :after after-reason}
+                 :else {:previous-run/id (:previous-run/id predecessor)})
         beta-posterior (or (:beta-posterior precision-row)
                            (absent :no-precision-row))
         beta-prior (when-not (failure? q-before) (descend hesp-level q-before))
