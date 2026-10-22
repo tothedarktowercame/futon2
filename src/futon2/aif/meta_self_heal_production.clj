@@ -228,11 +228,19 @@
           (if-not (= :available (:status source))
             (assoc source :injury-id injury-id :source-record-pin source-pin
                    :repair-claimed? false)
-            (let [request (bounded-diagnosis-request injury-id source-pin (:record source))
-                  response (try (diagnose request)
+            (let [request (try (bounded-diagnosis-request injury-id source-pin (:record source))
+                               (catch clojure.lang.ExceptionInfo e
+                                 (if (= :meta-self-heal/diagnosis-request-over-budget (:kind (ex-data e)))
+                                   (refusal (:kind (ex-data e))
+                                            (assoc (ex-data e) :injury-id injury-id
+                                                   :source-record-pin source-pin :repair-claimed? false))
+                                   (throw e))))
+                  response (cond
+                             (= :refused (:status request)) request
+                             :else (try (diagnose request)
                                 (catch Throwable _
                                   {:status :failed
-                                   :reason :meta-self-heal/diagnosis-port-threw}))]
+                                   :reason :meta-self-heal/diagnosis-port-threw})))]
               (cond
                 (nil? response)
                 (refusal :meta-self-heal/diagnosis-port-returned-nil

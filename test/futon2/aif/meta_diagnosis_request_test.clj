@@ -54,3 +54,16 @@
     (is (= [:exact-check] (get-in q [:injury-record :failed-checks])))
     (is (= [{:path [:failure] :serialized-bytes (byte-size value) :reason :causal-field-over-budget}]
            (:abbreviated-fields q)))))
+
+(deftest over-budget-request-is-a-typed-diagnosis-refusal
+  (with-redefs [futon2.aif.meta-self-heal-production/active-cause-pin (fn [& _] source-pin)
+                futon2.aif.meta-self-heal-production/source-record (fn [_] {:status :available :record {}})
+                futon2.aif.meta-self-heal-production/bounded-diagnosis-request
+                (fn [& _] (throw (ex-info "over" {:kind :meta-self-heal/diagnosis-request-over-budget
+                                                  :bytes 1 :budget 0})))]
+    (let [called (atom false)
+          r (#'futon2.aif.meta-self-heal-production/produce-diagnosis!
+             {:meta-diagnosis-fn (fn [_] (reset! called true) {:status :succeeded})}
+             ::durable {:injury-id "injury/x"})]
+      (is (= :refused (:status r)) (pr-str r))
+      (is (false? @called)))))
