@@ -1,0 +1,13 @@
+{
+  "review": "declared-effect-final-c2-review.json",
+  "correction": "a2e54d1ae",
+  "F1": "Public reconstruct refuses injected observation/resolution ports; private test helper separated.",
+  "F2": "Production resolver accepts only full immutable commit ids and checks resolved id equality.",
+  "gates": {
+    "fast": "28/124 pass",
+    "historical": "5/31 pass",
+    "lint": "0/0",
+    "parens": "OK"
+  },
+  "status": "independent rereview requested; not integrated/deployed; no Trial"
+}
