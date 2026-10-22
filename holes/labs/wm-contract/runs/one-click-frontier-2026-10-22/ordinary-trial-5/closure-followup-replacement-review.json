@@ -1,0 +1,32 @@
+{
+  "reviewer": "claude-7",
+  "date": "2026-10-22",
+  "subject": "futon2 c0f35f79d over c79f26b38 (worktree /home/joe/code/futon2-compiled-closure-review)",
+  "verdict": "accepted for the compiled route; legacy-route counterexample recorded",
+  "record_check": "git diff c79f26b38 c0f35f79d: full_loop_runner.clj +8 (one cond branch before (empty? declared)), compiled_closure_classification_test.clj +20 (one deftest). Matches the request.",
+  "adequacy": "The new branch is placed before the empty-declared and locator branches, so a foreign or non-pair vector product can no longer reach the bare-token strip. `some` over declared makes one bad product refuse the whole union (checked: mixed local+foreign -> :grounded-progress). The test pins the local positive and the two refused shapes; it would catch reverting the branch.",
+  "focused_namespace": "clojure -X:test :nses '[futon2.aif.compiled-closure-classification-test]': Ran 8 tests, 40 assertions, 0 failures, 0 errors.",
+  "probe": {
+    "file": "closure-followup-replacement-probe.clj",
+    "invocation": "clojure -Sdeps (test path + test deps, no runner main-opts) -M:probe -e (load-file probe)",
+    "results": {
+      "compiled-local-qualified": "grounded-change",
+      "compiled-mixed-local-and-foreign": "grounded-progress",
+      "compiled-keyword-target-qualifier": "grounded-progress",
+      "compiled-list-qualifier": "grounded-progress",
+      "legacy-vector-foreign-qualified": "grounded-change",
+      "legacy-vector-local-qualified": "grounded-change"
+    }
+  },
+  "counterexample": {
+    "route": "legacy vector precedence",
+    "input": "{:target \"T-fixture-closure\" :precedence [{:id :p :produces #{[\"foreign-target\" :fixture-done]}}]}, fresh binding, locator true",
+    "observed": ":grounded-change",
+    "why": "the legacy branch still maps every vector product to (second %) and measures the selected target's locator, so the qualifier loss fixed on the compiled route remains there",
+    "reachability": "cascade_revision_producer.clj executable-action emits legacy vector precedence with qualified products, but qualifies only with its own target (qualify = [target token]); no producer writing a foreign qualifier on that route was found in this review. Not a regression of c0f35f79d, which left legacy behaviour unchanged as stated.",
+    "suggested_fix": "drop the `compiled?` conjunct from the new branch, or apply the same pair+target check before the legacy strip"
+  },
+  "false_negative_note": "a qualifier that names the selected target with a different type (keyword :T vs string \"T\") is refused (grounded-progress). Safe direction; matters only if any producer qualifies with a non-string target.",
+  "process_incident": "My first probe used `clojure -M:test -e`, which since b463d85cc runs the whole suite (the broad run the request excluded). It ran ~8 min from the review worktree and wrote two test-fixture checkpoints (target M-current, patterns p/x p/y) into canonical futon2/data/wm-on-prod-history/checkpoints at 07:42Z. I moved both run dirs, unaltered, to claude-7-suite-pollution-2026-10-22T0742/ beside this file. No serving JVM touched; no other files under futon2/data modified since 07:40Z by find -newermt. The probe was then rerun alone (results above).",
+  "not_done": "no full-loop-runner-test, no serving-JVM load, no main edits, no Trials"
+}

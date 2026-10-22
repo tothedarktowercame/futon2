@@ -1,3 +1,17 @@
+LATEST: closure classifier C1 INTEGRATED canonical b17ece0cd (c34bd8447,
+0729ce8b9,065ec2986 plus legacy target-ownership fix). Reviews2403/2434 accepted;
+canonical focused8tests45assertions pass, lint0errors2existingwarnings/parensOK.
+closure-canonical-integration.json freezes mappings/log/reviews. NOT deployed.
+Declared-effect wiring still isolated /home/joe/code/futon2-declared-effect-wiring
+HEAD fe4a246ad: dispatch/retained-pin/occurrence checks, effect completion path;
+review2430 v2/precision findings fixed9809ec08b, not independently reapproved yet.
+Census fe4a246ad: five declaration files, zero eligible; four frozen Trial5 menu
+targets all undeclared. M-f11 open want lacks horizon. Census is not current live
+selection. Owner declaration question still pending. Need prediction/accounting,
+close manifest/falsifier, restart restoration/attempt contract before next Trial.
+Trial5 CLOSED failure, FIVE remain, broad work order OPEN. No broad suites,
+serving-JVM kills or worktree source loads. Older parks superseded where stale.
+
 LATEST: active isolated runner wiring branch declared-effect-runner-wiring at
 /home/joe/code/futon2-declared-effect-wiring HEAD c9b75569a, NOT integrated/deployed.
 c856 admission draft reviewed2419: vector shape exemption fixed0bd69c490; all

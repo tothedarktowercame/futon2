@@ -1,0 +1,31 @@
+{
+  "status": "integrated-tested-not-deployed",
+  "canonical_head": "b17ece0cd",
+  "mapping": {
+    "0bb9f6a4b": "c34bd8447",
+    "c79f26b38": "0729ce8b9",
+    "c0f35f79d": "065ec2986",
+    "324cf44f7": "b17ece0cd"
+  },
+  "reviews": [
+    "closure-followup-replacement-review.json",
+    "closure-vector-ownership-independent-review.json"
+  ],
+  "test": {
+    "tests": 8,
+    "assertions": 45,
+    "failures": 0,
+    "errors": 0,
+    "log": "holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/closure-canonical-final-test.log",
+    "sha256": "2aaa170888e7e746b88362c53d548d553aead17994b64ebea5d8125a6f3aa857"
+  },
+  "lint": "0 errors; 2 pre-existing runner warnings",
+  "parens": "OK",
+  "limits": [
+    "No live reload/Trial",
+    "Declared-effect runner bridge still isolated incomplete",
+    "No eligible declaration in current census; owner declaration/horizon pending"
+  ],
+  "work_order_status": "open",
+  "trials_remaining": 5
+}
