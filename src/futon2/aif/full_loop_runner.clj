@@ -3552,6 +3552,14 @@
         ;; honest progress, never closure credit (codex-11 review).
         :grounded-progress
 
+        (and compiled?
+             (some #(and (vector? %)
+                         (or (not= 2 (count %)) (not= target (first %))))
+                   declared))
+        ;; A qualified product belongs to its named target. Never strip a
+        ;; foreign target and measure the selected target's same-named token.
+        :grounded-progress
+
         (empty? declared)
         ;; vector route: a legacy cascade declaring nothing keeps the
         ;; legacy outcome; the compiled route never credits closure for
