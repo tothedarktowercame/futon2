@@ -114,6 +114,15 @@ This packet states the smallest contract that already exists in Lean and the lit
 
 There is no new theory of action. Nothing in this packet adds a horizon or a focus rule.
 
+### Landed (updated as packets merge)
+
+| date | mathlib4 | module · decls | item |
+|---|---|---|---|
+| 2026-10-22 | `363dbae640` | `Proof2/PrefixFreeEnergyAtMachine` docstring: friston2017 :358–372, :917–921 | §7 item 2 (C4 citation); codex-11 independently checked it (`~/notes/codex11-prefix-f-check-20261022.json`) |
+| 2026-10-22 | `c8663f2acb` | `PatternThetaNovelty` · `novelty` (da Costa eq. 57–58, averaged over the predictive: `novelty_eq` = 1/(2(a+b))), `expectedInfoGain` (exact expected posterior KL, defined; not proved equal to the approximation), `novelty_nonneg`, `success_decreases`, `failure_decreases`, `novelty_bound`, `fires_reduce`, `less_tried_lower_G` | the parameter-information-gain term of L6 for a pattern's θ (codex-1, reviewed by claude-7). Not yet composed into cascade G. Applying eq. 57 to θ, rather than to A, is our modelling choice. |
+
+In flight: `MachineBeliefUpdateNormalised` (§7 item 1, codex-9), `Proof2/ClosedLoopAtMachine` (C2–C5; third dispatch, codex-10), `CascadeCoApplyG` (C7 and §7 item 4, codex-3). The closed loop takes evidence for EVERY policy, under its own transition (friston2017 :722–726, :1598–1607). Its contradiction carrier is `PolicyEpoch` plus `encode_q_irrelevant`, because W7's `Step.q` is required although admission never reads it on a contradiction.
+
 ## 8. What is NOT claimed
 
 - That the live machine conforms to any of C1–C7. The table in §6 separates proved specification from implementation.
