@@ -1,0 +1,25 @@
+{
+  "agent": "zai-8",
+  "artifacts": [
+    {
+      "path": "recovery-repair-dispatch.json",
+      "sha256": "6ed345c5f0497bb195de37799c1208692ec89ecc065bbf3ba25adb5b3df851b8"
+    },
+    {
+      "path": "recovery-repair-result.json",
+      "sha256": "e5767d67ceb52848998887edec039add653c63032e17f822af9a6663be3dadc1"
+    },
+    {
+      "path": "recovery-repair-terminal.json",
+      "sha256": "b84bf047cc888466a8902a22d15bd14627759b617fbc041060aeccf89c9fc6d3"
+    },
+    {
+      "path": "entry-frontier-manifest.json",
+      "sha256": "dae33e16185e0195209f341f805112d79f337e6781edf5276f8d1cbc4511f919"
+    }
+  ],
+  "job_id": "invoke-1792639178635-2176-5cdccd60",
+  "phase": "recovery-repair",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

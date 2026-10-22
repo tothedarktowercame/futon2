@@ -1,0 +1,46 @@
+{
+  "task": "Smallest proper production repair for the observation-starved enacted retry (child wm-requeue-7-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc, injury/d755c886a22d6fc8c04db7fada64089e07157f62), in an isolated sibling worktree. No clicks, no shared-JVM loads, no ledger/acceptance edits.",
+  "worktree": {
+    "path": "/home/joe/code/futon2-repair-wt",
+    "branch": "repair/failed-child-observation",
+    "base": "main (e1d02c704)",
+    "sibling_rationale": "futon2 deps.edn uses :local/root \"../futon1/apps/common\" and \"../futon3a\"; a sibling under /home/joe/code keeps both resolving."
+  },
+  "commits": [
+    {
+      "sha": "3e17ebedb",
+      "subject": "wm: observe durable service-failed retry child in coordinate-queued-retry",
+      "files": [
+        "src/futon2/aif/meta_repair_coordinator.clj",
+        "src/futon2/aif/meta_self_heal_production.clj",
+        "test/futon2/aif/meta_repair_coordinator_test.clj"
+      ]
+    }
+  ],
+  "repair": {
+    "mechanism": "coordinate-queued-retry (src/futon2/aif/meta_repair_coordinator.clj) gains an optional read-only :retry-click-status-fn port. When the ledger has no pending-requeue observation for the enacted retry-click, the port is consulted; a durably :failed child with outcome :service-failed and a valid evidence pin appends the same :retry-inconclusive observation terminal ingestion would have appended (ledger/append-observation with attribution {injury-id, retry-click}), then the existing requeue loop runs unchanged: next requeue id minted via retry-click-id, or the typed :abandoned/:retry-budget-spent terminal when the budget is spent.",
+    "evidence_preservation": "The observation's record-pin seals the child's own durable futon3c acceptance bytes (wm/click-state-v1), which retain the actual failure: outcome :service-failed, error message 'Serving runner source drifts from the canonical checkout', attempt-id nil, completed-at. No typed data is invented; the legacy child's message-only shape flows through as-is.",
+    "fabrication_guards": [
+      "Only {:status :failed} + result outcome :service-failed is a failure; running/queued/completed/not-found/nil are not observed (tested: running-or-completed-child-is-never-observed).",
+      "A :failed report without a valid 64-hex evidence pin refuses :coordinator/failed-child-evidence-refused rather than appending an unsourced observation (tested: failed-child-without-evidence-pin-refuses-typedly).",
+      "Duplicate prevention: an already-ingested evidence pin is never observed twice, so crash-repair replays and ordinary replays are idempotent (tested: failed-child-observation-is-not-duplicated covers both a pre-appended crash state and a full replay)."
+    ],
+    "budget_honesty": "No budget change. append-requeue still abandons at (>= requeues retry-limit) without an other-open-injury explanation; tested in failed-child-observation-respects-spent-retry-budget-honestly, which ends :abandoned/:retry-budget-spent with zero retry-port calls. NOTE for Joe/codex-11: the live ledger entry 50 carries :requeues 3 = :retry-limit 3 with no other open injury currently explaining the child, so the honest expected terminal for THIS chain after the repair is :abandoned/:retry-budget-spent, not another requeue — unless a qualifying other open injury exists at resume time.",
+    "wiring": "meta_self_heal_production.clj effect-ports forwards :retry-click-status-fn from opts when it is a function; absence is not a defect (the starved-awaiting behavior is preserved). The futon3c side should supply the port backed by runner_service click-status / the acceptance EDN (pin = sha256 of that file's bytes); that wiring is deliberately left to the serving side."
+  },
+  "tests": [
+    "service-failed-child-without-run-record-is-observed-and-requeued — real-shaped durable failed child (no run record), incl. a control run proving the port-less resume still starves at :awaiting-retry",
+    "failed-child-observation-is-not-duplicated — crash-after-observation resume + full replay, pin never observed twice",
+    "failed-child-observation-respects-spent-retry-budget-honestly — spent budget ends :abandoned/:retry-budget-spent, no port call, no synthetic success",
+    "running-or-completed-child-is-never-observed — completed/running/not-found/nil never append",
+    "failed-child-without-evidence-pin-refuses-typedly — unsourced failure refuses by name"
+  ],
+  "validation": {
+    "clj-kondo": "0 errors, 0 warnings on all three files",
+    "check-parens": "futon4/dev/check-parens.el: OK on the test file",
+    "clojure -M:test -n futon2.aif.meta-repair-coordinator-test": "19 tests, 118 assertions, 0 failures, 0 errors",
+    "clojure -M:test -n futon2.aif.meta-self-heal-production-test": "55 tests, 396 assertions, 0 failures, 0 errors (covers the effect-ports passthrough)"
+  },
+  "correction": "resume-discovery.json line 13 missing comma fixed as a separate explicit correction; the original malformed file is preserved verbatim at resume-discovery.orig.json beside it.",
+  "scope": "No clicks issued, no shared-JVM loads, no live actions, no hand edits to ledgers or acceptance state. Production data untouched."
+}
