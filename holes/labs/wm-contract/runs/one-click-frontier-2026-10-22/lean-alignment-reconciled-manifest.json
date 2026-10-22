@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "claude-2-alignment-job.json",
+      "sha256": "4c0cf1edbe5dc03bf291a028d637d5bcfb7d4ae22aa4c6271de48f06479f891e"
+    },
+    {
+      "path": "lean-alignment-reconciled.md",
+      "sha256": "57cd7c96a18f02e555b9599ba4d5f49af30c8019d00b704be604c03391b4b5d9"
+    }
+  ]
+}
