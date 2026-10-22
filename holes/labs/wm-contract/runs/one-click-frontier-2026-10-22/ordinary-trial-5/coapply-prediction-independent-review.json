@@ -1,0 +1,22 @@
+{
+  "verdict": "accepted-and-integrated-not-deployed",
+  "source": "baf204561",
+  "review-fix": "980192261",
+  "canonical": [
+    "fe565bba4",
+    "887ccb75f"
+  ],
+  "validation": {
+    "coapply-tests": 6,
+    "coapply-assertions": 58,
+    "legacy-tests": 3,
+    "legacy-assertions": 17,
+    "failures": 0,
+    "errors": 0,
+    "lint": "0 errors 0 warnings",
+    "parens": "OK"
+  },
+  "review-finding-fixed": "Nine legacy assertions were outside deftest; moved inside, now test runner counts them",
+  "scope-limit": "Supports existing model coapplication shape only; does not supply live declared effect, q0, horizon or scoring certificate inputs. Precedence-kind is additive schema field, legacy rollout unchanged.",
+  "runtime": "No shared JVM load or Trial"
+}
