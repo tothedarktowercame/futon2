@@ -1,0 +1,144 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "wm-full-loop",
+    "session-id": null,
+    "execution": {
+      "executed?": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1792649952878-2360-aaffb02d",
+    "agent-id": "zai-3",
+    "artifact-ref": null,
+    "harness": {
+      "kind": "war-machine",
+      "basis": "producer-context",
+      "execution-id": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45",
+      "source-ref": "wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413"
+    },
+    "started-at": "2026-10-22T06:19:13.225212156Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-10-22T06:19:12.879757801Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-10-22T06:19:13.225218017Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-10-22T06:19:13.251214842Z",
+        "text": "D_TASK_DISPATCH_SHA256: 9c3c2415254afaecdbff0fe8fe8e59351880cae15d653324e2f09220c7bb5236\nzai-3: FULL-LOOP AMENDMENT RE-REVIEW. You are the same independent reviewer. zai-2 authored the bounded amendment. Review only that amendment and whether it resolves your original findings without regression.\n\nSELECTED TARGET: \"M-stack-geometry\"\nRepository: /home/joe/code/futon5a\nCONSTRUCTION CONTRACT: {:construction-kind :compiled-cascade, :shown [\"futon-theory/mission-lifecycle\" \"agent/evidence-over-assertion\" \"futon-theory/mission-lifecycle\" \"futon-theory/mission-lifecycle\" \"war-machine/state-capture\" \"war-machine/state-capture\" \"agent/evidence-over-assertion\" \"agent/evidence-over-assertion\" \"features/operator-turns-enter-the-observation-vector\" \"hdm/deep-storage-to-active-graph\" \"problems/operator-turns-become-inference-observations\" \"problems/operator-turns-become-inference-observations\" \"problems/llm-over-corpus-mining-lessons\" \"problems/llm-over-corpus-mining-lessons\" \"gauntlet/world-is-hypergraph\" \"gauntlet/world-is-hypergraph\" \"hdm/deep-storage-to-active-graph\" \"hdm/deep-storage-to-active-graph\" \"hdm/deep-storage-to-active-graph\"], :operational-plan {:selected-cascade-digest \"c601dc5697a2d5d65c5c8440f08b3905cee1030b9a62dfa03e2ad5e7ab202c27\", :compiled-cascade-digest \"f2d6feed1a394036e4891266361797bad256316bba3e3ec451dee8c204d257c1\", :steps [{:occurrence-id [\"futon-theory/mission-lifecycle\" 1], :pattern \"futon-theory/mission-lifecycle\", :provenance {:reading-record-id \"M-stack-geo \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-10-22T06:19:22.194851211Z",
+        "text": "Need to review amendment commit 87d4289 in /home/joe/code/futon5a. Run checks: git show, diff, py_compile, tests, --check."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-10-22T06:19:22.201829213Z",
+        "tools": [
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon5a && git log --oneline -3 && git show --stat 87d4289289da83a1040f5bf97252870f33ae6378 | head -30"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"87d4289 M-stack-geometry Checkpoint 19 revision: fix crossref reference semantics\\n9d8d699 M-stack-geometry Checkpoint 19: typed mission cross-reference edge extraction\\ndff2133 Add provisional 2026-10-09 closure criteria to 9 task documents\\ncommit 87d4289289da83a1040f5bf97252870f33ae6378\\nAuthor: zai-2 <zai-2@futon>\\nDate:   Thu Oct 22 06:18:46 2026 +0000\\n\\n    M-stack-geometry Checkpoint 19 revision: fix crossref reference semantics\\n    \\n    Review round 2 (zai-3 REQUEST_CHANGES), two bounded corrections:\\n    - classify_target: repo-qualified paths -> cross-repo BEFORE basename\\n      resolution; only bare filenames resolve to local mission/excursion.\\n    - split_items: join block lines before splitting on top-level , and ;\\n      so parentheticals spanning lines no longer emit prose-word targets;\\n      non-reference leading tokens excluded from edges and counted in\\n      stats.json as excluded-prose-items.\\n    \\n    Adds scripts/build_mission_crossref_edges_test.py with the reviewer's\\n    two probe cases verbatim (cross-repo classification; the six prose\\n    tokens asserted absent) plus the --check fixed point.\\n    \\n    Corrected artifact: 94 edges from 18 docs (59 cross-repo, 16 mission,\\n    2 excursion, 2 repo-root, 1 section, 14 unresolved), 7 prose items\\n    excluded; prior 171-edge count was inflated by the per-line defect.\\n    \\n    Agent-Session: zai-e495f6d3-34d9-4149-93ea-b8d14aa7d182\\n    Agent-Id: zai-2\\n    Agency-Job: invoke-1792649692337-2355-4419e2d0\\n    Dispatched-By: wm-full-loop\\n\\n data/mission-crossrefs/mission_crossref_edges.json | 1030 +++-----------------\\n .../mission-crossrefs/mission_crossref_edges.jsonl |  199 ++--\\n data/mission-crossrefs/stats.json                  |   11 +-\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-10-22T06:19:35.128747307Z",
+        "tools": [
+          "run_readonly",
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon5a && git show --stat 87d4289289da83a1040f5bf97252870f33ae6378 | tail -8 && git status --porcelai",
+          "run_readonly cd /home/joe/code/futon5a && git show 87d4289289da83a1040f5bf97252870f33ae6378 -- scripts/build_mission_crossref_edges.p"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\n data/mission-crossrefs/mission_crossref_edges.json | 1030 +++-----------------\\n .../mission-crossrefs/mission_crossref_edges.jsonl |  199 ++--\\n data/mission-crossrefs/stats.json                  |   11 +-\\n holes/missions/M-stack-geometry.md                 |   25 +\\n scripts/build_mission_crossref_edges.py            |   96 +-\\n scripts/build_mission_crossref_edges_test.py       |   85 ++\\n 6 files changed, 378 insertions(+), 1068 deletions(-)\\n\",\"err\":\"\"}}",
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"commit 87d4289289da83a1040f5bf97252870f33ae6378\\nAuthor: zai-2 <zai-2@futon>\\nDate:   Thu Oct 22 06:18:46 2026 +0000\\n\\n    M-stack-geometry Checkpoint 19 revision: fix crossref reference semantics\\n    \\n    Review round 2 (zai-3 REQUEST_CHANGES), two bounded corrections:\\n    - classify_target: repo-qualified paths -> cross-repo BEFORE basename\\n      resolution; only bare filenames resolve to local mission/excursion.\\n    - split_items: join block lines before splitti \u2026[trimmed]\u2026 ]:\\n     \\\"\\\"\\\"Split a cross-ref block into individual reference items.\\n \\n-    Handles comma-separated prose blocks (commas inside parentheses or\\n-    backticks do not split) and ``- `` bullet lists.\\\"\\\"\\\"\\n+    The block is first joined into single-line segments (bullet lists\\n+    split at bullet starts; parentheticals may span source lines, so\\n+    comma/parenthesis tracking must see the joined text), then split on\\n+    top-level commas \u2014 commas inside parentheses or backticks do not\\n+    split.\\\"\\\"\\\"\\n+    lines = text.splitlines()\\n+    if any(BULLET_RE.match(line) for line in lines):\\n+        segments: list[list[str]] = [[]]\\n+        for line in lines:\\n+            if BULLET_RE.match(line):\\n+                segments.append([BULLET_RE.match(line).group(1)])\\n+            else:\\n+                segments[-1].append(line)\\n+        chunks = [\\\" \\\".join(seg).strip() for seg in segments if seg and any(seg)]\\n+    else:\\n+        chunks = [\\\" \\\".join(line.strip() for line in lines).strip()]\\n     items: list[str] = []\\n-    for line in text.splitlines():\\n-        m = BULLET_RE.match(line)\\n-        chunk = m.group(1) if m else line\\n+    for chunk in chunks:\\n+        if not chunk:\\n+            continue\\n         depth = 0\\n         buf: list[str] = []\\n         in_tick = False\\n@@ -88,7 +102,7 @@ def split_items(text: str) -> list[str]:\\n                     depth += 1\\n                 elif ch == \\\")\\\":\\n                     depth = max(0, depth - 1)\\n-                elif ch == \\\",\\\" and depth == 0:\\n+                elif ch in \\\",;\\\" and depth == 0:\\n                     items.append(\\\"\\\".join(buf).strip())\\n                     buf = []\\n                     continue\\n@@ -99,6 +113,18 @@ def split_items(text: str) -> list[str]:\\n     return [i for i in (item.strip() for item in items) if i]\\n \\n \\n+REFERENCE_LIKE_RE = re.compile(r\\\"^(`[^`]+`|[ME][-_][\\\\w.-]+|futon\\\\w*/[\\\\w./-]+|[\\\\w.-]+/[\\\\w./-]+|~/[^\\\\s]+|/?[^\\\\s]*\u00a7[^\\\\s]*|[^\\\\s]+\\\\.(?:md|clj|py|edn|json|sexp|aif|org|tex))([+,]|$)\\\")\\n+\\n+\\n+def reference_like(target: str) -> bool:\\n+    \\\"\\\"\\\"A target token that can plausibly be a reference: a mission/excursion\\n+    id, a path, a backticked name, a \u00a7 section, or a known file extension.\\n+    Prose continuations of a qualifier are not references and are excluded\\n+    from the edge list (accounted in stats as excluded-prose-items).\\\"\\\"\\\"\\n+    t = target.strip().strip(\\\"`\\\")\\n+    return bool(REFERENCE_LIKE_RE.match(target.strip())) or \\\"\u00a7\\\" in t or \\\"/\\\" in t\\n+\\n+\\n def extract_blocks(lines: list[str]) -> list[str]:\\n     \\\"\\\"\\\"Yield the raw text of each cross-ref header block in a document.\\\"\\\"\\\"\\n     blocks: list[str] = []\\n@@ -125,20 +151,27 @@ def extract_blocks(lines: list[str]) -> list[str]:\\n \\n \\n def classify_target(target: str, known: dict[str, str]) -> tuple[str, str]:\\n-    \\\"\\\"\\\"Return (kind, resolved-name) for a raw reference target token.\\\"\\\"\\\"\\n+    \\\"\\\"\\\"Return (kind, resolved-name) for a raw reference target token.\\n+\\n+    Repo-qualified paths (any target containing a path separator) are\\n+    classified as ``cross-repo`` BEFORE basename resolution: a foreign\\n+    repository's file must never collapse to a local basename and be\\n+    mis-typed as a local mission/excursion edge. Only bare filenames\\n+    resolve to local ``mission``/``excursion``.\\\"\\\"\\\"\\n     t = target.strip().strip(\\\"`\\\")\\n+    if \\\"\u00a7\\\" in t:\\n+        return \\\"section\\\", t\\n+    if \\\"/\\\" in t and PATH_ISH_RE.search(t):\\n+        if t.startswith(\\\"~\\\"):\\n+            return \\\"repo-root\\\", t\\n+        return \\\"cross-repo\\\", t\\n     base = t\\n     if base.endswith(\\\".md\\\"):\\n         base = base[: -len(\\\".md\\\")]\\n-    base_file = base.split(\\\"/\\\")[-1]\\n-    if base_file in known or base_file.lower() in known:\\n-        stem = known.get(base_file, known.get(base_file.lower()))\\n+    if base in known or base.lower() in known:\\n+        stem = known.get(base) or known.get(base.lower())\\n         kind = \\\"mission\\\" if (MISSIONS_DIR / f\\\"{stem}.md\\\").exists() else \\\"excursion\\\"\\n         return kind, stem\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-10-22T06:19:38.477002957Z",
+        "tools": [
+          "run_readonly",
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon5a && git show 87d4289289da83a1040f5bf97252870f33ae6378 -- scripts/build_mission_crossref_edges.p",
+          "run_readonly cd /home/joe/code/futon5a && git show 87d4289289da83a1040f5bf97252870f33ae6378 -- scripts/build_mission_crossref_edges_t"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"         return kind, stem\\n-    if \\\"\u00a7\\\" in t:\\n-        return \\\"section\\\", t\\n-    if re.match(r\\\"^[A-Za-z0-9][\\\\w.-]*/\\\", t) and PATH_ISH_RE.search(t):\\n-        return \\\"cross-repo\\\", t\\n     if t.startswith(\\\"~\\\") or t.startswith(\\\"/\\\"):\\n         return \\\"repo-root\\\", t\\n     return \\\"unresolved\\\", t\\n@@ -152,14 +185,20 @@ def first_token(item: str) -> tuple[str, str]:\\n     return m.group(1), m.group(2).strip()\\n \\n \\n-def parse_doc(path: Path, known: dict[str, str]) -> list[dict]:\\n+def parse_doc(path: Path, known: dict[str, str]) -> tuple[list[dict], int]:\\n+    \\\"\\\"\\\"Edges plus the count of excluded non-reference (prose) items.\\\"\\\"\\\"\\n     from_id = path.name[: -len(\\\".md\\\")]\\n+    source_rel = str(path.relative_to(ROOT))\\n     lines = path.read_text(encoding=\\\"utf-8\\\").splitlines()\\n     edges: list[dict] = []\\n+    excluded = 0\\n     for block in extract_blocks(lines):\\n         for item in split_items(block):\\n             target, relation = first_token(item)\\n-            if not target or target.startswith(\\\"(\\\"):\\n+            if not target:\\n+                continue\\n+            if not reference_like(target):\\n+                excluded += 1\\n                 continue\\n             kind, resolved = classify_target(target, known)\\n             edges.append({\\n@@ -168,22 +207,27 @@ def parse_doc(path: Path, known: dict[str, str]) -> list[dict]:\\n                 \\\"to\\\": resolved,\\n                 \\\"to-kind\\\": kind,\\n                 \\\"relation\\\": relation.strip(\\\"()\\\").strip(),\\n-                \\\"source\\\": {\\\"file\\\": f\\\"holes/{'missions' if path.parent == MISSIONS_DIR else 'excursions'}/{path.name}\\\"},\\n+                \\\"source\\\": {\\\"file\\\": source_rel},\\n             })\\n-    return edges\\n+    return edges, excluded\\n \\n \\n-def build() -> list[dict]:\\n+def build() -> tuple[list[dict], int]:\\n     known = known_targets()\\n     edges: list[dict] = []\\n+    excluded = 0\\n     for d in (MISSIONS_DIR, EXCURSIONS_DIR):\\n         if d.is_dir():\\n             for f in sorted(d.glob(\\\"*.md\\\")):\\n-                edges.extend(parse_doc(f, known))\\n-    return sorted(edges, key=lambda e: (e[\\\"from\\\"], e[\\\"to\\\"], e[\\\"relation\\\"], e[\\\"to-kind\\\"]))\\n+                doc_edges, doc_excluded = parse_doc(f, known)\\n+                edges.extend(doc_edges)\\n+                excluded += doc_excluded\\n+    return (sorted(edges,\\n+                   key=lambda e: (e[\\\"from\\\"], e[\\\"to\\\"], e[\\\"relation\\\"], e[\\\"to-kind\\\"])),\\n+            excluded)\\n \\n \\n-def write_outputs(edges: list[dict]) -> None:\\n+def write_outputs(edges: list[dict], excluded_prose_items: int) -> None:\\n     OUT_DIR.mkdir(parents=True, exist_ok=True)\\n     EDGES_JSONL.write_text(\\n         \\\"\\\".join(json.dumps(e, sort_keys=True, ensure_ascii=False) + \\\"\\\\n\\\" for e in edges),\\n@@ -198,6 +242,7 @@ def write_outputs(edges: list[dict]) -> None:\\n         \\\"schema\\\": \\\"futon5a/mission-crossref-stats-v1\\\",\\n         \\\"edge-count\\\": len(edges),\\n         \\\"edges-by-to-kind\\\": dict(sorted(by_kind.items())),\\n+        \\\"excluded-prose-items\\\": excluded_prose_items,\\n         \\\"source-doc-count\\\": len(sources),\\n         \\\"source-docs\\\": sources,\\n     }, indent=2, sort_keys=True, ensure_ascii=False) + \\\"\\\\n\\\", encoding=\\\"utf-8\\\")\\n@@ -208,7 +253,7 @@ def main() -> int:\\n     ap.add_argument(\\\"--check\\\", action=\\\"store_true\\\",\\n                     help=\\\"rebuild in memory and exit 1 if committed output differs\\\")\\n     args = ap.parse_args()\\n-    edges = build()\\n+    edges, excluded = build()\\n     if args.check:\\n         expected = (\\\"\\\".join(json.dumps(e, sort_keys=True, ensure_ascii=False) + \\\"\\\\n\\\"\\n\",\"err\":\"\"}}",
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"commit 87d4289289da83a1040f5bf97252870f33ae6378\\nAuthor: zai-2 <zai-2@futon>\\nDate:   Thu Oct 22 06:18:46 2026 +0000\\n\\n    M-stack-geometry Checkpoint 19 revision: fix crossref reference semantics\\n    \\n    Review round 2 (zai-3 REQUEST_CHANGES), two bounded corrections:\\n    - classify_target: repo-qualified paths -> cross-repo BEFORE basename\\n      resolution; only bare filenames resolve to local mission/excursion.\\n    - split_items: join block lines before splitti \u2026[trimmed]\u2026 gent-Session: zai-e495f6d3-34d9-4149-93ea-b8d14aa7d182\\n    Agent-Id: zai-2\\n    Agency-Job: invoke-1792649692337-2355-4419e2d0\\n    Dispatched-By: wm-full-loop\\n\\ndiff --git a/scripts/build_mission_crossref_edges_test.py b/scripts/build_mission_crossref_edges_test.py\\nnew file mode 100644\\nindex 0000000..c93ce0e\\n--- /dev/null\\n+++ b/scripts/build_mission_crossref_edges_test.py\\n@@ -0,0 +1,85 @@\\n+#!/usr/bin/env python3\\n+\\\"\\\"\\\"Regression tests for build_mission_crossref_edges.py (revision round 2).\\n+\\n+Both probes reproduce the reviewer's exact defect cases verbatim:\\n+\\n+1. ``classify_target`` on a repo-qualified path must return ``cross-repo``\\n+   before any basename resolution \u2014 never a local ``mission`` collapse.\\n+2. ``parse_doc`` on the actual M-stack-geometry.md must emit no edge whose\\n+   target is a prose continuation token (analytic, and, candidate,\\n+   embedding, futon1a, same); such items are excluded and counted.\\n+3. ``--check`` over the committed artifact must confirm the fixed point.\\n+\\n+Run: python3 scripts/build_mission_crossref_edges_test.py  (exit 0 = pass)\\n+\\\"\\\"\\\"\\n+\\n+from __future__ import annotations\\n+\\n+import importlib.util\\n+import subprocess\\n+import sys\\n+from pathlib import Path\\n+\\n+ROOT = Path(__file__).resolve().parents[1]\\n+SCRIPT = ROOT / \\\"scripts\\\" / \\\"build_mission_crossref_edges.py\\\"\\n+PROSE_TOKENS = [\\\"analytic\\\", \\\"and\\\", \\\"candidate\\\", \\\"embedding\\\", \\\"futon1a\\\", \\\"same\\\"]\\n+\\n+\\n+def load():\\n+    spec = importlib.util.spec_from_file_location(\\\"xref\\\", SCRIPT)\\n+    mod = importlib.util.module_from_spec(spec)\\n+    spec.loader.exec_module(mod)\\n+    return mod\\n+\\n+\\n+def test_repo_qualified_target_is_cross_repo() -> None:\\n+    m = load()\\n+    kind, resolved = m.classify_target(\\n+        \\\"futon5a/holes/missions/M-stack-geometry.md\\\", m.known_targets())\\n+    assert kind == \\\"cross-repo\\\", f\\\"repo-qualified path mis-typed as {kind}\\\"\\n+    assert resolved == \\\"futon5a/holes/missions/M-stack-geometry.md\\\"\\n+    # the reviewer's original failing case: foreign repo, local basename\\n+    kind2, _ = m.classify_target(\\n+        \\\"futon3c/holes/missions/M-stack-geometry.md\\\", m.known_targets())\\n+    assert kind2 == \\\"cross-repo\\\", f\\\"foreign-repo path mis-typed as {kind2}\\\"\\n+    # bare local filenames still resolve to mission/excursion\\n+    kind3, resolved3 = m.classify_target(\\\"M-trip-journal.md\\\", m.known_targets())\\n+    assert (kind3, resolved3) == (\\\"mission\\\", \\\"M-trip-journal\\\")\\n+\\n+\\n+def test_no_prose_token_edges_from_stack_geometry_doc() -> None:\\n+    m = load()\\n+    doc = (ROOT / \\\"holes\\\" / \\\"missions\\\" / \\\"M-stack-geometry.md\\\").resolve()\\n+    edges, excluded = m.parse_doc(doc, m.known_targets())\\n+    bad = [e for e in edges if e[\\\"to\\\"] in PROSE_TOKENS]\\n+    assert not bad, f\\\"prose-token edges emitted: {bad}\\\"\\n+    # every extracted target for this doc is a path-shaped reference\\n+    for e in edges:\\n+        assert \\\"/\\\" in e[\\\"to\\\"] or e[\\\"to\\\"].startswith((\\\"M-\\\", \\\"E-\\\")), e\\n+    # the corpus-level stats must account for excluded prose items\\n+    import json\\n+    stats = json.loads((ROOT / \\\"data\\\" / \\\"mission-crossrefs\\\" / \\\"stats.json\\\").read_text())\\n+    assert \\\"excluded-prose-items\\\" in stats and stats[\\\"excluded-prose-items\\\"] >= 0\\n+    print(f\\\"  M-stack-geometry: {len(edges)} edges, corpus excluded {stats['excluded-prose-items']}\\\")\\n+\\n+\\n+def test_check_fixed_point() -> None:\\n+    r = subprocess.run([sys.executable, str(SCRIPT), \\\"--check\\\"],\\n+                       capture_output=True, text=True, cwd=ROOT)\\n+    assert r.returncode == 0, f\\\"--check failed: {r.stdout} {r.stderr}\\\"\\n+    print(f\\\"  {r.stdout.strip()}\\\")\\n+\\n+\\n+def main() -> int:\\n+    for fn in (test_repo_qualified_target_is_cross_repo,\\n+               test_no_prose_token_edges_from_stack_geometry_doc,\\n+               test_check_fixed_point):\\n+        print(f\\\"{fn.__name__}:\\\")\\n+        fn()\\n+        print(\\\"  ok\\\")\\n+    print(\\\"all regression tests passed\\\")\\n+    return 0\\n+\\n+\\n+if __name__ == \\\"__main__\\\":\\n+    raise SystemExit(main())\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "text",
+        "at": "2026-10-22T06:19:42.915643518Z",
+        "text": "Now run the checks myself: py_compile, tests, --check, and independent probes. Also check working tree clean at this commit (HEAD = 87d4289). Also stats.json content."
+      },
+      {
+        "seq": 9,
+        "type": "tool_use",
+        "at": "2026-10-22T06:19:42.977233842Z",
+        "tools": [
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon5a && python3 -m py_compile scripts/build_mission_crossref_edges.py scripts/build_mission_crossre"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"COMPILE_OK\\ntest_repo_qualified_target_is_cross_repo:\\n  ok\\ntest_no_prose_token_edges_from_stack_geometry_doc:\\n  M-stack-geometry: 9 edges, corpus excluded 7\\n  ok\\ntest_check_fixed_point:\\n  fixed point confirmed: 94 edges\\n  ok\\nall regression tests passed\\nTEST_EXIT=0\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 10,
+        "type": "tool_use",
+        "at": "2026-10-22T06:19:47.761677567Z",
+        "tools": [
+          "run_readonly",
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon5a && python3 -c \" import importlib.util from pathlib import Path spec=importlib.util.spec_from_f",
+          "run_readonly cd /home/joe/code/futon5a && git diff 9d8d699..87d4289 -- holes/missions/M-stack-geometry.md | head -40"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"('cross-repo', 'futon5a/holes/missions/M-stack-geometry.md')\\n('cross-repo', 'another-repo/holes/missions/M-stack-geometry.md')\\nprose-edges: []\\nedges: 9 kinds: ['cross-repo']\\n{\\n  \\\"edge-count\\\": 94,\\n  \\\"edges-by-to-kind\\\": {\\n    \\\"cross-repo\\\": 59,\\n    \\\"excursion\\\": 2,\\n    \\\"mission\\\": 16,\\n    \\\"repo-root\\\": 2,\\n    \\\"section\\\": 1,\\n    \\\"unresolved\\\": 14\\n  },\\n  \\\"excluded-prose-items\\\": 7,\\n  \\\"schema\\\": \\\"futon5a/mission-crossref-stats-v1\\\",\\n  \\\"source-doc-count\\\": 18,\\n  \\\"source-docs\\\": [\\n    \\\"E-EOI-supervision\\\",\\n    \\\"E-aif-stack\\\",\\n    \\\"E-close-S6\\\",\\n    \\\"E-networked-intelligence\\\",\\n    \\\"E-trip-journal-base-camp\\\",\\n    \\\"E-war-machine-qa\\\",\\n    \\\"E-webarxana-as-hinge-log-backend\\\",\\n    \\\"M-a-sorry-enterprise\\\",\\n    \\\"M-eoi-outbox-management\\\",\\n    \\\"M-expressions-of-interest\\\",\\n    \\\"M-hypergraph-operator\\\",\\n    \\\"M-landing-practice\\\",\\n    \\\"M-learning-loop\\\",\\n    \\\"M-recommendation-bindings\\\",\\n    \\\"M-self-improvement-loop\\\",\\n    \\\"M-stack-geometry\\\",\\n    \\\"M-stack-stereolithography\\\",\\n    \\\"M-trip-journal\\\"\\n  ]\\n}\\n\",\"err\":\"\"}}",
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"diff --git a/holes/missions/M-stack-geometry.md b/holes/missions/M-stack-geometry.md\\nindex 1be1d6d..f6ecf6f 100644\\n--- a/holes/missions/M-stack-geometry.md\\n+++ b/holes/missions/M-stack-geometry.md\\n@@ -2010,6 +2010,31 @@ the edge schema (`futon5a/mission-crossref-edge-v1`) carries `from`,\\n `to`, `to-kind`, and `relation` directly mappable to typed futon1a\\n hyperedges.\\n \\n+**Revision (review round 2, same day).** The independent reviewer\\n+(zai-3) reproduced two reference-semantics defects and requested\\n+changes; both are corrected in a follow-up commit, with regression\\n+tests (`scripts/build_mission_crossref_edges_test.py`):\\n+\\n+1. Repo-qualified targets (any path containing `/`) are now classified\\n+   `cross-repo` *before* basename resolution; only bare filenames\\n+   resolve to local `mission`/`excursion`. Previously a foreign\\n+   repository's file collapsed to its local basename and could be\\n+   mis-typed as a local mission edge.\\n+2. Qualifier parentheticals spanning source lines had been split\\n+   per line, emitting prose-continuation words (`analytic`, `and`,\\n+   `candidate`, `embedding`, `futon1a`, `same`) as bogus edge\\n+   targets; blocks are now joined before splitting (on top-level\\n+   `,` and `;`), and any item whose leading token cannot be a\\n+   reference is excluded from the edge list and counted in\\n+   `stats.json` as `excluded-prose-items` instead.\\n+\\n+The corrected artifact is **94 edges from 18 source docs**\\n+(59 `cross-repo`, 16 `mission`, 2 `excursion`, 2 `repo-root`,\\n+1 `section`, 14 `unresolved`), 7 prose items excluded. The earlier\\n+171-edge count was inflated by the per-line splitting defect.\\n+Fixed point preserved (`--check` verifies; second run leaves no\\n+diff). Acceptance item 1 remains unchecked as before.\\n+\\n ---\\n \\n ## Addendum \u2014 Cross-Session Memory Ported into the Mission Doc (2026-04-20)\\n\",\"err\":\"\"}}"
+        ]
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "pending"
+    },
+    "state": "running",
+    "invocation/model": null,
+    "trace-id": null,
+    "result-summary": null,
+    "terminal-message": null,
+    "finished-at": null,
+    "created-at": "2026-10-22T06:19:12.878292695Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

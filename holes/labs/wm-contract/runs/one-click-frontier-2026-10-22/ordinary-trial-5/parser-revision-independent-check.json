@@ -1,0 +1,13 @@
+{
+  "commit": "87d4289289da83a1040f5bf97252870f33ae6378",
+  "regression-exit": 0,
+  "stdout": "test_repo_qualified_target_is_cross_repo:\n  ok\ntest_no_prose_token_edges_from_stack_geometry_doc:\n  M-stack-geometry: 9 edges, corpus excluded 7\n  ok\ntest_check_fixed_point:\n  fixed point confirmed: 94 edges\n  ok\nall regression tests passed\n",
+  "stderr": "",
+  "original-foreign-probe": [
+    "cross-repo",
+    "another-repo/holes/missions/M-stack-geometry.md"
+  ],
+  "prose-tokens": [],
+  "mission-edge-count": 9,
+  "scope": "Independent regression replay only; runtime reviewer separate; no ingestion or production close claimed"
+}
