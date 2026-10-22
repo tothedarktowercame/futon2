@@ -71,19 +71,18 @@
       "resources/wm/cascade-sources"))
 
 (defn default-resolve-revision
-  "Production revision resolver: independently resolve {:repo r :sha ref} to
-  a commit through git, mirroring observation-checks' private
-  resolve-reference. Returns {:repo .. :reference .. :resolved-sha ..} or a
-  typed {:status :missing :kind :unknown-sha ..}. Unit tests inject a
-  resolver that models revision resolution."
+  "Resolve an immutable full commit id. Symbolic refs and abbreviations are
+  refused so later reconstruction cannot move the selection base."
   [{:keys [repo sha]}]
-  (let [{:keys [exit out err]}
-        (sh/sh "git" "-C" (str oc/repo-root "/" repo)
-               "rev-parse" "--verify" "--end-of-options" (str sha "^{commit}"))]
-    (if (zero? exit)
-      {:repo repo :reference sha :resolved-sha (str/trim out)}
-      {:status :missing :kind :unknown-sha :repo repo :sha sha
-       :stderr (str/trim err)})))
+  (if-not (and (string? sha) (re-matches #"[0-9a-f]{40}|[0-9a-f]{64}" sha))
+    {:status :missing :kind :base-not-a-commit :repo repo :sha sha}
+    (let [{:keys [exit out err]}
+          (sh/sh "git" "-C" (str oc/repo-root "/" repo)
+                 "rev-parse" "--verify" "--end-of-options" (str sha "^{commit}"))]
+      (if (and (zero? exit) (= sha (str/trim out)))
+        {:repo repo :reference sha :resolved-sha (str/trim out)}
+        {:status :missing :kind :unknown-sha :repo repo :sha sha
+         :stderr (str/trim err)}))))
 
 (defn- typed-refusal [reason details]
   {:status :refused :reason reason :details details})
@@ -546,7 +545,7 @@
                            :record (:admission record) :derived derived}
       :else {:verified true :digest (:record/digest record)})))
 
-(defn reconstruct
+(defn- reconstruct-with-ports
   "Validate the supplied record, re-consume the pinned declaration BYTES
   (re-reading :path and checking the sha256 pin -- a changed or lying
   declaration fails :declaration-pin-broken), rebuild from the same inputs,
@@ -575,3 +574,12 @@
                         (= (canon record) (canon rebuilt)))
          :expected (:record/digest record)
          :rebuilt (:record/digest rebuilt)}))))
+
+(defn reconstruct
+  "Authoritative reconstruction using production git resolution and C4 reads.
+  Injected ports are refused, not treated as evidence. The private helper is
+  available only for isolated model tests; production callers use this entry."
+  [inputs record]
+  (if (or (contains? inputs :observe) (contains? inputs :resolve-revision))
+    {:verified false :reason :injected-authority-ports-refused}
+    (reconstruct-with-ports inputs record)))

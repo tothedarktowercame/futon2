@@ -96,7 +96,7 @@
       (is (:eligible (:admission record)))
       (is (= [] (:refusals (:admission record))))
       (is (:verified (der/verify-record record)))
-      (is (:verified (der/reconstruct (base-inputs dir (proving-reader {})) record))))
+      (is (:verified (#'der/reconstruct-with-ports (base-inputs dir (proving-reader {})) record))))
     (testing "a tampered body fails digest verification"
       (is (false? (:verified (der/verify-record (assoc record :horizon {:status :declared :value 9}))))))))
 
@@ -410,7 +410,7 @@
         inputs (base-inputs dir (proving-reader {}))
         tampered (assoc (der/build-record inputs) :target "different-target")]
     (is (false? (:verified (der/verify-record tampered))))
-    (is (false? (:verified (der/reconstruct inputs tampered))))))
+    (is (false? (:verified (#'der/reconstruct-with-ports inputs tampered))))))
 
 (deftest changed-declaration-bytes-break-reconstruct-pin
   (let [dir (tmp-dir)
@@ -420,8 +420,8 @@
         _ (spit path (pr-str (assoc (read-string (slurp path)) :horizon-steps 9)))]
     (testing "reconstruct re-consumes the pinned bytes, not the status"
       (is (:verified (der/verify-record record)) "record itself stays consistent")
-      (is (false? (:verified (der/reconstruct inputs record))))
-      (is (= :declaration-pin-broken (:reason (der/reconstruct inputs record)))))))
+      (is (false? (:verified (#'der/reconstruct-with-ports inputs record))))
+      (is (= :declaration-pin-broken (:reason (#'der/reconstruct-with-ports inputs record)))))))
 
 (deftest admission-inconsistency-fails-verification
   (let [dir (tmp-dir)
@@ -452,3 +452,15 @@
       (is (false? (get-in record [:admission :eligible])))
       (is (:verified (der/verify-record record)))
       (is (false? (:verified (der/verify-record forged)))))))
+
+(deftest authoritative-reconstruction-refuses-injected-ports
+  (let [dir (tmp-dir)
+        _ (write-declaration! dir)
+        inputs (base-inputs dir (proving-reader {}))
+        record (der/build-record inputs)]
+    (is (:eligible (:admission record)))
+    (is (= {:verified false :reason :injected-authority-ports-refused}
+           (der/reconstruct inputs record)))
+    (doseq [ref ["HEAD" "main" "ae69f5e7"]]
+      (is (= :base-not-a-commit
+             (:kind (der/default-resolve-revision {:repo "futon2" :sha ref})))))))
