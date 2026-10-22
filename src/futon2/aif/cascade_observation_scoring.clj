@@ -190,6 +190,8 @@
                                                  {:op :score :belief next-q :tau tau
                                                   :target (:target candidate)
                                                   :preference (get-in preference [tau :probabilities])}))]
+                    (when (and (:require-finite-risk? opts) (= :infinite (:risk score)))
+                      (om/refuse! :inadmissible-risk {:candidate (:id candidate) :tau tau}))
                     (recur (inc tau) next-q
                            (conj result (assoc score :tau tau :belief next-q
                                                :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))

@@ -73,7 +73,8 @@
       (refuse! :conflicting-score-law {}))
     (doseq [c candidates] (candidate! c (get-in opts [:pattern-counts (:id c)])))
     (let [ranked (scorer/rank-cascade-actions state candidates
-                    (assoc opts :g-normalization :raw-cumulative :parameter-information-mode :none))]
+                    (assoc opts :g-normalization :raw-cumulative :parameter-information-mode :none
+                                :require-finite-risk? true))]
       (if-not (vector? ranked) ranked
         (let [entries
               (mapv (fn [e]

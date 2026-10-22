@@ -31,6 +31,11 @@
         chain (assoc chain :id :chain)
         ranked (g/compare-at-horizon {:cascade-belief {#{} 1}} [join chain]
                                     (opts 3 {:join counts :chain counts}))]
+    (is (= 1/4 (g/expected-novelty chain counts {#{} 1})))
+    (is (= [1/4 1/4 1/4]
+           (mapv :expected-novelty
+                 (get-in (first (filter #(= :chain (:cascade-id %)) ranked))
+                         [:certificate :parameter-novelty :steps]))))
     (is (vector? ranked) (pr-str ranked))
     (is (= #{3} (set (map :horizon-steps ranked))))
     (doseq [e ranked]
@@ -85,3 +90,11 @@
     (is (= [3 3] (mapv :horizon-steps rs)))
     (doseq [e rs]
       (is (close? (:G-efe e) (reduce + (map :g (get-in e [:certificate :steps]))))))))
+
+(deftest inadmissible-risk-refuses-instead-of-numeric-score
+  (let [options (assoc-in (opts 2 {:join counts})
+                         [:observation-model :class-preference 2]
+                         {:focused 0 :related 1 :unrelated 0 :stop-the-line 0})
+        result (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options)]
+    (is (= :inadmissible-risk (:kind result)) (pr-str result))
+    (is (not (contains? result :G-efe)))))
