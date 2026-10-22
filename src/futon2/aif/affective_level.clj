@@ -146,9 +146,9 @@
                        cold? nil
                        (= :present (:status predecessor))
                        (if (failure? carried-q)
-                         (:reason carried-q)
+                         (or (:reason carried-q) :carried-q-after-unreadable)
                          (when-not carried-q :predecessor-has-no-valence-carry))
-                       :else (:reason predecessor))
+                       :else (or (:reason predecessor) :predecessor-status-unknown))
         redeclared? (some? after-reason)
         q-before (if (or cold? redeclared?) {:pos 0.5 :neg 0.5} carried-q)
         source (cond

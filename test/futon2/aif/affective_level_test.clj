@@ -91,6 +91,13 @@
     (is (= :performed (get-in c [:update :status])))
     (is (close? 7/11 (get-in c [:q-after :pos])))))
 
+(deftest reasonless-predecessor-still-redeclares
+  (let [c (sut/valence-carry {:status :absent} {:beta-posterior 1.0})]
+    (is (= {:cold-start :redeclared :after :predecessor-status-unknown}
+           (:source c)))
+    (is (= half (:q-before c)))
+    (is (= :performed (get-in c [:update :status])))))
+
 (deftest valence-carry-crosses-the-real-sealed-q6-stream
   (let [dir (str (Files/createTempDirectory "r20-valence-carry-" (make-array java.nio.file.attribute.FileAttribute 0)))
         precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
