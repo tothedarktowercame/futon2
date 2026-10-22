@@ -1,0 +1,43 @@
+{
+  "task": "Find the supported production recovery for meta-retry child wm-requeue-7-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc (stale-runner-source) without a new ordinary click, gate bypass, or hand-edited accepted state.",
+  "verdict": "NO supported production resume exists for this exact state. A code reload is necessary but not sufficient; one small, principled code change is required. Details and file:line evidence below.",
+  "facts": [
+    {
+      "point": "How the child was launched (retained authoritative retry request path)",
+      "evidence": "futon3c/src/futon3c/wm/runner_service.clj:995-1008 — close-click! pops the !post-release-retries queue (enqueued by enqueue-post-release-retry!, runner_service.clj:71-73, wired as :queue-retry-fn at runner_service.clj:98) and calls click! with :accepted-click-id (:retry-click retry), :idempotency-key (str \"meta-retry/\" retry-click), :acceptance-payload retry, :meta-repair-retry {injury-id repair-id attempt patch-sha retry-click}. The retry port that produced the queue entry is meta_self_heal_adapters.clj:813-825 (:repair-retry-fn, 'queued-after-parent-release'). The child id was minted by retry-click-id (meta_self_heal_adapters.clj:727-738).",
+      "implication": "The in-memory queue entry is consumed; the durable remnants are the child's acceptance file (futon3c/data/wm-click-acceptances/click-wm-requeue-7-4-repair_239cf988....edn, status :failed) and idempotency file (.../idempotency/<sha256 of key>.edn, payload-sha256 453d6e72...)."
+    },
+    {
+      "point": "Idempotency DOES prevent rerunning the same child",
+      "evidence": "futon3c/src/futon3c/wm/runner_service.clj:1125-1130 — click! with an existing idempotency file and matching payload-sha256 returns (select-keys (click-status prior) [:click-id :started-at :status]) WITHOUT starting a worker; prior status is :failed. Confirmed live: the idempotency file exists with that exact payload-sha256. A different payload under the same key throws :wm-click-idempotency-conflict (409)."
+      "implication": "Relaunching wm-requeue-7-4-repair/... under its key is refused-by-design; there is no 'retry a failed idempotent click' entry point anywhere in runner_service.clj."
+    },
+    {
+      "point": "Parent coordinator resume is currently a no-op",
+      "evidence": "futon2/src/futon2/aif/meta_repair_coordinator.clj:239-279 — coordinate-queued-retry only mints the next requeue when (ledger/pending-requeue history injury-id) is truthy; pending-requeue (futon2/src/futon2/aif/meta_injury_ledger.clj:443-446, 94-103) requires an ingested :retry-inconclusive observation whose :retry-click equals the enacted entry's click. The ledger's last entry for injury/d755c886... is ordinal 50, state :enacted, retry-click wm-requeue-7-4-repair/... (verified in /home/joe/code/futon2/data/wm-meta-injuries/ledger.edn). No such observation exists because the child threw at refuse-on-runner-source-drift! (futon2/src/futon2/aif/full_loop_runner.clj:8199, throw at 680-699) BEFORE persist-run-record!, and ledger ingestion only runs from a persisted run record (full_loop_runner.clj:8331-8360 -> meta_injury_store.ingest-record-file!, futon2/src/futon2/aif/meta_injury_store.clj:136-151 -> terminal/integrate, meta_terminal_injury.clj:246-260, retry-inconclusive at 189/236).",
+      "implication": "Any future dedicated META self-heal coordinate call replays recorded receipts (:recorded, meta_repair_coordinator.clj:189-212), finds no pending requeue, and returns {:status :awaiting-retry} — exactly the frozen parent acceptance state. The chain is observation-starved, not authorization-starved."
+    },
+    {
+      "point": "Does normal action selection rerun?",
+      "evidence": "futon2/src/futon2/aif/full_loop_runtime.clj:490-493,546 — run-opportunity! arbitrates active META injuries before any ordinary policy field; an active injury consumes the opportunity. A retry child itself DOES rerun ordinary selection (full_loop_runtime.clj:505,546: retry -> attributable-retry-readiness -> run-ordinary-opportunity!, ordinary-selection runs, not ration-charged because close-click! dissoc'd :ordinary-click/issue! at runner_service.clj:1000).",
+      "implication": "Repairing the resume path does not need a new ordinary click: the meta-retry child is an unrationed in-process click, and META self-heal route clicks report :ordinary-selection-called? false."
+    },
+    {
+      "point": "What the drift refusal is and the supported reload authority",
+      "evidence": "futon2/src/futon2/aif/full_loop_runner.clj:639-699 — runner-source-drift compares sha256 captured at namespace load vs canonical disk for full_loop_runner.clj (and the required scope); drift refuses before the attempt so a stale runner cannot judge it. Loaded 9174b3c2... vs canonical acf4080b... (accepted.json error-data). The production reload authority is futon3c.wm.code-identity/load-file-recorded! (futon3c/src/futon3c/wm/code_identity.clj:52), the exact function the enact! port uses to reload changed sources (meta_self_heal_adapters.clj:752-757,773).",
+      "implication": "Reload is a legitimate, recorded operation — but after reload there is still no supported entry point to rerun the failed child (idempotency, fact 2) and nothing for the coordinator to observe (fact 3). Reload alone unblocks FUTURE clicks, not this one."
+    },
+    {
+      "point": "Requeue budget state (constrains any repair)",
+      "evidence": "ledger.edn entry 50 carries :requeues 3 and the ledger :retry-limit 3; append-requeue (meta_injury_ledger.clj:474-500+) appends :abandoned/:retry-budget-spent when (>= requeues retry-limit) UNLESS other-open-injury (meta_injury_ledger.clj:104-115) explains the inconclusive observation — entry 50's own :requeue-cause was :other-open-injury for injury/9c998f2e....",
+      "implication": "Even after the repair below, the coordinator may legitimately terminate the repair as :abandoned/:retry-budget-spent if no other open injury explains the inconclusive child. That is a typed terminal ledger outcome, not synthetic success, and must be accepted if it occurs."
+    }
+  ],
+  "recommendation": {
+    "necessary_first_step": "Reload the drifted runner namespaces in the serving JVM through the recorded reload authority — futon3c.wm.code-identity/load-file-recorded! on each drifted source (canonical sha acf4080b...), or a serving-JVM restart from a separate session per AGENTS.md restart-safety. Do this from a separate shell/session, never from the live agency-routed session.",
+    "smallest_real_repair": "Make a service-failed meta-retry child ledger-observable so the existing coordinator requeue loop can proceed. Concretely: in coordinate-queued-retry (futon2/src/futon2/aif/meta_repair_coordinator.clj:239-279), when pending-requeue is nil, consult the child click's durable futon3c acceptance state (via a new read-only port, e.g. :retry-click-status-fn backed by futon3c.wm.runner-service click-status / the acceptance EDN file); if the child is durably :failed with outcome :service-failed, append the :retry-inconclusive observation for that retry-click (the same ledger/append-observation meta_terminal_injury.clj:189-241 performs) instead of returning :awaiting-retry. Then one more dedicated META self-heal click (unrationed, :ordinary-selection-called? false) resumes the transaction — invoke-once replays recorded receipts, never redispatching author/review/enact — and coordinate-queued-retry either mints wm-requeue-8-4-repair/... or appends the typed :retry-budget-spent abandonment. Include a test that constructs exactly this state (enacted entry + durably failed child, no run record) and shows the observation being appended against the real ledger, per the workspace check-habit rule.",
+    "not_needed": "No new ordinary click, no gate bypass, no hand-edit of accepted.json / acceptance EDN / ledger. The acceptance and ledger files stay untouched; the repair adds a production observation path, it does not rewrite history.",
+    "open_risk": "If no other open injury exists at resume time, the repair chain ends :abandoned/:retry-budget-spent (requeues 3 = retry-limit 3). That is a real terminal state and should be reported to Joe as such rather than routed around."
+  },
+  "discovery-scope": "read-only; no clicks, reloads, code edits, or dispatches were performed."
+}

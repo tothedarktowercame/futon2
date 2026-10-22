@@ -1,0 +1,25 @@
+{
+  "agent": "zai-8",
+  "artifacts": [
+    {
+      "path": "resume-dispatch.json",
+      "sha256": "4ac871df06c15c40ff2db256c4a76c5d4a65085e6d46272a1b271801f1aad497"
+    },
+    {
+      "path": "resume-discovery.json",
+      "sha256": "1e5af224e786d17008af8b2867b101c53a7de4dfe195ee0c521adb65f9353970"
+    },
+    {
+      "path": "resume-terminal.json",
+      "sha256": "ece7742f2943d193383012af58d7f8d59db8c0325bd26aefc19d1ac18f1c1569"
+    },
+    {
+      "path": "entry-frontier-manifest.json",
+      "sha256": "dae33e16185e0195209f341f805112d79f337e6781edf5276f8d1cbc4511f919"
+    }
+  ],
+  "job_id": "invoke-1792638385207-2163-3612520d",
+  "phase": "resume",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}
