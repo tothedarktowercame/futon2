@@ -1,0 +1,47 @@
+{
+  "status": "integration-held",
+  "reviewed_commit": "4dae9104e57c4331f1e1fd67f79f76d9c38b7c3c",
+  "tests": 3,
+  "assertions": 44,
+  "failures": 2,
+  "errors": 0,
+  "failing_assertions": [
+    "production deposit root unchanged",
+    "production sealed ledger unchanged"
+  ],
+  "functional_assertions": "passed",
+  "clj_kondo": {
+    "exit": 2,
+    "errors": 0,
+    "warnings": 3,
+    "note": "pre-existing untouched lines"
+  },
+  "check_parens_exit": 0,
+  "log_sha256": "736abf56cabed4ea93e6bdcb4ac4783fe8feb32e589b024f305b5802bc860ead",
+  "observation": "Production ledger advanced from52 to56 during run; new source temp paths differ from all this review run phase-event paths. Concurrent writer attribution pending. No hand edits or rollback performed.",
+  "review_record_roots": [
+    "/tmp/wm-run-record-test-4613187528163940557",
+    "/tmp/wm-total-run-record-test-9217964069553824538",
+    "/tmp/wm-isolation-record-test-2734026164668180699"
+  ],
+  "new_production_record_roots": [
+    "/tmp/wm-run-record-test-8568171937566497819",
+    "/tmp/wm-total-run-record-test-7176804005292681155"
+  ],
+  "concurrent_processes": [
+    {
+      "pid": 2041286,
+      "cwd": "/home/joe/worktrees/futon2/zai8-tripwire-debugger",
+      "command": "clojure.main -m cognitect.test-runner -n futon2.aif.full-loop-runner-test",
+      "fixture": "does not redirect default-ledger-path at inspection"
+    },
+    {
+      "pid": 2042778,
+      "cwd": "/home/joe/worktrees/futon2/wm-live-store",
+      "command": "clojure.main -m cognitect.test-runner -n futon2.aif.full-loop-runner-test",
+      "head": "4dae9104e"
+    }
+  ],
+  "project_trials_remaining": 6,
+  "clicks_issued_this_turn": 0
+}

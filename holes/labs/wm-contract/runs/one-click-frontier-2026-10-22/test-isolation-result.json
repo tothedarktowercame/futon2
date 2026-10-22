@@ -1,0 +1,32 @@
+{
+  "result": "isolation repaired and proven; production stores byte-for-byte unchanged",
+  "worktree": "/home/joe/code/futon2-zai2-isolation",
+  "branch": "zai-2/test-isolation-ledger",
+  "commit": "4dae9104e",
+  "root_cause": "hermetic_repair_fixture.clj redef'd meta-injury-store/default-root but NOT meta-self-heal-production/default-ledger-path or default-transaction-path. Both are def vars read dynamically inside the terminal-publication sink thunks (full_loop_runner.clj ~8348-8372), so a with-redefs redirect works; nothing captures them at namespace load (checked full_loop_runner.clj, full_loop_runtime.clj:501-504, and runner/config — no load-time capture). The deftests compounded it by passing only :run-record-dir, so raw-opts fell through to the absolute production defaults.",
+  "changes": {
+    "test/futon2/aif/hermetic_repair_fixture.clj": [
+      "require futon2.aif.meta-self-heal-production",
+      "new defs production-meta-injury-ledger-path and production-meta-injury-transaction-path",
+      "with-hermetic-stores now with-redefs meta-self-heal/default-ledger-path and default-transaction-path to temp paths under the temp repair root",
+      "after the suite, asserts production deposit root, ledger.edn, and transaction.edn byte-for-byte unchanged (production-file-set: length + content)"
+    ],
+    "test/futon2/aif/full_loop_runner_test.clj": [
+      "run-opportunity-surfaces-stable-run-identity: explicit temp :meta-injury-root + :meta-injury-ledger-path",
+      "every-terminal-wrapper-category-persists-a-run-record: same explicit options in run-with",
+      "new deftest terminal-publication-ingests-into-isolated-stores-only: executes the REAL close -> deposit -> locked ingest path with a stubbed run-opportunity-core! stop-line failure; asserts :meta-terminal-injury-ingest {:status :appended, :durability :atomic-locked-one-form, :transition :open}, temp ledger.edn parsed with exactly 1 :wm/meta-injury-transition-v1 entry in :open, deposit head-path under the temp injury root only, and production root/ledger/transaction unchanged"
+    ]
+  },
+  "guard_does_not_mask_execution": "the fixture runs the tests first and only then asserts; the new deftest itself drives run-opportunity! to a real :appended durable append into a temp ledger (phase log shows the full meta-injury-deposit and meta-terminal-injury-ingest phases executing with ordinal-bearing entries), so the sinks genuinely run rather than being stubbed silent.",
+  "validation": {
+    "clj_kondo": "0 errors (3 pre-existing warnings in full_loop_runner_test.clj, untouched lines)",
+    "check_parens": "OK on both files (futon4/dev/check-parens.el)",
+    "tests": "clojure -M:test -n futon2.aif.full-loop-runner-test -v run-opportunity-surfaces-stable-run-identity -v every-terminal-wrapper-category-persists-a-run-record -v terminal-publication-ingests-into-isolated-stores-only -> Ran 3 tests, 44 assertions, 0 failures, 0 errors; clojure -M:test -n futon2.aif.hermetic-repair-fixture-test -> Ran 2 tests, 10 assertions, 0 failures, 0 errors",
+    "production_preservation": "sha256 of data/wm-meta-injuries/ledger.edn (17f2b935...876e65), transaction.edn (df74eac2...20ad3f), wm-full-loop-phases.edn.log (fa701322...de4428), file count (1271) and aggregate sha of all files under wm-meta-injuries identical before and after the runs (diff empty)"
+  },
+  "not_done_here": "retiring the three already-admitted test injuries (1bc0efe3, 9f1d0c67, ff6e0452, ledger ordinals 37-39 plus observations 40-49) remains open: no existing transition can retract them and hand-editing breaks the seal. The structural :retracted-transition proposal from ledger-contamination-result.json still needs Joe/packet-owner review. This fix only stops the source: future suite runs cannot re-pollute.",
+  "notes": [
+    "tests ran in the isolated sibling worktree; the fixture/test edits write only to /tmp temp roots",
+    "no live writes, no Trials, no JVM loads; whole full-loop runner suite deliberately not run — only the three affected/proof deftests plus the hermetic fixture namespace"
+  ]
+}
