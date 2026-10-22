@@ -2,7 +2,10 @@
 """Capture a serving debugger boundary without continuing or rerunning it.
 
 Usage: wm_capture_held_section.py ROOT RUN_ID LABEL
-The saved EDN must round-trip before capture succeeds. A result is evidence
+The saved EDN must round-trip before capture succeeds. Keywords are encoded
+as #wm/keyword [namespace name]; decode with a reader calling keyword on that
+pair. This preserves runtime-created keywords whose printed names EDN rejects.
+A result is evidence
 of a held computation, not automatically a successful mission effect.
 """
 import argparse
@@ -48,11 +51,21 @@ def main():
                   :result value :captured-at (str (java.time.Instant/now))
                   :source (select-keys (futon2.aif.full-loop-runner/runner-source-drift)
                            [:runner/source-check :runner/loaded-sha256 :runner/canonical-sha256])}}
-          text (pr-str record)
-          _ (when-not (= record (clojure.edn/read-string text))
+          encode (fn encode [x]
+                   (cond
+                     (keyword? x) (tagged-literal 'wm/keyword [(namespace x) (name x)])
+                     (map? x) (into {{}} (map (fn [[k v]] [(encode k) (encode v)])) x)
+                     (set? x) (set (map encode x))
+                     (vector? x) (mapv encode x)
+                     (sequential? x) (doall (map encode x))
+                     :else x))
+          text (pr-str (encode record))
+          decoded (clojure.edn/read-string
+                    {{:readers {{'wm/keyword (fn [[n k]] (keyword n k))}}}} text)
+          _ (when-not (= record decoded)
               (throw (ex-info "Held value is not round-trippable EDN" {{:run-id rid}})))
           bytes (.getBytes text "UTF-8")
-          result {{:run-id rid :phase (:phase stop) :has-value (:present value)
+          result {{:encoding "wm/keyword-v1" :run-id rid :phase (:phase stop) :has-value (:present value)
                   :path {q(str(data))}
                   :sha256 (futon2.aif.interpretation-evidence/sha256 bytes)}}]
       (with-open [out (java.util.zip.GZIPOutputStream.

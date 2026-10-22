@@ -1,0 +1,11 @@
+{
+  "response": {
+    "rc": 0,
+    "out": "{:ok true, :value {:encoding \"wm/keyword-v1\", :run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :phase :selection, :has-value false, :path \"/home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/selection-stop.edn.gz\", :sha256 \"a435c140e575291cdcb64f9e71a9eea0b7bbd02589f1821dcb10893cc71a9918\"}}",
+    "err": ""
+  },
+  "repository_heads": {
+    "futon2": "3f3a992796828316bf7e3a1fb4b59e05a4b274cf",
+    "futon3c": "e65ef06be4e797d69645667ee6d888833e5e3b35"
+  }
+}

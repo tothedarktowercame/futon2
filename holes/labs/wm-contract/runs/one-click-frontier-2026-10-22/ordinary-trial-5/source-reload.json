@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:path \"scripts/futon2/report/war_machine.clj\", :stable? true, :schema 1, :dirty? false, :serving-pid 27067, :readable? true, :content-sha256 \"5f9f0fb0bbb08808d675afac57e2bf6d9bc4b3715edd34fe8113990648685f5b\", :loaded-at \"2026-10-22T05:02:14.690030735Z\", :tree-sha \"5ab123017c47766566f9fac0b75c6360794b0ba6\", :git-head \"3f3a992796828316bf7e3a1fb4b59e05a4b274cf\"}}",
+  "err": ""
+}
