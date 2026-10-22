@@ -10,14 +10,13 @@
            [java.nio.file.attribute FileAttribute]))
 
 (def checkpoints [:claim :author :review :enact])
-(def default-ledger-path
-  "/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn")
-(def default-transaction-path
-  "/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn")
-(def default-diagnosis-root
-  "/home/joe/code/futon2/data/wm-meta-injuries/diagnoses")
-(def default-acceptance-root
-  "/home/joe/code/futon2/data/wm-meta-injuries/acceptances")
+;; All live store defaults derive from the single live root in
+;; meta-injury-store (fresh store opened 2026-10-22; the pre-2026-10-22
+;; data directory is a frozen archive that no production path reads or writes).
+(def default-ledger-path (str store/default-root "/ledger.edn"))
+(def default-transaction-path (str store/default-root "/transaction.edn"))
+(def default-diagnosis-root (str store/default-root "/diagnoses"))
+(def default-acceptance-root (str store/default-root "/acceptances"))
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 
 (defn- receipt-bytes [receipt]

@@ -72,7 +72,7 @@
       (is (= :transition/invalid (:reason forged)))
       (is (some #{:requeue/evidence} (:defects forged)))))
 
-  (testing "the production ledger remains valid"
-    (let [production (edn/read-string
-                      (slurp "/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn"))]
-      (is (= :valid (:status (ledger/validate-ledger production)))))))
+  (testing "the archived pre-2026-10-22 ledger remains valid and is read-only here"
+    (let [archived (edn/read-string
+                    (slurp "/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn"))]
+      (is (= :valid (:status (ledger/validate-ledger archived)))))))

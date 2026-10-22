@@ -13,7 +13,11 @@
            [java.nio.file.attribute FileAttribute]
            [java.util UUID]))
 
-(def default-root "/home/joe/code/futon2/data/wm-meta-injuries")
+;; Live store root, fresh from 2026-10-22 (Joe: the pre-2026-10-22 historical
+;; record is ignored and archived in place under data/, with an ARCHIVED.md
+;; pointing here). All live meta-injury defaults (deposit root, ledger,
+;; transaction, diagnosis, acceptance) resolve under this single definition.
+(def default-root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
 
 (def eof-token (Object.))
 (defn- refusal [reason & [details]]

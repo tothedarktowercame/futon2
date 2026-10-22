@@ -8,7 +8,11 @@
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
-(def canonical-root "/home/joe/code/futon2/data/wm-meta-injuries")
+(def canonical-root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
+
+(def archived-root
+  "Frozen 2026-10-22 (see data/wm-meta-injuries/ARCHIVED.md); read-only."
+  "/home/joe/code/futon2/data/wm-meta-injuries")
 
 (def live-run-record
   "L1, 2026-10-19: a real abstained click record, read only."
@@ -23,6 +27,7 @@
 
 (deftest deposit-under-fixture-does-not-touch-canonical-store
   (let [before (file-set canonical-root)
+        archived-before (file-set archived-root)
         seen (atom nil)]
     (runner-fixture/with-hermetic-traces
       (fn []
@@ -36,6 +41,8 @@
             (is (string? (:head-path result)))
             (is (.startsWith ^String (str (:head-path result))
                              ^String meta-injury-store/default-root))))))
-    (testing "the canonical injury store is byte-for-byte the same file set afterwards"
+    (testing "the canonical live injury store is byte-for-byte the same file set afterwards"
       (is (= before (file-set canonical-root))))
+    (testing "the frozen archive is untouched"
+      (is (= archived-before (file-set archived-root))))
     (is (some? @seen) "deposit was exercised")))
