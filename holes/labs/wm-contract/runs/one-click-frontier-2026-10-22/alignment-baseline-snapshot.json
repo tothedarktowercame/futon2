@@ -1,0 +1,25 @@
+{
+  "agent": "zai-8",
+  "artifacts": [
+    {
+      "path": "alignment-baseline-dispatch.json",
+      "sha256": "e3b9dc40a0347333d95a832bc174689a449a2ee7af42d27cd255fec2abcdd98a"
+    },
+    {
+      "path": "alignment-baseline/alignment-baseline-result.json",
+      "sha256": "af1569f124fc3e8b13d8c113c973eda823fefa0b4127d97b1d120289da8fbf14"
+    },
+    {
+      "path": "alignment-baseline-terminal.json",
+      "sha256": "f6245e7cca6322ae886a6b4c7f82e7b1830a5d1a49d05b694f8565a79bbced9c"
+    },
+    {
+      "path": "alignment-score-proposal.json",
+      "sha256": "3bf72ff2f8a2fe692e56dfdf6e8ab7b582abe64d44563bba9923359aaddbf697"
+    }
+  ],
+  "job_id": "invoke-1792640348262-2214-2498d945",
+  "phase": "alignment-baseline",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

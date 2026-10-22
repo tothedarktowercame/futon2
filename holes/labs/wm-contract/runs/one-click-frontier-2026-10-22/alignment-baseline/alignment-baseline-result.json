@@ -1,0 +1,56 @@
+{
+  "commands-run": [
+    "git -C futon2|futon3c|mathlib4 rev-parse HEAD  -> pins.txt",
+    "cp futon3c/holes/labs/M-wm-wiring/{r20-field-flow.edn,r20-lean-edges.edn} -> artifact; futon2 pin in the copy updated to bf5190475250ca2ef7fecf1aa9af6beb1b396738 (only change)",
+    "cd /home/joe/code/mathlib4 && lake build DarkTower.WarMachine.R20Witness  # staleness check only; already current",
+    "cd /home/joe/code/mathlib4 && lake env lean DarkTower/WarMachine/R20WitnessExport.lean > r20-lean-edges.exported.edn  # export captured in artifact (script r20-lean-edges.sh only diffs; identical to committed spec)",
+    "cd /home/joe/code/futon3c && clojure -M -m futon3c.diagramprover.r20-witness <map-copy> <edges-copy> R20WitnessFuton2.generated.lean  # own JVM, no shared loads",
+    "cd /home/joe/code/mathlib4 && lake env lean <artifact>/R20WitnessFuton2.generated.lean  # #eval verdicts, exit 0"
+  ],
+  "pins": {
+    "futon2": "bf5190475250ca2ef7fecf1aa9af6beb1b396738",
+    "futon3c": "36fb2c74025fdf8fbb89eab128c2078f03351805",
+    "mathlib4": "e8fb05451bd9aa48b415a47b14f8ef937a372a56",
+    "r20-lean-source-commit": "719e4a3e9c12795dd2f0dcf8aedc92fc327395bf",
+    "map-copy-sha256": "0894ccc9ae1041494f2ea62cea6581362450ba280cfd759e3cb1d540b426a949",
+    "generated-witness-sha256": "1af8b8e305664cdb6f281a651e32a2f5bdd04cfd5880d0979a7560bc852a8ae4",
+    "pinned-at": "2026-10-22T03:40:18Z"
+  },
+  "artifacts": [
+    "pins.txt",
+    "r20-field-flow.pinned.edn (copy; only the futon2 source pin changed)",
+    "r20-lean-edges.edn (copy of committed edge spec)",
+    "r20-lean-edges.exported.edn + r20-lean-edges.export.stderr.log (fresh Lean export; byte-identical to committed spec)",
+    "generate.stdout.log",
+    "R20WitnessFuton2.generated.lean",
+    "lean-check.stdout.log / lean-check.stderr.log",
+    "alignment-baseline-result.json"
+  ],
+  "per-edge-results": [
+    {"edge": "habitToSelectionHabit", "chains": 0, "verdict": false, "cause": "unmapped: no boxes in the field-flow map for enactment_habit.clj#fold or #masses (the edge's only source sites)"},
+    {"edge": "selectionToPrecisionHabit", "chains": 1, "hops-confirmed": [true, true], "verdict": true, "chain": "policy.clj#selection-candidate -> policy_precision_carry.clj#family -> policy_precision_carry.clj#advance"},
+    {"edge": "selectionToPrecisionG", "chains": 1, "hops-confirmed": [true, true], "verdict": true, "chain": "policy.clj#selection-candidate -> policy_precision_carry.clj#family -> policy_precision_carry.clj#advance"},
+    {"edge": "inferenceToPrecisionF", "chains": 1, "hops-confirmed": [true], "verdict": true, "chain": "policy_precision_carry.clj#retrospective-f -> policy_precision_carry.clj#advance"},
+    {"edge": "strategicFocusToClassPreference", "chains": 1, "hops-confirmed": [false, false], "verdict": false, "cause": "chain exists (focus_receipt.clj#decision-focus -> meta_live_outer_selector.clj#selector -> cascade_shape_g.clj#class-emission-model) but BOTH hops unconfirmed: the heuristic checker did not positively find the declared writes/reads at those sites at pin bf519047. Pre-existing at the old pin too (b6d557aa) — not a regression from the pin bump, but an open obligation.", "note": "the Lean docstring also states class-emission-model assigns :target-class without reading focus at the pin, so no confirmed chain is expected yet"},
+    {"edge": "selectionToClassPreference", "chains": 1, "hops-confirmed": [true], "verdict": true, "chain": "observation_model.clj#evaluate -> apparatus_certificates.clj#class-preference-row"},
+    {"edge": "classPreferenceToSelectionG", "chains": 1, "hops-confirmed": [true], "verdict": true, "chain": "cascade_shape_g.clj#class-emission-model -> observation_model.clj#evaluate"},
+    {"edge": "interoceptionToSelectionG", "chains": 0, "verdict": false, "cause": "unwitnessable by design: edge has empty source-sites; no futon2 code treats machine-internal state as an observation modality (R20Interoception), and the map has no interoception boxes"}
+  ],
+  "numerator-denominator": {"witnessed": 5, "total-lean-edges": 8, "expression": "5/8"},
+  "run-identity-coverage": {
+    "scope": ":r20/field-identity in the field-flow map (21 scoped fields)",
+    "present": 1,
+    "absent": 20,
+    "only-present-field": "[:jobs {:record :model-usage}] — :id-paths {run [:jobs :* :run-id], click [:jobs :* :click-id]}, witness-when [[:jobs :* :status] :complete]",
+    "reading": "the Lean witness layer is deliberately not about run identity (R20Witness docstring: run identity is R20Graph 'Wired', which needs run ids the Clojure fields do not carry yet)"
+  },
+  "unmapped-or-new-obligations": [
+    "habitToSelectionHabit: enactment_habit.clj (fold/masses) has no boxes in the map — the habit-counts producer side is entirely unmapped (see NOTE-r20-habit-counts-2026-10-22).",
+    "interoceptionToSelectionG: no Clojure site exists; structural gap, needs R20Interoception work in futon2 before mapping.",
+    "strategicFocusToClassPreference: chain is mapped but unconfirmed at both hops (decision-focus write of :focus, selector read of :focus / write of :scorer-class at the pinned source). Either the map's declarations drift from the pinned code or the heuristic occurrence check cannot see the access shape — needs a human/L4 look before treating the edge as witnessed.",
+    "No new obligations appeared from the pin bump: verdict vector is byte-for-byte the same as the prior baseline verdict (R20WitnessFuton2.verdict.txt, generated at futon2 b6d557aa / mathlib4 24655b3396)."
+  ],
+  "baseline-comparison": "Reproduces the prior committed baseline exactly (same 5/8, same per-edge booleans) after bumping only the futon2 source pin b6d557aa -> bf519047. The alignment is stable across that span of futon2 commits.",
+  "trust-boundary": "This baseline proves, per Lean edge, that the Clojure source at the pinned commit contains a confirmed writer->reader chain of the required field type between the edge's endpoint sites, as judged by the Lean checker over a generated witness. The source-extraction side is HEURISTIC: the field-flow checker greps/occurrence-matches declared field accesses in the materialized pinned sources (wiring/conformance {:heuristic? true}); it does not evaluate the Clojure, does not model control flow, aliasing beyond the declared record-aliases, transitive dataflow through unlisted vars, or dynamic dispatch beyond the documented 'name dispatch-value' form. Unconfirmed hops are reported as unconfirmed, never silently accepted. Nothing here is a proof of Clojure semantics generally, and nothing here observes actual live dataflow or runtime values: it is a static, commit-pinned structural alignment between the Lean R20 graph and futon2 source text. Run-identity ('Wired') is out of scope and separately reported above.",
+  "scope-notes": "No canonical witness/map overwritten (all outputs under alignment-baseline/), no production sources edited, no full builds (single targeted lake build staleness check + two single-file lean invocations), no test suites, no shared JVM loads, no clicks, no commits, no dispatches."
+}

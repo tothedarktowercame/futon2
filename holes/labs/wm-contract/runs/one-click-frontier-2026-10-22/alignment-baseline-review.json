@@ -1,0 +1,51 @@
+{
+  "reviewer": "codex-11",
+  "hashes_verified": true,
+  "map_change_only_source_pin": true,
+  "lean_output_edges": 8,
+  "lean_output_true": 5,
+  "identity_scope": "1/21 declared fields in copied map, conditional model-usage identity; not observed runtime coverage or proven exhaustive Wired denominator",
+  "live_route_caveat": "Three true precision-related edges reach policy_precision_carry/advance, which has no production caller in prior live-route audit. Structural score must not be interpreted as operational completeness.",
+  "files": [
+    {
+      "path": "alignment-baseline/R20WitnessFuton2.generated.lean",
+      "sha256": "1af8b8e305664cdb6f281a651e32a2f5bdd04cfd5880d0979a7560bc852a8ae4"
+    },
+    {
+      "path": "alignment-baseline/alignment-baseline-result.json",
+      "sha256": "af1569f124fc3e8b13d8c113c973eda823fefa0b4127d97b1d120289da8fbf14"
+    },
+    {
+      "path": "alignment-baseline/generate.stdout.log",
+      "sha256": "8cbdc222f5b503faea901e5780c522c6180d39b4d8b8a6effe3c7204e6f9d91b"
+    },
+    {
+      "path": "alignment-baseline/lean-check.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "alignment-baseline/lean-check.stdout.log",
+      "sha256": "8057db3264380482608fa67039368d173068601a25441db7d02f7c46410cf9e2"
+    },
+    {
+      "path": "alignment-baseline/pins.txt",
+      "sha256": "7919bbded79027192c2d5a114707280c4396e60deb13dce650f1428eb5f5e9e8"
+    },
+    {
+      "path": "alignment-baseline/r20-field-flow.pinned.edn",
+      "sha256": "0894ccc9ae1041494f2ea62cea6581362450ba280cfd759e3cb1d540b426a949"
+    },
+    {
+      "path": "alignment-baseline/r20-lean-edges.edn",
+      "sha256": "fd37b9982129a86391a24fd1c1624be3f47324b83741476ae4caafe30605a9bd"
+    },
+    {
+      "path": "alignment-baseline/r20-lean-edges.export.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "alignment-baseline/r20-lean-edges.exported.edn",
+      "sha256": "fd37b9982129a86391a24fd1c1624be3f47324b83741476ae4caafe30605a9bd"
+    }
+  ]
+}
