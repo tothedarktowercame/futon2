@@ -87,11 +87,13 @@
   (let [base {:E {"a" 1.0 "b" 2.0}
               :G {"a" 0.0 "b" 1.0}
               :F {:status :absent}
-              :prior {"a" (/ 1.0 (+ 1.0 (Math/exp -1.0)))
-                      "b" (/ (Math/exp -1.0) (+ 1.0 (Math/exp -1.0)))}
+              ;; softmax(ln E - G/beta) = softmax [0, ln 2 - 1]
+              :prior {"a" (/ 1.0 (+ 1.0 (* 2.0 (Math/exp -1.0))))
+                      "b" (/ (* 2.0 (Math/exp -1.0)) (+ 1.0 (* 2.0 (Math/exp -1.0))))}
               :posterior {:status :absent}
               :beta-prior 1.0
               :beta-posterior {:status :absent}}]
+    (is (empty? (:failures (sut/precision-conformance base))))
     (is (some #{:prior-not-softmax}
               (:failures (sut/precision-conformance (assoc-in base [:prior "a"] 0.1)))))
     (is (some #{:beta-prior-not-positive}
