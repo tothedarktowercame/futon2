@@ -1,0 +1,40 @@
+{:prefix-unchanged true,
+ :box-count 1,
+ :schema :wm/frozen-sections-verification-v1,
+ :stages
+ [:selected
+  :materialized
+  :compiled
+  :constructed
+  :wired
+  :dispatch-prepared],
+ :tests
+ [{:namespace futon2.aif.wm.compiled-cascade-construction-test,
+   :tests 2,
+   :assertions 23,
+   :failures 0,
+   :errors 0}
+  {:namespace futon2.aif.wm.cascade-continuation-test,
+   :tests 5,
+   :assertions 17,
+   :failures 0,
+   :errors 0}
+  {:namespace futon2.aif.wm.cascade-runner-seam-test,
+   :tests 7,
+   :assertions 70,
+   :failures 0,
+   :errors 0}],
+ :digests
+ ["c351c2f9e8731d2e4782ca9d0199554f8bca908b759506da8c57b0747ad38a3e"
+  "7e992c263fdd113ded4e7bfb764e593aafcd9a09fd7452e13b3bb3768b3face4"
+  "db6c8c4d86d1f43517519a4c783527835a6694172e030b1f4be686864c7558d4"
+  "3d6662e8cd95d2f95394788e5354dc4e625b52913477e01e54c5b00629951e69"
+  "1074a512ff7567ad4931d51fe68c4c1502cac6f6ee979a61dee4a943dc0f8429"
+  "537156dbae875126efd8046839fcc4b31c682bfc66cfdd38a17ed36503c9ccc0"],
+ :operation :declare-mission-lifecycle-state,
+ :wiring-status :wired,
+ :task-executed false,
+ :completed-restart-reused true,
+ :completion-status :unchecked,
+ :policy-hole-count 0,
+ :pattern "futon-theory/mission-lifecycle"}

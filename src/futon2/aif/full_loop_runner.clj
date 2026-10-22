@@ -50,6 +50,8 @@
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
+            [futon2.aif.wm.compiled-cascade-construction :as compiled-construction]
+            [futon2.aif.wm.executable-cascade :as executable-cascade]
             [futon2.aif.fold :as fold]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.delivery-qa :as delivery-qa]
@@ -2787,7 +2789,9 @@
   head. Dispatch by action type so meta-actions cannot masquerade as ordinary
   target-bearing mission actions."
   [entry]
-  (construct-selected-action entry))
+  (if-let [compiled (:compiled-cascade entry)]
+    (compiled-construction/construct entry compiled)
+    (construct-selected-action entry)))
 
 (defn- ground-cascade-policy-holes
   "Translate unfolded patterns to their declared, target-qualified outputs.
@@ -2855,7 +2859,9 @@
          result0 (when-not port-missing?
                    (if wiring-fn
                      (wiring-fn construction)
-                     (if (and (= :selected-cascade (:construction-kind construction))
+                     (if (= :compiled-cascade (:construction-kind construction))
+                       (:compiled-fold construction)
+                       (if (and (= :selected-cascade (:construction-kind construction))
                               (seq (:interpretation-receipts construction)))
                        (fold-cascade/realize construction)
                        (let [result (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
@@ -2864,7 +2870,7 @@
                                 :fold/route (if (= "semilattice-fold v1 (descent=BV.seq, co_app=BV.copar)"
                                                   (get-in result [:wiring :generated-by]))
                                               :semilattice :classical)
-                                :fold/selection-reason :legacy-construction)))))
+                                :fold/selection-reason :legacy-construction))))))
          result0 (if (nil? wiring-fn)
                    (let [grounded (ground-cascade-policy-holes construction result0)]
                      (if (= :cascade-interpretation (:fold/route grounded))
@@ -3282,7 +3288,8 @@
 (defn- prompt-construction [construction]
   (cond-> (select-keys construction
                        [:construction-kind :capability-contract
-                        :actuation-contract :repair-contract :shown :semilattice])
+                        :actuation-contract :repair-contract :shown :semilattice
+                        :operational-plan])
     (:selected-action construction)
     (assoc :selected-action
            (prompt-selected-action (:selected-action construction)))))
@@ -6967,7 +6974,13 @@
                     wm-cascade-decision/persistable-cascade-execution)
             entry (when-not (and cascade-execution
                                  (not= :cascade-ready (:status cascade-execution)))
-                    ordinary-entry)
+                    (cond-> ordinary-entry
+                      (:compiled-digest cascade-execution)
+                      (assoc :compiled-cascade
+                             (executable-cascade/load-record
+                              (io/file (or (:executable-cascade-root opts)
+                                           wm-cascade-decision/default-executable-cascade-root)
+                                       (str (:compiled-digest cascade-execution) ".edn"))))))
             historical-action? (= :revalidate-historical-repair
                                   (get-in entry [:action :type]))
             repair-action? (contains? #{:repair-machine-failure
@@ -7254,6 +7267,7 @@
                 (term (cond-> {:mission (str target)
                               :cascade (select-keys construction
                                                     [:psi :cascade-score :semilattice :cascade-structure
+                                                     :operational-plan
                                                      :construction-kind
                                                      :selected-action
                                                      :capability-contract

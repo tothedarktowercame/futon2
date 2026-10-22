@@ -24,7 +24,7 @@
   [cascade-digest node author reviewer]
   (let [body {:cascade-digest cascade-digest
               :occurrence-id (:occurrence-id node)
-              :pattern (get-in node [:structural-node :pattern])
+              :pattern (or (:pattern node) (get-in node [:structural-node :pattern]))
               :clause (:clause node)
               :author author :reviewer reviewer}]
     (assoc body :schema :wm/cascade-effect-request-v1
