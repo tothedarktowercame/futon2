@@ -109,6 +109,17 @@
 (def scorer-class
   {:focus :focused :associated :related :useful-elsewhere :unrelated})
 
+(defn relation-context
+  "The relation context classify-target derives T- parents and M- relations
+  through: the mission code root and futon2's ticket and findings dirs.  The
+  outer menu and the interpretation ask both pass this, so a target cannot
+  classify differently between them."
+  [code-root]
+  (let [f2-root (str code-root "/futon2")]
+    {:code-root code-root
+     :ticket-dir (str f2-root "/holes/tickets")
+     :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}))
+
 ;; ---------------------------------------------------------------------------
 ;; WM-RELATION-I: an M- target with no row derives its relation, in order,
 ;; from (a) its mission's stated ## Relations, walked through M- targets to

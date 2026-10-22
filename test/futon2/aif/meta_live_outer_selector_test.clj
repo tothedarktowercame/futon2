@@ -41,8 +41,20 @@
                       :policies [{:policy-id (str id "/policy-1")}]
                       :failures []}) task-rows)})
 
+(def selection-as-of "2026-10-22T12:34:56Z")
+
+(defn- frozen-focus
+  "A frozen focus every on-map target classes as :focus under, so tests of
+  the outer boundary do not depend on the live relation corpus."
+  [opts]
+  (merge {:selection-as-of selection-as-of
+          :focus-inputs {}
+          :focus-context {:as-of selection-as-of :status :retained :focus "WM"}
+          :focus-classify-fn (fn [_ _ _ target _] {:target target :class :focus})}
+         opts))
+
 (defn- select-ordinary [opts]
-  (live/select-live (assoc opts
+  (live/select-live (assoc (frozen-focus opts)
                            :policy-field-config {:authority :test-fixture}
                            :policy-field-fn complete-policy-field
                            ;; These tests exercise the outer admission boundary,
@@ -531,11 +543,12 @@
 
 (deftest explicit-nil-constructor-injections-use-production-defaults
   (let [receipt (live/select-live
-                 {:tasks tasks
-                  :policy-field-config {:authority :test-fixture}
-                  :policy-field-fn nil
-                  :policy-menu-fn nil
-                  :fetch-snapshot (constantly snapshot)})]
+                 (frozen-focus
+                  {:tasks tasks
+                   :policy-field-config {:authority :test-fixture}
+                   :policy-field-fn nil
+                   :policy-menu-fn nil
+                   :fetch-snapshot (constantly snapshot)}))]
     (is (= :refused (get-in receipt [:policy :status])))
     (is (contains? #{:incomplete-policy-menu-coverage
                      :outer-policy-evidence-provider-required}
@@ -760,3 +773,39 @@
     (is (= :refused (get-in receipt [:policy :status])))
     (is (= :policy-field-config-required (get-in receipt [:policy :reason])))
     (is (nil? (:action receipt)))))
+
+(deftest ordinary-menu-refuses-a-focus-read-at-another-time
+  (let [menu-called (atom false)
+        receipt (live/select-live
+                 (frozen-focus
+                  {:tasks tasks :fetch-snapshot (constantly snapshot)
+                   :focus-context {:as-of "2026-10-22T00:00:00Z" :status :retained
+                                   :focus "WM"}
+                   :policy-field-config {:authority :test-fixture}
+                   :policy-field-fn complete-policy-field
+                   :policy-menu-fn (fn [& _] (reset! menu-called true) nil)}))]
+    (is (= :focus-as-of-mismatch (get-in receipt [:policy :meta-selection :reason])))
+    (is (false? @menu-called))
+    (is (nil? (:action receipt)))))
+
+(deftest ordinary-menu-receives-the-frozen-classes
+  (let [join (atom nil)
+        _ (live/select-live
+           (frozen-focus {:tasks tasks :fetch-snapshot (constantly snapshot)
+                            :policy-field-config {:authority :test-fixture}
+                            :policy-field-fn complete-policy-field
+                            :focus-classify-fn
+                            (fn [_ _ as-of target _]
+                              (if (= "M-a" target)
+                                {:class :focus :derived-via {:as-of as-of}}
+                                {:class :unknown
+                                 :relation {:status :absent
+                                            :reason :relation-not-declared}}))
+                            :policy-menu-fn (fn [_ j] (reset! join j) nil)}))]
+    (is (= {:status :present :as-of selection-as-of :focus "WM"
+            :focus-status :retained :focus-origin nil}
+           (:focus-receipt @join)))
+    (is (= {:class :focus :scorer-class :focused}
+           (select-keys (get-in @join [:target-classes "M-a"]) [:class :scorer-class])))
+    (is (= :relation-not-declared (get-in @join [:target-classes "M-b" :reason]))
+        "the classifier's own reason is kept, not replaced by not-recorded")))

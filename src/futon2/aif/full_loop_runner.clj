@@ -2089,10 +2089,7 @@
          ;; prior focus when no window covers now); a bare discover at now
          ;; made every target :unknown (click 18)
          discovery (focus-receipt/decision-focus-info inputs as-of)
-         f2-root (str missions/default-code-root "/futon2")
-         ctx {:code-root missions/default-code-root
-              :ticket-dir (str f2-root "/holes/tickets")
-              :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}]
+         ctx (focus-receipt/relation-context missions/default-code-root)]
      (fn [target]
        (:class (focus-receipt/classify-target inputs discovery (:as-of discovery) target ctx))))))
 

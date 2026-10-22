@@ -9,9 +9,11 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy :as policy]
             [futon2.aif.wm.executable-cascade :as xc]
             [futon2.aif.wm.family-selection :as family-selection]
@@ -37,6 +39,9 @@
 (def other "p/other")
 
 (defn- sha [c] (apply str (repeat 64 c)))
+
+(defn- old-seal-sha [body]
+  (load-identity/sha256 (.getBytes (pr-str body) "UTF-8")))
 
 ;; occurrence ids of the production-shaped reading: p/dup cited at fragments
 ;; 0, 1 and 2; p/other sharing fragment 1 (witnessed overlap).
@@ -400,3 +405,71 @@
     (is (= :post-selector-identity-check (get-in result [:refusal :stage])))
     (is (= :chosen-action-unbound
            (get-in result [:refusal :identity-check :clause])))))
+
+;; ---------------------------------------------------------------------------
+;; Packet A2: the frozen focus class reaches score-policy through the sealed
+;; menu, not through a direct score-arranged call.
+
+(defn- other-family []
+  (assoc (family (assoc (occurrence-policy 3) :target "T-other" :mission "T-other"
+                        :policy-id "T-other/policy-3"))
+         :target-id "T-other"))
+
+(defn- frozen-class [relation]
+  {:class relation :scorer-class (get focus-receipt/scorer-class relation)
+   :reason (when (= :unknown relation) :relation-not-declared)
+   :provenance {:status :frozen-focus :as-of "2026-10-22T00:00:00Z"}})
+
+(defn- class-menu [classes]
+  (family-selection/sealed-pre-choice-menu
+   (pinned-field [(family (occurrence-policy 1)) (other-family)] "8")
+   (assoc (:bind-cascade-identity join-opts)
+          :focus-receipt {:status :present :as-of "2026-10-22T00:00:00Z" :focus "WM"}
+          :target-classes (update-vals classes frozen-class))))
+
+(defn- lower-g-target [menu]
+  (:target-id (first (sort-by :controller-score (:entries menu)))))
+
+(deftest swapping-focus-classes-reverses-the-menu-order
+  (let [a (class-menu {"T-occ" :focus "T-other" :useful-elsewhere})
+        b (class-menu {"T-occ" :useful-elsewhere "T-other" :focus})]
+    (is (= :sealed (:status a) (:status b)))
+    (is (= "T-occ" (lower-g-target a)))
+    (is (= "T-other" (lower-g-target b)))
+    (is (= {:focus 1 :useful-elsewhere 1} (get-in a [:class-census :by-class])))
+    (is (nil? (family-selection/verify-sealed-menu a)))))
+
+(deftest unknown-and-missing-classes-refuse-before-score-arranged
+  (let [scored (atom [])
+        menu (with-redefs [shape-g/score-arranged
+                           (let [real shape-g/score-arranged]
+                             (fn [target & more]
+                               (swap! scored conj target)
+                               (apply real target more)))]
+               (family-selection/sealed-pre-choice-menu
+                (pinned-field [(family (occurrence-policy 1)) (other-family)] "9")
+                (assoc (:bind-cascade-identity join-opts)
+                       :target-classes {"T-other" (frozen-class :unknown)})))
+        by-target (group-by :target-id (:failures menu))]
+    (is (empty? @scored) "neither target reached score-arranged")
+    (is (= [:target-class-required] (mapv :kind (by-target "T-occ"))))
+    (is (= [[:target-class-unknown :relation-not-declared]]
+           (mapv (juxt :kind :reason) (by-target "T-other"))))
+    (is (= {:relation-not-declared 1} (get-in menu [:class-census :unknown-by-reason])))
+    (is (not= :sealed (:status menu)))))
+
+(deftest pre-a2-sealed-menu-still-verifies
+  ;; A menu sealed before A2 has no :focus-receipt or :class-census; the pin
+  ;; selects body keys, so its old seal must still check.
+  (let [current (class-menu {"T-occ" :focus "T-other" :focus})
+        old-keys [:schema :field-source-pin :family-census :frontier
+                  :entries :refusals :failures]
+        old-body (select-keys current old-keys)
+        pre-a2 (assoc old-body :status :sealed
+                      :menu-pin {:path "wm://sealed-outer-policy-menu-v1"
+                                 :sha256 (old-seal-sha old-body)})]
+    (is (nil? (family-selection/verify-sealed-menu pre-a2)))
+    (is (= :menu-pin-mismatch
+           (family-selection/verify-sealed-menu
+            (assoc-in current [:class-census :by-class] {:focus 2 :unrelated 0})))
+        "the census is inside the seal")))

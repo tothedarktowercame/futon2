@@ -651,12 +651,14 @@
           (into {}
                 (map (fn [task]
                        (let [c (classify focus-inputs focus-context selection-as-of (:id task)
-                                         focus-classify-context)
+                                         (or focus-classify-context
+                                             (focus-receipt/relation-context
+                                              registry/default-code-root)))
                              relation (:class c)]
                          [(:id task) {:class relation
                                       :scorer-class (get focus-receipt/scorer-class relation)
                                       :reason (when (= :unknown relation)
-                                                (or (:reason c)
+                                                (or (get-in c [:relation :reason])
                                                     :classifier-reason-not-recorded))
                                       :provenance {:status :frozen-focus
                                                    :as-of selection-as-of
@@ -732,14 +734,16 @@
         ordinary-result
         (when-not injury?
           (cond
-          (not= :verified (:status snapshot-verification)) snapshot-verification
-            (not injury?) focus-receipt
+            (not= :verified (:status snapshot-verification)) snapshot-verification
             no-available-targets?
             {:status :abstained :reason no-target-reason
              :section-availability (:section-availability membership)
              :unknown-targets (mapv :id unknown-membership)}
             (not (map? policy-field-config))
             {:status :refused :reason :policy-field-config-required}
+            ;; Only the menu scores with the class, so focus refuses here and
+            ;; not before the abstain/config stops above.
+            (not= :present (:status focus-receipt)) focus-receipt
             (not= :sealed (:status sealed-menu))
             {:status :refused :reason (or (:reason sealed-menu) :sealed-policy-menu-invalid)}
             (not= :provided (:status provided)) provided
