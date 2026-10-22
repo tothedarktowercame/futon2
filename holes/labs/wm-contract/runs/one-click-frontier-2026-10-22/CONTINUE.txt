@@ -1,3 +1,12 @@
+ACTIVE TRIAL5: wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413,
+run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45, held at runner-source
+with stale-outer-selection-composition: futon2.report.war-machine loaded hash
+14a06c65 vs canonical5f9f0fb0. Captured ordinary-trial-5/source-stop.edn.gz.
+FIVE project Trials remain. Do not launch another; repair and retry same run.
+Reload helper omitted scripts/futon2 from CLICK_PATHS; fix now includes it.
+Canonical report source aaa85f9b4 is clean. Perform recorded targeted reload
+then retry held run. No selection has occurred yet; useful goal unfinished.
+
 LATEST: fresh-store review and deployment COMPLETE at Joe direct request.
 Futon2 d443921e6 and futon3c e65ef06be deployed with recorded reload.
 Read fresh-store-deployment/review-result.json and runtime-after.json.

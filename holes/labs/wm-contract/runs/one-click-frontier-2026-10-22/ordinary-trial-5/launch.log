@@ -1,0 +1,17 @@
+wm_click preflight
+  agency                 up
+  click budget           7 available
+  issuing caller         codex-11 (not a cast seat)
+  tripwires              13/13 clear
+  stop-line queue        69 open obligation(s) -- recorded as evidence in the run record; selection proceeds regardless (RULING-selection-precedence-2026-09-19, futon2 8b6827da)
+
+waiting for cast seats and single-flight boundary (since 2026-10-22T04:59:43Z; max 30 min)
+  casting                zai-2 / zai-3 / zai-1 idle and invoke-ready
+  in flight              none
+
+firing click, run-id 2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45
+{"click-id":"wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413","started-at":"2026-10-22T05:00:33.947128580Z","status":"queued"}
+tracking our click: wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413
+[21s] running=True phase=runner-source
+[41s] running=True phase=runner-source
+[61s] running=True phase=runner-source

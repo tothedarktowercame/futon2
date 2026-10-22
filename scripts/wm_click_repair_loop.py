@@ -83,7 +83,7 @@ WAIT_SECONDS = 900
 DEBUG = {"abstained", "no-selection"}
 DEBUGGER = STATE / "debugger"
 # The click's code: what a repair may change and what a reload must pick up.
-CLICK_PATHS = [(F2, "src"), (F3C, "src/futon3c/wm")]
+CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
 
 
