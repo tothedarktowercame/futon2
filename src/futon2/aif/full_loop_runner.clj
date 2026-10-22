@@ -1217,7 +1217,9 @@
                     :habit-fold-snapshot
                     (input-receipts/habit-fold-snapshot
                      (:enactment-fold raw-opts) habit-reads
-                     (or decision (:decision selection-sorry)))
+                     ;; the decision :decision below retains, so the
+                     ;; validator reads the same route
+                     retained-decision)
                     :declaration-reads declaration-reads
                     ;; After selection: these labels are for the next decision.
                     :observation-labels (observation-label-wire/record-declaration-reads!

@@ -148,7 +148,11 @@
              [(assoc-in record [:habit-fold-snapshot :sha256] "changed")
               :habit-fold-snapshot-hash-mismatch]
              [(dissoc record :habit-fold-snapshot)
-              :habit-fold-snapshot-not-observed]]]
+              :habit-fold-snapshot-not-observed]
+             [(assoc-in record [:habit-fold-snapshot :ln-e-source] :habit-fold)
+              :habit-fold-ln-e-source-not-route]
+             [(update record :habit-fold-snapshot dissoc :ln-e-source)
+              :habit-fold-ln-e-source-not-route]]]
       (is (= :invalid (:status (receipts/validate-record bad))))
       (is (some #{error} (:errors (receipts/validate-record bad)))))
     (binding [receipts/*habit-reads* reads]

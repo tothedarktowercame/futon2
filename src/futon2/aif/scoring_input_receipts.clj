@@ -45,6 +45,16 @@
                           i)))
         (:occurrences log)))
 
+(defn- ln-e-source
+  "Where the live ln E came from, read off the route DECISION took."
+  [decision consumed?]
+  (cond
+    (= :wm/selected-outer-cascade-policy-v1
+       (get-in decision [:selection-certificate :selection-route]))
+    :outer-controller-inputs
+    consumed? :habit-fold
+    :else :not-observed))
+
 (defn habit-fold-snapshot
   "Retain the supplied selection input, without re-reading or consuming it.
   Hash the full fold exactly as attach-state does; expose its count fields
@@ -60,13 +70,7 @@
           consumed-by (matching-habit-reads snapshot log)
           consumed? (boolean (seq consumed-by))]
       (assoc snapshot :consumed? consumed? :consumed-by consumed-by
-             :ln-e-source
-             (cond
-               (= :wm/selected-outer-cascade-policy-v1
-                  (get-in decision [:selection-certificate :selection-route]))
-               :outer-controller-inputs
-               consumed? :habit-fold
-               :else :not-observed)))))
+             :ln-e-source (ln-e-source decision consumed?)))))
 
 (defn- intact-fold-snapshot? [snapshot]
   (try
@@ -101,6 +105,10 @@
                       (or (not= (:consumed? snapshot) (boolean (seq consumed-by)))
                           (not= (:consumed-by snapshot) consumed-by)))
                  (conj :habit-fold-consumption-unwitnessed)
+                 (and snapshot-present?
+                      (not= (:ln-e-source snapshot)
+                            (ln-e-source decision (boolean (seq consumed-by)))))
+                 (conj :habit-fold-ln-e-source-not-route)
                  (and (contains? (:selection-certificate decision) :focus-receipt)
                       (not (focus-receipt/valid? decision (get-in decision [:selection-certificate :focus-receipt]))))
                  (conj :focus-receipt-mismatch)
