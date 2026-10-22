@@ -307,7 +307,7 @@
 
 (def sealed-menu-body-keys
   [:schema :field-source-pin :family-census :frontier :focus-receipt :class-census
-   :entries :refusals :failures])
+   :entries :refusals :failures :canonical-g-shadow])
 
 (defn- class-census [target-classes]
   {:by-class (frequencies (keep :class (vals target-classes)))
@@ -346,6 +346,22 @@
       (not= (count digests) (count (distinct digests))) :duplicate-cascade-digest
       :else nil)))
 
+(defn canonical-shadow
+  "Diagnostic only: rescore the exact pre-choice rows without replacing them."
+  [rows]
+  (let [result (canonical-g/rescore rows)]
+    {:role :diagnostic-only
+     :consumed-by-selection false
+     :comparison (:comparison result)
+     :entries (mapv (fn [[p s]]
+                      (assoc (select-keys s [:g :risk :ambiguity :information-gain :horizon])
+                             :target-id (:target p) :policy-id (:policy-id p)
+                             :rank (get-in s [:scorer-result 0 :rank])))
+                    (mapcat :scored (:rows result)))
+     :refusals (vec (filter #(= :canonical-g (:stage %))
+                            (mapcat :failures (:rows result))))
+     :refusal (:refusal result)}))
+
 (defn sealed-pre-choice-menu
   "Atomically form and canonical-bind a complete pre-choice policy menu.
   FIELD is the pinned full-field carrier.  JOIN supplies only existing
@@ -370,7 +386,10 @@
                   :focus-receipt (:focus-receipt join)
                   :class-census (class-census target-classes)
                   :entries entries :refusals refusals
-                  :failures (vec (concat failures (mapcat :failures rows) refusals))}]
+                  :failures (vec (concat failures (mapcat :failures rows) refusals))}
+            body (cond-> body
+                   (= :canonical-coapply (:g-law join))
+                   (assoc :canonical-g-shadow (canonical-shadow rows)))]
         (cond
           (and (empty? entries) (seq refusals))
           (assoc body :status :refused :reason :canonical-binding-refused

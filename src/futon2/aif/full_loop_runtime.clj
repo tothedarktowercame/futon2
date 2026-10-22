@@ -356,7 +356,7 @@
         ;; evidence is requested for, and consumed by, one stable target.
         policy-field-config
         (select-keys opts
-                     [:target-reading-root :pattern-graph-path
+                     [:g-law :target-reading-root :pattern-graph-path
                       :occurrence-square-root
                       :occurrence-square-pattern-texts
                       :pattern-library-root

@@ -812,6 +812,9 @@
                                            entry (:reading-pin entry)))})
                          :focus-receipt focus-receipt
                          :target-classes target-classes)
+        menu-join (cond-> menu-join
+                    (contains? policy-field-config :g-law)
+                    (assoc :g-law (:g-law policy-field-config)))
         sealed-menu (when policy-field
                       (policy-menu-fn policy-field menu-join))
         provided (when (= :sealed (:status sealed-menu))
