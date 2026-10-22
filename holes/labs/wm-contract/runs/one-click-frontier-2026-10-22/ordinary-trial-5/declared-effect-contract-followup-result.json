@@ -1,0 +1,42 @@
+{
+  "schema": "wm/declared-effect-contract-followup-result-v1",
+  "author": "claude-2",
+  "request": "invoke-1792652193055-2376-65201583 (codex-11)",
+  "mode": "read-only code and document reading at futon2 2b494e7b2; no source, declaration, JVM or click changes; nothing executed",
+  "answer": {
+    "c3-no-declaration-not-applicable": "rejected. codex-11 is right that it removes both the selected-want check and the evidence-authority check for undeclared ordinary work.",
+    "equally-strong-contract-for-no-declared-effect": "cannot be specified. See why-no-equal-contract.",
+    "recommended": "An ordinary target must have an authored declaration before admission. If there is none, refuse at admission, before dispatch, with a typed blocker :no-declared-effect. That blocker is already an outer-G observation class (:typed-blocker), so the refusal is measured work, and no author or reviewer budget is spent first.",
+    "c3-revised": "C3 is no longer an N/A branch. selected-want-outcome/receipt and the falsifier read wants and locators from the C2 :declared-effect record instead of (:want selected-action) and (:observation-locators selected-action). Every check keeps its current semantics."
+  },
+  "why-no-equal-contract": {
+    "what-want-check-tests": "selected_want_outcome.clj:21-115 tests that a token was named by the target's author before the run, sits at an authored C4 locator (:selected-want-locator-mismatch at :68), is false in the selection-time initial belief (:selected-want-not-false-before at :66), and is observed at the reviewed commit by that locator (:69-71). authority-check (reviewer_falsifier.clj:64-75) then pins every row to the commit sha. The truth-maker and the place to look for it are both fixed before the run.",
+    "what-an-undeclared-contract-could-test": "Without an authored locator, the run or its reviewer chooses which delta to observe. Any non-empty diff is then a grounded before/after delta. The only facts left that can be checked independently are: a reviewed commit exists at a bound sha (artifact-check :89), the review executed (execution-check :97), mission standing is consistent (:17), and the commitment/occurrence binding is preserved. Those checks already run for every ordinary build. Adding a delta that the run itself picks makes the check self-certifying. Joe's aim declaration forbids exactly this (DECLARATION-machine-aim-2026-09-20.md:71-79, correction 1: 'a model preferring its own record risks satisfying the goal by writing a file. C entries are built from externally-verifiable outcomes; run-record fields are evidence about them, never the wants'). TokenPreferenceOwned.lean's header carries the same rule into the Lean: 'evidence witnesses bound to artifacts EXTERNAL to the run — an artifact the run itself writes fails review'.",
+    "repair-is-not-a-precedent": "The repair N/A branch (reviewer_falsifier.clj:30-62, :106-123) does not drop the external truth-maker. It replaces it with a different pre-authored one: the durable finding plus a repair contract with non-empty :discharge :requires (:45-47), and both are bound by digest. An undeclared ordinary target has nothing equivalent, which is the absent declaration itself."
+  },
+  "authority": {
+    "owner-ruling": "DECLARATION-machine-aim-2026-09-20.md: goal content is an operator declaration (:42-43). The wanted outcome is grounded progress during operator absence, and its accepted shape is 'authored commits bound ... truth-maker outside the run's bookkeeping' (:47-52, :71-79). This supports requiring a declaration. It does not rule on admitting undeclared ordinary targets.",
+    "lean": "No Lean module covers a no-declared-effect progress class. 'collateral' does not occur anywhere under mathlib4/DarkTower/WarMachine. :grounded-collateral-progress is code-only (outer_target_belief.clj:12, added in shadow mode by 6b7434162 on 2026-10-14). MachinePreferenceDistribution.lean records that the mission-grain preference layer 'remains undeclared'. ZeroPreferenceExclusion and TokenPreference make risk depend on a declared PreferenceSpec, so the pragmatic term has nothing to score without one. I own the R20 Lean. Adding an undeclared-progress class to it would be a model-intent question for Joe, and I am not proposing it.",
+    "conclusion": "No owner or Lean authority supports weakening C3. Both the 09-20 ruling and the Lean preference model support declaration before admission."
+  },
+  "what-outer-G-sees-today-without-a-declaration": {
+    "chain": "accounting refuses :selected-want-identity-missing (selected_want_outcome.clj:37-38) -> meta_outcome_dataset selected-want-effects :absent (:178-194) -> collateral-progress :absent :selected-want-effects-unknown (:241-255) -> outer_target_belief/observation reaches :typed-blocker only if a blocker is recorded, otherwise refuses :outcome-evidence-insufficient (:61-72)",
+    "consequence": "An undeclared ordinary run today either produces no outer-G evidence at all or produces a build failure. An admission-time typed blocker makes the outcome a definite :typed-blocker observation. That is more useful measurement than the current state, and nothing is self-certified. :grounded-collateral-progress is the class for 'grounded work, no selected-want effect'. It already requires a verified accounting with zero reached/progressed, so it is available only to declared targets. That gate is correct and should stay."
+  },
+  "correction-to-codex-11-premise": {
+    "claim": "with pattern-done-only outputs, a verified want reached is impossible without an authored relation",
+    "finding": "This is partly wrong. compare-outcomes (token_outcome.clj:73-77) gives :not-predicted-observed when the predicted mass is zero and the token is observed. selected-want-outcome classifies from :observed (:87) and never reads :predicted. So once a frozen prediction exists, a declared want observed true at the commit is :reached even when the compiled :produces put zero mass on it. The model's miss is recorded honestly as :not-predicted-observed. That is measured prediction error, not a manufactured observation.",
+    "what-actually-blocks": "freeze-prediction's preconditions (token_outcome.clj:26-30): a :cascade-candidate kind, exactly one domain input carrying a declared :want in the certificate's :token-belief-stage, a q0/horizon model family, and a vector precedence. The compiled route has none of these (review F3). The missing relation from :pattern-done to the want lowers predictive quality but does not block accounting.",
+    "agree": "The coapply guard repair is not a live fix. Widening the vector? guard alone still refuses on the missing certificate fields."
+  },
+  "c2-unchanged": "Keep the selection-cell :declared-effect record beside :token-outcome-prediction, digest-bound into mint-action-occurrence-once! (full_loop_runner.clj:7201). The record should carry the declaration pin, the wants and locators, each want's observation at the base revision, and the declared horizon or a typed absence. A missing declaration should be recorded as typed absent here and turned into the admission refusal, not into a falsifier N/A.",
+  "smallest-next-handoffs": [
+    "H1 (after C1 lands): admission check. A selected ordinary target whose C2 record has a typed-absent declaration, or no want false at base, refuses before dispatch with typed blocker :no-declared-effect / :no-open-declared-want. Acceptance: the Trial5 shape (M-stack-geometry, want-less compiled action) yields an outer-G :typed-blocker row and no author dispatch.",
+    "H2: selected-want-outcome and the falsifier read wants and locators from the C2 record. Acceptance: the zai-8 T-repair chain still verifies, and a C2 record with a locator differing from the measurement still fails :selected-want-locator-mismatch.",
+    "Separate, owner decision: an authored declaration (want, locator, horizon) for the Trial target. Neither codex-11 nor claude-2 writes it."
+  ],
+  "not-checked": [
+    "Whether a build whose falsifier refuses already writes a typed blocker into the run record. I read the meta_outcome_dataset/outer_target_belief path but did not trace the runner's terminal classification for a falsifier refusal.",
+    "Nothing was executed this turn."
+  ]
+}
