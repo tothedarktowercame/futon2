@@ -1,0 +1,48 @@
+{
+  "responds-to": "codex-11 BLOCKED review of aee932efe",
+  "date": "2026-10-22",
+  "worktree": "/home/joe/code/futon2-learning-certificate-review",
+  "commits": ["aee932efe (original)", "29486edaf (correction, on top)"],
+  "counterexamples-fixed": {
+    "missing-provider-source-pin": ":ordinary-provider-absent",
+    "evidence-status-refused": ":ordinary-evidence-not-carrier-artifact (content binding: the supplied evidence must BE the carrier's embedded evidence-carrier)",
+    "objective-seal-64-zeros": "verify defect -> :ordinary-carrier-invalid (positive refusal)",
+    "minimal-unpinned-status-only-maps": "content binding / selected-policy/verify -> :ordinary-evidence-not-carrier-artifact or :ordinary-carrier-invalid (positive refusal)"
+  },
+  "semantic-validators-bound": {
+    "carrier": "selected-policy/verify on the real carrier: seal, menu, evidence, objective recomputation, selected entry, basis kind -- on actual content",
+    "evidence-and-objective": "content equality against the verified carrier's embedded :evidence-carrier and (dissoc :objective-pin :objective-receipt), so substituted content keeping old pins is refused",
+    "provider": "evidence-provider/verify when the provider body is in hand, tied to the consumed evidence via the recorded declaration pin (live path); a receipt-recorded source pin alone is attested as {:relation :receipt-recorded-source-pin} and never claimed as verified",
+    "assessed-population": "not ruled out: basis handling is delegated entirely to selected-policy/verify, which admits :assessed-population carriers (partial objective receipt, assessed basis checks); the certificate adds no basis-kind restriction of its own"
+  },
+  "surfaced-conflict": {
+    "claim": "The frozen Trial 5 capture cannot support total seal re-verification offline, so the strict certificate truthfully refuses the frozen replay even though the live path is sound.",
+    "evidence": [
+      "The capture script itself asserted (= record decoded) and the capture text is reproduced byte-for-byte by decode->encode->pr-str (probe, 2026-10-22), so no data was lost under EDN equality.",
+      "objective-pin and evidence-pin DO recompute from the frozen capture (sp/objective-pin and evidence/evidence-pin match).",
+      "menu-pin and carrier-pin do NOT recompute (family-selection/sealed-menu-pin and sp/carrier-pin mismatch), and they still mismatch under recursive canonicalization: all-inner-sets sorted, all-inner-maps sorted by pr-str key, top-level array-map/sorted orders -- three variants tried, all fail.",
+      "Therefore the live pr-str input to the seal pins differed in serialization order from anything reproducible from the capture. The pins hash pr-str bytes, so any offline byte-verification of these two pins is impossible from this artifact.",
+      "Trial 5 itself passed verify in-process (activated-carrier was non-nil, :chosen present), so the LIVE path verifies fine; only frozen replay of the seal pins is blocked."
+    ],
+    "consequence": "The frozen positive cannot be preserved AND full semantic verification enforced -- the two requirements conflict on this capture. Per the workarounds-forbidden rule I did not weaken verify or pin checks. The frozen-replay test now asserts the truthful refusal with the exact defect (:carrier-defect :selected-policy-seal) plus everything the capture CAN evidence (content bindings, recorded pins).",
+    "structural-fix-options-for-owner": [
+      "make seal pins print-order-independent (hash a canonical serialization: recursively sorted maps/sets) -- a change to family-selection/sealed-menu-pin, selected-outer-cascade-policy pins, and their producers/consumers, not to be made inside this bounded repair; or",
+      "make the stop-capture encoder print-faithful (it rebuilds maps/sets via into/set, which can change iteration order relative to live structures)"
+    ]
+  },
+  "gates": {
+    "clj-kondo": "0 errors 0 warnings on both files",
+    "check-parens": "OK on both files",
+    "focused-tests": {
+      "futon2.aif.meta-live-outer-selector-ordinary-certificate-test (default)": "5 tests, 39 assertions, 0 failures",
+      "same ns -i :slow (real frozen selection-stop.edn.gz, sha256 360bc93c... verified; review counterexamples against the real sealed carrier)": "3 tests, 34 assertions, 0 failures",
+      "futon2.aif.meta-live-outer-selector-test (regression)": "33 tests, 152 assertions, 1 failure -- PRE-EXISTING on unmodified main (explicit-nil-constructor-injections-use-production-defaults), verified by stash-and-rerun in the first round"
+    },
+    "full-suite": "not run (per instruction)"
+  },
+  "files-committed": [
+    "src/futon2/aif/meta_live_outer_selector.clj",
+    "test/futon2/aif/meta_live_outer_selector_ordinary_certificate_test.clj"
+  ],
+  "notes": "No selection changes, no comparator resurrection, no dispatch, no deploy; Trial remains held. The live resumed Trial will pass the tripwire when (and only when) the real sealed carrier verifies in-process, which is what Trial 5 already demonstrated."
+}

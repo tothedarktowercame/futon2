@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :phase :selection, :carrier-defect nil, :carrier-pin-matches true, :policy-id \"M-stack-geometry/policy-c7d7518e1e185c2e2318\", :evidence-matches true, :objective-matches true}}",
+  "err": ""
+}
