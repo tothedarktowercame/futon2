@@ -1,0 +1,13 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "commit": "fef62e9b0da42130cbb19e4dcf7b5d7761dba298",
+  "original_three_probes": "all refuse as expected",
+  "new_probe": "declared-effect-round2-probe.clj",
+  "output": "declared-effect-round2-probe.edn",
+  "exit": 0,
+  "defects": [
+    "Correct schema plus active-wants but empty active rows, no declaration/horizon/base verifies true. Census compares summary lists instead of actual evidence rows.",
+    "Injected reader echoed locator and sha plus resolved-sha not-a-commit admits wrong-repo/not-a-revision; no independent resolution or base repo ownership check."
+  ],
+  "integration": "rejected; no deployment/Trial"
+}
