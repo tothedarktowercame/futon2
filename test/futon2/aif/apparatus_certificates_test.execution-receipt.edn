@@ -1,10 +1,14 @@
 {:schema :wm/focused-test-execution-v1
- :date "2026-10-05"
+ :date "2026-10-22"
  :scope ["src/futon2/aif/wm/apparatus_certificates.clj"
          "src/futon2/aif/full_loop_runner.clj"
          "test/futon2/aif/apparatus_certificates_test.clj"]
  :runs
- [{:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
+ [{:command "FUTON3C_INVOKE_JOBS_FILE=$(mktemp) clojure -M:test -n futon2.aif.apparatus-certificates-test"
+   :status :passed
+   :tests 8 :assertions 44 :failures 0 :errors 0
+   :note "Ten rows, Lean de33cabb48: interoception is explicitly not-recorded with missing size/tick/observed. Forcing the other nine rows to agree still leaves the real receipt uncertified. clj-kondo: 0 errors, 0 warnings; check-parens: OK. No stored-receipt completeness validator was found in futon2 src/checks or futon3c src/witness; removal of a row from an external receipt is not currently validated. Earlier runs below are historical evidence, not the current row-count contract."}
+  {:command "clojure -X:test :nses '[futon2.aif.apparatus-certificates-test]'"
    :status :passed
    :tests 7
    :assertions 39

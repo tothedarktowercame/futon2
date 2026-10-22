@@ -144,8 +144,9 @@
 (deftest certificate-is-total-and-fail-closed
   (let [r (apparatus/receipt {:decision {} :participants {}})]
     (is (= apparatus/node-order (mapv :node (:rows r))))
-    (is (= (repeat 9 :not-recorded) (map :verdict (:rows r))))
-    (is (= :cost (:node (last (:rows r)))))
+    (is (= 10 (count (:rows r))))
+    (is (= (repeat 10 :not-recorded) (map :verdict (:rows r))))
+    (is (= :interoception (:node (last (:rows r)))))
     (is (false? (:certified? r))))
   (testing "one missing row prevents certification even when implemented rows agree"
     (let [r (apparatus/receipt {:decision (merge (class-scoring-decision)
@@ -153,6 +154,26 @@
                                 :participants (participant-record "author" "reviewer")})]
       (is (some #(= :agrees (:verdict %)) (:rows r)))
       (is (false? (:certified? r))))))
+
+(deftest interoception-absence-alone-prevents-certification
+  ;; Force every other row to agree at the row-production boundary, so the
+  ;; receipt's actual certification predicate must encounter this absence.
+  (let [absent-var #'apparatus/absent
+        original @absent-var
+        r (with-redefs-fn
+            {absent-var (fn [node & args]
+                          (if (= :interoception node)
+                            (apply original node args)
+                            {:node node :verdict :agrees}))}
+            #(apparatus/receipt {:decision {} :participants {}}))]
+    (is (= "de33cabb48" (get-in r [:lean :mathlib4])))
+    (is (= {:node :interoception :verdict :not-recorded
+            :missing [:size :tick :observed]
+            :reason :no-interoceptive-modality-recorded}
+           (row r :interoception)))
+    (is (every? #(= :agrees (:verdict %)) (butlast (:rows r))))
+    (is (false? (:certified? r))
+        "Even nine agreeing rows cannot certify an unrecorded modality")))
 
 ;; Two live pins: the :registered-run/model-usage and :registered-run/timing
 ;; values of two retained runs, copied whole into the fixture (see its :note).

@@ -3,9 +3,9 @@
   (:require [futon2.aif.focus-receipt :as focus-receipt]))
 
 (def schema :wm/r20-certificate-v1)
-(def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "8fda677deb"})
+(def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "de33cabb48"})
 (def node-order [:precision :evidence :habit :class-preference :strategic-focus
-                 :liveness :independence :joint-action :cost])
+                 :liveness :independence :joint-action :cost :interoception])
 (def risk-tolerance 1.0e-9)
 
 (defn- absent [node missing & [reason checked]]
@@ -246,6 +246,8 @@
               (constant-row :liveness [:before-state :after-state :reported-live])
               (independence-row participants)
               (constant-row :joint-action [:ownership])
-              (cost-row model-usage timing)]]
+              (cost-row model-usage timing)
+              (absent :interoception [:size :tick :observed]
+                      :no-interoceptive-modality-recorded)]]
     {:schema schema :lean lean-authority :rows rows
      :certified? (every? #(= :agrees (:verdict %)) rows)}))
