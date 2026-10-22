@@ -15,6 +15,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
+            [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
@@ -3445,6 +3446,55 @@
     (catch Exception e
       {:status :absent :reason :criterion-rendering-failed :message (.getMessage e)})))
 
+(defn- co-apply-product-census
+  "The compiled co-apply shape's closure census. The co-applied patterns
+  are ONLY the entries whose ids the recorded :units names, and the shape
+  must be internally coherent: every unit has a pattern entry, no pattern
+  sits outside the unit census, and :units is a real list of ids. Returns
+  {:status :ok :produced products} (the union of the co-applied patterns'
+  own :produces) or {:status :malformed :reason k :evidence m} with a typed
+  reason. Malformed claims nothing verifiable -- the caller records honest
+  progress rather than closure credit (codex-11 review of 0bb9f6a4b,
+  2026-10-22: an empty or incoherent compiled map must never fall through
+  to the legacy declare-nothing outcome)."
+  [co-apply]
+  (cond
+    (not (map? co-apply))
+    {:status :malformed :reason :co-apply-not-a-map :evidence {:co-apply co-apply}}
+    (not (and (sequential? (:units co-apply)) (seq (:units co-apply))))
+    {:status :malformed :reason :co-apply-units-missing-or-empty
+     :evidence {:units (:units co-apply)}}
+    (not (map? (:patterns co-apply)))
+    {:status :malformed :reason :co-apply-patterns-not-a-map
+     :evidence {:patterns (:patterns co-apply)}}
+    :else
+    (let [units (set (:units co-apply))
+          pattern-ids (set (keys (:patterns co-apply)))
+          unit-without-pattern (seq (cset/difference units pattern-ids))
+          pattern-outside-census (seq (cset/difference pattern-ids units))
+          bad-pattern-shape
+          (seq (for [[id p] (:patterns co-apply)
+                     :when (let [prod (:produces p)]
+                             (or (not (map? p))
+                                 (and (some? prod)
+                                      (or (string? prod)
+                                          (not (coll? prod))))))]
+                 id))]
+      (cond
+        unit-without-pattern
+        {:status :malformed :reason :co-apply-unit-without-pattern
+         :evidence {:units-without-patterns (vec unit-without-pattern)}}
+        pattern-outside-census
+        {:status :malformed :reason :co-apply-pattern-outside-unit-census
+         :evidence {:patterns-outside-census (vec pattern-outside-census)}}
+        bad-pattern-shape
+        {:status :malformed :reason :co-apply-pattern-malformed
+         :evidence {:pattern-ids (vec bad-pattern-shape)}}
+        :else
+        {:status :ok
+         :produced (vec (mapcat #(vec (or (:produces %) []))
+                                (vals (:patterns co-apply))))}))))
+
 (defn classify-grounded-outcome
   "Distinguish a reviewed, grounded increment from closure of the enacted
    step's declared products.  `:grounded-change` is retained for a change
@@ -3463,23 +3513,54 @@
    With no verified evidence (no declaration for the target, no fresh
    binding, or a locator observed false) the honest outcome is
    :grounded-progress: the caller supplied a reviewed GROUNDED increment,
-   but nothing mechanically verified its intended effect."
+   but nothing mechanically verified its intended effect.
+
+   The declare-nothing legacy early return belongs ONLY to the legacy
+   vector precedence (a legacy cascade with no closure claim to test).  On
+   the compiled map route there is no legacy to preserve: a malformed
+   co-apply (missing :units, patterns outside the unit census, patterns
+   missing for a unit) or an empty declared union yields
+   :grounded-progress, never closure credit for an absent claim
+   (codex-11 review of 0bb9f6a4b, 2026-10-22)."
   [requested-outcome selected-action data]
   (if-not (= :grounded-change requested-outcome)
     requested-outcome
     (let [action (or (:selected-action selected-action) selected-action)
           target (:target action)
-          co-apply (get-in action [:precedence :co-apply])
+          precedence (:precedence action)
+          compiled? (map? precedence)
+          census (when compiled?
+                   (co-apply-product-census (get precedence :co-apply)))
           declared
-          (if (map? (:precedence action))
-            ;; co-apply shape: the closure claim is every co-applied
-            ;; pattern's own declared products, in the union.
-            (vec (distinct (mapcat (comp :produces val)
-                                   (or (:patterns co-apply) {}))))
+          (if compiled?
+            ;; co-apply shape: the closure claim is the union of the
+            ;; co-applied patterns' own declared products, taken ONLY from
+            ;; the units census -- and only when the co-apply is well
+            ;; formed. Malformed (missing :units, pattern keys outside
+            ;; the census, units without patterns) claims nothing
+            ;; verifiable, and the compiled route never credits closure
+            ;; for an absent claim (codex-11 review of 0bb9f6a4b).
+            (if (= :malformed (:status census))
+              :malformed
+              (vec (distinct (:produced census))))
             (let [{:keys [pattern]} (enacted-step-pattern selected-action)]
-              (vec (:produces pattern))))]
-      (if (empty? declared)
-        requested-outcome
+              (vec (:produces pattern))))
+          empty-declared-keeps-outcome (not compiled?)]
+      (cond
+        (= :malformed declared)
+        ;; compiled route: a malformed co-apply claims nothing verifiable;
+        ;; honest progress, never closure credit (codex-11 review).
+        :grounded-progress
+
+        (empty? declared)
+        ;; vector route: a legacy cascade declaring nothing keeps the
+        ;; legacy outcome; the compiled route never credits closure for
+        ;; an absent claim.
+        (if empty-declared-keeps-outcome
+          requested-outcome
+          :grounded-progress)
+
+        :else
         (let [sources (cascade-sources/load-declared)
               bare (mapv #(if (vector? %) (second %) %) declared)
               locators (into {}
@@ -3487,16 +3568,25 @@
                                    :let [locator (get-in sources [:locators target token])]
                                    :when locator]
                                [token locator]))
-              verdict (accepted-increment/accepted-increment
-                       {:binding (or (:artifact-binding data)
-                                     (get-in data [:validation :artifact-binding]))
-                        :produced-tokens locators
-                        :declared-tokens bare
-                        :acceptance (cascade-sources/acceptance-of target)
-                        :after-revision (:commit data)})]
-          (if (true? (:accepted? verdict))
-            :grounded-change
-            :grounded-progress))))))
+              ;; A declared product whose target has no locator in the
+              ;; cascade sources is not independently verifiable: the
+              ;; accepted-increment (b) check only sees measured tokens,
+              ;; so an unmeasured declared token must fail closure here
+              ;; rather than be silently dropped (codex-11 review of
+              ;; 0bb9f6a4b: no closure credit without verification).
+              unverified (vec (remove #(contains? locators %) bare))]
+          (if (seq unverified)
+            :grounded-progress
+            (let [verdict (accepted-increment/accepted-increment
+                           {:binding (or (:artifact-binding data)
+                                         (get-in data [:validation :artifact-binding]))
+                            :produced-tokens locators
+                            :declared-tokens bare
+                            :acceptance (cascade-sources/acceptance-of target)
+                            :after-revision (:commit data)})]
+              (if (true? (:accepted? verdict))
+                :grounded-change
+                :grounded-progress))))))))
 
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir

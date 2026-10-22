@@ -78,24 +78,31 @@
   [{:keys [repo-name sha path decl]}]
   ;; the real load-declared shape: :wants (via which acceptance-of picks
   ;; the acceptance token), :locators per [target token], :files provenance
-  {:wants {"T-fixture-closure" [:fixture-done]}
-   :locators {"T-fixture-closure" {:fixture-done
-                                   {:class :C4 :repo repo-name :sha sha
-                                    :path path :decl decl}}}
-   :files [{:path "fixture/T-fixture-closure.edn"
-            :target "T-fixture-closure"}]})
+  (let [loc (fn [] {:class :C4 :repo repo-name :sha sha :path path :decl decl})]
+    {:wants {"T-fixture-closure" [:fixture-done]}
+     :locators {"T-fixture-closure" {:fixture-done (loc)
+                                     :fixture-done-2 (loc)}}
+     :files [{:path "fixture/T-fixture-closure.edn"
+              :target "T-fixture-closure"}]}))
 
 (defn- fresh-binding [commit head]
   {:repo "repo" :commit commit :pre-dispatch-head head
    :descendant? true :corroborates? true :claim-in-author-window? true
    :observed-valid? true})
 
-(defn- co-apply-action [target tokens]
+(defn- co-apply-action
+  "A co-apply cascade candidate for TARGET whose units each declare the
+  given product tokens: units is a sequence of [id tokens]."
+  [target units]
   {:kind :cascade-candidate :target target
-   :precedence {:co-apply {:units [:p] :descent []
-                           :patterns {:p {:id :p
-                                          :produces (set (map #(vector target %)
-                                                              tokens))}}}}})
+   :precedence {:co-apply
+                {:units (mapv first units)
+                 :descent []
+                 :patterns (into {}
+                                 (for [[id tokens] units]
+                                   [id {:id id
+                                        :produces (set (map #(vector target %)
+                                                            tokens))}]))}}})
 
 (deftest co-apply-map-without-evidence-is-grounded-progress-not-closure
   ;; The exact shape of the classification probe
@@ -103,7 +110,7 @@
   ;; declaring a product for a target with no cascade-source declaration.
   ;; Before C1 this preserved the requested :grounded-change and the outer
   ;; dataset counted :closure with zero effect measurements.
-  (let [action (co-apply-action "M-probe" [:wanted])
+  (let [action (co-apply-action "M-probe" [[:p [:wanted]]])
         actual (runner/classify-grounded-outcome :grounded-change action {})]
     (is (= :grounded-progress actual))
     (is (= :grounded-progress (dataset/outcome-class actual))
@@ -119,7 +126,7 @@
             (with-redefs [cascade-sources/load-declared (fn [& _] sources-before)]
               (let [actual (runner/classify-grounded-outcome
                             :grounded-change
-                            (co-apply-action "T-fixture-closure" [:fixture-done])
+                            (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
                             {:artifact-binding (fresh-binding (:after-sha fx)
                                                               (:before-sha fx))
                              :commit (:after-sha fx)})]
@@ -130,7 +137,7 @@
                         (fn [& _] (fixture-sources (assoc fx :sha (:after-sha fx))))]
           (let [actual (runner/classify-grounded-outcome
                         :grounded-change
-                        (co-apply-action "T-fixture-closure" [:fixture-done])
+                        (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
                         {:artifact-binding (fresh-binding (:after-sha fx)
                                                           (:before-sha fx))
                          :commit (:after-sha fx)})]
@@ -141,7 +148,7 @@
                         (fn [& _] (fixture-sources (assoc fx :sha (:after-sha fx))))]
           (let [actual (runner/classify-grounded-outcome
                         :grounded-change
-                        (co-apply-action "T-fixture-closure" [:fixture-done])
+                        (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
                         {:artifact-binding (assoc (fresh-binding (:after-sha fx)
                                                                  (:before-sha fx))
                                                   :corroborates? false)
@@ -152,10 +159,10 @@
   (testing "non-grounded requested outcomes pass through untouched"
     (is (= :grounded-no-change
            (runner/classify-grounded-outcome
-            :grounded-no-change (co-apply-action "M-probe" [:wanted]) {})))
+            :grounded-no-change (co-apply-action "M-probe" [[:p [:wanted]]]) {})))
     (is (= :abstained
            (runner/classify-grounded-outcome
-            :abstained (co-apply-action "M-probe" [:wanted]) {}))))
+            :abstained (co-apply-action "M-probe" [[:p [:wanted]]]) {}))))
   (testing "vector precedence with declared products keeps its existing path"
     ;; no declaration for this target, so the accepted-increment check
     ;; fails honestly -- exactly the pre-C1 vector behavior.
@@ -169,10 +176,105 @@
           actual (runner/classify-grounded-outcome :grounded-change action {})]
       (is (= :grounded-change actual))
       (is (= :closure (dataset/outcome-class actual)))))
-  (testing "co-apply declaring nothing also retains the legacy outcome"
-    ;; no closure claim to test: no :produces anywhere
+  (testing "co-apply declaring nothing is honest progress, not closure"
+    ;; codex-11 review of 0bb9f6a4b: the declare-nothing legacy outcome
+    ;; belongs to the legacy VECTOR precedence only. An empty union on the
+    ;; compiled map route claims nothing verifiable; no closure credit.
     (let [action {:kind :cascade-candidate :target "M-probe"
                   :precedence {:co-apply {:units [:p] :descent []
                                           :patterns {:p {:id :p}}}}}
           actual (runner/classify-grounded-outcome :grounded-change action {})]
-      (is (= :grounded-change actual)))))
+      (is (= :grounded-progress actual))
+      (is (= :grounded-progress (dataset/outcome-class actual))))))
+
+(deftest exact-review-negatives-replay-to-progress
+  ;; The exact executed probes compiled-closure-review-negatives.clj: both
+  ;; cases replayed to :grounded-change/:closure before the follow-up.
+  (doseq [[label precedence] [[:empty-products {:co-apply {:units [:p] :descent []
+                                                           :patterns {:p {:id :p}}}}]
+                              [:malformed {}]]]
+    (testing (str "case " label)
+      (let [v (runner/classify-grounded-outcome
+               :grounded-change
+               {:kind :cascade-candidate :target "M-probe" :precedence precedence}
+               {})]
+        (is (= :grounded-progress v))
+        (is (= :grounded-progress (dataset/outcome-class v)))))))
+
+(deftest malformed-co-apply-census-is-progress
+  ;; The union is taken ONLY from the recorded :units census, and the
+  ;; co-apply must be internally coherent. Each malformed variant yields
+  ;; :grounded-progress -- never the legacy :grounded-change preserved for
+  ;; a legacy vector cascade declaring nothing.
+  (doseq [[label precedence]
+          [[:units-missing {:co-apply {:descent []
+                                       :patterns {:p {:id :p :produces []}}}}]
+           [:units-empty {:co-apply {:units [] :descent []
+                                     :patterns {:p {:id :p :produces []}}}}]
+           [:unit-without-pattern {:co-apply {:units [:p :q] :descent []
+                                              :patterns {:p {:id :p :produces []}}}}]
+           [:pattern-outside-census {:co-apply {:units [:p] :descent []
+                                                :patterns {:p {:id :p :produces []}
+                                                           :ghost {:id :ghost
+                                                                   :produces ["x"]}}}}]
+           [:pattern-produces-not-a-collection {:co-apply {:units [:p] :descent []
+                                                     :patterns {:p {:id :p
+                                                                    :produces :bogus}}}}]
+           [:co-apply-not-a-map {:co-apply [:p]}]
+           [:patterns-not-a-map {:co-apply {:units [:p] :patterns #{:p}}}]]]
+    (testing (name label)
+      (let [v (runner/classify-grounded-outcome
+               :grounded-change
+               {:kind :cascade-candidate :target "M-probe" :precedence precedence}
+               {})]
+        (is (= :grounded-progress v))
+        (is (= :grounded-progress (dataset/outcome-class v)))))))
+
+(deftest legitimate-multi-unit-positive-closes-and-partial-fails
+  (with-fixture-repo
+    (fn [fx]
+      (with-redefs [observation/repo-root (:root fx)
+                    cascade-sources/load-declared
+                    (fn [& _] (fixture-sources (assoc fx :sha (:after-sha fx))))]
+        (testing "two units, both products observed true at the after-sha: closure"
+          (let [actual (runner/classify-grounded-outcome
+                        :grounded-change
+                        (co-apply-action "T-fixture-closure"
+                                         [[:p [:fixture-done]]
+                                          [:q [:fixture-done-2]]])
+                        {:artifact-binding (fresh-binding (:after-sha fx)
+                                                          (:before-sha fx))
+                         :commit (:after-sha fx)})]
+            (is (= :grounded-change actual))
+            (is (= :closure (dataset/outcome-class actual)))))
+        (testing "one unit's product unobserved (locator false): honest progress"
+          ;; :fixture-done-3 has no locator in the sources map, so the
+          ;; accepted-increment (b) conjunct fails with a missing token.
+          (let [actual (runner/classify-grounded-outcome
+                        :grounded-change
+                        (co-apply-action "T-fixture-closure"
+                                         [[:p [:fixture-done]]
+                                          [:q [:fixture-done-3]]])
+                        {:artifact-binding (fresh-binding (:after-sha fx)
+                                                          (:before-sha fx))
+                         :commit (:after-sha fx)})]
+            (is (= :grounded-progress actual))))))))
+
+(deftest forged-binding-with-true-locators-is-not-accepted
+  (with-fixture-repo
+    (fn [fx]
+      (with-redefs [observation/repo-root (:root fx)
+                    cascade-sources/load-declared
+                    (fn [& _] (fixture-sources (assoc fx :sha (:after-sha fx))))]
+        ;; A forged binding claims every freshness flag but cannot supply
+        ;; a pre-dispatch head: the accepted-increment (a) conjunct fails
+        ;; honestly (:binding-not-fresh) even with every locator true.
+        (let [forged (dissoc (fresh-binding (:after-sha fx) (:before-sha fx))
+                             :pre-dispatch-head)
+              actual (runner/classify-grounded-outcome
+                      :grounded-change
+                      (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
+                      {:artifact-binding forged
+                       :commit (:before-sha fx)})]
+          (is (= :grounded-progress actual))
+          (is (= :grounded-progress (dataset/outcome-class actual))))))))
