@@ -441,3 +441,14 @@
     (is (false? (:verified (der/verify-record rehashed))))
     (is (contains? #{:want-census-mismatch :admission-inconsistent}
                    (:reason (der/verify-record rehashed))))))
+
+(deftest duplicate-and-foreign-wants-refuse-admission
+  (doseq [wants [[:want-a :want-a] [["foreign-target" :want-a]]]]
+    (let [dir (tmp-dir)
+          _ (write-declaration! dir :want wants)
+          record (der/build-record (base-inputs dir (proving-reader {})))
+          forged (assoc record :admission {:eligible true :refusals []})
+          forged (assoc forged :record/digest (der/record-digest forged))]
+      (is (false? (get-in record [:admission :eligible])))
+      (is (:verified (der/verify-record record)))
+      (is (false? (:verified (der/verify-record forged)))))))

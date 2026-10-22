@@ -154,6 +154,11 @@
 (defn- want-owned? [target w]
   (and (vector? w) (= 2 (count w)) (= target (first w))))
 
+(defn- wants-owned? [target wants]
+  (and (string? target) (seq wants)
+       (= (count wants) (count (distinct wants)))
+       (every? (partial want-owned? target) wants)))
+
 (defn- classify-reader-result
   "Reader output to a typed observation row, before evidence validation.
   Anything that is not a genuine boolean observation stays typed and NEVER
@@ -395,7 +400,7 @@
                       refusals (admission-refusals
                                 {:declaration-status :pinned
                                  :horizon-status (:status horizon)
-                                 :wants-owned? (and target-ok? (seq wants))
+                                 :wants-owned? (and target-ok? (wants-owned? target wants))
                                  :base-resolved? (not (:status resolution))
                                  :base-consistent? base-consistent?
                                  :unknown? (boolean (seq unknown))
@@ -480,8 +485,7 @@
     {:invalid? (= :invalid-build-inputs (get-in record [:horizon :reason]))
      :declaration-status (get-in record [:declaration :status])
      :horizon-status (get-in record [:horizon :status])
-     :wants-owned? (and (string? (:target record)) (seq (:wants record))
-                        (every? (partial want-owned? (:target record)) (:wants record)))
+     :wants-owned? (wants-owned? (:target record) (:wants record))
      :base-resolved? base-resolved?
      :base-consistent? base-consistent?
      :unknown? (boolean (seq unknown))
