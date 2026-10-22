@@ -1,0 +1,35 @@
+{
+  "schema": "wm/frozen-live-reviewer-result-v1",
+  "reviewer": "zai-3",
+  "verdict": "accepted-with-corrections",
+  "author_result_sha256": "89b71e918ec50900b78682175c8f85175863d0dec7450c015ebca64e435b31c9",
+  "checkpoint_result_sha256_match": true,
+  "mission_observed": {
+    "path": "/home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md",
+    "sha256": "1a541e859c7abf6631edc39649b3a3067d33eea9715d74324e6c75a109f0d6bd",
+    "matches_mission_before_md": true,
+    "status_line": "3:**Status:** OPEN — IDENTIFY",
+    "lifecycle_operation_already_satisfied": true,
+    "new_mission_progress": false
+  },
+  "evidence": [
+    {"cmd": "sha256sum author-result.json", "out": "89b71e918ec50900b78682175c8f85175863d0dec7450c015ebca64e435b31c9 (matches author-checkpoint.json result_sha256)"},
+    {"cmd": "sha256sum /home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md mission-before.md", "out": "both 1a541e859c7abf6631edc39649b3a3067d33eea9715d74324e6c75a109f0d6bd — current mission is byte-identical to the frozen before-copy; no mission change, no new progress"},
+    {"cmd": "grep -n 'Status' M-pattern-posteriors.md", "out": "3:**Status:** OPEN — IDENTIFY — the recorded lifecycle clause :declare-mission-lifecycle-state was already satisfied before this section"},
+    {"cmd": "grep -n ':success false' -A4 /home/joe/code/futon6/holes/closure-folds.edn", "out": "5 negative records; two (hypergraph-operator/argue, hypergraph-operator/derive) carry non-empty :used [math-formalization/continuous-linear-map-composition]; one (E-mission-head/head-sigil v0) has :used [] — author's fold inventory is accurate"},
+    {"cmd": "cd /home/joe/code/futon6 && python3 scripts/cascade_learn.py --posteriors /tmp/pp.json --learned /tmp/pl.json --gaps /tmp/pg.edn (isolated rebuild, production outputs untouched)", "out": "closures=15 successful=12; posteriors table has 10 stems ALL at {alpha 1, beta 0, mean 0.666667}; continuous-linear-map-composition ABSENT; coverage-gaps gains the two hypergraph-operator entries"}
+  ],
+  "corrections": [
+    "The author's next-task acceptance ('beta == 2 for math-formalization/continuous-linear-map-composition, mean < 0.666667, non-uniform table after rerunning cascade_learn.py') is FALSIFIED by the current code. connected_within() in scripts/cascade_learn.py charges beta only when a failed fold's used pattern is phylogeny-connected to ANOTHER pattern in the same used set; both negative folds have a single-pattern used set, so both are treated as isolated failures (retrieval/coverage errors), excluded from the posterior table, and relocated to cascade-coverage-gaps.edn. Empirical isolated rebuild confirms: uniform 0.666667 across all stems, no beta anywhere. The closure-folds.edn header comment 'These two attach β to a REAL pattern' is stale relative to claude-4's connectivity gate.",
+    "Consequently mission checklist line 11 ('a rebuild can increment β') is satisfied by the data only in letter (attempted-but-unclosed fold with non-empty :used exists) but NOT in effect under the current gate: rebuilding increments beta for no pattern. Ticking line 11 on the strength of a rerun alone would be premature; either the checklist wording must be re-examined against the ratified connectivity-gate contract, or a genuinely phylogeny-connected failing fold must be recorded first."
+  ],
+  "revised_next_task_acceptance": {
+    "task": "Do NOT rerun cascade_learn.py expecting beta == 2. Productive next step is one of: (a) record a real attempted-but-unclosed fold whose :used set contains >=2 patterns sharing a computed phylogeny edge (co_app or descent) so connected_within() passes and beta actually charges, then rerun; or (b) surface the letter-vs-effect conflict between mission line 11 and the ratified per-pattern connectivity gate (workarounds forbidden) before any rebuild is claimed to satisfy line 11.",
+    "isolated_rebuild_acceptance": "after any isolated rerun (outputs redirected off the production paths), pattern_posteriors.grounded.json remains uniform at mean 0.666667 with beta 0 everywhere and continuous-linear-map-composition absent, and cascade-coverage-gaps.edn gains exactly the two hypergraph-operator entries — this is the predicted baseline, not a failure.",
+    "production_rebuild_acceptance_if_a_connected_negative_exists": "the charged stem shows beta >= 1, mean < 0.666667, and the table contains >= 2 distinct means; only then regenerate the grounded A/B and consider ticking line 11.",
+    "no_production_outputs_modified": true
+  },
+  "no_clicks_used": true,
+  "no_commits": true,
+  "no_production_writes": true
+}

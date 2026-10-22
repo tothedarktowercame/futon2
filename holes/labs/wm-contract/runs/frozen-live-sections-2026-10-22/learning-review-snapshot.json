@@ -1,0 +1,25 @@
+{
+  "agent": "zai-3",
+  "artifacts": [
+    {
+      "path": "learning-review-dispatch.json",
+      "sha256": "0b3615d9349d6ced280f24841703e2b7d62fe3bc8feeb466c5deb51b466a8041"
+    },
+    {
+      "path": "learning-review-result.json",
+      "sha256": "66b7eb94f938bda59567c53cad7de5e7a03789f36773ed40c2a0c11adc7c625d"
+    },
+    {
+      "path": "learning-review-terminal.json",
+      "sha256": "c473312dc2b5795ddc29308be8ed8f251e5a3f7acd73e965ca6627a982221ffe"
+    },
+    {
+      "path": "rebuild-snapshot.json",
+      "sha256": "438bed07aeb33812eb49f7b5ca5a90840c1bba47793f77bbaadc542ca598e44e"
+    }
+  ],
+  "job_id": "invoke-1792637481966-2146-08e9c189",
+  "phase": "learning-review",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

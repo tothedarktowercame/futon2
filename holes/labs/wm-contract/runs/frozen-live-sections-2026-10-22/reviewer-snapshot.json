@@ -1,0 +1,25 @@
+{
+  "agent": "zai-3",
+  "artifacts": [
+    {
+      "path": "reviewer-dispatch.json",
+      "sha256": "27ac84381a0efd895f8c2c7010ac50cf32a2ad12b01340271e4c1d14637e5637"
+    },
+    {
+      "path": "reviewer-result.json",
+      "sha256": "c9faa0cf8e61ca619af439b6b6a1716255cb2db57da7cd507e5feaaf77863f3d"
+    },
+    {
+      "path": "reviewer-terminal.json",
+      "sha256": "d74191be198ac6d2be75a2bf456fc23dde70f8cbb73a122d37452c1c407dd0b8"
+    },
+    {
+      "path": "author-snapshot.json",
+      "sha256": "4d5a0f7be25d54470d787aca575d707a13ec6712c8645748fa66d8f41998b6a6"
+    }
+  ],
+  "job_id": "invoke-1792637322161-2140-9be2c424",
+  "phase": "reviewer",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

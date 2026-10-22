@@ -1,0 +1,22 @@
+{
+  "closure-folds.edn": {
+    "source": "/home/joe/code/futon6/holes/closure-folds.edn",
+    "sha256": "a38a181827f91906b5e1275d942c0cc3f85817d23e3208461244334d762a3186"
+  },
+  "computed-edges.json": {
+    "source": "/home/joe/code/futon6/data/pattern-phylogeny-edges.json",
+    "sha256": "5a0c231ec2debd6e1f7f7cfff7d85d1e253389272d5d7bfa730683b5f3ab1a31"
+  },
+  "cascade_learn.py": {
+    "source": "/home/joe/code/futon6/scripts/cascade_learn.py",
+    "sha256": "67cb6f7d7db5274169ff8ff5b722e3f2ec1b05d72abdd1f6dfc862f28193e01e"
+  },
+  "futon6_config.py": {
+    "source": "/home/joe/code/futon6/scripts/futon6_config.py",
+    "sha256": "25125232643ecb863c2aca7c8a7d3ff533aa9777812bc3c24101b0a52bf0ef51"
+  },
+  "previous-posteriors.json": {
+    "source": "/home/joe/code/futon6/data/pattern_posteriors.grounded.json",
+    "sha256": "785915bc1d7ff105b14568e745060bdfa2cdaf25f8093483d8336ef566c6a9f3"
+  }
+}

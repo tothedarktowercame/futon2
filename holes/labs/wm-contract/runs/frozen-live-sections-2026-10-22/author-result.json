@@ -1,0 +1,41 @@
+{
+  "schema": "wm/frozen-live-author-result-v1",
+  "agent": "zai-2",
+  "operation": ":declare-mission-lifecycle-state",
+  "completion_check": "status-open-identify-recorded",
+  "target": {
+    "path": "/home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md",
+    "repo_head": "8cda33d6c8a155abea36dc362bd04d3e5f780096",
+    "sha256": "1a541e859c7abf6631edc39649b3a3067d33eea9715d74324e6c75a109f0d6bd",
+    "matches_input_sha256": true
+  },
+  "observed_status": {
+    "text": "**Status:** OPEN — IDENTIFY",
+    "line": 3,
+    "satisfied": true
+  },
+  "result": ":already-satisfied",
+  "changed": false,
+  "command_evidence": [
+    {"cmd": "sha256sum /home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md", "out": "1a541e859c7abf6631edc39649b3a3067d33eea9715d74324e6c75a109f0d6bd"},
+    {"cmd": "cd /home/joe/code/futon3a && git rev-parse HEAD", "out": "8cda33d6c8a155abea36dc362bd04d3e5f780096 (short 8cda33d)"},
+    {"cmd": "grep -n 'Status' futon3a/holes/missions/M-pattern-posteriors.md", "out": "3:**Status:** OPEN — IDENTIFY"}
+  ],
+  "first_unchecked_item": {
+    "line": 11,
+    "text": "- [ ] `futon6/holes/closure-folds.edn` contains at least one attempted-but-unclosed fold with a non-empty `:used` set, so a rebuild can increment β rather than observing success-only evidence.",
+    "data_source": "/home/joe/code/futon6/holes/closure-folds.edn (read-only, 7179 bytes)",
+    "finding": "SATISFIED BY THE DATA, STILL UNCHECKED: two records have :success false with non-empty :used: {scope hypergraph-operator/argue :used [math-formalization/continuous-linear-map-composition] :missing aif-architecture/capability-operator-argue} and {scope hypergraph-operator/derive :used [math-formalization/continuous-linear-map-composition] :missing aif-architecture/capability-operator-derive}. A third negative exists (E-mission-head/head-sigil v0) but with :used [], so it does not satisfy the non-empty-used condition.",
+    "consumer_state": "futon6/data/pattern_posteriors.grounded.json (9 entries) still shows every used stem at {alpha 1, beta 0, mean 0.666667} — i.e. it predates the failure records; the A/B report futon3a/holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md is dated 2026-06-10 and documents the uniform-0.667 ceiling. So the item's intended downstream effect (a β-growing rebuild) has not been run."
+  },
+  "smallest_productive_next_task": {
+    "task": "Rerun the recompute-from-scratch posterior learner so the two failure folds increment β, then re-verify the discriminating A/B.",
+    "inputs": ["/home/joe/code/futon6/holes/closure-folds.edn"],
+    "output": ["/home/joe/code/futon6/data/pattern_posteriors.grounded.json", "/home/joe/code/futon6/data/pattern-phylogeny-edges.json", "/home/joe/code/futon6/data/pattern-phylogeny-learned.json", "/home/joe/code/futon6/data/cascade-coverage-gaps.edn"],
+    "command": "cd /home/joe/code/futon6 && python3 scripts/cascade_learn.py (defaults point at the four outputs above; script is byte-idempotent over the same closure-folds.edn)",
+    "acceptance": "after the run, pattern_posteriors.grounded.json contains math-formalization/continuous-linear-map-composition with beta == 2 and mean < 0.666667, and at least two distinct means exist across used stems (non-uniform table). Then regenerate the grounded A/B section of futon3a/holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md from the rebuilt table (query scan-coherence/mission-anchored-scan over the embedded-pattern pool, preserving bounded positive-margin and coverage-saturation invariants), and only then tick line 11 of the mission."
+  },
+  "no_clicks_used": true,
+  "no_commits": true,
+  "no_other_writes": true
+}

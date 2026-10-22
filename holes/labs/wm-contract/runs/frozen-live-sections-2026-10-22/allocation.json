@@ -1,0 +1,41 @@
+{
+  "project": "wm-frozen-sections",
+  "authority": "Joe operator turn 2026-10-22",
+  "caller": "codex-11",
+  "allocated": 10,
+  "issued_click_ids": [],
+  "consumed": 0,
+  "remaining": 10,
+  "cumulative_before": {
+    "schema": "wm/ordinary-click-availability-v1",
+    "authorization": {
+      "path": "futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md",
+      "sha": "326826ac"
+    },
+    "allocated": 148,
+    "consumed": 147,
+    "available": 1,
+    "unit": "ordinary-click",
+    "ledger-source": {
+      "path": "/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl",
+      "sha256": "d0b4199582be2cadc2789fcc61f956209825531d25838c73369ebed92d832397"
+    }
+  },
+  "cumulative_after": {
+    "schema": "wm/ordinary-click-availability-v1",
+    "authorization": {
+      "path": "futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md",
+      "sha": "326826ac"
+    },
+    "allocated": 158,
+    "consumed": 147,
+    "available": 11,
+    "unit": "ordinary-click",
+    "ledger-source": {
+      "path": "/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl",
+      "sha256": "d0b4199582be2cadc2789fcc61f956209825531d25838c73369ebed92d832397"
+    }
+  },
+  "source_commit": "36fb2c740",
+  "method": "resume each saved successful section; issue new clicks only as needed"
+}

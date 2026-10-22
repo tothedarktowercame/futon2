@@ -1,0 +1,12 @@
+{
+  "schema": "wm/frozen-live-input-v1",
+  "authority": "Joe, operator approval 2026-10-22",
+  "project_clicks_allocated": 10,
+  "project_clicks_consumed": 0,
+  "mode": "new-author-review-exchange-from-offline-checkpoint",
+  "production_click": false,
+  "predecessor_digest": "537156dbae875126efd8046839fcc4b31c682bfc66cfdd38a17ed36503c9ccc0",
+  "mission_path": "/home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md",
+  "mission_sha256": "1a541e859c7abf6631edc39649b3a3067d33eea9715d74324e6c75a109f0d6bd",
+  "mission_repo_head": "8cda33d6c8a155abea36dc362bd04d3e5f780096"
+}

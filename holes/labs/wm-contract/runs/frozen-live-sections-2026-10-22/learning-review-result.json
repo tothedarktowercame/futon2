@@ -1,0 +1,39 @@
+{
+  "schema": "wm/frozen-live-learning-review-result-v1",
+  "reviewer": "zai-3",
+  "verdict": "accepted",
+  "learning_result_sha256": "7337631bc10dfddad02838dfa48d5ce4ba113b73967b4dabe323a7deb3bfb3d2",
+  "input_verification": {
+    "manifest_sha256": "e911689fcc40784aca0300e5f9a311c61e2d5f04c4ec4639a9af779f082fc47e",
+    "all_five_manifest_hashes_match_files": true,
+    "all_five_sources_still_current_in_futon6": {
+      "closure-folds.edn": "a38a181827f91906b5e1275d942c0cc3f85817d23e3208461244334d762a3186 == live",
+      "pattern-phylogeny-edges.json": "5a0c231ec2debd6e1f7f7cfff7d85d1e253389272d5d7bfa730683b5f3ab1a31 == live",
+      "cascade_learn.py": "67cb6f7d7db5274169ff8ff5b722e3f2ec1b05d72abdd1f6dfc862f28193e01e == live",
+      "futon6_config.py": "25125232643ecb863c2aca7c8a7d3ff533aa9777812bc3c24101b0a52bf0ef51 == live",
+      "pattern_posteriors.grounded.json (previous)": "785915bc1d7ff105b14568e745060bdfa2cdaf25f8093483d8336ef566c6a9f3 == live"
+    }
+  },
+  "approved_output_hashes": {
+    "pattern_posteriors.grounded.json": "c08e05266ab6c25be6ec844ec39cd51d3511428f33c8e22dda00e84bb161fd11",
+    "pattern-phylogeny-learned.json": "5f98fff202edae8f058f8ca40ca447d394cdf36a0ef5bb276affdd1d869b363e",
+    "cascade-coverage-gaps.edn": "7f55a7092d4e225ba4cd3658104cba1490a1195d42720b90a224ef4d72ac921b"
+  },
+  "independent_rerun": {
+    "command": "FUTON_CODE_ROOT=/home/joe/code python3 learning-input/cascade_learn.py --closures learning-input/closure-folds.edn --computed learning-input/computed-edges.json --posteriors /tmp/rv-pp.json --learned /tmp/rv-pl.json --gaps /tmp/rv-pg.edn",
+    "stdout": "closures=15 successful=12; grounded-posteriors=10; learned-co-app=2 learned-descent=0; coverage-gaps=2; exit 0",
+    "all_three_outputs_byte_identical_to_learning_pass_1": true
+  },
+  "repeatability_check": "learning-pass-1 and learning-pass-2 compared with cmp: all three files byte-identical (hashes match the recorded values exactly)",
+  "genuine_recomputation": {
+    "outputs_derived_from_real_recorded_outcomes": "The learner reads only closure-folds.edn + pattern-phylogeny-edges.json; both are the live futon6 sources, hash-pinned. No hand-edited data is involved: diff(previous, rebuilt) shows exactly one ADDED entry and zero modified entries.",
+    "only_change_vs_previous": "two-projections-of-one-quantity {alpha 1, beta 0, mean 0.666667} added; all 9 existing entries unchanged",
+    "real_success_evidence": "closure-folds.edn line 67-68: {:scope \"wm-flight/turn-4-two-projections-mint\" :success true :used [\"structure/two-projections-of-one-quantity\"]} — a genuinely recorded successful fold, which postdates the previous (9-entry) table. The new entry's alpha=1 comes from this real success, not from a manufactured outcome."
+  },
+  "author_correction_acknowledged": "The learning-result explicitly retracts the earlier beta==2 prediction for continuous-linear-map-composition, matching my independent finding (connected_within() charges beta only to phylogeny-connected multi-pattern used sets; both negatives are singleton-used and relocate to coverage gaps). No algorithm edits were made; behaviour is as specified.",
+  "blockers_to_install": "NONE. All five source hashes are still current in futon6 at review time (verified above), so installing learning-pass-1's three files into /home/joe/code/futon6/data is approved: pattern_posteriors.grounded.json <- c08e0526..., pattern-phylogeny-learned.json <- 5f98fff2..., cascade-coverage-gaps.edn <- 7f55a709.... The install updates a stale table; it claims no non-uniform prior, no mission completion, no production WM close. Re-verify the closure-folds.edn and cascade_learn.py hashes immediately before the copy in case the tree moved.",
+  "corrected_next_test": "Do not engineer failed folds. The natural, successful-work route to a differentiated table: a real further successful use of any already-scored pattern raises its alpha from 1 to 2 (mean 0.75) while others stay at 0.666667 — a genuine, non-uniform, count-differentiated table from real recorded outcomes only. Concretely: the next real fold that uses e.g. scan-coherence/mission-anchored-scan and closes is recorded in closure-folds.edn with that stem in :used and :success true; the following cascade_learn rerun then yields two distinct means with no invented negatives. Mission line 11 (data condition) already holds; line 12 (discriminating grounded A/B) remains open until such real evidence exists.",
+  "no_clicks": true,
+  "no_commits": true,
+  "no_production_writes": true
+}

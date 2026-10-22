@@ -1,0 +1,40 @@
+{
+  "schema": "wm/frozen-live-learning-result-v1",
+  "agent": "zai-2",
+  "task": "execute the real posterior learner from frozen inputs; verify repeatability; trace negative folds",
+  "input_validation": {
+    "manifest": "learning-input/manifest.json",
+    "all_five_sha256_match_manifest": true,
+    "closure-folds.edn_matches_live": true,
+    "cascade_learn.py_matches_live": true
+  },
+  "command": "FUTON_CODE_ROOT=/home/joe/code python3 learning-input/cascade_learn.py --closures learning-input/closure-folds.edn --computed learning-input/computed-edges.json --posteriors learning-pass-N/pattern_posteriors.grounded.json --learned learning-pass-N/pattern-phylogeny-learned.json --gaps learning-pass-N/cascade-coverage-gaps.edn  (N=1 then N=2, identical invocation)",
+  "stdout_frozen": "pass1: closures=15 successful=12 / grounded-posteriors=10 / learned-co-app=2 learned-descent=0 / coverage-gaps=2 (exit 0); pass2 byte-identical stdout (exit 0)",
+  "output_hashes": {
+    "learning-pass-1/pattern_posteriors.grounded.json": "c08e05266ab6c25be6ec844ec39cd51d3511428f33c8e22dda00e84bb161fd11",
+    "learning-pass-1/pattern-phylogeny-learned.json": "5f98fff202edae8f058f8ca40ca447d394cdf36a0ef5bb276affdd1d869b363e",
+    "learning-pass-1/cascade-coverage-gaps.edn": "7f55a7092d4e225ba4cd3658104cba1490a1195d42720b90a224ef4d72ac921b",
+    "learning-pass-2 (all three files)": "identical to pass-1 bytewise (cmp)"
+  },
+  "repeatability": "byte-identical across pass 1 and pass 2 for all three outputs",
+  "before_after_comparison": {
+    "previous": "learning-input/previous-posteriors.json (9 entries, all mean 0.666667)",
+    "after": "10 entries; the ONLY change vs previous is one ADDED entry two-projections-of-one-quantity {alpha 1, beta 0, mean 0.666667} (the wm-flight/turn-4-two-projections-mint success record, which postdates the live table). No existing entry changed.",
+    "distinct_means_after": [0.666667]
+  },
+  "observed_beta_and_means": {
+    "beta_anywhere": 0,
+    "continuous-linear-map-composition": "ABSENT from the posterior table (isolated failure -> no charge -> neutral Beta(1,1) by design)",
+    "my_prior_expectation_corrected": "My earlier beta==2 prediction for continuous-linear-map-composition was WRONG. connected_within charges beta to a used pattern only when it shares a phylogeny edge (co_app or descent) with ANOTHER pattern in the same used set. Both negative folds (hypergraph-operator/argue, hypergraph-operator/derive) have singleton used sets [continuous-linear-map-composition], so connectivity is impossible and the rule intentionally excludes them: sole-used failures are retrieval/coverage errors, not utility failures. The algorithm was not edited; this is its specified behaviour."
+  },
+  "negative_fold_trace": [
+    {"scope": "hypergraph-operator/argue", "success": false, "used": ["math-formalization/continuous-linear-map-composition"], "charge": "coverage-gap, NOT beta", "gap_entry": "{:scope hypergraph-operator/argue :missing aif-architecture/capability-operator-argue}"},
+    {"scope": "hypergraph-operator/derive", "success": false, "used": ["math-formalization/continuous-linear-map-composition"], "charge": "coverage-gap, NOT beta", "gap_entry": "{:scope hypergraph-operator/derive :missing aif-architecture/capability-operator-derive}"}
+  ],
+  "discrimination_status": "STILL UNAVAILABLE: all 10 grounded means are 0.666667, so the multiplier remains uniform and no A/B discrimination among used stems is possible yet.",
+  "next_missing_input": "One FAILED fold whose :used set has >=2 patterns that are phylogeny-connected within the set (a genuine failed compositional cascade, not a sole-match), OR any outcome pair that differentiates one stem's counts from the others. Concretely: attempt a fold that applies two already-co-used patterns (e.g. mission-anchored-scan + mission-unlocks-eoi, which share a co_app edge) and record the failure in futon6/holes/closure-folds.edn with both stems in :used; the next cascade_learn run will then charge beta to the connected participants and the table becomes non-uniform. Mission line 11's data condition already holds; the discrimination condition (line 12) does not.",
+  "evidence_class": "component execution evidence only; not a production click, not mission completion",
+  "no_clicks": true,
+  "no_commits": true,
+  "writes": ["learning-pass-1/", "learning-pass-2/", "learning-result.json"]
+}

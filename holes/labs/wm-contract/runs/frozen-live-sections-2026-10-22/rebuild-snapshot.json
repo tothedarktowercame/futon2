@@ -1,0 +1,25 @@
+{
+  "agent": "zai-2",
+  "artifacts": [
+    {
+      "path": "rebuild-dispatch.json",
+      "sha256": "c802b424538f977af44e24221ce093e76b47924da4daf22f67c0cc747a84b298"
+    },
+    {
+      "path": "learning-result.json",
+      "sha256": "7337631bc10dfddad02838dfa48d5ce4ba113b73967b4dabe323a7deb3bfb3d2"
+    },
+    {
+      "path": "rebuild-terminal.json",
+      "sha256": "067e5e05870b0907d5062a250ae79d7ba1c25ef13a8d94ef591d0c903a325b30"
+    },
+    {
+      "path": "learning-input/manifest.json",
+      "sha256": "e911689fcc40784aca0300e5f9a311c61e2d5f04c4ec4639a9af779f082fc47e"
+    }
+  ],
+  "job_id": "invoke-1792637358086-2141-6aafe86b",
+  "phase": "rebuild",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

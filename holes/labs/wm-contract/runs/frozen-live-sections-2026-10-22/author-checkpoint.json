@@ -1,0 +1,11 @@
+{
+  "schema": "wm/frozen-agent-section-v1",
+  "stage": "author-verified-current-state",
+  "predecessor": "537156dbae875126efd8046839fcc4b31c682bfc66cfdd38a17ed36503c9ccc0",
+  "job_id": "invoke-1792637169716-2135-b0c09671",
+  "result_path": "author-result.json",
+  "result_sha256": "89b71e918ec50900b78682175c8f85175863d0dec7450c015ebca64e435b31c9",
+  "job_sha256": "540a8d350f123a5875431bc6c4e2a73e820c1952f23f947fcef977f1bd3196f2",
+  "mission_changed": false,
+  "project_clicks_consumed": 0
+}

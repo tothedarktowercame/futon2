@@ -1,0 +1,25 @@
+{
+  "agent": "zai-2",
+  "artifacts": [
+    {
+      "path": "author-dispatch.json",
+      "sha256": "d7813f4fe72c6a8b5d042dabba015bcb87e55836bfe8db9c993743fb429965d8"
+    },
+    {
+      "path": "author-result.json",
+      "sha256": "89b71e918ec50900b78682175c8f85175863d0dec7450c015ebca64e435b31c9"
+    },
+    {
+      "path": "author-terminal.json",
+      "sha256": "540a8d350f123a5875431bc6c4e2a73e820c1952f23f947fcef977f1bd3196f2"
+    },
+    {
+      "path": "input.json",
+      "sha256": "6fba97d0838d0b3f8d1026d18f1bb13e33e4763125ba206307eaaf82f1445da9"
+    }
+  ],
+  "job_id": "invoke-1792637169716-2135-b0c09671",
+  "phase": "author",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

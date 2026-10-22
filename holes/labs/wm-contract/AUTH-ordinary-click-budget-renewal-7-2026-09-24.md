@@ -291,3 +291,18 @@ between 13:59Z and 14:21Z and all died at self-heal production readiness (findin
 by F2a `724d5799e` and F2b futon3c `d0fc30952`, live since the 15:28Z reload). None of those
 charges is reclaimed. Under this document's standing mechanism, `allocated` rises from 118 to
 **123**. Recorded by claude-5.
+
+## Joe's frozen-section project grant to codex-11, 2026-10-22 — ten clicks
+
+Joe directly approved the new Zai author/reviewer exchange in the emacs-repl
+operator turn: "record 10 are allocated for this project so that we can run them
+as needed". He required continuing to freeze each successful section and build
+the next section from that saved boundary. A resumed exchange need not spend a
+click. This is a project allowance, not an instruction to issue ten clicks now.
+
+Increase the cumulative ordinary allocation from 148 to **158**. Preserve all
+historical charges and the existing authorization identity. Record this lane's
+issued clicks as caller `codex-11`, with project evidence under
+`runs/frozen-live-sections-2026-10-22/`. Initial project usage: 0 of 10.
+The serving snapshot before this grant records allocated=148, consumed=147;
+the previously available click belongs to earlier grants, not this project.
