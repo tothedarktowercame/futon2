@@ -3451,13 +3451,33 @@
    whose declared products and target acceptance are mechanically true;
    `:grounded-progress` names an honest reviewed commit that did not close
    them.  Cascades declaring no products retain the legacy outcome because
-   there is no closure claim to test."
+   there is no closure claim to test.
+
+   A co-apply (compiled) cascade carries its patterns in a MAP under
+   :precedence {:co-apply {:patterns {id pattern}}}, so the vector-shaped
+   enacted-step-pattern reader sees no products.  C1 (declared-effect
+   contract review, claude-2, F1): on that shape the declared products are
+   the union of the co-applied patterns' own :produces, and the SAME
+   accepted-increment observation checks decide closure -- never a bare
+   :grounded-change preserved just because the vector reader found nothing.
+   With no verified evidence (no declaration for the target, no fresh
+   binding, or a locator observed false) the honest outcome is
+   :grounded-progress: the caller supplied a reviewed GROUNDED increment,
+   but nothing mechanically verified its intended effect."
   [requested-outcome selected-action data]
   (if-not (= :grounded-change requested-outcome)
     requested-outcome
-    (let [{:keys [pattern]} (enacted-step-pattern selected-action)
-          target (:target (or (:selected-action selected-action) selected-action))
-          declared (vec (:produces pattern))]
+    (let [action (or (:selected-action selected-action) selected-action)
+          target (:target action)
+          co-apply (get-in action [:precedence :co-apply])
+          declared
+          (if (map? (:precedence action))
+            ;; co-apply shape: the closure claim is every co-applied
+            ;; pattern's own declared products, in the union.
+            (vec (distinct (mapcat (comp :produces val)
+                                   (or (:patterns co-apply) {}))))
+            (let [{:keys [pattern]} (enacted-step-pattern selected-action)]
+              (vec (:produces pattern))))]
       (if (empty? declared)
         requested-outcome
         (let [sources (cascade-sources/load-declared)
