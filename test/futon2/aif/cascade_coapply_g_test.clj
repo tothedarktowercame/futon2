@@ -158,3 +158,57 @@
       (is (= kind (:kind r)) (pr-str r))
       (is (not= :no-admissible-candidate (:reason r)))
       (is (not (contains? r :candidates))))))
+
+(defn per-candidate-opts [h candidates models]
+  (-> (opts h (into {} (map (fn [candidate]
+                              [(:id candidate) (zipmap (keys (get-in candidate [:precedence :co-apply :patterns]))
+                                                       (repeat [1 1]))])
+                            candidates)))
+      (dissoc :observation-model)
+      (assoc :observation-model-of models)))
+
+(deftest different-targets-use-their-own-class-model-at-one-ruled-horizon
+  (let [u-token ["U" :done]
+        other (assoc (candidate :other {:done (pattern :done #{} #{u-token} 1)} []) :target "U")
+        model-t (shape/class-emission-model "T" #{a b c} #{c} 2)
+        model-u (shape/class-emission-model "U" #{u-token} #{u-token} 2)
+        options (assoc (per-candidate-opts 2 [join other] {:join model-t :other model-u})
+                       :require-ruled-class-kernel? true)
+        result (g/compare-at-horizon {:cascade-belief {#{} 1}} [join other] options)]
+    (is (vector? result) (pr-str result))
+    (is (= #{:join :other} (set (map :cascade-id result))))
+    (is (= #{1 2} (set (map :rank result))))
+    (is (= #{model-t model-u} (set (map :observation-model result))))
+    (is (= :compareAtHorizonN (:lean-reduction (meta result))))))
+
+(deftest per-candidate-model-family-refusals-are-distinct-from-candidate-refusals
+  (let [other (assoc join :id :other)
+        model-2 (shape/class-emission-model "T" #{a b c} #{c} 2)
+        model-3 (shape/class-emission-model "T" #{a b c} #{c} 3)
+        base (per-candidate-opts 2 [join other] {:join model-2 :other model-2})
+        unequal (assoc-in model-2 [:class-preference 2]
+                          {:focused 0 :related 1 :unrelated 0 :stop-the-line 0})]
+    (doseq [[options reason]
+            [[(assoc base :observation-model-of {:join model-2 :other model-3})
+              :class-horizon-mismatch]
+             [(assoc base :observation-model-of {:join model-2 :other unequal})
+              :class-preference-not-shared]
+             [(assoc base :observation-model-of {:join unequal :other unequal}
+                          :require-ruled-class-kernel? true)
+              :class-preference-not-ruled]]]
+      (let [result (g/compare-at-horizon {:cascade-belief {#{} 1}} [join other] options)]
+        (is (= reason (or (:reason result) (:kind result))) (pr-str result))
+        (is (not= :no-admissible-candidate (:reason result)))
+        (is (not (contains? result :candidates)))))))
+
+(deftest missing-per-candidate-model-refuses-only-that-candidate
+  (let [other (assoc join :id :other)
+        model-2 (shape/class-emission-model "T" #{a b c} #{c} 2)
+        options (per-candidate-opts 2 [join other] {:join model-2})
+        result (g/compare-at-horizon {:cascade-belief {#{} 1}} [join other] options)]
+    (is (vector? result) (pr-str result))
+    (is (= :join (:cascade-id (first result))))
+    (is (= 1 (:rank (first result))))
+    (is (= :refused (:status (second result))))
+    (is (= :observation-model-missing (get-in result [1 :refusal :reason])))
+    (is (= :scoreCascadeCoN-map (:lean-reduction (meta result))))))

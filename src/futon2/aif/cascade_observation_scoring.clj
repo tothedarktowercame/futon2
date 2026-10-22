@@ -88,52 +88,64 @@
                              (mapcat :absent (get-in p [:guard :clauses])))))
         (mapcat #(precedence-patterns (:precedence %)) candidates)))
 
-(defn validate-shared-inputs!
-  "Validate comparison-wide model, belief, horizon and context before any candidate is scored."
+(defn validate-comparison-inputs!
+  "Validate inputs shared by a comparison, independently of its observation model."
   [q0 opts]
-  (let [{:keys [observation-model horizon-steps prediction-context cascade-spec]} opts
-        universe (:universe observation-model)]
-    (om/validate! observation-model)
+  (let [{:keys [horizon-steps prediction-context cascade-spec]} opts]
     (when-not (and (pos-int? horizon-steps) (<= horizon-steps max-horizon))
       (om/refuse! :invalid-bounded-horizon {:limit max-horizon}))
     (when-not (and (some? (:occurrence-id prediction-context))
                    (= horizon-steps (:tau prediction-context)))
       (om/refuse! :missing-prediction-context {}))
-    (when (contains? #{:class-emission :progress-count} (:kind observation-model))
-      ;; The class scorer still rolls B through the token transition model,
-      ;; so B's token domain holds: set-shaped q0 states, q0 support and
-      ;; candidate tokens inside the declared universe, and the model's
-      ;; horizon equal to the rollout horizon (handoff A, codex-20).
-      (when-not (= (:horizon observation-model) horizon-steps)
-        (om/refuse! :class-horizon-mismatch
-                    {:model (:horizon observation-model) :rollout horizon-steps})))
-    (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
-                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
-      (om/refuse! :invalid-state-belief
-                   {:non-set-states (count (remove set? (keys q0)))
-                    :outside-states (vec (sort-by pr-str (for [st (keys q0)
-                                                               :when (and (set? st)
-                                                                          (seq (set/difference st universe)))]
-                                                           {:state st
-                                                            :outside (vec (sort-by pr-str (set/difference st universe)))})))}))
     (when-not (and (map? cascade-spec)
                    (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
-                   (every? set? (:zeroed cascade-spec))
-                   ;; The want/evidence/zeroed subset-of-universe check is
-                   ;; the token preference's domain rule; the class model's
-                   ;; preference lives over classes, so only the shape holds.
-                   (or (contains? #{:class-emission :progress-count} (:kind observation-model))
-                       (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
-                                               (into #{} cat (:zeroed cascade-spec))) universe)))
+                   (every? set? (:zeroed cascade-spec)))
       (om/refuse! :invalid-observation-preference {}))
-    ;; Tempering a coupled row requires its own normalization, not a map of
-    ;; tempered marginal rates. Never silently ignore the production option.
+    (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
+                   (every? set? (keys q0)))
+      (om/refuse! :invalid-state-belief
+                  {:non-set-states (count (remove set? (keys q0)))}))
     (when (or (contains? opts :adjudication-rates)
               (and (contains? opts :zeta) (not= 1 (:zeta opts))))
       (om/refuse! :conflicting-observation-options {}))))
 
+(defn validate-observation-model!
+  "Validate MODEL against comparison belief, horizon, and preference domain."
+  [q0 model {:keys [horizon-steps cascade-spec]}]
+  (let [universe (:universe model)]
+    (om/validate! model)
+    (when (contains? #{:class-emission :progress-count} (:kind model))
+      ;; The class scorer still rolls B through the token transition model,
+      ;; so B's token domain holds: set-shaped q0 states, q0 support and
+      ;; candidate tokens inside the declared universe, and the model's
+      ;; horizon equal to the rollout horizon (handoff A, codex-20).
+      (when-not (= (:horizon model) horizon-steps)
+        (om/refuse! :class-horizon-mismatch
+                    {:model (:horizon model) :rollout horizon-steps})))
+    (when-not (every? #(set/subset? % universe) (keys q0))
+      (om/refuse! :invalid-state-belief
+                   {:non-set-states 0
+                    :outside-states (vec (sort-by pr-str (for [st (keys q0)
+                                                               :when (seq (set/difference st universe))]
+                                                           {:state st
+                                                            :outside (vec (sort-by pr-str (set/difference st universe)))})))}))
+    ;; The want/evidence/zeroed subset-of-universe check is the token preference's
+    ;; domain rule; the class model's preference lives over classes.
+    (when-not (or (contains? #{:class-emission :progress-count} (:kind model))
+                  (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
+                                          (into #{} cat (:zeroed cascade-spec))) universe))
+      (om/refuse! :invalid-observation-preference {}))))
+
+(defn validate-shared-inputs!
+  "Validate comparison-wide inputs and its single observation model."
+  [q0 opts]
+  (validate-comparison-inputs! q0 opts)
+  (validate-observation-model! q0 (:observation-model opts) opts))
+
 (defn- validate-inputs! [q0 candidates opts]
-  (validate-shared-inputs! q0 opts)
+  (if (::comparison-validated? opts)
+    (validate-observation-model! q0 (:observation-model opts) opts)
+    (validate-shared-inputs! q0 opts))
   (let [observation-model (:observation-model opts)
         universe (:universe observation-model)]
     (when-not (and (vector? candidates)

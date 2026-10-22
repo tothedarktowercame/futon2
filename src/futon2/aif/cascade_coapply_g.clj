@@ -4,7 +4,8 @@
   Counts are explicit positive [a b] pairs per occurrence, not inferred priors.
   This is a scoring component, not an admission or execution certificate."
   (:require [futon2.aif.cascade-model-manifest :as model]
-            [futon2.aif.cascade-observation-scoring :as scorer]))
+            [futon2.aif.cascade-observation-scoring :as scorer]
+            [futon2.aif.cascade-shape-g :as shape]))
 
 (defn- refuse! [reason data]
   (throw (ex-info "Canonical co-application G refused"
@@ -54,10 +55,18 @@
 
 (defn- score-one [state c opts]
   (try
-    (let [counts (get-in opts [:pattern-counts (:id c)])
+    (let [observation-model (if-let [models (:observation-model-of opts)]
+                              (or (get models (:id c))
+                                  (refuse! :observation-model-missing {:candidate (:id c)}))
+                              (:observation-model opts))
+          candidate-opts (assoc opts :observation-model observation-model
+                                ::scorer/comparison-validated? true)
+          counts (get-in opts [:pattern-counts (:id c)])
           _ (candidate! c counts)
+          _ (scorer/validate-observation-model! (:cascade-belief state)
+                                                observation-model candidate-opts)
           ranked (scorer/rank-cascade-actions state [c]
-                   (assoc opts :g-normalization :raw-cumulative :parameter-information-mode :none
+                   (assoc candidate-opts :g-normalization :raw-cumulative :parameter-information-mode :none
                                :require-finite-risk? true :prediction-only? true))]
       (if-not (vector? ranked)
         {:cascade-id (:id c) :action c :status :refused :refusal ranked}
@@ -101,14 +110,32 @@
                    (every? :id candidates)
                    (= (count candidates) (count (distinct (map :id candidates)))))
       (refuse! :invalid-candidate-family {}))
-    (when-not (= :class-emission (get-in opts [:observation-model :kind]))
-      (refuse! :class-observation-required {}))
+    (when (and (contains? opts :observation-model)
+               (contains? opts :observation-model-of))
+      (refuse! :conflicting-observation-options {}))
+    (let [models (if-let [model-of (:observation-model-of opts)]
+                   (vals model-of)
+                   [(:observation-model opts)])
+          preferences (map :class-preference models)]
+      (when-not (every? #(= :class-emission (:kind %)) models)
+        (refuse! :class-observation-required {}))
+      (when-not (every? #(= (:horizon-steps opts) (:horizon %)) models)
+        (throw (ex-info "Canonical co-application G horizon refused"
+                        {:status :missing :kind :class-horizon-mismatch
+                         :rollout (:horizon-steps opts) :models (mapv :horizon models)})))
+      (when-not (apply = preferences)
+        (refuse! :class-preference-not-shared {}))
+      (when (:require-ruled-class-kernel? opts)
+        (let [ruled (:class-preference
+                     (shape/class-emission-model ::ruled #{} #{} (:horizon-steps opts)))]
+          (when-not (= ruled (first preferences))
+            (refuse! :class-preference-not-ruled {})))))
     (when (or (and (contains? opts :g-normalization)
                    (not= :raw-cumulative (:g-normalization opts)))
               (and (contains? opts :parameter-information-mode)
                    (not= :frontier-beta-approximation (:parameter-information-mode opts))))
       (refuse! :conflicting-score-law {}))
-    (scorer/validate-shared-inputs! (:cascade-belief state) opts)
+    (scorer/validate-comparison-inputs! (:cascade-belief state) opts)
     (let [results (mapv #(score-one state % opts) candidates)
           refused (filterv #(= :refused (:status %)) results)
           scored (filterv #(= :scored (:status %)) results)
@@ -123,5 +150,7 @@
                             (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
                 refused)
           {:formal-contract :cascade-coapply-g-novelty
+           :lean-reduction (if (:require-ruled-class-kernel? opts)
+                             :compareAtHorizonN :scoreCascadeCoN-map)
            :horizon-steps (:horizon-steps opts) :refused-count (count refused)})))
     (catch clojure.lang.ExceptionInfo e (ex-data e))))
