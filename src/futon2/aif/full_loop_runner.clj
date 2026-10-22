@@ -3388,12 +3388,19 @@
    the block is typed-absent with a reason. Nothing here is a gate."
   [{:keys [action]}]
   (try
-    (let [;; Initial dispatch supplies the construction/cascade entry, whose
-          ;; executable action lives under :selected-action. Revision prompts
-          ;; supply the action directly. Normalize both at this boundary so a
-          ;; produced token can never be rendered as [nil token].
-          action (or (:selected-action action) action)
-          target (:target action)
+    (let [;; A :compiled-cascade construction's criteria are its reviewed
+          ;; compiled completion checks, rendered verbatim by cascade-plan
+          ;; (with both digests).  Typed-absent when the compiled plan is
+          ;; absent or malformed; never silently rendered as complete.
+          entry action]
+      (if (cascade-plan/compiled-cascade? entry)
+        (cascade-plan/compiled-completion-criteria-text entry)
+        (let [;; Initial dispatch supplies the construction/cascade entry, whose
+              ;; executable action lives under :selected-action. Revision prompts
+              ;; supply the action directly. Normalize both at this boundary so a
+              ;; produced token can never be rendered as [nil token].
+              action (or (:selected-action action) action)
+              target (:target action)
           ;; ⟨1⟩6: the ENACTED step, read from the recorded decision's
           ;; :enacted-steps (threaded onto the action by
           ;; construct-selected-action); typed fallback to the head.
@@ -3434,7 +3441,7 @@
                     (clojure.string/join "\n" produced-lines) "\n"))
              (when acceptance-line
                (str "The target's own acceptance declaration:\n" acceptance-line "\n")))
-        {:status :absent :reason :no-renderable-criteria}))
+        {:status :absent :reason :no-renderable-criteria}))))
     (catch Exception e
       {:status :absent :reason :criterion-rendering-failed :message (.getMessage e)})))
 
