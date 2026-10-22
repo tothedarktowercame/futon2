@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:service {:running? false, :phase nil, :phase-transition :end, :click-id \"wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413\"}, :last {:click-id \"wm-click-c2a23bb2-b319-47ca-bd41-33aa6259e413\", :outcome :build-failed, :attempt-id \"attempt-002\", :run-record \"/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45.edn\", :report-card {:status :publication-launched, :url \"https://zone.hyperreal.enterprises/wip/wm-runs/2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45.html\", :artifacts {:edn \"/home/joe/code/futon2/data/wm-runs/2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45/report-card.edn\", :markdown \"/home/joe/code/futon2/data/wm-runs/2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45/report-card.md\", :html \"/home/joe/code/futon2/data/wm-runs/2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45/report-card.html\"}, :publication-job {:id \"bg-1792650641240-71\", :pid 2477847, :out-file \"/tmp/futon3c-bg/bg-1792650641240-71.log\", :started-at \"2026-10-22T06:30:41.241Z\"}}}, :stops []}}",
+  "err": ""
+}

@@ -1,0 +1,54 @@
+{
+  "schema": "wm/falsifier-frontier-discovery-result-v1",
+  "author": "zai-8",
+  "request": "invoke-1792650122696-2362-312afdf7",
+  "mode": "read-only discovery; no live state changed, no tests run, no shared JVM action",
+  "target": "M-stack-geometry",
+  "commit": "87d4289289da83a1040f5bf97252870f33ae6378",
+  "run": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45 (attempt-002, held at close-evidence-manifest)",
+
+  "findings": {
+
+    "1-exact-producer-consumer-mismatch": {
+      "consumer": "futon2.aif.selected-want-outcome/receipt (src/futon2/aif/selected_want_outcome.clj:30-38) requires the selected action to carry a non-empty :want (bare tokens, qualified to [target token]) plus :observation-locators, and a token-comparison with :status :compared whose rows census-match those wants.",
+      "build-phase-caller": "src/futon2/aif/full_loop_runner.clj:7762-7773 — reviewer-falsifier input recomputes measurements via d-task/artifact-tokens on the built commit, compares via token-outcome/compare-outcomes against the FROZEN selection checkpoint prediction, and passes :selected-action (get-in construction [:selected-action]). The close path repeats this at full_loop_runner.clj:5916-5922.",
+      "producer-of-wants": "Authored declaration source file (:want d keyed by target) read in cascade_sources.clj:285 → cascade-problems/base-problem :want (cascade_problems.clj:171-188, with the typed refusal :want-not-declared at 228-229) → token-belief-carry/domain-inputs [:declaration :want] (token_belief_carry.clj:10-15) → selection certificate token-belief-stage → token-outcome/freeze-prediction :wanted and the action's own :want key (token_outcome.clj:10-46).",
+      "producer-of-measurements": "d-task/artifact-tokens on the built commit — this producer EXISTS and ran (review-execution check passed, 8 tool events; revision-pair after=87d4289 present in failed-close-run-ending-classification.edn.gz). It is NOT an independent failure.",
+      "mismatch": "The compiled-cascade route selected from an already-compiled cascade-live-policy certificate (selection-frontier-summary: :policy-kind :cascade-live-policy-v1, branch :ordinary-cascade-policy). That route bypasses cascade-problems assembly, so the :want-not-declared guard never fires. Three independent want-reads all found nothing: (a) the frozen selected-action (construction.edn.gz) has keys only [kind id target precedence patterns ...] — no :want, no :observation-locators; (b) the frozen selection capture (selection-ordered.edn.gz) contains no domain-inputs at all; (c) freeze-prediction refused with :prediction-input-unavailable (failed-close-run-ending-classification.edn.gz). selected_want_outcome.clj:38 then refused :selected-want-identity-missing with wants [].",
+      "derivative-failure": "evidence-authority (:revision-authority-missing, measurements []) is purely derivative: reviewer_falsifier.clj:68-75 reads (get-in % [:after :measurement]) over (:outcomes outcomes), and a refused outcome receipt has no :outcomes, so rows=[] regardless of the measurements d-task actually produced."
+    },
+
+    "2-can-frozen-data-lawfully-supply-wants": {
+      "answer": "No. Grep of both frozen captures: no :want key on the selected action, no domain-inputs/declaration in the selection capture, prediction refused at selection time. The candidate's precedence patterns carry :produces (intended outputs) and freeze-prediction would derive :intended-outputs from them, but intended outputs are predictions, not declared wants; promoting them to :want would (i) invent the declaration this discovery was told not to invent, and (ii) fail the before-false check (selected_want_outcome.clj:~100 :selected-want-not-false-before) which requires the want absent from the frozen initial belief q0 — and q0 was never frozen because the prediction refused.",
+      "conclusion": "The upstream selected-action has no such declaration on this route. The omission is structural at selection, not a wiring slip between frozen producers and the build consumer."
+    },
+
+    "3-supported-recovery-point": {
+      "current-state": "Held at phase-breakpoint close-evidence-manifest (attempt-002); run-ending classification recorded :known-typed-failure {:outcome :build-failed :failure-kind :reviewer-falsifier-failed} (close-frontier-inspection.json).",
+      "reentry-mechanisms-audited": "Phase resume (run-phase! with frozen per-phase results) is forward-only; the only in-run repair/retry hook is :open-cascade-resume-fn at the cascade-execution phase (full_loop_runner.clj:6963-6986). No rewind to adjudication/grounding exists.",
+      "adjudication-would-not-help": "The falsifier's failed checks consume selection-phase products (declared wants, frozen prediction). Reentering adjudication/grounding cannot produce them; supplying them by hand at close would be forged selection evidence — reviewer_falsifier.clj:113-131 verify() reconstructs from canonical inputs and would refuse (a supplied pass cannot verify itself).",
+      "verdict": "This run can only finalize honest failure (:build-failed / :reviewer-falsifier-failed is already a known-typed-failure class). It must NOT be resumed into a grounded close.",
+      "lawful-repair-paths-for-a-NEW-attempt": [
+        "Author/complete the token declaration source for M-stack-geometry so cascade-sources reads a :want and cascade-problems assembles a problem with wants; then the ordinary route both freezes a prediction and carries :want on the action.",
+        "Or take the repair-machine-failure route, whose work-evidence kind legitimately makes selected-want-accounting and evidence-authority not-applicable through the durable-finding contract (reviewer_falsifier.clj:131-143) — after the durable finding for this failure is recorded."
+      ]
+    },
+
+    "4-smallest-structural-repair": {
+      "proposal": "Fail fast at the producer: in the selection cell construction (full_loop_runner.clj ~7079-7086 where :token-outcome-prediction is frozen onto the judgment), when the selected entry is an ordinary cascade-candidate whose freeze-prediction refused :prediction-input-unavailable / whose action lacks a declared :want, record a typed selection-phase refusal mirroring cascade_problems.clj:228-229 (:want-not-declared) instead of passing the want-less action to construction. Do NOT add a not-applicable branch to the falsifier — that would weaken the every-selected-want-accounted invariant.",
+      "positive-test": "A compiled-cascade selection whose declaration source declares wants: action carries :want, freeze-prediction is :frozen with matching :wanted, and the build falsifier's want-check and authority-check both pass against a real d-task measurement row (real dependency, not a stub).",
+      "negative-test": "The exact bad case this failure named: a compiled-cascade candidate for a target with NO declaration (this run's shape) → selection itself refuses :want-not-declared, the run record shows the refusal at the selection phase, and the run never reaches build with a want-less action.",
+      "limits": "This changes when the failure surfaces, not whether it is a failure; it does not mint wants, does not modify reviewer-falsifier/verify, and leaves the repair route untouched. Deeper (optional, separate) repair: policy compilation for cascade-live-policy should require a want declaration at compile time."
+    }
+  },
+
+  "evidence-cited": [
+    "reviewer-falsifier-frontier.json (refused checks, receipt 5d519f8e...)",
+    "construction.edn.gz (frozen selected-action without :want / :observation-locators)",
+    "selection-ordered.edn.gz (no domain-inputs)",
+    "selection-frontier-summary.edn (:cascade-live-policy-v1 branch)",
+    "failed-close-run-ending-classification.edn.gz (prediction :refused :prediction-input-unavailable)",
+    "failed-close-005-build.edn.gz (:validation :approved? false)"
+  ],
+  "limits-of-this-discovery": "Line numbers are from the working tree at futon2 HEAD as of 2026-10-22T06:2xZ; no code was changed. No runner test, Trial, dispatch, or shared-JVM load was performed."
+}

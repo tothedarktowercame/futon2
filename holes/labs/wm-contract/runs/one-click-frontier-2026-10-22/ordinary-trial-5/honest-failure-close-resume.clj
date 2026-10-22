@@ -1,0 +1,1 @@
+(let [rid "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45" s (first (filter #(= rid (:run-id %)) (futon2.aif.wm.debugger/stopped))) v (futon2.aif.wm.debugger/stop-value rid)] (assert (= :close-evidence-manifest (:phase s))) (assert (= "88b6cfd12813073a47462a2c2680bc25020c7c72c3a6bde3572585068672c9cd" (:manifest-sha256 v))) (futon2.aif.wm.debugger/continue! rid :continue))
