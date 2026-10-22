@@ -1,0 +1,25 @@
+{
+  "commit": "c856c363a",
+  "worktree": "/home/joe/code/futon2-declared-effect-wiring",
+  "scope": "First runner connections only; not deployable as complete live bridge",
+  "implemented": [
+    "Compiled ordinary route admission before cascade operational authoring/mint; real target repository head captured",
+    "Eligible record reconstructs with production authority; source+record retained before continuing and added to pending selection",
+    "Unchanged occurrence minted then separate binding retained",
+    "Pre-author dispatch compares actual head with frozen selection head and reconstructs binding"
+  ],
+  "validation": {
+    "real_historical_helper": "1 test/9 assertions pass: valid declaration binds, wrong target/base drift/absent declaration refuse",
+    "runner_compile": "require succeeded in standalone JVM, no serving load",
+    "lint": "0 errors;2 pre-existing runner warnings",
+    "parens": "OK"
+  },
+  "remaining": [
+    "effect prediction without synthetic scoring certificate",
+    "D-task effect universe/source binding and raw measurements",
+    "build/close selected-want receipts and independent falsifier using retained binding",
+    "close manifest inclusion and attempt contract versioning",
+    "owner declaration/horizon",
+    "independent review/integration/deploy/actual useful Trial"
+  ]
+}
