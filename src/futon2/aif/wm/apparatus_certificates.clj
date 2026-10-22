@@ -1,5 +1,6 @@
 (ns futon2.aif.wm.apparatus-certificates
-  "Fail-closed projection of retained run inputs into the R20 certificate.")
+  "Fail-closed projection of retained run inputs into the R20 certificate."
+  (:require [futon2.aif.focus-receipt :as focus-receipt]))
 
 (def schema :wm/r20-certificate-v1)
 (def lean-authority {:module "DarkTower.WarMachine.R20Certificate" :mathlib4 "8fda677deb"})
@@ -111,7 +112,7 @@
 ;; other relations are unscored/unknown. The focus receipt keeps the relation
 ;; vocabulary in :class; :scored-class below records its Lean projection, and
 ;; :consumed-class is what the scorer's class model held for that target.
-(def scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated})
+(def scorer-class focus-receipt/scorer-class)
 (defn- relation-key [relation]
   (let [relation (if (map? relation) (:relation relation) relation)]
     (cond (keyword? relation) relation (string? relation) (keyword relation) :else :other)))

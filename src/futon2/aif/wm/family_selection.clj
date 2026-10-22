@@ -259,16 +259,21 @@
 (defn score-family-field
   "Pure scoring stage.  It preserves one row per target and every typed
   construction/scoring failure; it never selects or certifies."
-  [families]
+  ([families] (score-family-field families nil))
+  ([families target-classes]
   (mapv
    (fn [family]
      (let [target (:target-id family)
+           target-class (get target-classes target)
            ready? (= :computed (:status family))
            reading-pin (select-keys (:provenance family)
                                     [:analysis-digest :excerpt-digest])
            attempted (if ready?
-                       (mapv (fn [p] [(assoc p :reading-pin reading-pin)
-                                      (shape-g/score-policy p)])
+                       (mapv (fn [p]
+                               (let [prepared (cond-> (assoc p :reading-pin reading-pin
+                                                               :require-target-class? (some? target-classes))
+                                                target-class (assoc :target-class target-class))]
+                                 [prepared (shape-g/score-policy prepared)]))
                              (:policies family)) [])
            scored (filterv #(= :computed (:status (second %))) attempted)
            score-failures
@@ -286,7 +291,7 @@
         :scored scored
         :policies (mapv (fn [[p score]] (policy-summary p score)) scored)
         :failures failures :failure-count (count failures)}))
-   families))
+   families)))
 
 (defn construct-ranked
   "Construct occurrence-grain ranked carriers without selecting."
@@ -297,7 +302,14 @@
                    (range 1 (inc (count scored))) scored)}))
 
 (def sealed-menu-body-keys
-  [:schema :field-source-pin :family-census :frontier :entries :refusals :failures])
+  [:schema :field-source-pin :family-census :frontier :focus-receipt :class-census
+   :entries :refusals :failures])
+
+(defn- class-census [target-classes]
+  {:by-class (frequencies (keep :class (vals target-classes)))
+   :unknown-by-reason (frequencies (keep (fn [[_ c]]
+                                          (when (= :unknown (:class c)) (:reason c)))
+                                        target-classes))})
 
 (defn measured-frontier [field]
   (let [families (:families field)
@@ -336,9 +348,11 @@
   occurrence readings and explicitly authored executable additions."
   [field join]
   (let [families (:families field)
+        target-classes (:target-classes join)
         failures (vec (mapcat #(map (partial annotate-failure (:target-id %))
                                     (:failures %)) families))]
-      (let [rows (score-family-field (filterv #(= :computed (:status %)) families))
+      (let [rows (score-family-field (filterv #(= :computed (:status %)) families)
+                                     target-classes)
             {:keys [ranked]} (construct-ranked rows)
             bound (cascade-identity/bind-ranked ranked
                                                 (or (:readings join) (constantly {}))
@@ -349,6 +363,8 @@
                   :field-source-pin (:source-pin field)
                   :family-census (field-census field)
                   :frontier (measured-frontier field)
+                  :focus-receipt (:focus-receipt join)
+                  :class-census (class-census target-classes)
                   :entries entries :refusals refusals
                   :failures (vec (concat failures (mapcat :failures rows) refusals))}]
         (cond

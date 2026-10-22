@@ -104,6 +104,11 @@
   [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
    :stated-relation :embedding-neighbour])
 
+;; CTauClassPreference.lean:124-138.  This is the sole relation-to-scorer
+;; vocabulary: callers retain the relation, while G consumes the projection.
+(def scorer-class
+  {:focus :focused :associated :related :useful-elsewhere :unrelated})
+
 ;; ---------------------------------------------------------------------------
 ;; WM-RELATION-I: an M- target with no row derives its relation, in order,
 ;; from (a) its mission's stated ## Relations, walked through M- targets to

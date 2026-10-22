@@ -17,6 +17,7 @@
             [futon2.aif.outer-policy-evidence-provider :as evidence-provider]
             [futon2.aif.outer-policy-objective :as policy-objective]
             [futon2.aif.assessed-policy-basis :as assessed-basis]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.selected-outer-cascade-policy :as selected-policy]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.q2-construction :as q2]
@@ -532,7 +533,8 @@
   "Run the live adapter. Dependencies are injectable for exact replay."
   [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning
            policy-field-config policy-field-fn policy-menu-fn
-           policy-menu-join outer-policy-evidence-provider selection-as-of]
+           policy-menu-join outer-policy-evidence-provider selection-as-of
+           focus-inputs focus-context focus-classify-fn focus-classify-context]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates
          policy-field-fn family-selection/full-eligible-target-field
@@ -621,6 +623,47 @@
                                     :graph-source (:graph-source snapshot)})))
         injury? (boolean (seq algorithm-tasks))
         candidates (if injury? (algorithm-candidates algorithm-tasks) [])
+        ;; The ordinary menu reads focus exactly once at the timestamp A1
+        ;; retained.  It is deliberately not consulted by the injury arm.
+        focus-inputs (when (and (not injury?) selection-as-of)
+                       (or focus-inputs (focus-receipt/read-inputs)))
+        focus-context (when (and (not injury?) selection-as-of)
+                        (or focus-context
+                            (focus-receipt/decision-focus-info focus-inputs selection-as-of)))
+        focus-valid? (and selection-as-of
+                          (= selection-as-of (:as-of focus-context)))
+        focus-receipt (cond
+                        injury? nil
+                        (nil? selection-as-of)
+                        {:status :refused :reason :selection-as-of-required}
+                        (not focus-valid?)
+                        {:status :refused :reason :focus-as-of-mismatch
+                         :selection-as-of selection-as-of
+                         :focus-as-of (:as-of focus-context)}
+                        :else
+                        {:status :present :as-of selection-as-of
+                         :focus (:focus focus-context)
+                         :focus-status (:status focus-context)
+                         :focus-origin (:focus-origin focus-context)})
+        classify (or focus-classify-fn focus-receipt/classify-target)
+        target-classes
+        (if (= :present (:status focus-receipt))
+          (into {}
+                (map (fn [task]
+                       (let [c (classify focus-inputs focus-context selection-as-of (:id task)
+                                         focus-classify-context)
+                             relation (:class c)]
+                         [(:id task) {:class relation
+                                      :scorer-class (get focus-receipt/scorer-class relation)
+                                      :reason (when (= :unknown relation)
+                                                (or (:reason c)
+                                                    :classifier-reason-not-recorded))
+                                      :provenance {:status :frozen-focus
+                                                   :as-of selection-as-of
+                                                   :relation-source (:derived-via c)
+                                                   :focus-status (:status focus-context)}}]))
+                     on-map))
+          {})
         ;; `selector` transports optional injection keys explicitly.  Clojure's
         ;; destructuring :or does not replace a present nil, so production
         ;; requests without an injected constructor used to call nil here and
@@ -634,16 +677,19 @@
                            :pipeline-target-data-unavailable
                            :pipeline-target-population-observed-empty)
         policy-field (when (and (not injury?)
+                                (= :present (:status focus-receipt))
                                 (seq on-map)
                                 (= :verified (:status snapshot-verification))
                                 (map? policy-field-config))
                        (policy-field-fn on-map policy-field-config))
         incomplete (when policy-field
                      (filterv #(not= :computed (:status %)) (:families policy-field)))
-        menu-join (or policy-menu-join
-                      {:readings (fn [entry]
-                                   (cascade-decision/occurrence-readings
-                                    entry (:reading-pin entry)))})
+        menu-join (assoc (or policy-menu-join
+                             {:readings (fn [entry]
+                                          (cascade-decision/occurrence-readings
+                                           entry (:reading-pin entry)))})
+                         :focus-receipt focus-receipt
+                         :target-classes target-classes)
         sealed-menu (when policy-field
                       (policy-menu-fn policy-field menu-join))
         provided (when (= :sealed (:status sealed-menu))
@@ -686,7 +732,8 @@
         ordinary-result
         (when-not injury?
           (cond
-            (not= :verified (:status snapshot-verification)) snapshot-verification
+          (not= :verified (:status snapshot-verification)) snapshot-verification
+            (not injury?) focus-receipt
             no-available-targets?
             {:status :abstained :reason no-target-reason
              :section-availability (:section-availability membership)

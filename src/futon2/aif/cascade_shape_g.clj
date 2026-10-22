@@ -37,7 +37,11 @@
 
 (defn class-emission-model
   "Build the genuine class observation channel for a reading policy."
-  [target universe acceptance horizon]
+  ([target universe acceptance horizon]
+   (class-emission-model target universe acceptance horizon :focused
+                         {:status :synthetic
+                          :source "reading-policy terminal class emission default"}))
+  ([target universe acceptance horizon target-class provenance]
   {:schema :wm/observation-model-v1
    :backend :exact-enumeration
    :kind :class-emission
@@ -45,17 +49,14 @@
    :horizon horizon
    :class-universe class-universe
    :acceptance acceptance
-   :target-class {target :focused}
+   :target-class {target target-class}
    :class-preference
    (into {} (for [tau (range 1 (inc horizon))]
               [tau (if (= tau horizon)
                      terminal-class-preference
                      {:ending/not-yet-evaluated 1})]))
    :provenance
-   {:status :synthetic
-    :calibrated false
-    :source (str "reading-policy terminal class emission; selected outer target "
-                 "is focused; Joe 2026-09-22 preference 55/35/5/5")}})
+   (assoc provenance :calibrated false)}))
 
 (defn- pattern-key [s]
   (keyword (str/replace (str s) #"^:" "")))
@@ -272,8 +273,9 @@
 
   LEDGER-ROOT is optional.  It exists so tests can state their learning
   evidence; production-shaped callers normally use the declared ledger."
-  ([target id cascade] (score-arranged target id cascade nil))
-  ([target id cascade ledger-root]
+  ([target id cascade] (score-arranged target id cascade nil nil))
+  ([target id cascade ledger-root] (score-arranged target id cascade ledger-root nil))
+  ([target id cascade ledger-root class-context]
    (let [occurrence-shape (occurrence-arrangement cascade)
          units (mapv :occurrence-id (:nodes occurrence-shape))
          cycle (directed-cycle (mapv :occurrence-id (:nodes occurrence-shape))
@@ -328,7 +330,11 @@
                                  :c {:source :terminal-and-progress-preference}
                                  :c-schedule (vec (range 1 (inc horizon)))}})
          entry (when (vector? ranked) (first ranked))
-         class-model (class-emission-model target universe acceptance horizon)
+         class-model (class-emission-model target universe acceptance horizon
+                                           (or (:scorer-class class-context) :focused)
+                                           (or (:provenance class-context)
+                                               {:status :synthetic
+                                                :source "score-arranged default class"}))
          class-ranked (scorer/rank-cascade-actions
                        {:cascade-belief {#{} 1}} [candidate]
                        {:horizon-steps horizon
@@ -513,13 +519,33 @@
   progress model plus score-policy's circumstance fit. Recorded on every
   scored record so the decision's precision identity binds the scorer it
   actually ran; change it whenever either scoring rule changes."
-  :wm/cascade-shape-g-score-policy-v2-class-emission)
+  :wm/cascade-shape-g-score-policy-v3-frozen-focus-class)
 
 (defn score-policy
   "Score one materialized policy, attaching circumstance fit as F and adding
   its stated uncertainty to the scorer's ambiguity term."
   [policy]
-  (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy))]
+  (let [target-class (:target-class policy)]
+    (cond
+      (and (:require-target-class? policy) (nil? target-class))
+      {:status :refused :kind :target-class-required
+       :policy-id (:policy-id policy) :target (:target policy)}
+
+      (= :unknown (:class target-class))
+      {:status :refused :kind :target-class-unknown
+       :reason (:reason target-class) :policy-id (:policy-id policy) :target (:target policy)}
+
+      (and target-class (nil? (:scorer-class target-class)))
+      {:status :refused :kind :target-class-unknown
+       :reason (or (:reason target-class) :target-class-unmapped)
+       :policy-id (:policy-id policy) :target (:target policy)}
+
+      :else
+  (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy)
+                             nil {:scorer-class (:scorer-class target-class)
+                                  :provenance {:status :synthetic
+                                               :source "frozen focus target class"
+                                               :focus (:provenance target-class)}})]
     (if (= :refused (:status base))
       base
       (let [fit (fit-evidence (:cascade policy) (:analysis policy))
@@ -536,7 +562,7 @@
            :scorer-ambiguity (:progress-ambiguity base)
            :fit fit :f (:f fit) :f-status :computed :computed-f computed-f
            :selection-candidate carrier
-           :selection-law (selection/law-receipt [carrier]))))))
+           :selection-law (selection/law-receipt [carrier]))))))))
 
 (defn policy-shape-stats [policy]
   (let [candidate (arranged->candidate (:target policy) (:policy-id policy)
