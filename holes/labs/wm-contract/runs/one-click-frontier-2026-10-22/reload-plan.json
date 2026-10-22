@@ -1,0 +1,43 @@
+{
+  "since": 1792499736,
+  "files": [
+    "/home/joe/code/futon2/src/futon2/aif/affective_level.clj",
+    "/home/joe/code/futon2/src/futon2/aif/cascade_shape_g.clj",
+    "/home/joe/code/futon2/src/futon2/aif/focus_receipt.clj",
+    "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj",
+    "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj",
+    "/home/joe/code/futon2/src/futon2/aif/handoff_contract.clj",
+    "/home/joe/code/futon2/src/futon2/aif/meta_injury_ledger.clj",
+    "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj",
+    "/home/joe/code/futon2/src/futon2/aif/meta_repair_coordinator.clj",
+    "/home/joe/code/futon2/src/futon2/aif/meta_self_heal_production.clj",
+    "/home/joe/code/futon2/src/futon2/aif/meta_terminal_injury.clj",
+    "/home/joe/code/futon2/src/futon2/aif/outer_policy_objective.clj",
+    "/home/joe/code/futon2/src/futon2/aif/scoring_input_receipts.clj",
+    "/home/joe/code/futon2/src/futon2/aif/selected_outer_cascade_policy.clj",
+    "/home/joe/code/futon2/src/futon2/aif/selected_target_reading.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/apparatus_certificates.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/authored/req_1a602e71.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/authored/req_f7374bcce.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/cascade_continuation.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/compiled_cascade_construction.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/frozen_cascade_steps.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/loop_node_exercise.clj",
+    "/home/joe/code/futon2/src/futon2/aif/wm/terminal_receipt.clj",
+    "/home/joe/code/futon3c/src/futon3c/wm/code_identity.clj",
+    "/home/joe/code/futon3c/src/futon3c/wm/meta_self_heal_adapters.clj",
+    "/home/joe/code/futon3c/src/futon3c/wm/ordinary_click_budget.clj",
+    "/home/joe/code/futon3c/src/futon3c/wm/runner_service.clj"
+  ],
+  "dirty": [],
+  "identity_dependencies": [
+    "futon2.aif.focus-receipt",
+    "futon2.aif.full-loop-runner",
+    "futon2.aif.full-loop-runtime",
+    "futon2.aif.meta-live-outer-selector",
+    "futon2.aif.scoring-input-receipts",
+    "futon2.aif.wm.family-selection",
+    "futon3c.wm.runner-service"
+  ]
+}

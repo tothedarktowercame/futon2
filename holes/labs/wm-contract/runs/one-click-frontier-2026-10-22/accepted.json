@@ -1,0 +1,2597 @@
+{
+  "last-result": {
+    "attempt-id": null,
+    "outcome": "service-failed",
+    "error": "Serving runner source drifts from the canonical checkout",
+    "error-data": {
+      "outcome": "build-failed",
+      "failure-kind": "stale-runner-source",
+      "failure-stage": "runner-source",
+      "runner/source": {
+        "runner/source-check": "drift",
+        "runner/loaded-present?": true,
+        "runner/canonical-present?": true,
+        "runner/loaded-sha256": "9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224",
+        "runner/canonical-sha256": "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063",
+        "identity-kind": "source-digest-at-namespace-load",
+        "namespaces": {
+          "futon2.aif.accepted-increment": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.accepted-increment",
+              "source-file": "futon2/aif/accepted_increment.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/accepted_increment.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/accepted_increment.clj",
+              "captured-at": "2026-10-20T12:42:57.397992549Z",
+              "status": "captured",
+              "sha256": "078206957f4dc87e0e597e059d6856d300aae85f11431d8e0cfe37cafa7fa6ec"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.action-identity": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/action_identity.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.action-identity",
+              "source-file": "futon2/aif/action_identity.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/action_identity.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/action_identity.clj",
+              "captured-at": "2026-10-20T12:35:40.729119059Z",
+              "status": "captured",
+              "sha256": "5b477c0280edea969b26d80f2408b6eba280cf7e084f44953c69721253fc2488"
+            },
+            "disk-sha256": "5b477c0280edea969b26d80f2408b6eba280cf7e084f44953c69721253fc2488"
+          },
+          "futon2.aif.analysis-cascade": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.analysis-cascade",
+              "source-file": "futon2/aif/analysis_cascade.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/analysis_cascade.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/analysis_cascade.clj",
+              "captured-at": "2026-10-20T12:42:56.749088573Z",
+              "status": "captured",
+              "sha256": "d8e3c3369782441b1d001edba720ddd6049a246b7fab758acd9600835ca923e5"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.attempt-learning": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.attempt-learning",
+              "source-file": "futon2/aif/attempt_learning.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj",
+              "captured-at": "2026-10-20T12:42:56.289242782Z",
+              "status": "captured",
+              "sha256": "1b30ff728cd80703beeb5568086723bd21dcf7f85f0cc5212455f6b90b11f59c"
+            },
+            "disk-sha256": "1b30ff728cd80703beeb5568086723bd21dcf7f85f0cc5212455f6b90b11f59c"
+          },
+          "futon2.aif.c-fold-config": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.c-fold-config",
+              "source-file": "futon2/aif/c_fold_config.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj",
+              "captured-at": "2026-10-20T12:35:40.811867817Z",
+              "status": "captured",
+              "sha256": "21deb55b90a215b32e00f5b00cc430249dc03a3951869db40a2ffbf523723ea7"
+            },
+            "disk-sha256": "21deb55b90a215b32e00f5b00cc430249dc03a3951869db40a2ffbf523723ea7"
+          },
+          "futon2.aif.c-vector": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/c_vector.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.c-vector",
+              "source-file": "futon2/aif/c_vector.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/c_vector.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/c_vector.clj",
+              "captured-at": "2026-10-20T12:42:56.158162930Z",
+              "status": "captured",
+              "sha256": "ef9807329ba95abcfaa97b5c584638560204cc9c5d792705199f16b9487dfac9"
+            },
+            "disk-sha256": "ef9807329ba95abcfaa97b5c584638560204cc9c5d792705199f16b9487dfac9"
+          },
+          "futon2.aif.cascade-feedback": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_feedback.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-feedback",
+              "source-file": "futon2/aif/cascade_feedback.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_feedback.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_feedback.clj",
+              "captured-at": "2026-10-20T12:42:56.189485882Z",
+              "status": "captured",
+              "sha256": "1c7fd0e372d6eacda09998021c231b9ce35c398aee5aabcb129036d38f296bb4"
+            },
+            "disk-sha256": "1c7fd0e372d6eacda09998021c231b9ce35c398aee5aabcb129036d38f296bb4"
+          },
+          "futon2.aif.cascade-habit-reinforcement": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_habit_reinforcement.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-habit-reinforcement",
+              "source-file": "futon2/aif/cascade_habit_reinforcement.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_habit_reinforcement.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_habit_reinforcement.clj",
+              "captured-at": "2026-10-20T12:42:56.414149908Z",
+              "status": "captured",
+              "sha256": "2ade42b1c8df6901673a0e081ed81ccd91c9a5f515cccf5721f4b3bf6e039a92"
+            },
+            "disk-sha256": "2ade42b1c8df6901673a0e081ed81ccd91c9a5f515cccf5721f4b3bf6e039a92"
+          },
+          "futon2.aif.cascade-habit-store": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_habit_store.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-habit-store",
+              "source-file": "futon2/aif/cascade_habit_store.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_habit_store.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_habit_store.clj",
+              "captured-at": "2026-10-20T12:42:56.408241402Z",
+              "status": "captured",
+              "sha256": "22edc0251900014eb1e725717081096ff44fa4cc23a1fe1945d164d71b49cf02"
+            },
+            "disk-sha256": "22edc0251900014eb1e725717081096ff44fa4cc23a1fe1945d164d71b49cf02"
+          },
+          "futon2.aif.cascade-model-manifest": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-model-manifest",
+              "source-file": "futon2/aif/cascade_model_manifest.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj",
+              "captured-at": "2026-10-20T12:35:43.799089068Z",
+              "status": "captured",
+              "sha256": "7daa6581c77731990adc829eeb30beccd425084b109b0d5202be0d717c54261c"
+            },
+            "disk-sha256": "7daa6581c77731990adc829eeb30beccd425084b109b0d5202be0d717c54261c"
+          },
+          "futon2.aif.cascade-plan": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_plan.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-plan",
+              "source-file": "futon2/aif/cascade_plan.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_plan.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_plan.clj",
+              "captured-at": "2026-10-20T12:42:56.419666296Z",
+              "status": "captured",
+              "sha256": "be64df1e237721fb5f9e9b5298f484f3ccf609f122b8c3f24054b2a946af20d9"
+            },
+            "disk-sha256": "be64df1e237721fb5f9e9b5298f484f3ccf609f122b8c3f24054b2a946af20d9"
+          },
+          "futon2.aif.cascade-problems": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-problems",
+              "source-file": "futon2/aif/cascade_problems.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj",
+              "captured-at": "2026-10-20T12:42:55.895857896Z",
+              "status": "captured",
+              "sha256": "ae594d66338cbd8d8d0eb9cf5b4298244d55da40527c63a2cd8b571bdef81d57"
+            },
+            "disk-sha256": "ae594d66338cbd8d8d0eb9cf5b4298244d55da40527c63a2cd8b571bdef81d57"
+          },
+          "futon2.aif.cascade-revision": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_revision.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-revision",
+              "source-file": "futon2/aif/cascade_revision.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_revision.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_revision.clj",
+              "captured-at": "2026-10-20T12:42:56.199895973Z",
+              "status": "captured",
+              "sha256": "cd29be753e747313a4777a0820e1832ce2165aa95376ea105c828881e9b8f32e"
+            },
+            "disk-sha256": "cd29be753e747313a4777a0820e1832ce2165aa95376ea105c828881e9b8f32e"
+          },
+          "futon2.aif.cascade-revision-producer": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_revision_producer.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-revision-producer",
+              "source-file": "futon2/aif/cascade_revision_producer.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_revision_producer.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_revision_producer.clj",
+              "captured-at": "2026-10-20T12:42:58.089131217Z",
+              "status": "captured",
+              "sha256": "05cf9d4ace5aa14aea539dfec9da304f94b5127b4d7be420313b7596a864622a"
+            },
+            "disk-sha256": "05cf9d4ace5aa14aea539dfec9da304f94b5127b4d7be420313b7596a864622a"
+          },
+          "futon2.aif.cascade-selection": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-selection",
+              "source-file": "futon2/aif/cascade_selection.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj",
+              "captured-at": "2026-10-20T12:42:56.321743851Z",
+              "status": "captured",
+              "sha256": "7a4362befac050a32142789bdd2ba2ad6fbc5c1c957adba5f06aa74a2106f31f"
+            },
+            "disk-sha256": "7a4362befac050a32142789bdd2ba2ad6fbc5c1c957adba5f06aa74a2106f31f"
+          },
+          "futon2.aif.cascade-sources": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-sources",
+              "source-file": "futon2/aif/cascade_sources.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj",
+              "captured-at": "2026-10-20T12:42:55.989251466Z",
+              "status": "captured",
+              "sha256": "8c845b3529e70c3ad9038b1e229df910888457a4159375679b842a222d6afaed"
+            },
+            "disk-sha256": "8c845b3529e70c3ad9038b1e229df910888457a4159375679b842a222d6afaed"
+          },
+          "futon2.aif.cascade-structure": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.cascade-structure",
+              "source-file": "futon2/aif/cascade_structure.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj",
+              "captured-at": "2026-10-20T12:42:56.179153657Z",
+              "status": "captured",
+              "sha256": "f04b554872d1accd1929f79d3fe6e356a582740a144f9420c48cb7b0cca4a223"
+            },
+            "disk-sha256": "f04b554872d1accd1929f79d3fe6e356a582740a144f9420c48cb7b0cca4a223"
+          },
+          "futon2.aif.close-loop": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/close_loop.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.close-loop",
+              "source-file": "futon2/aif/close_loop.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/close_loop.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/close_loop.clj",
+              "captured-at": "2026-10-20T12:42:56.448906062Z",
+              "status": "captured",
+              "sha256": "f774f248ff94f3b0559affa6d9222e133a4617ebf7f0ee3f79c8f28e44d14772"
+            },
+            "disk-sha256": "f774f248ff94f3b0559affa6d9222e133a4617ebf7f0ee3f79c8f28e44d14772"
+          },
+          "futon2.aif.close-retention": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/close_retention.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.close-retention",
+              "source-file": "futon2/aif/close_retention.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/close_retention.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/close_retention.clj",
+              "captured-at": "2026-10-20T12:35:40.734986142Z",
+              "status": "captured",
+              "sha256": "99ff8cb322700a3067126426018745b0a0227c17880d863398f3480b5d4cd9ae"
+            },
+            "disk-sha256": "99ff8cb322700a3067126426018745b0a0227c17880d863398f3480b5d4cd9ae"
+          },
+          "futon2.aif.d-predecessor-task-authority": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/d_predecessor_task_authority.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.d-predecessor-task-authority",
+              "source-file": "futon2/aif/d_predecessor_task_authority.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/d_predecessor_task_authority.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/d_predecessor_task_authority.clj",
+              "captured-at": "2026-10-20T12:42:56.259781064Z",
+              "status": "captured",
+              "sha256": "3a54ad47663c44cc6c9f7993047767bc77380b0fb21a2e9edef157e285dd5cc1"
+            },
+            "disk-sha256": "3a54ad47663c44cc6c9f7993047767bc77380b0fb21a2e9edef157e285dd5cc1"
+          },
+          "futon2.aif.delivery-qa": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/delivery_qa.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.delivery-qa",
+              "source-file": "futon2/aif/delivery_qa.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/delivery_qa.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/delivery_qa.clj",
+              "captured-at": "2026-10-20T12:42:57.338309563Z",
+              "status": "captured",
+              "sha256": "62e52ae86e4d8bc83f3dc0ad97fd11f87e97d908450b547cf2fd5547cb9c27de"
+            },
+            "disk-sha256": "62e52ae86e4d8bc83f3dc0ad97fd11f87e97d908450b547cf2fd5547cb9c27de"
+          },
+          "futon2.aif.efe": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/efe.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.efe",
+              "source-file": "futon2/aif/efe.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/efe.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/efe.clj",
+              "captured-at": "2026-10-20T12:42:56.673278807Z",
+              "status": "captured",
+              "sha256": "c6d4148865c19a7dafbbbac78c922a03fcfdd7ee09de337a7a2d9780bbc030bb"
+            },
+            "disk-sha256": "c6d4148865c19a7dafbbbac78c922a03fcfdd7ee09de337a7a2d9780bbc030bb"
+          },
+          "futon2.aif.eig-shadow": {
+            "status": "unregistered",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/eig_shadow.clj",
+            "loaded-source": null,
+            "disk-sha256": "c8f27b4562539b6e323938b968e6ab01ae780e4d9c90b1af10a6797f87c39c32"
+          },
+          "futon2.aif.enactment-fold-source": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/enactment_fold_source.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.enactment-fold-source",
+              "source-file": "futon2/aif/enactment_fold_source.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/enactment_fold_source.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/enactment_fold_source.clj",
+              "captured-at": "2026-10-20T12:42:58.308635316Z",
+              "status": "captured",
+              "sha256": "649fe384593d9c12ba0ad884e0cd6bda7aae6cfc46e5d162fdef5e71d3c215f9"
+            },
+            "disk-sha256": "649fe384593d9c12ba0ad884e0cd6bda7aae6cfc46e5d162fdef5e71d3c215f9"
+          },
+          "futon2.aif.enactment-habit": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.enactment-habit",
+              "source-file": "futon2/aif/enactment_habit.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/enactment_habit.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/enactment_habit.clj",
+              "captured-at": "2026-10-20T12:42:58.101696086Z",
+              "status": "captured",
+              "sha256": "c7b678f3491f5e8dd4c5120ed06923836471f839f0439fea7cde21c9a09749a0"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.evidence-manifest": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/evidence_manifest.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.evidence-manifest",
+              "source-file": "futon2/aif/evidence_manifest.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/evidence_manifest.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/evidence_manifest.clj",
+              "captured-at": "2026-10-20T12:35:40.747809098Z",
+              "status": "captured",
+              "sha256": "77369013dd703c5b6c29fced1b99e24922527e7ae5c40b9aa0d4e0174bb8a3ad"
+            },
+            "disk-sha256": "77369013dd703c5b6c29fced1b99e24922527e7ae5c40b9aa0d4e0174bb8a3ad"
+          },
+          "futon2.aif.fact-measurement": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/fact_measurement.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.fact-measurement",
+              "source-file": "futon2/aif/fact_measurement.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/fact_measurement.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/fact_measurement.clj",
+              "captured-at": "2026-10-20T12:42:57.363930593Z",
+              "status": "captured",
+              "sha256": "b7a56bf1cff4e1e6c09c233e8328657e116147a438b59ea120c8dc4ce28bea2d"
+            },
+            "disk-sha256": "b7a56bf1cff4e1e6c09c233e8328657e116147a438b59ea120c8dc4ce28bea2d"
+          },
+          "futon2.aif.finding-ticket": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/finding_ticket.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.finding-ticket",
+              "source-file": "futon2/aif/finding_ticket.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/finding_ticket.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/finding_ticket.clj",
+              "captured-at": "2026-10-20T12:35:41.899418674Z",
+              "status": "captured",
+              "sha256": "387c9c5983e8234bc1cd3e344ab8ad45d7888c5c2a39d07a9b22add2f1ba220d"
+            },
+            "disk-sha256": "387c9c5983e8234bc1cd3e344ab8ad45d7888c5c2a39d07a9b22add2f1ba220d"
+          },
+          "futon2.aif.focus-receipt": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/focus_receipt.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.focus-receipt",
+              "source-file": "futon2/aif/focus_receipt.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/focus_receipt.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/focus_receipt.clj",
+              "captured-at": "2026-10-22T03:02:28.756142745Z",
+              "status": "captured",
+              "sha256": "f6193646cc33cf05b088dd695769496b36af3c5e2b69d225cc86f0aef4374908"
+            },
+            "disk-sha256": "f6193646cc33cf05b088dd695769496b36af3c5e2b69d225cc86f0aef4374908"
+          },
+          "futon2.aif.fold": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/fold.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.fold",
+              "source-file": "futon2/aif/fold.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/fold.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/fold.clj",
+              "captured-at": "2026-10-20T12:35:40.758044882Z",
+              "status": "captured",
+              "sha256": "f3b0956c409d2e44f000725f7ce13952cad15d450a4571924a57d658aff10d12"
+            },
+            "disk-sha256": "f3b0956c409d2e44f000725f7ce13952cad15d450a4571924a57d658aff10d12"
+          },
+          "futon2.aif.fold-cascade": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/fold_cascade.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.fold-cascade",
+              "source-file": "futon2/aif/fold_cascade.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/fold_cascade.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/fold_cascade.clj",
+              "captured-at": "2026-10-20T12:42:57.330629679Z",
+              "status": "captured",
+              "sha256": "bb070fc67cf2fdcdca576fb67c35a9fb9c924241c3298fa1092593c78f80e707"
+            },
+            "disk-sha256": "bb070fc67cf2fdcdca576fb67c35a9fb9c924241c3298fa1092593c78f80e707"
+          },
+          "futon2.aif.fold-classical": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/fold_classical.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.fold-classical",
+              "source-file": "futon2/aif/fold_classical.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/fold_classical.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/fold_classical.clj",
+              "captured-at": "2026-10-20T12:42:56.439242017Z",
+              "status": "captured",
+              "sha256": "338b31d4002239b570508fc0349ba7aa0675f87f46af3ac45433224a1bf5a380"
+            },
+            "disk-sha256": "338b31d4002239b570508fc0349ba7aa0675f87f46af3ac45433224a1bf5a380"
+          },
+          "futon2.aif.full-loop-cohort": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_cohort.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.full-loop-cohort",
+              "source-file": "futon2/aif/full_loop_cohort.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/full_loop_cohort.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_cohort.clj",
+              "captured-at": "2026-10-20T12:35:40.765946061Z",
+              "status": "captured",
+              "sha256": "5e266810249e67294be5d36a3f8576aaa6a8d17410ddb46dae3347d739d48f4d"
+            },
+            "disk-sha256": "5e266810249e67294be5d36a3f8576aaa6a8d17410ddb46dae3347d739d48f4d"
+          },
+          "futon2.aif.full-loop-runner": {
+            "status": "stale",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.full-loop-runner",
+              "source-file": "futon2/aif/full_loop_runner.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj",
+              "captured-at": "2026-10-22T03:02:29.253584532Z",
+              "status": "captured",
+              "sha256": "9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224"
+            },
+            "disk-sha256": "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063"
+          },
+          "futon2.aif.full-loop-runtime": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.full-loop-runtime",
+              "source-file": "futon2/aif/full_loop_runtime.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj",
+              "captured-at": "2026-10-22T03:02:29.653767110Z",
+              "status": "captured",
+              "sha256": "eb5da584959eda4a9b6653434bf6f5e06d137ea09396a958a513c5f7264d6f63"
+            },
+            "disk-sha256": "eb5da584959eda4a9b6653434bf6f5e06d137ea09396a958a513c5f7264d6f63"
+          },
+          "futon2.aif.g-term-decomposition": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/g_term_decomposition.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.g-term-decomposition",
+              "source-file": "futon2/aif/g_term_decomposition.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/g_term_decomposition.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/g_term_decomposition.clj",
+              "captured-at": "2026-10-20T12:42:56.210922306Z",
+              "status": "captured",
+              "sha256": "acacab476c5f0637acc3f1726f671c044b7aded43a727cab0a160a8f2e633846"
+            },
+            "disk-sha256": "acacab476c5f0637acc3f1726f671c044b7aded43a727cab0a160a8f2e633846"
+          },
+          "futon2.aif.held-out-split": {
+            "status": "unregistered",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/held_out_split.clj",
+            "loaded-source": null,
+            "disk-sha256": "70b95e655234c14204d4be148e3456ebe5516c628f7b35104dc017cd6d3b88c7"
+          },
+          "futon2.aif.increment-attestation": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.increment-attestation",
+              "source-file": "futon2/aif/increment_attestation.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/increment_attestation.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/increment_attestation.clj",
+              "captured-at": "2026-10-20T12:42:56.515008092Z",
+              "status": "captured",
+              "sha256": "2401409a4b120acbf16e2ef81df192dcec6abb2321a9b7967264ef1000384c91"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.interpretation-construction": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_construction.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.interpretation-construction",
+              "source-file": "futon2/aif/interpretation_construction.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/interpretation_construction.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_construction.clj",
+              "captured-at": "2026-10-20T12:42:58.077567847Z",
+              "status": "captured",
+              "sha256": "e6677183d820062ad6ba0674b102c97ca6a2bf711a02a390b8a792b0eaac5206"
+            },
+            "disk-sha256": "e6677183d820062ad6ba0674b102c97ca6a2bf711a02a390b8a792b0eaac5206"
+          },
+          "futon2.aif.interpretation-evidence": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_evidence.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.interpretation-evidence",
+              "source-file": "futon2/aif/interpretation_evidence.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/interpretation_evidence.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_evidence.clj",
+              "captured-at": "2026-10-20T12:42:55.913013105Z",
+              "status": "captured",
+              "sha256": "908271b3b58880993d6b4097d4bf11f0389d6ae1aeba59c8e023c7ed46266c1b"
+            },
+            "disk-sha256": "908271b3b58880993d6b4097d4bf11f0389d6ae1aeba59c8e023c7ed46266c1b"
+          },
+          "futon2.aif.interpretation-job": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_job.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.interpretation-job",
+              "source-file": "futon2/aif/interpretation_job.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/interpretation_job.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/interpretation_job.clj",
+              "captured-at": "2026-10-20T12:42:57.384208547Z",
+              "status": "captured",
+              "sha256": "1f86b92d56ef27b3480e081968b31b3a7fbf503d0662151f0e2d48111603af84"
+            },
+            "disk-sha256": "1f86b92d56ef27b3480e081968b31b3a7fbf503d0662151f0e2d48111603af84"
+          },
+          "futon2.aif.job-text-retention": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/job_text_retention.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.job-text-retention",
+              "source-file": "futon2/aif/job_text_retention.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/job_text_retention.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/job_text_retention.clj",
+              "captured-at": "2026-10-20T12:42:57.356174899Z",
+              "status": "captured",
+              "sha256": "0180d87c9a0824c34552f0216fa886386b665d7cb6c1e3ed73cae75919e4a379"
+            },
+            "disk-sha256": "0180d87c9a0824c34552f0216fa886386b665d7cb6c1e3ed73cae75919e4a379"
+          },
+          "futon2.aif.kernel-example": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/kernel_example.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.kernel-example",
+              "source-file": "futon2/aif/kernel_example.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/kernel_example.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/kernel_example.clj",
+              "captured-at": "2026-10-20T12:42:57.292821110Z",
+              "status": "captured",
+              "sha256": "8393e64a5f9e8aa4307d1615ef64fae8ca01d2a75c29560b953de7f3407c4c42"
+            },
+            "disk-sha256": "8393e64a5f9e8aa4307d1615ef64fae8ca01d2a75c29560b953de7f3407c4c42"
+          },
+          "futon2.aif.learning-trial": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/learning_trial.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.learning-trial",
+              "source-file": "futon2/aif/learning_trial.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/learning_trial.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/learning_trial.clj",
+              "captured-at": "2026-10-20T12:42:56.285258938Z",
+              "status": "captured",
+              "sha256": "70d6bcfd1f805241b9395a18e11d1fe5794f99523916a2ece4e40a963eac1e0c"
+            },
+            "disk-sha256": "70d6bcfd1f805241b9395a18e11d1fe5794f99523916a2ece4e40a963eac1e0c"
+          },
+          "futon2.aif.learning-trial-ledger": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.learning-trial-ledger",
+              "source-file": "futon2/aif/learning_trial_ledger.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj",
+              "captured-at": "2026-10-20T12:42:56.801370273Z",
+              "status": "captured",
+              "sha256": "b66b1308680a0b7cd38bb045382466f1136eaf38b3f7bda910913780c1eec138"
+            },
+            "disk-sha256": "b66b1308680a0b7cd38bb045382466f1136eaf38b3f7bda910913780c1eec138"
+          },
+          "futon2.aif.limb-evidence": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/limb_evidence.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.limb-evidence",
+              "source-file": "futon2/aif/limb_evidence.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/limb_evidence.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/limb_evidence.clj",
+              "captured-at": "2026-10-20T12:42:57.342984078Z",
+              "status": "captured",
+              "sha256": "aa91ef6d9945580b032fb4f01c06bf9fd47bcf8e983c89d1b75e0f0129ba5fb2"
+            },
+            "disk-sha256": "aa91ef6d9945580b032fb4f01c06bf9fd47bcf8e983c89d1b75e0f0129ba5fb2"
+          },
+          "futon2.aif.live-c": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/live_c.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.live-c",
+              "source-file": "futon2/aif/live_c.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/live_c.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/live_c.clj",
+              "captured-at": "2026-10-20T12:42:55.880642538Z",
+              "status": "captured",
+              "sha256": "8427954e6d86d6116580b291c5da27335d41bfa10fcbc586c573959f22423cb4"
+            },
+            "disk-sha256": "8427954e6d86d6116580b291c5da27335d41bfa10fcbc586c573959f22423cb4"
+          },
+          "futon2.aif.meta-live-outer-selector": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.meta-live-outer-selector",
+              "source-file": "futon2/aif/meta_live_outer_selector.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj",
+              "captured-at": "2026-10-22T03:02:29.586554014Z",
+              "status": "captured",
+              "sha256": "afbf133ff9b38c41f2eb085bf7203ab0bdcd668890f33873f227218bdbf97831"
+            },
+            "disk-sha256": "afbf133ff9b38c41f2eb085bf7203ab0bdcd668890f33873f227218bdbf97831"
+          },
+          "futon2.aif.meta-pipeline-selector": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.meta-pipeline-selector",
+              "source-file": "futon2/aif/meta_pipeline_selector.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj",
+              "captured-at": "2026-10-20T12:42:58.186960038Z",
+              "status": "captured",
+              "sha256": "200330ac22cf7864837445f7249ea92659eab664f2166008eab867950aca8807"
+            },
+            "disk-sha256": "200330ac22cf7864837445f7249ea92659eab664f2166008eab867950aca8807"
+          },
+          "futon2.aif.mission-hole-wants": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/mission_hole_wants.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.mission-hole-wants",
+              "source-file": "futon2/aif/mission_hole_wants.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/mission_hole_wants.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/mission_hole_wants.clj",
+              "captured-at": "2026-10-20T12:42:58.271229054Z",
+              "status": "captured",
+              "sha256": "497cc98b62d84fd520d51265c06760e51b4d1b54f25313dd19ebde5db84e4e00"
+            },
+            "disk-sha256": "497cc98b62d84fd520d51265c06760e51b4d1b54f25313dd19ebde5db84e4e00"
+          },
+          "futon2.aif.mission-registry": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.mission-registry",
+              "source-file": "futon2/aif/mission_registry.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/mission_registry.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj",
+              "captured-at": "2026-10-20T12:35:43.884476203Z",
+              "status": "captured",
+              "sha256": "a55f6333e5ce81345f8088b6d6c29ed52bd368bd7f61b3f44c23d5c8352328a4"
+            },
+            "disk-sha256": "a55f6333e5ce81345f8088b6d6c29ed52bd368bd7f61b3f44c23d5c8352328a4"
+          },
+          "futon2.aif.morning-brief": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/morning_brief.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.morning-brief",
+              "source-file": "futon2/aif/morning_brief.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/morning_brief.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/morning_brief.clj",
+              "captured-at": "2026-10-20T12:40:02.605188593Z",
+              "status": "captured",
+              "sha256": "0b6d3d72508fda2286c31c46f7e80791caffc933cd3f98ddcaed0adb979956ba"
+            },
+            "disk-sha256": "0b6d3d72508fda2286c31c46f7e80791caffc933cd3f98ddcaed0adb979956ba"
+          },
+          "futon2.aif.observation-checks": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/observation_checks.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.observation-checks",
+              "source-file": "futon2/aif/observation_checks.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/observation_checks.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/observation_checks.clj",
+              "captured-at": "2026-10-20T12:42:55.943665242Z",
+              "status": "captured",
+              "sha256": "b89c3fdb2a2e4d8aa6ac235223d7d6210b3393c85b58dbcb9d4d36cea6471ec5"
+            },
+            "disk-sha256": "b89c3fdb2a2e4d8aa6ac235223d7d6210b3393c85b58dbcb9d4d36cea6471ec5"
+          },
+          "futon2.aif.observation-label-store": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/observation_label_store.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.observation-label-store",
+              "source-file": "futon2/aif/observation_label_store.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/observation_label_store.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/observation_label_store.clj",
+              "captured-at": "2026-10-20T12:42:56.718092317Z",
+              "status": "captured",
+              "sha256": "35f15b63de2aafb6888555cceeb529def0ff179f9a1446ffadabad178b1916b8"
+            },
+            "disk-sha256": "35f15b63de2aafb6888555cceeb529def0ff179f9a1446ffadabad178b1916b8"
+          },
+          "futon2.aif.observation-labels": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/observation_labels.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.observation-labels",
+              "source-file": "futon2/aif/observation_labels.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/observation_labels.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/observation_labels.clj",
+              "captured-at": "2026-10-20T12:42:56.710033330Z",
+              "status": "captured",
+              "sha256": "cf815b97a8a5befb25c8c6af4021ef4fcee20c2ca35b940177fa0510d6efe397"
+            },
+            "disk-sha256": "cf815b97a8a5befb25c8c6af4021ef4fcee20c2ca35b940177fa0510d6efe397"
+          },
+          "futon2.aif.outer-policy-evidence": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.outer-policy-evidence",
+              "source-file": "futon2/aif/outer_policy_evidence.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/outer_policy_evidence.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/outer_policy_evidence.clj",
+              "captured-at": "2026-10-20T12:42:56.953244127Z",
+              "status": "captured",
+              "sha256": "52c902070c1ee1809f0bb1ffdab6fec042700bd6147f35e745e5dcb7d176ca3d"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.outer-policy-evidence-provider": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.outer-policy-evidence-provider",
+              "source-file": "futon2/aif/outer_policy_evidence_provider.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/outer_policy_evidence_provider.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/outer_policy_evidence_provider.clj",
+              "captured-at": "2026-10-20T12:42:58.228731031Z",
+              "status": "captured",
+              "sha256": "ae980258f2007ad4c6b0230caa51696a62366267b19652d1af3d4009781d056a"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.parameter-novelty": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.parameter-novelty",
+              "source-file": "futon2/aif/parameter_novelty.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj",
+              "captured-at": "2026-10-20T12:42:56.292880694Z",
+              "status": "captured",
+              "sha256": "f7613042074558eaf37b068a6d22543b27639a778ea40526871faa70cec302b5"
+            },
+            "disk-sha256": "f7613042074558eaf37b068a6d22543b27639a778ea40526871faa70cec302b5"
+          },
+          "futon2.aif.pattern-graph-pin": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.pattern-graph-pin",
+              "source-file": "futon2/aif/pattern_graph_pin.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/pattern_graph_pin.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/pattern_graph_pin.clj",
+              "captured-at": "2026-10-20T12:42:56.558258500Z",
+              "status": "captured",
+              "sha256": "58f91700c2bbf97dd3523872c13113546f7a386fa6e7fd07250cd1d07c63ce80"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.pattern-registry": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/pattern_registry.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.pattern-registry",
+              "source-file": "futon2/aif/pattern_registry.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/pattern_registry.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/pattern_registry.clj",
+              "captured-at": "2026-10-20T12:42:57.420436713Z",
+              "status": "captured",
+              "sha256": "da60dc19b2948a6a262caa1fddf36135e78fedf174df221cf74624b8215f948b"
+            },
+            "disk-sha256": "da60dc19b2948a6a262caa1fddf36135e78fedf174df221cf74624b8215f948b"
+          },
+          "futon2.aif.pattern-retraction": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.pattern-retraction",
+              "source-file": "futon2/aif/pattern_retraction.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/pattern_retraction.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/pattern_retraction.clj",
+              "captured-at": "2026-10-20T12:42:56.567099158Z",
+              "status": "captured",
+              "sha256": "c892c8a136c2e8b36b7d7d887df5148b79dac63b6230b23684dde5defddaaa14"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.policy": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/policy.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.policy",
+              "source-file": "futon2/aif/policy.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/policy.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/policy.clj",
+              "captured-at": "2026-10-20T12:42:56.331539932Z",
+              "status": "captured",
+              "sha256": "b61029a446a4f7243169c0290f7ba8e826c56bcc96fbf433d7de57014544bf97"
+            },
+            "disk-sha256": "b61029a446a4f7243169c0290f7ba8e826c56bcc96fbf433d7de57014544bf97"
+          },
+          "futon2.aif.preference-audit": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/preference_audit.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.preference-audit",
+              "source-file": "futon2/aif/preference_audit.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/preference_audit.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/preference_audit.clj",
+              "captured-at": "2026-10-20T12:42:56.360395154Z",
+              "status": "captured",
+              "sha256": "af3a8ab5d03263757960321c6e0b5162b888eec02a46b3b6ac7df2f61be629d6"
+            },
+            "disk-sha256": "af3a8ab5d03263757960321c6e0b5162b888eec02a46b3b6ac7df2f61be629d6"
+          },
+          "futon2.aif.reading-interpretation-debt": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.reading-interpretation-debt",
+              "source-file": "futon2/aif/reading_interpretation_debt.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/reading_interpretation_debt.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/reading_interpretation_debt.clj",
+              "captured-at": "2026-10-20T12:42:56.611214632Z",
+              "status": "captured",
+              "sha256": "5b0d697e866d2174cd882fe02ee7c840d9c86f024dae852669c8db08795268cb"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.receipt-construction": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.receipt-construction",
+              "source-file": "futon2/aif/receipt_construction.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj",
+              "captured-at": "2026-10-20T12:42:57.046813012Z",
+              "status": "captured",
+              "sha256": "84d4f3eac7cb11beee8068aee99bbf0cb8188f0031dffce3309c21a7d07ffc2d"
+            },
+            "disk-sha256": "84d4f3eac7cb11beee8068aee99bbf0cb8188f0031dffce3309c21a7d07ffc2d"
+          },
+          "futon2.aif.registered-run-telemetry": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.registered-run-telemetry",
+              "source-file": "futon2/aif/registered_run_telemetry.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/registered_run_telemetry.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/registered_run_telemetry.clj",
+              "captured-at": "2026-10-20T12:40:02.626739033Z",
+              "status": "captured",
+              "sha256": "769accd2404fa8809795787f91cfe224857d05cc68b189e8eb2ed68be4e00185"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.registry-port": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.registry-port",
+              "source-file": "futon2/aif/registry_port.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/registry_port.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/registry_port.clj",
+              "captured-at": "2026-10-20T12:35:40.704244578Z",
+              "status": "captured",
+              "sha256": "045f9f4087955635c808cc723e70a8280cce6f09bdeb8718997c6d0b91b7565c"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.repair-discharge": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/repair_discharge.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.repair-discharge",
+              "source-file": "futon2/aif/repair_discharge.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/repair_discharge.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/repair_discharge.clj",
+              "captured-at": "2026-10-20T12:42:57.645918566Z",
+              "status": "captured",
+              "sha256": "5e56808da9deb087f1e2df921f8abe4213d861ecf687520b5ce62a41f8e1bedf"
+            },
+            "disk-sha256": "5e56808da9deb087f1e2df921f8abe4213d861ecf687520b5ce62a41f8e1bedf"
+          },
+          "futon2.aif.repair-discharge-receipt": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/repair_discharge_receipt.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.repair-discharge-receipt",
+              "source-file": "futon2/aif/repair_discharge_receipt.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/repair_discharge_receipt.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/repair_discharge_receipt.clj",
+              "captured-at": "2026-10-20T12:42:57.632236453Z",
+              "status": "captured",
+              "sha256": "aa76e4db4a208b8bc5d559ca4145eddb82bd9edb5f576675df3d984d2666a95d"
+            },
+            "disk-sha256": "aa76e4db4a208b8bc5d559ca4145eddb82bd9edb5f576675df3d984d2666a95d"
+          },
+          "futon2.aif.repair-evaluators": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/repair_evaluators.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.repair-evaluators",
+              "source-file": "futon2/aif/repair_evaluators.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/repair_evaluators.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/repair_evaluators.clj",
+              "captured-at": "2026-10-20T12:42:57.639981828Z",
+              "status": "captured",
+              "sha256": "1b49c59fcddb2e1d0be207d9c96f075d818b4e777df2217b728bc54b9ddcd063"
+            },
+            "disk-sha256": "1b49c59fcddb2e1d0be207d9c96f075d818b4e777df2217b728bc54b9ddcd063"
+          },
+          "futon2.aif.repair-obligation": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.repair-obligation",
+              "source-file": "futon2/aif/repair_obligation.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj",
+              "captured-at": "2026-10-20T12:35:41.903803434Z",
+              "status": "captured",
+              "sha256": "957e19194690a07426166c27c596a610016ed54d4ee47f57c1279eff7def9890"
+            },
+            "disk-sha256": "957e19194690a07426166c27c596a610016ed54d4ee47f57c1279eff7def9890"
+          },
+          "futon2.aif.retraction-cascade": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.retraction-cascade",
+              "source-file": "futon2/aif/retraction_cascade.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/retraction_cascade.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/retraction_cascade.clj",
+              "captured-at": "2026-10-20T12:42:56.819040708Z",
+              "status": "captured",
+              "sha256": "23020850be49e7d39f52f368a8541b0b3c9b3a52221ad8b2e1459a866f9d51f1"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.reviewer-falsifier": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.reviewer-falsifier",
+              "source-file": "futon2/aif/reviewer_falsifier.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/reviewer_falsifier.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/reviewer_falsifier.clj",
+              "captured-at": "2026-10-20T12:42:56.493659901Z",
+              "status": "captured",
+              "sha256": "57195c56a0db4fab64c55d2a95d77d8ed1e2ce7b83feaabd93e5c4a4262acfe5"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.route-attestation": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/route_attestation.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.route-attestation",
+              "source-file": "futon2/aif/route_attestation.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/route_attestation.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/route_attestation.clj",
+              "captured-at": "2026-10-20T12:42:56.506767047Z",
+              "status": "captured",
+              "sha256": "3a91d6333f7c982914f5126ab8c7fc940fa4822954553369ebc385383efaa67b"
+            },
+            "disk-sha256": "3a91d6333f7c982914f5126ab8c7fc940fa4822954553369ebc385383efaa67b"
+          },
+          "futon2.aif.run-ending-classification": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/run_ending_classification.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.run-ending-classification",
+              "source-file": "futon2/aif/run_ending_classification.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/run_ending_classification.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/run_ending_classification.clj",
+              "captured-at": "2026-10-20T12:42:56.521761726Z",
+              "status": "captured",
+              "sha256": "2a49bd9ebd880116f5edf428d3160a9275cf1c156d06221f18ba192f11327454"
+            },
+            "disk-sha256": "2a49bd9ebd880116f5edf428d3160a9275cf1c156d06221f18ba192f11327454"
+          },
+          "futon2.aif.run-narrative": {
+            "status": "unregistered",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/run_narrative.clj",
+            "loaded-source": null,
+            "disk-sha256": "14fadad58c56cfd214fb29719edd47da933b27e7c77e6fe9ece2f3e47d45f863"
+          },
+          "futon2.aif.run-participants": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/run_participants.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.run-participants",
+              "source-file": "futon2/aif/run_participants.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/run_participants.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/run_participants.clj",
+              "captured-at": "2026-10-20T12:42:57.499552074Z",
+              "status": "captured",
+              "sha256": "fc10d1917dbc2b494b5aa7035b7dbb00d601cf64638b4300a234e930232b615e"
+            },
+            "disk-sha256": "fc10d1917dbc2b494b5aa7035b7dbb00d601cf64638b4300a234e930232b615e"
+          },
+          "futon2.aif.scan-report": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/scan_report.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.scan-report",
+              "source-file": "futon2/aif/scan_report.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/scan_report.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/scan_report.clj",
+              "captured-at": "2026-10-20T12:42:56.425299040Z",
+              "status": "captured",
+              "sha256": "ccf7a180bd8256d2b6dfbdb5c1127816f33e35c74c0fee663db4e874ba594e4d"
+            },
+            "disk-sha256": "ccf7a180bd8256d2b6dfbdb5c1127816f33e35c74c0fee663db4e874ba594e4d"
+          },
+          "futon2.aif.scoring-input-receipts": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/scoring_input_receipts.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.scoring-input-receipts",
+              "source-file": "futon2/aif/scoring_input_receipts.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/scoring_input_receipts.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/scoring_input_receipts.clj",
+              "captured-at": "2026-10-22T03:02:29.162229235Z",
+              "status": "captured",
+              "sha256": "4df7f2ebe067b6d81700eaedefc82fdbd3764338e02fbe108db7a0cf1a622fa4"
+            },
+            "disk-sha256": "4df7f2ebe067b6d81700eaedefc82fdbd3764338e02fbe108db7a0cf1a622fa4"
+          },
+          "futon2.aif.selected-outer-cascade-policy": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.selected-outer-cascade-policy",
+              "source-file": "futon2/aif/selected_outer_cascade_policy.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/selected_outer_cascade_policy.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/selected_outer_cascade_policy.clj",
+              "captured-at": "2026-10-22T03:02:29.075706978Z",
+              "status": "captured",
+              "sha256": "f1a142a626a144384c217dabf4948fa8a2996f88175acae2612a8a076661920c"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.selected-reading": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.selected-reading",
+              "source-file": "futon2/aif/selected_reading.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/selected_reading.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/selected_reading.clj",
+              "captured-at": "2026-10-20T12:42:56.929523524Z",
+              "status": "captured",
+              "sha256": "421b1b66d52e4b4043680d425d57c89841c370c5603d5e792805bc81f46d36ba"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.selected-want-outcome": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.selected-want-outcome",
+              "source-file": "futon2/aif/selected_want_outcome.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/selected_want_outcome.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/selected_want_outcome.clj",
+              "captured-at": "2026-10-20T12:42:56.488897803Z",
+              "status": "captured",
+              "sha256": "c3b37d558ad48a62818f5971ebf557e655f3645b776b34ceb0b3191c25ee3cbc"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.substrate": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/substrate.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.substrate",
+              "source-file": "futon2/aif/substrate.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/substrate.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/substrate.clj",
+              "captured-at": "2026-10-20T12:35:41.881682736Z",
+              "status": "captured",
+              "sha256": "8228407fd1cfae14a4d4a747e5ef5044fd81a97e4cfdbd4170694baeec0536e7"
+            },
+            "disk-sha256": "8228407fd1cfae14a4d4a747e5ef5044fd81a97e4cfdbd4170694baeec0536e7"
+          },
+          "futon2.aif.surprise": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/surprise.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.surprise",
+              "source-file": "futon2/aif/surprise.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/surprise.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/surprise.clj",
+              "captured-at": "2026-10-20T12:42:56.501574290Z",
+              "status": "captured",
+              "sha256": "1c5ebd4151434e288d001e0d5d85ca208758744fee187014884d5a4d4e816130"
+            },
+            "disk-sha256": "1c5ebd4151434e288d001e0d5d85ca208758744fee187014884d5a4d4e816130"
+          },
+          "futon2.aif.target-policy-family": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.target-policy-family",
+              "source-file": "futon2/aif/target_policy_family.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/target_policy_family.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/target_policy_family.clj",
+              "captured-at": "2026-10-20T12:42:56.875384918Z",
+              "status": "captured",
+              "sha256": "daa4433eb7436cebd2825ee8f0d316e83735ca7a323aa4fbec6f8afa1e0cd727"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.target-reading-registry": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.target-reading-registry",
+              "source-file": "futon2/aif/target_reading_registry.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/target_reading_registry.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/target_reading_registry.clj",
+              "captured-at": "2026-10-20T12:42:56.757719942Z",
+              "status": "captured",
+              "sha256": "2c7612039439dc7c93a12799e803a47a2113d56436819cfd27d2c2024fe6696a"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.task-execution-evidence": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/task_execution_evidence.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.task-execution-evidence",
+              "source-file": "futon2/aif/task_execution_evidence.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/task_execution_evidence.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/task_execution_evidence.clj",
+              "captured-at": "2026-10-20T12:42:56.251773012Z",
+              "status": "captured",
+              "sha256": "c366966b1ef2b5f28e97ed35b6094cfb6da5a155c7d152150953b253fd742898"
+            },
+            "disk-sha256": "c366966b1ef2b5f28e97ed35b6094cfb6da5a155c7d152150953b253fd742898"
+          },
+          "futon2.aif.ticket-publication-io": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/ticket_publication_io.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.ticket-publication-io",
+              "source-file": "futon2/aif/ticket_publication_io.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/ticket_publication_io.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/ticket_publication_io.clj",
+              "captured-at": "2026-10-20T12:35:41.892646701Z",
+              "status": "captured",
+              "sha256": "bf57a2b932a50416349c2b1c98701a3c5af24c8ea15078f7cdbf925429f23285"
+            },
+            "disk-sha256": "bf57a2b932a50416349c2b1c98701a3c5af24c8ea15078f7cdbf925429f23285"
+          },
+          "futon2.aif.ticket-queue": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/ticket_queue.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.ticket-queue",
+              "source-file": "futon2/aif/ticket_queue.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/ticket_queue.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/ticket_queue.clj",
+              "captured-at": "2026-10-20T12:35:41.895807469Z",
+              "status": "captured",
+              "sha256": "29dea8e4aaa49907d6af1b653e47aaa86966ae9cc1834a6bb8de712bbcaa98b0"
+            },
+            "disk-sha256": "29dea8e4aaa49907d6af1b653e47aaa86966ae9cc1834a6bb8de712bbcaa98b0"
+          },
+          "futon2.aif.token-belief-carry": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/token_belief_carry.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.token-belief-carry",
+              "source-file": "futon2/aif/token_belief_carry.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/token_belief_carry.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/token_belief_carry.clj",
+              "captured-at": "2026-10-20T12:42:56.389546957Z",
+              "status": "captured",
+              "sha256": "9bf050a9f1bab20eda1b66517b5dc24bc1169cefaf27c4c0956a360eb27c41c2"
+            },
+            "disk-sha256": "9bf050a9f1bab20eda1b66517b5dc24bc1169cefaf27c4c0956a360eb27c41c2"
+          },
+          "futon2.aif.token-belief-predecessor": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/token_belief_predecessor.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.token-belief-predecessor",
+              "source-file": "futon2/aif/token_belief_predecessor.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/token_belief_predecessor.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/token_belief_predecessor.clj",
+              "captured-at": "2026-10-20T12:42:56.394593173Z",
+              "status": "captured",
+              "sha256": "c526e0a7aa58da25327d0c73571c46296d03953c9ec961f7fb03c9b62182ebc6"
+            },
+            "disk-sha256": "c526e0a7aa58da25327d0c73571c46296d03953c9ec961f7fb03c9b62182ebc6"
+          },
+          "futon2.aif.token-initialization-policy": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/token_initialization_policy.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.token-initialization-policy",
+              "source-file": "futon2/aif/token_initialization_policy.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/token_initialization_policy.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/token_initialization_policy.clj",
+              "captured-at": "2026-10-20T12:42:55.985158881Z",
+              "status": "captured",
+              "sha256": "cfa8aae5461470eb9bfe973437837c45293b79646a90fbca7bb10b33522c4a23"
+            },
+            "disk-sha256": "cfa8aae5461470eb9bfe973437837c45293b79646a90fbca7bb10b33522c4a23"
+          },
+          "futon2.aif.token-outcome": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/token_outcome.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.token-outcome",
+              "source-file": "futon2/aif/token_outcome.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/token_outcome.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/token_outcome.clj",
+              "captured-at": "2026-10-20T12:42:56.452959555Z",
+              "status": "captured",
+              "sha256": "1835f1421452353bbbbdcd6767ed07ce3bc419672476757218a1fbebc5ead741"
+            },
+            "disk-sha256": "1835f1421452353bbbbdcd6767ed07ce3bc419672476757218a1fbebc5ead741"
+          },
+          "futon2.aif.token-outcome-pair": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.token-outcome-pair",
+              "source-file": "futon2/aif/token_outcome_pair.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/token_outcome_pair.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/token_outcome_pair.clj",
+              "captured-at": "2026-10-20T12:42:56.456806956Z",
+              "status": "captured",
+              "sha256": "a07c28ebf5422cd2a0ce4001247c42968ae21dcc4be9d8a81c4d6db904676907"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.trace": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/trace.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.trace",
+              "source-file": "futon2/aif/trace.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/trace.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/trace.clj",
+              "captured-at": "2026-10-20T12:40:02.688257909Z",
+              "status": "captured",
+              "sha256": "99230b1d2e03744a8a60921c371d2273d63a0a1240602c14646c43d98729f900"
+            },
+            "disk-sha256": "99230b1d2e03744a8a60921c371d2273d63a0a1240602c14646c43d98729f900"
+          },
+          "futon2.aif.tripwire": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/tripwire.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.tripwire",
+              "source-file": "futon2/aif/tripwire.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/tripwire.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/tripwire.clj",
+              "captured-at": "2026-10-20T12:40:02.710939738Z",
+              "status": "captured",
+              "sha256": "a147add52d76fbd917027fd7492258dbf916d206bc21a34728d08142586b5984"
+            },
+            "disk-sha256": "a147add52d76fbd917027fd7492258dbf916d206bc21a34728d08142586b5984"
+          },
+          "futon2.aif.wm.authored.req-1a602e71": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.authored.req-1a602e71",
+              "source-file": "futon2/aif/wm/authored/req_1a602e71.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/authored/req_1a602e71.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/authored/req_1a602e71.clj",
+              "captured-at": "2026-10-22T03:02:29.710894954Z",
+              "status": "captured",
+              "sha256": "7d742fb9efcb236ca54a8610759b9f091b38cbc5f3462e9aa5b7ddaca7880ef9"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.wm.authored.req-f7374bcce": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.authored.req-f7374bcce",
+              "source-file": "futon2/aif/wm/authored/req_f7374bcce.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/authored/req_f7374bcce.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/authored/req_f7374bcce.clj",
+              "captured-at": "2026-10-22T03:02:29.723743396Z",
+              "status": "captured",
+              "sha256": "daf082ebc82d1306a86a0c6fad221d4fdef7e30090b7bf64ff9e017a76cd85a0"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.wm.cascade-enactment-compiler": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.cascade-enactment-compiler",
+              "source-file": "futon2/aif/wm/cascade_enactment_compiler.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/cascade_enactment_compiler.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/cascade_enactment_compiler.clj",
+              "captured-at": "2026-10-20T12:42:57.079820461Z",
+              "status": "captured",
+              "sha256": "33247b2ad0ad2a3609082695bc0e0ae1b38f4f80fc35ea0759b7f9e00a717fe6"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.wm.executable-cascade": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.executable-cascade",
+              "source-file": "futon2/aif/wm/executable_cascade.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/executable_cascade.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/executable_cascade.clj",
+              "captured-at": "2026-10-20T12:42:56.854704226Z",
+              "status": "captured",
+              "sha256": "9f1a6c8734559505713ec53643fa7fb9e9319a166acc2c67847f5510ff8d0031"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.wm.family-selection": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj",
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.family-selection",
+              "source-file": "futon2/aif/wm/family_selection.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj",
+              "captured-at": "2026-10-22T03:02:29.013880693Z",
+              "status": "captured",
+              "sha256": "0edce2a2a865708c789d43043a639055b213e427d8fefabc5c4fb076031645dd"
+            },
+            "disk-sha256": "0edce2a2a865708c789d43043a639055b213e427d8fefabc5c4fb076031645dd"
+          },
+          "futon2.aif.wm.loop-node-exercise": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.loop-node-exercise",
+              "source-file": "futon2/aif/wm/loop_node_exercise.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/loop_node_exercise.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/loop_node_exercise.clj",
+              "captured-at": "2026-10-22T03:02:29.228722732Z",
+              "status": "captured",
+              "sha256": "c35e375585100d3cbc0b718965fc17af65c4c5e4fc31cd639a4f1b0d0cd2e985"
+            },
+            "disk-sha256": null
+          },
+          "futon2.aif.wm.selection-cascade-identity": {
+            "status": "unavailable",
+            "canonical-path": null,
+            "loaded-source": {
+              "namespace": "futon2.aif.wm.selection-cascade-identity",
+              "source-file": "futon2/aif/wm/selection_cascade_identity.clj",
+              "source-url": "file:/home/joe/code/futon2/src/futon2/aif/wm/selection_cascade_identity.clj",
+              "source-path": "/home/joe/code/futon2/src/futon2/aif/wm/selection_cascade_identity.clj",
+              "captured-at": "2026-10-20T12:42:56.869887755Z",
+              "status": "captured",
+              "sha256": "1166863214bcd390eafac788a0458936c93bd4e12920de733494cfc337937a07"
+            },
+            "disk-sha256": null
+          },
+          "futon2.report.cascade-lane": {
+            "status": "current",
+            "canonical-path": "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj",
+            "loaded-source": {
+              "namespace": "futon2.report.cascade-lane",
+              "source-file": "futon2/report/cascade_lane.clj",
+              "source-url": "file:/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj",
+              "source-path": "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj",
+              "captured-at": "2026-10-20T12:42:57.683461733Z",
+              "status": "captured",
+              "sha256": "cc8f059ddfba13fb34d65eaaf0d134e951cfacc58e223dcc6d99fd71d8973729"
+            },
+            "disk-sha256": "cc8f059ddfba13fb34d65eaaf0d134e951cfacc58e223dcc6d99fd71d8973729"
+          },
+          "futon2.report.war-machine": {
+            "status": "stale",
+            "canonical-path": "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj",
+            "loaded-source": {
+              "namespace": "futon2.report.war-machine",
+              "source-file": "futon2/report/war_machine.clj",
+              "source-url": "file:/home/joe/code/futon2/scripts/futon2/report/war_machine.clj",
+              "source-path": "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj",
+              "captured-at": "2026-10-20T12:42:58.445068894Z",
+              "status": "captured",
+              "sha256": "14a06c657f0ed2ef9ead008d1c29d9223ab3a69720677f6d79c3f3cc892427b6"
+            },
+            "disk-sha256": "5f9f0fb0bbb08808d675afac57e2bf6d9bc4b3715edd34fe8113990648685f5b"
+          },
+          "futon3c.wm.runner-service": {
+            "status": "unregistered",
+            "canonical-path": "/home/joe/code/futon3c/src/futon3c/wm/runner_service.clj",
+            "loaded-source": null,
+            "disk-sha256": "d7d553a25b1dab3c98ac67a7b8e471804ae1d61b4370ba7d208ab08eaf9f1f55"
+          }
+        },
+        "loaded-displacement": {
+          "futon2.aif.accepted-increment": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.accumulation-bmr": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.action-identity": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.action-proposer": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.affective-level": {
+            "status": "current",
+            "of": 19
+          },
+          "futon2.aif.analysis-cascade": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.anticipation": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.application-order-certificate": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.assessed-policy-basis": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.attempt-learning": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.belief": {
+            "status": "current",
+            "of": 82
+          },
+          "futon2.aif.beta-habit": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.bmr": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.c-fold-config": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.c-vector": {
+            "status": "current",
+            "of": 43
+          },
+          "futon2.aif.calibration-admission": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.calibration-cycle": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.cascade-feedback": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.cascade-free-energy": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.cascade-habit-reinforcement": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.cascade-habit-store": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.cascade-model-manifest": {
+            "status": "current",
+            "of": 68
+          },
+          "futon2.aif.cascade-observation-scoring": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.cascade-plan": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.cascade-policy": {
+            "status": "current",
+            "of": 19
+          },
+          "futon2.aif.cascade-prior": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.cascade-problems": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.cascade-proposals": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.cascade-revision": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.cascade-revision-producer": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.cascade-selection": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.cascade-shape-g": {
+            "status": "current",
+            "of": 28
+          },
+          "futon2.aif.cascade-sources": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.cascade-structure": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.check-candidates": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.close-loop": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.close-retention": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.conditioned-trajectory": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.construction": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.construction-moves": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.controller-authority": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.d-predecessor-task-authority": {
+            "status": "current",
+            "of": 39
+          },
+          "futon2.aif.decision-gate": {
+            "status": "current",
+            "of": 18
+          },
+          "futon2.aif.delivery-qa": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.disposition-risk": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.efe": {
+            "status": "current",
+            "of": 45
+          },
+          "futon2.aif.enactment-fold-source": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.enactment-habit": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.enumeration-completeness": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.epistemic-value": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.evidence-manifest": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.exact-belief-adapter": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.exact-belief-core": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.fact-measurement": {
+            "status": "current",
+            "of": 24
+          },
+          "futon2.aif.find-designation": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.find-expectations": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.find-receipt": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.finding-ticket": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.flight": {
+            "status": "current",
+            "of": 20
+          },
+          "futon2.aif.flight-runner": {
+            "status": "current",
+            "of": 38
+          },
+          "futon2.aif.focus-receipt": {
+            "status": "current",
+            "of": 25
+          },
+          "futon2.aif.fold": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.fold-cascade": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.fold-classical": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.fold-eval": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.fold-llm": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.fold-semilattice": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.forward-model": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.free-energy": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.full-loop-cohort": {
+            "status": "current",
+            "of": 78
+          },
+          "futon2.aif.full-loop-runner": {
+            "status": "displaced",
+            "file": "futon2/aif/full_loop_runner.clj",
+            "mismatched": 196,
+            "of": 250,
+            "sample": [
+              [
+                "default-substrate-base",
+                113
+              ],
+              [
+                "default-run-record-dir",
+                141
+              ],
+              [
+                "default-agent-budget-ms",
+                149
+              ]
+            ]
+          },
+          "futon2.aif.full-loop-runtime": {
+            "status": "current",
+            "of": 26
+          },
+          "futon2.aif.g-term-decomposition": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.grain-gate": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.habit-prior": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.handoff-contract": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.hierarchical-budget": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.increment-attestation": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.interoceptive-store-lock": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.interpretation-construction": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.interpretation-evidence": {
+            "status": "current",
+            "of": 33
+          },
+          "futon2.aif.interpretation-job": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.interpretation-request": {
+            "status": "current",
+            "of": 22
+          },
+          "futon2.aif.intrinsic-values": {
+            "status": "current",
+            "of": 22
+          },
+          "futon2.aif.job-text-retention": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.kernel-example": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.lane-futility": {
+            "status": "current",
+            "of": 40
+          },
+          "futon2.aif.learning-trial": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.learning-trial-ledger": {
+            "status": "current",
+            "of": 26
+          },
+          "futon2.aif.legacy-three-halves-registry": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.lifecycle-exits": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.likelihood-precision": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.limb-evidence": {
+            "status": "current",
+            "of": 20
+          },
+          "futon2.aif.live-c": {
+            "status": "current",
+            "of": 27
+          },
+          "futon2.aif.load-identity": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.loaded-displacement": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.machine-accumulation": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.machine-model": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.machine-q": {
+            "status": "current",
+            "of": 22
+          },
+          "futon2.aif.machine-q-risk": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.matched-observation-evidence": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.memory-contract": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.meta-decision-manifest": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.meta-field-observation": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.meta-injury-ledger": {
+            "status": "current",
+            "of": 48
+          },
+          "futon2.aif.meta-injury-observation": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.meta-injury-store": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.meta-live-outer-selector": {
+            "status": "current",
+            "of": 37
+          },
+          "futon2.aif.meta-outcome-dataset": {
+            "status": "current",
+            "of": 27
+          },
+          "futon2.aif.meta-pipeline-selector": {
+            "status": "current",
+            "of": 22
+          },
+          "futon2.aif.meta-repair-coordinator": {
+            "status": "current",
+            "of": 36
+          },
+          "futon2.aif.meta-self-heal-harness": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.meta-self-heal-production": {
+            "status": "current",
+            "of": 58
+          },
+          "futon2.aif.meta-terminal-injury": {
+            "status": "current",
+            "of": 33
+          },
+          "futon2.aif.mission-c": {
+            "status": "current",
+            "of": 25
+          },
+          "futon2.aif.mission-criteria": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.mission-epistemic-value": {
+            "status": "current",
+            "of": 19
+          },
+          "futon2.aif.mission-gauges": {
+            "status": "current",
+            "of": 22
+          },
+          "futon2.aif.mission-hole-wants": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.mission-reading": {
+            "status": "current",
+            "of": 37
+          },
+          "futon2.aif.mission-registry": {
+            "status": "current",
+            "of": 66
+          },
+          "futon2.aif.morning-brief": {
+            "status": "current",
+            "of": 36
+          },
+          "futon2.aif.move-class-intensity": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.observation": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.observation-admission": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.observation-checks": {
+            "status": "current",
+            "of": 42
+          },
+          "futon2.aif.observation-label-reader": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.observation-label-store": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.observation-label-wire": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.observation-labels": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.observation-model": {
+            "status": "current",
+            "of": 24
+          },
+          "futon2.aif.observation-rates": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.occurrence-square-authoring": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.occurrence-square-registry": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.open-cascade-refinement": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.outcome-wants": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.outer-learning-manifest": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.outer-learning-runtime": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.outer-policy-evidence": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.outer-policy-evidence-provider": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.outer-policy-objective": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.outer-policy-provider-runtime": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.outer-target-belief": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.outer-target-score": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.outer-task-selection": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.parameter-novelty": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.pattern-graph-pin": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.pattern-registry": {
+            "status": "current",
+            "of": 21
+          },
+          "futon2.aif.pattern-retraction": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.policy": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.policy-depth": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.policy-free-energy": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.policy-precision": {
+            "status": "current",
+            "of": 18
+          },
+          "futon2.aif.policy-precision-carry": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.policy-prefix-admission": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.policy-prefix-evidence": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.precision": {
+            "status": "current",
+            "of": 20
+          },
+          "futon2.aif.preference-audit": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.preference-module": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.preferences": {
+            "status": "current",
+            "of": 27
+          },
+          "futon2.aif.prefix-free-energy-cold-start": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.prefix-free-energy-sut": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.previous-run": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.q10-arrangement-census": {
+            "status": "current",
+            "of": 17
+          },
+          "futon2.aif.q2-construction": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.q4-preference": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.q8-frontier": {
+            "status": "current",
+            "of": 29
+          },
+          "futon2.aif.q9-factorization": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.reading-interpretation-debt": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.reading-policy-precision": {
+            "status": "current",
+            "of": 31
+          },
+          "futon2.aif.reading-policy-preference": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.realized-outcome": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.realized-recording": {
+            "status": "current",
+            "of": 19
+          },
+          "futon2.aif.receipt-construction": {
+            "status": "current",
+            "of": 25
+          },
+          "futon2.aif.registered-run-telemetry": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.registry-port": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.repair-discharge": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.repair-discharge-evidence": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.repair-discharge-receipt": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.repair-evaluators": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.repair-obligation": {
+            "status": "current",
+            "of": 88
+          },
+          "futon2.aif.repair-proposals": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.retraction-cascade": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.reviewer-falsifier": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.revision-pattern-use": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.rollout": {
+            "status": "current",
+            "of": 46
+          },
+          "futon2.aif.route-attestation": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.ruled-outcome-c": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.run-ending-classification": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.run-participants": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.run-record-io": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.run4-task-pin": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.scan-bins": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.scan-bmr": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.scan-learn": {
+            "status": "current",
+            "of": 29
+          },
+          "futon2.aif.scan-report": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.scan-shadow": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.scoring-input-receipts": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.selected-outer-cascade-policy": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.selected-reading": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.selected-target-reading": {
+            "status": "current",
+            "of": 24
+          },
+          "futon2.aif.selected-want-outcome": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.selection-gain": {
+            "status": "current",
+            "of": 16
+          },
+          "futon2.aif.selection-rationale": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.selection-timing": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.selection-world": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.served-by-reading": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.shadow-cascade-g": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.sorry-registry": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.state-prediction-error": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.strategic-habit": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.substrate": {
+            "status": "current",
+            "of": 20
+          },
+          "futon2.aif.surprise": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.target-policy-family": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.target-reading-preparation": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.target-reading-registry": {
+            "status": "current",
+            "of": 19
+          },
+          "futon2.aif.task-belief-ladder": {
+            "status": "current",
+            "of": 24
+          },
+          "futon2.aif.task-execution-evidence": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.task-requisition": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.temporal-input": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.temporal-update": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.terminal-publication-receipt": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.three-halves-policy": {
+            "status": "current",
+            "of": 23
+          },
+          "futon2.aif.three-halves-square": {
+            "status": "current",
+            "of": 15
+          },
+          "futon2.aif.ticket-publication-io": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.ticket-queue": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.token-a-bmr": {
+            "status": "current",
+            "of": 10
+          },
+          "futon2.aif.token-belief-carry": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.token-belief-predecessor": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.token-initialization-policy": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.token-outcome": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.token-outcome-pair": {
+            "status": "current",
+            "of": 24
+          },
+          "futon2.aif.trace": {
+            "status": "current",
+            "of": 39
+          },
+          "futon2.aif.tripwire": {
+            "status": "current",
+            "of": 98
+          },
+          "futon2.aif.want-interpretation": {
+            "status": "current",
+            "of": 31
+          },
+          "futon2.aif.wm.apparatus-certificates": {
+            "status": "current",
+            "of": 28
+          },
+          "futon2.aif.wm.authored.req-1a602e71": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.wm.authored.req-f7374bcce": {
+            "status": "current",
+            "of": 2
+          },
+          "futon2.aif.wm.cascade-capability-dispatch": {
+            "status": "current",
+            "of": 8
+          },
+          "futon2.aif.wm.cascade-continuation": {
+            "status": "current",
+            "of": 9
+          },
+          "futon2.aif.wm.cascade-decision": {
+            "status": "current",
+            "of": 47
+          },
+          "futon2.aif.wm.cascade-enactment-compiler": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.wm.click-ask": {
+            "status": "current",
+            "of": 5
+          },
+          "futon2.aif.wm.compiled-cascade-construction": {
+            "status": "current",
+            "of": 1
+          },
+          "futon2.aif.wm.construction-inputs": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.wm.debugger": {
+            "status": "current",
+            "of": 20
+          },
+          "futon2.aif.wm.executable-cascade": {
+            "status": "current",
+            "of": 28
+          },
+          "futon2.aif.wm.execution-journal": {
+            "status": "current",
+            "of": 18
+          },
+          "futon2.aif.wm.family-selection": {
+            "status": "current",
+            "of": 21
+          },
+          "futon2.aif.wm.frozen-cascade-steps": {
+            "status": "current",
+            "of": 13
+          },
+          "futon2.aif.wm.loop-node-exercise": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.wm.on-prod-history": {
+            "status": "current",
+            "of": 6
+          },
+          "futon2.aif.wm.open-cascade-resume": {
+            "status": "current",
+            "of": 18
+          },
+          "futon2.aif.wm.pattern-graph-diff": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.aif.wm.pattern-graph-view": {
+            "status": "current",
+            "of": 4
+          },
+          "futon2.aif.wm.preregistration": {
+            "status": "current",
+            "of": 14
+          },
+          "futon2.aif.wm.run-output": {
+            "status": "current",
+            "of": 3
+          },
+          "futon2.aif.wm.selection-cascade-identity": {
+            "status": "current",
+            "of": 7
+          },
+          "futon2.aif.wm.terminal-receipt": {
+            "status": "current",
+            "of": 11
+          },
+          "futon2.aif.zeta-posterior": {
+            "status": "current",
+            "of": 12
+          },
+          "futon2.report.cascade-lane": {
+            "status": "current",
+            "of": 41
+          },
+          "futon2.report.war-machine": {
+            "status": "displaced",
+            "file": "futon2/report/war_machine.clj",
+            "mismatched": 11,
+            "of": 292,
+            "sample": [
+              [
+                "active-sessions-D-days",
+                4238
+              ],
+              [
+                "scan-annotation-graph",
+                7103
+              ],
+              [
+                "mode-vocabulary-record",
+                7137
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "running?": false,
+  "phase-transition": "end",
+  "started-at": "2026-10-22T03:04:34.920490546Z",
+  "click-id": "wm-requeue-7-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+  "attempt-id": null,
+  "phase": null,
+  "phase-at": "2026-10-21T02:49:36.204593755Z",
+  "ordinary-click-budget": {
+    "schema": "wm/ordinary-click-availability-v1",
+    "authorization": {
+      "path": "futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md",
+      "sha": "326826ac"
+    },
+    "allocated": 158,
+    "consumed": 148,
+    "available": 10,
+    "unit": "ordinary-click",
+    "ledger-source": {
+      "path": "/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl",
+      "sha256": "a67fe41d185636e83de41b59c713b4960c9f46fafac274f6364e0359832c3fa1"
+    }
+  },
+  "serving-runner-code": {
+    "schema": 1,
+    "required-file": "src/futon2/aif/full_loop_runner.clj",
+    "availability": "available",
+    "reason": null,
+    "identity": {
+      "schema": 1,
+      "loaded-at": "2026-10-22T03:02:29.253584532Z",
+      "path": "src/futon2/aif/full_loop_runner.clj",
+      "content-sha256": "9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224",
+      "source": "namespace-load-registration",
+      "current-status": "stale",
+      "disk-sha256": "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063"
+    }
+  },
+  "registry-publication": {
+    "status": "published",
+    "stage": "failure"
+  }
+}

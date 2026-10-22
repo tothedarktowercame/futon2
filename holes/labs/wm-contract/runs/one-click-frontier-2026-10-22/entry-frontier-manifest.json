@@ -1,0 +1,89 @@
+{
+  "schema": "wm/frozen-entry-frontier-v1",
+  "completed_click": false,
+  "project_clicks_allocated": 10,
+  "project_clicks_consumed": 2,
+  "project_clicks_remaining": 8,
+  "files": [
+    {
+      "path": "accepted.json",
+      "sha256": "2e094b576f9b3577d59f6a838fe4f4b1948b0623c4670ae0c93a597769bcb9f5"
+    },
+    {
+      "path": "attach-result.json",
+      "sha256": "f0ec0258c24d79ef07f771e646357ed46ebcb9d0e0d90486056d1d4d123f72b8"
+    },
+    {
+      "path": "attach.clj",
+      "sha256": "357a0e3020cd81cda0fd55742b6aa001bb9d098d39898a5e964f6ebbda9f79e4"
+    },
+    {
+      "path": "before.json",
+      "sha256": "66e3b11f44c20061ceeb80b6641ef335266d4197eb84d3636a67aba34fa9402b"
+    },
+    {
+      "path": "click-2-launch.log",
+      "sha256": "580062982b35ad3bd57fc48b4b2487f587a8001cf1f8d21789e0cc85adb30fb4"
+    },
+    {
+      "path": "click-2.log",
+      "sha256": "cf88026fb26db8b5f6a0d607a93aa42347ebb6335e366339b57dca51b4bfe37b"
+    },
+    {
+      "path": "click.log",
+      "sha256": "35820b78f4d4a00412b6259131426ab256519fb6ca8203282b980d38780fc9da"
+    },
+    {
+      "path": "current-status.json",
+      "sha256": "8b14e5f87d7aacbc625115ccf08767a39252858e8546572d0cbc339168a5ff69"
+    },
+    {
+      "path": "failed-child.edn",
+      "sha256": "fae67ad77c7fe4ad6802f543ec0b4deda966a5bfc42db80548abb99298dfe0c3"
+    },
+    {
+      "path": "issued-status.json",
+      "sha256": "05dcfd1768e91131b42794383c1d77650d0cbea70f61519f9955f70178667f77"
+    },
+    {
+      "path": "launch-stack.json",
+      "sha256": "c0ffd911c2592d445f0f09dfb31300207d4723e87d9a2b3b6c7b8c1c6772f562"
+    },
+    {
+      "path": "parent-acceptance.edn",
+      "sha256": "2fe6653a92e9c842ecbd0868a8e8129968b0a84b4e4dcbfd9176216ccd1cb742"
+    },
+    {
+      "path": "reload-after-drift.json",
+      "sha256": "b50a025e663cef5788c240a37b7d678f545e8c760a676156bfe0d7c67824d0ea"
+    },
+    {
+      "path": "reload-plan.json",
+      "sha256": "9d4f4d9c79b42f267b891ea8b1c2aba9c709bb651f67d34e4674f4c4a0d4ee68"
+    },
+    {
+      "path": "reload-result.json",
+      "sha256": "ba077dc49b0d26c4867d51f3c9fd2e9d979cde2fa9a0bf39197a668609722138"
+    },
+    {
+      "path": "second-cast.json",
+      "sha256": "2d9faba686b3f384b761039ecaaf30026e2c366c63c1fc57895a2813aaf035a8"
+    },
+    {
+      "path": "second-parent-acceptance.json",
+      "sha256": "aba120d69cbb7d4316283048d94e7771d64c83fd28c75e772bbc7b1175959391"
+    },
+    {
+      "path": "source-restart-deployment.json",
+      "sha256": "0208a2544cb45db018d6c63b8c7660989aa9482eb49fd8853984ebe0e8c22f3e"
+    },
+    {
+      "path": "source-restart-live-verification.json",
+      "sha256": "cb25850c39de5186563fea43896936008f0709f810b39e66b3cf7328a5546e5f"
+    },
+    {
+      "path": "source-restart-test.log",
+      "sha256": "5be98152d498322197ed45568ba986f3a2bd983b6c3d8e5e85922a2a3412ff95"
+    }
+  ]
+}

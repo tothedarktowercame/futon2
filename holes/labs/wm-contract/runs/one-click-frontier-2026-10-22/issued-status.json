@@ -1,0 +1,84 @@
+{
+  "last-result": {
+    "run-binding": "/home/joe/code/futon3c/data/wm-click-run-bindings/click-run-binding-wm-requeue-6-4-repair_239cf98836afc977cd589141c224ec3f4bca83dc.edn",
+    "run-record": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-21-752b48a7-6d82-4a0e-b888-9966e8c46116.edn",
+    "click-id": "wm-requeue-6-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+    "attempt-id": "attempt-001",
+    "route-check": {
+      "status": "launched",
+      "job": {
+        "id": "bg-1792550985511-57",
+        "pid": 1895184,
+        "out-file": "/tmp/futon3c-bg/bg-1792550985511-57.log",
+        "started-at": "2026-10-21T02:49:45.511Z"
+      }
+    },
+    "outcome": "incomplete",
+    "binding-durability": "confirmed",
+    "binding-status": "verified",
+    "runtime-disposition": {
+      "carried-bindings": {
+        "status": "absent",
+        "reason": "retry"
+      },
+      "diagnosis-observation": null,
+      "acceptance-observation": {
+        "status": "not-required",
+        "reason": "meta-self-heal/acceptance-retry-not-prepared"
+      }
+    },
+    "run-id-observation": {
+      "status": "present",
+      "source": "runner-return",
+      "value": "2026-10-21-752b48a7-6d82-4a0e-b888-9966e8c46116"
+    },
+    "run-record-status": "present",
+    "report-card": {
+      "status": "failed",
+      "reason": "report-card-binding-update-failed",
+      "error-class": "java.io.FileNotFoundException",
+      "message": "/home/joe/code/futon3c/data/wm-click-run-bindings/report-card-wm-requeue-6-4-repair/.239cf98836afc977cd589141c224ec3f4bca83dc.edn.245ad517-cb6f-4013-8f86-0caa14d53abc.tmp (No such file or directory)"
+    }
+  },
+  "running?": false,
+  "phase-transition": "end",
+  "started-at": "2026-10-21T02:43:47.580418748Z",
+  "click-id": "wm-requeue-6-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc",
+  "attempt-id": "attempt-001",
+  "phase": null,
+  "phase-at": "2026-10-21T02:49:36.204593755Z",
+  "ordinary-click-budget": {
+    "schema": "wm/ordinary-click-availability-v1",
+    "authorization": {
+      "path": "futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md",
+      "sha": "326826ac"
+    },
+    "allocated": 158,
+    "consumed": 147,
+    "available": 11,
+    "unit": "ordinary-click",
+    "ledger-source": {
+      "path": "/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl",
+      "sha256": "d0b4199582be2cadc2789fcc61f956209825531d25838c73369ebed92d832397"
+    }
+  },
+  "serving-runner-code": {
+    "schema": 1,
+    "required-file": "src/futon2/aif/full_loop_runner.clj",
+    "availability": "available",
+    "reason": null,
+    "identity": {
+      "schema": 1,
+      "loaded-at": "2026-10-22T03:02:29.253584532Z",
+      "path": "src/futon2/aif/full_loop_runner.clj",
+      "content-sha256": "9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224",
+      "source": "namespace-load-registration",
+      "current-status": "stale",
+      "disk-sha256": "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063"
+    }
+  },
+  "registry-publication": {
+    "status": "published",
+    "stage": "close"
+  }
+}

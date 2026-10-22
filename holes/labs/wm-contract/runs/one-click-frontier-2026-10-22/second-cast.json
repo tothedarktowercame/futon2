@@ -1,0 +1,9 @@
+{
+  "author": "zai-2",
+  "reviewer": "zai-3",
+  "repair-reviewer": "zai-1",
+  "fresh_sessions": true,
+  "reason": "Keep separate read-only recovery investigation from blocking production cast",
+  "replaced_waiter_pid": 1740844,
+  "no_click_in_flight": true
+}

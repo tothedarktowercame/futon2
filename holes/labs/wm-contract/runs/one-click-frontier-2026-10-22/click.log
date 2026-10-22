@@ -1,0 +1,46 @@
+wm_click preflight
+  agency                 up
+  click budget           11 available
+  issuing caller         codex-11 (not a cast seat)
+  tripwires              13/13 clear
+  stop-line queue        69 open obligation(s) -- recorded as evidence in the run record; selection proceeds regardless (RULING-selection-precedence-2026-09-19, futon2 8b6827da)
+
+waiting for cast seats and single-flight boundary (since 2026-10-22T03:03:35Z; max 30 min)
+  casting                zai-2 / zai-3 / zai-8 idle and invoke-ready
+  in flight              none
+
+firing click, run-id 2026-10-22-a9149edf-a9c0-4fd3-bedf-c62a4b2ff064
+{"click-id":"wm-click-3041d9dc-2084-493a-8735-241ed1b5bd94","started-at":"2026-10-22T03:04:28.429482773Z","status":"queued"}
+tracking our click: wm-click-3041d9dc-2084-493a-8735-241ed1b5bd94
+status now shows a different click (wm-requeue-7-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc); ours (wm-click-3041d9dc-2084-493a-8735-241ed1b5bd94) has finished
+
+terminal state:
+{
+    "last-result": {
+        "attempt-id": null,
+        "outcome": "service-failed",
+        "error": "Serving runner source drifts from the canonical checkout",
+        "error-data": {
+            "outcome": "build-failed",
+            "failure-kind": "stale-runner-source",
+            "failure-stage": "runner-source",
+            "runner/source": {
+                "runner/source-check": "drift",
+                "runner/loaded-present?": true,
+                "runner/canonical-present?": true,
+                "runner/loaded-sha256": "9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224",
+                "runner/canonical-sha256": "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063",
+                "identity-kind": "source-digest-at-namespace-load",
+                "namespaces": {
+                    "futon2.aif.accepted-increment": {
+                        "status": "unavailable",
+                        "canonical-path": null,
+                        "loaded-source": {
+                            "namespace": "futon2.aif.accepted-increment",
+                            "source-file": "futon2/aif/accepted_increment.clj",
+                            "source-url": "file:/home/joe/code/futon2/src/futon2/aif/accepted_increment.clj",
+
+newest repair finding, if the click opened one:
+-rw-rw-r-- 1 joe joe 29903 Oct 21 02:49 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-occ-d2f65574326c6cf91328d4061f10e695abdb63444df18c2fa78a8ead4dd54812.edn
+ALERT FOR JOE
+requirements NOT CHECKED: run record missing after completed click: /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-a9149edf-a9c0-4fd3-bedf-c62a4b2ff064.edn

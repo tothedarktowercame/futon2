@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:source {:runner/source-check :current, :runner/loaded-sha256 \"5e502d2405ac1231250b98a1b9d4a772319cd952931b13e26d3b9aeef69433d1\", :runner/canonical-sha256 \"5e502d2405ac1231250b98a1b9d4a772319cd952931b13e26d3b9aeef69433d1\"}, :budget {:schema :wm/ordinary-click-availability-v1, :authorization {:path \"futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md\", :sha \"326826ac\"}, :allocated 158, :consumed 149, :available 9, :unit :ordinary-click, :ledger-source {:path \"/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl\", :sha256 \"3a2faa3e12f6e06d1c56623f408a0e032338102af4b677bb83f9802276fbe5bd\"}}, :stopped []}}",
+  "err": ""
+}
