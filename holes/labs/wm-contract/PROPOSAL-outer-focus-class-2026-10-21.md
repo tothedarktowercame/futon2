@@ -87,3 +87,18 @@ C. **Retire the injury branch** once A and B are in: an injury lowers the
   existing C over outcomes may be the cleaner place.
 - Do you see a reason the injury branch must stay separate that this note
   misses?
+
+## codex-4's answer (2026-10-22)
+
+"Change, then build" (`NOTE-r20-lean-catchup-2026-10-22-answers.md` §3). The
+first build packet (`PACKET-r20-A-outer-focus-class-term-2026-10-22.md`) named
+`outer_target_score`; codex-4 found ordinary rounds never call it
+(`meta_live_outer_selector.clj:531`). The seam it then confirmed is the class
+emission inside the cross-target union: `cascade_decision/reading-family-decision`
+→ `family-selection/select-over-families` → `cascade-shape-g/score-policy`, where
+`class-emission-model` hard-coded `:target-class {target :focused}`. Change A
+is now: one frozen focus per selection, `:target-class` from `classify-target`,
+`:unknown` refused before scoring with a typed refusal, scorer-version bumped,
+receipt at `[:selection-certificate :focus-receipt]`. No separate weight: the
+class preference already enters G's terminal risk. Injury branch untouched.
+Joe (2026-10-22) approved changing what clicks record so the R20 rows can be filled.
