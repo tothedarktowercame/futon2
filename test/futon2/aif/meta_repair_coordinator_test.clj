@@ -425,3 +425,181 @@
           verdict (coordinator/verify-work-order raw)]
       (is (= :refused (:status verdict)))
       (is (some #{:attempt/exceeds-limit} (:defects verdict))))))
+
+;; --- One-click frontier repair (2026-10-22): durable service-failed child ---
+
+(defn- child-acceptance-pin
+  "Each failed child's durable acceptance file is its own evidence; pins are
+  per-click, as in production."
+  [click-id]
+  {:path (str "data/wm-click-acceptances/click-" click-id ".edn")
+   :sha256 (str (apply str (repeat 63 "7"))
+               (nth "0123456789abcdef" (mod (count click-id) 16)))})
+
+(defn- failed-child-status-fn
+  "Read-only port shaped like futon3c runner_service click-status/acceptance
+  state: only the named child is durably :failed/:service-failed, and the
+  evidence pin seals the exact acceptance bytes (message preserved there —
+  'Serving runner source drifts from the canonical checkout', attempt-id nil;
+  no typed data is invented)."
+  [failed-click]
+  (fn [click-id]
+    (when (= failed-click click-id)
+      {:status :failed
+       :result {:attempt-id nil :outcome :service-failed
+                :error "Serving runner source drifts from the canonical checkout"}
+       :evidence-pin (child-acceptance-pin click-id)})))
+
+(defn- observation-count
+  ([history]
+   (count (filter #(= :retry-inconclusive (:observation-kind %))
+                  (:entries history))))
+  ([history pin]
+   (count (filter #(and (= :retry-inconclusive (:observation-kind %))
+                        (= pin (:record-pin %)))
+                  (:entries history)))))
+
+(defn- requeue-ports
+  ([] (requeue-ports {}))
+  ([overrides]
+   (ports (merge {:retry (fn [r]
+                           (receipt r :queued {:retry-click (:retry-click r)}))}
+                 overrides))))
+
+(deftest service-failed-child-without-run-record-is-observed-and-requeued
+  ;; The real shape of click wm-requeue-7-4-repair/239cf988: the enacted
+  ;; retry child failed service-side BEFORE any run record, so terminal
+  ;; ingestion appended nothing and every resume starved at :awaiting-retry.
+  ;; With the status port the failure is observed from its own durable
+  ;; acceptance evidence and the requeue loop advances.
+  (let [initial (awaiting-retry (opened-ledger))
+        _ (is (= :awaiting-retry (:status initial)))
+        _ (is (= "click-retry-repair-1" (:retry-click initial)))
+        ;; Control: without the port the same resume stays observation-starved.
+        control (coordinator/coordinate
+                 (durable (:ledger initial)) (:transaction initial)
+                 (requeue-ports))
+        _ (is (= :awaiting-retry (:status control)))
+        _ (is (= "click-retry-repair-1" (:retry-click control)))
+        _ (is (zero? (observation-count (:ledger control))))
+        calls (atom [])
+        ps (requeue-ports
+            {:retry (fn [r]
+                      (swap! calls conj r)
+                      (receipt r :queued {:retry-click (:retry-click r)}))
+             :retry-click-status-fn (failed-child-status-fn "click-retry-repair-1")})
+        result (coordinator/coordinate (durable (:ledger initial))
+                                       (:transaction initial) ps)
+        entries (-> result :ledger :entries)]
+    (is (= :awaiting-retry (:status result)))
+    (is (= "click-retry-requeue-1" (:retry-click result)))
+    (is (= 1 (observation-count (:ledger result)))
+        "exactly one observation cites the child's acceptance evidence")
+    (is (= {:injury-id "injury/2026-10-19/reload"
+            :retry-click "click-retry-repair-1"}
+           (-> (filter #(= :retry-inconclusive (:observation-kind %)) entries)
+               first (select-keys [:injury-id :retry-click]))))
+    (is (= (child-acceptance-pin "click-retry-repair-1")
+           (-> (filter #(= :retry-inconclusive (:observation-kind %)) entries)
+               first :record-pin)))
+    (is (= 1 (-> result :ledger :entries last :requeues)))
+    (is (= :retry-requeue-1 (-> @calls first :phase)))))
+
+(deftest failed-child-observation-is-not-duplicated
+  ;; Crash repair between the observation append and the requeue append, plus
+  ;; a plain replay: the evidence pin is never observed twice.
+  (let [initial (awaiting-retry (opened-ledger))
+        ;; Simulate the crash-after-observation state directly, the same way
+        ;; terminal ingestion would have appended it.
+        pin (child-acceptance-pin "click-retry-repair-1")
+        pre (ledger/append-observation
+             (:ledger initial) pin :retry-inconclusive
+             {:injury-id "injury/2026-10-19/reload"
+              :retry-click "click-retry-repair-1"})
+        _ (is (= :appended (:status pre)))
+        observed (:ledger pre)
+        _ (is (= 1 (observation-count observed pin)))
+        calls (atom [])
+        ps (requeue-ports
+            {:retry (fn [r]
+                      (swap! calls conj r)
+                      (receipt r :queued {:retry-click (:retry-click r)}))
+             :retry-click-status-fn (failed-child-status-fn "click-retry-repair-1")})
+        result (coordinator/coordinate (durable observed)
+                                       (:transaction initial) ps)
+        ;; Replay of the completed resume: the port still reports the same
+        ;; failed child, but its evidence is already ingested.
+        replay (coordinator/coordinate (durable (:ledger result))
+                                       (:transaction result) ps)]
+    (is (= :awaiting-retry (:status result)))
+    (is (= "click-retry-requeue-1" (:retry-click result)))
+    (is (= 1 (observation-count (:ledger result) pin)))
+    (is (= (:ledger result) (:ledger replay)))
+    (is (= 1 (observation-count (:ledger replay) pin)))))
+
+(deftest failed-child-observation-respects-spent-retry-budget-honestly
+  ;; Observing a durably failed child must not buy budget: when the retry
+  ;; budget is already spent and no other open injury explains the child,
+  ;; the requeue loop appends the typed :abandoned/:retry-budget-spent
+  ;; terminal instead of another requeue or a synthetic success.
+  (let [limited (ledger/seal-ledger (assoc ledger/empty-ledger :retry-limit 1))
+        history (append! limited
+                         {:injury-id "injury/2026-10-19/reload"
+                          :state :open :attempt 1 :cause-record-pin pin-a
+                          :failure-stage :reload :failure-kind :phase-failure
+                          :detected-click "click-2026-10-19-4"})
+        initial (awaiting-retry history)
+        ;; First failed child observed -> requeue 1 (budget 1 allows it).
+        requeued (coordinator/coordinate
+                   (durable (:ledger initial))
+                   (:transaction initial)
+                   (requeue-ports {:retry-click-status-fn
+                                   (failed-child-status-fn "click-retry-repair-1")}))
+        _ (is (= :awaiting-retry (:status requeued)))
+        _ (is (= "click-retry-requeue-1" (:retry-click requeued)))
+        ;; The requeued child also fails service-side; budget is now spent.
+        calls (atom 0)
+        result (coordinator/coordinate
+                 (durable (:ledger requeued))
+                 (:transaction requeued)
+                 (requeue-ports {:retry (fn [r]
+                                          (swap! calls inc)
+                                          (receipt r :queued
+                                                   {:retry-click (:retry-click r)}))
+                                 :retry-click-status-fn
+                                 (failed-child-status-fn "click-retry-requeue-1")}))]
+    (is (= :abandoned (:status result)))
+    (is (= :retry-budget-spent (:reason result)))
+    (is (= :abandoned (-> result :ledger :entries last :state)))
+    (is (zero? @calls))
+    (is (= 2 (observation-count (:ledger result))))))
+
+(deftest running-or-completed-child-is-never-observed
+  ;; Only a durable :service-failed outcome is evidence: a completed, running
+  ;; or unknown child must not append anything.
+  (doseq [observed [{:status :completed :result {:outcome :cohort-complete}}
+                    {:status :running}
+                    {:status :not-found}
+                    nil]]
+    (let [initial (awaiting-retry (opened-ledger))
+          result (coordinator/coordinate
+                  (durable (:ledger initial)) (:transaction initial)
+                  (requeue-ports {:retry-click-status-fn (fn [_] observed)}))]
+      (is (= :awaiting-retry (:status result)))
+      (is (= "click-retry-repair-1" (:retry-click result)))
+      (is (zero? (observation-count (:ledger result)))))))
+
+(deftest failed-child-without-evidence-pin-refuses-typedly
+  ;; The legacy child carries only a message and a nil attempt-id in its
+  ;; acceptance file; a status port that cannot pin the bytes it reports
+  ;; must refuse by name rather than append an unsourced observation.
+  (let [initial (awaiting-retry (opened-ledger))
+        result (coordinator/coordinate
+                (durable (:ledger initial)) (:transaction initial)
+                (requeue-ports
+                 {:retry-click-status-fn
+                  (fn [_] {:status :failed
+                           :result {:outcome :service-failed :error "x"}})}))]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/failed-child-evidence-refused (:reason result)))
+    (is (zero? (observation-count (:ledger result))))))

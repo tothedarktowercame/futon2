@@ -233,6 +233,50 @@
 (defn- requeue-phase [n]
   (keyword (str "retry-requeue-" n)))
 
+(defn- failed-child-observation
+  "Read the durable service-side status of one meta-retry child click through
+  the read-only :retry-click-status-fn port. Returns the evidence map only
+  for a durably recorded service failure whose evidence pin seals the bytes
+  the observation will cite; a running, queued, completed or unknown child is
+  not a failure and returns nil. A recorded failure without a valid evidence
+  pin refuses typedly rather than observing an unsourced failure."
+  [ports retry-click]
+  (when-let [status-fn (:retry-click-status-fn ports)]
+    (let [observed (try (status-fn retry-click) (catch Throwable _ nil))]
+      (when (map? observed)
+        (cond
+          (not= :failed (:status observed)) nil
+          (not= :service-failed (get-in observed [:result :outcome])) nil
+          (not (pin? (:evidence-pin observed)))
+          (refusal :coordinator/failed-child-evidence-refused
+                   {:retry-click retry-click
+                    :result (select-keys (:result observed) [:outcome :error])})
+          :else observed)))))
+
+(defn- observe-failed-child!
+  "Append the :retry-inconclusive observation terminal ingestion would have
+  appended for a child that failed service-side before any run record
+  existed (one-click frontier 2026-10-22: wm-requeue-7-4-repair/239cf988
+  died at the stale-runner-source refusal, before persist-run-record!, so
+  the ledger never saw it). The observation cites the child's own durable
+  acceptance evidence by pin; no failure or success is synthesized, and an
+  already-ingested evidence pin is never observed twice. Returns the
+  advanced history, or nil when there is nothing durable to observe."
+  [history ports injury-id retry-click]
+  (when-let [observed (failed-child-observation ports retry-click)]
+    (if (= :refused (:status observed))
+      (stop! observed)
+      (let [pin (:evidence-pin observed)]
+        (when-not (some #(= pin (:record-pin %)) (:entries history))
+          (let [appended (ledger/append-observation
+                          history pin :retry-inconclusive
+                          {:injury-id injury-id :retry-click retry-click})]
+            (if (= :appended (:status appended))
+              (:ledger appended)
+              (stop! (refusal :coordinator/failed-child-observation-refused
+                              {:ledger-result appended
+                               :retry-click retry-click})))))))))
+
 (defn- last-receipt-pin [transaction]
   (:receipt-pin (last (:receipts transaction))))
 
@@ -257,10 +301,13 @@
         (stop! (refusal :coordinator/retry-attribution-refused
                         {:ledger history :transaction transaction})))
       (if-not (ledger/pending-requeue history injury-id)
-        {:status :awaiting-retry
-         :ledger history
-         :transaction transaction
-         :retry-click (:retry-click latest)}
+        (if-let [observed-history (observe-failed-child! history ports injury-id
+                                                         (:retry-click latest))]
+          (recur observed-history transaction)
+          {:status :awaiting-retry
+           :ledger history
+           :transaction transaction
+           :retry-click (:retry-click latest)})
         (let [next-n (inc n)
               retry-click-id (:retry-click-id ports)
               _ (when-not (fn? retry-click-id)

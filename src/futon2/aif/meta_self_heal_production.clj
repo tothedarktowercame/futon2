@@ -875,7 +875,13 @@
           ;; absence is not a port defect here: the coordinator refuses
           ;; :coordinator/retry-click-id-unavailable only at the requeue.
           (fn? (:retry-click-id-fn opts))
-          (assoc :retry-click-id (:retry-click-id-fn opts))))))
+          (assoc :retry-click-id (:retry-click-id-fn opts))
+          ;; One-click frontier (2026-10-22): the coordinator reads this
+          ;; read-only port to observe a meta-retry child that failed
+          ;; service-side before any run record existed. Absence is not a
+          ;; defect: without it such a child simply stays :awaiting-retry.
+          (fn? (:retry-click-status-fn opts))
+          (assoc :retry-click-status-fn (:retry-click-status-fn opts))))))
 (defn latest-retry-click
   "The retry click the transaction currently names. Receipts are keyed by
    phase, not by index: after author, review, enact and retry, each requeue
