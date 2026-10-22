@@ -1,0 +1,17 @@
+{
+  "commit": "7fc3b894c",
+  "worktree": "/home/joe/code/futon2-declared-effect-adapter",
+  "review": "2410 authority/pin/path accepted; retention followups addressed",
+  "behavior": [
+    "Matching retained destination returns same pin; conflicting bytes refuse and remain untouched.",
+    "Missing/unpinned declaration refuses before reading path.",
+    "Docstring states original path is provenance only and runner must compare record base to selection base."
+  ],
+  "tests": {
+    "retention": "1/7 pass",
+    "historical_adapter": "1/9 pass",
+    "lint": "0/0",
+    "parens": "OK"
+  },
+  "scope": "isolated committed correction; no runner wiring/integration/deploy/Trial"
+}
