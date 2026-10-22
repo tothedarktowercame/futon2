@@ -65,4 +65,4 @@ This file is the one list. Each item names the goal it blocks. Work that blocks 
 - 2026-10-22 22:50Z — (times in entries above corrected from commit times; they had been written ahead of the clock.)
 - 2026-10-22 22:48Z — M1 done (diagnosis ran). M2 reached acceptance; its run aborted on `Unknown option: "-m"`. M2a dispatched.
 - 2026-10-22 22:54Z — M2a fixed and reloaded (futon3c `1082ee474`); acceptance-rerun click dispatched to codex-11.
-- 2026-10-22 23:07Z — click `wm-click-57af6c46…`: M2 acceptance admitted and repair `dafa05dbd` reviewed; enact refused (untracked files read as a dirty futon2). M2b fixed and reloaded (futon3c `9994f5496`). M3 done.
+- 2026-10-22 23:06Z — click `wm-click-57af6c46…`: M2 acceptance admitted and repair `dafa05dbd` reviewed; enact refused (untracked files read as a dirty futon2). M2b fixed and reloaded (futon3c `9994f5496`). M3 done.
