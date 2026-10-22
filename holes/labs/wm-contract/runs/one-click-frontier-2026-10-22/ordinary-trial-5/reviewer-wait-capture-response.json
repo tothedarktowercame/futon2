@@ -1,0 +1,11 @@
+{
+  "response": {
+    "rc": 0,
+    "out": "{:ok true, :value {:encoding \"wm/ordered-edn-v2\", :print-roundtrip true, :run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :phase :reviewer-wait, :has-value true, :path \"/home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/reviewer-wait.edn.gz\", :sha256 \"3e3aaa8924ee41dc74f99186d385b5853ab46a7a6718e533be734080fa0360df\"}}",
+    "err": ""
+  },
+  "repository_heads": {
+    "futon2": "f4ae5b676e54c3111e497fa7d7d6ecf15138e4b8",
+    "futon3c": "e65ef06be4e797d69645667ee6d888833e5e3b35"
+  }
+}

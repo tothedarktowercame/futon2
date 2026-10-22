@@ -1,0 +1,74 @@
+{
+  "script_sha256": "2c27eb5205a006886aa0b0072e85822e127f4964f943eafb37ba9bfc36781c71",
+  "cross_repo_identity_probe": {
+    "input": "another-repo/holes/missions/M-stack-geometry.md",
+    "actual": [
+      "mission",
+      "M-stack-geometry"
+    ],
+    "expected": "cross-repo identity must not be collapsed to local basename"
+  },
+  "source_header_continuation_edges": [
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "same",
+      "to-kind": "unresolved",
+      "relation": "futon1a ingestion substrate);",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    },
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "and",
+      "to-kind": "unresolved",
+      "relation": "sorry-proximity model; M-trip-journal B\u2192A turns are one",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    },
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "candidate",
+      "to-kind": "unresolved",
+      "relation": "observation stream for sorry discovery);",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    },
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "embedding",
+      "to-kind": "unresolved",
+      "relation": "space and futon1a rendering; pattern-mining uses this",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    },
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "analytic",
+      "to-kind": "unresolved",
+      "relation": "layer above the geometry);",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    },
+    {
+      "schema": "futon5a/mission-crossref-edge-v1",
+      "from": "M-stack-geometry",
+      "to": "futon1a",
+      "to-kind": "unresolved",
+      "relation": "and how WebArxana renders them).",
+      "source": {
+        "file": "holes/missions/M-stack-geometry.md"
+      }
+    }
+  ],
+  "read_only": true
+}
