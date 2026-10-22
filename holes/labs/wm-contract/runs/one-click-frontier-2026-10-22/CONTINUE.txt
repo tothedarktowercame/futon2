@@ -1,3 +1,20 @@
+LATEST: same Trial5 now HELD at :reviewer-wait (phase-breakpoint), actual
+runtime reviewer job2347 APPROVE captured in reviewer-wait.edn.gz/e4ee41d4d.
+Before continuing, root independently executed parser probes on futon5a9d8d6993:
+classify_target("another-repo/holes/missions/M-stack-geometry.md") silently
+returns local mission; actual mission wrapped prose emits targets same/and/
+candidate/embedding/analytic/futon1a. Evidence parser-independent-probe.json;
+reviewer initially called prose unresolved acceptable, but cross-repo identity
+loss is separate concrete bug. Root sent findings to same reviewer via whistle
+job invoke-1792649262785-2348-2be907db, awaiting adjudication/correction. Blocking
+client output /home/joe/notes/lean-led/scratch/trial5-parser-review-findings-response.json.
+Do not silently replace approval or fabricate a revised verdict. Preserve both
+reviews and job attribution; if revised, use supported correction/retry handling
+with genuine new reviewer evidence. Freeze before each restart. Current trial
+has real useful code candidate but review concerns unresolved; no close yet.
+FIVE Trials remain. No new admission. Rendering fix Zai5 job2343 is independent;
+no deployment while active worker. Work order remains open.
+
 LATEST: same Trial5 author returned real futon5a commit
 9d8d6993c7b3d813aabce8e90862f2d97bbdb727 (crossref extractor+171-edge artifacts,
 Checkpoint19, acceptance remains unchecked; no live ingestion claimed).
