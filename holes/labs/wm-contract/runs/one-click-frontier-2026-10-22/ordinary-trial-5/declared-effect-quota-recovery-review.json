@@ -1,0 +1,16 @@
+{
+  "failed_job": "invoke-1792653865313-2388-96995978",
+  "failure": "HTTP429 usage limit; reset reported 2026-10-22 15:46:37",
+  "recovered_commit": "5460a97dd",
+  "worktree": "/home/joe/code/futon2-declared-effect-review",
+  "root_followup": "37a9c991d",
+  "independent_execution": {
+    "round2_probes": "missing declaration rejected; wrong repo unresolved and admission false",
+    "fast_tests": "27 tests/119 assertions, zero failures",
+    "historical_replay": "5 tests/31 assertions, zero failures",
+    "lint": "0 errors/warnings",
+    "parens": "OK"
+  },
+  "followup": "Shared uniqueness/ownership predicate used by producer and verifier; duplicate and foreign wants refuse; forged eligible admission refuses.",
+  "boundary": "verify-record is internal shape consistency; authority requires reconstruct with production resolver/observer and pinned declaration bytes. No integration/deploy/Trial; independent review requested."
+}
