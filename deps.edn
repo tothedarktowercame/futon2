@@ -33,6 +33,8 @@
   ;; wired, so they live outside the default :test path.
   ;; Run: clojure -M:test:vm-test -m cognitect.test-runner -d vm-test
   :vm-test {:extra-paths ["vm-test"]}
+  :test-slow {:extra-paths ["test-slow"]
+              :main-opts ["-m" "cognitect.test-runner" "-d" "test-slow"]}
   :test {:extra-paths ["test"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       babashka/fs {:mvn/version "0.5.25"}
