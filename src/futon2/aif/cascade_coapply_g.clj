@@ -83,7 +83,11 @@
       {:cascade-id (:id c) :action c :status :refused :refusal (ex-data e)})))
 
 (defn compare-at-horizon
-  "Compare at one explicit H (compareAtHorizonN). Successful entries are ranked;
+  "Map scoreCascadeCoN over a family at one explicit H and caller-supplied C.
+  This equals compareAtHorizonN only when C is classKernel H: unit mass on
+  not-yet-evaluated before H, then the ruled 55/35/5/5 terminal preference.
+  The production wrapper must check that schedule before claiming that reduction.
+  Successful entries are ranked;
   candidate refusals follow them without scores/ranks. All-refused returns
   :no-admissible-candidate with every refusal retained. Family-shape or conflicting
   score-law errors refuse the family. Counts are candidate-id -> occurrence -> [a b].
@@ -104,6 +108,7 @@
               (and (contains? opts :parameter-information-mode)
                    (not= :frontier-beta-approximation (:parameter-information-mode opts))))
       (refuse! :conflicting-score-law {}))
+    (scorer/validate-shared-inputs! (:cascade-belief state) opts)
     (let [results (mapv #(score-one state % opts) candidates)
           refused (filterv #(= :refused (:status %)) results)
           scored (filterv #(= :scored (:status %)) results)

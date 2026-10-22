@@ -146,3 +146,15 @@
                                   (opts 2 {:join counts :good counts}))]
       (is (= :good (:cascade-id (first rs))))
       (is (= :refused (:status (second rs)))))))
+
+(deftest invalid-shared-input-is-not-a-candidate-refusal
+  (doseq [[state options kind]
+          [[{:cascade-belief {#{} 1}} (assoc (opts 2 {:join counts}) :horizon-steps 3
+                                           :prediction-context {:occurrence-id "x" :tau 3}) :class-horizon-mismatch]
+           [{:cascade-belief {#{} 1}} (assoc-in (opts 2 {:join counts}) [:prediction-context :tau] 3)
+            :missing-prediction-context]
+           [{:cascade-belief {#{} 2}} (opts 2 {:join counts}) :invalid-state-belief]]]
+    (let [r (g/compare-at-horizon state [join] options)]
+      (is (= kind (:kind r)) (pr-str r))
+      (is (not= :no-admissible-candidate (:reason r)))
+      (is (not (contains? r :candidates))))))

@@ -88,7 +88,9 @@
                              (mapcat :absent (get-in p [:guard :clauses])))))
         (mapcat #(precedence-patterns (:precedence %)) candidates)))
 
-(defn- validate-inputs! [q0 candidates opts]
+(defn validate-shared-inputs!
+  "Validate comparison-wide model, belief, horizon and context before any candidate is scored."
+  [q0 opts]
   (let [{:keys [observation-model horizon-steps prediction-context cascade-spec]} opts
         universe (:universe observation-model)]
     (om/validate! observation-model)
@@ -97,6 +99,43 @@
     (when-not (and (some? (:occurrence-id prediction-context))
                    (= horizon-steps (:tau prediction-context)))
       (om/refuse! :missing-prediction-context {}))
+    (when (contains? #{:class-emission :progress-count} (:kind observation-model))
+      ;; The class scorer still rolls B through the token transition model,
+      ;; so B's token domain holds: set-shaped q0 states, q0 support and
+      ;; candidate tokens inside the declared universe, and the model's
+      ;; horizon equal to the rollout horizon (handoff A, codex-20).
+      (when-not (= (:horizon observation-model) horizon-steps)
+        (om/refuse! :class-horizon-mismatch
+                    {:model (:horizon observation-model) :rollout horizon-steps})))
+    (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
+                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
+      (om/refuse! :invalid-state-belief
+                   {:non-set-states (count (remove set? (keys q0)))
+                    :outside-states (vec (sort-by pr-str (for [st (keys q0)
+                                                               :when (and (set? st)
+                                                                          (seq (set/difference st universe)))]
+                                                           {:state st
+                                                            :outside (vec (sort-by pr-str (set/difference st universe)))})))}))
+    (when-not (and (map? cascade-spec)
+                   (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
+                   (every? set? (:zeroed cascade-spec))
+                   ;; The want/evidence/zeroed subset-of-universe check is
+                   ;; the token preference's domain rule; the class model's
+                   ;; preference lives over classes, so only the shape holds.
+                   (or (contains? #{:class-emission :progress-count} (:kind observation-model))
+                       (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
+                                               (into #{} cat (:zeroed cascade-spec))) universe)))
+      (om/refuse! :invalid-observation-preference {}))
+    ;; Tempering a coupled row requires its own normalization, not a map of
+    ;; tempered marginal rates. Never silently ignore the production option.
+    (when (or (contains? opts :adjudication-rates)
+              (and (contains? opts :zeta) (not= 1 (:zeta opts))))
+      (om/refuse! :conflicting-observation-options {}))))
+
+(defn- validate-inputs! [q0 candidates opts]
+  (validate-shared-inputs! q0 opts)
+  (let [observation-model (:observation-model opts)
+        universe (:universe observation-model)]
     (when-not (and (vector? candidates)
                    (<= 1 (count candidates)
                        ;; The class-emission model scores candidates
@@ -122,40 +161,8 @@
       (om/refuse! :invalid-bounded-candidates
                   {:limit (when-not (contains? #{:class-emission :progress-count}
                                                (:kind observation-model)) max-candidates)}))
-    (when (contains? #{:class-emission :progress-count} (:kind observation-model))
-      ;; The class scorer still rolls B through the token transition model,
-      ;; so B's token domain holds: set-shaped q0 states, q0 support and
-      ;; candidate tokens inside the declared universe, and the model's
-      ;; horizon equal to the rollout horizon (handoff A, codex-20).
-      (when-not (= (:horizon observation-model) horizon-steps)
-        (om/refuse! :class-horizon-mismatch
-                    {:model (:horizon observation-model) :rollout horizon-steps})))
-    (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
-                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
-      (om/refuse! :invalid-state-belief
-                   {:non-set-states (count (remove set? (keys q0)))
-                    :outside-states (vec (sort-by pr-str (for [st (keys q0)
-                                                               :when (and (set? st)
-                                                                          (seq (set/difference st universe)))]
-                                                           {:state st
-                                                            :outside (vec (sort-by pr-str (set/difference st universe)))})))}))
     (when-not (set/subset? (candidate-tokens candidates) universe)
-      (om/refuse! :candidate-outside-observation-universe {}))
-    (when-not (and (map? cascade-spec)
-                   (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
-                   (every? set? (:zeroed cascade-spec))
-                   ;; The want/evidence/zeroed subset-of-universe check is
-                   ;; the token preference's domain rule; the class model's
-                   ;; preference lives over classes, so only the shape holds.
-                   (or (contains? #{:class-emission :progress-count} (:kind observation-model))
-                       (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
-                                               (into #{} cat (:zeroed cascade-spec))) universe)))
-      (om/refuse! :invalid-observation-preference {}))
-    ;; Tempering a coupled row requires its own normalization, not a map of
-    ;; tempered marginal rates. Never silently ignore the production option.
-    (when (or (contains? opts :adjudication-rates)
-              (and (contains? opts :zeta) (not= 1 (:zeta opts))))
-      (om/refuse! :conflicting-observation-options {}))))
+      (om/refuse! :candidate-outside-observation-universe {}))))
 
 (defn candidate-information-gain
   "Expected information from one Bernoulli observation of each distinct
