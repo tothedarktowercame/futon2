@@ -191,13 +191,17 @@
                                                   :target (:target candidate)
                                                   :preference (get-in preference [tau :probabilities])}))]
                     (when (and (:require-finite-risk? opts) (= :infinite (:risk score)))
-                      (om/refuse! :inadmissible-risk {:candidate (:id candidate) :tau tau}))
+                      (throw (ex-info "Risk outside preference support"
+                                      {:status :refused :kind :inadmissible-risk
+                                       :candidate (:id candidate) :tau tau})))
                     (recur (inc tau) next-q
                            (conj result (assoc score :tau tau :belief next-q
                                                :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))
         predicted (:belief (peek steps))
-        conditioned (om/query observation-model {:op :condition :belief predicted
-                                                 :observation observation :context prediction-context})
+        conditioned (if (:prediction-only? opts)
+                      {:status :not-requested :reason :prediction-only-score}
+                      (om/query observation-model {:op :condition :belief predicted
+                                                   :observation observation :context prediction-context}))
         raw-risk (reduce + 0.0 (map :risk steps))
         raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
         raw-information (if (= :beta-pattern (:parameter-information-mode opts))
@@ -294,7 +298,8 @@
                                             :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
                                                                  (subsets (:universe model)))}]))))
             entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
-            failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
+            failures (if (:prediction-only? opts) []
+                         (filterv #(not= :computed (get-in % [:inference :status])) entries))]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)
                      :missing :contradiction)

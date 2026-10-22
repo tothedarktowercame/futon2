@@ -1,6 +1,7 @@
 (ns futon2.aif.cascade-coapply-g-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-coapply-g :as g]
+            [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.cascade-shape-g :as shape]))
 
@@ -78,7 +79,8 @@
            [(assoc-in join [:precedence :co-apply :descent] [[:a :b] [:b :a]])
             (opts 2 {:join counts}) :cyclic-containment]
            [(assoc join :precedence []) (opts 2 {:join counts}) :invalid-co-application]]]
-    (is (= reason (:reason (g/compare-at-horizon {:cascade-belief {#{} 1}} [candidate] options)))))
+    (is (= reason (let [r (g/compare-at-horizon {:cascade-belief {#{} 1}} [candidate] options)]
+                      (or (get-in r [:candidates 0 :refusal :reason]) (:reason r))))))
   (is (= :invalid-pattern-counts
          (try (g/beta-novelty [Double/NaN 1]) (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))))
 
@@ -96,5 +98,51 @@
                          [:observation-model :class-preference 2]
                          {:focused 0 :related 1 :unrelated 0 :stop-the-line 0})
         result (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options)]
-    (is (= :inadmissible-risk (:kind result)) (pr-str result))
+    (is (= :inadmissible-risk (get-in result [:candidates 0 :refusal :kind])) (pr-str result))
     (is (not (contains? result :G-efe)))))
+
+(deftest prediction-does-not-require-a-future-observation
+  (let [options (dissoc (opts 2 {:join counts}) :observation)
+        rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options)
+        impossible (g/compare-at-horizon {:cascade-belief {#{} 1}} [join]
+                     (assoc options :observation {:status :observed :present #{} :absent #{c}
+                                                  :occurrence-id "test-only" :tau 2}))]
+    (is (vector? rs) (pr-str rs))
+    (is (= (:G-efe (first rs)) (:G-efe (first impossible))))
+    (is (= {:status :not-requested :reason :prediction-only-score} (:inference (first rs))))
+    (is (not (contains? (first rs) :posterior)))
+    (is (not (contains? (first rs) :f)))))
+
+(deftest legacy-class-conditioning-remains-unchanged
+  (let [state {:cascade-belief {#{} 1}} options (opts 2 {:join counts})
+        missing (scorer/rank-cascade-actions state [join] (dissoc options :observation))
+        matched (scorer/rank-cascade-actions state [join] options)]
+    (is (vector? missing))
+    (is (= :not-supplied (get-in missing [0 :f :status])))
+    (is (vector? matched) (pr-str matched))
+    (is (= :computed (get-in matched [0 :inference :status])))
+    (is (contains? (first matched) :posterior))))
+
+(deftest one-refusal-does-not-suppress-an-admissible-candidate
+  (let [uc ["U" :c]
+        other (assoc (candidate :other {:c (pattern :c #{} #{uc} 1)} []) :target "U")
+        options (-> (opts 2 {:join counts :other {:c [1 1]}})
+                    (assoc-in [:observation-model :universe] #{a b c uc})
+                    (assoc-in [:observation-model :acceptance] #{c uc})
+                    (assoc-in [:observation-model :target-class] {"T" :focused "U" :related})
+                    (assoc-in [:observation-model :class-preference 2]
+                              {:focused 0 :related 1 :unrelated 0 :stop-the-line 0}))
+        rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [join other] options)]
+    (is (vector? rs) (pr-str rs))
+    (is (= :other (:cascade-id (first rs))))
+    (is (= 1 (:rank (first rs))))
+    (is (= :refused (:status (second rs))))
+    (is (= :inadmissible-risk (get-in rs [1 :refusal :kind])))
+    (is (not-any? #(contains? (second rs) %) [:G-efe :rank :controller-score])))
+  (doseq [bad [(assoc-in join [:precedence :co-apply :descent] [[:a :b] [:b :a]])
+               (assoc join :precedence [])]]
+    (let [good (assoc join :id :good)
+          rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [bad good]
+                                  (opts 2 {:join counts :good counts}))]
+      (is (= :good (:cascade-id (first rs))))
+      (is (= :refused (:status (second rs)))))))
