@@ -82,7 +82,8 @@
            record (edn/read-string (slurp path))
            input-path [:decision :selection-certificate :token-belief-input]
            record (-> record
-                      (assoc :habit-reads (receipts/habit-log []))
+                      (assoc :habit-reads (receipts/habit-log [])
+                             :habit-fold-snapshot (receipts/habit-fold-snapshot nil nil nil))
                       (assoc-in [:decision :selection-certificate :candidates] [])
                       ;; Both receipts are derived from the candidates just
                       ;; cleared, so the validator rightly refuses them; they

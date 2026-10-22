@@ -109,3 +109,63 @@
          (habit/record-selection! path {:action candidate}))
        (is (= [0 0 1] (mapv #(get-in % [:receipt :state :samples]) @log)))
        (is (= [:selection-scoring :selection-update :selection-update] (mapv :purpose @log)))))))
+
+(defn- snapshot-run-record [fold reads decision]
+  (runner-fixture/with-dir
+   (fn [dir]
+     (let [saved (#'runner/persist-run-record!
+                  {:run-record-dir (str dir) :habit-reads/state reads
+                   :enactment-fold fold :scan-render-fn (fn [& _] nil)}
+                  "habit-snapshot-fixture" "2026-10-22"
+                  {:outcome :incomplete
+                   :checkpoints {:selection {:judgment {:controller-decision decision}}}})]
+       (edn/read-string (slurp (:run-record saved)))))))
+
+(deftest retained-fold-does-not-claim-consumption
+  (let [candidate (first (store-fixture/menu))
+        fold (assoc ((requiring-resolve 'futon2.aif.cascade-prior/observe-policy)
+                     nil (habit/policy-view candidate))
+                    :folded-from {:dir "fixture/flights" :read [] :unread []})
+        decision {:selection-certificate
+                  {:selection-route :wm/selected-outer-cascade-policy-v1}}
+        reads (atom [])
+        record (snapshot-run-record fold reads decision)
+        snapshot (:habit-fold-snapshot record)]
+    (is (seq (:counts snapshot)))
+    (is (= 1 (:samples snapshot)))
+    (is (= fold (edn/read-string (:snapshot-edn snapshot))))
+    (is (= {:status :present :consumed? false :consumed-by []
+            :ln-e-source :outer-controller-inputs}
+           (select-keys snapshot [:status :consumed? :consumed-by :ln-e-source])))
+    (is (= [] @reads) "retention does not append a consumption occurrence")
+    (is (= :valid (:status (receipts/validate-record record))))
+    (doseq [[bad error]
+            [[(assoc-in record [:habit-fold-snapshot :consumed?] true)
+              :habit-fold-consumption-unwitnessed]
+             [(update-in record [:habit-fold-snapshot :counts]
+                         #(into {} (map (fn [[k n]] [k (inc n)])) %))
+              :habit-fold-snapshot-hash-mismatch]
+             [(assoc-in record [:habit-fold-snapshot :sha256] "changed")
+              :habit-fold-snapshot-hash-mismatch]
+             [(dissoc record :habit-fold-snapshot)
+              :habit-fold-snapshot-not-observed]]]
+      (is (= :invalid (:status (receipts/validate-record bad))))
+      (is (some #{error} (:errors (receipts/validate-record bad)))))
+    (binding [receipts/*habit-reads* reads]
+      (habit/attach-state fold [{:action candidate}] :enactment-fold))
+    (let [consumed (snapshot-run-record fold reads {:selection-certificate {}})]
+      (is (= {:consumed? true :consumed-by [0] :ln-e-source :habit-fold}
+             (select-keys (:habit-fold-snapshot consumed)
+                          [:consumed? :consumed-by :ln-e-source])))
+      (is (= :valid (:status (receipts/validate-record consumed))))
+      (is (some #{:habit-fold-consumption-unwitnessed}
+                (:errors (receipts/validate-record
+                          (assoc-in consumed [:habit-fold-snapshot :consumed?] false)))))
+      (is (some #{:habit-fold-consumption-unwitnessed}
+                (:errors (receipts/validate-record
+                          (assoc-in consumed [:habit-fold-snapshot :consumed-by] [1])))))))
+  (let [record (snapshot-run-record nil (atom []) {})]
+    (is (= {:schema :wm/habit-fold-snapshot-v1 :status :absent
+            :reason :fold-not-passed-to-runner}
+           (:habit-fold-snapshot record)))
+    (is (= :valid (:status (receipts/validate-record record))))))

@@ -1205,11 +1205,19 @@
                                     :failures [{:part :world-at-selection
                                                 :status :failed
                                                 :error "selection did not attach census"}]})
+            habit-reads (input-receipts/habit-log
+                         (some-> (:habit-reads/state raw-opts) deref))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants participants-record
-                    :habit-reads (input-receipts/habit-log
-                                  (some-> (:habit-reads/state raw-opts) deref))
+                    :habit-reads habit-reads
+                    ;; The report's locally built fold is not returned to
+                    ;; this runner. Retain an explicit absence unless the
+                    ;; selection input was supplied; never re-fold here.
+                    :habit-fold-snapshot
+                    (input-receipts/habit-fold-snapshot
+                     (:enactment-fold raw-opts) habit-reads
+                     (or decision (:decision selection-sorry)))
                     :declaration-reads declaration-reads
                     ;; After selection: these labels are for the next decision.
                     :observation-labels (observation-label-wire/record-declaration-reads!

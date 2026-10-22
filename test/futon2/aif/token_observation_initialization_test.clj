@@ -167,7 +167,8 @@
                     (get-in second [:selection-certificate :node-evaluation-traces])))
         (is (carry/valid-stage? stage (:initial-belief-receipt second)))
         (is (predecessor/valid-input? (edn/read-string (pr-str input)) stage))
-        (let [record {:decision second :habit-reads habit-reads}]
+        (let [record {:decision second :habit-reads habit-reads
+                      :habit-fold-snapshot (receipts/habit-fold-snapshot nil nil nil)}]
           (is (= :valid (:status (receipts/validate-record record))) (pr-str (receipts/validate-record record)))
           (is (= :invalid (:status (receipts/validate-record
                                    (assoc-in record [:decision :selection-certificate :token-belief-input

@@ -34,6 +34,49 @@
    :reason (when (and (some? state) (empty? state)) :never-read)
    :occurrences (vec state)})
 
+(def ^:private fold-fields [:counts :samples :alpha :folded-from])
+
+(defn- matching-habit-reads [snapshot log]
+  (into []
+        (keep-indexed (fn [i occurrence]
+                        (when (and (string? (:sha256 snapshot))
+                                   (= (:sha256 snapshot)
+                                      (get-in occurrence [:receipt :sha256])))
+                          i)))
+        (:occurrences log)))
+
+(defn habit-fold-snapshot
+  "Retain the supplied selection input, without re-reading or consuming it.
+  Hash the full fold exactly as attach-state does; expose its count fields
+  beside that snapshot for inspection. Nil means the runner did not get it."
+  [fold log decision]
+  (if (nil? fold)
+    {:schema :wm/habit-fold-snapshot-v1
+     :status :absent :reason :fold-not-passed-to-runner}
+    (let [text (pr-str fold)
+          snapshot (merge {:schema :wm/habit-fold-snapshot-v1 :status :present
+                           :snapshot-edn text :sha256 (sha text)}
+                          (select-keys fold fold-fields))
+          consumed-by (matching-habit-reads snapshot log)
+          consumed? (boolean (seq consumed-by))]
+      (assoc snapshot :consumed? consumed? :consumed-by consumed-by
+             :ln-e-source
+             (cond
+               (= :wm/selected-outer-cascade-policy-v1
+                  (get-in decision [:selection-certificate :selection-route]))
+               :outer-controller-inputs
+               consumed? :habit-fold
+               :else :not-observed)))))
+
+(defn- intact-fold-snapshot? [snapshot]
+  (try
+    (let [text (:snapshot-edn snapshot)]
+      (and (string? text)
+           (= (:sha256 snapshot) (sha text))
+           (= (select-keys snapshot fold-fields)
+              (select-keys (edn/read-string text) fold-fields))))
+    (catch Exception _ false)))
+
 (defn- validate-record*
   "Check retained receipts and their joins without reading any external store."
   [record]
@@ -47,7 +90,17 @@
         input? (contains? (:selection-certificate decision) :token-belief-input)
         log (:habit-reads record)
         occurrences (:occurrences log)
+        snapshot (:habit-fold-snapshot record)
+        snapshot-present? (= :present (:status snapshot))
+        consumed-by (matching-habit-reads snapshot log)
         errors (cond-> []
+                 (nil? snapshot) (conj :habit-fold-snapshot-not-observed)
+                 (and snapshot-present? (not (intact-fold-snapshot? snapshot)))
+                 (conj :habit-fold-snapshot-hash-mismatch)
+                 (and snapshot-present?
+                      (or (not= (:consumed? snapshot) (boolean (seq consumed-by)))
+                          (not= (:consumed-by snapshot) consumed-by)))
+                 (conj :habit-fold-consumption-unwitnessed)
                  (and (contains? (:selection-certificate decision) :focus-receipt)
                       (not (focus-receipt/valid? decision (get-in decision [:selection-certificate :focus-receipt]))))
                  (conj :focus-receipt-mismatch)
