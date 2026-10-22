@@ -92,7 +92,25 @@
         _ (previous-run/close! dir terminal "run-one.edn")
         p1 (previous-run/start! dir "two" "2026-10-22T11:00:00Z")
         c2 (sut/valence-carry p1 precision)]
+    (is (= :no-earlier-started-run (:reason p0)))
+    (is (= :declared-cold-start-r20-packet (get-in c1 [:source :provenance])))
+    (is (= half (:q-before c1)))
     (is (= :present (:status p1)))
     (is (= c1 (get-in p1 [:previous :valence-carry])))
     (is (= (:q-after c1) (:q-before c2)))
     (is (= "one" (get-in c2 [:source :previous-run/id])))))
+
+(deftest tampered-valence-carry-is-caught-by-the-sealed-terminal
+  (let [dir (str (Files/createTempDirectory "r20-valence-tamper-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
+        c1 (sut/valence-carry (previous-run/start! dir "one" "2026-10-22T10:00:00Z") precision)
+        terminal (previous-run/terminal {:run-id "one" :started-at "2026-10-22T10:00:00Z"
+                                         :valence-carry c1})
+        forged (assoc-in terminal [:valence-carry :q-after] {:pos 0.9 :neg 0.1})
+        _ (previous-run/close! dir forged "run-one.edn")
+        p1 (previous-run/start! dir "two" "2026-10-22T11:00:00Z")
+        c2 (sut/valence-carry p1 precision)]
+    (is (= :previous-terminal-carrier-tampered (:reason p1)))
+    (is (= :previous-terminal-carrier-tampered (:reason (:q-before c2))))
+    (is (= :not-performed (get-in c2 [:update :status])))
+    (is (nil? (:beta-prior c2)))))
