@@ -1,0 +1,17 @@
+{
+  "writer": "zai-3",
+  "source_message": "invoke-1792643387838-2279-daa517f9",
+  "attribution": "Confirmed by author: accidental whole-suite invocation in futon2-next-route appended historical ledger observations53-56. Source dirs match independent review.",
+  "command": "timeout 600 clojure -M:test -e \"$(cat /tmp/wm-next-route-repro/repro.clj)\" > /tmp/wm-next-route-repro/out.txt 2>&1",
+  "cause": ":test alias runs test runner; -e did not select a read-only evaluation",
+  "isolated_review_conclusion": "Two preservation assertions failed due to this concurrent writer; not evidence that reviewed4dae9104e itself leaked. Previous nonpassing result retained.",
+  "route_commit": "839fb6c01",
+  "integration": "not integrated by codex-11; historical continuation superseded by fresh-store plan; generic repair still requires independent review",
+  "live_mutations_this_action": false,
+  "log": {
+    "source": "/tmp/wm-next-route-repro/out.txt",
+    "sha256": "c0bf0bb882a751fa4bd1f6f6f48d4fd09b9e0b82bcac9a7706063e6e9c66abf8",
+    "bytes": 1415771,
+    "lines": 6107
+  }
+}

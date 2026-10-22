@@ -1,0 +1,25 @@
+{
+  "status": "fixed-committed",
+  "commit": "839fb6c01",
+  "worktree": "/home/joe/code/futon2-next-route (branch wm-route-next-active-injury, from main 149b69946)",
+  "defect-confirmed": true,
+  "defect": "route! in futon2.aif.meta-self-heal-production retired a persisted transaction only when a NEWER ledger attempt existed for the same injury. A terminal injury (abandoned :retry-budget-spent, production ledger ordinal 52, injury/d755c886a22d6fc8c04db7fada64089e07157f62) has no newer attempt, so route! loaded the terminal transaction forever and the abandoned injury masked the next active injury from preparation. carried-bindings-observation already refused it as :transaction-injury-not-active; route! did not agree.",
+  "reproduction-isolated": {
+    "production-copy": "/tmp/wm-next-route-repro (byte copies of data/wm-meta-injuries/ledger.edn + transaction.edn; read-only inspection)",
+    "findings": {
+      "active-injuries": 8,
+      "d755c886-active?": false,
+      "carried-observation": "{:status :absent, :reason :transaction-injury-not-active}",
+      "next-active-sorted-first": "injury/1bc0efe3d3a1a2c487e2ad28e431fb3b842ad680"
+    },
+    "note": "The next selected injury is the initialization-failed injury whose cause-record-pin is /tmp/wm-total-run-record-test-5158430499882562667/tick-run-record-initialization.edn — it originates from /tmp TEST records, not a production run. Its discharge was NOT fabricated: the committed test creates its own second injury and discharges THAT one in isolation. The production ledger and transaction were not altered by the fix or its tests."
+  },
+  "fix": "In route!, a loaded transaction whose work-order injury is outside the active set is now archived via retire-stale-transaction! (attempt-stamped path beside the transaction file, receipts byte-preserved) and coordinator/prepare selects the next active injury (first sorted). The attempt-newer retirement path is unchanged.",
+  "tests": {
+    "new": "abandoned-terminal-transaction-archives-and-advances-to-next-injury — runs a real injury to terminal :abandoned through route! (author-failure ports), ingests a second classified injury into the same ledger, then asserts route! returns :discharged on the NEXT injury, archives the terminal transaction at transaction.edn.attempt-3.retired.edn byte-preserved, and leaves the abandoned entry unchanged while the next injury reaches :discharged.",
+    "updated": "route-binds-produced-diagnosis-to-its-prepared-transaction (third block) — a resumed transaction naming a non-active injury is now archived and never coordinated; the never-coordinated invariant is kept. In-memory-ledger preparation refusal is its own typed reason.",
+    "pre-fix-verification": "with the src change stashed, the new test fails exactly as the defect predicts (:refused, no advancement, no archival)",
+    "namespaces-run": "futon2.aif.meta-self-heal-production-test (56 tests, 408 assertions, 0 failures) and futon2.aif.full-loop-runtime-test (0 failures); clj-kondo clean on both changed files"
+  },
+  "incident": "An attempted read-only eval was run as 'clojure -M:test -e <form>' from the worktree (twice: ~04:06Z piped to grep, ~04:19-04:26Z redirected to /tmp/wm-next-route-repro/out.txt). The futon2 :test alias ignores -e and executed the entire suite; un-isolated runner tests in it created /tmp/wm-run-record-test-8568171937566497819 (04:23:44Z) and /tmp/wm-total-run-record-test-7176804005292681155 (04:26:21Z) and appended production ledger entries 53-56 (ledger mtime 04:26:21.366Z, 52->56). Production transaction.edn untouched (mtime 03:44:35Z). Log preserved at /tmp/wm-next-route-repro/out.txt. No tests have been run since; no shared JVM touched. All future runner tests will adopt zai-2 isolation commit 4dae9104e."
+}
