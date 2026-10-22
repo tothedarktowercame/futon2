@@ -138,7 +138,7 @@
            (decision [u1 (assoc u3 :guard {:status :missing})]))]
     (is (= :refused (:status p)))
     (is (= :model-rollout-refused (:reason p)))
-    (is (nil? (:precedence-finding p)))))
+    (is (nil? (:precedence-finding p))))
 
   (let [p (outcome/freeze-prediction
            (decision {:not-a-precedence true}))]
@@ -165,4 +165,4 @@
       (is (= #{:schema :target :action :model-id :prediction-rule :status
                :initial-belief :horizon :model :rollout :precedence-kind
                :observation-locators :intended-outputs :wanted}
-             (set (keys p))))))
+             (set (keys p)))))))
