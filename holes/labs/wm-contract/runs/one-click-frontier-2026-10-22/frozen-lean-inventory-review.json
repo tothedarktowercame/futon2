@@ -1,0 +1,22 @@
+{
+  "reviewer": "codex-11",
+  "source_commit": "a00c190927104bbd6086ab4495c05b8d7ad9df7a",
+  "verdict": "inventory retained; proposed next precision repair not accepted as live-route fix",
+  "corrections": [
+    {
+      "claim": "0 of 10 issued",
+      "actual": "3 of 10 consumed; 7 remaining",
+      "evidence": "requested-click-outcome.md and requested-click-status.json"
+    },
+    {
+      "claim": "retaining distributions in policy_precision_carry/advance on next Trial unblocks precision verdict",
+      "actual": "No production invocation found in src/ or scripts/. References are namespace declarations and validators. Current outer_policy_objective/precision-row explicitly lacks F, posterior and beta-posterior. Merely adding fields at advance does not wire a live update or establish conformance.",
+      "evidence": [
+        "src/futon2/aif/outer_policy_objective.clj:59",
+        "src/futon2/aif/policy_precision_carry.clj:87",
+        "NOTE-r20-valence-carry-2026-10-22.md"
+      ]
+    }
+  ],
+  "next_action": "Keep independent-role evidence extraction; treat precision as a missing execution/dataflow connection requiring actual retrospective inputs, not just a recording change. Await deployed recovery before new Trial."
+}

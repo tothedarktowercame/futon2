@@ -1,0 +1,80 @@
+{
+  "schema": "wm/frozen-lean-inventory-result-v1",
+  "task": "Read-only bounded inventory: which one-click R20 rows/ports are extractable from frozen values vs require a later execution section, plus the single smallest useful recording repair. No code changed, no Trials, no agents dispatched, no shared JVM, no Lean build.",
+  "author": "zai-1",
+  "caller": "codex-11",
+  "thread": "invoke-1792640057897-2206-b8c88c82",
+  "written_at": "2026-10-22",
+  "commit_pins": {
+    "futon2": {
+      "head": "ddb48e9cbfe56ae2a8021f471ae06428051166f4",
+      "subject": "wm: dispatch independent recovery review, live port wiring and frozen R20 inventory",
+      "dirty_untracked": [
+        "holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/recovery-repair-result.json",
+        "scripts/wm_capture_held_section.py"
+      ]
+    },
+    "futon3c": "36fb2c74025fdf8fbb89eab128c2078f03351805",
+    "mathlib4_darktower_head": "e8fb05451bd9aa48b415a47b14f8ef937a372a56",
+    "mathlib4_alignment_pins": {
+      "claude2_combined_r20_defs": "862666e9260522e9ac6bc77246fb6a845197630d",
+      "claude2_r20_files_unchanged_at": "b95a286564",
+      "claude7_one_click_graph_pin": "719e4a3e9c",
+      "note": "Both claude2 pins verified as ancestors of the current darktower HEAD; R20* files clean in the working tree. Claude7's unchanged-beta description is superseded by R20Run (BetaFromValence, five carries) per claude-2-alignment-job.json."
+    },
+    "stale_witness_pin_rejected": "futon2 b6d557aa0 is older than d089214d5 (tenth interoception row, 2026-10-22); per lean-alignment-reconciled.md the pinned witness and earlier 5/6, 5/8 reports must not be used as current live edge evidence."
+  },
+  "evidence_read": [
+    "runs/frozen-cascade-verified-2026-10-22/00-selected.edn.gz through 05-dispatch-prepared.edn.gz",
+    "runs/frozen-cascade-verified-2026-10-22/verification.edn",
+    "runs/frozen-live-sections-2026-10-22/{README.md, allocation.json, author-result.json, author-terminal.json, reviewer-result.json, reviewer-terminal.json, learning-review-terminal.json}",
+    "runs/one-click-frontier-2026-10-22/lean-alignment-reconciled.md",
+    "src/futon2/aif/wm/apparatus_certificates.clj (receipt, lines 236-253; node-order line 7)",
+    "futon3c/scripts/r20-lean-edges.sh and futon3c/holes/labs/M-wm-wiring/r20-lean-edges.edn (generated from mathlib4 719e4a3e9c)",
+    "mathlib4/DarkTower/WarMachine/R20Witness.lean (allEdges, lines 127-129; Witness/Hop/EdgeWitness, 106-125)"
+  ],
+  "row_source_of_truth": "futon2.aif.wm.apparatus-certificates/receipt builds the ten rows at HEAD ddb48e9c: precision (dynamic), evidence (constant-row typed absence [:likelihood]), habit (constant-row typed absence [:counts-after :next-consumed]), class-preference (dynamic), strategic-focus (dynamic), liveness (constant-row typed absence), independence (dynamic), joint-action (constant-row typed absence [:ownership]), cost (dynamic), interoception (hard-coded absent, :no-interoceptive-modality-recorded; commit d089214d5).",
+  "rows": {
+    "independence": {
+      "status": "extractable-from-frozen",
+      "detail": "Row needs participants :roles :author and :reviewer-of-record identities. Frozen live sections pin author zai-2 (author-terminal.json job.agent-id, job-id invoke-1792637169716-2135-b0c09671) and reviewer zai-3 (reviewer-terminal.json job.agent-id, job-id invoke-1792637322161-2140-9be2c424; reviewer-result.json reviewer zai-3). Distinct identities -> the row would compute :agrees, case :author-is-not-reviewer. Caveat: these are section bytes, not a run-record participants map; a later execution section must carry them into the click's decision record."
+    },
+    "cost": {
+      "status": "partial-frozen-requires-execution",
+      "detail": "Per-agent token totals exist frozen (author-terminal.json usage: 851971 input / 2920 output / 854891 total, model glm-5.3), but the row requires model-usage with :complete status plus per-job phase tags and phase-timings-ms split into through-selection vs after-selection (through-selection-phases, apparatus_certificates.clj). No phase timings are recorded anywhere frozen. Requires a later execution section."
+    },
+    "precision": {
+      "status": "requires-execution",
+      "detail": "Row reads decision [:selection-certificate :policy-precision-state]. The frozen cascade fixture's selection-certificate (00-selected.edn.gz) contains no :policy-precision-state at all; the beta-prior 1.0 and habit prior masses (0.951229...) found in the fixture are selection-time inputs, not the precision-state record. Also even with the record present, the row currently returns absent unless :update retains prior and posterior DISTRIBUTIONS (code returns :policy-distributions-not-retained when only beta numbers are there)."
+    },
+    "class_preference": {
+      "status": "absent-in-frozen-not-violated",
+      "detail": "Row needs scored :class-emission candidates under :selection-certificate :scoring. Frozen fixture's only :scoring entry is {:scorer-version nil, :g-terms nil} at :pre-selector-binding — no class-emission candidate, so the row verdict would be :not-recorded (:no-scored-class-emission-candidate). This is ABSENCE, not a violated equation: no recorded risk was checked and none failed."
+    },
+    "strategic_focus": {
+      "status": "requires-execution",
+      "detail": "Row needs :focus-receipt on the decision plus consumed target-classes in scored observation models. Fixture has no :focus-receipt. Consistent with lean-alignment-reconciled.md: focus does not yet set class preference; the fixed terminal preference (apparatus_certificates.clj terminal-preference 55/35/5/5) remains, so even a future record cannot reach :agrees until the focus->preference hop lands (Claude2's carry work, not duplicated here)."
+    },
+    "evidence": "typed-absence-in-source: constant-row [:likelihood] at receipt; nothing frozen or live supplies it.",
+    "habit": "typed-absence-in-source: constant-row [:counts-after :next-consumed]. The fixture's habit-prior masses and :habit fields are policy-selection metadata (e.g. :habit 1 in M-formal-war-machine census), not habit counts-after; do not conflate them with the R20 habit row.",
+    "liveness": "typed-absence-in-source: constant-row [:before-state :after-state :reported-live].",
+    "joint_action": "typed-absence-in-source: constant-row [:ownership].",
+    "interoception": "typed-absence-in-source AND in Lean: hard-coded absent (:no-interoceptive-modality-recorded) at d089214d5; G lacks the interoceptive risk term (r20-lean-edges.edn edge :interoceptionToSelectionG has empty source-sites and no carriers). No equation is violated — the modality simply is not recorded anywhere."
+  },
+  "ports_and_run_identity": {
+    "frozen_cascade_fixture": "The frozen selected cascade is a single futon-theory/mission-lifecycle box (M-pattern-posteriors/policy-2f5c7f6d3345d326aae3, cascade-digest 9c2f7532552a2c940429c7f2b16e74a3df2f2c5463927b3051089a8d30929387). Stage digests chain per verification.edn; wiring-status :wired, task-executed false, completion-status :unchecked. A grep across all six frozen stages finds no :run-id, no :policy-precision-state, no :focus-receipt, no :model-usage, no :participants. So Wired-with-current-run-identity on R20 ports cannot be evaluated from this fixture at all — absence, not a failed check.",
+    "r20_edges": "The eight Lean edges (R20Witness.lean allEdges; exported in r20-lean-edges.edn) name their port sites in futon2 source (enactment_habit, policy, policy_precision_carry#advance, focus_receipt, cascade_shape_g#class-emission-model, apparatus_certificates#class-preference-row). Of these only the habit->selection source (enactment_habit fold/masses) and selection sites are exercised by the frozen selection; the precision-carry, focus-receipt and class-emission sites need a later executed click."
+  },
+  "old_vs_current_distinctions": [
+    "The r20-lean-edges.edn pins mathlib4 719e4a3e9c (Claude7 one-click pin) — a valid static graph pin, but not the combined R20 definitions pin 862666e9; per lean-alignment-reconciled.md regenerate via lake build + r20-lean-edges.sh only when assessing a repaired deployed revision.",
+    "The frozen cascade fixture predates and does not reflect source at ddb48e9c/d089214d5: its selection-certificate schema is the frozen-selected-boundary shape, not the decision shape apparatus-certificates reads. Treating fixture fields as current producer output would be old-fixture-as-current-source.",
+    "requested-click-outcome.md (META awaiting-retry, no ordinary run record) supports no R20 certification claim; the last live attempt produced no rows to check."
+  ],
+  "single_smallest_useful_recording_repair": {
+    "choice": "Retain the prior and posterior policy distributions (with the beta prior/posterior and solve terms) inside :selection-certificate :policy-precision-state :update at the existing write site futon2/src/futon2/aif/policy_precision_carry.clj#advance, during the next executed project click.",
+    "why_smallest": "One existing write site, no new producer, no schema change beyond retaining fields the row already knows how to read (precision-row, apparatus_certificates.clj). It converts the precision row from :policy-distributions-not-retained to a real agrees/disagrees verdict on the first executed click, exercises the selectionToPrecisionHabit/selectionToPrecisionG/inferenceToPrecisionF edge sites, and — unlike the focus->preference hop (Claude2's carry work) or the interoception modality (needs a G term in Lean first) — it is unblocked.",
+    "tied_to_useful_execution": "Run it on the next of the ten allocated project clicks (0 of 10 issued per allocation.json), with run identity stamped on the ports, then inventory the ten rows present/conforming/absent per lean-alignment-reconciled.md's 'Next live report'.",
+    "runner_up": "Record phase-timings-ms and per-job phase-tagged model usage in the click's run record (unlocks the cost row's through/after split); deferred because it is a second recording site and the precision repair also unblocks three Lean edge sites at once."
+  },
+  "not_done_here": ["No Claude2 valence-carry work duplicated", "no code changed", "no Trials", "no agents dispatched", "no shared JVM loaded", "no Lean built"]
+}

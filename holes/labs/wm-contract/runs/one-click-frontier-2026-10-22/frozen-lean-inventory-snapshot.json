@@ -1,0 +1,25 @@
+{
+  "agent": "zai-1",
+  "artifacts": [
+    {
+      "path": "frozen-lean-inventory-dispatch.json",
+      "sha256": "df4d9a5bafd04687a686f40893959eadcb78acd9ff0e54f233d647acd12eb45d"
+    },
+    {
+      "path": "frozen-lean-inventory-result.json",
+      "sha256": "6ff6523881e2193c7b47edaad9b9d4e0d5f03a1030c7fb898f8b5987c97031c8"
+    },
+    {
+      "path": "frozen-lean-inventory-terminal.json",
+      "sha256": "a009df5473ece59c68721ca308d158a3f5c7212938792ae203548427d44f3ae8"
+    },
+    {
+      "path": "entry-frontier-manifest.json",
+      "sha256": "dae33e16185e0195209f341f805112d79f337e6781edf5276f8d1cbc4511f919"
+    }
+  ],
+  "job_id": "invoke-1792640057897-2206-b8c88c82",
+  "phase": "frozen-lean-inventory",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}
