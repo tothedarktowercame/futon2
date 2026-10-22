@@ -1,0 +1,17 @@
+{
+  "commit": "f1a9a08dc",
+  "verdict": "REQUEST_CHANGES",
+  "focused_tests": {
+    "tests": 7,
+    "assertions": 35,
+    "failures": 0,
+    "exit": 0
+  },
+  "probe": "binding-independent-probe.clj",
+  "output": "binding-independent-probe.edn",
+  "findings": [
+    "Stale record-verification map and unchanged recorded digest accepted after horizon/wants body mutation.",
+    "verify-binding cannot compare against selection-cell selected mission because API omits it."
+  ],
+  "scope": "pure joins only; authoritative C2 integration remains pending; no deployment or Trial"
+}
