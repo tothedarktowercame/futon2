@@ -23,6 +23,7 @@
 #                                       # callers do not break (firing no longer needs it)
 #   scripts/wm_click.sh --probe-seats   # also spend one turn per seat on a quota probe
 #
+# Optional: --g-law canonical-coapply selects the canonical law on the reading-family route.
 # Identify the issuer with --issuing-caller NAME or WM_ISSUING_CALLER.
 # Omission is recorded as caller-unknown and does not block a click.
 #
@@ -41,11 +42,12 @@ BASE="http://localhost:7070"
 # at 21:11Z). Override with --author / --reviewer / --repair-reviewer.
 AUTHOR="zai-2"; REVIEWER="zai-3"; REPAIR="zai-8"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
-RUN=0; PROBE=0
+RUN=0; PROBE=0; G_LAW=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --run) RUN=1;;
+    --g-law) G_LAW="${2:-}"; [ "$G_LAW" = "canonical-coapply" ] || { echo "unsupported --g-law" >&2; exit 2; }; shift;;
     --force) :;; # no-op since firing never refuses; kept for old callers
     --probe-seats) PROBE=1;;
     --issuing-caller) ISSUING_CALLER="$2"; shift;;
@@ -321,11 +323,14 @@ while [ -z "$clickid" ]; do
   # endpoint refuses as :wm-click-run-id-malformed.
   RUNID="$(date -u +%Y-%m-%d)-$(cat /proc/sys/kernel/random/uuid)"
   echo; echo "firing click, run-id $RUNID"
-  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" <<'PYJSON'
+  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" "$G_LAW" <<'PYJSON'
 import json, sys
-print(json.dumps(dict(zip(
+payload = dict(zip(
     ["run-id", "author", "reviewer", "repair-reviewer", "issuing-caller"],
-    sys.argv[1:]), trigger="duree-click-on-demand")))
+    sys.argv[1:6]), trigger="duree-click-on-demand")
+if sys.argv[6]:
+    payload["g-law"] = sys.argv[6]
+print(json.dumps(payload))
 PYJSON
 )
   resp=$(curl -s -m 60 -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
