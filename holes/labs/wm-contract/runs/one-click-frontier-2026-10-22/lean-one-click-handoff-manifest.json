@@ -1,0 +1,13 @@
+{
+  "job": "invoke-1792639622286-2192-61c4de2e",
+  "files": [
+    {
+      "path": "claude-7-alignment-job.json",
+      "sha256": "3d8d3ce3f222c8f00bd7a5559591bf18bee4d93bf2111dabf9812a7e47f94e49"
+    },
+    {
+      "path": "lean-one-click-handoff.md",
+      "sha256": "7b79feda25845438817063969194719a01ef4db9cac71fabec92a4d42dc08d2c"
+    }
+  ]
+}
