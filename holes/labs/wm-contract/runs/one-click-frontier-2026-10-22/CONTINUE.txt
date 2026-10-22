@@ -1,3 +1,17 @@
+LATEST: Joe requests Lean-led Clojure alignment plus Arxana paper/formal/code links.
+Canonical scoring component integrated through6427696a9: cascade_coapply_g/compare-at-horizon,
+raw coapply G minus pre-step state/frontier weighted Beta approximation; explicit counts/H,
+per-candidate refusals preserved; shared-input errors separate; prediction-only no F/posterior.
+Claude7 review2510 conditionally approved; shared validator+doc clarification applied cdff2b7f7.
+Canonical focused10tests64assertions pass, lint0/0/parensOK. Arxana12nodes3alignment edges
+published+readback at Futon1b7073; artifacts lean-cascade-g-alignment/{result,arxana-*,*review}.json.
+NOT live-wired/deployed. Next: single pattern-belief count producer + ruled classKernel wrapper,
+family horizon, current belief, then production caller; prefix-F/carries still unfinished.
+Owner-authored declaration prerequisite is WITHDRAWN: Joe09-24 mission-reading ruling allows
+computed criteria with span/locator receipts; do not ask Joe for precomputed declarations.
+Lean contract SPEC-useful-trial-loop-contract-2026-10-22.md §7 landed mathlib4f01d392afb.
+Trial5 closed failure, FIVE remain; work order OPEN. No broad tests or serving JVM worktree loads.
+
 LATEST: closure classifier C1 INTEGRATED canonical b17ece0cd (c34bd8447,
 0729ce8b9,065ec2986 plus legacy target-ownership fix). Reviews2403/2434 accepted;
 canonical focused8tests45assertions pass, lint0errors2existingwarnings/parensOK.

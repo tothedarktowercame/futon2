@@ -1,0 +1,44 @@
+{
+  "status": "reviewed-integrated-tested-not-deployed",
+  "canonical_commit": "6427696a944ac86ddc679ff2a52dbd10cb7bff6a",
+  "mapping": {
+    "0e47cdc24": "ee3cc89bc",
+    "c90656ee6": "9f2547b8a",
+    "f0b5499f2": "4ad18c2af",
+    "cdff2b7f7": "6427696a9"
+  },
+  "tests": {
+    "namespace": "futon2.aif.cascade-coapply-g-test",
+    "tests": 10,
+    "assertions": 64,
+    "failures": 0,
+    "errors": 0,
+    "log": "focused-tests.log"
+  },
+  "negative_control": {
+    "script": "frontier-negative-control.clj",
+    "log": "frontier-negative-control.log",
+    "expected_failures": 2,
+    "errors": 0
+  },
+  "review": {
+    "job": "invoke-1792701677025-2510-31c22369",
+    "verdict": "approved conditional on shared validation and precise docstring; both implemented in cdff2b7f7"
+  },
+  "remaining": [
+    "Production wrapper: verify ruled classKernel H and supply one horizon per comparison",
+    "Production counts: one pattern-belief snapshot, mapped consistently to all occurrences/candidates",
+    "Live caller wiring, prefix-F history and belief carries remain unfinished",
+    "No serving reload or useful production Trial claimed"
+  ],
+  "arxana": {
+    "manifest": "arxana-alignment-manifest.json",
+    "receipt": "arxana-publication-receipt.json",
+    "entities": 12,
+    "alignment_hyperedges": 3
+  },
+  "sha256": {
+    "focused-tests.log": "a087100b70c6641c2255cdf91ef0f26259cd5e7eaaac72c3b4e1427b9a18e539",
+    "frontier-negative-control.log": "650542f5a9a91a07de6a9b505051af21221a93558a868d4d465140bcc0f148ed"
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "schema": "wm/arxana-alignment-publication-v1",
+  "base": "http://127.0.0.1:7073/api/alpha",
+  "entities": [
+    {
+      "id": "arxana:wm-loop-alignment:paper-r13:b134e6116ccc1ec174ad",
+      "name": "WM loop alignment \u2014 paper-r13",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"text\": \"Temporal Depth Beyond the Greedy Step (R13)\", \"type\": \"explicit\"}, \"kind\": \"paper-original\", \"path\": \"sec-catalog.tex\", \"repo\": \"/home/joe/code/p4ng\", \"revision\": \"630bc92a1e154b80552a68f867cd15a66b6bb455\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"5cc467eaf0064007e02025dc0f70d7b43302075ac2e09f1ea8739d0f041eb3cf\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:paper-r5:79ed17043d36fa7326f5",
+      "name": "WM loop alignment \u2014 paper-r5",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"text\": \"Expected Free Energy Inside an Auditable Controller (R5)\", \"type\": \"explicit\"}, \"kind\": \"paper-original\", \"path\": \"sec-catalog.tex\", \"repo\": \"/home/joe/code/p4ng\", \"revision\": \"630bc92a1e154b80552a68f867cd15a66b6bb455\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"5cc467eaf0064007e02025dc0f70d7b43302075ac2e09f1ea8739d0f041eb3cf\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:revision-r13:ee8abaab5232ad00f909",
+      "name": "WM loop alignment \u2014 revision-r13",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"json-id\": \"upgrade-r13-common-horizon\", \"text\": \"upgrade-r13-common-horizon\", \"type\": \"explicit\"}, \"kind\": \"paper-revision-note\", \"path\": \"plop-2026-alignment.json\", \"repo\": \"/home/joe/code/p4ng\", \"revision\": \"630bc92a1e154b80552a68f867cd15a66b6bb455\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"002227b46eb117dce2bbe4156750a1ccf5295a0becd8a46e6ece21bcd2dd23ce\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:revision-novelty:e2430a9f3d20496dad8a",
+      "name": "WM loop alignment \u2014 revision-novelty",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"json-id\": \"upgrade-native-novelty-not-ambiguity\", \"text\": \"upgrade-native-novelty-not-ambiguity\", \"type\": \"explicit\"}, \"kind\": \"paper-revision-note\", \"path\": \"plop-2026-alignment.json\", \"repo\": \"/home/joe/code/p4ng\", \"revision\": \"630bc92a1e154b80552a68f867cd15a66b6bb455\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"002227b46eb117dce2bbe4156750a1ccf5295a0becd8a46e6ece21bcd2dd23ce\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:literature:14fdfa04f8ea9a1d84a7",
+      "name": "WM loop alignment \u2014 literature",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"text\": \"Finally, the analytical expression of the novelty term:\", \"type\": \"explicit\"}, \"kind\": \"primary-literature-equations-42-57-58\", \"path\": \"holes/labs/wm-contract/refs/dacosta2020.txt\", \"repo\": \"/home/joe/code/futon2\", \"revision\": null, \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"0b5bcf78d331eeaba9d9fd3969d888d6b39fdf786793011cfe624ea57be37c47\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:lean-g:ffe43a2d30f0d9b64e0c",
+      "name": "WM loop alignment \u2014 lean-g",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"cascadeGrainG\", \"type\": \"explicit\"}, \"kind\": \"formal-definition\", \"path\": \"DarkTower/WarMachine/GOverCascades.lean\", \"repo\": \"/home/joe/code/mathlib4\", \"revision\": \"f01d392afb345e6feccb1d8cd08c7de1fe34183e\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"8bfc12d077756e950ccb9265b988c1d740c71fb14f5e89a348fbeb657fea096a\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:lean-novelty:193a4fa369e882238a4e",
+      "name": "WM loop alignment \u2014 lean-novelty",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"expectedNovelty\", \"type\": \"explicit\"}, \"kind\": \"formal-definition\", \"path\": \"DarkTower/WarMachine/CascadeCoApplyGNovelty.lean\", \"repo\": \"/home/joe/code/mathlib4\", \"revision\": \"f01d392afb345e6feccb1d8cd08c7de1fe34183e\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"66045561aec2dae4effcef636b113994ffd63015cc2916dcb7dcc4b224876c22\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:lean-shared-horizon:d2f9c530baf75fb4ba00",
+      "name": "WM loop alignment \u2014 lean-shared-horizon",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"compareAtHorizonN_uses_H\", \"type\": \"explicit\"}, \"kind\": \"formal-theorem\", \"path\": \"DarkTower/WarMachine/CascadeCoApplyGNovelty.lean\", \"repo\": \"/home/joe/code/mathlib4\", \"revision\": \"f01d392afb345e6feccb1d8cd08c7de1fe34183e\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"66045561aec2dae4effcef636b113994ffd63015cc2916dcb7dcc4b224876c22\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:clojure-g:fda5f410f850c44002ca",
+      "name": "WM loop alignment \u2014 clojure-g",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"compare-at-horizon\", \"type\": \"explicit\"}, \"kind\": \"implementation-integrated-not-live\", \"path\": \"src/futon2/aif/cascade_coapply_g.clj\", \"repo\": \"/home/joe/code/futon2\", \"revision\": \"6427696a944ac86ddc679ff2a52dbd10cb7bff6a\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"a30839736279683663c9227837fa10cc8a0d8f72a086c271853d746e8b3e256f\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:clojure-novelty:8309ea3142a991d81d86",
+      "name": "WM loop alignment \u2014 clojure-novelty",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"expected-novelty\", \"type\": \"explicit\"}, \"kind\": \"implementation-integrated-not-live\", \"path\": \"src/futon2/aif/cascade_coapply_g.clj\", \"repo\": \"/home/joe/code/futon2\", \"revision\": \"6427696a944ac86ddc679ff2a52dbd10cb7bff6a\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"a30839736279683663c9227837fa10cc8a0d8f72a086c271853d746e8b3e256f\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:tests:613c6bf823c1d2c4a48b",
+      "name": "WM loop alignment \u2014 tests",
+      "type": "arxana/alignment-source",
+      "source": "{\"finder\": {\"symbol\": \"unequal-lengths-use-one-horizon-and-raw-epoch-sum\", \"type\": \"explicit\"}, \"kind\": \"executable-conformance-tests\", \"path\": \"test/futon2/aif/cascade_coapply_g_test.clj\", \"repo\": \"/home/joe/code/futon2\", \"revision\": \"6427696a944ac86ddc679ff2a52dbd10cb7bff6a\", \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"e4f70f49d9dcce72164e7e8b8ed6e52e4c09b35526331e7ce87f9e8860b96949\"}"
+    },
+    {
+      "id": "arxana:wm-loop-alignment:test-log:1c268c2ff6df2768f206",
+      "name": "WM loop alignment \u2014 test-log",
+      "type": "arxana/alignment-source",
+      "source": "{\"artifact-status\": \"retained-output\", \"finder\": {\"text\": \"0 failures, 0 errors.\", \"type\": \"explicit\"}, \"kind\": \"execution-evidence\", \"path\": \"holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/lean-cascade-g-alignment/focused-tests.log\", \"repo\": \"/home/joe/code/futon2\", \"revision\": null, \"schema\": \"arxana/alignment-source-v1\", \"sha256\": \"a087100b70c6641c2255cdf91ef0f26259cd5e7eaaac72c3b4e1427b9a18e539\"}"
+    }
+  ],
+  "hyperedges": [
+    {
+      "hx/id": "hx:arxana/alignment:common-horizon:db489bbbebcfdafe0cc6",
+      "hx/type": "arxana/alignment",
+      "hx/endpoints": [
+        {
+          "role": "paper",
+          "entity-id": "arxana:wm-loop-alignment:paper-r13:b134e6116ccc1ec174ad"
+        },
+        {
+          "role": "paper-revision",
+          "entity-id": "arxana:wm-loop-alignment:revision-r13:ee8abaab5232ad00f909"
+        },
+        {
+          "role": "formal",
+          "entity-id": "arxana:wm-loop-alignment:lean-shared-horizon:d2f9c530baf75fb4ba00"
+        },
+        {
+          "role": "implementation",
+          "entity-id": "arxana:wm-loop-alignment:clojure-g:fda5f410f850c44002ca"
+        },
+        {
+          "role": "test",
+          "entity-id": "arxana:wm-loop-alignment:tests:613c6bf823c1d2c4a48b"
+        },
+        {
+          "role": "evidence",
+          "entity-id": "arxana:wm-loop-alignment:test-log:1c268c2ff6df2768f206"
+        }
+      ],
+      "hx/props": {
+        "schema": "wm/lean-code-paper-alignment-v1",
+        "claim": "All candidates use one explicit H; raw epoch sum; no length normalization. Original paper wording about discount is superseded by revision note.",
+        "status": "component-reviewed-integrated-tested-not-deployed",
+        "live-conformance": false,
+        "test-count": 10,
+        "assertions": 64,
+        "implementation-commit": "6427696a944ac86ddc679ff2a52dbd10cb7bff6a",
+        "review-job": "invoke-1792701677025-2510-31c22369",
+        "limitations": [
+          "No serving reload or Trial",
+          "No full extensional-equivalence proof",
+          "Existing production callers remain on old scorer",
+          "No manufactured counts, horizon, observation or current belief",
+          "Production count maps must derive from ONE shared pattern-belief snapshot",
+          "General C: reduction to compareAtHorizonN additionally requires the ruled classKernel schedule"
+        ]
+      }
+    },
+    {
+      "hx/id": "hx:arxana/alignment:frontier-novelty:6f58258fb82cd317557f",
+      "hx/type": "arxana/alignment",
+      "hx/endpoints": [
+        {
+          "role": "paper",
+          "entity-id": "arxana:wm-loop-alignment:paper-r5:79ed17043d36fa7326f5"
+        },
+        {
+          "role": "paper-revision",
+          "entity-id": "arxana:wm-loop-alignment:revision-novelty:e2430a9f3d20496dad8a"
+        },
+        {
+          "role": "literature",
+          "entity-id": "arxana:wm-loop-alignment:literature:14fdfa04f8ea9a1d84a7"
+        },
+        {
+          "role": "formal",
+          "entity-id": "arxana:wm-loop-alignment:lean-novelty:193a4fa369e882238a4e"
+        },
+        {
+          "role": "implementation",
+          "entity-id": "arxana:wm-loop-alignment:clojure-novelty:8309ea3142a991d81d86"
+        },
+        {
+          "role": "test",
+          "entity-id": "arxana:wm-loop-alignment:tests:613c6bf823c1d2c4a48b"
+        },
+        {
+          "role": "evidence",
+          "entity-id": "arxana:wm-loop-alignment:test-log:1c268c2ff6df2768f206"
+        }
+      ],
+      "hx/props": {
+        "schema": "wm/lean-code-paper-alignment-v1",
+        "claim": "Predicted PRE-step state mass times enabled-frontier Beta approximation 1/(2(a+b)); not exact KL and not flat all-pattern bonus.",
+        "status": "component-reviewed-integrated-tested-not-deployed",
+        "live-conformance": false,
+        "test-count": 10,
+        "assertions": 64,
+        "implementation-commit": "6427696a944ac86ddc679ff2a52dbd10cb7bff6a",
+        "review-job": "invoke-1792701677025-2510-31c22369",
+        "limitations": [
+          "No serving reload or Trial",
+          "No full extensional-equivalence proof",
+          "Existing production callers remain on old scorer",
+          "No manufactured counts, horizon, observation or current belief",
+          "Production count maps must derive from ONE shared pattern-belief snapshot",
+          "General C: reduction to compareAtHorizonN additionally requires the ruled classKernel schedule"
+        ]
+      }
+    },
+    {
+      "hx/id": "hx:arxana/alignment:canonical-g:75f7e7a005c5ec5d12b4",
+      "hx/type": "arxana/alignment",
+      "hx/endpoints": [
+        {
+          "role": "paper",
+          "entity-id": "arxana:wm-loop-alignment:paper-r5:79ed17043d36fa7326f5"
+        },
+        {
+          "role": "formal",
+          "entity-id": "arxana:wm-loop-alignment:lean-g:ffe43a2d30f0d9b64e0c"
+        },
+        {
+          "role": "implementation",
+          "entity-id": "arxana:wm-loop-alignment:clojure-g:fda5f410f850c44002ca"
+        },
+        {
+          "role": "test",
+          "entity-id": "arxana:wm-loop-alignment:tests:613c6bf823c1d2c4a48b"
+        },
+        {
+          "role": "evidence",
+          "entity-id": "arxana:wm-loop-alignment:test-log:1c268c2ff6df2768f206"
+        }
+      ],
+      "hx/props": {
+        "schema": "wm/lean-code-paper-alignment-v1",
+        "claim": "Component implements raw risk + ambiguity minus expected frontier novelty with co-application. Live caller wiring and count/horizon producers remain pending.",
+        "status": "component-reviewed-integrated-tested-not-deployed",
+        "live-conformance": false,
+        "test-count": 10,
+        "assertions": 64,
+        "implementation-commit": "6427696a944ac86ddc679ff2a52dbd10cb7bff6a",
+        "review-job": "invoke-1792701677025-2510-31c22369",
+        "limitations": [
+          "No serving reload or Trial",
+          "No full extensional-equivalence proof",
+          "Existing production callers remain on old scorer",
+          "No manufactured counts, horizon, observation or current belief",
+          "Production count maps must derive from ONE shared pattern-belief snapshot",
+          "General C: reduction to compareAtHorizonN additionally requires the ruled classKernel schedule"
+        ]
+      }
+    }
+  ]
+}

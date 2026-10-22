@@ -1,0 +1,9 @@
+
+FAIL in (frontier-and-shared-horizon) (cascade_coapply_g_test.clj:34)
+expected: (= 1/4 (g/expected-novelty chain counts {#{} 1}))
+  actual: (not (= 1/4 1/2))
+
+FAIL in (frontier-and-shared-horizon) (cascade_coapply_g_test.clj:35)
+expected: (= [1/4 1/4 1/4] (mapv :expected-novelty (get-in (first (filter (fn* [p1__6845#] (= :chain (:cascade-id p1__6845#))) ranked)) [:certificate :parameter-novelty :steps])))
+  actual: (not (= [1/4 1/4 1/4] [1/2 1/4 0]))
+{:negative-control :all-enabled-instead-of-frontier, :counters {:test 1, :pass 10, :fail 2, :error 0}}
