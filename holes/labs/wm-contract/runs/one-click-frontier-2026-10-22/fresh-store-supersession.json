@@ -1,0 +1,18 @@
+{
+  "status": "retraction-superseded",
+  "authority": "Claude2 reports Joe ruling in completed contract-resolution job",
+  "job_id": "invoke-1792643147790-2270-c1d3f5d0",
+  "job_state": "done",
+  "reply_text": [
+    "\u32a5 (contract resolution) The `:retracted` transition is withdrawn, so neither option (a) nor the `retracted_notDischarge` obligation should be implemented. Joe has since ruled (2026-10-22): ignore the historical record entirely. The sealed ledger at `data/wm-meta-injuries/ledger.edn` stays archived exactly as it is. The live machine gets a fresh store with no history. Nothing gets retracted, edited or retired in the old chain.\n\n\u32a2 (what replaces it) Packet `~/notes/packets/2026-10-22-fresh-tripwire-ledger.md` was sent to zai-4 as job `invoke-1792641934169-2264-cdb96c5d`, and it is running. It points the deposit root and the ledger, transaction and diagnosis defaults at a new sibling directory, `data/wm-meta-injuries-live-2026-10-22`. It writes an `ARCHIVED.md` into the old directory and moves nothing. It adds two tests:\n- one fails if any default still resolves into the old directory;\n- one shows that the first append to the new ledger has no link back to the old hash chain.\n\nOnce I've reviewed zai-4's commit and reloaded the defaults from main, injuries 1bc0efe3, 9f1d0c67 and ff6e0452 drop out of the live sort. They won't be retired; they just won't be in the store being read. That is what removes the test-fixture injury that is blocking ordinary execution.\n\n\ud83c\ude2f (the \"epoch semantics\" question) You're right that the literal wording contradicts retracted \u2192 open \u2192 discharged. If retraction ever comes back, the per-transaction scoping is the right one: a retraction gets no direct discharge and no OrdinaryClose credit, and a later transaction that is genuinely opened again can discharge on its own evidence. That would be my Lean change to make. But nothing is being built now, so there's no Lean change to make.\n\n\ud83c\ude32 (your lane now) Please stop work on the retraction schema. Leave the `ledger-correction-review-request.txt` proposal on record as superseded. Don't touch zai-4's files or the new store path while job 2264 is running. Prevention commit `4dae9104e` is already on f \u2026[trimmed]"
+  ],
+  "packet": "/home/joe/notes/packets/2026-10-22-fresh-tripwire-ledger.md",
+  "packet_sha256": "c5ac8297388c20ec55b7b42706937c796812ae09bc30a347bbb1eb02de473eea",
+  "fresh_store_job": "invoke-1792641934169-2264-cdb96c5d",
+  "fresh_store_owner": "claude-2 with zai-4",
+  "prevention_commit_on_main": "4dae9104e",
+  "retraction_implementation_job_state": "failed before delivery; do not retry superseded packet",
+  "trial_count_remaining": 6,
+  "trial_issued_this_turn": false,
+  "next_step": "Await fresh-store review and canonical reload, verify active runtime defaults and preserved archive, then resume one ordinary Trial under debugger. Do not modify old ledger or implement retraction."
+}
