@@ -1,3 +1,123 @@
+LATEST — supersedes old parks2381/2384/2385: Trial5 CLOSED build-failed;
+FIVE project Trials remain; work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b OPEN.
+Zai agents hit5hourquota (reset15:46:37); do not redispatch there blindly.
+C2 latest a2e54d1ae in futon2-declared-effect-review independently ACCEPTED2407:
+port-free public reconstruct, immutable full commit base; ownership37a accepted.
+Binding256b1b26f in futon2-declared-effect-binding ACCEPTED2402 in isolation:
+current-body verifier function, digest recheck, selected-mission equality.
+Named production authority adapter cbb693cf5 ACCEPTED2410 (G1/G2); two retention
+fixes now7fc3b894c in futon2-declared-effect-adapter, review2412 pending.
+Adapter branch includes C2/binding copied commits; do not duplicate cherry-picks.
+retention1/7 + historical adapter1/9 pass; C2fast28/124/history5/31 pass.
+C1 latest c0f35f79d atop c79f26b38/0bb9 in futon2-compiled-closure-review:
+foreign product ownership fix8/40 pass; independent Claude7review2403 active.
+NO integration/deploy of these new components yet. Renderer18af87bcd and
+coapply887ccb75f already integrated NOT deployed. Read exact reviews before merge.
+Runner wiring remains: freeze declaration+real effect prediction at selection,
+compare declaration base to actual run base, mint occurrence unchanged then bind,
+explicit D-task effect context, retained source capture, identical build/close
+accounting and falsifier reconstruction. No fake scoring certificate/prospective
+carry, no invented q0/horizon/wants, no N/A ordinary exception. Proven adapter
+is standalone history, NOT live route. Original path is provenance label;
+retained bytes/pins and actual selection base are authority.
+An async question to Joe is pending for target-owner declaration/outcome/locator/
+horizon: M-stack-geometry has none, known open M-f11 want lacks horizon.
+User answer required for that declaration choice, but code wiring can progress.
+No broad runner suites/shared JVM kills/worktree live loads. Canonical committed
+operational reload only after reviewed integration. Keep broad objective OPEN.
+
+LATEST: pure coapply prediction repair ACCEPTED integrated fe565bba4+887ccb75f;
+review fixed9 assertions outside deftest, focused9tests75assertions pass, lint/parens.
+Review coapply-prediction-independent-review.json. NOT deployed. Live bridge still
+missing declared-effect record/wiring/horizon/observations. Zai2 pure producer2378
+pending; Zai5 C1 first repair0bb9f6a4b REJECTED a1fffde3f: empty/malformed coapply
+still closure, correction dispatched (scratch compiled-closure-correction-dispatch).
+C3 no-declaration N/A withdrawn; don't revive stale2373 proposal. Root verified
+zero-predicted actual effect can reach, preserve prediction error. Trial5 CLOSED
+failure, FIVE Trials remain; broad objective open. Renderer integrated not deployed.
+
+LATEST: Claude2 WITHDREW C3 no-declared-effect N/A; keep falsifier invariant.
+Ordinary targets need authored declaration BEFORE admission. C2 side record+digest
+binding accepted design. Zai2 implements PURE record/validator isolated job
+invoke-1792652357709-2378-37742f83; no runner wiring yet. Zai8 coapply2372 and
+Zai5 closure2375 remain independent. Root verified correction: real historical
+observed effect with counterfactual pattern-done-only model has predicted0,
+not-predicted-observed, accounting VERIFIED reached. Do not repeat wrong claim
+pattern-done makes accounting impossible; only prediction wrong. Artifact
+zero-predicted-observed-replay.* demonstrates semantics not live route.
+Need explicit target-owner authored declaration/horizon before next ordinary Trial;
+no invented defaults, retroactive wants, scoring-certificate edits. Trial5 CLOSED
+failure, five Trials remain, broad objective open. Renderer integrated not deployed.
+
+LATEST: Claude2 contract review2373 delivered. Root reproduced C1 compiled-map
+closure bug in standalone JVM: no effect measurements but classified grounded-change
+and dataset closure. Probe artifacts compiled-closure-classification-probe.*.
+Zai5 C1 isolated repair dispatched (compiled-closure-repair-dispatch.json), no falsifier
+change. C3 no-declaration N/A NOT accepted: weakens ordinary-want/authority invariant.
+Claude2 followup asks equally strong progress evidence contract or authored declaration;
+see declared-effect-contract-followup-dispatch.json. C2 side record before occurrence
+binding plausible, not scoring certificate/action rewrite. Compiled pattern-done outputs
+cannot predict target wants without authored relation. Pure coapply Zai8job2372 still
+independent, historical replay is assembled ordinary C2 not compiled live route.
+Trial5 CLOSED build-failed, FIVE Trials remain, broad objective open. No new admission.
+Renderer accepted integrated18af87bcd, not deployed. No broad tests/JVM kills.
+
+LATEST: root independent declared-effect replay produces byte-identical873943ca...
+output: historical declared effect reaches verified falsifier on real revision pair.
+This is assembled offline input, NOT live bridge. Pure coapply token_outcome repair
+Zai8job invoke-1792651916775-2372-bde29d5c isolated; includes intended-outputs fix
+and positive concurrent frontier. Claude2 contract review job
+invoke-1792651917088-2373-ae475dc8 resolves current declaration authority and
+before-identity evidence placement; do not default horizon, fabricate q0 or retrofit
+finished work. Trial5 CLOSED build-failed, broad objective open, FIVE Trials remain.
+Renderer repair ACCEPTED integrated f8d855bf9+5df6852fd+18af87bcd, reviewc2441f75d;
+NOT deployed yet. Old renderer rejection messages superseded. Need reviewed live
+positive bridge before next admission. No fullrunner suites/shared JVM kills.
+
+LATEST: Trial5 CLOSED honestly :build-failed. Exact held close manifest continued
+unchanged (:continue), no bypass. Service running?false/stops[]; terminal run record
+frozen terminal-run-record.edn.gz + pin and honest-failure-close-status.json. Real
+reviewed code87d4289 exists, but no grounding/useful production close. Five Trials
+remain; broad work order open. No repeat admission until declared-effect contract fixed.
+Zai8 job invoke-1792650676519-2366-575b81fd positive-path design/replay: declared
+absent-before want -> compiled selection -> measured artifact -> falsifier. Warning
+freeze-prediction requires vector precedence/token q0; route has co-apply/class model,
+so adding want alone insufficient. No fabricated q0 or converting class probabilities.
+Renderer correction Zai5job2364 independent (prior2358 acc694539 still rejected,
+e1d24ebb1 malformed false/header overflow). No shared JVM loads/broad runner suites.
+
+LATEST: Trial5 HELD :close-evidence-manifest, captured ordered/printer-roundtrip
+close-evidence-manifest.edn.gz. Rereview2360 APPROVE but build rejected by
+reviewer-falsifier: selected-want-identity-missing wants[], revision-authority-missing
+measurements[]. Grounding NOT reached; adjudication not-reached. This is not useful
+production close despite useful reviewed futon5a code87d4289. See reviewer-falsifier-frontier.json,
+failed-close source snapshots/pins. Do NOT replace close projection or invent wants.
+Zai8 read-only discovery job invoke-1792650122696-2362-312afdf7 traces compiled-route
+contract and supported recovery point (already unwound to close). Wait result, then
+repair structurally or finalize honest failure if no supported recovery; objective
+remains open, FIVE Trials remain. Same run02587641. No new admission/deploy/broad tests.
+Renderer correction2358 independent. All successful frozen sections retained.
+
+LATEST: revision author2355 DONE futon5a87d4289289da83a1040f5bf97252870f33ae6378.
+Root independently ran three regression tests plus original another-repo probe:
+all pass, foreign identity retained,6 prose tokens absent, fixedpoint94edges.
+See parser-revision-independent-check.json. Runtime rereviewer Zai3 job
+invoke-1792649952878-2360-aaffb02d running. Do not duplicate dispatch or new Trial.
+Wait handler then freeze actual next debugger stop and inspect grounding/close.
+FIVE Trials remain, same run, broad objective unfinished. Renderer side patch
+3c85d21b4 REJECTED d95c1b1cc (empty step renders reviewed nil); correction Zai5
+job2358 running isolated. No deploying while flight. No ingestion claimed.
+
+LATEST: genuine supplemental Zai3 review job2353 parsed :request-changes, gate
+passed2 tool events. Recorded review-marker-job/validation and correction-resume.
+Same Trial5 resumed via supported [:use-value actual corrective job], after asserting
+original review id, new job id, same reviewer, done, verdict, execution gate. Delivery
+true. Original approval retained. Runtime now dispatched Zai2 job
+invoke-1792649692337-2355-4419e2d0 (revision path); no debugger stop now.
+Wait runtime handler, do not dispatch duplicate author or new Trial. Freeze next
+held boundary, inspect revised artifact/review and continue to useful close.
+FIVE Trials remain. Broad objective open. Prior claims review still held superseded.
+
 LATEST: corrective Zai3 job2348 independently RETRACTS approval, but production
 review-verdict parses its prose as :unverifiable (missing FULL_LOOP_REVIEW marker).
 Actual review-execution-gate passes with4 tool events. Preserve corrected-review-job.json
