@@ -148,6 +148,7 @@
        :expected expected :candidate candidate}
       (not= :verified (:status expected))
       {:status :refused :reason :reviewer-falsifier-applicable-check-failed
+       :failed-checks (:failed-checks expected)
        :receipt expected}
       :else {:status :verified :receipt/id (:receipt/id expected)})))
 
