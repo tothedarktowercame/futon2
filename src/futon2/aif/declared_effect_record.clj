@@ -88,7 +88,7 @@
   {:status :refused :reason reason :details details})
 
 (defn- sha256-of-bytes [^bytes bs]
-  (identity/sha256 (String. bs java.nio.charset.StandardCharsets/UTF_8)))
+  (format "%064x" (java.math.BigInteger. 1 (.digest (java.security.MessageDigest/getInstance "SHA-256") bs))))
 
 (defn declaration-file-for
   "The path of the declared cascade-source whose :target is TARGET, or nil.
@@ -115,10 +115,10 @@
 (defn- read-declaration
   "Pinned read of the declaration source. Returns {:declaration .. :sha256 ..
   :path ..} or a typed refusal. Blank/missing paths are typed, not thrown."
-  [{:keys [path expected-sha256] :as input}]
+  [{:keys [path storage-path expected-sha256] :as input}]
   (if-not (and (map? input) (string? path) (not (str/blank? path)))
     (typed-refusal :declaration-source-missing {:path path})
-    (let [f (io/file path)]
+    (let [f (io/file (or storage-path path))]
       (if-not (.isFile f)
         (typed-refusal :declaration-source-missing {:path path})
         (let [bs (java.nio.file.Files/readAllBytes (.toPath f))
@@ -557,7 +557,8 @@
       (= :pinned (get-in record [:declaration :status]))
       (let [re-read (read-declaration
                      {:path (get-in record [:declaration :path])
-                      :expected-sha256 (get-in record [:declaration :sha256])})]
+                      :expected-sha256 (get-in record [:declaration :sha256])
+                      :storage-path (get-in inputs [:declaration :storage-path])})]
         (if (= :refused (:status re-read))
           {:verified false :reason :declaration-pin-broken
            :details (:details re-read)}
