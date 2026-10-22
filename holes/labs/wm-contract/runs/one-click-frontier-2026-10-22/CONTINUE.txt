@@ -1,11 +1,31 @@
-Continue Joe's one-click objective, not between-click loop validation. Work remains unfinished. Read one-click-frontier-2026-10-22/README.md and entry-frontier-manifest.json. Source-entry restart repair dd8b9352f tested 2/8 and deployed; live hashes match (source-restart-live-verification.json). Frozen charged admissions committed 6785482b0. Three of 10 project clicks used, 7 remain. Joe subsequently requested click wm-click-2fe0dcf5-664f-4fa4-91c0-dbfcf13c9ddb; same awaiting-retry result. Read requested-click-outcome.md. No click is currently running. Join Zai8 recovery-repair result and Zai3 source-review result. Review/tests before cherry-pick/deploy. Zai8 adds durable failed-child observation into coordinator in sibling worktrees; keep existing retry budget and attribution. Child wm-requeue-7-4-repair/239cf98836afc977cd589141c224ec3f4bca83dc failed pre-attempt, so coordinator is stuck awaiting-retry, with requeues3/limit3. Do not issue another ordinary admission until repaired. A supported coordinator continuation may legitimately exhaust this repair; report that honestly, then determine ordinary route under real ledger, not fake success or bypass. After recovery, run one ordinary click under attached debugger, freeze each successful boundary with scripts/wm_capture_held_section.py (draft, not live verified yet), continue exact held run, repair at next failure. All prior frozen sections retained. Do not count abstention/already-satisfied as useful execution. Preserve result commits/artifacts, keep Joe informed, continue until one useful production click closes or concrete external blocker requires Joe. Never close broad objective based only on component commits. Claude handles beta/valence carry. No diagnostic shared-JVM loads; committed operational reloads only. Current helper loaded via wm_click_repair_loop.reload_changed; never kill serving JVM.
+Continue Joe's ONE useful ordinary Trial objective, not between-click validation.
+Work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b is unfinished. SIX project
+Trials remain. Read README.md's Current frontier first; older parked payloads
+and historical sections are superseded.
 
-Read lean-alignment-reconciled.md before using earlier Lean handoffs: combined pin 862666e926, valence carry supersedes unchanged beta, current witness stale, absent terms cannot certify.
+BLOCKER: fresh-store job invoke-1792641934169-2264-cdb96c5d (Zai4) is running;
+Claude2 owns review and canonical operational reload. No accepted deployment
+is yet recorded here. Do not touch their files/new store while running. Joe's
+fresh-store ruling supersedes retraction and historical recovery. Do not retry
+failed retraction jobs. Read fresh-store-supersession.json and packet
+/home/joe/notes/packets/2026-10-22-fresh-tripwire-ledger.md.
 
-LATEST: SIX project Trials remain. Core f446e99ed and adapter e19efbe7f deployed. Trial wm-click-2a4789f3-70f6-4a87-9919-e03e5fa94af2 observed child failure and abandoned exhausted repair, ledger ordinals51/52. Offline scripts/wm_replay_failed_child.clj reproduces live transition with zero actuations. Next-route and ledger-contamination jobs investigate next blockers. See README repaired recovery section; no useful ordinary execution yet.
+Completed: source guard restart dd8b9352f; recovery core f446e99ed and adapter
+futon3c e19efbe7f deployed; recovery Trial wm-click-2a4789f3-70f6-4a87-9919-e03e5fa94af2
+advanced old ledger51/52 to honest budget exhaustion. Offline replay in
+398695e09 reproduces with zero actuations. Not useful task completion.
+Prevention4dae9104e is on main. Independent review failed2 preservation checks
+because Zai3's accidental full-suite command concurrently wrote observations
+53-56; attribution and preserved log are in56f1f9fb5. Do not claim review passed.
+Route fix839fb6c01 remains unintegrated/unreviewed by codex-11; no need to revive
+old transaction after Joe's fresh-store ruling.
 
-2026-10-22 review: test-isolation-independent-review.json reports3tests44assertions,2 production-preservation failures. Functional assertions passed, but concurrent ledger appended ordinals53-56 with different temp source paths. Integration held; standalone full runner tests found in zai8-tripwire-debugger (old fixture) and wm-live-store (4dae9104e). Alerts dispatched; no processes killed. Zai1 implementing retraction-ledger packet1; Claude2 asked to scope no-discharge obligation to retracted transaction, since fresh open must permit later real success. SIX project Trials remain; no new Trial. Preserve failed review evidence and resolve writer before rerun/landing.
-
-SUPERSEDES RETRACTION PLAN: Claude2 completed contract reply reports Joe ruling: archive old ledger in place and start fresh live store. Read fresh-store-supersession.json and /home/joe/notes/packets/2026-10-22-fresh-tripwire-ledger.md. Zai4 job invoke-1792641934169-2264-cdb96c5d owns implementation; Claude2 owns review/reload. Do NOT implement/retry retraction schema or touch their files/new store while running. Prevention4dae9104e is already on main. Rerun failure remains evidence of concurrent historical writer, not a successful preservation check. After reviewed fresh-store deployment verify runtime defaults, archive preservation and no running Trial before next ordinary admission. SIX project Trials remain. Broad useful-click objective open.
-
-Writer attribution resolved: zai-3 explicitly owns observations53-56 from accidental whole-suite `clojure -M:test -e` in futon2-next-route. See concurrent-writer-attribution.json and preserved next-route-accidental-suite.log.gz. It was not the isolated review run. Route fix839fb6c01 remains unintegrated by codex-11; do not revive historical recovery now that fresh-store ruling supersedes it.
+NEXT: obtain Claude2's fresh-store review and operational reload evidence;
+verify runtime defaults, preserved archive, no running Trial and six remaining
+project admissions. Continue ordinary execution under attached debugger.
+Freeze each successful section with scripts/wm_capture_held_section.py (draft,
+not yet live verified), continue exact held run, repair at next failure.
+No fake discharge, ledger hand edits, shared-JVM diagnostic source loads or
+serving-JVM kills. Preserve previous frozen sections. Abstention, already
+satisfied work and budget exhaustion do not complete the useful-click goal.
+Claude2/7 own Lean carry. PatternTheta and CascadeRuledCEval side tasks done.

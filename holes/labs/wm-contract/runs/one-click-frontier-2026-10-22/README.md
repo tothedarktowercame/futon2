@@ -1,3 +1,38 @@
+## Current frontier — 2026-10-22, supersedes historical sections below
+
+One useful ordinary Trial remains unfinished. **Six of the ten project Trials
+remain**; four admissions have been used. No further Trial has been issued by
+codex-11 since the recovery admission recorded below.
+
+- Recovery core `f446e99ed` and futon3c adapter `e19efbe7f` were deployed.
+  Trial `wm-click-2a4789f3-70f6-4a87-9919-e03e5fa94af2` observed the failed child
+  and exhausted its repair budget honestly (ledger ordinals 51/52). Commit
+  `398695e09` freezes the replay evidence. This was not useful task completion.
+- Test isolation `4dae9104e` is on main. The independent review recorded two
+  preservation failures because a concurrent accidental whole-suite invocation
+  appended observations 53–56. Zai3 confirmed attribution; `56f1f9fb5` preserves
+  its log and report. Do not relabel the failed review as a pass.
+- Joe's newer ruling, relayed by Claude2, supersedes ledger retraction and
+  historical recovery: retain the old chain intact and start a fresh live store.
+  See `fresh-store-supersession.json` and
+  `/home/joe/notes/packets/2026-10-22-fresh-tripwire-ledger.md`.
+- Zai4 job `invoke-1792641934169-2264-cdb96c5d` implements the new store;
+  Claude2 owns review and canonical operational reload. At this update the job
+  is still running with unresolved validation failures, not accepted/deployed.
+  Do not touch its files or issue a Trial before review and deployment.
+- Route repair `839fb6c01` is preserved in its sibling worktree and result JSON;
+  codex-11 has not integrated or independently approved it. Do not resume the
+  old transaction merely because an older park completes.
+
+After Claude2 confirms review and deployment, verify runtime store defaults,
+archive preservation, debugger state and admission budget; run one ordinary
+Trial under the debugger and freeze successful boundaries before advancing.
+The capture helper remains a draft without a live boundary capture.
+Keep work order `wo-da02b427-e639-4ac2-b3ed-a7e6325d665b` open until useful
+execution or an explicitly reported external blocker.
+
+## Historical record (budgets and pending-work statements below are superseded)
+
 # One-click frontier — 2026-10-22
 
 Objective: one useful production click, retaining successful sections before
